@@ -1,0 +1,87 @@
+Dxx x2UC02 Firmware Update Utility
+Copyright 2012 The Imaging Source Europe GmbH
+
+v1.0 16.03.2012
+
+### This is BETA software ! Use with caution ! ###
+
+This firmware update utility writes an UVC compliant firmware into a
+Dxx 72UC02 or Dxx 22UC03 CMOS camera. Please contact
+support@theimagingsouce.com for questions regarding this utility.
+
+
+1. Compilation
+==============
+
+To build the utility, extract all files to some directory and type
+"make" in the archives root directory to build the necessary files.
+
+2. Usage
+========
+
+IMPORTANT NOTE:
+
+You may need to have ROOT privileges to run this tool!
+
+
+2.1 Switch interface mode
+=========================
+
+There are two supported software interface modes for these cameras: 
+
+ - UVC  ( USB Video Class interface )
+ and
+ - Proprietary
+
+Use the command 
+
+ ./euvccam-fw -m uvc
+
+or
+
+ ./euvccam-fw -m proprietary
+
+to switch between the modes. 
+
+
+2.2 Change color format
+=======================
+
+The color camera uses a color format that indicates a RGB bayer
+pattern. This color format is currently not known to the driver and/or
+to most software. To use the camera with existing software, replace
+the camera firmware with the monochrome version for your camera.
+
+A different firmware can be uploaded the following command: 
+
+./euvccam-fw -u files/<firmware-file>
+
+The first three characters of the firmware file specify whether the
+firmware is a color or monochrome version. Firmware files starting
+with "dfk" are color versions while files starting with "dmk" are
+monochrome versions.
+
+Example to change a DFK 72UC02 to monochrome format: 
+
+./euvccam-fw -u files/dmk72uc02_*
+
+
+
+After the firmware upload is complete, disconnect and reconnect the
+camera to use the new firmware.
+
+
+IMPORTANT: The utility creates a backup of the current firmware. To
+return to the original firmware, you will need this backup file. It is
+strongly recommended to save the firmware update utility and the
+backup file for future use.
+
+
+3. Notes on UVC compatibility
+=============================
+
+With the new firmware, the camera will be UVC compliant regarding to
+the specifications but it will not output a color ( YUV ) image
+itself. The image data will still be in RAW format for either the
+monochrome or the color camera. It remains to the software to further
+process the image data to get RGB or YUV color data. 
