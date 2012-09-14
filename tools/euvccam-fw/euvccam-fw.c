@@ -132,16 +132,9 @@ static struct usb_device *euvc_find_device(struct caminfo *camera_info)
 			for( i = 0; i < ( sizeof( camera_infos ) / sizeof( camera_infos[0] ) ); i++ ){
 				if( ( dev->descriptor.idVendor == camera_infos[i].idVendor ) &&
 				    ( dev->descriptor.idProduct == camera_infos[i].idProduct )){
-					unsigned char mode_flag;
-					usb_dev_handle *usb_dev;
-					usb_dev = euvc_open (dev);
-					mode_flag = euvc_read_vendor_register( usb_dev, 0x1a ) & 0x2;
-					euvc_close (usb_dev);
-					if (mode_flag == camera_infos[i].mode_flag){
-						memcpy( camera_info, &camera_infos[i], sizeof( struct caminfo ) );
+					memcpy( camera_info, &camera_infos[i], sizeof( struct caminfo ) );
 /*	       printf( "Found: %x:%x\n", dev->descriptor.idVendor, dev->descriptor.idProduct ); */
-						return dev;
-					}
+					return dev;
 				}
 			}
 		}
