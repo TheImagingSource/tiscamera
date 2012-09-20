@@ -1071,6 +1071,10 @@ main(int argc, char *argv[])
 
 	if (options.mode){
 		unsigned short pid = 0;
+		if (euvc_get_firmware_version (dev) < 129){
+			fprintf (stderr, "The firmware version of the device is too old. Please update!\n");
+			return 1;
+		}
 		switch (options.mode[0]){
 		case 'u':
 			printf ("Switching camera to UVC mode\n");
