@@ -583,7 +583,7 @@ static int euvc_get_pid (usb_dev_handle *dev, unsigned short *pid)
 	int ret;
 	unsigned char buffer[2];
 
-	read_eeprom (dev, addr, buffer, 2);
+	ret = read_eeprom (dev, addr, buffer, 2);
 	*pid = buffer[0] | buffer[1] << 8;
 
 	return ret;
