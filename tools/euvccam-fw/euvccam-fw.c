@@ -1005,8 +1005,11 @@ main(int argc, char *argv[])
 		int file_version = get_file_firmware_version (filename);
 
 		if (euvc_get_pid (dev, &pid) < 0 ){
-			fprintf (stderr, "Upload failed: Failed to read device ID\n");
-			return 1;
+			perror ("Upload failed: Failed to read device ID");
+			if (!options.force)
+				return 1;
+			else
+				fprintf (stderr, "Continuing anyway due to 'force'\n");
 		}
 
 		if( !filename ){
