@@ -51,7 +51,8 @@ static void gst_tisvideobufferfilter_get_property (GObject * object,
 static void gst_tisvideobufferfilter_finalize (GObject * object);
 static GstFlowReturn
 gst_tisvideobufferfilter_sink_chain (GstPad *pad, GstBuffer *buffer);
-
+static GstCaps *
+gst_tisvideobufferfilter_sink_getcaps (GstPad *pad);
 
 enum
 {
@@ -63,14 +64,14 @@ static GstStaticPadTemplate gst_tisvideobufferfilter_sink_template =
 	GST_STATIC_PAD_TEMPLATE ("sink",
 				 GST_PAD_SINK,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1]")
 		);
 
 static GstStaticPadTemplate gst_tisvideobufferfilter_src_template =
 	GST_STATIC_PAD_TEMPLATE ("src",
 				 GST_PAD_SRC,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1];video/x-raw-bayer,format=(fourcc)grbg,width=[1,MAX],height=[1,MAX],framerate=(fraction)[0/1,1000/1]")
 		);
 
 
@@ -106,24 +107,27 @@ gst_tisvideobufferfilter_class_init (GstTisVideoBufferFilterClass * klass)
 }
 
 static void
-gst_tisvideobufferfilter_init (GstTisVideoBufferFilter *tisvideobufferfilter)
+gst_tisvideobufferfilter_init (GstTisVideoBufferFilter *self)
 {
 
-	tisvideobufferfilter->sinkpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_sink_template
-									  ,     
-									  "sink");
+	self->sinkpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_sink_template,     
+							  "sink");
 
-	tisvideobufferfilter->srcpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_src_template
-									 ,     
-									 "src");
+	self->srcpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_src_template,     
+							 "src");
 
-	gst_element_add_pad (GST_ELEMENT (tisvideobufferfilter), 
-			     tisvideobufferfilter->sinkpad);
-	gst_element_add_pad (GST_ELEMENT (tisvideobufferfilter), 
-			     tisvideobufferfilter->srcpad);
+	gst_element_add_pad (GST_ELEMENT (self), 
+			     self->sinkpad);
+	gst_element_add_pad (GST_ELEMENT (self), 
+			     self->srcpad);
 
-	gst_pad_set_chain_function (tisvideobufferfilter->sinkpad,
+	gst_pad_set_chain_function (self->sinkpad,
 				    GST_DEBUG_FUNCPTR(gst_tisvideobufferfilter_sink_chain));
+
+	gst_pad_set_getcaps_function (self->sinkpad,
+				      GST_DEBUG_FUNCPTR(gst_tisvideobufferfilter_sink_getcaps));
+
+				      
 }
 
 void
@@ -162,6 +166,35 @@ gst_tisvideobufferfilter_finalize (GObject * object)
 	G_OBJECT_CLASS (gst_tisvideobufferfilter_parent_class)->finalize (object);
 }
 
+
+static GstCaps *
+gst_tisvideobufferfilter_sink_getcaps (GstPad *pad)
+{
+	GstTisVideoBufferFilter *self = GST_TISVIDEOBUFFERFILTER (gst_pad_get_parent (pad));
+	GstPad *peerpad;
+	
+	peerpad = gst_pad_get_peer (self->srcpad);
+	if (peerpad){
+		GstCaps *caps;
+		GstStructure *s;
+		caps = gst_pad_get_caps (peerpad);
+		s = gst_caps_get_structure (caps, 0);
+		if (gst_structure_has_name (s, "video/x-raw-bayer")){
+			caps = gst_caps_make_writable (caps);
+			gst_structure_set_name (s, "video/x-raw-gray");
+		}
+
+		GST_DEBUG_OBJECT (self, "flt Caps: %s", gst_caps_to_string (caps));
+		
+		return caps;
+	}
+
+	GST_DEBUG_OBJECT (self, "%s", gst_caps_to_string (gst_pad_get_caps (self->srcpad)));
+		
+	return gst_pad_get_caps (self->srcpad);
+}
+
+
 static GstFlowReturn
 gst_tisvideobufferfilter_sink_chain (GstPad *pad, GstBuffer *buffer)
 {
@@ -181,14 +214,6 @@ gst_tisvideobufferfilter_sink_chain (GstPad *pad, GstBuffer *buffer)
 	if (GST_BUFFER_SIZE (buffer) >=
 	    (width * height)){
 		// if buffer contains enough data for video format, push it to the src pad
-		GstCaps *destcaps;
-		destcaps = gst_pad_get_caps (filter->srcpad);
-		
-		if (!gst_caps_is_equal (caps, destcaps)){
-			gst_pad_set_caps (filter->srcpad, caps);
-		}
-		gst_caps_unref (destcaps);
-		
 		gst_pad_push (filter->srcpad, buffer);
 
 	}
