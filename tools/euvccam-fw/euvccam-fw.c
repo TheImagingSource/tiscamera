@@ -43,6 +43,7 @@ typedef enum{
 #define DEV_DFK71xUC            0x199e, 0x8207
 #define DEV_DFK71xUC_UVC        0x199e, 0x8307
 #define DEV_DFK42xUC            0x199e, 0x8208
+#define DEV_DFK42xUC_UVC        0x199e, 0x8308
 #define DEV_EMPIA               0xeb1a, 0x2760
 
 #define EEPROM_SIZE 16384
@@ -82,6 +83,7 @@ struct caminfo camera_infos[] =
 	{ DEV_DFK71xUC, 2, 0,     "files/dfk72uc02_[0-9]*.euvc" },
 	{ DEV_DFK71xUC_UVC, 2, 0, "files/dfk72uc02_[0-9]*.euvc" },
 	{ DEV_DFK42xUC, 1, 0,     "files/dfk42uc02_[0-9]*.euvc" },
+	{ DEV_DFK42xUC_UVC, 1, 0,     "files/dfk42uc02_[0-9]*.euvc" },
 	{ DEV_EMPIA,    2, 0,     "none" },
 
 };
@@ -1019,10 +1021,14 @@ main(int argc, char *argv[])
 
 		printf( "Upload firmware version: %d\n", get_file_firmware_version (filename) );
 		file_id = get_firmware_file_id (filename);
+		if (file_id == 0){
+			fprintf (stderr, "Failed to read firmware file -- Aborting!");
+			return -1;
+		}
 
 		if (file_id != (pid&0xff)){
 			if (!options.force){
-				fprintf (stderr, "Camera firmware ID does not match file ID! Aborting!\n");
+				fprintf (stderr, "Camera firmware ID [%x] does not match file ID [%x]! Aborting!\n", pid&0xff, file_id);
 				return 1;
 			} else {
 				fprintf (stderr, "Camera firmware ID does not match file ID! Forcing anyway!\n");
