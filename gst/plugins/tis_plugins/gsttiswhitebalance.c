@@ -50,10 +50,16 @@ static void gst_tiswhitebalance_get_property (GObject * object,
 					      guint property_id, GValue * value, GParamSpec * pspec);
 static void gst_tiswhitebalance_finalize (GObject * object);
 
-/* static gboolean gst_tiswhitebalance_set_caps (GstBaseTransform *trans, GstCaps *incaps, */
-/* 					      GstCaps *outcaps); */
 static GstFlowReturn
 gst_tiswhitebalance_transform_ip (GstBaseTransform * trans, GstBuffer * buf);
+static GstCaps *
+gst_tiswhitebalance_transform_caps (GstBaseTransform * trans,
+				    GstPadDirection direction, GstCaps * caps);
+
+static void gst_tiswhitebalance_fixate_caps (GstBaseTransform * base,
+					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps);
+
+
 
 enum
 {
@@ -70,14 +76,14 @@ static GstStaticPadTemplate gst_tiswhitebalance_sink_template =
 	GST_STATIC_PAD_TEMPLATE ("sink",
 				 GST_PAD_SINK,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-bayer,format=grbg")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
 		);
 
 static GstStaticPadTemplate gst_tiswhitebalance_src_template =
 	GST_STATIC_PAD_TEMPLATE ("src",
 				 GST_PAD_SRC,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-bayer,format=grbg")
+				 GST_STATIC_CAPS ("video/x-raw-bayer,format=grbg,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX],format=(string)grbg")
 		);
 
 
@@ -95,10 +101,11 @@ gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 
 	/* Setting up pads and setting metadata should be moved to
 	   base_class_init if you intend to subclass this class. */
-	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-					    gst_static_pad_template_get (&gst_tiswhitebalance_sink_template));
-	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-					    gst_static_pad_template_get (&gst_tiswhitebalance_src_template));
+
+	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
+						   &gst_tiswhitebalance_src_template);
+	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
+						   &gst_tiswhitebalance_sink_template);
 
 	gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
 					      "The Imaging Source White Balance Element", "Generic", "Adjusts white balancing of RAW video data buffers",
@@ -108,6 +115,9 @@ gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 	gobject_class->get_property = gst_tiswhitebalance_get_property;
 	gobject_class->finalize = gst_tiswhitebalance_finalize;
 	base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform_ip);
+	//base_transform_class->transform = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform);
+	base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform_caps);
+	base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_fixate_caps);
 
 	g_object_class_install_property (gobject_class,
 					 PROP_GAIN_RED,
@@ -136,8 +146,10 @@ gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 }
 
 static void
-gst_tiswhitebalance_init (GstTisWhiteBalance *tiswhitebalance)
+gst_tiswhitebalance_init (GstTisWhiteBalance *self)
 {
+	/* gst_pad_set_getcaps_function (self->sinkpad, */
+	/* 			      GST_DEBUG_FUNCPTR(gst_tiswhitebalance_sink_getcaps)); */
 }
 
 void
@@ -201,61 +213,70 @@ gst_tiswhitebalance_finalize (GObject * object)
 	G_OBJECT_CLASS (gst_tiswhitebalance_parent_class)->finalize (object);
 }
 
-/* static gboolean */
-/* gst_tiswhitebalance_set_caps (GstBaseTransform * trans, GstCaps * incaps, */
-/* 			      GstCaps * outcaps) */
-/* { */
-/* 	g_message ("Set Caps"); */
+static void
+auto_grbg (GstTisWhiteBalance *self, GstBuffer *buf)
+{
+	GstCaps *caps = GST_BUFFER_CAPS (buf);
+	GstStructure *structure = gst_caps_get_structure (caps, 0);
+
+	guint32 sum_r = 0;
+	guint32 sum_g = 0;
+	guint32 sum_b = 0;
+	guint32 samples_r = 0;
+	guint32 samples_g = 0;
+	guint32 samples_b = 0;
+	guint8 *data = (guint8*)GST_BUFFER_DATA (buf);
+	gint width, height;
 	
-/* 	return TRUE; */
-/* } */
+	g_return_if_fail (gst_structure_get_int (structure, "width", &width));
+	g_return_if_fail (gst_structure_get_int (structure, "height", &height));
 
-/* static void */
-/* auto_grbg (GstBuffer *buf, gint *gain_r, gint *gain_g, gint *gain_b) */
-/* { */
-/* 	GstCaps *caps = GST_BUFFER_CAPS (buf); */
-/* 	GstStructure *structure = gst_caps_get_structure (caps, 0); */
+	guint x,y;
 
-/* 	guint32 sum_r = 0; */
-/* 	guint32 sum_g = 0; */
-/* 	guint32 sum_b = 0; */
-/* 	guint32 samples_r = 0; */
-/* 	guint32 samples_g = 0; */
-/* 	guint32 samples_b = 0; */
-/* 	guint8 *data = (guint8*)GST_BUFFER_DATA (buf); */
-/* 	gint width, height; */
-	
-/* 	g_return_if_fail (gst_structure_get_int (structure, "width", &width)); */
-/* 	g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
+	for (y = 64; y < height-63; y+= 64){
+		for (x = 0; x < width; x += 64){
+			guint8 value = data[y*width+x];
+			if ( value < 250 ){
+				samples_g++;
+				sum_g += value;
+			}
+			value = data[y*width+x+1];
+			if ( value < 250 ){
+				samples_r++;
+				sum_r += value;
+			}
+			value = data[(y+1)*width+x];
+			if ( value < 250 ){
+				samples_b++;
+				sum_b += value;
+			}
+		}
+	}
 
-/* 	guint x,y; */
+	sum_r /= samples_r;
+	sum_g /= samples_g;
+	sum_b /= samples_b;
 
-/* 	for (y = 64; y < height-63; y+= 64){ */
-/* 		for (x = 0; x < width; x += 64){ */
-/* 			guint8 value = data[y*width+x]; */
-/* 			if ( value < 250 ){ */
-/* 				samples_g++; */
-/* 				sum_g += value; */
-/* 			} */
-/* 			value = data[y*width+x+1]; */
-/* 			if ( value < 250 ){ */
-/* 				samples_r++; */
-/* 				sum_r += value; */
-/* 			} */
-/* 			value = data[(y+1)*width+x]; */
-/* 			if ( value < 250 ){ */
-/* 				samples_b++; */
-/* 				sum_b += value; */
-/* 			} */
-/* 		} */
-/* 	} */
 
-/* 	sum_r /= samples_r; */
-/* 	sum_g /= samples_g; */
-/* 	sum_b /= samples_b; */
+	if ((sum_r > sum_g) && (sum_r > sum_b)){
+		// R max
+		self->gain_red = 0;
+		self->gain_green = (int)(((float)sum_r/(float)sum_g)*1024)-1024;
+		self->gain_blue = (int)(((float)sum_r/(float)sum_b)*1024)-1024;
+	} else if ((sum_g > sum_r) && (sum_g > sum_b)){
+		// G max
+		self->gain_red = (int)(((float)sum_g/(float)sum_r)*1024)-1024;
+		self->gain_green = 0;
+		self->gain_blue = (int)(((float)sum_g/(float)sum_b)*1024)-1024;
+	} else {
+		// B max
+		self->gain_red = (int)(((float)sum_g/(float)sum_r)*1024)-1024;
+		self->gain_green = (int)(((float)sum_r/(float)sum_g)*1024)-1024;
+		self->gain_blue = 0;
+	}
 
-/* 	//gain_r = sum_r; */
-/* } */
+	GST_LOG_OBJECT (self, "R: %03d[%04d] G: %03d[%04d], B: %03d[%04d]", sum_r, self->gain_red, sum_g, self->gain_green, sum_b, self->gain_blue);
+}
 
 static void
 wb_grbg (GstBuffer *buf, gint gain_r, gint gain_g, gint gain_b)
@@ -304,18 +325,79 @@ wb_grbg (GstBuffer *buf, gint gain_r, gint gain_g, gint gain_b)
 	}
 }
 
+static GstCaps *
+gst_tiswhitebalance_transform_caps (GstBaseTransform * trans,
+    GstPadDirection direction, GstCaps * caps)
+{
+	GstStructure *s;
+	/* GstStructure *ns; */
+	GstCaps *outcaps;
+	/* const GValue *value; */
 
+	
+	outcaps = gst_caps_copy (caps);
+	
+	s = gst_caps_get_structure (outcaps, 0);
+
+
+	if (direction == GST_PAD_SINK) {
+		gst_structure_set_name (s, "video/x-raw-bayer");
+		gst_structure_set (s, "format", G_TYPE_STRING, "grbg", NULL);
+		gst_structure_remove_fields (s, "bpp", "depth", NULL);
+	} else {
+		gst_structure_set_name (s, "video/x-raw-gray");
+		gst_structure_set (s, "bpp", G_TYPE_INT, 8, NULL);
+		gst_structure_remove_field (s, "format");
+	}
+
+	GST_LOG_OBJECT (trans, "Transform caps\n\nin:%"GST_PTR_FORMAT"\nout:%"GST_PTR_FORMAT, caps, outcaps);
+	
+	return outcaps;
+}
+
+static void gst_tiswhitebalance_fixate_caps (GstBaseTransform * base,
+					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps)
+{
+	GstStructure *ins, *outs;
+	gint width, height;
+	g_return_if_fail (gst_caps_is_fixed (caps));
+	
+	GST_DEBUG_OBJECT (base, "trying to fixate othercaps %" GST_PTR_FORMAT
+			  " based on caps %" GST_PTR_FORMAT, othercaps, caps);
+
+	ins = gst_caps_get_structure (caps, 0);
+	outs = gst_caps_get_structure (othercaps, 0);
+
+	if (gst_structure_get_int (ins, "width", &width)) {
+		if (gst_structure_has_field (outs, "width")) {
+			gst_structure_fixate_field_nearest_int (outs, "width", width);
+		}
+	}
+	
+	if (gst_structure_get_int (ins, "height", &height)) {
+		if (gst_structure_has_field (outs, "height")) {
+			gst_structure_fixate_field_nearest_int (outs, "width", height);
+		}
+	}
+	
+}
 
 static GstFlowReturn
 gst_tiswhitebalance_transform_ip (GstBaseTransform * trans, GstBuffer * buf)
 {
-	GstTisWhiteBalance *tiswhitebalance = GST_TISWHITEBALANCE (trans);
+	GstTisWhiteBalance *self = GST_TISWHITEBALANCE (trans);
 
-	wb_grbg (buf, tiswhitebalance->gain_red, tiswhitebalance->gain_green, tiswhitebalance->gain_blue);
+	if (self->auto_wb){
+		auto_grbg (self, buf);
+	}
+
+	wb_grbg (buf,
+		 self->gain_red, 
+		 self->gain_green, 
+		 self->gain_blue);
 
 	return GST_FLOW_OK;
 }
-
 
 static gboolean
 plugin_init (GstPlugin * plugin)
