@@ -178,7 +178,7 @@ gst_tiscamerasrc_pad_link_function (GstPad *pad, GstPad *peer)
 		if (gst_element_link_many (self->src, self->flt, self->identity, NULL))
 			ret = GST_PAD_LINK_OK;
 	} else if (gst_structure_has_name (s, "video/x-raw-rgb")){
-		if (gst_element_link_many (self->src, self->flt, self->debayer, self->identity, NULL))
+		if (gst_element_link_many (self->src, self->flt, self->wb, self->debayer, self->identity, NULL))
 			ret = GST_PAD_LINK_OK;
 	}
 	
@@ -242,15 +242,16 @@ gst_tiscamerasrc_create_elements (GstTisCameraSrc *self)
 	self->src = gst_element_factory_make ("v4l2src", NULL);
 	self->capsfilter = gst_element_factory_make ("capsfilter", NULL);
 	self->flt = gst_element_factory_make ("tisvideobufferfilter", NULL);	
-	self->debayer = gst_element_factory_make ("tisbayer2rgb", NULL);
+	self->wb = gst_element_factory_make ("tiswhitebalance", NULL);
+	self->debayer = gst_element_factory_make ("bayer2rgb", NULL);
 	self->identity = gst_element_factory_make ("identity", NULL);
 
-	if (!self->src || !self->flt || !self->debayer || !self->identity){
+	if (!self->src || !self->flt || !self->wb || !self->debayer || !self->identity){
 		GST_ERROR_OBJECT (self, "Missing elements");
 		goto error_out;
 	}
 	
-	gst_bin_add_many (GST_BIN (self), self->src, self->flt, self->debayer, self->identity, NULL);
+	gst_bin_add_many (GST_BIN (self), self->src, self->flt, self->wb, self->debayer, self->identity, NULL);
 	/* gst_element_link_many (self->src, self->flt, self->identity, NULL); */
 
 	pad = gst_element_get_static_pad (self->identity, "src");

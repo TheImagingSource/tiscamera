@@ -41,6 +41,7 @@ struct _GstTisCameraSrc
 
 	GstElement *src;
 	GstElement *flt;
+	GstElement *wb;
 	GstElement *capsfilter;
 	GstElement *capssetter;
 	GstElement *debayer;
