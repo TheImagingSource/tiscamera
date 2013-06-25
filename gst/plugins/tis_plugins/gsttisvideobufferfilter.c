@@ -64,14 +64,14 @@ static GstStaticPadTemplate gst_tisvideobufferfilter_sink_template =
 	GST_STATIC_PAD_TEMPLATE ("sink",
 				 GST_PAD_SINK,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1]")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
 		);
 
 static GstStaticPadTemplate gst_tisvideobufferfilter_src_template =
 	GST_STATIC_PAD_TEMPLATE ("src",
 				 GST_PAD_SRC,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1];video/x-raw-bayer,format=(fourcc)grbg,width=[1,MAX],height=[1,MAX],framerate=(fraction)[0/1,1000/1]")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
 		);
 
 
