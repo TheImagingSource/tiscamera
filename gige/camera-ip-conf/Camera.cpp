@@ -193,7 +193,10 @@ bool Camera::setStaticIPstate (const bool on)
             {
                 data |= (0x01 << dhcp_bit);
             }
-
+            else
+            {
+                data &= ~(0x01 << dhcp_bit);
+            }
             data |= (0x01 << static_ip_bit);
             data = ntohl(data);
 
@@ -207,6 +210,10 @@ bool Camera::setStaticIPstate (const bool on)
             if (isDHCPactive())
             {
                 data |= (0x01 << dhcp_bit);
+            }
+            else
+            {
+                data &= ~(0x01 << dhcp_bit);
             }
             data = ntohl(data);
 
@@ -251,6 +258,10 @@ bool Camera::setDHCPstate (const bool on)
             {
                 data |= (0x01 << static_ip_bit);
             }
+            else
+            {
+                data &= ~(0x01 << static_ip_bit);
+            }
             data = htonl(data);
             retv = this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
         }
@@ -261,6 +272,10 @@ bool Camera::setDHCPstate (const bool on)
             if (isStaticIPactive())
             {
                 data |= (0x01 << static_ip_bit);
+            }
+            else
+            {
+                data &= ~(0x01 << static_ip_bit);
             }
             data = htonl(data);
             retv =  this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
