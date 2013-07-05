@@ -66,6 +66,12 @@ To toggle static ip usage:
 
    camera-ip-conf-cli set static=on -c <CAMERA_SERIAL>
 
+To upload a new firmware:
+
+   camera-ip-conf-cli upload firmware=<FILE> -c <CAMERA_SERIAL>
+
+   CAUTION: This can break your camera. Use at own risk!
+
 Contacts
 --------
 
