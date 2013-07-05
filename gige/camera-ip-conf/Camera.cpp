@@ -6,6 +6,7 @@
 
 #include "Camera.h"
 #include "utils.h"
+#include "Firmware.h"
 
 #include <thread>
 #include <future>
@@ -393,6 +394,20 @@ bool Camera::forceIP (const std::string& ip, const std::string& subnet, const st
 std::string Camera::getFirmwareVersion ()
 {
     return this->packet.DeviceVersion;
+}
+
+
+bool Camera::uploadFirmware (const std::string& filename, std::function<void(int)> progressFunc)
+{
+    FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
+
+    FirmwareUpdate::Status retv = upgradeFirmware( writer, this->packet, filename, progressFunc);
+
+    if (retv == FirmwareUpdate::Status::SuccessDisconnectRequired || retv == FirmwareUpdate::Status::Success)
+    {
+        return true;
+    }
+    return false;
 }
 
 

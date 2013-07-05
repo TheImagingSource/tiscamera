@@ -26,6 +26,13 @@ Dependencies
 
 GCC with c++11 support; confirmed compilation with gcc 4.7.3
                         confirmed compilation with gcc 4.6
+
+tinyxml
+sudo apt-get install libtinyxml-dev
+
+libzip
+sudo apt-get install libzip-dev
+
 QT 4.8 for gui-version
 
 To install qt dependencies execute:

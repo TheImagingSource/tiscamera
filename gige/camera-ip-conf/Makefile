@@ -16,14 +16,14 @@
 # make realclean  cleans up object files + executables
 
 CCFLAGS= -g -Wall -W -std=c++0x -O2 -Wextra
-LDFLAGS= -pthread
+LDFLAGS= -pthread -lzip -ltinyxml
 
 # Gui related variables
 GUI_DIR=gui
 GUI_PROJECT_FILE=camera-ip-conf.pro
 
 
-OBJ= main.o ConsoleManager.o CameraDiscovery.o Camera.o Socket.o NetworkInterface.o utils.o
+OBJ= main.o ConsoleManager.o CameraDiscovery.o Camera.o Socket.o NetworkInterface.o utils.o FirmwareUpgrade.o
 
 # general build section
 .PHONY: all gui cli

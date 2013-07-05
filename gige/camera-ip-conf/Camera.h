@@ -137,6 +137,12 @@ public:
     /// @return string containing information about current firmware
     std::string getFirmwareVersion ();
 
+    /// @name uploadFirmware
+    /// @param filename - string containing the location of the firmware that shall be used
+    /// @param progressFunc callback function to inform over progress
+    /// @return true on success
+    bool uploadFirmware (const std::string& filename, std::function<void(int)> progressFunc);
+
     /// @name getInterfaceName
     /// @return name of interface used for communication
     std::string getInterfaceName ();
@@ -158,8 +164,6 @@ public:
     /// @return true on success
     bool abandonControl();
 
-private:
-
     /// @name sendReadMemory
     /// @param address - address that shall be read
     /// @param size - size of memory to read
@@ -174,6 +178,8 @@ private:
     /// @param data - pointer to information that shall be written
     /// @return int containing the return value of write attempt
     bool sendWriteMemory (const uint32_t address, const uint32_t size, void* data);
+
+private:
 
     /// @name sendForceIP
     /// @param ip - ip address camera shall use

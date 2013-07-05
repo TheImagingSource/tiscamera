@@ -23,6 +23,7 @@ SOURCES +=\
     ../NetworkInterface.cpp \
     ../Socket.cpp \
     ../Camera.cpp \
+    ../FirmwareUpgrade.cpp \
     ../utils.cpp \
     UpdateHandler.cpp \
     InfoBox.cpp \
@@ -34,6 +35,8 @@ HEADERS  += \
     ../Socket.h \
     ../gigevision.h \
     ../Camera.h \
+    ../FirmwareUpgrade.h \
+    ../Firmware.h \
     ../utils.h \
     UpdateHandler.h \
     InfoBox.h \
@@ -41,3 +44,5 @@ HEADERS  += \
 
 FORMS    += mainwindow.ui \
     infobox.ui
+
+unix|win32: LIBS += -ltinyxml -lzip
