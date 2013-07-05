@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>801</width>
+    <height>500</height>
+   </rect>
+  </property>
   <property name="minimumSize">
    <size>
     <width>771</width>
@@ -104,7 +112,7 @@
        <string>Name</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="Overview">
        <property name="accessibleName">
@@ -441,6 +449,16 @@
            <string>Save</string>
           </property>
           <property name="default">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6" rowspan="2">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>To assure correct behaviour, the camera should be in the same subnet as this computers. Use forceIP to temporarly adjust the camera settings for this.</string>
+          </property>
+          <property name="wordWrap">
            <bool>true</bool>
           </property>
          </widget>
