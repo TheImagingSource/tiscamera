@@ -409,24 +409,45 @@ void MainWindow::allowPersistentConfig (bool allow)
 void MainWindow::buttonFirmware_clicked ()
 {
     // show file dialog and fill edit box with selected filepath
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Firmware File"), QDir::homePath(), tr("Firmware Files (*.euvc)"));
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Open Firmware File"),
+                                                    QDir::homePath(),
+                                                    tr("Firmware Files (*.fwpack *.fw)"));
     ui->editFirmwarePath->setText(fileName);
 }
 
 
 void MainWindow::uploadFirmware ()
 {
-    QString s = "Firmware upload not yet imlpemented";
-    this->box.showMessage(s);
+
+//    QString s = "Firmware upload not yet imlpemented";
+//    this->box.showMessage(s);
 
     std::string firmware_file = ui->editFirmwarePath->text().toStdString();
     if (firmware_file.empty())
     {
         return;
     }
-    QPalette* palette = new QPalette(Qt::red);
-    palette->setColor(QPalette::Highlight, Qt::red);
-    ui->editFirmwarePath->setPalette(*palette);
+    ui->progressFirmwareUpload->setVisible(true);
+
+    auto func = [this] (int val)
+    {
+
+        ui->progressFirmwareUpload->setValue(val);
+    };
+
+    if (selectedCamera->uploadFirmware(firmware_file, func))
+    {
+        QString s = "Successfully uploaded Firmware. Please reconnect your camera for full funcionality.";
+        box.showMessage(s);
+    }
+    else
+    {
+        QString s = "Error while uploading Firmware. Please try again.";
+        box.showMessage(s);
+    }
+    ui->editFirmwarePath->setText("");
+    ui->progressFirmwareUpload->setVisible(false);
 }
 
 
