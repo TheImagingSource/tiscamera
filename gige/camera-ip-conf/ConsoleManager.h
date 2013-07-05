@@ -50,6 +50,11 @@ namespace tis
     /// sends forced ip configuration to described camera
     void forceIP (const std::vector<std::string>& args);
 
+    /// @name upgradeFirmware
+    /// @param args - vector containing camera and filepath to firmware
+    /// checks for newer firmware in given file and uploads it to camera
+    void upgradeFirmware (const std::vector<std::string>& args);
+
     void rescue (std::vector<std::string> args);
 
 } /* namespace tis */

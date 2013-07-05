@@ -10,6 +10,8 @@
 #include "utils.h"
 #include <algorithm>
 #include <unistd.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #include <thread>
 #include <mutex>
@@ -459,6 +461,83 @@ void forceIP (const std::vector<std::string>& args)
     {
         std::cout << std::endl <<  "Aborted forceIP!" << std::endl << std::endl;
     }
+}
+
+
+void upgradeFirmware (const std::vector<std::string>& args)
+{
+    std::string serial = getSerialFromArgs(args);
+    if (serial.empty())
+    {
+        std::cout << std::endl << "No serial number given! Please specifiy!" << std::endl << std::endl;
+        return;
+    }
+
+    std::string firmware = getArgument (args, "firmware");
+    if (firmware.empty())
+    {
+        std::cout << "Pleaser specify a valid firmware file." << std::endl;
+        return;
+    }
+
+    char actualpath [PATH_MAX+1];
+    std::string cF (realpath(firmware.c_str(), actualpath));
+
+    std::cout << "===========================" << firmware << " - " << cF << std::endl;
+
+    camera_list cameras;
+    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera)
+    {
+        std::mutex cam_lock;
+        cam_lock.lock();
+        cameras.push_back(camera);
+        cam_lock.unlock();
+    };
+
+    discoverCameras(f);
+
+    auto camera = getCameraFromList(cameras, serial);
+
+    if (camera == NULL)
+    {
+        std::cout << "No camera found." << std::endl;
+        return;
+    }
+
+    auto func = [] (int progress)
+        {
+            std::cout << "\r";
+            std::string progressSign = "[";
+
+            int i = progress*10 / 100;
+            for (int x = 0; x < i; ++x)
+            {
+                progressSign += "XX";
+            }
+            for (int x = 0; x < 20 - (i*2); ++x)
+            {
+                progressSign += " ";
+            }
+
+
+            progressSign += "] ";
+
+            std::cout << progressSign;
+            std::cout.flush();
+        };
+
+
+    std::cout << std::endl;
+    if (camera->uploadFirmware(cF, func))
+    {
+        std::cout << std::endl << "Successfully uploaded firmware. \
+Please reconnect your camera to assure full functionality." << std::endl;
+    }
+    else
+    {
+        std::cout << std::endl << "ERROR aborted upgrade. " << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 

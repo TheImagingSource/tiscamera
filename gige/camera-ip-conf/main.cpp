@@ -31,7 +31,7 @@ void printHelp ()
               << "    set      - configure camera settings" << std::endl
               << "    forceip  - force ip onto camera" << std::endl
               << "    rescue   - broadcasts to MAC given settings" << std::endl
-              << "    firmware - upload new firmware to camera" << std::endl
+              << "    upload   - upload new firmware to camera" << std::endl
               << "    help     - print this text"
               << std::endl << std::endl;
 
@@ -47,6 +47,7 @@ void printHelp ()
               << "    dhcp=on/off              - toggle dhcp state" << std::endl
               << "    static=on/off            - toggle static ip state" << std::endl
               << "    name=\"xyz\"               - set name for camera; maximum 16 characters" << std::endl
+              << "    firmware=firmware.zip    - file containing new firmware"
               << "    " << std::endl
               << std::endl;
 
@@ -107,10 +108,9 @@ void handleCommandlineArguments (const int argc, char* argv[])
             forceIP(args);
             break;
         }
-        else if (arg.compare("firmware") == 0)
+        else if (arg.compare("upload") == 0)
         {
-            // to be implemented
-            std::cout << std::endl << "Not yet available." << std::endl << std::endl;
+            upgradeFirmware(args);
             break;
         }
         else if (arg.compare("rescue") == 0)
@@ -120,6 +120,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
         }
         else
         {
+            // TODO allow it to write camera before other args so that -c does not break it
             std::cout << "Unknown parameter \"" << arg << "\"" << std::endl << std::endl;
             return;
         }
