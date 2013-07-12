@@ -73,6 +73,54 @@ process_image                   (const void *           p)
         fflush (stdout);
 }
 
+static void 
+list_framerates (__u32 pixelformat, int width, int height)
+{
+	struct v4l2_frmivalenum frmival;
+	
+	frmival.pixel_format = pixelformat;
+	frmival.width = width;
+	frmival.height = height;
+
+	for( frmival.index = 0; 
+	     xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; 
+	     frmival.index++ ) {
+		if( frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE ) {
+			fprintf (stdout, "Numerator: %d, Denominator: %d, Frame Rate: %f\n", 
+				 frmival.discrete.numerator, 
+				 frmival.discrete.denominator, 
+				 1/((double)frmival.discrete.numerator / (double)frmival.discrete.denominator));
+		} else {
+			fprintf (stdout, "Frame rate range: \n");
+			fprintf (stdout, " Min:\n");
+			fprintf (stdout, "  Numerator: %d, Denominator: %d, Frame Rate: %f\n", 
+				frmival.stepwise.min.numerator, 
+				frmival.stepwise.min.denominator, 
+				1/((double)frmival.stepwise.min.numerator / (double)frmival.stepwise.min.denominator));
+			fprintf (stdout, " Max:\n");
+			fprintf (stdout, "  Numerator: %d, Denominator: %d, Frame Rate: %f\n", 
+				frmival.stepwise.max.numerator, 
+				frmival.stepwise.max.denominator, 
+				1/((double)frmival.stepwise.max.numerator / (double)frmival.stepwise.max.denominator));
+		}
+	}	
+}
+
+static void
+set_framerate (int numerator, int denominator)
+{
+	struct v4l2_streamparm parm;
+
+	fprintf (stdout, "Set Framerate: %f FPS\n", 1/((double)numerator / (double)denominator));
+	
+	parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	parm.parm.capture.timeperframe.numerator = numerator;
+	parm.parm.capture.timeperframe.denominator = denominator;
+
+	if( xioctl( fd, VIDIOC_S_PARM, &parm ) < 0 )
+		fprintf (stderr, "Failed to set frame rate\n");
+}
+
 static int
 read_frame                      (void)
 {
@@ -455,6 +503,8 @@ init_device                     (void)
                 }
         }
 
+	printf ("Card: %s\n", cap.card);
+
         if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
                 fprintf (stderr, "%s is no video capture device\n",
                          dev_name);
@@ -512,8 +562,8 @@ init_device                     (void)
         CLEAR (fmt);
 
         fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        fmt.fmt.pix.width       = 1280; 
-        fmt.fmt.pix.height      = 720;
+        fmt.fmt.pix.width       = 2592; 
+        fmt.fmt.pix.height      = 1944;
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
         fmt.fmt.pix.field       = V4L2_FIELD_NONE;
 
@@ -543,6 +593,9 @@ init_device                     (void)
                 init_userp (fmt.fmt.pix.sizeimage);
                 break;
         }
+
+	// Set frame rate to 5 FPS
+	set_framerate (1, 5);
 }
 
 static void
@@ -592,6 +645,7 @@ list_format_info                   (void)
 		fprintf (stdout, "Format %d: %s\n", 
 			 fmtdesc.index, fmtdesc.description );
 		fprintf (stdout, " Size:\n");
+		frms.pixel_format = fmtdesc.pixelformat;
 		for (frms.index = 0;
 		     ! xioctl (fd, VIDIOC_ENUM_FRAMESIZES, &frms);
 		     frms.index++) {
@@ -599,8 +653,21 @@ list_format_info                   (void)
 				fprintf (stdout, " %dx%d\n", 
 					 frms.discrete.width, 
 					 frms.discrete.height);
-			}
-		}			 
+				fprintf (stdout, "----- Frame Rates -----\n");
+				list_framerates (fmtdesc.pixelformat, frms.discrete.width, frms.discrete.height);
+			} else {
+				fprintf (stdout, " Range\n");
+				fprintf (stdout, "  Min:\n");
+				fprintf (stdout, "   Width: %d, Height: %d\n", frms.stepwise.min_width, frms.stepwise.min_height);
+				fprintf (stdout, "  Max:\n");
+				fprintf (stdout, "   Width: %d, Height: %d\n", frms.stepwise.max_width, frms.stepwise.max_height);
+				fprintf (stdout, "----- Frame Rates -----\n");
+				fprintf (stdout, "  Min:\n");
+				list_framerates (fmtdesc.pixelformat, frms.stepwise.min_width, frms.stepwise.min_height);
+				fprintf (stdout, "  Max:\n");
+				list_framerates (fmtdesc.pixelformat, frms.stepwise.max_width, frms.stepwise.max_height);
+			}			 
+		}
 	}
 }
 
@@ -688,6 +755,8 @@ main                            (int                    argc,
                         exit (EXIT_FAILURE);
                 }
         }
+
+	//set_framerate ();
 
         open_device ();
 
