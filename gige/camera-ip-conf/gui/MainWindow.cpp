@@ -92,6 +92,7 @@ void MainWindow::displayCamera()
     }
 
     selectedCamera = cam;
+    blockUpgrade = false;
 
     // overview tab
     ui->displayModelName->setText(QString(cam->getModelName().c_str()));
@@ -420,8 +421,10 @@ void MainWindow::buttonFirmware_clicked ()
 void MainWindow::uploadFirmware ()
 {
 
-//    QString s = "Firmware upload not yet imlpemented";
-//    this->box.showMessage(s);
+    if (blockUpload)
+    {
+        return;
+    }
 
     std::string firmware_file = ui->editFirmwarePath->text().toStdString();
     if (firmware_file.empty())
@@ -438,6 +441,7 @@ void MainWindow::uploadFirmware ()
 
     if (selectedCamera->uploadFirmware(firmware_file, func))
     {
+        blockUpload = true;
         QString s = "Successfully uploaded Firmware. Please reconnect your camera for full funcionality.";
         box.showMessage(s);
     }
@@ -509,6 +513,8 @@ void MainWindow::deprecatedCamera (std::shared_ptr<Camera> camera)
 
         // firmware tab
         ui->labelVersion->setText(defaultText);
+
+        blockUpload = false;
     }
     else
     {

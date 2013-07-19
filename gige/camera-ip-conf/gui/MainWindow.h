@@ -126,7 +126,7 @@ private:
 
     InfoBox box;
 
-
+    bool blockUpload;
 
 };
 
