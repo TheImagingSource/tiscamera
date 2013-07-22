@@ -92,7 +92,7 @@ void MainWindow::displayCamera()
     }
 
     selectedCamera = cam;
-    blockUpgrade = false;
+    blockUpload = false;
 
     // overview tab
     ui->displayModelName->setText(QString(cam->getModelName().c_str()));
