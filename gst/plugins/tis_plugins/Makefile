@@ -1,4 +1,4 @@
-PLUGINS=libgsttiswhitebalance.so libgsttisvideobufferfilter.so libgsttiscamerasrc.so libgsttisbayer2rgb.so
+PLUGINS=libgsttiswhitebalance.so libgsttisvideobufferfilter.so libgsttiscamerasrc.so
 
 all: $(PLUGINS)
 
@@ -19,4 +19,3 @@ install: all
 	install -D libgsttiswhitebalance.so $(HOME)/.gstreamer-0.10/plugins 
 	install -D libgsttisvideobufferfilter.so $(HOME)/.gstreamer-0.10/plugins 
 	install -D libgsttiscamerasrc.so $(HOME)/.gstreamer-0.10/plugins 
-	install -D libgsttisbayer2rgb.so $(HOME)/.gstreamer-0.10/plugins 
