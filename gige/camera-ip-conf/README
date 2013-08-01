@@ -108,7 +108,7 @@ Troubleshooting
         system or your environment caused by these actions. Usage at
         own risk.
 
-    O I misconfigureed my camera.
+    O I misconfigured my camera.
       If the camera has a temporary IP configuration and is not
       reachable a simple reconnecting of the camera should reset the
       configuration.

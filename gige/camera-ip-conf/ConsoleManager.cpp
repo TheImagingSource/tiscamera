@@ -238,7 +238,7 @@ void setCamera (const std::vector<std::string>& args)
         }
         else
         {
-            std::cout << "  Unable to set ip address." << std::endl;
+            std::cout << "  Unable to set IP address." << std::endl;
         }
     }
     
@@ -390,7 +390,7 @@ void forceIP (const std::vector<std::string>& args)
 
     if (serial.empty())
     {
-        std::cout << std::endl << "No serial number given! Please specifiy!" << std::endl << std::endl;
+        std::cout << std::endl << "No serial number given! Please specify!" << std::endl << std::endl;
         return;
     }
 
@@ -469,14 +469,14 @@ void upgradeFirmware (const std::vector<std::string>& args)
     std::string serial = getSerialFromArgs(args);
     if (serial.empty())
     {
-        std::cout << std::endl << "No serial number given! Please specifiy!" << std::endl << std::endl;
+        std::cout << std::endl << "No serial number given! Please specify!" << std::endl << std::endl;
         return;
     }
 
     std::string firmware = getArgument (args, "firmware");
     if (firmware.empty())
     {
-        std::cout << "Pleaser specify a valid firmware file." << std::endl;
+        std::cout << "Please specify a valid firmware file." << std::endl;
         return;
     }
 
@@ -553,14 +553,14 @@ void rescue (std::vector<std::string> args)
     std::string ip = getArgument (args,"ip");
     if (ip.empty() || !isValidIpAddress(ip))
     {
-        std::cout << "Please specifiy a valid IP address." << std::endl;
+        std::cout << "Please specify a valid IP address." << std::endl;
         return;
     }
 
     std::string subnet = getArgument (args,"subnet");
     if (subnet.empty() || !isValidIpAddress(subnet))
     {
-        std::cout << "Please specifiy a valid subnet mask." << std::endl;
+        std::cout << "Please specify a valid subnet mask." << std::endl;
         return;
     }
 
@@ -568,7 +568,7 @@ void rescue (std::vector<std::string> args)
     std::string gateway = getArgument (args,"gateway");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
-        std::cout << "Please specifiy a gateway address." << std::endl;
+        std::cout << "Please specify a gateway address." << std::endl;
         return;
     }
 
