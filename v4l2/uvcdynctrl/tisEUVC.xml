@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config version="1.0"
+	xmlns="http://www.quickcamteam.net"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.quickcamteam.net uvcconfig.xsd">
+	<meta>
+		<version>1.0</version>
+		<author>Arne Caspari, The Imaging Source Europe GmbH</author>
+		<contact>http://www.theimagingsource.com</contact>
+		<revision>0.1</revision>
+		<copyright>Copyright (c) 2013 The Imaging Source Europe GmbH</copyright>
+		<history>
+			0.1, 2013-08-01:
+			- Initial release to the public
+		</history>
+	</meta>
+  
+  <constants>
+    <constant type="guid">
+      <id>UVC_GUID_TISEUVC_XU</id>
+      <value>923ed695-56f2-11e1-83f7-37704824019b</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_BINNING</id>
+      <value>0x4</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_EXT_IO</id>
+      <value>0x5</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_GAIN_R</id>
+      <value>0x6</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_GAIN_G</id>
+      <value>0x7</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_GAIN_B</id>
+      <value>0x8</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER</id>
+      <value>0x1</value>
+    </constant>
+
+    <constant type="integer">
+      <id>V4L2_CID_EUVC_EXT_IO</id>
+      <value>0x00980920</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_EUVC_GAIN_R</id>
+      <value>0x00980921</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_EUVC_GAIN_G</id>
+      <value>0x00980922</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_EUVC_GAIN_B</id>
+      <value>0x00980923</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_TRIGGER</id>
+      <value>0x00980924</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_BINNING</id>
+      <value>0x00980925</value>
+    </constant>
+
+  </constants>
+
+  <devices>
+    <device>
+      <controls>
+	<control id="extio">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_EXT_IO</selector>
+	  <index>0</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+	<control id="gainr">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_GAIN_R</selector>
+	  <index>1</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+ 	<control id="gaing">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_GAIN_G</selector>
+	  <index>2</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+	<control id="gainb">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_GAIN_B</selector>
+	  <index>3</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+    <control id="trigger">
+      <entity>UVC_GUID_TISEUVC_XU</entity>
+      <selector>XU_TRIGGER</selector>
+      <index>4</index>
+      <size>1</size>
+      <requests>
+	<request>SET_CUR</request>
+	<request>GET_CUR</request>
+      </requests>
+      <description>
+      </description>
+    </control>
+ 	<control id="binning">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_BINNING</selector>
+	  <index>5</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+      </controls>
+    </device>
+  </devices>
+  
+  <mappings>
+    <mapping>
+      <name>ExtIO</name>
+      <uvc>
+	<control_ref idref="extio"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_RAW</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_EUVC_EXT_IO</id>
+	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>GainR</name>
+      <uvc>
+	<control_ref idref="gainr"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_EUVC_GAIN_R</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>GainG</name>
+      <uvc>
+	<control_ref idref="gaing"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_EUVC_GAIN_G</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>GainB</name>
+      <uvc>
+	<control_ref idref="gainb"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_EUVC_GAIN_B</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger</name>
+      <uvc>
+	<control_ref idref="trigger"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_TRIGGER</id>
+	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Binning</name>
+      <uvc>
+	<control_ref idref="binning"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_BINNING</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+  </mappings>
+</config>
