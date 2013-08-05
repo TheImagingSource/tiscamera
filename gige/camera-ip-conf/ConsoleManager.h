@@ -31,6 +31,10 @@ namespace tis
     /// searches for -c and assumes the following element is serial
     std::string getSerialFromArgs (const std::vector<std::string>& args);
 
+    /// @name getCameraList
+    /// @return vector containing all found cameras
+    camera_list getCameraList ();
+
     /// @name listCameras
     /// prints overview over detected cameras
     void listCameras ();

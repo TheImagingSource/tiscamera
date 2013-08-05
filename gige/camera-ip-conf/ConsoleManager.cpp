@@ -54,6 +54,24 @@ std::string getSerialFromArgs(const std::vector<std::string>& args)
 }
 
 
+camera_list getCameraList ()
+{
+    camera_list cameras;
+    std::mutex cam_lock;
+
+    std::function<void(std::shared_ptr<Camera>)> f = [&cameras, &cam_lock] (std::shared_ptr<Camera> camera)
+    {
+        cam_lock.lock();
+        cameras.push_back(camera);
+        cam_lock.unlock();
+    };
+
+    discoverCameras(f);
+
+    return cameras;
+}
+
+
 void listCameras ()
 {
     camera_list cameras;
