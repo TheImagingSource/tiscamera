@@ -119,6 +119,13 @@ public:
     bool isDHCPactive ();
     bool setDHCPstate (const bool on);
 
+    /// @name setIPconfigState
+    /// @param dhcp - true if dhcp shall be active
+    /// @param staticIP - true is static IP shall be active
+    /// @return true on success
+    /// @brief Sets the ip configuration according to the given flags
+    bool setIPconfigState (const bool dhcp, const bool staticIP);
+
     const std::string getPersistentIP ();
     bool setPersistentIP (const std::string& ip);
     const std::string getPersistentSubnet ();

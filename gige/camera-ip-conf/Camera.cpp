@@ -287,6 +287,45 @@ bool Camera::setDHCPstate (const bool on)
 }
 
 
+bool Camera::setIPconfigState (const bool dhcp, const bool staticIP)
+{
+    bool retv = false;
+    if (getControl())
+    {
+        const int static_ip_bit = 0x00;
+        const int dhcpBit       = 0x01;
+        const int llaBit        = 0x02;
+        uint32_t data = ntohl(this->packet.IPConfigCurrent);
+
+        data |= (0x01 << llaBit);  // always on
+
+        if (dhcp)
+        {
+            data |= (0x01 << dhcpBit);
+        }
+        else
+        {
+            data &= ~(0x01 << dhcpBit);
+        }
+
+        if (staticIP)
+        {
+            data |= (0x01 << static_ip_bit);
+        }
+        else
+        {
+            data &= ~(0x01 << static_ip_bit);
+        }
+
+        data = htonl(data);
+        retv =  this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
+
+        abandonControl();
+    }
+    return retv;
+}
+
+
 const std::string Camera::getPersistentIP ()
 {
     uint32_t ip = 0;
