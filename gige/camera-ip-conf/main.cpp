@@ -19,43 +19,39 @@ using namespace tis;
 /// @brief prints complete overview over possible actions
 void printHelp ()
 {
-    std::cout << std::endl << "tis_network - network module for GigE cameras" << std::endl
-              << std::endl
-              << "usage: tis_network [command]             - execute specified command" << std::endl
-              << "   or: tis_network [command] -c <camera> - execute command for given camera" << std::endl
-              << std::endl << std::endl;
+    std::cout << "\ntis_network - network module for GigE cameras"
+              << "\n\nusage: tis_network [command]             - execute specified command"
+              << "\n   or: tis_network [command] -c <camera> - execute command for given camera\n\n\n"
 
-    std::cout << "Available commands: " << std::endl
-              << "    list     - list all available GigE cameras" << std::endl
-              << "    info     - print all information for camera" << std::endl
-              << "    set      - configure camera settings" << std::endl
-              << "    forceip  - force ip onto camera" << std::endl
-              << "    rescue   - broadcasts to MAC given settings" << std::endl
-              << "    upload   - upload new firmware to camera" << std::endl
-              << "    help     - print this text"
-              << std::endl << std::endl;
-
-    std::cout << std::endl
-              << "Available parameter:" << std::endl
-              << "    -c <camera-serianumber>  - specify camera to use" << std::endl
-              << "    -h                       - same as help" << std::endl
-              << "    -i                       - same as info" << std::endl
-              << "    -l                       - same as list" << std::endl
-              << "    ip=X.X.X.X               - specifiy persistent ip that camera shall use" << std::endl
-              << "    subnet=X.X.X.X           - specifiy persistent subnetmask that camera shall use" << std::endl
-              << "    gateway=X.X.X.X          - specifiy persistent gateway that camera shall use" << std::endl
-              << "    dhcp=on/off              - toggle dhcp state" << std::endl
-              << "    static=on/off            - toggle static ip state" << std::endl
-              << "    name=\"xyz\"               - set name for camera; maximum 16 characters" << std::endl
-              << "    firmware=firmware.zip    - file containing new firmware"
-              << "    " << std::endl
+              << "Available commands:\n"
+              << "    list     - list all available GigE cameras\n"
+              << "    info     - print all information for camera\n"
+              << "    set      - configure camera settings\n"
+              << "    forceip  - force ip onto camera\n"
+              << "    rescue   - broadcasts to MAC given settings\n"
+              << "    upload   - upload new firmware to camera\n"
+              << "    help     - print this text\n"
               << std::endl;
 
-    std::cout << "Examples:" << std::endl
-              << std::endl
-              << "    tis_network set gateway=192.168.0.1 -c 46210199" << std::endl
-              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -c 46210199" << std::endl
-              << std::endl << std::endl;
+    std::cout << "\nAvailable parameter:\n"
+              << "    -c <camera-serialnumber> - specify camera to use\n"
+              << "    -h                       - same as help\n"
+              << "    -i                       - same as info\n"
+              << "    -l                       - same as list\n"
+              << "    ip=X.X.X.X               - specifiy persistent ip that camera shall use\n"
+              << "    subnet=X.X.X.X           - specifiy persistent subnetmask that camera shall use\n"
+              << "    gateway=X.X.X.X          - specifiy persistent gateway that camera shall use\n"
+              << "    dhcp=on/off              - toggle dhcp state\n"
+              << "    static=on/off            - toggle static ip state\n"
+              << "    name=\"xyz\"               - set name for camera; maximum 16 characters\n"
+              << "    firmware=firmware.zip    - file containing new firmware\n"
+              << std::endl;
+
+    std::cout << "Examples:\n\n"
+
+              << "    tis_network set gateway=192.168.0.1 -c 46210199\n"
+              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -c 46210199\n\n"
+              << std::endl;
 }
 
 
@@ -121,7 +117,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
         else
         {
             // TODO allow it to write camera before other args so that -c does not break it
-            std::cout << "Unknown parameter \"" << arg << "\"" << std::endl << std::endl;
+            std::cout << "Unknown parameter \"" << arg << "\"\n" << std::endl;
             return;
         }
     }

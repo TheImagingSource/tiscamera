@@ -110,7 +110,7 @@ void listCameras ()
 
     if (cameras.size() == 0)
     {
-        std::cout << std::endl << "No cameras found." << std::endl << std::endl;
+        std::cout << "\nNo cameras found.\n" << std::endl;
         return;
     }
 
@@ -153,7 +153,7 @@ void printCameraInformation (const std::vector<std::string>& args)
     
     if (serial.empty())
     {
-        std::cout << std::endl << "No serial number given." << std::endl << std::endl;
+        std::cout << "\nNo serial number given.\n" << std::endl;
         return;
     }
 
@@ -179,38 +179,33 @@ void printCameraInformation (const std::vector<std::string>& args)
     bool reachable = false;
     if(!camera->isReachable())
     {
-        std::cout << std::endl 
-                  << "========================================" << std::endl
-                  << ">  Camera is currently not reachable!  <" << std::endl
-                  << "> To enable full communication set IP  <" << std::endl
-                  << ">     configuration via forceip        <" << std::endl
-                  << "========================================" << std::endl;
+        std::cout << "\n========================================"
+                  << "\n>  Camera is currently not reachable!  <"
+                  << "\n> To enable full communication set IP  <"
+                  << "\n>     configuration via forceip        <"
+                  << "\n========================================" << std::endl;
     }
     else
     {
         reachable = true;
     }
 
-    std::cout << std::endl;
-    std::cout << "Model:    " << camera->getModelName() << std::endl
-              << "Serial:   " << camera->getSerialNumber() << std::endl
-              << "Firmware: " << camera->getFirmwareVersion() << std::endl
-              << "UserName: " << camera->getUserDefinedName() << std::endl
-              << std::endl
-              << "MAC Address:        " << camera->getMAC() << std::endl
-              << "Current IP:         " << camera->getCurrentIP() << std::endl
-              << "Current Subnet:     " << camera->getCurrentSubnet() << std::endl 
-              << "Current Gateway:    " << camera->getCurrentGateway() << std::endl
-              << std::endl
-              << "DHCP is:   " << (camera->isDHCPactive() ? "enabled" : "disabled") << std::endl
-              << "Static is: " << (camera->isStaticIPactive() ? "enabled" : "disabled") << std::endl;
+    std::cout << "\nModel:    " << camera->getModelName()
+              << "\nSerial:   " << camera->getSerialNumber()
+              << "\nFirmware: " << camera->getFirmwareVersion()
+              << "\nUserName: " << camera->getUserDefinedName()
+              << "\n\nMAC Address:        " << camera->getMAC()
+              << "\nCurrent IP:         " << camera->getCurrentIP()
+              << "\nCurrent Subnet:     " << camera->getCurrentSubnet()
+              << "\nCurrent Gateway:    " << camera->getCurrentGateway()
+              << "\n\nDHCP is:   " << (camera->isDHCPactive() ? "enabled" : "disabled")
+              << "\nStatic is: " << (camera->isStaticIPactive() ? "enabled" : "disabled") << std::endl;
 
     if (reachable)
     {
-        std::cout << std::endl
-                  << "Persistent IP:      " << camera->getPersistentIP() << std::endl
-                  << "Persistent Subnet:  " << camera->getPersistentSubnet() << std::endl
-                  << "Persistent Gateway: " << camera->getPersistentGateway() << std::endl <<  std::endl;
+        std::cout << "\n\nPersistent IP:      " << camera->getPersistentIP()
+                  << "\nPersistent Subnet:  " << camera->getPersistentSubnet()
+                  << "\nPersistent Gateway: " << camera->getPersistentGateway() << "\n" <<  std::endl;
     }
 }
 
@@ -221,7 +216,7 @@ void setCamera (const std::vector<std::string>& args)
 
     if (serial.empty())
     {
-        std::cout << std::endl << "No serial number given! Please specifiy!" << std::endl << std::endl;
+        std::cout << "\nNo serial number given! Please specify!\n" << std::endl;
         return;
     }
 
@@ -386,7 +381,7 @@ void setCamera (const std::vector<std::string>& args)
         }
         else
         {
-            std::cout << std::endl << "Unknown setting \"" << dhcp << "\"" << std::endl << std::endl;
+            std::cout << "\nUnknown setting \"" << dhcp << "\"\n" << std::endl;
         }
     }
 
@@ -412,7 +407,7 @@ void forceIP (const std::vector<std::string>& args)
 
     if (serial.empty())
     {
-        std::cout << std::endl << "No serial number given! Please specify!" << std::endl << std::endl;
+        std::cout << "\nNo serial number given! Please specify!\n" << std::endl;
         return;
     }
 
@@ -457,19 +452,18 @@ void forceIP (const std::vector<std::string>& args)
         return;
     }
 
-    std::cout << std::endl;
-    std::cout << "Do you really want to enforce the following configuration? " << std::endl << std::endl
-              << "Serial Number: " << camera->getSerialNumber() << std::endl
-              << "IP:     " << ip << std::endl
-              << "Subnet: " << subnet << std::endl
-              << "Gateway:" << gateway << std::endl << std::endl;
-    std::cout << "Enforce IP? [y/N] ";
+    std::cout << "\nDo you really want to enforce the following configuration?\n\n"
+              << "Serial Number: " << camera->getSerialNumber()
+              << "\nIP:     " << ip
+              << "\nSubnet: " << subnet
+              << "\nGateway:" << gateway;
+    std::cout << "\n\nEnforce IP? [y/N] ";
 
     std::string really;
     std::cin >> really;
     if (really.compare("y") == 0 )
     {
-        std::cout << std::endl << "Sending forceIP...." << std::endl << std::endl;
+        std::cout << "\nSending forceIP....\n" << std::endl;
         if (camera->forceIP(ip, subnet, gateway))
         {
             std::cout << "  Done." << std::endl;
@@ -481,7 +475,7 @@ void forceIP (const std::vector<std::string>& args)
     }
     else
     {
-        std::cout << std::endl <<  "Aborted forceIP!" << std::endl << std::endl;
+        std::cout << "\nAborted forceIP!\n" << std::endl;
     }
 }
 
@@ -552,12 +546,12 @@ void upgradeFirmware (const std::vector<std::string>& args)
     std::cout << std::endl;
     if (camera->uploadFirmware(cF, func))
     {
-        std::cout << std::endl << "Successfully uploaded firmware. \
-Please reconnect your camera to assure full functionality." << std::endl;
+        std::cout << "\nSuccessfully uploaded firmware. \
+Please reconnect your camera to assure full functionality.\n";
     }
     else
     {
-        std::cout << std::endl << "ERROR aborted upgrade. " << std::endl;
+        std::cout << "\nERROR aborted upgrade.\n";
     }
     std::cout << std::endl;
 }
