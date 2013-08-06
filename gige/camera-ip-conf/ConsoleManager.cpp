@@ -202,26 +202,8 @@ void printCameraInformation (const std::vector<std::string>& args)
               << "Current Subnet:     " << camera->getCurrentSubnet() << std::endl 
               << "Current Gateway:    " << camera->getCurrentGateway() << std::endl
               << std::endl
-              << "DHCP is:   ";
-
-    if (camera->isDHCPactive())
-    {
-        std::cout << "enabled" << std::endl;
-    }
-    else
-    {
-        std::cout << "disabled" << std::endl;
-    }
-
-    std::cout << "Static is: ";
-    if (camera->isStaticIPactive())
-    {
-        std::cout << "enabled" << std::endl;
-    }
-    else
-    {
-        std::cout << "disabled" << std::endl;
-    }
+              << "DHCP is:   " << (camera->isDHCPactive() ? "enabled" : "disabled") << std::endl
+              << "Static is: " << (camera->isStaticIPactive() ? "enabled" : "disabled") << std::endl;
 
     if (reachable)
     {
