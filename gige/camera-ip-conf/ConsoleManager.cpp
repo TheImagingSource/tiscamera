@@ -37,6 +37,28 @@ std::string getArgument(const std::vector<std::string>& args, const std::string&
 }
 
 
+std::string getArgumentValue (const std::vector<std::string>& args, const std::string& long_name, const std::string& short_name)
+{
+    std::string retv;
+
+    auto iter = find_if(args.begin(), args.end(),  [&long_name, &short_name] (std::string s)
+                        {
+                            if ((s.compare(long_name) == 0) || (s.compare(short_name) == 0))
+                            {
+                                return true;
+                            }
+                            return false;
+                        });
+
+    if (iter != args.end() && std::next(iter) != args.end())
+    {
+        retv = *++iter;
+    }
+
+    return retv;
+}
+
+
 std::string getSerialFromArgs(const std::vector<std::string>& args)
 {
     for (unsigned int x = 0; x < args.size(); ++x)

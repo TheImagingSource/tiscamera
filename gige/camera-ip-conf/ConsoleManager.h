@@ -26,6 +26,13 @@ namespace tis
     /// argument/value pairs are expected to be argument=x
     std::string getArgument (const std::vector<std::string>& args, const std::string& argument);
 
+    /// @name getArgumentValue
+    /// @param args - vector that shall be searched
+    /// @param long_name - long ident of wanted argument; empty if not wanted
+    /// @param short_name - short ident of wanted argument; empty if not wanted
+    /// @return std::string containing the value; empty if none found
+    std::string getArgumentValue (const std::vector<std::string>& args, const std::string& long_name, const std::string& short_name);
+
     /// @name getSerialFromArgs
     /// @param args - args - vector containing string with camera serial
     /// searches for -c and assumes the following element is serial
