@@ -21,11 +21,19 @@ namespace tis
     class Camera;
     typedef std::vector<std::shared_ptr<Camera>> camera_list;
 
+    enum camera_ident
+    {
+        CAMERA_NAME = 0,
+        CAMERA_SERIAL,
+        CAMERA_MAC
+    };
+
     /// @name getCameraFromList
     /// @param cameras - vector containing cameras that shall be searched
-    /// @param serialNumber - string containing the serial of the wished camera
+    /// @param identifier - string containing the serial of the wished camera
+    /// @param id_type - camera_ident describing the identifier; default CAMERA_SERIAL
     /// @return shared pointer to the wished camera, else null
-    std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& serialNumber);
+    std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type = CAMERA_SERIAL);
 
 
 class Camera

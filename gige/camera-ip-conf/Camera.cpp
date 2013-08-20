@@ -11,6 +11,7 @@
 #include <thread>
 #include <future>
 #include <iostream>
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -24,16 +25,41 @@
 namespace tis
 {
 
-std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& serialNumber)
+std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type)
 {
     std::shared_ptr<Camera> rval;
 
-    for (auto& cam : cameras)
-    {
-        if (cam->getSerialNumber().compare(serialNumber) == 0)
+    std::function<bool(std::shared_ptr<Camera>)> f = [&identifier, &id_type] (std::shared_ptr<Camera> cam)
         {
-            return cam;
-        }
+            if (id_type == CAMERA_MAC)
+            {
+                if (cam->getMAC().compare(identifier) == 0)
+                {
+                    return true;
+                }
+            }
+            else if (id_type == CAMERA_NAME)
+            {
+                if (cam->getUserDefinedName().compare(identifier) == 0)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (cam->getSerialNumber().compare(identifier) == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+    auto iter = find_if(cameras.begin(), cameras.end(), f);
+
+    if (iter != cameras.end())
+    {
+        rval = *iter;
     }
     return rval;
 }
