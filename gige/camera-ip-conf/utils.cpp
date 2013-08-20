@@ -22,9 +22,14 @@ namespace tis
 
 bool startsWith (const std::string& searchThrough, const std::string& searchFor)
 {
+    if (searchThrough.empty() || searchFor.empty())
+    {
+        return false;
+    }
+
     size_t lensearchThrough = searchThrough.size();
     size_t lenstr = searchFor.size();
-    if (lenstr >= lensearchThrough)
+    if (lenstr > lensearchThrough)
     {
         return false;
     }
