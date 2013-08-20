@@ -452,11 +452,16 @@ void forceIP (const std::vector<std::string>& args)
         return;
     }
 
-    std::cout << "\nDo you really want to enforce the following configuration?\n\n"
-              << "Serial Number: " << camera->getSerialNumber()
-              << "\nIP:     " << ip
-              << "\nSubnet: " << subnet
-              << "\nGateway:" << gateway;
+    std::cout << "\nEnforcing IP Configuration.\n\n"
+              << "Serial Number:     " << camera->getSerialNumber()
+              << "\nCurrent Settings:"
+              << "\n    IP:      " << camera->getCurrentIP()
+              << "\n    Subnet:  " << camera->getCurrentSubnet()
+              << "\n    Gateway: " << camera->getCurrentGateway()
+              << "\n\nDo you really want to enforce the following configuration?\n"
+              << "\n    IP:     " << ip
+              << "\n    Subnet: " << subnet
+              << "\n    Gateway:" << gateway << std::endl;
     std::cout << "\n\nEnforce IP? [y/N] ";
 
     std::string really;
