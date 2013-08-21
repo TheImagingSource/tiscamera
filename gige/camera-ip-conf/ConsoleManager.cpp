@@ -146,17 +146,7 @@ std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args)
 
 void listCameras ()
 {
-    camera_list cameras;
-
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera) 
-    {
-        std::mutex cam_lock;
-        cam_lock.lock();
-        cameras.push_back(camera);
-        cam_lock.unlock();
-    };
-
-    discoverCameras(f);
+    camera_list cameras = getCameraList();
 
     if (cameras.size() == 0)
     {
