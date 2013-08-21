@@ -43,16 +43,27 @@ std::string getArgumentValue (const std::vector<std::string>& args, const std::s
 
     auto iter = find_if(args.begin(), args.end(),  [&long_name, &short_name] (std::string s)
                         {
-                            if ((s.compare(long_name) == 0) || (s.compare(short_name) == 0))
+                            if ((startsWith(s, long_name)) || (startsWith(s, short_name)))
                             {
                                 return true;
                             }
                             return false;
                         });
 
-    if (iter != args.end() && std::next(iter) != args.end())
+    if (iter == args.end())
     {
-        retv = *++iter;
+        return retv;
+    }
+    if ((*iter).find("=") != std::string::npos)
+    {
+            std::string s = *iter;
+            unsigned pos = s.find("=");
+
+            retv = s.substr(pos+1);
+    }
+    else if (std::next(iter) != args.end())
+    {
+        retv = *(std::next(iter));
     }
 
     return retv;
