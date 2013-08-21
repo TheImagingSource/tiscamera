@@ -15,6 +15,7 @@
 
 #include <thread>
 #include <mutex>
+#include <exception>
 
 namespace tis
 {
@@ -102,6 +103,44 @@ camera_list getCameraList ()
     discoverCameras(f);
 
     return cameras;
+}
+
+
+std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args)
+{
+    std::shared_ptr<Camera> retv;
+
+    std::string serial = getArgumentValue(args, "--serial", "-s");
+    std::string name   = getArgumentValue(args, "--name",   "-n");
+    std::string mac    = getArgumentValue(args, "--mac",    "-m");
+
+    if (serial.empty() && name.empty() && mac.empty())
+    {
+        throw std::invalid_argument("No camera identifier found.");
+    }
+
+    camera_list cameras = getCameraList();
+
+    if (cameras.size() == 0)
+    {
+        std::cout << "\nNo cameras found.\n" << std::endl;
+        exit(1);
+    }
+
+    if (!serial.empty())
+    {
+        retv = getCameraFromList(cameras, serial, CAMERA_SERIAL);
+    }
+    else if (!name.empty())
+    {
+        retv = getCameraFromList(cameras, name, CAMERA_NAME);
+    }
+    else
+    {
+        retv = getCameraFromList(cameras, mac, CAMERA_MAC);
+    }
+
+    return retv;
 }
 
 

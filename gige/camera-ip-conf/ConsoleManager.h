@@ -42,6 +42,12 @@ namespace tis
     /// @return vector containing all found cameras
     camera_list getCameraList ();
 
+    /// @name findCamera
+    /// @param args - vector that shall be searched
+    /// @return shared_ptr to found camera; empty if non found
+    /// @searches args for camera identifier and queries for a corresponding Camera instance
+    std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args);
+
     /// @name listCameras
     /// prints overview over detected cameras
     void listCameras ();
