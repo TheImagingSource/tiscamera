@@ -291,99 +291,43 @@ void setCamera (const std::vector<std::string>& args)
             return;
         }
 
-        std::cout << "Setting Gateway...." << std::endl;
-        if (camera->setPersistentGateway(gateway))
+    // if one exists we have to check them both
+    if (!getArgumentValue(args, "dhcp", "").empty() || !getArgumentValue(args, "static", "").empty())
+    {
+        bool dhcp = camera->isDHCPactive();
+        bool staticIP = camera->isStaticIPactive();
+
+        std::string d = getArgumentValue(args, "dhcp", "");
+        if (d.compare("on") == 0 || d.compare("off") == 0)
+        {
+            (d.compare("on") == 0) ? dhcp = true : dhcp = false;
+        }
+        else
+        {
+            throw std::invalid_argument("Unable to interpret dhcp argument as value: " + d);
+        }
+
+        std::string s = getArgumentValue(args, "static", "");
+        if (s.compare("on") == 0 || s.compare("off") == 0)
+        {
+            (s.compare("on") == 0) ? staticIP = true : staticIP = false;
+        }
+        else
+        {
+            throw std::invalid_argument("Unable to interpret static ip argument as value: " + s);
+        }
+
+        std::cout << "DHCP will be: " << ((dhcp) ? "on" : "off")
+                  << "\nStatic IP to: " << ((staticIP) ? "on" : "off")
+                  << "\n\nWriting IP configuration...." << std::endl;
+        if (camera->setIPconfigState(dhcp, staticIP))
         {
             std::cout << "  Done." << std::endl;
         }
         else
         {
-            std::cout << "  Unable to set Gateway." << std::endl;
-        }
-    }
-
-    std::string dhcp = getArgument (args,"dhcp");
-    if (!dhcp.empty())
-    {
-        bool check = camera->isDHCPactive();
-       
-        if (dhcp.compare("on") == 0)
-        {
-            if (check)
-            {
-                std::cout << "DHCP is already on." << std::endl;
-            }
-            else
-            {
-                std::cout << "Enabling DHCP...." << std::endl;
-                
-                if (camera->setDHCPstate(true))
-                {
-                    std::cout << "  Done." << std::endl; 
-                }
-                else
-                {
-                    std::cout << "  Unable to set DHCP state." << std::endl;
-                }
-            }
-        }
-        else if (dhcp.compare("off") == 0 )
-        {
-            std::cout << "Disabling DHCP...." << std::endl;
-            if (camera->setDHCPstate(false))
-            {
-                std::cout << "  Done." << std::endl; 
-            }
-            else
-            {
-                std::cout << "  Unable to set DHCP state." << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "Unknown setting \"" << dhcp << "\"" << std::endl;
-        }
-    }
-
-    std::string staticIP = getArgument (args,"static");
-    if (!staticIP.empty())
-    {
-        bool check = camera->isStaticIPactive();
-       
-        if (staticIP.compare("on") == 0)
-        {
-            if (check)
-            {
-                std::cout << "Static IP is already on." << std::endl;
-            }
-            else
-            {
-                std::cout << "Enabling static IP...." << std::endl;
-                if (camera->setStaticIPstate(true))
-                {
-                    std::cout << "  Done." << std::endl; 
-                }
-                else
-                {
-                    std::cout << "  Unable to set static IP state." << std::endl;
-                }
-            }
-        }
-        else if (staticIP.compare("off") == 0 )
-        {
-            std::cout << "Disabling static IP...." << std::endl;
-            if (camera->setStaticIPstate(false))
-            {
-                std::cout << "  Done." << std::endl; 
-            }
-            else
-            {
-                std::cout << "  Unable to set static IP state." << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "\nUnknown setting \"" << dhcp << "\"\n" << std::endl;
+            std::cout << "  Error while setting IP configuration." << std::endl;
+            exit(1);
         }
     }
 
