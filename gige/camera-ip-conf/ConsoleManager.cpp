@@ -405,14 +405,6 @@ void setCamera (const std::vector<std::string>& args)
 
 void forceIP (const std::vector<std::string>& args)
 {
-    std::string serial = getSerialFromArgs(args);
-
-    if (serial.empty())
-    {
-        std::cout << "\nNo serial number given! Please specify!\n" << std::endl;
-        return;
-    }
-
     std::string ip = getArgument (args,"ip");
     if (ip.empty() || !isValidIpAddress(ip))
     {
@@ -426,7 +418,6 @@ void forceIP (const std::vector<std::string>& args)
         std::cout << "Please specifiy a valid subnet mask." << std::endl;
         return;
     }
-
 
     std::string gateway = getArgument (args,"gateway");
     if (gateway.empty() || !isValidIpAddress(gateway))
@@ -478,13 +469,6 @@ void forceIP (const std::vector<std::string>& args)
 
 void upgradeFirmware (const std::vector<std::string>& args)
 {
-    std::string serial = getSerialFromArgs(args);
-    if (serial.empty())
-    {
-        std::cout << std::endl << "No serial number given! Please specify!" << std::endl << std::endl;
-        return;
-    }
-
     std::string firmware = getArgument (args, "firmware");
     if (firmware.empty())
     {
