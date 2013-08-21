@@ -189,26 +189,7 @@ void listCameras ()
 
 void printCameraInformation (const std::vector<std::string>& args)
 {
-    std::string serial = getSerialFromArgs(args);
-    
-    if (serial.empty())
-    {
-        std::cout << "\nNo serial number given.\n" << std::endl;
-        return;
-    }
-
-    camera_list cameras;
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera) 
-    {
-        std::mutex cam_lock;
-        cam_lock.lock();
-        cameras.push_back(camera);
-        cam_lock.unlock();
-    };
-
-    discoverCameras(f);
-
-    auto camera = getCameraFromList(cameras, serial);
+    auto camera = findCamera(args);
 
     if (camera == NULL)
     {
@@ -252,26 +233,7 @@ void printCameraInformation (const std::vector<std::string>& args)
 
 void setCamera (const std::vector<std::string>& args)
 {
-    std::string serial = getSerialFromArgs(args);
-
-    if (serial.empty())
-    {
-        std::cout << "\nNo serial number given! Please specify!\n" << std::endl;
-        return;
-    }
-
-    camera_list cameras;
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera) 
-        {
-            std::mutex cam_lock;
-            cam_lock.lock();
-            cameras.push_back(camera);
-            cam_lock.unlock();
-        };
-
-    discoverCameras(f);
-
-    auto camera = getCameraFromList(cameras, serial);
+    auto camera = findCamera(args);
 
     if (camera == NULL)
     {
@@ -473,18 +435,7 @@ void forceIP (const std::vector<std::string>& args)
         return;
     }
 
-    camera_list cameras;
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera) 
-    {
-        std::mutex cam_lock;
-        cam_lock.lock();
-        cameras.push_back(camera);
-        cam_lock.unlock();
-    };
-
-    discoverCameras(f);
-
-    auto camera = getCameraFromList(cameras, serial);
+    auto camera = findCamera(args);
 
     if (camera == NULL)
     {
@@ -546,18 +497,7 @@ void upgradeFirmware (const std::vector<std::string>& args)
 
     std::cout << "===========================" << firmware << " - " << cF << std::endl;
 
-    camera_list cameras;
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras] (std::shared_ptr<Camera> camera)
-    {
-        std::mutex cam_lock;
-        cam_lock.lock();
-        cameras.push_back(camera);
-        cam_lock.unlock();
-    };
-
-    discoverCameras(f);
-
-    auto camera = getCameraFromList(cameras, serial);
+    auto camera = findCamera(args);
 
     if (camera == NULL)
     {
