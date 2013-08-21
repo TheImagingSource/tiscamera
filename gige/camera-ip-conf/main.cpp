@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <exception>
+#include <stdexcept>
 
 using namespace tis;
 
@@ -67,59 +69,68 @@ void handleCommandlineArguments (const int argc, char* argv[])
     // we don;t need the program name itself and just ignore it
     std::vector<std::string> args(argv+1, argv + argc);
 
-    for (const auto& arg : args)
+    try
     {
-        if ((arg.compare("help") == 0) || (arg.compare("-h") == 0))
+        for (const auto& arg : args)
         {
-            printHelp();
-            return;
-        }
-        else if ((arg.compare("list") == 0) || (arg.compare("-l") == 0))
-        {
-            listCameras();
-            break;
-        }
-        else if ((arg.compare("info") == 0) || arg.compare("-i") == 0)
-        {
-            if (argc <= 2)
+            if ((arg.compare("help") == 0) || (arg.compare("-h") == 0))
             {
-                std::cout << "Not enough arguments." << std::endl;
+                printHelp();
                 return;
             }
-            printCameraInformation(args);
-            break;
-        }
-        else if (arg.compare("set") == 0)
-        {
-            if (argc <= 2)
+            else if ((arg.compare("list") == 0) || (arg.compare("-l") == 0))
             {
-                std::cout << "Not enough arguments." << std::endl;
+                listCameras();
+                break;
+            }
+            else if ((arg.compare("info") == 0) || arg.compare("-i") == 0)
+            {
+                if (argc <= 2)
+                {
+                    std::cout << "Not enough arguments." << std::endl;
+                    return;
+                }
+                printCameraInformation(args);
+                break;
+            }
+            else if (arg.compare("set") == 0)
+            {
+                if (argc <= 2)
+                {
+                    std::cout << "Not enough arguments." << std::endl;
+                    return;
+                }
+                setCamera(args);
+                break;
+            }
+            else if (arg.compare("forceip") == 0)
+            {
+                forceIP(args);
+                break;
+            }
+            else if (arg.compare("upload") == 0)
+            {
+                upgradeFirmware(args);
+                break;
+            }
+            else if (arg.compare("rescue") == 0)
+            {
+                rescue(args);
+                break;
+            }
+            else
+            {
+                // TODO allow it to write camera before other args so that -c does not break it
+                std::cout << "Unknown parameter \"" << arg << "\"\n" << std::endl;
                 return;
             }
-            setCamera(args);
-            break;
         }
-        else if (arg.compare("forceip") == 0)
-        {
-            forceIP(args);
-            break;
-        }
-        else if (arg.compare("upload") == 0)
-        {
-            upgradeFirmware(args);
-            break;
-        }
-        else if (arg.compare("rescue") == 0)
-        {
-            rescue(args);
-            break;
-        }
-        else
-        {
-            // TODO allow it to write camera before other args so that -c does not break it
-            std::cout << "Unknown parameter \"" << arg << "\"\n" << std::endl;
-            return;
-        }
+    }
+    catch (std::invalid_argument& exc)
+    {
+        std::cout << "\n" << exc.what()
+                  << "\n" << std::endl;
+        exit(1);
     }
 }
 
