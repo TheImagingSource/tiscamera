@@ -18,25 +18,12 @@
 
 namespace tis
 {
-    /// @name getArgument
-    /// @param args - vector containing string that shall be searched
-    /// @param argument - string defining what shall be searched
-    /// @return value of argument or string.empty()
-    /// searches through args for string containing argument and returns x
-    /// argument/value pairs are expected to be argument=x
-    std::string getArgument (const std::vector<std::string>& args, const std::string& argument);
-
     /// @name getArgumentValue
     /// @param args - vector that shall be searched
     /// @param long_name - long ident of wanted argument; empty if not wanted
     /// @param short_name - short ident of wanted argument; empty if not wanted
     /// @return std::string containing the value; empty if none found
     std::string getArgumentValue (const std::vector<std::string>& args, const std::string& long_name, const std::string& short_name);
-
-    /// @name getSerialFromArgs
-    /// @param args - args - vector containing string with camera serial
-    /// searches for -c and assumes the following element is serial
-    std::string getSerialFromArgs (const std::vector<std::string>& args);
 
     /// @name getCameraList
     /// @return vector containing all found cameras
@@ -63,7 +50,7 @@ namespace tis
     /// @param subnet - subnet the camera shall use
     /// @param gateway - gateway the camera shall use
     /// @brief writes given arguments in given camera
-    void writeChanges(std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway);
+    void writeChanges (std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway);
 
     /// @name setCamera
     /// @param args - vector containing string that shall be searched

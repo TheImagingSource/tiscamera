@@ -20,24 +20,6 @@
 namespace tis
 {
 
-std::string getArgument(const std::vector<std::string>& args, const std::string& argument)
-{
-    for(const auto& arg : args)
-    {
-        if (tis::startsWith(arg,argument))
-        {
-            std::string s = arg;
-            unsigned pos = s.find("=");
-
-            s = s.substr(pos+1);
-
-            return s;
-        }
-    }
-    return "";
-}
-
-
 std::string getArgumentValue (const std::vector<std::string>& args, const std::string& long_name, const std::string& short_name)
 {
     std::string retv;
@@ -68,23 +50,6 @@ std::string getArgumentValue (const std::vector<std::string>& args, const std::s
     }
 
     return retv;
-}
-
-
-std::string getSerialFromArgs(const std::vector<std::string>& args)
-{
-    for (unsigned int x = 0; x < args.size(); ++x)
-    {
-        if (args.at(x).compare("-c") == 0)
-        {
-            if (x+1 < args.size())
-            {
-                return args.at(x+1);
-            }
-        }
-    }
-
-    return "";
 }
 
 
