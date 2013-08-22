@@ -395,21 +395,21 @@ void setCamera (const std::vector<std::string>& args)
 
 void forceIP (const std::vector<std::string>& args)
 {
-    std::string ip = getArgument (args,"ip");
+    std::string ip = getArgumentValue (args, "ip", "");
     if (ip.empty() || !isValidIpAddress(ip))
     {
         std::cout << "Please specifiy a valid IP address." << std::endl;
         return;
     }
 
-    std::string subnet = getArgument (args,"subnet");
+    std::string subnet = getArgumentValue (args, "subnet", "");
     if (subnet.empty() || !isValidIpAddress(subnet))
     {
         std::cout << "Please specifiy a valid subnet mask." << std::endl;
         return;
     }
 
-    std::string gateway = getArgument (args,"gateway");
+    std::string gateway = getArgumentValue (args, "gateway", "");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specifiy a gateway address." << std::endl;
@@ -459,7 +459,7 @@ void forceIP (const std::vector<std::string>& args)
 
 void upgradeFirmware (const std::vector<std::string>& args)
 {
-    std::string firmware = getArgument (args, "firmware");
+    std::string firmware = getArgumentValue(args, "firmware", "");
     if (firmware.empty())
     {
         std::cout << "Please specify a valid firmware file." << std::endl;
@@ -518,21 +518,21 @@ Please reconnect your camera to assure full functionality.\n";
 
 void rescue (std::vector<std::string> args)
 {
-    std::string mac = getArgument (args,"mac");
+    std::string mac = getArgumentValue(args, "--mac", "-m");
     if (mac.empty())
     {
         std::cout << "Please specify the MAC address to use." << std::endl;
         return;
     }
 
-    std::string ip = getArgument (args,"ip");
+    std::string ip = getArgumentValue(args, "ip", "");
     if (ip.empty() || !isValidIpAddress(ip))
     {
         std::cout << "Please specify a valid IP address." << std::endl;
         return;
     }
 
-    std::string subnet = getArgument (args,"subnet");
+    std::string subnet = getArgumentValue(args, "subnet", "");
     if (subnet.empty() || !isValidIpAddress(subnet))
     {
         std::cout << "Please specify a valid subnet mask." << std::endl;
@@ -540,7 +540,7 @@ void rescue (std::vector<std::string> args)
     }
 
 
-    std::string gateway = getArgument (args,"gateway");
+    std::string gateway = getArgumentValue (args,"gateway", "");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specify a gateway address." << std::endl;
