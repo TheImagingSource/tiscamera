@@ -351,10 +351,19 @@ void setCamera (const std::vector<std::string>& args)
         }
     }
 
-    std::string name = getArgument (args,"name");
-    if (!name.empty())
+    auto iter_name = find_if(args.begin(), args.end(), [] (std::string s)
+                             {
+                                 if (startsWith(s, "name"))
+                                 {
+                                     return true;
+                                 }
+                                 return false;
+                             });
+    // if name exists we have to evaluate to allow the setting of empty names
+    if (iter_name != args.end())
     {
-        std::cout << "Setting user defined name...." << std::endl;
+        std::string name = getArgumentValue(args, "name", "");
+        std::cout << "Setting user defined name to \"" <<  name << "\" ...." << std::endl;
         if (camera->setUserDefinedName(name))
         {
             std::cout << "  Done." << std::endl;
