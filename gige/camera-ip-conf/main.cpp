@@ -36,7 +36,6 @@ void printHelp ()
               << std::endl;
 
     std::cout << "\nAvailable parameter:\n"
-              << "    -c <camera-serialnumber> - specify camera to use\n"
               << "    -h                       - same as help\n"
               << "    -i                       - same as info\n"
               << "    -l                       - same as list\n"
@@ -49,10 +48,16 @@ void printHelp ()
               << "    firmware=firmware.zip    - file containing new firmware\n"
               << std::endl;
 
+    std::cout << "Camera identification is possible via:\n"
+              << "    --serial     -s          - serial number of camera\n"
+              << "    --name       -n          - user defined name of camera\n"
+              << "    --mac        -m          - MAC of camera\n"
+              << std::endl;
+    
     std::cout << "Examples:\n\n"
 
-              << "    tis_network set gateway=192.168.0.1 -c 46210199\n"
-              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -c 46210199\n\n"
+              << "    tis_network set gateway=192.168.0.1 -s 46210199\n"
+              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -s 46210199\n\n"
               << std::endl;
 }
 
