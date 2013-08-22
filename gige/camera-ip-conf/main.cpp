@@ -126,7 +126,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
         }
     }
-    catch (std::invalid_argument& exc)
+    catch (std::exception& exc)
     {
         std::cout << "\n" << exc.what()
                   << "\n" << std::endl;
