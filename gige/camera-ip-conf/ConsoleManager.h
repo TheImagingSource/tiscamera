@@ -57,6 +57,14 @@ namespace tis
     /// prints information about camera
     void printCameraInformation (const std::vector<std::string>& args);
 
+    /// @name writeChanges
+    /// @param camera - camera that shall be written
+    /// @param ip - ip the camera shall use
+    /// @param subnet - subnet the camera shall use
+    /// @param gateway - gateway the camera shall use
+    /// @brief writes given arguments in given camera
+    void writeChanges(std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway);
+
     /// @name setCamera
     /// @param args - vector containing string that shall be searched
     /// sets the values described in args for described camera

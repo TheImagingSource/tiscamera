@@ -231,6 +231,26 @@ void printCameraInformation (const std::vector<std::string>& args)
 }
 
 
+void writeChanges (std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway)
+{
+    std::cout << "Writing changes...." << std::endl;
+    if (!camera->setPersistentIP(ip))
+    {
+        throw std::runtime_error( "  Unable to set IP address.");
+    }
+
+    if (!camera->setPersistentSubnet(subnet))
+    {
+        throw std::runtime_error( "  Unable to set Subnetmask.");
+    }
+
+    if (!camera->setPersistentGateway(gateway))
+    {
+        throw std::runtime_error("  Unable to set Gateway.");
+    }
+}
+
+
 void setCamera (const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
