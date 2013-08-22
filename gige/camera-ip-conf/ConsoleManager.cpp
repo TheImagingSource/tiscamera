@@ -260,7 +260,9 @@ void setCamera (const std::vector<std::string>& args)
         return;
     }
 
-    std::string ip = getArgument (args,"ip");
+    bool write_changes = false;
+
+    std::string ip = getArgumentValue(args, "ip", "");
     if (!ip.empty())
     {
         if (!isValidIpAddress(ip))
@@ -268,20 +270,17 @@ void setCamera (const std::vector<std::string>& args)
             std::cout << "Please enter a valid IP address." << std::endl;
             return;
         }
-
-        std::cout << "Setting IP address...." << std::endl;
-        if (camera->setPersistentIP(ip))
-        {
-            std::cout << "  Done." << std::endl;
-        }
         else
         {
-            std::cout << "  Unable to set IP address." << std::endl;
+            write_changes = true;
         }
     }
-    
+    else
+    {
+        ip = camera->getPersistentIP();
+    }
 
-    std::string subnet = getArgument (args,"subnet");
+    std::string subnet = getArgumentValue(args, "subnet", "");
     if (!subnet.empty())
     {
         if (!isValidIpAddress(subnet))
@@ -289,19 +288,17 @@ void setCamera (const std::vector<std::string>& args)
             std::cout << "Please enter a valid subnet address." << std::endl;
             return;
         }
-
-        std::cout << "Setting Subnetmask...." << std::endl;
-        if (camera->setPersistentSubnet(subnet))
-        {
-            std::cout << "  Done." << std::endl;
-        }
         else
         {
-            std::cout << "  Unable to set Subnetmask." << std::endl;
+            write_changes = true;
         }
     }
+    else
+    {
+        subnet = camera->getPersistentSubnet();
+    }
 
-    std::string gateway = getArgument (args,"gateway");
+    std::string gateway = getArgumentValue(args, "gateway", "");
     if (!gateway.empty())
     {
         if (!isValidIpAddress(gateway))
@@ -309,6 +306,27 @@ void setCamera (const std::vector<std::string>& args)
             std::cout << "Please enter a valid gateway address." << std::endl;
             return;
         }
+        else
+        {
+            write_changes = true;
+        }
+    }
+    else
+    {
+        gateway = camera->getPersistentGateway();
+    }
+
+    if (write_changes)
+    {
+        try
+        {
+            writeChanges(camera, ip, subnet, gateway);
+        }
+        catch (std::runtime_error run)
+        {
+            throw run;
+        }
+    }
 
     // if one exists we have to check them both
     if (!getArgumentValue(args, "dhcp", "").empty() || !getArgumentValue(args, "static", "").empty())
@@ -339,14 +357,14 @@ void setCamera (const std::vector<std::string>& args)
         std::cout << "DHCP will be: " << ((dhcp) ? "on" : "off")
                   << "\nStatic IP to: " << ((staticIP) ? "on" : "off")
                   << "\n\nWriting IP configuration...." << std::endl;
+
         if (camera->setIPconfigState(dhcp, staticIP))
         {
             std::cout << "  Done." << std::endl;
         }
         else
         {
-            std::cout << "  Error while setting IP configuration." << std::endl;
-            exit(1);
+            throw std::runtime_error("  Error while setting IP configuration.");
         }
     }
 
