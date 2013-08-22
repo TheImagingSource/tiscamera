@@ -95,9 +95,8 @@ camera_list getCameraList ()
 
     std::function<void(std::shared_ptr<Camera>)> f = [&cameras, &cam_lock] (std::shared_ptr<Camera> camera)
     {
-        cam_lock.lock();
+        std::lock_guard<std::mutex> mutex_lock(cam_lock);
         cameras.push_back(camera);
-        cam_lock.unlock();
     };
 
     discoverCameras(f);
