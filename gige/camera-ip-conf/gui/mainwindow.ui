@@ -479,10 +479,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Maximum of 16 characters</string>
+           <string>Maximum of 15 characters</string>
           </property>
           <property name="maxLength">
-           <number>16</number>
+           <number>15</number>
           </property>
          </widget>
         </item>
