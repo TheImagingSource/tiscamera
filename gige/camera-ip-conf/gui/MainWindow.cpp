@@ -51,12 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // hide progressbar until it is needed
     ui->progressFirmwareUpload->setHidden(true);
-
-    // disable all tabs except first one
-//    for (int x = 1; x < ui->tabWidget->count(); ++x)
-//    {
-//        ui->tabWidget->setTabEnabled(x, false);
-//    }
 }
 
 
@@ -68,11 +62,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayCamera()
 {
-//    for (int x = 1; x < ui->tabWidget->count(); ++x)
-//    {
-//        ui->tabWidget->setTabEnabled(x, true);
-//    }
-
     QList<QTreeWidgetItem*> selection = ui->cameraList->selectedItems();
 
     QTreeWidgetItem* item;
@@ -480,12 +469,6 @@ void MainWindow::deprecatedCamera (std::shared_ptr<Camera> camera)
         QString defaultText = "<Select Device>";
         QString emptyString = "";
         ui->tabWidget->setCurrentIndex(0);
-
-        // not working; gui is not updated
-//        for (int x = 1; x < ui->tabWidget->count(); ++x)
-//        {
-//            ui->tabWidget->setTabEnabled(x, false);
-//        }
 
         ui->displayModelName->setText(defaultText);
         ui->displaySerialNumber->setText(defaultText);
