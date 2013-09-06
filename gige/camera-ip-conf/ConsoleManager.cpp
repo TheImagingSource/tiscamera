@@ -87,8 +87,7 @@ std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args)
 
     if (cameras.size() == 0)
     {
-        std::cout << "\nNo cameras found.\n" << std::endl;
-        exit(1);
+        throw std::runtime_error("\nNo cameras found.\n");
     }
 
     if (!serial.empty())
@@ -119,7 +118,7 @@ void listCameras ()
     }
 
     // header for table
-    std::cout << std::endl << std::setw(12) << "Model"
+    std::cout << "\n" << std::setw(12) << "Model"
               << std::setw(3)  << " - " 
               << std::setw(9)  << "Serial"
               << std::setw(3)  << " - " 
@@ -352,9 +351,10 @@ void setCamera (const std::vector<std::string>& args)
         }
         else
         {
-            std::cout << "  Unable to set name." << std::endl;
+            throw std::runtime_error("  Unable to set name.");
         }
     }
+    std::cout << std::endl;
 }
 
 
