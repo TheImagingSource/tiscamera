@@ -50,13 +50,22 @@ To list all cameras:
 
    camera-ip-conf-cli -l
 
+Cameras can be named using the following methods:
+   -s  --serial - The serial number of the camera
+   -m  --mac    - The mac of the camera
+   -n  --name   - The user defined name (assuming the name is not empty)
+
 To get information about a single camera:
 
-   camera-ip-conf-cli -i -c <CAMERA_SERIAL>
+   camera-ip-conf-cli -i -s <CAMERA_SERIAL>
 
 To set the name of a camera:
 
-   camera-ip-conf-cli set name="CAMERA_NAME" -c <CAMERA_SERIAL>
+   camera-ip-conf-cli set name="CAMERA_NAME" -s <CAMERA_SERIAL>
+
+To delete the name simply set it to an empty name
+
+   camera-ip-conf-cli set name="" -s <CAMERA_SERIAL>
 
 To set the static ip configuration of a camera:
 
@@ -64,11 +73,11 @@ To set the static ip configuration of a camera:
 
 To toggle static ip usage:
 
-   camera-ip-conf-cli set static=on -c <CAMERA_SERIAL>
+   camera-ip-conf-cli set static=on -s <CAMERA_SERIAL>
 
 To upload a new firmware:
 
-   camera-ip-conf-cli upload firmware=<FILE> -c <CAMERA_SERIAL>
+   camera-ip-conf-cli upload firmware=<FILE> -s <CAMERA_SERIAL>
 
    CAUTION: This can break your camera. Use at own risk!
 
