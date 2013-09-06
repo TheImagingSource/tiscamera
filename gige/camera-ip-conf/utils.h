@@ -36,13 +36,14 @@ std::string int2ip (const uint32_t addr);
 std::string int2mac (const uint64_t mac);
 
 /// @name readHexByte
-/// @param
-/// @param
-/// @return
+/// @param beg - char sequence that shall be converted
+/// @param end - end of sequence that shall not be exceeded
+/// @return int containing the value of first chars
+/// @brief reads the first chars of sequence and returns their integer value
 unsigned int readHexByte (const char** beg, const char* end);
 
 /// @name mac2int
-/// @param
+/// @param mac - string containing the MAC that shall be converted
 /// @return uint64_t containing the converted mac
 uint64_t mac2int (const std::string& mac);
 
