@@ -44,7 +44,7 @@ void printHelp ()
               << "    gateway=X.X.X.X          - specifiy persistent gateway that camera shall use\n"
               << "    dhcp=on/off              - toggle dhcp state\n"
               << "    static=on/off            - toggle static ip state\n"
-              << "    name=\"xyz\"               - set name for camera; maximum 16 characters\n"
+              << "    name=\"xyz\"               - set name for camera; maximum 15 characters\n"
               << "    firmware=firmware.zip    - file containing new firmware\n"
               << std::endl;
 
