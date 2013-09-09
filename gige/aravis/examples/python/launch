@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# this assumes you have a local installation of aravis
+# if this is not the case simply adjust these variables to point to the concerning directories,
+# if they are not already in your established search path
+
+# set this to your aravis path
+export ARV_HOME=/home/*/work/aravis
+
+# adjust gobject introspection search path to find the file Aravis-0.4.gir
+export GI_TYPELIB_PATH=$GI_TYPELIB_PATH:$ARV_HOME/src
+
+# adjust runtime path for shared libraries to find libaravis-0.4.so
+export LD_LIBRARY_PATH=$ARV_HOME/src/.libs
+
+# starts example script
+python $*
+

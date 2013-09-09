@@ -1,0 +1,18 @@
+
+Aravis python example
+=====================
+
+Preconditions
+-------------
+
+You configured aravis with --enable-introspection=yes
+
+How to use
+----------
+
+Adjust the settings in 'launch' to your environment.
+
+After that simply execute:
+
+    launch gstexample.py
+
