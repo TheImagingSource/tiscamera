@@ -1,0 +1,16 @@
+
+Aravis c example
+================
+
+HOW TO USE
+----------
+
+Open gstexample.c and change the definitions to fit your camera.
+Change the marked variables in the Makefile to fit your aravis installation.
+
+After that simply call make.
+
+Call:
+
+    gstexample
+
