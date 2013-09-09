@@ -1,0 +1,52 @@
+
+Aravis Examples
+===============
+
+These examples show how to address Gige cameras via the aravis
+gstreamer plugin.
+
+Getting started
+---------------
+
+To obtain aravis, visit to following link:
+
+https://git.gnome.org/browse/aravis/
+
+and download the latest archive.
+Just follow the included instructions, but assure that you run
+configure with
+  --enable-gst-plugin
+to enable the needed gstreamer plugin.
+
+If you plan to use python or another non c compatible language,
+you will have to set the additional flag
+  --enable-introspection=yes
+to enable gobject introspection to allow a seamless interaction with aravis.
+
+Usage
+-----
+
+The examples are all independent programs that show how to interact
+with the aravis gstreamer plugin and how to embed such a gstreamer stream into
+an application.
+
+Dependencies
+------------
+
+Currently gstreamer-0.10 as well as gstreamer-0.10-plugins-bad are required.
+
+To run the examples some need additional libraries.
+
+### C
+gtk dev packages
+
+### Python
+gtk libraries
+
+Contact
+-------
+
+For questions, bugs reports, etc., please refer to :
+
+https://code.google.com/p/tiscamera/
+
