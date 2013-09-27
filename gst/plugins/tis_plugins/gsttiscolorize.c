@@ -17,14 +17,14 @@
  * Boston, MA 02110-1335, USA.
  */
 /**
- * SECTION:element-gsttiswhitebalance
+ * SECTION:element-gsttiscolorize
  *
- * The tiswhitebalance element does FIXME stuff.
+ * The tiscolorize element does FIXME stuff.
  *
  * <refsect2>
  * <title>Example launch line</title>
  * |[
- * gst-launch -v fakesrc ! tiswhitebalance ! FIXME ! fakesink
+ * gst-launch -v fakesrc ! tiscolorize ! FIXME ! fakesink
  * ]|
  * FIXME Describe what the pipeline does.
  * </refsect2>
@@ -36,27 +36,27 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
-#include "gsttiswhitebalance.h"
+#include "gsttiscolorize.h"
 
-GST_DEBUG_CATEGORY_STATIC (gst_tiswhitebalance_debug_category);
-#define GST_CAT_DEFAULT gst_tiswhitebalance_debug_category
+GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
+#define GST_CAT_DEFAULT gst_tiscolorize_debug_category
 
 /* prototypes */
 
 
-static void gst_tiswhitebalance_set_property (GObject * object,
+static void gst_tiscolorize_set_property (GObject * object,
 					      guint property_id, const GValue * value, GParamSpec * pspec);
-static void gst_tiswhitebalance_get_property (GObject * object,
+static void gst_tiscolorize_get_property (GObject * object,
 					      guint property_id, GValue * value, GParamSpec * pspec);
-static void gst_tiswhitebalance_finalize (GObject * object);
+static void gst_tiscolorize_finalize (GObject * object);
 
 static GstFlowReturn
-gst_tiswhitebalance_transform_ip (GstBaseTransform * trans, GstBuffer * buf);
+gst_tiscolorize_transform_ip (GstBaseTransform * trans, GstBuffer * buf);
 static GstCaps *
-gst_tiswhitebalance_transform_caps (GstBaseTransform * trans,
+gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 				    GstPadDirection direction, GstCaps * caps);
 
-static void gst_tiswhitebalance_fixate_caps (GstBaseTransform * base,
+static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
 					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps);
 
 
@@ -72,29 +72,29 @@ enum
 
 /* pad templates */
 
-static GstStaticPadTemplate gst_tiswhitebalance_sink_template =
+static GstStaticPadTemplate gst_tiscolorize_sink_template =
 	GST_STATIC_PAD_TEMPLATE ("sink",
 				 GST_PAD_SINK,
 				 GST_PAD_ALWAYS,
 				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
 		);
 
-static GstStaticPadTemplate gst_tiswhitebalance_src_template =
+static GstStaticPadTemplate gst_tiscolorize_src_template =
 	GST_STATIC_PAD_TEMPLATE ("src",
-				 GST_PAD_SRC,
-				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-bayer,format=grbg,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX],format=(string)grbg")
+                             GST_PAD_SRC,
+                             GST_PAD_ALWAYS,
+                             GST_STATIC_CAPS ("video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
 		);
 
 
 /* class initialization */
 
-G_DEFINE_TYPE_WITH_CODE (GstTisWhiteBalance, gst_tiswhitebalance, GST_TYPE_BASE_TRANSFORM,
-			 GST_DEBUG_CATEGORY_INIT (gst_tiswhitebalance_debug_category, "tiswhitebalance", 0,
-						  "debug category for tiswhitebalance element"));
+G_DEFINE_TYPE_WITH_CODE (GstTisColorize, gst_tiscolorize, GST_TYPE_BASE_TRANSFORM,
+			 GST_DEBUG_CATEGORY_INIT (gst_tiscolorize_debug_category, "tiscolorize", 0,
+						  "debug category for tiscolorize element"));
 
 static void
-gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
+gst_tiscolorize_class_init (GstTisColorizeClass * klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 	GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
@@ -103,21 +103,21 @@ gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 	   base_class_init if you intend to subclass this class. */
 
 	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
-						   &gst_tiswhitebalance_src_template);
+						   &gst_tiscolorize_src_template);
 	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
-						   &gst_tiswhitebalance_sink_template);
+						   &gst_tiscolorize_sink_template);
 
 	gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
 					      "The Imaging Source White Balance Element", "Generic", "Adjusts white balancing of RAW video data buffers",
 					      "Arne Caspari <arne.caspari@gmail.com>");
 
-	gobject_class->set_property = gst_tiswhitebalance_set_property;
-	gobject_class->get_property = gst_tiswhitebalance_get_property;
-	gobject_class->finalize = gst_tiswhitebalance_finalize;
-	base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform_ip);
-	//base_transform_class->transform = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform);
-	base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_transform_caps);
-	base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiswhitebalance_fixate_caps);
+	gobject_class->set_property = gst_tiscolorize_set_property;
+	gobject_class->get_property = gst_tiscolorize_get_property;
+	gobject_class->finalize = gst_tiscolorize_finalize;
+	base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
+	//base_transform_class->transform = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform);
+	base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
+	base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
 
 	g_object_class_install_property (gobject_class,
 					 PROP_GAIN_RED,
@@ -146,30 +146,30 @@ gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 }
 
 static void
-gst_tiswhitebalance_init (GstTisWhiteBalance *self)
+gst_tiscolorize_init (GstTisColorize *self)
 {
 	/* gst_pad_set_getcaps_function (self->sinkpad, */
-	/* 			      GST_DEBUG_FUNCPTR(gst_tiswhitebalance_sink_getcaps)); */
+	/* 			      GST_DEBUG_FUNCPTR(gst_tiscolorize_sink_getcaps)); */
 }
 
 void
-gst_tiswhitebalance_set_property (GObject * object, guint property_id,
+gst_tiscolorize_set_property (GObject * object, guint property_id,
 				  const GValue * value, GParamSpec * pspec)
 {
-	GstTisWhiteBalance *tiswhitebalance = GST_TISWHITEBALANCE (object);
+	GstTisColorize *tiscolorize = GST_TISCOLORIZE (object);
 
 	switch (property_id) {
 	case PROP_GAIN_RED:
-		tiswhitebalance->gain_red = g_value_get_int (value);
+		tiscolorize->gain_red = g_value_get_int (value);
 		break;
 	case PROP_GAIN_GREEN:
-		tiswhitebalance->gain_green = g_value_get_int (value);
+		tiscolorize->gain_green = g_value_get_int (value);
 		break;
 	case PROP_GAIN_BLUE:
-		tiswhitebalance->gain_blue = g_value_get_int (value);
+		tiscolorize->gain_blue = g_value_get_int (value);
 		break;
 	case PROP_AUTO:
-		tiswhitebalance->auto_wb = g_value_get_boolean (value);
+		tiscolorize->auto_wb = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -178,23 +178,23 @@ gst_tiswhitebalance_set_property (GObject * object, guint property_id,
 }
 
 void
-gst_tiswhitebalance_get_property (GObject * object, guint property_id,
+gst_tiscolorize_get_property (GObject * object, guint property_id,
 				  GValue * value, GParamSpec * pspec)
 {
-	GstTisWhiteBalance *tiswhitebalance = GST_TISWHITEBALANCE (object);
+	GstTisColorize *tiscolorize = GST_TISCOLORIZE (object);
 
 	switch (property_id) {
 	case PROP_GAIN_RED:
-		g_value_set_int (value, tiswhitebalance->gain_red);
+		g_value_set_int (value, tiscolorize->gain_red);
 		break;
 	case PROP_GAIN_GREEN:
-		g_value_set_int (value, tiswhitebalance->gain_green);
+		g_value_set_int (value, tiscolorize->gain_green);
 		break;
 	case PROP_GAIN_BLUE:
-		g_value_set_int (value, tiswhitebalance->gain_blue);
+		g_value_set_int (value, tiscolorize->gain_blue);
 		break;
 	case PROP_AUTO:
-		g_value_set_boolean (value, tiswhitebalance->auto_wb);
+		g_value_set_boolean (value, tiscolorize->auto_wb);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -204,17 +204,17 @@ gst_tiswhitebalance_get_property (GObject * object, guint property_id,
 
 
 void
-gst_tiswhitebalance_finalize (GObject * object)
+gst_tiscolorize_finalize (GObject * object)
 {
-	/* GstTisWhiteBalance *tiswhitebalance = GST_TISWHITEBALANCE (object); */
+	/* GstTiscolorize *tiscolorize = GST_TISCOLORIZE (object); */
 
 	/* clean up object here */
 
-	G_OBJECT_CLASS (gst_tiswhitebalance_parent_class)->finalize (object);
+	G_OBJECT_CLASS (gst_tiscolorize_parent_class)->finalize (object);
 }
 
 static void
-auto_grbg (GstTisWhiteBalance *self, GstBuffer *buf)
+auto_grbg (GstTisColorize *self, GstBuffer *buf)
 {
 	GstCaps *caps = GST_BUFFER_CAPS (buf);
 	GstStructure *structure = gst_caps_get_structure (caps, 0);
@@ -326,7 +326,7 @@ wb_grbg (GstBuffer *buf, gint gain_r, gint gain_g, gint gain_b)
 }
 
 static GstCaps *
-gst_tiswhitebalance_transform_caps (GstBaseTransform * trans,
+gst_tiscolorize_transform_caps (GstBaseTransform * trans,
     GstPadDirection direction, GstCaps * caps)
 {
 	GstStructure *s;
@@ -355,7 +355,7 @@ gst_tiswhitebalance_transform_caps (GstBaseTransform * trans,
 	return outcaps;
 }
 
-static void gst_tiswhitebalance_fixate_caps (GstBaseTransform * base,
+static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
 					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps)
 {
 	GstStructure *ins, *outs;
@@ -383,9 +383,9 @@ static void gst_tiswhitebalance_fixate_caps (GstBaseTransform * base,
 }
 
 static GstFlowReturn
-gst_tiswhitebalance_transform_ip (GstBaseTransform * trans, GstBuffer * buf)
+gst_tiscolorize_transform_ip (GstBaseTransform * trans, GstBuffer * buf)
 {
-	GstTisWhiteBalance *self = GST_TISWHITEBALANCE (trans);
+	GstTisColorize *self = GST_TISCOLORIZE (trans);
 
 	if (self->auto_wb){
 		auto_grbg (self, buf);
@@ -403,18 +403,18 @@ static gboolean
 plugin_init (GstPlugin * plugin)
 {
 
-	return gst_element_register (plugin, "tiswhitebalance", GST_RANK_NONE,
-				     GST_TYPE_TISWHITEBALANCE);
+	return gst_element_register (plugin, "tiscolorize", GST_RANK_NONE,
+				     GST_TYPE_TISCOLORIZE);
 }
 
 #ifndef VERSION
 #define VERSION "0.0.1"
 #endif
 #ifndef PACKAGE
-#define PACKAGE "tiswhitebalance_package"
+#define PACKAGE "tiscolorize_package"
 #endif
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "tiswhitebalance_package_name"
+#define PACKAGE_NAME "tiscolorize_package_name"
 #endif
 #ifndef GST_PACKAGE_ORIGIN
 #define GST_PACKAGE_ORIGIN "http://code.google.com/p/tiscamera"
@@ -422,6 +422,6 @@ plugin_init (GstPlugin * plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
 		   GST_VERSION_MINOR,
-		   "tiswhitebalance",
+		   "tiscolorize",
 		   "The Imaging Source white balance plugin",
 		   plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)

@@ -17,25 +17,25 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef _GST_TISWHITEBALANCE_H_
-#define _GST_TISWHITEBALANCE_H_
+#ifndef _GST_TISCOLORIZE_H_
+#define _GST_TISCOLORIZE_H_
 
 #include <gst/base/gstbasetransform.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_TISWHITEBALANCE   (gst_tiswhitebalance_get_type())
-#define GST_TISWHITEBALANCE(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TISWHITEBALANCE,GstTisWhiteBalance))
-#define GST_TISWHITEBALANCE_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TISWHITEBALANCE,GstTisWhiteBalanceClass))
-#define GST_IS_TISWHITEBALANCE(obj)   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_TISWHITEBALANCE))
-#define GST_IS_TISWHITEBALANCE_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TISWHITEBALANCE))
+#define GST_TYPE_TISCOLORIZE   (gst_tiscolorize_get_type())
+#define GST_TISCOLORIZE(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TISCOLORIZE,GstTisColorize))
+#define GST_TISCOLORIZE_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TISCOLORIZE,GstTisColorizeClass))
+#define GST_IS_TISCOLORIZE(obj)   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_TISCOLORIZE))
+#define GST_IS_TISCOLORIZE_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TISCOLORIZE))
 
-typedef struct _GstTisWhiteBalance GstTisWhiteBalance;
-typedef struct _GstTisWhiteBalanceClass GstTisWhiteBalanceClass;
+typedef struct _GstTisColorize GstTisColorize;
+typedef struct _GstTisColorizeClass GstTisColorizeClass;
 
-struct _GstTisWhiteBalance
+struct _GstTisColorize
 {
-	GstBaseTransform base_tiswhitebalance;
+	GstBaseTransform base_tiscolorize;
 
 	GstPad *sinkpad;
 	GstPad *srcpad;
@@ -48,12 +48,12 @@ struct _GstTisWhiteBalance
 	
 };
 
-struct _GstTisWhiteBalanceClass
+struct _GstTisColorizeClass
 {
-  GstBaseTransformClass base_tiswhitebalance_class;
+  GstBaseTransformClass base_tiscolorize_class;
 };
 
-GType gst_tiswhitebalance_get_type (void);
+GType gst_tiscolorize_get_type (void);
 
 G_END_DECLS
 
