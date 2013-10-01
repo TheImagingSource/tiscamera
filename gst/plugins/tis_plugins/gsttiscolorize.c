@@ -43,11 +43,6 @@ GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
 
 /* prototypes */
 
-
-static void gst_tiscolorize_set_property (GObject * object,
-					      guint property_id, const GValue * value, GParamSpec * pspec);
-static void gst_tiscolorize_get_property (GObject * object,
-					      guint property_id, GValue * value, GParamSpec * pspec);
 static void gst_tiscolorize_finalize (GObject * object);
 
 static GstFlowReturn
@@ -59,16 +54,6 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
 					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps);
 
-
-
-enum
-{
-	PROP_0,
-	PROP_GAIN_RED,
-	PROP_GAIN_GREEN,
-	PROP_GAIN_BLUE,
-	PROP_AUTO,
-};
 
 /* pad templates */
 
@@ -111,38 +96,12 @@ gst_tiscolorize_class_init (GstTisColorizeClass * klass)
 					      "The Imaging Source White Balance Element", "Generic", "Adjusts white balancing of RAW video data buffers",
 					      "Arne Caspari <arne.caspari@gmail.com>");
 
-	gobject_class->set_property = gst_tiscolorize_set_property;
-	gobject_class->get_property = gst_tiscolorize_get_property;
 	gobject_class->finalize = gst_tiscolorize_finalize;
 	base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
 	//base_transform_class->transform = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform);
 	base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
 	base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
 
-	g_object_class_install_property (gobject_class,
-					 PROP_GAIN_RED,
-					 g_param_spec_int ("red gain", "Red Gain",
-							   "Value for red gain", 0, 2048,
-							   0,
-							   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-	g_object_class_install_property (gobject_class,
-					 PROP_GAIN_GREEN,
-					 g_param_spec_int ("green gain", "Green Gain",
-							   "Value for red gain", 0, 2048,
-							   0,
-							   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-	g_object_class_install_property (gobject_class,
-					 PROP_GAIN_BLUE,
-					 g_param_spec_int ("blue gain", "Blue Gain",
-							   "Value for blue gain", 0, 2048,
-							   0,
-							   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-	g_object_class_install_property (gobject_class,
-					 PROP_AUTO,
-					 g_param_spec_boolean ("auto", "Auto White Balance",
-							       "Automatically adjust white balance",
-							       FALSE,
-							       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 static void
@@ -150,56 +109,6 @@ gst_tiscolorize_init (GstTisColorize *self)
 {
 	/* gst_pad_set_getcaps_function (self->sinkpad, */
 	/* 			      GST_DEBUG_FUNCPTR(gst_tiscolorize_sink_getcaps)); */
-}
-
-void
-gst_tiscolorize_set_property (GObject * object, guint property_id,
-				  const GValue * value, GParamSpec * pspec)
-{
-	GstTisColorize *tiscolorize = GST_TISCOLORIZE (object);
-
-	switch (property_id) {
-	case PROP_GAIN_RED:
-		tiscolorize->gain_red = g_value_get_int (value);
-		break;
-	case PROP_GAIN_GREEN:
-		tiscolorize->gain_green = g_value_get_int (value);
-		break;
-	case PROP_GAIN_BLUE:
-		tiscolorize->gain_blue = g_value_get_int (value);
-		break;
-	case PROP_AUTO:
-		tiscolorize->auto_wb = g_value_get_boolean (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-		break;
-	}
-}
-
-void
-gst_tiscolorize_get_property (GObject * object, guint property_id,
-				  GValue * value, GParamSpec * pspec)
-{
-	GstTisColorize *tiscolorize = GST_TISCOLORIZE (object);
-
-	switch (property_id) {
-	case PROP_GAIN_RED:
-		g_value_set_int (value, tiscolorize->gain_red);
-		break;
-	case PROP_GAIN_GREEN:
-		g_value_set_int (value, tiscolorize->gain_green);
-		break;
-	case PROP_GAIN_BLUE:
-		g_value_set_int (value, tiscolorize->gain_blue);
-		break;
-	case PROP_AUTO:
-		g_value_set_boolean (value, tiscolorize->auto_wb);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-		break;
-	}
 }
 
 

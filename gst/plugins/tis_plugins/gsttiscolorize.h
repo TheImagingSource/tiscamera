@@ -39,13 +39,6 @@ struct _GstTisColorize
 
 	GstPad *sinkpad;
 	GstPad *srcpad;
-	
-	gint gain_red;
-	gint gain_green;
-	gint gain_blue;
-
-	gboolean auto_wb;
-	
 };
 
 struct _GstTisColorizeClass
