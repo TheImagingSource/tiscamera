@@ -213,117 +213,6 @@ gst_tiscolorize_finalize (GObject * object)
 	G_OBJECT_CLASS (gst_tiscolorize_parent_class)->finalize (object);
 }
 
-static void
-auto_grbg (GstTisColorize *self, GstBuffer *buf)
-{
-	GstCaps *caps = GST_BUFFER_CAPS (buf);
-	GstStructure *structure = gst_caps_get_structure (caps, 0);
-
-	guint32 sum_r = 0;
-	guint32 sum_g = 0;
-	guint32 sum_b = 0;
-	guint32 samples_r = 0;
-	guint32 samples_g = 0;
-	guint32 samples_b = 0;
-	guint8 *data = (guint8*)GST_BUFFER_DATA (buf);
-	gint width, height;
-	
-	g_return_if_fail (gst_structure_get_int (structure, "width", &width));
-	g_return_if_fail (gst_structure_get_int (structure, "height", &height));
-
-	guint x,y;
-
-	for (y = 64; y < height-63; y+= 64){
-		for (x = 0; x < width; x += 64){
-			guint8 value = data[y*width+x];
-			if ( value < 250 ){
-				samples_g++;
-				sum_g += value;
-			}
-			value = data[y*width+x+1];
-			if ( value < 250 ){
-				samples_r++;
-				sum_r += value;
-			}
-			value = data[(y+1)*width+x];
-			if ( value < 250 ){
-				samples_b++;
-				sum_b += value;
-			}
-		}
-	}
-
-	sum_r /= samples_r;
-	sum_g /= samples_g;
-	sum_b /= samples_b;
-
-
-	if ((sum_r > sum_g) && (sum_r > sum_b)){
-		// R max
-		self->gain_red = 0;
-		self->gain_green = (int)(((float)sum_r/(float)sum_g)*1024)-1024;
-		self->gain_blue = (int)(((float)sum_r/(float)sum_b)*1024)-1024;
-	} else if ((sum_g > sum_r) && (sum_g > sum_b)){
-		// G max
-		self->gain_red = (int)(((float)sum_g/(float)sum_r)*1024)-1024;
-		self->gain_green = 0;
-		self->gain_blue = (int)(((float)sum_g/(float)sum_b)*1024)-1024;
-	} else {
-		// B max
-		self->gain_red = (int)(((float)sum_g/(float)sum_r)*1024)-1024;
-		self->gain_green = (int)(((float)sum_r/(float)sum_g)*1024)-1024;
-		self->gain_blue = 0;
-	}
-
-	GST_LOG_OBJECT (self, "R: %03d[%04d] G: %03d[%04d], B: %03d[%04d]", sum_r, self->gain_red, sum_g, self->gain_green, sum_b, self->gain_blue);
-}
-
-static void
-wb_grbg (GstBuffer *buf, gint gain_r, gint gain_g, gint gain_b)
-{
-	guint8 *data = (guint8*)GST_BUFFER_DATA (buf);
-	GstCaps *caps = GST_BUFFER_CAPS (buf);
-	GstStructure *structure = gst_caps_get_structure (caps, 0);
-	gint width, height;
-	g_return_if_fail (gst_structure_get_int (structure, "width", &width));
-	g_return_if_fail (gst_structure_get_int (structure, "height", &height));
-
-	guint gr = gain_r + 1024;
-	guint gg = gain_g + 1024;
-	guint gb = gain_b + 1024;
-
-	guint x,y;
-	for ( y = 0; y < height; y += 2){
-		for (x = 0; x < width; x += 2){
-			guint32 val;
-			val = ( (guint32)*data * gg ) / 1024;
-			if ((val) > 255)
-				val = 255;
-			*data = val & 0xff;
-			data++;
-
-			val = ( (guint32)*data * gr ) / 1024;
-			if ((val) > 255)
-				val = 255;
-			*data = val & 0xff;
-			data++;
-		}
-		for (x = 0; x < width; x += 2){
-			guint32 val;
-			val = ( (guint32)*data * gb ) / 1024;
-			if ((val) > 255)
-				val = 255;
-			*data = val & 0xff;
-			data++;
-
-			val = ((guint32)*data * gg ) / 1024;
-			if ((val) > 255)
-				val = 255;
-			*data = val & 0xff;
-			data++;
-		}
-	}
-}
 
 static GstCaps *
 gst_tiscolorize_transform_caps (GstBaseTransform * trans,
@@ -385,16 +274,8 @@ static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
 static GstFlowReturn
 gst_tiscolorize_transform_ip (GstBaseTransform * trans, GstBuffer * buf)
 {
-	GstTisColorize *self = GST_TISCOLORIZE (trans);
-
-	if (self->auto_wb){
-		auto_grbg (self, buf);
-	}
-
-	wb_grbg (buf,
-		 self->gain_red, 
-		 self->gain_green, 
-		 self->gain_blue);
+    /* We change the caps automatically in the background. */
+    /* Here we simply say everything is OK and go on. */
 
 	return GST_FLOW_OK;
 }
