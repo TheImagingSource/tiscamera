@@ -38,6 +38,10 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttiscolorize.h"
 
+#include <string.h>
+#include "bayer.h"
+#include <libudev.h>
+
 GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
 #define GST_CAT_DEFAULT gst_tiscolorize_debug_category
 
@@ -109,6 +113,7 @@ gst_tiscolorize_init (GstTisColorize *self)
 {
 	/* gst_pad_set_getcaps_function (self->sinkpad, */
 	/* 			      GST_DEBUG_FUNCPTR(gst_tiscolorize_sink_getcaps)); */
+    self->i = 0;
 }
 
 
@@ -123,15 +128,188 @@ gst_tiscolorize_finalize (GObject * object)
 }
 
 
+typedef struct
+{
+    const char* device_name;
+    unsigned int device_id;
+    tBY8Pattern bayer_pattern;
+} dev_info;
+
+
+typedef struct
+{
+    char devnode [100];
+    unsigned int productid;
+    unsigned int serial;
+} usb_cam;
+
+
+
+dev_info device_info [] =
+{
+    {
+        "DFx 72BUC02",
+        8307,
+        GR
+    },
+    {
+        "DFx 22BUC02",
+        8302,
+        GB
+    },
+    {
+        "DFx 42UC03",
+        8308,
+        GR
+    }
+};
+
+#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
+
+void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
+{
+
+	struct udev* udev;
+	struct udev_enumerate* enumerate;
+	struct udev_list_entry* devices;
+    struct udev_list_entry* dev_list_entry;
+	struct udev_device* dev;
+
+    int camera_cnt = 0;
+    (*camera_count) = 0;
+
+	udev = udev_new();
+	if (!udev)
+    {
+        gst_debug_log (gst_tiscolorize_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tiscolorize",
+                       "get_usbs_cameras",
+                       184,
+                       NULL,
+                       "Unable to create udev object");
+
+        return;
+	}
+
+	/* Create a list of the devices in the 'video4linux' subsystem. */
+	enumerate = udev_enumerate_new(udev);
+	udev_enumerate_add_match_subsystem(enumerate, "video4linux");
+	udev_enumerate_scan_devices(enumerate);
+	devices = udev_enumerate_get_list_entry(enumerate);
+
+	udev_list_entry_foreach(dev_list_entry, devices) {
+		const char *path;
+        char needed_path[100];
+
+		/* Get the filename of the /sys entry for the device
+		   and create a udev_device object (dev) representing it */
+		path = udev_list_entry_get_name(dev_list_entry);
+		dev = udev_device_new_from_syspath(udev, path);
+
+		/* The device pointed to by dev contains information about
+		   the hidraw device. In order to get information about the
+		   USB device, get the parent device with the
+		   subsystem/devtype pair of "usb"/"usb_device". This will
+		   be several levels up the tree, but the function will find
+		   it.*/
+
+        /* we need to copy the devnode (/dev/videoX) before the path
+           is changed to the path of the usb device behind it (/sys/class/....) */
+        strcpy(needed_path, udev_device_get_devnode(dev));
+
+        dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+
+        if (!dev)
+        {
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_ERROR,
+                           "tiscolorize",
+                           "get_usbs_cameras",
+                           184,
+                           NULL,
+                           "Unable to retrieve usb device for %s", needed_path);
+			return;
+		}
+
+        /* From here, we can call get_sysattr_value() for each file
+		   in the device's /sys entry. The strings passed into these
+		   functions (idProduct, idVendor, serial, etc.) correspond
+		   directly to the files in the directory which represents
+		   the USB device. Note that USB strings are Unicode, UCS2
+		   encoded, but the strings returned from
+		   udev_device_get_sysattr_value() are UTF-8 encoded. */
+
+        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0) {
+
+            strcpy((*cameras)[camera_cnt].devnode, needed_path);
+            (*cameras)[camera_cnt].productid = atoi(udev_device_get_sysattr_value(dev, "idProduct"));
+            (*cameras)[camera_cnt].serial = atoi(udev_device_get_sysattr_value(dev, "serial"));
+
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_INFO,
+                           "tiscolorize",
+                           "get_usbs_cameras",
+                           250,
+                           NULL,
+                           "Found v4l2 device %s", needed_path);
+
+            camera_cnt++;
+        }
+		udev_device_unref(dev);
+	}
+
+    (*camera_count) = camera_cnt;
+	/* Free the enumerator object */
+	udev_enumerate_unref(enumerate);
+
+	udev_unref(udev);
+
+}
+
+
+int get_product_id (char* devnode)
+{
+    usb_cam cameras [100];
+    int camera_cnt = 0;
+    get_usb_cameras(&cameras, &camera_cnt);
+    int i;
+    for (i = 0; i < camera_cnt; ++i) {
+        if (strcmp(devnode, cameras[i].devnode) == 0) {
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_INFO,
+                           "tiscolorize",
+                           "get_product_id",
+                           280,
+                           NULL,
+                           "Found product id %d for device %s", cameras[i].productid, cameras[i].devnode);
+
+            return cameras[i].productid;
+        }
+    }
+    return 0;
+}
+
+
+char* device_bayer_pattern (int id)
+{
+    unsigned int i;
+    for (i = 0; i < ARRAYSIZE(device_info); i++) {
+        if (device_info[i].device_id == id) {
+            return bayer_to_string(device_info[i].bayer_pattern);
+        }
+    }
+
+    return "";
+}
+
+
 static GstCaps *
 gst_tiscolorize_transform_caps (GstBaseTransform * trans,
     GstPadDirection direction, GstCaps * caps)
 {
 	GstStructure *s;
-	/* GstStructure *ns; */
 	GstCaps *outcaps;
-	/* const GValue *value; */
-
 	
 	outcaps = gst_caps_copy (caps);
 	
@@ -139,8 +317,72 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 
 
 	if (direction == GST_PAD_SINK) {
+
+        /* Here we get the parent element of the gstcolorize element (i.e. the pipeline),
+           iterate all its children and search for the v4l2src element.
+
+           When we have the gstelement we take the device description (/dev/videoX)
+           and use it to iterate all udev v4l devices to find the according usb device
+           and retrieve the idProduct as a unique identifier. */
+
+        char* dev;
+
+        GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(trans)));
+
+        GList* l =  GST_BIN(e)->children;
+
+        while (1==1) {
+
+            const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
+
+            if (g_strcmp0(name, "GstV4l2Src") == 0)
+                g_object_get(G_OBJECT(l->data), "device", &dev, NULL);
+
+            if (g_list_next(l) == NULL)
+                break;
+
+            l = g_list_next(l);
+        }
 		gst_structure_set_name (s, "video/x-raw-bayer");
-		gst_structure_set (s, "format", G_TYPE_STRING, "grbg", NULL);
+
+        /* Here we simply fake the whole thing.
+           On the first run we are unable to determine the correct pattern
+           because GstV4l2src has not yet initialized the device and we therefor cannot
+           ask the device anything (including its id).
+           We pass one random pattern to allow a correct pipeline build up.
+           On the second round the device is correctly initialized. Now we ask its id and
+           use it to look up the correct pattern. */
+
+        GstTisColorize *tiscolorize = GST_TISCOLORIZE (trans);
+        if (tiscolorize->i == 0) {
+
+            tiscolorize->i++;
+
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_INFO,
+                           "tiscolorize",
+                           "gst_tiscolorize_transform_caps",
+                           365,
+                           NULL,
+                           "Setting format to grbg while waiting for device init.");
+
+            gst_structure_set (s, "format", G_TYPE_STRING, "grbg", NULL);
+
+        } else {
+
+            int id = get_product_id(dev);
+            char* p =  device_bayer_pattern(id);
+            gst_structure_set (s, "format", G_TYPE_STRING, p, NULL);
+
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_INFO,
+                           "tiscolorize",
+                           "gst_tiscolorize_transform_caps",
+                           380,
+                           NULL,
+                           "Setting real format for device %s to %s", dev, p);
+
+        }
 		gst_structure_remove_fields (s, "bpp", "depth", NULL);
 	} else {
 		gst_structure_set_name (s, "video/x-raw-gray");

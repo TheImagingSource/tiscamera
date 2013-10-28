@@ -37,6 +37,7 @@ struct _GstTisColorize
 {
 	GstBaseTransform base_tiscolorize;
 
+	int i;
 	GstPad *sinkpad;
 	GstPad *srcpad;
 };
