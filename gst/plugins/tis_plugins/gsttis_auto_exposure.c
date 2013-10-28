@@ -53,7 +53,10 @@
 #include "config.h"
 #endif
 
+#ifdef ENABLE_ARAVIS
 #include <arv.h>
+#endif
+
 #include <math.h>
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
@@ -337,12 +340,18 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
         self->source_type = NETWORK;
         self->exposure.value = 0.0;
         self->gain.value = 0.0;
+
+#ifdef ENABLE_ARAVIS
+
         ArvCamera* cam;
         g_object_get (G_OBJECT (self->camera_src), "camera", &cam, NULL);
 
         arv_camera_get_exposure_time_bounds(cam, &self->exposure.min, &self->exposure.max);
         arv_camera_get_gain_bounds(cam, &self->gain.min, &self->gain.max);
         /* do not free camera; it is just a pointer to the internally used object */
+
+#endif
+
     }
     else if (g_strcmp0(element_name, CAMERASRC_USB) == 0)
     {
