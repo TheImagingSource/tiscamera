@@ -43,7 +43,6 @@ def search_euvccam():
             for path in os.environ["PATH"].split(os.pathsep):
                 path = path.strip('"')
                 exe_file = os.path.join(path, EUVCCAM_NAME)
-                print exe_file
                 if is_exe(exe_file):
                     global EUVCCAM
                     EUVCCAM = exe_file
