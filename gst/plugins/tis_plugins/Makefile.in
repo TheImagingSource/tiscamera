@@ -21,7 +21,6 @@ CFLAGS+=@CFLAGS@
 
 PLUGINS=libgsttiswhitebalance.so \
 		libgsttisvideobufferfilter.so \
-		libgsttiscamerasrc.so \
 		libgsttiscolorize.so \
 		libgsttis_auto_exposure.so
 
