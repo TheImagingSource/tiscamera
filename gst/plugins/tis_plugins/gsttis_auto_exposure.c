@@ -227,6 +227,37 @@ static GstCaps* gst_tis_auto_exposure_transform_caps (GstBaseTransform* trans,
 {
     GstCaps *outcaps = gst_caps_copy (caps);
 
+    if (GST_TIS_AUTO_EXPOSURE(trans)->camera_src != NULL)
+        return outcaps;
+
+    /* if camera_src is not set we assume that the first default camera src found shall be used */
+
+    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(trans)));
+
+    GList* l =  GST_BIN(e)->children;
+
+    while (1==1)
+    {
+
+        const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
+
+        if (g_strcmp0(name, "GstV4l2Src") == 0)
+        {
+            GST_TIS_AUTO_EXPOSURE(trans)->camera_src = l->data;
+            break;
+        }
+        if (g_strcmp0(name, "GstAravis") == 0)
+        {
+            GST_TIS_AUTO_EXPOSURE(trans)->camera_src = l->data;
+            break;
+        }
+
+        if (g_list_next(l) == NULL)
+            break;
+
+        l = g_list_next(l);
+    }
+
     return outcaps;
 }
 
