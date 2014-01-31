@@ -1,5 +1,5 @@
 #
-# Copyright 2013 The Imaging Source Europe GmbH
+# Copyright 2013-2014 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,25 +21,32 @@ import gobject
 WIDTH = 744
 HEIGHT = 480
 
-gobject.threads_init ()
+gobject.threads_init()
 
-def on_new_buffer (sink, buffer, pad, src):
-    structure = buffer.get_caps ().get_structure (0)
+
+def on_new_buffer(sink, buffer, pad, src):
+    structure = buffer.get_caps().get_structure(0)
     if buffer.size != (structure["width"] * structure["height"]):
-	return
-    src.emit ("push-buffer", buffer)
+        return
+    src.emit("push-buffer", buffer)
 
-video_pipeline = gst.parse_launch ('v4l2src device=/dev/video1 ! video/x-raw-gray,width=%d,height=%d ! fakesink signal-handoffs=true name="sink"' % (WIDTH,HEIGHT))
-display_pipeline = gst.parse_launch ('appsrc name="src" ! queue ! ffmpegcolorspace ! ximagesink sync=false')
+video_pipeline = gst.parse_launch('v4l2src device=/dev/video1 '
+                                  '! video/x-raw-gray,width=%d,height=%d '
+                                  '! fakesink signal-handoffs=true name="sink"'
+                                  % (WIDTH, HEIGHT))
+display_pipeline = gst.parse_launch('appsrc name="src" '
+                                    '! queue '
+                                    '! ffmpegcolorspace '
+                                    '! ximagesink sync=false')
 
-sink = video_pipeline.get_by_name ("sink")
-src = display_pipeline.get_by_name ("src")
+sink = video_pipeline.get_by_name("sink")
+src = display_pipeline.get_by_name("src")
 
-sink.connect ("handoff", on_new_buffer, src)
+sink.connect("handoff", on_new_buffer, src)
 
 print ("Starting pipelines...")
-display_pipeline.set_state (gst.STATE_PLAYING)
-video_pipeline.set_state (gst.STATE_PLAYING)
+display_pipeline.set_state(gst.STATE_PLAYING)
+video_pipeline.set_state(gst.STATE_PLAYING)
 print ("Done")
 
 loop = glib.MainLoop()
