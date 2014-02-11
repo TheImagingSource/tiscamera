@@ -9,9 +9,9 @@ This repository will give you additional ressources to control your TIS camera.
 * firmware update tools
 * examples on how to interact with your camera
 
-## Want to see how these things might work for you?
+## Don't know where to start?
 
-Take a look at our wiki to see how they work.
+Take a look at our wiki to see where to begin.
 
 ## Questions, etc.
 
