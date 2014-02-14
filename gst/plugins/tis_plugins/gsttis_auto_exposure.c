@@ -672,7 +672,7 @@ static gboolean plugin_init (GstPlugin * plugin)
 #define PACKAGE_NAME "tis_auto_exposure_package_name"
 #endif
 #ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "http://code.google.com/p/tiscamera"
+#define GST_PACKAGE_ORIGIN "https://github.com/TheImagingSource/tiscamera"
 #endif
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
