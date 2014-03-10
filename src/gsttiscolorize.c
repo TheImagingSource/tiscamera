@@ -150,13 +150,28 @@ dev_info device_info [] =
         GR
     },
     {
+        "DFx 72BUC02",
+        8207,
+        GR
+    },
+    {
         "DFx 22BUC02",
         8302,
         GB
     },
     {
+        "DFx 22BUC02",
+        8202,
+        GB
+    },
+    {
         "DFx 42UC03",
         8308,
+        GR
+    },
+    {
+        "DFx 42UC03",
+        8208,
         GR
     }
 };
