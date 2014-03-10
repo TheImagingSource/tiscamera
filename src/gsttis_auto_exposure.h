@@ -83,6 +83,9 @@ typedef struct GstTis_Auto_Exposure
     tBY8Pattern pattern;
     format color_format;
 
+    gint framerate_numerator;
+    gint framerate_denominator;
+
     gint frame_counter;
 
 } GstTis_Auto_Exposure;

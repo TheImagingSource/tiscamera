@@ -279,6 +279,8 @@ static void gst_tis_auto_exposure_fixate_caps (GstBaseTransform* base,
     ins = gst_caps_get_structure (incoming, 0);
     outs = gst_caps_get_structure (outgoing, 0);
 
+    gst_structure_get_fraction(ins, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+
     if (gst_structure_get_int (ins, "width", &width))
     {
         if (gst_structure_has_field (outs, "width"))
@@ -378,6 +380,9 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
         arv_camera_get_gain_bounds(cam, &self->gain.min, &self->gain.max);
         /* do not free camera; it is just a pointer to the internally used object */
 
+        /* all gige cameras use the same time unit, thus can be handled identically */
+        /* 1 000 000 = 1s */
+        self->exposure.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
 #endif
 
     }
@@ -422,7 +427,27 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
             }
             qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
         }
+        /* we know the framerate and adjust the maximum for exposure */
+        /* in order to always have exposure settings that are within range */
+
+        /* exposure_absolute is treated as follows: */
+        /* Determines the exposure time of the camera sensor.
+           The exposure time is limited by the frame interval.
+           Drivers should interpret the values as 100 µs units,
+           where the value 1 stands for 1/10000th of a second,
+           10000 for 1 second and 100000 for 10 seconds. */
+
+        self->exposure.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
     }
+
+
+    gst_debug_log (gst_tis_auto_exposure_debug_category,
+                   GST_LEVEL_INFO,
+                   "tis_auto_exposure",
+                   "init_camera_resources",
+                   450,
+                   NULL,
+                   "Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
 }
 
 
