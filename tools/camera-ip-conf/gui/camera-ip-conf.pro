@@ -23,6 +23,9 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++0x -O2
 
+CONFIG += link_pkgconfig
+PKGCONFIG += libzip tinyxml
+
 CONFIG(release, debug|release) {
     DESTDIR = ".."
 }
@@ -54,5 +57,3 @@ HEADERS  += \
 
 FORMS    += mainwindow.ui \
     infobox.ui
-
-unix|win32: LIBS += -ltinyxml -lzip

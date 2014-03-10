@@ -24,8 +24,8 @@
 # make distclean  deletes every generated file
 # make realclean  cleans up object files + executables
 
-CCFLAGS= -g -Wall -W -std=c++0x -O2 -Wextra
-LDFLAGS= -pthread -lzip -ltinyxml
+CCFLAGS= -g -Wall -W -std=c++0x -O2 -Wextra $(shell pkg-config --cflags libzip) $(shell pkg-config --cflags tinyxml)
+LDFLAGS= -pthread $(shell pkg-config --libs libzip) $(shell pkg-config --libs tinyxml)
 
 # Gui related variables
 GUI_DIR=gui
