@@ -58,7 +58,11 @@ TAGS:
 
 PLUGIN_INSTALL_DIR=$(HOME)/.gstreamer-0.10/plugins
 
-.PHONY: install
+.PHONY: install uninstall
+
 install: all
 	mkdir -p $(PLUGIN_INSTALL_DIR)
 	install -D libgsttis*.so $(PLUGIN_INSTALL_DIR)
+
+uninstall:
+	$(RM) $(PLUGIN_INSTALL_DIR)/libgsttis*.so
