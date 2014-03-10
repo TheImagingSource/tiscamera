@@ -56,7 +56,9 @@ TAGS:
 
 # ==================== Installation ====================
 
+PLUGIN_INSTALL_DIR=$(HOME)/.gstreamer-0.10/plugins
+
+.PHONY: install
 install: all
-	install -D libgsttiswhitebalance.so $(HOME)/.gstreamer-0.10/plugins 
-	install -D libgsttisvideobufferfilter.so $(HOME)/.gstreamer-0.10/plugins 
-	install -D libgsttiscamerasrc.so $(HOME)/.gstreamer-0.10/plugins 
+	mkdir -p $(PLUGIN_INSTALL_DIR)
+	install -D libgsttis*.so $(PLUGIN_INSTALL_DIR)
