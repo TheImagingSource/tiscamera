@@ -100,6 +100,8 @@ enum
     PROP_0,
     PROP_AUTO_EXPOSURE,
     PROP_CAMERA,
+    PROP_EXPOSURE_MAX,
+    PROP_GAIN_MAX,
 };
 
 /* pad templates */
@@ -158,6 +160,20 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_EXPOSURE_MAX,
+                                     g_param_spec_double ("exposure-max",
+                                                          "Exposure Maximum",
+                                                          "Maximum value exposure can take",
+                                                          0.0, G_MAXDOUBLE, 0.0,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_GAIN_MAX,
+                                     g_param_spec_double ("gain-max",
+                                                          "Gain Maximum",
+                                                          "Maximum value gain can take",
+                                                          0.0, G_MAXDOUBLE, 0.0,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_CAMERA,
                                      g_param_spec_object ("camera",
                                                           "camera gst element",
@@ -189,6 +205,16 @@ void gst_tis_auto_exposure_set_property (GObject* object,
         case PROP_CAMERA:
             tis_auto_exposure->camera_src = g_value_get_object (value);
             break;
+        case PROP_EXPOSURE_MAX:
+            tis_auto_exposure->exposure.max = g_value_get_double (value);
+            if (tis_auto_exposure->exposure.max == 0.0)
+                tis_auto_exposure->exposure = tis_auto_exposure->default_exposure_values;
+            break;
+        case PROP_GAIN_MAX:
+            tis_auto_exposure->gain.max = g_value_get_double (value);
+            if (tis_auto_exposure->gain.max == 0.0)
+                tis_auto_exposure->gain = tis_auto_exposure->default_gain_values;
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -209,6 +235,12 @@ void gst_tis_auto_exposure_get_property (GObject* object,
             break;
         case PROP_CAMERA:
             g_value_set_object (value, tis_auto_exposure->camera_src);
+            break;
+        case PROP_EXPOSURE_MAX:
+            g_value_set_double(value, tis_auto_exposure->exposure.max);
+            break;
+        case PROP_GAIN_MAX:
+            g_value_set_double(value, tis_auto_exposure->gain.max);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -376,13 +408,18 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
         ArvCamera* cam;
         g_object_get (G_OBJECT (self->camera_src), "camera", &cam, NULL);
 
-        arv_camera_get_exposure_time_bounds(cam, &self->exposure.min, &self->exposure.max);
-        arv_camera_get_gain_bounds(cam, &self->gain.min, &self->gain.max);
+        arv_camera_get_exposure_time_bounds(cam,
+                                            &self->default_exposure_values.min,
+                                            &self->default_exposure_values.max);
+        arv_camera_get_gain_bounds(cam,
+                                   &self->default_gain_values.min,
+                                   &self->default_gain_values.max);
         /* do not free camera; it is just a pointer to the internally used object */
 
         /* all gige cameras use the same time unit, thus can be handled identically */
         /* 1 000 000 = 1s */
-        self->exposure.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
+
 #endif
 
     }
@@ -409,8 +446,8 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                     continue;
                 }
                 self->gain.value= ctrl.value;
-                self->gain.min = qctrl.minimum;
-                self->gain.max = qctrl.maximum;
+                self->default_gain_values.min = qctrl.minimum;
+                self->default_gain_values.max = qctrl.maximum;
 
             }
             /* TODO check camera for V4L2_CID_EXPOSURE */
@@ -422,8 +459,8 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                     continue;
                 }
                 self->exposure.value = ctrl.value;
-                self->exposure.min = qctrl.minimum;
-                self->exposure.max = qctrl.maximum;
+                self->default_exposure_values.min = qctrl.minimum;
+                self->default_exposure_values.max = qctrl.maximum;
             }
             qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
         }
@@ -437,9 +474,27 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
            where the value 1 stands for 1/10000th of a second,
            10000 for 1 second and 100000 for 10 seconds. */
 
-        self->exposure.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
     }
 
+    if (self->gain.max == 0.0)
+    {
+        self->gain = self->default_gain_values;
+    }
+    else
+    {
+        self->gain.min = self->default_gain_values.min;
+    }
+
+    /* simply use the retrieved default values */
+    if (self->exposure.max == 0.0)
+    {
+        self->exposure = self->default_exposure_values;
+    }
+    else
+    {
+        self->exposure.min = self->default_exposure_values.min;
+    }
 
     gst_debug_log (gst_tis_auto_exposure_debug_category,
                    GST_LEVEL_INFO,
@@ -448,6 +503,14 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                    450,
                    NULL,
                    "Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
+
+    gst_debug_log (gst_tis_auto_exposure_debug_category,
+                   GST_LEVEL_INFO,
+                   "tis_auto_exposure",
+                   "init_camera_resources",
+                   450,
+                   NULL,
+                   "Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
 
 

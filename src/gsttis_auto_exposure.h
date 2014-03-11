@@ -76,7 +76,9 @@ typedef struct GstTis_Auto_Exposure
     gboolean auto_exposure;
 
     Gain gain;
+    Gain default_gain_values;
     Exposure exposure;
+    Exposure default_exposure_values;
 
     CameraType source_type;
     GstElement* camera_src;
