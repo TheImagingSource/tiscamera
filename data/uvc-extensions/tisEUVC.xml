@@ -26,6 +26,14 @@
       <value>0x4</value>
     </constant>
     <constant type="integer">
+      <id>XU_SCAN_X</id>
+      <value>0x2</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_SCAN_Y</id>
+      <value>0x3</value>
+    </constant>
+    <constant type="integer">
       <id>XU_EXT_IO</id>
       <value>0x5</value>
     </constant>
@@ -44,6 +52,10 @@
     <constant type="integer">
       <id>XU_TRIGGER</id>
       <value>0x1</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_SOFTWARE_TRIGGER</id>
+      <value>0xa</value>
     </constant>
 
     <constant type="integer">
@@ -69,6 +81,18 @@
     <constant type="integer">
       <id>V4L2_CID_BINNING</id>
       <value>0x00980925</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_SOFTWARE_TRIGGER</id>
+      <value>0x00980926</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_SCAN_X</id>
+      <value>0x00980927</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_SCAN_Y</id>
+      <value>0x00980928</value>
     </constant>
 
   </constants>
@@ -124,23 +148,59 @@
 	  <description>
 	  </description>
 	</control>
-    <control id="trigger">
-      <entity>UVC_GUID_TISEUVC_XU</entity>
-      <selector>XU_TRIGGER</selector>
-      <index>4</index>
-      <size>1</size>
-      <requests>
-	<request>SET_CUR</request>
-	<request>GET_CUR</request>
-      </requests>
-      <description>
-      </description>
-    </control>
+	<control id="trigger">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_TRIGGER</selector>
+	  <index>4</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+	<control id="softwaretrigger">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_SOFTWARE_TRIGGER</selector>
+	  <index>5</index>
+	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
  	<control id="binning">
 	  <entity>UVC_GUID_TISEUVC_XU</entity>
 	  <selector>XU_BINNING</selector>
-	  <index>5</index>
+	  <index>6</index>
 	  <size>8</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+ 	<control id="scanx">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_SCAN_X</selector>
+	  <index>7</index>
+	  <size>16</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+ 	<control id="scany">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_SCAN_Y</selector>
+	  <index>8</index>
+	  <size>16</size>
 	  <requests>
 	    <request>SET_CUR</request>
 	    <request>GET_CUR</request>
@@ -219,6 +279,19 @@
       </v4l2>
     </mapping>
     <mapping>
+      <name>Software Trigger</name>
+      <uvc>
+	<control_ref idref="softwaretrigger"/>
+	<size>8</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_SOFTWARE_TRIGGER</id>
+	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
       <name>Binning</name>
       <uvc>
 	<control_ref idref="binning"/>
@@ -228,6 +301,32 @@
       </uvc>
       <v4l2>
 	<id>V4L2_CID_BINNING</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>X Offset</name>
+      <uvc>
+	<control_ref idref="scanx"/>
+	<size>16</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_SCAN_X</id>
+	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Y Offset</name>
+      <uvc>
+	<control_ref idref="scany"/>
+	<size>16</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_SCAN_Y</id>
 	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
