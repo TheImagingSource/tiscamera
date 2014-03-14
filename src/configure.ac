@@ -22,7 +22,6 @@ AC_INIT([tis-gst-plugins], [0.1])
 AC_CONFIG_SRCDIR([gsttiswhitebalance.c])
 AC_CONFIG_HEADERS([config.h])
 
-dnl AC_LANG(C)
 AC_LANG_C
 
 
@@ -30,12 +29,9 @@ AC_LANG_C
 AC_PROG_CC
 AC_PROG_LN_S
 
-dnl AM_INIT_AUTOMAKE([-Wall foreign])
-
 ACLOCAL_FLAGS="-I /usr/share/aclocal"
 PKG_CONFIG_PATH="-I /usr/share/aclocal"
 PKG_CONFIG_LIBDIR="-I /usr/share/aclocal"
-dnl m4_include([pkg.m4])
 
 PKG_CHECK_MODULES([GLIB], [glib-2.0],break,AC_MSG_ERROR(Unable to locate glib module))
 PKG_CHECK_MODULES([GST_BASE], [gstreamer-base-0.10],break,AC_MSG_ERROR(Unable to locate gst-base module))
@@ -46,11 +42,8 @@ PKG_CHECK_MODULES([UDEV], [libudev], break, AC_MSG_ERROR(Unable to locate libude
 CFLAGS+=" $GLIB_CFLAGS $GST_BASE_CFLAGS $GST_CFLAGS $UDEV_CFLAGS -DHAVE_CONFIG_H "
 
 # assure all checks have all necessary flags
-dnl CPPFLAGS+=" $CFLAGS -DHAVE_CONFIG_H "
-LDFLAGS+=" -L/home/edt/work/aravis/src/.libs $GLIB_LIBS $GST_BASE_LIBS $GST_LIBS $UDEV_LIBS"
+LDFLAGS+="$GLIB_LIBS $GST_BASE_LIBS $GST_LIBS $UDEV_LIBS"
 
-
-# libusb
 
 AC_ARG_ENABLE(aravis,
               [  --enable-aravis    build with aravis support],
@@ -93,5 +86,3 @@ echo ""
 echo "Configuration:"
 echo "  Building with aravis as a dependency:  $enable_aravis"
 echo ""
-echo "$CFLAGS"
-echo "$CPPFLAGS"
