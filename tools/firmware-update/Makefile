@@ -14,10 +14,13 @@
 # limitations under the License.
 #
 
+CFLAGS+=$(shell pkg-config --cflags libzip)
+LDFLAGS+=$(shell pkg-config --libs libzip)
+
 all: firmware-update
 
 firmware-update: firmware-update.o UsbSession.o UsbHandler.o FileHandling.o UsbCamera.o Usb3Camera.o Usb2Camera.o
-	$(CXX) -std=c++0x -O0 -g $^ -o $@ -lusb-1.0 -lzip
+	$(CXX) -std=c++0x -O0 -g $^ -o $@ -lusb-1.0 $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) -std=c++0x -Wall -g -O0 $(CPPFLAGS) $(CFLAGS) -c $^ -o $@
