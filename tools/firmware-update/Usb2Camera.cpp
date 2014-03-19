@@ -417,6 +417,7 @@ int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
 		ret = set_productid(pid);
         buffer[2] = 0 & 0xff;
     }
+    usleep (10000);
     ret = libusb_control_transfer(this->dev_handle,
                                   LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_VENDOR,
                                   0x2,
