@@ -22,6 +22,8 @@
 #include <sstream>
 #include <iomanip>
 #include <getopt.h>
+#include <exception>
+#include <stdexcept>
 
 using namespace tis;
 

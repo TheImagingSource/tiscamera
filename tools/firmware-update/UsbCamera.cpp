@@ -15,7 +15,7 @@
  */
 
 #include "UsbCamera.h"
-
+#include <stdexcept>
 
 namespace tis
 {

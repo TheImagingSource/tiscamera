@@ -22,6 +22,8 @@
 #include "FileHandling.h"
 
 #include <iostream>
+#include <exception>
+#include <stdexcept>
 
 #define EEPROM_BUFFER_SIZE              4096
 #define FIRMWARE_SIZE                   0x50000

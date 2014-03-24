@@ -16,6 +16,7 @@
 
 
 #include "UsbSession.h"
+#include <stdexcept>
 
 namespace tis
 {

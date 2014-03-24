@@ -18,6 +18,7 @@
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
+#include <stdexcept>
 
 #include "Usb2Camera.h"
 #include "FileHandling.h"
