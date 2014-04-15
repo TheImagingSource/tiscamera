@@ -27,22 +27,24 @@ AC_LANG_C
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
+
 AC_PROG_LN_S
 
 ACLOCAL_FLAGS="-I /usr/share/aclocal"
 PKG_CONFIG_PATH="-I /usr/share/aclocal"
 PKG_CONFIG_LIBDIR="-I /usr/share/aclocal"
 
-PKG_CHECK_MODULES([GLIB], [glib-2.0],break,AC_MSG_ERROR(Unable to locate glib module))
-PKG_CHECK_MODULES([GST_BASE], [gstreamer-base-0.10],break,AC_MSG_ERROR(Unable to locate gst-base module))
-PKG_CHECK_MODULES([GST], [gstreamer-0.10],break,AC_MSG_ERROR(Unable to locate gstreamer-0.10 module))
+PKG_CHECK_MODULES([GLIB], [glib-2.0], break, AC_MSG_ERROR(Unable to locate glib module))
+PKG_CHECK_MODULES([GST_BASE], [gstreamer-base-0.10], break, AC_MSG_ERROR(Unable to locate gst-base module))
+PKG_CHECK_MODULES([GST], [gstreamer-0.10], break, AC_MSG_ERROR(Unable to locate gstreamer-0.10 module))
 
 PKG_CHECK_MODULES([UDEV], [libudev], break, AC_MSG_ERROR(Unable to locate libudev module))
 
 CFLAGS+=" $GLIB_CFLAGS $GST_BASE_CFLAGS $GST_CFLAGS $UDEV_CFLAGS -DHAVE_CONFIG_H "
 
 # assure all checks have all necessary flags
-LDFLAGS+="$GLIB_LIBS $GST_BASE_LIBS $GST_LIBS $UDEV_LIBS"
+LDFLAGS+=" $GLIB_LIBS $GST_BASE_LIBS $GST_LIBS $UDEV_LIBS"
 
 
 AC_ARG_ENABLE(aravis,
@@ -55,6 +57,7 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 
 HAVE_ARV=no
 LIBARV=
+AC_DEFINE([ENABLE_ARAVIS], [0], [CONFIG PARAMETER FOR ARAVIS])
 
 if test "$enable_aravis" = "yes"; then
 
@@ -67,16 +70,21 @@ if test "$enable_aravis" = "yes"; then
 
    AC_CHECK_HEADER([arv.h],
                    [HAVE_ARV=yes],
-                   [HAVE_ARV=no; AC_MSG_ERROR(Unable to locate aravis header.)])
+                   [HAVE_ARV=no; AC_MSG_ERROR(Unable to locate aravis header.)],
+                   [#ifdef HAVE_ARAVIS_H
+                   include <arv.h>
+                   #endif
+                   ])
 
    # no error until here; aravis is working
    LDFLAGS+=" -laravis-0.4"
-   AC_DEFINE([ENABLE_ARAVIS], [1])
+   AC_SUBST([ENABLE_ARAVIS], [1])
 fi
 
 AC_SUBST([LIBS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
+AC_SUBST([ENABLE_ARAVIS])
 
 
 AC_CONFIG_FILES([Makefile])
