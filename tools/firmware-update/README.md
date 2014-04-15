@@ -6,6 +6,8 @@ This tool allows you to update the firmware of your TIS USB camera.
 
 # Build
 
+You will need gcc >= 4.7 to successfully compile this tool.
+
 Simply call:
 
 make
