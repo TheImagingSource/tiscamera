@@ -49,6 +49,15 @@ std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces ()
     // check the family and the device name
     while (addrs != NULL)
     {
+        // ignore VPN and inactive
+        // VPN do not exhibit valid addresses and can cause
+        // crashes, therfore jump over them
+        if ((addrs->ifa_addr == NULL) || ! (addrs->ifa_flags & IFF_RUNNING))
+        {
+            addrs = addrs->ifa_next;
+            continue;
+        }
+
         if  ( addrs->ifa_addr->sa_family == AF_INET
               && !(addrs->ifa_flags & IFF_LOOPBACK)
               && !(addrs->ifa_flags & IFF_POINTOPOINT)
