@@ -30,6 +30,7 @@ namespace tis
 
 struct device_info
 {
+    char manufacturer[256];
     char product[256];
     char serial[256];
     uint32_t idVendor;

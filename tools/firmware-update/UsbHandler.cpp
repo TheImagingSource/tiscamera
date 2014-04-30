@@ -72,6 +72,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
         }
         
         // TODO find alternative to root requirements
+        libusb_get_string_descriptor_ascii(dh, desc.iManufacturer, (unsigned char*)d.manufacturer, sizeof(d.manufacturer));
         libusb_get_string_descriptor_ascii(dh, desc.iProduct, (unsigned char*)d.product, sizeof(d.product));
         libusb_get_string_descriptor_ascii(dh, desc.iSerialNumber, (unsigned char*)d.serial, sizeof(d.serial));
 

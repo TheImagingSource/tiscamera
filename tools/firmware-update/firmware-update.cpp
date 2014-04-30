@@ -159,7 +159,7 @@ void print_device_info (const std::string serial_number)
     auto d = cam->get_device_info();
 
     std::cout << std::endl
-              << "Device manufacturer: " << std::endl
+              << "Device manufacturer: " << d.manufacturer << std::endl
               << "Product name:        " << d.product << std::endl
               << "Serial number:       " << d.serial << std::endl
               << "VendorID:ProductID:  " << std::hex << d.idVendor << ":" << d.idProduct << std::dec << std::endl
