@@ -57,6 +57,10 @@
       <id>XU_SOFTWARE_TRIGGER</id>
       <value>0xa</value>
     </constant>
+    <constant type="integer">
+      <id>XU_SKIP</id>
+      <value>0xb</value>
+    </constant>
 
     <constant type="integer">
       <id>V4L2_CID_EUVC_EXT_IO</id>
@@ -93,6 +97,10 @@
     <constant type="integer">
       <id>V4L2_CID_SCAN_Y</id>
       <value>0x00980928</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_CID_SKIP</id>
+      <value>0x00980929</value>
     </constant>
 
   </constants>
@@ -152,7 +160,7 @@
 	  <entity>UVC_GUID_TISEUVC_XU</entity>
 	  <selector>XU_TRIGGER</selector>
 	  <index>4</index>
-	  <size>8</size>
+	  <size>1</size>
 	  <requests>
 	    <request>SET_CUR</request>
 	    <request>GET_CUR</request>
@@ -201,6 +209,18 @@
 	  <selector>XU_SCAN_Y</selector>
 	  <index>8</index>
 	  <size>16</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+ 	<control id="skip">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_SKIP</selector>
+	  <index>9</index>
+	  <size>1</size>
 	  <requests>
 	    <request>SET_CUR</request>
 	    <request>GET_CUR</request>
@@ -269,7 +289,7 @@
       <name>Trigger</name>
       <uvc>
 	<control_ref idref="trigger"/>
-	<size>8</size>
+	<size>1</size>
 	<offset>0</offset>
 	<uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
@@ -282,7 +302,7 @@
       <name>Software Trigger</name>
       <uvc>
 	<control_ref idref="softwaretrigger"/>
-	<size>8</size>
+	<size>1</size>
 	<offset>0</offset>
 	<uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
@@ -302,6 +322,19 @@
       <v4l2>
 	<id>V4L2_CID_BINNING</id>
 	<v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Skipping</name>
+      <uvc>
+	<control_ref idref="skip"/>
+	<size>1</size>
+	<offset>0</offset>
+	<uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	<id>V4L2_CID_SKIP</id>
+	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
     <mapping>
