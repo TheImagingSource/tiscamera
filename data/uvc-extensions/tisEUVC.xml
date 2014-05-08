@@ -308,7 +308,7 @@
       </uvc>
       <v4l2>
 	<id>V4L2_CID_SOFTWARE_TRIGGER</id>
-	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+	<v4l2_type>V4L2_CTRL_TYPE_BUTTON</v4l2_type>
       </v4l2>
     </mapping>
     <mapping>
