@@ -263,22 +263,22 @@ static void gst_tis_autofocus_class_init (GstTis_AutoFocusClass* klass)
     g_object_class_install_property (gobject_class,
                                      PROP_X,
                                      g_param_spec_int ("x",
-                                                       "Activate auto focus run",
-                                                       "Automatically adjust exposure balance",
+                                                       "X Coordinate",
+                                                       "Coordinate for focus region.",
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_Y,
                                      g_param_spec_int ("y",
-                                                       "Activate auto focus run",
-                                                       "Automatically adjust exposure balance",
+                                                       "Y Coordinate",
+                                                       "Coordinate for focus region.",
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_SIZE,
                                      g_param_spec_int ("size",
-                                                       "Activate auto focus run",
-                                                       "Automatically adjust exposure balance",
+                                                       "Size of focus region",
+                                                       "Radius of the focus region around the given coordinates.",
                                                        0, G_MAXINT, 50,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
