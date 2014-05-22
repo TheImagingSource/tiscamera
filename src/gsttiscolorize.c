@@ -13,19 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * SECTION:element-gsttiscolorize
- *
- * The tiscolorize element does FIXME stuff.
- *
- * <refsect2>
- * <title>Example launch line</title>
- * |[
- * gst-launch -v fakesrc ! tiscolorize ! FIXME ! fakesink
- * ]|
- * FIXME Describe what the pipeline does.
- * </refsect2>
- */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -49,84 +36,77 @@ GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
 
 /* prototypes */
 
-static void gst_tiscolorize_finalize (GObject * object);
+static void gst_tiscolorize_finalize (GObject* object);
 
-static GstFlowReturn
-gst_tiscolorize_transform_ip (GstBaseTransform * trans, GstBuffer * buf);
-static GstCaps *
-gst_tiscolorize_transform_caps (GstBaseTransform * trans,
-				    GstPadDirection direction, GstCaps * caps);
+static GstFlowReturn gst_tiscolorize_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
+static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
+                                                GstPadDirection direction,
+                                                GstCaps* caps);
 
-static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
-					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps);
-
+static void gst_tiscolorize_fixate_caps (GstBaseTransform* base,
+                                         GstPadDirection direction,
+                                         GstCaps* caps,
+                                         GstCaps* othercaps);
 
 /* pad templates */
 
 static GstStaticPadTemplate gst_tiscolorize_sink_template =
-	GST_STATIC_PAD_TEMPLATE ("sink",
-				 GST_PAD_SINK,
-				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
-		);
+    GST_STATIC_PAD_TEMPLATE ("sink",
+                             GST_PAD_SINK,
+                             GST_PAD_ALWAYS,
+                             GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
+        );
 
 static GstStaticPadTemplate gst_tiscolorize_src_template =
-	GST_STATIC_PAD_TEMPLATE ("src",
+    GST_STATIC_PAD_TEMPLATE ("src",
                              GST_PAD_SRC,
                              GST_PAD_ALWAYS,
                              GST_STATIC_CAPS ("video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
-		);
+        );
 
 
 /* class initialization */
 
 G_DEFINE_TYPE_WITH_CODE (GstTisColorize, gst_tiscolorize, GST_TYPE_BASE_TRANSFORM,
-			 GST_DEBUG_CATEGORY_INIT (gst_tiscolorize_debug_category, "tiscolorize", 0,
-						  "debug category for tiscolorize element"));
+                         GST_DEBUG_CATEGORY_INIT (gst_tiscolorize_debug_category, "tiscolorize", 0,
+                                                  "debug category for tiscolorize element"));
 
-static void
-gst_tiscolorize_class_init (GstTisColorizeClass * klass)
+
+static void gst_tiscolorize_class_init (GstTisColorizeClass* klass)
 {
-	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-	GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
+    GObjectClass* gobject_class = G_OBJECT_CLASS (klass);
+    GstBaseTransformClass* base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
 
-	/* Setting up pads and setting metadata should be moved to
-	   base_class_init if you intend to subclass this class. */
+    /* Setting up pads and setting metadata should be moved to
+       base_class_init if you intend to subclass this class. */
 
-	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
-						   &gst_tiscolorize_src_template);
-	gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
-						   &gst_tiscolorize_sink_template);
+    gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
+                                               &gst_tiscolorize_src_template);
+    gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
+                                               &gst_tiscolorize_sink_template);
 
-	gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
-					      "The Imaging Source White Balance Element", "Generic", "Adjusts white balancing of RAW video data buffers",
-					      "Arne Caspari <arne.caspari@gmail.com>");
+    gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
+                                          "The Imaging Source White Balance Element",
+                                          "Generic",
+                                          "Adjusts white balancing of RAW video data buffers",
+                                          "Arne Caspari <arne.caspari@gmail.com>");
 
-	gobject_class->finalize = gst_tiscolorize_finalize;
-	base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
-	//base_transform_class->transform = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform);
-	base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
-	base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
-
+    gobject_class->finalize = gst_tiscolorize_finalize;
+    base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
+    base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
+    base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
 }
 
-static void
-gst_tiscolorize_init (GstTisColorize *self)
+
+static void gst_tiscolorize_init (GstTisColorize* self)
 {
-	/* gst_pad_set_getcaps_function (self->sinkpad, */
-	/* 			      GST_DEBUG_FUNCPTR(gst_tiscolorize_sink_getcaps)); */
     self->i = 0;
 }
 
 
-void
-gst_tiscolorize_finalize (GObject * object)
+void gst_tiscolorize_finalize (GObject* object)
 {
-	/* GstTiscolorize *tiscolorize = GST_TISCOLORIZE (object); */
-
-	/* clean up object here */
-
-	G_OBJECT_CLASS (gst_tiscolorize_parent_class)->finalize (object);
+    G_OBJECT_CLASS (gst_tiscolorize_parent_class)->finalize (object);
 }
 
 
@@ -144,7 +124,6 @@ typedef struct
     unsigned int productid;
     unsigned int serial;
 } usb_cam;
-
 
 
 dev_info device_info [] =
@@ -181,22 +160,23 @@ dev_info device_info [] =
     }
 };
 
+
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
 {
 
-	struct udev* udev;
-	struct udev_enumerate* enumerate;
-	struct udev_list_entry* devices;
+    struct udev* udev;
+    struct udev_enumerate* enumerate;
+    struct udev_list_entry* devices;
     struct udev_list_entry* dev_list_entry;
-	struct udev_device* dev;
+    struct udev_device* dev;
 
     int camera_cnt = 0;
     (*camera_count) = 0;
 
-	udev = udev_new();
-	if (!udev)
+    udev = udev_new();
+    if (!udev)
     {
         gst_debug_log (gst_tiscolorize_debug_category,
                        GST_LEVEL_ERROR,
@@ -207,29 +187,30 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                        "Unable to create udev object");
 
         return;
-	}
+    }
 
-	/* Create a list of the devices in the 'video4linux' subsystem. */
-	enumerate = udev_enumerate_new(udev);
-	udev_enumerate_add_match_subsystem(enumerate, "video4linux");
-	udev_enumerate_scan_devices(enumerate);
-	devices = udev_enumerate_get_list_entry(enumerate);
+    /* Create a list of the devices in the 'video4linux' subsystem. */
+    enumerate = udev_enumerate_new(udev);
+    udev_enumerate_add_match_subsystem(enumerate, "video4linux");
+    udev_enumerate_scan_devices(enumerate);
+    devices = udev_enumerate_get_list_entry(enumerate);
 
-	udev_list_entry_foreach(dev_list_entry, devices) {
-		const char *path;
+    udev_list_entry_foreach(dev_list_entry, devices)
+    {
+        const char* path;
         char needed_path[100];
 
-		/* Get the filename of the /sys entry for the device
-		   and create a udev_device object (dev) representing it */
-		path = udev_list_entry_get_name(dev_list_entry);
-		dev = udev_device_new_from_syspath(udev, path);
+        /* Get the filename of the /sys entry for the device
+           and create a udev_device object (dev) representing it */
+        path = udev_list_entry_get_name(dev_list_entry);
+        dev = udev_device_new_from_syspath(udev, path);
 
-		/* The device pointed to by dev contains information about
-		   the hidraw device. In order to get information about the
-		   USB device, get the parent device with the
-		   subsystem/devtype pair of "usb"/"usb_device". This will
-		   be several levels up the tree, but the function will find
-		   it.*/
+        /* The device pointed to by dev contains information about
+           the hidraw device. In order to get information about the
+           USB device, get the parent device with the
+           subsystem/devtype pair of "usb"/"usb_device". This will
+           be several levels up the tree, but the function will find
+           it.*/
 
         /* we need to copy the devnode (/dev/videoX) before the path
            is changed to the path of the usb device behind it (/sys/class/....) */
@@ -246,18 +227,19 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                            184,
                            NULL,
                            "Unable to retrieve usb device for %s", needed_path);
-			return;
-		}
+            return;
+        }
 
         /* From here, we can call get_sysattr_value() for each file
-		   in the device's /sys entry. The strings passed into these
-		   functions (idProduct, idVendor, serial, etc.) correspond
-		   directly to the files in the directory which represents
-		   the USB device. Note that USB strings are Unicode, UCS2
-		   encoded, but the strings returned from
-		   udev_device_get_sysattr_value() are UTF-8 encoded. */
+           in the device's /sys entry. The strings passed into these
+           functions (idProduct, idVendor, serial, etc.) correspond
+           directly to the files in the directory which represents
+           the USB device. Note that USB strings are Unicode, UCS2
+           encoded, but the strings returned from
+           udev_device_get_sysattr_value() are UTF-8 encoded. */
 
-        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0) {
+        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0)
+        {
 
             strcpy((*cameras)[camera_cnt].devnode, needed_path);
             (*cameras)[camera_cnt].productid = atoi(udev_device_get_sysattr_value(dev, "idProduct"));
@@ -273,14 +255,14 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
 
             camera_cnt++;
         }
-		udev_device_unref(dev);
-	}
+        udev_device_unref(dev);
+    }
 
     (*camera_count) = camera_cnt;
-	/* Free the enumerator object */
-	udev_enumerate_unref(enumerate);
+    /* Free the enumerator object */
+    udev_enumerate_unref(enumerate);
 
-	udev_unref(udev);
+    udev_unref(udev);
 
 }
 
@@ -291,8 +273,10 @@ int get_product_id (char* devnode)
     int camera_cnt = 0;
     get_usb_cameras(&cameras, &camera_cnt);
     int i;
-    for (i = 0; i < camera_cnt; ++i) {
-        if (strcmp(devnode, cameras[i].devnode) == 0) {
+    for (i = 0; i < camera_cnt; ++i)
+    {
+        if (strcmp(devnode, cameras[i].devnode) == 0)
+        {
             gst_debug_log (gst_tiscolorize_debug_category,
                            GST_LEVEL_INFO,
                            "tiscolorize",
@@ -311,8 +295,10 @@ int get_product_id (char* devnode)
 char* device_bayer_pattern (int id)
 {
     unsigned int i;
-    for (i = 0; i < ARRAYSIZE(device_info); i++) {
-        if (device_info[i].device_id == id) {
+    for (i = 0; i < ARRAYSIZE(device_info); i++)
+    {
+        if (device_info[i].device_id == id)
+        {
             return bayer_to_string(device_info[i].bayer_pattern);
         }
     }
@@ -323,37 +309,41 @@ char* device_bayer_pattern (int id)
 
 int check_bayer_pattern (char* desc)
 {
-    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0) {
+    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0)
+    {
         return GR;
     }
-    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0) {
+    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0)
+    {
         return RG;
     }
-    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0) {
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0)
+    {
         return GB;
     }
-    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0) {
+    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0)
+    {
         return BG;
     }
-    else {
+    else
+    {
         return -1;
     }
 }
 
 
-static GstCaps *
-gst_tiscolorize_transform_caps (GstBaseTransform * trans,
-    GstPadDirection direction, GstCaps * caps)
+static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
+                                                GstPadDirection direction,
+                                                GstCaps* caps)
 {
-	GstStructure *s;
-	GstCaps *outcaps;
-	
-	outcaps = gst_caps_copy (caps);
-	
-	s = gst_caps_get_structure (outcaps, 0);
+    GstStructure* s;
+    GstCaps *outcaps;
 
+    outcaps = gst_caps_copy (caps);
+    s = gst_caps_get_structure (outcaps, 0);
 
-	if (direction == GST_PAD_SINK) {
+    if (direction == GST_PAD_SINK)
+    {
 
         /* Here we get the parent element of the gstcolorize element (i.e. the pipeline),
            iterate all its children and search for the v4l2src element.
@@ -366,21 +356,25 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 
         GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(trans)));
 
-        GList* l =  GST_BIN(e)->children;
+        GList* l = GST_BIN(e)->children;
 
-        while (1==1) {
-
+        while (1==1)
+        {
             const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
 
             if (g_strcmp0(name, "GstV4l2Src") == 0)
+            {
                 g_object_get(G_OBJECT(l->data), "device", &dev, NULL);
+            }
 
             if (g_list_next(l) == NULL)
+            {
                 break;
+            }
 
             l = g_list_next(l);
         }
-		gst_structure_set_name (s, "video/x-raw-bayer");
+        gst_structure_set_name (s, "video/x-raw-bayer");
 
         /* Here we simply fake the whole thing.
            On the first run we are unable to determine the correct pattern
@@ -391,7 +385,8 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
            use it to look up the correct pattern. */
 
         GstTisColorize *tiscolorize = GST_TISCOLORIZE (trans);
-        if (tiscolorize->i == 0) {
+        if (tiscolorize->i == 0)
+        {
 
             tiscolorize->i++;
 
@@ -405,8 +400,9 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 
             gst_structure_set (s, "format", G_TYPE_STRING, "grbg", NULL);
 
-        } else {
-
+        }
+        else
+        {
             /* Check the format descriptions v4l2 offers.
                Iterate them and look for one matching a bayer pattern description.
                If none are present fall back to the udev variant where the bayer pattern
@@ -424,22 +420,26 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 
             char* bayer_pattern = NULL;
 
-            for (fmtdesc.index = 0; ! ioctl (dev_fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++) {
+            for (fmtdesc.index = 0; ! ioctl (dev_fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++)
+            {
                 int pattern = check_bayer_pattern((char*)fmtdesc.description);
 
-                if (pattern != -1) {
+                if (pattern != -1)
+                {
                     bayer_pattern = bayer_to_string(pattern);
                 }
             }
 
             close(dev_fd);
 
-            if (bayer_pattern == NULL) {
+            if (bayer_pattern == NULL)
+            {
                 int id = get_product_id(dev);
-                bayer_pattern =  device_bayer_pattern(id);
+                bayer_pattern = device_bayer_pattern(id);
             }
 
-            if (bayer_pattern == NULL) {
+            if (bayer_pattern == NULL)
+            {
                 gst_debug_log (gst_tiscolorize_debug_category,
                                GST_LEVEL_ERROR,
                                "tiscolorize",
@@ -460,60 +460,69 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
                            "Setting real format for device %s to %s", dev, bayer_pattern);
 
         }
-		gst_structure_remove_fields (s, "bpp", "depth", NULL);
-	} else {
-		gst_structure_set_name (s, "video/x-raw-gray");
-		gst_structure_set (s, "bpp", G_TYPE_INT, 8, NULL);
-		gst_structure_remove_field (s, "format");
-	}
+        gst_structure_remove_fields (s, "bpp", "depth", NULL);
+    }
+    else
+    {
+        gst_structure_set_name (s, "video/x-raw-gray");
+        gst_structure_set (s, "bpp", G_TYPE_INT, 8, NULL);
+        gst_structure_remove_field (s, "format");
+    }
 
-	GST_LOG_OBJECT (trans, "Transform caps\n\nin:%"GST_PTR_FORMAT"\nout:%"GST_PTR_FORMAT, caps, outcaps);
-	
-	return outcaps;
+    GST_LOG_OBJECT (trans, "Transform caps\n\nin:%"GST_PTR_FORMAT"\nout:%"GST_PTR_FORMAT, caps, outcaps);
+
+    return outcaps;
 }
 
-static void gst_tiscolorize_fixate_caps (GstBaseTransform * base,
-					     GstPadDirection direction, GstCaps * caps, GstCaps * othercaps)
+
+static void gst_tiscolorize_fixate_caps (GstBaseTransform* base,
+                                         GstPadDirection direction,
+                                         GstCaps* caps,
+                                         GstCaps* othercaps)
 {
-	GstStructure *ins, *outs;
-	gint width, height;
-	g_return_if_fail (gst_caps_is_fixed (caps));
-	
-	GST_DEBUG_OBJECT (base, "trying to fixate othercaps %" GST_PTR_FORMAT
-			  " based on caps %" GST_PTR_FORMAT, othercaps, caps);
+    GstStructure* ins;
+    GstStructure* outs;
+    gint width;
+    gint height;
+    g_return_if_fail (gst_caps_is_fixed (caps));
 
-	ins = gst_caps_get_structure (caps, 0);
-	outs = gst_caps_get_structure (othercaps, 0);
+    GST_DEBUG_OBJECT (base, "trying to fixate othercaps %" GST_PTR_FORMAT
+                      " based on caps %" GST_PTR_FORMAT, othercaps, caps);
 
-	if (gst_structure_get_int (ins, "width", &width)) {
-		if (gst_structure_has_field (outs, "width")) {
-			gst_structure_fixate_field_nearest_int (outs, "width", width);
-		}
-	}
-	
-	if (gst_structure_get_int (ins, "height", &height)) {
-		if (gst_structure_has_field (outs, "height")) {
-			gst_structure_fixate_field_nearest_int (outs, "width", height);
-		}
-	}
-	
+    ins = gst_caps_get_structure (caps, 0);
+    outs = gst_caps_get_structure (othercaps, 0);
+
+    if (gst_structure_get_int (ins, "width", &width))
+    {
+        if (gst_structure_has_field (outs, "width"))
+        {
+            gst_structure_fixate_field_nearest_int (outs, "width", width);
+        }
+    }
+
+    if (gst_structure_get_int (ins, "height", &height))
+    {
+        if (gst_structure_has_field (outs, "height"))
+        {
+            gst_structure_fixate_field_nearest_int (outs, "width", height);
+        }
+    }
+
 }
 
-static GstFlowReturn
-gst_tiscolorize_transform_ip (GstBaseTransform * trans, GstBuffer * buf)
+
+static GstFlowReturn gst_tiscolorize_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     /* We change the caps automatically in the background. */
     /* Here we simply say everything is OK and go on. */
 
-	return GST_FLOW_OK;
+    return GST_FLOW_OK;
 }
 
-static gboolean
-plugin_init (GstPlugin * plugin)
-{
 
-	return gst_element_register (plugin, "tiscolorize", GST_RANK_NONE,
-				     GST_TYPE_TISCOLORIZE);
+static gboolean plugin_init (GstPlugin* plugin)
+{
+    return gst_element_register (plugin, "tiscolorize", GST_RANK_NONE, GST_TYPE_TISCOLORIZE);
 }
 
 #ifndef VERSION
@@ -530,7 +539,11 @@ plugin_init (GstPlugin * plugin)
 #endif
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-		   GST_VERSION_MINOR,
-		   "tiscolorize",
-		   "The Imaging Source white balance plugin",
-		   plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+                   GST_VERSION_MINOR,
+                   "tiscolorize",
+                   "The Imaging Source white balance plugin",
+                   plugin_init,
+                   VERSION,
+                   "LGPL",
+                   PACKAGE_NAME,
+                   GST_PACKAGE_ORIGIN)
