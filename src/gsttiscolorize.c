@@ -38,6 +38,11 @@
 #include <string.h>
 #include "bayer.h"
 #include <libudev.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <linux/videodev2.h>
+
 
 GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
 #define GST_CAT_DEFAULT gst_tiscolorize_debug_category
@@ -312,7 +317,27 @@ char* device_bayer_pattern (int id)
         }
     }
 
-    return "";
+    return NULL;
+}
+
+
+int check_bayer_pattern (char* desc)
+{
+    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0) {
+        return GR;
+    }
+    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0) {
+        return RG;
+    }
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0) {
+        return GB;
+    }
+    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0) {
+        return BG;
+    }
+    else {
+        return -1;
+    }
 }
 
 
@@ -382,9 +407,49 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
 
         } else {
 
-            int id = get_product_id(dev);
-            char* p =  device_bayer_pattern(id);
-            gst_structure_set (s, "format", G_TYPE_STRING, p, NULL);
+            /* Check the format descriptions v4l2 offers.
+               Iterate them and look for one matching a bayer pattern description.
+               If none are present fall back to the udev variant where the bayer pattern
+               is found through the productid */
+
+            struct v4l2_fmtdesc fmtdesc;
+            fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+            int dev_fd = open(dev, O_RDONLY);
+
+            if (dev_fd == -1)
+            {
+
+            }
+
+            char* bayer_pattern = NULL;
+
+            for (fmtdesc.index = 0; ! ioctl (dev_fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++) {
+                int pattern = check_bayer_pattern((char*)fmtdesc.description);
+
+                if (pattern != -1) {
+                    bayer_pattern = bayer_to_string(pattern);
+                }
+            }
+
+            close(dev_fd);
+
+            if (bayer_pattern == NULL) {
+                int id = get_product_id(dev);
+                bayer_pattern =  device_bayer_pattern(id);
+            }
+
+            if (bayer_pattern == NULL) {
+                gst_debug_log (gst_tiscolorize_debug_category,
+                               GST_LEVEL_ERROR,
+                               "tiscolorize",
+                               "gst_tiscolorize_transform_caps",
+                               447,
+                               NULL,
+                               "Unable to determine bayer pattern");
+            }
+
+            gst_structure_set (s, "format", G_TYPE_STRING, bayer_pattern, NULL);
 
             gst_debug_log (gst_tiscolorize_debug_category,
                            GST_LEVEL_INFO,
@@ -392,7 +457,7 @@ gst_tiscolorize_transform_caps (GstBaseTransform * trans,
                            "gst_tiscolorize_transform_caps",
                            380,
                            NULL,
-                           "Setting real format for device %s to %s", dev, p);
+                           "Setting real format for device %s to %s", dev, bayer_pattern);
 
         }
 		gst_structure_remove_fields (s, "bpp", "depth", NULL);
