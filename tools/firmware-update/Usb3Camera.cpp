@@ -110,6 +110,7 @@ int Usb3Camera::download_firmware (std::vector<unsigned char>& firmware, std::fu
 
         if (ret < 0)
         {
+            delete[] data;
             throw std::runtime_error("Unable to read data. Libusb returned " + std::to_string(ret) + ".");
         }
         else
