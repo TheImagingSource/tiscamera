@@ -78,9 +78,7 @@ int Usb2Camera::usbbuffer_to_string (unsigned char* usbbuffer,
                                      char* string,
                                      int string_size )
 {
-    int s;
-
-    s = usbbuffer[0];
+    int s = usbbuffer[0];
 
     if ( s > buffer_size )
     {
@@ -397,14 +395,16 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
 {
 	unsigned short addr = FLAGS_LOCATION;
-	int ret = -1;
 	unsigned char buffer[3];
 	buffer[0] = ( addr >> 8 ) & 0xff;
 	buffer[1] = addr & 0xff;
 
     unsigned short pid;
-    ret = get_productid(pid);
+    int ret = get_productid(pid);
 
+    // we change the product id to ensure that a user visible change has happened so
+    // it can easily be determined if UVC mode is active or not
+    // this also causes possible TIS windows drivers to not use the camera
 
     if (mode == CAMERA_INTERFACE_MODE_UVC)
     {

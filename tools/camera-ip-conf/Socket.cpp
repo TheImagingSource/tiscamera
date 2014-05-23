@@ -121,15 +121,13 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
         FD_ZERO(&fds);
         FD_SET(fd, &fds);
 
-        int ret_val = 0;
-
-        while ((ret_val = select(fd+1, &fds, NULL, NULL, &timeout)) > 0)
+        while (select(fd+1, &fds, NULL, NULL, &timeout) > 0)
         {
             char msg[1024];
 
             // TODO maybe replace with recv
             struct sockaddr_storage sender = sockaddr_storage();
-            socklen_t sendsize;
+            socklen_t sendsize = 0;
 
             if (recvfrom(fd, msg, sizeof(msg), 0, (sockaddr*)&sender, &sendsize) >= 0)
             {

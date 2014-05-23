@@ -57,7 +57,7 @@ void list_devices ()
     {
          devs = usb.get_device_list();
     }
-    catch (std::runtime_error err)
+    catch (const std::runtime_error& err)
     {
         std::cout << err.what() << std::endl;
 
@@ -143,7 +143,7 @@ void query_device_strings (std::string& vendor, std::string& device, std::string
 }
 
 
-void print_device_info (const std::string serial_number)
+void print_device_info (const std::string& serial_number)
 {
     UsbHandler usb;
 
@@ -185,7 +185,7 @@ void print_device_info (const std::string serial_number)
 
 // toggle uvc mode in USB2 cameras
 // USB3 cameras do net have this "feature" and have to be ignored
-void set_device_mode (const std::string serial_number, const std::string mode)
+void set_device_mode (const std::string& serial_number, const std::string& mode)
 {
     UsbHandler usb;
 
@@ -254,9 +254,9 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
               << "This action could break your camera." << std::endl << std::endl
               << "Do you really want to proceed? [y/N] ";
 
-    std::string s;
     while (1)
     {
+        std::string s;
         std::getline(std::cin, s);
         if (s.compare("y") == 0 || s.compare("Y") == 0 )
             break;
@@ -288,7 +288,7 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
     {
          success = cam->upload_firmware(firmware, fw_name, func);
     }
-    catch (std::runtime_error err)
+    catch (const std::runtime_error& err)
     {
         std::cout << std::endl << "There was a mistake. " << std::endl
                   << err.what() << std::endl;
@@ -344,13 +344,13 @@ int main (int argc, char *argv[])
             {"set",    no_argument,       0, 's'},
             {0,        0,                 0, 0}
         };
-    int c;
+
     while (1)
     {
         int option_index = 0;
 
-        c = getopt_long (argc, argv, "ud:lim:f:s:h",
-                         long_options, &option_index);
+        int c = getopt_long (argc, argv, "ud:lim:f:s:h",
+                             long_options, &option_index);
 
         if (c == -1)
             break;
