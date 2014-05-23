@@ -50,10 +50,9 @@ public:
     /// @return vector of device_info of found cameras
     std::vector<device_info> get_device_list ();
 
-    ///
-    ///
-    ///
-    ///
+    /// @name open_camera
+    /// @param serial - string containing the serial number of the camera that shall be opened
+    /// @return shared pointer to the opened usb camera; Reutrns nullptr on failure
     std::shared_ptr<UsbCamera> open_camera (std::string serial);
 
 }; /* class UsbHandler */
