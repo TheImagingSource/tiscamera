@@ -181,14 +181,6 @@ void focus_run (GstTis_AutoFocus* self)
         
     }
     
-    /* values from windows driver */
-    /* min = 0; */
-    /* max = 1000; */
-    /* roi = {0, 0, 0, 0} */
-    /* speed = 500 */
-    /* auto_step_divisor = 4 */
-    /* suggest_sweep = false */
-
     RECT r = {0, 0, 0, 0};
 
     /* user defined rectangle */

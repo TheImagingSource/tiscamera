@@ -450,7 +450,6 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                 self->default_gain_values.max = qctrl.maximum;
 
             }
-            /* TODO check camera for V4L2_CID_EXPOSURE */
             else if (qctrl.id == V4L2_CID_EXPOSURE_ABSOLUTE)
             {
                 ctrl.id = qctrl.id;
