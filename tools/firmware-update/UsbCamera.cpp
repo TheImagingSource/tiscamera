@@ -67,7 +67,7 @@ const camera_type find_camera_type (const unsigned int& idVendor, const unsigned
 {
     for (auto& c : camera_type_list)
     {
-        if (idProduct == c.idProduct && idProduct == c.idProduct)
+        if (idVendor == c.idVendor && idProduct == c.idProduct)
         {
             return c;
         }
