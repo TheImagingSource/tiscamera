@@ -32,8 +32,6 @@ AC_PROG_CXX
 AC_PROG_LN_S
 
 ACLOCAL_FLAGS="-I /usr/share/aclocal"
-PKG_CONFIG_PATH="-I /usr/share/aclocal"
-PKG_CONFIG_LIBDIR="-I /usr/share/aclocal"
 
 PKG_CHECK_MODULES([GLIB], [glib-2.0], break, AC_MSG_ERROR(Unable to locate glib module))
 PKG_CHECK_MODULES([GST_BASE], [gstreamer-base-0.10], break, AC_MSG_ERROR(Unable to locate gst-base module))
@@ -60,20 +58,22 @@ LIBARV=
 
 if test "$enable_aravis" = "yes"; then
 
-   PKG_CHECK_MODULES([ARV], [aravis], break, AC_MSG_NOTICE(Unable to locate pkg-config for aravis.))
+   PKG_CHECK_MODULES([ARV], [aravis-0.4], break, AC_MSG_NOTICE(Unable to locate pkg-config for aravis.))
+   CFLAGS+=" $ARV_CFLAGS"
+   LDFLAGS+=" $ARV_LIBS"
+
+   AC_CHECK_HEADER([arv.h],
+   [HAVE_ARV=yes],
+   [HAVE_ARV=no; AC_MSG_ERROR(Unable to locate aravis header.)],
+   [#ifdef HAVE_ARAVIS_H
+   include <arv.h>
+   #endif
+   ])
 
    AC_CHECK_LIB([aravis-0.4],
                 arv_camera_set_gain,
                 break,
                 AC_MSG_ERROR(Unable to locate aravis libraries))
-
-   AC_CHECK_HEADER([arv.h],
-                   [HAVE_ARV=yes],
-                   [HAVE_ARV=no; AC_MSG_ERROR(Unable to locate aravis header.)],
-                   [#ifdef HAVE_ARAVIS_H
-                   include <arv.h>
-                   #endif
-                   ])
 
    # no error until here; aravis is working
    LDFLAGS+=" -laravis-0.4"
