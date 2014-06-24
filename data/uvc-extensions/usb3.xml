@@ -38,7 +38,7 @@
     </constant>
     <!-- S32 -->
     <constant type="integer">
-      <id>V4L2_AUTO_EXPOSURE</id>
+      <id>V4L2_AUTO_EXPOSURE_REF</id>
       <value>0x0199e203</value>
     </constant>
     <!-- U32, in 0.01 dB units -->
@@ -745,7 +745,7 @@
         <!-- XU_IMAGE_STABILIZATION		0x26 // BM8, bit 0 = ENABLE -->
         <control id="image_stabilization">
           <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_IMAGE_STABILISATION</selector>
+          <selector>XU_IMAGE_STABILIZATION</selector>
           <index>37</index>
           <size>1</size>
           <requests>
@@ -1213,7 +1213,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_ATR_CONTRAST</id>
         <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
@@ -1227,7 +1227,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_ATR_CONTRAST_AUTO</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
@@ -1241,7 +1241,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_ATR_CHROMA</id>
         <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
@@ -1255,7 +1255,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_IMAGE_STABILIZATION</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
@@ -1269,7 +1269,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_NOISE_REDUCTION</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
@@ -1283,7 +1283,7 @@
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_ATR_ENABLE</id>
+        <id>V4L2_FACE_DETECTION</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
