@@ -29,5 +29,6 @@ bool is_package_file (const std::string& fileName);
 
 std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName, const std::string& fileName);
 
+bool is_valid_firmware_file (const std::string& firmware);
 
 #endif /* _FILE_HANDLING_H_ */
