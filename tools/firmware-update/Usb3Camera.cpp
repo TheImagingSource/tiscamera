@@ -185,6 +185,10 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
                                   std::function<void(int)> progress)
 {
     int r = -1;
+    if (!is_valid_firmware_file(firmware_package))
+    {
+        throw std::runtime_error("Not a valid firmware file!");
+    }
 
     std::vector<unsigned char> fw;
     if (is_package_file(firmware_package))
@@ -194,7 +198,7 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
     else
         fw = load_file(firmware_package);
 
-    if (fw.empty())
+    if (fw.empty() || ( fw.size() * sizeof(unsigned char) ) > FIRMWARE_SIZE)
     {
         throw std::runtime_error("Firmware File could not be loaded correctly");
     }

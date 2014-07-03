@@ -345,6 +345,11 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
     // and then downloads it to compare it with the existing one
     // to assure it was correctly transferred
 
+    if (!is_valid_firmware_file(firmware_package))
+    {
+        throw std::runtime_error("Not a valid firmware file!");
+    }
+
     auto fw = load_file(firmware_package);
 
     if (fw.empty())
