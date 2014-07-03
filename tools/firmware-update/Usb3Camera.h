@@ -48,6 +48,7 @@ public:
     /// @return integer containing the currently used firmware version
     int get_firmware_version ();
 
+    int delete_firmware (std::function<void(int)> progress);
     /// @name download_firmware
     /// @param firmware - vector containing the firmware file
     /// @param progress - callback function

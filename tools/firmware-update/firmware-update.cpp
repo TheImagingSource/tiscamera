@@ -314,6 +314,33 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
 }
 
 
+void delete_firmware (std::string& serial_number)
+{
+    UsbHandler usb;
+
+    auto cam = usb.open_camera(serial_number);
+
+    if (cam == NULL)
+    {
+        std::cerr << "Unable to find device with serial \""
+                  << serial_number << "\"" << std::endl;
+        return;
+    }
+    std::cout << std::endl;
+
+    auto func = [] (int progress)
+        {
+            std::cout << "\r    " << progress << " %";
+
+            std::cout.flush();
+        };
+
+    cam->delete_firmware(func);
+    std::cout << std::endl;
+
+}
+
+
 int main (int argc, char *argv[])
 {
     std::string program_name(argv[0]);
@@ -328,7 +355,8 @@ int main (int argc, char *argv[])
         LIST,
         DETAILS,
         MODE,
-        UPLOAD
+        UPLOAD,
+        DELETE,
     };
 
     mode active_mode = UNKNOWN;
@@ -342,6 +370,7 @@ int main (int argc, char *argv[])
             {"mode",   required_argument, 0, 'm'},
             {"file",   required_argument, 0, 'f'},
             {"set",    no_argument,       0, 's'},
+            {"delete", no_argument, 0, '9'},
             {0,        0,                 0, 0}
         };
 
@@ -384,6 +413,9 @@ int main (int argc, char *argv[])
                 break;
             case 's':
                 break;
+            case '9':
+                active_mode = DELETE;
+                break;
             default:
                 break;
         }
@@ -424,6 +456,10 @@ int main (int argc, char *argv[])
     else if (active_mode == UPLOAD)
     {
         upload_to_device(serial_number, firmware_file);
+    }
+    else if (active_mode == DELETE)
+    {
+        delete_firmware(serial_number);
     }
 
     return 0;

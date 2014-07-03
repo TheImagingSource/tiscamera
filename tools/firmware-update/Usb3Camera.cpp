@@ -70,6 +70,22 @@ int Usb3Camera::get_firmware_version ()
 }
 
 
+int Usb3Camera::delete_firmware (std::function<void(int)> progress)
+{
+    auto map_progress = [] ( std::function<void(int)> progress, int begin, int end )
+        {
+            return [=]( int x )
+            {
+                progress( begin + x * (end-begin) / 100 );
+            };
+        };
+
+    erase_eeprom(map_progress(progress, 0, 100));
+
+    return 0;
+}
+
+
 int Usb3Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
 {
     return libusb_control_transfer(this->dev_handle,
