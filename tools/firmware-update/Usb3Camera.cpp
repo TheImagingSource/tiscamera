@@ -15,31 +15,33 @@
  */
 
 #include "Usb3Camera.h"
+#include "FileHandling.h"
 
 #include <string>
 #include <vector>
-
-#include "FileHandling.h"
-
 #include <iostream>
 #include <exception>
 #include <stdexcept>
 
-#define EEPROM_BUFFER_SIZE              4096
-#define FIRMWARE_SIZE                   0x50000
-#define SECTOR_SIZE                     0x10000
-#define TIS_FX3_REQ_FIRMWARE_VERSION    0x01    // 4 bytes
-#define TIS_FX3_REQ_EEPROM              0x10    // len = wLength bytes (max EEPROM_BUFFER_SIZE)
-#define TIMEOUT                         10000
-#define TIS_FX3_REQ_DEVICE_RESET        0x11    // value = index = 0xB007, len = 0
+#include <unistd.h>
 
-#define min(a,b)            ((a<b)?(a):(b))
+#include <string.h>
+
+#define EEPROM_BUFFER_SIZE 4096
+#define FIRMWARE_SIZE 0x50000
+#define SECTOR_SIZE 0x10000
+#define TIS_FX3_REQ_FIRMWARE_VERSION 0x01 // 4 bytes
+#define TIS_FX3_REQ_EEPROM 0x10 // len = wLength bytes (max EEPROM_BUFFER_SIZE)
+#define TIMEOUT 10000
+#define TIS_FX3_REQ_DEVICE_RESET 0x11 // value = index = 0xB007, len = 0
+
+#define min(a,b) ((a<b)?(a):(b))
 
 namespace tis
 {
 
 Usb3Camera::Usb3Camera (std::shared_ptr<UsbSession> session, device_info _dev, unsigned int _interface):
-UsbCamera(session, _dev, _interface)
+    UsbCamera(session, _dev, _interface)
 {}
 
 
@@ -308,7 +310,6 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
                                   const std::string& firmware,
                                   std::function<void(int)> progress)
 {
-    int r = -1;
     if (!is_valid_firmware_file(firmware_package))
     {
         throw std::runtime_error("Not a valid firmware file!");
@@ -349,7 +350,7 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
     {
         progress( 0 );
 
-        r = erase_eeprom( map_progress( progress, 0, 20 ) );
+        int r = erase_eeprom( map_progress( progress, 0, 20 ) );
 
         if ( r < 0 )
         {
@@ -361,7 +362,7 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
         }
         catch (std::runtime_error& err)
         {
-
+            std::cerr << err.what() << std::endl;
         }
 
         if ( r < 0 )

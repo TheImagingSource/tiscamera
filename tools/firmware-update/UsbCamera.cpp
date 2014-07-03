@@ -156,7 +156,7 @@ void UsbCamera::release_interface ()
     int r = libusb_release_interface(this->dev_handle, this->interface);
     if (r != 0)
     {
-        throw std::runtime_error("Unable to release intreface.");
+        throw std::runtime_error("Unable to release interface.");
     }
     libusb_attach_kernel_driver(this->dev_handle, this->interface);
 }

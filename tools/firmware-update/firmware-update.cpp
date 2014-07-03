@@ -286,7 +286,7 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
     bool success = false;
     try
     {
-         success = cam->upload_firmware(firmware, fw_name, func);
+        success = cam->upload_firmware(firmware, fw_name, func);
     }
     catch (const std::runtime_error& err)
     {
