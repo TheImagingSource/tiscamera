@@ -97,6 +97,8 @@ private:
     /// @return
     int erase_eeprom (std::function<void(int)> progress);
 
+    bool initialize_eeprom (std::vector<uint8_t>& firmware);
+
     /// @name upload_firmware_file
     /// @param firmware - vector containing the firmware that shall be written
     /// @param progress - callback function

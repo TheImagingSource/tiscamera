@@ -196,6 +196,114 @@ int Usb3Camera::upload_firmware_file (std::vector<uint8_t> firmware ,std::functi
 }
 
 
+
+#define MAX_FWIMG_SIZE 533504 //(512 * 1024) // Maximum size of the firmware binary.
+#define MAX_WRITE_SIZE 2048 //(2 * 1024) // Max. size of data that can be written through one vendor command.
+
+#define I2C_PAGE_SIZE (64) // Page size for I2C EEPROM.
+#define I2C_SLAVE_SIZE 65536 //(64 * 1024) // Max. size of data that can fit on one EEPROM address.
+
+#define SPI_PAGE_SIZE (256) // Page size for SPI flash memory.
+#define SPI_SECTOR_SIZE 65536 //(64 * 1024) // Sector size for SPI flash memory.
+
+#define VENDORCMD_TIMEOUT (5000) // Timeout (in milliseconds) for each vendor command.
+#define GETHANDLE_TIMEOUT (5) // Timeout (in seconds) for getting a FX3 flash programmer handle.
+
+#define GET_LSW(v)	((unsigned short)((v) & 0xFFFF))	// Get Least Significant Word part of an integer.
+#define GET_MSW(v)	((unsigned short)((v) >> 16))		// Get Most Significant Word part of an integer.
+
+
+static int fx3_ram_write (libusb_device_handle* h, unsigned char* buf, unsigned int ramAddress, int len)
+{
+
+    int index = 0;
+
+    while (len > 0)
+    {
+        int size = (len > MAX_WRITE_SIZE) ? MAX_WRITE_SIZE : len;
+        int r = libusb_control_transfer (h, 0x40, 0xA0, GET_LSW(ramAddress), GET_MSW(ramAddress),
+                                         &buf[index], size, VENDORCMD_TIMEOUT);
+        if (r != size)
+        {
+            fprintf (stderr, "Error: Vendor write to FX3 RAM failed\n");
+            return -1;
+        }
+
+        ramAddress += size;
+        index      += size;
+        len        -= size;
+    }
+
+    return 0;
+}
+
+
+bool Usb3Camera::initialize_eeprom (std::vector<uint8_t>& firmware)
+{
+
+    unsigned char *fwBuf = firmware.data();
+    int filesize = firmware.size();
+
+    if (this->dev_handle == NULL)
+    {
+        return false;
+    }
+
+    // Run through each section of code, and use vendor commands to download them to RAM.
+    int index = 4;
+    unsigned int checksum = 0;
+    int r;
+    while (index < filesize)
+    {
+        unsigned int* data_p  = (unsigned int *)(fwBuf + index);
+        int length  = data_p[0];
+        int address = data_p[1];
+        if (length != 0)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                checksum += data_p[2 + i];
+            }
+            r = fx3_ram_write (this->dev_handle, fwBuf + index + 8, address, length * 4);
+            if (r != 0)
+            {
+                fprintf (stderr, "Error: Failed to download data to FX3 RAM\n");
+                free (fwBuf);
+                return false;
+            }
+        }
+        else
+        {
+            if (checksum != data_p[2])
+            {
+                fprintf (stderr, "Error: Checksum error in firmware binary\n");
+                free (fwBuf);
+                return false;
+            }
+
+            r = libusb_control_transfer (this->dev_handle,
+                                         0x40,
+                                         0xA0,
+                                         GET_LSW(address),
+                                         GET_MSW(address),
+                                         NULL,
+                                         0,
+                                         VENDORCMD_TIMEOUT);
+            if (r != 0)
+            {
+                printf ("Info: Ignored error in control transfer: %d\n", r);
+            }
+            break;
+        }
+
+        index += (8 + length * 4);
+    }
+
+    return true;
+
+}
+
+
 bool Usb3Camera::upload_firmware (const std::string& firmware_package,
                                   const std::string& firmware,
                                   std::function<void(int)> progress)
@@ -227,6 +335,15 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
             };
         };
 
+    // if this device starts as cypress/westwood
+    // handle it as a vanilla device that has to be initialized and
+    // not just update
+    if (this->dev.idVendor == 0x04b4)
+    {
+        return initialize_eeprom (fw);
+    }
+
+    // normal update cycle
     int retry = 0;
     while (retry++ < 5)
     {

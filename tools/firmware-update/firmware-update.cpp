@@ -299,9 +299,17 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
     if (success)
     {
         std::cout << std::endl << std::endl
-                  << "Upload successful!" << std::endl
-                  << "Please reconnect your camera."<< std::endl
-                  << std::endl;
+                  << "Upload successful!" << std::endl;
+
+        if (dev.idVendor != 0x04b4)
+        {
+            std::cout << "Please reconnect your camera."<< std::endl
+                      << std::endl;
+        }
+        else
+        {
+            std::cout << std::endl;
+        }
     }
     else
     {
