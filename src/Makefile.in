@@ -24,11 +24,8 @@ CFLAGS+=@CFLAGS@
 PLUGINS=libgsttiswhitebalance.so \
 		libgsttisvideobufferfilter.so \
 		libgsttiscolorize.so \
-		libgsttis_auto_exposure.so
-
-ifeq ($(ENABLE_ARAVIS),1)
-	PLUGINS+=libgsttis_auto_focus.so
-endif
+		libgsttis_auto_exposure.so \
+		libgsttis_auto_focus.so
 
 .PHONY: all
 

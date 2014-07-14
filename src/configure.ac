@@ -55,6 +55,7 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 
 HAVE_ARV=no
 LIBARV=
+AC_DEFINE([ENABLE_ARAVIS], [], "Flag to enable aravis.")
 
 if test "$enable_aravis" = "yes"; then
 

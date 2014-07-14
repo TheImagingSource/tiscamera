@@ -22,6 +22,10 @@
 #include <arv.h>
 #endif
 
+#include <linux/videodev2.h>
+
+#include "sys/ioctl.h"
+
 #include <math.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -94,13 +98,40 @@ GstElement* get_camera_src (GstElement* object)
 
     GList* l =  GST_BIN(e)->children;
 
+    self->camera_type = CAMERA_TYPE_UNKNOWN;
+
     while (1==1)
     {
         const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
 
         if (g_strcmp0(name, "GstAravis") == 0)
         {
+            self->camera_type = CAMERA_TYPE_ARAVIS;
             self->camera_src = l->data;
+
+            gst_debug_log (gst_tis_autofocus_debug_category,
+                           GST_LEVEL_INFO,
+                           "tis_autofocus",
+                           __FUNCTION__,
+                           __LINE__,
+                           NULL,
+                           "Identified camera source as aravissrc.");
+            break;
+        }
+        else if (g_strcmp0(name, "GstV4l2Src") == 0)
+        {
+            gint fd;
+            g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
+            self->camera_type = CAMERA_TYPE_USB;
+            self->camera_src = l->data;
+
+            gst_debug_log (gst_tis_autofocus_debug_category,
+                           GST_LEVEL_INFO,
+                           "tis_autofocus",
+                           __FUNCTION__,
+                           __LINE__,
+                           NULL,
+                           "Identified camera source as v4l2src.");
             break;
         }
 
@@ -110,19 +141,28 @@ GstElement* get_camera_src (GstElement* object)
         l = g_list_next(l);
     }
 
+    if (self->camera_type == CAMERA_TYPE_UNKNOWN)
+    {
+        gst_debug_log (gst_tis_autofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tis_autofocus",
+                       "run",
+                       336,
+                       NULL,
+                       "Unknown camera source. ");
+    }
+
 
     return self->camera_src;
 }
 
 
-void focus_run (GstTis_AutoFocus* self)
+static void focus_run_aravis (GstTis_AutoFocus* self)
 {
+#ifdef ENABLE_ARAVIS
     if (self->camera_src == NULL)
         get_camera_src (GST_ELEMENT(self));
-    
-    ArvCamera* camera;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
-    
+
     if (self->camera_src == NULL)
     {
         gst_debug_log (gst_tis_autofocus_debug_category,
@@ -131,8 +171,13 @@ void focus_run (GstTis_AutoFocus* self)
                        "run",
                        336,
                        NULL,
-                       "SOURCE EMPTY! Aborting. ");
+                       "Source empty! Aborting. ");
+        return;
     }
+
+    ArvCamera* camera;
+    g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
+
     if (camera == NULL)
     {
         gst_debug_log (gst_tis_autofocus_debug_category,
@@ -142,8 +187,9 @@ void focus_run (GstTis_AutoFocus* self)
                        336,
                        NULL,
                        "Unable to retrieve camera! Aborting. ");
+        return;
     }
-    
+
     ArvDevice* device = arv_camera_get_device(camera);
 
     if (device == NULL)
@@ -155,12 +201,13 @@ void focus_run (GstTis_AutoFocus* self)
                        336,
                        NULL,
                        "Unable to retrieve device! Aborting. ");
+        return;
     }
-    
+
     int current_focus = arv_device_get_integer_feature_value(device, "Focus");
     int focus_auto_min =  arv_device_get_integer_feature_value(device, "FocusAutoMin"); 
     int focus_auto_step_divisor = arv_device_get_integer_feature_value(device, "FocusAutoStepDivisor");
-    
+
     gint64 min;
     gint64 max;
     arv_device_get_integer_feature_bounds(device, "Focus", &min, &max);
@@ -219,6 +266,115 @@ void focus_run (GstTis_AutoFocus* self)
                   500,
                   focus_auto_step_divisor,
                   false);
+#endif
+}
+
+
+static void focus_run_usb (GstTis_AutoFocus* self)
+{
+    if (self->camera_src == NULL)
+        get_camera_src (GST_ELEMENT(self));
+
+    if (self->camera_src == NULL)
+    {
+        gst_debug_log (gst_tis_autofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tis_autofocus",
+                       "run",
+                       336,
+                       NULL,
+                       "Source empty! Aborting. ");
+        return;
+    }
+
+    gint fd = -1;
+    g_object_get (G_OBJECT (self->camera_src), "device-fd", &fd, NULL);
+
+    if (fd <= 0)
+    {
+        gst_debug_log (gst_tis_autofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tis_autofocus",
+                       "run",
+                       336,
+                       NULL,
+                       "Unable to retrieve camera! Aborting. ");
+        return;
+    }
+
+    RECT r = {0, 0, 0, 0};
+
+    /* user defined rectangle */
+    if (self->x != 0 || self->y != 0)
+    {
+        r.left = (self->x - self->size < 0) ? 0 : self->x - self->size;
+        r.right =(self->x - self->size > self->width) ? self->width : self->x - self->size;
+        r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
+        r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
+    }
+
+
+    int min = 0;
+    int max = 0;
+
+    struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
+    struct v4l2_control ctrl = { 0 };
+
+    while (ioctl(fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
+    {
+        if (qctrl.id == V4L2_CID_FOCUS_ABSOLUTE)
+        {
+
+            ctrl.id = qctrl.id;
+            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+            {
+                continue;
+            }
+            self->cur_focus = ctrl.value;
+            min = qctrl.minimum;
+            max = qctrl.maximum;
+
+        }
+
+        qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
+
+    /* magic number */
+    int focus_auto_step_divisor = 4;
+
+    gst_debug_log (gst_tis_autofocus_debug_category,
+                   GST_LEVEL_ERROR,
+                   "tis_autofocus",
+                   "run",
+                   336,
+                   NULL,
+                   "Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
+                   self->cur_focus,
+                   min,
+                   max,
+                   focus_auto_step_divisor);
+
+    autofocus_run(self->focus,
+                  self->cur_focus,
+                  min,
+                  max,
+                  r,
+                  500,
+                  focus_auto_step_divisor,
+                  false);
+}
+
+
+static void focus_run (GstTis_AutoFocus* self)
+{
+    if (self->camera_type == CAMERA_TYPE_ARAVIS)
+    {
+        focus_run_aravis(self);
+    }
+    else
+    {
+        focus_run_usb(self);
+    }
 }
 
 
@@ -494,59 +650,173 @@ static int clip(int min, int value, int max)
 }
 
 
-static GstFlowReturn gst_tis_autofocus_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
+
+static void transform_aravis (GstTis_AutoFocus* self, GstBuffer* buf)
 {
-    GstTis_AutoFocus* self = GST_TIS_AUTOFOCUS (trans);
+#ifdef ENABLE_ARAVIS
 
-    if (autofocus_is_running(self->focus))
+    if (self->camera_src)
     {
-        if (self->camera_src)
-            get_camera_src(GST_ELEMENT(self));
-        
-        ArvCamera* camera;
+        get_camera_src(GST_ELEMENT(self));
+    }
 
-        g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
+    ArvCamera* camera;
+    g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
 
-        ArvDevice* device = arv_camera_get_device(camera);
+    ArvDevice* device = arv_camera_get_device(camera);
 
-        int current_focus = arv_device_get_integer_feature_value(device, "Focus");
-        int focus_auto_min =  arv_device_get_integer_feature_value(device, "FocusAutoMin"); 
+    int current_focus = arv_device_get_integer_feature_value(device, "Focus");
+    int focus_auto_min =  arv_device_get_integer_feature_value(device, "FocusAutoMin"); 
 
-        gint64 min;
-        gint64 max;
-        arv_device_get_integer_feature_bounds(device, "Focus", &min, &max);
+    gint64 min;
+    gint64 max;
+    arv_device_get_integer_feature_bounds(device, "Focus", &min, &max);
 
+    gst_debug_log (gst_tis_autofocus_debug_category,
+                   GST_LEVEL_ERROR,
+                   "tis_autofocus",
+                   "fixate_caps",
+                   336,
+                   NULL,
+                   "cur focus %d ", current_focus);
+
+    /* assure we use the current focus value */
+    autofocus_update_focus(self->focus, clip(focus_auto_min, current_focus, max));
+
+    img_descriptor img =
+        {
+            GST_BUFFER_DATA(buf),
+            GST_BUFFER_SIZE(buf),
+            FOURCC_GRBG,    /* TODO: DYNAMICALLY FIND FORMAT */
+            self->width,
+            self->height,
+            self->width
+        };
+
+    int new_focus_value;
+    POINT p = {0, 0};
+
+    bool ret = autofocus_analyze_frame(self->focus,
+                                       img,
+                                       p,
+                                       1,
+                                       &new_focus_value);
+
+    if (ret)
+    {
         gst_debug_log (gst_tis_autofocus_debug_category,
                        GST_LEVEL_ERROR,
                        "tis_autofocus",
                        "fixate_caps",
                        336,
                        NULL,
-                       "cur focus %d ", current_focus);
+                       "Setting focus %d", new_focus_value);
+        arv_device_set_integer_feature_value(device, "Focus", new_focus_value);
+        self->cur_focus = new_focus_value;
+    }
+#endif /* ENABLE_ARAVIS*/
+}
 
-        /* assure we use the current focus value */
-        autofocus_update_focus(self->focus, clip(focus_auto_min, current_focus, max));
-        
-        img_descriptor img =
+
+static void transform_usb (GstTis_AutoFocus* self, GstBuffer* buf)
+{
+    if (self->camera_src)
+    {
+        get_camera_src(GST_ELEMENT(self));
+    }
+
+    int fd = -1;
+    g_object_get (G_OBJECT (self->camera_src), "device-fd", &fd, NULL);
+
+    gint64 min;
+    gint64 max;
+
+
+    struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
+    struct v4l2_control ctrl = { 0 };
+
+    while (ioctl(fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
+    {
+        if (qctrl.id == V4L2_CID_FOCUS_ABSOLUTE)
+        {
+
+            ctrl.id = qctrl.id;
+            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
-                GST_BUFFER_DATA(buf),
-                GST_BUFFER_SIZE(buf),
-                FOURCC_GRBG,    /* TODO: DYNAMICALLY FIND FORMAT */
-                self->width,
-                self->height,
-                self->width
-            };
+                continue;
+            }
+            self->cur_focus = ctrl.value;
+            min = qctrl.minimum;
+            max = qctrl.maximum;
 
-        int new_focus_value;
-        POINT p = {0, 0};
+        }
 
-        bool ret = autofocus_analyze_frame(self->focus,
-                                           img,
-                                           p,
-                                           1,
-                                           &new_focus_value);
+        qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
 
-        if (ret)
+    int focus_auto_min = min;
+
+    gst_debug_log (gst_tis_autofocus_debug_category,
+                   GST_LEVEL_ERROR,
+                   "tis_autofocus",
+                   "fixate_caps",
+                   336,
+                   NULL,
+                   "current focus %d - %dx%d ", self->cur_focus, self->width, self->height);
+
+    /* assure we use the current focus value */
+    autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
+
+    img_descriptor img =
+        {
+            GST_BUFFER_DATA(buf),
+            GST_BUFFER_SIZE(buf),
+            FOURCC_GRBG,    /* TODO: DYNAMICALLY FIND FORMAT */
+            self->width,
+            self->height,
+            self->width
+        };
+
+    int new_focus_value;
+    POINT p = {0, 0};
+
+    bool ret = autofocus_analyze_frame(self->focus,
+                                       img,
+                                       p,
+                                       500,
+                                       &new_focus_value);
+
+    if (ret)
+    {
+        gst_debug_log (gst_tis_autofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tis_autofocus",
+                       "fixate_caps",
+                       336,
+                       NULL,
+                       "Setting focus %d", new_focus_value);
+
+        ctrl.id = V4L2_CID_FOCUS_ABSOLUTE;
+        ctrl.value = new_focus_value;
+
+        ioctl(fd, VIDIOC_S_CTRL, &ctrl);
+
+        self->cur_focus = new_focus_value;
+    }
+}
+
+static GstFlowReturn gst_tis_autofocus_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
+{
+    GstTis_AutoFocus* self = GST_TIS_AUTOFOCUS (trans);
+
+    if (autofocus_is_running(self->focus))
+    {
+        if (self->camera_src == NULL)
+        {
+            get_camera_src(GST_ELEMENT(self));
+        }
+
+        if (self->camera_type == CAMERA_TYPE_USB)
         {
             gst_debug_log (gst_tis_autofocus_debug_category,
                            GST_LEVEL_ERROR,
@@ -554,11 +824,31 @@ static GstFlowReturn gst_tis_autofocus_transform_ip (GstBaseTransform* trans, Gs
                            "fixate_caps",
                            336,
                            NULL,
-                           "Setting focus %d", new_focus_value);
-            arv_device_set_integer_feature_value(device, "Focus", new_focus_value);
-            self->cur_focus = new_focus_value;
+                           "Calling USB");
+            transform_usb(self, buf);
         }
-        
+        else if (self->camera_type == CAMERA_TYPE_ARAVIS)
+        {
+            gst_debug_log (gst_tis_autofocus_debug_category,
+                           GST_LEVEL_ERROR,
+                           "tis_autofocus",
+                           "fixate_caps",
+                           336,
+                           NULL,
+                           "Calling ARAVIS");
+            transform_aravis(self, buf);
+        }
+        else
+        {
+            gst_debug_log (gst_tis_autofocus_debug_category,
+                           GST_LEVEL_ERROR,
+                           "tis_autofocus",
+                           "fixate_caps",
+                           336,
+                           NULL,
+                           "Unable to determine camera type. Aborting");
+            return GST_FLOW_ERROR;
+        }
         return GST_FLOW_OK;
     }
 
