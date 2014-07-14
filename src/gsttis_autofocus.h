@@ -19,6 +19,7 @@
 
 #include <gst/base/gstbasetransform.h>
 #include "AutoFocus.h"
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_TIS_AUTOFOCUS            (gst_tis_autofocus_get_type())
@@ -52,20 +53,17 @@ typedef struct GstTis_AutoFocus
 
     unsigned int width;
     unsigned int height;
-    
+
     gboolean focus_active;
 
     GstElement* camera_src;
     AutoFocus* focus;
-    /* unsigned int x; */
-    /* unsigned int y; */
-    /* unsigned int size; */
-    
+
     guint cur_focus;
     guint x;
     guint y;
     guint size;
-    
+
 
 } GstTis_AutoFocus;
 

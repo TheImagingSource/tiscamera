@@ -44,21 +44,21 @@ static void gst_tis_autofocus_set_property (GObject* object,
                                             const GValue* value,
                                             GParamSpec* pspec);
 static void gst_tis_autofocus_get_property (GObject* object,
-                                                guint property_id,
-                                                GValue* value,
-                                                GParamSpec* pspec);
+                                            guint property_id,
+                                            GValue* value,
+                                            GParamSpec* pspec);
 static void gst_tis_autofocus_finalize (GObject* object);
 
 static GstFlowReturn gst_tis_autofocus_transform_ip (GstBaseTransform* trans,
-                                                         GstBuffer* buf);
+                                                     GstBuffer* buf);
 static GstCaps* gst_tis_autofocus_transform_caps (GstBaseTransform* trans,
-                                                      GstPadDirection direction,
-                                                      GstCaps* caps);
+                                                  GstPadDirection direction,
+                                                  GstCaps* caps);
 
 static void gst_tis_autofocus_fixate_caps (GstBaseTransform* base,
-                                               GstPadDirection direction,
-                                               GstCaps* caps,
-                                               GstCaps* othercaps);
+                                           GstPadDirection direction,
+                                           GstCaps* caps,
+                                           GstCaps* othercaps);
 
 enum
 {
@@ -93,10 +93,10 @@ G_DEFINE_TYPE_WITH_CODE (GstTis_AutoFocus,
 GstElement* get_camera_src (GstElement* object)
 {
     GstTis_AutoFocus* self = GST_TIS_AUTOFOCUS(object);
-   
+
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(object)));
 
-    GList* l =  GST_BIN(e)->children;
+    GList* l = GST_BIN(e)->children;
 
     self->camera_type = CAMERA_TYPE_UNKNOWN;
 
@@ -205,7 +205,7 @@ static void focus_run_aravis (GstTis_AutoFocus* self)
     }
 
     int current_focus = arv_device_get_integer_feature_value(device, "Focus");
-    int focus_auto_min =  arv_device_get_integer_feature_value(device, "FocusAutoMin"); 
+    int focus_auto_min = arv_device_get_integer_feature_value(device, "FocusAutoMin");
     int focus_auto_step_divisor = arv_device_get_integer_feature_value(device, "FocusAutoStepDivisor");
 
     gint64 min;
@@ -225,9 +225,8 @@ static void focus_run_aravis (GstTis_AutoFocus* self)
                        focus_auto_min,
                        max,
                        focus_auto_step_divisor);
-        
     }
-    
+
     RECT r = {0, 0, 0, 0};
 
     /* user defined rectangle */
@@ -238,7 +237,7 @@ static void focus_run_aravis (GstTis_AutoFocus* self)
         r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
         r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
     }
-    
+
     if (current_focus < focus_auto_min)
     {
         arv_device_set_integer_feature_value(device, "Focus", focus_auto_min);
@@ -257,7 +256,7 @@ static void focus_run_aravis (GstTis_AutoFocus* self)
                    focus_auto_min,
                    max,
                    focus_auto_step_divisor);
-    
+
     autofocus_run(self->focus,
                   current_focus,
                   focus_auto_min,
@@ -456,7 +455,9 @@ void gst_tis_autofocus_set_property (GObject* object,
         case PROP_AUTO:
             self->focus_active = g_value_get_boolean (value);
             if (self->focus_active == TRUE)
+            {
                 focus_run(self);
+            }
             break;
         case PROP_X:
             self->x = g_value_get_int (value);
@@ -505,7 +506,7 @@ void gst_tis_autofocus_get_property (GObject* object,
 void gst_tis_autofocus_finalize (GObject* object)
 {
     GstTis_AutoFocus* self = GST_TIS_AUTOFOCUS (object);
-    
+
     autofocus_destroy(self->focus);
     G_OBJECT_CLASS (gst_tis_autofocus_parent_class)->finalize (object);
 }
@@ -519,8 +520,9 @@ static GstCaps* gst_tis_autofocus_transform_caps (GstBaseTransform* trans,
     GstCaps *outcaps = gst_caps_copy (caps);
 
     if (self->camera_src != NULL)
+    {
         return outcaps;
-
+    }
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
     get_camera_src(GST_ELEMENT(trans));
@@ -568,17 +570,17 @@ static void gst_tis_autofocus_fixate_caps (GstBaseTransform* base,
 
     if (gst_structure_get_field_type (ins, "format") == G_TYPE_STRING)
     {
-		const char *string;
+        const char* string;
 
         string = gst_structure_get_string (ins, "format");
-		fourcc = GST_STR_FOURCC (string);
-	}
+        fourcc = GST_STR_FOURCC (string);
+    }
     else if (gst_structure_get_field_type (ins, "format") == GST_TYPE_FOURCC)
     {
-		gst_structure_get_fourcc (ins, "format", &fourcc);
-	}
+        gst_structure_get_fourcc (ins, "format", &fourcc);
+    }
     else
-		fourcc = 0;
+        fourcc = 0;
 
     if (fourcc == 0)
     {
@@ -600,16 +602,13 @@ static void gst_tis_autofocus_fixate_caps (GstBaseTransform* base,
         bytes[2] = (fourcc >> 8) & 0xFF;
         bytes[3] = fourcc & 0xFF;
 
-
-        
         fourcc = GST_MAKE_FOURCC (toupper(bytes[0]),
                                   toupper(bytes[1]),
                                   toupper(bytes[2]),
                                   toupper(bytes[3]));
-        
+
     }
 
-    
     gst_debug_log (gst_tis_autofocus_debug_category,
                    GST_LEVEL_ERROR,
                    "tis_auto_exposure",
@@ -622,25 +621,10 @@ static void gst_tis_autofocus_fixate_caps (GstBaseTransform* base,
                    FOURCC_BGGR8,
                    FOURCC_RGGB8,
                    GST_FOURCC_ARGS(fourcc));
-        
-    /* gst_debug_log (gst_tis_autofocus_debug_category, */
-    /*                GST_LEVEL_ERROR, */
-    /*                "tis_auto_exposure", */
-    /*                "gst_tis_autofocus_fixate_caps", */
-    /*                336, */
-    /*                NULL, */
-    /*                "Fixated caps %d %d %d %d %d %d", */
-    /*                FOURCC_GRBG, */
-    /*                FOURCC_GRBG8, */
-    /*                FOURCC_GBRG8, */
-    /*                FOURCC_BGGR8, */
-    /*                FOURCC_RGGB8, */
-    /*                fourcc); */
-    
 }
 
 
-static int clip(int min, int value, int max)
+static int clip (int min, int value, int max)
 {
     if (min > value)
         return min;
@@ -666,7 +650,7 @@ static void transform_aravis (GstTis_AutoFocus* self, GstBuffer* buf)
     ArvDevice* device = arv_camera_get_device(camera);
 
     int current_focus = arv_device_get_integer_feature_value(device, "Focus");
-    int focus_auto_min =  arv_device_get_integer_feature_value(device, "FocusAutoMin"); 
+    int focus_auto_min = arv_device_get_integer_feature_value(device, "FocusAutoMin");
 
     gint64 min;
     gint64 max;
@@ -687,7 +671,7 @@ static void transform_aravis (GstTis_AutoFocus* self, GstBuffer* buf)
         {
             GST_BUFFER_DATA(buf),
             GST_BUFFER_SIZE(buf),
-            FOURCC_GRBG,    /* TODO: DYNAMICALLY FIND FORMAT */
+            FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
             self->width,
             self->height,
             self->width
@@ -771,7 +755,7 @@ static void transform_usb (GstTis_AutoFocus* self, GstBuffer* buf)
         {
             GST_BUFFER_DATA(buf),
             GST_BUFFER_SIZE(buf),
-            FOURCC_GRBG,    /* TODO: DYNAMICALLY FIND FORMAT */
+            FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
             self->width,
             self->height,
             self->width
@@ -858,7 +842,7 @@ static GstFlowReturn gst_tis_autofocus_transform_ip (GstBaseTransform* trans, Gs
 }
 
 
-static gboolean plugin_init (GstPlugin * plugin)
+static gboolean plugin_init (GstPlugin* plugin)
 {
     return gst_element_register (plugin,
                                  "tis_autofocus",
@@ -888,4 +872,3 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    VERSION,
                    "LGPL",
                    PACKAGE_NAME, GST_PACKAGE_ORIGIN)
-
