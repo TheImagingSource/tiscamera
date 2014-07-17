@@ -98,18 +98,19 @@ bool has_ending (const std::string& fullString,  const std::string& ending)
     }
 }
 
+
 bool is_valid_firmware_file (const std::string& firmware)
 {
     std::string usb2_ending = ".euvc";
     std::string usb3_ending = ".fw";
     std::string usb3pack_ending = ".fwpack";
 
-    if (!has_ending(firmware, usb2_ending))
+    if (has_ending(firmware, usb2_ending))
     {
         return true;
     }
 
-    else if (!has_ending(firmware, usb3_ending))
+    else if (has_ending(firmware, usb3_ending))
     {
         auto f = load_file(firmware);
 
@@ -121,7 +122,7 @@ bool is_valid_firmware_file (const std::string& firmware)
         if (f[0] == 0x43 && f[1] == 0x59)
             return true;
     }
-    else if (!has_ending(firmware, usb3pack_ending))
+    else if (has_ending(firmware, usb3pack_ending))
     {
         return true;
     }
