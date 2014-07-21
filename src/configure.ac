@@ -55,7 +55,6 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 
 HAVE_ARV=no
 LIBARV=
-AC_DEFINE([ENABLE_ARAVIS], [], "Flag to enable aravis.")
 
 if test "$enable_aravis" = "yes"; then
 
@@ -78,13 +77,14 @@ if test "$enable_aravis" = "yes"; then
 
    # no error until here; aravis is working
    LDFLAGS+=" -laravis-0.4"
-   AC_DEFINE([ENABLE_ARAVIS], [1])
+   AC_DEFINE([ENABLE_ARAVIS], [1], "Flag to enable aravis.")
+   AC_SUBST([ENABLE_ARAVIS])
+
 fi
 
 AC_SUBST([LIBS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
-AC_SUBST([ENABLE_ARAVIS])
 
 
 AC_CONFIG_FILES([Makefile])
