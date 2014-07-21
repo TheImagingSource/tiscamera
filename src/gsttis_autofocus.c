@@ -712,9 +712,8 @@ static void transform_usb (GstTis_AutoFocus* self, GstBuffer* buf)
     int fd = -1;
     g_object_get (G_OBJECT (self->camera_src), "device-fd", &fd, NULL);
 
-    gint64 min;
-    gint64 max;
-
+    gint64 min = 0;
+    gint64 max = 0;
 
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
     struct v4l2_control ctrl = { 0 };
