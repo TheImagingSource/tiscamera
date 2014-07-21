@@ -17,7 +17,9 @@ dnl limitations under the License.
 dnl
 
 AC_PREREQ([2.68])
-AC_INIT([tis-gst-plugins], [0.1], [support@theimagingsource.com], [https://github.com/TheImagingSource/tiscamera])
+AC_INIT([tis-gst-plugins], [0.1], [support@theimagingsource.com],
+[tiscamera],
+[https://github.com/TheImagingSource/tiscamera])
 
 AC_CONFIG_SRCDIR([gsttiswhitebalance.c])
 AC_CONFIG_HEADERS([config.h])
