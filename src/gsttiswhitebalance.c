@@ -147,14 +147,22 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
     g_object_class_install_property (gobject_class,
                                      PROP_WHITEBALANCE_ENABLED,
                                      g_param_spec_boolean ("module-enabled", "Enable/Disable White Balance Module",
-                                                           "Automatically adjust white balance",
+                                                           "Disable entire module",
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 
 static void gst_tiswhitebalance_init (GstTisWhiteBalance *self)
-{}
+{
+
+    self->rgb = (rgb_tripel){64, 64, 64};
+    self->red = 64;
+    self->green = 64;
+    self->blue = 64;
+    self->auto_wb = TRUE;
+
+}
 
 
 void gst_tiswhitebalance_set_property (GObject* object,
@@ -300,11 +308,6 @@ static void gst_tiswhitebalance_fixate_caps (GstBaseTransform* base,
             return;
         }
 
-        self->rgb = (rgb_tripel){64, 64, 64};
-        self->red = 64;
-        self->green = 64;
-        self->blue = 64;
-
         if (fourcc == MAKE_FOURCC ('g','r','b','g'))
         {
             self->pattern = GR;
@@ -353,7 +356,6 @@ static void gst_tiswhitebalance_fixate_caps (GstBaseTransform* base,
                        "Not a bayer format. White balance will be disabled.");
     }
 
-    self->auto_wb = FALSE;
 }
 
 
@@ -634,7 +636,7 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     auto_whitebalance(&points, &rgb, &resulting_brightness );
 
     /* we prefer to set our own values */
-    if (self->auto_wb)
+    if (self->auto_wb == FALSE)
     {
         rgb.R = self->red;
         rgb.G = self->green;
