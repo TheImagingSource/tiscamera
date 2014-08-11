@@ -195,6 +195,16 @@
       <id>V4L2_FACE_DETECTION</id>
       <value>0x0199e233</value>
     </constant>
+
+    <constant type="integer">
+      <id>V4L2_HFLIP</id>
+      <value>0x0199e234</value>
+    </constant>
+    
+    <constant type="integer">
+      <id>V4L2_VFLIP</id>
+      <value>0x0199e235</value>
+    </constant>
     
     <!-- register values -->
 
@@ -346,6 +356,11 @@
     <constant type="integer">
       <id>XU_FACE_DETECTION</id>
       <value>0x28</value>
+    </constant>
+    <!-- BM8, bit 0 = Horizontal, bit 1 = Vertical -->
+    <constant type="integer">
+      <id>XU_FLIP</id>
+      <value>0x2E</value>
     </constant>
 
   </constants>
@@ -775,6 +790,20 @@
           <entity>UVC_GUID_TISEUVC_XU</entity>
           <selector>XU_FACE_DETECTION</selector>
           <index>39</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
+        <!-- XU_FLIP			0x2E // BM8, bit 0 = horizontal, bit 1 = vertical -->
+        <control id="flip">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_FLIP</selector>
+          <index>45</index>
           <size>1</size>
           <requests>
             <request>SET_CUR</request>
@@ -1284,6 +1313,34 @@
       </uvc>
       <v4l2>
         <id>V4L2_FACE_DETECTION</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Flip Horizontal</name>
+      <uvc>
+        <control_ref idref="flip"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_HFLIP</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Flip Vertical</name>
+      <uvc>
+        <control_ref idref="flip"/>
+        <size>1</size>
+        <offset>1</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_VFLIP</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
