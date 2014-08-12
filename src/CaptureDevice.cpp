@@ -2,7 +2,7 @@
 
 
 #include "CaptureDevice.h"
-#include "tis_camera_index.h"
+#include "device_discovery.h"
 
 #include <cstring>
 

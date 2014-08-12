@@ -21,7 +21,7 @@
 // #include "tis_video.h"
 #include "tis_utils.h"
 #include "tis_logging.h"
-#include "tis_camera_index.h"
+#include "device_discovery.h"
 #include "tis_logging.h"
 
 #if HAVE_ARAVIS
@@ -38,7 +38,10 @@ int tis_get_camera_count ()
 {
     int count = 0;
 
+#if HAVE_ARAVIS
     count += tis_get_gige_camera_count();
+#endif
+    
     count += tis_get_usb_camera_count();
     
     return count;
@@ -61,8 +64,12 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
 
     int usb_count = tis_get_usb_camera_list(info_vec.data(), count);
 
-    int gige_count = tis_get_gige_camera_list(&(info_vec.data()[usb_count]), array_size - usb_count);
-
+    int gige_count = 0;
+    
+#if HAVE_ARAVIS
+    gige_count = tis_get_gige_camera_list(&(info_vec.data()[usb_count]), array_size - usb_count);
+#endif
+    
     if (usb_count + gige_count != count)
     {
         return -1;
@@ -189,22 +196,18 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
 }
 
 
+#if HAVE_ARAVIS
+
 int tis_get_gige_camera_count ()
 {
-#if HAVE_ARAVIS
     arv_update_device_list();
 
     return arv_get_n_devices();
-#else
-    return 0;
-#endif
 }
 
 
 int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_size)
 {
-#if HAVE_ARAVIS
-
     arv_update_device_list ();
 
     unsigned int number_devices = arv_get_n_devices();
@@ -214,6 +217,7 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
         // TODO: errno missing.
         return -1;
     }
+
     int counter = 0;
     
     for (unsigned int i = 0; i < number_devices; ++i)
@@ -250,8 +254,6 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
     }
     
     return counter;
-#else
-    return 0;
-#endif /* HAVE_ARAVIS*/
 }
 
+#endif /* HAVE_ARAVIS */

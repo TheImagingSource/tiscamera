@@ -8,6 +8,8 @@
 // #include "tis_video.h"
 #include "base_types.h"
 // #include "tis_camera_interface.h"
+#include "config.h"
+
 
 #ifdef __cplusplus
 extern "C"
@@ -32,9 +34,13 @@ extern "C"
     
     int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
+#if HAVE_ARAVIS
+    
     int tis_get_gige_camera_count ();
     
     int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_size);
+
+#endif
     
 #ifdef __cplusplus
 }

@@ -52,7 +52,7 @@ OBJECT_FILES= \
  UsbCapture.o \
  VideoFormat.o \
  VideoFormatDescription.o \
- tis_camera_index.o \
+ device_discovery.o \
  tis_logging.o \
  tis_utils.o \
  Property.o \
