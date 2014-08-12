@@ -50,7 +50,6 @@ OBJECT_FILES= \
  Grabber.o \
  Device.o \
  UsbCapture.o \
- GigECapture.o \
  VideoFormat.o \
  VideoFormatDescription.o \
  tis_camera_index.o \
@@ -59,6 +58,10 @@ OBJECT_FILES= \
  Property.o \
  Properties.o \
  PropertyGeneration.o
+
+ifeq ($(HAVE_ARAVIS), 1)
+OBJECT_FILES += GigECapture.o 
+endif
 
 # tis_v4l2.o \
 # MemoryBuffer.o \

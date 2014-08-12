@@ -4,8 +4,15 @@
 #include "CaptureInterface.h"
 
 #include "UsbCapture.h"
-#include "GigECapture.h"
 #include "tis_logging.h"
+
+#include "config.h"
+
+#if HAVE_ARAVIS
+
+#include "GigECapture.h"
+
+#endif
 
 #include <algorithm>
 #include <memory>
@@ -27,9 +34,11 @@ std::shared_ptr<CaptureInterface> tis_imaging::openCaptureInterface (const Captu
                 return std::make_shared<UsbCapture>(device);
             }
             case TIS_DEVICE_TYPE_GIGE:
+#if HAVE_ARAVIS
             {
                 return std::make_shared<GigECapture>(device);
             }
+#endif
             case TIS_DEVICE_TYPE_FIREWIRE:
             case TIS_DEVICE_TYPE_UNKNOWN:
             default:
