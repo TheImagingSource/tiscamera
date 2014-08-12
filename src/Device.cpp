@@ -22,12 +22,6 @@ Device::Device (const CaptureDevice& _device)
 }
 
     
-Device::Device (const Device&)
-{
-
-}
-
-
 Device::~Device ()
 {
     for (auto& p : device_properties)

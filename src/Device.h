@@ -23,7 +23,7 @@ public:
     
     Device (const CaptureDevice&);
     
-    Device (const Device&);
+    Device (const Device&) = delete;
     
     Device& operator= (const Device&) = delete;
     
