@@ -187,28 +187,28 @@ struct camera_property
    should be ignored by the application. Any
    attempt to change the control will
    result in an EINVAL error code. */
-#define TIS_CTRL_FLAG_DISABLED      0x0001
+#define PROPERTY_FLAG_DISABLED      0x0001
 /* V4L2_CTRL_FLAG_GRABBED	0x0002	This control is temporarily unchangeable,
    for example because another application
    took over control of the respective
    resource. Such controls may be displayed
    specially in a user interface. Attempts to
    change the control may result in an EBUSY error code. */
-#define TIS_CTRL_FLAG_GRABBED       0x0002
+#define PROPERTY_FLAG_GRABBED       0x0002
 /* V4L2_CTRL_FLAG_READ_ONLY	0x0004	This control is permanently readable only.
    Any attempt to change the control will result
    in an EINVAL error code. */
-#define TIS_CTRL_FLAG_READ_ONLY     0x0004
+#define PROPERTY_FLAG_READ_ONLY     0x0004
 /* OWN FLAG                         This control is realized through library code and is
    not available in the camera */
-#define TIS_CTRL_FLAG_EXTERNAL      0x0008
+#define PROPERTY_FLAG_EXTERNAL      0x0008
 /* V4L2_CTRL_FLAG_INACTIVE	0x0010	This control is not applicable to the
    current configuration and should be displayed
    accordingly in a user interface. For example
    the flag may be set on a MPEG audio level 2
    bitrate control when MPEG audio encoding
    level 1 was selected with another control. */
-#define TIS_CTRL_FLAG_INACTIVE      0x0010
+#define PROPERTY_FLAG_INACTIVE      0x0010
 /* V4L2_CTRL_FLAG_WRITE_ONLY 0x0040	This control is permanently writable only.
    Any attempt to read the control will result
    in an EACCES error code error code. This flag
@@ -216,7 +216,7 @@ struct camera_property
    or action controls where writing a value will
    cause the device to carry out a given action
    (e. g. motor control) but no meaningful value can be returned. */
-#define TIS_CTRL_FLAG_WRITE_ONLY    0x0020
+#define PROPERTY_FLAG_WRITE_ONLY    0x0020
 
 
 #endif /* BASE_TYPES_H_ */
