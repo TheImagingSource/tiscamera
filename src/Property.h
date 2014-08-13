@@ -75,8 +75,7 @@ protected:
     bool setProperty (const Property&);
     bool getProperty (Property&);
 
-    std::vector<std::weak_ptr<PropertyImpl>> impl;
-
+    std::weak_ptr<PropertyImpl> impl;
 
     // struct control_mapping mapping;
     struct camera_property prop;

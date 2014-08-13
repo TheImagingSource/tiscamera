@@ -15,7 +15,7 @@ using namespace tis_imaging;
 PropertyString::PropertyString (std::shared_ptr<PropertyImpl> _impl, const camera_property& _property)
     : Property(_property)
 {
-    impl.push_back (_impl);
+    impl = _impl;
 }
 
 
@@ -57,7 +57,7 @@ PropertyStringMap::PropertyStringMap (std::shared_ptr<PropertyImpl> _impl,
                                       const std::map<std::string, int>& _values)
     : Property(_property), string_map(_values)
 {
-    impl.push_back(_impl);
+    impl = _impl;
 }
 
 
@@ -113,7 +113,7 @@ PropertySwitch::PropertySwitch (std::shared_ptr<PropertyImpl> _impl,
                                 const camera_property& _property)
     : Property(_property)
 {
-    impl.push_back(_impl);
+    impl = _impl ;
 }
 
 
@@ -150,7 +150,7 @@ PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> _impl,
                                   const camera_property& _property)
     : Property (_property)
 {
-    impl.push_back(_impl);
+    impl = _impl;
 }
 
 
@@ -214,7 +214,7 @@ PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> _impl,
                                 const camera_property& _property)
     : Property(_property)
 {
-    impl.push_back(_impl);
+    impl = _impl;
 }
 
 
@@ -271,7 +271,7 @@ PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> _impl,
                                 const camera_property& _property)
     : Property(_property)
 {
-    impl.push_back(_impl);
+    impl = _impl ;
 }
 
 

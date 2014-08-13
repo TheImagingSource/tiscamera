@@ -110,7 +110,7 @@ bool Property::isAvailable (const Property&)
 
 bool Property::setProperty (const Property&)
 {
-    if (impl.empty())
+    if (impl.expired())
     {
         return false;
     }
@@ -130,16 +130,12 @@ bool Property::getProperty (Property&)
 void Property::notifyImpl ()
 {
 
-    for (auto& i : impl)
+    if (impl.expired())
     {
-        if (i.expired())
-        {
-            tis_log(TIS_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
-            continue;
-        }
-
-        auto ptr(i.lock());
-
-        ptr->setProperty(*this);
+        tis_log(TIS_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
     }
+
+    auto ptr(impl.lock());
+
+    ptr->setProperty(*this);
 }
