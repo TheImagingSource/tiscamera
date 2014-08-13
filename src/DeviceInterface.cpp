@@ -1,7 +1,7 @@
 
 
 
-#include "CaptureInterface.h"
+#include "DeviceInterface.h"
 
 #include "UsbCapture.h"
 #include "tis_logging.h"
@@ -20,7 +20,7 @@
 using namespace tis_imaging;
 
 
-std::shared_ptr<CaptureInterface> tis_imaging::openCaptureInterface (const CaptureDevice& device)
+std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const CaptureDevice& device)
 {
 
     try

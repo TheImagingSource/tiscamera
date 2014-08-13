@@ -4,7 +4,7 @@
 #ifndef USBCAPTURE_H_
 #define USBCAPTURE_H_
 
-#include "CaptureInterface.h"
+#include "DeviceInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 
@@ -14,7 +14,8 @@
 namespace tis_imaging
 {
 
-class UsbCapture : public CaptureInterface
+class UsbCapture : public DeviceInterface, public std::enable_shared_from_this<UsbCapture>
+
 {
 
 public:

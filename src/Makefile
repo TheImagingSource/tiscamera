@@ -46,7 +46,7 @@ LIB= libtis_imaging.a libtis_imaging.so
 OBJECT_FILES= \
  Error.o \
  CaptureDevice.o \
- CaptureInterface.o \
+ DeviceInterface.o \
  Grabber.o \
  Device.o \
  UsbCapture.o \

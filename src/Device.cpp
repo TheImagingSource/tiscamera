@@ -9,7 +9,7 @@
 using namespace tis_imaging;
 
 Device::Device (const CaptureDevice& _device)
-    : actual_device(openCaptureInterface(_device))
+    : actual_device(openDeviceInterface(_device))
 {
 
     for (auto& p : actual_device->create_properties(actual_device))

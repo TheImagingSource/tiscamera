@@ -6,7 +6,7 @@
 #define DEVICE_H_
 
 #include "CaptureDevice.h"
-#include "CaptureInterface.h"
+#include "DeviceInterface.h"
 
 #include <memory>
 
@@ -15,7 +15,7 @@ namespace tis_imaging
 
 struct control_reference;
 
-class Device : public CaptureInterface
+class Device : public DeviceInterface
 {
 public:
 
@@ -49,7 +49,7 @@ public:
 
 private:
 
-    std::shared_ptr<CaptureInterface> actual_device;
+    std::shared_ptr<DeviceInterface> actual_device;
 
     std::vector<std::weak_ptr<Property> > device_properties;
     

@@ -4,14 +4,14 @@
 #ifndef GIGECAPTURE_H_
 #define GIGECAPTURE_H_
 
-#include "CaptureInterface.h"
+#include "DeviceInterface.h"
 
 #include <arv.h>
 
 namespace tis_imaging
 {
 
-class GigECapture : public CaptureInterface
+class GigECapture : public DeviceInterface, public std::enable_shared_from_this<GigECapture>
 {
 
 public:

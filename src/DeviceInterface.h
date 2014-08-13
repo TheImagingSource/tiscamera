@@ -19,18 +19,17 @@
 namespace tis_imaging
 {
 
-class CaptureInterface :  public PropertyImpl
+class DeviceInterface : public PropertyImpl
+//, std::enable_shared_from_this<DeviceInterface>
 {
 
 public:
 
-    virtual ~CaptureInterface () {};
+    virtual ~DeviceInterface () {};
 
     virtual CaptureDevice getDeviceDescription () const = 0;
 
-    virtual std::vector<Property> getProperties () const = 0;
-
-    virtual std::vector<std::shared_ptr<Property>> create_properties(std::shared_ptr<PropertyImpl>) = 0;
+    virtual std::vector<std::shared_ptr<Property>> getProperties () = 0;
 
     virtual bool setProperty (const Property&) = 0;
 
@@ -44,7 +43,7 @@ public:
 
 }; /* class Camera_Interface*/
 
-std::shared_ptr<CaptureInterface> openCaptureInterface (const CaptureDevice& device);
+std::shared_ptr<DeviceInterface> openDeviceInterface (const CaptureDevice& device);
 
 } /* namespace tis_imaging */
 
