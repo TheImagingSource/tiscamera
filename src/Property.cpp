@@ -22,35 +22,8 @@ Property::Property (const camera_property& _property,
 }
 
 
-Property::Property (const Property& other)
-{
-    memcpy(&this->prop, &other.prop, sizeof(prop));
-    this->impl = other.impl;
-}
-
-
-Property& Property::operator= (const Property& other)
-{
-    memcpy(&this->prop, &other.prop, sizeof(prop));
-    return *this;
-}
-
-
 Property::~Property ()
 {}
-
-
-bool Property::operator== (const Property& other) const
-{
-    return (strcmp(this->prop.name, other.prop.name) == 0);
-}
-
-
-bool Property::operator== (const struct camera_property* other) const
-{
-    // return (memcmp(&this->prop, other, sizeof(prop)) == 0);
-    return false;
-}
 
 
 void Property::reset ()

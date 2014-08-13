@@ -72,7 +72,7 @@ bool UsbCapture::setProperty (const Property& _property)
 {
     auto f = [&_property] (const property_description& d)
         {
-            return (*d.prop == _property);
+            return ((*d.prop).getName().compare(_property.getName()) == 0);
         };
     
     auto desc = std::find_if(properties.begin(), properties.end(),f);

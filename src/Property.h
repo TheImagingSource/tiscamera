@@ -25,20 +25,10 @@ class Property : public PropertyImpl
 public:
 
     Property (const camera_property&);
-    // Property (std::vector<PropertyImpl*>, const camera_property&);
+
     Property (const camera_property&, const std::map<int, std::string>&);
 
-    Property (const Property&);
-
-    Property& operator= (const Property&);
-
     virtual ~Property ();
-
-    bool operator== (const Property&) const;
-    bool operator!= (const Property&) const;
-
-    bool operator== (const struct camera_property* other) const;
-
 
     void reset ();
 
