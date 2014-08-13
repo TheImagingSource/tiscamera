@@ -177,9 +177,6 @@ struct camera_property
         struct tis_value_bool b;
     } value;
 
-    bool enable_auto;           /* enable automatic adjustments to value */
-    bool auto_available;        /* are automatic adjustments available */
-    
     uint32_t flags;             /* bit flags */
 };
 
