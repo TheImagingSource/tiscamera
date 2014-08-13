@@ -48,7 +48,6 @@ OBJECT_FILES= \
  CaptureDevice.o \
  DeviceInterface.o \
  Grabber.o \
- Device.o \
  UsbCapture.o \
  VideoFormat.o \
  VideoFormatDescription.o \

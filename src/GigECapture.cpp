@@ -48,11 +48,7 @@ CaptureDevice GigECapture::getDeviceDescription () const
 }
 
 
-std::vector<Property> GigECapture::getProperties () const
-{}
-
-
-std::vector<std::shared_ptr<Property> > GigECapture::create_properties(std::shared_ptr<PropertyImpl>)
+std::vector<std::shared_ptr<Property>>  GigECapture::getProperties ()
 {}
 
 

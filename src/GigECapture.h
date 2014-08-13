@@ -24,11 +24,8 @@ public:
 
     CaptureDevice getDeviceDescription () const;
 
-    std::vector<Property> getProperties () const;
+    std::vector<std::shared_ptr<Property>> getProperties () ;
 
-    std::vector<std::shared_ptr<Property> > create_properties(std::shared_ptr<PropertyImpl>);
-
-    
     bool isAvailable (const Property&);
 
     bool setProperty (const Property&);

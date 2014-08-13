@@ -20,14 +20,21 @@ bool Grabber::openDevice (const CaptureDevice& _device)
 
     open_device = _device;
 
-    capture = std::make_shared<Device>(open_device);
+    device = openDeviceInterface(open_device);
 
+    if (device == nullptr)
+    {
+        return false;
+    }
+    device_properties = device->getProperties();
+    
     return true;
 }
 
+
 bool Grabber::isDeviceOpen () const
 {
-    if (capture != nullptr)
+    if (device != nullptr)
     {
         return true;
     }
@@ -47,7 +54,8 @@ bool Grabber::closeDevice ()
     std::string name = open_device.getName();
 
     open_device = CaptureDevice ();
-    capture.reset();
+    device.reset();
+    device_properties.clear();
 
     tis_log(TIS_LOG_INFO, "Closed device %s.", name.c_str());
     
@@ -61,7 +69,15 @@ std::vector<Property> Grabber::getAvailableProperties ()
     {
         return std::vector<Property>();
     }
-    return capture->getProperties();
+
+    std::vector<Property> props;
+
+    for ( const auto& p : device_properties )
+    {
+        props.push_back(*p);
+    }
+    
+    return props;
 }
 
 
@@ -72,7 +88,7 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
         return std::vector<VideoFormatDescription>();
     }
     
-    return capture->getAvailableVideoFormats();
+    return device->getAvailableVideoFormats();
 }
 
 
@@ -83,7 +99,7 @@ bool Grabber::setVideoFormat (const VideoFormat& _format)
         return false;
     }
         
-    return this->capture->setVideoFormat(_format);
+    return this->device->setVideoFormat(_format);
 }
 
 
@@ -94,6 +110,6 @@ VideoFormat Grabber::getActiveVideoFormat () const
         return VideoFormat();
     }
         
-    return capture->getActiveVideoFormat();
+    return device->getActiveVideoFormat();
 }
 

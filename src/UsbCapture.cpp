@@ -43,25 +43,16 @@ CaptureDevice UsbCapture::getDeviceDescription () const
 }
 
 
-std::vector<Property> UsbCapture::getProperties () const
+std::vector<std::shared_ptr<Property>> UsbCapture::getProperties ()
 {
-    std::vector<Property> props;
-
-    for ( const auto& p : properties )
+    if (this->properties.empty())
     {
-        props.push_back(*p.prop);
+        index_all_controls(shared_from_this());
     }
     
-    return props;
-}
-
-std::vector<std::shared_ptr<Property> > UsbCapture::create_properties(std::shared_ptr<PropertyImpl> _impl)
-{
-    this->index_all_controls(_impl);
-
     std::vector<std::shared_ptr<Property>> props;
 
-    for (auto& p : properties)
+    for ( const auto& p : properties )
     {
         props.push_back(p.prop);
     }

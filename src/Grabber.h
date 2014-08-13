@@ -4,7 +4,7 @@
 #define GRABBER_H_
 
 #include "CaptureDevice.h"
-#include "Device.h"
+#include "DeviceInterface.h"
 #include "Properties.h"
 
 #include <string>
@@ -58,12 +58,14 @@ private:
     
     CaptureDevice open_device;
 
-    std::shared_ptr<Device> capture;
+    // std::shared_ptr<Device> capture;
+    std::shared_ptr<DeviceInterface> device;
     
-    std::vector<Property> device_properties;
-    std::vector<Property> algorithm_properties;
+    std::vector<std::shared_ptr<Property>> device_properties;
     
-    std::vector<Property> user_properties;
+    std::vector<std::shared_ptr<Property>> algorithm_properties;
+    
+    std::vector<std::shared_ptr<Property>> user_properties;
     
 }; /* class Grabber */
 
