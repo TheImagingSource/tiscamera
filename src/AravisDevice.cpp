@@ -2,7 +2,7 @@
 
 
 
-#include "GigECapture.h"
+#include "AravisDevice.h"
 #include "tis_logging.h"
 
 #include <algorithm>
@@ -11,7 +11,7 @@
 
 using namespace tis_imaging;
 
-GigECapture::GigECapture (const CaptureDevice& _device)
+AravisDevice::AravisDevice (const CaptureDevice& _device)
     : device(_device)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
@@ -32,7 +32,7 @@ GigECapture::GigECapture (const CaptureDevice& _device)
 }
 
 
-GigECapture::~GigECapture()
+AravisDevice::~AravisDevice()
 {
     if (arv_camera != NULL)
     {
@@ -42,45 +42,45 @@ GigECapture::~GigECapture()
 }
 
 
-CaptureDevice GigECapture::getDeviceDescription () const
+CaptureDevice AravisDevice::getDeviceDescription () const
 {
     return device;
 }
 
 
-std::vector<std::shared_ptr<Property>>  GigECapture::getProperties ()
+std::vector<std::shared_ptr<Property>>  AravisDevice::getProperties ()
 {}
 
 
-bool GigECapture::isAvailable (const Property&)
+bool AravisDevice::isAvailable (const Property&)
 {
     return false;
 }
 
 
-bool GigECapture::setProperty (const Property&)
+bool AravisDevice::setProperty (const Property&)
 {
     return false;
 }
 
 
-bool GigECapture::getProperty (Property&)
+bool AravisDevice::getProperty (Property&)
 {
     return false;
 }
     
 
-bool GigECapture::setVideoFormat (const VideoFormat& _format)
+bool AravisDevice::setVideoFormat (const VideoFormat& _format)
 {
     return false;
 }
 
-VideoFormat GigECapture::getActiveVideoFormat () const
+VideoFormat AravisDevice::getActiveVideoFormat () const
 {
     return active_video_format;
 }
 
-std::vector<VideoFormatDescription> GigECapture::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats () const
 {
     return available_videoformats;
 }
@@ -88,7 +88,7 @@ std::vector<VideoFormatDescription> GigECapture::getAvailableVideoFormats () con
 
 //// genicam handling
 
-void GigECapture::index_genicam ()
+void AravisDevice::index_genicam ()
 {
     if (this->arv_camera == nullptr)
     {
@@ -100,7 +100,7 @@ void GigECapture::index_genicam ()
 }
 
 
-void GigECapture::iterate_genicam (const char* feature)
+void AravisDevice::iterate_genicam (const char* feature)
 {
 
     ArvGc* genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
@@ -160,7 +160,7 @@ void GigECapture::iterate_genicam (const char* feature)
 }
 
 
-void GigECapture::index_genicam_format (ArvGcNode* /* node */ )
+void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 {
     // genicam formats behave like follows:
     // All framerates are valid for all frame sizes

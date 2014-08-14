@@ -10,7 +10,7 @@
 
 #if HAVE_ARAVIS
 
-#include "GigECapture.h"
+#include "AravisDevice.h"
 
 #endif
 
@@ -36,7 +36,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
             case TIS_DEVICE_TYPE_GIGE:
 #if HAVE_ARAVIS
             {
-                return std::make_shared<GigECapture>(device);
+                return std::make_shared<AravisDevice>(device);
             }
 #endif
             case TIS_DEVICE_TYPE_FIREWIRE:

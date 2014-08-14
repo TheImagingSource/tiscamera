@@ -11,16 +11,16 @@
 namespace tis_imaging
 {
 
-class GigECapture : public DeviceInterface, public std::enable_shared_from_this<GigECapture>
+class AravisDevice : public DeviceInterface, public std::enable_shared_from_this<AravisDevice>
 {
 
 public:
 
-    GigECapture (const CaptureDevice&);
+    AravisDevice (const CaptureDevice&);
 
-    GigECapture () = delete;
+    AravisDevice () = delete;
 
-    ~GigECapture ();
+    ~AravisDevice ();
 
     CaptureDevice getDeviceDescription () const;
 
