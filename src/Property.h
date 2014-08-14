@@ -60,6 +60,12 @@ public:
 
 protected:
 
+    bool setReadOnly (const bool);
+
+    bool setWriteOnly (const bool);
+
+    bool setInactive (const bool);
+
     // PropertyImple interface
     bool isAvailable (const Property&);
     bool setProperty (const Property&);

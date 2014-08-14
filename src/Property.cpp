@@ -46,19 +46,19 @@ PROPERTY_TYPE Property::getType () const
 
 bool Property::isReadOnly () const
 {
-    return (prop.flags & PROPERTY_FLAG_READ_ONLY);
+    return (prop.flags & (1 << PROPERTY_FLAG_READ_ONLY));
 }
 
 
 bool Property::isWriteOnly () const
 {
-    return (prop.flags & PROPERTY_FLAG_WRITE_ONLY);
+    return (prop.flags & (1 << PROPERTY_FLAG_WRITE_ONLY));
 }
 
 
 bool Property::isDisabled () const
 {
-    return (prop.flags & PROPERTY_FLAG_DISABLED);
+    return (prop.flags & (1 << PROPERTY_FLAG_DISABLED));
 }
 
 
@@ -71,6 +71,51 @@ uint32_t Property::getFlags () const
 struct camera_property Property::getStruct () const
 {
     return prop;
+}
+
+
+bool Property::setReadOnly (const bool only_read)
+{
+    if (only_read)
+    {
+        prop.flags |= 1 << PROPERTY_FLAG_READ_ONLY;
+    }
+    else
+    {
+        prop.flags &= ~(1 << PROPERTY_FLAG_READ_ONLY);
+    }
+
+    return true;
+}
+
+
+bool Property::setWriteOnly (const bool only_write)
+{
+    if (only_write)
+    {
+        prop.flags |= 1 << PROPERTY_FLAG_WRITE_ONLY;
+    }
+    else
+    {
+        prop.flags &= ~(1 << PROPERTY_FLAG_WRITE_ONLY);
+    }
+
+    return true;
+}
+
+
+bool Property::setInactive (const bool is_disabled)
+{
+    if (is_disabled)
+    {
+        prop.flags |= 1 << PROPERTY_FLAG_INACTIVE;
+    }
+    else
+    {
+        prop.flags &= ~(1 << PROPERTY_FLAG_INACTIVE);
+    }
+
+    return true;
 }
 
 
