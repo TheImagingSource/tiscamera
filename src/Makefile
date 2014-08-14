@@ -48,7 +48,7 @@ OBJECT_FILES= \
  CaptureDevice.o \
  DeviceInterface.o \
  Grabber.o \
- UsbCapture.o \
+ V4l2Device.o \
  VideoFormat.o \
  VideoFormatDescription.o \
  device_discovery.o \
@@ -59,7 +59,7 @@ OBJECT_FILES= \
  PropertyGeneration.o
 
 ifeq ($(HAVE_ARAVIS), 1)
-OBJECT_FILES += GigECapture.o 
+OBJECT_FILES += AravisDevice.o 
 endif
 
 # tis_v4l2.o \

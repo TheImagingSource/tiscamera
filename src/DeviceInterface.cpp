@@ -3,7 +3,7 @@
 
 #include "DeviceInterface.h"
 
-#include "UsbCapture.h"
+#include "V4l2Device.h"
 #include "tis_logging.h"
 
 #include "config.h"
@@ -31,7 +31,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
         {
             case TIS_DEVICE_TYPE_USB:
             {
-                return std::make_shared<UsbCapture>(device);
+                return std::make_shared<V4l2Device>(device);
             }
             case TIS_DEVICE_TYPE_GIGE:
 #if HAVE_ARAVIS

@@ -1,5 +1,5 @@
 
-#include "UsbCapture.h"
+#include "V4l2Device.h"
 #include "tis_logging.h"
 #include "tis_utils.h"
 #include "PropertyGeneration.h"
@@ -13,7 +13,7 @@
 using namespace tis_imaging;
 
 
-UsbCapture::UsbCapture (const CaptureDevice& _device)
+V4l2Device::V4l2Device (const CaptureDevice& _device)
     : device(_device)
 {
 
@@ -27,7 +27,7 @@ UsbCapture::UsbCapture (const CaptureDevice& _device)
 }
 
 
-UsbCapture::~UsbCapture ()
+V4l2Device::~V4l2Device ()
 {
     if (this->fd != -1)
     {
@@ -37,13 +37,13 @@ UsbCapture::~UsbCapture ()
 }
 
 
-CaptureDevice UsbCapture::getDeviceDescription () const
+CaptureDevice V4l2Device::getDeviceDescription () const
 {
     return device;
 }
 
 
-std::vector<std::shared_ptr<Property>> UsbCapture::getProperties ()
+std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
 {
     if (this->properties.empty())
     {
@@ -62,13 +62,13 @@ std::vector<std::shared_ptr<Property>> UsbCapture::getProperties ()
 
 
 
-bool UsbCapture::isAvailable (const Property&)
+bool V4l2Device::isAvailable (const Property&)
 {
     return false;
 }
 
 
-bool UsbCapture::setProperty (const Property& _property)
+bool V4l2Device::setProperty (const Property& _property)
 {
     auto f = [&_property] (const property_description& d)
         {
@@ -97,13 +97,13 @@ bool UsbCapture::setProperty (const Property& _property)
 }
 
 
-bool UsbCapture::getProperty (Property&)
+bool V4l2Device::getProperty (Property&)
 {
     return false;
 }
 
 
-bool UsbCapture::setVideoFormat (const VideoFormat& _format)
+bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 {
     if (!validateVideoFormat(_format))
     {
@@ -142,7 +142,7 @@ bool UsbCapture::setVideoFormat (const VideoFormat& _format)
 }
 
 
-bool UsbCapture::validateVideoFormat (const VideoFormat& _format)
+bool V4l2Device::validateVideoFormat (const VideoFormat& _format)
 {
 
     for (const auto& f : available_videoformats)
@@ -156,19 +156,19 @@ bool UsbCapture::validateVideoFormat (const VideoFormat& _format)
 }
 
 
-VideoFormat UsbCapture::getActiveVideoFormat () const
+VideoFormat V4l2Device::getActiveVideoFormat () const
 {
     return active_video_format;
 }
 
 
-std::vector<VideoFormatDescription> UsbCapture::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> V4l2Device::getAvailableVideoFormats () const
 {
     return available_videoformats;
 }
 
 
-bool UsbCapture::setFramerate (double framerate)
+bool V4l2Device::setFramerate (double framerate)
 {
 
     // TODO what about range framerates?
@@ -199,7 +199,7 @@ bool UsbCapture::setFramerate (double framerate)
 }
 
 
-void UsbCapture::index_formats ()
+void V4l2Device::index_formats ()
 {
     struct v4l2_fmtdesc fmtdesc = {};
     struct v4l2_frmsizeenum frms = {};
@@ -241,7 +241,7 @@ void UsbCapture::index_formats ()
 }
 
 
-std::vector<double> UsbCapture::index_framerates (const struct v4l2_frmsizeenum& frms)
+std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum& frms)
 {
     struct v4l2_frmivalenum frmival = {};
 
@@ -280,7 +280,7 @@ std::vector<double> UsbCapture::index_framerates (const struct v4l2_frmsizeenum&
 }
 
 
-void UsbCapture::index_all_controls (std::shared_ptr<PropertyImpl> impl)
+void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
 
     
@@ -299,7 +299,7 @@ void UsbCapture::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 }
 
 
-int UsbCapture::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl)
+int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl)
 {
 
     if (qctrl->flags & V4L2_CTRL_FLAG_DISABLED)
@@ -372,7 +372,7 @@ int UsbCapture::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 }
 
 
-bool UsbCapture::propertyChangeEvent (const Property& _property)
+bool V4l2Device::propertyChangeEvent (const Property& _property)
 {
 
     tis_log(TIS_LOG_DEBUG,"Property %s changed!", _property.getName().c_str());
@@ -387,7 +387,7 @@ bool UsbCapture::propertyChangeEvent (const Property& _property)
 }
 
 
-bool UsbCapture::changeV4L2Control (const property_description& _property)
+bool V4l2Device::changeV4L2Control (const property_description& _property)
 {
 
     // currently no extended controls are in use

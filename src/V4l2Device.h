@@ -14,17 +14,17 @@
 namespace tis_imaging
 {
 
-class UsbCapture : public DeviceInterface, public std::enable_shared_from_this<UsbCapture>
+class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V4l2Device>
 
 {
 
 public:
 
-    UsbCapture (const CaptureDevice&);
+    V4l2Device (const CaptureDevice&);
 
-    UsbCapture () = delete;
+    V4l2Device () = delete;
 
-    ~UsbCapture ();
+    ~V4l2Device ();
 
     CaptureDevice getDeviceDescription () const;
 
