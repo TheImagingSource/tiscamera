@@ -357,10 +357,15 @@
       <id>XU_FACE_DETECTION</id>
       <value>0x28</value>
     </constant>
-    <!-- BM8, bit 0 = Horizontal, bit 1 = Vertical -->
+    <!-- BM8 -->
     <constant type="integer">
-      <id>XU_FLIP</id>
+      <id>XU_FLIPH</id>
       <value>0x2E</value>
+    </constant>
+    <!-- BM8 -->
+    <constant type="integer">
+      <id>XU_FLIPV</id>
+      <value>0x2F</value>
     </constant>
 
   </constants>
@@ -799,11 +804,25 @@
           </requests>
         </control>
 
-        <!-- XU_FLIP			0x2E // BM8, bit 0 = horizontal, bit 1 = vertical -->
-        <control id="flip">
+        <!-- XU_FLIPH			0x2E // BM8 -->
+        <control id="fliph">
           <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_FLIP</selector>
+          <selector>XU_FLIPH</selector>
           <index>45</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
+        <!-- XU_FLIPV			0x2f // BM8 -->
+        <control id="flipv">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_FLIPV</selector>
+          <index>46</index>
           <size>1</size>
           <requests>
             <request>SET_CUR</request>
@@ -1320,7 +1339,7 @@
     <mapping>
       <name>Flip Horizontal</name>
       <uvc>
-        <control_ref idref="flip"/>
+        <control_ref idref="fliph"/>
         <size>1</size>
         <offset>0</offset>
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
@@ -1334,9 +1353,9 @@
     <mapping>
       <name>Flip Vertical</name>
       <uvc>
-        <control_ref idref="flip"/>
+        <control_ref idref="flipv"/>
         <size>1</size>
-        <offset>1</offset>
+        <offset>0</offset>
         <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
       </uvc>
       <v4l2>
