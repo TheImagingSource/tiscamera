@@ -48,6 +48,18 @@ uint32_t VideoFormat::getFourcc () const
 }
 
 
+double VideoFormat::getFramerate () const
+{
+    return format.framerate;
+}
+
+
+void VideoFormat::setFramerate (const double& framerate)
+{
+    format.framerate = framerate;
+}
+
+
 struct SIZE VideoFormat::getSize () const
 {
     SIZE s = {format.width, format.height};

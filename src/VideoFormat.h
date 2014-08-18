@@ -29,6 +29,10 @@ public:
 
     uint32_t getFourcc () const;
 
+    double getFramerate () const;
+
+    void setFramerate (const double&);
+
     struct SIZE getSize () const;
     
 private:
