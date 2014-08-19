@@ -372,21 +372,6 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 }
 
 
-bool V4l2Device::propertyChangeEvent (const Property& _property)
-{
-
-    tis_log(TIS_LOG_DEBUG,"Property %s changed!", _property.getName().c_str());
-
-    if (!setProperty(_property))
-    {
-        tis_log(TIS_LOG_ERROR, "Error while setting property");
-
-    }
-    
-    return true;
-}
-
-
 bool V4l2Device::changeV4L2Control (const property_description& _property)
 {
 
