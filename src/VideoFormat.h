@@ -7,6 +7,8 @@
 
 #include "base_types.h"
 
+#include <string>
+
 namespace tis_imaging
 {
 
@@ -34,6 +36,12 @@ public:
     void setFramerate (const double&);
 
     struct SIZE getSize () const;
+
+    void setSize (const unsigned int& width, const unsigned int& height);
+
+    std::string getString () const;
+
+    bool setValuesFromString (const std::string&);
     
 private:
 
