@@ -38,7 +38,7 @@ endif
 
 CPPFLAGS+= -std=c++11 -flto $(CFLAGS)
 
-LINK_OPTIONS=-Wl,--gc-sections -ffunction-sections -fdata-sections 
+LINK_OPTIONS=-Wl,--gc-sections -ffunction-sections -fdata-sections -ldl
 
 
 LIB= libtis_imaging.a libtis_imaging.so
