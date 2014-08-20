@@ -1,8 +1,14 @@
 
 #include "tis_utils.h"
 
+#include "tis_logging.h"
+
+#include <cstring>
 #include <sys/ioctl.h>
 #include <errno.h>
+
+#define IOCTL_RETRY 4
+
 
 using namespace tis_imaging;
 
@@ -10,13 +16,13 @@ std::string tis_imaging::propertyType2String (const PROPERTY_TYPE& type)
 {
     switch (type)
     {
-        case PROPERTY_TYPE_BOOLEAN:      return "BOOLEAN";
-        case PROPERTY_TYPE_INTEGER:      return "INTEGER";
-        case PROPERTY_TYPE_DOUBLE:       return "DOUBLE";
-        case PROPERTY_TYPE_STRING:       return "STRING";
+        case PROPERTY_TYPE_BOOLEAN: return "BOOLEAN";
+        case PROPERTY_TYPE_INTEGER: return "INTEGER";
+        case PROPERTY_TYPE_DOUBLE: return "DOUBLE";
+        case PROPERTY_TYPE_STRING: return "STRING";
         case PROPERTY_TYPE_STRING_TABLE: return "STRING_TABLE";
-        case PROPERTY_TYPE_BUTTON:       return "BUTTON";
-        case PROPERTY_TYPE_BITMASK:      return "BITMASK";
+        case PROPERTY_TYPE_BUTTON: return "BUTTON";
+        case PROPERTY_TYPE_BITMASK: return "BITMASK";
         case PROPERTY_TYPE_UNKNOWN:
         default:
             return "";
@@ -24,50 +30,84 @@ std::string tis_imaging::propertyType2String (const PROPERTY_TYPE& type)
 }
 
 
-int tis_imaging::tis_xioctl (int fd, int request, void *arg)
+std::string tis_imaging::fourcc2string (const uint32_t& fourcc)
 {
-    int r = -1;
 
-    do
+
+    union _bla
     {
-        r = ioctl(fd, request, arg);
-    } while (-1 == r && EINTR == errno);
+        uint32_t i;
+        char c[4];
+    } bla;
 
-    return r;
+    bla.i = fourcc;
+
+    std::string s (bla.c);
+
+    // std::string s ( (char*)&fourcc);
+    // s += "\0";
+    return s;
 }
 
 
-// unsigned int tis_get_bits_per_pixel (uint32_t fcc)
-// {
-//     switch (fcc)
-//     {
-//         case FOURCC_RGB24:      return 24;
-//         case FOURCC_RGB32:      return 32;
-//         case FOURCC_YUY2:       return 16;
-//         case FOURCC_UYVY:       return 16;
-//         case FOURCC_Y800:       return 8;
-//         case FOURCC_BY8:        return 8;
-//         case FOURCC_BGGR8:      return 8;
-//         case FOURCC_GBRG8:      return 8;
-//         case FOURCC_RGGB8:      return 8;
-//         case FOURCC_GRBG8:      return 8;
-//         case FOURCC_YGB0:       return 16;
-//         case FOURCC_YGB1:       return 16;
-//         case FOURCC_Y16  :      return 16;
-//         case FOURCC_YV16:       return 16;
-//         case FOURCC_I420:       return 12;
-//         case FOURCC_YUV8PLANAR: return 24;
-//         default:
-//             return 8;
-//     }
-// }
+uint32_t tis_imaging::string2fourcc (const std::string& s)
+{
+    if(s.length() != 4)
+    {
+        return 0;
+    }
+
+    uint32_t fourcc = 0;
+
+    char c[4];
+
+    strncpy(c, s.c_str(), 4);
+
+    fourcc = mmioFOURCC(c[0],c[1],c[2],c[3]);
+
+    return fourcc;
+}
 
 
-// unsigned int tis_imaging::tis_get_required_buffer_size (struct tis_video_format* format)
-// {
-//     unsigned int byte = tis_get_bits_per_pixel (format->fourcc) / 8;
-    
-//     unsigned int size = format->width * format->height * byte;
+std::vector<std::string> tis_imaging::split_string (const std::string& to_split, const std::string &delim)
+{
+    std::vector<std::string> vec;
 
-//     return size;
-// }
+    size_t beg = 0;
+    size_t end = 0;
+
+    while (end != std::string::npos)
+    {
+        end = to_split.find_first_of(delim, beg);
+
+        std::string s = to_split.substr(beg, end - beg);
+
+        vec.push_back(s);
+
+        beg = end + delim.size();
+    }
+
+    return vec;
+}
+
+
+int tis_imaging::tis_xioctl (int fd, int request, void *arg)
+{
+    int ret = 0;
+    int tries= IOCTL_RETRY;
+    do
+    {
+        ret = ioctl(fd, request, arg);
+        // ret = v4l2_ioctl(fd, request, arg);
+    }
+    while (ret && tries-- &&
+           ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
+
+    if (ret && (tries <= 0))
+    {
+        tis_log(TIS_LOG_ERROR,"ioctl (%i) retried %i times - giving up: %s)\n", request, IOCTL_RETRY, strerror(errno));
+    }
+
+    return (ret);
+
+}

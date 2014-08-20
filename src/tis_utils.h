@@ -7,26 +7,19 @@
 #include "base_types.h"
 
 #include <string>
+#include <vector>
 
 namespace tis_imaging
 {
 
 std::string propertyType2String (const PROPERTY_TYPE&);
 
-inline std::string fourcc2string (const uint32_t& fourcc)
-{
-    union _b
-    {
-        uint32_t i;
-        char c[4];
-    } conversion;
+std::string fourcc2string (const uint32_t& fourcc);
 
-    conversion.i = fourcc;
+uint32_t string2fourcc (const std::string& s);
 
-    std::string s = conversion.c;
-    
-    return s;
-}
+
+std::vector<std::string> split_string (const std::string& to_split, const std::string &delim);
 
 
 int tis_xioctl (int fd, int request, void* arg);
