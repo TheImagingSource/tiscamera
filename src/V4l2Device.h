@@ -10,6 +10,7 @@
 
 #include <linux/videodev2.h>
 #include <memory>
+#include <thread>
 
 namespace tis_imaging
 {
