@@ -43,19 +43,21 @@ public:
 
     
     SIZE getSizeMax () const;
-
-    
-    bool isValidVideoFormat (const VideoFormat&) const;
-
-
     
     std::vector<double> getFrameRates () const;
+
+    bool isValidVideoFormat (const VideoFormat&) const;
+
+    bool isValidFramerate (const double framerate) const;
+    
+    bool isValidResolution (const unsigned int width, const unsigned int height) const;
     
 private:
 
     video_format_description format;
 
     std::vector<double> framerates;
+
 };
 
 } /* namespace tis_imaging */

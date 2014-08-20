@@ -80,28 +80,76 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
 {
     auto desc = to_check.getFormatDescription();
 
-    if (this->format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
+    if (format.fourcc != desc.fourcc)
     {
-        auto f = [&desc] (const double& fps) { return fps == desc.framerate;};
-        
-        auto res = std::find_if(framerates.begin(), framerates.end(), f);
-        
-        if (res == framerates.end())
-        {
-            return false;
-        }
+        return false;
     }
-    else
+
+    if (format.binning != desc.binning)
     {
-        double min = this->framerates.at(0);
-        double max = this->framerates.at(1);
-        
-        if (min > desc.framerate > max)
-        {
-            return false;
-        }
+        return false;
     }
-    
+
+    if (!isValidFramerate(to_check.getFramerate()))
+    {
+        return false;
+    }
+
+
+    if (!isValidResolution(to_check.getSize().width, to_check.getSize().height))
+    {
+        // tis_log(TIS_LOG_ERROR, "Resolution is not");
+        return false;
+    }
+
     return true;
 }
 
+
+bool VideoFormatDescription::isValidFramerate (const double framerate) const
+{
+    // auto desc = to_check.getFormatDescription();
+
+
+    // TODO: framerate checking
+    // if (this->format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
+    // {
+    // auto f = [&desc] (const double& fps)
+    // {
+    // return fps == desc.framerate;
+    // };
+
+    // auto res = std::find_if(framerates.begin(), framerates.end(), f);
+
+    // if (res == framerates.end())
+    // {
+    // return false;
+    // }
+    // }
+    // else
+    // {
+    // double min = this->framerates.at(0);
+    // double max = this->framerates.at(1);
+
+    // if (min > desc.framerate || desc.framerate > max)
+    // {
+    // return false;
+    // }
+    // }
+    return true;
+}
+
+
+bool VideoFormatDescription::isValidResolution (const unsigned int width, const unsigned int height) const
+{
+    if (format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
+    {
+        return (format.min_size.width == width && format.min_size.height == height);
+    }
+    else
+    {
+        return (format.min_size.width <= width &&
+                format.min_size.height <= height &&
+                format.max_size.width >= width && format.max_size.height >= height);
+    }
+}
