@@ -13,15 +13,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// enum PIPELINE_STATUS
-// {
-//     PIPELINE_UNDEFINED = 0,
-//     PIPELINE_STOPPED,
-//     PIPELINE_PAUSED,
-//     PIPELINE_PLAYING,
-//     PIPELINE_ERROR,
+enum PIPELINE_STATUS
+{
+    PIPELINE_UNDEFINED = 0,
+    PIPELINE_STOPPED,
+    PIPELINE_PAUSED,
+    PIPELINE_PLAYING,
+    PIPELINE_ERROR,
 
-// };
+};
+
 
 
 
