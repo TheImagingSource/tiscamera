@@ -31,13 +31,18 @@ std::string PropertyString::getDefault () const
 
 bool PropertyString::setValue (const std::string& _value)
 {
+    if (isReadOnly())
+    {
+        return false;
+    }
+
     if (_value.size() > sizeof(this->prop.value.s.value))
         return false;
 
     memcpy(this->prop.value.s.value, _value.c_str(), _value.size());
 
     notifyImpl();
-    
+
     return true;
 }
 
@@ -73,13 +78,16 @@ std::vector<std::string> PropertyStringMap::getValues () const
 
 std::string PropertyStringMap::getDefault () const
 {
-    return  "";
+    return "";
 }
 
 
 bool PropertyStringMap::setValue (const std::string& _value)
 {
-    // TODO: give value to device
+    if (isReadOnly())
+    {
+        return false;
+    }
 
     auto element = string_map.find(_value);
 
@@ -87,9 +95,9 @@ bool PropertyStringMap::setValue (const std::string& _value)
     {
         return false;
     }
-    
+
     notifyImpl();
-    
+
     return false;
 }
 
@@ -129,7 +137,11 @@ bool PropertySwitch::getDefault () const
 
 bool PropertySwitch::setValue (const bool&)
 {
-    
+    if (isReadOnly())
+    {
+        return false;
+    }
+
     notifyImpl();
 
     return true;
@@ -152,15 +164,6 @@ PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> _impl,
 {
     impl = _impl;
 }
-
-
-// PropertyInteger::PropertyInteger (const PropertyInteger& other):
-//     Property(other)
-// {
-//     // this->Property =
-//     // memcpy(&this->prop, &other.prop, sizeof(prop));
-//     this->impl = other.impl;
-// }
 
 
 PropertyInteger::~PropertyInteger ()
@@ -193,16 +196,19 @@ int64_t PropertyInteger::getValue () const
 
 bool PropertyInteger::setValue (const int64_t& _value)
 {
+    // if (isReadOnly())
+    // return false;
+
     tis_value_int& i = this->prop.value.i;
-    
-    if (i.min > _value || i.max < _value)
-        return false;
-    
+
+    // if (i.min > _value || i.max < _value)
+    // return false;
+
     i.value = _value;
 
     notifyImpl();
-    
-    return false;
+
+    return true;
 }
 
 
@@ -248,18 +254,22 @@ double PropertyDouble::getValue () const
 
 bool PropertyDouble::setValue (const double& _value)
 {
-
+    if (isReadOnly())
+    {
+        return false;
+    }
+    
     tis_value_double& d = this->prop.value.d;
 
     if (d.min > _value || d.max < _value)
     {
-        return false; 
+        return false;
     }
-    
+
     d.value = _value;
 
     notifyImpl();
-    
+
     return false;
 }
 
@@ -281,11 +291,10 @@ PropertyButton::~PropertyButton ()
 
 bool PropertyButton::activate ()
 {
+    if (isReadOnly())
+        return false;
+
     notifyImpl();
-    
+
     return true;
 }
-
-
-
-
