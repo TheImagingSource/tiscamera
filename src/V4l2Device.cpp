@@ -6,15 +6,16 @@
 
 #include <algorithm>
 #include <unistd.h>
-#include <fcntl.h> /* O_RDWR O_NONBLOCK */
+#include <fcntl.h>              /* O_RDWR O_NONBLOCK */
+#include <sys/mman.h>           /* mmap PROT_READ*/
 #include <linux/videodev2.h>
-#include <cstring> /* memcpy*/
+#include <cstring>              /* memcpy*/
 
 using namespace tis_imaging;
 
 
 V4l2Device::V4l2Device (const CaptureDevice& _device)
-    : device(_device)
+    : device(_device), is_stream_on(false)
 {
 
     if ((fd = open(device.getInfo().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
@@ -83,13 +84,11 @@ bool V4l2Device::setProperty (const Property& _property)
         return false;
     }
 
-    const property_description write_desc = {desc->id, NULL};
-    
-    if (changeV4L2Control(write_desc))
+    if (changeV4L2Control(*desc))
     {
         // now save property internally
         *desc->prop = _property;
-        
+
         return true;
     }
 
@@ -105,17 +104,24 @@ bool V4l2Device::getProperty (Property&)
 
 bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 {
-    if (!validateVideoFormat(_format))
+    if (is_stream_on == true)
     {
-        tis_log(TIS_LOG_ERROR, "Not a valid format.");
+        tis_log(TIS_LOG_ERROR, "Device is streaming.");
         return false;
     }
 
+    // if (!validateVideoFormat(_format))
+    // {
+    // tis_log(TIS_LOG_ERROR, "Not a valid format.");
+    // return false;
+    // }
+
     // set format in camera
-    
+
     struct v4l2_format fmt = {};
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
     fmt.fmt.pix.width = _format.getSize().width;
     fmt.fmt.pix.height = _format.getSize().height;
 
@@ -126,18 +132,22 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 
     if (ret < 0)
     {
-        tis_log(TIS_LOG_ERROR, "Error while setting format");
+        tis_log(TIS_LOG_ERROR, "Error while setting format %d", errno);
 
         // TODO error handling
         return false;
     }
 
     // set framerate
-    
-    
+    if (!setFramerate(_format.getFramerate()))
+    {
+        tis_log(TIS_LOG_ERROR, "Unable to set framerate to %f", _format.getFramerate());
+        return false;
+    }
+
     // copy format as local reference
     active_video_format = _format;
-    
+
     return true;
 }
 
@@ -170,33 +180,246 @@ std::vector<VideoFormatDescription> V4l2Device::getAvailableVideoFormats () cons
 
 bool V4l2Device::setFramerate (double framerate)
 {
+    if (is_stream_on == true)
+    {
+        tis_log(TIS_LOG_ERROR, "Device is streaming.");
+        return false;
+    }
+    // auto fps = std::find_if(framerate_conversions.begin(),
+    // framerate_conversions.end(),
+    // [&framerate] (const framerate_conv& f) {tis_log(TIS_LOG_ERROR,"%f", f.fps);
+    // return (framerate == f.fps);});
 
-    // TODO what about range framerates?
-	struct v4l2_streamparm parm;
+    // if (fps == framerate_conversions.end())
+    // {
+    // tis_log(TIS_LOG_ERROR,"unable to find corresponding framerate settings.");
+    // return false;
+    // }
+
+    std::vector<double> vec;
+
+    for (auto& d : framerate_conversions)
+    {
+        vec.push_back(d.fps);
+    }
+
+    std::sort(vec.begin(), vec.end());
+
+    auto iter_low = std::lower_bound(vec.begin(), vec.end(), framerate);
+    // auto iter_up = std::upper_bound(vec.begin(), vec.end(), framerate);
+
+    framerate = *iter_low;
+
+    auto f =[&framerate] (const framerate_conv& f)
+        {
+            tis_log(TIS_LOG_ERROR,"%f", f.fps);
+            return (framerate == f.fps);
+        };
 
     auto fps = std::find_if(framerate_conversions.begin(),
                             framerate_conversions.end(),
-                            [&framerate] (const framerate_conv& f) { return (framerate == f.fps);});
+                            f);
+
+
 
     if (fps == framerate_conversions.end())
     {
+        tis_log(TIS_LOG_ERROR,"unable to find corresponding framerate settings.");
         return false;
     }
-    
-	parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	parm.parm.capture.timeperframe.numerator = fps->numerator;
-	parm.parm.capture.timeperframe.denominator = fps->denominator;
+
+
+    // TODO what about range framerates?
+    struct v4l2_streamparm parm;
+
+    parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    parm.parm.capture.timeperframe.numerator = fps->numerator;
+    parm.parm.capture.timeperframe.denominator = fps->denominator;
+
+    // parm.parm.capture.timeperframe.numerator = 1;
+    // parm.parm.capture.timeperframe.denominator = 24;
+
+    // parm.parm.capture.timeperframe.numerator = 24;
+    // parm.parm.capture.timeperframe.denominator = 1;
+
+    // tis_log(TIS_LOG_ERROR, "Setting framerate to %d / %d fps",
+    // parm.parm.capture.timeperframe.numerator,
+    // parm.parm.capture.timeperframe.denominator);
+
 
     int ret = tis_xioctl( fd, VIDIOC_S_PARM, &parm );
-    
-	if (ret < 0)
+
+    if (ret < 0)
     {
-        
-		fprintf (stderr, "Failed to set frame rate\n");
+        tis_log (TIS_LOG_ERROR, "Failed to set frame rate\n");
         return false;
     }
+
+    getFramerate();
+
     return true;
 }
+
+
+double V4l2Device::getFramerate ()
+{
+    // TODO what about range framerates?
+    struct v4l2_streamparm parm = {};
+
+    parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    // parm.parm.capture.timeperframe.numerator = fps->numerator;
+    // parm.parm.capture.timeperframe.denominator = fps->denominator;
+
+    // parm.parm.capture.timeperframe.numerator = 1;
+    // parm.parm.capture.timeperframe.denominator = 24;
+
+    int ret = tis_xioctl( fd, VIDIOC_S_PARM, &parm );
+
+    if (ret < 0)
+    {
+        tis_log (TIS_LOG_ERROR, "Failed to set frame rate\n");
+        return 0.0;
+    }
+
+    tis_log(TIS_LOG_ERROR, "Current framerate to %d / %d fps",
+            parm.parm.capture.timeperframe.numerator,
+            parm.parm.capture.timeperframe.denominator);
+
+
+
+    return parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
+
+}
+
+
+bool V4l2Device::setSink (std::shared_ptr<SinkInterface> sink)
+{
+    if (is_stream_on)
+    {
+        return false;
+    }
+
+    this->listener = sink;
+
+    // if (listener.expired())
+    // {
+    // tis_log(TIS_LOG_ERROR,"WAIT WHAT");
+    // }
+    // else
+    // {
+    // tis_log(TIS_LOG_ERROR,"VALID LISTENER");
+
+    // }
+
+    return true;
+}
+
+
+bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> b)
+{
+    if (is_stream_on)
+    {
+        tis_log(TIS_LOG_ERROR, "Stream running.");
+
+        return false;
+    }
+
+    this->buffers.clear();
+
+    this->buffers = b;
+
+    init_mmap_buffers();
+
+    return true;
+}
+
+
+bool V4l2Device::release_buffers ()
+{
+    if (is_stream_on)
+    {
+        return false;
+    }
+
+    free_mmap_buffers();
+
+    buffers.clear();
+    return true;
+}
+
+
+bool V4l2Device::start_stream ()
+{
+
+    // if (listener.expired())
+    // {
+    // tis_log(TIS_LOG_ERROR, "Expired listener.");
+    // return false;
+    // }
+
+    // VideoFormat v;
+
+    // setVideoFormat(v);
+
+    enum v4l2_buf_type type;
+
+    tis_log(TIS_LOG_DEBUG, "Will use %d buffers", buffers.size());
+
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_MMAP;
+        buf.index = i;
+
+        if (-1 == tis_xioctl(fd, VIDIOC_QBUF, &buf))
+        {
+            // TODO: error
+            tis_log(TIS_LOG_ERROR, "Unable to queue v4l2_buffer 'VIDIOC_QBUF'");
+            return false;
+        }
+        else
+        {
+            tis_log(TIS_LOG_DEBUG, "Queued buffer %d", i);
+
+        }
+    }
+
+    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == tis_xioctl(fd, VIDIOC_STREAMON, &type))
+    {
+        // TODO: error
+        tis_log(TIS_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMON %d", errno);
+        return false;
+    }
+
+    is_stream_on = true;
+
+    this->work_thread = std::thread(&V4l2Device::stream, this);
+
+    return true;
+}
+
+
+bool V4l2Device::stop_stream ()
+{
+    is_stream_on = false;
+
+    enum v4l2_buf_type type;
+    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == tis_xioctl(fd, VIDIOC_STREAMOFF, &type))
+    {
+        return false;
+    }
+
+    work_thread.join();
+
+    return true;
+}
+
 
 
 void V4l2Device::index_formats ()
@@ -375,12 +598,8 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 bool V4l2Device::changeV4L2Control (const property_description& _property)
 {
 
-    // currently no extended controls are in use
-    // always use v4l2_control instead of v4l2_ext_control
-    
-
     PROPERTY_TYPE type = _property.prop->getType();
-    
+
     if (type == PROPERTY_TYPE_STRING ||
         type == PROPERTY_TYPE_UNKNOWN ||
         type == PROPERTY_TYPE_DOUBLE)
@@ -390,20 +609,20 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
     }
 
     struct v4l2_control ctrl = {0};
-    
+
     ctrl.id = _property.id;
     // TODO: get value
     ctrl.value = 0;
 
     if (type == PROPERTY_TYPE_INTEGER)
     {
-        ctrl.value = (std::dynamic_pointer_cast<PropertyInteger>(_property.prop))->getValue();
+        ctrl.value = (std::static_pointer_cast<PropertyInteger>(_property.prop))->getValue();
     }
     else if (type == PROPERTY_TYPE_BOOLEAN)
     {
-        ctrl.value = (std::dynamic_pointer_cast<PropertySwitch>(_property.prop))->getValue();
+        ctrl.value = (std::static_pointer_cast<PropertySwitch>(_property.prop))->getValue();
     }
-    
+
     int ret = tis_xioctl(fd, VIDIOC_S_CTRL, &ctrl);
 
     if (ret < 0)
@@ -412,11 +631,207 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
     }
     else
     {
-        tis_log(TIS_LOG_ERROR,
-                "Changed ctrl %s to value %d.",
-                _property.prop->getName().c_str(),
-                ctrl.value);
+        // tis_log(TIS_LOG_ERROR,
+        // "Changed ctrl %s to value %d.",
+        // _property.prop->getName().c_str(),
+        // ctrl.value);
     }
 
     return true;
+}
+
+
+void V4l2Device::stream ()
+{
+    current_buffer = 0;
+
+    while (this->is_stream_on)
+    {
+        if (current_buffer >= buffers.size())
+        {
+            current_buffer = 0;
+        }
+        else
+        {
+            current_buffer++;
+        }
+        for (;;)
+        {
+            fd_set fds;
+
+            FD_ZERO(&fds);
+            FD_SET(fd, &fds);
+
+            // TODO: should timeout be configurable?
+            /* Timeout. */
+            struct timeval tv;
+            tv.tv_sec = 2;
+            tv.tv_usec = 0;
+
+            /* Wait until device gives go */
+            int ret = select(fd + 1, &fds, NULL, NULL, &tv);
+
+            if (ret == -1)
+            {
+                if (errno == EINTR)
+                {
+                    continue;
+                }
+                else
+                {
+                    // TODO: errno
+                    /* error during select */
+                    tis_log(TIS_LOG_ERROR, "Error during select");
+                    return;
+                }
+            }
+
+            /* timeout! */
+            if (ret == 0)
+            {
+                tis_log(TIS_LOG_ERROR, "Timeout while waiting for new image buffer.");
+                is_stream_on = false;
+                // TODO: inform listener
+                return;
+            }
+
+            if (get_frame())
+            {
+                break;
+            }
+            /* receive frame since device is ready */
+            // if ( == 0)
+            // {
+            // break;
+            // }
+            /* EAGAIN - continue select loop. */
+        }
+    }
+
+}
+
+
+bool V4l2Device::get_frame ()
+{
+    struct v4l2_buffer buf = {};
+
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+
+    int ret = tis_xioctl(fd, VIDIOC_DQBUF, &buf);
+
+    if (ret == -1)
+    {
+        tis_log(TIS_LOG_ERROR, "Unable to dequeue buffer.");
+
+        return false;
+    }
+
+
+    listener->pushImage(buffers.at(buf.index));
+
+    // requeue buffer
+    ret = tis_xioctl(fd, VIDIOC_QBUF, &buf);
+    if (ret == -1)
+    {
+        // TODO: errno
+        return false;
+    }
+    return true;
+}
+
+
+// TODO: look into mmap with existing memory
+void V4l2Device::init_mmap_buffers ()
+{
+    if (buffers.empty())
+    {
+        tis_log(TIS_LOG_ERROR, "Number of used buffers has to be >= 2");
+        return;
+    }
+    else
+    {
+        tis_log(TIS_LOG_ERROR, "Mmaping %d buffers", buffers.size());
+    }
+
+
+
+    struct v4l2_requestbuffers req = {};
+
+    req.count = buffers.size();
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_MMAP;
+
+    if (tis_xioctl(fd, VIDIOC_REQBUFS, &req) == -1)
+    {
+        // TODO: error
+        return;
+    }
+
+    if (req.count < 2)
+    {
+        tis_log(TIS_LOG_ERROR, "Insufficient memory for memory mapping");
+        // TODO: errno
+        return;
+    }
+
+    for (unsigned int n_buffers = 0; n_buffers < req.count; ++n_buffers)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_MMAP;
+        buf.index = n_buffers;
+
+        if (tis_xioctl(fd, VIDIOC_QUERYBUF, &buf) == -1)
+        {
+            // TODO: error
+            return;
+        }
+
+        tis_log(TIS_LOG_ERROR, "MMAPING buffer %d", n_buffers);
+
+        struct image_buffer buffer = {};
+
+        // TODO: settings have to be found
+
+        // buffer.length = buf.length;
+        buffer.length = 1920*1080*8;
+        buffer.pData =
+            (unsigned char*) mmap( NULL, /* start anywhere */
+                                   buf.length,
+                                   PROT_READ | PROT_WRITE, /* required */
+                                   MAP_SHARED, /* recommended */
+                                   fd,
+                                   buf.m.offset);
+
+        buffer.format = active_video_format.getFormatDescription();
+
+        if (buffer.pData == MAP_FAILED)
+        {
+            tis_log(TIS_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);
+            // TODO: errno
+            return;
+        }
+
+        buffers.at(n_buffers)->setImageBuffer(buffer);
+    }
+
+}
+
+
+void V4l2Device::free_mmap_buffers ()
+{
+    unsigned int i;
+
+    for (i = 0; i < buffers.size(); ++i)
+    {
+        if (-1 == munmap(buffers.at(i)->getImageBuffer().pData, buffers.at(i)->getImageBuffer().length))
+        {
+            // TODO: error
+
+            return;
+        }
+    }
+
 }

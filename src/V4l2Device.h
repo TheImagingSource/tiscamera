@@ -46,7 +46,23 @@ public:
 
     bool setFramerate (double framerate);
     
+    double getFramerate ();
+
+    bool setSink (std::shared_ptr<SinkInterface>);
+
+
+    bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
+
+    bool release_buffers ();
+
+    bool start_stream ();
+
+    bool stop_stream ();
+
+
 private:
+
+    std::thread work_thread;
     
     CaptureDevice device;
 
@@ -97,7 +113,24 @@ private:
     bool propertyChangeEvent (const Property&);
 
     bool changeV4L2Control (const property_description&);
+
+    // streaming related
+
+    bool is_stream_on;
+
+    size_t current_buffer;
+    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
     
+    std::shared_ptr<SinkInterface> listener;
+    // std::weak_ptr<SinkInterface> listener;
+
+    void stream ();
+
+    bool get_frame ();
+
+    void init_mmap_buffers ();
+
+    void free_mmap_buffers ();
 };
 
 } /* namespace tis_imaging */

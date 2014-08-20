@@ -40,6 +40,16 @@ public:
 
     std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
 
+
+    bool setSink (std::shared_ptr<SinkInterface>);
+
+    bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
+    bool release_buffers ();
+
+    bool start_stream ();
+
+    bool stop_stream ();
+
 private:
 
     CaptureDevice device;

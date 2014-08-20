@@ -12,6 +12,9 @@
 #include "VideoFormat.h"
 #include <VideoFormatDescription.h>
 
+#include "MemoryBuffer.h"
+#include "SinkInterface.h"
+
 #include <vector>
 #include <memory>
 
@@ -40,6 +43,16 @@ public:
     virtual VideoFormat getActiveVideoFormat () const = 0;
     
     virtual std::vector<VideoFormatDescription> getAvailableVideoFormats () const = 0;
+
+
+    virtual bool setSink (std::shared_ptr<SinkInterface>) = 0;
+
+    virtual bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>) = 0;
+    virtual bool release_buffers () = 0;
+
+    virtual bool start_stream () = 0;
+
+    virtual bool stop_stream () = 0;
 
 }; /* class Camera_Interface*/
 

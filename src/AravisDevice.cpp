@@ -86,6 +86,37 @@ std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats () co
 }
 
 
+bool AravisDevice::setSink (std::shared_ptr<SinkInterface>)
+{
+    return false;
+}
+
+
+bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>)
+{
+    return false;
+}
+
+
+bool AravisDevice::release_buffers ()
+{
+    return false;
+}
+
+
+bool AravisDevice::start_stream ()
+{
+    return false;
+}
+
+
+bool AravisDevice::stop_stream ()
+{
+    return false;
+}
+
+
+
 //// genicam handling
 
 void AravisDevice::index_genicam ()
