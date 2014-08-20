@@ -50,14 +50,14 @@ std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
     {
         index_all_controls(shared_from_this());
     }
-    
+
     std::vector<std::shared_ptr<Property>> props;
 
     for ( const auto& p : properties )
     {
         props.push_back(p.prop);
     }
-    
+
     return props;
 }
 
@@ -75,7 +75,7 @@ bool V4l2Device::setProperty (const Property& _property)
         {
             return ((*d.prop).getName().compare(_property.getName()) == 0);
         };
-    
+
     auto desc = std::find_if(properties.begin(), properties.end(),f);
 
     if (desc == properties.end())
@@ -505,8 +505,6 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
 
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
-
-    
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
 
     while (tis_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
@@ -514,7 +512,7 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
         index_control(&qctrl, impl);
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
-    
+
     if (qctrl.id != V4L2_CTRL_FLAG_NEXT_CTRL)
     {
         return;
@@ -538,7 +536,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     }
     struct v4l2_ext_control ext_ctrl = {};
     struct v4l2_ext_controls ctrls = {};
-    
+
     ext_ctrl.id = qctrl->id;
     ctrls.ctrl_class = V4L2_CTRL_ID2CLASS(qctrl->id);
     ctrls.count = 1;
@@ -558,7 +556,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
         {
             tis_log(TIS_LOG_INFO, "Encountered write only control.");
         }
-        
+
         else if (tis_xioctl(fd, VIDIOC_G_EXT_CTRLS, &ctrls))
         {
             tis_log(TIS_LOG_ERROR, "Errno %d getting ext_ctrl %s", errno, qctrl->name);
@@ -568,7 +566,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     else
     {
         struct v4l2_control ctrl = {};
-        
+
         ctrl.id = qctrl->id;
         if (tis_xioctl(fd, VIDIOC_G_CTRL, &ctrl))
         {
@@ -586,7 +584,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     desc.prop = p;
 
     properties.push_back(desc);
-    
+
     if (qctrl->type == V4L2_CTRL_TYPE_STRING)
     {
         free(ext_ctrl.string);

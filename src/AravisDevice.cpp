@@ -26,9 +26,9 @@ AravisDevice::AravisDevice (const CaptureDevice& _device)
     // arv_options.no_packet_resend = TRUE;
     arv_options.packet_timeout = 20;
     arv_options.frame_retention = 100;
-    
+
     index_genicam();
-    
+
 }
 
 
@@ -48,7 +48,7 @@ CaptureDevice AravisDevice::getDeviceDescription () const
 }
 
 
-std::vector<std::shared_ptr<Property>>  AravisDevice::getProperties ()
+std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
 {}
 
 
@@ -68,7 +68,7 @@ bool AravisDevice::getProperty (Property&)
 {
     return false;
 }
-    
+
 
 bool AravisDevice::setVideoFormat (const VideoFormat& _format)
 {
@@ -125,7 +125,7 @@ void AravisDevice::index_genicam ()
     {
         return;
     }
-    
+
     iterate_genicam("Root");
     index_genicam_format(NULL);
 }
@@ -135,7 +135,7 @@ void AravisDevice::iterate_genicam (const char* feature)
 {
 
     ArvGc* genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
-    
+
     ArvGcNode* node = arv_gc_get_node (genicam, feature);
 
     if (ARV_IS_GC_FEATURE_NODE (node) &&
@@ -151,7 +151,7 @@ void AravisDevice::iterate_genicam (const char* feature)
             features = arv_gc_category_get_features (ARV_GC_CATEGORY (node));
 
             for (iter = features; iter != NULL; iter = iter->next)
-            {    
+            {
                 iterate_genicam ((char*)iter->data);
             }
             return;
@@ -163,7 +163,7 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                       "PayloadSize",
                                                       "GevSCPSPacketSize",
                                                       "GevSCPSFireTestPacket"};
-        
+
         std::vector<std::string> format_member = { "AcquisitionStart",
                                                    "AcquisitionStop",
                                                    "AcquisitionMode",
@@ -177,7 +177,7 @@ void AravisDevice::iterate_genicam (const char* feature)
         {
             // TODO: implement handling
         }
-        // is part of the format description 
+        // is part of the format description
         else if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
         {
             // index_genicam_format(camera, node, frmt_mapping);
@@ -196,22 +196,22 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     // genicam formats behave like follows:
     // All framerates are valid for all frame sizes
     // All frame sizes are valid for all formats
-    
+
     // We search for the wanted node and save the intermediate result
-    std::string node_to_use; 
+    std::string node_to_use;
     auto find_node = [&node_to_use] (ArvGcNode* node)
         {
             return (node_to_use.compare(arv_gc_feature_node_get_name((ArvGcFeatureNode*) node)) == 0);
         };
-    
+
     // work your way from bottom to top
     // start with frame rates and use everthing until all format descriptions are complete
 
     node_to_use = "FPS";
     auto fps_node = std::find_if(format_nodes.begin() , format_nodes.end(), find_node);
-    
+
     std::vector<double> fps;
-    
+
     if (fps_node != format_nodes.end())
     {
 
@@ -231,17 +231,17 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
                         // this is the denominator of our framerate
                         uint64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-                        
+
                         // std::cout << "FPS entry: "
-                        //           << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
-                        //           << " - "
-                        //           << (uint32_t)val << "" << std::endl;
+                        // << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
+                        // << " - "
+                        // << (uint32_t)val << "" << std::endl;
 
                         double f = (double)1 / (uint32_t)val;
 
                         fps.push_back(f);
                     }
-                    
+
                 }
             }
         }
@@ -264,15 +264,15 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
         fps.push_back(0.0);
     }
 
-    
+
     node_to_use = "Binning";
     auto binning_node = std::find_if(format_nodes.begin() , format_nodes.end(), find_node);
-    
+
     std::vector<int> binning;
-    
+
     if (binning_node != format_nodes.end())
     {
-     
+
         if (ARV_IS_GC_ENUMERATION (*binning_node))
         {
             const GSList* childs;
@@ -289,11 +289,11 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
                         // this is the denominator of our framerate
                         int64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-                        
+
                         // std::cout << "Binning entry: "
-                        //           << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
-                        //           << " - "
-                        //           << val << std::endl;
+                        // << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
+                        // << " - "
+                        // << val << std::endl;
 
                         binning.push_back(val);
                     }
@@ -305,7 +305,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             // int range
             // TODO implement
         }
-   
+
     }
     else
     {
@@ -326,7 +326,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
     SIZE min = {(unsigned int)width_min, (unsigned int)height_min};
     SIZE max = {(unsigned int)width_max, (unsigned int)height_max};
-    
+
     node_to_use = "PixelFormat";
 
     auto pixel_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
@@ -364,10 +364,10 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                         // bsd.fps = fps;
 
                         // std::cout << "FPS size " << fps.size() << std::endl;
-                        
+
                         // std::vector<buffer_size_desc> bsd_vec;
                         // bsd_vec.push_back(bsd);
-                        
+
                         // we create a format for every binning value and store it seperately
                         for ( const auto& b : binning)
                         {
@@ -396,6 +396,5 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
         // TODO
     }
-   
-}
 
+}
