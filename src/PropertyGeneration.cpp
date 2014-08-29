@@ -137,7 +137,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             cp.value.i.default_value = queryctrl->default_value;
             cp.value.i.value = ctrl->value;
             cp.flags = flags;
-            return std::make_shared<Property>(PropertySwitch(impl, cp));
+            return std::make_shared<Property>(PropertySwitch(impl, cp, type));
 
         }
         case PROPERTY_TYPE_INTEGER:
@@ -153,7 +153,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             cp.value.i.value = ctrl->value;
             cp.flags = flags;
 
-            return std::make_shared<Property>(PropertyInteger(impl, cp));
+            return std::make_shared<Property>(PropertyInteger(impl, cp, type));
         }
         // case TIS_CTRL_TYPE_DOUBLE:
         // {
@@ -168,7 +168,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             memcpy(cp.value.s.default_value, (char*)queryctrl->name, sizeof(cp.value.s.default_value));
             cp.flags = flags;
 
-            return std::make_shared<Property>(PropertyString(impl, cp));
+            return std::make_shared<Property>(PropertyString(impl, cp, type));
         }
         case PROPERTY_TYPE_STRING_TABLE:
         {
@@ -199,7 +199,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
                 m.emplace(map_string, i);
             }
 
-            return std::make_shared<Property>(PropertyStringMap(impl, cp, m));
+            return std::make_shared<Property>(PropertyStringMap(impl, cp, m, type));
         }
         case PROPERTY_TYPE_BUTTON:
         {
@@ -209,7 +209,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             cp.type = PROPERTY_TYPE_BUTTON;
             cp.flags = flags;
 
-            return std::make_shared<Property>(PropertyButton(impl, cp));
+            return std::make_shared<Property>(PropertyButton(impl, cp, type));
         }
         default:
         {

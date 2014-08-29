@@ -2,6 +2,7 @@
 
 
 #include "Property.h"
+#include "base_types.h"
 #include "tis_logging.h"
 
 #include <cstring>
@@ -10,16 +11,21 @@
 using namespace tis_imaging;
 
 
-Property::Property (const camera_property& _property)
-{
-    memcpy(&prop, &_property, sizeof(prop));
-}
+Property::Property ()
+    : value_type(UNDEFINED), prop(), ref_prop()
+{}
+
+
+Property::Property (const camera_property& _property, const VALUE_TYPE& t)
+    : prop(_property), ref_prop(_property), value_type(t)
+{}
+
 
 Property::Property (const camera_property& _property,
-                    const std::map<int, std::string>& _map)
-{
-    memcpy(&prop, &_property, sizeof(prop));
-}
+                    const std::map<std::string, int>& _map,
+                    const VALUE_TYPE& t)
+    : prop(_property), ref_prop(_property), string_map(_map), value_type(t)
+{}
 
 
 Property::~Property ()
@@ -71,6 +77,13 @@ uint32_t Property::getFlags () const
 struct camera_property Property::getStruct () const
 {
     return prop;
+}
+
+
+
+Property::VALUE_TYPE Property::getValueType () const
+{
+    return value_type;
 }
 
 

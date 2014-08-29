@@ -23,10 +23,26 @@ class Property : public PropertyImpl
 {
 
 public:
+    enum VALUE_TYPE
+    {
+        UNDEFINED = 0,
+        BOOLEAN,
+        STRING,
+        ENUM,
+        INTEGER,
+        INTSWISSKNIFE,
+        FLOAT,
+        COMMAND,
+        BUTTON,
+    };
 
-    Property (const camera_property&);
+    Property();
 
-    Property (const camera_property&, const std::map<int, std::string>&);
+    Property (const camera_property&, const VALUE_TYPE&);
+
+    Property (const camera_property&,
+              const std::map<std::string, int>&,
+              const VALUE_TYPE&);
 
     virtual ~Property ();
 
@@ -44,19 +60,7 @@ public:
     uint32_t getFlags () const;
 
     struct camera_property getStruct () const;
-
-    enum VALUE_TYPE
-    {
-        UNDEFINED = 0,
-        BOOLEAN,
-        STRING,
-        ENUM,
-        INTEGER,
-        INTSWISSKNIFE,
-        FLOAT,
-        COMMAND,
-        BUTTON,
-    };
+    Property::VALUE_TYPE getValueType () const;
 
 protected:
 
@@ -73,6 +77,7 @@ protected:
 
     std::weak_ptr<PropertyImpl> impl;
 
+    Property::VALUE_TYPE value_type;
     // struct control_mapping mapping;
     struct camera_property prop;
     const struct camera_property ref_prop;

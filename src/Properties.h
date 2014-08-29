@@ -24,7 +24,9 @@ class PropertyString : public Property
 {
 public:
 
-    PropertyString (std::shared_ptr<PropertyImpl>, const camera_property&);
+    PropertyString (std::shared_ptr<PropertyImpl>,
+                    const camera_property&,
+                    const VALUE_TYPE&);
     ~PropertyString ();
 
     std::string getDefault () const;
@@ -44,8 +46,9 @@ public:
 
     PropertyStringMap (std::shared_ptr<PropertyImpl>,
                        const camera_property&,
-                       const std::map<std::string, int>&);
-    
+                       const std::map<std::string, int>&,
+                       const VALUE_TYPE&);
+
     ~PropertyStringMap ();
 
     std::vector<std::string> getValues () const;
@@ -68,7 +71,7 @@ class PropertySwitch : public Property
 {
 public:
 
-    PropertySwitch (std::shared_ptr<PropertyImpl>, const camera_property&);
+    PropertySwitch (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
 
     ~PropertySwitch ();
 
@@ -88,7 +91,7 @@ class PropertyInteger : public Property
 {
 public:
 
-    PropertyInteger (std::shared_ptr<PropertyImpl>, const camera_property&);
+    PropertyInteger (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
 
     ~PropertyInteger ();
 
@@ -110,7 +113,7 @@ class PropertyDouble : public Property
 {
 public:
 
-    PropertyDouble (std::shared_ptr<PropertyImpl>, const camera_property&);
+    PropertyDouble (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
     ~PropertyDouble ();
 
     double getDefault () const;
@@ -131,7 +134,7 @@ class PropertyButton : public Property
 {
 public:
 
-    PropertyButton (std::shared_ptr<PropertyImpl>, const camera_property&);
+    PropertyButton (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
     ~PropertyButton ();
 
     bool activate ();
