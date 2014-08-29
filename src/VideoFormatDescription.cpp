@@ -58,13 +58,13 @@ struct video_format_description VideoFormatDescription::getFormatDescription () 
 }
 
 
-SIZE VideoFormatDescription::getSizeMin () const
+IMG_SIZE VideoFormatDescription::getSizeMin () const
 {
     return format.min_size;
 }
 
 
-SIZE VideoFormatDescription::getSizeMax () const
+IMG_SIZE VideoFormatDescription::getSizeMax () const
 {
     return format.max_size;
 }

@@ -53,7 +53,7 @@ struct tis_device_info
 
 
 
-struct SIZE
+struct IMG_SIZE
 {
     uint32_t width;
     uint32_t height;
@@ -75,8 +75,8 @@ struct video_format_description
     uint32_t fourcc;
     char description [256];
 
-    SIZE min_size;
-    SIZE max_size;
+    IMG_SIZE min_size;
+    IMG_SIZE max_size;
 
     uint32_t binning;
 

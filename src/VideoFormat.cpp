@@ -65,9 +65,9 @@ void VideoFormat::setFramerate (const double& framerate)
 }
 
 
-struct SIZE VideoFormat::getSize () const
+struct IMG_SIZE VideoFormat::getSize () const
 {
-    SIZE s = {format.width, format.height};
+    IMG_SIZE s = {format.width, format.height};
     return s;
 }
 

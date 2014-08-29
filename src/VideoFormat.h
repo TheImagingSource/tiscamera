@@ -35,7 +35,7 @@ public:
 
     void setFramerate (const double&);
 
-    struct SIZE getSize () const;
+    struct IMG_SIZE getSize () const;
 
     void setSize (const unsigned int& width, const unsigned int& height);
 

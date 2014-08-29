@@ -39,10 +39,10 @@ public:
     struct video_format_description getFormatDescription () const;
 
 
-    SIZE getSizeMin () const;
+    IMG_SIZE getSizeMin () const;
 
     
-    SIZE getSizeMax () const;
+    IMG_SIZE getSizeMax () const;
     
     std::vector<double> getFrameRates () const;
 

@@ -324,8 +324,8 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max);
     arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max);
 
-    SIZE min = {(unsigned int)width_min, (unsigned int)height_min};
-    SIZE max = {(unsigned int)width_max, (unsigned int)height_max};
+    IMG_SIZE min = {(unsigned int)width_min, (unsigned int)height_min};
+    IMG_SIZE max = {(unsigned int)width_max, (unsigned int)height_max};
 
     node_to_use = "PixelFormat";
 
