@@ -49,7 +49,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .genicam_name = {"ExposureAuto"},
     },
     {
-        "Gain",
+        .name = "Gain",
         .type_to_use = PROPERTY_TYPE_INTEGER,
         .v4l2_id = { V4L2_CID_GAIN },
         .v4l2_name = { "Gain" },
