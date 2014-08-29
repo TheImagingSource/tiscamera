@@ -36,6 +36,8 @@ public:
     struct tis_device_info getInfo () const;
     
     std::string getName () const;
+
+    std::string getSerial () const;
     
     enum TIS_DEVICE_TYPE getDeviceType () const;
 
