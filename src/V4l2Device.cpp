@@ -237,17 +237,6 @@ bool V4l2Device::setFramerate (double framerate)
     parm.parm.capture.timeperframe.numerator = fps->numerator;
     parm.parm.capture.timeperframe.denominator = fps->denominator;
 
-    // parm.parm.capture.timeperframe.numerator = 1;
-    // parm.parm.capture.timeperframe.denominator = 24;
-
-    // parm.parm.capture.timeperframe.numerator = 24;
-    // parm.parm.capture.timeperframe.denominator = 1;
-
-    // tis_log(TIS_LOG_ERROR, "Setting framerate to %d / %d fps",
-    // parm.parm.capture.timeperframe.numerator,
-    // parm.parm.capture.timeperframe.denominator);
-
-
     int ret = tis_xioctl( fd, VIDIOC_S_PARM, &parm );
 
     if (ret < 0)
@@ -269,12 +258,6 @@ double V4l2Device::getFramerate ()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    // parm.parm.capture.timeperframe.numerator = fps->numerator;
-    // parm.parm.capture.timeperframe.denominator = fps->denominator;
-
-    // parm.parm.capture.timeperframe.numerator = 1;
-    // parm.parm.capture.timeperframe.denominator = 24;
-
     int ret = tis_xioctl( fd, VIDIOC_S_PARM, &parm );
 
     if (ret < 0)
@@ -287,10 +270,7 @@ double V4l2Device::getFramerate ()
             parm.parm.capture.timeperframe.numerator,
             parm.parm.capture.timeperframe.denominator);
 
-
-
     return parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
-
 }
 
 
@@ -362,7 +342,6 @@ bool V4l2Device::start_stream ()
     // VideoFormat v;
 
     // setVideoFormat(v);
-
     enum v4l2_buf_type type;
 
     tis_log(TIS_LOG_DEBUG, "Will use %d buffers", buffers.size());
@@ -609,8 +588,6 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
     struct v4l2_control ctrl = {0};
 
     ctrl.id = _property.id;
-    // TODO: get value
-    ctrl.value = 0;
 
     if (type == PROPERTY_TYPE_INTEGER)
     {
