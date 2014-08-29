@@ -56,7 +56,8 @@ OBJECT_FILES= \
  tis_utils.o \
  Property.o \
  Properties.o \
- PropertyGeneration.o
+ PropertyGeneration.o \
+ ImageSink.o \
 
 ifeq ($(HAVE_ARAVIS), 1)
 OBJECT_FILES += AravisDevice.o 
