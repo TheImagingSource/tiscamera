@@ -24,6 +24,8 @@ V4l2Device::V4l2Device (const CaptureDevice& _device)
         throw std::runtime_error("Failed opening device.");
     }
 
+    determine_active_video_format();
+
     this->index_formats();
 }
 
@@ -480,6 +482,50 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
 
     return f;
 }
+
+void V4l2Device::determine_active_video_format ()
+{
+
+    struct v4l2_format fmt = {};
+
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    int ret = tis_xioctl(this->fd, VIDIOC_G_FMT, &fmt);
+
+    if (ret < 0)
+    {
+        tis_log(TIS_LOG_ERROR, "Error while setting format");
+
+        // TODO error handling
+        return;
+    }
+
+    // TODO what about range framerates?
+    struct v4l2_streamparm parm = {};
+
+    parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    ret = tis_xioctl( fd, VIDIOC_G_PARM, &parm );
+
+    if (ret < 0)
+    {
+
+        fprintf (stderr, "Failed to set frame rate\n");
+        return;
+    }
+
+    video_format format = {};
+    format.fourcc = fmt.fmt.pix.pixelformat;
+    format.width = fmt.fmt.pix.width;
+    format.height = fmt.fmt.pix.height;
+    // TODO: determine binning
+    format.binning = 0;
+    format.framerate = parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
+    this->active_video_format = format;
+
+    return;
+}
+
 
 
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)

@@ -94,6 +94,7 @@ private:
 
     std::vector<double> index_framerates (const struct v4l2_frmsizeenum& frms);
 
+    void determine_active_video_format ();
 
     struct property_description
     {
