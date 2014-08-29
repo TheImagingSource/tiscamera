@@ -51,7 +51,21 @@ CaptureDevice AravisDevice::getDeviceDescription () const
 
 
 std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
-{}
+{
+    if (this->properties.empty())
+    {
+        index_genicam();
+    }
+    std::vector<std::shared_ptr<Property>> vec;
+
+    for (auto& p : properties)
+    {
+        vec.push_back(p.prop);
+    }
+    tis_log(TIS_LOG_DEBUG, "Returning %d properties", vec.size());
+
+    return vec;
+}
 
 
 bool AravisDevice::isAvailable (const Property&)

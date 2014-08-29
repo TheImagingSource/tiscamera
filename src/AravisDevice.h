@@ -77,6 +77,13 @@ private:
     // they are generally set to assure well defined interaction
     struct aravis_options arv_options;
 
+    struct property_mapping
+    {
+        std::shared_ptr<Property> prop;
+        std::string arv_ident;
+    };
+
+    std::vector<property_mapping> properties;
     
     VideoFormat active_video_format;
     // std::shared_ptr<> buffer;
