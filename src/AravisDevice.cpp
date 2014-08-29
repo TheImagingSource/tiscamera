@@ -180,7 +180,12 @@ bool AravisDevice::start_stream ()
 
 bool AravisDevice::stop_stream ()
 {
-    return false;
+    if (arv_camera == NULL)
+        return false;
+
+    arv_camera_stop_acquisition(arv_camera);
+
+    return true;
 }
 
 
