@@ -58,6 +58,8 @@ private:
 
     std::shared_ptr<SinkInterface> external_sink;
 
+    ArvStream* stream;
+
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
     int current_buffer;
 

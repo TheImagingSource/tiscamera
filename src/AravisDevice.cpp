@@ -14,7 +14,7 @@
 using namespace tis_imaging;
 
 AravisDevice::AravisDevice (const CaptureDevice& _device)
-    : device(_device), current_buffer(0)
+    : device(_device), current_buffer(0), stream(NULL)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
 
