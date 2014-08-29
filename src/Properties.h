@@ -30,7 +30,7 @@ public:
     ~PropertyString ();
 
     std::string getDefault () const;
-    
+
     bool setValue (const std::string&);
     std::string getValue () const;
 };
@@ -54,7 +54,7 @@ public:
     std::vector<std::string> getValues () const;
 
     std::string getDefault () const;
-    
+
     bool setValue (const std::string&);
     std::string getValue () const;
 
@@ -76,7 +76,7 @@ public:
     ~PropertySwitch ();
 
     bool getDefault () const;
-    
+
     bool setValue (const bool&);
 
     bool getValue () const;
@@ -117,7 +117,7 @@ public:
     ~PropertyDouble ();
 
     double getDefault () const;
-    
+
     double getMin () const;
     double getMax () const;
 
