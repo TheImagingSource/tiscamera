@@ -53,6 +53,12 @@ uint32_t VideoFormat::getFourcc () const
 }
 
 
+void VideoFormat::setFourcc (const uint32_t& fourcc)
+{
+    format.fourcc = fourcc;
+}
+
+
 double VideoFormat::getFramerate () const
 {
     return format.framerate;

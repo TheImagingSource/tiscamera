@@ -31,6 +31,8 @@ public:
 
     uint32_t getFourcc () const;
 
+    void setFourcc (const uint32_t&);
+
     double getFramerate () const;
 
     void setFramerate (const double&);
