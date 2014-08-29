@@ -34,7 +34,10 @@ Property::~Property ()
 
 void Property::reset ()
 {
-    // notifyListeners();
+    tis_log(TIS_LOG_INFO, "Resetting property to initial values.");
+    prop = ref_prop;
+
+    notifyImpl();
 }
 
 
