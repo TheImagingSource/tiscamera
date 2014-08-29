@@ -436,7 +436,15 @@ void AravisDevice::iterate_genicam (const char* feature)
 
         std::vector<std::string> private_settings = { "TLParamsLocked",
                                                       "GevSCPSDoNotFragment",
+                                                      "GevTimestampTickFrequency",
+                                                      "GevTimeSCPD",
+                                                      "GevSCPD",
                                                       "PayloadSize",
+                                                      "PayloadPerFrame",
+                                                      "PayloadPerPacket",
+                                                      "TotalPacketSize",
+                                                      "PacketsPerFrame",
+                                                      "PacketTimeUS",
                                                       "GevSCPSPacketSize",
                                                       "GevSCPSFireTestPacket"};
 
