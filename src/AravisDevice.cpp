@@ -74,8 +74,37 @@ bool AravisDevice::getProperty (Property&)
 
 bool AravisDevice::setVideoFormat (const VideoFormat& _format)
 {
-    return false;
+    // bool valid = false;
+    // for (const auto& v : available_videoformats)
+    // {
+    // if (v.isValidVideoFormat( _format))
+    // {
+    // valid = true;
+    // break;
+    // }
+    // }
+
+    // if (valid == false)
+    // {
+    // return false;
+    // }
+
+    arv_camera_set_frame_rate (this->arv_camera, _format.getFramerate());
+
+    arv_camera_set_pixel_format(this->arv_camera, _format.getFourcc());
+
+    // TODO: validity check
+    arv_camera_set_binning(this->arv_camera, _format.getBinning(), _format.getBinning());
+
+    // TODO: auto center
+
+    arv_camera_set_region(this->arv_camera, 0, 0, _format.getSize().width, _format.getSize().height);
+
+    determine_active_video_format();
+
+    return true;
 }
+
 
 VideoFormat AravisDevice::getActiveVideoFormat () const
 {
