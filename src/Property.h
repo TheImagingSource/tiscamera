@@ -75,6 +75,7 @@ protected:
 
     // struct control_mapping mapping;
     struct camera_property prop;
+    const struct camera_property ref_prop;
     std::map<std::string, int> string_map;
 
     // internal method that notifies implementations about requests
