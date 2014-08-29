@@ -79,6 +79,8 @@ private:
     // found nodes that contain format information
     std::vector<ArvGcNode*> format_nodes;
 
+    void determine_active_video_format ();
+
     void index_genicam ();
     void iterate_genicam (const char* feature);
     void index_genicam_format (ArvGcNode* /* node */ );

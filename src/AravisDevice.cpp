@@ -111,6 +111,31 @@ VideoFormat AravisDevice::getActiveVideoFormat () const
     return active_video_format;
 }
 
+
+void AravisDevice::determine_active_video_format ()
+{
+
+    this->active_video_format.setFramerate(arv_camera_get_frame_rate (this->arv_camera));
+    active_video_format.setFourcc(arv_camera_get_pixel_format(this->arv_camera));
+
+    int dx = 0;
+    int dy = 0;
+
+    arv_camera_get_binning(this->arv_camera, &dx, &dy);
+
+    // TODO binning
+
+    int x1, x2, y1, y2;
+    arv_camera_get_region(this->arv_camera, &x1, &y1, &x2, &y2);
+
+    unsigned int height = y2 - y1;
+    unsigned int width = x2 - x1;
+
+    active_video_format.setSize(width, height);
+
+}
+
+
 std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
 {
     if (this->available_videoformats.empty())
