@@ -51,7 +51,7 @@ private:
 }; /* class CaptureDevice */
 
 /// @brief return a list of all identified capture devices
-std::shared_ptr<std::vector<CaptureDevice> > getAvailableCaptureDevices ();
+std::vector<CaptureDevice> getAvailableCaptureDevices ();
 
 } /* namespace tis_imaging */
 

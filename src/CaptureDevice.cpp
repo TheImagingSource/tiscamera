@@ -65,7 +65,6 @@ enum TIS_DEVICE_TYPE CaptureDevice::getDeviceType () const
 }
 
 
-std::shared_ptr<std::vector<CaptureDevice> > tis_imaging::getAvailableCaptureDevices ()
 std::string CaptureDevice::getDeviceTypeAsString () const
 {
     switch (device.type)
@@ -82,24 +81,23 @@ std::string CaptureDevice::getDeviceTypeAsString () const
 }
 
 
+std::vector<CaptureDevice> tis_imaging::getAvailableCaptureDevices ()
 {
     int count = tis_get_camera_count();
 
     std::vector<struct tis_device_info> info(count);
-
     int ret = tis_get_camera_list(info.data(), count);
 
+    auto vec = std::vector<CaptureDevice>();
+    
     if (ret < -1)
     {
-        return nullptr;
+        return vec;
     }
-
-    auto vec = std::make_shared<std::vector<CaptureDevice> >();
-
 
     for (const auto& i : info)
     {
-        vec->push_back(CaptureDevice(i));
+        vec.push_back(CaptureDevice(i));
     }
 
     return vec;

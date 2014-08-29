@@ -54,16 +54,25 @@ int main (int /* argc */, char* /* argv */ [])
 
     auto dev = getAvailableCaptureDevices();
 
-    std::cout << "Number of Cameras: " << dev->size() << std::endl;
+    std::cout << "Number of Cameras: " << dev.size() << std::endl;
 
-    for (const auto& d : *dev)
+    for (const auto& d : dev)
     {
         std::cout << "====================" << std::endl << std::endl;
-        std::cout << d.getName() << std::endl;
+        std::cout << d.getName() << " - " << d.getSerial() <<std::endl;
+
+        // if (d.getSerial().compare("20410002") == 0)
+        if (d.getSerial().compare("28210147") == 0)
+        {
+            if (!g.openDevice(d))
+            {
+                std::cout << "Error while opening device." << std::endl;
+            }
+        }
     }
 
     
-    g.openDevice(dev->at(0));
+    //g.openDevice(dev.at(0));
 
     if (g.isDeviceOpen())
     {
@@ -71,9 +80,14 @@ int main (int /* argc */, char* /* argv */ [])
 
         auto d = g.getDevice();
 
-        std::cout << d.getName() << std::endl;
+        std::cout << d.getName() <<  std::endl;
 
         
+    }
+    else
+    {
+        std::cout << "Device not opened!" << std::endl;
+        exit(1);
     }
 
     // auto frmts = g.getAvailableVideoFormats();
@@ -82,7 +96,7 @@ int main (int /* argc */, char* /* argv */ [])
     // {
     //     auto desc = f.getFormatDescription();
 
-    //     std::cout << desc.description << std::endl;
+    //     std::cout << desc.description << " - " << desc.fourcc << std::endl;
 
     //     // std::cout << f.getFrameRates().size()<< std::endl;
     //     for (const auto& d : f.getFrameRates())
