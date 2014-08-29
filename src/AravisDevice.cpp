@@ -3,6 +3,8 @@
 
 
 #include "AravisDevice.h"
+
+#include "PropertyGeneration.h"
 #include "tis_logging.h"
 
 #include <algorithm>
