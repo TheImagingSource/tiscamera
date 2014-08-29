@@ -105,7 +105,7 @@ static struct control_reference ctrl_reference_table [] =
         .genicam_name = {"TriggerActivation"},
     },
     {
-        .name = "TriggerSoftware",
+        .name = "Software Trigger",
         .type_to_use = PROPERTY_TYPE_BUTTON,
         .v4l2_id = {0},
         .v4l2_name = { "SoftwareTrigger" },
