@@ -174,7 +174,74 @@ bool AravisDevice::release_buffers ()
 
 bool AravisDevice::start_stream ()
 {
-    return false;
+    if (arv_camera == NULL)
+    {
+        tis_log(TIS_LOG_ERROR, "ArvCamera missing!");
+        return false;
+    }
+    if (external_sink == nullptr)
+    {
+        tis_log(TIS_LOG_ERROR, "No sink specified");
+        return false;
+    }
+
+    //this->arv_camera = arv_camera_new(device.getInfo().identifier);
+
+    this->stream = arv_camera_create_stream(this->arv_camera, NULL, NULL);
+
+    if (this->stream == NULL)
+    {
+        tis_log(TIS_LOG_ERROR, "Unable to create ArvStream.");
+        // TODO errno
+        return false;
+    }
+    int payload = arv_camera_get_payload(this->arv_camera);
+
+    for (int i = 0; i < 50; ++i)
+    {
+        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, NULL));
+    }
+
+    if (ARV_IS_GV_STREAM (this->stream))
+    {
+        if (this->arv_options.auto_socket_buffer)
+        {
+            g_object_set (this->stream,
+                          "socket-buffer", ARV_GV_STREAM_SOCKET_BUFFER_AUTO,
+                          "socket-buffer-size", 0,
+                          NULL);
+        }
+        if (this->arv_options.no_packet_resend)
+        {
+            g_object_set (this->stream,
+                          "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER,
+                          NULL);
+        }
+        else
+        {
+            // g_object_set (this->stream,
+            // "packet-resend", ARV_GV_STREAM_PACKET_RESEND_ALWAYS,
+            // NULL);
+        }
+        g_object_set (this->stream,
+                      "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
+                      "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
+                      NULL);
+    }
+
+    arv_stream_set_emit_signals (this->stream, TRUE);
+
+    arv_camera_set_acquisition_mode(this->arv_camera, ARV_ACQUISITION_MODE_CONTINUOUS);
+
+    // a work thread is not required as aravis already pushes the images asynchroniously
+
+    g_signal_connect (stream, "new-buffer", G_CALLBACK (callback), this);
+
+    tis_log(TIS_LOG_INFO, "Starting actual stream...");
+
+    arv_camera_start_acquisition(this->arv_camera);
+
+    return true;
 }
 
 
