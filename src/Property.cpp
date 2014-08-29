@@ -170,7 +170,6 @@ bool Property::getProperty (Property&)
 
 void Property::notifyImpl ()
 {
-
     if (impl.expired())
     {
         tis_log(TIS_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
@@ -178,5 +177,6 @@ void Property::notifyImpl ()
 
     auto ptr(impl.lock());
 
+    tis_log(TIS_LOG_DEBUG, "Notifying impl about property change.");
     ptr->setProperty(*this);
 }
