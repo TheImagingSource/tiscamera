@@ -24,7 +24,7 @@ PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
         case Property::STRING:
             return PROPERTY_TYPE_STRING;
         case Property::ENUM:
-            return PROPERTY_TYPE_STRING_TABLE; 
+            return PROPERTY_TYPE_STRING_TABLE;
         case Property::INTSWISSKNIFE:
         case Property::INTEGER:
             return PROPERTY_TYPE_INTEGER;
@@ -44,10 +44,10 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
                                                        struct v4l2_ext_control* ctrl,
                                                        std::shared_ptr<PropertyImpl> impl)
 {
-    
+
     // assure we have the typ
     Property::VALUE_TYPE type;
-    
+
     switch (queryctrl->type)
     {
         case V4L2_CTRL_TYPE_BOOLEAN:
@@ -59,31 +59,30 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         {
             type = Property::INTEGER;
             break;
-        }            
+        }
         case V4L2_CTRL_TYPE_STRING:
         {
             type = Property::STRING;
             break;
-        }            
+        }
         case V4L2_CTRL_TYPE_INTEGER_MENU:
         {
             type = Property::ENUM;
             break;
-        }            
+        }
         case V4L2_CTRL_TYPE_BUTTON:
         {
             type = Property::BUTTON;
             break;
-        }            
+        }
         default:
         {
             // TODO error
             type = Property::UNDEFINED;
             break;
-        }            
+        }
     }
 
- 
     PROPERTY_TYPE type_to_use;
 
     type_to_use = value_type_to_ctrl_type(type);
@@ -94,7 +93,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
     {
         flags = queryctrl->flags;
     }
-    
+
     switch (type_to_use)
     {
         case PROPERTY_TYPE_BOOLEAN:
@@ -159,7 +158,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             qmenu.id = queryctrl->id;
 
             std::map<std::string, int> m;
-            
+
             for (int i = 0; i <= queryctrl->maximum; i++)
             {
                 qmenu.index = i;
