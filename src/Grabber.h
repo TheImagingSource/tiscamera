@@ -63,7 +63,7 @@ private:
     
     std::vector<std::shared_ptr<Property>> device_properties;
     
-    std::vector<std::shared_ptr<Property>> algorithm_properties;
+    std::vector<std::shared_ptr<Property>> pipeline_properties;
     
     std::vector<std::shared_ptr<Property>> user_properties;
     
