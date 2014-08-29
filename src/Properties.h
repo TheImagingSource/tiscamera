@@ -56,10 +56,7 @@ public:
     std::string getValue () const;
 
     std::map<std::string, int> getMapping () const;
-    
-private:
 
-    std::map<std::string, int> string_map;
 };
 
 
