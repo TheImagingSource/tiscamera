@@ -38,7 +38,7 @@ public:
 
     VideoFormat getActiveVideoFormat () const;
 
-    std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
+    std::vector<VideoFormatDescription> getAvailableVideoFormats ();
 
 
     bool setSink (std::shared_ptr<SinkInterface>);

@@ -49,7 +49,7 @@ public:
      
     virtual VideoFormat getActiveVideoFormat () const = 0;
     
-    virtual std::vector<VideoFormatDescription> getAvailableVideoFormats () const = 0;
+    virtual std::vector<VideoFormatDescription> getAvailableVideoFormats () = 0;
 
 
     virtual bool setSink (std::shared_ptr<SinkInterface>) = 0;

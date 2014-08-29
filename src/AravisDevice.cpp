@@ -111,7 +111,7 @@ VideoFormat AravisDevice::getActiveVideoFormat () const
     return active_video_format;
 }
 
-std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
 {
     return available_videoformats;
 }

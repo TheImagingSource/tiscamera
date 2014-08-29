@@ -174,7 +174,7 @@ VideoFormat V4l2Device::getActiveVideoFormat () const
 }
 
 
-std::vector<VideoFormatDescription> V4l2Device::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> V4l2Device::getAvailableVideoFormats ()
 {
     return available_videoformats;
 }
