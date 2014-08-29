@@ -14,7 +14,7 @@
 using namespace tis_imaging;
 
 AravisDevice::AravisDevice (const CaptureDevice& _device)
-    : device(_device)
+    : device(_device), current_buffer(0)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
 
@@ -155,15 +155,20 @@ bool AravisDevice::setSink (std::shared_ptr<SinkInterface> s)
 }
 
 
-bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>)
+bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> b)
 {
-    return false;
+    this->buffers = b;
+
+    return true;
 }
 
 
 bool AravisDevice::release_buffers ()
 {
-    return false;
+
+    buffers.clear();
+
+    return true;
 }
 
 
