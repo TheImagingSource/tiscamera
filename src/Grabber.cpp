@@ -12,7 +12,10 @@ Grabber::Grabber ()
 
 
 Grabber::~Grabber ()
-{}
+{
+    if (isDeviceOpen())
+        closeDevice();
+}
 
 
 bool Grabber::openDevice (const CaptureDevice& _device)
