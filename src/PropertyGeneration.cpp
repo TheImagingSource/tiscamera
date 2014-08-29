@@ -5,7 +5,7 @@
 #include "tis_utils.h"
 #include "tis_logging.h"
 
-// #include "user_properties.h"
+#include "standard_properties.h"
 
 #include <linux/videodev2.h>
 #include <cstring>
@@ -83,9 +83,39 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         }
     }
 
+
+    uint32_t id = ctrl->id;
+
+    auto find_control_ref = [id] (const struct control_reference& ref)
+        {
+            // id comparison
+            auto id_comp = [id] (const uint32_t& i)
+            {
+                return (id == i);
+            };
+
+            if (std::find_if(ref.v4l2_id.begin(), ref.v4l2_id.end(), id_comp) != ref.v4l2_id.end())
+            {
+                return true;
+            }
+            return false;
+        };
+
+    auto ctrl_m = std::find_if( ctrl_reference_table.begin(),
+                                                     ctrl_reference_table.end(),
+                                                     find_control_ref);
+
     PROPERTY_TYPE type_to_use;
 
-    type_to_use = value_type_to_ctrl_type(type);
+    if (ctrl_m == ctrl_reference_table.end())
+    {
+        // pass through and do not associate with anything existing
+        type_to_use = value_type_to_ctrl_type(type);
+    }
+    else
+    {
+        type_to_use = ctrl_m->type_to_use;
+    }
 
     uint32_t flags;
     // simply copy existing flags

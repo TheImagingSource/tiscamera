@@ -31,7 +31,8 @@ struct control_reference
     std::vector<std::string> genicam_name; // list of genicam identifiers that shall be mapped to control
 };
 
-static struct control_reference ctrl_reference_table [] =
+
+static std::vector<struct control_reference> ctrl_reference_table =
 {
     {
         .name = "Exposure",
