@@ -95,6 +95,7 @@ int tis_get_usb_camera_count ()
     if (ret != 0)
     {
         // TODO: error
+        return 0;
     }
 
     count = gs.gl_pathc;
