@@ -52,6 +52,8 @@ public:
 
 private:
 
+    static void callback(ArvStream* stream, void* user_data);
+
     CaptureDevice device;
     
     ArvCamera* arv_camera;

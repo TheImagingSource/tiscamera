@@ -184,6 +184,128 @@ bool AravisDevice::stop_stream ()
 }
 
 
+void AravisDevice::callback (ArvStream* stream, void* user_data)
+{
+    AravisDevice* self = static_cast<AravisDevice*>(user_data);
+    if (self == NULL)
+    {
+        tis_log(TIS_LOG_ERROR, "Callback camera instance is NULL.");
+        return;
+    }
+    if (self->stream == NULL)
+    {
+        return;
+    }
+
+    ArvBuffer* buffer = arv_stream_pop_buffer (self->stream);
+
+    if (buffer != NULL)
+    {
+        if (buffer->status == ARV_BUFFER_STATUS_SUCCESS)
+        {
+            struct image_buffer desc = {0};
+
+            desc.format = self->active_video_format.getFormatDescription();
+
+
+            desc.pData = (unsigned char*)buffer->data;
+            desc.length = buffer->size;
+
+            if (buffer->data == NULL)
+            {
+                tis_log(TIS_LOG_ERROR, "FUCKING HELL");
+            }
+
+            self->buffers.at(self->current_buffer)->setImageBuffer(desc);
+            //tis_log(TIS_LOG_DEBUG, "Pushing new image buffer to sink.");
+            self->external_sink->pushImage(self->buffers.at(self->current_buffer));
+
+            if (self->current_buffer < self->buffers.size() -1)
+                self->current_buffer++;
+            else
+                self->current_buffer = 0;
+        }
+        else
+        {
+            std::string msg;
+            switch (buffer->status)
+            {
+                case ARV_BUFFER_STATUS_SUCCESS:
+                    msg = "the buffer is cleared";
+                    break;
+                case ARV_BUFFER_STATUS_TIMEOUT:
+                    msg = "Timeout has been reached before all packets were received";
+                    break;
+                case ARV_BUFFER_STATUS_MISSING_PACKETS:
+                {
+                    msg = "Stream has missing packets";
+
+                    // struct image_buffer desc = {0};
+
+                    // desc.format = self->active_video_format.getFormatDescription();
+
+
+                    // desc.pData = (unsigned char*)buffer->data;
+                    // desc.length = buffer->size;
+
+                    // if (buffer->data == NULL)
+                    // {
+                    // tis_log(TIS_LOG_ERROR, "FUCKING HELL");
+                    // }
+
+                    // self->buffers.at(self->current_buffer)->setImageBuffer(desc);
+                    // tis_log(TIS_LOG_DEBUG, "Pushing new image buffer to sink.");
+                    // self->external_sink->pushImage(self->buffers.at(self->current_buffer));
+
+                    // if (self->current_buffer < self->buffers.size() -1)
+                    // self->current_buffer++;
+                    // else
+                    // self->current_buffer = 0;
+
+                    break;
+                }
+                case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
+                    msg = "Stream has packet with wrong id";
+                    break;
+                case ARV_BUFFER_STATUS_SIZE_MISMATCH:
+                    msg = "The received image did not fit in the buffer data space";
+                    break;
+                case ARV_BUFFER_STATUS_FILLING:
+                    msg = "The image is currently being filled";
+                    break;
+                case ARV_BUFFER_STATUS_ABORTED:
+                    msg = "The filling was aborted before completion";
+                    break;
+                case ARV_BUFFER_STATUS_CLEARED:
+                    msg = "Buffer cleared";
+                    break;
+            }
+            tis_log(TIS_LOG_WARNING, msg.c_str());
+        }
+        //tis_log(TIS_LOG_DEBUG, "Returning buffer to aravis.");
+        arv_stream_push_buffer(self->stream, buffer);
+    }
+    else
+    {
+        // switch (type)
+        // {
+        // case ARV_STREAM_CALLBACK_TYPE_INIT:
+        // // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: thread initialization", source->mClassName.c_str());
+        // break;
+        // case ARV_STREAM_CALLBACK_TYPE_EXIT:
+        // // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: thread end", source->mClassName.c_str());
+        // break;
+        //case ARV_STREAM_CALLBACK_TYPE_START_BUFFER:
+        // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: buffer filling start", source->mClassName.c_str());
+        // break;
+        //case ARV_STREAM_CALLBACK_TYPE_BUFFER_DONE:
+        // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: buffer filled", source->mClassName.c_str());
+        // break;
+        // }
+    }
+
+}
+
 
 //// genicam handling
 
