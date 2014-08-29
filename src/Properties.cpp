@@ -75,7 +75,14 @@ PropertyStringMap::~PropertyStringMap ()
 
 std::vector<std::string> PropertyStringMap::getValues () const
 {
+    std::vector<std::string> vec;
 
+    for (auto m : string_map)
+    {
+        vec.push_back(std::get<0>(m));
+    }
+
+    return vec;
 }
 
 
