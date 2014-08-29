@@ -79,6 +79,18 @@ void VideoFormat::setSize (const unsigned int& width, const unsigned int& height
 }
 
 
+unsigned int VideoFormat::getBinning () const
+{
+    return format.binning;
+}
+
+
+void VideoFormat::setBinning (const unsigned int binning)
+{
+    format.binning = binning;
+}
+
+
 std::string VideoFormat::getString () const
 {
     std::string s;
