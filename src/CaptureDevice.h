@@ -41,6 +41,8 @@ public:
     
     enum TIS_DEVICE_TYPE getDeviceType () const;
 
+    std::string getDeviceTypeAsString () const;
+
 private:
 
     /// internal device representation

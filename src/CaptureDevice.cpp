@@ -66,6 +66,22 @@ enum TIS_DEVICE_TYPE CaptureDevice::getDeviceType () const
 
 
 std::shared_ptr<std::vector<CaptureDevice> > tis_imaging::getAvailableCaptureDevices ()
+std::string CaptureDevice::getDeviceTypeAsString () const
+{
+    switch (device.type)
+    {
+        case TIS_DEVICE_TYPE_USB:
+            return "USB";
+        case TIS_DEVICE_TYPE_GIGE:
+            return "GigE";
+        case TIS_DEVICE_TYPE_FIREWIRE:
+            return "Firewire";
+        default:
+            return "";
+    }
+}
+
+
 {
     int count = tis_get_camera_count();
 
