@@ -469,7 +469,18 @@ void AravisDevice::iterate_genicam (const char* feature)
         }
         else
         {
-            // index_genicam_controls(camera, node, feature, mapping);
+            property_mapping m;
+
+            m.arv_ident = feature;
+            m.prop = createProperty(arv_camera, node, shared_from_this());
+
+            if (m.prop == nullptr)
+            {
+                tis_log(TIS_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+                return;
+            }
+
+            properties.push_back(m);
         }
     }
 }
