@@ -113,6 +113,11 @@ VideoFormat AravisDevice::getActiveVideoFormat () const
 
 std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
 {
+    if (this->available_videoformats.empty())
+    {
+        this->index_genicam();
+    }
+
     return available_videoformats;
 }
 
