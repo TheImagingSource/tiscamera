@@ -83,6 +83,13 @@ struct camera_property Property::getStruct () const
 }
 
 
+bool Property::setStruct (const struct camera_property& p)
+{
+    // TODO: only copy actual value;
+    this->prop = p;
+    return true;
+}
+
 
 Property::VALUE_TYPE Property::getValueType () const
 {

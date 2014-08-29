@@ -60,6 +60,8 @@ public:
     uint32_t getFlags () const;
 
     struct camera_property getStruct () const;
+    bool setStruct (const struct camera_property&);
+
     Property::VALUE_TYPE getValueType () const;
 
 protected:
