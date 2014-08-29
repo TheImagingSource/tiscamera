@@ -147,9 +147,11 @@ std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
 }
 
 
-bool AravisDevice::setSink (std::shared_ptr<SinkInterface>)
+bool AravisDevice::setSink (std::shared_ptr<SinkInterface> s)
 {
-    return false;
+    this->external_sink = s;
+
+    return true;
 }
 
 

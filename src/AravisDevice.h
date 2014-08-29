@@ -56,6 +56,8 @@ private:
     
     ArvCamera* arv_camera;
 
+    std::shared_ptr<SinkInterface> external_sink;
+
 
     struct aravis_options
     {
