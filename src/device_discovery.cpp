@@ -229,8 +229,18 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
         ArvCamera* cam = arv_camera_new(name.c_str());
         
         ptr->type = TIS_DEVICE_TYPE_GIGE;
-        strcpy(ptr->name, arv_camera_get_model_name(cam));
-        
+        // TODO: check if name is terminated
+        // strcpy(ptr->name, arv_camera_get_model_name(cam));
+        const char* n =  arv_camera_get_model_name(cam);
+
+        if (n != NULL)
+        {
+            strncpy(ptr->name, n, sizeof(ptr->name));
+        }
+        else
+        {
+            tis_log(TIS_LOG_WARNING, "Unable to determine model name.");
+        }
         size_t t = name.find("-");
 
         if (t != std::string::npos)
