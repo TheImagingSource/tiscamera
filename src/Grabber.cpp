@@ -89,6 +89,7 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
 {
     if (!isDeviceOpen())
     {
+        tis_log(TIS_LOG_ERROR, "No open device");
         return std::vector<VideoFormatDescription>();
     }
 
@@ -100,6 +101,7 @@ bool Grabber::setVideoFormat (const VideoFormat& _format)
 {
     if (!isDeviceOpen())
     {
+        tis_log(TIS_LOG_ERROR, "No open device");
         return false;
     }
         
@@ -111,6 +113,7 @@ VideoFormat Grabber::getActiveVideoFormat () const
 {
     if(!isDeviceOpen())
     {
+        tis_log(TIS_LOG_ERROR, "No open device");
         return VideoFormat();
     }
         
