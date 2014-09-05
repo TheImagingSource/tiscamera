@@ -48,11 +48,10 @@ public:
 
     // playback related:
 
-    bool setPipelineStatus ();
+    bool startStream (std::shared_ptr<ImageSink>);
 
-    void getPipelineStatus () const;
+    bool stopStream ();
 
-    
 private:
 
     std::shared_ptr<PipelineManager> pipeline;

@@ -116,3 +116,29 @@ VideoFormat Grabber::getActiveVideoFormat () const
     return device->getActiveVideoFormat();
 }
 
+
+bool Grabber::startStream (std::shared_ptr<ImageSink> sink)
+{
+    if (!isDeviceOpen())
+    {
+        tis_log(TIS_LOG_ERROR, "No open device");
+        return false;
+    }
+    pipeline->setSink(sink);
+
+    return pipeline->setPipelineStatus(PIPELINE_PLAYING);
+}
+
+
+bool Grabber::stopStream ()
+{
+    if (!isDeviceOpen())
+    {
+        tis_log(TIS_LOG_ERROR, "No open device");
+        return false;
+    }
+
+    return pipeline->setPipelineStatus(PIPELINE_STOPPED);
+}
+
+
