@@ -103,6 +103,7 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
 void ImageSource::initialize_buffers ()
 {
+    // TODO:
     struct video_format format = {};
 
     format.fourcc = V4L2_PIX_FMT_GREY;
@@ -111,8 +112,7 @@ void ImageSource::initialize_buffers ()
     format.binning = 0;
     format.framerate = 0.1;
 
-    // TODO:
-    int bit_depth = 1;
+    int bit_depth = img::getBitsPerPixel(format.fourcc);
 
     for (unsigned int i = 0; i < this->n_buffers; ++i)
     {
@@ -121,11 +121,9 @@ void ImageSource::initialize_buffers ()
         b.pData = NULL;
         b.length = format.width * format.height * bit_depth;
         b.format = format;
-        b.pitch = 1;
+        b.pitch = format.width * bit_depth;
 
         auto ptr = std::make_shared<MemoryBuffer>(MemoryBuffer(b));
-
-        //ptr->isLocked();
 
         this->buffers.push_back(ptr);
     }
