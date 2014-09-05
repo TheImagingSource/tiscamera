@@ -105,7 +105,7 @@ struct image_buffer
     unsigned char*      pData;  /* pointer to actual image buffer */
     unsigned int        length; /* size if image buffer in bytes */
     struct video_format format;
-    unsigned int        pitch;  /* in bytes */
+    unsigned int        pitch;  /* length of single image line in bytes */
 };
 
 

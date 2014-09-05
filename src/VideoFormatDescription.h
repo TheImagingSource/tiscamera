@@ -36,16 +36,16 @@ public:
 
     VideoFormatDescription (const VideoFormatDescription&);
 
-    
+
     VideoFormatDescription& operator= (const VideoFormatDescription&);
 
     bool operator== (const VideoFormatDescription& other);
     bool operator!= (const VideoFormatDescription& other);
 
-    
+
     ~VideoFormatDescription ();
 
-    
+
     struct video_format_description getFormatDescription () const;
 
     std::vector<res_fps> getResolutionsFramesrates () const;
@@ -60,9 +60,9 @@ public:
     bool isValidVideoFormat (const VideoFormat&) const;
 
     bool isValidFramerate (const double framerate) const;
-    
+
     bool isValidResolution (const unsigned int width, const unsigned int height) const;
-    
+
 private:
 
     video_format_description format;

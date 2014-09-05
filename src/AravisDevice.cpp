@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <cstring>
-// #include <iostream>
+
 
 using namespace tis_imaging;
 
@@ -34,7 +34,7 @@ AravisDevice::AravisDevice (const CaptureDevice& _device)
 }
 
 
-AravisDevice::~AravisDevice()
+AravisDevice::~AravisDevice ()
 {
     if (arv_camera != NULL)
     {
@@ -179,7 +179,6 @@ bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>
 
 bool AravisDevice::release_buffers ()
 {
-
     buffers.clear();
 
     return true;
@@ -199,8 +198,6 @@ bool AravisDevice::start_stream ()
         return false;
     }
 
-    //this->arv_camera = arv_camera_new(device.getInfo().identifier);
-
     this->stream = arv_camera_create_stream(this->arv_camera, NULL, NULL);
 
     if (this->stream == NULL)
@@ -210,11 +207,6 @@ bool AravisDevice::start_stream ()
         return false;
     }
     int payload = arv_camera_get_payload(this->arv_camera);
-
-    for (int i = 0; i < 50; ++i)
-    {
-        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, NULL));
-    }
 
     if (ARV_IS_GV_STREAM (this->stream))
     {
@@ -231,16 +223,15 @@ bool AravisDevice::start_stream ()
                           "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER,
                           NULL);
         }
-        else
-        {
-            // g_object_set (this->stream,
-            // "packet-resend", ARV_GV_STREAM_PACKET_RESEND_ALWAYS,
-            // NULL);
-        }
         g_object_set (this->stream,
                       "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
                       NULL);
+    }
+
+    for (int i = 0; i < 50; ++i)
+    {
+        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, NULL));
     }
 
     arv_stream_set_emit_signals (this->stream, TRUE);
@@ -433,7 +424,7 @@ void AravisDevice::iterate_genicam (const char* feature)
             return;
         }
 
-
+// TODO: how to handle private settings
         std::vector<std::string> private_settings = { "TLParamsLocked",
                                                       "GevSCPSDoNotFragment",
                                                       "GevTimestampTickFrequency",
