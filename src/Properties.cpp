@@ -142,7 +142,7 @@ PropertySwitch::~PropertySwitch ()
 
 bool PropertySwitch::getDefault () const
 {
-    return prop.value.i.default_value;
+    return prop.value.b.default_value;
 }
 
 
@@ -161,7 +161,7 @@ bool PropertySwitch::setValue (const bool&)
 
 bool PropertySwitch::getValue () const
 {
-    return prop.value.i.value;
+    return prop.value.b.value;
 }
 
 
