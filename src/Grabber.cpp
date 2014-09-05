@@ -135,7 +135,9 @@ bool Grabber::setVideoFormat (const VideoFormat& _format)
         tis_log(TIS_LOG_ERROR, "No open device");
         return false;
     }
-        
+
+    pipeline->setVideoFormat(_format);
+
     return this->device->setVideoFormat(_format);
 }
 
