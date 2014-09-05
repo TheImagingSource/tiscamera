@@ -106,15 +106,21 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
                                                      find_control_ref);
 
     PROPERTY_TYPE type_to_use;
+    camera_property cp = {};
 
     if (ctrl_m == ctrl_reference_table.end())
     {
+        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through.");
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
+        memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
+        cp.type = value_type_to_ctrl_type(type);
     }
     else
     {
         type_to_use = ctrl_m->type_to_use;
+        memcpy(cp.name, ctrl_m->name.c_str(), ctrl_m->name.size());
+        cp.type = ctrl_m->type_to_use;
     }
 
     uint32_t flags;
@@ -128,24 +134,17 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
     {
         case PROPERTY_TYPE_BOOLEAN:
         {
-            camera_property cp = {};
-            memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
-            cp.type = PROPERTY_TYPE_BOOLEAN;
             cp.value.i.min = 0;
             cp.value.i.max = 1;
             cp.value.i.step = 1;
             cp.value.i.default_value = queryctrl->default_value;
             cp.value.i.value = ctrl->value;
             cp.flags = flags;
-            return std::make_shared<Property>(PropertySwitch(impl, cp, type));
 
+            return std::make_shared<Property>(PropertySwitch(impl, cp, type));
         }
         case PROPERTY_TYPE_INTEGER:
         {
-            camera_property cp = {};
-            memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
-
-            cp.type = PROPERTY_TYPE_INTEGER;
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;
             cp.value.i.step = queryctrl->step;
@@ -161,9 +160,6 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         // }
         case PROPERTY_TYPE_STRING:
         {
-            camera_property cp = {};
-            memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
-            cp.type = PROPERTY_TYPE_STRING;
             memcpy(cp.value.s.value,(char*)queryctrl->name, sizeof(cp.value.s.value));
             memcpy(cp.value.s.default_value, (char*)queryctrl->name, sizeof(cp.value.s.default_value));
             cp.flags = flags;
@@ -172,10 +168,6 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         }
         case PROPERTY_TYPE_STRING_TABLE:
         {
-            camera_property cp = {};
-
-            memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
-            cp.type = PROPERTY_TYPE_STRING_TABLE;
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;
             cp.value.i.step = 0;
@@ -203,10 +195,6 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         }
         case PROPERTY_TYPE_BUTTON:
         {
-            camera_property cp = {};
-            memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
-
-            cp.type = PROPERTY_TYPE_BUTTON;
             cp.flags = flags;
 
             return std::make_shared<Property>(PropertyButton(impl, cp, type));
@@ -292,13 +280,6 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
     auto ctrl_m = std::find_if( ctrl_reference_table.begin() ,
                                 ctrl_reference_table.end(),
                                 find_control_ref);
-
-    // struct control_reference* ctrl_m = std::find_if( std::begin(ctrl_reference_table),
-    //                                                  std::end(ctrl_reference_table),
-    //                                                  find_control_ref);
-
-
-    // tis_log(TIS_LOG_DEBUG, "'%s'", ctrl_reference_table.at(0).genicam_name.at(0).c_str());
 
     // type which the control shall use
     PROPERTY_TYPE type_to_use;
