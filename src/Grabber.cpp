@@ -21,6 +21,21 @@ Grabber::~Grabber ()
 
 bool Grabber::openDevice (const CaptureDevice& _device)
 {
+    if (pipeline->getPipelineStatus() == PIPELINE_PLAYING ||
+        pipeline->getPipelineStatus() == PIPELINE_PAUSED)
+    {
+        return false;
+    }
+
+    if (isDeviceOpen())
+    {
+        bool ret = closeDevice();
+        if (ret == false)
+        {
+            tis_log(TIS_LOG_ERROR, "Unable to close previous device.");
+            return false;
+        }
+    }
 
     open_device = _device;
 
@@ -30,7 +45,16 @@ bool Grabber::openDevice (const CaptureDevice& _device)
     {
         return false;
     }
+
     device_properties = device->getProperties();
+
+    tis_log(TIS_LOG_DEBUG, "Retrieved %d properties",device_properties.size());
+    bool ret = pipeline->setSource(device);
+
+    if (ret == true)
+    {
+        pipeline_properties = pipeline->getFilterProperties();
+    }
     
     return true;
 }
