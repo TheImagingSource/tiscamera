@@ -82,6 +82,7 @@ bool V4l2Device::setProperty (const Property& _property)
 
     if (desc == properties.end())
     {
+        tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", _property.getName().c_str());
         // TODO: failure description
         return false;
     }
@@ -379,6 +380,7 @@ bool V4l2Device::start_stream ()
 
     is_stream_on = true;
 
+    tis_log(TIS_LOG_INFO, "Starting stream in work thread.");
     this->work_thread = std::thread(&V4l2Device::stream, this);
 
     return true;
