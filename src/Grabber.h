@@ -6,6 +6,7 @@
 #include "CaptureDevice.h"
 #include "DeviceInterface.h"
 #include "Properties.h"
+#include "PipelineManager.h"
 
 #include <string>
 #include <vector>
@@ -53,6 +54,8 @@ public:
 
     
 private:
+
+    std::shared_ptr<PipelineManager> pipeline;
 
     // GrabberImpl* impl;
     
