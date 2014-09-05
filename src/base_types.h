@@ -10,6 +10,8 @@
    - C API
  */
 
+#include "image_transform_base.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
