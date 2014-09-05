@@ -14,6 +14,14 @@
 namespace tis_imaging
 {
 
+
+struct res_fps
+{
+    IMG_SIZE resolution;
+    std::vector<double> fps;
+};
+
+
 class VideoFormatDescription
 {
 public:
@@ -23,7 +31,9 @@ public:
     VideoFormatDescription (const struct video_format_description&,
                             const std::vector<double>&);
 
-    
+    VideoFormatDescription (const struct video_format_description&,
+                            const std::vector<res_fps>&);
+
     VideoFormatDescription (const VideoFormatDescription&);
 
     
@@ -38,13 +48,14 @@ public:
     
     struct video_format_description getFormatDescription () const;
 
+    std::vector<res_fps> getResolutionsFramesrates () const;
+
+    std::vector<IMG_SIZE> getResolutions () const;
 
     IMG_SIZE getSizeMin () const;
-
-    
     IMG_SIZE getSizeMax () const;
-    
-    std::vector<double> getFrameRates () const;
+
+    std::vector<double> getFrameRates (const IMG_SIZE& size) const;
 
     bool isValidVideoFormat (const VideoFormat&) const;
 
@@ -56,7 +67,7 @@ private:
 
     video_format_description format;
 
-    std::vector<double> framerates;
+    std::vector<res_fps> rf;
 
 };
 

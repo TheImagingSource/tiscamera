@@ -12,23 +12,30 @@ using namespace tis_imaging;
 
 VideoFormatDescription::VideoFormatDescription (const struct video_format_description& _format,
                                                 const std::vector<double>& _framerates)
-    : framerates(_framerates)
 {
     memcpy(&format, &_format, sizeof(format));
+}
+
+
+VideoFormatDescription::VideoFormatDescription (const struct video_format_description& f,
+                                                const std::vector<res_fps>& r)
+    : rf(r)
+{
+    memcpy(&format, &f, sizeof(format));
 }
 
 
 VideoFormatDescription::VideoFormatDescription (const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
-    framerates = other.framerates;
+    rf = other.rf;
 }
 
 
 VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
-    framerates = other.framerates;
+    rf = other.rf;
 
     return *this;
 }
@@ -36,8 +43,8 @@ VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDesc
 
 bool VideoFormatDescription::operator== (const VideoFormatDescription& other)
 {
-    return (memcmp(&format, &other.format, sizeof(format)) == 0) &&
-        (framerates == framerates);
+    // TODO: complete comparison
+    return (memcmp(&format, &other.format, sizeof(format)) == 0);
 }
 
 
@@ -58,6 +65,25 @@ struct video_format_description VideoFormatDescription::getFormatDescription () 
 }
 
 
+std::vector<res_fps> VideoFormatDescription::getResolutionsFramesrates () const
+{
+    return rf;
+}
+
+
+std::vector<IMG_SIZE> VideoFormatDescription::getResolutions () const
+{
+    std::vector<IMG_SIZE> vec;
+
+    for (auto r : rf)
+    {
+        vec.push_back(r.resolution);
+    }
+
+    return vec;
+}
+
+
 IMG_SIZE VideoFormatDescription::getSizeMin () const
 {
     return format.min_size;
@@ -70,7 +96,20 @@ IMG_SIZE VideoFormatDescription::getSizeMax () const
 }
 
 
-std::vector<double> VideoFormatDescription::getFrameRates () const
+std::vector<double> VideoFormatDescription::getFrameRates (const IMG_SIZE& size) const
+{
+
+    for (auto r : rf)
+    {
+        if (size.width == r.resolution.width && size.height == r.resolution.height)
+        {
+            return r.fps;
+        }
+    }
+
+    return std::vector<double>();
+}
+
 {
     return framerates;
 }

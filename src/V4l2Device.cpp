@@ -421,6 +421,8 @@ void V4l2Device::index_formats ()
         memcpy (desc.description, fmtdesc.description, 256);
         frms.pixel_format = fmtdesc.pixelformat;
 
+        std::vector<res_fps> rf;
+
         for (frms.index = 0; ! tis_xioctl (fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
@@ -429,12 +431,14 @@ void V4l2Device::index_formats ()
                 desc.max_size.width = frms.discrete.width;
                 desc.min_size.height = frms.discrete.height;
                 desc.max_size.height = frms.discrete.height;
+
+                IMG_SIZE s = { frms.discrete.width, frms.discrete.height };
+
                 desc.framerate_type = TIS_FRAMERATE_TYPE_FIXED;
                 std::vector<double> f = index_framerates(frms);
 
-                VideoFormatDescription format(desc, f);
-                available_videoformats.push_back(format);
-
+                res_fps r = { s, f };
+                rf.push_back(r);
             }
             else
             {
@@ -442,6 +446,9 @@ void V4l2Device::index_formats ()
                 tis_log(TIS_LOG_ERROR, "Encountered unknown V4L2_FRMSIZE_TYPE");
             }
         }
+
+        VideoFormatDescription format(desc, rf);
+        available_videoformats.push_back(format);
     }
 
 }
