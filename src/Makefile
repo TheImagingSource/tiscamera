@@ -27,9 +27,18 @@ ifeq ($(HAVE_ARAVIS), 1)
 # LDFLAGS+= -L/home/edt/work/aravis/src/.libs -laravis-0.4
 LDFLAGS+= $(shell pkg-config --libs aravis-0.4)
 CFLAGS+= -DHAVE_ARAVIS $(shell pkg-config --cflags aravis-0.4)
+OBJECT_FILES+= AravisDevice.o
 # OBJECT_FILES+= 			camera_gige_interface.o \
 
 endif
+
+
+# FILTER_DIR="./filter"
+
+# FILTER:
+# 	$(MAKE) -C $(FILTER_DIR) all
+
+
 
 
 # $(shell pkg-config --cflags opencv) \
