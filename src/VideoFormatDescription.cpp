@@ -110,8 +110,22 @@ std::vector<double> VideoFormatDescription::getFrameRates (const IMG_SIZE& size)
     return std::vector<double>();
 }
 
+
+VideoFormat VideoFormatDescription::createVideoFormat (const unsigned int width,
+                                                       const unsigned int height,
+                                                       const double framerate) const
 {
-    return framerates;
+
+    // TODO validity check
+
+    video_format f = {};
+
+    f.fourcc = this->format.fourcc;
+    f.width = width;
+    f.height = height;
+    f.binning = this->format.binning;
+
+    return VideoFormat(f);
 }
 
 
