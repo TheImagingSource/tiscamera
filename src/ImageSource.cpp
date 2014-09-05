@@ -96,8 +96,10 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
     // tis_log(TIS_LOG_INFO, "received buffer");
 
-
-    pipeline.lock()->pushImage(buffer);
+    if (!pipeline.expired())
+        pipeline.lock()->pushImage(buffer);
+    else
+        tis_log(TIS_LOG_ERROR, "Pipeline over expiration date.");
 }
 
 
