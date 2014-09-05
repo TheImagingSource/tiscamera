@@ -82,7 +82,7 @@ endif
 
 .PHONY: all clean
 
-all: $(LIB)  $(APP)
+all:  $(APP) $(LIB)
 
 .c.o:
 	$(CXX) $(CFLAGS) -c -o $@ $^
@@ -99,7 +99,11 @@ libtis_imaging.so: $(OBJECT_FILES)
 	$(CXX) -shared -fpic $(CPPFLAGS)  $^ -o $@ $(LINK_OPTIONS) $(LDFLAGS)
 
 $(APP): $(LIB) main.o
-	$(CXX) main.o  -o $@  $(CPPFLAGS)  -L. -ltis_imaging 
+	$(CXX) main.o  -o $@  $(CPPFLAGS)  -L. -ltis_imaging $(shell pkg-config --libs-only-l opencv libv4l2)
+
+clean_filter:
+	$(MAKE) -C $(FILTER_DIR) clean
+
 
 clean:
 	$(RM) $(APP)
