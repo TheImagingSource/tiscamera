@@ -91,8 +91,8 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
     {
         return std::vector<VideoFormatDescription>();
     }
-    
-    return device->getAvailableVideoFormats();
+
+    return pipeline->getAvailableVideoFormats();
 }
 
 
