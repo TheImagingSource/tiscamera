@@ -81,6 +81,8 @@ bool Grabber::closeDevice ()
 {
     std::string name = open_device.getName();
 
+    pipeline->destroyPipeline();
+
     open_device = CaptureDevice ();
     device.reset();
     device_properties.clear();
