@@ -177,6 +177,6 @@ void Property::notifyImpl ()
 
     auto ptr(impl.lock());
 
-    tis_log(TIS_LOG_DEBUG, "Notifying impl about property change.");
+    // tis_log(TIS_LOG_DEBUG, "Notifying impl about property change.");
     ptr->setProperty(*this);
 }
