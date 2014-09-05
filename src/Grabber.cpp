@@ -100,11 +100,16 @@ std::vector<Property> Grabber::getAvailableProperties ()
 
     std::vector<Property> props;
 
-    for ( const auto& p : device_properties )
+    for (const auto& p : device_properties)
     {
         props.push_back(*p);
     }
-    
+
+    for ( const auto& p : pipeline_properties)
+    {
+        props.push_back(*p);
+    }
+
     return props;
 }
 
