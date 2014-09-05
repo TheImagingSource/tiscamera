@@ -57,7 +57,10 @@ OBJECT_FILES= \
  Property.o \
  Properties.o \
  PropertyGeneration.o \
+ FilterLoader.o \
+ MemoryBuffer.o \
  ImageSink.o \
+ PipelineManager.o \
  ImageSource.o
 
 ifeq ($(HAVE_ARAVIS), 1)
