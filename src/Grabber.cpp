@@ -8,6 +8,7 @@ using namespace tis_imaging;
 
 
 Grabber::Grabber ()
+    : device(nullptr), pipeline(std::make_shared<PipelineManager>())
 {}
 
 
