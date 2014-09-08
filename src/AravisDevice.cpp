@@ -519,6 +519,8 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                    "Binning",
                                                    "SensorWidth",
                                                    "SensorHeight",
+                                                   "Width",
+                                                   "Height",
                                                    "FPS",
                                                    "PixelFormat"};
 
