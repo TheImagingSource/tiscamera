@@ -55,8 +55,6 @@ public:
     
     virtual PIPELINE_STATUS getStatus () const = 0;
 
-    virtual bool setVideoFormat (const VideoFormat&) = 0;
-    
     virtual bool setVideoFormat (const VideoFormat& in, const VideoFormat& out) = 0;
     
     virtual void setDeviceProperties (std::vector<std::shared_ptr<Property>>) = 0;
