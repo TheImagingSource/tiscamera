@@ -153,7 +153,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
     if (!setFramerate(_format.getFramerate()))
     {
         tis_log(TIS_LOG_ERROR, "Unable to set framerate to %f", _format.getFramerate());
-        return false;
+        // return false;
     }
 
     // copy format as local reference
