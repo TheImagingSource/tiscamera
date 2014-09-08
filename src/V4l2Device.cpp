@@ -119,6 +119,14 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
     // return false;
     // }
 
+
+    uint32_t fourcc  = _format.getFourcc();
+
+    if (fourcc == FOURCC_Y800)
+    {
+        fourcc = mmioFOURCC('G', 'R', 'E', 'Y');
+    }
+
     // set format in camera
 
     struct v4l2_format fmt = {};
@@ -128,7 +136,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
     fmt.fmt.pix.width = _format.getSize().width;
     fmt.fmt.pix.height = _format.getSize().height;
 
-    fmt.fmt.pix.pixelformat = _format.getFourcc();
+    fmt.fmt.pix.pixelformat = fourcc;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
     int ret = tis_xioctl(this->fd, VIDIOC_S_FMT, &fmt);
@@ -837,6 +845,10 @@ void V4l2Device::init_mmap_buffers ()
 
         buffer.format = active_video_format.getFormatDescription();
 
+        if (buffer.format.fourcc == mmioFOURCC('G', 'R', 'E', 'Y'))
+        {
+            buffer.format.fourcc = FOURCC_Y800;
+        }
         if (buffer.pData == MAP_FAILED)
         {
             tis_log(TIS_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);
