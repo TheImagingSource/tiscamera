@@ -61,7 +61,7 @@ bool Property::isReadOnly () const
 
 bool Property::isWriteOnly () const
 {
-    return (prop.flags & (1 << PROPERTY_FLAG_WRITE_ONLY));
+    return (prop.flags & ((long)1 << PROPERTY_FLAG_WRITE_ONLY));
 }
 
 
@@ -135,13 +135,14 @@ bool Property::setReadOnly (const bool only_read)
 
 bool Property::setWriteOnly (const bool only_write)
 {
+    long val = 1;
     if (only_write)
     {
-        prop.flags |= 1 << PROPERTY_FLAG_WRITE_ONLY;
+        prop.flags |= val << PROPERTY_FLAG_WRITE_ONLY;
     }
     else
     {
-        prop.flags &= ~(1 << PROPERTY_FLAG_WRITE_ONLY);
+        prop.flags &= ~(val << PROPERTY_FLAG_WRITE_ONLY);
     }
 
     return true;
