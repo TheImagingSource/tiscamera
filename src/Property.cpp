@@ -85,8 +85,29 @@ struct camera_property Property::getStruct () const
 
 bool Property::setStruct (const struct camera_property& p)
 {
-    // TODO: only copy actual value;
-    this->prop = p;
+    switch (prop.type)
+    {
+        case PROPERTY_TYPE_STRING:
+            std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
+        case PROPERTY_TYPE_STRING_TABLE:
+            prop.value.i.value = p.value.i.value;
+            break
+        case PROPERTY_TYPE_INTEGER:
+            prop.value.i.value = p.value.i.value;
+            break;
+        case PROPERTY_TYPE_DOUBLE:
+            prop.value.d.value = p.value.d.value;
+            break;
+        case PROPERTY_TYPE_BUTTON:
+            // do nothing
+            break;
+        case PROPERTY_TYPE_BOOLEAN:
+            prop.value.b.value = p.value.b.value;
+            break;
+        case PROPERTY_TYPE_UNKNOWN:
+        default:
+            return false;
+    }
     return true;
 }
 
