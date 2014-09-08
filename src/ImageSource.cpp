@@ -79,9 +79,10 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
     return true;
 }
 
-bool ImageSource::setVideoFormat (const VideoFormat&)
-{
 
+bool ImageSource::setVideoFormat (const VideoFormat& f)
+{
+    return device->setVideoFormat(f);
 }
 
 
