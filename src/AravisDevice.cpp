@@ -74,9 +74,85 @@ bool AravisDevice::isAvailable (const Property&)
 }
 
 
-bool AravisDevice::setProperty (const Property&)
+bool AravisDevice::setProperty (const Property& p)
 {
-    return false;
+    auto f = [p] (const property_mapping& m)
+        {
+            return p.getName().compare(m.prop->getName()) == 0;
+        };
+
+    auto pm = std::find_if(properties.begin(), properties.end(), f);
+
+    if (pm == properties.end())
+    {
+        return false;
+    }
+
+    auto device = arv_camera_get_device(arv_camera);
+
+    Property::VALUE_TYPE value_type = pm->prop->getValueType();
+
+    PROPERTY_TYPE type = pm->prop->getType();
+
+    if (type == PROPERTY_TYPE_INTEGER)
+    {
+        auto prop_impl = (PropertyInteger&) (*pm->prop);
+    }
+    else if (type == PROPERTY_TYPE_DOUBLE)
+    {
+
+    }
+    else
+    {
+        return false;
+    }
+
+    switch (value_type)
+    {
+        case Property::BOOLEAN:
+        {
+            break;
+        }
+        case Property::STRING:
+        {
+            break;
+        }
+        case Property::ENUM:
+        {
+            break;
+        }
+        case Property::INTEGER:
+        {
+            // PropertyInteger&
+            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (*pm->prop)).getValue());
+            break;
+        }
+        case Property::INTSWISSKNIFE:
+        {
+            break;
+        }
+        case Property::FLOAT:
+        {
+            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (*pm->prop)).getValue());
+            break;
+        }
+        case Property::COMMAND:
+        {
+            //arv_device_
+            arv_device_execute_command(device, pm->arv_ident.c_str());
+            break;
+        }
+        case Property::BUTTON:
+        {
+            break;
+        }
+        case Property::UNDEFINED:
+        default:
+        {
+            break;
+        }
+    }
+    return true;
 }
 
 
