@@ -3,7 +3,7 @@
 #define _CONFIG_H_
 
 
-#define HAVE_ARAVIS 1
+// #define HAVE_ARAVIS 1
 
 
 #define HAVE_USB 1
