@@ -412,6 +412,39 @@ bool V4l2Device::stop_stream ()
 }
 
 
+bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
+{
+
+    new_desc = fmtdesc;
+    // TODO: incorporate image_transform_base.h for fourcc definitions
+    if (strcmp((const char*)fmtdesc.description, "47425247-0000-0010-8000-00aa003") == 0)
+    {
+        new_desc.pixelformat = FOURCC_GBRG8;
+        memcpy(new_desc.description, "BayerGB8", sizeof(new_desc.description));
+        return true;
+    }
+    else if (strcmp((const char*)fmtdesc.description, "42474752-0000-0010-8000-00aa003") == 0)
+    {
+        new_desc.pixelformat = FOURCC_BGGR8;
+        memcpy(new_desc.description, "BayerBG8", sizeof(new_desc.description));
+        return true;
+    }
+    else if (strcmp((const char*)fmtdesc.description, "52474742-0000-0010-8000-00aa003") == 0)
+    {
+        new_desc.pixelformat = FOURCC_RGGB8;
+        memcpy(new_desc.description, "BayerRG8", sizeof(new_desc.description));
+        return true;
+    }
+    else if (strcmp((const char*)fmtdesc.description, "47524247-0000-0010-8000-00aa003") == 0)
+    {
+        new_desc.pixelformat = FOURCC_GRBG8;
+        memcpy(new_desc.description, "BayerGR8", sizeof(new_desc.description));
+        return true;
+    }
+
+    return false;
+}
+
 
 void V4l2Device::index_formats ()
 {
@@ -424,10 +457,15 @@ void V4l2Device::index_formats ()
     {
         struct video_format_description desc = {};
 
+        // TODO: handle bayer formats in older kernels
+        // 42474752-0000-0010-8000-00aa003 has fourcc 0
+        struct v4l2_fmtdesc new_desc = {};
+        checkForBayer(fmtdesc, new_desc);
+
         // internal fourcc definitions are identical with v4l2
-        desc.fourcc = fmtdesc.pixelformat;
-        memcpy (desc.description, fmtdesc.description, 256);
-        frms.pixel_format = fmtdesc.pixelformat;
+        desc.fourcc = new_desc.pixelformat;
+        memcpy (desc.description, new_desc.description, 256);
+        frms.pixel_format = new_desc.pixelformat;
 
         std::vector<res_fps> rf;
 
