@@ -247,6 +247,17 @@ void PipelineManager::distributeProperties ()
 }
 
 
+bool isFilterApplicable (const uint32_t& fourcc,
+                         const std::vector<uint32_t>& vec)
+{
+    if (std::find(vec.begin(), vec.end(), fourcc) == vec.end())
+    {
+        return false;
+    }
+    return true;
+}
+
+
 bool PipelineManager::create_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
