@@ -118,7 +118,10 @@ std::string VideoFormat::getString () const
 {
     std::string s;
 
-    s  = "format="    +fourcc2string(format.fourcc)    + ",";
+    s  = "format=";//    +
+    //s.append(fourcc2description(format.fourcc));
+    s += std::to_string(format.fourcc);
+        s += ",";
     s += "width="     + std::to_string(format.width)   + ",";
     s += "height="    + std::to_string(format.height)  + ",";
     s += "binning="   + std::to_string(format.binning) + ",";
@@ -154,7 +157,7 @@ bool VideoFormat::setValuesFromString (const std::string& desc)
         
         if (val[0].compare("format") == 0)
         {
-            
+            // TODO: different format definitions
             // union
             // {
             //     uint32_t i;
@@ -164,7 +167,10 @@ bool VideoFormat::setValuesFromString (const std::string& desc)
             // f.c = val[1].c_str();
             
             // f.fourcc = stoi(val[1]);
-            f.fourcc = string2fourcc(val[1]);
+            // f.fourcc = string2fourcc(val[1]);
+            tis_log(TIS_LOG_ERROR, "format is  \"%s\"", val[1].c_str());
+
+            f.fourcc = std::stoul(val[1]);
         }
         else if (val[0].compare("width") == 0)
         {
