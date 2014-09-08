@@ -24,13 +24,11 @@ AravisDevice::AravisDevice (const CaptureDevice& _device)
     }
 
     arv_options.auto_socket_buffer = false;
-    arv_options.no_packet_resend = false;
-    // arv_options.no_packet_resend = TRUE;
-    arv_options.packet_timeout = 20;
-    arv_options.frame_retention = 100;
+    arv_options.no_packet_resend = true;
+    arv_options.packet_timeout = 40;
+    arv_options.frame_retention = 200;
 
-    index_genicam();
-
+    determine_active_video_format();
 }
 
 
