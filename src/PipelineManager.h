@@ -23,7 +23,6 @@ class PipelineManager : public SinkInterface, public std::enable_shared_from_thi
 public:
 
     PipelineManager ();
-    // PipelineManager (std::vector<std::shared_ptr<FilterBase>> filter);
 
     ~PipelineManager ();
 
