@@ -887,6 +887,10 @@ void V4l2Device::init_mmap_buffers ()
         {
             buffer.format.fourcc = FOURCC_Y800;
         }
+
+        // TODO: dynamically create values
+        buffer.format.fourcc = FOURCC_RGGB8;
+        buffer.pitch = buffer.format.width;
         if (buffer.pData == MAP_FAILED)
         {
             tis_log(TIS_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);
