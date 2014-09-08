@@ -37,6 +37,23 @@ VideoFormat& VideoFormat::operator= (const VideoFormat&  other)
 }
 
 
+bool VideoFormat::operator== (const VideoFormat& other) const
+{
+    return format.fourcc == other.format.fourcc
+        && format.width == other.format.width
+        && format.height == other.format.height
+        && format.binning == other.format.binning;
+
+    // TODO: framerate
+}
+
+
+bool VideoFormat::operator!= (const VideoFormat& other) const
+{
+    return !(*this == other);
+}
+
+
 VideoFormat::~VideoFormat ()
 {}
 

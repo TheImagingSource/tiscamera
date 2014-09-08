@@ -27,6 +27,10 @@ public:
     
     ~VideoFormat ();
 
+    bool operator== (const VideoFormat&) const;
+
+    bool operator!= (const VideoFormat& other) const;
+
     struct video_format getFormatDescription () const;
 
     uint32_t getFourcc () const;
