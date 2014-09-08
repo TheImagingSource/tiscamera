@@ -45,12 +45,9 @@ public:
      */
     bool destroyPipeline ();
 
-    void index_output_formats ();
-
     bool setSource (std::shared_ptr<DeviceInterface>);
 
     std::shared_ptr<ImageSource> getSource ();
-
     
     bool setSink (std::shared_ptr<ImageSink>);
     
@@ -96,6 +93,15 @@ private:
      * @brief Additional buffer used for internal image copies
      */
     std::vector<std::shared_ptr<MemoryBuffer>> pipeline_buffer;
+
+
+    /**
+     * Informs all available transformation filter about the available
+     * device formats to create a list about indirectly available formats
+     *
+     * requires defined source
+     */
+    void index_output_formats ();
     
     void distributeProperties ();
     
