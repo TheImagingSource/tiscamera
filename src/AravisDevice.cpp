@@ -728,6 +728,10 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                         // std::vector<buffer_size_desc> bsd_vec;
                         // bsd_vec.push_back(bsd);
 
+                        res_fps rf = {};
+
+                        rf.resolution = {};
+
                         // we create a format for every binning value and store it seperately
                         for ( const auto& b : binning)
                         {
