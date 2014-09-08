@@ -81,8 +81,8 @@ private:
     struct framerate_conv
     {
         double fps;
-        int numerator;
-        int denominator;
+        unsigned int numerator;
+        unsigned int denominator;
     };
 
     std::vector<framerate_conv> framerate_conversions;
