@@ -36,6 +36,17 @@ GST_DEBUG_CATEGORY_STATIC (gst_tiscolorize_debug_category);
 
 /* prototypes */
 
+
+static void gst_tiscolorize_set_property (GObject* object,
+                                          guint property_id,
+                                          const GValue* value,
+                                          GParamSpec* pspec);
+
+static void gst_tiscolorize_get_property (GObject* object,
+                                          guint property_id,
+                                          GValue* value,
+                                          GParamSpec* pspec);
+
 static void gst_tiscolorize_finalize (GObject* object);
 
 static GstFlowReturn gst_tiscolorize_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
@@ -47,6 +58,12 @@ static void gst_tiscolorize_fixate_caps (GstBaseTransform* base,
                                          GstPadDirection direction,
                                          GstCaps* caps,
                                          GstCaps* othercaps);
+
+enum
+{
+    PROP_0,
+    PROP_PATTERN,
+};
 
 /* pad templates */
 
@@ -85,27 +102,84 @@ static void gst_tiscolorize_class_init (GstTisColorizeClass* klass)
     gst_element_class_add_static_pad_template (GST_ELEMENT_CLASS(klass),
                                                &gst_tiscolorize_sink_template);
 
+
+    gobject_class->set_property = gst_tiscolorize_set_property;
+	gobject_class->get_property = gst_tiscolorize_get_property;
+    gobject_class->finalize = gst_tiscolorize_finalize;
+    base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
+    base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
+    base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
+
     gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
                                           "The Imaging Source White Balance Element",
                                           "Generic",
                                           "Adjusts white balancing of RAW video data buffers",
                                           "Arne Caspari <arne.caspari@gmail.com>");
 
-    gobject_class->finalize = gst_tiscolorize_finalize;
-    base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_ip);
-    base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_transform_caps);
-    base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tiscolorize_fixate_caps);
+	g_object_class_install_property (gobject_class,
+                                     PROP_PATTERN,
+                                     g_param_spec_string ("bayer-pattern",
+                                                          "Bayer Pattern",
+                                                          "Bayer Pattern to use:",
+                                                          NULL,
+                                                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
 }
+
+
+
+void gst_tiscolorize_set_property (GObject* object,
+                                   guint property_id,
+                                   const GValue* value,
+                                   GParamSpec* pspec)
+{
+    GstTisColorize* self = GST_TISCOLORIZE (object);
+
+    switch (property_id)
+    {
+        case PROP_PATTERN:
+            g_free(self->pattern);
+            self->pattern = g_strdup(g_value_get_string( value));
+            break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            break;
+    }
+}
+
+
+void gst_tiscolorize_get_property (GObject* object,
+                                     guint property_id,
+                                     GValue* value,
+                                     GParamSpec* pspec)
+{
+    GstTisColorize* self = GST_TISCOLORIZE (object);
+
+    switch (property_id)
+    {
+        case PROP_PATTERN:
+            g_value_set_string (value, self->pattern);
+            break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            break;
+    }
+}
+
 
 
 static void gst_tiscolorize_init (GstTisColorize* self)
 {
     self->i = 0;
+    self->pattern = NULL;
 }
 
 
 void gst_tiscolorize_finalize (GObject* object)
 {
+    GstTisColorize* self = (GstTisColorize*) object;
+    g_free(self->pattern);
+
     G_OBJECT_CLASS (gst_tiscolorize_parent_class)->finalize (object);
 }
 
@@ -342,8 +416,26 @@ static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
     outcaps = gst_caps_copy (caps);
     s = gst_caps_get_structure (outcaps, 0);
 
+    GstTisColorize* self = (GstTisColorize*) trans;
+
     if (direction == GST_PAD_SINK)
     {
+
+        if (self->pattern != NULL)
+        {
+
+            gst_debug_log (gst_tiscolorize_debug_category,
+                           GST_LEVEL_INFO,
+                           "tiscolorize",
+                           "gst_tiscolorize_transform_caps",
+                           __LINE__,
+                           NULL,
+                           "Setting format to \"%s\". As defined by user input.", self->pattern);
+            gst_structure_set_name (s, "video/x-raw-bayer");
+            gst_structure_set (s, "format", G_TYPE_STRING, self->pattern, NULL);
+
+            return outcaps;
+        }
 
         /* Here we get the parent element of the gstcolorize element (i.e. the pipeline),
            iterate all its children and search for the v4l2src element.

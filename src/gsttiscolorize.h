@@ -34,6 +34,7 @@ struct _GstTisColorize
 {
 	GstBaseTransform base_tiscolorize;
 
+    char* pattern;
 	int i;
 	GstPad *sinkpad;
 	GstPad *srcpad;
