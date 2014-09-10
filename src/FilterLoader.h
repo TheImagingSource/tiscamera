@@ -23,8 +23,15 @@ public:
 
     ~FilterLoader ();
 
+    /**
+     * @return vector containing shared_ptr to all found filter
+     */
     std::vector<std::shared_ptr<FilterBase>> get_all_filter ();
 
+    /**
+     * Forcefully closes all available filter
+     * shared_ptr to filter will be invalid after this method
+     */
     bool drop_all_filter ();
 
     void index_possible_filter ();

@@ -14,6 +14,9 @@
 namespace tis_imaging
 {
 
+/**
+ * @class
+ */
 class CaptureDevice
 {
 
@@ -33,6 +36,11 @@ public:
     
     ~CaptureDevice ();
 
+    /**
+     * @name getInfo
+     * @brief returns a struct version of the device description
+     * @return struct tis_device_info
+     */
     struct tis_device_info getInfo () const;
     
     std::string getName () const;
@@ -41,6 +49,10 @@ public:
     
     enum TIS_DEVICE_TYPE getDeviceType () const;
 
+    /**
+     * @brief returns @TIS_DEVICE_TYPE string representation
+     * @return std::string
+     */
     std::string getDeviceTypeAsString () const;
 
 private:
@@ -50,7 +62,11 @@ private:
     
 }; /* class CaptureDevice */
 
-/// @brief return a list of all identified capture devices
+/**
+ * @name getAvailableCaptureDevices
+ * @brief return a vector of all identified capture devices
+ * @return std::vector<CaptureDevice>; empty on error
+ */
 std::vector<CaptureDevice> getAvailableCaptureDevices ();
 
 } /* namespace tis_imaging */

@@ -1,20 +1,25 @@
 
 
+/**
+This file contains basic c types that are used for:
+- internal representation
+- C API
+*/
+
 
 #ifndef BASE_TYPES_H_
 #define BASE_TYPES_H_
-
-/**
-   This file contains basic c types that are used for:
-   - internal representation
-   - C API
- */
 
 #include "image_transform_base.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
+
+/**
+* @name PIPELINE_STATUS
+* @brief overview over possible pipeline states
+*/
 enum PIPELINE_STATUS
 {
     PIPELINE_UNDEFINED = 0,
@@ -41,18 +46,15 @@ enum TIS_DEVICE_TYPE
 };
 
 /**
- * Allows for reliable camera identification
+ * @name tis_device_info
  */
 struct tis_device_info
 {
-    enum TIS_DEVICE_TYPE type;
-    char name[128];
-    char identifier[128];
-    char serial_number[64];
+    enum TIS_DEVICE_TYPE type; ///< type of camera connection
+    char name[128];            ///< Camera name (e.g. DFK 23UP031)
+    char identifier[128];      ///< identifier used for camera interaction (e.g. /dev/video0)
+    char serial_number[64];    ///< unique identifier
 };
-
-
-
 
 
 struct IMG_SIZE
@@ -66,12 +68,15 @@ struct IMG_SIZE
  */
 enum TIS_FRAMERATE_TYPE
 {
-    TIS_FRAMERATE_TYPE_RANGE,    /* returned values should be interpreted as boundaries for value range */
-    TIS_FRAMERATE_TYPE_FIXED,         /* only non-negotiable framerates are offered */
+    TIS_FRAMERATE_TYPE_RANGE, ///< returned values should be interpreted as boundaries for value range
+    TIS_FRAMERATE_TYPE_FIXED, ///< only non-negotiable framerates are offered
 };
 
 
-
+/**
+ * @name video_format_description
+ * @brief generic format description
+ */
 struct video_format_description
 {
     uint32_t fourcc;
@@ -86,7 +91,10 @@ struct video_format_description
 };
 
 
-
+/**
+ * @name video_format
+ * @brief description of a specific video format
+ */
 struct video_format
 {
     uint32_t fourcc;
@@ -100,12 +108,16 @@ struct video_format
 };
 
 
+/**
+ * @name image_buffer
+ * @brief container for image transfer
+ */
 struct image_buffer
 {
-    unsigned char*      pData;  /* pointer to actual image buffer */
-    unsigned int        length; /* size if image buffer in bytes */
-    struct video_format format;
-    unsigned int        pitch;  /* length of single image line in bytes */
+    unsigned char*      pData;  /**< pointer to actual image buffer */
+    unsigned int        length; /**< size if image buffer in bytes */
+    struct video_format format; /**< video_format the image buffer has */
+    unsigned int        pitch;  /**< length of single image line in bytes */
 };
 
 
@@ -165,7 +177,7 @@ struct tis_value_bool
 
 /**
  * @struct tis_camera_capability
- * @brief unified capability description
+ * @brief unified property description
  */
 struct camera_property
 {
@@ -178,9 +190,9 @@ struct camera_property
         struct tis_value_double d;
         struct tis_value_string s;
         struct tis_value_bool b;
-    } value;
+    } value; ///< actual value settings
 
-    uint32_t flags;             /* bit flags */
+    uint32_t flags;             ///< bit flags
 };
 
 /* V4L2_CTRL_FLAG_DISABLED	0x0001	This control is permanently disabled and

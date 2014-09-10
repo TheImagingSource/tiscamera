@@ -29,10 +29,16 @@ public:
 
     std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
 
-    /// @brief informs all filter about new format and checks if a valid pipeline can be created
-    /// @return true is device and pipeline allow format; else false
+    /**
+     * @brief informs all filter about new format and checks if a valid pipeline can be created
+     * @return true is device and pipeline allow format; else false
+     */
     bool setVideoFormat (const VideoFormat&);
-    
+
+    /**
+     *
+     * @return vector containing all filter properties; empty on error
+     */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
     
     bool setPipelineStatus (const PIPELINE_STATUS&);
@@ -42,6 +48,7 @@ public:
     /**
      * @brief Reset the pipeline to an undefined state.
      * Stop all streams.
+     * @return true on success
      */
     bool destroyPipeline ();
 
