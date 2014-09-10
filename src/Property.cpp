@@ -91,7 +91,7 @@ bool Property::setStruct (const struct camera_property& p)
             std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
         case PROPERTY_TYPE_STRING_TABLE:
             prop.value.i.value = p.value.i.value;
-            break
+            break;
         case PROPERTY_TYPE_INTEGER:
             prop.value.i.value = p.value.i.value;
             break;
