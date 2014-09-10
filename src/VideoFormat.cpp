@@ -139,7 +139,7 @@ std::string VideoFormat::toString () const
 }
 
 
-bool VideoFormat::setValuesFromString (const std::string& desc)
+bool VideoFormat::fromString (const std::string& desc)
 {
     video_format f = {};
 

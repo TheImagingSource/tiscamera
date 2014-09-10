@@ -395,8 +395,8 @@ bool PipelineManager::create_pipeline ()
     {
         tis_log(TIS_LOG_DEBUG,
                 "Video format in source does not match pipeline: '%s' != '%s'",
-                in_format.getString().c_str(),
-                input_format.getString().c_str());
+                in_format.toString().c_str(),
+                input_format.toString().c_str());
         return false;
     }
 
@@ -412,8 +412,8 @@ bool PipelineManager::create_pipeline ()
             tis_log(TIS_LOG_ERROR,
                     "Ingoing video format for filter %s is not compatible with previous element. '%s' != '%s'",
                     f->getDescription().name.c_str(),
-                    in_format.getString().c_str(),
-                    in.getString().c_str());
+                    in_format.toString().c_str(),
+                    in.toString().c_str());
             // TODO: error
             return false;
         }
@@ -421,7 +421,7 @@ bool PipelineManager::create_pipeline ()
         {
             tis_log(TIS_LOG_DEBUG, "Filter %s connected to pipeline -- %s",
                     f->getDescription().name.c_str(),
-                    out.getString().c_str());
+                    out.toString().c_str());
             // save output for next comparison
             in_format = out;
         }
@@ -430,8 +430,8 @@ bool PipelineManager::create_pipeline ()
     if (in_format != this->format)
     {
         tis_log(TIS_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
-                in_format.getString().c_str(),
-                format.getString().c_str());
+                in_format.toString().c_str(),
+                format.toString().c_str());
 
         tis_log(TIS_LOG_ERROR,
                 "RGB32: %d \nBY8-GRBG: %d ------- %s",

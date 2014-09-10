@@ -51,7 +51,7 @@ public:
 
     std::string toString () const;
 
-    bool setValuesFromString (const std::string&);
+    bool fromString (const std::string&);
     
 private:
 
