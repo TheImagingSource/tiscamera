@@ -77,8 +77,7 @@ public:
 private:
 
     void update_params ();
-    void update_state ();
-    
+
     void set_gain     (int);
     void set_exposure (int);
     void set_iris     (int);

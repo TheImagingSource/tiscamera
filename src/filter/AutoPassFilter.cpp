@@ -147,18 +147,11 @@ void AutoPassFilter::update_params ()
 }
 
     
-void AutoPassFilter::update_state ()
-{
-
-}
-
-
 bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
 
     update_params();
-    update_state();
-    
+
     img::img_descriptor img = to_img_desc(*buf);
 
     tis_log(TIS_LOG_INFO, "Received image descriptor with type %d", img.type);
