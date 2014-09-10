@@ -114,7 +114,7 @@ void VideoFormat::setBinning (const unsigned int binning)
 }
 
 
-std::string VideoFormat::getString () const
+std::string VideoFormat::toString () const
 {
     std::string s;
 

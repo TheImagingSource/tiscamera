@@ -49,7 +49,7 @@ public:
 
     void setBinning (const unsigned int binning);
 
-    std::string getString () const;
+    std::string toString () const;
 
     bool setValuesFromString (const std::string&);
     
