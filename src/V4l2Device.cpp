@@ -15,7 +15,7 @@ using namespace tis_imaging;
 
 
 V4l2Device::V4l2Device (const CaptureDevice& _device)
-    : device(_device), is_stream_on(false)
+    : device(_device), is_stream_on(false), emulate_bayer(false), emulated_fourcc(0)
 {
 
     if ((fd = open(device.getInfo().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
@@ -121,6 +121,14 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 
 
     uint32_t fourcc  = _format.getFourcc();
+
+    // use greyscale for camera interaction
+    if (emulate_bayer)
+    {
+        // TODO: correctly handle bit deptht
+        emulated_fourcc = fourcc;
+        fourcc = FOURCC_Y800;
+    }
 
     if (fourcc == FOURCC_Y800)
     {
@@ -460,7 +468,7 @@ void V4l2Device::index_formats ()
         // TODO: handle bayer formats in older kernels
         // 42474752-0000-0010-8000-00aa003 has fourcc 0
         struct v4l2_fmtdesc new_desc = {};
-        checkForBayer(fmtdesc, new_desc);
+        emulate_bayer = checkForBayer(fmtdesc, new_desc);
 
         // internal fourcc definitions are identical with v4l2
         desc.fourcc = new_desc.pixelformat;
@@ -888,8 +896,14 @@ void V4l2Device::init_mmap_buffers ()
             buffer.format.fourcc = FOURCC_Y800;
         }
 
-        // TODO: dynamically create values
-        buffer.format.fourcc = FOURCC_RGGB8;
+        if (emulate_bayer)
+        {
+            if (emulated_fourcc != 0)
+            {
+                buffer.format.fourcc = emulated_fourcc;
+            }
+        }
+
         buffer.pitch = buffer.format.width;
         if (buffer.pData == MAP_FAILED)
         {

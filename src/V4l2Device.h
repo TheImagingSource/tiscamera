@@ -73,7 +73,8 @@ private:
     VideoFormat active_video_format;
     
     std::vector<VideoFormatDescription> available_videoformats;
-
+    bool emulate_bayer;
+    uint32_t emulated_fourcc;
 
     // v4l2 uses fractions
     // to assure correct handling we store the values received by v4l2
