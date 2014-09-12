@@ -111,6 +111,8 @@ private:
     void index_output_formats ();
     
     void distributeProperties ();
+
+    void create_input_format (const uint32_t& fourcc);
     
     bool create_pipeline ();
 

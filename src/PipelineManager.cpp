@@ -258,6 +258,13 @@ bool isFilterApplicable (const uint32_t& fourcc,
 }
 
 
+void PipelineManager::create_input_format (const uint32_t& fourcc)
+{
+    input_format = format;
+    input_format.setFourcc(fourcc);
+}
+
+
 bool PipelineManager::create_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
