@@ -146,13 +146,14 @@ bool PropertySwitch::getDefault () const
 }
 
 
-bool PropertySwitch::setValue (const bool&)
+bool PropertySwitch::setValue (const bool& value)
 {
     if (isReadOnly())
     {
         return false;
     }
 
+    prop.value.b.value = value;
     notifyImpl();
 
     return true;
