@@ -575,6 +575,8 @@ error:
 
 bool PipelineManager::stop_playing ()
 {
+    status = PIPELINE_STOPPED;
+
     if (!source->setStatus(PIPELINE_STOPPED))
     {
         tis_log(TIS_LOG_ERROR, "Source refused to change to state STOP");
@@ -598,14 +600,17 @@ bool PipelineManager::stop_playing ()
         return false;
     }
 
-    status = PIPELINE_STOPPED;
-
     return true;
 }
 
 
 void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
+    if (status == PIPELINE_STOPPED)
+    {
+        return;
+    }
+
     frame_count++;
     buffer->lock();
 
