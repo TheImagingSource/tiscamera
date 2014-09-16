@@ -23,9 +23,9 @@ PropertyHandler::PropertyHandler ()
       prop_wb_b(nullptr)
 {}
 
+
 PropertyHandler::~PropertyHandler ()
 {}
-
 
 
 bool PropertyHandler::isAvailable (const Property&)
@@ -69,7 +69,6 @@ bool PropertyHandler::getProperty (Property&)
 }
 
 
-
 AutoPassFilter::AutoPassFilter ()
     : valid(false),
       current_status(PIPELINE_UNDEFINED),
@@ -93,7 +92,6 @@ void AutoPassFilter::reset ()
     state = {};
 
     handler = std::make_shared<PropertyHandler>();
- 
 }
 
 
@@ -179,29 +177,24 @@ void AutoPassFilter::update_params ()
     
 bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
-
     update_params();
 
     img::img_descriptor img = to_img_desc(*buf);
-
-    tis_log(TIS_LOG_INFO, "Received image descriptor with type %d", img.type);
-
-    
     auto_alg::auto_pass_results res = auto_alg::auto_pass(img, params, state);
 
+
+    // tis_log(TIS_LOG_DEBUG, "brightness: %d\n exposure: %d\n gain: %d", res.brightness, res.exposure, res.gain);
+    
     if (params.exposure.do_auto == true)
     {
-        tis_log(TIS_LOG_INFO, "Setting exposure to  %d", res.exposure);
         set_exposure(res.exposure);
     }
     if (params.gain.do_auto == true)
     {
-        tis_log(TIS_LOG_INFO, "Setting gain to  %d", res.gain);
         set_gain(res.gain);
     }
     if (params.iris.do_auto == true)
     {
-        tis_log(TIS_LOG_INFO, "Setting iris to  %d", res.iris);
         set_iris(res.iris);
     }
 
@@ -222,6 +215,7 @@ bool AutoPassFilter::setStatus (const PIPELINE_STATUS& s)
 
     return true;
 }
+
 
 PIPELINE_STATUS AutoPassFilter::getStatus () const
 {
@@ -285,15 +279,12 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     if (exp == dev_properties.end())
     {
         tis_log(TIS_LOG_ERROR, "Unable to find exposure property. Auto Exposure will be disabled.");
-        // handler->property_exposure = nullptr;
         return;
     }
     else
     {
         handler->property_exposure = std::static_pointer_cast<PropertyInteger>(*exp);
 
-        // property_exposure =*exp;
-        // create auto_exposure property
         camera_property prop = {};
 
         strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
@@ -375,11 +366,8 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     params.wb.one_push_enabled = false;
     params.wb.is_software_applied_wb = true;
     params.wb.temperature_mode = false;
-
-    update_params();
     
     valid = true;
-    
 }
 
 
@@ -436,24 +424,19 @@ void set_int_property (std::weak_ptr<PropertyInteger> ptr, int val)
 
 void AutoPassFilter::set_gain (int gain)
 {
-
     set_int_property(handler->property_gain, gain);
-
 }
 
 
 void AutoPassFilter::set_exposure (int exposure)
 {
     set_int_property(handler->property_exposure, exposure);
-
 }
 
 
 void AutoPassFilter::set_iris (int iris)
 {
-
     set_int_property(handler->property_iris, iris);
-
 }
 
 
