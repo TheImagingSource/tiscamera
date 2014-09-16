@@ -134,11 +134,39 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
     {
         case PROPERTY_TYPE_BOOLEAN:
         {
-            cp.value.i.min = 0;
-            cp.value.i.max = 1;
-            cp.value.i.step = 1;
-            cp.value.i.default_value = queryctrl->default_value;
-            cp.value.i.value = ctrl->value;
+            if (queryctrl->default_value == 0)
+            {
+                cp.value.b.default_value = false;
+            }
+            else if (queryctrl->default_value == 1)
+            {
+                cp.value.b.default_value = true;
+            }
+            else
+            {
+                tis_log(TIS_LOG_ERROR,
+                        "Boolean '%s' has impossible default value: %d Setting to false",
+                        cp.name,
+                        queryctrl->default_value);
+                cp.value.b.default_value = false;
+            }
+
+            if (ctrl->value == 0)
+            {
+                cp.value.b.value = false;
+            }
+            else if (ctrl->value == 1)
+            {
+                cp.value.b.value = true;
+            }
+            else
+            {
+                tis_log(TIS_LOG_ERROR,
+                        "Boolean '%s' has impossible value: %d Setting to false",
+                        cp.name,
+                        ctrl->value);
+                cp.value.b.value = false;
+            }
             cp.flags = flags;
 
             return std::make_shared<Property>(PropertySwitch(impl, cp, type));
