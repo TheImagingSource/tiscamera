@@ -34,9 +34,32 @@ bool PropertyHandler::isAvailable (const Property&)
 }
 
 
-bool PropertyHandler::setProperty (const Property&)
+bool PropertyHandler::setProperty (const Property& prop)
 {
-    return false;
+    if (prop.getName().compare("Exposure Auto") == 0)
+    {
+        prop_auto_exposure->setStruct(prop.getStruct());
+    }
+    else if (prop.getName().compare("Gain Auto") == 0)
+    {
+        prop_auto_gain->setStruct(prop.getStruct());
+    }
+    else if (prop.getName().compare("Iris Auto") == 0)
+    {
+        prop_auto_iris->setStruct(prop.getStruct());
+
+    }
+    else if (prop.getName().compare("Whitebalance Auto") == 0)
+    {
+        prop_auto_wb->setStruct(prop.getStruct());
+    }
+    else
+    {
+        tis_log(TIS_LOG_ERROR, "Property not supported by impl");
+        return false;
+    }
+    tis_log(TIS_LOG_DEBUG, "Received change from %s", prop.getName().c_str());
+    return true;
 }
 
 
