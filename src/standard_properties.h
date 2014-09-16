@@ -134,16 +134,17 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .genicam_name = {"GPOut"},
     },
     {
+        // TODO extract extension unit ids
         .name = "Offset X",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0},
+        .v4l2_id = {0x00980927 /*usb2*/, 0x0199e218 /*usb3*/},
         .v4l2_name = {},
         .genicam_name = {"OffsetX"},
     },
     {
         .name = "Offset Y",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0},
+        .v4l2_id = {0x00980928 /*usb2*/, 0x0199e219/*usb3*/},
         .v4l2_name = {},
         .genicam_name = {"OffsetY"},
     },
