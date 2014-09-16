@@ -112,35 +112,41 @@ void AutoPassFilter::update_params ()
 {
     if (handler->prop_auto_exposure != nullptr)
     {
-        params.exposure.min = handler->property_exposure.lock()->getMin();
-        params.exposure.max = exposure_max;
-        params.exposure.def = handler->property_exposure.lock()->getDefault();
-        params.exposure.val = handler->property_exposure.lock()->getValue();
- 
-        params.exposure.do_auto = true;
+        auto exp = handler->property_exposure.lock();
+        params.exposure.min = exp->getMin();
+
+        if (exposure_max > 100)
+            params.exposure.max = exposure_max;
+        else
+            params.exposure.max = 300;
+
+        params.exposure.def = exp->getDefault();
+        params.exposure.val = exp->getValue();
+        params.exposure.do_auto = handler->prop_auto_exposure->getValue();
         params.exposure.flags = 0;
         params.exposure.granularity = 1;
     }
 
     if (handler->prop_auto_gain != nullptr)
     {
-        params.gain.min = handler->property_gain.lock()->getMin();
-        params.gain.max = handler->property_gain.lock()->getMax();
-        params.gain.def = handler->property_gain.lock()->getDefault();
+        auto gain = handler->property_gain.lock();
+        params.gain.min = gain->getMin();
+        params.gain.max = gain->getMax();
+        params.gain.def = gain->getDefault();
         params.gain.val = handler->property_gain.lock()->getValue();
-        params.gain.do_auto = true;
+        params.gain.do_auto = handler->prop_auto_gain->getValue();
         params.gain.flags = 0;
         params.gain.steps_to_double_brightness = 1;
     }
 
     if (handler->prop_auto_iris != nullptr)
     {
-        params.iris.min = handler->property_iris.lock()->getMin();
-        params.iris.max = handler->property_iris.lock()->getMax();
-        params.iris.def = handler->property_iris.lock()->getDefault();
-        params.iris.val = handler->property_iris.lock()->getValue();
-        // params.iris.do_auto = handler->prop_auto_iris->getValue();
-        params.iris.do_auto = false;
+        auto iris = handler->property_iris.lock();
+        params.iris.min = iris->getMin();
+        params.iris.max = iris->getMax();
+        params.iris.def = iris->getDefault();
+        params.iris.val = iris->getValue();
+        params.iris.do_auto = handler->prop_auto_iris->getValue();
         params.iris.flags = 0;
         params.iris.camera_fps = 30.0;   // TODO: automate
         params.iris.is_pwm_iris = false; // TODO: automate
@@ -151,7 +157,7 @@ void AutoPassFilter::update_params ()
         params.wb.r = 64;
         params.wb.g = 64;
         params.wb.b = 64;
-        params.wb.auto_enabled = true;
+        params.wb.auto_enabled = handler->prop_auto_wb->getValue();
         params.wb.one_push_enabled = false;
         params.wb.is_software_applied_wb = true;
         params.wb.temperature_mode = true;
