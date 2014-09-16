@@ -113,6 +113,16 @@ private:
     void distributeProperties ();
 
     void create_input_format (const uint32_t& fourcc);
+
+    std::vector<uint32_t> getDeviceFourcc ();
+
+    bool validate_pipeline ();
+
+    bool create_conversion_pipeline ();
+
+    bool add_interpretation_filter ();
+
+    bool allocate_conversion_buffer ();
     
     bool create_pipeline ();
 

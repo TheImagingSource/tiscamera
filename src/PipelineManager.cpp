@@ -265,135 +265,32 @@ void PipelineManager::create_input_format (const uint32_t& fourcc)
 }
 
 
-bool PipelineManager::create_pipeline ()
+std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 {
-    if (source.get() == nullptr || sink.get() == nullptr)
-    {
-        // TODO: error
-        return false;
-    }
-
-    // assure everything is in a defined state
-    filter_pipeline.clear();
-
     // for easy usage we create a vector<fourcc> for avail. inputs
     std::vector<uint32_t> device_fourcc;
 
     for (const auto& v : available_input_formats)
     {
+        tis_log(TIS_LOG_DEBUG,
+                "Found device fourcc '%s' - %d",
+                fourcc2description(v.getFormatDescription().fourcc),
+                v.getFormatDescription().fourcc);
+
         device_fourcc.push_back(v.getFormatDescription().fourcc);
     }
-
-    // input_format.setFourcc(FOURCC_Y800);
-    input_format.setFourcc(FOURCC_RGGB8);
-    input_format.setSize(1920, 1080);
-    input_format.setFramerate(10.0);
-    input_format.setBinning(0);
-
-    if (source->setVideoFormat(input_format))
-    {
-        tis_log(TIS_LOG_ERROR, "Unable to set video format in source.");
-    }
-
-    format.setFourcc(FOURCC_RGB32);
-    format.setSize(1920, 1080);
-    format.setFramerate(10.0);
-    format.setBinning(0);
+    return device_fourcc;
+}
 
 
-    // apply conversion to receive a pipeline that has valid input/output videoformats
-
-    for (auto f : available_filter)
-    {
-        std::string s = f->getDescription().name;
-        if (f->getDescription().type == FILTER_TYPE_INTERPRET)
-        {
-
-            //if (isFilterApplicable(input_format.getFourcc(), f->getDescription().input_fourcc))
-            // {
-            // tis_log(TIS_LOG_DEBUG, "Informing Filter %s about format", s.c_str());
-            f->setVideoFormat(input_format, input_format);
-            filter_pipeline.push_back(f);
-            // }
-            // else
-            // {
-            // tis_log(TIS_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
-            // }
-        }
-        else if (f->getDescription().type == FILTER_TYPE_CONVERSION)
-        {
-
-            if (isFilterApplicable(format.getFourcc(), f->getDescription().output_fourcc))
-            {
-                bool filter_valid = false;
-                for (const auto& cc : device_fourcc)
-                {
-                    if (isFilterApplicable(cc, f->getDescription().input_fourcc))
-                    {
-                        filter_valid = true;
-                        break;
-                    }
-                }
-
-                if (filter_valid)
-                    // if (isFilterApplicable(input_format.getFourcc(),
-                    // f->getDescription().input_fourcc))
-                {
-                    if (f->setVideoFormat(input_format, format))
-                    {
-                        tis_log(TIS_LOG_DEBUG,
-                                "Added filter \"%s\" to pipeline",
-                                s.c_str());
-                        filter_pipeline.push_back(f);
-                    }
-                    else
-                    {
-                        tis_log(TIS_LOG_DEBUG,
-                                "Filter %s did not accept format settings",
-                                s.c_str());
-                    }
-                }
-                else
-                {
-                    tis_log(TIS_LOG_DEBUG, "Filter %s is not applicable!!!", s.c_str());
-                }
-            }
-            else
-            {
-                tis_log(TIS_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
-
-            }
-        }
-    }
-
-    // filter_pipeline = available_filter;
-
-    // if a valid pipeline can be created insert additional filter (e.g. autoexposure)
-
-    for (int i = 0; i < 5; ++i)
-    {
-
-        image_buffer b = {};
-        b.pitch = format.getSize().width * 4;
-        b.length = b.pitch * format.getSize().height;
-
-        b.pData = (unsigned char*)malloc(b.length);
-
-        b.format.fourcc = FOURCC_RGB32;
-        b.format.width = format.getSize().width;
-        b.format.height = format.getSize().height;
-        b.format.binning = format.getBinning();
-        b.format.framerate = format.getFramerate();
-
-        this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
-    }
-
-    tis_log(TIS_LOG_DEBUG,
-            "filter in use %d of %d",
-            filter_pipeline.size(),
-            available_filter.size());
-
+bool PipelineManager::validate_pipeline ()
+{
     // check if pipeline is valid
+    if (source.get() == nullptr || sink.get() == nullptr)
+    {
+        // TODO: error
+        return false;
+    }
 
     // check source format
     auto in_format = source->getVideoFormat();
@@ -439,16 +336,191 @@ bool PipelineManager::create_pipeline ()
         tis_log(TIS_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
                 in_format.toString().c_str(),
                 format.toString().c_str());
-
-        tis_log(TIS_LOG_ERROR,
-                "RGB32: %d \nBY8-GRBG: %d ------- %s",
-                FOURCC_RGB32, FOURCC_GRBG8,
-                fourcc2description(1111967570));
-
         return false;
     }
 
-    tis_log(TIS_LOG_DEBUG, "Pipeline creation successful.");
+    return true;
+}
+
+
+bool PipelineManager::create_conversion_pipeline ()
+{
+    if (source.get() == nullptr || sink.get() == nullptr)
+    {
+        // TODO: error
+        return false;
+    }
+
+    auto device_fourcc = getDeviceFourcc();
+
+    for (auto f : available_filter)
+    {
+        std::string s = f->getDescription().name;
+
+        if (f->getDescription().type == FILTER_TYPE_CONVERSION)
+        {
+
+            if (isFilterApplicable(format.getFourcc(), f->getDescription().output_fourcc))
+            {
+                bool filter_valid = false;
+                uint32_t fourcc_to_use = 0;
+                for (const auto& cc : device_fourcc)
+                {
+                    if (isFilterApplicable(cc, f->getDescription().input_fourcc))
+                    {
+                        filter_valid = true;
+                        fourcc_to_use = cc;
+                        break;
+                    }
+                }
+
+                // set device format to use correct fourcc
+                create_input_format(fourcc_to_use);
+
+                if (filter_valid)
+                {
+                    if (f->setVideoFormat(input_format, format))
+                    {
+                        tis_log(TIS_LOG_DEBUG,
+                                "Added filter \"%s\" to pipeline",
+                                s.c_str());
+                        filter_pipeline.push_back(f);
+                    }
+                    else
+                    {
+                        tis_log(TIS_LOG_DEBUG,
+                                "Filter %s did not accept format settings",
+                                s.c_str());
+                    }
+                }
+                else
+                {
+                    tis_log(TIS_LOG_DEBUG, "Filter %s does not use the device output formats.", s.c_str());
+                }
+            }
+            else
+            {
+                tis_log(TIS_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
+
+            }
+        }
+    }
+    return true;
+}
+
+
+bool PipelineManager::add_interpretation_filter ()
+{
+
+    // if a valid pipeline can be created insert additional filter (e.g. autoexposure)
+    // interpretations should be done as early as possible in the pipeline
+
+    for (auto& f : available_filter)
+    {
+        if (f->getDescription().type == FILTER_TYPE_INTERPRET)
+        {
+            std::string s  = f->getDescription().name;
+            // applicable to sink
+            bool all_formats = false;
+            if (f->getDescription().input_fourcc.size() == 1)
+            {
+                if (f->getDescription().input_fourcc.at(0) == 0)
+                {
+                    all_formats = true;
+                }
+            }
+
+            if (all_formats ||isFilterApplicable(input_format.getFourcc(), f->getDescription().input_fourcc))
+            {
+                tis_log(TIS_LOG_DEBUG, "Adding filter '%s' after source", s.c_str());
+                f->setVideoFormat(input_format, input_format);
+                filter_pipeline.insert(filter_pipeline.begin(), f);
+                continue;
+            }
+            else
+            {
+                tis_log(TIS_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
+            }
+
+            for (auto& filter : filter_pipeline)
+            {
+                if (f->setVideoFormat(input_format, input_format))
+                {
+
+                    continue;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+
+bool PipelineManager::allocate_conversion_buffer ()
+{
+
+    for (int i = 0; i < 5; ++i)
+    {
+        image_buffer b = {};
+        b.pitch = format.getSize().width * 4;
+        b.length = b.pitch * format.getSize().height;
+
+        b.pData = (unsigned char*)malloc(b.length);
+
+        b.format.fourcc = format.getFourcc();
+        b.format.width = format.getSize().width;
+        b.format.height = format.getSize().height;
+        b.format.binning = format.getBinning();
+        b.format.framerate = format.getFramerate();
+
+        this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
+    }
+    return true;
+}
+
+
+bool PipelineManager::create_pipeline ()
+{
+    if (source.get() == nullptr || sink.get() == nullptr)
+    {
+        // TODO: error
+        return false;
+    }
+
+    // assure everything is in a defined state
+    filter_pipeline.clear();
+
+    format.setSize(1920, 1080);
+    format.setFramerate(10.0);
+    format.setBinning(0);
+
+    if (!create_conversion_pipeline())
+    {
+        return false;
+    }
+
+    if (source->setVideoFormat(input_format))
+    {
+        tis_log(TIS_LOG_ERROR, "Unable to set video format in source.");
+        //return false;
+    }
+
+    if (!add_interpretation_filter())
+    {
+        return false;
+    }
+
+    if (!allocate_conversion_buffer())
+    {
+        return false;
+    }
+
+    if (!validate_pipeline())
+    {
+        return false;
+    }
+
+    tis_log(TIS_LOG_INFO, "Pipeline creation successful.");
 
     std::string ppl = "source -> ";
 
@@ -457,15 +529,8 @@ bool PipelineManager::create_pipeline ()
         ppl += f->getDescription().name;
         ppl += " -> ";
     }
-
     ppl += " sink";
-
-    tis_log(TIS_LOG_DEBUG, "%s" , ppl.c_str());
-
-
-    tis_log(TIS_LOG_ERROR,
-            "------- %s",
-            fourcc2description(1111967570));
+    tis_log(TIS_LOG_INFO, "%s" , ppl.c_str());
 
     return true;
 }
