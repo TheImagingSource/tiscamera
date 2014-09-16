@@ -77,7 +77,8 @@ AutoPassFilter::AutoPassFilter ()
 {
     description.name = "AutoPass";
     description.type = FILTER_TYPE_INTERPRET;
-
+    description.input_fourcc = {0};
+    description.output_fourcc = {0};
     state = {};
 }
 
