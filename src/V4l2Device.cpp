@@ -874,10 +874,8 @@ void V4l2Device::init_mmap_buffers ()
 
         struct image_buffer buffer = {};
 
-        // TODO: settings have to be found
-
-        // buffer.length = buf.length;
-        buffer.length = 1920*1080*8;
+        buffer.length = buf.length;
+        buffer.length = active_video_format.getSize().width * active_video_format.getSize().height * img::getBitsPerPixel(active_video_format.getFourcc());
         buffer.pData =
             (unsigned char*) mmap( NULL, /* start anywhere */
                                    buf.length,
