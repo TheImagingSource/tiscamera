@@ -262,19 +262,38 @@ void MainWindow::on_actionClose_Camera_triggered ()
 }
 
 
-void MainWindow::getActiveVideoFormat ()
+bool MainWindow::getActiveVideoFormat ()
 {
     VideoFormat input_format;
 
     int format_index = ui->format_box->currentIndex ();
-    uint32_t f = available_formats.at(format_index).getFormatDescription().fourcc;
+
+    if (format_index == -1)
+    {
+        input_format.setFourcc(FOURCC_Y800);
+    }
+
+    auto active_desc = available_formats.at(format_index);
+    uint32_t f = active_desc.getFormatDescription().fourcc;
 
     input_format.setFourcc(f);
-    input_format.setSize(1920, 1080);
+
+    int size_index = ui->size_box->currentIndex();
+    if (size_index == -1)
+    {
+        input_format.setSize(640, 480);
+    }
+    else
+    {
+        auto size_desc = active_desc.getResolutions();
+        input_format.setSize(size_desc.at(size_index).width, size_desc.at(size_index).height);
+    }
+
     input_format.setFramerate(10.0);
     input_format.setBinning(0);
-
     active_format = input_format;
+
+    return true;
 }
 
 

@@ -86,7 +86,7 @@ private:
 
     static void callback (std::shared_ptr<MemoryBuffer>, void*);
 
-    void getActiveVideoFormat ();
+    bool getActiveVideoFormat ();
 
     void start_stream ();
 
