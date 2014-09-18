@@ -299,9 +299,14 @@ bool MainWindow::getActiveVideoFormat ()
 
 void MainWindow::start_stream ()
 {
-    getActiveVideoFormat();
+    bool ret = getActiveVideoFormat();
 
-    bool ret = grabber->setVideoFormat(active_format);
+    if (!ret)
+    {
+        return;
+    }
+
+    ret = grabber->setVideoFormat(active_format);
 
     if (ret == false)
     {
