@@ -58,3 +58,5 @@ MESSAGE(STATUS "")
 
 # install(DIRECTORY src DESTINATION lib
 #   FILES_MATCHING PATTERN "*.[so|a]")
+
+add_subdirectory(tools/tis-ctrl)
