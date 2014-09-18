@@ -774,9 +774,6 @@ void V4l2Device::stream ()
             if (ret == 0)
             {
                 tis_log(TIS_LOG_ERROR, "Timeout while waiting for new image buffer.");
-                is_stream_on = false;
-                // TODO: inform listener
-                return;
             }
 
             if (get_frame())
