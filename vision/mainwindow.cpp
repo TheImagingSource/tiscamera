@@ -198,7 +198,7 @@ void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
         return;
     }
 
-    if (buffer->getImageBuffer().format.height != 1080 || buffer->getImageBuffer().format.width != 1920)
+    if (buffer->getImageBuffer().format.height != active_format.getSize().height|| buffer->getImageBuffer().format.width != active_format.getSize().width)
     {
         std::cout << "Faulty format!!!" << std::endl;
         return;
