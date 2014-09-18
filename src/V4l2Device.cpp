@@ -291,7 +291,7 @@ double V4l2Device::getFramerate ()
             parm.parm.capture.timeperframe.numerator,
             parm.parm.capture.timeperframe.denominator);
 
-    return parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
+    return parm.parm.capture.timeperframe.denominator / parm.parm.capture.timeperframe.numerator;
 }
 
 
@@ -529,7 +529,7 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
             // we however use framerates as fps (e.g. 30/1)
             // therefor we have to switch numerator and denominator
 
-            double frac = (double)frmival.discrete.numerator/frmival.discrete.denominator;
+            double frac = (double)frmival.discrete.denominator/frmival.discrete.numerator;
             f.push_back(frac);
 
             framerate_conv c = {frac, frmival.discrete.numerator, frmival.discrete.denominator};
