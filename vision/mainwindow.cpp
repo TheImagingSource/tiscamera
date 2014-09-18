@@ -166,12 +166,6 @@ void MainWindow::my_newImage_received(std::shared_ptr<MemoryBuffer> buffer)
 {
     std::cout << "working on image" << std::endl;
 
-    img->loadFromData(data, length);
-
-    this->video->img = *this->img;
-    this->video->repaint();
-    this->video->update();
-
     update();
 }
 
@@ -225,15 +219,15 @@ void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
 
     if (buf.format.fourcc == FOURCC_Y800)
     {
-        this->video->img = QImage(data, width, height, QImage::Format_Mono);
+        this->ui->videowidget->img = QImage(data, width, height, QImage::Format_Mono);
     }
     else if (buf.format.fourcc == FOURCC_Y16)
     {
-        this->video->img = QImage(data, width, height, QImage::Format_Mono);
+        this->ui->videowidget->img = QImage(data, width, height, QImage::Format_Mono);
     }
     else if (buf.format.fourcc == FOURCC_RGB24)
     {
-        this->video->img =QImage(buf.pData, width, height, QImage::Format_RGB666);
+        this->ui->videowidget->img =QImage(buf.pData, width, height, QImage::Format_RGB666);
     }
     else if (buf.format.fourcc == FOURCC_RGB32)
     {

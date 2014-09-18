@@ -24,7 +24,6 @@ set(SOURCES
      mainwindow.cpp
      propertywidget.cpp
      capturedeviceselectiondialog.cpp
-     videowidget.cpp
      capturedisplay.cpp)
 
 set(HEADERS

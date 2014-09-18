@@ -9,7 +9,6 @@
 #include <QGraphicsItem>
 
 #include "capturedeviceselectiondialog.h"
-#include "videowidget.h"
 #include "propertywidget.h"
 
 #include <tis.h>
@@ -58,8 +57,6 @@ private slots:
 private:
 
     Ui::MainWindow *ui;
-
-    videowidget* video;
 
     QImage* current_frame;
     QGraphicsScene* scene;
