@@ -85,6 +85,9 @@ private:
     // general
     bool valid;
 
+    int		wb_r;
+    int		wb_g;
+    int		wb_b;
     unsigned int exposure_max;
     
     //tis_imaging::

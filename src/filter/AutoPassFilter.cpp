@@ -196,10 +196,13 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
     if (params.iris.do_auto == true)
     {
         set_iris(res.iris);
-    }
 
-    by8_transform::apply_wb_to_bayer_img(img, res.wb_r, res.wb_g, res.wb_b, res.wb_g, 0);
-    
+        wb_r = res.wb_r;
+        wb_g = res.wb_g;
+        wb_b = res.wb_b;
+    }
+    by8_transform::apply_wb_to_bayer_img(img, wb_r, wb_g, wb_b, wb_g, 0);
+
     return true;
 }
 
