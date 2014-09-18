@@ -236,6 +236,14 @@ void MainWindow::on_format_box_currentIndexChanged (int index)
 {
     std::cout << index << std::endl;
 
+    if (index > available_formats.size())
+    {
+        std::cerr << index << " is an illegal index for format selection." << std::endl;
+        return;
+    }
+
+
+
     auto f = available_formats.at(index);
 
     ui->size_box->clear();
