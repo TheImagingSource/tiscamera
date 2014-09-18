@@ -225,13 +225,17 @@ bool V4l2Device::setFramerate (double framerate)
     std::sort(vec.begin(), vec.end());
 
     auto iter_low = std::lower_bound(vec.begin(), vec.end(), framerate);
-    // auto iter_up = std::upper_bound(vec.begin(), vec.end(), framerate);
+
+    if (iter_low == vec.end())
+    {
+        tis_log(TIS_LOG_ERROR, "No framerates available");
+        return false;
+    }
 
     framerate = *iter_low;
 
     auto f =[&framerate] (const framerate_conv& f)
         {
-            tis_log(TIS_LOG_ERROR,"%f", f.fps);
             return (framerate == f.fps);
         };
 
@@ -263,8 +267,6 @@ bool V4l2Device::setFramerate (double framerate)
         tis_log (TIS_LOG_ERROR, "Failed to set frame rate\n");
         return false;
     }
-
-    getFramerate();
 
     return true;
 }
