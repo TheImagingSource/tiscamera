@@ -71,6 +71,7 @@ bool PropertyHandler::getProperty (Property&)
 
 AutoPassFilter::AutoPassFilter ()
     : valid(false),
+      skipped_buffer(0),
       current_status(PIPELINE_UNDEFINED),
       exposure_max(0)
 {
@@ -177,29 +178,35 @@ void AutoPassFilter::update_params ()
     
 bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
-    update_params();
-
     img::img_descriptor img = to_img_desc(*buf);
-    auto_alg::auto_pass_results res = auto_alg::auto_pass(img, params, state);
-
-
-    // tis_log(TIS_LOG_DEBUG, "brightness: %d\n exposure: %d\n gain: %d", res.brightness, res.exposure, res.gain);
-    
-    if (params.exposure.do_auto == true)
+    if (skipped_buffer < 3)
     {
-        set_exposure(res.exposure);
+        skipped_buffer++;
     }
-    if (params.gain.do_auto == true)
+    else
     {
-        set_gain(res.gain);
-    }
-    if (params.iris.do_auto == true)
-    {
-        set_iris(res.iris);
+        skipped_buffer = 0;
+
+        update_params();
+
+        auto_alg::auto_pass_results res = auto_alg::auto_pass(img, params, state);
 
         wb_r = res.wb_r;
         wb_g = res.wb_g;
         wb_b = res.wb_b;
+
+        if (params.exposure.do_auto == true)
+        {
+            set_exposure(res.exposure);
+        }
+        if (params.gain.do_auto == true)
+        {
+            set_gain(res.gain);
+        }
+        if (params.iris.do_auto == true)
+        {
+            set_iris(res.iris);
+        }
     }
     by8_transform::apply_wb_to_bayer_img(img, wb_r, wb_g, wb_b, wb_g, 0);
 
