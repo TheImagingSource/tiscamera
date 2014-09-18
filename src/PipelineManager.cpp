@@ -490,7 +490,6 @@ bool PipelineManager::create_pipeline ()
     // assure everything is in a defined state
     filter_pipeline.clear();
 
-    format.setSize(1920, 1080);
     format.setFramerate(10.0);
     format.setBinning(0);
 
