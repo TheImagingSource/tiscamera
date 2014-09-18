@@ -29,7 +29,8 @@ signals:
     void changed (PropertyWidget*);
 
 private slots:
-    void on_checkBox_released ();
+
+    void on_checkBox_toggled (bool val);
 
     void on_comboBox_activated (const QString &arg1);
 

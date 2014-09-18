@@ -122,8 +122,11 @@ void PropertyWidget::setProperty (const tis_imaging::Property& p)
 }
 
 
-void PropertyWidget::on_checkBox_released ()
+void PropertyWidget::on_checkBox_toggled (bool val)
 {
+    PropertySwitch& s = (PropertySwitch&) property;
+    s.setValue(ui->checkBox->isChecked());
+
     emit changed(this);
 }
 
