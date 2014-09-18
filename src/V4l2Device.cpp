@@ -473,7 +473,7 @@ void V4l2Device::index_formats ()
         // internal fourcc definitions are identical with v4l2
         desc.fourcc = new_desc.pixelformat;
         memcpy (desc.description, new_desc.description, 256);
-        frms.pixel_format = new_desc.pixelformat;
+        frms.pixel_format = fmtdesc.pixelformat;
 
         std::vector<res_fps> rf;
 
