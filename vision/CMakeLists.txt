@@ -25,13 +25,13 @@ set(SOURCES
      propertywidget.cpp
      capturedeviceselectiondialog.cpp
      videowidget.cpp
-     )
+     capturedisplay.cpp)
 
 set(HEADERS
      mainwindow.h
      capturedeviceselectiondialog.h
      propertywidget.h
-     videowidget.h)
+     capturedisplay.h)
       #   videowidgetsurface.h)
 
 set(MOCS
@@ -44,6 +44,7 @@ set(UIS
  propertywidget.ui
  capturedeviceselectiondialog.ui
  mainwindow.ui
+capturedisplay.ui
 )
 
 #set(RESOURCES resources.qrc)

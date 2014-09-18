@@ -20,9 +20,6 @@ MainWindow::MainWindow (QWidget *parent) :
             this,
             SLOT(my_captureDevice_selected(tis_imaging::CaptureDevice)));
 
-    video = new videowidget(this->ui->widget);
-    video->show();
-
     sink = std::make_shared<ImageSink>();
 
     connect(this,
@@ -201,24 +198,30 @@ void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
 #endif
 
     unsigned int height = buffer->getImageBuffer().format.height;
-    unsigned int width  = buffer->getImageBuffer().format.width;
+    unsigned int width = buffer->getImageBuffer().format.width;
 
-    if (buf.format.fourcc == mmioFOURCC('Y','8','0','0')) // Y800
+    if (buf.format.fourcc == FOURCC_Y800)
     {
         this->video->img = QImage(data, width, height, QImage::Format_Mono);
     }
-    else if (buf.format.fourcc == mmioFOURCC('R', 'G', 'B', '3'))
+    else if (buf.format.fourcc == FOURCC_Y16)
+    {
+        this->video->img = QImage(data, width, height, QImage::Format_Mono);
+    }
+    else if (buf.format.fourcc == FOURCC_RGB24)
     {
         this->video->img =QImage(buf.pData, width, height, QImage::Format_RGB666);
     }
-    else if (buf.format.fourcc == mmioFOURCC('R', 'G', 'B', '4'))
+    else if (buf.format.fourcc == FOURCC_RGB32)
     {
-        this->video->img =QImage(buf.pData, width, height, QImage::Format_RGB32);
+        this->ui->videowidget->img = QImage(buf.pData, width, height, QImage::Format_RGB32);
     }
     else
-    {}
+    {
+        std::cout << "Unable to interpret buffer format" << std::endl;
+    }
 
-    this->video->update();
+    this->ui->videowidget->update();
 
     emit newImage_received(buffer);
 }

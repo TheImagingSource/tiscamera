@@ -19,7 +19,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="2">
+    <item row="0" column="1">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -37,7 +37,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="property_tab">
        <attribute name="title">
@@ -157,19 +157,13 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="videowidget" name="widget" native="true">
+    <item row="0" column="0">
+     <widget class="CaptureDisplay" name="videowidget" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>640</width>
-        <height>480</height>
-       </size>
       </property>
      </widget>
     </item>
@@ -279,9 +273,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>videowidget</class>
+   <class>CaptureDisplay</class>
    <extends>QWidget</extends>
-   <header>videowidget.h</header>
+   <header>capturedisplay.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
