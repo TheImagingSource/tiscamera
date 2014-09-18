@@ -201,6 +201,12 @@ int64_t PropertyInteger::getMax () const
 }
 
 
+int64_t PropertyInteger::getStep () const
+{
+  return this->prop.value.i.step;
+}
+
+
 int64_t PropertyInteger::getValue () const
 {
     return this->prop.value.i.value;

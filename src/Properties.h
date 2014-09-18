@@ -99,7 +99,7 @@ public:
 
     int64_t getMin () const;
     int64_t getMax () const;
-
+    int64_t getStep () const;
     int64_t getValue () const;
 
     bool setValue(const int64_t&);
