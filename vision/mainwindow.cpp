@@ -85,21 +85,44 @@ void MainWindow::my_captureDevice_selected (tis_imaging::CaptureDevice device)
     ui->property_list->setFlow(QListView::TopToBottom);
     ui->property_list->update();
 
+    active_format = grabber->getActiveVideoFormat();
     available_formats = grabber->getAvailableVideoFormats();
 
-    for ( auto a : available_formats)
+    std::cout << "Active format: " << active_format.toString() << std::endl;
+
+    active_format.setFourcc(FOURCC_RGB32);
+
+    if (available_formats.empty())
+    {
+        std::cout << "No available formats!" << std::endl;
+        return;
+    }
+
+    bool fill = false;
+    for ( auto& a : available_formats)
     {
         video_format_description desc = a.getFormatDescription();
         ui->format_box->addItem(desc.description);
 
-        for (IMG_SIZE f : a.getResolutions())
+        if (fill == false)
         {
-            QString s = QString::number(f.width);
-                    s += "x"
-                    + QString::number(f.height);
+            auto res = a.getResolutions();
+            for (IMG_SIZE f : a.getResolutions())
+            {
+                QString s = QString::number(f.width);
+                s += "x";
+                s += QString::number(f.height);
 
-            ui->size_box->addItem(s);
+                ui->size_box->addItem(s);
+            }
+            fill = true;
         }
+        else
+        {
+            continue;
+        }
+
+
         ui->binning_box->addItem(QString::number(desc.binning));
     }
 }
