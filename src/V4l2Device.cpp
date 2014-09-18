@@ -704,7 +704,18 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
     }
     else if (type == PROPERTY_TYPE_BOOLEAN)
     {
-        ctrl.value = (std::static_pointer_cast<PropertySwitch>(_property.prop))->getValue();
+        if ((std::static_pointer_cast<PropertySwitch>(_property.prop))->getValue())
+        {
+            ctrl.value = 1;
+        }
+        else
+        {
+            ctrl.value = 0;
+        }
+    }
+    else if (type == PROPERTY_TYPE_BUTTON)
+    {
+        ctrl.value = 1;
     }
 
     int ret = tis_xioctl(fd, VIDIOC_S_CTRL, &ctrl);
