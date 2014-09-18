@@ -80,6 +80,8 @@ private:
 
     CaptureDeviceSelectionDialog* selection_dialog;
 
+    void reset_gui();
+
     void internal_callback (std::shared_ptr<MemoryBuffer>);
 
     static void callback (std::shared_ptr<MemoryBuffer>, void*);

@@ -162,6 +162,15 @@ void MainWindow::property_changed (PropertyWidget* pw)
 }
 
 
+void MainWindow::reset_gui ()
+{
+    this->ui->format_box->clear();
+    this->ui->size_box->clear();
+    this->ui->framerate_box->clear();
+    this->ui->binning_box->clear();
+}
+
+
 void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
 {
     if (buffer->getData() == NULL || buffer->getImageBuffer().length == 0)
