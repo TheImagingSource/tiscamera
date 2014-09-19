@@ -42,10 +42,6 @@ public:
     bool operator== (const VideoFormatDescription& other);
     bool operator!= (const VideoFormatDescription& other);
 
-
-    ~VideoFormatDescription ();
-
-
     struct video_format_description getFormatDescription () const;
 
     std::vector<res_fps> getResolutionsFramesrates () const;

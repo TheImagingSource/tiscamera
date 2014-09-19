@@ -21,8 +21,6 @@ public:
 
     FilterLoader ();
 
-    ~FilterLoader ();
-
     /**
      * @return vector containing shared_ptr to all found filter
      */

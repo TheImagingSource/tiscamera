@@ -24,8 +24,6 @@ public:
     VideoFormat (const VideoFormat&);
 
     VideoFormat& operator= (const VideoFormat&);
-    
-    ~VideoFormat ();
 
     bool operator== (const VideoFormat&) const;
 

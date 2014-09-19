@@ -33,8 +33,6 @@ public:
     CaptureDevice (const CaptureDevice&);
 
     CaptureDevice& operator= (const CaptureDevice&);
-    
-    ~CaptureDevice ();
 
     /**
      * @name getInfo

@@ -25,9 +25,6 @@ BayerRgbFilter::BayerRgbFilter ()
                                  FOURCC_RGB24};
 }
 
-BayerRgbFilter::~BayerRgbFilter ()
-{}
-
 
 struct FilterDescription BayerRgbFilter::getDescription () const
 {

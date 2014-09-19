@@ -16,12 +16,6 @@ FilterLoader::FilterLoader ()
 }
 
 
-FilterLoader::~FilterLoader ()
-{
-
-}
-
-
 std::vector<std::shared_ptr<FilterBase>> FilterLoader::get_all_filter ()
 {
     return loaded_filter;

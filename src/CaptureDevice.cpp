@@ -37,10 +37,6 @@ CaptureDevice& CaptureDevice::operator= (const CaptureDevice& other)
 }
 
 
-CaptureDevice::~CaptureDevice ()
-{}
-
-
 struct tis_device_info CaptureDevice::getInfo () const
 {
     return device;

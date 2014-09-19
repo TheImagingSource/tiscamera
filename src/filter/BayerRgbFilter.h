@@ -15,8 +15,6 @@ class BayerRgbFilter : public FilterBase
 {
 public:
     BayerRgbFilter ();
-    ~BayerRgbFilter ();
-
     
     struct FilterDescription getDescription () const;
 

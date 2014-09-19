@@ -24,10 +24,6 @@ PropertyHandler::PropertyHandler ()
 {}
 
 
-PropertyHandler::~PropertyHandler ()
-{}
-
-
 bool PropertyHandler::isAvailable (const Property&)
 {
     return true;

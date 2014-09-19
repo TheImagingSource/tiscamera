@@ -16,7 +16,6 @@ public:
     friend AutoPassFilter;
     
     PropertyHandler ();
-    ~PropertyHandler ();
     
     bool isAvailable (const Property&);
 
@@ -50,8 +49,6 @@ class AutoPassFilter : public FilterBase, public std::enable_shared_from_this<Au
 public:
 
     AutoPassFilter ();
-        
-    ~AutoPassFilter ();
 
     void reset ();
 

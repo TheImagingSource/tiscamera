@@ -54,10 +54,6 @@ bool VideoFormat::operator!= (const VideoFormat& other) const
 }
 
 
-VideoFormat::~VideoFormat ()
-{}
-
-
 struct video_format VideoFormat::getFormatDescription () const
 {
     return format;
