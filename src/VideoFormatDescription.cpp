@@ -41,14 +41,14 @@ VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDesc
 }
 
 
-bool VideoFormatDescription::operator== (const VideoFormatDescription& other)
+bool VideoFormatDescription::operator== (const VideoFormatDescription& other) const
 {
     // TODO: complete comparison
     return (memcmp(&format, &other.format, sizeof(format)) == 0);
 }
 
 
-bool VideoFormatDescription::operator!= (const VideoFormatDescription& other)
+bool VideoFormatDescription::operator!= (const VideoFormatDescription& other) const
 {
     return !(*this == other);
 }

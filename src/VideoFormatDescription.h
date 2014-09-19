@@ -39,8 +39,8 @@ public:
 
     VideoFormatDescription& operator= (const VideoFormatDescription&);
 
-    bool operator== (const VideoFormatDescription& other);
-    bool operator!= (const VideoFormatDescription& other);
+    bool operator== (const VideoFormatDescription& other) const;
+    bool operator!= (const VideoFormatDescription& other) const;
 
     struct video_format_description getFormatDescription () const;
 
