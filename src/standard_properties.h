@@ -86,7 +86,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "Trigger Mode",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = { V4L2_CID_PRIVACY},
+        .v4l2_id = { V4L2_CID_PRIVACY, 0x0199e208},
         .v4l2_name = { "Privacy" },
         .genicam_name = {"TriggerMode"},
     },
@@ -108,14 +108,14 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "Software Trigger",
         .type_to_use = PROPERTY_TYPE_BUTTON,
-        .v4l2_id = {0},
+        .v4l2_id = {0x0199e209},
         .v4l2_name = { "SoftwareTrigger" },
         .genicam_name = {"TriggerSoftware"},
     },
     {
         .name = "GPIO",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0},
+        .v4l2_id = {0x0199e217},
         .v4l2_name = {},
         .genicam_name = {"GPIO"},
     },
@@ -129,7 +129,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "GPOut",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0},
+        .v4l2_id = {0x0199e216},
         .v4l2_name = {},
         .genicam_name = {"GPOut"},
     },
@@ -151,7 +151,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "Offset Auto Center",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {0},
+        .v4l2_id = {0x0199e220},
         .v4l2_name = {},
         .genicam_name = {"OffsetAutoCenter"},
     },
@@ -214,14 +214,14 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "Focus",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {},
+        .v4l2_id = {V4L2_CID_FOCUS_ABSOLUTE},
         .v4l2_name = { "Focus (Absolute)" },
         .genicam_name = {"Focus"},
     },
     {
         .name = "Zoom",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {},
+        .v4l2_id = {V4L2_CID_ZOOM_ABSOLUTE},
         .v4l2_name = { "Zoom, Absolute" },
         .genicam_name = {"Zoom"},
     },
@@ -235,7 +235,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
     {
         .name = "Strobe Enable",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {},
+        .v4l2_id = {0x0199e211},
         .v4l2_name = {},
         .genicam_name = {"StrobeEnable"},
     },
