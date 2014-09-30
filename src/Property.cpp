@@ -183,9 +183,9 @@ bool Property::setProperty (const Property&)
 }
 
 
-bool Property::getProperty (Property&)
+bool Property::getProperty (Property& p)
 {
-    // TODO:
+    p.setStruct(this->prop);
     return true;
 }
 
