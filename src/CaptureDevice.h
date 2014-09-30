@@ -23,14 +23,12 @@ class CaptureDevice
 public:
 
     
-    CaptureDevice (const struct tis_device_info&);
+    explicit CaptureDevice (const struct tis_device_info&);
 
     /**
      * @brief Creates an invalid device  
      */
     CaptureDevice ();
-
-    CaptureDevice (const CaptureDevice&);
 
     CaptureDevice& operator= (const CaptureDevice&);
 

@@ -21,7 +21,7 @@ class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V
 
 public:
 
-    V4l2Device (const CaptureDevice&);
+    explicit V4l2Device (const CaptureDevice&);
 
     V4l2Device () = delete;
 

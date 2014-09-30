@@ -586,7 +586,8 @@ void V4l2Device::determine_active_video_format ()
     // TODO: determine binning
     format.binning = 0;
     format.framerate = parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
-    this->active_video_format = format;
+
+    this->active_video_format = VideoFormat(format);
 
     return;
 }

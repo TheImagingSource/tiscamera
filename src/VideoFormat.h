@@ -19,7 +19,7 @@ public:
     
     VideoFormat ();
     
-    VideoFormat (const struct video_format&);
+    explicit VideoFormat (const struct video_format&);
     
     VideoFormat (const VideoFormat&);
 

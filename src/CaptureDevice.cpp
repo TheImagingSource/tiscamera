@@ -24,12 +24,6 @@ CaptureDevice::CaptureDevice ()
 }
 
 
-CaptureDevice::CaptureDevice (const CaptureDevice& other)
-    : device(other.device)
-{}
-
-
-
 CaptureDevice& CaptureDevice::operator= (const CaptureDevice& other)
 {
     this->device = other.device;

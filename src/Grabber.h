@@ -20,7 +20,7 @@ class Grabber
     
 public:
     
-    Grabber ();
+    explicit Grabber ();
     
     ~Grabber ();
 
