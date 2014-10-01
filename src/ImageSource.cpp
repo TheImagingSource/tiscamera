@@ -124,7 +124,7 @@ void ImageSource::initialize_buffers ()
         b.pData = NULL;
         b.length = format.width * format.height * bit_depth;
         b.format = format;
-        b.pitch = format.width * bit_depth;
+        b.pitch = format.width * bit_depth / 8;
 
         auto ptr = std::make_shared<MemoryBuffer>(MemoryBuffer(b));
 
