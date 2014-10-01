@@ -44,7 +44,7 @@ void CaptureDeviceSelectionDialog::on_buttonBox_accepted ()
 
     if (d == devices.end())
     {
-        // TODO
+        return;
     }
 
     //return *d;
@@ -111,7 +111,7 @@ tis_imaging::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
 
     if (d == devices.end())
     {
-        // TODO
+        return CaptureDevice();
     }
 
     return *d;
