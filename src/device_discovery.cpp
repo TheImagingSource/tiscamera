@@ -108,17 +108,10 @@ int tis_get_usb_camera_count ()
 
 int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_size)
 {
-
-    struct udev* udev;
-    struct udev_enumerate* enumerate;
-    struct udev_list_entry* devices;
-    struct udev_list_entry* dev_list_entry;
-    // struct udev_device* dev;
-
     int camera_cnt = 0;
     int camera_count = 0;
 
-    udev = udev_new();
+    struct udev* udev = udev_new();
     if (!udev)
     {
         // tis_log (TIS_LOG_ERROR, "Unable to create udev object");
@@ -127,10 +120,11 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
     }
 
     /* Create a list of the devices in the 'video4linux' subsystem. */
-    enumerate = udev_enumerate_new(udev);
+    struct udev_enumerate* enumerate = udev_enumerate_new(udev);
     udev_enumerate_add_match_subsystem(enumerate, "video4linux");
     udev_enumerate_scan_devices(enumerate);
-    devices = udev_enumerate_get_list_entry(enumerate);
+    struct udev_list_entry* devices = udev_enumerate_get_list_entry(enumerate);
+    struct udev_list_entry* dev_list_entry;
 
     udev_list_entry_foreach(dev_list_entry, devices)
     {
