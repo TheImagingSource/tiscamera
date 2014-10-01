@@ -52,7 +52,7 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
 {
     memset(user_list, 0, sizeof(struct tis_device_info)*array_size);
     
-    int count = tis_get_camera_count();
+    unsigned int count = tis_get_camera_count();
 
     if (count > array_size)
     {
@@ -62,9 +62,9 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
     
     std::vector<struct tis_device_info> info_vec(count);
 
-    int usb_count = tis_get_usb_camera_list(info_vec.data(), count);
+    unsigned int usb_count = tis_get_usb_camera_list(info_vec.data(), count);
 
-    int gige_count = 0;
+    unsigned int gige_count = 0;
     
 #if HAVE_ARAVIS
     gige_count = tis_get_gige_camera_list(&(info_vec.data()[usb_count]), array_size - usb_count);
@@ -75,7 +75,7 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
         return -1;
     }
     
-    memcpy(user_list, info_vec.data(), count*sizeof(tis_device_info));
+    memcpy(user_list, info_vec.data(), count * sizeof(tis_device_info));
     
     return count;
 }
@@ -114,8 +114,6 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
     struct udev* udev = udev_new();
     if (!udev)
     {
-        // tis_log (TIS_LOG_ERROR, "Unable to create udev object");
-
         return -1;
     }
 
@@ -151,7 +149,6 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
 
         if (!dev)
         {
-            // tis_log (TIS_LOG_ERROR, "Unable to retrieve usb device for %s", needed_path);
             return -1;
         }
 
@@ -169,10 +166,7 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
             ptr->type = TIS_DEVICE_TYPE_USB;
             strcpy(ptr->identifier, needed_path);
             strcpy(ptr->name, udev_device_get_sysattr_value(dev, "product"));
-            // (*cameras)[camera_cnt].productid = atoi(udev_device_get_sysattr_value(dev, "idProduct"));
             strcpy(ptr->serial_number, udev_device_get_sysattr_value(dev, "serial"));
-            
-            // tis_log (TIS_LOG_INFO, "Found v4l2 device %s", needed_path);
 
             camera_cnt++;
             ptr++;
@@ -213,18 +207,16 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
         return -1;
     }
 
-    int counter = 0;
-    
+    unsigned int counter = 0;
+
     for (unsigned int i = 0; i < number_devices; ++i)
     {
         std::string name = arv_get_device_id(i);
         memcpy(ptr->identifier, name.c_str(), name.size());
 
         ArvCamera* cam = arv_camera_new(name.c_str());
-        
+
         ptr->type = TIS_DEVICE_TYPE_GIGE;
-        // TODO: check if name is terminated
-        // strcpy(ptr->name, arv_camera_get_model_name(cam));
         const char* n =  arv_camera_get_model_name(cam);
 
         if (n != NULL)
@@ -242,8 +234,6 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
             strcpy(ptr->serial_number, name.substr((t+1)).c_str());
         }
 
-        // printf("%s - %s - %s\n", ptr->name, ptr->identifier, ptr->serial_number);
-        // tis_log(TIS_LOG_ERROR, "%s", ptr->name);
         if (counter < array_size)
         {
             ptr++;
@@ -255,9 +245,9 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
         }
 
         g_object_unref(cam);
-        
+
     }
-    
+
     return counter;
 }
 

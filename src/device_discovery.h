@@ -5,11 +5,8 @@
 #ifndef _CAMERA_INDEX_H_
 #define _CAMERA_INDEX_H_
 
-// #include "tis_video.h"
 #include "base_types.h"
-// #include "tis_camera_interface.h"
 #include "config.h"
-
 
 #ifdef __cplusplus
 extern "C"
