@@ -22,6 +22,7 @@ bool ImageSource::setStatus (const PIPELINE_STATUS& status)
 
     if (current_status == PIPELINE_PLAYING)
     {
+        this->initialize_buffers();
 
         device->initialize_buffers(buffers);
         device->setSink(shared_from_this());
@@ -42,6 +43,7 @@ bool ImageSource::setStatus (const PIPELINE_STATUS& status)
     {
         tis_log(TIS_LOG_ERROR, "Source changed to state STOPPED");
         device->stop_stream();
+        device->release_buffers();
     }
 
 
@@ -65,7 +67,6 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
     }
 
     device = dev;
-    this->initialize_buffers();
 
     //tis_log(TIS_LOG_INFO, "Giving %d buffers to initialize in device", buffers.size());
 
