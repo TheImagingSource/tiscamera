@@ -430,6 +430,9 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 case ARV_BUFFER_STATUS_CLEARED:
                     msg = "Buffer cleared";
                     break;
+                case ARV_BUFFER_STATUS_UNKNOWN:
+                    msg = "This should not happen";
+                    break;
             }
             tis_log(TIS_LOG_WARNING, msg.c_str());
         }
