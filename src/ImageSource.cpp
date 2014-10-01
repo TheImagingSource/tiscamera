@@ -106,15 +106,9 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
 void ImageSource::initialize_buffers ()
 {
-    // TODO:
-    struct video_format format = {};
+    VideoFormat f = device->getActiveVideoFormat();
 
-    format.fourcc = V4L2_PIX_FMT_GREY;
-    format.width = 1920;
-    format.height = 1080;
-    format.binning = 0;
-    format.framerate = 0.1;
-
+    struct video_format format = f.getFormatDescription();
     int bit_depth = img::getBitsPerPixel(format.fourcc);
 
     for (unsigned int i = 0; i < this->n_buffers; ++i)
