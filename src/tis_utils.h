@@ -28,6 +28,8 @@ unsigned int tis_get_required_buffer_size (struct tis_video_format* format);
 
 const char* fourcc2description (const uint32_t& fourcc);
 
+uint32_t description2fourcc (const char* description);
+
 } /* namespace tis_imaging */
 
 #endif /* _TIS_UTILS_H_ */
