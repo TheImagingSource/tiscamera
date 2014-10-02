@@ -438,7 +438,7 @@ bool V4l2Device::stop_stream ()
 }
 
 
-bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
+static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
 {
 
     new_desc = fmtdesc;
