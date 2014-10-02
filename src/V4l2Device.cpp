@@ -87,11 +87,10 @@ bool V4l2Device::setProperty (const Property& _property)
         return false;
     }
 
+    desc->prop->setStruct(_property.getStruct());
+
     if (changeV4L2Control(*desc))
     {
-        // now save property internally
-        (*desc).prop->setStruct( _property.getStruct());
-
         return true;
     }
 
