@@ -521,6 +521,12 @@ void V4l2Device::index_formats ()
             }
         }
 
+        uint32_t FOURCC_GREY = mmioFOURCC('G', 'R', 'E', 'Y');
+        if (desc.fourcc == FOURCC_GREY)
+        {
+            desc.fourcc = FOURCC_Y800;
+        }
+
         VideoFormatDescription format(desc, rf);
         available_videoformats.push_back(format);
     }
