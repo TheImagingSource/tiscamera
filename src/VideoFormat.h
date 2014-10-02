@@ -50,6 +50,8 @@ public:
     std::string toString () const;
 
     bool fromString (const std::string&);
+
+    uint64_t getRequiredBufferSize () const;
     
 private:
 
