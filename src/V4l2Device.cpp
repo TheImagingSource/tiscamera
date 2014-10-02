@@ -99,8 +99,25 @@ bool V4l2Device::setProperty (const Property& _property)
 }
 
 
-bool V4l2Device::getProperty (Property&)
+bool V4l2Device::getProperty (Property& p)
 {
+    auto f = [&p] (const property_description& d)
+        {
+            return ((*d.prop).getName().compare(p.getName()) == 0);
+        };
+
+    auto desc = std::find_if(properties.begin(), properties.end(),f);
+
+    if (desc == properties.end())
+    {
+        tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", p.getName().c_str());
+        // TODO: failure description
+        return false;
+    }
+
+    p.setStruct(desc->prop->getStruct());
+
+    // TODO: ask device for current value
     return false;
 }
 
