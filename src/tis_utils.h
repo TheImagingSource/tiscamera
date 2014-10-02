@@ -38,6 +38,11 @@ uint32_t description2fourcc (const char* description);
  */
 std::vector<double> createStepsForRange (double min, double max);
 
+/**
+ * @return required buffer size in byte
+ */
+uint64_t getBufferLength (unsigned int width, unsigned int height, unsigned int fourcc);
+
 } /* namespace tis_imaging */
 
 #endif /* _TIS_UTILS_H_ */
