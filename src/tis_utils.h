@@ -30,6 +30,14 @@ const char* fourcc2description (const uint32_t& fourcc);
 
 uint32_t description2fourcc (const char* description);
 
+
+
+/**
+ * Create step list for given range
+ * @return vector containing all step from min to max; empty on error
+ */
+std::vector<double> createStepsForRange (double min, double max);
+
 } /* namespace tis_imaging */
 
 #endif /* _TIS_UTILS_H_ */

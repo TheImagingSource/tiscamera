@@ -192,3 +192,37 @@ uint32_t tis_imaging::description2fourcc (const char* description)
     return 0;
 }
 
+
+std::vector<double> tis_imaging::createStepsForRange (double min, double max)
+{
+    std::vector<double> vec;
+
+    if (max >= min)
+        return vec;
+
+    double current_step = min;
+
+    while (current_step < max)
+    {
+        vec.push_back(current_step);
+
+        if (current_step < 10.0)
+        {
+            current_step += 1;
+        }
+        else if (current_step < 20.0)
+        {
+            current_step += 2.0;
+        }
+        else
+        {
+            current_step += 5.0;
+        }
+    }
+
+    if (vec.back() != max)
+    {
+        vec.push_back(max);
+    }
+    return vec;
+}
