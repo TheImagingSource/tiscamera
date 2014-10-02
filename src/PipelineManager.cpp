@@ -462,7 +462,7 @@ bool PipelineManager::allocate_conversion_buffer ()
     for (int i = 0; i < 5; ++i)
     {
         image_buffer b = {};
-        b.pitch = format.getSize().width * 4;
+        b.pitch = format.getSize().width * img::getBitsPerPixel(format.getFourcc()) / 8;
         b.length = b.pitch * format.getSize().height;
 
         b.pData = (unsigned char*)malloc(b.length);
