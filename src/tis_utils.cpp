@@ -239,3 +239,14 @@ uint64_t tis_imaging::getBufferLength (unsigned int width, unsigned int height, 
 
     return size;
 }
+
+
+uint32_t tis_imaging::getPitchLength (unsigned int width, uint32_t fourcc)
+{
+    if (width == 0 || fourcc == 0)
+    {
+        return 0;
+    }
+
+    return width * (img::getBitsPerPixel(fourcc) / 8);
+}

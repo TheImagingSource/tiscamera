@@ -43,6 +43,11 @@ std::vector<double> createStepsForRange (double min, double max);
  */
 uint64_t getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc);
 
+/**
+ * @return row length of image in byte
+ */
+uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
+
 } /* namespace tis_imaging */
 
 #endif /* _TIS_UTILS_H_ */
