@@ -181,3 +181,9 @@ uint64_t VideoFormat::getRequiredBufferSize () const
 {
     return getBufferLength(format.width, format.height, format.fourcc);
 }
+
+
+uint32_t VideoFormat::getPitchSize () const
+{
+    return getPitchLength(format.width, format.fourcc);
+}

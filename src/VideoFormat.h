@@ -52,6 +52,8 @@ public:
     bool fromString (const std::string&);
 
     uint64_t getRequiredBufferSize () const;
+
+    uint32_t getPitchSize () const;
     
 private:
 
