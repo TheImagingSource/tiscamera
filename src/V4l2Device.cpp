@@ -425,9 +425,11 @@ bool V4l2Device::stop_stream ()
 {
     is_stream_on = false;
 
-    enum v4l2_buf_type type;
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == tis_xioctl(fd, VIDIOC_STREAMOFF, &type))
+    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    int ret = tis_xioctl(fd, VIDIOC_STREAMOFF, &type);
+
+    if (ret < 0)
     {
         return false;
     }
@@ -904,8 +906,7 @@ void V4l2Device::init_mmap_buffers ()
 
         struct image_buffer buffer = {};
 
-        buffer.length = buf.length;
-        buffer.length = active_video_format.getSize().width * active_video_format.getSize().height * img::getBitsPerPixel(active_video_format.getFourcc());
+        buffer.length = active_video_format.getRequiredBufferSize();
         buffer.pData =
             (unsigned char*) mmap( NULL, /* start anywhere */
                                    buf.length,
@@ -929,7 +930,7 @@ void V4l2Device::init_mmap_buffers ()
             }
         }
 
-        buffer.pitch = buffer.format.width;
+        buffer.pitch = active_video_format.getPitchSize();
         if (buffer.pData == MAP_FAILED)
         {
             tis_log(TIS_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);
