@@ -228,7 +228,7 @@ std::vector<double> tis_imaging::createStepsForRange (double min, double max)
 }
 
 
-uint64_t tis_imaging::getBufferLength (unsigned int width, unsigned int height, unsigned int fourcc)
+uint64_t tis_imaging::getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc)
 {
     uint64_t size = width * height * (img::getBitsPerPixel(fourcc) / 8);
 

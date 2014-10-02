@@ -41,7 +41,7 @@ std::vector<double> createStepsForRange (double min, double max);
 /**
  * @return required buffer size in byte
  */
-uint64_t getBufferLength (unsigned int width, unsigned int height, unsigned int fourcc);
+uint64_t getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc);
 
 } /* namespace tis_imaging */
 
