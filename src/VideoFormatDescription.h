@@ -29,9 +29,6 @@ public:
     VideoFormatDescription () = delete;
 
     VideoFormatDescription (const struct video_format_description&,
-                            const std::vector<double>&);
-
-    VideoFormatDescription (const struct video_format_description&,
                             const std::vector<res_fps>&);
 
     VideoFormatDescription (const VideoFormatDescription&);

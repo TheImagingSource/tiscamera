@@ -10,13 +10,6 @@
 using namespace tis_imaging;
 
 
-VideoFormatDescription::VideoFormatDescription (const struct video_format_description& _format,
-                                                const std::vector<double>& _framerates)
-{
-    memcpy(&format, &_format, sizeof(format));
-}
-
-
 VideoFormatDescription::VideoFormatDescription (const struct video_format_description& f,
                                                 const std::vector<res_fps>& r)
     : rf(r)
