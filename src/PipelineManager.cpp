@@ -173,8 +173,12 @@ void PipelineManager::index_output_formats ()
 
         if (match != available_input_formats.end())
         {
-            tis_log(TIS_LOG_ERROR, "Passing format through" );
+            tis_log(TIS_LOG_ERROR, "Passing format through %s", fourcc2description(f));
             available_output_formats.push_back(*match);
+        }
+        else
+        {
+            tis_log(TIS_LOG_DEBUG, "Device format '%s' will not be passed to user.", fourcc2description(f));
         }
     }
 }

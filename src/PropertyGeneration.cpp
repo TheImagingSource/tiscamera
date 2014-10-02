@@ -110,7 +110,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
 
     if (ctrl_m == ctrl_reference_table.end())
     {
-        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through.");
+        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
@@ -315,7 +315,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
 
     if (ctrl_m == ctrl_reference_table.end())
     {
-        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through.");
+        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. %s", feature);
         // pass through and do not associate with anything existing
         // TODO LOG
         type_to_use = value_type_to_ctrl_type(type);

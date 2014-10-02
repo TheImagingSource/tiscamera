@@ -48,7 +48,14 @@ bool Grabber::openDevice (const CaptureDevice& _device)
 
     device_properties = device->getProperties();
 
-    tis_log(TIS_LOG_DEBUG, "Retrieved %d properties",device_properties.size());
+    if (device_properties.empty())
+    {
+        tis_log(TIS_LOG_ERROR, "Device did not expose any properties!");
+    }
+    else
+    {
+        tis_log(TIS_LOG_DEBUG, "Retrieved %d properties", device_properties.size());
+    }
     bool ret = pipeline->setSource(device);
 
     if (ret == true)
