@@ -54,6 +54,8 @@ private slots:
 
     void on_actionClose_Camera_triggered ();
 
+    void on_size_box_currentIndexChanged(int index);
+
 private:
 
     Ui::MainWindow *ui;

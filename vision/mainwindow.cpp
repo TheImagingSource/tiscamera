@@ -361,3 +361,28 @@ void MainWindow::stop_stream ()
     data = NULL;
     playing = false;
 }
+
+
+void MainWindow::on_size_box_currentIndexChanged(int index)
+{
+    int format_index = ui->format_box->currentIndex();
+
+    if (format_index < 0)
+    {
+        return;
+    }
+
+    VideoFormatDescription desc = available_formats.at(format_index);
+
+    int size_index = ui->size_box->currentIndex();
+
+    auto res = desc.getResolutionsFramesrates();
+
+    ui->framerate_box->clear();
+
+    for (auto& fps : res.at(size_index).fps)
+    {
+        QString qs = QString::number(fps);
+        ui->framerate_box->addItem(qs);
+    }
+}
