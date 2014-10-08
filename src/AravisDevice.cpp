@@ -6,6 +6,7 @@
 
 #include "PropertyGeneration.h"
 #include "tis_logging.h"
+#include "tis_utils.h"
 
 #include <algorithm>
 #include <cstring>
@@ -102,51 +103,72 @@ bool AravisDevice::setProperty (const Property& p)
     }
     else
     {
-        return false;
+        //return false;
     }
 
     switch (value_type)
     {
-        case Property::BOOLEAN:
-        {
-            break;
-        }
-        case Property::STRING:
-        {
-            break;
-        }
-        case Property::ENUM:
-        {
-            break;
-        }
         case Property::INTEGER:
         {
+            tis_log(TIS_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
             // PropertyInteger&
-            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (*pm->prop)).getValue());
+            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
+            pm->prop->setStruct(p.getStruct());
             break;
         }
         case Property::INTSWISSKNIFE:
         {
+            tis_log(TIS_LOG_ERROR, "Swissknife");
+            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
             break;
         }
         case Property::FLOAT:
         {
-            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (*pm->prop)).getValue());
+            tis_log(TIS_LOG_ERROR, "FLOAT");
+            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
+            pm->prop->setStruct(p.getStruct());
+
             break;
         }
+        case Property::BUTTON:
         case Property::COMMAND:
         {
             //arv_device_
             arv_device_execute_command(device, pm->arv_ident.c_str());
             break;
         }
-        case Property::BUTTON:
+        case Property::BOOLEAN:
         {
+            tis_log(TIS_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
+            if (((PropertySwitch&)p).getValue())
+                arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
+            else
+                arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
+
+            pm->prop->setStruct(p.getStruct());
             break;
+        }
+        case Property::STRING:
+        case Property::ENUM:
+        {
+            tis_log(TIS_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
+            if (p.getType() == PROPERTY_TYPE_BOOLEAN)
+            {
+                if (((PropertySwitch&)p).getValue())
+                    arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
+                else
+                    arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
+
+                pm->prop->setStruct(p.getStruct());
+                break;
+            }
+
+            //break;
         }
         case Property::UNDEFINED:
         default:
         {
+            tis_log(TIS_LOG_ERROR, "NOT SUPPORTED!!!");
             break;
         }
     }
