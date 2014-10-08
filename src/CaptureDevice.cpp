@@ -59,10 +59,10 @@ std::string CaptureDevice::getDeviceTypeAsString () const
 {
     switch (device.type)
     {
-        case TIS_DEVICE_TYPE_GIGE:
-            return "GigE";
         case TIS_DEVICE_TYPE_V4L2:
             return "V4L2";
+        case TIS_DEVICE_TYPE_ARAVIS:
+            return "Aravis";
         case TIS_DEVICE_TYPE_FIREWIRE:
             return "Firewire";
         default:

@@ -33,7 +33,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
             {
                 return std::make_shared<V4l2Device>(device);
             }
-            case TIS_DEVICE_TYPE_GIGE:
+            case TIS_DEVICE_TYPE_ARAVIS:
 #if HAVE_ARAVIS
             {
                 return std::make_shared<AravisDevice>(device);

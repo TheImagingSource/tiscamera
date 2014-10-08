@@ -216,7 +216,7 @@ int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_si
 
         ArvCamera* cam = arv_camera_new(name.c_str());
 
-        ptr->type = TIS_DEVICE_TYPE_GIGE;
+        ptr->type = TIS_DEVICE_TYPE_ARAVIS;
         const char* n =  arv_camera_get_model_name(cam);
 
         if (n != NULL)
