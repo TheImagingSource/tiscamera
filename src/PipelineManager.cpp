@@ -79,7 +79,7 @@ bool PipelineManager::setStatus (const PIPELINE_STATUS& s)
     }
     else if (status == PIPELINE_STOPPED)
     {
-
+      stop_playing();
     }
 
     return true;
