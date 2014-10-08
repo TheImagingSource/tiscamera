@@ -56,9 +56,9 @@ public:
 
     std::shared_ptr<ImageSource> getSource ();
     
-    bool setSink (std::shared_ptr<ImageSink>);
+    bool setSink (std::shared_ptr<SinkInterface>);
     
-    std::shared_ptr<ImageSink> setSink ();
+    std::shared_ptr<SinkInterface> getSink ();
 
     // @brief callback for ImageSource
     void pushImage (std::shared_ptr<MemoryBuffer>);
@@ -79,7 +79,7 @@ private:
     PIPELINE_STATUS status;
     
     std::shared_ptr<ImageSource> source;
-    std::shared_ptr<ImageSink> sink;
+    std::shared_ptr<SinkInterface> sink;
 
     // @brief device properties
     std::vector<std::shared_ptr<Property>> properties;

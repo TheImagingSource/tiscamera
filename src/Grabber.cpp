@@ -161,7 +161,7 @@ VideoFormat Grabber::getActiveVideoFormat () const
 }
 
 
-bool Grabber::startStream (std::shared_ptr<ImageSink> sink)
+bool Grabber::startStream (std::shared_ptr<SinkInterface> sink)
 {
     if (!isDeviceOpen())
     {

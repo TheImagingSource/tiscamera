@@ -223,7 +223,7 @@ std::shared_ptr<ImageSource> PipelineManager::getSource ()
 }
 
 
-bool PipelineManager::setSink (std::shared_ptr<ImageSink> s)
+bool PipelineManager::setSink (std::shared_ptr<SinkInterface> s)
 {
     if (status == PIPELINE_PLAYING || status == PIPELINE_PAUSED)
     {
@@ -236,7 +236,7 @@ bool PipelineManager::setSink (std::shared_ptr<ImageSink> s)
 }
 
 
-std::shared_ptr<ImageSink> PipelineManager::setSink ()
+std::shared_ptr<SinkInterface> PipelineManager::getSink ()
 {
     return sink;
 }

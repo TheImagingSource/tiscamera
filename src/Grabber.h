@@ -48,7 +48,7 @@ public:
 
     // playback related:
 
-    bool startStream (std::shared_ptr<ImageSink>);
+    bool startStream (std::shared_ptr<SinkInterface>);
 
     bool stopStream ();
 
