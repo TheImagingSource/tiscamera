@@ -41,7 +41,7 @@ bool ImageSource::setStatus (const PIPELINE_STATUS& status)
     }
     else if (current_status == PIPELINE_STOPPED)
     {
-        tis_log(TIS_LOG_ERROR, "Source changed to state STOPPED");
+        tis_log(TIS_LOG_INFO, "Source changed to state STOPPED");
         device->stop_stream();
         device->release_buffers();
     }
