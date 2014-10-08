@@ -446,14 +446,13 @@ bool PipelineManager::add_interpretation_filter ()
                 tis_log(TIS_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
             }
 
-            for (auto& filter : filter_pipeline)
-            {
+            // for (auto& filter : filter_pipeline)
+            // {
                 if (f->setVideoFormat(input_format, input_format))
                 {
-
                     continue;
                 }
-            }
+           // }
         }
     }
     return true;
