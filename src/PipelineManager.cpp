@@ -635,7 +635,14 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         }
     }
 
-    sink->pushImage(current_buffer);
 
+    if (sink != nullptr)
+    {
+      sink->pushImage(current_buffer);
+    }
+    else
+    {
+      tis_log(TIS_LOG_ERROR, "Sink is NULL");
+    }
     buffer->unlock();
 }
