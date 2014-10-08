@@ -1,16 +1,11 @@
 
-if (BUILD_USB)
-  ExternalProject_Add (firmware-update
-    SOURCE_DIR firmware-update
-    BUILD_COMMAND make
-    INSTALL_DIR sbin)
 
+add_subdirectory(tis-ctrl)
 
+if (${BUILD_USB})
+  add_subdirectory(firmware-update)
+endif (${BUILD_USB})
 
-  # TODO: 
-endif (BUILD_USB)
-
-
-if (BUILD_ARAVIS)
-  # TODO:
-endif (BUILD_ARAVIS)
+if (${BUILD_ARAVIS})
+  # TODO
+endif (${BUILD_ARAVIS})

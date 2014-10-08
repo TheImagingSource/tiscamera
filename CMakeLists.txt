@@ -40,9 +40,9 @@ add_subdirectory(vision)
 add_subdirectory(data)
 
 
-if (BUILD_TOOLS)
+if (${BUILD_TOOLS})
   add_subdirectory(tools)
-endif (BUILD_TOOLS)
+endif (${BUILD_TOOLS})
 
 # Give overview over build configuration
 
@@ -58,5 +58,3 @@ MESSAGE(STATUS "")
 
 # install(DIRECTORY src DESTINATION lib
 #   FILES_MATCHING PATTERN "*.[so|a]")
-
-add_subdirectory(tools/tis-ctrl)
