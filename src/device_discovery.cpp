@@ -163,7 +163,7 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
         // TODO: no hard coded numbers find more general approach
         if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0)
         {
-            ptr->type = TIS_DEVICE_TYPE_USB;
+            ptr->type = TIS_DEVICE_TYPE_V4L2;
             strcpy(ptr->identifier, needed_path);
             strcpy(ptr->name, udev_device_get_sysattr_value(dev, "product"));
             strcpy(ptr->serial_number, udev_device_get_sysattr_value(dev, "serial"));

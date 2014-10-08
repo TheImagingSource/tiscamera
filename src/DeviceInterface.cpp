@@ -29,7 +29,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
 
         switch (type)
         {
-            case TIS_DEVICE_TYPE_USB:
+            case TIS_DEVICE_TYPE_V4L2:
             {
                 return std::make_shared<V4l2Device>(device);
             }

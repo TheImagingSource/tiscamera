@@ -40,7 +40,7 @@ enum PIPELINE_STATUS
 enum TIS_DEVICE_TYPE
 {
     TIS_DEVICE_TYPE_UNKNOWN = 0,
-    TIS_DEVICE_TYPE_USB,
+    TIS_DEVICE_TYPE_V4L2,
     TIS_DEVICE_TYPE_FIREWIRE,    /* both 400 and 800 */
     TIS_DEVICE_TYPE_GIGE,        /* currently through aravis */
 };
