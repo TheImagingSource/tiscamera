@@ -16,7 +16,7 @@ public:
 
     virtual ~SinkInterface () {};
 
-    virtual bool setStatus (const PIPELINE_STATUS&) = 0;
+    virtual bool setStatus (PIPELINE_STATUS) = 0;
 
     virtual PIPELINE_STATUS getStatus () const = 0;
 

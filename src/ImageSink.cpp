@@ -12,7 +12,7 @@ ImageSink::ImageSink ()
 {}
 
 
-bool ImageSink::setStatus (const PIPELINE_STATUS& s)
+bool ImageSink::setStatus (PIPELINE_STATUS s)
 {
     if (status == s)
         return true;

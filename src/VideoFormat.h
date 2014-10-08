@@ -33,19 +33,19 @@ public:
 
     uint32_t getFourcc () const;
 
-    void setFourcc (const uint32_t&);
+    void setFourcc (uint32_t);
 
     double getFramerate () const;
 
-    void setFramerate (const double&);
+    void setFramerate (double);
 
     struct IMG_SIZE getSize () const;
 
-    void setSize (const unsigned int& width, const unsigned int& height);
+    void setSize (unsigned int width, unsigned int height);
 
     unsigned int getBinning () const;
 
-    void setBinning (const unsigned int binning);
+    void setBinning (unsigned int binning);
 
     std::string toString () const;
 

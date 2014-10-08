@@ -50,15 +50,15 @@ public:
 
     std::vector<double> getFrameRates (const IMG_SIZE& size) const;
 
-    VideoFormat createVideoFormat (const unsigned int width,
-                                   const unsigned int height,
-                                   const double framerate) const;
+    VideoFormat createVideoFormat (unsigned int width,
+                                   unsigned int height,
+                                   double framerate) const;
 
     bool isValidVideoFormat (const VideoFormat&) const;
 
     bool isValidFramerate (const double framerate) const;
 
-    bool isValidResolution (const unsigned int width, const unsigned int height) const;
+    bool isValidResolution (unsigned int width, unsigned int height) const;
 
 private:
 

@@ -26,7 +26,7 @@ public:
 
     PropertyString (std::shared_ptr<PropertyImpl>,
                     const camera_property&,
-                    const VALUE_TYPE&);
+                    VALUE_TYPE);
     ~PropertyString ();
 
     std::string getDefault () const;
@@ -47,7 +47,7 @@ public:
     PropertyStringMap (std::shared_ptr<PropertyImpl>,
                        const camera_property&,
                        const std::map<std::string, int>&,
-                       const VALUE_TYPE&);
+                       VALUE_TYPE);
 
     ~PropertyStringMap ();
 
@@ -71,13 +71,13 @@ class PropertySwitch : public Property
 {
 public:
 
-    PropertySwitch (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
+    PropertySwitch (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
 
     ~PropertySwitch ();
 
     bool getDefault () const;
 
-    bool setValue (const bool&);
+    bool setValue (bool);
 
     bool getValue () const;
 };
@@ -91,7 +91,7 @@ class PropertyInteger : public Property
 {
 public:
 
-    PropertyInteger (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
+    PropertyInteger (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
 
     ~PropertyInteger ();
 
@@ -102,7 +102,7 @@ public:
     int64_t getStep () const;
     int64_t getValue () const;
 
-    bool setValue(const int64_t&);
+    bool setValue (int64_t);
 };
 
 
@@ -113,7 +113,7 @@ class PropertyDouble : public Property
 {
 public:
 
-    PropertyDouble (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
+    PropertyDouble (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
     ~PropertyDouble ();
 
     double getDefault () const;
@@ -123,7 +123,7 @@ public:
 
     double getValue () const;
 
-    bool setValue(const double&);
+    bool setValue (double);
 };
 
 
@@ -134,7 +134,7 @@ class PropertyButton : public Property
 {
 public:
 
-    PropertyButton (std::shared_ptr<PropertyImpl>, const camera_property&, const VALUE_TYPE&);
+    PropertyButton (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
     ~PropertyButton ();
 
     bool activate ();

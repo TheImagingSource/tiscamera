@@ -99,9 +99,9 @@ std::vector<double> VideoFormatDescription::getFrameRates (const IMG_SIZE& size)
 }
 
 
-VideoFormat VideoFormatDescription::createVideoFormat (const unsigned int width,
-                                                       const unsigned int height,
-                                                       const double framerate) const
+VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
+                                                       unsigned int height,
+                                                       double framerate) const
 {
 
     // TODO validity check
@@ -147,7 +147,7 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
 }
 
 
-bool VideoFormatDescription::isValidFramerate (const double framerate) const
+bool VideoFormatDescription::isValidFramerate (double framerate) const
 {
     // auto desc = to_check.getFormatDescription();
 
@@ -181,7 +181,7 @@ bool VideoFormatDescription::isValidFramerate (const double framerate) const
 }
 
 
-bool VideoFormatDescription::isValidResolution (const unsigned int width, const unsigned int height) const
+bool VideoFormatDescription::isValidResolution (unsigned int width, unsigned int height) const
 {
     if (format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
     {

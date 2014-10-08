@@ -66,7 +66,7 @@ uint32_t VideoFormat::getFourcc () const
 }
 
 
-void VideoFormat::setFourcc (const uint32_t& fourcc)
+void VideoFormat::setFourcc (uint32_t fourcc)
 {
     format.fourcc = fourcc;
 }
@@ -78,7 +78,7 @@ double VideoFormat::getFramerate () const
 }
 
 
-void VideoFormat::setFramerate (const double& framerate)
+void VideoFormat::setFramerate (double framerate)
 {
     format.framerate = framerate;
 }
@@ -91,7 +91,7 @@ struct IMG_SIZE VideoFormat::getSize () const
 }
 
 
-void VideoFormat::setSize (const unsigned int& width, const unsigned int& height)
+void VideoFormat::setSize (unsigned int width, unsigned int height)
 {
     format.width = width;
     format.height = height;

@@ -21,7 +21,7 @@ public:
 
     ImageSink ();
 
-    bool setStatus (const PIPELINE_STATUS&);
+    bool setStatus (PIPELINE_STATUS);
     PIPELINE_STATUS getStatus () const;
 
     bool registerCallback (sink_callback, void*);

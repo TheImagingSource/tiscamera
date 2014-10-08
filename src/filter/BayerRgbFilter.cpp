@@ -57,7 +57,7 @@ bool BayerRgbFilter::apply (std::shared_ptr<MemoryBuffer>)
 }
 
 
-bool BayerRgbFilter::setStatus (const PIPELINE_STATUS& s)
+bool BayerRgbFilter::setStatus (PIPELINE_STATUS s)
 {
     if (status == s)
     {

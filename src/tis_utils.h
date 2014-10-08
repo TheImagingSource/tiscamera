@@ -12,21 +12,21 @@
 namespace tis_imaging
 {
 
-std::string propertyType2String (const PROPERTY_TYPE&);
+std::string propertyType2String (PROPERTY_TYPE);
 
-std::string fourcc2string (const uint32_t& fourcc);
+std::string fourcc2string (uint32_t fourcc);
 
 uint32_t string2fourcc (const std::string& s);
 
 
-std::vector<std::string> split_string (const std::string& to_split, const std::string &delim);
+std::vector<std::string> split_string (const std::string& to_split, const std::string& delim);
 
 
 int tis_xioctl (int fd, int request, void* arg);
 
 unsigned int tis_get_required_buffer_size (struct tis_video_format* format);
 
-const char* fourcc2description (const uint32_t& fourcc);
+const char* fourcc2description (uint32_t fourcc);
 
 uint32_t description2fourcc (const char* description);
 

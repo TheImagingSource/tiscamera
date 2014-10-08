@@ -24,7 +24,7 @@ public:
 
     bool apply (std::shared_ptr<MemoryBuffer>);
     
-    bool setStatus (const PIPELINE_STATUS&);
+    bool setStatus (PIPELINE_STATUS);
 
     PIPELINE_STATUS getStatus () const;
 

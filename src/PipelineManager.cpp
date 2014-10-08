@@ -54,7 +54,7 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
-bool PipelineManager::setStatus (const PIPELINE_STATUS& s)
+bool PipelineManager::setStatus (PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
@@ -251,8 +251,8 @@ void PipelineManager::distributeProperties ()
 }
 
 
-bool isFilterApplicable (const uint32_t& fourcc,
-                         const std::vector<uint32_t>& vec)
+static bool isFilterApplicable (uint32_t fourcc,
+                                const std::vector<uint32_t>& vec)
 {
     if (std::find(vec.begin(), vec.end(), fourcc) == vec.end())
     {
@@ -262,7 +262,7 @@ bool isFilterApplicable (const uint32_t& fourcc,
 }
 
 
-void PipelineManager::create_input_format (const uint32_t& fourcc)
+void PipelineManager::create_input_format (uint32_t fourcc)
 {
     input_format = format;
     input_format.setFourcc(fourcc);

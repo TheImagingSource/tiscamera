@@ -16,7 +16,7 @@ ImageSource::~ImageSource ()
 }
 
 
-bool ImageSource::setStatus (const PIPELINE_STATUS& status)
+bool ImageSource::setStatus (PIPELINE_STATUS status)
 {
     current_status = status;
 

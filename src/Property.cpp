@@ -16,14 +16,14 @@ Property::Property ()
 {}
 
 
-Property::Property (const camera_property& _property, const VALUE_TYPE& t)
+Property::Property (const camera_property& _property, VALUE_TYPE t)
     : prop(_property), ref_prop(_property), value_type(t)
 {}
 
 
 Property::Property (const camera_property& _property,
                     const std::map<std::string, int>& _map,
-                    const VALUE_TYPE& t)
+                    VALUE_TYPE t)
     : prop(_property), ref_prop(_property), string_map(_map), value_type(t)
 {}
 

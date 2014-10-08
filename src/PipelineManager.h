@@ -41,7 +41,7 @@ public:
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
     
-    bool setStatus (const PIPELINE_STATUS&);
+    bool setStatus (PIPELINE_STATUS);
     
     PIPELINE_STATUS getStatus () const;
 
@@ -112,7 +112,7 @@ private:
     
     void distributeProperties ();
 
-    void create_input_format (const uint32_t& fourcc);
+    void create_input_format (uint32_t fourcc);
 
     std::vector<uint32_t> getDeviceFourcc ();
 

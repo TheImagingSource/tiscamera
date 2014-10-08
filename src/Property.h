@@ -38,11 +38,11 @@ public:
 
     Property();
 
-    Property (const camera_property&, const VALUE_TYPE&);
+    Property (const camera_property&, VALUE_TYPE);
 
     Property (const camera_property&,
               const std::map<std::string, int>&,
-              const VALUE_TYPE&);
+              VALUE_TYPE);
 
     virtual ~Property ();
 

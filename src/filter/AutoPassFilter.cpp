@@ -206,7 +206,7 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 }
 
 
-bool AutoPassFilter::setStatus (const PIPELINE_STATUS& s)
+bool AutoPassFilter::setStatus (PIPELINE_STATUS s)
 {
     if (current_status == s)
     {

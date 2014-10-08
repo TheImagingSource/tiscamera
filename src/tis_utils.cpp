@@ -12,7 +12,7 @@
 
 using namespace tis_imaging;
 
-std::string tis_imaging::propertyType2String (const PROPERTY_TYPE& type)
+std::string tis_imaging::propertyType2String (PROPERTY_TYPE type)
 {
     switch (type)
     {
@@ -30,7 +30,7 @@ std::string tis_imaging::propertyType2String (const PROPERTY_TYPE& type)
 }
 
 
-std::string tis_imaging::fourcc2string (const uint32_t& fourcc)
+std::string tis_imaging::fourcc2string (uint32_t fourcc)
 {
 
 
@@ -167,7 +167,7 @@ fourcc_names fourcc_name_array [] =
 };
 
 
-const char* tis_imaging::fourcc2description (const uint32_t& fourcc)
+const char* tis_imaging::fourcc2description (uint32_t fourcc)
 {
     for (const auto& entry : fourcc_name_array)
     {
