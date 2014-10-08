@@ -352,17 +352,22 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
     if (buffer != NULL)
     {
-        if (buffer->status == ARV_BUFFER_STATUS_SUCCESS)
+        ArvBufferStatus status = arv_buffer_get_status(buffer);
+
+        //ArvBufferStatus status = buffer->;
+
+        if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            struct image_buffer desc = {0};
+            struct image_buffer desc = {};
 
             desc.format = self->active_video_format.getFormatDescription();
 
+            size_t size = 0;
+            desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
+            desc.length = size;
+            desc.pitch = desc.format.width * img::getBitsPerPixel(desc.format.fourcc) / 8;
 
-            desc.pData = (unsigned char*)buffer->data;
-            desc.length = buffer->size;
-
-            if (buffer->data == NULL)
+            if (desc.pData == NULL)
             {
                 tis_log(TIS_LOG_ERROR, "FUCKING HELL");
             }
@@ -372,14 +377,19 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             self->external_sink->pushImage(self->buffers.at(self->current_buffer));
 
             if (self->current_buffer < self->buffers.size() -1)
+            {
                 self->current_buffer++;
+            }
             else
+            {
                 self->current_buffer = 0;
+            }
         }
         else
         {
             std::string msg;
-            switch (buffer->status)
+
+            switch (status)
             {
                 case ARV_BUFFER_STATUS_SUCCESS:
                     msg = "the buffer is cleared";
