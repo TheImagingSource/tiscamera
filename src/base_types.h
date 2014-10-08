@@ -109,6 +109,18 @@ struct video_format
 
 
 /**
+ * Statistic container for additional image_buffer descriptions
+ */
+struct stream_statistics
+{
+    uint64_t frame_count;      //
+    uint64_t frames_dropped;   //
+    uint64_t capture_time_ns;  // capture time reported by lib
+    uint64_t camera_time_ns;   // capture time reported by camera
+    double   actual_framerate; // in contrast to selected one
+};
+
+/**
  * @name image_buffer
  * @brief container for image transfer
  */
