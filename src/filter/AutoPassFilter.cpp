@@ -79,10 +79,6 @@ AutoPassFilter::AutoPassFilter ()
 }
 
 
-AutoPassFilter::~AutoPassFilter ()
-{}
-
-
 void AutoPassFilter::reset ()
 {
     params = {};

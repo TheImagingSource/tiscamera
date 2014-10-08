@@ -35,10 +35,6 @@ struct FilterDescription BayerRgbFilter::getDescription () const
 bool BayerRgbFilter::transform (MemoryBuffer& in, MemoryBuffer& out)
 {
 
-    // debayer_bayer_rgb24(in.getData(), out.getData())
-
-// std::remove_const<MemoryBuffer>::type in;
-
     auto img_out = to_img_desc(out);
     auto img_in  = to_img_desc(in);
     

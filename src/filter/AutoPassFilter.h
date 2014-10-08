@@ -13,7 +13,7 @@ class PropertyHandler: public PropertyImpl
 {
 public:
 
-    friend AutoPassFilter;
+    friend class AutoPassFilter;
     
     PropertyHandler ();
     
@@ -54,8 +54,6 @@ public:
 
     struct FilterDescription getDescription () const;
 
-    //bool init (const VideoFormat&);
-    
     bool transform (MemoryBuffer& in, MemoryBuffer& out );
 
     bool apply (std::shared_ptr<MemoryBuffer>);
