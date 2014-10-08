@@ -397,11 +397,6 @@ bool V4l2Device::start_stream ()
             tis_log(TIS_LOG_ERROR, "Unable to queue v4l2_buffer 'VIDIOC_QBUF'");
             return false;
         }
-        else
-        {
-            tis_log(TIS_LOG_DEBUG, "Queued buffer %d", i);
-
-        }
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -485,8 +480,7 @@ void V4l2Device::index_formats ()
     {
         struct video_format_description desc = {};
 
-        // TODO: handle bayer formats in older kernels
-        // 42474752-0000-0010-8000-00aa003 has fourcc 0
+        // TODO: Assure format descriptions are always consistent
         struct v4l2_fmtdesc new_desc = {};
         emulate_bayer = checkForBayer(fmtdesc, new_desc);
 
@@ -873,8 +867,6 @@ void V4l2Device::init_mmap_buffers ()
         tis_log(TIS_LOG_ERROR, "Mmaping %d buffers", buffers.size());
     }
 
-
-
     struct v4l2_requestbuffers req = {};
 
     req.count = buffers.size();
@@ -907,8 +899,6 @@ void V4l2Device::init_mmap_buffers ()
             // TODO: error
             return;
         }
-
-        tis_log(TIS_LOG_ERROR, "MMAPING buffer %d", n_buffers);
 
         struct image_buffer buffer = {};
 
