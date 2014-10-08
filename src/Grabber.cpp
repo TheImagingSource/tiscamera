@@ -21,8 +21,8 @@ Grabber::~Grabber ()
 
 bool Grabber::openDevice (const CaptureDevice& _device)
 {
-    if (pipeline->getPipelineStatus() == PIPELINE_PLAYING ||
-        pipeline->getPipelineStatus() == PIPELINE_PAUSED)
+    if (pipeline->getStatus() == PIPELINE_PLAYING ||
+        pipeline->getStatus() == PIPELINE_PAUSED)
     {
         return false;
     }
@@ -170,7 +170,7 @@ bool Grabber::startStream (std::shared_ptr<ImageSink> sink)
     }
     pipeline->setSink(sink);
 
-    return pipeline->setPipelineStatus(PIPELINE_PLAYING);
+    return pipeline->setStatus(PIPELINE_PLAYING);
 }
 
 
@@ -182,7 +182,7 @@ bool Grabber::stopStream ()
         return false;
     }
 
-    return pipeline->setPipelineStatus(PIPELINE_STOPPED);
+    return pipeline->setStatus(PIPELINE_STOPPED);
 }
 
 

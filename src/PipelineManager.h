@@ -41,9 +41,9 @@ public:
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
     
-    bool setPipelineStatus (const PIPELINE_STATUS&);
+    bool setStatus (const PIPELINE_STATUS&);
     
-    PIPELINE_STATUS getPipelineStatus () const;
+    PIPELINE_STATUS getStatus () const;
 
     /**
      * @brief Reset the pipeline to an undefined state.

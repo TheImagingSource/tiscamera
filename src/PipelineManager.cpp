@@ -54,7 +54,7 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
-bool PipelineManager::setPipelineStatus (const PIPELINE_STATUS& s)
+bool PipelineManager::setStatus (const PIPELINE_STATUS& s)
 {
     if (status == s)
         return true;
@@ -86,7 +86,7 @@ bool PipelineManager::setPipelineStatus (const PIPELINE_STATUS& s)
 }
 
 
-PIPELINE_STATUS PipelineManager::getPipelineStatus () const
+PIPELINE_STATUS PipelineManager::getStatus () const
 {
     return status;
 }
@@ -94,7 +94,7 @@ PIPELINE_STATUS PipelineManager::getPipelineStatus () const
 
 bool PipelineManager::destroyPipeline ()
 {
-    setPipelineStatus(PIPELINE_STOPPED);
+    setStatus(PIPELINE_STOPPED);
 
     source = nullptr;
     sink = nullptr;
