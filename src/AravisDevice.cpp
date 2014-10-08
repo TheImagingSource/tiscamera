@@ -199,9 +199,11 @@ bool AravisDevice::setVideoFormat (const VideoFormat& _format)
     // return false;
     // }
 
-    arv_camera_set_frame_rate (this->arv_camera, _format.getFramerate());
+    tis_log(TIS_LOG_DEBUG, "Setting format to '%s'", _format.toString().c_str());
 
-    arv_camera_set_pixel_format(this->arv_camera, _format.getFourcc());
+    arv_camera_set_frame_rate (this->arv_camera, 3.75);
+
+    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(_format.getFourcc()));
 
     // TODO: validity check
     arv_camera_set_binning(this->arv_camera, _format.getBinning(), _format.getBinning());
@@ -225,8 +227,8 @@ VideoFormat AravisDevice::getActiveVideoFormat () const
 void AravisDevice::determine_active_video_format ()
 {
 
-    this->active_video_format.setFramerate(arv_camera_get_frame_rate (this->arv_camera));
-    active_video_format.setFourcc(arv_camera_get_pixel_format(this->arv_camera));
+    this->active_video_format.setFramerate(arv_camera_get_frame_rate(this->arv_camera));
+    active_video_format.setFourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera)));
 
     int dx = 0;
     int dy = 0;
