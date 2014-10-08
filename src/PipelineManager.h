@@ -46,8 +46,8 @@ public:
     PIPELINE_STATUS getStatus () const;
 
     /**
-     * @brief Reset the pipeline to an undefined state.
-     * Stop all streams.
+     * @brief Reset the pipeline to PIPELINE_STOPPED.
+     * Stop all streams. Destroys all buffer.
      * @return true on success
      */
     bool destroyPipeline ();
