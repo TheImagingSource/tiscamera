@@ -42,8 +42,16 @@ void print_properties (const std::vector<Property>& properties)
                           << std::setw(10) << "(bool)"
                           << std::setw(31) << " " 
                           << "default="<< std::setw(5) << s.getDefault()
-                          << "value=" << s.getValue()
-                          << std::endl;
+                          << "value=";
+                if (s.getValue())
+                {
+                    std::cout << "true";
+                }
+                else
+                {
+                    std::cout << "false";
+                }
+                std::cout << std::endl;
                 break;
             }
             case PROPERTY_TYPE_BUTTON:
@@ -75,8 +83,16 @@ bool set_property (Grabber& g, const std::string& new_prop)
         return false;
     }
 
-    std::string name;
-    std::string value;
+    std::vector<std::string> prop_vec = tis_imaging::split_string(new_prop, "=");
+
+    if (prop_vec.size() != 2)
+    {
+        std::cout << "Given property string is faulty!" << std::endl;
+        return false;
+    }
+
+    std::string name = prop_vec.at(0);
+    std::string value = prop_vec.at(1);
     
     auto properties = g.getAvailableProperties();
 
@@ -84,6 +100,7 @@ bool set_property (Grabber& g, const std::string& new_prop)
     {
         if (p.getName().compare(name) == 0)
         {
+            std::cout << "Found property!" << std::endl;
             switch(p.getType())
             {
                 case PROPERTY_TYPE_DOUBLE:
@@ -120,7 +137,24 @@ bool set_property (Grabber& g, const std::string& new_prop)
                 }
                 case PROPERTY_TYPE_BOOLEAN:
                 {
-                    
+                    PropertySwitch& prop_s = (PropertySwitch&) p;
+                    if (value == "true" || value == "TRUE" || value == "1")
+                    {
+                        std::cout << "Setting " << name << " to TRUE"<< std::endl;
+
+                        return prop_s.setValue(true);
+                    }
+                    else if (value == "false" || value == "FALSE" || value == "0")
+                    {
+                        std::cout << "Setting " << name << " to FALSE"<< std::endl;
+                        return prop_s.setValue(false);
+                    }
+                    else
+                    {
+                        std::cout << "Could not interpret \"" << value << "\" as boolean." << std::endl;
+                        return false;
+                    }
+
                 }
                 case PROPERTY_TYPE_UNKNOWN:
                 default:
