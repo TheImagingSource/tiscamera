@@ -825,65 +825,75 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
     if (pixel_node != format_nodes.end())
     {
-        if (ARV_IS_GC_ENUMERATION (*pixel_node))
+
+        // we know there are formats
+        // use official API to retrieve info
+        // if needed we can perform additional genicam interpretation here
+
+        unsigned  n_formats;
+        gint64* format_ptr = arv_camera_get_available_pixel_formats ( this->arv_camera, &n_formats );
+        unsigned  n2_formats;
+        const char** format_str = arv_camera_get_available_pixel_formats_as_strings ( this->arv_camera, &n2_formats );
+
+        if ( n_formats != n2_formats )
         {
-            const GSList* childs;
-            const GSList* iter;
-
-            childs = arv_gc_enumeration_get_entries (ARV_GC_ENUMERATION (*pixel_node));
-            for (iter = childs; iter != NULL; iter = iter->next)
-            {
-                if (arv_gc_feature_node_is_implemented ((ArvGcFeatureNode*)iter->data, NULL))
-                {
-                    if (strcmp(arv_dom_node_get_node_name ((ArvDomNode*)iter->data), "EnumEntry") == 0)
-                    {
-                        GError* error = NULL;
-
-                        struct video_format_description desc = {0};
-
-                        memcpy(desc.description,
-                               arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data),
-                               sizeof(desc.description));
-
-                        // this is fourcc. unless otherwise specified it should assumed,
-                        // that this fourcc is v4l2 compatible
-                        desc.fourcc = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-                        tis_log(TIS_LOG_WARNING, "Found Format: %d", desc.fourcc);
-
-                        // merge frame_size and frame rates
-                        // struct buffer_size_desc bsd = {0};
-                        // bsd.frame = frame_size;
-                        // bsd.fps = fps;
-
-                        // std::cout << "FPS size " << fps.size() << std::endl;
-
-                        // std::vector<buffer_size_desc> bsd_vec;
-                        // bsd_vec.push_back(bsd);
-
-                        res_fps rf = {};
-
-                        rf.resolution = {};
-
-                        // we create a format for every binning value and store it seperately
-                        for ( const auto& b : binning)
-                        {
-                            struct video_format_description d = desc;
-
-                            d.binning = b;
-                            d.framerate_type = TIS_FRAMERATE_TYPE_RANGE;
-                            d.min_size = min;
-                            d.max_size = max;
-
-                            this->available_videoformats.push_back(VideoFormatDescription(d, fps));
-                        }
-                    }
-                }
-            }
+            tis_log ( TIS_LOG_ERROR, "Format retrieval encountered nonsensical information" );
         }
-        else
+
+        for ( int i = 0; i < n_formats; ++i )
         {
-            tis_log(TIS_LOG_ERROR, "No PixelFormat Enumeration");
-            // TODO
+            struct video_format_description desc = {};
+
+            desc.fourcc = format_ptr[i];
+
+            desc.fourcc = aravis2fourcc(desc.fourcc);
+
+            if (desc.fourcc == 0)
+            {
+                tis_log(TIS_LOG_ERROR, "Input format no supported! \"%x\"", format_ptr[i]);
+            }
+
+            memcpy(desc.description, format_str[i], sizeof(desc.description));
+
+            res_fps rf = {};
+
+            rf.resolution = {};
+
+            double fps_min;
+            double fps_max;
+
+            //arv_camera_get_frame_rate_bounds ( this->arv_camera, &fps_min, &fps_max );
+
+
+            rf.resolution = min;
+            // rf.fps.push_back ( fps_min );
+            // rf.fps.push_back ( fps_max );
+
+            rf.fps =fps;
+
+            std::vector<res_fps> res_vec;
+
+            res_vec.push_back ( rf );
+
+            rf.resolution = max;
+
+            res_vec.push_back ( rf );
+
+            // we create a format for every binning value and store it seperately
+            for ( const auto & b : binning )
+            {
+                struct video_format_description d = desc;
+
+                d.binning = b;
+                d.framerate_type = TIS_FRAMERATE_TYPE_RANGE;
+                d.min_size = min;
+                d.max_size = max;
+
+                tis_log(TIS_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
+
+                this->available_videoformats.push_back ( VideoFormatDescription ( d, res_vec ) );
+            }
+
         }
     }
     else
