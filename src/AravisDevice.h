@@ -63,7 +63,7 @@ private:
     ArvStream* stream;
 
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
-    int current_buffer;
+    unsigned int current_buffer;
 
     struct aravis_options
     {
