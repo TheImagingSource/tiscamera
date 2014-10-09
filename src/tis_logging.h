@@ -34,6 +34,7 @@ enum TIS_LOG_LEVEL
     TIS_LOG_ERROR   = 4,
 };
 
+typedef void (*logging_callback) (enum TIS_LOG_LEVEL, const char*, int, const char*, ...);
 
 
 class Logger
@@ -53,6 +54,15 @@ public:
     void set_log_level (enum TIS_LOG_LEVEL);
     enum TIS_LOG_LEVEL get_log_level () const;
 
+    void set_target (enum TIS_LOG_TARGET);
+    enum TIS_LOG_TARGET get_target () const;
+
+    void set_log_file (const std::string& filename);
+    std::string get_log_file () const;
+
+    void set_external_callback (logging_callback);
+    void delete_external_callback ();
+
 private:
 
     Logger ();
@@ -65,9 +75,14 @@ private:
     void log_to_stdout (const char* message);
     void log_to_file (const char* message);
 
+    void open_logfile ();
+    void close_logfile ();
+
     TIS_LOG_LEVEL level;
     std::string log_file;
     TIS_LOG_TARGET target;
+    logging_callback callback;
+    FILE* logfile;
 };
 
 /*
@@ -103,8 +118,6 @@ void tis_logging (const char* module,
 #define tis_log(level, message, ...) (tis_logging(level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
 #define tis__log(module, level, message, ...) (tis_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
-
-typedef void (*logging_callback) (enum TIS_LOG_LEVEL, const char*, int, const char*, ...);
 
 
 #endif /* _LOGGING_H_ */

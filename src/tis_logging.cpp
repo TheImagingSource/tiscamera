@@ -21,24 +21,6 @@ struct tis_logging_info
 static struct tis_logging_info logger = { TIS_LOG_DEBUG, STDIO, "/tmp/tis.log", NULL, NULL};
 
 
-void tis_set_logging_target (enum TIS_LOG_TARGET target)
-{
-    logger.target = target;
-}
-
-
-void tis_set_logging_file (const char* logfile_name)
-{
-    memcpy(logger.logfile_name, logfile_name, sizeof(logger.logfile_name));
-}
-
-
-const char* tis_get_logging_file ()
-{
-    return logger.logfile_name;
-}
-
-
 static const char* loglevel2string (const enum TIS_LOG_LEVEL level)
 {
     switch (level)
@@ -59,8 +41,11 @@ static const char* loglevel2string (const enum TIS_LOG_LEVEL level)
 }
 
 
-Logger::Logger ()
+Logger::Logger ():
+    callback(nullptr),
+    logfile(nullptr)
 {
+    // TODO: make environment variable name configurable
     char* log_def = getenv("TIS_LOG");
     if (log_def == nullptr)
     {
@@ -146,6 +131,59 @@ enum TIS_LOG_LEVEL Logger::get_log_level () const
 }
 
 
+void Logger::set_target (enum TIS_LOG_TARGET t)
+{
+    target = t;
+}
+
+
+enum TIS_LOG_TARGET Logger::get_target () const
+{
+    return target;
+}
+
+
+void Logger::set_log_file (const std::string& filename)
+{
+    log_file = filename;
+}
+
+
+std::string Logger::get_log_file () const
+{
+    return log_file;
+}
+
+
+void Logger::set_external_callback (logging_callback c)
+{
+    callback = c;
+}
+
+
+void Logger::delete_external_callback ()
+{
+    callback = nullptr;
+}
+
+
+void Logger::open_logfile ()
+{
+    if (!log_file.empty())
+        logfile = fopen(log_file.c_str(), "a+");
+}
+
+
+void Logger::close_logfile ()
+{
+    if (logfile != NULL)
+    {
+        fclose(logfile);
+        logfile = NULL;
+    }
+}
+
+
 Logger& Logger::getInstance ()
 {
     static Logger instance;
@@ -153,15 +191,17 @@ Logger& Logger::getInstance ()
     return instance;
 }
 
+
+
 void tis_set_logging_level (enum TIS_LOG_LEVEL level)
 {
-    logger.level = level;
+    Logger::getInstance().set_log_level(level);
 }
 
 
 enum TIS_LOG_LEVEL tis_get_logging_level ()
 {
-    return logger.level;
+    return Logger::getInstance().get_log_level();
 }
 
 
@@ -173,48 +213,23 @@ void tis_logging_init(enum TIS_LOG_TARGET target, enum TIS_LOG_LEVEL level)
 
 
 
-static void open_logfile ()
+
+
+void tis_set_logging_target (enum TIS_LOG_TARGET target)
 {
-    logger.logfile = fopen(logger.logfile_name, "a+");
+    Logger::getInstance().set_target(target);
 }
 
 
-static void close_logfile ()
+void tis_set_logging_file (const char* logfile_name)
 {
-    if (logger.logfile != NULL)
-    {
-        fclose(logger.logfile);
-        logger.logfile = NULL;
-    }
+    Logger::getInstance().set_log_file(logfile_name);
 }
 
 
-static void log_logfile (const char* message)
+const char* tis_get_logging_file ()
 {
-    if (strcmp(logger.logfile_name, "") == 0)
-    {
-        return;
-    }
-
-    if (logger.logfile == NULL)
-    {
-        open_logfile();
-        if (logger.logfile == NULL)
-        {
-            return;
-        }
-    }
-
-    fwrite(message, sizeof(char), strlen(message), logger.logfile);
-    
-    close_logfile();
-}
-
-
-static void log_stdio (const char* message)
-{
-    fprintf(stdout, "%s", message);
-    fflush(stdout);
+    return Logger::getInstance().get_log_file().c_str();
 }
 
 
@@ -237,7 +252,8 @@ void tis_logging (enum TIS_LOG_LEVEL level, const char* file, int line, const ch
 
 void tis_logging (const char* module, enum TIS_LOG_LEVEL level, const char* function, int line, const char* message, ...)
 {
-    if (Logger::getInstance().get_log_level() > level || Logger::getInstance().get_log_level() == TIS_LOG_OFF)
+    if (Logger::getInstance().get_log_level() > level ||
+        Logger::getInstance().get_log_level() == TIS_LOG_OFF)
     {
         return;
     }
