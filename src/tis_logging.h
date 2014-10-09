@@ -4,6 +4,7 @@
 #define _LOGGING_H_
 
 #include <stdarg.h>             /* va_args */
+#include <string>
 
 
 enum TIS_LOG_TARGET
@@ -31,6 +32,42 @@ enum TIS_LOG_LEVEL
     TIS_LOG_INFO    = 2,
     TIS_LOG_WARNING = 3,
     TIS_LOG_ERROR   = 4,
+};
+
+
+
+class Logger
+{
+
+public:
+
+    static Logger& getInstance ();
+
+    void log (const char* module,
+              enum TIS_LOG_LEVEL level,
+              const char* function,
+              int line,
+              const char* message,
+              va_list);
+
+    void set_log_level (enum TIS_LOG_LEVEL);
+    enum TIS_LOG_LEVEL get_log_level () const;
+
+private:
+
+    Logger ();
+
+    Logger (const Logger&) = delete;
+    Logger& operator= (const Logger&) = delete;
+
+    void load_default_settings ();
+
+    void log_to_stdout (const char* message);
+    void log_to_file (const char* message);
+
+    TIS_LOG_LEVEL level;
+    std::string log_file;
+    TIS_LOG_TARGET target;
 };
 
 /*

@@ -58,6 +58,101 @@ static const char* loglevel2string (const enum TIS_LOG_LEVEL level)
     }
 }
 
+
+Logger::Logger ()
+{
+    char* log_def = getenv("TIS_LOG");
+    if (log_def == nullptr)
+    {
+        load_default_settings();
+    }
+}
+
+void Logger::load_default_settings ()
+{
+    level = TIS_LOG_DEBUG;
+    target = STDIO;
+    log_file = "tmp/tis.log";
+}
+
+
+void Logger::log (const char* module,
+                  enum TIS_LOG_LEVEL level,
+                  const char* function,
+                  int line,
+                  const char* message,
+                  va_list args)
+{
+    if (level < logger.level)
+    {
+        return;
+    }
+
+    char msg[1024];
+    char buffer [2056];
+
+    /* fill user defined message */
+    vsprintf(msg, message, args);
+
+    clock_t t;
+    t = clock();
+    /* write complete message */
+    sprintf(buffer,
+            "%-10ld <%s> %s:%d: %s\n",
+            /* ctime(&timer), */
+            t,
+            loglevel2string(level),
+            function,
+            line,
+            msg);
+
+    switch (logger.target)
+    {
+        case STDIO:
+            log_to_stdout(buffer);
+            break;
+        case LOGFILE:
+            log_to_file(buffer);
+            break;
+        case USER_DEFINED:
+            //logger.callback(level, file, line, message, args);
+            break;
+        default:
+            break;
+    }
+}
+
+
+void Logger::log_to_stdout (const char* message)
+{
+    fprintf(stdout, "%s", message);
+    fflush(stdout);
+}
+
+
+void Logger::log_to_file (const char* message)
+{}
+
+
+void Logger::set_log_level (enum TIS_LOG_LEVEL l)
+{
+    level = l;
+}
+
+
+enum TIS_LOG_LEVEL Logger::get_log_level () const
+{
+    return level;
+}
+
+
+Logger& Logger::getInstance ()
+{
+    static Logger instance;
+
+    return instance;
+}
+
 void tis_set_logging_level (enum TIS_LOG_LEVEL level)
 {
     logger.level = level;
@@ -125,54 +220,17 @@ static void log_stdio (const char* message)
 
 void tis_logging (enum TIS_LOG_LEVEL level, const char* file, int line, const char* message, ...)
 {
-    if (level < logger.level)
+    if (Logger::getInstance().get_log_level() > level ||
+        Logger::getInstance().get_log_level() == TIS_LOG_OFF)
     {
         return;
     }
+
     va_list args;
     va_start(args, message);
 
-    char msg[1024];
-    char buffer [2056];
+    Logger::getInstance().log("", level, file, line, message, args);
 
-    /* fill user defined message */
-    vsprintf(msg, message, args);
-
-    /* time_t timer = {0}; */
-    /* time(&timer); */
-
-/* char t [64]; */
-
-    clock_t t;
-    t = clock();
-    /* write complete message */
-    sprintf(buffer,
-            "%-10ld <%s> %s:%d: %s\n",
-            /* ctime(&timer), */
-            t,
-            loglevel2string(level),
-            file,
-            line,
-            msg);
-
-/* printf("%s", buffer); */
-    
-    switch (logger.target)
-    {
-        case STDIO:
-            log_stdio(buffer);
-            break;
-        case LOGFILE:
-            log_logfile(buffer);
-            break;
-        case USER_DEFINED:
-            logger.callback(level, file, line, message, args);
-            break;
-        default:
-            break;
-    }
     va_end(args);
 }
-
-/* #define mylog(message,...) logging(__FILE__ , __LINE__, message, ## __VA_ARGS__) */
 
