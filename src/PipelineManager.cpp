@@ -494,7 +494,6 @@ bool PipelineManager::create_pipeline ()
     // assure everything is in a defined state
     filter_pipeline.clear();
 
-    format.setFramerate(10.0);
     format.setBinning(0);
 
     if (!create_conversion_pipeline())
