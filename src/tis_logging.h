@@ -90,13 +90,22 @@ void tis_logging_init(enum TIS_LOG_TARGET target, enum TIS_LOG_LEVEL level);
 */
 void tis_logging (enum TIS_LOG_LEVEL level, const char* function, int line, const char* message, ...);
 
+void tis_logging (const char* module,
+                  enum TIS_LOG_LEVEL level,
+                  const char* function,
+                  int line,
+                  const char* message,
+                  ...);
+
 /*
   Convience wrapper macro
 */
-// #define tis_log(level, message, ...) (tis_logging(level, __FUNCTION__ , __LINE__, message, ##__VA_ARGS__)) 
-#define tis_log(level, message, ...) (tis_logging(level, __FILE__ , __LINE__, message, ##__VA_ARGS__)) 
+#define tis_log(level, message, ...) (tis_logging(level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
+
+#define tis__log(module, level, message, ...) (tis_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
 typedef void (*logging_callback) (enum TIS_LOG_LEVEL, const char*, int, const char*, ...);
 
 
 #endif /* _LOGGING_H_ */
+

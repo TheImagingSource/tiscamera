@@ -234,3 +234,20 @@ void tis_logging (enum TIS_LOG_LEVEL level, const char* file, int line, const ch
     va_end(args);
 }
 
+
+void tis_logging (const char* module, enum TIS_LOG_LEVEL level, const char* function, int line, const char* message, ...)
+{
+    if (Logger::getInstance().get_log_level() > level || Logger::getInstance().get_log_level() == TIS_LOG_OFF)
+    {
+        return;
+    }
+
+    va_list args;
+    va_start(args, message);
+
+    Logger::getInstance().log(module, level, function, line, message, args);
+
+    va_end(args);
+}
+
+
