@@ -461,6 +461,7 @@ bool PipelineManager::add_interpretation_filter ()
 
 bool PipelineManager::allocate_conversion_buffer ()
 {
+    pipeline_buffer.clear();
 
     for (int i = 0; i < 5; ++i)
     {
