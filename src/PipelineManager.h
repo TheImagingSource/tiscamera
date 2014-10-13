@@ -116,6 +116,8 @@ private:
 
     std::vector<uint32_t> getDeviceFourcc ();
 
+    bool set_sink_status (PIPELINE_STATUS);
+
     bool validate_pipeline ();
 
     bool create_conversion_pipeline ();

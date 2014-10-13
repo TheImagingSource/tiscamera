@@ -287,6 +287,24 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 }
 
 
+bool PipelineManager::set_sink_status (PIPELINE_STATUS status)
+{
+    if (sink == nullptr)
+    {
+        tis_log(TIS_LOG_ERROR, "Sink is not defined.");
+        return false;
+    }
+
+    if (!sink->setStatus(status))
+    {
+        tis_log(TIS_LOG_ERROR, "Sink spewed error");
+        return false;
+    }
+
+    return true;
+}
+
+
 bool PipelineManager::validate_pipeline ()
 {
     // check if pipeline is valid
@@ -541,7 +559,7 @@ bool PipelineManager::create_pipeline ()
 bool PipelineManager::start_playing ()
 {
 
-    if (!sink->setStatus(PIPELINE_PLAYING))
+    if (!set_sink_status(PIPELINE_PLAYING))
     {
         tis_log(TIS_LOG_ERROR, "Sink refused to change to state PLAYING");
         goto error;
@@ -596,11 +614,7 @@ bool PipelineManager::stop_playing ()
         }
     }
 
-    if (!sink->setStatus(PIPELINE_STOPPED))
-    {
-        tis_log(TIS_LOG_ERROR, "Sink refused to change to state STOP");
-        return false;
-    }
+    set_sink_status(PIPELINE_STOPPED);
 
     return true;
 }
