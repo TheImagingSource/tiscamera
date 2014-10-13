@@ -418,6 +418,8 @@ bool V4l2Device::start_stream ()
 
 bool V4l2Device::stop_stream ()
 {
+    bool wait_for_join = is_stream_on;
+
     is_stream_on = false;
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -429,7 +431,8 @@ bool V4l2Device::stop_stream ()
         return false;
     }
 
-    work_thread.join();
+    if (wait_for_join)
+        work_thread.join();
 
     return true;
 }
