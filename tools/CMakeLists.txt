@@ -2,9 +2,9 @@
 
 add_subdirectory(tis-ctrl)
 
-if (${BUILD_USB})
+if (BUILD_USB)
   add_subdirectory(firmware-update)
-endif (${BUILD_USB})
+endif (BUILD_USB)
 
 if (BUILD_ARAVIS)
   add_subdirectory(camera-ip-conf)

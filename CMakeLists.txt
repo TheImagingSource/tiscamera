@@ -15,7 +15,6 @@ configure_file(
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
 
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
@@ -29,8 +28,7 @@ option(BUILD_USB      "Include support for USB cameras"      ON )
 option(BUILD_FIREWIRE "Include support for firewire devices" OFF)
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 
-#add_definitions(-std=c99 -std=c++11)
-# add_definitions(-std=c++11)
+
 set(CMAKE_CXX_FLAGS "-std=c++11 -flto -pthread")
 set(CMAKE_C_FLAGS " -flto -pthread")
 
@@ -40,9 +38,9 @@ add_subdirectory(vision)
 add_subdirectory(data)
 
 
-if (${BUILD_TOOLS})
+if (BUILD_TOOLS)
   add_subdirectory(tools)
-endif (${BUILD_TOOLS})
+endif (BUILD_TOOLS)
 
 # Give overview over build configuration
 
@@ -56,5 +54,3 @@ MESSAGE(STATUS "Support for firewire devices:  " ${BUILD_FIREWIRE})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "")
 
-# install(DIRECTORY src DESTINATION lib
-#   FILES_MATCHING PATTERN "*.[so|a]")
