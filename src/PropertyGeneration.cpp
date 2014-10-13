@@ -39,6 +39,43 @@ PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
 }
 
 
+static uint32_t convertV4L2flags (uint32_t v4l2_flags)
+{
+    uint32_t internal_flags = 0;
+
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_DISABLED))
+    {
+        internal_flags = set_bit(internal_flags, PROPERTY_FLAG_DISABLED);
+    }
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_GRABBED))
+    {
+        internal_flags = set_bit(internal_flags, PROPERTY_FLAG_GRABBED);
+    }
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_READ_ONLY))
+    {
+        internal_flags = set_bit(internal_flags, PROPERTY_FLAG_READ_ONLY);
+    }
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_UPDATE))
+    {}
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_INACTIVE))
+    {
+        internal_flags = set_bit(internal_flags, PROPERTY_FLAG_INACTIVE);
+    }
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_SLIDER))
+    {}
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_WRITE_ONLY))
+    {
+        internal_flags = set_bit(internal_flags, PROPERTY_FLAG_WRITE_ONLY);
+    }
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_VOLATILE))
+    {}
+    // if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_HAS_PAYLOAD))
+    // {}
+
+    return internal_flags;
+}
+
+
 std::shared_ptr<Property> tis_imaging::createProperty (int fd,
                                                        struct v4l2_queryctrl* queryctrl,
                                                        struct v4l2_ext_control* ctrl,
@@ -127,7 +164,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
     // simply copy existing flags
     if (queryctrl->flags)
     {
-        flags = queryctrl->flags;
+        flags = convertV4L2flags(queryctrl->flags);
     }
 
     switch (type_to_use)
