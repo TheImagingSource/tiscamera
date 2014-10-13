@@ -22,6 +22,24 @@ uint32_t string2fourcc (const std::string& s);
 std::vector<std::string> split_string (const std::string& to_split, const std::string& delim);
 
 
+inline bool is_bit_set (unsigned int value, unsigned int bitindex)
+{
+    return (value & (1 << bitindex)) != 0;
+}
+
+
+inline unsigned int set_bit (unsigned int value, unsigned int bitindex)
+{
+    return (value |= (1 << bitindex));
+}
+
+
+inline unsigned int unset_bit (unsigned int value, unsigned int bitindex)
+{
+    return (value &= ~(1 << bitindex));
+}
+
+
 int tis_xioctl (int fd, int request, void* arg);
 
 unsigned int tis_get_required_buffer_size (struct tis_video_format* format);
