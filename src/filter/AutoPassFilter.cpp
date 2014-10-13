@@ -292,7 +292,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags & (1 << PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_exposure = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
     }
@@ -317,7 +317,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Gain Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags & (1 << PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_gain = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
     }
@@ -345,7 +345,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Iris Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags & (1 << PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_iris = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
 
@@ -357,7 +357,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     strncpy(prop.name, "Whitebalance Auto", sizeof(prop.name));
     prop.type = PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
-    prop.flags & (1 << PROPERTY_FLAG_EXTERNAL);
+    prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_auto_wb = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
 
