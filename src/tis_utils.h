@@ -66,6 +66,15 @@ uint64_t getBufferLength (unsigned int width, unsigned int height, uint32_t four
  */
 uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
 
+
+/**
+ * @name calculateAutoCenter
+ * @param sensor - size of the sensor on which image shall be centered
+ * @param image  - image size of the image that shall be auto centered
+ * @return coordinates that shall be used for offsets
+ */
+IMG_SIZE calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image);
+
 } /* namespace tis_imaging */
 
 #endif /* _TIS_UTILS_H_ */

@@ -250,3 +250,19 @@ uint32_t tis_imaging::getPitchLength (unsigned int width, uint32_t fourcc)
 
     return width * (img::getBitsPerPixel(fourcc) / 8);
 }
+
+
+IMG_SIZE tis_imaging::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image)
+{
+    IMG_SIZE ret = {};
+
+    if (image.width > sensor.width || image.height > sensor.height)
+    {
+        return ret;
+    }
+
+    ret.width = (sensor.width / 2) - (image.width /2);
+    ret.height = (sensor.height / 2) - (image.height / 2);
+
+    return ret;
+}
