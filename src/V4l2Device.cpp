@@ -53,14 +53,7 @@ std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
         index_all_controls(shared_from_this());
     }
 
-    std::vector<std::shared_ptr<Property>> props;
-
-    for ( const auto& p : properties )
-    {
-        props.push_back(p.prop);
-    }
-
-    return props;
+    return create_property_vector();
 }
 
 
@@ -611,6 +604,19 @@ void V4l2Device::determine_active_video_format ()
     this->active_video_format = VideoFormat(format);
 
     return;
+}
+
+
+std::vector<std::shared_ptr<Property>> V4l2Device::create_property_vector ()
+{
+    std::vector<std::shared_ptr<Property>> props;
+
+    for ( const auto& p : properties )
+    {
+        props.push_back(p.prop);
+    }
+
+    return props;
 }
 
 

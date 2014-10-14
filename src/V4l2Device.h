@@ -106,6 +106,8 @@ private:
 
     std::vector<property_description> properties;
 
+    std::vector<std::shared_ptr<Property>> create_property_vector ();
+
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
 
     int index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
