@@ -94,7 +94,7 @@ void MainWindow::my_captureDevice_selected (tis_imaging::CaptureDevice device)
 
     if (available_formats.empty())
     {
-        std::cout << "No available formats!" << std::endl;
+        tis_log(TIS_LOG_ERROR, "No available formats!");
         return;
     }
 
@@ -264,7 +264,7 @@ void MainWindow::callback (std::shared_ptr<MemoryBuffer> buffer, void* user_data
 
 void MainWindow::on_format_box_currentIndexChanged (int index)
 {
-    std::cout << index << std::endl;
+    tis_log(TIS_LOG_INFO, "New format index %d", index);
 
     if (index > available_formats.size())
     {
@@ -272,9 +272,13 @@ void MainWindow::on_format_box_currentIndexChanged (int index)
         return;
     }
 
+    for (VideoFormatDescription d: available_formats)
+    {
+        std::cout << "Format: " << fourcc2description(d.getFormatDescription().fourcc) << std::endl;
 
+    }
 
-    auto f = available_formats.at(index);
+    VideoFormatDescription f = available_formats.at(index);
 
     ui->size_box->clear();
 
@@ -311,7 +315,7 @@ bool MainWindow::getActiveVideoFormat ()
         input_format.setFourcc(FOURCC_Y800);
     }
 
-    auto active_desc = available_formats.at(format_index);
+    VideoFormatDescription active_desc = available_formats.at(format_index);
     uint32_t f = active_desc.getFormatDescription().fourcc;
 
     input_format.setFourcc(f);
@@ -325,9 +329,16 @@ bool MainWindow::getActiveVideoFormat ()
     {
         auto size_desc = active_desc.getResolutions();
         input_format.setSize(size_desc.at(size_index).width, size_desc.at(size_index).height);
+
+        auto res = active_desc.getResolutionsFramesrates().at(size_index);
+
+        int fps_index = ui->framerate_box->currentIndex();
+
+        input_format.setFramerate (res.fps.at(fps_index));
+
+        //input_format.setFramerate(10.0);
     }
 
-    input_format.setFramerate(10.0);
     input_format.setBinning(0);
     active_format = input_format;
 
@@ -367,8 +378,6 @@ void MainWindow::start_stream ()
 void MainWindow::stop_stream ()
 {
     grabber->stopStream();
-    free(data);
-    data = NULL;
     playing = false;
 }
 
@@ -385,6 +394,11 @@ void MainWindow::on_size_box_currentIndexChanged(int index)
     VideoFormatDescription desc = available_formats.at(format_index);
 
     int size_index = ui->size_box->currentIndex();
+
+    if (size_index < 0)
+    {
+        return;
+    }
 
     auto res = desc.getResolutionsFramesrates();
 
