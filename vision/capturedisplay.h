@@ -12,18 +12,19 @@ class CaptureDisplay : public QWidget
     Q_OBJECT
 
 public:
-    explicit CaptureDisplay(QWidget *parent = 0);
-    ~CaptureDisplay();
+    explicit CaptureDisplay (QWidget* parent = 0);
+    ~CaptureDisplay ();
 
-    QImage img;
+    QPixmap m;
     bool new_image;
 
 protected:
 
-    void paintEvent(QPaintEvent * e);
+    void paintEvent (QPaintEvent* e);
+    void resizeEvent (QResizeEvent* event);
 
 private:
-    Ui::CaptureDisplay *ui;
+    Ui::CaptureDisplay* ui;
 };
 
 #endif // CAPTUREDISPLAY_H

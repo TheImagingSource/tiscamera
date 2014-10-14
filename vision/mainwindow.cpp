@@ -219,25 +219,35 @@ void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
 
     if (buf.format.fourcc == FOURCC_Y800)
     {
-        this->ui->videowidget->img = QImage(data, width, height, QImage::Format_Mono);
+        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
+                                                             width, height,
+                                                             QImage::Format_Mono));
     }
     else if (buf.format.fourcc == FOURCC_Y16)
     {
-        this->ui->videowidget->img = QImage(data, width, height, QImage::Format_Mono);
+        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
+                                                             width, height,
+                                                             QImage::Format_Mono));
     }
     else if (buf.format.fourcc == FOURCC_RGB24)
     {
-        this->ui->videowidget->img =QImage(buf.pData, width, height, QImage::Format_RGB666);
+        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
+                                                             width, height,
+                                                             QImage::Format_RGB666));
     }
     else if (buf.format.fourcc == FOURCC_RGB32)
     {
-        this->ui->videowidget->img = QImage(buf.pData, width, height, QImage::Format_RGB32);
+        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
+                                                             width, height,
+                                                             QImage::Format_RGB32));
     }
     else
     {
         std::cout << "Unable to interpret buffer format" << std::endl;
+        return;
     }
 
+    this->ui->videowidget->new_image = true;
     this->ui->videowidget->update();
 
     emit newImage_received(buffer);

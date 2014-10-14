@@ -3,53 +3,64 @@
 
 #include <iostream>
 
-CaptureDisplay::CaptureDisplay(QWidget *parent) :
+CaptureDisplay::CaptureDisplay (QWidget* parent) :
     QWidget(parent),
     ui(new Ui::CaptureDisplay)
 {
     ui->setupUi(this);
 }
 
-CaptureDisplay::~CaptureDisplay()
+CaptureDisplay::~CaptureDisplay ()
 {
     delete ui;
 }
 
 
-void CaptureDisplay::paintEvent(QPaintEvent * e)
+void CaptureDisplay::paintEvent (QPaintEvent* e)
 {
 
-    if (img.size().width() == 0)
+    if (m.width() == 0)
     {
         return;
     }
 
-    //std::cout << "paint event! ========================================================================" << std::endl;
+    if (new_image)
+    {
+        unsigned int w = ui->label->width();
+        unsigned int h = ui->label->height();
+        auto l = this->layout();
 
-//    unsigned int w = ui->label->width();
-//    unsigned int h = ui->label->height();
+        int margin = l->margin();
+
+        // ui->label->setPixmap(m.scaled(w - margin,
+        //                               h -margin,
+        //                               Qt::KeepAspectRatio,
+        //                               Qt::FastTransformation ));
 
 
-    unsigned int w = ui->label->width();
-    unsigned int h = ui->label->height();
-    auto l = this->layout();
+        ui->label->setPixmap(m.scaled(w,
+                                      h,
+                                      Qt::KeepAspectRatio));
+                                      // ,
+                                      // Qt::FastTransformation ));
 
-    int margin = l->margin();
+        new_image=false;
+    }
+}
 
-    QPixmap map = QPixmap::fromImage(img);
-//     QPixmap scaled= map.scaled ( w - margin,
-//                                  h -margin,
-//                                  Qt::KeepAspectRatio,
-//                                  Qt::FastTransformation );
-    //imageLabel->setBaseSize (width(), height());
 
-ui->label->setPixmap(map);
+void CaptureDisplay::resizeEvent (QResizeEvent* event)
+{
+    //std::cout << "RESIZE!!!" << std::endl;
 
-//     ui->label->setPixmap(scaled);
 
-    //adjustSize();
-    ui->label->adjustSize();
+  // get label dimensions
+  int w = ui->label->width();
+  int h = ui->label->height();
 
-    new_image=false;
+  // set a scaled pixmap to a w x h window keeping its aspect ratio
+  ui->label->setPixmap(m.scaled(w, h, Qt::KeepAspectRatio));
+
+  ui->label->adjustSize();
 
 }
