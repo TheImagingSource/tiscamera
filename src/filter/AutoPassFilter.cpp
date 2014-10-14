@@ -280,7 +280,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (exp == dev_properties.end())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find exposure property. Auto Exposure will be disabled.");
+        tis_log(TIS_LOG_INFO, "Unable to find exposure property. Auto Exposure will be disabled.");
         return;
     }
     else
@@ -303,7 +303,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (gain == dev_properties.end())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find exposure property. Module will be disabled.");
+        tis_log(TIS_LOG_INFO, "Unable to find exposure property. Module will be disabled.");
         return;
     }
     else
@@ -327,7 +327,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (iris == dev_properties.end())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find iris property.");
+        tis_log(TIS_LOG_INFO, "Unable to find iris property.");
         // return;
         //property_iris = nullptr;
     }

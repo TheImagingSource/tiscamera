@@ -527,16 +527,19 @@ bool PipelineManager::create_pipeline ()
 
     if (!add_interpretation_filter())
     {
+        tis_log(TIS_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
         return false;
     }
 
     if (!allocate_conversion_buffer())
     {
+        tis_log(TIS_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
         return false;
     }
 
     if (!validate_pipeline())
     {
+        tis_log(TIS_LOG_ERROR, "Unable to validate pipeline. Aborting...");
         return false;
     }
 
