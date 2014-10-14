@@ -80,13 +80,57 @@ bool V4l2Device::setProperty (const Property& _property)
         return false;
     }
 
-    desc->prop->setStruct(_property.getStruct());
-
-    if (changeV4L2Control(*desc))
+    if (desc->id == EMULATED_PROPERTY)
     {
-        return true;
-    }
+        if (_property.getName() == "Offset Auto Center")
+        {
+            if (_property.getType() != PROPERTY_TYPE_BOOLEAN)
+            {
+                return false;
+            }
 
+            auto p =  static_cast<const PropertySwitch&>(_property);
+
+            if (p.getValue())
+            {
+                IMG_SIZE values = calculateAutoCenter(get_sensor_size(), active_video_format.getSize());
+
+                auto p = create_property_vector();
+                auto prop_off_x = find_property(p, "Offset X");
+                auto prop_off_y = find_property(p, "Offset Y");
+
+                std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(values.width);
+                std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(values.height);
+
+                // TODO: set properties read only
+            }
+            else
+            {
+                // TODO: remove read only
+
+                auto p = create_property_vector();
+                auto prop_off_x = find_property(p, "Offset X");
+                auto prop_off_y = find_property(p, "Offset Y");
+
+                std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(0);
+                std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(0);
+            }
+        }
+        else
+        {
+            tis_log(TIS_LOG_ERROR, "Emulated property not implemented");
+            return false;
+        }
+    }
+    else
+    {
+        desc->prop->setStruct(_property.getStruct());
+
+        if (changeV4L2Control(*desc))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -620,6 +664,32 @@ std::vector<std::shared_ptr<Property>> V4l2Device::create_property_vector ()
 }
 
 
+void V4l2Device::create_emulated_properties ()
+{
+    auto props = create_property_vector();
+
+    // requirements for auto center
+    if (find_property(props, "Offset Auto Center") == nullptr &&
+        find_property(props, "Offset X") != nullptr &&
+        find_property(props, "Offset Y") != nullptr)
+    {
+        camera_property cp = {};
+        strcpy(cp.name, "Offset Auto Center");
+        cp.type = PROPERTY_TYPE_BOOLEAN;
+        cp.value.b.default_value = false;
+        cp.value.b.value = cp.value.b.default_value;
+        cp.flags = set_bit(cp.flags, PROPERTY_FLAG_EXTERNAL);
+
+        auto property_auto_offset = std::make_shared<PropertySwitch>(shared_from_this(), cp, Property::BOOLEAN);
+
+        property_description pd = { EMULATED_PROPERTY, property_auto_offset};
+
+        tis_log(TIS_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
+
+        properties.push_back(pd);
+    }
+}
+
 
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
@@ -631,10 +701,7 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
 
-    if (qctrl.id != V4L2_CTRL_FLAG_NEXT_CTRL)
-    {
-        return;
-    }
+    create_emulated_properties();
 }
 
 

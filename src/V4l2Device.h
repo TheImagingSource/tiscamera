@@ -104,9 +104,13 @@ private:
         std::shared_ptr<Property> prop; 
     } ;
 
+    static const int EMULATED_PROPERTY = -1;
+
     std::vector<property_description> properties;
 
     std::vector<std::shared_ptr<Property>> create_property_vector ();
+
+    void create_emulated_properties ();
 
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
 
