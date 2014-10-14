@@ -958,3 +958,21 @@ void V4l2Device::free_mmap_buffers ()
     }
 
 }
+
+
+IMG_SIZE V4l2Device::get_sensor_size ()
+{
+    IMG_SIZE size = {};
+    for (const auto& f : available_videoformats)
+    {
+        for (const auto& r :f.getResolutions())
+        {
+            if (r.width > size.width || r.height > size.width)
+            {
+                size = r;
+            }
+        }
+    }
+
+    return size;
+}

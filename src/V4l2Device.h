@@ -135,6 +135,8 @@ private:
     void init_mmap_buffers ();
 
     void free_mmap_buffers ();
+
+    IMG_SIZE get_sensor_size ();
 };
 
 } /* namespace tis_imaging */
