@@ -107,6 +107,9 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
 void ImageSource::initialize_buffers ()
 {
+    device->release_buffers();
+    buffers.clear();
+
     VideoFormat f = device->getActiveVideoFormat();
 
     struct video_format format = f.getFormatDescription();
