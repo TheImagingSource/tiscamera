@@ -55,11 +55,14 @@ enum modes
     SAVE_IMAGE,
 };
 
+enum INTERACTION
+{
+    GET = 0,
+    SET,
+};
 
 int main (int argc, char *argv[])
 {
-    std::string serial = "25410069";
-    modes do_this;
 
     if (argc == 1)
     {
@@ -67,7 +70,13 @@ int main (int argc, char *argv[])
         return 0;
     }
     
-    for (unsigned int i = 0; i < argc; ++i)
+    INTERACTION way = GET;
+    std::string serial;
+    std::string param;
+    std::string filename;
+    modes do_this;
+
+    for (int i = 0; i < argc; ++i)
     {
         std::string arg = argv[i];
 
@@ -89,13 +98,28 @@ int main (int argc, char *argv[])
         }
         else if (arg == "-s" || arg == "--set")
         {
+            way = SET;
             do_this = SET_PROPERTY;
-            break;
+            int tmp_i = i;
+            tmp_i++;
+            if (tmp_i >= argc)
+            {
+                std::cout << "--set requires additional arguments to work properly!" << std::endl;
+                return 1;
+            }
+            param = argv[tmp_i];
+            i++;
+
+            // break;
         }
         else if (arg == "-f" || arg == "--format")
         {
             do_this = LIST_FORMATS;
-            break;
+            // break;
+        }
+        else
+        {
+            serial = arg;
         }
     }
 
