@@ -68,15 +68,6 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 
     device = dev;
 
-    //tis_log(TIS_LOG_INFO, "Giving %d buffers to initialize in device", buffers.size());
-
-    if (buffers.empty())
-    {
-        tis_log(TIS_LOG_ERROR, "Have no Buffers to work with");
-        return false;
-    }
-
-
     return true;
 }
 
