@@ -2,7 +2,8 @@
 #include "Grabber.h"
 
 #include "tis_logging.h"
-
+#include "tis_utils.h"
+#include "serialization.h"
 
 using namespace tis_imaging;
 
@@ -16,6 +17,46 @@ Grabber::~Grabber ()
 {
     if (isDeviceOpen())
         closeDevice();
+}
+
+
+bool Grabber::load_configuration (const std::string& filename)
+{
+    if (!isDeviceOpen())
+    {
+        return false;
+    }
+
+    std::vector<std::shared_ptr<Property>> properties ;
+    properties.reserve(device_properties.size() + pipeline_properties.size());
+
+    properties.insert(properties.end(), device_properties.begin(), device_properties.end());
+    properties.insert(properties.end(), pipeline_properties.begin(), pipeline_properties.end());
+
+    return load_xml_description(filename,
+                                open_device,
+                                active_format,
+                                properties);
+}
+
+
+bool Grabber::save_configuration (const std::string& filename)
+{
+    if (!isDeviceOpen())
+    {
+        return false;
+    }
+
+    std::vector<std::shared_ptr<Property>> properties ;
+    properties.reserve(device_properties.size() + pipeline_properties.size());
+
+    properties.insert(properties.end(), device_properties.begin(), device_properties.end());
+    properties.insert(properties.end(), pipeline_properties.begin(), pipeline_properties.end());
+
+    return save_xml_description(filename,
+                                open_device,
+                                device->getActiveVideoFormat(),
+                                properties);
 }
 
 

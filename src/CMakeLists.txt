@@ -22,6 +22,8 @@ find_package(UDev REQUIRED)
 include_directories(${UDEV_INCLUDE_DIR})
 add_definitions(-DHAVE_UDEV)
 
+find_package(TinyXML REQUIRED)
+include_directories(${TinyXML_INCLUDE_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -48,6 +50,7 @@ VideoFormatDescription.cpp
 ImageSink.cpp
 PipelineManager.cpp
 ImageSource.cpp
+serialization.cpp
 )
 
 
@@ -99,6 +102,8 @@ add_library(tis_imaging SHARED  ${srcs} )
 if (UDEV_FOUND)
 TARGET_LINK_LIBRARIES(tis_imaging ${UDEV_LIBRARIES})
 endif (UDEV_FOUND)
+
+TARGET_LINK_LIBRARIES(tis_imaging ${TinyXML_LIBRARIES})
 
 if (BUILD_ARAVIS)
 

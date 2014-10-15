@@ -24,6 +24,11 @@ public:
     
     ~Grabber ();
 
+
+    bool load_configuration (const std::string& filename);
+
+    bool save_configuration (const std::string& filename);
+
     // device related:
     
     bool openDevice (const CaptureDevice&);
