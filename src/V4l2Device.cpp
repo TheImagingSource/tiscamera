@@ -1028,6 +1028,15 @@ void V4l2Device::free_mmap_buffers ()
 
             return;
         }
+        else
+        {
+            auto buf = buffers.at(i)->getImageBuffer();
+
+            buf.pData = nullptr;
+            buf.length = 0;
+
+            buffers.at(i)->setImageBuffer(buf);
+        }
     }
 
 }
