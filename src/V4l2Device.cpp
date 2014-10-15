@@ -1018,6 +1018,10 @@ void V4l2Device::init_mmap_buffers ()
 
 void V4l2Device::free_mmap_buffers ()
 {
+    if (buffers.empty())
+        return;
+
+
     unsigned int i;
 
     for (i = 0; i < buffers.size(); ++i)
