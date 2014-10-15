@@ -6,7 +6,7 @@
 using namespace tis_imaging;
 
 ImageSource::ImageSource ()
-    : current_status(PIPELINE_UNDEFINED), n_buffers(10)
+    : current_status(PIPELINE_UNDEFINED), n_buffers(10), frame_count(0)
 {}
 
 
@@ -27,7 +27,9 @@ bool ImageSource::setStatus (PIPELINE_STATUS status)
         device->initialize_buffers(buffers);
         device->setSink(shared_from_this());
 
-        //tis_log(TIS_LOG_ERROR, "Source changed to state PLAYING");
+        frame_count = 0;
+        second_count = time(0);
+
         if ( device->start_stream())
         {
             tis_log(TIS_LOG_DEBUG, "PLAYING....");
@@ -86,8 +88,14 @@ VideoFormat ImageSource::getVideoFormat () const
 
 void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
-
-    // tis_log(TIS_LOG_INFO, "received buffer");
+    frame_count++;
+    time_t timer;
+    time(&timer);
+    double seconds = difftime(timer, second_count);
+    if (seconds != 0)
+    {
+        tis_log(TIS_LOG_DEBUG, "FRAMERATE: %f", frame_count/seconds);
+    }
 
     if (!pipeline.expired())
         pipeline.lock()->pushImage(buffer);

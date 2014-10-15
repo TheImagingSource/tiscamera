@@ -13,7 +13,6 @@
 #include "FilterLoader.h"
 
 #include <memory>
-#include <ctime>
 
 namespace tis_imaging
 {
@@ -64,10 +63,6 @@ public:
     void pushImage (std::shared_ptr<MemoryBuffer>);
     
 private:
-
-    unsigned long long frame_count;
-    time_t second_count;
-    
     
     VideoFormat format;
     VideoFormat input_format;

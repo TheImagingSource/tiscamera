@@ -11,7 +11,7 @@
 using namespace tis_imaging;
 
 PipelineManager::PipelineManager ()
-    : status(PIPELINE_UNDEFINED), filter_loader(), frame_count(0)
+    : status(PIPELINE_UNDEFINED), filter_loader()
 {
     filter_loader.index_possible_filter();
     filter_loader.open_possible_filter();
@@ -63,8 +63,6 @@ bool PipelineManager::setStatus (PIPELINE_STATUS s)
 
     if (status == PIPELINE_PLAYING)
     {
-        frame_count = 0;
-        second_count = time(0);
         if (create_pipeline())
         {
             start_playing();
@@ -630,7 +628,6 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         return;
     }
 
-    frame_count++;
     buffer->lock();
 
     auto current_buffer = buffer;

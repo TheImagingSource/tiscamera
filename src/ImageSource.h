@@ -9,6 +9,7 @@
 #include "SinkInterface.h"
 #include "DeviceInterface.h"
 
+#include <ctime>
 #include <memory>
 
 namespace tis_imaging
@@ -46,6 +47,10 @@ private:
     std::shared_ptr<DeviceInterface> device;
 
     unsigned int n_buffers;
+
+    uint64_t frame_count;
+    time_t second_count;
+
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
 
     std::weak_ptr<SinkInterface> pipeline;
