@@ -51,6 +51,7 @@ std::vector<VideoFormatDescription> PipelineManager::getAvailableVideoFormats ()
 bool PipelineManager::setVideoFormat(const VideoFormat& f)
 {
     this->format = f;
+    return true;
 }
 
 
