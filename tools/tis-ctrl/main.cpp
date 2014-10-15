@@ -99,8 +99,12 @@ int main (int argc, char *argv[])
         }
     }
 
+    if (serial.empty())
+    {
+        std::cout << "No serial given!" << std::endl;
+        return 1;
+    }
     
-
     std::vector<CaptureDevice> device_list = getAvailableCaptureDevices();
 
     Grabber g;
