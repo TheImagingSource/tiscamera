@@ -51,7 +51,8 @@ enum modes
     LIST_FORMATS,
     SET_FORMAT,
     LIST_DEVICES,
-    
+    SAVE_STREAM,
+    SAVE_IMAGE,
 };
 
 
@@ -129,6 +130,30 @@ int main (int argc, char *argv[])
         case LIST_FORMATS:
         {
             list_formats(g.getAvailableVideoFormats());
+            break;
+        }
+        case SET_PROPERTY:
+        {
+            set_property(g, param);
+            break;
+        }
+        case SET_FORMAT:
+        {
+            set_active_format(g, param);
+            break;
+        }
+        case SAVE_STREAM:
+        {
+            //save_stream(g, filename);
+        }
+        case SAVE_IMAGE:
+        {
+            save_image(g, filename);
+            break;
+        }
+        default:
+        {
+            std::cout << "Unknown command." << std::endl;
             break;
         }
     }
