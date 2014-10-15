@@ -11,8 +11,8 @@ Error::Error ():
 {}
 
 
-Error::Error (const std::string& errordesc)
-    : m_String(errordesc)
+Error::Error (const std::string& errordesc, int err_no)
+    : m_errno(err_no), m_String(errordesc)
 {
     // TODO: determine other values
 }
@@ -35,9 +35,4 @@ Error::Error (int errno):
 Error::Error (const Error& e)
     : m_errno(e.m_errno), m_Enum(e.m_Enum), m_String(e.m_String)
 {}
-
-
-Error::~Error ()
-{}
-
 
