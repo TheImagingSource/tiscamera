@@ -115,6 +115,7 @@ int main (int argc, char *argv[])
     if (!g.isDeviceOpen())
     {
         std::cout << "Unable to find device with serial '" << serial << "'" << std::endl;
+        return 1;
     }
 
     switch (do_this)
