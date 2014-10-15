@@ -14,8 +14,8 @@
 using namespace tis_imaging;
 
 
-V4l2Device::V4l2Device (const CaptureDevice& _device)
-    : device(_device), is_stream_on(false), emulate_bayer(false), emulated_fourcc(0)
+V4l2Device::V4l2Device (const CaptureDevice& device_desc)
+    : device(device_desc), is_stream_on(false), emulate_bayer(false), emulated_fourcc(0)
 {
 
     if ((fd = open(device.getInfo().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
@@ -64,32 +64,32 @@ bool V4l2Device::isAvailable (const Property&)
 }
 
 
-bool V4l2Device::setProperty (const Property& _property)
+bool V4l2Device::setProperty (const Property& new_property)
 {
-    auto f = [&_property] (const property_description& d)
+    auto f = [&new_property] (const property_description& d)
         {
-            return ((*d.prop).getName().compare(_property.getName()) == 0);
+            return ((*d.prop).getName().compare(new_property.getName()) == 0);
         };
 
     auto desc = std::find_if(properties.begin(), properties.end(),f);
 
     if (desc == properties.end())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", _property.getName().c_str());
+        tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", new_property.getName().c_str());
         // TODO: failure description
         return false;
     }
 
     if (desc->id == EMULATED_PROPERTY)
     {
-        if (_property.getName() == "Offset Auto Center")
+        if (new_property.getName() == "Offset Auto Center")
         {
-            if (_property.getType() != PROPERTY_TYPE_BOOLEAN)
+            if (new_property.getType() != PROPERTY_TYPE_BOOLEAN)
             {
                 return false;
             }
 
-            auto p =  static_cast<const PropertySwitch&>(_property);
+            auto p =  static_cast<const PropertySwitch&>(new_property);
 
             if (p.getValue())
             {
@@ -124,7 +124,7 @@ bool V4l2Device::setProperty (const Property& _property)
     }
     else
     {
-        desc->prop->setStruct(_property.getStruct());
+        desc->prop->setStruct(new_property.getStruct());
 
         if (changeV4L2Control(*desc))
         {
@@ -158,7 +158,7 @@ bool V4l2Device::getProperty (Property& p)
 }
 
 
-bool V4l2Device::setVideoFormat (const VideoFormat& _format)
+bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
 {
     if (is_stream_on == true)
     {
@@ -166,14 +166,14 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
         return false;
     }
 
-    // if (!validateVideoFormat(_format))
+    // if (!validateVideoFormat(new_format))
     // {
     // tis_log(TIS_LOG_ERROR, "Not a valid format.");
     // return false;
     // }
 
 
-    uint32_t fourcc  = _format.getFourcc();
+    uint32_t fourcc  = new_format.getFourcc();
 
     // use greyscale for camera interaction
     if (emulate_bayer)
@@ -194,8 +194,8 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    fmt.fmt.pix.width = _format.getSize().width;
-    fmt.fmt.pix.height = _format.getSize().height;
+    fmt.fmt.pix.width = new_format.getSize().width;
+    fmt.fmt.pix.height = new_format.getSize().height;
 
     fmt.fmt.pix.pixelformat = fourcc;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
@@ -204,32 +204,30 @@ bool V4l2Device::setVideoFormat (const VideoFormat& _format)
 
     if (ret < 0)
     {
-        tis_log(TIS_LOG_ERROR, "Error while setting format %d", errno);
-
-        // TODO error handling
+        tis_log(TIS_LOG_ERROR, "Error while setting format '%s'", strerror(errno));
         return false;
     }
 
     // set framerate
-    if (!setFramerate(_format.getFramerate()))
+    if (!setFramerate(new_format.getFramerate()))
     {
-        tis_log(TIS_LOG_ERROR, "Unable to set framerate to %f", _format.getFramerate());
+        tis_log(TIS_LOG_ERROR, "Unable to set framerate to %f", new_format.getFramerate());
         // return false;
     }
 
     // copy format as local reference
-    active_video_format = _format;
+    active_video_format = new_format;
 
     return true;
 }
 
 
-bool V4l2Device::validateVideoFormat (const VideoFormat& _format)
+bool V4l2Device::validateVideoFormat (const VideoFormat& format)
 {
 
     for (const auto& f : available_videoformats)
     {
-        if (f.isValidVideoFormat(_format))
+        if (f.isValidVideoFormat(format))
         {
             return true;
         }
@@ -778,10 +776,10 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 }
 
 
-bool V4l2Device::changeV4L2Control (const property_description& _property)
+bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 {
 
-    PROPERTY_TYPE type = _property.prop->getType();
+    PROPERTY_TYPE type = prop_desc.prop->getType();
 
     if (type == PROPERTY_TYPE_STRING ||
         type == PROPERTY_TYPE_UNKNOWN ||
@@ -791,17 +789,17 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
         return false;
     }
 
-    struct v4l2_control ctrl = {0};
+    struct v4l2_control ctrl = {};
 
-    ctrl.id = _property.id;
+    ctrl.id = prop_desc.id;
 
     if (type == PROPERTY_TYPE_INTEGER)
     {
-        ctrl.value = (std::static_pointer_cast<PropertyInteger>(_property.prop))->getValue();
+        ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->getValue();
     }
     else if (type == PROPERTY_TYPE_BOOLEAN)
     {
-        if ((std::static_pointer_cast<PropertySwitch>(_property.prop))->getValue())
+        if ((std::static_pointer_cast<PropertySwitch>(prop_desc.prop))->getValue())
         {
             ctrl.value = 1;
         }
@@ -825,7 +823,7 @@ bool V4l2Device::changeV4L2Control (const property_description& _property)
     {
         // tis_log(TIS_LOG_ERROR,
         // "Changed ctrl %s to value %d.",
-        // _property.prop->getName().c_str(),
+        // prop_desc.prop->getName().c_str(),
         // ctrl.value);
     }
 

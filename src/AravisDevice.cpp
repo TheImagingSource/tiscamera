@@ -14,8 +14,8 @@
 
 using namespace tis_imaging;
 
-AravisDevice::AravisDevice (const CaptureDevice& _device)
-    : device(_device), current_buffer(0), stream(NULL)
+AravisDevice::AravisDevice (const CaptureDevice& device_desc)
+    : device(device_desc), current_buffer(0), stream(NULL)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
 
@@ -182,7 +182,7 @@ bool AravisDevice::getProperty (Property&)
 }
 
 
-bool AravisDevice::setVideoFormat (const VideoFormat& _format)
+bool AravisDevice::setVideoFormat (const VideoFormat& new_format)
 {
     // bool valid = false;
     // for (const auto& v : available_videoformats)
@@ -199,18 +199,18 @@ bool AravisDevice::setVideoFormat (const VideoFormat& _format)
     // return false;
     // }
 
-    tis_log(TIS_LOG_DEBUG, "Setting format to '%s'", _format.toString().c_str());
+    tis_log(TIS_LOG_DEBUG, "Setting format to '%s'", new_format.toString().c_str());
 
     arv_camera_set_frame_rate (this->arv_camera, 3.75);
 
-    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(_format.getFourcc()));
+    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.getFourcc()));
 
     // TODO: validity check
-    arv_camera_set_binning(this->arv_camera, _format.getBinning(), _format.getBinning());
+    arv_camera_set_binning(this->arv_camera, new_format.getBinning(), new_format.getBinning());
 
     // TODO: auto center
 
-    arv_camera_set_region(this->arv_camera, 0, 0, _format.getSize().width, _format.getSize().height);
+    arv_camera_set_region(this->arv_camera, 0, 0, new_format.getSize().width, new_format.getSize().height);
 
     determine_active_video_format();
 

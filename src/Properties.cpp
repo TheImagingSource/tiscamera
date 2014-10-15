@@ -12,12 +12,12 @@ using namespace tis_imaging;
 
 
 
-PropertyString::PropertyString (std::shared_ptr<PropertyImpl> _impl,
-                                const camera_property& _property,
+PropertyString::PropertyString (std::shared_ptr<PropertyImpl> prop_impl,
+                                const camera_property& prop,
                                 VALUE_TYPE t)
-    : Property(_property, t)
+    : Property(prop, t)
 {
-    impl = _impl;
+    impl = prop_impl;
 }
 
 
@@ -31,17 +31,17 @@ std::string PropertyString::getDefault () const
 }
 
 
-bool PropertyString::setValue (const std::string& _value)
+bool PropertyString::setValue (const std::string& new_value)
 {
     if (isReadOnly())
     {
         return false;
     }
 
-    if (_value.size() > sizeof(this->prop.value.s.value))
+    if (new_value.size() > sizeof(this->prop.value.s.value))
         return false;
 
-    memcpy(this->prop.value.s.value, _value.c_str(), _value.size());
+    memcpy(this->prop.value.s.value, new_value.c_str(), sizeof(this->prop.value.s.value));
 
     notifyImpl();
 
@@ -59,13 +59,13 @@ std::string PropertyString::getValue () const
 
 
 
-PropertyStringMap::PropertyStringMap (std::shared_ptr<PropertyImpl> _impl,
-                                      const camera_property& _property,
-                                      const std::map<std::string, int>& _values,
+PropertyStringMap::PropertyStringMap (std::shared_ptr<PropertyImpl> prop_impl,
+                                      const camera_property& prop,
+                                      const std::map<std::string, int>& values,
                                       VALUE_TYPE t)
-    : Property(_property, _values, t)
+    : Property(prop, values, t)
 {
-    impl = _impl;
+    impl = prop_impl;
 }
 
 
@@ -92,14 +92,14 @@ std::string PropertyStringMap::getDefault () const
 }
 
 
-bool PropertyStringMap::setValue (const std::string& _value)
+bool PropertyStringMap::setValue (const std::string& new_value)
 {
     if (isReadOnly())
     {
         return false;
     }
 
-    auto element = string_map.find(_value);
+    auto element = string_map.find(new_value);
 
     if (element == string_map.end())
     {
@@ -127,12 +127,12 @@ std::map<std::string, int> PropertyStringMap::getMapping () const
 
 
 
-PropertySwitch::PropertySwitch (std::shared_ptr<PropertyImpl> _impl,
-                                const camera_property& _property,
+PropertySwitch::PropertySwitch (std::shared_ptr<PropertyImpl> prop_impl,
+                                const camera_property& prop,
                                 VALUE_TYPE t)
-    : Property(_property, t)
+    : Property(prop, t)
 {
-    impl = _impl ;
+    impl = prop_impl;
 }
 
 
@@ -170,12 +170,12 @@ bool PropertySwitch::getValue () const
 
 
 
-PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> _impl,
-                                  const camera_property& _property,
+PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> prop_impl,
+                                  const camera_property& prop,
                                   VALUE_TYPE t)
-    : Property (_property, t)
+    : Property (prop, t)
 {
-    impl = _impl;
+    impl = prop_impl;
 }
 
 
@@ -213,7 +213,7 @@ int64_t PropertyInteger::getValue () const
 }
 
 
-bool PropertyInteger::setValue (int64_t _value)
+bool PropertyInteger::setValue (int64_t new_value)
 {
     // if (isReadOnly())
     // return false;
@@ -223,7 +223,7 @@ bool PropertyInteger::setValue (int64_t _value)
     // if (i.min > _value || i.max < _value)
     // return false;
 
-    i.value = _value;
+    i.value = new_value;
 
     notifyImpl();
 
@@ -235,12 +235,12 @@ bool PropertyInteger::setValue (int64_t _value)
 
 
 
-PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> _impl,
-                                const camera_property& _property,
+PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> prop_impl,
+                                const camera_property& prop,
                                 VALUE_TYPE t)
-    : Property(_property, t)
+    : Property(prop, t)
 {
-    impl = _impl;
+    impl = prop_impl;
 }
 
 
@@ -272,7 +272,7 @@ double PropertyDouble::getValue () const
 }
 
 
-bool PropertyDouble::setValue (double _value)
+bool PropertyDouble::setValue (double new_value)
 {
     if (isReadOnly())
     {
@@ -281,12 +281,12 @@ bool PropertyDouble::setValue (double _value)
     
     tis_value_double& d = this->prop.value.d;
 
-    if (d.min > _value || d.max < _value)
+    if (d.min > new_value || d.max < new_value)
     {
         return false;
     }
 
-    d.value = _value;
+    d.value = new_value;
 
     notifyImpl();
 
@@ -297,12 +297,12 @@ bool PropertyDouble::setValue (double _value)
 
 
 
-PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> _impl,
-                                const camera_property& _property,
+PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> prop_impl,
+                                const camera_property& prop,
                                 VALUE_TYPE t)
-    : Property(_property, t)
+    : Property(prop, t)
 {
-    impl = _impl ;
+    impl = prop_impl;
 }
 
 

@@ -17,9 +17,9 @@ VideoFormat::VideoFormat ()
 {}
 
 
-VideoFormat::VideoFormat (const struct video_format& _format)
+VideoFormat::VideoFormat (const struct video_format& new_format)
 {
-    memcpy(&format, &_format, sizeof(format));
+    memcpy(&format, &new_format, sizeof(format));
 }
 
 

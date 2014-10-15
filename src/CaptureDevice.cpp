@@ -9,8 +9,8 @@
 using namespace tis_imaging;
 
     
-CaptureDevice::CaptureDevice (const struct tis_device_info& _device)
-    : device(_device)
+CaptureDevice::CaptureDevice (const struct tis_device_info& device_desc)
+    : device(device_desc)
 {}
 
 

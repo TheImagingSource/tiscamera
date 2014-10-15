@@ -60,7 +60,7 @@ bool Grabber::save_configuration (const std::string& filename)
 }
 
 
-bool Grabber::openDevice (const CaptureDevice& _device)
+bool Grabber::openDevice (const CaptureDevice& device_desc)
 {
     if (pipeline->getStatus() == PIPELINE_PLAYING ||
         pipeline->getStatus() == PIPELINE_PAUSED)
@@ -78,7 +78,7 @@ bool Grabber::openDevice (const CaptureDevice& _device)
         }
     }
 
-    open_device = _device;
+    open_device = device_desc;
 
     device = openDeviceInterface(open_device);
 
@@ -176,7 +176,7 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
 }
 
 
-bool Grabber::setVideoFormat (const VideoFormat& _format)
+bool Grabber::setVideoFormat (const VideoFormat& new_format)
 {
     if (!isDeviceOpen())
     {
@@ -184,9 +184,9 @@ bool Grabber::setVideoFormat (const VideoFormat& _format)
         return false;
     }
 
-    pipeline->setVideoFormat(_format);
+    pipeline->setVideoFormat(new_format);
 
-    return this->device->setVideoFormat(_format);
+    return this->device->setVideoFormat(new_format);
 }
 
 
