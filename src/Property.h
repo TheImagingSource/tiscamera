@@ -64,6 +64,11 @@ public:
 
     Property::VALUE_TYPE getValueType () const;
 
+
+    std::string toString () const;
+
+    bool fromString (const std::string&);
+
 protected:
 
     bool setReadOnly (bool);

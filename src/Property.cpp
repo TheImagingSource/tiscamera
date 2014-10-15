@@ -4,6 +4,7 @@
 #include "Property.h"
 #include "base_types.h"
 #include "tis_logging.h"
+#include "tis_utils.h"
 
 #include <cstring>
 #include <algorithm>
@@ -118,6 +119,121 @@ Property::VALUE_TYPE Property::getValueType () const
 }
 
 
+std::string Property::toString () const
+{
+    std::string property_string;
+    // = getName() + "(" + propertyType2String(prop.type) + ")=";
+
+    switch (prop.type)
+    {
+        case PROPERTY_TYPE_BOOLEAN:
+        {
+            if (prop.value.b.value)
+            {
+                property_string += "true";
+            }
+            else
+            {
+                property_string += "false";
+            }
+            break;
+        }
+        case PROPERTY_TYPE_BITMASK:
+        case PROPERTY_TYPE_INTEGER:
+        {
+            property_string += std::to_string(prop.value.i.value);
+            break;
+        }
+        case PROPERTY_TYPE_DOUBLE:
+        {
+            property_string += std::to_string(prop.value.d.value);
+            break;
+        }
+        case PROPERTY_TYPE_STRING:
+        {
+            property_string += prop.value.s.value;
+            break;
+
+        }
+        case PROPERTY_TYPE_STRING_TABLE:
+        {
+
+        }
+        case PROPERTY_TYPE_BUTTON:
+        {
+
+        }
+        case PROPERTY_TYPE_UNKNOWN:
+        default:
+        {
+
+        }
+    }
+
+    return property_string;
+}
+
+
+bool Property::fromString (const std::string& s)
+{
+    try
+    {
+        switch (prop.type)
+        {
+            case PROPERTY_TYPE_BOOLEAN:
+            {
+                if (s.compare("true") == 0)
+                {
+                    prop.value.b.value = true;
+                }
+                else
+                {
+                    // TODO: should bool have more checking
+                    prop.value.b.value = false;
+                }
+                break;
+            }
+            case PROPERTY_TYPE_BITMASK:
+            case PROPERTY_TYPE_INTEGER:
+            {
+                prop.value.i.value = stoi(s);
+
+                break;
+            }
+            case PROPERTY_TYPE_DOUBLE:
+            {
+                prop.value.d.value = stod(s);
+                break;
+            }
+            case PROPERTY_TYPE_STRING:
+            {
+                strncpy(prop.value.s.value, s.c_str(), sizeof(prop.value.s.value));
+                prop.value.s.value[sizeof(prop.value.s.value)-1] = '\0';
+                break;
+            }
+            case PROPERTY_TYPE_STRING_TABLE:
+            {
+
+            }
+            case PROPERTY_TYPE_BUTTON:
+            case PROPERTY_TYPE_UNKNOWN:
+            default:
+            {
+                return false;
+            }
+        }
+    }
+    catch (const std::invalid_argument& e)
+    {
+        return false;
+    }
+    catch (const std::out_of_range& e)
+    {
+        return false;
+    }
+
+    return true;
+}
 
 
 bool Property::setReadOnly (bool only_read)
