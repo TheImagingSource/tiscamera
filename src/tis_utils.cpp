@@ -3,6 +3,7 @@
 
 #include "tis_logging.h"
 
+#include <algorithm>
 #include <cstring>
 #include <sys/ioctl.h>
 #include <errno.h>
@@ -266,3 +267,26 @@ IMG_SIZE tis_imaging::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZ
 
     return ret;
 }
+
+
+std::shared_ptr<Property> tis_imaging::find_property (std::vector<std::shared_ptr<Property>>& properties,
+                                                      const std::string& property_name)
+{
+
+    auto f = [&property_name] (const std::shared_ptr<Property>& p)
+        {
+            if (p->getName().compare(property_name) == 0)
+                return true;
+            return false;
+        };
+
+    auto iter = std::find_if(properties.begin(), properties.end(), f);
+
+    if (iter != properties.end())
+    {
+        return *iter;
+    }
+
+    return nullptr;
+}
+

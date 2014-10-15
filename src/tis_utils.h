@@ -1,14 +1,14 @@
 
 #ifndef _TIS_UTILS_H_
 #define _TIS_UTILS_H_
-
-// #include "tis_video.h"
-
+ 
 #include "base_types.h"
+#include "Property.h"
 
 #include <string>
 #include <vector>
-
+#include <memory>
+ 
 namespace tis_imaging
 {
 
@@ -74,6 +74,10 @@ uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
  * @return coordinates that shall be used for offsets
  */
 IMG_SIZE calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image);
+
+
+std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties, const std::string& property_name);
+
 
 } /* namespace tis_imaging */
 
