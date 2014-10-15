@@ -79,7 +79,7 @@ int main (int argc, char *argv[])
         {
             std::vector<CaptureDevice> device_list = getAvailableCaptureDevices();
             print_capture_devices(device_list);
-            break;
+            return 0;
         }
         else if (arg == "-p" || arg == "--list-properties")
         {
