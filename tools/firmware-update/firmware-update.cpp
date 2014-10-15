@@ -178,6 +178,13 @@ void print_device_info (const std::string& serial_number)
             std::cout << "off" << std::endl;
 
     }
+    else if (type.camera_type == USB3 && cam->get_firmware_version() < 102)
+    {
+        std::cout << "\n!!! FIRMWARE UPGRADE REQUIRED !!!\n\n";
+        std::cout << "To correctly interact with this camera under Linux\n";
+        std::cout << "this device requires a firmware upgrade.\n\n";
+        std::cout << "Please contact the manufacturer to receive the concerning firmware files." << std::endl;
+    }
 
     std::cout << std::endl;
 }
