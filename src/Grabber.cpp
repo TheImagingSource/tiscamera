@@ -103,7 +103,7 @@ bool Grabber::openDevice (const CaptureDevice& _device)
     {
         pipeline_properties = pipeline->getFilterProperties();
     }
-    
+
     return true;
 }
 
@@ -115,7 +115,7 @@ bool Grabber::isDeviceOpen () const
         return true;
     }
 
-    return false;      
+    return false;
 }
 
 
@@ -136,7 +136,7 @@ bool Grabber::closeDevice ()
     device_properties.clear();
 
     tis_log(TIS_LOG_INFO, "Closed device %s.", name.c_str());
-    
+
     return true;
 }
 
@@ -197,7 +197,7 @@ VideoFormat Grabber::getActiveVideoFormat () const
         tis_log(TIS_LOG_ERROR, "No open device");
         return VideoFormat();
     }
-        
+
     return device->getActiveVideoFormat();
 }
 
@@ -225,5 +225,3 @@ bool Grabber::stopStream ()
 
     return pipeline->setStatus(PIPELINE_STOPPED);
 }
-
-

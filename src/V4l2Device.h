@@ -132,7 +132,6 @@ private:
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
     
     std::shared_ptr<SinkInterface> listener;
-    // std::weak_ptr<SinkInterface> listener;
 
     void stream ();
 

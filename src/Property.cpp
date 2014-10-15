@@ -118,7 +118,9 @@ Property::VALUE_TYPE Property::getValueType () const
 }
 
 
-bool Property::setReadOnly (const bool only_read)
+
+
+bool Property::setReadOnly (bool only_read)
 {
     if (only_read)
     {
@@ -133,7 +135,7 @@ bool Property::setReadOnly (const bool only_read)
 }
 
 
-bool Property::setWriteOnly (const bool only_write)
+bool Property::setWriteOnly (bool only_write)
 {
     long val = 1;
     if (only_write)
@@ -149,7 +151,7 @@ bool Property::setWriteOnly (const bool only_write)
 }
 
 
-bool Property::setInactive (const bool is_disabled)
+bool Property::setInactive (bool is_disabled)
 {
     if (is_disabled)
     {

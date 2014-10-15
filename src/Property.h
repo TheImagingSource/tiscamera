@@ -66,11 +66,11 @@ public:
 
 protected:
 
-    bool setReadOnly (const bool);
+    bool setReadOnly (bool);
 
-    bool setWriteOnly (const bool);
+    bool setWriteOnly (bool);
 
-    bool setInactive (const bool);
+    bool setInactive (bool);
 
     // PropertyImple interface
     bool isAvailable (const Property&);
