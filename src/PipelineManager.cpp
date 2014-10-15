@@ -208,6 +208,12 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 
     index_output_formats();
 
+    if (available_output_formats.empty())
+    {
+        tis_log(TIS_LOG_ERROR, "No output formats available.");
+        return false;
+    }
+
     return true;
 }
 
