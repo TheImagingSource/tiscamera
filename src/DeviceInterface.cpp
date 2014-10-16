@@ -34,11 +34,13 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
                 return std::make_shared<V4l2Device>(device);
             }
             case TIS_DEVICE_TYPE_ARAVIS:
-#if HAVE_ARAVIS
             {
+#if HAVE_ARAVIS
                 return std::make_shared<AravisDevice>(device);
-            }
+#else
+                break;
 #endif
+            }
             case TIS_DEVICE_TYPE_FIREWIRE:
             case TIS_DEVICE_TYPE_UNKNOWN:
             default:
@@ -53,7 +55,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
         tis_log(TIS_LOG_ERROR, "Encountered Error while creating device interface.");
         return nullptr;
     }
-    
+    return nullptr;
 }
 
 
