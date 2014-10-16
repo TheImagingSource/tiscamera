@@ -6,20 +6,6 @@
 #include <string.h>             /* memcpy */
 #include <time.h>               /* time_t */
 
-struct tis_logging_info
-{
-    enum TIS_LOG_LEVEL  level;
-    enum TIS_LOG_TARGET target;
-
-    char  logfile_name[256];
-    FILE* logfile;
-
-    logging_callback callback;
-};
-
-/* static struct tis_logging_info logger = { ERROR, STDIO, "/tmp/tis.log", NULL, NULL}; */
-static struct tis_logging_info logger = { TIS_LOG_DEBUG, STDIO, "/tmp/tis.log", NULL, NULL};
-
 
 static const char* loglevel2string (const enum TIS_LOG_LEVEL level)
 {
@@ -68,7 +54,7 @@ void Logger::log (const char* module,
                   const char* message,
                   va_list args)
 {
-    if (level < logger.level)
+    if (level < this->level)
     {
         return;
     }
@@ -91,7 +77,7 @@ void Logger::log (const char* module,
             line,
             msg);
 
-    switch (logger.target)
+    switch (target)
     {
         case STDIO:
             log_to_stdout(buffer);
