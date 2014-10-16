@@ -1,7 +1,7 @@
 
 #include "ImageSource.h"
 
-#include "tis_logging.h"
+#include "logging.h"
 
 using namespace tis_imaging;
 

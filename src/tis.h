@@ -8,7 +8,7 @@
 #include "Grabber.h"
 #include "CaptureDevice.h"
 #include "Error.h"
-#include "tis_logging.h"
+#include "logging.h"
 #include "utils.h"
 
 

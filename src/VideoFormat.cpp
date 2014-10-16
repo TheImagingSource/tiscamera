@@ -1,7 +1,7 @@
 
 
 #include "VideoFormat.h"
-#include "tis_logging.h"
+#include "logging.h"
 #include "utils.h"
 
 #include <iomanip>              // setprecision

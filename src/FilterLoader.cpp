@@ -2,7 +2,7 @@
 
 #include "FilterLoader.h"
 #include "FilterBase.h"
-#include "tis_logging.h"
+#include "logging.h"
 
 #include <glob.h>
 #include <dlfcn.h> // dlopen

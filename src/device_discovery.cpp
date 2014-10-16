@@ -20,9 +20,8 @@
 
 // #include "tis_video.h"
 #include "utils.h"
-#include "tis_logging.h"
+#include "logging.h"
 #include "device_discovery.h"
-#include "tis_logging.h"
 
 #if HAVE_ARAVIS
 #include "arv.h"

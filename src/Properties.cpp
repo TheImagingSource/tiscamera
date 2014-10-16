@@ -1,7 +1,7 @@
 
 
 #include "Properties.h"
-#include "tis_logging.h"
+#include "logging.h"
 #include "utils.h" // tis_xioctl
 
 #include <algorithm> // find_if

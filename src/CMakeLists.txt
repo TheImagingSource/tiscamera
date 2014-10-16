@@ -31,7 +31,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set( srcs
 
-tis_logging.cpp
+logging.cpp
 CaptureDevice.cpp
 device_discovery.cpp
 DeviceInterface.cpp

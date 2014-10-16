@@ -3,7 +3,7 @@
 
 #include "Property.h"
 #include "base_types.h"
-#include "tis_logging.h"
+#include "logging.h"
 #include "utils.h"
 
 #include <cstring>

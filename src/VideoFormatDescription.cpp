@@ -2,7 +2,7 @@
 
 #include "VideoFormatDescription.h"
 
-#include "tis_logging.h"
+#include "logging.h"
 
 #include <algorithm>
 #include <cstring>

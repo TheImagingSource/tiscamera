@@ -1,5 +1,5 @@
 
-#include "tis_logging.h"
+#include "logging.h"
 
 #include <stdio.h>              /* printf, fopen */
 #include <stdarg.h>             /* va_args */

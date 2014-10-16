@@ -1,7 +1,7 @@
 
 
-#ifndef _LOGGING_H_
-#define _LOGGING_H_
+#ifndef LOGGING_H
+#define LOGGING_H
 
 #include <stdarg.h>             /* va_args */
 #include <string>
@@ -120,5 +120,5 @@ void tis_logging (const char* module,
 #define tis__log(module, level, message, ...) (tis_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
 
-#endif /* _LOGGING_H_ */
+#endif /* LOGGING_H */
 

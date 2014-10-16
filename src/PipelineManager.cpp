@@ -1,7 +1,7 @@
 
 #include "PipelineManager.h"
 
-#include "tis_logging.h"
+#include "logging.h"
 
 #include <ctime>
 #include <cstring>

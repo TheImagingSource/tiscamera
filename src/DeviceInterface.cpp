@@ -4,7 +4,7 @@
 #include "DeviceInterface.h"
 
 #include "V4l2Device.h"
-#include "tis_logging.h"
+#include "logging.h"
 
 #include "config.h"
 

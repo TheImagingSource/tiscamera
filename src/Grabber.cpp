@@ -1,7 +1,7 @@
 
 #include "Grabber.h"
 
-#include "tis_logging.h"
+#include "logging.h"
 #include "utils.h"
 #include "serialization.h"
 
