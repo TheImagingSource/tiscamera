@@ -1,7 +1,7 @@
 
 #include "V4l2Device.h"
 #include "tis_logging.h"
-#include "tis_utils.h"
+#include "utils.h"
 #include "PropertyGeneration.h"
 
 #include <algorithm>

@@ -19,7 +19,7 @@
 #include <linux/media.h>
 
 // #include "tis_video.h"
-#include "tis_utils.h"
+#include "utils.h"
 #include "tis_logging.h"
 #include "device_discovery.h"
 #include "tis_logging.h"

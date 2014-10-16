@@ -9,7 +9,7 @@
 #include "CaptureDevice.h"
 #include "Error.h"
 #include "tis_logging.h"
-#include "tis_utils.h"
+#include "utils.h"
 
 
 

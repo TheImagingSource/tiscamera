@@ -6,7 +6,7 @@
 
 #include "PropertyGeneration.h"
 #include "tis_logging.h"
-#include "tis_utils.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <cstring>

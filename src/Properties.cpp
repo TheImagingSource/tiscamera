@@ -2,7 +2,7 @@
 
 #include "Properties.h"
 #include "tis_logging.h"
-#include "tis_utils.h" // tis_xioctl
+#include "utils.h" // tis_xioctl
 
 #include <algorithm> // find_if
 #include <cstring>

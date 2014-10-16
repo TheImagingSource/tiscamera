@@ -6,7 +6,7 @@
 #include <ctime>
 #include <cstring>
 #include <algorithm>
-#include <tis_utils.h>
+#include <utils.h>
 
 using namespace tis_imaging;
 

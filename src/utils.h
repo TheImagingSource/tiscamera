@@ -1,6 +1,6 @@
 
-#ifndef _TIS_UTILS_H_
-#define _TIS_UTILS_H_
+#ifndef UTILS_H
+#define UTILS_H
  
 #include "base_types.h"
 #include "Property.h"
@@ -81,4 +81,4 @@ std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>&
 
 } /* namespace tis_imaging */
 
-#endif /* _TIS_UTILS_H_ */
+#endif /* UTILS_H */

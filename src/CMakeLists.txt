@@ -43,7 +43,7 @@ MemoryBuffer.cpp
 Properties.cpp
 Property.cpp
 PropertyGeneration.cpp
-tis_utils.cpp
+utils.cpp
 V4l2Device.cpp
 VideoFormat.cpp
 VideoFormatDescription.cpp

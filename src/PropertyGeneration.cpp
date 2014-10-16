@@ -2,7 +2,7 @@
 #include "PropertyGeneration.h"
 
 #include "base_types.h"
-#include "tis_utils.h"
+#include "utils.h"
 #include "tis_logging.h"
 
 #include "standard_properties.h"
