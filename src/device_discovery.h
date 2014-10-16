@@ -27,6 +27,7 @@ extern "C"
      */
     int tis_get_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
+#if HAVE_USB
 
     /**
      * @name tis_get_camera_count
@@ -41,6 +42,8 @@ extern "C"
      * @return number of devices copied to ptr; -1 on error
      */
     int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_size);
+
+#endif /* HAVE_USB */
 
 #if HAVE_ARAVIS
 
@@ -58,7 +61,7 @@ extern "C"
      */
     int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
-#endif
+#endif /* HAVE_ARAVIS */
     
 #ifdef __cplusplus
 }

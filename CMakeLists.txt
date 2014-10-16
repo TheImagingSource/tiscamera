@@ -32,6 +32,9 @@ option(BUILD_TOOLS    "Build additional utilities"           OFF)
 set(CMAKE_CXX_FLAGS "-std=c++11 -flto -pthread")
 set(CMAKE_C_FLAGS " -flto -pthread")
 
+if (BUILD_USB)
+  add_definitions(-DHAVE_USB)
+endif (BUILD_USB)
 
 add_subdirectory(src)
 add_subdirectory(vision)

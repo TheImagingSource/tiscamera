@@ -40,9 +40,11 @@ int tis_get_camera_count ()
 #if HAVE_ARAVIS
     count += tis_get_gige_camera_count();
 #endif
-    
+
+#if HAVE_USB
     count += tis_get_usb_camera_count();
-    
+#endif
+
     return count;
 }
 
@@ -61,7 +63,11 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
     
     std::vector<struct tis_device_info> info_vec(count);
 
-    unsigned int usb_count = tis_get_usb_camera_list(info_vec.data(), count);
+    unsigned int usb_count = 0;
+
+#if HAVE_USB
+    usb_count = tis_get_usb_camera_list(info_vec.data(), count);
+#endif
 
     unsigned int gige_count = 0;
     
@@ -79,6 +85,8 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
     return count;
 }
 
+
+#if HAVE_USB
 
 int tis_get_usb_camera_count ()
 {
@@ -183,6 +191,7 @@ int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_siz
     return camera_count;
 }
 
+#endif /* HAVE_USB */
 
 #if HAVE_ARAVIS
 

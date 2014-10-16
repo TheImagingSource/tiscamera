@@ -16,12 +16,6 @@ add_subdirectory(filter)
 
 # add_defintions($ENV{CFLAGS})
 
-# dependencies
-
-find_package(UDev REQUIRED)
-include_directories(${UDEV_INCLUDE_DIR})
-add_definitions(-DHAVE_UDEV)
-
 find_package(TinyXML REQUIRED)
 include_directories(${TinyXML_INCLUDE_DIR})
 
@@ -44,7 +38,6 @@ Properties.cpp
 Property.cpp
 PropertyGeneration.cpp
 utils.cpp
-V4l2Device.cpp
 VideoFormat.cpp
 VideoFormatDescription.cpp
 ImageSink.cpp
@@ -53,6 +46,14 @@ ImageSource.cpp
 serialization.cpp
 )
 
+if (BUILD_USB)
+  list(APPEND srcs V4l2Device.cpp)
+
+  find_package(UDev REQUIRED)
+  include_directories(${UDEV_INCLUDE_DIR})
+  add_definitions(-DHAVE_UDEV)
+
+endif (BUILD_USB)
 
 if (BUILD_ARAVIS)
 
@@ -99,9 +100,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 ${cflags} ${lflags} -pthread")
 set(PUBLIC_HEADER "tis.h")
 add_library(tis_imaging SHARED  ${srcs} )
 
-if (UDEV_FOUND)
-TARGET_LINK_LIBRARIES(tis_imaging ${UDEV_LIBRARIES})
-endif (UDEV_FOUND)
+if (BUILD_USB)
+  if (UDEV_FOUND)
+    TARGET_LINK_LIBRARIES(tis_imaging ${UDEV_LIBRARIES})
+  endif (UDEV_FOUND)
+endif(BUILD_USB)
 
 TARGET_LINK_LIBRARIES(tis_imaging ${TinyXML_LIBRARIES})
 

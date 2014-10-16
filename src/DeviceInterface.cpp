@@ -2,11 +2,13 @@
 
 
 #include "DeviceInterface.h"
-
-#include "V4l2Device.h"
 #include "logging.h"
 
 #include "config.h"
+
+#if HAVE_USB
+#include "V4l2Device.h"
+#endif
 
 #if HAVE_ARAVIS
 
@@ -31,7 +33,11 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
         {
             case TIS_DEVICE_TYPE_V4L2:
             {
+#if HAVE_USB
                 return std::make_shared<V4l2Device>(device);
+#else
+                break;
+#endif
             }
             case TIS_DEVICE_TYPE_ARAVIS:
             {
