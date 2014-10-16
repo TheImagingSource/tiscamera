@@ -287,6 +287,24 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 }
 
 
+bool PipelineManager::set_source_status (PIPELINE_STATUS status)
+{
+    if (source == nullptr)
+    {
+        tis_log(TIS_LOG_ERROR, "Source is not defined");
+        return false;
+    }
+
+    if (!source->setStatus(status))
+    {
+        tis_log(TIS_LOG_ERROR, "Source did not accept status change");
+        return false;
+    }
+
+    return true;
+}
+
+
 bool PipelineManager::set_sink_status (PIPELINE_STATUS status)
 {
     if (sink == nullptr)
@@ -578,7 +596,7 @@ bool PipelineManager::start_playing ()
         }
     }
 
-    if (!source->setStatus(PIPELINE_PLAYING))
+    if (!set_source_status(PIPELINE_PLAYING))
     {
         tis_log(TIS_LOG_ERROR, "Source refused to change to state PLAYING");
         goto error;
@@ -599,7 +617,7 @@ bool PipelineManager::stop_playing ()
 {
     status = PIPELINE_STOPPED;
 
-    if (!source->setStatus(PIPELINE_STOPPED))
+    if (!set_source_status(PIPELINE_STOPPED))
     {
         tis_log(TIS_LOG_ERROR, "Source refused to change to state STOP");
         return false;
