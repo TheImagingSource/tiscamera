@@ -320,3 +320,27 @@ void Property::notifyImpl ()
     // tis_log(TIS_LOG_DEBUG, "Notifying impl about property change.");
     ptr->setProperty(*this);
 }
+
+
+PROPERTY_TYPE tis_imaging::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
+{
+    switch (t)
+    {
+        case Property::BOOLEAN:
+            return PROPERTY_TYPE_BOOLEAN;
+        case Property::STRING:
+            return PROPERTY_TYPE_STRING;
+        case Property::ENUM:
+            return PROPERTY_TYPE_STRING_TABLE;
+        case Property::INTSWISSKNIFE:
+        case Property::INTEGER:
+            return PROPERTY_TYPE_INTEGER;
+        case Property::FLOAT:
+            return PROPERTY_TYPE_DOUBLE;
+        case Property::BUTTON:
+            return PROPERTY_TYPE_BUTTON;
+        case Property::COMMAND:
+        default:
+            return PROPERTY_TYPE_UNKNOWN;
+    };
+}

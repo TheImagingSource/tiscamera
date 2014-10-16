@@ -94,6 +94,8 @@ protected:
     void notifyImpl ();
 };
 
+PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t);
+
 } /* namespace tis_imaging */
 
 #endif /* PROPERTY_H_ */
