@@ -8,9 +8,9 @@ project(tiscamera)
 
 set(TISCAMERA_VERSION 1.0.0)
 
-configure_file(
-  "${PROJECT_SOURCE_DIR}/src/config.h.in"
-  "${PROJECT_BINARY_DIR}/config.h")
+# configure_file(
+#   "${PROJECT_SOURCE_DIR}/src/config.h.in"
+#   "${PROJECT_BINARY_DIR}/config.h")
 
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")

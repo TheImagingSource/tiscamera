@@ -21,8 +21,6 @@ include_directories(${TinyXML_INCLUDE_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# TODO flag settings
-
 set( srcs
 
 logging.cpp
@@ -59,15 +57,6 @@ if (BUILD_ARAVIS)
 
   list(APPEND srcs AravisDevice.cpp)
   
-  # find_package(Aravis REQUIRED)
-  # include_directories(${aravis_INCLUDE_DIR})
-  # # include_directories(/usr/include/aravis-0.4)
-
-  # message( ===== ${aravis_INCLUDE_DIR} )
-  # message( ===== ${aravis_LIBRARIES} === ${aravis_LIBS})
-  # set( CMAKE_C_FLAGS ${ARAVIS_DEFINITIONS})
-  # find_package(GLIB2 REQUIRED)
-  # include_directories(${GLIB2_INCLUDE_DIR})
   add_definitions(-DHAVE_ARAVIS)
 
   # TODO replace with find module
@@ -75,25 +64,15 @@ if (BUILD_ARAVIS)
   pkg_check_modules(ARAVIS REQUIRED aravis-0.4)
   include_directories(${ARAVIS_INCLUDE_DIRS})
   link_directories(${ARAVIS_LIBRARY_DIRS})
-  # target_link_libraries(map_server ${GDKPIXBUF_LIBRARIES})
-
   
 endif (BUILD_ARAVIS)
 
-# usb stuff 
-# if ()
-
-# end usb
-
-# TODO:
 set(cflags "-fpic -w -Wall -Wextra -pedantic -Wundef -Wshadow")
 set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -ldl")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -O0 ${cflags} ${lflags}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ${lflags}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 ${cflags} ${lflags} -pthread")
-
-# SET( LINK_FLAGS ${LINK_OPT})
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 
 
 
