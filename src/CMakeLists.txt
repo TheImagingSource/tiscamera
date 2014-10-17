@@ -57,6 +57,7 @@ endif (BUILD_USB)
 if (BUILD_ARAVIS)
 
   list(APPEND srcs AravisDevice.cpp)
+  list(APPEND srcs aravis_utils.cpp)
   
   add_definitions(-DHAVE_ARAVIS)
 

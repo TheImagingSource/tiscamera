@@ -4,7 +4,7 @@
 
 #include "AravisDevice.h"
 
-#include "PropertyGeneration.h"
+#include "aravis_utils.h"
 #include "logging.h"
 #include "utils.h"
 
