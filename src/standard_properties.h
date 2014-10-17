@@ -18,6 +18,7 @@ namespace tis_imaging
 
 enum PROPERTY_ID
 {
+    PROPERTY_INVALID,
     PROPERTY_EXPOSURE,
     PROPERTY_EXPOSURE_AUTO,
     PROPERTY_GAIN,
@@ -69,75 +70,65 @@ struct control_reference
 static std::vector<struct control_reference> ctrl_reference_table =
 {
     {
+        .id = PROPERTY_INVALID,
+        .name = "INVALID_PORPERTY",
+        .type_to_use = PROPERTY_TYPE_UNKNOWN,
+        .v4l2_id = {},
+        .v4l2_name = {},
+        .genicam_name = {},
+    },
+    {
         .id = PROPERTY_EXPOSURE,
         .name = "Exposure",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE },
-        .v4l2_name = { "Exposure (Absolute)"},
         .genicam_name = {"ExposureTime"},
     },
     {
         .id = PROPERTY_EXPOSURE_AUTO,
         .name = "Exposure Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS },
-        .v4l2_name = {},
         .genicam_name = {"ExposureAuto"},
     },
     {
         .id = PROPERTY_GAIN,
         .name = "Gain",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = { V4L2_CID_GAIN },
-        .v4l2_name = { "Gain" },
         .genicam_name = {"Gain"},
     },
     {
         .id = PROPERTY_GAIN_RED,
         "Gain Red",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = { 0 },
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_GAIN_GREEN,
         "Gain Green",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = { 0 },
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_GAIN_BLUE,
         "Gain Blue",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0 },
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_GAIN_AUTO,
         "Gain Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {0 },
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_TRIGGER_MODE,
         .name = "Trigger Mode",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = { V4L2_CID_PRIVACY, 0x0199e208},
-        .v4l2_name = { "Privacy" },
         .genicam_name = {"TriggerMode"},
     },
     {
         .id = PROPERTY_TRIGGER_SOURCE,
         .name = "Trigger Source",
         .type_to_use = PROPERTY_TYPE_STRING_TABLE,
-        .v4l2_id = {0},
-        .v4l2_name = {},
         .genicam_name = {"TriggerSource"},
     },
     {
