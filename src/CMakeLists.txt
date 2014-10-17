@@ -46,6 +46,7 @@ serialization.cpp
 
 if (BUILD_USB)
   list(APPEND srcs V4l2Device.cpp)
+  list(APPEND srcs v4l2_utils.cpp)
 
   find_package(UDev REQUIRED)
   include_directories(${UDEV_INCLUDE_DIR})

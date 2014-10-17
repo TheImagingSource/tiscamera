@@ -61,8 +61,6 @@ struct control_reference
     std::string name;               // name for external usage
     enum PROPERTY_TYPE type_to_use; // type outgoing control shall have
 
-    std::vector<int> v4l2_id;              // list of v4l2 identifiers that shall be mapped to control
-    std::vector<std::string> v4l2_name;
     std::vector<std::string> genicam_name; // list of genicam identifiers that shall be mapped to control
 };
 
@@ -73,8 +71,6 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .id = PROPERTY_INVALID,
         .name = "INVALID_PORPERTY",
         .type_to_use = PROPERTY_TYPE_UNKNOWN,
-        .v4l2_id = {},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
@@ -136,40 +132,30 @@ static std::vector<struct control_reference> ctrl_reference_table =
         // enum
         .name = "Trigger Activation",
         .type_to_use = PROPERTY_TYPE_STRING_TABLE,
-        .v4l2_id = {0},
-        .v4l2_name = {},
         .genicam_name = {"TriggerActivation"},
     },
     {
         .id = PROPERTY_SOFTWARETRIGGER,
         .name = "Software Trigger",
         .type_to_use = PROPERTY_TYPE_BUTTON,
-        .v4l2_id = {0x0199e209},
-        .v4l2_name = { "SoftwareTrigger" },
         .genicam_name = {"TriggerSoftware"},
     },
     {
         .id = PROPERTY_GPIO,
         .name = "GPIO",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0x0199e217},
-        .v4l2_name = {},
         .genicam_name = {"GPIO"},
     },
     {
         .id = PROPERTY_GPIN,
         .name = "GPIn",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0},
-        .v4l2_name = {},
         .genicam_name = {"GPIn"},
     },
     {
         .id = PROPERTY_GPOUT,
         .name = "GPOut",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0x0199e216},
-        .v4l2_name = {},
         .genicam_name = {"GPOut"},
     },
     {
@@ -177,138 +163,105 @@ static std::vector<struct control_reference> ctrl_reference_table =
         // TODO extract extension unit ids
         .name = "Offset X",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0x00980927 /*usb2*/, 0x0199e218 /*usb3*/},
-        .v4l2_name = {},
         .genicam_name = {"OffsetX"},
     },
     {
         .id = PROPERTY_OFFSET_Y,
         .name = "Offset Y",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {0x00980928 /*usb2*/, 0x0199e219/*usb3*/},
-        .v4l2_name = {},
         .genicam_name = {"OffsetY"},
     },
     {
         .id = PROPERTY_OFFSET_AUTO,
         .name = "Offset Auto Center",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {0x0199e220},
-        .v4l2_name = {},
         .genicam_name = {"OffsetAutoCenter"},
     },
     {
         .id = PROPERTY_BRIGHTNESS,
         .name = "Brightness",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_BRIGHTNESS},
-        .v4l2_name = { "Brightness" },
         .genicam_name = {},
     },
     {
         .id = PROPERTY_CONTRAST,
         .name = "Contrast",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_CONTRAST},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_SATURATION,
         .name = "Saturation",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_SATURATION},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_HUE,
         .name = "Hue",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_HUE},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_GAMMA,
         .name = "Gamma",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_GAMMA},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_WB_AUTO,
         .name = "Whitebalance Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_IRCUT,
         .name = "IRCutFilter",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {},
-        .v4l2_name = {},
         .genicam_name = {"IRCutFilter"},
     },
     {
         .id = PROPERTY_IRIS,
         .name = "Iris",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {},
-        .v4l2_name = {},
         .genicam_name = {"Iris"},
     },
     {
         .id = PROPERTY_FOCUS,
         .name = "Focus",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_FOCUS_ABSOLUTE},
-        .v4l2_name = { "Focus (Absolute)" },
         .genicam_name = {"Focus"},
     },
     {
         .id = PROPERTY_ZOOM,
         .name = "Zoom",
         .type_to_use = PROPERTY_TYPE_INTEGER,
-        .v4l2_id = {V4L2_CID_ZOOM_ABSOLUTE},
-        .v4l2_name = { "Zoom, Absolute" },
         .genicam_name = {"Zoom"},
     },
     {
         .id = PROPERTY_FOCUS_AUTO,
         .name = "Focus Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {},
-        .v4l2_name = {},
         .genicam_name = {},
     },
     {
         .id = PROPERTY_STROBE_ENABLE,
         .name = "Strobe Enable",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
-        .v4l2_id = {0x0199e211},
-        .v4l2_name = {},
         .genicam_name = {"StrobeEnable"},
     },
     // {
     //     .name = "Strobe Polarity",
     //     .type_to_use = ,
-    //     .v4l2_id = {},
     //     .genicam_name = {"StrobePolarity"},
     // },
     // {
     //     .name = "Strobe Operation",
     //     .type_to_use = ,
-    //     .v4l2_id = {},
     //     .genicam_name = {"StrobeOperation"},
     // },
     // {
     //     .name = "",
     //     .type_to_use = ,
-    //     .v4l2_id = {},
     //     .genicam_name = {},
     // },
 
@@ -322,7 +275,7 @@ inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
         if (ref.id == wanted_id)
             return ref;
     }
-    return {PROPERTY_INVALID, "", PROPERTY_TYPE_UNKNOWN, {}, {}, {}};
+    return {PROPERTY_INVALID, "", PROPERTY_TYPE_UNKNOWN, {}};
 }
 
 

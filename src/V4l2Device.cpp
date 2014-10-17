@@ -2,7 +2,7 @@
 #include "V4l2Device.h"
 #include "logging.h"
 #include "utils.h"
-#include "PropertyGeneration.h"
+#include "v4l2_utils.h"
 
 #include <algorithm>
 #include <unistd.h>
