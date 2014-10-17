@@ -1,8 +1,8 @@
 
 
 
-#ifndef USBCAPTURE_H_
-#define USBCAPTURE_H_
+#ifndef V4L2DEVICE_H
+#define V4L2DEVICE_H
 
 #include "DeviceInterface.h"
 #include "VideoFormat.h"
@@ -146,13 +146,4 @@ private:
 
 } /* namespace tis_imaging */
 
-#endif /* USBCAPTURE_H_ */
-
-
-
-
-
-
-
-
-
+#endif /* V4L2DEVICE_H */

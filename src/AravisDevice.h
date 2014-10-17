@@ -1,8 +1,8 @@
 
 
 
-#ifndef GIGECAPTURE_H_
-#define GIGECAPTURE_H_
+#ifndef ARAVISDEVICE_H
+#define ARAVISDEVICE_H
 
 #include "DeviceInterface.h"
 
@@ -107,5 +107,5 @@ private:
 
 } /* namespace tis_imaging */
 
-#endif /* GIGECAPTURE_H_ */
+#endif /* ARAVISDEVICE_H */
 
