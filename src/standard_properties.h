@@ -314,6 +314,18 @@ static std::vector<struct control_reference> ctrl_reference_table =
 
 };
 
+
+inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
+{
+    for (const auto& ref : ctrl_reference_table)
+    {
+        if (ref.id == wanted_id)
+            return ref;
+    }
+    return {PROPERTY_INVALID, "", PROPERTY_TYPE_UNKNOWN, {}, {}, {}};
+}
+
+
 } /*namespace tis_imaging */
 
 #endif /* user_properties */
