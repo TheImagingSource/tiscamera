@@ -18,7 +18,7 @@ bool tis_imaging::save_image (Grabber& g, const std::string& filename)
         bool wait;
     };
 
-    auto f = [] (std::shared_ptr<MemoryBuffer> buf, void* userdata)
+    auto f = [] (MemoryBuffer* buf, void* userdata)
         {
             data* d = static_cast<data*>(userdata);
 

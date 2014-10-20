@@ -52,6 +52,6 @@ void ImageSink::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
     if (callback != nullptr)
     {
-        this->callback(buffer, user_data);
+        this->callback(&*buffer, user_data);
     }
 }

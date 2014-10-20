@@ -10,7 +10,7 @@
 
 #include <memory>
 
-typedef void (*sink_callback)(std::shared_ptr<tis_imaging::MemoryBuffer>, void*);
+typedef void (*sink_callback)(tis_imaging::MemoryBuffer*, void*);
 
 namespace tis_imaging
 {

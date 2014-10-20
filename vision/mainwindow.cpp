@@ -185,7 +185,7 @@ void MainWindow::reset_gui ()
 }
 
 
-void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
+void MainWindow::internal_callback(MemoryBuffer* buffer)
 {
     if (buffer->getData() == NULL || buffer->getImageBuffer().length == 0)
     {
@@ -254,7 +254,7 @@ void MainWindow::internal_callback(std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-void MainWindow::callback (std::shared_ptr<MemoryBuffer> buffer, void* user_data)
+void MainWindow::callback (MemoryBuffer* buffer, void* user_data)
 {
     MainWindow* win = static_cast<MainWindow*>(user_data);
 
