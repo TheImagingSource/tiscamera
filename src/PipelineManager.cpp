@@ -185,7 +185,7 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
         return false;
     }
 
-    properties = device->getProperties();
+    device_properties = device->getProperties();
     available_input_formats = device->getAvailableVideoFormats();
 
     distributeProperties();
@@ -246,7 +246,7 @@ void PipelineManager::distributeProperties ()
 {
     for (auto& f : available_filter)
     {
-        f->setDeviceProperties(properties);
+        f->setDeviceProperties(device_properties);
     }
 }
 

@@ -77,7 +77,7 @@ private:
     std::shared_ptr<SinkInterface> sink;
 
     // @brief device properties
-    std::vector<std::shared_ptr<Property>> properties;
+    std::vector<std::shared_ptr<Property>> device_properties;
 
     std::vector<std::shared_ptr<Property>> filter_properties;
 
