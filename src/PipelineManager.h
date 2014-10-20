@@ -63,14 +63,13 @@ public:
     void pushImage (std::shared_ptr<MemoryBuffer>);
     
 private:
-    
-    VideoFormat format;
+
+    VideoFormat output_format;
     VideoFormat input_format;
 
     std::vector<VideoFormatDescription> available_input_formats;
     std::vector<VideoFormatDescription> available_output_formats;
 
-    
     PIPELINE_STATUS status;
     
     std::shared_ptr<ImageSource> source;

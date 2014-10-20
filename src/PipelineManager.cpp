@@ -50,7 +50,7 @@ std::vector<VideoFormatDescription> PipelineManager::getAvailableVideoFormats ()
 
 bool PipelineManager::setVideoFormat(const VideoFormat& f)
 {
-    this->format = f;
+    this->output_format = f;
     return true;
 }
 
@@ -264,7 +264,7 @@ static bool isFilterApplicable (uint32_t fourcc,
 
 void PipelineManager::create_input_format (uint32_t fourcc)
 {
-    input_format = format;
+    input_format = output_format;
     input_format.setFourcc(fourcc);
 }
 
@@ -371,11 +371,11 @@ bool PipelineManager::validate_pipeline ()
         }
     }
 
-    if (in_format != this->format)
+    if (in_format != this->output_format)
     {
         tis_log(TIS_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
                 in_format.toString().c_str(),
-                format.toString().c_str());
+                output_format.toString().c_str());
         return false;
     }
 
@@ -400,7 +400,7 @@ bool PipelineManager::create_conversion_pipeline ()
         if (f->getDescription().type == FILTER_TYPE_CONVERSION)
         {
 
-            if (isFilterApplicable(format.getFourcc(), f->getDescription().output_fourcc))
+            if (isFilterApplicable(output_format.getFourcc(), f->getDescription().output_fourcc))
             {
                 bool filter_valid = false;
                 uint32_t fourcc_to_use = 0;
@@ -419,7 +419,7 @@ bool PipelineManager::create_conversion_pipeline ()
 
                 if (filter_valid)
                 {
-                    if (f->setVideoFormat(input_format, format))
+                    if (f->setVideoFormat(input_format, output_format))
                     {
                         tis_log(TIS_LOG_DEBUG,
                                 "Added filter \"%s\" to pipeline",
@@ -502,16 +502,16 @@ bool PipelineManager::allocate_conversion_buffer ()
     for (int i = 0; i < 5; ++i)
     {
         image_buffer b = {};
-        b.pitch = format.getSize().width * img::getBitsPerPixel(format.getFourcc()) / 8;
-        b.length = b.pitch * format.getSize().height;
+        b.pitch = output_format.getSize().width * img::getBitsPerPixel(output_format.getFourcc()) / 8;
+        b.length = b.pitch * output_format.getSize().height;
 
         b.pData = (unsigned char*)malloc(b.length);
 
-        b.format.fourcc = format.getFourcc();
-        b.format.width = format.getSize().width;
-        b.format.height = format.getSize().height;
-        b.format.binning = format.getBinning();
-        b.format.framerate = format.getFramerate();
+        b.format.fourcc = output_format.getFourcc();
+        b.format.width = output_format.getSize().width;
+        b.format.height = output_format.getSize().height;
+        b.format.binning = output_format.getBinning();
+        b.format.framerate = output_format.getFramerate();
 
         this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
     }
@@ -530,7 +530,7 @@ bool PipelineManager::create_pipeline ()
     // assure everything is in a defined state
     filter_pipeline.clear();
 
-    format.setBinning(0);
+    output_format.setBinning(0);
 
     if (!create_conversion_pipeline())
     {
