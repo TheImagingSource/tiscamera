@@ -42,7 +42,14 @@ public:
     std::string getName () const;
 
     std::string getSerial () const;
-    
+
+    /**
+     * returns identifier used for communication
+     * with underlying system (e.g. /dev/video0)
+     * @return string containing the identifier
+     */
+    std::string getIdentifier () const;
+
     enum TIS_DEVICE_TYPE getDeviceType () const;
 
     /**

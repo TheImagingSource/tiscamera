@@ -49,6 +49,12 @@ std::string CaptureDevice::getSerial () const
 }
 
 
+std::string CaptureDevice::getIdentifier () const
+{
+    return device.identifier;
+}
+
+
 enum TIS_DEVICE_TYPE CaptureDevice::getDeviceType () const
 {
     return device.type;
