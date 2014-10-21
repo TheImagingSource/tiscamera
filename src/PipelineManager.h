@@ -25,7 +25,9 @@ public:
 
     ~PipelineManager ();
 
-
+    /**
+     * @return vector containing all videoformats the pipeline can create
+     */
     std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
 
     /**
@@ -41,7 +43,10 @@ public:
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
     
     bool setStatus (PIPELINE_STATUS);
-    
+
+    /**
+     * @return PIPELINE_STATUS the pipeline currently has
+     */
     PIPELINE_STATUS getStatus () const;
 
     /**
@@ -51,6 +56,10 @@ public:
      */
     bool destroyPipeline ();
 
+    /**
+     * @brief Define the device the pipeline shall use
+     * @return true on success
+     */
     bool setSource (std::shared_ptr<DeviceInterface>);
 
     std::shared_ptr<ImageSource> getSource ();
