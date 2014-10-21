@@ -458,3 +458,68 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
     return nullptr;
 
 }
+
+
+int tis_imaging::tis_get_gige_camera_count ()
+{
+    arv_update_device_list();
+
+    return arv_get_n_devices();
+}
+
+
+int tis_imaging::tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_size)
+{
+    arv_update_device_list ();
+
+    unsigned int number_devices = arv_get_n_devices();
+
+    if (number_devices > array_size)
+    {
+        // TODO: errno missing.
+        return -1;
+    }
+
+    unsigned int counter = 0;
+
+    for (unsigned int i = 0; i < number_devices; ++i)
+    {
+        std::string name = arv_get_device_id(i);
+        memcpy(ptr->identifier, name.c_str(), name.size());
+
+        ArvCamera* cam = arv_camera_new(name.c_str());
+
+        ptr->type = TIS_DEVICE_TYPE_ARAVIS;
+        const char* n =  arv_camera_get_model_name(cam);
+
+        if (n != NULL)
+        {
+            strncpy(ptr->name, n, sizeof(ptr->name));
+        }
+        else
+        {
+            tis_log(TIS_LOG_WARNING, "Unable to determine model name.");
+        }
+        size_t t = name.find("-");
+
+        if (t != std::string::npos)
+        {
+            strcpy(ptr->serial_number, name.substr((t+1)).c_str());
+        }
+
+        if (counter < array_size)
+        {
+            ptr++;
+            ++counter;
+        }
+        else
+        {
+
+        }
+
+        g_object_unref(cam);
+
+    }
+
+    return counter;
+}
