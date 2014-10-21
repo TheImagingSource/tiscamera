@@ -53,6 +53,12 @@ struct video_format_description VideoFormatDescription::getFormatDescription () 
 }
 
 
+uint32_t VideoFormatDescription::getFourcc () const
+{
+    return format.fourcc;
+}
+
+
 std::vector<res_fps> VideoFormatDescription::getResolutionsFramesrates () const
 {
     return rf;

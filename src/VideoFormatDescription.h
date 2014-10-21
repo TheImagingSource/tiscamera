@@ -41,6 +41,8 @@ public:
 
     struct video_format_description getFormatDescription () const;
 
+    uint32_t getFourcc () const;
+
     std::vector<res_fps> getResolutionsFramesrates () const;
 
     std::vector<IMG_SIZE> getResolutions () const;
