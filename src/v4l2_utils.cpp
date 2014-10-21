@@ -39,15 +39,15 @@ static std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = PROPERTY_GAIN_RED,
-        .v4l2_id = { 0 },
+        .v4l2_id = { 0x980921 },
     },
     {
         .id = PROPERTY_GAIN_GREEN,
-        .v4l2_id = { 0 },
+        .v4l2_id = {  0x980922 },
     },
     {
         .id = PROPERTY_GAIN_BLUE,
-        .v4l2_id = { 0 },
+        .v4l2_id = {  0x980923 },
     },
     {
         .id = PROPERTY_GAIN_AUTO,
@@ -67,7 +67,7 @@ static std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = PROPERTY_SOFTWARETRIGGER,
-            .v4l2_id = {0x0199e209},
+        .v4l2_id = {/* usb 2: */ 0x980925, /* usb 3: */ 0x0199e209},
     },
     {
         .id = PROPERTY_GPIO,
