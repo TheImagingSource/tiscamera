@@ -490,3 +490,82 @@ int tis_imaging::tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned 
 
     return camera_count;
 }
+
+
+std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
+{
+    std::vector<CaptureDevice> device_list;
+
+
+    struct udev* udev = udev_new();
+    if (!udev)
+    {
+        return device_list;
+    }
+
+    /* Create a list of the devices in the 'video4linux' subsystem. */
+    struct udev_enumerate* enumerate = udev_enumerate_new(udev);
+    udev_enumerate_add_match_subsystem(enumerate, "video4linux");
+    udev_enumerate_scan_devices(enumerate);
+    struct udev_list_entry* devices = udev_enumerate_get_list_entry(enumerate);
+    struct udev_list_entry* dev_list_entry;
+
+    udev_list_entry_foreach(dev_list_entry, devices)
+    {
+        const char* path;
+        char needed_path[100];
+
+        /* Get the filename of the /sys entry for the device
+           and create a udev_device object (dev) representing it */
+        path = udev_list_entry_get_name(dev_list_entry);
+        struct udev_device* dev = udev_device_new_from_syspath(udev, path);
+
+        /* The device pointed to by dev contains information about
+           the hidraw device. In order to get information about the
+           USB device, get the parent device with the
+           subsystem/devtype pair of "usb"/"usb_device". This will
+           be several levels up the tree, but the function will find
+           it.*/
+
+        /* we need to copy the devnode (/dev/videoX) before the path
+           is changed to the path of the usb device behind it (/sys/class/....) */
+        strcpy(needed_path, udev_device_get_devnode(dev));
+
+        dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+
+        if (!dev)
+        {
+            // // TODO: error
+            return device_list;
+        }
+
+        /* From here, we can call get_sysattr_value() for each file
+           in the device's /sys entry. The strings passed into these
+           functions (idProduct, idVendor, serial, etc.) correspond
+           directly to the files in the directory which represents
+           the USB device. Note that USB strings are Unicode, UCS2
+           encoded, but the strings returned from
+           udev_device_get_sysattr_value() are UTF-8 encoded. */
+
+        // TODO: no hard coded numbers find more general approach
+        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0)
+        {
+            tis_device_info info = {};
+            info.type = TIS_DEVICE_TYPE_V4L2;
+            strcpy(info.identifier, needed_path);
+            strcpy(info.name, udev_device_get_sysattr_value(dev, "product"));
+            strcpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"));
+
+            device_list.push_back(CaptureDevice(info));
+        }
+
+        udev_device_unref(dev);
+    }
+
+    /* Free the enumerator object */
+    udev_enumerate_unref(enumerate);
+
+    udev_unref(udev);
+
+    return device_list;
+}

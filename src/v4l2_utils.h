@@ -4,6 +4,7 @@
 #define V4L2_UTILS_H
 
 #include "Properties.h"
+#include "CaptureDevice.h"
 
 namespace tis_imaging
 {
@@ -41,6 +42,8 @@ int tis_get_usb_camera_count ();
  */
 int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
+
+std::vector<CaptureDevice> get_v4l2_device_list ();
 
 } /* namespace tis_imaging */
 
