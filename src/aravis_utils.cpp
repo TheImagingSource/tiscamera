@@ -523,3 +523,51 @@ int tis_imaging::tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned
 
     return counter;
 }
+
+
+std::vector<CaptureDevice> tis_imaging::get_aravis_device_list ()
+{
+    std::vector<CaptureDevice> device_list;
+
+    arv_update_device_list ();
+
+    unsigned int number_devices = arv_get_n_devices();
+
+    if (number_devices == 0)
+    {
+        return device_list;
+    }
+
+    for (unsigned int i = 0; i < number_devices; ++i)
+    {
+        tis_device_info info = {};
+        std::string name = arv_get_device_id(i);
+        memcpy(info.identifier, name.c_str(), name.size());
+
+        ArvCamera* cam = arv_camera_new(name.c_str());
+
+        info.type = TIS_DEVICE_TYPE_ARAVIS;
+        const char* n =  arv_camera_get_model_name(cam);
+
+        if (n != NULL)
+        {
+            strncpy(info.name, n, sizeof(info.name));
+        }
+        else
+        {
+            tis_log(TIS_LOG_WARNING, "Unable to determine model name.");
+        }
+        size_t t = name.find("-");
+
+        if (t != std::string::npos)
+        {
+            strcpy(info.serial_number, name.substr((t+1)).c_str());
+        }
+
+        device_list.push_back(CaptureDevice(info));
+
+        g_object_unref(cam);
+    }
+
+    return device_list;
+}

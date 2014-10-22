@@ -7,6 +7,8 @@
 
 #include "arv.h"
 
+#include "CaptureDevice.h"
+
 namespace tis_imaging
 {
 
@@ -30,6 +32,8 @@ int tis_get_gige_camera_count ();
  */
 int tis_get_gige_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
+
+std::vector<CaptureDevice> get_aravis_device_list ();
 
 }; /* namespace tis_imaging */
 
