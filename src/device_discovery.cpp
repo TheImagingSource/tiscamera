@@ -5,19 +5,9 @@
 
 #include <vector>
 #include <string>
-#include <dirent.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <memory>
+#include <mutex>
 
-/* Not technically required, but needed on some UNIX distributions */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <linux/videodev2.h>
-#include <linux/media.h>
-
-// #include "tis_video.h"
 #include "utils.h"
 #include "logging.h"
 #include "device_discovery.h"
@@ -31,6 +21,73 @@
 #endif
 
 using namespace tis_imaging;
+
+
+std::vector<CaptureDevice> DeviceIndex::getDeviceList () const
+{
+    return device_list;
+}
+
+
+DeviceIndex::DeviceIndex ()
+    : continue_thread(false), wait_period(2000000)
+{
+    continue_thread = true;
+    work_thread = std::thread(&DeviceIndex::run, this);
+}
+
+
+DeviceIndex::~DeviceIndex ()
+{
+    if (continue_thread)
+    {
+        continue_thread = false;
+        work_thread.join();
+    }
+}
+
+
+void DeviceIndex::updateDeviceList ()
+{
+    std::vector<CaptureDevice> tmp_dev_list (10);
+
+#if HAVE_ARAVIS
+    auto aravis_dev_list = get_aravis_device_list();
+    tmp_dev_list.insert(aravis_dev_list.begin(), aravis_dev_list.end(), tmp_dev_list.end());
+#endif
+
+#if HAVE_USB
+    auto v4l2_dev_list = get_v4l2_device_list();
+    tmp_dev_list.insert(v4l2_dev_list.begin(), v4l2_dev_list.end(), tmp_dev_list.end());
+#endif
+
+    std::mutex mtx;
+
+    mtx.lock();
+
+    device_list.clear();
+
+    device_list.insert(tmp_dev_list.begin(), tmp_dev_list.end(), device_list.end());
+
+    mtx.unlock();
+}
+
+
+void DeviceIndex::run ()
+{
+    while (continue_thread)
+    {
+        updateDeviceList();
+        usleep(wait_period);
+    }
+}
+
+
+std::shared_ptr<DeviceIndex> getDeviceIndex ()
+{
+    return std::make_shared<DeviceIndex>();
+}
+
 
 // TODO: something makes list return 0 cameras when aravis is not included
 

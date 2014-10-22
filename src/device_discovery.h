@@ -8,6 +8,43 @@
 #include "base_types.h"
 #include "config.h"
 
+#include "CaptureDevice.h"
+
+#include <vector>
+#include <thread>
+
+namespace tis_imaging
+{
+
+class DeviceIndex
+{
+
+public:
+
+    DeviceIndex ();
+
+    ~DeviceIndex ();
+
+    std::vector<CaptureDevice> getDeviceList () const;
+
+private:
+
+    bool continue_thread;
+    unsigned int wait_period;
+    std::thread work_thread;
+
+    std::vector<CaptureDevice> device_list;
+
+    void updateDeviceList ();
+
+    void run ();
+
+};
+
+std::shared_ptr<DeviceIndex> getDeviceIndex ();
+
+} /* namespace tis_imaging */
+
 #ifdef __cplusplus
 extern "C"
 {
