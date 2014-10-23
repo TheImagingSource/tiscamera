@@ -94,7 +94,11 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
     double seconds = difftime(timer, second_count);
     if (seconds != 0)
     {
-        tis_log(TIS_LOG_DEBUG, "FRAMERATE: %f", frame_count/seconds);
+        auto stats = buffer->getStatistics();
+
+        stats.framerate = frame_count/seconds;
+
+        buffer->setStatistics(stats);
     }
 
     if (!pipeline.expired())
