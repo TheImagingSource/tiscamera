@@ -658,6 +658,8 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         {
             auto next_buffer = pipeline_buffer.at(0);
 
+            next_buffer->setStatistics(current_buffer->getStatistics());
+
             f->transform(*current_buffer, *next_buffer);
 
             current_buffer = next_buffer;
