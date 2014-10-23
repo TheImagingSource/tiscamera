@@ -72,6 +72,13 @@ private:
 
 };
 
+
+Error getError ();
+
+void setError (const Error& err);
+
+void resetError ();
+
 } /* namespace tis_imaging */
 
 #endif /* ERROR_H_ */

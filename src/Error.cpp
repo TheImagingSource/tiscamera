@@ -35,3 +35,23 @@ Error::Error (int errno):
 Error::Error (const Error& e)
     : m_errno(e.m_errno), m_Enum(e.m_Enum), m_String(e.m_String)
 {}
+
+
+Error global_last_error;
+
+Error tis_imaging::getError ()
+{
+    return global_last_error;
+}
+
+
+void tis_imaging::setError (const Error& err)
+{
+    global_last_error = err;
+}
+
+
+void tis_imaging::resetError ()
+{
+    setError(Error());
+}
