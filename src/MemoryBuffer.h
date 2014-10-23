@@ -33,6 +33,9 @@ public:
      */
     unsigned char* getData ();
 
+
+    struct stream_statistics getStatistics () const;
+
     /**
      * @brief Fills MemoryBuffer with 0
      */

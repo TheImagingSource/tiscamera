@@ -41,6 +41,13 @@ unsigned char* MemoryBuffer::getData ()
     return buffer.pData;
 }
 
+
+struct stream_statistics MemoryBuffer::getStatistics () const
+{
+    return buffer.statistics;
+}
+
+
 void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);
