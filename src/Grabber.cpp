@@ -1,6 +1,8 @@
 
 #include "Grabber.h"
 
+#include "Error.h"
+
 #include "logging.h"
 #include "utils.h"
 #include "serialization.h"
@@ -22,6 +24,8 @@ Grabber::~Grabber ()
 
 bool Grabber::load_configuration (const std::string& filename)
 {
+    resetError();
+
     if (!isDeviceOpen())
     {
         return false;
@@ -42,6 +46,8 @@ bool Grabber::load_configuration (const std::string& filename)
 
 bool Grabber::save_configuration (const std::string& filename)
 {
+    resetError();
+
     if (!isDeviceOpen())
     {
         return false;
@@ -62,6 +68,8 @@ bool Grabber::save_configuration (const std::string& filename)
 
 bool Grabber::openDevice (const CaptureDevice& device_desc)
 {
+    resetError();
+
     if (pipeline->getStatus() == PIPELINE_PLAYING ||
         pipeline->getStatus() == PIPELINE_PAUSED)
     {
@@ -110,10 +118,14 @@ bool Grabber::openDevice (const CaptureDevice& device_desc)
 
 bool Grabber::isDeviceOpen () const
 {
+    resetError();
     if (device != nullptr)
     {
         return true;
     }
+
+    tis_log(TIS_LOG_ERROR, "No open device");
+    setError(Error("No open device", ENOENT));
 
     return false;
 }
@@ -143,6 +155,7 @@ bool Grabber::closeDevice ()
 
 std::vector<Property> Grabber::getAvailableProperties ()
 {
+    resetError();
     if (!isDeviceOpen())
     {
         return std::vector<Property>();
@@ -166,9 +179,9 @@ std::vector<Property> Grabber::getAvailableProperties ()
 
 std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
 {
+    resetError();
     if (!isDeviceOpen())
     {
-        tis_log(TIS_LOG_ERROR, "No open device");
         return std::vector<VideoFormatDescription>();
     }
 
@@ -178,9 +191,9 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
 
 bool Grabber::setVideoFormat (const VideoFormat& new_format)
 {
+    resetError();
     if (!isDeviceOpen())
     {
-        tis_log(TIS_LOG_ERROR, "No open device");
         return false;
     }
 
@@ -192,9 +205,9 @@ bool Grabber::setVideoFormat (const VideoFormat& new_format)
 
 VideoFormat Grabber::getActiveVideoFormat () const
 {
+    resetError();
     if(!isDeviceOpen())
     {
-        tis_log(TIS_LOG_ERROR, "No open device");
         return VideoFormat();
     }
 
@@ -204,9 +217,9 @@ VideoFormat Grabber::getActiveVideoFormat () const
 
 bool Grabber::startStream (std::shared_ptr<SinkInterface> sink)
 {
+    resetError();
     if (!isDeviceOpen())
     {
-        tis_log(TIS_LOG_ERROR, "No open device");
         return false;
     }
     pipeline->setSink(sink);
@@ -217,9 +230,9 @@ bool Grabber::startStream (std::shared_ptr<SinkInterface> sink)
 
 bool Grabber::stopStream ()
 {
+    resetError();
     if (!isDeviceOpen())
     {
-        tis_log(TIS_LOG_ERROR, "No open device");
         return false;
     }
 
