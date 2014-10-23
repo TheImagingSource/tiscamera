@@ -114,7 +114,7 @@ struct stream_statistics
     uint64_t frames_dropped;   //
     uint64_t capture_time_ns;  // capture time reported by lib
     uint64_t camera_time_ns;   // capture time reported by camera
-    double   actual_framerate; // in contrast to selected one
+    double   framerate;        // in contrast to selected one
 };
 
 /**
