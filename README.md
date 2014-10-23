@@ -41,6 +41,7 @@ Build against v4l2 to enable support for USB cameras
 
 cmake
 libudev
+tinyxml
 
 ### Additional aravis dependencies
 
@@ -67,5 +68,5 @@ For questions simply open a ticket or write us a mail.
 
 ## Licensing
 
-All files are published under the Apache License 2.0.
+All files are published under the Apache License 2.0, unless otherwise noted.
 
