@@ -8,13 +8,13 @@ if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
-add_subdirectory(filter)
-
 
 # If you really want to set additional options from outside CMakeLists.txt you
 # can do this:
-
 # add_defintions($ENV{CFLAGS})
+
+include_directories(/home/edt/include)
+include_directories(/home/edt/work/drvbuildtools/trunk/lib/dutils_image/)
 
 find_package(TinyXML REQUIRED)
 include_directories(${TinyXML_INCLUDE_DIR})
@@ -42,6 +42,8 @@ ImageSink.cpp
 PipelineManager.cpp
 ImageSource.cpp
 serialization.cpp
+filter/AutoPassFilter.cpp
+filter/BayerRgbFilter.cpp
 )
 
 if (BUILD_USB)
@@ -94,6 +96,9 @@ if (BUILD_ARAVIS)
   # TARGET_LINK_LIBRARIES(tis_imaging ${aravis_LIBRARIES})
   TARGET_LINK_LIBRARIES(tis_imaging ${ARAVIS_LIBRARIES})
 endif (BUILD_ARAVIS)
+
+
+target_link_libraries(tis_imaging "-L/home/edt/lib -ltis_auto_alg")
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)

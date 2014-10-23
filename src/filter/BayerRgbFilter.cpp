@@ -122,16 +122,3 @@ std::vector<std::shared_ptr<Property>> BayerRgbFilter::getFilterProperties ()
 {
     return std::vector<std::shared_ptr<Property>>();
 }
-
-
-FB* create ()
-{
-    return (FB*)new BayerRgbFilter();
-}
-
-
-void destroy (FB* filter)
-{
-    delete reinterpret_cast<BayerRgbFilter*>( filter);
-}
-

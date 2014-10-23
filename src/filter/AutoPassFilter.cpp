@@ -434,17 +434,3 @@ void AutoPassFilter::set_iris (int iris)
 {
     set_int_property(handler->property_iris, iris);
 }
-
-
-// FilterBase* create ()
-FB* create ()
-{
-    return (FB*)new AutoPassFilter();
-}
-
-
-// void close (FilterBase* filter)
-void close (FB* filter)
-{
-    delete reinterpret_cast<AutoPassFilter*>(filter);
-}
