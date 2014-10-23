@@ -48,6 +48,14 @@ struct stream_statistics MemoryBuffer::getStatistics () const
 }
 
 
+bool MemoryBuffer::setStatistics (const struct stream_statistics& stats)
+{
+    buffer.statistics = stats;;
+
+    return true;
+}
+
+
 void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);

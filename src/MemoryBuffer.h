@@ -36,6 +36,8 @@ public:
 
     struct stream_statistics getStatistics () const;
 
+    bool setStatistics (const struct stream_statistics&);
+
     /**
      * @brief Fills MemoryBuffer with 0
      */
