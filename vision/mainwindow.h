@@ -27,12 +27,9 @@ public:
 
     tis_imaging::Grabber* getGrabber ();
 
-    unsigned char* data;
-    size_t length;
-
 signals:
 
-    void newImage_received (std::shared_ptr<MemoryBuffer>);
+    void newImage_received (MemoryBuffer*);
 
 private slots:
 
@@ -79,11 +76,11 @@ private:
 
     CaptureDeviceSelectionDialog* selection_dialog;
 
-    void reset_gui();
+    void reset_gui ();
 
-    void internal_callback (std::shared_ptr<MemoryBuffer>);
+    void internal_callback (MemoryBuffer*);
 
-    static void callback (std::shared_ptr<MemoryBuffer>, void*);
+    static void callback (MemoryBuffer*, void*);
 
     bool getActiveVideoFormat ();
 

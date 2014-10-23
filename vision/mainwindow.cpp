@@ -8,7 +8,6 @@ MainWindow::MainWindow (QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     grabber(new tis_imaging::Grabber),
-    data(NULL),
     selection_dialog(NULL),
     playing(false)
 {
@@ -22,11 +21,6 @@ MainWindow::MainWindow (QWidget *parent) :
 
     sink = std::make_shared<ImageSink>();
 
-    connect(this,
-            SIGNAL(newImage_received(std::shared_ptr<MemoryBuffer>)),
-            this,
-            SLOT(my_newImage_received(std::shared_ptr<MemoryBuffer>)));
-
 }
 
 
@@ -37,11 +31,6 @@ MainWindow::~MainWindow ()
 
     delete grabber;
 
-    if (data != NULL)
-    {
-        free(data);
-        data = NULL;
-    }
 }
 
 
@@ -203,9 +192,6 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
         return;
     }
 
-    memcpy(data, buffer->getData(), buffer->getImageBuffer().length);
-    this->length = buffer->getImageBuffer().length;
-
     auto buf = buffer->getImageBuffer();
 
 #ifndef mmioFOURCC
@@ -363,7 +349,6 @@ void MainWindow::start_stream ()
         return;
     }
     sink->registerCallback(this->callback, this);
-    data = (unsigned char*)malloc(active_format.getSize().height * active_format.getSize().width * 8);
 
     ret = grabber->startStream(sink);
 
