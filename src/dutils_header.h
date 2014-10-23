@@ -7,7 +7,9 @@
 #include <auto_alg/auto_alg.h>
 #include <by8/by8_apply_whitebalance.h>
 
-img::img_descriptor to_img_desc (MemoryBuffer& buf)
+#include "MemoryBuffer.h"
+
+inline img::img_descriptor to_img_desc (tis_imaging::MemoryBuffer& buf)
 {
     image_buffer b = buf.getImageBuffer();
     img::img_descriptor img = {b.pData,
