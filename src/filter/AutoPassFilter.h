@@ -14,17 +14,17 @@ class PropertyHandler: public PropertyImpl
 public:
 
     friend class AutoPassFilter;
-    
+
     PropertyHandler ();
-    
+
     bool isAvailable (const Property&);
 
     bool setProperty (const Property&);
-    
+
     bool getProperty (Property&);
 
 protected:
-    
+
     // device properties
     std::weak_ptr<PropertyInteger> property_exposure;
     std::weak_ptr<PropertyInteger> property_gain;
@@ -34,13 +34,13 @@ protected:
     std::shared_ptr<PropertySwitch> prop_auto_exposure;
     std::shared_ptr<PropertySwitch> prop_auto_gain;
     std::shared_ptr<PropertySwitch> prop_auto_iris;
-    
+
     std::shared_ptr<PropertySwitch>  prop_auto_wb;
     std::shared_ptr<PropertyInteger> prop_wb_r;
     std::shared_ptr<PropertyInteger> prop_wb_g;
     std::shared_ptr<PropertyInteger> prop_wb_b;
-        
-    
+
+
 };
 
 
@@ -57,14 +57,14 @@ public:
     bool transform (MemoryBuffer& in, MemoryBuffer& out );
 
     bool apply (std::shared_ptr<MemoryBuffer>);
-    
+
     bool setStatus (PIPELINE_STATUS);
     PIPELINE_STATUS getStatus () const;
 
     void getVideoFormat (VideoFormat& in, VideoFormat& out) const;
     bool setVideoFormat(const VideoFormat&);
     bool setVideoFormat(const VideoFormat& in, const VideoFormat& out);
-    
+
     void setDeviceProperties (std::vector<std::shared_ptr<Property>>);
 
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
@@ -85,12 +85,12 @@ private:
     int		wb_g;
     int		wb_b;
     unsigned int exposure_max;
-    
+
     //tis_imaging::
     FilterDescription description;
     PIPELINE_STATUS current_status;
     tis_imaging::VideoFormat input_format;
-    
+
     auto_alg::auto_pass_params params;
     auto_alg::auto_pass_state state;
 
@@ -111,17 +111,3 @@ extern "C"
 }
 
 #endif /* AUTOPASSFILTER_H_ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-

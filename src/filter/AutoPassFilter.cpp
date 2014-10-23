@@ -163,11 +163,11 @@ void AutoPassFilter::update_params ()
     params.exposure_reference.val = 128;
     params.exposure_reference.do_auto = params.exposure.do_auto;
     params.exposure_reference.flags = params.exposure.flags;
-    
+
     params.enable_auto_ref = false;
 }
 
-    
+
 bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
     img::img_descriptor img = to_img_desc(*buf);
@@ -242,12 +242,12 @@ bool AutoPassFilter::setVideoFormat (const VideoFormat& f)
     {
         return true;
     }
-    
+
     int exp_max = handler->property_exposure.lock()->getMax();
     double fps = input_format.getFramerate();
-    
+
     exposure_max = exp_max / 10000 / fps;
-    
+
     return true;
 }
 
@@ -258,7 +258,7 @@ bool AutoPassFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
     {
         return false;
     }
-    
+
     input_format = in;
 
     return true;
@@ -268,7 +268,7 @@ bool AutoPassFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
 void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>> dev_properties)
 {
     reset();
-    
+
     std::string s;
     auto f = [&s] (std::shared_ptr<Property> p)
         {
@@ -297,7 +297,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         handler->prop_auto_exposure = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
     }
 
-    
+
     s = "Gain";
     auto gain = std::find_if(dev_properties.begin(), dev_properties.end(), f);
 
@@ -321,7 +321,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
         handler->prop_auto_gain = std::make_shared<PropertySwitch>(handler, prop, Property::BOOLEAN);
     }
-    
+
     s = "Iris";
     auto iris = std::find_if(dev_properties.begin(), dev_properties.end(), f);
 
@@ -351,7 +351,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     }
 
-    
+
     camera_property prop = {};
 
     strncpy(prop.name, "Whitebalance Auto", sizeof(prop.name));
@@ -368,7 +368,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     params.wb.one_push_enabled = false;
     params.wb.is_software_applied_wb = true;
     params.wb.temperature_mode = false;
-    
+
     valid = true;
 }
 

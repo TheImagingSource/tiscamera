@@ -69,6 +69,3 @@ extern "C"
 #endif
 
 #endif /* _CAMERA_INDEX_H_ */
-
-
-

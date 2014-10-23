@@ -188,7 +188,6 @@ bool Property::fromString (const std::string& s)
                 }
                 else
                 {
-                    // TODO: should bool have more checking
                     prop.value.b.value = false;
                 }
                 break;
@@ -284,7 +283,6 @@ bool Property::setInactive (bool is_disabled)
 
 bool Property::isAvailable (const Property&)
 {
-    // TODO:
     return false;
 }
 

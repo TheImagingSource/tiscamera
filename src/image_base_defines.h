@@ -101,5 +101,3 @@ typedef struct tagSIZE
 #define SSE_ALIGN   _ALIGNED(16)
 
 #endif
-
-

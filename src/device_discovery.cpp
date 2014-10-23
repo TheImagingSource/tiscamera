@@ -110,7 +110,7 @@ int tis_get_camera_count ()
 int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_size)
 {
     memset(user_list, 0, sizeof(struct tis_device_info)*array_size);
-    
+
     unsigned int count = tis_get_camera_count();
 
     if (count > array_size)
@@ -118,7 +118,7 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
         // TODO: errno missing
         return -1;
     }
-    
+
     std::vector<struct tis_device_info> info_vec(count);
 
     unsigned int usb_count = 0;
@@ -128,11 +128,11 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
 #endif
 
     unsigned int gige_count = 0;
-    
+
 #if HAVE_ARAVIS
     gige_count = tis_get_gige_camera_list(&(info_vec.data()[usb_count]), array_size - usb_count);
 #endif
-    
+
     if (usb_count + gige_count != count)
     {
         return -1;

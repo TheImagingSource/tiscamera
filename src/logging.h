@@ -121,4 +121,3 @@ void tis_logging (const char* module,
 
 
 #endif /* LOGGING_H */
-

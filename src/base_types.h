@@ -31,9 +31,6 @@ enum PIPELINE_STATUS
 };
 
 
-
-
-
 /**
  * Supported camera types
  */

@@ -22,11 +22,11 @@ class CaptureDevice
 
 public:
 
-    
+
     explicit CaptureDevice (const struct tis_device_info&);
 
     /**
-     * @brief Creates an invalid device  
+     * @brief Creates an invalid device
      */
     CaptureDevice ();
 
@@ -38,7 +38,7 @@ public:
      * @return struct tis_device_info
      */
     struct tis_device_info getInfo () const;
-    
+
     std::string getName () const;
 
     std::string getSerial () const;
@@ -62,7 +62,7 @@ private:
 
     /// internal device representation
     struct tis_device_info device;
-    
+
 }; /* class CaptureDevice */
 
 /**

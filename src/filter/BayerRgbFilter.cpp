@@ -37,16 +37,16 @@ bool BayerRgbFilter::transform (MemoryBuffer& in, MemoryBuffer& out)
 
     auto img_out = to_img_desc(out);
     auto img_in  = to_img_desc(in);
-    
+
     by8_transform::transform_by8_options options = {};
 
     options.options = 0;
     options.opt_level = 0;
 
     bool hflip = true;
-    
+
     by8_transform::transform_by8_to_dest(img_out, img_in, hflip, options);
-    
+
     return true;
 }
 
@@ -67,7 +67,7 @@ bool BayerRgbFilter::setStatus (PIPELINE_STATUS s)
     status = s;
 
     return true;
-    
+
 }
 
 
@@ -92,7 +92,7 @@ bool BayerRgbFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
     auto res = std::find(description.input_fourcc.begin(),
                          description.input_fourcc.end(),
                          input_format.getFourcc());
-    
+
     if (res == description.input_fourcc.end())
     {
         return false;
@@ -101,7 +101,7 @@ bool BayerRgbFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
     res = std::find(description.output_fourcc.begin(),
                     description.output_fourcc.end(),
                     output_format.getFourcc());
-    
+
     if (res == description.output_fourcc.end())
     {
         return false;
@@ -109,7 +109,7 @@ bool BayerRgbFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
 
     std::cout << "OUTPUT FOURCC IS : " << output_format.getFourcc() << std::endl;
 
-    
+
     return true;
 }
 

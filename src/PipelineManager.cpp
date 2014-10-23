@@ -147,7 +147,7 @@ void PipelineManager::index_output_formats ()
 
                         desc.fourcc = fcc;
                         memcpy(desc.description, fourcc2description(fcc), sizeof(desc.description));
-                        
+
                         VideoFormatDescription v (desc, rf);
                         available_output_formats.push_back (v);
                     }
@@ -162,7 +162,7 @@ void PipelineManager::index_output_formats ()
     }
 
     // to finalize iterate input formats and select those that shall be passed through
-    
+
     std::vector<uint32_t> pass_through = {FOURCC_Y800, FOURCC_Y16, FOURCC_UYVY};
 
     for (auto f : pass_through)
@@ -482,13 +482,10 @@ bool PipelineManager::add_interpretation_filter ()
                 tis_log(TIS_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
             }
 
-            // for (auto& filter : filter_pipeline)
-            // {
-                if (f->setVideoFormat(input_format, input_format))
-                {
-                    continue;
-                }
-           // }
+            if (f->setVideoFormat(input_format, input_format))
+            {
+                continue;
+            }
         }
     }
     return true;

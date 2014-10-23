@@ -176,13 +176,13 @@ typedef enum
 /// Structure describing the properties of a frame (e.g. a MemBuffer)
 typedef struct tsMediaSampleDesc
 {
-    
+
     REFERENCE_TIME SampleStart; ///< the start time of the sample as set by the video capture device
     REFERENCE_TIME SampleEnd;   ///< the end time of the sample as set by the video capture device
     unsigned long  FrameNumber; ///< the frame number of the sample as set by the video capture device
     ///< the device does not need to set this field, or keep it updated
     tFrameDesc FrameType; ///< the type of the frame
-    
+
 } tsMediaSampleDesc;
 
 

@@ -25,15 +25,3 @@ bool save_xml_description (const std::string& filename,
 } /* namespace tis_imaging */
 
 #endif /* SERIALIZATION_H */
-
-
-
-
-
-
-
-
-
-
-
-

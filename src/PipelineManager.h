@@ -41,7 +41,7 @@ public:
      * @return vector containing all filter properties; empty on error
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
-    
+
     bool setStatus (PIPELINE_STATUS);
 
     /**
@@ -63,14 +63,14 @@ public:
     bool setSource (std::shared_ptr<DeviceInterface>);
 
     std::shared_ptr<ImageSource> getSource ();
-    
+
     bool setSink (std::shared_ptr<SinkInterface>);
-    
+
     std::shared_ptr<SinkInterface> getSink ();
 
     // @brief callback for ImageSource
     void pushImage (std::shared_ptr<MemoryBuffer>);
-    
+
 private:
 
     VideoFormat output_format;
@@ -80,7 +80,7 @@ private:
     std::vector<VideoFormatDescription> available_output_formats;
 
     PIPELINE_STATUS status;
-    
+
     std::shared_ptr<ImageSource> source;
     std::shared_ptr<SinkInterface> sink;
 
@@ -112,7 +112,7 @@ private:
      * requires defined source
      */
     void index_output_formats ();
-    
+
     void distributeProperties ();
 
     void create_input_format (uint32_t fourcc);
@@ -130,7 +130,7 @@ private:
     bool add_interpretation_filter ();
 
     bool allocate_conversion_buffer ();
-    
+
     bool create_pipeline ();
 
     bool start_playing ();
@@ -144,5 +144,3 @@ private:
 } /* namespace tis_imaging */
 
 #endif /* PIPELINEMANAGER_H_ */
-
-

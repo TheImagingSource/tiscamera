@@ -22,7 +22,7 @@ static bool load_single_property (TiXmlElement* prop_node,
         };
 
 
-    
+
     for (TiXmlAttribute* attr = prop_node->FirstAttribute(); attr != nullptr; attr = attr->Next())
     {
         if (strcmp(attr->Name(), "name") == 0)
@@ -31,7 +31,7 @@ static bool load_single_property (TiXmlElement* prop_node,
         }
         else if (strcmp(attr->Name(), "type") == 0)
         {
-            
+
         }
         else
         {
@@ -47,7 +47,7 @@ static bool load_single_property (TiXmlElement* prop_node,
         // TODO: error prop not found
         return false;
     }
-    
+
     for (TiXmlNode* pChild = prop_node->FirstChild(); pChild != nullptr; pChild = pChild->NextSibling())
     {
         switch (pChild->Type())
@@ -63,10 +63,10 @@ static bool load_single_property (TiXmlElement* prop_node,
             }
             default:
                 break;
-        } 
+        }
     }
-    
-    
+
+
     return true;
 }
 
@@ -94,9 +94,9 @@ static bool load_property_values (TiXmlNode* properties_node,
             }
             default:
                 break;
-        } 
+        }
     }
-    
+
     return true;
 }
 
@@ -115,7 +115,7 @@ bool tis_imaging::load_xml_description (const std::string& filename,
         // lastError = Error("Filename is not a loadable XML configuration.", ENOENT);
         return false;
     }
-    
+
     if (device.getSerial().compare("") == 0)
     {
         return false;
@@ -123,11 +123,11 @@ bool tis_imaging::load_xml_description (const std::string& filename,
 
 
     TiXmlNode* pChild = nullptr;
-    
-    load_property_values(pChild, properties);
-    
 
-    
+    load_property_values(pChild, properties);
+
+
+
     return false;
 }
 
@@ -140,9 +140,9 @@ bool tis_imaging::save_xml_description (const std::string& filename,
 
     // all allocated tinyxml elements will automatically be cleaned up
     // changing the implementation to raii can cause segmentation faults
-    
+
     CaptureDevice open_device = device;
-    
+
     TiXmlDocument doc;
 
     TiXmlDeclaration* decl = new TiXmlDeclaration ( "1.0", "", "" );

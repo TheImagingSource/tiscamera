@@ -15,9 +15,9 @@ class Property;
  */
 class PropertyImpl
 {
-    
+
 public:
-    
+
     virtual ~PropertyImpl () {};
 
     virtual bool isAvailable (const Property&) = 0;

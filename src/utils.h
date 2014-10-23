@@ -1,14 +1,14 @@
 
 #ifndef UTILS_H
 #define UTILS_H
- 
+
 #include "base_types.h"
 #include "Property.h"
 
 #include <string>
 #include <vector>
 #include <memory>
- 
+
 namespace tis_imaging
 {
 

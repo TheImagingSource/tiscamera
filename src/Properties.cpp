@@ -278,7 +278,7 @@ bool PropertyDouble::setValue (double new_value)
     {
         return false;
     }
-    
+
     tis_value_double& d = this->prop.value.d;
 
     if (d.min > new_value || d.max < new_value)

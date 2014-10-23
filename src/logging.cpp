@@ -251,5 +251,3 @@ void tis_logging (const char* module, enum TIS_LOG_LEVEL level, const char* func
 
     va_end(args);
 }
-
-

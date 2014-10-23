@@ -37,17 +37,17 @@ public:
     bool setProperty (const Property&);
 
     bool getProperty (Property&);
-    
+
     bool setVideoFormat (const VideoFormat&);
 
     bool validateVideoFormat (const VideoFormat&);
-    
+
     VideoFormat getActiveVideoFormat () const;
 
     std::vector<VideoFormatDescription> getAvailableVideoFormats ();
 
     bool setFramerate (double framerate);
-    
+
     double getFramerate ();
 
     bool setSink (std::shared_ptr<SinkInterface>);
@@ -65,13 +65,13 @@ public:
 private:
 
     std::thread work_thread;
-    
+
     CaptureDevice device;
 
     int fd;
 
     VideoFormat active_video_format;
-    
+
     std::vector<VideoFormatDescription> available_videoformats;
     bool emulate_bayer;
     uint32_t emulated_fourcc;
@@ -101,7 +101,7 @@ private:
     struct property_description
     {
         int id; // v4l2 identification
-        std::shared_ptr<Property> prop; 
+        std::shared_ptr<Property> prop;
     } ;
 
     static const int EMULATED_PROPERTY = -1;
@@ -130,7 +130,7 @@ private:
 
     size_t current_buffer;
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
-    
+
     std::shared_ptr<SinkInterface> listener;
 
     void stream ();

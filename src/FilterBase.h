@@ -33,10 +33,7 @@ struct FilterDescription
     // 0 == all types
     std::vector<uint32_t> output_fourcc;
     std::vector<uint32_t> input_fourcc;
-    
-    // std::vector<VideoFormatDescription> 
 };
-
 
 
 class FilterBase
@@ -50,9 +47,9 @@ public:
     virtual bool transform (MemoryBuffer& in, MemoryBuffer& out ) = 0;
 
     virtual bool apply (std::shared_ptr<MemoryBuffer>) = 0;
-    
+
     virtual bool setStatus (PIPELINE_STATUS) = 0;
-    
+
     virtual PIPELINE_STATUS getStatus () const = 0;
 
     virtual bool setVideoFormat (const VideoFormat& in, const VideoFormat& out) = 0;
@@ -75,7 +72,7 @@ extern "C"
     // These two functions serve as entry points to the filter
     // They are used for construction/descruction of your filter
     // The rest can be deduced at runtime
-    
+
     // FilterBase* create ();
 
     // void destroy (FilterBase*);
@@ -83,7 +80,7 @@ extern "C"
     FB* create ();
 
     void destroy (FB*);
-    
+
 }
 
 // } /* namespace tis_imaging */

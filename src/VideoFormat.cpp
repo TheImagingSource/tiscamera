@@ -121,7 +121,7 @@ std::string VideoFormat::toString () const
     s += "height="    + std::to_string(format.height)  + ",";
     s += "binning="   + std::to_string(format.binning) + ",";
     s += "framerate=" + std::to_string(format.framerate);
-        
+
     return s;
 }
 
@@ -141,7 +141,7 @@ bool VideoFormat::fromString (const std::string& desc)
             tis_log(TIS_LOG_ERROR, "Received faulty VideoFormat String \"%s\"", v.c_str());
             return false;
         }
-        
+
         if (val[0].compare("format") == 0)
         {
             tis_log(TIS_LOG_ERROR, "format is  \"%s\"", val[1].c_str());
@@ -172,10 +172,10 @@ bool VideoFormat::fromString (const std::string& desc)
     }
 
     this->format = f;
-    
+
     return true;
 }
-    
+
 
 uint64_t VideoFormat::getRequiredBufferSize () const
 {

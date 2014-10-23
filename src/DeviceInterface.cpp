@@ -63,5 +63,3 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
     }
     return nullptr;
 }
-
-

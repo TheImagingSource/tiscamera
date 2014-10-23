@@ -18,18 +18,8 @@ inline img::img_descriptor to_img_desc (tis_imaging::MemoryBuffer& buf)
                                b.format.width,
                                b.format.height,
                                b.pitch};
-    
+
     return img;
 }
 
 #endif /* DUTILS_HEADER */
-
-
-
-
-
-
-
-
-
-

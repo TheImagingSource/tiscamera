@@ -6,9 +6,9 @@
 
 #include "image_base_defines.h"
 
-#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h): (val) )  
+#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h): (val) )
 
-#ifndef mmioFOURCC    
+#ifndef mmioFOURCC
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )                \
 	( (uint32_t)(unsigned char)(ch0) | ( (uint32_t)(unsigned char)(ch1) << 8 ) |    \
 	( (uint32_t)(unsigned char)(ch2) << 16 ) | ( (uint32_t)(unsigned char)(ch3) << 24 ) )
@@ -31,7 +31,7 @@
 
 #define FOURCC_Y444			mmioFOURCC('Y', '4', '4', '4')  // TIYUV: 1394 conferencing camera 4:4:4 mode 0, 24 bit
 #define FOURCC_Y411			mmioFOURCC('Y', '4', '1', '1')  // TIYUV: 1394 conferencing camera 4:1:1 mode 2, 12 bit
-#define FOURCC_B800			mmioFOURCC('B', 'Y', '8', ' ')  
+#define FOURCC_B800			mmioFOURCC('B', 'Y', '8', ' ')
 #define FOURCC_Y422			FOURCC_UYVY
 
 #define FOURCC_BGGR8		mmioFOURCC('B', 'A', '8', '1') /*  8  BGBG.. GRGR.. */
@@ -54,15 +54,15 @@
 #define FOURCC_GRBG16		mmioFOURCC('B', 'A', '1', '6') /* 16  GRGR.. BGBG.. */
 #define FOURCC_RGGB16		mmioFOURCC('R', 'G', '1', '6') /* 16  RGRG.. GBGB.. */
 
-#define FOURCC_I420			mmioFOURCC('I', '4', '2', '0') 
-#define FOURCC_YV16			mmioFOURCC('Y', 'V', '1', '6')		// YUV planar Y plane, U plane, V plane. U and V sub sampled in horz 
-//#define FOURCC_YV12			mmioFOURCC('Y', 'V', '1', '2') 
+#define FOURCC_I420			mmioFOURCC('I', '4', '2', '0')
+#define FOURCC_YV16			mmioFOURCC('Y', 'V', '1', '6')		// YUV planar Y plane, U plane, V plane. U and V sub sampled in horz
+//#define FOURCC_YV12			mmioFOURCC('Y', 'V', '1', '2')
 #define FOURCC_YUV8PLANAR	mmioFOURCC('Y', 'U', '8', 'p')		// unofficial, YUV planar, Y U V planes, all 8 bit, no sub-sampling
 #define FOURCC_YUV16PLANAR	mmioFOURCC('Y', 'U', 'h', 'p')		// unofficial, YUV planar, Y U V planes, all 16 bit, no sub-sampling
 #define FOURCC_YUV8			mmioFOURCC('Y', 'U', 'V', '8')      // 8 bit, U Y V _ ordering, 32 bit
 
-#define FOURCC_H264			mmioFOURCC('H', '2', '6', '4') 
-#define FOURCC_MJPG			mmioFOURCC('M', 'J', 'P', 'G') 
+#define FOURCC_H264			mmioFOURCC('H', '2', '6', '4')
+#define FOURCC_MJPG			mmioFOURCC('M', 'J', 'P', 'G')
 
 namespace img
 {
@@ -128,7 +128,7 @@ namespace img
 	struct img_descriptor
 	{
 		byte*			pData;
-		unsigned int	length;	
+		unsigned int	length;
 
 		uint32_t		type;	// this must be at least 32 bit wide
 

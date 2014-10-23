@@ -58,7 +58,7 @@ if (BUILD_ARAVIS)
 
   list(APPEND srcs AravisDevice.cpp)
   list(APPEND srcs aravis_utils.cpp)
-  
+
   add_definitions(-DHAVE_ARAVIS)
 
   # TODO replace with find module
@@ -66,7 +66,7 @@ if (BUILD_ARAVIS)
   pkg_check_modules(ARAVIS REQUIRED aravis-0.4)
   include_directories(${ARAVIS_INCLUDE_DIRS})
   link_directories(${ARAVIS_LIBRARY_DIRS})
-  
+
 endif (BUILD_ARAVIS)
 
 set(cflags "-fpic -w -Wall -Wextra -pedantic -Wundef -Wshadow")

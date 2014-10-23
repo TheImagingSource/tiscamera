@@ -29,17 +29,14 @@ public:
     bool isAvailable (const Property&);
 
     bool setProperty (const Property&);
-    
+
     bool getProperty (Property&);
 
-    
-    
     bool setVideoFormat (const VideoFormat&);
 
     VideoFormat getActiveVideoFormat () const;
 
     std::vector<VideoFormatDescription> getAvailableVideoFormats ();
-
 
     bool setSink (std::shared_ptr<SinkInterface>);
 
@@ -55,7 +52,7 @@ private:
     static void callback(ArvStream* stream, void* user_data);
 
     CaptureDevice device;
-    
+
     ArvCamera* arv_camera;
 
     std::shared_ptr<SinkInterface> external_sink;
@@ -84,9 +81,8 @@ private:
     };
 
     std::vector<property_mapping> properties;
-    
+
     VideoFormat active_video_format;
-    // std::shared_ptr<> buffer;
 
     std::vector<VideoFormatDescription> available_videoformats;
 
@@ -108,4 +104,3 @@ private:
 } /* namespace tis_imaging */
 
 #endif /* ARAVISDEVICE_H */
-

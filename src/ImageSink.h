@@ -40,13 +40,3 @@ private:
 
 
 #endif /* IMAGESINK_H_ */
-
-
-
-
-
-
-
-
-
-

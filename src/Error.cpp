@@ -35,4 +35,3 @@ Error::Error (int errno):
 Error::Error (const Error& e)
     : m_errno(e.m_errno), m_Enum(e.m_Enum), m_String(e.m_String)
 {}
-

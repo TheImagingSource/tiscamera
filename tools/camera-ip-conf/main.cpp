@@ -61,7 +61,7 @@ void printHelp ()
               << "    --name       -n          - user defined name of camera\n"
               << "    --mac        -m          - MAC of camera\n"
               << std::endl;
-    
+
     std::cout << "Examples:\n\n"
 
               << "    tis_network set gateway=192.168.0.1 -s 46210199\n"
@@ -133,7 +133,6 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
             else
             {
-                // TODO allow it to write camera before other args so that -c does not break it
                 std::cout << "Unknown parameter \"" << arg << "\"\n" << std::endl;
                 return;
             }

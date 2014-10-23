@@ -8,7 +8,7 @@
 
 using namespace tis_imaging;
 
-    
+
 CaptureDevice::CaptureDevice (const struct tis_device_info& device_desc)
     : device(device_desc)
 {}
@@ -85,7 +85,7 @@ std::vector<CaptureDevice> tis_imaging::getAvailableCaptureDevices ()
     int ret = tis_get_camera_list(info.data(), count);
 
     auto vec = std::vector<CaptureDevice>();
-    
+
     if (ret < -1)
     {
         return vec;
@@ -98,4 +98,3 @@ std::vector<CaptureDevice> tis_imaging::getAvailableCaptureDevices ()
 
     return vec;
 }
-

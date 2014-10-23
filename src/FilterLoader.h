@@ -50,7 +50,7 @@ private:
     };
 
     std::vector<filter_desc> filter_collection;
-        
+
     std::vector<std::shared_ptr<FilterBase>> loaded_filter;
 
 };
@@ -58,13 +58,3 @@ private:
 } /* namespace tis_imaging */
 
 #endif /* FILTERLOADER_H_ */
-
-
-
-
-
-
-
-
-
-

@@ -289,4 +289,3 @@ std::shared_ptr<Property> tis_imaging::find_property (std::vector<std::shared_pt
 
     return nullptr;
 }
-

@@ -16,11 +16,11 @@ class VideoFormat
 {
 
 public:
-    
+
     VideoFormat ();
-    
+
     explicit VideoFormat (const struct video_format&);
-    
+
     VideoFormat (const VideoFormat&);
 
     VideoFormat& operator= (const VideoFormat&);
@@ -54,11 +54,11 @@ public:
     uint64_t getRequiredBufferSize () const;
 
     uint32_t getPitchSize () const;
-    
+
 private:
 
     struct video_format format;
-    
+
 };
 
 

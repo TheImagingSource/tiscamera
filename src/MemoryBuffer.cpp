@@ -66,7 +66,7 @@ bool MemoryBuffer::isLocked ()
 void MemoryBuffer::unlock ()
 {
     if (lock_count > 0)
-    {    
+    {
         lock_count--;
     }
 }
@@ -76,4 +76,3 @@ void MemoryBuffer::forceUnlock ()
 {
     lock_count = 0;
 }
-    

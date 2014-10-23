@@ -125,7 +125,6 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
         {
             char msg[1024];
 
-            // TODO maybe replace with recv
             struct sockaddr_storage sender = sockaddr_storage();
             socklen_t sendsize = 0;
 

@@ -477,7 +477,6 @@ static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtde
 {
 
     new_desc = fmtdesc;
-    // TODO: incorporate image_transform_base.h for fourcc definitions
     if (strcmp((const char*)fmtdesc.description, "47425247-0000-0010-8000-00aa003") == 0)
     {
         new_desc.pixelformat = FOURCC_GBRG8;

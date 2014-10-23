@@ -37,7 +37,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
     libusb_device** devs;
 
     int cnt = libusb_get_device_list(this->session->get_session(), &devs);
-    
+
     if (cnt < 0)
     {
         throw std::runtime_error("Unable to retrieve device list. " + std::to_string(cnt));
@@ -45,7 +45,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
 
     std::vector<device_info> ret;
     ret.reserve(20);
-    
+
     for (ssize_t i = 0; i < cnt; i++)
     {
         libusb_device_descriptor desc;
@@ -70,8 +70,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
         {
             throw std::runtime_error("Unable to open device.");
         }
-        
-        // TODO find alternative to root requirements
+
         libusb_get_string_descriptor_ascii(dh, desc.iManufacturer, (unsigned char*)d.manufacturer, sizeof(d.manufacturer));
         libusb_get_string_descriptor_ascii(dh, desc.iProduct, (unsigned char*)d.product, sizeof(d.product));
         libusb_get_string_descriptor_ascii(dh, desc.iSerialNumber, (unsigned char*)d.serial, sizeof(d.serial));
@@ -81,7 +80,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
     }
 
     libusb_free_device_list(devs, 1);
-    
+
     return ret;
 }
 
@@ -113,7 +112,7 @@ std::shared_ptr<UsbCamera> UsbHandler::open_camera (std::string serial_number)
             return std::make_shared<Usb2Camera>(this->session, d);
         default:
             return nullptr;
-    } 
+    }
 }
 
 }; /* namespace tis */

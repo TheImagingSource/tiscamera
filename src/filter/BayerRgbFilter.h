@@ -15,15 +15,15 @@ class BayerRgbFilter : public FilterBase
 {
 public:
     BayerRgbFilter ();
-    
+
     struct FilterDescription getDescription () const;
 
     // bool init (const VideoFormat&);
-    
+
     bool transform (MemoryBuffer& in, MemoryBuffer& out);
 
     bool apply (std::shared_ptr<MemoryBuffer>);
-    
+
     bool setStatus (PIPELINE_STATUS);
 
     PIPELINE_STATUS getStatus () const;
@@ -33,7 +33,7 @@ public:
     bool setVideoFormat (const VideoFormat&);
 
     bool setVideoFormat (const VideoFormat& in, const VideoFormat& out);
-    
+
     void setDeviceProperties (std::vector<std::shared_ptr<Property>>);
 
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
@@ -45,7 +45,7 @@ private:
 
     VideoFormat input_format;
     VideoFormat output_format;
-    
+
 };
 
 
@@ -56,13 +56,12 @@ extern "C"
    // FilterBase* create ();
 
     // void destroy (FilterBase*);
-    
+
     FB* create ();
 
     void destroy (FB*);
-    
+
 }
 
 }
 #endif /* _BAYERRGBFILTER_H_ */
-

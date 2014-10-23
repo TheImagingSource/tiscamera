@@ -16,9 +16,9 @@ class MemoryBuffer
 public:
 
     MemoryBuffer (const struct image_buffer&);
-    
+
     MemoryBuffer () = delete;
-    
+
     ~MemoryBuffer ();
 
     /**
@@ -27,7 +27,7 @@ public:
     image_buffer getImageBuffer ();
 
     void setImageBuffer (image_buffer);
-    
+
     /**
      * @return Pointer to actual image data
      */
@@ -57,13 +57,13 @@ public:
      * Forcefully reset lock count to 0
      */
     void forceUnlock ();
-    
+
 private:
 
     struct image_buffer buffer;
 
     unsigned int lock_count;
-    
+
 };
 
 

@@ -17,11 +17,11 @@ namespace tis_imaging
 
 class Grabber
 {
-    
+
 public:
-    
+
     explicit Grabber ();
-    
+
     ~Grabber ();
 
 
@@ -30,13 +30,13 @@ public:
     bool save_configuration (const std::string& filename);
 
     // device related:
-    
+
     bool openDevice (const CaptureDevice&);
 
     bool isDeviceOpen () const;
 
     CaptureDevice getDevice() const;
-    
+
     bool closeDevice ();
 
     // property related:
@@ -61,8 +61,6 @@ private:
 
     std::shared_ptr<PipelineManager> pipeline;
 
-    // GrabberImpl* impl;
-    
     CaptureDevice open_device;
     VideoFormat active_format;
 
@@ -80,4 +78,3 @@ private:
 } /* namespace tis_imaging */
 
 #endif /* GRABBER_H_ */
-
