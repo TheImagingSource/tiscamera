@@ -27,6 +27,7 @@ option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_USB      "Include support for USB cameras"      ON )
 option(BUILD_FIREWIRE "Include support for firewire devices" OFF)
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
+option(BUILD_GUI      "Build gui versions of tools"          ON)
 
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -flto -pthread")
@@ -37,7 +38,11 @@ if (BUILD_USB)
 endif (BUILD_USB)
 
 add_subdirectory(src)
-add_subdirectory(vision)
+
+if (BUILD_GUI)
+  add_subdirectory(vision)
+endif (BUILD_GUI)
+
 add_subdirectory(data)
 
 

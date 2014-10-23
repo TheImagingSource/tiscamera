@@ -15,5 +15,6 @@ target_link_libraries(camera-ip-conf-cli ${LIBZIP_LIBRARY})
 
 install(TARGETS camera-ip-conf-cli DESTINATION bin)
 
-# TODO: make gui optional
-add_subdirectory(gui)
+if (BUILD_GUI)
+  add_subdirectory(gui)
+endif (BUILD_GUI)
