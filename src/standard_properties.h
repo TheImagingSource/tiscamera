@@ -87,22 +87,22 @@ static std::vector<struct control_reference> ctrl_reference_table =
     },
     {
         .id = PROPERTY_GAIN_RED,
-        "Gain Red",
+        .name = "Gain Red",
         .type_to_use = PROPERTY_TYPE_INTEGER,
     },
     {
         .id = PROPERTY_GAIN_GREEN,
-        "Gain Green",
+        .name = "Gain Green",
         .type_to_use = PROPERTY_TYPE_INTEGER,
     },
     {
         .id = PROPERTY_GAIN_BLUE,
-        "Gain Blue",
+        .name = "Gain Blue",
         .type_to_use = PROPERTY_TYPE_INTEGER,
     },
     {
         .id = PROPERTY_GAIN_AUTO,
-        "Gain Auto",
+        .name = "Gain Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
     },
     {
