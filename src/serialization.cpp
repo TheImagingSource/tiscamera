@@ -11,6 +11,58 @@
 using namespace tis_imaging;
 
 
+bool tis_imaging::export_device_list (const std::vector<CaptureDevice>& device_list,
+                                      const std::string& filename)
+{
+    // all allocated tinyxml elements will automatically be cleaned up
+    // changing the implementation to raii can cause segmentation faults
+
+    TiXmlDocument doc;
+
+    TiXmlDeclaration* decl = new TiXmlDeclaration ( "1.0", "", "" );
+    doc.LinkEndChild( decl );
+
+    TiXmlElement* devices_node = new TiXmlElement ("devices");
+    doc.LinkEndChild( devices_node );
+
+    for (const auto& open_device : device_list)
+    {
+        TiXmlElement* device_node = new TiXmlElement ("device");
+        devices_node->LinkEndChild( device_node );
+
+        TiXmlElement* device_name_node = new TiXmlElement( "device_name" );
+        device_node->LinkEndChild( device_name_node );
+
+        TiXmlText* name_text = new TiXmlText(open_device.getName().c_str());
+        device_name_node->LinkEndChild( name_text );
+
+        TiXmlElement* device_id_node = new TiXmlElement( "serialnumber" );
+        device_node->LinkEndChild( device_id_node );
+
+        TiXmlText* id_text = new TiXmlText(open_device.getSerial().c_str());
+        device_id_node->LinkEndChild( id_text );
+
+        TiXmlElement* device_identifier_node = new TiXmlElement( "identifier" );
+        device_node->LinkEndChild( device_identifier_node );
+
+        TiXmlText* identifier_text = new TiXmlText(open_device.getIdentifier().c_str());
+        device_identifier_node->LinkEndChild( identifier_text );
+
+
+        TiXmlElement* device_type_node = new TiXmlElement( "type" );
+        device_node->LinkEndChild( device_type_node );
+
+        TiXmlText* type_text = new TiXmlText(open_device.getDeviceTypeAsString().c_str());
+        device_type_node->LinkEndChild( type_text );
+    }
+
+    doc.SaveFile( filename.c_str() );
+
+
+    return true;
+}
+
+
 static bool load_single_property (TiXmlElement* prop_node,
                                   std::vector<std::shared_ptr<Property>> properties)
 {
