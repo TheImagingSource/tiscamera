@@ -548,7 +548,10 @@ std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
            udev_device_get_sysattr_value() are UTF-8 encoded. */
 
         // TODO: no hard coded numbers find more general approach
-        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), "199e") == 0)
+
+        static const char* TIS_VENDOR_ID_STRING = "199e";
+
+        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), TIS_VENDOR_ID_STRING) == 0)
         {
             tis_device_info info = {};
             info.type = TIS_DEVICE_TYPE_V4L2;
