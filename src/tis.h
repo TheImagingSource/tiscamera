@@ -1,16 +1,13 @@
 
 
 
-#ifndef TIS_H_
-#define TIS_H_
+#ifndef TIS_H
+#define TIS_H
 
-
+#include "base_types.h"
 #include "Grabber.h"
 #include "CaptureDevice.h"
 #include "Error.h"
-#include "logging.h"
-#include "utils.h"
+#include "serialization.h"
 
-
-
-#endif /* TIS_H_ */
+#endif /* TIS_H */

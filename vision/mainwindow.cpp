@@ -83,7 +83,7 @@ void MainWindow::my_captureDevice_selected (tis_imaging::CaptureDevice device)
 
     if (available_formats.empty())
     {
-        tis_log(TIS_LOG_ERROR, "No available formats!");
+        std::cerr <<  "No available formats!" << std::endl;
         return;
     }
 
@@ -250,18 +250,12 @@ void MainWindow::callback (MemoryBuffer* buffer, void* user_data)
 
 void MainWindow::on_format_box_currentIndexChanged (int index)
 {
-    tis_log(TIS_LOG_INFO, "New format index %d", index);
+    std::cout <<  "New format index " << index << std::endl;
 
     if (index > available_formats.size())
     {
         std::cerr << index << " is an illegal index for format selection." << std::endl;
         return;
-    }
-
-    for (VideoFormatDescription d: available_formats)
-    {
-        std::cout << "Format: " << fourcc2description(d.getFormatDescription().fourcc) << std::endl;
-
     }
 
     VideoFormatDescription f = available_formats.at(index);
