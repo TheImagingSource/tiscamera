@@ -57,13 +57,6 @@ std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
 }
 
 
-
-bool V4l2Device::isAvailable (const Property&)
-{
-    return false;
-}
-
-
 bool V4l2Device::setProperty (const Property& new_property)
 {
     auto f = [&new_property] (const property_description& d)

@@ -26,8 +26,6 @@ public:
 
     std::vector<std::shared_ptr<Property>> getProperties () ;
 
-    bool isAvailable (const Property&);
-
     bool setProperty (const Property&);
 
     bool getProperty (Property&);

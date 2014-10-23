@@ -24,12 +24,6 @@ PropertyHandler::PropertyHandler ()
 {}
 
 
-bool PropertyHandler::isAvailable (const Property&)
-{
-    return true;
-}
-
-
 bool PropertyHandler::setProperty (const Property& prop)
 {
     if (prop.getName().compare("Exposure Auto") == 0)

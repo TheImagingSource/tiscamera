@@ -281,12 +281,6 @@ bool Property::setInactive (bool is_disabled)
 }
 
 
-bool Property::isAvailable (const Property&)
-{
-    return false;
-}
-
-
 bool Property::setProperty (const Property&)
 {
     if (impl.expired())

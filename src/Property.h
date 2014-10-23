@@ -78,7 +78,6 @@ protected:
     bool setInactive (bool);
 
     // PropertyImple interface
-    bool isAvailable (const Property&);
     bool setProperty (const Property&);
     bool getProperty (Property&);
 

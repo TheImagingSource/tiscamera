@@ -67,12 +67,6 @@ std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
 }
 
 
-bool AravisDevice::isAvailable (const Property&)
-{
-    return false;
-}
-
-
 bool AravisDevice::setProperty (const Property& p)
 {
     auto f = [p] (const property_mapping& m)

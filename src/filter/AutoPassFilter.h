@@ -17,8 +17,6 @@ public:
 
     PropertyHandler ();
 
-    bool isAvailable (const Property&);
-
     bool setProperty (const Property&);
 
     bool getProperty (Property&);

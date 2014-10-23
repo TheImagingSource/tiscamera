@@ -20,8 +20,6 @@ public:
 
     virtual ~PropertyImpl () {};
 
-    virtual bool isAvailable (const Property&) = 0;
-
     /**
      * Set internal properties to the values described in parameter
      * @return true is given property values where successfully applied; else false
