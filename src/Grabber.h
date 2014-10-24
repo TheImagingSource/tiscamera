@@ -25,18 +25,50 @@ public:
     ~Grabber ();
 
 
+    /**
+     * @brief Load xml configuration and apply it to device
+     * @param filename - string containing the filename of the xml description
+     * @return true on success; on error Error will be set
+     */
     bool load_configuration (const std::string& filename);
 
+
+    /**
+     * @brief Store current device configuration in xml
+     * @param filename - string containing the filename under which the xml shall be saved
+     * @return true on success; on error Error will be set
+     */
     bool save_configuration (const std::string& filename);
 
     // device related:
 
-    bool openDevice (const CaptureDevice&);
 
+    /**
+     * Open the described device for interaction
+     * @param device - CaptureDevice description of the device that shall be opened
+     * @return true on success; on error Error will be set
+     */
+    bool openDevice (const CaptureDevice& device);
+
+
+    /**
+     * Check if device is currently open
+     * @return true if a device is open
+     */
     bool isDeviceOpen () const;
 
+
+    /**
+     * Return description of current device
+     * @return description of the currently open device. empty if no device is open
+     */
     CaptureDevice getDevice() const;
 
+
+    /**
+     * Closes the open device. All streams will be stopped.
+     * @return true on success; on error Error will be set
+     */
     bool closeDevice ();
 
     // property related:

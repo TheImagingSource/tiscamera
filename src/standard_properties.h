@@ -143,7 +143,6 @@ static std::vector<struct control_reference> ctrl_reference_table =
     },
     {
         .id = PROPERTY_OFFSET_X,
-        // TODO extract extension unit ids
         .name = "Offset X",
         .type_to_use = PROPERTY_TYPE_INTEGER,
     },

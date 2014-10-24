@@ -137,8 +137,8 @@ void AutoPassFilter::update_params ()
         params.iris.val = iris->getValue();
         params.iris.do_auto = handler->prop_auto_iris->getValue();
         params.iris.flags = 0;
-        params.iris.camera_fps = 30.0;   // TODO: automate
-        params.iris.is_pwm_iris = false; // TODO: automate
+        params.iris.camera_fps = 30.0;   // not used
+        params.iris.is_pwm_iris = false; // not used
     }
 
     if (handler->prop_auto_wb != nullptr)
