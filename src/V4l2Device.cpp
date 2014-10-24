@@ -1022,6 +1022,17 @@ void V4l2Device::init_mmap_buffers ()
 }
 
 
+static bool reqbufs_mmap (int fd, v4l2_requestbuffers &reqbuf, uint32_t buftype, int count)
+{
+	memset(&reqbuf, 0, sizeof (reqbuf));
+	reqbuf.type = buftype;
+	reqbuf.memory = V4L2_MEMORY_MMAP;
+	reqbuf.count = count;
+
+	return tis_xioctl(fd, VIDIOC_REQBUFS, &reqbuf) >= 0;
+}
+
+
 void V4l2Device::free_mmap_buffers ()
 {
     if (buffers.empty())
@@ -1049,6 +1060,11 @@ void V4l2Device::free_mmap_buffers ()
         }
     }
 
+	uint32_t buftype = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	v4l2_requestbuffers reqbufs;
+
+    reqbufs_mmap(fd, reqbufs, buftype, 1);  // videobuf workaround
+    reqbufs_mmap(fd, reqbufs, buftype, 0);
 }
 
 
