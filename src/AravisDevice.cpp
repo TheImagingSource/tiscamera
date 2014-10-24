@@ -653,25 +653,28 @@ void AravisDevice::iterate_genicam (const char* feature)
             // TODO: implement handling
         }
         // is part of the format description
-        else if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
-        {
-            // index_genicam_format(camera, node, frmt_mapping);
-            this->format_nodes.push_back(node);
-        }
         else
         {
-            property_mapping m;
-
-            m.arv_ident = feature;
-            m.prop = createProperty(arv_camera, node, shared_from_this());
-
-            if (m.prop == nullptr)
+            if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
             {
-                tis_log(TIS_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
-                return;
+                // index_genicam_format(camera, node, frmt_mapping);
+                this->format_nodes.push_back(node);
             }
+            else
+            {
+                property_mapping m;
 
-            properties.push_back(m);
+                m.arv_ident = feature;
+                m.prop = createProperty(arv_camera, node, shared_from_this());
+
+                if (m.prop == nullptr)
+                {
+                    tis_log(TIS_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+                    return;
+                }
+
+                properties.push_back(m);
+            }
         }
     }
 }
