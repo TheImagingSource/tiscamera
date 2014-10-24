@@ -36,6 +36,7 @@ DeviceIndex::DeviceIndex ()
 {
     continue_thread = true;
     work_thread = std::thread(&DeviceIndex::run, this);
+    device_list = std::vector<CaptureDevice>();
 }
 
 
@@ -51,16 +52,16 @@ DeviceIndex::~DeviceIndex ()
 
 void DeviceIndex::updateDeviceList ()
 {
-    std::vector<CaptureDevice> tmp_dev_list (10);
+    std::vector<CaptureDevice> tmp_dev_list;
 
 #if HAVE_ARAVIS
     auto aravis_dev_list = get_aravis_device_list();
-    tmp_dev_list.insert(aravis_dev_list.begin(), aravis_dev_list.end(), tmp_dev_list.end());
+    tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
 #endif
 
 #if HAVE_USB
     auto v4l2_dev_list = get_v4l2_device_list();
-    tmp_dev_list.insert(v4l2_dev_list.begin(), v4l2_dev_list.end(), tmp_dev_list.end());
+    tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
 #endif
 
     std::mutex mtx;
@@ -69,7 +70,7 @@ void DeviceIndex::updateDeviceList ()
 
     device_list.clear();
 
-    device_list.insert(tmp_dev_list.begin(), tmp_dev_list.end(), device_list.end());
+    device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
 
     mtx.unlock();
 }
@@ -85,7 +86,7 @@ void DeviceIndex::run ()
 }
 
 
-std::shared_ptr<DeviceIndex> getDeviceIndex ()
+std::shared_ptr<DeviceIndex> tis_imaging::getDeviceIndex ()
 {
     return std::make_shared<DeviceIndex>();
 }
