@@ -43,6 +43,11 @@ int tis_get_usb_camera_count ();
 int tis_get_usb_camera_list (struct tis_device_info* ptr, unsigned int array_size);
 
 
+/**
+ * @name get_v4l2_device_list
+ * @brief lists all supported v4l2 devices
+ * @return vector containing all found v4l2 devices
+ */
 std::vector<CaptureDevice> get_v4l2_device_list ();
 
 } /* namespace tis_imaging */
