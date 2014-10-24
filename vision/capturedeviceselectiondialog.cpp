@@ -5,7 +5,8 @@
 
 CaptureDeviceSelectionDialog::CaptureDeviceSelectionDialog (QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CaptureDeviceSelectionDialog)
+    ui(new Ui::CaptureDeviceSelectionDialog),
+    device_watch_dog(tis_imaging::getDeviceIndex())
 {
     ui->setupUi(this);
 
@@ -58,11 +59,15 @@ void CaptureDeviceSelectionDialog::update_list ()
 
     while (run_thread)
     {
-        devices = tis_imaging::getAvailableCaptureDevices();
+        if (device_watch_dog == nullptr)
+            device_watch_dog = tis_imaging::getDeviceIndex();
+
+        devices = device_watch_dog->getDeviceList();
         ui->device_table->clear();
         this->ui->device_table->setRowCount(devices.size());
 
-        if (devices.empty())
+        bool is_empty = devices.empty();
+        if (is_empty)
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;
@@ -116,4 +121,3 @@ tis_imaging::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
 
     return *d;
 }
-

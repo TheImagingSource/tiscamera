@@ -35,7 +35,7 @@ private:
     Ui::CaptureDeviceSelectionDialog *ui;
 
     std::vector<tis_imaging::CaptureDevice> devices;
-
+    std::shared_ptr<tis_imaging::DeviceIndex> device_watch_dog;
     bool run_thread;
     std::thread work_thread;
 };
