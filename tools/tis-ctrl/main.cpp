@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <unistd.h>
 
 using namespace tis_imaging;
 
@@ -87,7 +88,9 @@ int main (int argc, char *argv[])
         }
         else if (arg == "-l" || arg == "--list")
         {
-            std::vector<CaptureDevice> device_list = getAvailableCaptureDevices();
+            auto index = getDeviceIndex();
+            sleep(3); // let camera detection do its magic
+            std::vector<CaptureDevice> device_list = index->getDeviceList();
             print_capture_devices(device_list);
             return 0;
         }
@@ -128,8 +131,13 @@ int main (int argc, char *argv[])
         std::cout << "No serial given!" << std::endl;
         return 1;
     }
-    
-    std::vector<CaptureDevice> device_list = getAvailableCaptureDevices();
+
+
+    auto device_index = getDeviceIndex();
+    sleep(3);
+    std::vector<CaptureDevice> device_list = device_index->getDeviceList();
+
+
 
     Grabber g;
 
