@@ -6,7 +6,7 @@
 
 #include "utils.h"
 #include "logging.h"
-
+#include "Error.h"
 
 #if HAVE_UDEV
 #include <libudev.h>
@@ -246,7 +246,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         }
         default:
         {
-            // TODO error
+            setError(Error("undefined property type", ENOENT));
             type = Property::UNDEFINED;
             break;
         }
@@ -380,9 +380,11 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         }
         default:
         {
-            tis_log(TIS_LOG_ERROR, "Unknown V4L2 Control type. %s", (char*)queryctrl->name);
-            // break;
-            // TODO: exception
+            std::string s = "Unknown V4L2 Control type: ";
+            s.append((char*)queryctrl->name);
+            tis_log(TIS_LOG_ERROR, s.c_str());
+            setError(Error(s, EIO));
+            break;
         }
     }
     return nullptr;
@@ -500,6 +502,7 @@ std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
     struct udev* udev = udev_new();
     if (!udev)
     {
+        setError(Error("Unable to create udev reference.", EIO));
         return device_list;
     }
 
@@ -535,7 +538,7 @@ std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
 
         if (!dev)
         {
-            // // TODO: error
+            setError(Error("udev_device_get_parent_with_subsystem_devtype failed", EIO));
             return device_list;
         }
 

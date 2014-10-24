@@ -12,6 +12,8 @@
 #include "logging.h"
 #include "device_discovery.h"
 
+#include "Error.h"
+
 #if HAVE_ARAVIS
 #include "aravis_utils.h"
 #endif
@@ -89,8 +91,6 @@ std::shared_ptr<DeviceIndex> getDeviceIndex ()
 }
 
 
-// TODO: something makes list return 0 cameras when aravis is not included
-
 int tis_get_camera_count ()
 {
     int count = 0;
@@ -115,7 +115,7 @@ int tis_get_camera_list (struct tis_device_info* user_list, unsigned int array_s
 
     if (count > array_size)
     {
-        // TODO: errno missing
+        setError(Error("Array not big enough", ENOENT));
         return -1;
     }
 

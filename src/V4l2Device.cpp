@@ -3,6 +3,7 @@
 #include "logging.h"
 #include "utils.h"
 #include "v4l2_utils.h"
+#include "Error.h"
 
 #include <algorithm>
 #include <unistd.h>
@@ -68,6 +69,7 @@ bool V4l2Device::setProperty (const Property& new_property)
 
     if (desc == properties.end())
     {
+        setError(Error("", 0));
         tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", new_property.getName().c_str());
         // TODO: failure description
         return false;
@@ -111,6 +113,7 @@ bool V4l2Device::setProperty (const Property& new_property)
         }
         else
         {
+            setError(Error("Emulated property not implemented", ENOENT));
             tis_log(TIS_LOG_ERROR, "Emulated property not implemented");
             return false;
         }
@@ -139,8 +142,9 @@ bool V4l2Device::getProperty (Property& p)
 
     if (desc == properties.end())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find Property \"%s\"", p.getName().c_str());
-        // TODO: failure description
+        std::string s = "Unable to find Property \"" + p.getName() + "\"";
+        tis_log(TIS_LOG_ERROR, "%s", s.c_str());
+        setError(Error(s, ENOENT));
         return false;
     }
 
@@ -198,6 +202,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
     if (ret < 0)
     {
         tis_log(TIS_LOG_ERROR, "Error while setting format '%s'", strerror(errno));
+        setError(Error("Unable to set format", errno));
         return false;
     }
 
@@ -304,6 +309,7 @@ bool V4l2Device::setFramerate (double framerate)
     parm.parm.capture.timeperframe.numerator = fps->numerator;
     parm.parm.capture.timeperframe.denominator = fps->denominator;
 
+    tis_log(TIS_LOG_DEBUG, "Setting framerate to '%f'", framerate);
     int ret = tis_xioctl( fd, VIDIOC_S_PARM, &parm );
 
     if (ret < 0)
@@ -422,9 +428,13 @@ bool V4l2Device::start_stream ()
         if (-1 == tis_xioctl(fd, VIDIOC_QBUF, &buf))
         {
             // TODO: error
-            tis_log(TIS_LOG_ERROR, "Unable to queue v4l2_buffer 'VIDIOC_QBUF'");
+            std::string s = "Unable to queue v4l2_buffer 'VIDIOC_QBUF'";
+            tis_log(TIS_LOG_ERROR, s.c_str());
+            setError(Error(s, EIO));
             return false;
         }
+        else
+            tis_log(TIS_LOG_DEBUG, "Successfully queued v4l2_buffer");
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -607,9 +617,9 @@ void V4l2Device::determine_active_video_format ()
 
     if (ret < 0)
     {
-        tis_log(TIS_LOG_ERROR, "Error while setting format");
+        tis_log(TIS_LOG_ERROR, "Error while querying video format");
 
-        // TODO error handling
+        setError(Error("VIDIOC_G_FMT failed", EIO));
         return;
     }
 
@@ -902,7 +912,7 @@ bool V4l2Device::get_frame ()
     if (ret == -1)
     {
         tis_log(TIS_LOG_ERROR, "Unable to dequeue buffer.");
-
+        setError(Error("Unable to dequeue buffer.", EIO));
         return false;
     }
 
@@ -926,6 +936,7 @@ void V4l2Device::init_mmap_buffers ()
     if (buffers.empty())
     {
         tis_log(TIS_LOG_ERROR, "Number of used buffers has to be >= 2");
+        setError(Error("Number of used buffers has to be >= 2", EINVAL));
         return;
     }
     else
@@ -962,7 +973,7 @@ void V4l2Device::init_mmap_buffers ()
 
         if (tis_xioctl(fd, VIDIOC_QUERYBUF, &buf) == -1)
         {
-            // TODO: error
+            setError(Error("Unable to query v4l2_buffer ", EIO));
             return;
         }
 

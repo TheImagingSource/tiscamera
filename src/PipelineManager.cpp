@@ -3,6 +3,8 @@
 
 #include "logging.h"
 
+#include "Error.h"
+
 #include <ctime>
 #include <cstring>
 #include <algorithm>
@@ -72,7 +74,7 @@ bool PipelineManager::setStatus (PIPELINE_STATUS s)
         else
         {
             status = PIPELINE_ERROR;
-            // TODO: error
+            setError(Error("Unable to create pipeline", EPIPE));
             return false;
         }
     }
@@ -106,8 +108,8 @@ void PipelineManager::index_output_formats ()
 {
     if (available_input_formats.empty() || available_filter.empty())
     {
-
-        return ;
+        setError(Error("No input formats. Unable to determine output formats", EPIPE));
+        return;
     }
 
     uint32_t fourcc = 0;
@@ -328,7 +330,7 @@ bool PipelineManager::validate_pipeline ()
     // check if pipeline is valid
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        // TODO: error
+        setError(Error("No image source", EPIPE));
         return false;
     }
 
@@ -387,7 +389,7 @@ bool PipelineManager::create_conversion_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        // TODO: error
+        setError(Error("No image source", EPIPE));
         return false;
     }
 
@@ -520,7 +522,7 @@ bool PipelineManager::create_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        // TODO: error
+        setError(Error("No image source", EPIPE));
         return false;
     }
 
@@ -604,7 +606,7 @@ bool PipelineManager::start_playing ()
     return true;
 
 error:
-
+    setError(Error("Unable to start playback", EPIPE));
     stop_playing();
     return false;
 }

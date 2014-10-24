@@ -2,6 +2,7 @@
 
 #include "serialization.h"
 
+#include "Error.h"
 #include "utils.h"
 
 #include <tinyxml.h>
@@ -87,7 +88,7 @@ static bool load_single_property (TiXmlElement* prop_node,
         }
         else
         {
-            // unknown
+            setError(Error("No known attribute with that name", ENOENT));
             return false;
         }
     }
@@ -96,7 +97,7 @@ static bool load_single_property (TiXmlElement* prop_node,
 
     if (iter == properties.end())
     {
-        // TODO: error prop not found
+        setError(Error("No corresponding property found.", ENOENT));
         return false;
     }
 
@@ -139,7 +140,6 @@ static bool load_property_values (TiXmlNode* properties_node,
                 bool ret = load_single_property(pChild->ToElement(), properties);
                 if (!ret)
                 {
-                    // TODO: error
                     return false;
                 }
                 break;
@@ -164,12 +164,15 @@ bool tis_imaging::load_xml_description (const std::string& filename,
 
     if (!ret)
     {
-        // lastError = Error("Filename is not a loadable XML configuration.", ENOENT);
+        setError(Error("Filename is not a loadable XML configuration.", ENOENT));
         return false;
     }
 
+    // TODO finish implementation
+
     if (device.getSerial().compare("") == 0)
     {
+        setError(Error("Xml configuration is not applicable to this device", ENXIO));
         return false;
     }
 
@@ -200,9 +203,6 @@ bool tis_imaging::save_xml_description (const std::string& filename,
     TiXmlDeclaration* decl = new TiXmlDeclaration ( "1.0", "", "" );
     doc.LinkEndChild( decl );
 
-    // TiXmlElement device_node ("device");
-    // doc.LinkEndChild( &device_node );
-
     TiXmlElement* device_node = new TiXmlElement ("device");
     doc.LinkEndChild( device_node );
 
@@ -215,7 +215,6 @@ bool tis_imaging::save_xml_description (const std::string& filename,
 
     TiXmlText* id_text = new TiXmlText(open_device.getSerial().c_str());
     device_id_node->LinkEndChild( id_text );
-
 
     TiXmlComment* comment2 = new TiXmlComment();
     comment2->SetValue(" active format settings " );
@@ -266,7 +265,6 @@ bool tis_imaging::save_xml_description (const std::string& filename,
     TiXmlElement* properties_node = new TiXmlElement( "properties" );
     device_node->LinkEndChild( properties_node );
 
-    // emulated properties
     for (const auto& dp : properties)
     {
         TiXmlElement* property_node = new TiXmlElement ( "property" );
