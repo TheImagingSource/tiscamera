@@ -65,13 +65,6 @@ private:
 
 }; /* class CaptureDevice */
 
-/**
- * @name getAvailableCaptureDevices
- * @brief return a vector of all identified capture devices
- * @return std::vector<CaptureDevice>; empty on error
- */
-std::vector<CaptureDevice> getAvailableCaptureDevices ();
-
 } /* namespace tis_imaging */
 
 #endif /* CAPTUREDEVICE_H_ */

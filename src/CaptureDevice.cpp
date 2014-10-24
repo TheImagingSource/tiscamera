@@ -75,26 +75,3 @@ std::string CaptureDevice::getDeviceTypeAsString () const
             return "";
     }
 }
-
-
-std::vector<CaptureDevice> tis_imaging::getAvailableCaptureDevices ()
-{
-    int count = tis_get_camera_count();
-
-    std::vector<struct tis_device_info> info(count);
-    int ret = tis_get_camera_list(info.data(), count);
-
-    auto vec = std::vector<CaptureDevice>();
-
-    if (ret < -1)
-    {
-        return vec;
-    }
-
-    for (const auto& i : info)
-    {
-        vec.push_back(CaptureDevice(i));
-    }
-
-    return vec;
-}
