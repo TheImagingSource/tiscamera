@@ -1,6 +1,8 @@
 
 #include "properties.h"
 
+#include "utils.h"
+
 #include <iostream>
 #include <iomanip>
 

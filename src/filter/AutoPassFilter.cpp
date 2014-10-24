@@ -3,6 +3,9 @@
 #include "AutoPassFilter.h"
 #include <tis.h>
 
+#include "logging.h"
+#include "utils.h"
+
 #include <dutils_header.h>
 #include <by8/by8_apply_whitebalance.h>
 

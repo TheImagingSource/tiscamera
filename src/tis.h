@@ -7,6 +7,7 @@
 #include "base_types.h"
 #include "Grabber.h"
 #include "CaptureDevice.h"
+#include "device_discovery.h"
 #include "Error.h"
 #include "serialization.h"
 
