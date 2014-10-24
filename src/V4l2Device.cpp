@@ -445,6 +445,8 @@ bool V4l2Device::start_stream ()
         return false;
     }
 
+    statistics = {};
+
     is_stream_on = true;
 
     tis_log(TIS_LOG_INFO, "Starting stream in work thread.");
@@ -882,6 +884,7 @@ void V4l2Device::stream ()
             if (ret == 0)
             {
                 tis_log(TIS_LOG_ERROR, "Timeout while waiting for new image buffer.");
+                statistics.frames_dropped++;
             }
 
             if (get_frame())
@@ -916,6 +919,8 @@ bool V4l2Device::get_frame ()
         return false;
     }
 
+    statistics.frame_count++;
+    buffers.at(buf.index)->setStatistics(statistics);
 
     listener->pushImage(buffers.at(buf.index));
 
