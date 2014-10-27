@@ -5,7 +5,7 @@
 #ifndef CAPTUREINTERFACE_H_
 #define CAPTUREINTERFACE_H_
 
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 #include "Properties.h"
 #include "PropertyImpl.h"
 
@@ -30,9 +30,9 @@ public:
     virtual ~DeviceInterface () {};
 
     /**
-     * @return the CaptureDevice describing the device
+     * @return the DeviceInfo describing the device
      */
-    virtual CaptureDevice getDeviceDescription () const = 0;
+    virtual DeviceInfo getDeviceDescription () const = 0;
 
     /**
      * @brief Returns all device properties
@@ -94,11 +94,11 @@ public:
 
 
 /**
- * @brief open the device for the given CaptureDevice
+ * @brief open the device for the given DeviceInfo
  * @param device - device description for which an interface shall be created
  * @return shared_ptr containing the device; nullptr on error
  */
-std::shared_ptr<DeviceInterface> openDeviceInterface (const CaptureDevice& device);
+std::shared_ptr<DeviceInterface> openDeviceInterface (const DeviceInfo& device);
 
 } /* namespace tcam */
 

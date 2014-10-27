@@ -8,7 +8,7 @@
 #include "base_types.h"
 #include "config.h"
 
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 
 #include <vector>
 #include <thread>
@@ -25,7 +25,7 @@ public:
 
     ~DeviceIndex ();
 
-    std::vector<CaptureDevice> getDeviceList () const;
+    std::vector<DeviceInfo> getDeviceList () const;
 
 private:
 
@@ -33,7 +33,7 @@ private:
     unsigned int wait_period;
     std::thread work_thread;
 
-    std::vector<CaptureDevice> device_list;
+    std::vector<DeviceInfo> device_list;
 
     void updateDeviceList ();
 

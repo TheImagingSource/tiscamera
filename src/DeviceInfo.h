@@ -2,8 +2,8 @@
 
 
 
-#ifndef CAPTUREDEVICE_H_
-#define CAPTUREDEVICE_H_
+#ifndef DEVICEINFO_H
+#define DEVICEINFO_H
 
 #include "base_types.h"
 
@@ -17,20 +17,20 @@ namespace tcam
 /**
  * @class
  */
-class CaptureDevice
+class DeviceInfo
 {
 
 public:
 
 
-    explicit CaptureDevice (const struct tcam_device_info&);
+    explicit DeviceInfo (const struct tcam_device_info&);
 
     /**
      * @brief Creates an invalid device
      */
-    CaptureDevice ();
+    DeviceInfo ();
 
-    CaptureDevice& operator= (const CaptureDevice&);
+    DeviceInfo& operator= (const DeviceInfo&);
 
     /**
      * @name getInfo
@@ -63,8 +63,8 @@ private:
     /// internal device representation
     struct tcam_device_info device;
 
-}; /* class CaptureDevice */
+}; /* class DeviceInfo */
 
 } /* namespace tcam */
 
-#endif /* CAPTUREDEVICE_H_ */
+#endif /* DEVICEINFO_H */

@@ -7,7 +7,7 @@
 
 #include "arv.h"
 
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 
 namespace tcam
 {
@@ -17,7 +17,7 @@ std::shared_ptr<Property> createProperty (ArvCamera* camera,
                                           std::shared_ptr<PropertyImpl> impl);
 
 
-std::vector<CaptureDevice> get_aravis_device_list ();
+std::vector<DeviceInfo> get_aravis_device_list ();
 
 }; /* namespace tcam */
 

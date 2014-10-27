@@ -12,7 +12,7 @@
 using namespace tcam;
 
 
-bool tcam::export_device_list (const std::vector<CaptureDevice>& device_list,
+bool tcam::export_device_list (const std::vector<DeviceInfo>& device_list,
                                       const std::string& filename)
 {
     // all allocated tinyxml elements will automatically be cleaned up
@@ -154,7 +154,7 @@ static bool load_property_values (TiXmlNode* properties_node,
 
 
 bool tcam::load_xml_description (const std::string& filename,
-                                        const CaptureDevice& device,
+                                        const DeviceInfo& device,
                                         VideoFormat& format,
                                         std::vector<std::shared_ptr<Property>>& properties)
 {
@@ -188,7 +188,7 @@ bool tcam::load_xml_description (const std::string& filename,
 
 
 bool tcam::save_xml_description (const std::string& filename,
-                                        const CaptureDevice& device,
+                                        const DeviceInfo& device,
                                         const VideoFormat& format,
                                         const std::vector<std::shared_ptr<Property>>& properties)
 {
@@ -196,7 +196,7 @@ bool tcam::save_xml_description (const std::string& filename,
     // all allocated tinyxml elements will automatically be cleaned up
     // changing the implementation to raii can cause segmentation faults
 
-    CaptureDevice open_device = device;
+    DeviceInfo open_device = device;
 
     TiXmlDocument doc;
 

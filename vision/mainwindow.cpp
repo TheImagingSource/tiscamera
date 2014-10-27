@@ -13,11 +13,11 @@ MainWindow::MainWindow (QWidget *parent) :
 {
     ui->setupUi(this);
 
-    selection_dialog = new CaptureDeviceSelectionDialog();
+    selection_dialog = new DeviceInfoSelectionDialog();
     connect(selection_dialog,
-            SIGNAL(device_selected(tcam::CaptureDevice)),
+            SIGNAL(device_selected(tcam::DeviceInfo)),
             this,
-            SLOT(my_captureDevice_selected(tcam::CaptureDevice)));
+            SLOT(my_captureDevice_selected(tcam::DeviceInfo)));
 
     sink = std::make_shared<ImageSink>();
 
@@ -41,7 +41,7 @@ tcam::Grabber* MainWindow::getGrabber ()
 }
 
 
-void MainWindow::my_captureDevice_selected (tcam::CaptureDevice device)
+void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
 {
     bool ret = grabber->openDevice(device);
 

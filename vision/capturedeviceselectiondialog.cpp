@@ -3,20 +3,20 @@
 
 #include <unistd.h>
 
-CaptureDeviceSelectionDialog::CaptureDeviceSelectionDialog (QWidget *parent) :
+DeviceInfoSelectionDialog::DeviceInfoSelectionDialog (QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CaptureDeviceSelectionDialog),
+    ui(new Ui::DeviceInfoSelectionDialog),
     device_watch_dog(tcam::getDeviceIndex())
 {
     ui->setupUi(this);
 
     run_thread = true;
 
-    work_thread = std::thread(&CaptureDeviceSelectionDialog::update_list, this);
+    work_thread = std::thread(&DeviceInfoSelectionDialog::update_list, this);
 }
 
 
-CaptureDeviceSelectionDialog::~CaptureDeviceSelectionDialog ()
+DeviceInfoSelectionDialog::~DeviceInfoSelectionDialog ()
 {
     run_thread = false;
     work_thread.join();
@@ -24,19 +24,19 @@ CaptureDeviceSelectionDialog::~CaptureDeviceSelectionDialog ()
 }
 
 
-void CaptureDeviceSelectionDialog::on_buttonBox_accepted ()
+void DeviceInfoSelectionDialog::on_buttonBox_accepted ()
 {
     auto selected_item = this->ui->device_table->selectedItems();
 
     if (selected_item.empty())
     {
-        //return CaptureDevice();
+        //return DeviceInfo();
         return;
     }
 
     QString serial = selected_item[1]->text();
 
-    auto f = [&serial] (const tcam::CaptureDevice& dev)
+    auto f = [&serial] (const tcam::DeviceInfo& dev)
     {
         return serial.toStdString().compare(dev.getSerial()) == 0;
     };
@@ -54,7 +54,7 @@ void CaptureDeviceSelectionDialog::on_buttonBox_accepted ()
 }
 
 
-void CaptureDeviceSelectionDialog::update_list ()
+void DeviceInfoSelectionDialog::update_list ()
 {
 
     while (run_thread)
@@ -90,24 +90,24 @@ void CaptureDeviceSelectionDialog::update_list ()
 }
 
 
-void CaptureDeviceSelectionDialog::on_buttonBox_rejected ()
+void DeviceInfoSelectionDialog::on_buttonBox_rejected ()
 {
     QWidget::close();
 }
 
 
-tcam::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
+tcam::DeviceInfo DeviceInfoSelectionDialog::getSelection ()
 {
     auto selected_item = this->ui->device_table->selectedItems();
 
     if (selected_item.empty())
     {
-        return CaptureDevice();
+        return DeviceInfo();
     }
 
     QString serial = selected_item[0]->text();
 
-    auto f = [&serial] (const tcam::CaptureDevice& dev)
+    auto f = [&serial] (const tcam::DeviceInfo& dev)
     {
         return serial.toStdString().compare(dev.getSerial()) == 0;
     };
@@ -116,7 +116,7 @@ tcam::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
 
     if (d == devices.end())
     {
-        return CaptureDevice();
+        return DeviceInfo();
     }
 
     return *d;

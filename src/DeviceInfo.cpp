@@ -1,7 +1,7 @@
 
 
 
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 #include "device_discovery.h"
 
 #include <cstring>
@@ -9,12 +9,12 @@
 using namespace tcam;
 
 
-CaptureDevice::CaptureDevice (const struct tcam_device_info& device_desc)
+DeviceInfo::DeviceInfo (const struct tcam_device_info& device_desc)
     : device(device_desc)
 {}
 
 
-CaptureDevice::CaptureDevice ()
+DeviceInfo::DeviceInfo ()
 {
     device.type = TCAM_DEVICE_TYPE_UNKNOWN;
 
@@ -24,44 +24,44 @@ CaptureDevice::CaptureDevice ()
 }
 
 
-CaptureDevice& CaptureDevice::operator= (const CaptureDevice& other)
+DeviceInfo& DeviceInfo::operator= (const DeviceInfo& other)
 {
     this->device = other.device;
     return *this;
 }
 
 
-struct tcam_device_info CaptureDevice::getInfo () const
+struct tcam_device_info DeviceInfo::getInfo () const
 {
     return device;
 }
 
 
-std::string CaptureDevice::getName () const
+std::string DeviceInfo::getName () const
 {
     return device.name;
 }
 
 
-std::string CaptureDevice::getSerial () const
+std::string DeviceInfo::getSerial () const
 {
     return device.serial_number;
 }
 
 
-std::string CaptureDevice::getIdentifier () const
+std::string DeviceInfo::getIdentifier () const
 {
     return device.identifier;
 }
 
 
-enum TCAM_DEVICE_TYPE CaptureDevice::getDeviceType () const
+enum TCAM_DEVICE_TYPE DeviceInfo::getDeviceType () const
 {
     return device.type;
 }
 
 
-std::string CaptureDevice::getDeviceTypeAsString () const
+std::string DeviceInfo::getDeviceTypeAsString () const
 {
     switch (device.type)
     {

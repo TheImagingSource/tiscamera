@@ -4,7 +4,7 @@
 #define V4L2_UTILS_H
 
 #include "Properties.h"
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 
 namespace tcam
 {
@@ -32,7 +32,7 @@ std::shared_ptr<Property> createProperty (int fd,
  * @brief lists all supported v4l2 devices
  * @return vector containing all found v4l2 devices
  */
-std::vector<CaptureDevice> get_v4l2_device_list ();
+std::vector<DeviceInfo> get_v4l2_device_list ();
 
 } /* namespace tcam */
 

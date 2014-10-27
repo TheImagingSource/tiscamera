@@ -8,23 +8,23 @@
 #include <thread>
 
 namespace Ui {
-class CaptureDeviceSelectionDialog;
+class DeviceInfoSelectionDialog;
 }
 
-class CaptureDeviceSelectionDialog : public QDialog
+class DeviceInfoSelectionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CaptureDeviceSelectionDialog (QWidget *parent = 0);
-    ~CaptureDeviceSelectionDialog ();
+    explicit DeviceInfoSelectionDialog (QWidget *parent = 0);
+    ~DeviceInfoSelectionDialog ();
 
-    tcam::CaptureDevice getSelection ();
+    tcam::DeviceInfo getSelection ();
 
     void update_list ();
 
 signals:
-    void device_selected (tcam::CaptureDevice);
+    void device_selected (tcam::DeviceInfo);
 
 private slots:
     void on_buttonBox_accepted ();
@@ -32,9 +32,9 @@ private slots:
     void on_buttonBox_rejected ();
 
 private:
-    Ui::CaptureDeviceSelectionDialog *ui;
+    Ui::DeviceInfoSelectionDialog *ui;
 
-    std::vector<tcam::CaptureDevice> devices;
+    std::vector<tcam::DeviceInfo> devices;
     std::shared_ptr<tcam::DeviceIndex> device_watch_dog;
     bool run_thread;
     std::thread work_thread;

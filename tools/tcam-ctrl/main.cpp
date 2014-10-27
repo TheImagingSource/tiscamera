@@ -33,7 +33,7 @@ void print_help ()
 }
 
 
-void print_capture_devices (const std::vector<CaptureDevice>& devices)
+void print_capture_devices (const std::vector<DeviceInfo>& devices)
 {
   std::cout << "Available devices:" << std::endl;
   std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
@@ -90,7 +90,7 @@ int main (int argc, char *argv[])
         {
             auto index = getDeviceIndex();
             sleep(3); // let camera detection do its magic
-            std::vector<CaptureDevice> device_list = index->getDeviceList();
+            std::vector<DeviceInfo> device_list = index->getDeviceList();
             print_capture_devices(device_list);
             return 0;
         }
@@ -135,7 +135,7 @@ int main (int argc, char *argv[])
 
     auto device_index = getDeviceIndex();
     sleep(3);
-    std::vector<CaptureDevice> device_list = device_index->getDeviceList();
+    std::vector<DeviceInfo> device_list = device_index->getDeviceList();
 
 
 

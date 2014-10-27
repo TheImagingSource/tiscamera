@@ -460,9 +460,9 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 }
 
 
-std::vector<CaptureDevice> tcam::get_aravis_device_list ()
+std::vector<DeviceInfo> tcam::get_aravis_device_list ()
 {
-    std::vector<CaptureDevice> device_list;
+    std::vector<DeviceInfo> device_list;
 
     arv_update_device_list ();
 
@@ -499,7 +499,7 @@ std::vector<CaptureDevice> tcam::get_aravis_device_list ()
             strcpy(info.serial_number, name.substr((t+1)).c_str());
         }
 
-        device_list.push_back(CaptureDevice(info));
+        device_list.push_back(DeviceInfo(info));
 
         g_object_unref(cam);
     }

@@ -22,7 +22,7 @@
 using namespace tcam;
 
 
-std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const CaptureDevice& device)
+std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& device)
 {
 
     try

@@ -16,13 +16,13 @@ class AravisDevice : public DeviceInterface, public std::enable_shared_from_this
 
 public:
 
-    AravisDevice (const CaptureDevice&);
+    AravisDevice (const DeviceInfo&);
 
     AravisDevice () = delete;
 
     ~AravisDevice ();
 
-    CaptureDevice getDeviceDescription () const;
+    DeviceInfo getDeviceDescription () const;
 
     std::vector<std::shared_ptr<Property>> getProperties () ;
 
@@ -49,7 +49,7 @@ private:
 
     static void callback(ArvStream* stream, void* user_data);
 
-    CaptureDevice device;
+    DeviceInfo device;
 
     ArvCamera* arv_camera;
 

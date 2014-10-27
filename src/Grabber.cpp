@@ -66,7 +66,7 @@ bool Grabber::save_configuration (const std::string& filename)
 }
 
 
-bool Grabber::openDevice (const CaptureDevice& device_desc)
+bool Grabber::openDevice (const DeviceInfo& device_desc)
 {
     resetError();
 
@@ -131,7 +131,7 @@ bool Grabber::isDeviceOpen () const
 }
 
 
-CaptureDevice Grabber::getDevice () const
+DeviceInfo Grabber::getDevice () const
 {
     return this->open_device;
 }
@@ -143,7 +143,7 @@ bool Grabber::closeDevice ()
 
     pipeline->destroyPipeline();
 
-    open_device = CaptureDevice ();
+    open_device = DeviceInfo ();
     device.reset();
     device_properties.clear();
 

@@ -25,7 +25,7 @@
 using namespace tcam;
 
 
-std::vector<CaptureDevice> DeviceIndex::getDeviceList () const
+std::vector<DeviceInfo> DeviceIndex::getDeviceList () const
 {
     return device_list;
 }
@@ -36,7 +36,7 @@ DeviceIndex::DeviceIndex ()
 {
     continue_thread = true;
     work_thread = std::thread(&DeviceIndex::run, this);
-    device_list = std::vector<CaptureDevice>();
+    device_list = std::vector<DeviceInfo>();
 }
 
 
@@ -52,7 +52,7 @@ DeviceIndex::~DeviceIndex ()
 
 void DeviceIndex::updateDeviceList ()
 {
-    std::vector<CaptureDevice> tmp_dev_list;
+    std::vector<DeviceInfo> tmp_dev_list;
 
 #if HAVE_ARAVIS
     auto aravis_dev_list = get_aravis_device_list();

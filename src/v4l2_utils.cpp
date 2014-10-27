@@ -391,9 +391,9 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 }
 
 
-std::vector<CaptureDevice> tcam::get_v4l2_device_list ()
+std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 {
-    std::vector<CaptureDevice> device_list;
+    std::vector<DeviceInfo> device_list;
 
 
     struct udev* udev = udev_new();
@@ -459,7 +459,7 @@ std::vector<CaptureDevice> tcam::get_v4l2_device_list ()
             strcpy(info.name, udev_device_get_sysattr_value(dev, "product"));
             strcpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"));
 
-            device_list.push_back(CaptureDevice(info));
+            device_list.push_back(DeviceInfo(info));
         }
 
         udev_device_unref(dev);

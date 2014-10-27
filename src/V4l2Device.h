@@ -21,13 +21,13 @@ class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V
 
 public:
 
-    explicit V4l2Device (const CaptureDevice&);
+    explicit V4l2Device (const DeviceInfo&);
 
     V4l2Device () = delete;
 
     ~V4l2Device ();
 
-    CaptureDevice getDeviceDescription () const;
+    DeviceInfo getDeviceDescription () const;
 
     // TODO: eval if weak_ptr should be distributed
     std::vector<std::shared_ptr<Property>> getProperties ();
@@ -64,7 +64,7 @@ private:
 
     std::thread work_thread;
 
-    CaptureDevice device;
+    DeviceInfo device;
 
     int fd;
 

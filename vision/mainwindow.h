@@ -33,7 +33,7 @@ signals:
 
 private slots:
 
-    void my_captureDevice_selected (tcam::CaptureDevice);
+    void my_captureDevice_selected (tcam::DeviceInfo);
 
     // create selection dialog
     void on_actionOpen_Camera_triggered ();
@@ -70,11 +70,11 @@ private:
     std::shared_ptr<tcam::ImageSink> sink;
     std::vector<tcam::VideoFormatDescription> available_formats;
 
-    tcam::CaptureDevice open_device;
+    tcam::DeviceInfo open_device;
 
     VideoFormat active_format;
 
-    CaptureDeviceSelectionDialog* selection_dialog;
+    DeviceInfoSelectionDialog* selection_dialog;
 
     void reset_gui ();
 

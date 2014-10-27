@@ -16,7 +16,7 @@
 using namespace tcam;
 
 
-V4l2Device::V4l2Device (const CaptureDevice& device_desc)
+V4l2Device::V4l2Device (const DeviceInfo& device_desc)
     : device(device_desc), is_stream_on(false), emulate_bayer(false), emulated_fourcc(0)
 {
 
@@ -42,7 +42,7 @@ V4l2Device::~V4l2Device ()
 }
 
 
-CaptureDevice V4l2Device::getDeviceDescription () const
+DeviceInfo V4l2Device::getDeviceDescription () const
 {
     return device;
 }

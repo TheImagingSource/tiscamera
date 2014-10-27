@@ -14,7 +14,7 @@
 
 using namespace tcam;
 
-AravisDevice::AravisDevice (const CaptureDevice& device_desc)
+AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     : device(device_desc), current_buffer(0), stream(NULL)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
@@ -43,7 +43,7 @@ AravisDevice::~AravisDevice ()
 }
 
 
-CaptureDevice AravisDevice::getDeviceDescription () const
+DeviceInfo AravisDevice::getDeviceDescription () const
 {
     return device;
 }

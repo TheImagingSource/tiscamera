@@ -3,7 +3,7 @@
 #ifndef GRABBER_H_
 #define GRABBER_H_
 
-#include "CaptureDevice.h"
+#include "DeviceInfo.h"
 #include "DeviceInterface.h"
 #include "Properties.h"
 #include "PipelineManager.h"
@@ -45,10 +45,10 @@ public:
 
     /**
      * Open the described device for interaction
-     * @param device - CaptureDevice description of the device that shall be opened
+     * @param device - DeviceInfo description of the device that shall be opened
      * @return true on success; on error Error will be set
      */
-    bool openDevice (const CaptureDevice& device);
+    bool openDevice (const DeviceInfo& device);
 
 
     /**
@@ -62,7 +62,7 @@ public:
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    CaptureDevice getDevice() const;
+    DeviceInfo getDevice() const;
 
 
     /**
@@ -93,7 +93,7 @@ private:
 
     std::shared_ptr<PipelineManager> pipeline;
 
-    CaptureDevice open_device;
+    DeviceInfo open_device;
     VideoFormat active_format;
 
     // std::shared_ptr<Device> capture;
