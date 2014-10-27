@@ -882,6 +882,9 @@ bool V4l2Device::get_frame ()
         return false;
     }
 
+    // v4l2 timestamps contain seconds and microseconds
+    // here they are converted to nanoseconds
+    statistics.capture_time_ns = (buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
     buffers.at(buf.index)->setStatistics(statistics);
 
