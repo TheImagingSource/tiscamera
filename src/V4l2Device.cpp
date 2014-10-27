@@ -3,6 +3,7 @@
 #include "logging.h"
 #include "utils.h"
 #include "v4l2_utils.h"
+#include "PropertyGeneration.h"
 #include "Error.h"
 
 #include <algorithm>
@@ -79,37 +80,11 @@ bool V4l2Device::setProperty (const Property& new_property)
     {
         if (new_property.getName() == "Offset Auto Center")
         {
-            if (new_property.getType() != PROPERTY_TYPE_BOOLEAN)
-            {
-                return false;
-            }
-
-            auto p =  static_cast<const PropertySwitch&>(new_property);
-
-            if (p.getValue())
-            {
-                IMG_SIZE values = calculateAutoCenter(get_sensor_size(), active_video_format.getSize());
-
-                auto p = create_property_vector();
-                auto prop_off_x = find_property(p, "Offset X");
-                auto prop_off_y = find_property(p, "Offset Y");
-
-                std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(values.width);
-                std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(values.height);
-
-                // TODO: set properties read only
-            }
-            else
-            {
-                // TODO: remove read only
-
-                auto p = create_property_vector();
-                auto prop_off_x = find_property(p, "Offset X");
-                auto prop_off_y = find_property(p, "Offset Y");
-
-                std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(0);
-                std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(0);
-            }
+            auto props = create_property_vector();
+            return handle_auto_center(new_property,
+                                      props,
+                                      get_sensor_size(),
+                                      active_video_format.getSize());
         }
         else
         {
@@ -668,26 +643,14 @@ std::vector<std::shared_ptr<Property>> V4l2Device::create_property_vector ()
 
 void V4l2Device::create_emulated_properties ()
 {
-    auto props = create_property_vector();
 
-    // requirements for auto center
-    if (find_property(props, "Offset Auto Center") == nullptr &&
-        find_property(props, "Offset X") != nullptr &&
-        find_property(props, "Offset Y") != nullptr)
+    auto tmp_props = generate_simulated_properties(create_property_vector(),
+                                                   shared_from_this());
+
+    for (auto& p : tmp_props)
     {
-        camera_property cp = {};
-        strcpy(cp.name, "Offset Auto Center");
-        cp.type = PROPERTY_TYPE_BOOLEAN;
-        cp.value.b.default_value = false;
-        cp.value.b.value = cp.value.b.default_value;
-        cp.flags = set_bit(cp.flags, PROPERTY_FLAG_EXTERNAL);
-
-        auto property_auto_offset = std::make_shared<PropertySwitch>(shared_from_this(), cp, Property::BOOLEAN);
-
-        property_description pd = { EMULATED_PROPERTY, property_auto_offset};
-
-        tis_log(TIS_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
-
+        property_description pd = { EMULATED_PROPERTY, p};
+        tis_log(TIS_LOG_DEBUG, "Adding '%s' to property list", p->getName().c_str());
         properties.push_back(pd);
     }
 }

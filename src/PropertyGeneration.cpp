@@ -13,8 +13,68 @@
 
 using namespace tis_imaging;
 
-#if HAVE_ARAVIS
+std::vector<std::shared_ptr<Property>> tis_imaging::generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
+                                                                                   std::shared_ptr<PropertyImpl> impl)
+{
+    std::vector<std::shared_ptr<Property>> new_properties;
+
+    // requirements for auto center
+    if (find_property(props, "Offset Auto Center") == nullptr &&
+        find_property(props, "Offset X") != nullptr &&
+        find_property(props, "Offset Y") != nullptr)
+    {
+        camera_property cp = {};
+        strcpy(cp.name, "Offset Auto Center");
+        cp.type = PROPERTY_TYPE_BOOLEAN;
+        cp.value.b.default_value = false;
+        cp.value.b.value = cp.value.b.default_value;
+        cp.flags = set_bit(cp.flags, PROPERTY_FLAG_EXTERNAL);
+
+        auto property_auto_offset = std::make_shared<PropertySwitch>(impl, cp, Property::BOOLEAN);
+
+        // property_description pd = { EMULATED_PROPERTY, property_auto_offset};
+
+        tis_log(TIS_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
+
+        new_properties.push_back(property_auto_offset);
+    }
+
+    return new_properties;
+}
 
 
-#endif /* HAVE_ARAVIS */
+bool tis_imaging::handle_auto_center (const Property& new_property,
+                                      std::vector<std::shared_ptr<Property>>& props,
+                                      const IMG_SIZE& sensor,
+                                      const IMG_SIZE& current_format)
+{
+    if (new_property.getType() != PROPERTY_TYPE_BOOLEAN)
+    {
+        return false;
+    }
 
+    auto p = static_cast<const PropertySwitch&>(new_property);
+
+    if (p.getValue())
+    {
+        IMG_SIZE values = calculateAutoCenter(sensor, current_format);
+
+        auto prop_off_x = find_property(props, "Offset X");
+        auto prop_off_y = find_property(props, "Offset Y");
+
+        std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(values.width);
+        std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(values.height);
+
+        // TODO: set properties read only
+    }
+    else
+    {
+        // TODO: remove read only
+
+        auto prop_off_x = find_property(props, "Offset X");
+        auto prop_off_y = find_property(props, "Offset Y");
+
+        std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(0);
+        std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(0);
+    }
+}
