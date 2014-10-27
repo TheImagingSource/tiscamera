@@ -76,7 +76,7 @@ void print_properties (const std::vector<Property>& properties)
 }
 
 
-bool set_property (Grabber& g, const std::string& new_prop)
+bool set_property (CaptureDevice& g, const std::string& new_prop)
 {
 
     if (!g.isDeviceOpen())

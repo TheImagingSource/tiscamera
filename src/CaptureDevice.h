@@ -1,7 +1,7 @@
 
 
-#ifndef GRABBER_H_
-#define GRABBER_H_
+#ifndef CAPTUREDEVICE_H
+#define CAPTUREDEVICE_H
 
 #include "DeviceInfo.h"
 #include "DeviceInterface.h"
@@ -15,14 +15,14 @@
 namespace tcam
 {
 
-class Grabber
+class CaptureDevice
 {
 
 public:
 
-    explicit Grabber ();
+    explicit CaptureDevice ();
 
-    ~Grabber ();
+    ~CaptureDevice ();
 
 
     /**
@@ -105,8 +105,8 @@ private:
 
     std::vector<std::shared_ptr<Property>> user_properties;
 
-}; /* class Grabber */
+}; /* class CaptureDevice */
 
 } /* namespace tcam */
 
-#endif /* GRABBER_H_ */
+#endif /* CAPTUREDEVICE_H */

@@ -29,7 +29,7 @@ device_discovery.cpp
 DeviceInterface.cpp
 Error.cpp
 FilterLoader.cpp
-Grabber.cpp
+CaptureDevice.cpp
 image_transform_base.h
 MemoryBuffer.cpp
 Properties.cpp

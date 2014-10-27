@@ -5,7 +5,7 @@
 #define SERIALIZATION_H
 
 
-#include "Grabber.h"
+#include "CaptureDevice.h"
 
 #include <string>
 

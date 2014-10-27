@@ -37,7 +37,7 @@ void print_active_format (const VideoFormat& format)
 }
 
 
-bool set_active_format (Grabber& g, const std::string& new_format)
+bool set_active_format (CaptureDevice& g, const std::string& new_format)
 {
     VideoFormat v;
 

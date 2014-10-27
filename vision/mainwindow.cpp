@@ -7,7 +7,7 @@
 MainWindow::MainWindow (QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    grabber(new tcam::Grabber),
+    grabber(new tcam::CaptureDevice),
     selection_dialog(NULL),
     playing(false)
 {
@@ -34,7 +34,7 @@ MainWindow::~MainWindow ()
 }
 
 
-tcam::Grabber* MainWindow::getGrabber ()
+tcam::CaptureDevice* MainWindow::getCaptureDevice ()
 {
 
     return grabber;

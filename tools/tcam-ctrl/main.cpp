@@ -139,7 +139,7 @@ int main (int argc, char *argv[])
 
 
 
-    Grabber g;
+    CaptureDevice g;
 
     for (auto& d : device_list)
     {

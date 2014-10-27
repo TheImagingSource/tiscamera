@@ -7,12 +7,12 @@
 using namespace tcam;
 
 
-bool tcam::save_image (Grabber& g, const std::string& filename)
+bool tcam::save_image (CaptureDevice& g, const std::string& filename)
 {
 
     struct data
     {
-        Grabber* g;
+        CaptureDevice* g;
         std::string filename;
         int count;
         bool wait;
@@ -62,7 +62,7 @@ bool tcam::save_image (Grabber& g, const std::string& filename)
 }
 
 
-bool tcam::save_stream (Grabber& g, const std::string& filename)
+bool tcam::save_stream (CaptureDevice& g, const std::string& filename)
 {
     return false;
 }

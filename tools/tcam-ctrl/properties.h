@@ -17,10 +17,10 @@ void print_properties (const std::vector<Property>& properties);
 
 /**
  * @brief Set property described in string to new value
- * @param g - Grabber of the device that shall be used
+ * @param g - CaptureDevice of the device that shall be used
  * @param new_prop - string describing the format
  * @return true on success
  */
-bool set_property (Grabber& g, const std::string& new_prop);
+bool set_property (CaptureDevice& g, const std::string& new_prop);
 
 #endif /* CONTROLS_H */

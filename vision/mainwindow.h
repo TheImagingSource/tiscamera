@@ -25,7 +25,7 @@ public:
     explicit MainWindow (QWidget *parent = 0);
     ~MainWindow();
 
-    tcam::Grabber* getGrabber ();
+    tcam::CaptureDevice* getCaptureDevice ();
 
 signals:
 
@@ -66,7 +66,7 @@ private:
     QPainter painter;
     bool playing;
 
-    tcam::Grabber* grabber;
+    tcam::CaptureDevice* grabber;
     std::shared_ptr<tcam::ImageSink> sink;
     std::vector<tcam::VideoFormatDescription> available_formats;
 

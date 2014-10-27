@@ -9,9 +9,9 @@
 namespace tcam
 {
 
-bool save_image (Grabber& g, const std::string& filename);
+bool save_image (CaptureDevice& g, const std::string& filename);
 
-bool save_stream (Grabber& g, const std::string& file);
+bool save_stream (CaptureDevice& g, const std::string& file);
 
 } /* namespace tcam */
 

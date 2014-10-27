@@ -1,5 +1,5 @@
 
-#include "Grabber.h"
+#include "CaptureDevice.h"
 
 #include "Error.h"
 
@@ -10,19 +10,19 @@
 using namespace tcam;
 
 
-Grabber::Grabber ()
+CaptureDevice::CaptureDevice ()
     : device(nullptr), pipeline(std::make_shared<PipelineManager>())
 {}
 
 
-Grabber::~Grabber ()
+CaptureDevice::~CaptureDevice ()
 {
     if (isDeviceOpen())
         closeDevice();
 }
 
 
-bool Grabber::load_configuration (const std::string& filename)
+bool CaptureDevice::load_configuration (const std::string& filename)
 {
     resetError();
 
@@ -44,7 +44,7 @@ bool Grabber::load_configuration (const std::string& filename)
 }
 
 
-bool Grabber::save_configuration (const std::string& filename)
+bool CaptureDevice::save_configuration (const std::string& filename)
 {
     resetError();
 
@@ -66,7 +66,7 @@ bool Grabber::save_configuration (const std::string& filename)
 }
 
 
-bool Grabber::openDevice (const DeviceInfo& device_desc)
+bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
 {
     resetError();
 
@@ -116,7 +116,7 @@ bool Grabber::openDevice (const DeviceInfo& device_desc)
 }
 
 
-bool Grabber::isDeviceOpen () const
+bool CaptureDevice::isDeviceOpen () const
 {
     resetError();
     if (device != nullptr)
@@ -131,13 +131,13 @@ bool Grabber::isDeviceOpen () const
 }
 
 
-DeviceInfo Grabber::getDevice () const
+DeviceInfo CaptureDevice::getDevice () const
 {
     return this->open_device;
 }
 
 
-bool Grabber::closeDevice ()
+bool CaptureDevice::closeDevice ()
 {
     std::string name = open_device.getName();
 
@@ -153,7 +153,7 @@ bool Grabber::closeDevice ()
 }
 
 
-std::vector<Property> Grabber::getAvailableProperties ()
+std::vector<Property> CaptureDevice::getAvailableProperties ()
 {
     resetError();
     if (!isDeviceOpen())
@@ -177,7 +177,7 @@ std::vector<Property> Grabber::getAvailableProperties ()
 }
 
 
-std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> CaptureDevice::getAvailableVideoFormats () const
 {
     resetError();
     if (!isDeviceOpen())
@@ -189,7 +189,7 @@ std::vector<VideoFormatDescription> Grabber::getAvailableVideoFormats () const
 }
 
 
-bool Grabber::setVideoFormat (const VideoFormat& new_format)
+bool CaptureDevice::setVideoFormat (const VideoFormat& new_format)
 {
     resetError();
     if (!isDeviceOpen())
@@ -203,7 +203,7 @@ bool Grabber::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-VideoFormat Grabber::getActiveVideoFormat () const
+VideoFormat CaptureDevice::getActiveVideoFormat () const
 {
     resetError();
     if(!isDeviceOpen())
@@ -215,7 +215,7 @@ VideoFormat Grabber::getActiveVideoFormat () const
 }
 
 
-bool Grabber::startStream (std::shared_ptr<SinkInterface> sink)
+bool CaptureDevice::startStream (std::shared_ptr<SinkInterface> sink)
 {
     resetError();
     if (!isDeviceOpen())
@@ -228,7 +228,7 @@ bool Grabber::startStream (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool Grabber::stopStream ()
+bool CaptureDevice::stopStream ()
 {
     resetError();
     if (!isDeviceOpen())
