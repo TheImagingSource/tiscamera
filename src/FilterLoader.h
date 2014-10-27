@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class FilterLoader
@@ -55,6 +55,6 @@ private:
 
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* FILTERLOADER_H_ */

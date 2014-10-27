@@ -84,10 +84,9 @@ private:
     int		wb_b;
     unsigned int exposure_max;
 
-    //tis_imaging::
     FilterDescription description;
     PIPELINE_STATUS current_status;
-    tis_imaging::VideoFormat input_format;
+    tcam::VideoFormat input_format;
 
     auto_alg::auto_pass_params params;
     auto_alg::auto_pass_state state;

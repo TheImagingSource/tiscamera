@@ -12,7 +12,7 @@
 #include <memory>
 #include <thread>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V4l2Device>
@@ -142,6 +142,6 @@ private:
     IMG_SIZE get_sensor_size ();
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* V4L2DEVICE_H */

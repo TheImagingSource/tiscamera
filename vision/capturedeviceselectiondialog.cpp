@@ -6,7 +6,7 @@
 CaptureDeviceSelectionDialog::CaptureDeviceSelectionDialog (QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CaptureDeviceSelectionDialog),
-    device_watch_dog(tis_imaging::getDeviceIndex())
+    device_watch_dog(tcam::getDeviceIndex())
 {
     ui->setupUi(this);
 
@@ -36,7 +36,7 @@ void CaptureDeviceSelectionDialog::on_buttonBox_accepted ()
 
     QString serial = selected_item[1]->text();
 
-    auto f = [&serial] (const tis_imaging::CaptureDevice& dev)
+    auto f = [&serial] (const tcam::CaptureDevice& dev)
     {
         return serial.toStdString().compare(dev.getSerial()) == 0;
     };
@@ -60,7 +60,7 @@ void CaptureDeviceSelectionDialog::update_list ()
     while (run_thread)
     {
         if (device_watch_dog == nullptr)
-            device_watch_dog = tis_imaging::getDeviceIndex();
+            device_watch_dog = tcam::getDeviceIndex();
 
         devices = device_watch_dog->getDeviceList();
         ui->device_table->clear();
@@ -96,7 +96,7 @@ void CaptureDeviceSelectionDialog::on_buttonBox_rejected ()
 }
 
 
-tis_imaging::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
+tcam::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
 {
     auto selected_item = this->ui->device_table->selectedItems();
 
@@ -107,7 +107,7 @@ tis_imaging::CaptureDevice CaptureDeviceSelectionDialog::getSelection ()
 
     QString serial = selected_item[0]->text();
 
-    auto f = [&serial] (const tis_imaging::CaptureDevice& dev)
+    auto f = [&serial] (const tcam::CaptureDevice& dev)
     {
         return serial.toStdString().compare(dev.getSerial()) == 0;
     };

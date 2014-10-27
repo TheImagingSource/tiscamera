@@ -13,7 +13,7 @@
 #include <vector>
 #include <thread>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class DeviceIndex
@@ -43,7 +43,7 @@ private:
 
 std::shared_ptr<DeviceIndex> getDeviceIndex ();
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #ifdef __cplusplus
 extern "C"
@@ -51,10 +51,10 @@ extern "C"
 #endif
 
     /**
-     * @name tis_get_camera_count
+     * @name tcam_get_camera_count
      * @return number of available devices
      */
-    int tis_get_camera_count ();
+    int tcam_get_camera_count ();
 
     /**
      * @name
@@ -62,7 +62,7 @@ extern "C"
      * @param array_size - size of array that ptr points to
      * @return number of devices copied to ptr; -1 on error
      */
-    int tis_get_camera_list (struct tis_device_info* ptr, unsigned int array_size);
+    int tcam_get_camera_list (struct tcam_device_info* ptr, unsigned int array_size);
 
 #ifdef __cplusplus
 }

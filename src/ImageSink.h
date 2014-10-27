@@ -10,9 +10,9 @@
 
 #include <memory>
 
-typedef void (*sink_callback)(tis_imaging::MemoryBuffer*, void*);
+typedef void (*sink_callback)(tcam::MemoryBuffer*, void*);
 
-namespace tis_imaging
+namespace tcam
 {
 
 class ImageSink : public SinkInterface
@@ -36,7 +36,7 @@ private:
     void* user_data;
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 
 #endif /* IMAGESINK_H_ */

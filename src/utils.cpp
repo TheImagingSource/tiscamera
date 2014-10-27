@@ -11,9 +11,9 @@
 #define IOCTL_RETRY 4
 
 
-using namespace tis_imaging;
+using namespace tcam;
 
-std::string tis_imaging::propertyType2String (PROPERTY_TYPE type)
+std::string tcam::propertyType2String (PROPERTY_TYPE type)
 {
     switch (type)
     {
@@ -31,7 +31,7 @@ std::string tis_imaging::propertyType2String (PROPERTY_TYPE type)
 }
 
 
-std::string tis_imaging::fourcc2string (uint32_t fourcc)
+std::string tcam::fourcc2string (uint32_t fourcc)
 {
 
 
@@ -51,7 +51,7 @@ std::string tis_imaging::fourcc2string (uint32_t fourcc)
 }
 
 
-uint32_t tis_imaging::string2fourcc (const std::string& s)
+uint32_t tcam::string2fourcc (const std::string& s)
 {
     if(s.length() != 4)
     {
@@ -70,7 +70,7 @@ uint32_t tis_imaging::string2fourcc (const std::string& s)
 }
 
 
-std::vector<std::string> tis_imaging::split_string (const std::string& to_split, const std::string &delim)
+std::vector<std::string> tcam::split_string (const std::string& to_split, const std::string &delim)
 {
     std::vector<std::string> vec;
 
@@ -92,7 +92,7 @@ std::vector<std::string> tis_imaging::split_string (const std::string& to_split,
 }
 
 
-int tis_imaging::tis_xioctl (int fd, int request, void *arg)
+int tcam::tcam_xioctl (int fd, int request, void *arg)
 {
     int ret = 0;
     int tries= IOCTL_RETRY;
@@ -106,7 +106,7 @@ int tis_imaging::tis_xioctl (int fd, int request, void *arg)
 
     if (ret && (tries <= 0))
     {
-        tis_log(TIS_LOG_ERROR,"ioctl (%i) retried %i times - giving up: %s)\n", request, IOCTL_RETRY, strerror(errno));
+        tcam_log(TCAM_LOG_ERROR,"ioctl (%i) retried %i times - giving up: %s)\n", request, IOCTL_RETRY, strerror(errno));
     }
 
     return (ret);
@@ -168,7 +168,7 @@ fourcc_names fourcc_name_array [] =
 };
 
 
-const char* tis_imaging::fourcc2description (uint32_t fourcc)
+const char* tcam::fourcc2description (uint32_t fourcc)
 {
     for (const auto& entry : fourcc_name_array)
     {
@@ -181,7 +181,7 @@ const char* tis_imaging::fourcc2description (uint32_t fourcc)
 }
 
 
-uint32_t tis_imaging::description2fourcc (const char* description)
+uint32_t tcam::description2fourcc (const char* description)
 {
     for (const auto& entry : fourcc_name_array)
     {
@@ -194,7 +194,7 @@ uint32_t tis_imaging::description2fourcc (const char* description)
 }
 
 
-std::vector<double> tis_imaging::createStepsForRange (double min, double max)
+std::vector<double> tcam::createStepsForRange (double min, double max)
 {
     std::vector<double> vec;
 
@@ -229,7 +229,7 @@ std::vector<double> tis_imaging::createStepsForRange (double min, double max)
 }
 
 
-uint64_t tis_imaging::getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc)
+uint64_t tcam::getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc)
 {
     if (width == 0 || height == 0 || fourcc == 0)
     {
@@ -242,7 +242,7 @@ uint64_t tis_imaging::getBufferLength (unsigned int width, unsigned int height, 
 }
 
 
-uint32_t tis_imaging::getPitchLength (unsigned int width, uint32_t fourcc)
+uint32_t tcam::getPitchLength (unsigned int width, uint32_t fourcc)
 {
     if (width == 0 || fourcc == 0)
     {
@@ -253,7 +253,7 @@ uint32_t tis_imaging::getPitchLength (unsigned int width, uint32_t fourcc)
 }
 
 
-IMG_SIZE tis_imaging::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image)
+IMG_SIZE tcam::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image)
 {
     IMG_SIZE ret = {};
 
@@ -269,7 +269,7 @@ IMG_SIZE tis_imaging::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZ
 }
 
 
-std::shared_ptr<Property> tis_imaging::find_property (std::vector<std::shared_ptr<Property>>& properties,
+std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
                                                       const std::string& property_name)
 {
 

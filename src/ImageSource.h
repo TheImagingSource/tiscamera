@@ -12,7 +12,7 @@
 #include <ctime>
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class ImageSource : public SinkInterface, public std::enable_shared_from_this<ImageSource>
@@ -57,6 +57,6 @@ private:
 
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* IMAGESOURCE_H_ */

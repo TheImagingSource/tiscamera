@@ -6,17 +6,17 @@
 
 #include <cstring>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
-CaptureDevice::CaptureDevice (const struct tis_device_info& device_desc)
+CaptureDevice::CaptureDevice (const struct tcam_device_info& device_desc)
     : device(device_desc)
 {}
 
 
 CaptureDevice::CaptureDevice ()
 {
-    device.type = TIS_DEVICE_TYPE_UNKNOWN;
+    device.type = TCAM_DEVICE_TYPE_UNKNOWN;
 
     memset(device.identifier, 0, sizeof(device.identifier));
     memset(device.name, 0, sizeof(device.name));
@@ -31,7 +31,7 @@ CaptureDevice& CaptureDevice::operator= (const CaptureDevice& other)
 }
 
 
-struct tis_device_info CaptureDevice::getInfo () const
+struct tcam_device_info CaptureDevice::getInfo () const
 {
     return device;
 }
@@ -55,7 +55,7 @@ std::string CaptureDevice::getIdentifier () const
 }
 
 
-enum TIS_DEVICE_TYPE CaptureDevice::getDeviceType () const
+enum TCAM_DEVICE_TYPE CaptureDevice::getDeviceType () const
 {
     return device.type;
 }
@@ -65,11 +65,11 @@ std::string CaptureDevice::getDeviceTypeAsString () const
 {
     switch (device.type)
     {
-        case TIS_DEVICE_TYPE_V4L2:
+        case TCAM_DEVICE_TYPE_V4L2:
             return "V4L2";
-        case TIS_DEVICE_TYPE_ARAVIS:
+        case TCAM_DEVICE_TYPE_ARAVIS:
             return "Aravis";
-        case TIS_DEVICE_TYPE_FIREWIRE:
+        case TCAM_DEVICE_TYPE_FIREWIRE:
             return "Firewire";
         default:
             return "";

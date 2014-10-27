@@ -22,7 +22,7 @@
 #include "v4l2_utils.h"
 #endif
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 std::vector<CaptureDevice> DeviceIndex::getDeviceList () const
@@ -86,7 +86,7 @@ void DeviceIndex::run ()
 }
 
 
-std::shared_ptr<DeviceIndex> tis_imaging::getDeviceIndex ()
+std::shared_ptr<DeviceIndex> tcam::getDeviceIndex ()
 {
     return std::make_shared<DeviceIndex>();
 }

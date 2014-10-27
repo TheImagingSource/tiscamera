@@ -4,10 +4,10 @@
 #include <iostream>
 #include <unistd.h>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
-bool tis_imaging::save_image (Grabber& g, const std::string& filename)
+bool tcam::save_image (Grabber& g, const std::string& filename)
 {
 
     struct data
@@ -62,7 +62,7 @@ bool tis_imaging::save_image (Grabber& g, const std::string& filename)
 }
 
 
-bool tis_imaging::save_stream (Grabber& g, const std::string& filename)
+bool tcam::save_stream (Grabber& g, const std::string& filename)
 {
     return false;
 }

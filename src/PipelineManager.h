@@ -14,7 +14,7 @@
 
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class PipelineManager : public SinkInterface, public std::enable_shared_from_this<PipelineManager>
@@ -141,6 +141,6 @@ private:
 
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* PIPELINEMANAGER_H_ */

@@ -14,7 +14,7 @@
 #include <vector>
 #include <memory>
 
-using namespace tis_imaging;
+using namespace tcam;
 // {
 
 enum FILTER_TYPE
@@ -83,6 +83,6 @@ extern "C"
 
 }
 
-// } /* namespace tis_imaging */
+// } /* namespace tcam */
 
 #endif /* FILTERBASE_H_ */

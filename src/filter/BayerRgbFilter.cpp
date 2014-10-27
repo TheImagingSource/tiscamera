@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 BayerRgbFilter::BayerRgbFilter ()
     : status(PIPELINE_UNDEFINED)

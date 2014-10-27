@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = tis_vision
+TARGET = tcam_vision
 TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++11
@@ -28,8 +28,8 @@ FORMS    += mainwindow.ui \
             capturedeviceselectiondialog.ui \
             propertywidget.ui \
     videowidget.ui
-
-unix:!macx: LIBS += -L/home/edt/lib -ltis_imaging
+#TODO: make generic
+unix:!macx: LIBS += -L/home/edt/lib -ltcam
 
 INCLUDEPATH += $$PWD/../../
 INCLUDEPATH += /home/edt/include

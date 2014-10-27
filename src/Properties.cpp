@@ -2,12 +2,12 @@
 
 #include "Properties.h"
 #include "logging.h"
-#include "utils.h" // tis_xioctl
+#include "utils.h" // tcam_xioctl
 
 #include <algorithm> // find_if
 #include <cstring>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 
@@ -218,7 +218,7 @@ bool PropertyInteger::setValue (int64_t new_value)
     // if (isReadOnly())
     // return false;
 
-    tis_value_int& i = this->prop.value.i;
+    tcam_value_int& i = this->prop.value.i;
 
     // if (i.min > _value || i.max < _value)
     // return false;
@@ -279,7 +279,7 @@ bool PropertyDouble::setValue (double new_value)
         return false;
     }
 
-    tis_value_double& d = this->prop.value.d;
+    tcam_value_double& d = this->prop.value.d;
 
     if (d.min > new_value || d.max < new_value)
     {

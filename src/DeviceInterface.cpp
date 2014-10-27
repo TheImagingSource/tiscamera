@@ -19,19 +19,19 @@
 #include <algorithm>
 #include <memory>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
-std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const CaptureDevice& device)
+std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const CaptureDevice& device)
 {
 
     try
     {
-        TIS_DEVICE_TYPE type = device.getDeviceType();
+        TCAM_DEVICE_TYPE type = device.getDeviceType();
 
         switch (type)
         {
-            case TIS_DEVICE_TYPE_V4L2:
+            case TCAM_DEVICE_TYPE_V4L2:
             {
 #if HAVE_USB
                 return std::make_shared<V4l2Device>(device);
@@ -39,7 +39,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
                 break;
 #endif
             }
-            case TIS_DEVICE_TYPE_ARAVIS:
+            case TCAM_DEVICE_TYPE_ARAVIS:
             {
 #if HAVE_ARAVIS
                 return std::make_shared<AravisDevice>(device);
@@ -47,8 +47,8 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
                 break;
 #endif
             }
-            case TIS_DEVICE_TYPE_FIREWIRE:
-            case TIS_DEVICE_TYPE_UNKNOWN:
+            case TCAM_DEVICE_TYPE_FIREWIRE:
+            case TCAM_DEVICE_TYPE_UNKNOWN:
             default:
             {
                 throw std::runtime_error("Unsupported device");
@@ -58,7 +58,7 @@ std::shared_ptr<DeviceInterface> tis_imaging::openDeviceInterface (const Capture
     }
     catch (...)
     {
-        tis_log(TIS_LOG_ERROR, "Encountered Error while creating device interface.");
+        tcam_log(TCAM_LOG_ERROR, "Encountered Error while creating device interface.");
         return nullptr;
     }
     return nullptr;

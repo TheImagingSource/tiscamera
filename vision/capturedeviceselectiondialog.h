@@ -19,12 +19,12 @@ public:
     explicit CaptureDeviceSelectionDialog (QWidget *parent = 0);
     ~CaptureDeviceSelectionDialog ();
 
-    tis_imaging::CaptureDevice getSelection ();
+    tcam::CaptureDevice getSelection ();
 
     void update_list ();
 
 signals:
-    void device_selected (tis_imaging::CaptureDevice);
+    void device_selected (tcam::CaptureDevice);
 
 private slots:
     void on_buttonBox_accepted ();
@@ -34,8 +34,8 @@ private slots:
 private:
     Ui::CaptureDeviceSelectionDialog *ui;
 
-    std::vector<tis_imaging::CaptureDevice> devices;
-    std::shared_ptr<tis_imaging::DeviceIndex> device_watch_dog;
+    std::vector<tcam::CaptureDevice> devices;
+    std::shared_ptr<tcam::DeviceIndex> device_watch_dog;
     bool run_thread;
     std::thread work_thread;
 };

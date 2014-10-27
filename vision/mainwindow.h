@@ -25,7 +25,7 @@ public:
     explicit MainWindow (QWidget *parent = 0);
     ~MainWindow();
 
-    tis_imaging::Grabber* getGrabber ();
+    tcam::Grabber* getGrabber ();
 
 signals:
 
@@ -33,7 +33,7 @@ signals:
 
 private slots:
 
-    void my_captureDevice_selected (tis_imaging::CaptureDevice);
+    void my_captureDevice_selected (tcam::CaptureDevice);
 
     // create selection dialog
     void on_actionOpen_Camera_triggered ();
@@ -66,11 +66,11 @@ private:
     QPainter painter;
     bool playing;
 
-    tis_imaging::Grabber* grabber;
-    std::shared_ptr<tis_imaging::ImageSink> sink;
-    std::vector<tis_imaging::VideoFormatDescription> available_formats;
+    tcam::Grabber* grabber;
+    std::shared_ptr<tcam::ImageSink> sink;
+    std::vector<tcam::VideoFormatDescription> available_formats;
 
-    tis_imaging::CaptureDevice open_device;
+    tcam::CaptureDevice open_device;
 
     VideoFormat active_format;
 

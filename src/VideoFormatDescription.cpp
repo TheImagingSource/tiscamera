@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 VideoFormatDescription::VideoFormatDescription (const struct video_format_description& f,
@@ -145,7 +145,7 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
 
     if (!isValidResolution(to_check.getSize().width, to_check.getSize().height))
     {
-        // tis_log(TIS_LOG_ERROR, "Resolution is not");
+        // tcam_log(TCAM_LOG_ERROR, "Resolution is not");
         return false;
     }
 
@@ -159,7 +159,7 @@ bool VideoFormatDescription::isValidFramerate (double framerate) const
 
 
     // TODO: framerate checking
-    // if (this->format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
+    // if (this->format.framerate_type == TCAM_FRAMERATE_TYPE_FIXED)
     // {
     // auto f = [&desc] (const double& fps)
     // {
@@ -189,7 +189,7 @@ bool VideoFormatDescription::isValidFramerate (double framerate) const
 
 bool VideoFormatDescription::isValidResolution (unsigned int width, unsigned int height) const
 {
-    if (format.framerate_type == TIS_FRAMERATE_TYPE_FIXED)
+    if (format.framerate_type == TCAM_FRAMERATE_TYPE_FIXED)
     {
         return (format.min_size.width == width && format.min_size.height == height);
     }

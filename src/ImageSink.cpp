@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 ImageSink::ImageSink ()

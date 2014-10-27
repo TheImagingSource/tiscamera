@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <utils.h>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 PipelineManager::PipelineManager ()
     : status(PIPELINE_UNDEFINED), filter_loader()
@@ -69,7 +69,7 @@ bool PipelineManager::setStatus (PIPELINE_STATUS s)
         if (create_pipeline())
         {
             start_playing();
-            tis_log(TIS_LOG_INFO, "All pipeline elements set to PLAYING.");
+            tcam_log(TCAM_LOG_INFO, "All pipeline elements set to PLAYING.");
         }
         else
         {
@@ -115,7 +115,7 @@ void PipelineManager::index_output_formats ()
     uint32_t fourcc = 0;
     auto dev_formats = [&fourcc] (const VideoFormatDescription& vfd)
         {
-            tis_log(TIS_LOG_DEBUG,
+            tcam_log(TCAM_LOG_DEBUG,
                     "Testing %s against %s",
                     fourcc2description(fourcc),
                     fourcc2description(vfd.getFormatDescription().fourcc));
@@ -211,7 +211,7 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 
     if (available_output_formats.empty())
     {
-        tis_log(TIS_LOG_ERROR, "No output formats available.");
+        tcam_log(TCAM_LOG_ERROR, "No output formats available.");
         return false;
     }
 
@@ -278,7 +278,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 
     for (const auto& v : available_input_formats)
     {
-        tis_log(TIS_LOG_DEBUG,
+        tcam_log(TCAM_LOG_DEBUG,
                 "Found device fourcc '%s' - %d",
                 fourcc2description(v.getFormatDescription().fourcc),
                 v.getFormatDescription().fourcc);
@@ -293,13 +293,13 @@ bool PipelineManager::set_source_status (PIPELINE_STATUS status)
 {
     if (source == nullptr)
     {
-        tis_log(TIS_LOG_ERROR, "Source is not defined");
+        tcam_log(TCAM_LOG_ERROR, "Source is not defined");
         return false;
     }
 
     if (!source->setStatus(status))
     {
-        tis_log(TIS_LOG_ERROR, "Source did not accept status change");
+        tcam_log(TCAM_LOG_ERROR, "Source did not accept status change");
         return false;
     }
 
@@ -311,13 +311,13 @@ bool PipelineManager::set_sink_status (PIPELINE_STATUS status)
 {
     if (sink == nullptr)
     {
-        tis_log(TIS_LOG_ERROR, "Sink is not defined.");
+        tcam_log(TCAM_LOG_ERROR, "Sink is not defined.");
         return false;
     }
 
     if (!sink->setStatus(status))
     {
-        tis_log(TIS_LOG_ERROR, "Sink spewed error");
+        tcam_log(TCAM_LOG_ERROR, "Sink spewed error");
         return false;
     }
 
@@ -339,7 +339,7 @@ bool PipelineManager::validate_pipeline ()
 
     if (in_format != this->input_format)
     {
-        tis_log(TIS_LOG_DEBUG,
+        tcam_log(TCAM_LOG_DEBUG,
                 "Video format in source does not match pipeline: '%s' != '%s'",
                 in_format.toString().c_str(),
                 input_format.toString().c_str());
@@ -355,7 +355,7 @@ bool PipelineManager::validate_pipeline ()
 
         if (in != in_format)
         {
-            tis_log(TIS_LOG_ERROR,
+            tcam_log(TCAM_LOG_ERROR,
                     "Ingoing video format for filter %s is not compatible with previous element. '%s' != '%s'",
                     f->getDescription().name.c_str(),
                     in_format.toString().c_str(),
@@ -365,7 +365,7 @@ bool PipelineManager::validate_pipeline ()
         }
         else
         {
-            tis_log(TIS_LOG_DEBUG, "Filter %s connected to pipeline -- %s",
+            tcam_log(TCAM_LOG_DEBUG, "Filter %s connected to pipeline -- %s",
                     f->getDescription().name.c_str(),
                     out.toString().c_str());
             // save output for next comparison
@@ -375,7 +375,7 @@ bool PipelineManager::validate_pipeline ()
 
     if (in_format != this->output_format)
     {
-        tis_log(TIS_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
+        tcam_log(TCAM_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
                 in_format.toString().c_str(),
                 output_format.toString().c_str());
         return false;
@@ -423,26 +423,26 @@ bool PipelineManager::create_conversion_pipeline ()
                 {
                     if (f->setVideoFormat(input_format, output_format))
                     {
-                        tis_log(TIS_LOG_DEBUG,
+                        tcam_log(TCAM_LOG_DEBUG,
                                 "Added filter \"%s\" to pipeline",
                                 s.c_str());
                         filter_pipeline.push_back(f);
                     }
                     else
                     {
-                        tis_log(TIS_LOG_DEBUG,
+                        tcam_log(TCAM_LOG_DEBUG,
                                 "Filter %s did not accept format settings",
                                 s.c_str());
                     }
                 }
                 else
                 {
-                    tis_log(TIS_LOG_DEBUG, "Filter %s does not use the device output formats.", s.c_str());
+                    tcam_log(TCAM_LOG_DEBUG, "Filter %s does not use the device output formats.", s.c_str());
                 }
             }
             else
             {
-                tis_log(TIS_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
+                tcam_log(TCAM_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
 
             }
         }
@@ -474,14 +474,14 @@ bool PipelineManager::add_interpretation_filter ()
 
             if (all_formats ||isFilterApplicable(input_format.getFourcc(), f->getDescription().input_fourcc))
             {
-                tis_log(TIS_LOG_DEBUG, "Adding filter '%s' after source", s.c_str());
+                tcam_log(TCAM_LOG_DEBUG, "Adding filter '%s' after source", s.c_str());
                 f->setVideoFormat(input_format, input_format);
                 filter_pipeline.insert(filter_pipeline.begin(), f);
                 continue;
             }
             else
             {
-                tis_log(TIS_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
+                tcam_log(TCAM_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
             }
 
             if (f->setVideoFormat(input_format, input_format))
@@ -538,28 +538,28 @@ bool PipelineManager::create_pipeline ()
 
     if (source->setVideoFormat(input_format))
     {
-        tis_log(TIS_LOG_ERROR, "Unable to set video format in source.");
+        tcam_log(TCAM_LOG_ERROR, "Unable to set video format in source.");
     }
 
     if (!add_interpretation_filter())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
+        tcam_log(TCAM_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
         return false;
     }
 
     if (!allocate_conversion_buffer())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
+        tcam_log(TCAM_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
         return false;
     }
 
     if (!validate_pipeline())
     {
-        tis_log(TIS_LOG_ERROR, "Unable to validate pipeline. Aborting...");
+        tcam_log(TCAM_LOG_ERROR, "Unable to validate pipeline. Aborting...");
         return false;
     }
 
-    tis_log(TIS_LOG_INFO, "Pipeline creation successful.");
+    tcam_log(TCAM_LOG_INFO, "Pipeline creation successful.");
 
     std::string ppl = "source -> ";
 
@@ -569,7 +569,7 @@ bool PipelineManager::create_pipeline ()
         ppl += " -> ";
     }
     ppl += " sink";
-    tis_log(TIS_LOG_INFO, "%s" , ppl.c_str());
+    tcam_log(TCAM_LOG_INFO, "%s" , ppl.c_str());
 
     return true;
 }
@@ -580,7 +580,7 @@ bool PipelineManager::start_playing ()
 
     if (!set_sink_status(PIPELINE_PLAYING))
     {
-        tis_log(TIS_LOG_ERROR, "Sink refused to change to state PLAYING");
+        tcam_log(TCAM_LOG_ERROR, "Sink refused to change to state PLAYING");
         goto error;
     }
 
@@ -588,7 +588,7 @@ bool PipelineManager::start_playing ()
     {
         if (!f->setStatus(PIPELINE_PLAYING))
         {
-            tis_log(TIS_LOG_ERROR,
+            tcam_log(TCAM_LOG_ERROR,
                     "Filter %s refused to change to state PLAYING",
                     f->getDescription().name.c_str());
             goto error;
@@ -597,7 +597,7 @@ bool PipelineManager::start_playing ()
 
     if (!set_source_status(PIPELINE_PLAYING))
     {
-        tis_log(TIS_LOG_ERROR, "Source refused to change to state PLAYING");
+        tcam_log(TCAM_LOG_ERROR, "Source refused to change to state PLAYING");
         goto error;
     }
 
@@ -618,7 +618,7 @@ bool PipelineManager::stop_playing ()
 
     if (!set_source_status(PIPELINE_STOPPED))
     {
-        tis_log(TIS_LOG_ERROR, "Source refused to change to state STOP");
+        tcam_log(TCAM_LOG_ERROR, "Source refused to change to state STOP");
         return false;
     }
 
@@ -626,7 +626,7 @@ bool PipelineManager::stop_playing ()
     {
         if (!f->setStatus(PIPELINE_STOPPED))
         {
-            tis_log(TIS_LOG_ERROR,
+            tcam_log(TCAM_LOG_ERROR,
                     "Filter %s refused to change to state STOP",
                     f->getDescription().name.c_str());
             return false;
@@ -675,7 +675,7 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
     }
     else
     {
-      tis_log(TIS_LOG_ERROR, "Sink is NULL");
+      tcam_log(TCAM_LOG_ERROR, "Sink is NULL");
     }
     buffer->unlock();
 }

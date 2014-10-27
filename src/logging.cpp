@@ -7,19 +7,19 @@
 #include <time.h>               /* time_t */
 
 
-static const char* loglevel2string (const enum TIS_LOG_LEVEL level)
+static const char* loglevel2string (const enum TCAM_LOG_LEVEL level)
 {
     switch (level)
     {
-        case TIS_LOG_OFF:
+        case TCAM_LOG_OFF:
             return "OFF";
-        case TIS_LOG_DEBUG:
+        case TCAM_LOG_DEBUG:
             return "DEBUG";
-        case TIS_LOG_INFO:
+        case TCAM_LOG_INFO:
             return "INFO";
-        case TIS_LOG_WARNING:
+        case TCAM_LOG_WARNING:
             return "WARNING";
-        case TIS_LOG_ERROR:
+        case TCAM_LOG_ERROR:
             return "ERROR";
         default:
             return NULL;
@@ -32,7 +32,7 @@ Logger::Logger ():
     logfile(nullptr)
 {
     // TODO: make environment variable name configurable
-    char* log_def = getenv("TIS_LOG");
+    char* log_def = getenv("TCAM_LOG");
     if (log_def == nullptr)
     {
         load_default_settings();
@@ -41,14 +41,14 @@ Logger::Logger ():
 
 void Logger::load_default_settings ()
 {
-    level = TIS_LOG_DEBUG;
+    level = TCAM_LOG_DEBUG;
     target = STDIO;
     log_file = "tmp/tis.log";
 }
 
 
 void Logger::log (const char* module,
-                  enum TIS_LOG_LEVEL level,
+                  enum TCAM_LOG_LEVEL level,
                   const char* function,
                   int line,
                   const char* message,
@@ -105,25 +105,25 @@ void Logger::log_to_file (const char* message)
 {}
 
 
-void Logger::set_log_level (enum TIS_LOG_LEVEL l)
+void Logger::set_log_level (enum TCAM_LOG_LEVEL l)
 {
     level = l;
 }
 
 
-enum TIS_LOG_LEVEL Logger::get_log_level () const
+enum TCAM_LOG_LEVEL Logger::get_log_level () const
 {
     return level;
 }
 
 
-void Logger::set_target (enum TIS_LOG_TARGET t)
+void Logger::set_target (enum TCAM_LOG_TARGET t)
 {
     target = t;
 }
 
 
-enum TIS_LOG_TARGET Logger::get_target () const
+enum TCAM_LOG_TARGET Logger::get_target () const
 {
     return target;
 }
@@ -179,50 +179,50 @@ Logger& Logger::getInstance ()
 
 
 
-void tis_set_logging_level (enum TIS_LOG_LEVEL level)
+void tcam_set_logging_level (enum TCAM_LOG_LEVEL level)
 {
     Logger::getInstance().set_log_level(level);
 }
 
 
-enum TIS_LOG_LEVEL tis_get_logging_level ()
+enum TCAM_LOG_LEVEL tcam_get_logging_level ()
 {
     return Logger::getInstance().get_log_level();
 }
 
 
-void tis_logging_init(enum TIS_LOG_TARGET target, enum TIS_LOG_LEVEL level)
+void tcam_logging_init(enum TCAM_LOG_TARGET target, enum TCAM_LOG_LEVEL level)
 {
-    tis_set_logging_target(target);
-    tis_set_logging_level(level);
+    tcam_set_logging_target(target);
+    tcam_set_logging_level(level);
 }
 
 
 
 
 
-void tis_set_logging_target (enum TIS_LOG_TARGET target)
+void tcam_set_logging_target (enum TCAM_LOG_TARGET target)
 {
     Logger::getInstance().set_target(target);
 }
 
 
-void tis_set_logging_file (const char* logfile_name)
+void tcam_set_logging_file (const char* logfile_name)
 {
     Logger::getInstance().set_log_file(logfile_name);
 }
 
 
-const char* tis_get_logging_file ()
+const char* tcam_get_logging_file ()
 {
     return Logger::getInstance().get_log_file().c_str();
 }
 
 
-void tis_logging (enum TIS_LOG_LEVEL level, const char* file, int line, const char* message, ...)
+void tcam_logging (enum TCAM_LOG_LEVEL level, const char* file, int line, const char* message, ...)
 {
     if (Logger::getInstance().get_log_level() > level ||
-        Logger::getInstance().get_log_level() == TIS_LOG_OFF)
+        Logger::getInstance().get_log_level() == TCAM_LOG_OFF)
     {
         return;
     }
@@ -236,10 +236,10 @@ void tis_logging (enum TIS_LOG_LEVEL level, const char* file, int line, const ch
 }
 
 
-void tis_logging (const char* module, enum TIS_LOG_LEVEL level, const char* function, int line, const char* message, ...)
+void tcam_logging (const char* module, enum TCAM_LOG_LEVEL level, const char* function, int line, const char* message, ...)
 {
     if (Logger::getInstance().get_log_level() > level ||
-        Logger::getInstance().get_log_level() == TIS_LOG_OFF)
+        Logger::getInstance().get_log_level() == TCAM_LOG_OFF)
     {
         return;
     }

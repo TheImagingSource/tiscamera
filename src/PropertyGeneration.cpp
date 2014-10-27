@@ -11,9 +11,9 @@
 #include <cstring>
 #include <algorithm>
 
-using namespace tis_imaging;
+using namespace tcam;
 
-std::vector<std::shared_ptr<Property>> tis_imaging::generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
+std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
                                                                                    std::shared_ptr<PropertyImpl> impl)
 {
     std::vector<std::shared_ptr<Property>> new_properties;
@@ -34,7 +34,7 @@ std::vector<std::shared_ptr<Property>> tis_imaging::generate_simulated_propertie
 
         // property_description pd = { EMULATED_PROPERTY, property_auto_offset};
 
-        tis_log(TIS_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
+        tcam_log(TCAM_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
 
         new_properties.push_back(property_auto_offset);
     }
@@ -43,7 +43,7 @@ std::vector<std::shared_ptr<Property>> tis_imaging::generate_simulated_propertie
 }
 
 
-bool tis_imaging::handle_auto_center (const Property& new_property,
+bool tcam::handle_auto_center (const Property& new_property,
                                       std::vector<std::shared_ptr<Property>>& props,
                                       const IMG_SIZE& sensor,
                                       const IMG_SIZE& current_format)

@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <unistd.h>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 void print_help ()
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
         print_help();
         return 0;
     }
-    
+
     INTERACTION way = GET;
     std::string serial;
     std::string param;
@@ -149,7 +149,7 @@ int main (int argc, char *argv[])
 
         }
     }
-    
+
     if (!g.isDeviceOpen())
     {
         std::cout << "Unable to find device with serial '" << serial << "'" << std::endl;
@@ -159,7 +159,7 @@ int main (int argc, char *argv[])
     switch (do_this)
     {
         case LIST_PROPERTIES:
-        {            
+        {
             print_properties(g.getAvailableProperties());
             break;
         }

@@ -11,7 +11,7 @@
 
 #include <vector>
 
-namespace tis_imaging
+namespace tcam
 {
 
 
@@ -70,6 +70,6 @@ private:
 
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* VIDEOFORMATDESCRIPTION_H_ */

@@ -3,7 +3,7 @@
 
 #include "logging.h"
 
-using namespace tis_imaging;
+using namespace tcam;
 
 ImageSource::ImageSource ()
     : current_status(PIPELINE_UNDEFINED), n_buffers(10), frame_count(0)
@@ -32,18 +32,18 @@ bool ImageSource::setStatus (PIPELINE_STATUS status)
 
         if ( device->start_stream())
         {
-            tis_log(TIS_LOG_DEBUG, "PLAYING....");
+            tcam_log(TCAM_LOG_DEBUG, "PLAYING....");
         }
         else
         {
-            tis_log(TIS_LOG_ERROR, "Unable to start stream from device.");
+            tcam_log(TCAM_LOG_ERROR, "Unable to start stream from device.");
             return false;
         }
 
     }
     else if (current_status == PIPELINE_STOPPED)
     {
-        tis_log(TIS_LOG_INFO, "Source changed to state STOPPED");
+        tcam_log(TCAM_LOG_INFO, "Source changed to state STOPPED");
         device->stop_stream();
         device->release_buffers();
     }
@@ -61,7 +61,7 @@ PIPELINE_STATUS ImageSource::getStatus () const
 
 bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 {
-    //tis_log(TIS_LOG_DEBUG, "Received device to use as source.");
+    //tcam_log(TCAM_LOG_DEBUG, "Received device to use as source.");
 
     if (current_status == PIPELINE_PAUSED || current_status == PIPELINE_PLAYING)
     {
@@ -104,7 +104,7 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
     if (!pipeline.expired())
         pipeline.lock()->pushImage(buffer);
     else
-        tis_log(TIS_LOG_ERROR, "Pipeline over expiration date.");
+        tcam_log(TCAM_LOG_ERROR, "Pipeline over expiration date.");
 }
 
 

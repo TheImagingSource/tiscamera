@@ -3,7 +3,7 @@
 
 #include <memory>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 PropertyWidget::PropertyWidget (QWidget *parent) :
     QWidget(parent),
@@ -11,7 +11,7 @@ PropertyWidget::PropertyWidget (QWidget *parent) :
 {}
 
 
-PropertyWidget::PropertyWidget (QWidget *parent, tis_imaging::Property* p) :
+PropertyWidget::PropertyWidget (QWidget *parent, tcam::Property* p) :
     QWidget(parent),
     ui(new Ui::PropertyWidget),
     property(*p)
@@ -110,13 +110,13 @@ QString PropertyWidget::getName ()
 }
 
 
-tis_imaging::Property PropertyWidget::getProperty ()
+tcam::Property PropertyWidget::getProperty ()
 {
     return property;
 }
 
 
-void PropertyWidget::setProperty (const tis_imaging::Property& p)
+void PropertyWidget::setProperty (const tcam::Property& p)
 {
     this->property.setStruct( p.getStruct());
 }

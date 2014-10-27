@@ -12,7 +12,7 @@
 #include <cstring>
 
 
-using namespace tis_imaging;
+using namespace tcam;
 
 AravisDevice::AravisDevice (const CaptureDevice& device_desc)
     : device(device_desc), current_buffer(0), stream(NULL)
@@ -61,7 +61,7 @@ std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
     {
         vec.push_back(p.prop);
     }
-    tis_log(TIS_LOG_DEBUG, "Returning %d properties", vec.size());
+    tcam_log(TCAM_LOG_DEBUG, "Returning %d properties", vec.size());
 
     return vec;
 }
@@ -104,7 +104,7 @@ bool AravisDevice::setProperty (const Property& p)
     {
         case Property::INTEGER:
         {
-            tis_log(TIS_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
+            tcam_log(TCAM_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
             // PropertyInteger&
             arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
             pm->prop->setStruct(p.getStruct());
@@ -112,13 +112,13 @@ bool AravisDevice::setProperty (const Property& p)
         }
         case Property::INTSWISSKNIFE:
         {
-            tis_log(TIS_LOG_ERROR, "Swissknife");
+            tcam_log(TCAM_LOG_ERROR, "Swissknife");
             arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
             break;
         }
         case Property::FLOAT:
         {
-            tis_log(TIS_LOG_ERROR, "FLOAT");
+            tcam_log(TCAM_LOG_ERROR, "FLOAT");
             arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
             pm->prop->setStruct(p.getStruct());
 
@@ -133,7 +133,7 @@ bool AravisDevice::setProperty (const Property& p)
         }
         case Property::BOOLEAN:
         {
-            tis_log(TIS_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
+            tcam_log(TCAM_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
             if (((PropertySwitch&)p).getValue())
                 arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
             else
@@ -145,7 +145,7 @@ bool AravisDevice::setProperty (const Property& p)
         case Property::STRING:
         case Property::ENUM:
         {
-            tis_log(TIS_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
+            tcam_log(TCAM_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
             if (p.getType() == PROPERTY_TYPE_BOOLEAN)
             {
                 if (((PropertySwitch&)p).getValue())
@@ -162,7 +162,7 @@ bool AravisDevice::setProperty (const Property& p)
         case Property::UNDEFINED:
         default:
         {
-            tis_log(TIS_LOG_ERROR, "NOT SUPPORTED!!!");
+            tcam_log(TCAM_LOG_ERROR, "NOT SUPPORTED!!!");
             break;
         }
     }
@@ -193,7 +193,7 @@ bool AravisDevice::setVideoFormat (const VideoFormat& new_format)
     // return false;
     // }
 
-    tis_log(TIS_LOG_DEBUG, "Setting format to '%s'", new_format.toString().c_str());
+    tcam_log(TCAM_LOG_DEBUG, "Setting format to '%s'", new_format.toString().c_str());
 
     arv_camera_set_frame_rate (this->arv_camera, 3.75);
 
@@ -281,12 +281,12 @@ bool AravisDevice::start_stream ()
 {
     if (arv_camera == NULL)
     {
-        tis_log(TIS_LOG_ERROR, "ArvCamera missing!");
+        tcam_log(TCAM_LOG_ERROR, "ArvCamera missing!");
         return false;
     }
     if (external_sink == nullptr)
     {
-        tis_log(TIS_LOG_ERROR, "No sink specified");
+        tcam_log(TCAM_LOG_ERROR, "No sink specified");
         return false;
     }
 
@@ -294,7 +294,7 @@ bool AravisDevice::start_stream ()
 
     if (this->stream == NULL)
     {
-        tis_log(TIS_LOG_ERROR, "Unable to create ArvStream.");
+        tcam_log(TCAM_LOG_ERROR, "Unable to create ArvStream.");
         // TODO errno
         return false;
     }
@@ -334,7 +334,7 @@ bool AravisDevice::start_stream ()
 
     g_signal_connect (stream, "new-buffer", G_CALLBACK (callback), this);
 
-    tis_log(TIS_LOG_INFO, "Starting actual stream...");
+    tcam_log(TCAM_LOG_INFO, "Starting actual stream...");
 
     arv_camera_start_acquisition(this->arv_camera);
 
@@ -358,7 +358,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
     {
-        tis_log(TIS_LOG_ERROR, "Callback camera instance is NULL.");
+        tcam_log(TCAM_LOG_ERROR, "Callback camera instance is NULL.");
         return;
     }
     if (self->stream == NULL)
@@ -387,11 +387,11 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
             if (desc.pData == NULL)
             {
-                tis_log(TIS_LOG_ERROR, "FUCKING HELL");
+                tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
             }
 
             self->buffers.at(self->current_buffer)->setImageBuffer(desc);
-            //tis_log(TIS_LOG_DEBUG, "Pushing new image buffer to sink.");
+            //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
             self->external_sink->pushImage(self->buffers.at(self->current_buffer));
 
             if (self->current_buffer < self->buffers.size() -1)
@@ -429,11 +429,11 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
                     // if (buffer->data == NULL)
                     // {
-                    // tis_log(TIS_LOG_ERROR, "FUCKING HELL");
+                    // tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
                     // }
 
                     // self->buffers.at(self->current_buffer)->setImageBuffer(desc);
-                    // tis_log(TIS_LOG_DEBUG, "Pushing new image buffer to sink.");
+                    // tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
                     // self->external_sink->pushImage(self->buffers.at(self->current_buffer));
 
                     // if (self->current_buffer < self->buffers.size() -1)
@@ -462,9 +462,9 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                     msg = "This should not happen";
                     break;
             }
-            tis_log(TIS_LOG_WARNING, msg.c_str());
+            tcam_log(TCAM_LOG_WARNING, msg.c_str());
         }
-        //tis_log(TIS_LOG_DEBUG, "Returning buffer to aravis.");
+        //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
         arv_stream_push_buffer(self->stream, buffer);
     }
     else
@@ -669,7 +669,7 @@ void AravisDevice::iterate_genicam (const char* feature)
 
                 if (m.prop == nullptr)
                 {
-                    tis_log(TIS_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+                    tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
                     return;
                 }
 
@@ -746,7 +746,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     }
     else
     {
-        tis_log(TIS_LOG_ERROR, "Unable to find fps node.");
+        tcam_log(TCAM_LOG_ERROR, "Unable to find fps node.");
         // fallback and atleast try to not wreck the whole system
 
         // show that something went wrong
@@ -834,7 +834,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
         if ( n_formats != n2_formats )
         {
-            tis_log ( TIS_LOG_ERROR, "Format retrieval encountered nonsensical information" );
+            tcam_log ( TCAM_LOG_ERROR, "Format retrieval encountered nonsensical information" );
         }
 
         for ( int i = 0; i < n_formats; ++i )
@@ -847,7 +847,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             if (desc.fourcc == 0)
             {
-                tis_log(TIS_LOG_ERROR, "Input format no supported! \"%x\"", format_ptr[i]);
+                tcam_log(TCAM_LOG_ERROR, "Input format no supported! \"%x\"", format_ptr[i]);
             }
 
             memcpy(desc.description, format_str[i], sizeof(desc.description));
@@ -882,11 +882,11 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                 struct video_format_description d = desc;
 
                 d.binning = b;
-                d.framerate_type = TIS_FRAMERATE_TYPE_RANGE;
+                d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
                 d.min_size = min;
                 d.max_size = max;
 
-                tis_log(TIS_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
+                tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
 
                 this->available_videoformats.push_back ( VideoFormatDescription ( d, res_vec ) );
             }
@@ -895,7 +895,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     }
     else
     {
-        tis_log(TIS_LOG_ERROR, "NO PixelFormat Node");
+        tcam_log(TCAM_LOG_ERROR, "NO PixelFormat Node");
 
         // TODO
     }

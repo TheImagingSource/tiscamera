@@ -6,7 +6,7 @@
 #include "Properties.h"
 #include "CaptureDevice.h"
 
-namespace tis_imaging
+namespace tcam
 {
 
 uint32_t convertV4L2flags (uint32_t v4l2_flags);
@@ -34,6 +34,6 @@ std::shared_ptr<Property> createProperty (int fd,
  */
 std::vector<CaptureDevice> get_v4l2_device_list ();
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* V4L2_UTILS_H */

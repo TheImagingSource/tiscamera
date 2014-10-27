@@ -9,7 +9,7 @@
 #include <cstring>
 #include <algorithm>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 Property::Property ()
@@ -35,7 +35,7 @@ Property::~Property ()
 
 void Property::reset ()
 {
-    tis_log(TIS_LOG_INFO, "Resetting property to initial values.");
+    tcam_log(TCAM_LOG_INFO, "Resetting property to initial values.");
     prop = ref_prop;
 
     notifyImpl();
@@ -304,17 +304,17 @@ void Property::notifyImpl ()
 {
     if (impl.expired())
     {
-        tis_log(TIS_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
+        tcam_log(TCAM_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
     }
 
     auto ptr(impl.lock());
 
-    // tis_log(TIS_LOG_DEBUG, "Notifying impl about property change.");
+    // tcam_log(TCAM_LOG_DEBUG, "Notifying impl about property change.");
     ptr->setProperty(*this);
 }
 
 
-PROPERTY_TYPE tis_imaging::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
+PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
 {
     switch (t)
     {

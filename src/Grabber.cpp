@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "serialization.h"
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 Grabber::Grabber ()
@@ -81,7 +81,7 @@ bool Grabber::openDevice (const CaptureDevice& device_desc)
         bool ret = closeDevice();
         if (ret == false)
         {
-            tis_log(TIS_LOG_ERROR, "Unable to close previous device.");
+            tcam_log(TCAM_LOG_ERROR, "Unable to close previous device.");
             return false;
         }
     }
@@ -99,11 +99,11 @@ bool Grabber::openDevice (const CaptureDevice& device_desc)
 
     if (device_properties.empty())
     {
-        tis_log(TIS_LOG_ERROR, "Device did not expose any properties!");
+        tcam_log(TCAM_LOG_ERROR, "Device did not expose any properties!");
     }
     else
     {
-        tis_log(TIS_LOG_DEBUG, "Retrieved %d properties", device_properties.size());
+        tcam_log(TCAM_LOG_DEBUG, "Retrieved %d properties", device_properties.size());
     }
     bool ret = pipeline->setSource(device);
 
@@ -124,7 +124,7 @@ bool Grabber::isDeviceOpen () const
         return true;
     }
 
-    tis_log(TIS_LOG_ERROR, "No open device");
+    tcam_log(TCAM_LOG_ERROR, "No open device");
     setError(Error("No open device", ENOENT));
 
     return false;
@@ -147,7 +147,7 @@ bool Grabber::closeDevice ()
     device.reset();
     device_properties.clear();
 
-    tis_log(TIS_LOG_INFO, "Closed device %s.", name.c_str());
+    tcam_log(TCAM_LOG_INFO, "Closed device %s.", name.c_str());
 
     return true;
 }

@@ -16,7 +16,7 @@
 #include <map>
 
 
-namespace tis_imaging
+namespace tcam
 {
 
 class Property : public PropertyImpl
@@ -95,6 +95,6 @@ protected:
 
 PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t);
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* PROPERTY_H_ */

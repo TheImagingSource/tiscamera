@@ -191,7 +191,7 @@
     <property name="title">
      <string>About</string>
     </property>
-    <addaction name="actionTis_vision"/>
+    <addaction name="actionTcam_vision"/>
     <addaction name="actionContact"/>
    </widget>
    <widget class="QMenu" name="menuVideo">
@@ -238,9 +238,9 @@
     <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionTis_vision">
+  <action name="actionTcam_vision">
    <property name="text">
-    <string>tis_vision</string>
+    <string>tcam_vision</string>
    </property>
   </action>
   <action name="actionContact">

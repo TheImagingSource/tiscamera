@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cstdlib>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 MemoryBuffer::MemoryBuffer (const struct image_buffer& buf)

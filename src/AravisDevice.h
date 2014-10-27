@@ -8,7 +8,7 @@
 
 #include <arv.h>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class AravisDevice : public DeviceInterface, public std::enable_shared_from_this<AravisDevice>
@@ -99,6 +99,6 @@ private:
 
 }; /* class GigeCapture */
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* ARAVISDEVICE_H */

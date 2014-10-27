@@ -9,7 +9,7 @@
 #include <cstring>
 #include <cstdlib>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 VideoFormat::VideoFormat ()
@@ -138,13 +138,13 @@ bool VideoFormat::fromString (const std::string& desc)
 
         if (val.size() != 2)
         {
-            tis_log(TIS_LOG_ERROR, "Received faulty VideoFormat String \"%s\"", v.c_str());
+            tcam_log(TCAM_LOG_ERROR, "Received faulty VideoFormat String \"%s\"", v.c_str());
             return false;
         }
 
         if (val[0].compare("format") == 0)
         {
-            tis_log(TIS_LOG_ERROR, "format is  \"%s\"", val[1].c_str());
+            tcam_log(TCAM_LOG_ERROR, "format is  \"%s\"", val[1].c_str());
 
             f.fourcc  = description2fourcc(val[1].c_str());
         }
@@ -166,7 +166,7 @@ bool VideoFormat::fromString (const std::string& desc)
         }
         else
         {
-            tis_log(TIS_LOG_ERROR, "Unknown descriptor in VideoFormat String \"%s\"", val[0].c_str());
+            tcam_log(TCAM_LOG_ERROR, "Unknown descriptor in VideoFormat String \"%s\"", val[0].c_str());
             return false;
         }
     }

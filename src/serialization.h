@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace tis_imaging
+namespace tcam
 {
 
 /**
@@ -32,6 +32,6 @@ bool save_xml_description (const std::string& filename,
                            const VideoFormat& format,
                            const std::vector<std::shared_ptr<Property>>& properties);
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* SERIALIZATION_H */

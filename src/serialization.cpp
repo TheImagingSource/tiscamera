@@ -9,10 +9,10 @@
 
 #include <algorithm>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
-bool tis_imaging::export_device_list (const std::vector<CaptureDevice>& device_list,
+bool tcam::export_device_list (const std::vector<CaptureDevice>& device_list,
                                       const std::string& filename)
 {
     // all allocated tinyxml elements will automatically be cleaned up
@@ -153,7 +153,7 @@ static bool load_property_values (TiXmlNode* properties_node,
 }
 
 
-bool tis_imaging::load_xml_description (const std::string& filename,
+bool tcam::load_xml_description (const std::string& filename,
                                         const CaptureDevice& device,
                                         VideoFormat& format,
                                         std::vector<std::shared_ptr<Property>>& properties)
@@ -187,7 +187,7 @@ bool tis_imaging::load_xml_description (const std::string& filename,
 }
 
 
-bool tis_imaging::save_xml_description (const std::string& filename,
+bool tcam::save_xml_description (const std::string& filename,
                                         const CaptureDevice& device,
                                         const VideoFormat& format,
                                         const std::vector<std::shared_ptr<Property>>& properties)

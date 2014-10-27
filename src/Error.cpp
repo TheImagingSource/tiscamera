@@ -3,7 +3,7 @@
 
 #include "Error.h"
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 Error::Error ():
@@ -39,19 +39,19 @@ Error::Error (const Error& e)
 
 Error global_last_error;
 
-Error tis_imaging::getError ()
+Error tcam::getError ()
 {
     return global_last_error;
 }
 
 
-void tis_imaging::setError (const Error& err)
+void tcam::setError (const Error& err)
 {
     global_last_error = err;
 }
 
 
-void tis_imaging::resetError ()
+void tcam::resetError ()
 {
     setError(Error());
 }

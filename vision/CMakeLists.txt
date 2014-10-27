@@ -64,7 +64,7 @@ include_directories("${CMAKE_BINARY_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 # Build the app!
-add_executable(tis_vision
+add_executable(tcam_vision
      MACOSX_BUNDLE
      WIN32
      # source files that are actually built direclty
@@ -78,6 +78,5 @@ add_executable(tis_vision
      ${RESOURCES})
 
 # Link the app!
-target_link_libraries(tis_vision tis_imaging)
-target_link_libraries(tis_vision ${QT_LIBRARIES})
-
+target_link_libraries(tcam_vision tcam)
+target_link_libraries(tcam_vision ${QT_LIBRARIES})

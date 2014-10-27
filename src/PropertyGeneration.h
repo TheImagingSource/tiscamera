@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 
@@ -34,6 +34,6 @@ bool handle_auto_center (const Property& new_property,
                          const IMG_SIZE& sensor,
                          const IMG_SIZE& current_format);
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* PROPERTYGENERATION_H_ */

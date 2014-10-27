@@ -34,20 +34,20 @@ enum PIPELINE_STATUS
 /**
  * Supported camera types
  */
-enum TIS_DEVICE_TYPE
+enum TCAM_DEVICE_TYPE
 {
-    TIS_DEVICE_TYPE_UNKNOWN = 0,
-    TIS_DEVICE_TYPE_V4L2,
-    TIS_DEVICE_TYPE_FIREWIRE,    /* both 400 and 800 */
-    TIS_DEVICE_TYPE_ARAVIS,      /* currently through aravis */
+    TCAM_DEVICE_TYPE_UNKNOWN = 0,
+    TCAM_DEVICE_TYPE_V4L2,
+    TCAM_DEVICE_TYPE_FIREWIRE,    /* both 400 and 800 */
+    TCAM_DEVICE_TYPE_ARAVIS,      /* currently through aravis */
 };
 
 /**
- * @name tis_device_info
+ * @name tcam_device_info
  */
-struct tis_device_info
+struct tcam_device_info
 {
-    enum TIS_DEVICE_TYPE type; ///< type of camera connection
+    enum TCAM_DEVICE_TYPE type; ///< type of camera connection
     char name[128];            ///< Camera name (e.g. DFK 23UP031)
     char identifier[128];      ///< identifier used for camera interaction (e.g. /dev/video0)
     char serial_number[64];    ///< unique identifier
@@ -63,10 +63,10 @@ struct IMG_SIZE
 /**
  * format capabilities
  */
-enum TIS_FRAMERATE_TYPE
+enum TCAM_FRAMERATE_TYPE
 {
-    TIS_FRAMERATE_TYPE_RANGE, ///< returned values should be interpreted as boundaries for value range
-    TIS_FRAMERATE_TYPE_FIXED, ///< only non-negotiable framerates are offered
+    TCAM_FRAMERATE_TYPE_RANGE, ///< returned values should be interpreted as boundaries for value range
+    TCAM_FRAMERATE_TYPE_FIXED, ///< only non-negotiable framerates are offered
 };
 
 
@@ -84,7 +84,7 @@ struct video_format_description
 
     uint32_t binning;
 
-    enum TIS_FRAMERATE_TYPE framerate_type;
+    enum TCAM_FRAMERATE_TYPE framerate_type;
 };
 
 
@@ -152,7 +152,7 @@ enum PROPERTY_TYPE
 };
 
 
-struct tis_value_int
+struct tcam_value_int
 {
     int64_t min;
     int64_t max;
@@ -162,7 +162,7 @@ struct tis_value_int
 };
 
 
-struct tis_value_double
+struct tcam_value_double
 {
     double min;
     double max;
@@ -172,21 +172,21 @@ struct tis_value_double
 };
 
 
-struct tis_value_string
+struct tcam_value_string
 {
     char value[64];
     char default_value[64];
 };
 
 
-struct tis_value_bool
+struct tcam_value_bool
 {
     bool value;
     bool default_value;
 };
 
 /**
- * @struct tis_camera_capability
+ * @struct tcam_camera_capability
  * @brief unified property description
  */
 struct camera_property
@@ -196,10 +196,10 @@ struct camera_property
 
     union
     {
-        struct tis_value_int i;
-        struct tis_value_double d;
-        struct tis_value_string s;
-        struct tis_value_bool b;
+        struct tcam_value_int i;
+        struct tcam_value_double d;
+        struct tcam_value_string s;
+        struct tcam_value_bool b;
     } value; ///< actual value settings
 
     uint32_t flags;             ///< bit flags

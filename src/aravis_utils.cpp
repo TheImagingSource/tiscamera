@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <vector>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 struct aravis_property
 {
@@ -177,9 +177,9 @@ static PROPERTY_ID find_mapping (const std::string& genicam_id)
 }
 
 
-std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
-                                                       ArvGcNode* node,
-                                                       std::shared_ptr<PropertyImpl> impl)
+std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
+                                                ArvGcNode* node,
+                                                std::shared_ptr<PropertyImpl> impl)
 {
     // Map genicam feature to library feature
     // Check if an existing control should be used
@@ -217,7 +217,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
     }
     else
     {
-        tis_log(TIS_LOG_ERROR, "%s has unknown node type '%s'", feature, node_type);
+        tcam_log(TCAM_LOG_ERROR, "%s has unknown node type '%s'", feature, node_type);
         // TODO ERROR
     }
 
@@ -231,7 +231,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
 
     if (ctrl_m.id == PROPERTY_INVALID)
     {
-        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. %s", feature);
+        tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. %s", feature);
         // pass through and do not associate with anything existing
         // TODO LOG
         type_to_use = value_type_to_ctrl_type(type);
@@ -313,12 +313,12 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
             return std::make_shared<PropertyDouble>(impl, prop, type);
 
             // TODO: implement
-            tis_log(TIS_LOG_ERROR, "Trying to map int to double. not implemented.");
+            tcam_log(TCAM_LOG_ERROR, "Trying to map int to double. not implemented.");
             return nullptr;
         }
         else
         {
-            tis_log(TIS_LOG_ERROR, "\n\nBAD");
+            tcam_log(TCAM_LOG_ERROR, "\n\nBAD");
         }
 
         // ctrl.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
@@ -447,12 +447,12 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
         }
         else
         {
-            tis_log(TIS_LOG_DEBUG,"SHIT");
+            tcam_log(TCAM_LOG_DEBUG,"SHIT");
         }
     }
     else
     {
-        tis_log(TIS_LOG_WARNING, "Unknown Control '%s'", feature);
+        tcam_log(TCAM_LOG_WARNING, "Unknown Control '%s'", feature);
     }
 
     return nullptr;
@@ -460,7 +460,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (ArvCamera* camera,
 }
 
 
-std::vector<CaptureDevice> tis_imaging::get_aravis_device_list ()
+std::vector<CaptureDevice> tcam::get_aravis_device_list ()
 {
     std::vector<CaptureDevice> device_list;
 
@@ -475,13 +475,13 @@ std::vector<CaptureDevice> tis_imaging::get_aravis_device_list ()
 
     for (unsigned int i = 0; i < number_devices; ++i)
     {
-        tis_device_info info = {};
+        tcam_device_info info = {};
         std::string name = arv_get_device_id(i);
         memcpy(info.identifier, name.c_str(), name.size());
 
         ArvCamera* cam = arv_camera_new(name.c_str());
 
-        info.type = TIS_DEVICE_TYPE_ARAVIS;
+        info.type = TCAM_DEVICE_TYPE_ARAVIS;
         const char* n =  arv_camera_get_model_name(cam);
 
         if (n != NULL)
@@ -490,7 +490,7 @@ std::vector<CaptureDevice> tis_imaging::get_aravis_device_list ()
         }
         else
         {
-            tis_log(TIS_LOG_WARNING, "Unable to determine model name.");
+            tcam_log(TCAM_LOG_WARNING, "Unable to determine model name.");
         }
         size_t t = name.find("-");
 

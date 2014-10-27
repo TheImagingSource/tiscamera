@@ -9,7 +9,7 @@
 
 #include "MemoryBuffer.h"
 
-inline img::img_descriptor to_img_desc (tis_imaging::MemoryBuffer& buf)
+inline img::img_descriptor to_img_desc (tcam::MemoryBuffer& buf)
 {
     image_buffer b = buf.getImageBuffer();
     img::img_descriptor img = {b.pData,

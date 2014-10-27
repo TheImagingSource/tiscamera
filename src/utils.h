@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 std::string propertyType2String (PROPERTY_TYPE);
@@ -40,9 +40,9 @@ inline unsigned int unset_bit (unsigned int value, unsigned int bitindex)
 }
 
 
-int tis_xioctl (int fd, int request, void* arg);
+int tcam_xioctl (int fd, int request, void* arg);
 
-unsigned int tis_get_required_buffer_size (struct tis_video_format* format);
+unsigned int tcam_get_required_buffer_size (struct tcam_video_format* format);
 
 const char* fourcc2description (uint32_t fourcc);
 
@@ -79,6 +79,6 @@ IMG_SIZE calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image);
 std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties, const std::string& property_name);
 
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* UTILS_H */

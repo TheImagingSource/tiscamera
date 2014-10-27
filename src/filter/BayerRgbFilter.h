@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class BayerRgbFilter : public FilterBase

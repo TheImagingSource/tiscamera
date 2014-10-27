@@ -7,7 +7,7 @@
 
 #include "base_types.h"
 
-namespace tis_imaging
+namespace tcam
 {
 
 class MemoryBuffer
@@ -72,6 +72,6 @@ private:
 };
 
 
-} /* namespace tis_imaging*/
+} /* namespace tcam*/
 
 #endif /* MEMORYBUFFER_H_ */

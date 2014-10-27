@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class SinkInterface
@@ -24,6 +24,6 @@ public:
 
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* SINKINTERFACE_H_ */

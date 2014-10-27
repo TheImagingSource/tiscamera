@@ -5,7 +5,7 @@
 #ifndef PROPERTYIMPL_H_
 #define PROPERTYIMPL_H_
 
-namespace tis_imaging
+namespace tcam
 {
 
 class Property;
@@ -33,6 +33,6 @@ public:
     virtual bool getProperty (Property&) = 0;
 };
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* PROPERTYIMPL_H_ */

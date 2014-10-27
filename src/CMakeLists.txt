@@ -81,24 +81,22 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 
 
 set(PUBLIC_HEADER "tis.h")
-add_library(tis_imaging SHARED  ${srcs} )
+add_library(tcam SHARED  ${srcs} )
 
 if (BUILD_USB)
   if (UDEV_FOUND)
-    TARGET_LINK_LIBRARIES(tis_imaging ${UDEV_LIBRARIES})
+    TARGET_LINK_LIBRARIES(tcam ${UDEV_LIBRARIES})
   endif (UDEV_FOUND)
 endif(BUILD_USB)
 
-TARGET_LINK_LIBRARIES(tis_imaging ${TinyXML_LIBRARIES})
+TARGET_LINK_LIBRARIES(tcam ${TinyXML_LIBRARIES})
 
 if (BUILD_ARAVIS)
-
-  # TARGET_LINK_LIBRARIES(tis_imaging ${aravis_LIBRARIES})
-  TARGET_LINK_LIBRARIES(tis_imaging ${ARAVIS_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam ${ARAVIS_LIBRARIES})
 endif (BUILD_ARAVIS)
 
 
-target_link_libraries(tis_imaging "-L/home/edt/lib -ltis_auto_alg")
+target_link_libraries(tcam "-L/home/edt/lib -ltis_auto_alg")
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)

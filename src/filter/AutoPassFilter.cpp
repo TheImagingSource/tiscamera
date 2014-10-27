@@ -13,7 +13,7 @@
 
 //#include <standard_properties.h>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 PropertyHandler::PropertyHandler ()
@@ -48,10 +48,10 @@ bool PropertyHandler::setProperty (const Property& prop)
     }
     else
     {
-        tis_log(TIS_LOG_ERROR, "Property not supported by impl");
+        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl");
         return false;
     }
-    tis_log(TIS_LOG_DEBUG, "Received change from %s", prop.getName().c_str());
+    tcam_log(TCAM_LOG_DEBUG, "Received change from %s", prop.getName().c_str());
     return true;
 }
 
@@ -277,7 +277,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (exp == dev_properties.end())
     {
-        tis_log(TIS_LOG_INFO, "Unable to find exposure property. Auto Exposure will be disabled.");
+        tcam_log(TCAM_LOG_INFO, "Unable to find exposure property. Auto Exposure will be disabled.");
         return;
     }
     else
@@ -300,7 +300,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (gain == dev_properties.end())
     {
-        tis_log(TIS_LOG_INFO, "Unable to find exposure property. Module will be disabled.");
+        tcam_log(TCAM_LOG_INFO, "Unable to find exposure property. Module will be disabled.");
         return;
     }
     else
@@ -324,13 +324,13 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     if (iris == dev_properties.end())
     {
-        tis_log(TIS_LOG_INFO, "Unable to find iris property.");
+        tcam_log(TCAM_LOG_INFO, "Unable to find iris property.");
         // return;
         //property_iris = nullptr;
     }
     else
     {
-        tis_log(TIS_LOG_INFO, "Found iris property.");
+        tcam_log(TCAM_LOG_INFO, "Found iris property.");
 
         handler->property_iris = std::static_pointer_cast<PropertyInteger>(*iris);
 

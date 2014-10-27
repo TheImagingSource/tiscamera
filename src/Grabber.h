@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class Grabber
@@ -107,6 +107,6 @@ private:
 
 }; /* class Grabber */
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* GRABBER_H_ */

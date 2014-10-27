@@ -13,7 +13,7 @@
 #include <vector>
 #include <memory>
 
-namespace tis_imaging
+namespace tcam
 {
 
 
@@ -141,6 +141,6 @@ public:
 };
 
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* PROPERTIES_H_ */

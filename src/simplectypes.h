@@ -19,7 +19,7 @@ typedef long long REFERENCE_TIME;
 
 
 // #ifndef __midl
-namespace tis_imaging
+namespace tcam
 {
 // #endif
 

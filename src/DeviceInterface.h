@@ -19,7 +19,7 @@
 #include <memory>
 
 
-namespace tis_imaging
+namespace tcam
 {
 
 class DeviceInterface : public PropertyImpl
@@ -100,6 +100,6 @@ public:
  */
 std::shared_ptr<DeviceInterface> openDeviceInterface (const CaptureDevice& device);
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* CAPTUREINTERFACE_H_ */

@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 /**

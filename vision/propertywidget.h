@@ -16,14 +16,14 @@ class PropertyWidget : public QWidget
 public:
     explicit PropertyWidget (QWidget *parent = 0);
 
-    PropertyWidget (QWidget *parent = 0, tis_imaging::Property* = 0);
+    PropertyWidget (QWidget *parent = 0, tcam::Property* = 0);
     ~PropertyWidget ();
 
     QString getName ();
 
-    tis_imaging::Property getProperty ();
+    tcam::Property getProperty ();
 
-    void setProperty (const tis_imaging::Property&);
+    void setProperty (const tcam::Property&);
 
 signals:
     void changed (PropertyWidget*);
@@ -42,7 +42,7 @@ private:
 
     Ui::PropertyWidget *ui;
 
-    tis_imaging::Property property;
+    tcam::Property property;
 
     static const int precision = 1000;
 };

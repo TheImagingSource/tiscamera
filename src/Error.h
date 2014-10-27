@@ -7,7 +7,7 @@
 #include <string>
 
 
-namespace tis_imaging
+namespace tcam
 {
 
 class Error
@@ -79,6 +79,6 @@ void setError (const Error& err);
 
 void resetError ();
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* ERROR_H_ */

@@ -9,7 +9,7 @@
 
 #include "CaptureDevice.h"
 
-namespace tis_imaging
+namespace tcam
 {
 
 std::shared_ptr<Property> createProperty (ArvCamera* camera,
@@ -19,6 +19,6 @@ std::shared_ptr<Property> createProperty (ArvCamera* camera,
 
 std::vector<CaptureDevice> get_aravis_device_list ();
 
-}; /* namespace tis_imaging */
+}; /* namespace tcam */
 
 #endif /* ARAVIS_UTILS_H */

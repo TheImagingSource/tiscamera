@@ -8,7 +8,7 @@
 
 void print_properties (const std::vector<Property>& properties)
 {
-    
+
     for (const auto& p : properties)
     {
         std::cout << std::left;
@@ -42,7 +42,7 @@ void print_properties (const std::vector<Property>& properties)
 
                 std::cout << std::setw(20) << s.getName()
                           << std::setw(10) << "(bool)"
-                          << std::setw(31) << " " 
+                          << std::setw(31) << " "
                           << "default="<< std::setw(5) << s.getDefault()
                           << "value=";
                 if (s.getValue())
@@ -85,7 +85,7 @@ bool set_property (Grabber& g, const std::string& new_prop)
         return false;
     }
 
-    std::vector<std::string> prop_vec = tis_imaging::split_string(new_prop, "=");
+    std::vector<std::string> prop_vec = tcam::split_string(new_prop, "=");
 
     if (prop_vec.size() != 2)
     {
@@ -95,7 +95,7 @@ bool set_property (Grabber& g, const std::string& new_prop)
 
     std::string name = prop_vec.at(0);
     std::string value = prop_vec.at(1);
-    
+
     auto properties = g.getAvailableProperties();
 
     for (Property& p : properties)
@@ -170,16 +170,6 @@ bool set_property (Grabber& g, const std::string& new_prop)
     }
 
     std::cout << "No property with name ' " << name <<"'"<< std::endl;
-    
+
     return false;
 }
-
-
-
-
-
-
-
-
-
-

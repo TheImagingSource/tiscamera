@@ -17,7 +17,7 @@
 #include <vector>
 #include <algorithm>
 
-using namespace tis_imaging;
+using namespace tcam;
 
 struct v4l2_property
 {
@@ -151,7 +151,7 @@ static std::vector<struct v4l2_property> v4l2_mappings =
 };
 
 
-uint32_t tis_imaging::convertV4L2flags (uint32_t v4l2_flags)
+uint32_t tcam::convertV4L2flags (uint32_t v4l2_flags)
 {
     uint32_t internal_flags = 0;
 
@@ -208,7 +208,7 @@ static PROPERTY_ID find_mapping (int v4l2_id)
 }
 
 
-std::shared_ptr<Property> tis_imaging::createProperty (int fd,
+std::shared_ptr<Property> tcam::createProperty (int fd,
                                                        struct v4l2_queryctrl* queryctrl,
                                                        struct v4l2_ext_control* ctrl,
                                                        std::shared_ptr<PropertyImpl> impl)
@@ -261,7 +261,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
 
     if (ctrl_m.id == PROPERTY_INVALID)
     {
-        tis_log(TIS_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
+        tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
@@ -295,7 +295,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             }
             else
             {
-                tis_log(TIS_LOG_ERROR,
+                tcam_log(TCAM_LOG_ERROR,
                         "Boolean '%s' has impossible default value: %d Setting to false",
                         cp.name,
                         queryctrl->default_value);
@@ -312,7 +312,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             }
             else
             {
-                tis_log(TIS_LOG_ERROR,
+                tcam_log(TCAM_LOG_ERROR,
                         "Boolean '%s' has impossible value: %d Setting to false",
                         cp.name,
                         ctrl->value);
@@ -333,7 +333,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
 
             return std::make_shared<Property>(PropertyInteger(impl, cp, type));
         }
-        // case TIS_CTRL_TYPE_DOUBLE:
+        // case TCAM_CTRL_TYPE_DOUBLE:
         // {
         // Does not exist in v4l2
         // }
@@ -363,7 +363,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
             for (int i = 0; i <= queryctrl->maximum; i++)
             {
                 qmenu.index = i;
-                if (tis_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
+                if (tcam_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
                     continue;
 
                 std::string map_string((char*) qmenu.name);
@@ -382,7 +382,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
         {
             std::string s = "Unknown V4L2 Control type: ";
             s.append((char*)queryctrl->name);
-            tis_log(TIS_LOG_ERROR, s.c_str());
+            tcam_log(TCAM_LOG_ERROR, s.c_str());
             setError(Error(s, EIO));
             break;
         }
@@ -391,7 +391,7 @@ std::shared_ptr<Property> tis_imaging::createProperty (int fd,
 }
 
 
-std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
+std::vector<CaptureDevice> tcam::get_v4l2_device_list ()
 {
     std::vector<CaptureDevice> device_list;
 
@@ -449,12 +449,12 @@ std::vector<CaptureDevice> tis_imaging::get_v4l2_device_list ()
 
         // TODO: no hard coded numbers find more general approach
 
-        static const char* TIS_VENDOR_ID_STRING = "199e";
+        static const char* TCAM_VENDOR_ID_STRING = "199e";
 
-        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), TIS_VENDOR_ID_STRING) == 0)
+        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), TCAM_VENDOR_ID_STRING) == 0)
         {
-            tis_device_info info = {};
-            info.type = TIS_DEVICE_TYPE_V4L2;
+            tcam_device_info info = {};
+            info.type = TCAM_DEVICE_TYPE_V4L2;
             strcpy(info.identifier, needed_path);
             strcpy(info.name, udev_device_get_sysattr_value(dev, "product"));
             strcpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"));

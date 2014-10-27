@@ -13,7 +13,7 @@
    Alle devices will have to abide to this mapping.
  */
 
-namespace tis_imaging
+namespace tcam
 {
 
 enum PROPERTY_ID
@@ -243,6 +243,6 @@ inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
 }
 
 
-} /*namespace tis_imaging */
+} /*namespace tcam */
 
 #endif /* user_properties */

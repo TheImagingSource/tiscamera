@@ -7,7 +7,7 @@
 #include "filter/AutoPassFilter.h"
 #include "filter/BayerRgbFilter.h"
 
-using namespace tis_imaging;
+using namespace tcam;
 
 
 FilterLoader::FilterLoader ()

@@ -1,6 +1,6 @@
 
 
-add_subdirectory(tis-ctrl)
+add_subdirectory(tcam-ctrl)
 
 if (BUILD_USB)
   add_subdirectory(firmware-update)

@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace tis_imaging
+namespace tcam
 {
 
 class VideoFormat
@@ -62,6 +62,6 @@ private:
 };
 
 
-} /*namespace tis_imaging */
+} /*namespace tcam */
 
 #endif /* VIDEOFORMAT_H_ */

@@ -11,7 +11,7 @@
 #include <memory>
 
 
-namespace tis_imaging
+namespace tcam
 {
 
 /**
@@ -23,7 +23,7 @@ class CaptureDevice
 public:
 
 
-    explicit CaptureDevice (const struct tis_device_info&);
+    explicit CaptureDevice (const struct tcam_device_info&);
 
     /**
      * @brief Creates an invalid device
@@ -35,9 +35,9 @@ public:
     /**
      * @name getInfo
      * @brief returns a struct version of the device description
-     * @return struct tis_device_info
+     * @return struct tcam_device_info
      */
-    struct tis_device_info getInfo () const;
+    struct tcam_device_info getInfo () const;
 
     std::string getName () const;
 
@@ -50,10 +50,10 @@ public:
      */
     std::string getIdentifier () const;
 
-    enum TIS_DEVICE_TYPE getDeviceType () const;
+    enum TCAM_DEVICE_TYPE getDeviceType () const;
 
     /**
-     * @brief returns @TIS_DEVICE_TYPE string representation
+     * @brief returns @TCAM_DEVICE_TYPE string representation
      * @return std::string
      */
     std::string getDeviceTypeAsString () const;
@@ -61,10 +61,10 @@ public:
 private:
 
     /// internal device representation
-    struct tis_device_info device;
+    struct tcam_device_info device;
 
 }; /* class CaptureDevice */
 
-} /* namespace tis_imaging */
+} /* namespace tcam */
 
 #endif /* CAPTUREDEVICE_H_ */
