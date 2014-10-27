@@ -15,7 +15,8 @@ namespace tcam
 {
 
 /**
- * @class
+ * @class DeviceInfo
+ * Contains a unique device description
  */
 class DeviceInfo
 {
@@ -39,8 +40,15 @@ public:
      */
     struct tcam_device_info getInfo () const;
 
+    /**
+     * Description for getName.
+     * @return string containing the device model
+     */
     std::string getName () const;
 
+    /**
+     * @return string containing the serial number of the device
+     */
     std::string getSerial () const;
 
     /**
@@ -50,6 +58,9 @@ public:
      */
     std::string getIdentifier () const;
 
+    /**
+     * @return TCAM_DEVICE_TYPE of the device
+     */
     enum TCAM_DEVICE_TYPE getDeviceType () const;
 
     /**

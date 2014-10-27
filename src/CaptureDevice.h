@@ -73,20 +73,47 @@ public:
 
     // property related:
 
+    /**
+     * @return vector containing all available properties
+     */
     std::vector<Property> getAvailableProperties ();
 
     // videoformat related:
 
+
+    /**
+     * @return vector containing all available video format settings
+     */
     std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
 
-    bool setVideoFormat (const VideoFormat&);
 
+    /**
+     * Description for setVideoFormat.
+     * @param new_format - format the device shall use
+     * @return true if device accepted the given VideoFormat
+     */
+    bool setVideoFormat (const VideoFormat& new_format);
+
+
+    /**
+     * @return Currently used video format
+     */
     VideoFormat getActiveVideoFormat () const;
 
     // playback related:
 
-    bool startStream (std::shared_ptr<SinkInterface>);
+    /**
+     * @brief Start a new stream
+     * @param sink - SinkInterface that shall be called for new images
+     * @return true if stream could successfully be initialized
+     */
+    bool startStream (std::shared_ptr<SinkInterface> sink);
 
+
+    /**
+     * @brief Stop currently running stream
+     * @return true if stream could successfully be stopped
+     */
     bool stopStream ();
 
 private:

@@ -113,7 +113,7 @@ struct stream_statistics
     uint64_t frame_count;      //
     uint64_t frames_dropped;   //
     uint64_t capture_time_ns;  // capture time reported by lib
-    uint64_t camera_time_ns;   // capture time reported by camera
+    uint64_t camera_time_ns;   // capture time reported by camera; empty if not supported
     double   framerate;        // in contrast to selected one
 };
 
