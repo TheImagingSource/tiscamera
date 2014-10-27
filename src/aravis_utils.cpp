@@ -369,7 +369,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
         prop.value.i.step = 1;
         // // TODO: default value
 
-        return std::make_shared<PropertySwitch>(impl, prop, type);
+        return std::make_shared<PropertyBoolean>(impl, prop, type);
 
     }
     else if (strcmp(node_type, "Enumeration") == 0)

@@ -127,7 +127,7 @@ std::map<std::string, int> PropertyStringMap::getMapping () const
 
 
 
-PropertySwitch::PropertySwitch (std::shared_ptr<PropertyImpl> prop_impl,
+PropertyBoolean::PropertyBoolean (std::shared_ptr<PropertyImpl> prop_impl,
                                 const camera_property& prop,
                                 VALUE_TYPE t)
     : Property(prop, t)
@@ -136,17 +136,17 @@ PropertySwitch::PropertySwitch (std::shared_ptr<PropertyImpl> prop_impl,
 }
 
 
-PropertySwitch::~PropertySwitch ()
+PropertyBoolean::~PropertyBoolean ()
 {}
 
 
-bool PropertySwitch::getDefault () const
+bool PropertyBoolean::getDefault () const
 {
     return prop.value.b.default_value;
 }
 
 
-bool PropertySwitch::setValue (bool value)
+bool PropertyBoolean::setValue (bool value)
 {
     if (isReadOnly())
     {
@@ -160,7 +160,7 @@ bool PropertySwitch::setValue (bool value)
 }
 
 
-bool PropertySwitch::getValue () const
+bool PropertyBoolean::getValue () const
 {
     return prop.value.b.value;
 }

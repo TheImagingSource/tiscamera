@@ -30,7 +30,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         cp.value.b.value = cp.value.b.default_value;
         cp.flags = set_bit(cp.flags, PROPERTY_FLAG_EXTERNAL);
 
-        auto property_auto_offset = std::make_shared<PropertySwitch>(impl, cp, Property::BOOLEAN);
+        auto property_auto_offset = std::make_shared<PropertyBoolean>(impl, cp, Property::BOOLEAN);
 
         // property_description pd = { EMULATED_PROPERTY, property_auto_offset};
 
@@ -53,7 +53,7 @@ bool tcam::handle_auto_center (const Property& new_property,
         return false;
     }
 
-    auto p = static_cast<const PropertySwitch&>(new_property);
+    auto p = static_cast<const PropertyBoolean&>(new_property);
 
     if (p.getValue())
     {

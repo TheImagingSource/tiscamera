@@ -134,7 +134,7 @@ bool AravisDevice::setProperty (const Property& p)
         case Property::BOOLEAN:
         {
             tcam_log(TCAM_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
-            if (((PropertySwitch&)p).getValue())
+            if (((PropertyBoolean&)p).getValue())
                 arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
             else
                 arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
@@ -148,7 +148,7 @@ bool AravisDevice::setProperty (const Property& p)
             tcam_log(TCAM_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
             if (p.getType() == PROPERTY_TYPE_BOOLEAN)
             {
-                if (((PropertySwitch&)p).getValue())
+                if (((PropertyBoolean&)p).getValue())
                     arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
                 else
                     arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);

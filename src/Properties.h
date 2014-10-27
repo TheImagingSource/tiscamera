@@ -67,13 +67,13 @@ public:
 /*
 
  */
-class PropertySwitch : public Property
+class PropertyBoolean : public Property
 {
 public:
 
-    PropertySwitch (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
+    PropertyBoolean (std::shared_ptr<PropertyImpl>, const camera_property&, VALUE_TYPE);
 
-    ~PropertySwitch ();
+    ~PropertyBoolean ();
 
     bool getDefault () const;
 

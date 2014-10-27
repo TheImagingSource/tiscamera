@@ -320,7 +320,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
             }
             cp.flags = flags;
 
-            return std::make_shared<Property>(PropertySwitch(impl, cp, type));
+            return std::make_shared<Property>(PropertyBoolean(impl, cp, type));
         }
         case PROPERTY_TYPE_INTEGER:
         {

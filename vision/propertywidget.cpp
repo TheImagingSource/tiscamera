@@ -29,7 +29,7 @@ PropertyWidget::PropertyWidget (QWidget *parent, tcam::Property* p) :
         ui->pushButton->setVisible(false);
         ui->comboBox->setVisible(false);
 
-        PropertySwitch& prop_sw = (PropertySwitch&) property;
+        PropertyBoolean& prop_sw = (PropertyBoolean&) property;
         ui->checkBox->setChecked(prop_sw.getValue());
     }
     else if (type == PROPERTY_TYPE_INTEGER)
@@ -124,7 +124,7 @@ void PropertyWidget::setProperty (const tcam::Property& p)
 
 void PropertyWidget::on_checkBox_toggled (bool val)
 {
-    PropertySwitch& s = (PropertySwitch&) property;
+    PropertyBoolean& s = (PropertyBoolean&) property;
     s.setValue(ui->checkBox->isChecked());
 
     emit changed(this);

@@ -766,7 +766,7 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
     }
     else if (type == PROPERTY_TYPE_BOOLEAN)
     {
-        if ((std::static_pointer_cast<PropertySwitch>(prop_desc.prop))->getValue())
+        if ((std::static_pointer_cast<PropertyBoolean>(prop_desc.prop))->getValue())
         {
             ctrl.value = 1;
         }

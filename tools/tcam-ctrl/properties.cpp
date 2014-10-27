@@ -38,7 +38,7 @@ void print_properties (const std::vector<Property>& properties)
             }
             case PROPERTY_TYPE_BOOLEAN:
             {
-                PropertySwitch& s = (PropertySwitch&) p;
+                PropertyBoolean& s = (PropertyBoolean&) p;
 
                 std::cout << std::setw(20) << s.getName()
                           << std::setw(10) << "(bool)"
@@ -139,7 +139,7 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
                 }
                 case PROPERTY_TYPE_BOOLEAN:
                 {
-                    PropertySwitch& prop_s = (PropertySwitch&) p;
+                    PropertyBoolean& prop_s = (PropertyBoolean&) p;
                     if (value == "true" || value == "TRUE" || value == "1")
                     {
                         std::cout << "Setting " << name << " to TRUE"<< std::endl;
