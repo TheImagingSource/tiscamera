@@ -43,6 +43,7 @@ tcam::CaptureDevice* MainWindow::getCaptureDevice ()
 
 void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
 {
+    reset_gui();
     bool ret = grabber->openDevice(device);
 
     if (ret == false)

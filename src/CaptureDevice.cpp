@@ -105,6 +105,7 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
     {
         tcam_log(TCAM_LOG_DEBUG, "Retrieved %d properties", device_properties.size());
     }
+    pipeline = std::make_shared<PipelineManager>();
     bool ret = pipeline->setSource(device);
 
     if (ret == true)
