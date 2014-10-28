@@ -194,7 +194,7 @@ uint32_t tcam::description2fourcc (const char* description)
 }
 
 
-std::vector<double> tcam::createStepsForRange (double min, double max)
+std::vector<double> tcam::create_steps_for_range (double min, double max)
 {
     std::vector<double> vec;
 
@@ -229,7 +229,7 @@ std::vector<double> tcam::createStepsForRange (double min, double max)
 }
 
 
-uint64_t tcam::getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc)
+uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint32_t fourcc)
 {
     if (width == 0 || height == 0 || fourcc == 0)
     {
@@ -242,7 +242,7 @@ uint64_t tcam::getBufferLength (unsigned int width, unsigned int height, uint32_
 }
 
 
-uint32_t tcam::getPitchLength (unsigned int width, uint32_t fourcc)
+uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
 {
     if (width == 0 || fourcc == 0)
     {
@@ -253,7 +253,7 @@ uint32_t tcam::getPitchLength (unsigned int width, uint32_t fourcc)
 }
 
 
-IMG_SIZE tcam::calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image)
+IMG_SIZE tcam::calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image)
 {
     IMG_SIZE ret = {};
 

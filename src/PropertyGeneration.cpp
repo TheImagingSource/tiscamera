@@ -57,7 +57,7 @@ bool tcam::handle_auto_center (const Property& new_property,
 
     if (p.getValue())
     {
-        IMG_SIZE values = calculateAutoCenter(sensor, current_format);
+        IMG_SIZE values = calculate_auto_center(sensor, current_format);
 
         auto prop_off_x = find_property(props, "Offset X");
         auto prop_off_y = find_property(props, "Offset Y");

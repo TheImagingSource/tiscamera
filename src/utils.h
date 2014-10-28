@@ -82,7 +82,7 @@ uint32_t description2fourcc (const char* description);
  * @param max - maximum framerate
  * @return vector containing all step from min to max; empty on error
  */
-std::vector<double> createStepsForRange (double min, double max);
+std::vector<double> create_steps_for_range (double min, double max);
 
 /**
  * @brief Calculate required image size
@@ -91,24 +91,24 @@ std::vector<double> createStepsForRange (double min, double max);
  * @param fourcc - format description
  * @return required buffer size in byte
  */
-uint64_t getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc);
+uint64_t get_buffer_length (unsigned int width, unsigned int height, uint32_t fourcc);
 
 /**
- * Description for getPitchLength.
+ * Description for get_pitch_length.
  * @param width  - pixel width
  * @param fourcc - pixel format
  * @return row length of image in byte
  */
-uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
+uint32_t get_pitch_length (unsigned int width, uint32_t fourcc);
 
 
 /**
- * @name calculateAutoCenter
+ * @name calculate_auto_center
  * @param sensor - size of the sensor on which image shall be centered
  * @param image  - image size of the image that shall be auto centered
  * @return coordinates that shall be used for offsets
  */
-IMG_SIZE calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image);
+IMG_SIZE calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image);
 
 
 /**

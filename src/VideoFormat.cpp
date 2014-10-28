@@ -179,11 +179,11 @@ bool VideoFormat::fromString (const std::string& desc)
 
 uint64_t VideoFormat::getRequiredBufferSize () const
 {
-    return getBufferLength(format.width, format.height, format.fourcc);
+    return get_buffer_length(format.width, format.height, format.fourcc);
 }
 
 
 uint32_t VideoFormat::getPitchSize () const
 {
-    return getPitchLength(format.width, format.fourcc);
+    return get_pitch_length(format.width, format.fourcc);
 }
