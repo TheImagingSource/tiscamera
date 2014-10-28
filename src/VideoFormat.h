@@ -51,8 +51,16 @@ public:
 
     bool fromString (const std::string&);
 
+    /**
+     * Description for getRequiredBufferSize.
+     * @return size in bytes an image with this format will have
+     */
     uint64_t getRequiredBufferSize () const;
 
+    /**
+     * Description for getPitchSize.
+     * @return the size og an image line
+     */
     uint32_t getPitchSize () const;
 
 private:

@@ -22,18 +22,36 @@ uint32_t string2fourcc (const std::string& s);
 std::vector<std::string> split_string (const std::string& to_split, const std::string& delim);
 
 
+/**
+ * @brief Check id bit is set.
+ * @param value    - bitfield that shall be checked
+ * @param bitindex - index that shall be checked
+ * @return true if bit is 1
+ */
 inline bool is_bit_set (unsigned int value, unsigned int bitindex)
 {
     return (value & (1 << bitindex)) != 0;
 }
 
 
+/**
+ * @brief Set bit
+ * @param value    - bitfield that shall be manipulated
+ * @param bitindex - index of the bit that shall be set
+ * @return the manipulated bitfield
+ */
 inline unsigned int set_bit (unsigned int value, unsigned int bitindex)
 {
     return (value |= (1 << bitindex));
 }
 
 
+/**
+ * @brief Unset bit
+ * @param value    - bitfield that shall be manipulated
+ * @param bitindex - index of the bit that shall be unset
+ * @return the manipulated bitfield
+ */
 inline unsigned int unset_bit (unsigned int value, unsigned int bitindex)
 {
     return (value &= ~(1 << bitindex));
@@ -44,24 +62,41 @@ int tcam_xioctl (int fd, int request, void* arg);
 
 unsigned int tcam_get_required_buffer_size (struct tcam_video_format* format);
 
+/**
+ * Description for fourcc2description.
+ * @param fourcc - format type that shall be descriped
+ * @return description of the fourcc; NULL if none
+ */
 const char* fourcc2description (uint32_t fourcc);
 
+/**
+ * @brief convert string to fourcc
+ * @param description - string that shall be converted
+ * @return fourcc of the description; 0 if none
+ */
 uint32_t description2fourcc (const char* description);
 
-
-
 /**
- * Create step list for given range
+ * @brief Create framerate list for range
+ * @param min - minimum framerate
+ * @param max - maximum framerate
  * @return vector containing all step from min to max; empty on error
  */
 std::vector<double> createStepsForRange (double min, double max);
 
 /**
+ * @brief Calculate required image size
+ * @param width  - width of the image
+ * @param height - height of the image
+ * @param fourcc - format description
  * @return required buffer size in byte
  */
 uint64_t getBufferLength (unsigned int width, unsigned int height, uint32_t fourcc);
 
 /**
+ * Description for getPitchLength.
+ * @param width  - pixel width
+ * @param fourcc - pixel format
  * @return row length of image in byte
  */
 uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
@@ -76,7 +111,14 @@ uint32_t getPitchLength (unsigned int width, uint32_t fourcc);
 IMG_SIZE calculateAutoCenter (const IMG_SIZE& sensor, const IMG_SIZE& image);
 
 
-std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties, const std::string& property_name);
+/**
+ * @brief Find property with name
+ * @param properties    - vector that shall be searched
+ * @param property_name - string of the property name
+ * @return shared_ptr of the Property; nullptr if not found
+ */
+std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties,
+                                         const std::string& property_name);
 
 
 } /* namespace tcam */
