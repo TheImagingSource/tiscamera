@@ -1,6 +1,6 @@
 
 
-set(RULE_FILES 80-theimagingsource-cameras)
+set(RULE_FILES 80-theimagingsource-cameras.rules)
 
 set(UDEV_INSTALL_DIR udev/rules.d)
 
