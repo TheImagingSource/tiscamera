@@ -8,11 +8,12 @@
 
 void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 {
+    std::cout << "Available format settings:" << std::endl;
     for (const VideoFormatDescription& f : available_formats)
     {
         auto desc = f.getFormatDescription();
 
-        std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")" //<< std::endl
+        std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")"
                   << std::endl;
         for (const auto& s : f.getResolutionsFramesrates())
         {
@@ -29,11 +30,11 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 
 void print_active_format (const VideoFormat& format)
 {
-    std::cout << "Active format:" << std::endl;
-    std::cout << fourcc2description(format.getFourcc()) << std::endl
-              << format.getSize().width << "x" << format.getSize().height << std::endl
-              << format.getFramerate() << std::endl
-              << format.getBinning() << std::endl << std::endl;
+    std::cout << "Active format:\n"
+              << "Format: \t" << fourcc2description(format.getFourcc())
+              << "\nResolution: \t" << format.getSize().width << "x" << format.getSize().height
+              << "\nBinning: \t" << format.getBinning()
+              << "\nFramerate: \t" << format.getFramerate() << "\n" << std::endl;
 }
 
 
@@ -45,9 +46,7 @@ bool set_active_format (CaptureDevice& g, const std::string& new_format)
 
     if (ret)
     {
-        ret = g.setVideoFormat(v);
-
-        return ret;
+        return g.setVideoFormat(v);
     }
     else
     {
