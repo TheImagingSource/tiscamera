@@ -120,6 +120,8 @@ IMG_SIZE calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image);
 std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties,
                                          const std::string& property_name);
 
+bool compare_double (double val1, double val2);
+
 
 } /* namespace tcam */
 

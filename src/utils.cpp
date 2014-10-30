@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <limits>
 
 #define IOCTL_RETRY 4
 
@@ -288,4 +289,10 @@ std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Prope
     }
 
     return nullptr;
+}
+
+
+bool tcam::compare_double (double val1, double val2)
+{
+    return std::fabs(val1 - val2) < std::numeric_limits<double>::epsilon();
 }
