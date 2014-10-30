@@ -9,7 +9,7 @@
 #include "SinkInterface.h"
 #include "DeviceInterface.h"
 
-#include <ctime>
+#include <chrono>
 #include <memory>
 
 namespace tcam
@@ -48,8 +48,7 @@ private:
 
     unsigned int n_buffers;
 
-    uint64_t frame_count;
-    time_t second_count;
+    std::chrono::time_point<std::chrono::steady_clock> stream_start;
 
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
 

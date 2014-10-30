@@ -6,7 +6,7 @@
 using namespace tcam;
 
 ImageSource::ImageSource ()
-    : current_status(PIPELINE_UNDEFINED), n_buffers(10), frame_count(0)
+    : current_status(PIPELINE_UNDEFINED), n_buffers(10)
 {}
 
 
@@ -27,8 +27,7 @@ bool ImageSource::setStatus (PIPELINE_STATUS status)
         device->initialize_buffers(buffers);
         device->setSink(shared_from_this());
 
-        frame_count = 0;
-        second_count = time(0);
+        stream_start = std::chrono::steady_clock::now();
 
         if ( device->start_stream())
         {
@@ -88,18 +87,15 @@ VideoFormat ImageSource::getVideoFormat () const
 
 void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
-    frame_count++;
-    time_t timer;
-    time(&timer);
-    double seconds = difftime(timer, second_count);
-    if (seconds != 0)
+    auto stats = buffer->getStatistics();
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = end - stream_start;
+
+    if (stats.frame_count > 0 && std::chrono::duration_cast<std::chrono::seconds>(elapsed).count())
     {
-        auto stats = buffer->getStatistics();
-
-        stats.framerate = frame_count/seconds;
-
-        buffer->setStatistics(stats);
+        stats.framerate = (double)stats.frame_count / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
     }
+    buffer->setStatistics(stats);
 
     if (!pipeline.expired())
         pipeline.lock()->pushImage(buffer);
