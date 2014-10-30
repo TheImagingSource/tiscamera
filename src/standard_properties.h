@@ -42,6 +42,9 @@ enum PROPERTY_ID
     PROPERTY_HUE,
     PROPERTY_GAMMA,
     PROPERTY_WB_AUTO,
+    PROPERTY_WB_RED,
+    PROPERTY_WB_GREEN,
+    PROPERTY_WB_BLUE,
     PROPERTY_IRCUT,
     PROPERTY_IRIS,
     PROPERTY_FOCUS,
@@ -185,6 +188,21 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .id = PROPERTY_WB_AUTO,
         .name = "Whitebalance Auto",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        .id = PROPERTY_WB_RED,
+        .name = "Whitebalance Red",
+        .type_to_use = PROPERTY_TYPE_INTEGER,
+    },
+    {
+        .id = PROPERTY_WB_GREEN,
+        .name = "Whitebalance Green",
+        .type_to_use = PROPERTY_TYPE_INTEGER,
+    },
+    {
+        .id = PROPERTY_WB_BLUE,
+        .name = "Whitebalance Blue",
+        .type_to_use = PROPERTY_TYPE_INTEGER,
     },
     {
         .id = PROPERTY_IRCUT,
