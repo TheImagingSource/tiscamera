@@ -103,11 +103,7 @@ void AutoPassFilter::update_params ()
     {
         auto exp = handler->property_exposure.lock();
         params.exposure.min = exp->getMin();
-
-        if (exposure_max > 100)
-            params.exposure.max = exposure_max;
-        else
-            params.exposure.max = 300;
+        params.exposure.max = exposure_max;
 
         params.exposure.def = exp->getDefault();
         params.exposure.val = exp->getValue();
@@ -233,17 +229,9 @@ bool AutoPassFilter::setVideoFormat (const VideoFormat& f)
 {
     input_format = f;
 
-    // exposure_max = handler->property_exposure.lock()->getValue() / 10000;//;
+    exposure_max = calculate_exposure_max();
 
-    if (handler->property_exposure.expired())
-    {
-        return true;
-    }
-
-    int exp_max = handler->property_exposure.lock()->getMax();
-    double fps = input_format.getFramerate();
-
-    exposure_max = exp_max / 10000 / fps;
+    tcam_log(TCAM_LOG_INFO, "Exposure maximum will be %d", exposure_max);
 
     return true;
 }
@@ -257,6 +245,10 @@ bool AutoPassFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
     }
 
     input_format = in;
+
+    exposure_max = calculate_exposure_max();
+
+    tcam_log(TCAM_LOG_INFO, "Exposure maximum will be %d", exposure_max);
 
     return true;
 }
@@ -436,4 +428,17 @@ void AutoPassFilter::set_exposure (int exposure)
 void AutoPassFilter::set_iris (int iris)
 {
     set_int_property(handler->property_iris, iris);
+}
+
+
+unsigned int AutoPassFilter::calculate_exposure_max ()
+{
+    if (handler->property_exposure.expired())
+    {
+        return 0;
+    }
+    int exp_max = handler->property_exposure.lock()->getMax();
+    double fps = input_format.getFramerate();
+
+    return exp_max / 10000 * fps;
 }

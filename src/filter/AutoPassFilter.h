@@ -75,6 +75,8 @@ private:
     void set_exposure (int);
     void set_iris     (int);
 
+    unsigned int calculate_exposure_max ();
+
     // general
     bool valid;
     unsigned int skipped_buffer;
