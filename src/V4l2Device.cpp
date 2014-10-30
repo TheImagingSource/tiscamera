@@ -260,7 +260,7 @@ bool V4l2Device::setFramerate (double framerate)
 
     auto f =[&framerate] (const framerate_conv& f)
         {
-            return (framerate == f.fps);
+            return compare_double(framerate, f.fps);
         };
 
     auto fps = std::find_if(framerate_conversions.begin(),
