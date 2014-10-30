@@ -536,7 +536,7 @@ bool PipelineManager::create_pipeline ()
         return false;
     }
 
-    if (source->setVideoFormat(input_format))
+    if (!source->setVideoFormat(input_format))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set video format in source.");
     }
