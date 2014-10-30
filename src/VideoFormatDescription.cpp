@@ -3,6 +3,7 @@
 #include "VideoFormatDescription.h"
 
 #include "logging.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <cstring>
@@ -118,6 +119,7 @@ VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
     f.width = width;
     f.height = height;
     f.binning = this->format.binning;
+    f.framerate = framerate;
 
     return VideoFormat(f);
 }
@@ -157,33 +159,29 @@ bool VideoFormatDescription::isValidFramerate (double framerate) const
 {
     // auto desc = to_check.getFormatDescription();
 
+    for (const auto& res: rf)
+    {
+        if (format.framerate_type == TCAM_FRAMERATE_TYPE_FIXED)
+        {
+            for (const auto& f : res.fps)
+            {
+                if (compare_double(framerate, f))
+                {
+                    return true;
+                }
+            }
+        }
+        else // range
+        {
+            if (framerate <= res.fps.at(0) && framerate >= res.fps.at(1))
+            {
+                return true;
+            }
+        }
+    }
 
-    // TODO: framerate checking
-    // if (this->format.framerate_type == TCAM_FRAMERATE_TYPE_FIXED)
-    // {
-    // auto f = [&desc] (const double& fps)
-    // {
-    // return fps == desc.framerate;
-    // };
+    return false;
 
-    // auto res = std::find_if(framerates.begin(), framerates.end(), f);
-
-    // if (res == framerates.end())
-    // {
-    // return false;
-    // }
-    // }
-    // else
-    // {
-    // double min = this->framerates.at(0);
-    // double max = this->framerates.at(1);
-
-    // if (min > desc.framerate || desc.framerate > max)
-    // {
-    // return false;
-    // }
-    // }
-    return true;
 }
 
 

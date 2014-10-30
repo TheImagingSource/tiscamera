@@ -42,9 +42,8 @@ bool VideoFormat::operator== (const VideoFormat& other) const
     return format.fourcc == other.format.fourcc
         && format.width == other.format.width
         && format.height == other.format.height
-        && format.binning == other.format.binning;
-
-    // TODO: framerate
+        && format.binning == other.format.binning
+        && compare_double(format.framerate, other.format.framerate);
 }
 
 
