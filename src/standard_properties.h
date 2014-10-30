@@ -65,6 +65,13 @@ struct control_reference
     enum PROPERTY_TYPE type_to_use; // type outgoing control shall have
 };
 
+static control_reference INVALID_STD_PROPERTY
+{
+    .id = PROPERTY_INVALID,
+    .name = "INVALID_PORPERTY",
+    .type_to_use = PROPERTY_TYPE_UNKNOWN
+};
+
 
 static std::vector<struct control_reference> ctrl_reference_table =
 {
@@ -257,7 +264,7 @@ inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
         if (ref.id == wanted_id)
             return ref;
     }
-    return {PROPERTY_INVALID, "", PROPERTY_TYPE_UNKNOWN};
+    return INVALID_STD_PROPERTY;
 }
 
 
