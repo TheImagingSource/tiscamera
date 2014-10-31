@@ -34,6 +34,9 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 
 V4l2Device::~V4l2Device ()
 {
+    if (is_stream_on)
+        stop_stream();
+
     if (this->fd != -1)
     {
         close(fd);
@@ -446,7 +449,7 @@ bool V4l2Device::stop_stream ()
         return false;
     }
 
-    if (wait_for_join)
+    if (work_thread.joinable())
         work_thread.join();
 
     return true;
