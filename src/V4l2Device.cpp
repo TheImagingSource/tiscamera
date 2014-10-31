@@ -453,6 +453,10 @@ bool V4l2Device::stop_stream ()
 }
 
 
+/*
+ * in kernel versions > 3.15 uvcvideo does not correctly interpret bayer 8-bit
+ * this function detects those cases and corrects all settings
+ */
 static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
 {
 
@@ -536,6 +540,8 @@ void V4l2Device::index_formats ()
             }
         }
 
+        // algorithms, etc. use Y800 as an identifier.
+        // declare format as such.
         uint32_t FOURCC_GREY = mmioFOURCC('G', 'R', 'E', 'Y');
         if (desc.fourcc == FOURCC_GREY)
         {
