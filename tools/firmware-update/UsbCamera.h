@@ -37,7 +37,8 @@ struct device_info
     uint32_t idProduct;
 };
 
-const camera_type find_camera_type (const unsigned int& idVendor, const unsigned int& idProduct);
+const camera_type find_camera_type (const unsigned int& idVendor,
+                                    const unsigned int& idProduct);
 
 
 class UsbCamera
@@ -51,7 +52,9 @@ protected:
 
 public:
 
-    UsbCamera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface = 0);
+    UsbCamera (std::shared_ptr<UsbSession> session,
+               device_info dev,
+               unsigned int _interface = 0);
 
     virtual ~UsbCamera ();
 
