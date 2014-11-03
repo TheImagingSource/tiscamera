@@ -5,6 +5,7 @@
 #include "base_types.h"
 #include "logging.h"
 #include "utils.h"
+#include "Error.h"
 
 #include <cstring>
 #include <algorithm>
@@ -39,6 +40,22 @@ void Property::reset ()
     prop = ref_prop;
 
     notifyImpl();
+}
+
+
+bool Property::update ()
+{
+    if (impl.expired())
+    {
+        setError(Error("Property implementation has expired.", ENOENT));
+        return false;
+    }
+
+    auto ptr = impl.lock();
+
+    tcam_log(TCAM_LOG_DEBUG, "Updating %s", prop.name);
+
+    return ptr->getProperty(*this);
 }
 
 

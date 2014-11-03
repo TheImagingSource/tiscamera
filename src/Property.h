@@ -48,6 +48,12 @@ public:
 
     void reset ();
 
+    /**
+     * @brief update the property so that it will hold up to date information
+     * @return true on success
+     */
+    bool update ();
+
     std::string getName () const;
 
     PROPERTY_TYPE getType () const;
