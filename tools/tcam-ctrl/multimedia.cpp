@@ -25,7 +25,6 @@ bool tcam::save_image (CaptureDevice& g, const std::string& filename)
             if (d->count >= 2)
             {
                 //save_jpeg(*buf, d->filename);
-                d->g->stopStream();
                 d->wait = false;
             }
             else
@@ -55,6 +54,7 @@ bool tcam::save_image (CaptureDevice& g, const std::string& filename)
     {
         usleep(500);
     }
+    d.g->stopStream();
 
     std::cout << "Successfully saved image" << std::endl;
 
