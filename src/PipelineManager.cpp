@@ -360,7 +360,7 @@ bool PipelineManager::validate_pipeline ()
                     f->getDescription().name.c_str(),
                     in_format.toString().c_str(),
                     in.toString().c_str());
-            // TODO: error
+            setError(Error("Faulty pipeline creation.", EINVAL));
             return false;
         }
         else

@@ -891,7 +891,7 @@ bool V4l2Device::get_frame ()
     if (ret == -1)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to dequeue buffer.");
-        setError(Error("Unable to dequeue buffer.", EIO));
+        setError(Error("Unable to dequeue buffer.", errno));
         return false;
     }
 
@@ -907,7 +907,7 @@ bool V4l2Device::get_frame ()
     ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
     if (ret == -1)
     {
-        // TODO: errno
+        setError(Error("Unable to requeue buffer. ioctl error", errno));
         return false;
     }
     return true;
