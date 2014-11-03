@@ -47,6 +47,14 @@ void PropertyWidget::setProperty (const tcam::Property& p)
 }
 
 
+void PropertyWidget::update ()
+{
+    this->property.update();
+
+    redraw();
+}
+
+
 void PropertyWidget::on_checkBox_toggled (bool val)
 {
     PropertyBoolean& s = (PropertyBoolean&) property;

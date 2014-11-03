@@ -25,6 +25,8 @@ public:
 
     void setProperty (const tcam::Property&);
 
+    void update ();
+
 signals:
     void changed (PropertyWidget*);
 
