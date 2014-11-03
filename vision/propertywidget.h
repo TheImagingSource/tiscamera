@@ -44,6 +44,8 @@ private:
 
     tcam::Property property;
 
+    void redraw ();
+
     static const int precision = 1000;
 };
 

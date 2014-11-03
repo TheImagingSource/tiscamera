@@ -17,7 +17,83 @@ PropertyWidget::PropertyWidget (QWidget *parent, tcam::Property* p) :
     property(*p)
 {
     ui->setupUi(this);
+    redraw();
 
+
+}
+
+
+PropertyWidget::~PropertyWidget ()
+{
+    delete ui;
+}
+
+
+QString PropertyWidget::getName ()
+{
+    return property.getName().c_str();
+}
+
+
+tcam::Property PropertyWidget::getProperty ()
+{
+    return property;
+}
+
+
+void PropertyWidget::setProperty (const tcam::Property& p)
+{
+    this->property.setStruct( p.getStruct());
+}
+
+
+void PropertyWidget::on_checkBox_toggled (bool val)
+{
+    PropertyBoolean& s = (PropertyBoolean&) property;
+    s.setValue(ui->checkBox->isChecked());
+
+    emit changed(this);
+}
+
+
+void PropertyWidget::on_comboBox_activated (const QString &arg1)
+{
+    PropertyStringMap& m = (PropertyStringMap&) property;
+    m.setValue(arg1.toStdString());
+    emit changed(this);
+}
+
+
+void PropertyWidget::on_horizontalSlider_sliderMoved (int position)
+{
+
+    if (property.getType() == PROPERTY_TYPE_INTEGER)
+    {
+        PropertyInteger& i = (PropertyInteger&) property;
+        i.setValue(position);
+        ui->valueDisplay->setText(QString::number(i.getValue()));
+    }
+    else
+    {
+        PropertyDouble& d = (PropertyDouble&) property;
+        d.setValue((double)(position / precision));
+        ui->valueDisplay->setText(QString::number(d.getValue()));
+    }
+
+    emit changed(this);
+}
+
+
+void PropertyWidget::on_pushButton_clicked ()
+{
+    PropertyButton& b = (PropertyButton&) property;
+
+    b.activate();
+}
+
+
+void PropertyWidget::redraw ()
+{
     ui->propertyName->setText(QString(property.getName().c_str()));
 
     PROPERTY_TYPE type = property.getType();
@@ -95,73 +171,4 @@ PropertyWidget::PropertyWidget (QWidget *parent, tcam::Property* p) :
         ui->pushButton->setText("Push");
     }
 
-}
-
-
-PropertyWidget::~PropertyWidget ()
-{
-    delete ui;
-}
-
-
-QString PropertyWidget::getName ()
-{
-    return property.getName().c_str();
-}
-
-
-tcam::Property PropertyWidget::getProperty ()
-{
-    return property;
-}
-
-
-void PropertyWidget::setProperty (const tcam::Property& p)
-{
-    this->property.setStruct( p.getStruct());
-}
-
-
-void PropertyWidget::on_checkBox_toggled (bool val)
-{
-    PropertyBoolean& s = (PropertyBoolean&) property;
-    s.setValue(ui->checkBox->isChecked());
-
-    emit changed(this);
-}
-
-
-void PropertyWidget::on_comboBox_activated (const QString &arg1)
-{
-    PropertyStringMap& m = (PropertyStringMap&) property;
-    m.setValue(arg1.toStdString());
-    emit changed(this);
-}
-
-
-void PropertyWidget::on_horizontalSlider_sliderMoved (int position)
-{
-
-    if (property.getType() == PROPERTY_TYPE_INTEGER)
-    {
-        PropertyInteger& i = (PropertyInteger&) property;
-        i.setValue(position);
-        ui->valueDisplay->setText(QString::number(i.getValue()));
-    }
-    else
-    {
-        PropertyDouble& d = (PropertyDouble&) property;
-        d.setValue((double)(position / precision));
-        ui->valueDisplay->setText(QString::number(d.getValue()));
-    }
-
-    emit changed(this);
-}
-
-
-void PropertyWidget::on_pushButton_clicked ()
-{
-    PropertyButton& b = (PropertyButton&) property;
-
-    b.activate();
 }
