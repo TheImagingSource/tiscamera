@@ -125,9 +125,6 @@ bool CaptureDevice::isDeviceOpen () const
         return true;
     }
 
-    tcam_log(TCAM_LOG_ERROR, "No open device");
-    setError(Error("No open device", ENOENT));
-
     return false;
 }
 
