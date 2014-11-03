@@ -5,6 +5,7 @@
 
 #include "logging.h"
 #include "utils.h"
+#include "standard_properties.h"
 
 #include <dutils_header.h>
 #include <by8/by8_apply_whitebalance.h>
@@ -45,6 +46,18 @@ bool PropertyHandler::setProperty (const Property& prop)
     else if (prop.getName().compare("Whitebalance Auto") == 0)
     {
         prop_auto_wb->setStruct(prop.getStruct());
+    }
+    else if (prop.getName().compare("Whitebalance Red") == 0)
+    {
+
+    }
+    else if (prop.getName().compare("Whitebalance Green") == 0)
+    {
+
+    }
+    else if (prop.getName().compare("Whitebalance Blue") == 0)
+    {
+
     }
     else
     {
@@ -349,6 +362,38 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
+
+
+    camera_property prop_wbr = {};
+    strncpy(prop_wbr.name, "Whitebalance Red", sizeof(prop.name));
+    prop_wbr.type = PROPERTY_TYPE_INTEGER;
+    prop_wbr.value.i.min = 0;
+    prop_wbr.value.i.max = 255;
+    prop_wbr.value.i.value = 60;
+    prop_wbr.value.i.default_value = 60;
+    prop_wbr.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+    handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
+
+    camera_property prop_wbg = {};
+    strncpy(prop_wbg.name, "Whitebalance Green", sizeof(prop_wbg.name));
+    prop_wbg.type = PROPERTY_TYPE_INTEGER;
+    prop_wbg.value.i.min = 0;
+    prop_wbg.value.i.max = 255;
+    prop_wbg.value.i.value = 60;
+    prop_wbg.value.i.default_value = 60;
+    prop_wbg.flags = set_bit(prop_wbg.flags, PROPERTY_FLAG_EXTERNAL);
+    handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
+
+    camera_property prop_wbb = {};
+    strncpy(prop_wbb.name, "Whitebalance Blue", sizeof(prop_wbb.name));
+    prop_wbb.type = PROPERTY_TYPE_INTEGER;
+    prop_wbb.value.i.min = 0;
+    prop_wbb.value.i.max = 255;
+    prop_wbb.value.i.value = 60;
+    prop_wbb.value.i.default_value = 60;
+    prop_wbb.flags = set_bit(prop_wbb.flags, PROPERTY_FLAG_EXTERNAL);
+    handler->prop_wb_b= std::make_shared<PropertyInteger>(handler, prop_wbb, Property::INTEGER);
+
 
     params.wb.r = 60;
     params.wb.g = 60;
