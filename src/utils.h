@@ -113,6 +113,16 @@ IMG_SIZE calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image);
 
 /**
  * @brief Find property with name
+ * @param properties  - vector that shall be searched
+ * @param property_id - id of the property
+ * @return shared_ptr of the Property; nullptr if not found
+ */
+std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>& properties,
+                                         PROPERTY_ID property_id);
+
+
+/**
+ * @brief Find property with name
  * @param properties    - vector that shall be searched
  * @param property_name - string of the property name
  * @return shared_ptr of the Property; nullptr if not found

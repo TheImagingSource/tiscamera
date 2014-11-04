@@ -271,7 +271,22 @@ IMG_SIZE tcam::calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& im
 
 
 std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
-                                                      const std::string& property_name)
+                                               PROPERTY_ID property_id)
+{
+    for (auto& p : properties)
+    {
+        if (p->getID() == property_id)
+        {
+            return p;
+        }
+    }
+
+    return nullptr;
+}
+
+
+std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
+                                               const std::string& property_name)
 {
 
     auto f = [&property_name] (const std::shared_ptr<Property>& p)
