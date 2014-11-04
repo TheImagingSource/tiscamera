@@ -21,6 +21,7 @@ AutoPassPropertyHandler::AutoPassPropertyHandler ()
     : prop_auto_exposure(nullptr),
       prop_auto_gain(nullptr),
       prop_auto_iris(nullptr),
+      prop_wb(nullptr),
       prop_auto_wb(nullptr),
       prop_wb_r(nullptr),
       prop_wb_g(nullptr),
@@ -41,7 +42,10 @@ bool AutoPassPropertyHandler::setProperty (const Property& prop)
     else if (prop.getName().compare("Iris Auto") == 0)
     {
         prop_auto_iris->setStruct(prop.getStruct());
-
+    }
+    else if (prop.getName().compare("Whitebalance") == 0)
+    {
+        prop_wb->setStruct(prop.getStruct());
     }
     else if (prop.getName().compare("Whitebalance Auto") == 0)
     {
@@ -49,15 +53,15 @@ bool AutoPassPropertyHandler::setProperty (const Property& prop)
     }
     else if (prop.getName().compare("Whitebalance Red") == 0)
     {
-
+        prop_wb_r->setStruct(prop.getStruct());
     }
     else if (prop.getName().compare("Whitebalance Green") == 0)
     {
-
+        prop_wb_g->setStruct(prop.getStruct());
     }
     else if (prop.getName().compare("Whitebalance Blue") == 0)
     {
-
+        prop_wb_b->setStruct(prop.getStruct());
     }
     else
     {
@@ -189,9 +193,18 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 
         auto_alg::auto_pass_results res = auto_alg::auto_pass(img, params, state);
 
-        wb_r = res.wb_r;
-        wb_g = res.wb_g;
-        wb_b = res.wb_b;
+        if (handler->prop_auto_wb->getValue())
+        {
+            wb_r = res.wb_r;
+            wb_g = res.wb_g;
+            wb_b = res.wb_b;
+        }
+        else
+        {
+            wb_r = handler->prop_wb_r->getValue();
+            wb_g = handler->prop_wb_g->getValue();
+            wb_b = handler->prop_wb_b->getValue();
+        }
 
         if (params.exposure.do_auto == true)
         {
@@ -206,7 +219,9 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
             set_iris(res.iris);
         }
     }
-    by8_transform::apply_wb_to_bayer_img(img, wb_r, wb_g, wb_b, wb_g, 0);
+
+    if (handler->prop_wb->getValue())
+        by8_transform::apply_wb_to_bayer_img(img, wb_r, wb_g, wb_b, wb_g, 0);
 
     return true;
 }
@@ -354,14 +369,26 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     }
 
 
+
     camera_property prop = {};
 
-    strncpy(prop.name, "Whitebalance Auto", sizeof(prop.name));
+    strncpy(prop.name, "Whitebalance", sizeof(prop.name));
     prop.type = PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
     prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
-    handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
+    handler->prop_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
+
+
+
+    camera_property prop_auto = {};
+
+    strncpy(prop_auto.name, "Whitebalance Auto", sizeof(prop_auto.name));
+    prop_auto.type = PROPERTY_TYPE_BOOLEAN;
+    prop_auto.value.b.value = true;
+    prop_auto.flags = set_bit(prop_auto.flags, PROPERTY_FLAG_EXTERNAL);
+
+    handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop_auto, Property::BOOLEAN);
 
 
     camera_property prop_wbr = {};
@@ -427,6 +454,10 @@ std::vector<std::shared_ptr<Property>> AutoPassFilter::getFilterProperties ()
     if (handler->prop_auto_wb != nullptr)
     {
         vec.push_back(handler->prop_auto_wb);
+    }
+    if (handler->prop_wb != nullptr)
+    {
+        vec.push_back(handler->prop_wb);
     }
     if (handler->prop_wb_r != nullptr)
     {

@@ -41,6 +41,7 @@ enum PROPERTY_ID
     PROPERTY_SATURATION,
     PROPERTY_HUE,
     PROPERTY_GAMMA,
+    PROPERTY_WB,
     PROPERTY_WB_AUTO,
     PROPERTY_WB_RED,
     PROPERTY_WB_GREEN,
@@ -190,6 +191,11 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .id = PROPERTY_GAMMA,
         .name = "Gamma",
         .type_to_use = PROPERTY_TYPE_INTEGER,
+    },
+    {
+        .id = PROPERTY_WB,
+        .name = "Whitebalance",
+        .type_to_use = PROPERTY_TYPE_BOOLEAN,
     },
     {
         .id = PROPERTY_WB_AUTO,

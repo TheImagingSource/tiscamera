@@ -33,7 +33,8 @@ protected:
     std::shared_ptr<PropertyBoolean> prop_auto_gain;
     std::shared_ptr<PropertyBoolean> prop_auto_iris;
 
-    std::shared_ptr<PropertyBoolean>  prop_auto_wb;
+    std::shared_ptr<PropertyBoolean> prop_wb;
+    std::shared_ptr<PropertyBoolean> prop_auto_wb;
     std::shared_ptr<PropertyInteger> prop_wb_r;
     std::shared_ptr<PropertyInteger> prop_wb_g;
     std::shared_ptr<PropertyInteger> prop_wb_b;
