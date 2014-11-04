@@ -369,7 +369,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     }
 
-
+    // TODO check for device whitebalance
 
     camera_property prop = {};
     prop.id = PROPERTY_WB;

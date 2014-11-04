@@ -856,7 +856,7 @@ void V4l2Device::stream ()
                 }
             }
 
-            /* timeout! */
+            /* timeout! */ // TODO: check if trigger is enabled
             if (ret == 0)
             {
                 tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
