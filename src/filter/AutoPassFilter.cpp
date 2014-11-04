@@ -17,7 +17,7 @@
 using namespace tcam;
 
 
-PropertyHandler::PropertyHandler ()
+AutoPassPropertyHandler::AutoPassPropertyHandler ()
     : prop_auto_exposure(nullptr),
       prop_auto_gain(nullptr),
       prop_auto_iris(nullptr),
@@ -28,7 +28,7 @@ PropertyHandler::PropertyHandler ()
 {}
 
 
-bool PropertyHandler::setProperty (const Property& prop)
+bool AutoPassPropertyHandler::setProperty (const Property& prop)
 {
     if (prop.getName().compare("Exposure Auto") == 0)
     {
@@ -69,7 +69,7 @@ bool PropertyHandler::setProperty (const Property& prop)
 }
 
 
-bool PropertyHandler::getProperty (Property&)
+bool AutoPassPropertyHandler::getProperty (Property& prop)
 {
     return false;
 }
@@ -94,7 +94,7 @@ void AutoPassFilter::reset ()
     params = {};
     state = {};
 
-    handler = std::make_shared<PropertyHandler>();
+    handler = std::make_shared<AutoPassPropertyHandler>();
 }
 
 

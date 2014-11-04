@@ -9,13 +9,13 @@
 // forward declaration
 class AutoPassFilter;
 
-class PropertyHandler: public PropertyImpl
+class AutoPassPropertyHandler: public PropertyImpl
 {
 public:
 
     friend class AutoPassFilter;
 
-    PropertyHandler ();
+    AutoPassPropertyHandler ();
 
     bool setProperty (const Property&);
 
@@ -93,7 +93,7 @@ private:
     auto_alg::auto_pass_params params;
     auto_alg::auto_pass_state state;
 
-    std::shared_ptr<PropertyHandler> handler;
+    std::shared_ptr<AutoPassPropertyHandler> handler;
 
 
 };
