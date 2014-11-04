@@ -376,6 +376,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     strncpy(prop.name, "Whitebalance", sizeof(prop.name));
     prop.type = PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
+    prop.value.b.default_value = true;
     prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
@@ -387,6 +388,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     strncpy(prop_auto.name, "Whitebalance Auto", sizeof(prop_auto.name));
     prop_auto.type = PROPERTY_TYPE_BOOLEAN;
     prop_auto.value.b.value = true;
+    prop_auto.value.b.default_value = true;
     prop_auto.flags = set_bit(prop_auto.flags, PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop_auto, Property::BOOLEAN);
