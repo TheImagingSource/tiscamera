@@ -286,13 +286,14 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 {
     reset();
 
-    std::string s;
-    auto f = [&s] (std::shared_ptr<Property> p)
+    PROPERTY_ID id;
+    auto f = [&id] (std::shared_ptr<Property> p)
         {
-            return s.compare(p->getName()) == 0;
+            return id ==p->getID();
         };
 
-    s = "Exposure";
+
+    id = PROPERTY_EXPOSURE;
     auto exp = std::find_if(dev_properties.begin(), dev_properties.end(), f);
 
     if (exp == dev_properties.end())
@@ -305,7 +306,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         handler->property_exposure = std::static_pointer_cast<PropertyInteger>(*exp);
 
         camera_property prop = {};
-
+        prop.id = PROPERTY_EXPOSURE_AUTO;
         strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
@@ -315,7 +316,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     }
 
 
-    s = "Gain";
+    id = PROPERTY_GAIN;
     auto gain = std::find_if(dev_properties.begin(), dev_properties.end(), f);
 
     if (gain == dev_properties.end())
@@ -330,7 +331,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         // property_gain = *gain;
         // create auto_gain property
         camera_property prop = {};
-
+        prop.id = PROPERTY_GAIN_AUTO;
         strncpy(prop.name, "Gain Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
@@ -339,7 +340,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         handler->prop_auto_gain = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
     }
 
-    s = "Iris";
+    id = PROPERTY_IRIS;
     auto iris = std::find_if(dev_properties.begin(), dev_properties.end(), f);
 
     if (iris == dev_properties.end())
@@ -358,7 +359,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         // create auto_iris property
 
         camera_property prop = {};
-
+        prop.id = PROPERTY_IRIS_AUTO;
         strncpy(prop.name, "Iris Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
@@ -371,7 +372,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
 
     camera_property prop = {};
-
+    prop.id = PROPERTY_WB;
     strncpy(prop.name, "Whitebalance", sizeof(prop.name));
     prop.type = PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
@@ -382,7 +383,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
 
     camera_property prop_auto = {};
-
+    prop.id = PROPERTY_WB_AUTO;
     strncpy(prop_auto.name, "Whitebalance Auto", sizeof(prop_auto.name));
     prop_auto.type = PROPERTY_TYPE_BOOLEAN;
     prop_auto.value.b.value = true;
@@ -392,6 +393,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
 
     camera_property prop_wbr = {};
+    prop.id = PROPERTY_WB_RED;
     strncpy(prop_wbr.name, "Whitebalance Red", sizeof(prop.name));
     prop_wbr.type = PROPERTY_TYPE_INTEGER;
     prop_wbr.value.i.min = 0;
@@ -402,6 +404,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
 
     camera_property prop_wbg = {};
+    prop.id = PROPERTY_WB_GREEN;
     strncpy(prop_wbg.name, "Whitebalance Green", sizeof(prop_wbg.name));
     prop_wbg.type = PROPERTY_TYPE_INTEGER;
     prop_wbg.value.i.min = 0;
@@ -412,6 +415,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
 
     camera_property prop_wbb = {};
+    prop.id = PROPERTY_WB_BLUE;
     strncpy(prop_wbb.name, "Whitebalance Blue", sizeof(prop_wbb.name));
     prop_wbb.type = PROPERTY_TYPE_INTEGER;
     prop_wbb.value.i.min = 0;

@@ -59,6 +59,12 @@ bool Property::update ()
 }
 
 
+PROPERTY_ID Property::getID () const
+{
+    return prop.id;
+}
+
+
 std::string Property::getName () const
 {
     return prop.name;

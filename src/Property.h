@@ -54,6 +54,8 @@ public:
      */
     bool update ();
 
+    PROPERTY_ID getID () const;
+
     std::string getName () const;
 
     PROPERTY_TYPE getType () const;

@@ -81,7 +81,7 @@ bool V4l2Device::setProperty (const Property& new_property)
 
     if (desc->id == EMULATED_PROPERTY)
     {
-        if (new_property.getName() == "Offset Auto Center")
+        if (new_property.getID() == PROPERTY_OFFSET_AUTO)
         {
             auto props = create_property_vector();
             return handle_auto_center(new_property,

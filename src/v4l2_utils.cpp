@@ -269,6 +269,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
     }
     else
     {
+        cp.id = ctrl_m.id;
         type_to_use = ctrl_m.type_to_use;
         memcpy(cp.name, ctrl_m.name.c_str(), ctrl_m.name.size());
         cp.type = ctrl_m.type_to_use;

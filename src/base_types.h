@@ -230,6 +230,7 @@ struct tcam_value_bool
  */
 struct camera_property
 {
+    PROPERTY_ID id;
     char name [32];              /* unique string identifier */
     enum PROPERTY_TYPE type;     /* type identification */
 
