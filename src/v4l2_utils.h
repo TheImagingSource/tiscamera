@@ -6,6 +6,8 @@
 #include "Properties.h"
 #include "DeviceInfo.h"
 
+#include <linux/videodev2.h>
+
 namespace tcam
 {
 
