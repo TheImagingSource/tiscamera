@@ -2,8 +2,8 @@
 
 
 
-#ifndef _CAMERA_INDEX_H_
-#define _CAMERA_INDEX_H_
+#ifndef CAMERA_INDEX_H
+#define CAMERA_INDEX_H
 
 #include "base_types.h"
 #include "config.h"
@@ -35,37 +35,19 @@ private:
 
     std::vector<DeviceInfo> device_list;
 
+    std::vector<dev_callback> callbacks;
+
     void updateDeviceList ();
 
     void run ();
 
+    void fire_device_lost (const DeviceInfo& d);
+
 };
+
 
 std::shared_ptr<DeviceIndex> getDeviceIndex ();
 
 } /* namespace tcam */
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    /**
-     * @name tcam_get_camera_count
-     * @return number of available devices
-     */
-    int tcam_get_camera_count ();
-
-    /**
-     * @name
-     * @param ptr        - pointer to the array that shall be filled
-     * @param array_size - size of array that ptr points to
-     * @return number of devices copied to ptr; -1 on error
-     */
-    int tcam_get_camera_list (struct tcam_device_info* ptr, unsigned int array_size);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* _CAMERA_INDEX_H_ */
+#endif /* CAMERA_INDEX_H */
