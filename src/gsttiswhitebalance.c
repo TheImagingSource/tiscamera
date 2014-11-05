@@ -644,6 +644,9 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     }
     else /* update the permanent values to represent the current adjustments */
     {
+        self->rgb.R = rgb.R;
+        self->rgb.G = rgb.G;
+        self->rgb.B = rgb.B;
         self->red = rgb.R;
         self->green = rgb.G;
         self->blue = rgb.B;
