@@ -30,7 +30,7 @@ G_BEGIN_DECLS
 #define GST_IS_TISWHITEBALANCE_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TISWHITEBALANCE))
 
 
-static const guint MAX_STEPS = 20;
+static const guint MAX_STEPS = 200;
 static const guint WB_IDENTITY = 64;
 static const guint WB_MAX = 255;
 static const guint BREAK_DIFF = 2;
