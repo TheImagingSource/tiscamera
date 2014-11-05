@@ -124,19 +124,19 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
                                      PROP_GAIN_RED,
                                      g_param_spec_int ("red", "Red",
                                                        "Value for red",
-                                                       0, 255, 0,
+                                                       0, 255, 64,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_GREEN,
                                      g_param_spec_int ("green", "Green Gain",
                                                        "Value for red gain",
-                                                       0, 255, 0,
+                                                       0, 255, 64,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_BLUE,
                                      g_param_spec_int ("blue", "Blue Gain",
                                                        "Value for blue gain",
-                                                       0, 255, 0,
+                                                       0, 255, 64,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_ENABLED,
