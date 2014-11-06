@@ -48,6 +48,10 @@ DeviceIndex::~DeviceIndex ()
     continue_thread = false;
 }
 
+
+void DeviceIndex::register_device_lost (dev_callback c)
+{
+    callbacks.push_back(c);
 }
 
 

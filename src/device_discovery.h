@@ -27,6 +27,8 @@ public:
 
     std::vector<DeviceInfo> getDeviceList () const;
 
+    void register_device_lost (dev_callback);
+
 private:
 
     bool continue_thread;
