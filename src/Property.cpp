@@ -132,6 +132,9 @@ bool Property::setStruct (const struct camera_property& p)
         default:
             return false;
     }
+
+    prop.flags = p.flags;
+
     return true;
 }
 
@@ -145,7 +148,6 @@ Property::VALUE_TYPE Property::getValueType () const
 std::string Property::toString () const
 {
     std::string property_string;
-    // = getName() + "(" + propertyType2String(prop.type) + ")=";
 
     switch (prop.type)
     {
@@ -331,7 +333,6 @@ void Property::notifyImpl ()
 
     auto ptr(impl.lock());
 
-    // tcam_log(TCAM_LOG_DEBUG, "Notifying impl about property change.");
     ptr->setProperty(*this);
 }
 
