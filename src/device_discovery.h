@@ -6,8 +6,6 @@
 #define CAMERA_INDEX_H
 
 #include "base_types.h"
-#include "config.h"
-
 #include "DeviceInfo.h"
 
 #include <vector>
