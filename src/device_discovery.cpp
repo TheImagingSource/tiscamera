@@ -6,7 +6,9 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 #include <mutex>
+#include <cstring>
 
 #include "utils.h"
 #include "logging.h"
@@ -32,21 +34,20 @@ std::vector<DeviceInfo> DeviceIndex::getDeviceList () const
 
 
 DeviceIndex::DeviceIndex ()
-    : continue_thread(false), wait_period(2000000)
+    : continue_thread(false), wait_period(2)
 {
     continue_thread = true;
-    work_thread = std::thread(&DeviceIndex::run, this);
+    std::thread (&DeviceIndex::run, this).detach();
+
     device_list = std::vector<DeviceInfo>();
 }
 
 
 DeviceIndex::~DeviceIndex ()
 {
-    if (continue_thread)
-    {
-        continue_thread = false;
-        work_thread.join();
-    }
+    continue_thread = false;
+}
+
 }
 
 
@@ -81,7 +82,7 @@ void DeviceIndex::run ()
     while (continue_thread)
     {
         updateDeviceList();
-        usleep(wait_period);
+        std::this_thread::sleep_for(std::chrono::seconds(wait_period));
     }
 }
 
