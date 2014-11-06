@@ -77,6 +77,10 @@ public:
 
     bool fromString (const std::string&);
 
+
+    bool setProperty (const Property&);
+    bool getProperty (Property&);
+
 protected:
 
     bool setReadOnly (bool);
@@ -85,15 +89,14 @@ protected:
 
     bool setInactive (bool);
 
-    // PropertyImple interface
-    bool setProperty (const Property&);
-    bool getProperty (Property&);
-
     std::weak_ptr<PropertyImpl> impl;
 
     Property::VALUE_TYPE value_type;
-    // struct control_mapping mapping;
+
+    // internal storage
     struct camera_property prop;
+
+    // reference of initial state
     const struct camera_property ref_prop;
     std::map<std::string, int> string_map;
 
