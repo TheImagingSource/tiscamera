@@ -3,10 +3,12 @@
 #define USER_PROPERTIES_H_
 
 #include "base_types.h"
+#include "Error.h"
 
 #include <linux/videodev2.h>
 #include <string>
 #include <vector>
+#include <cstring>
 
 /**
    This file contains the mapping between userspace properties and device properties.
@@ -235,6 +237,22 @@ inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
     return INVALID_STD_PROPERTY;
 }
 
+
+
+inline camera_property create_empty_property (enum PROPERTY_ID id)
+{
+    auto ref = get_control_reference(id);
+    if (ref.id == INVALID_STD_PROPERTY.id)
+    {
+        setError(Error("No matching property", ENOENT));
+    }
+
+    camera_property prop = {};
+    prop.type = ref.type_to_use;
+    strncpy(prop.name, ref.name.c_str(), sizeof(prop.name));
+
+    return prop;
+}
 
 } /*namespace tcam */
 
