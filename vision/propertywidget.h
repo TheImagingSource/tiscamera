@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include <tis.h>
+#include <tcam.h>
 
 namespace Ui {
 class PropertyWidget;

@@ -2,7 +2,7 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include <tis.h>
+#include <tcam.h>
 
 #include <vector>
 #include <string>

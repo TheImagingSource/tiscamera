@@ -11,7 +11,7 @@
 #include "capturedeviceselectiondialog.h"
 #include "propertywidget.h"
 
-#include <tis.h>
+#include <tcam.h>
 
 namespace Ui {
 class MainWindow;

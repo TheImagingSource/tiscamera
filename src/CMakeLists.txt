@@ -81,7 +81,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 
 
 
-set(PUBLIC_HEADER "tis.h")
+set(PUBLIC_HEADER "tcam.h")
 add_library(tcam SHARED  ${srcs} )
 
 if (BUILD_USB)

@@ -4,7 +4,7 @@
 #define CTRL_MULTIMEDIA_H
 
 #include <string>
-#include <tis.h>
+#include <tcam.h>
 
 namespace tcam
 {

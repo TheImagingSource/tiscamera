@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include <tis.h>
+#include <tcam.h>
 
 #include <thread>
 
