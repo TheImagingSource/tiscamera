@@ -11,7 +11,7 @@ using namespace tcam;
 
 
 CaptureDevice::CaptureDevice ()
-    : device(nullptr), pipeline(std::make_shared<PipelineManager>())
+    : pipeline(nullptr), property_handler(nullptr), device(nullptr)
 {}
 
 
@@ -70,18 +70,13 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
 {
     resetError();
 
-    if (pipeline->getStatus() == PIPELINE_PLAYING ||
-        pipeline->getStatus() == PIPELINE_PAUSED)
-    {
-        return false;
-    }
-
     if (isDeviceOpen())
     {
         bool ret = closeDevice();
         if (ret == false)
         {
             tcam_log(TCAM_LOG_ERROR, "Unable to close previous device.");
+            // setError(Error("A device is already open", EPERM));
             return false;
         }
     }
@@ -94,6 +89,8 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
     {
         return false;
     }
+
+    property_handler = std::make_shared<PropertyHandler>();
 
     device_properties = device->getProperties();
 
@@ -112,6 +109,8 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
     {
         pipeline_properties = pipeline->getFilterProperties();
     }
+
+    property_handler->set_properties(device_properties, pipeline_properties);
 
     return true;
 }
@@ -161,12 +160,7 @@ std::vector<Property> CaptureDevice::getAvailableProperties ()
 
     std::vector<Property> props;
 
-    for (const auto& p : device_properties)
-    {
-        props.push_back(*p);
-    }
-
-    for ( const auto& p : pipeline_properties)
+    for ( const auto& p : property_handler->get_properties())
     {
         props.push_back(*p);
     }

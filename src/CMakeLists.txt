@@ -44,6 +44,7 @@ ImageSource.cpp
 serialization.cpp
 filter/AutoPassFilter.cpp
 filter/BayerRgbFilter.cpp
+PropertyHandler.cpp
 )
 
 if (BUILD_USB)

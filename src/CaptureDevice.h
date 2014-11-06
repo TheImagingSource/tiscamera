@@ -7,6 +7,7 @@
 #include "DeviceInterface.h"
 #include "Properties.h"
 #include "PipelineManager.h"
+#include "PropertyHandler.h"
 
 #include <string>
 #include <vector>
@@ -119,6 +120,7 @@ public:
 private:
 
     std::shared_ptr<PipelineManager> pipeline;
+    std::shared_ptr<PropertyHandler> property_handler;
 
     DeviceInfo open_device;
     VideoFormat active_format;
