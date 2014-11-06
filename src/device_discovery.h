@@ -14,6 +14,8 @@
 namespace tcam
 {
 
+typedef void (*dev_callback) (const DeviceInfo&);
+
 class DeviceIndex
 {
 
