@@ -305,12 +305,13 @@ bool Property::setInactive (bool is_disabled)
 }
 
 
-bool Property::setProperty (const Property&)
+bool Property::setProperty (const Property& p)
 {
     if (impl.expired())
     {
         return false;
     }
+    setStruct(p.getStruct());
     notifyImpl();
 
     return true;
