@@ -4,8 +4,6 @@
 #include "DeviceInterface.h"
 #include "logging.h"
 
-#include "config.h"
-
 #if HAVE_USB
 #include "V4l2Device.h"
 #endif

@@ -1,8 +1,4 @@
 
-#ifdef HAVE_CONFIG
-#include "config.h"
-#endif
-
 #include <vector>
 #include <string>
 #include <memory>
