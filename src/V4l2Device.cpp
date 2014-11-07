@@ -160,7 +160,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
 
     if (fourcc == FOURCC_Y800)
     {
-        fourcc = mmioFOURCC('G', 'R', 'E', 'Y');
+        fourcc = V4L2_PIX_FMT_GREY;
     }
 
     // set format in camera
@@ -545,8 +545,7 @@ void V4l2Device::index_formats ()
 
         // algorithms, etc. use Y800 as an identifier.
         // declare format as such.
-        uint32_t FOURCC_GREY = mmioFOURCC('G', 'R', 'E', 'Y');
-        if (desc.fourcc == FOURCC_GREY)
+        if (desc.fourcc == V4L2_PIX_FMT_GREY) // equals FOURCC_GREY
         {
             desc.fourcc = FOURCC_Y800;
         }
