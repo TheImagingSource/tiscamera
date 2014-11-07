@@ -287,8 +287,10 @@ bool V4l2Device::setFramerate (double framerate)
     parm.parm.capture.timeperframe.numerator = fps->numerator;
     parm.parm.capture.timeperframe.denominator = fps->denominator;
 
-    tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f'", framerate);
-    int ret = tcam_xioctl( fd, VIDIOC_S_PARM, &parm );
+    tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d", framerate,
+             parm.parm.capture.timeperframe.numerator,
+             parm.parm.capture.timeperframe.denominator);
+    int ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
 
     if (ret < 0)
     {
@@ -311,13 +313,13 @@ double V4l2Device::getFramerate ()
 
     if (ret < 0)
     {
-        tcam_log (TCAM_LOG_ERROR, "Failed to set frame rate\n");
+        tcam_log (TCAM_LOG_ERROR, "Failed to get frame rate\n");
         return 0.0;
     }
 
-    tcam_log(TCAM_LOG_ERROR, "Current framerate to %d / %d fps",
-            parm.parm.capture.timeperframe.numerator,
-            parm.parm.capture.timeperframe.denominator);
+    tcam_log(TCAM_LOG_INFO, "Set framerate to %d / %d fps",
+             parm.parm.capture.timeperframe.numerator,
+             parm.parm.capture.timeperframe.denominator);
 
     return parm.parm.capture.timeperframe.denominator / parm.parm.capture.timeperframe.numerator;
 }
