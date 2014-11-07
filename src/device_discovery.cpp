@@ -64,6 +64,22 @@ void DeviceIndex::updateDeviceList ()
     tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
 #endif
 
+    for (const auto& d : device_list)
+    {
+        auto f = [&d] (const DeviceInfo& info)
+            {
+                if (d.getSerial().compare( info.getSerial()) == 0)
+                    return true;
+                return false;
+            };
+
+        auto found = std::find_if(tmp_dev_list.begin(), tmp_dev_list.end(), f);
+
+        if (found == tmp_dev_list.end())
+        {
+            fire_device_lost(d);
+        }
+    }
 
     mtx.lock();
 
@@ -81,6 +97,15 @@ void DeviceIndex::run ()
     {
         updateDeviceList();
         std::this_thread::sleep_for(std::chrono::seconds(wait_period));
+    }
+}
+
+
+void DeviceIndex::fire_device_lost (const DeviceInfo& d)
+{
+    for (auto& c : callbacks)
+    {
+        c(d);
     }
 }
 
