@@ -3,7 +3,6 @@
 #include <string>
 #include <memory>
 #include <algorithm>
-#include <mutex>
 #include <cstring>
 
 #include "utils.h"
@@ -65,7 +64,6 @@ void DeviceIndex::updateDeviceList ()
     tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
 #endif
 
-    std::mutex mtx;
 
     mtx.lock();
 

@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <thread>
+#include <mutex>
+
 
 namespace tcam
 {
@@ -32,6 +34,7 @@ public:
 private:
 
     bool continue_thread;
+    std::mutex mtx;
     unsigned int wait_period;
     std::thread work_thread;
 
