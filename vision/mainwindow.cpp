@@ -208,7 +208,7 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
     {
         this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
                                                              width, height,
-                                                             QImage::Format_Mono));
+                                                             QImage::Format_Indexed8));
     }
     else if (buf.format.fourcc == FOURCC_Y16)
     {
