@@ -29,7 +29,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         cp.type = PROPERTY_TYPE_BOOLEAN;
         cp.value.b.default_value = false;
         cp.value.b.value = cp.value.b.default_value;
-        cp.flags = set_bit(cp.flags, PROPERTY_FLAG_EXTERNAL);
+        cp.flags = set_bit(cp.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         auto property_auto_offset = std::make_shared<PropertyBoolean>(impl, cp, Property::BOOLEAN);
 

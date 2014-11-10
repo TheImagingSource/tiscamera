@@ -310,7 +310,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_exposure = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
     }
@@ -335,7 +335,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Gain Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_gain = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
     }
@@ -363,7 +363,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Iris Auto", sizeof(prop.name));
         prop.type = PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
-        prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_iris = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
 
@@ -377,7 +377,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop.type = PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
     prop.value.b.default_value = true;
-    prop.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+    prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
 
@@ -389,7 +389,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_auto.type = PROPERTY_TYPE_BOOLEAN;
     prop_auto.value.b.value = true;
     prop_auto.value.b.default_value = true;
-    prop_auto.flags = set_bit(prop_auto.flags, PROPERTY_FLAG_EXTERNAL);
+    prop_auto.flags = set_bit(prop_auto.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop_auto, Property::BOOLEAN);
 
@@ -402,7 +402,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbr.value.i.max = 255;
     prop_wbr.value.i.value = 60;
     prop_wbr.value.i.default_value = 60;
-    prop_wbr.flags = set_bit(prop.flags, PROPERTY_FLAG_EXTERNAL);
+    prop_wbr.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
 
     camera_property prop_wbg = {};
@@ -413,7 +413,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbg.value.i.max = 255;
     prop_wbg.value.i.value = 60;
     prop_wbg.value.i.default_value = 60;
-    prop_wbg.flags = set_bit(prop_wbg.flags, PROPERTY_FLAG_EXTERNAL);
+    prop_wbg.flags = set_bit(prop_wbg.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
 
     camera_property prop_wbb = {};
@@ -424,7 +424,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbb.value.i.max = 255;
     prop_wbb.value.i.value = 60;
     prop_wbb.value.i.default_value = 60;
-    prop_wbb.flags = set_bit(prop_wbb.flags, PROPERTY_FLAG_EXTERNAL);
+    prop_wbb.flags = set_bit(prop_wbb.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_b= std::make_shared<PropertyInteger>(handler, prop_wbb, Property::INTEGER);
 
 

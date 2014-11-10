@@ -79,14 +79,14 @@ bool PropertyHandler::setProperty (const Property& p)
         {
             auto pe = find_property(external_properties, PROPERTY_EXPOSURE);
             auto s = pe->getStruct();
-            s.flags = set_bit(s.flags, PROPERTY_FLAG_READ_ONLY);
+            s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
             pe->setStruct(s);
         }
         else
         {
             auto pe = find_property(external_properties, PROPERTY_EXPOSURE);
             auto s = pe->getStruct();
-            s.flags = unset_bit(s.flags, PROPERTY_FLAG_READ_ONLY);
+            s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
             pe->setStruct(s);
         }
     }

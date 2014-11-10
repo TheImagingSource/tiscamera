@@ -246,34 +246,34 @@ struct camera_property
     uint32_t flags;             ///< bit flags
 };
 
-enum PROPERTY_FLAGS
+enum TCAM_PROPERTY_FLAGS
 {
     /* This control is permanently disabled and
        should be ignored by the application. Any
        attempt to change the control will
        result in an EINVAL error code. */
-    PROPERTY_FLAG_DISABLED = 0x0001,
+    TCAM_ROPERTY_FLAG_DISABLED = 0x0001,
     /*This control is temporarily unchangeable,
       for example because another application
       took over control of the respective
       resource. Such controls may be displayed
       specially in a user interface. Attempts to
       change the control may result in an EBUSY error code. */
-    PROPERTY_FLAG_GRABBED = 0x0002,
+    TCAM_PROPERTY_FLAG_GRABBED = 0x0002,
     /* This control is permanently readable only.
        Any attempt to change the control will result
        in an EINVAL error code. */
-    PROPERTY_FLAG_READ_ONLY = 0x0004,
+    TCAM_PROPERTY_FLAG_READ_ONLY = 0x0004,
     /* This control is realized through library code and is
        not available in the camera */
-    PROPERTY_FLAG_EXTERNAL = 0x0008,
+    TCAM_PROPERTY_FLAG_EXTERNAL = 0x0008,
     /* This control is not applicable to the
        current configuration and should be displayed
        accordingly in a user interface. For example
        the flag may be set on a MPEG audio level 2
        bitrate control when MPEG audio encoding
        level 1 was selected with another control. */
-    PROPERTY_FLAG_INACTIVE = 0x0010,
+    TCAM_PROPERTY_FLAG_INACTIVE = 0x0010,
     /* This control is permanently writable only.
        Any attempt to read the control will result
        in an EACCES error code error code. This flag
@@ -281,7 +281,7 @@ enum PROPERTY_FLAGS
        or action controls where writing a value will
        cause the device to carry out a given action
        (e. g. motor control) but no meaningful value can be returned. */
-    PROPERTY_FLAG_WRITE_ONLY = 0x0020,
+    TCAM_PROPERTY_FLAG_WRITE_ONLY = 0x0020,
 };
 
 #endif /* BASE_TYPES_H_ */

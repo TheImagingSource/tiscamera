@@ -273,7 +273,7 @@ bool tcam::save_xml_description (const std::string& filename,
         property_node->SetAttribute("name", dp->getName().c_str());
         property_node->SetAttribute("type", propertyType2String(dp->getType()).c_str());
 
-        if (is_bit_set(dp->getFlags(), PROPERTY_FLAG_EXTERNAL))
+        if (is_bit_set(dp->getFlags(), TCAM_PROPERTY_FLAG_EXTERNAL))
         {
             TiXmlElement* emulated_node = new TiXmlElement( "emulated" );
             property_node->LinkEndChild( emulated_node );
