@@ -16,8 +16,98 @@
 using namespace tcam;
 
 
+V4l2Device::V4L2PropertyHandler::V4L2PropertyHandler (V4l2Device* dev)
+    : device(dev)
+{}
+
+
+std::vector<std::shared_ptr<Property>> V4l2Device::V4L2PropertyHandler::create_property_vector ()
+{
+    std::vector<std::shared_ptr<Property>> props;
+
+    for ( const auto& p : properties )
+    {
+        props.push_back(p.prop);
+    }
+
+    return props;
+}
+
+
+bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
+{
+    auto f = [&new_property] (const property_description& d)
+        {
+            return ((*d.prop).getName().compare(new_property.getName()) == 0);
+        };
+
+    auto desc = std::find_if(properties.begin(), properties.end(),f);
+
+    if (desc == properties.end())
+    {
+        setError(Error("", 0));
+        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.getName().c_str());
+        // TODO: failure description
+        return false;
+    }
+
+    if (desc->id == EMULATED_PROPERTY)
+    {
+        if (new_property.getID() == PROPERTY_OFFSET_AUTO)
+        {
+            auto props = create_property_vector();
+            return handle_auto_center(new_property,
+                                      props,
+                                      device->get_sensor_size(),
+                                      device->active_video_format.getSize());
+        }
+        else
+        {
+            setError(Error("Emulated property not implemented", ENOENT));
+            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented");
+            return false;
+        }
+    }
+    else
+    {
+        desc->prop->setStruct(new_property.getStruct());
+
+        if (device->changeV4L2Control(*desc))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+bool V4l2Device::V4L2PropertyHandler::getProperty (Property& p)
+{
+    auto f = [&p] (const property_description& d)
+        {
+            return ((*d.prop).getName().compare(p.getName()) == 0);
+        };
+
+    auto desc = std::find_if(properties.begin(), properties.end(),f);
+
+    if (desc == properties.end())
+    {
+        std::string s = "Unable to find Property \"" + p.getName() + "\"";
+        tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
+        setError(Error(s, ENOENT));
+        return false;
+    }
+
+    p.setStruct(desc->prop->getStruct());
+
+    // TODO: ask device for current value
+    return false;
+}
+
+
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
-    : device(device_desc), is_stream_on(false), emulate_bayer(false), emulated_fourcc(0)
+    : device(device_desc), emulate_bayer(false), emulated_fourcc(0),
+      property_handler(nullptr), is_stream_on(false)
 {
 
     if ((fd = open(device.getInfo().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
@@ -26,8 +116,11 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
         throw std::runtime_error("Failed opening device.");
     }
 
+    property_handler = std::make_shared<V4L2PropertyHandler>(this);
+
     determine_active_video_format();
 
+    this->index_all_controls(property_handler);
     this->index_formats();
 }
 
@@ -53,82 +146,18 @@ DeviceInfo V4l2Device::getDeviceDescription () const
 
 std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
 {
-    if (this->properties.empty())
-    {
-        index_all_controls(shared_from_this());
-    }
-
-    return create_property_vector();
+    return property_handler->create_property_vector();
 }
 
 
 bool V4l2Device::setProperty (const Property& new_property)
 {
-    auto f = [&new_property] (const property_description& d)
-        {
-            return ((*d.prop).getName().compare(new_property.getName()) == 0);
-        };
-
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
-
-    if (desc == properties.end())
-    {
-        setError(Error("", 0));
-        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.getName().c_str());
-        // TODO: failure description
-        return false;
-    }
-
-    if (desc->id == EMULATED_PROPERTY)
-    {
-        if (new_property.getID() == PROPERTY_OFFSET_AUTO)
-        {
-            auto props = create_property_vector();
-            return handle_auto_center(new_property,
-                                      props,
-                                      get_sensor_size(),
-                                      active_video_format.getSize());
-        }
-        else
-        {
-            setError(Error("Emulated property not implemented", ENOENT));
-            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented");
-            return false;
-        }
-    }
-    else
-    {
-        desc->prop->setStruct(new_property.getStruct());
-
-        if (changeV4L2Control(*desc))
-        {
-            return true;
-        }
-    }
     return false;
 }
 
 
 bool V4l2Device::getProperty (Property& p)
 {
-    auto f = [&p] (const property_description& d)
-        {
-            return ((*d.prop).getName().compare(p.getName()) == 0);
-        };
-
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
-
-    if (desc == properties.end())
-    {
-        std::string s = "Unable to find Property \"" + p.getName() + "\"";
-        tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
-        setError(Error(s, ENOENT));
-        return false;
-    }
-
-    p.setStruct(desc->prop->getStruct());
-
-    // TODO: ask device for current value
     return false;
 }
 
@@ -642,30 +671,16 @@ void V4l2Device::determine_active_video_format ()
 }
 
 
-std::vector<std::shared_ptr<Property>> V4l2Device::create_property_vector ()
-{
-    std::vector<std::shared_ptr<Property>> props;
-
-    for ( const auto& p : properties )
-    {
-        props.push_back(p.prop);
-    }
-
-    return props;
-}
-
-
 void V4l2Device::create_emulated_properties ()
 {
-
-    auto tmp_props = generate_simulated_properties(create_property_vector(),
-                                                   shared_from_this());
+    auto tmp_props = generate_simulated_properties(property_handler->create_property_vector(),
+                                                   property_handler);
 
     for (auto& p : tmp_props)
     {
         property_description pd = { EMULATED_PROPERTY, p};
         tcam_log(TCAM_LOG_DEBUG, "Adding '%s' to property list", p->getName().c_str());
-        properties.push_back(pd);
+        property_handler->properties.push_back(pd);
     }
 }
 
@@ -740,14 +755,14 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
         ext_ctrl.value = ctrl.value;
     }
 
-    auto p = createProperty(fd, qctrl, &ext_ctrl, impl);
+    auto p = createProperty(fd, qctrl, &ext_ctrl, property_handler);
 
     struct property_description desc;
 
     desc.id = qctrl->id;
     desc.prop = p;
 
-    properties.push_back(desc);
+    property_handler->properties.push_back(desc);
 
     if (qctrl->type == V4L2_CTRL_TYPE_STRING)
     {

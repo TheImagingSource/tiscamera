@@ -15,9 +15,40 @@
 namespace tcam
 {
 
-class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V4l2Device>
 
+class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V4l2Device>
 {
+
+    struct property_description
+    {
+        int id; // v4l2 identification
+        std::shared_ptr<Property> prop;
+    };
+    static const int EMULATED_PROPERTY = -1;
+
+    class V4L2PropertyHandler : public PropertyImpl
+    {
+        friend class V4l2Device;
+
+    public:
+        V4L2PropertyHandler (V4l2Device*);
+
+
+        std::vector<std::shared_ptr<Property>> create_property_vector ();
+
+        bool setProperty (const Property&);
+        bool getProperty (Property&);
+
+    protected:
+
+        static const int EMULATED_PROPERTY = -1;
+
+        std::vector<property_description> properties;
+        std::vector<property_description> special_properties;
+
+        V4l2Device* device;
+    };
+
 
 public:
 
@@ -86,6 +117,8 @@ private:
 
     std::vector<framerate_conv> framerate_conversions;
 
+    std::shared_ptr<V4L2PropertyHandler> property_handler;
+
     /**
      * @brief iterate over all v4l2 format descriptions and convert them
      *        into the internal representation
@@ -95,18 +128,6 @@ private:
     std::vector<double> index_framerates (const struct v4l2_frmsizeenum& frms);
 
     void determine_active_video_format ();
-
-    struct property_description
-    {
-        int id; // v4l2 identification
-        std::shared_ptr<Property> prop;
-    } ;
-
-    static const int EMULATED_PROPERTY = -1;
-
-    std::vector<property_description> properties;
-
-    std::vector<std::shared_ptr<Property>> create_property_vector ();
 
     void create_emulated_properties ();
 
