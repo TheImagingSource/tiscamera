@@ -150,7 +150,7 @@ bool CaptureDevice::closeDevice ()
 }
 
 
-std::vector<Property> CaptureDevice::getAvailableProperties ()
+std::vector<Property> CaptureDevice::getAvailableProperties () const
 {
     resetError();
     if (!isDeviceOpen())

@@ -77,7 +77,7 @@ public:
     /**
      * @return vector containing all available properties
      */
-    std::vector<Property> getAvailableProperties ();
+    std::vector<Property> getAvailableProperties () const;
 
     // videoformat related:
 
