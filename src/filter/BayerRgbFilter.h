@@ -24,9 +24,9 @@ public:
 
     bool apply (std::shared_ptr<MemoryBuffer>);
 
-    bool setStatus (PIPELINE_STATUS);
+    bool setStatus (TCAM_PIPELINE_STATUS);
 
-    PIPELINE_STATUS getStatus () const;
+    TCAM_PIPELINE_STATUS getStatus () const;
 
     void getVideoFormat (VideoFormat& in, VideoFormat& out) const;
 
@@ -40,7 +40,7 @@ public:
 
 private:
 
-    PIPELINE_STATUS status;
+    TCAM_PIPELINE_STATUS status;
     FilterDescription description;
 
     VideoFormat input_format;

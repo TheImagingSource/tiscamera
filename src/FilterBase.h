@@ -48,9 +48,9 @@ public:
 
     virtual bool apply (std::shared_ptr<MemoryBuffer>) = 0;
 
-    virtual bool setStatus (PIPELINE_STATUS) = 0;
+    virtual bool setStatus (TCAM_PIPELINE_STATUS) = 0;
 
-    virtual PIPELINE_STATUS getStatus () const = 0;
+    virtual TCAM_PIPELINE_STATUS getStatus () const = 0;
 
     virtual bool setVideoFormat (const VideoFormat& in, const VideoFormat& out) = 0;
     virtual void getVideoFormat (VideoFormat& in, VideoFormat& out) const = 0;

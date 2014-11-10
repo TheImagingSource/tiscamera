@@ -24,9 +24,9 @@ public:
 
     ~ImageSource ();
 
-    bool setStatus (PIPELINE_STATUS);
+    bool setStatus (TCAM_PIPELINE_STATUS);
 
-    PIPELINE_STATUS getStatus () const;
+    TCAM_PIPELINE_STATUS getStatus () const;
 
     bool setDevice (std::shared_ptr<DeviceInterface>);
 
@@ -42,7 +42,7 @@ public:
 
 private:
 
-    PIPELINE_STATUS current_status;
+    TCAM_PIPELINE_STATUS current_status;
 
     std::shared_ptr<DeviceInterface> device;
 

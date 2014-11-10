@@ -6,7 +6,7 @@
 using namespace tcam;
 
 ImageSource::ImageSource ()
-    : current_status(PIPELINE_UNDEFINED), n_buffers(10)
+    : current_status(TCAM_PIPELINE_UNDEFINED), n_buffers(10)
 {}
 
 
@@ -16,11 +16,11 @@ ImageSource::~ImageSource ()
 }
 
 
-bool ImageSource::setStatus (PIPELINE_STATUS status)
+bool ImageSource::setStatus (TCAM_PIPELINE_STATUS status)
 {
     current_status = status;
 
-    if (current_status == PIPELINE_PLAYING)
+    if (current_status == TCAM_PIPELINE_PLAYING)
     {
         this->initialize_buffers();
 
@@ -40,7 +40,7 @@ bool ImageSource::setStatus (PIPELINE_STATUS status)
         }
 
     }
-    else if (current_status == PIPELINE_STOPPED)
+    else if (current_status == TCAM_PIPELINE_STOPPED)
     {
         tcam_log(TCAM_LOG_INFO, "Source changed to state STOPPED");
         device->stop_stream();
@@ -52,7 +52,7 @@ bool ImageSource::setStatus (PIPELINE_STATUS status)
 }
 
 
-PIPELINE_STATUS ImageSource::getStatus () const
+TCAM_PIPELINE_STATUS ImageSource::getStatus () const
 {
     return current_status;
 }
@@ -62,7 +62,7 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 {
     //tcam_log(TCAM_LOG_DEBUG, "Received device to use as source.");
 
-    if (current_status == PIPELINE_PAUSED || current_status == PIPELINE_PLAYING)
+    if (current_status == TCAM_PIPELINE_PAUSED || current_status == TCAM_PIPELINE_PLAYING)
     {
         return false;
     }

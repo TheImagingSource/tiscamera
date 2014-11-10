@@ -57,8 +57,8 @@ public:
 
     bool apply (std::shared_ptr<MemoryBuffer>);
 
-    bool setStatus (PIPELINE_STATUS);
-    PIPELINE_STATUS getStatus () const;
+    bool setStatus (TCAM_PIPELINE_STATUS);
+    TCAM_PIPELINE_STATUS getStatus () const;
 
     void getVideoFormat (VideoFormat& in, VideoFormat& out) const;
     bool setVideoFormat(const VideoFormat&);
@@ -88,7 +88,7 @@ private:
     unsigned int exposure_max;
 
     FilterDescription description;
-    PIPELINE_STATUS current_status;
+    TCAM_PIPELINE_STATUS current_status;
     tcam::VideoFormat input_format;
 
     auto_alg::auto_pass_params params;

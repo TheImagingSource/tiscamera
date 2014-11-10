@@ -216,7 +216,7 @@ bool CaptureDevice::startStream (std::shared_ptr<SinkInterface> sink)
     }
     pipeline->setSink(sink);
 
-    return pipeline->setStatus(PIPELINE_PLAYING);
+    return pipeline->setStatus(TCAM_PIPELINE_PLAYING);
 }
 
 
@@ -228,5 +228,5 @@ bool CaptureDevice::stopStream ()
         return false;
     }
 
-    return pipeline->setStatus(PIPELINE_STOPPED);
+    return pipeline->setStatus(TCAM_PIPELINE_STOPPED);
 }

@@ -13,7 +13,7 @@
 using namespace tcam;
 
 BayerRgbFilter::BayerRgbFilter ()
-    : status(PIPELINE_UNDEFINED)
+    : status(TCAM_PIPELINE_UNDEFINED)
 {
     description.name = "bayer2rgb";
     description.type = FILTER_TYPE_CONVERSION;
@@ -57,7 +57,7 @@ bool BayerRgbFilter::apply (std::shared_ptr<MemoryBuffer>)
 }
 
 
-bool BayerRgbFilter::setStatus (PIPELINE_STATUS s)
+bool BayerRgbFilter::setStatus (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
     {
@@ -71,7 +71,7 @@ bool BayerRgbFilter::setStatus (PIPELINE_STATUS s)
 }
 
 
-PIPELINE_STATUS BayerRgbFilter::getStatus () const
+TCAM_PIPELINE_STATUS BayerRgbFilter::getStatus () const
 {
     return status;
 }

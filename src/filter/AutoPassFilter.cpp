@@ -82,7 +82,7 @@ bool AutoPassPropertyHandler::getProperty (Property& prop)
 AutoPassFilter::AutoPassFilter ()
     : valid(false),
       skipped_buffer(0),
-      current_status(PIPELINE_UNDEFINED),
+      current_status(TCAM_PIPELINE_UNDEFINED),
       exposure_max(0)
 {
     description.name = "AutoPass";
@@ -227,7 +227,7 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 }
 
 
-bool AutoPassFilter::setStatus (PIPELINE_STATUS s)
+bool AutoPassFilter::setStatus (TCAM_PIPELINE_STATUS s)
 {
     if (current_status == s)
     {
@@ -240,7 +240,7 @@ bool AutoPassFilter::setStatus (PIPELINE_STATUS s)
 }
 
 
-PIPELINE_STATUS AutoPassFilter::getStatus () const
+TCAM_PIPELINE_STATUS AutoPassFilter::getStatus () const
 {
     return current_status;
 }

@@ -8,22 +8,22 @@ using namespace tcam;
 
 
 ImageSink::ImageSink ()
-    : status(PIPELINE_UNDEFINED), callback(nullptr), user_data(nullptr)
+    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), user_data(nullptr)
 {}
 
 
-bool ImageSink::setStatus (PIPELINE_STATUS s)
+bool ImageSink::setStatus (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
 
     status = s;
 
-    if (status == PIPELINE_PLAYING)
+    if (status == TCAM_PIPELINE_PLAYING)
     {
         std::cout << "Pipeline started playing" << std::endl;
     }
-    else if (status == PIPELINE_STOPPED)
+    else if (status == TCAM_PIPELINE_STOPPED)
     {
         std::cout << "Pipeline stopped playing" << std::endl;
     }
@@ -32,7 +32,7 @@ bool ImageSink::setStatus (PIPELINE_STATUS s)
 }
 
 
-PIPELINE_STATUS ImageSink::getStatus () const
+TCAM_PIPELINE_STATUS ImageSink::getStatus () const
 {
     return status;
 }

@@ -13,7 +13,7 @@
 using namespace tcam;
 
 PipelineManager::PipelineManager ()
-    : status(PIPELINE_UNDEFINED), filter_loader()
+    : status(TCAM_PIPELINE_UNDEFINED), filter_loader()
 {
     filter_loader.index_possible_filter();
     filter_loader.open_possible_filter();
@@ -26,7 +26,7 @@ PipelineManager::PipelineManager ()
 
 PipelineManager::~PipelineManager ()
 {
-    if (status == PIPELINE_PLAYING)
+    if (status == TCAM_PIPELINE_PLAYING)
     {
         stop_playing();
     }
@@ -57,14 +57,14 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
-bool PipelineManager::setStatus (PIPELINE_STATUS s)
+bool PipelineManager::setStatus (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
 
     this->status = s;
 
-    if (status == PIPELINE_PLAYING)
+    if (status == TCAM_PIPELINE_PLAYING)
     {
         if (create_pipeline())
         {
@@ -73,12 +73,12 @@ bool PipelineManager::setStatus (PIPELINE_STATUS s)
         }
         else
         {
-            status = PIPELINE_ERROR;
+            status = TCAM_PIPELINE_ERROR;
             setError(Error("Unable to create pipeline", EPIPE));
             return false;
         }
     }
-    else if (status == PIPELINE_STOPPED)
+    else if (status == TCAM_PIPELINE_STOPPED)
     {
       stop_playing();
     }
@@ -87,7 +87,7 @@ bool PipelineManager::setStatus (PIPELINE_STATUS s)
 }
 
 
-PIPELINE_STATUS PipelineManager::getStatus () const
+TCAM_PIPELINE_STATUS PipelineManager::getStatus () const
 {
     return status;
 }
@@ -95,7 +95,7 @@ PIPELINE_STATUS PipelineManager::getStatus () const
 
 bool PipelineManager::destroyPipeline ()
 {
-    setStatus(PIPELINE_STOPPED);
+    setStatus(TCAM_PIPELINE_STOPPED);
 
     source = nullptr;
     sink = nullptr;
@@ -183,7 +183,7 @@ void PipelineManager::index_output_formats ()
 
 bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 {
-    if (status == PIPELINE_PLAYING || status == PIPELINE_PAUSED)
+    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
         return false;
     }
@@ -228,7 +228,7 @@ std::shared_ptr<ImageSource> PipelineManager::getSource ()
 
 bool PipelineManager::setSink (std::shared_ptr<SinkInterface> s)
 {
-    if (status == PIPELINE_PLAYING || status == PIPELINE_PAUSED)
+    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
         return false;
     }
@@ -290,7 +290,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 }
 
 
-bool PipelineManager::set_source_status (PIPELINE_STATUS status)
+bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS status)
 {
     if (source == nullptr)
     {
@@ -308,7 +308,7 @@ bool PipelineManager::set_source_status (PIPELINE_STATUS status)
 }
 
 
-bool PipelineManager::set_sink_status (PIPELINE_STATUS status)
+bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS status)
 {
     if (sink == nullptr)
     {
@@ -586,7 +586,7 @@ bool PipelineManager::create_pipeline ()
 bool PipelineManager::start_playing ()
 {
 
-    if (!set_sink_status(PIPELINE_PLAYING))
+    if (!set_sink_status(TCAM_PIPELINE_PLAYING))
     {
         tcam_log(TCAM_LOG_ERROR, "Sink refused to change to state PLAYING");
         goto error;
@@ -594,7 +594,7 @@ bool PipelineManager::start_playing ()
 
     for (auto& f : filter_pipeline)
     {
-        if (!f->setStatus(PIPELINE_PLAYING))
+        if (!f->setStatus(TCAM_PIPELINE_PLAYING))
         {
             tcam_log(TCAM_LOG_ERROR,
                     "Filter %s refused to change to state PLAYING",
@@ -603,13 +603,13 @@ bool PipelineManager::start_playing ()
         }
     }
 
-    if (!set_source_status(PIPELINE_PLAYING))
+    if (!set_source_status(TCAM_PIPELINE_PLAYING))
     {
         tcam_log(TCAM_LOG_ERROR, "Source refused to change to state PLAYING");
         goto error;
     }
 
-    status = PIPELINE_PLAYING;
+    status = TCAM_PIPELINE_PLAYING;
 
     return true;
 
@@ -622,9 +622,9 @@ error:
 
 bool PipelineManager::stop_playing ()
 {
-    status = PIPELINE_STOPPED;
+    status = TCAM_PIPELINE_STOPPED;
 
-    if (!set_source_status(PIPELINE_STOPPED))
+    if (!set_source_status(TCAM_PIPELINE_STOPPED))
     {
         tcam_log(TCAM_LOG_ERROR, "Source refused to change to state STOP");
         return false;
@@ -632,7 +632,7 @@ bool PipelineManager::stop_playing ()
 
     for (auto& f : filter_pipeline)
     {
-        if (!f->setStatus(PIPELINE_STOPPED))
+        if (!f->setStatus(TCAM_PIPELINE_STOPPED))
         {
             tcam_log(TCAM_LOG_ERROR,
                     "Filter %s refused to change to state STOP",
@@ -641,7 +641,7 @@ bool PipelineManager::stop_playing ()
         }
     }
 
-    set_sink_status(PIPELINE_STOPPED);
+    set_sink_status(TCAM_PIPELINE_STOPPED);
 
     return true;
 }
@@ -649,7 +649,7 @@ bool PipelineManager::stop_playing ()
 
 void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
-    if (status == PIPELINE_STOPPED)
+    if (status == TCAM_PIPELINE_STOPPED)
     {
         return;
     }

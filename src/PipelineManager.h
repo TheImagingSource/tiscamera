@@ -42,12 +42,12 @@ public:
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
 
-    bool setStatus (PIPELINE_STATUS);
+    bool setStatus (TCAM_PIPELINE_STATUS);
 
     /**
-     * @return PIPELINE_STATUS the pipeline currently has
+     * @return TCAM_PIPELINE_STATUS the pipeline currently has
      */
-    PIPELINE_STATUS getStatus () const;
+    TCAM_PIPELINE_STATUS getStatus () const;
 
     /**
      * @brief Reset the pipeline to PIPELINE_STOPPED.
@@ -79,7 +79,7 @@ private:
     std::vector<VideoFormatDescription> available_input_formats;
     std::vector<VideoFormatDescription> available_output_formats;
 
-    PIPELINE_STATUS status;
+    TCAM_PIPELINE_STATUS status;
 
     std::shared_ptr<ImageSource> source;
     std::shared_ptr<SinkInterface> sink;
@@ -119,9 +119,9 @@ private:
 
     std::vector<uint32_t> getDeviceFourcc ();
 
-    bool set_source_status (PIPELINE_STATUS status);
+    bool set_source_status (TCAM_PIPELINE_STATUS status);
 
-    bool set_sink_status (PIPELINE_STATUS);
+    bool set_sink_status (TCAM_PIPELINE_STATUS);
 
     bool validate_pipeline ();
 

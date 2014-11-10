@@ -21,8 +21,8 @@ public:
 
     ImageSink ();
 
-    bool setStatus (PIPELINE_STATUS);
-    PIPELINE_STATUS getStatus () const;
+    bool setStatus (TCAM_PIPELINE_STATUS);
+    TCAM_PIPELINE_STATUS getStatus () const;
 
     bool registerCallback (sink_callback, void*);
 
@@ -30,7 +30,7 @@ public:
 
 private:
 
-    PIPELINE_STATUS status;
+    TCAM_PIPELINE_STATUS status;
 
     sink_callback callback;
     void* user_data;

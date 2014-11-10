@@ -17,17 +17,16 @@ This file contains basic c types that are used for:
 
 
 /**
-* @name PIPELINE_STATUS
+* @name TCAM_PIPELINE_STATUS
 * @brief overview over possible pipeline states
 */
-enum PIPELINE_STATUS
+enum TCAM_PIPELINE_STATUS
 {
-    PIPELINE_UNDEFINED = 0,
-    PIPELINE_STOPPED,
-    PIPELINE_PAUSED,
-    PIPELINE_PLAYING,
-    PIPELINE_ERROR,
-
+    TCAM_PIPELINE_UNDEFINED = 0,
+    TCAM_PIPELINE_STOPPED,
+    TCAM_PIPELINE_PAUSED,
+    TCAM_PIPELINE_PLAYING,
+    TCAM_PIPELINE_ERROR,
 };
 
 
