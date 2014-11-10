@@ -581,8 +581,43 @@ void V4l2Device::index_formats ()
             desc.fourcc = FOURCC_Y800;
         }
 
-        VideoFormatDescription format(desc, rf);
-        available_videoformats.push_back(format);
+
+        std::vector<int> binnings;
+
+        binnings.push_back(1); // default value; binning disabled
+
+        auto binning_desc = std::find_if(property_handler->special_properties.begin(),
+                                         property_handler->special_properties.end(),
+                                         [] (const property_description& d)
+                                         {
+                                             if (d.prop->getID() == PROPERTY_BINNING)
+                                                 return true;
+                                             return false;
+                                         });
+
+        if (binning_desc != property_handler->special_properties.end())
+        {
+
+            auto bp = (PropertyInteger&) *(binning_desc->prop);
+
+            for (auto i = bp.getMin(); i <= bp.getMax(); i += bp.getStep())
+            {
+                if (i % 2 == 0)
+                    binnings.push_back(i);
+            }
+
+        }
+        else
+        {
+        }
+
+        for (const auto& b : binnings)
+        {
+            desc.binning = b;
+
+            VideoFormatDescription format(desc, rf);
+            available_videoformats.push_back(format);
+        }
     }
 
 }
@@ -762,7 +797,16 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     desc.id = qctrl->id;
     desc.prop = p;
 
-    property_handler->properties.push_back(desc);
+    static std::vector<PROPERTY_ID> special_controls = {PROPERTY_BINNING};
+
+    if (std::find(special_controls.begin(), special_controls.end(), p->getID()) != special_controls.end())
+    {
+        property_handler->special_properties.push_back(desc);
+    }
+    else
+    {
+        property_handler->properties.push_back(desc);
+    }
 
     if (qctrl->type == V4L2_CTRL_TYPE_STRING)
     {
