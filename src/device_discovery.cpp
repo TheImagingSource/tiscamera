@@ -110,6 +110,37 @@ void DeviceIndex::fire_device_lost (const DeviceInfo& d)
 }
 
 
+bool DeviceIndex::fillDeviceInfo (DeviceInfo& info)
+{
+    if (!info.getSerial().empty())
+    {
+        for (const auto& d : device_list)
+        {
+            if (info.getSerial() == d.getSerial())
+            {
+                info = d;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (!info.getIdentifier().empty())
+    {
+        for (const auto& d : device_list)
+        {
+            if (info.getIdentifier() == d.getIdentifier())
+            {
+                info = d;
+                return true;
+            }
+        }
+        return false;
+    }
+    return false;
+}
+
+
 std::shared_ptr<DeviceIndex> tcam::getDeviceIndex ()
 {
     return std::make_shared<DeviceIndex>();

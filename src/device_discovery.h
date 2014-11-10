@@ -31,6 +31,13 @@ public:
 
     void register_device_lost (dev_callback);
 
+    /**
+     * @param[in/out] DeviceInfo that shall be filled. \
+     *                Must contain identifier or serial
+     * @return true if device found and argument could be filled
+     */
+    bool fillDeviceInfo (DeviceInfo&);
+
 private:
 
     bool continue_thread;
