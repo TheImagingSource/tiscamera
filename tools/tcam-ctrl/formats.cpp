@@ -13,8 +13,8 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
     {
         auto desc = f.getFormatDescription();
 
-        std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")"
-                  << std::endl;
+        std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")\n"
+                  << "\tBinning: " << desc.binning << std::endl;
         for (const auto& s : f.getResolutionsFramesrates())
         {
             std::cout << "\tResolution: " << s.resolution.width << "x" << s.resolution.height << std::endl;
