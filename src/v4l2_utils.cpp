@@ -62,7 +62,7 @@ static std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = PROPERTY_TRIGGER_MODE,
-        .v4l2_id = { V4L2_CID_PRIVACY, 0x0199e208},
+        .v4l2_id = { V4L2_CID_PRIVACY, 0x0199e208, 0x980924},
     },
     {
         .id = PROPERTY_TRIGGER_SOURCE,
@@ -74,11 +74,11 @@ static std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = PROPERTY_SOFTWARETRIGGER,
-        .v4l2_id = {/* usb 2: */ 0x980925, /* usb 3: */ 0x0199e209},
+        .v4l2_id = {/* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209},
     },
     {
         .id = PROPERTY_GPIO,
-        .v4l2_id = {0x0199e217},
+        .v4l2_id = {/* usb 2: */ 0x980920, /* usb 3: */ 0x0199e217},
     },
     {
         .id = PROPERTY_GPIN,
