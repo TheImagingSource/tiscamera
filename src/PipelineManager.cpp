@@ -174,6 +174,7 @@ void PipelineManager::index_output_formats ()
 
         if (match != available_input_formats.end())
         {
+            tcam_log(TCAM_LOG_DEBUG, "Adding %s to format list", fourcc2description(match->getFourcc()));
             available_output_formats.push_back(*match);
         }
     }
@@ -344,6 +345,12 @@ bool PipelineManager::validate_pipeline ()
                 in_format.toString().c_str(),
                 input_format.toString().c_str());
         return false;
+    }
+    else
+    {
+        tcam_log(TCAM_LOG_DEBUG,
+                 "Starting pipeline with format: '%s'",
+                 in_format.toString().c_str());
     }
 
     VideoFormat in;
@@ -533,6 +540,7 @@ bool PipelineManager::create_pipeline ()
 
     if (!create_conversion_pipeline())
     {
+        tcam_log(TCAM_LOG_ERROR, "Unable to determine conversion pipeline.");
         return false;
     }
 

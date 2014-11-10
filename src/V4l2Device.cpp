@@ -64,7 +64,7 @@ bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
         else
         {
             setError(Error("Emulated property not implemented", ENOENT));
-            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented");
+            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.getName().c_str());
             return false;
         }
     }
