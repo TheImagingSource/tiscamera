@@ -211,6 +211,16 @@ static std::vector<struct control_reference> ctrl_reference_table =
         .name = "Strobe Enable",
         .type_to_use = PROPERTY_TYPE_BOOLEAN,
     },
+    {
+        .id = PROPERTY_SKIPPING,
+        .name = "Skipping",
+        .type_to_use = PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        PROPERTY_BINNING,
+        .name = "Binning",
+        .type_to_use = PROPERTY_TYPE_INTEGER,
+    },
     // {
     //     .name = "Strobe Polarity",
     //     .type_to_use = ,
