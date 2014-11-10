@@ -19,11 +19,12 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
     std::vector<std::shared_ptr<Property>> new_properties;
 
     // requirements for auto center
-    if (find_property(props, "Offset Auto Center") == nullptr &&
-        find_property(props, "Offset X") != nullptr &&
-        find_property(props, "Offset Y") != nullptr)
+    if (find_property(props, PROPERTY_OFFSET_AUTO) == nullptr &&
+        find_property(props, PROPERTY_OFFSET_X) != nullptr &&
+        find_property(props, PROPERTY_OFFSET_Y) != nullptr)
     {
         camera_property cp = {};
+        cp.id = PROPERTY_OFFSET_AUTO;
         strcpy(cp.name, "Offset Auto Center");
         cp.type = PROPERTY_TYPE_BOOLEAN;
         cp.value.b.default_value = false;
