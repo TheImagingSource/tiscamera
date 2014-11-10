@@ -148,6 +148,10 @@ static std::vector<struct v4l2_property> v4l2_mappings =
         .id = PROPERTY_STROBE_ENABLE,
         .v4l2_id = {0x0199e211},
     },
+    {
+        .id = PROPERTY_BINNING,
+        .v4l2_id = {0x980925},
+    },
 };
 
 
