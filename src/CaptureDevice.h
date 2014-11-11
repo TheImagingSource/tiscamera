@@ -125,14 +125,7 @@ private:
     DeviceInfo open_device;
     VideoFormat active_format;
 
-    // std::shared_ptr<Device> capture;
     std::shared_ptr<DeviceInterface> device;
-
-    std::vector<std::shared_ptr<Property>> device_properties;
-
-    std::vector<std::shared_ptr<Property>> pipeline_properties;
-
-    std::vector<std::shared_ptr<Property>> user_properties;
 
 }; /* class CaptureDevice */
 

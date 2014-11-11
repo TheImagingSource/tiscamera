@@ -31,16 +31,12 @@ bool CaptureDevice::load_configuration (const std::string& filename)
         return false;
     }
 
-    std::vector<std::shared_ptr<Property>> properties ;
-    properties.reserve(device_properties.size() + pipeline_properties.size());
-
-    properties.insert(properties.end(), device_properties.begin(), device_properties.end());
-    properties.insert(properties.end(), pipeline_properties.begin(), pipeline_properties.end());
+    auto vec = property_handler->get_properties();
 
     return load_xml_description(filename,
                                 open_device,
                                 active_format,
-                                properties);
+                                vec);
 }
 
 
@@ -53,16 +49,10 @@ bool CaptureDevice::save_configuration (const std::string& filename)
         return false;
     }
 
-    std::vector<std::shared_ptr<Property>> properties ;
-    properties.reserve(device_properties.size() + pipeline_properties.size());
-
-    properties.insert(properties.end(), device_properties.begin(), device_properties.end());
-    properties.insert(properties.end(), pipeline_properties.begin(), pipeline_properties.end());
-
     return save_xml_description(filename,
                                 open_device,
                                 device->getActiveVideoFormat(),
-                                properties);
+                                property_handler->get_properties());
 }
 
 
@@ -92,25 +82,7 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
 
     property_handler = std::make_shared<PropertyHandler>();
 
-    device_properties = device->getProperties();
-
-    if (device_properties.empty())
-    {
-        tcam_log(TCAM_LOG_ERROR, "Device did not expose any properties!");
-    }
-    else
-    {
-        tcam_log(TCAM_LOG_DEBUG, "Retrieved %d properties", device_properties.size());
-    }
-    pipeline = std::make_shared<PipelineManager>();
-    bool ret = pipeline->setSource(device);
-
-    if (ret == true)
-    {
-        pipeline_properties = pipeline->getFilterProperties();
-    }
-
-    property_handler->set_properties(device_properties, pipeline_properties);
+    property_handler->set_properties(device->getProperties(), pipeline->getFilterProperties());
 
     return true;
 }
@@ -142,7 +114,7 @@ bool CaptureDevice::closeDevice ()
 
     open_device = DeviceInfo ();
     device.reset();
-    device_properties.clear();
+    property_handler = nullptr;
 
     tcam_log(TCAM_LOG_INFO, "Closed device %s.", name.c_str());
 
