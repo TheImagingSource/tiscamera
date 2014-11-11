@@ -108,7 +108,7 @@ uint32_t get_pitch_length (unsigned int width, uint32_t fourcc);
  * @param image  - image size of the image that shall be auto centered
  * @return coordinates that shall be used for offsets
  */
-IMG_SIZE calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image);
+tcam_image_size calculate_auto_center (const tcam_image_size& sensor, const tcam_image_size& image);
 
 
 /**

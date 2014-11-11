@@ -83,9 +83,9 @@ void VideoFormat::setFramerate (double framerate)
 }
 
 
-struct IMG_SIZE VideoFormat::getSize () const
+struct tcam_image_size VideoFormat::getSize () const
 {
-    IMG_SIZE s = {format.width, format.height};
+    tcam_image_size s = {format.width, format.height};
     return s;
 }
 

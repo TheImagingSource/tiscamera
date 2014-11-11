@@ -586,7 +586,7 @@ void V4l2Device::index_formats ()
                 desc.min_size.height = frms.discrete.height;
                 desc.max_size.height = frms.discrete.height;
 
-                IMG_SIZE s = { frms.discrete.width, frms.discrete.height };
+                tcam_image_size s = { frms.discrete.width, frms.discrete.height };
 
                 desc.framerate_type = TCAM_FRAMERATE_TYPE_FIXED;
                 std::vector<double> f = index_framerates(frms);
@@ -1134,9 +1134,9 @@ void V4l2Device::free_mmap_buffers ()
 }
 
 
-IMG_SIZE V4l2Device::get_sensor_size ()
+tcam_image_size V4l2Device::get_sensor_size ()
 {
-    IMG_SIZE size = {};
+    tcam_image_size size = {};
     for (const auto& f : available_videoformats)
     {
         for (const auto& r :f.getResolutions())

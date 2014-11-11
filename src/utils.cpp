@@ -253,9 +253,9 @@ uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
 }
 
 
-IMG_SIZE tcam::calculate_auto_center (const IMG_SIZE& sensor, const IMG_SIZE& image)
+tcam_image_size tcam::calculate_auto_center (const tcam_image_size& sensor, const tcam_image_size& image)
 {
-    IMG_SIZE ret = {};
+    tcam_image_size ret = {};
 
     if (image.width > sensor.width || image.height > sensor.height)
     {

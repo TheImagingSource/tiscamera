@@ -39,7 +39,7 @@ public:
 
     void setFramerate (double);
 
-    struct IMG_SIZE getSize () const;
+    struct tcam_image_size getSize () const;
 
     void setSize (unsigned int width, unsigned int height);
 

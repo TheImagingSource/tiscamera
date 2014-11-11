@@ -53,7 +53,7 @@ struct tcam_device_info
 };
 
 
-struct IMG_SIZE
+struct tcam_image_size
 {
     uint32_t width;
     uint32_t height;
@@ -78,8 +78,8 @@ struct tcam_video_format_description
     uint32_t fourcc;
     char description [256];
 
-    IMG_SIZE min_size;
-    IMG_SIZE max_size;
+    tcam_image_size min_size;
+    tcam_image_size max_size;
 
     uint32_t binning;
 

@@ -97,7 +97,7 @@ void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
         if (fill == false)
         {
             auto res = a.getResolutions();
-            for (IMG_SIZE f : a.getResolutions())
+            for (tcam_image_size f : a.getResolutions())
             {
                 QString s = QString::number(f.width);
                 s += "x";

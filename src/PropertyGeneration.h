@@ -31,8 +31,8 @@ std::vector<std::shared_ptr<Property>> generate_simulated_properties (std::vecto
  */
 bool handle_auto_center (const Property& new_property,
                          std::vector<std::shared_ptr<Property>>& props,
-                         const IMG_SIZE& sensor,
-                         const IMG_SIZE& current_format);
+                         const tcam_image_size& sensor,
+                         const tcam_image_size& current_format);
 
 } /* namespace tcam */
 

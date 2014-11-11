@@ -17,7 +17,7 @@ namespace tcam
 
 struct res_fps
 {
-    IMG_SIZE resolution;
+    tcam_image_size resolution;
     std::vector<double> fps;
 };
 
@@ -45,12 +45,12 @@ public:
 
     std::vector<res_fps> getResolutionsFramesrates () const;
 
-    std::vector<IMG_SIZE> getResolutions () const;
+    std::vector<tcam_image_size> getResolutions () const;
 
-    IMG_SIZE getSizeMin () const;
-    IMG_SIZE getSizeMax () const;
+    tcam_image_size getSizeMin () const;
+    tcam_image_size getSizeMax () const;
 
-    std::vector<double> getFrameRates (const IMG_SIZE& size) const;
+    std::vector<double> getFrameRates (const tcam_image_size& size) const;
 
     VideoFormat createVideoFormat (unsigned int width,
                                    unsigned int height,

@@ -46,8 +46,8 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
 
 bool tcam::handle_auto_center (const Property& new_property,
                                       std::vector<std::shared_ptr<Property>>& props,
-                                      const IMG_SIZE& sensor,
-                                      const IMG_SIZE& current_format)
+                                      const tcam_image_size& sensor,
+                                      const tcam_image_size& current_format)
 {
     if (new_property.getType() != TCAM_PROPERTY_TYPE_BOOLEAN)
     {
@@ -58,7 +58,7 @@ bool tcam::handle_auto_center (const Property& new_property,
 
     if (p.getValue())
     {
-        IMG_SIZE values = calculate_auto_center(sensor, current_format);
+        tcam_image_size values = calculate_auto_center(sensor, current_format);
 
         auto prop_off_x = find_property(props, "Offset X");
         auto prop_off_y = find_property(props, "Offset Y");

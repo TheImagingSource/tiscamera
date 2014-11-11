@@ -66,9 +66,9 @@ std::vector<res_fps> VideoFormatDescription::getResolutionsFramesrates () const
 }
 
 
-std::vector<IMG_SIZE> VideoFormatDescription::getResolutions () const
+std::vector<tcam_image_size> VideoFormatDescription::getResolutions () const
 {
-    std::vector<IMG_SIZE> vec;
+    std::vector<tcam_image_size> vec;
 
     for (auto r : rf)
     {
@@ -79,19 +79,19 @@ std::vector<IMG_SIZE> VideoFormatDescription::getResolutions () const
 }
 
 
-IMG_SIZE VideoFormatDescription::getSizeMin () const
+tcam_image_size VideoFormatDescription::getSizeMin () const
 {
     return format.min_size;
 }
 
 
-IMG_SIZE VideoFormatDescription::getSizeMax () const
+tcam_image_size VideoFormatDescription::getSizeMax () const
 {
     return format.max_size;
 }
 
 
-std::vector<double> VideoFormatDescription::getFrameRates (const IMG_SIZE& size) const
+std::vector<double> VideoFormatDescription::getFrameRates (const tcam_image_size& size) const
 {
 
     for (auto r : rf)

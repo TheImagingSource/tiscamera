@@ -160,7 +160,7 @@ private:
 
     void free_mmap_buffers ();
 
-    IMG_SIZE get_sensor_size ();
+    tcam_image_size get_sensor_size ();
 };
 
 } /* namespace tcam */
