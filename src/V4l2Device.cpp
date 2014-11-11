@@ -365,7 +365,7 @@ double V4l2Device::getFramerate ()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    int ret = tcam_xioctl( fd, VIDIOC_S_PARM, &parm );
+    int ret = tcam_xioctl( fd, VIDIOC_G_PARM, &parm );
 
     if (ret < 0)
     {
@@ -377,7 +377,7 @@ double V4l2Device::getFramerate ()
              parm.parm.capture.timeperframe.numerator,
              parm.parm.capture.timeperframe.denominator);
 
-    return parm.parm.capture.timeperframe.denominator / parm.parm.capture.timeperframe.numerator;
+    return (double)parm.parm.capture.timeperframe.denominator / (double)parm.parm.capture.timeperframe.numerator;
 }
 
 
