@@ -225,10 +225,10 @@ struct tcam_value_bool
 };
 
 /**
- * @struct tcam_camera_capability
+ * @struct tcam_camera_property
  * @brief unified property description
  */
-struct camera_property
+struct tcam_camera_property
 {
     TCAM_PROPERTY_ID id;
     char name [32];              /* unique string identifier */

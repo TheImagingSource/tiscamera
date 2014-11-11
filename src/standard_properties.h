@@ -249,7 +249,7 @@ inline control_reference get_control_reference (enum TCAM_PROPERTY_ID wanted_id)
 
 
 
-inline camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
+inline tcam_camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);
     if (ref.id == INVALID_STD_PROPERTY.id)
@@ -257,7 +257,7 @@ inline camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
         setError(Error("No matching property", ENOENT));
     }
 
-    camera_property prop = {};
+    tcam_camera_property prop = {};
     prop.type = ref.type_to_use;
     strncpy(prop.name, ref.name.c_str(), sizeof(prop.name));
 

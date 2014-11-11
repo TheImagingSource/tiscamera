@@ -23,7 +23,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         find_property(props, TCAM_PROPERTY_OFFSET_X) != nullptr &&
         find_property(props, TCAM_PROPERTY_OFFSET_Y) != nullptr)
     {
-        camera_property cp = {};
+        tcam_camera_property cp = {};
         cp.id = TCAM_PROPERTY_OFFSET_AUTO;
         strcpy(cp.name, "Offset Auto Center");
         cp.type = TCAM_PROPERTY_TYPE_BOOLEAN;
