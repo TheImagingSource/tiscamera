@@ -42,13 +42,13 @@ unsigned char* MemoryBuffer::getData ()
 }
 
 
-struct stream_statistics MemoryBuffer::getStatistics () const
+struct tcam_stream_statistics MemoryBuffer::getStatistics () const
 {
     return buffer.statistics;
 }
 
 
-bool MemoryBuffer::setStatistics (const struct stream_statistics& stats)
+bool MemoryBuffer::setStatistics (const struct tcam_stream_statistics& stats)
 {
     buffer.statistics = stats;;
 

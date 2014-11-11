@@ -146,7 +146,7 @@ private:
     // streaming related
 
     bool is_stream_on;
-    struct stream_statistics statistics;
+    struct tcam_stream_statistics statistics;
     size_t current_buffer;
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
 

@@ -34,9 +34,9 @@ public:
     unsigned char* getData ();
 
 
-    struct stream_statistics getStatistics () const;
+    struct tcam_stream_statistics getStatistics () const;
 
-    bool setStatistics (const struct stream_statistics&);
+    bool setStatistics (const struct tcam_stream_statistics&);
 
     /**
      * @brief Fills MemoryBuffer with 0

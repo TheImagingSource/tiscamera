@@ -107,7 +107,7 @@ struct video_format
 /**
  * Statistic container for additional image_buffer descriptions
  */
-struct stream_statistics
+struct tcam_stream_statistics
 {
     uint64_t frame_count;      //
     uint64_t frames_dropped;   //
@@ -126,7 +126,7 @@ struct image_buffer
     unsigned int        length; /**< size if image buffer in bytes */
     struct video_format format; /**< video_format the image buffer has */
     unsigned int        pitch;  /**< length of single image line in bytes */
-    struct stream_statistics statistics;
+    struct tcam_stream_statistics statistics;
 };
 
 
