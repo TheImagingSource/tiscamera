@@ -10,7 +10,7 @@
 #include "PropertyImpl.h"
 
 #include "VideoFormat.h"
-#include <VideoFormatDescription.h>
+#include "VideoFormatDescription.h"
 
 #include "MemoryBuffer.h"
 #include "SinkInterface.h"
