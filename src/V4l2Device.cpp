@@ -220,8 +220,34 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
         // return false;
     }
 
+    fmt = {};
+    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    ret = tcam_xioctl(this->fd, VIDIOC_G_FMT, &fmt);
+
+    if (ret < 0)
+    {
+        tcam_log(TCAM_LOG_ERROR, "VIDIOC_G_FMT failed with '%s'", strerror(errno));
+    }
+
+    video_format f = {};
+
+    f.fourcc = fmt.fmt.pix.pixelformat;
+    f.width = fmt.fmt.pix.width;
+    f.height = fmt.fmt.pix.height;
+    f.binning = 0;
+    f.framerate = getFramerate();
+
+
+    if (f.fourcc == V4L2_PIX_FMT_GREY)
+    {
+        f.fourcc = FOURCC_Y800;
+    }
+
     // copy format as local reference
-    active_video_format = new_format;
+    active_video_format = VideoFormat(f);
+    tcam_log(TCAM_LOG_DEBUG, "Active format is: '%s'",
+             active_video_format.toString().c_str() );
 
     return true;
 }
