@@ -11,7 +11,7 @@
 
 inline img::img_descriptor to_img_desc (tcam::MemoryBuffer& buf)
 {
-    image_buffer b = buf.getImageBuffer();
+    tcam_image_buffer b = buf.getImageBuffer();
     img::img_descriptor img = {b.pData,
                                b.length,
                                b.format.fourcc,

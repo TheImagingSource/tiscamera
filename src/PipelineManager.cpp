@@ -508,7 +508,7 @@ bool PipelineManager::allocate_conversion_buffer ()
 
     for (int i = 0; i < 5; ++i)
     {
-        image_buffer b = {};
+        tcam_image_buffer b = {};
         b.pitch = output_format.getSize().width * img::getBitsPerPixel(output_format.getFourcc()) / 8;
         b.length = b.pitch * output_format.getSize().height;
 

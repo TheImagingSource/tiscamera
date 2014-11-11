@@ -8,7 +8,7 @@
 using namespace tcam;
 
 
-MemoryBuffer::MemoryBuffer (const struct image_buffer& buf)
+MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf)
     : buffer(buf), lock_count(0)
 {}
 
@@ -25,12 +25,12 @@ MemoryBuffer::~MemoryBuffer ()
 }
 
 
-image_buffer MemoryBuffer::getImageBuffer ()
+tcam_image_buffer MemoryBuffer::getImageBuffer ()
 {
     return buffer;
 }
 
-void MemoryBuffer::setImageBuffer (image_buffer buf)
+void MemoryBuffer::setImageBuffer (tcam_image_buffer buf)
 {
     this->buffer = buf;
 }

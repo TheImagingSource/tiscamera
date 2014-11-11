@@ -15,7 +15,7 @@ class MemoryBuffer
 
 public:
 
-    MemoryBuffer (const struct image_buffer&);
+    MemoryBuffer (const struct tcam_image_buffer&);
 
     MemoryBuffer () = delete;
 
@@ -24,9 +24,9 @@ public:
     /**
      *
      */
-    image_buffer getImageBuffer ();
+    tcam_image_buffer getImageBuffer ();
 
-    void setImageBuffer (image_buffer);
+    void setImageBuffer (tcam_image_buffer);
 
     /**
      * @return Pointer to actual image data
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    struct image_buffer buffer;
+    struct tcam_image_buffer buffer;
 
     unsigned int lock_count;
 

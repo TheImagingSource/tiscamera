@@ -11,7 +11,7 @@
 using namespace tcam;
 
 
-VideoFormatDescription::VideoFormatDescription (const struct video_format_description& f,
+VideoFormatDescription::VideoFormatDescription (const struct tcam_video_format_description& f,
                                                 const std::vector<res_fps>& r)
     : rf(r)
 {
@@ -48,7 +48,7 @@ bool VideoFormatDescription::operator!= (const VideoFormatDescription& other) co
 }
 
 
-struct video_format_description VideoFormatDescription::getFormatDescription () const
+struct tcam_video_format_description VideoFormatDescription::getFormatDescription () const
 {
     return format;
 }

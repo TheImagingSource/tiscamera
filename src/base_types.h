@@ -70,10 +70,10 @@ enum TCAM_FRAMERATE_TYPE
 
 
 /**
- * @name video_format_description
+ * @name tcam_video_format_description
  * @brief generic format description
  */
-struct video_format_description
+struct tcam_video_format_description
 {
     uint32_t fourcc;
     char description [256];
@@ -117,10 +117,10 @@ struct tcam_stream_statistics
 };
 
 /**
- * @name image_buffer
+ * @name tcam_image_buffer
  * @brief container for image transfer
  */
-struct image_buffer
+struct tcam_image_buffer
 {
     unsigned char*      pData;  /**< pointer to actual image buffer */
     unsigned int        length; /**< size if image buffer in bytes */

@@ -116,7 +116,7 @@ void ImageSource::initialize_buffers ()
 
     for (unsigned int i = 0; i < this->n_buffers; ++i)
     {
-        struct image_buffer b = {};
+        struct tcam_image_buffer b = {};
 
         b.pData = NULL;
         b.length = format.width * format.height * bit_depth;

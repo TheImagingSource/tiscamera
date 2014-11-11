@@ -564,7 +564,7 @@ void V4l2Device::index_formats ()
 
     for (fmtdesc.index = 0; ! tcam_xioctl (fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++)
     {
-        struct video_format_description desc = {};
+        struct tcam_video_format_description desc = {};
 
         // TODO: Assure format descriptions are always consistent
         struct v4l2_fmtdesc new_desc = {};
@@ -1048,7 +1048,7 @@ void V4l2Device::init_mmap_buffers ()
             return;
         }
 
-        struct image_buffer buffer = {};
+        struct tcam_image_buffer buffer = {};
 
         buffer.length = active_video_format.getRequiredBufferSize();
         buffer.pData =

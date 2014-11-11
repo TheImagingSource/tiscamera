@@ -28,7 +28,7 @@ public:
 
     VideoFormatDescription () = delete;
 
-    VideoFormatDescription (const struct video_format_description&,
+    VideoFormatDescription (const struct tcam_video_format_description&,
                             const std::vector<res_fps>&);
 
     VideoFormatDescription (const VideoFormatDescription&);
@@ -39,7 +39,7 @@ public:
     bool operator== (const VideoFormatDescription& other) const;
     bool operator!= (const VideoFormatDescription& other) const;
 
-    struct video_format_description getFormatDescription () const;
+    struct tcam_video_format_description getFormatDescription () const;
 
     uint32_t getFourcc () const;
 
@@ -64,7 +64,7 @@ public:
 
 private:
 
-    video_format_description format;
+    tcam_video_format_description format;
 
     std::vector<res_fps> rf;
 

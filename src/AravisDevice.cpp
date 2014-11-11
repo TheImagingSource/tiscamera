@@ -376,7 +376,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            struct image_buffer desc = {};
+            struct tcam_image_buffer desc = {};
 
             desc.format = self->active_video_format.getFormatDescription();
 
@@ -419,7 +419,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 {
                     msg = "Stream has missing packets";
 
-                    // struct image_buffer desc = {0};
+                    // struct tcam_image_buffer desc = {0};
 
                     // desc.format = self->active_video_format.getFormatDescription();
 
@@ -839,7 +839,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
         for ( int i = 0; i < n_formats; ++i )
         {
-            struct video_format_description desc = {};
+            struct tcam_video_format_description desc = {};
 
             desc.fourcc = format_ptr[i];
 
@@ -879,7 +879,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             // we create a format for every binning value and store it seperately
             for ( const auto & b : binning )
             {
-                struct video_format_description d = desc;
+                struct tcam_video_format_description d = desc;
 
                 d.binning = b;
                 d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
