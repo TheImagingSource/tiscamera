@@ -59,7 +59,7 @@ bool Property::update ()
 }
 
 
-PROPERTY_ID Property::getID () const
+TCAM_PROPERTY_ID Property::getID () const
 {
     return prop.id;
 }

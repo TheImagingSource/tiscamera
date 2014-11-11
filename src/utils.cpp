@@ -270,7 +270,7 @@ tcam_image_size tcam::calculate_auto_center (const tcam_image_size& sensor, cons
 
 
 std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
-                                               PROPERTY_ID property_id)
+                                               TCAM_PROPERTY_ID property_id)
 {
     for (auto& p : properties)
     {

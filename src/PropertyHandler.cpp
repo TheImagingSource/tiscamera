@@ -71,20 +71,20 @@ bool PropertyHandler::setProperty (const Property& p)
         }
     }
 
-    if (p.getID() == PROPERTY_EXPOSURE_AUTO)
+    if (p.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
     {
-        auto pea = find_property(emulated_properties, PROPERTY_EXPOSURE_AUTO);
+        auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
         bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
         if (vla)
         {
-            auto pe = find_property(external_properties, PROPERTY_EXPOSURE);
+            auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
             auto s = pe->getStruct();
             s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
             pe->setStruct(s);
         }
         else
         {
-            auto pe = find_property(external_properties, PROPERTY_EXPOSURE);
+            auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
             auto s = pe->getStruct();
             s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
             pe->setStruct(s);
@@ -119,7 +119,7 @@ static bool is_wanted_property (const std::string& prop_name,  const std::shared
 
 
 
-PropertyHandler::property_mapping PropertyHandler::find_mapping_external (PROPERTY_ID id)
+PropertyHandler::property_mapping PropertyHandler::find_mapping_external (TCAM_PROPERTY_ID id)
 {
     for (auto& m : properties)
     {
@@ -130,7 +130,7 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_external (PROPER
 }
 
 
-PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (PROPERTY_ID id)
+PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (TCAM_PROPERTY_ID id)
 {
     for (auto& m : properties)
     {

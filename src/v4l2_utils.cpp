@@ -21,7 +21,7 @@ using namespace tcam;
 
 struct v4l2_property
 {
-    PROPERTY_ID id;
+    TCAM_PROPERTY_ID id;
     std::vector<int> v4l2_id;
 };
 
@@ -29,127 +29,127 @@ struct v4l2_property
 static std::vector<struct v4l2_property> v4l2_mappings =
 {
     {
-        .id = PROPERTY_INVALID,
+        .id = TCAM_PROPERTY_INVALID,
         .v4l2_id = {},
     },
     {
-        .id = PROPERTY_EXPOSURE,
+        .id = TCAM_PROPERTY_EXPOSURE,
         .v4l2_id = { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE },
     },
     {
-        .id = PROPERTY_EXPOSURE_AUTO,
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO,
         .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS },
     },
     {
-        .id = PROPERTY_GAIN,
+        .id = TCAM_PROPERTY_GAIN,
         .v4l2_id = { V4L2_CID_GAIN },
     },
     {
-        .id = PROPERTY_GAIN_RED,
+        .id = TCAM_PROPERTY_GAIN_RED,
         .v4l2_id = { 0x980921 },
     },
     {
-        .id = PROPERTY_GAIN_GREEN,
+        .id = TCAM_PROPERTY_GAIN_GREEN,
         .v4l2_id = {  0x980922 },
     },
     {
-        .id = PROPERTY_GAIN_BLUE,
+        .id = TCAM_PROPERTY_GAIN_BLUE,
         .v4l2_id = {  0x980923 },
     },
     {
-        .id = PROPERTY_GAIN_AUTO,
+        .id = TCAM_PROPERTY_GAIN_AUTO,
         .v4l2_id = { 0 },
     },
     {
-        .id = PROPERTY_TRIGGER_MODE,
+        .id = TCAM_PROPERTY_TRIGGER_MODE,
         .v4l2_id = { V4L2_CID_PRIVACY, 0x0199e208, 0x980924},
     },
     {
-        .id = PROPERTY_TRIGGER_SOURCE,
+        .id = TCAM_PROPERTY_TRIGGER_SOURCE,
         .v4l2_id = {0},
     },
     {
-        .id = PROPERTY_TRIGGER_ACTIVATION,
+        .id = TCAM_PROPERTY_TRIGGER_ACTIVATION,
         .v4l2_id = {0},
     },
     {
-        .id = PROPERTY_SOFTWARETRIGGER,
+        .id = TCAM_PROPERTY_SOFTWARETRIGGER,
         .v4l2_id = {/* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209},
     },
     {
-        .id = PROPERTY_GPIO,
+        .id = TCAM_PROPERTY_GPIO,
         .v4l2_id = {/* usb 2: */ 0x980920, /* usb 3: */ 0x0199e217},
     },
     {
-        .id = PROPERTY_GPIN,
+        .id = TCAM_PROPERTY_GPIN,
         .v4l2_id = {0},
     },
     {
-        .id = PROPERTY_GPOUT,
+        .id = TCAM_PROPERTY_GPOUT,
         .v4l2_id = {0x0199e216},
     },
     {
-        .id = PROPERTY_OFFSET_X,
+        .id = TCAM_PROPERTY_OFFSET_X,
         .v4l2_id = {0x00980927 /*usb2*/, 0x0199e218 /*usb3*/},
     },
     {
-        .id = PROPERTY_OFFSET_Y,
+        .id = TCAM_PROPERTY_OFFSET_Y,
         .v4l2_id = {0x00980928 /*usb2*/, 0x0199e219/*usb3*/},
     },
     {
-        .id = PROPERTY_OFFSET_AUTO,
+        .id = TCAM_PROPERTY_OFFSET_AUTO,
         .v4l2_id = {0x0199e220},
     },
     {
-        .id = PROPERTY_BRIGHTNESS,
+        .id = TCAM_PROPERTY_BRIGHTNESS,
         .v4l2_id = {V4L2_CID_BRIGHTNESS},
     },
     {
-        .id = PROPERTY_CONTRAST,
+        .id = TCAM_PROPERTY_CONTRAST,
         .v4l2_id = {V4L2_CID_CONTRAST},
     },
     {
-        .id = PROPERTY_SATURATION,
+        .id = TCAM_PROPERTY_SATURATION,
         .v4l2_id = {V4L2_CID_SATURATION},
     },
     {
-        .id = PROPERTY_HUE,
+        .id = TCAM_PROPERTY_HUE,
         .v4l2_id = {V4L2_CID_HUE},
     },
     {
-        .id = PROPERTY_GAMMA,
+        .id = TCAM_PROPERTY_GAMMA,
         .v4l2_id = {V4L2_CID_GAMMA},
     },
     {
-        .id = PROPERTY_WB_AUTO,
+        .id = TCAM_PROPERTY_WB_AUTO,
         .v4l2_id = {},
     },
     {
-        .id = PROPERTY_IRCUT,
+        .id = TCAM_PROPERTY_IRCUT,
         .v4l2_id = {},
     },
     {
-        .id = PROPERTY_IRIS,
+        .id = TCAM_PROPERTY_IRIS,
         .v4l2_id = {},
     },
     {
-        .id = PROPERTY_FOCUS,
+        .id = TCAM_PROPERTY_FOCUS,
         .v4l2_id = {V4L2_CID_FOCUS_ABSOLUTE},
     },
     {
-        .id = PROPERTY_ZOOM,
+        .id = TCAM_PROPERTY_ZOOM,
         .v4l2_id = {V4L2_CID_ZOOM_ABSOLUTE},
     },
     {
-        .id = PROPERTY_FOCUS_AUTO,
+        .id = TCAM_PROPERTY_FOCUS_AUTO,
         .v4l2_id = {},
     },
     {
-        .id = PROPERTY_STROBE_ENABLE,
+        .id = TCAM_PROPERTY_STROBE_ENABLE,
         .v4l2_id = {0x0199e211},
     },
     {
-        .id = PROPERTY_BINNING,
+        .id = TCAM_PROPERTY_BINNING,
         .v4l2_id = {0x980925},
     },
 };
@@ -192,7 +192,7 @@ uint32_t tcam::convertV4L2flags (uint32_t v4l2_flags)
 }
 
 
-static PROPERTY_ID find_mapping (int v4l2_id)
+static TCAM_PROPERTY_ID find_mapping (int v4l2_id)
 {
     auto f = [v4l2_id] (int p)
         {
@@ -208,7 +208,7 @@ static PROPERTY_ID find_mapping (int v4l2_id)
         if (match != m.v4l2_id.end())
             return m.id;
     }
-    return PROPERTY_INVALID;
+    return TCAM_PROPERTY_INVALID;
 }
 
 
@@ -263,7 +263,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
     TCAM_PROPERTY_TYPE type_to_use;
     camera_property cp = {};
 
-    if (ctrl_m.id == PROPERTY_INVALID)
+    if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
         tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
         // pass through and do not associate with anything existing

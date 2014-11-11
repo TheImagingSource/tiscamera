@@ -53,7 +53,7 @@ bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
 
     if (desc->id == EMULATED_PROPERTY)
     {
-        if (new_property.getID() == PROPERTY_OFFSET_AUTO)
+        if (new_property.getID() == TCAM_PROPERTY_OFFSET_AUTO)
         {
             auto props = create_property_vector();
             return handle_auto_center(new_property,
@@ -617,7 +617,7 @@ void V4l2Device::index_formats ()
                                          property_handler->special_properties.end(),
                                          [] (const property_description& d)
                                          {
-                                             if (d.prop->getID() == PROPERTY_BINNING)
+                                             if (d.prop->getID() == TCAM_PROPERTY_BINNING)
                                                  return true;
                                              return false;
                                          });
@@ -824,7 +824,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     desc.id = qctrl->id;
     desc.prop = p;
 
-    static std::vector<PROPERTY_ID> special_controls = {PROPERTY_BINNING};
+    static std::vector<TCAM_PROPERTY_ID> special_controls = {TCAM_PROPERTY_BINNING};
 
     if (std::find(special_controls.begin(), special_controls.end(), p->getID()) != special_controls.end())
     {

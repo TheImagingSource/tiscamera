@@ -25,14 +25,14 @@ namespace tcam
 */
 struct control_reference
 {
-    PROPERTY_ID id;
+    TCAM_PROPERTY_ID id;
     std::string name;               // name for external usage
     enum TCAM_PROPERTY_TYPE type_to_use; // type outgoing control shall have
 };
 
 static control_reference INVALID_STD_PROPERTY
 {
-    .id = PROPERTY_INVALID,
+    .id = TCAM_PROPERTY_INVALID,
     .name = "INVALID_PORPERTY",
     .type_to_use = TCAM_PROPERTY_TYPE_UNKNOWN
 };
@@ -41,183 +41,183 @@ static control_reference INVALID_STD_PROPERTY
 static std::vector<struct control_reference> ctrl_reference_table =
 {
     {
-        .id = PROPERTY_INVALID,
+        .id = TCAM_PROPERTY_INVALID,
         .name = "INVALID_PORPERTY",
         .type_to_use = TCAM_PROPERTY_TYPE_UNKNOWN,
     },
     {
-        .id = PROPERTY_EXPOSURE,
+        .id = TCAM_PROPERTY_EXPOSURE,
         .name = "Exposure",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_EXPOSURE_AUTO,
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO,
         .name = "Exposure Auto",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_GAIN,
+        .id = TCAM_PROPERTY_GAIN,
         .name = "Gain",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GAIN_RED,
+        .id = TCAM_PROPERTY_GAIN_RED,
         .name = "Gain Red",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GAIN_GREEN,
+        .id = TCAM_PROPERTY_GAIN_GREEN,
         .name = "Gain Green",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GAIN_BLUE,
+        .id = TCAM_PROPERTY_GAIN_BLUE,
         .name = "Gain Blue",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GAIN_AUTO,
+        .id = TCAM_PROPERTY_GAIN_AUTO,
         .name = "Gain Auto",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_TRIGGER_MODE,
+        .id = TCAM_PROPERTY_TRIGGER_MODE,
         .name = "Trigger Mode",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_TRIGGER_SOURCE,
+        .id = TCAM_PROPERTY_TRIGGER_SOURCE,
         .name = "Trigger Source",
         .type_to_use = TCAM_PROPERTY_TYPE_STRING_TABLE,
     },
     {
-        .id = PROPERTY_TRIGGER_ACTIVATION,
+        .id = TCAM_PROPERTY_TRIGGER_ACTIVATION,
         // enum
         .name = "Trigger Activation",
         .type_to_use = TCAM_PROPERTY_TYPE_STRING_TABLE,
     },
     {
-        .id = PROPERTY_SOFTWARETRIGGER,
+        .id = TCAM_PROPERTY_SOFTWARETRIGGER,
         .name = "Software Trigger",
         .type_to_use = TCAM_PROPERTY_TYPE_BUTTON,
     },
     {
-        .id = PROPERTY_GPIO,
+        .id = TCAM_PROPERTY_GPIO,
         .name = "GPIO",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GPIN,
+        .id = TCAM_PROPERTY_GPIN,
         .name = "GPIn",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GPOUT,
+        .id = TCAM_PROPERTY_GPOUT,
         .name = "GPOut",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_OFFSET_X,
+        .id = TCAM_PROPERTY_OFFSET_X,
         .name = "Offset X",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_OFFSET_Y,
+        .id = TCAM_PROPERTY_OFFSET_Y,
         .name = "Offset Y",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_OFFSET_AUTO,
+        .id = TCAM_PROPERTY_OFFSET_AUTO,
         .name = "Offset Auto Center",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_BRIGHTNESS,
+        .id = TCAM_PROPERTY_BRIGHTNESS,
         .name = "Brightness",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_CONTRAST,
+        .id = TCAM_PROPERTY_CONTRAST,
         .name = "Contrast",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_SATURATION,
+        .id = TCAM_PROPERTY_SATURATION,
         .name = "Saturation",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_HUE,
+        .id = TCAM_PROPERTY_HUE,
         .name = "Hue",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_GAMMA,
+        .id = TCAM_PROPERTY_GAMMA,
         .name = "Gamma",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_WB,
+        .id = TCAM_PROPERTY_WB,
         .name = "Whitebalance",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_WB_AUTO,
+        .id = TCAM_PROPERTY_WB_AUTO,
         .name = "Whitebalance Auto",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_WB_RED,
+        .id = TCAM_PROPERTY_WB_RED,
         .name = "Whitebalance Red",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_WB_GREEN,
+        .id = TCAM_PROPERTY_WB_GREEN,
         .name = "Whitebalance Green",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_WB_BLUE,
+        .id = TCAM_PROPERTY_WB_BLUE,
         .name = "Whitebalance Blue",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_IRCUT,
+        .id = TCAM_PROPERTY_IRCUT,
         .name = "IRCutFilter",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_IRIS,
+        .id = TCAM_PROPERTY_IRIS,
         .name = "Iris",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_FOCUS,
+        .id = TCAM_PROPERTY_FOCUS,
         .name = "Focus",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_ZOOM,
+        .id = TCAM_PROPERTY_ZOOM,
         .name = "Zoom",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
     {
-        .id = PROPERTY_FOCUS_AUTO,
+        .id = TCAM_PROPERTY_FOCUS_AUTO,
         .name = "Focus Auto",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_STROBE_ENABLE,
+        .id = TCAM_PROPERTY_STROBE_ENABLE,
         .name = "Strobe Enable",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        .id = PROPERTY_SKIPPING,
+        .id = TCAM_PROPERTY_SKIPPING,
         .name = "Skipping",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     {
-        PROPERTY_BINNING,
+        TCAM_PROPERTY_BINNING,
         .name = "Binning",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
@@ -237,7 +237,7 @@ static std::vector<struct control_reference> ctrl_reference_table =
 };
 
 
-inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
+inline control_reference get_control_reference (enum TCAM_PROPERTY_ID wanted_id)
 {
     for (const auto& ref : ctrl_reference_table)
     {
@@ -249,7 +249,7 @@ inline control_reference get_control_reference (enum PROPERTY_ID wanted_id)
 
 
 
-inline camera_property create_empty_property (enum PROPERTY_ID id)
+inline camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);
     if (ref.id == INVALID_STD_PROPERTY.id)

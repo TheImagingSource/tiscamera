@@ -52,8 +52,8 @@ private:
     std::vector<std::shared_ptr<Property>> external_properties;
     std::vector<property_mapping> properties;
 
-    property_mapping find_mapping_external (PROPERTY_ID id);
-    property_mapping find_mapping_internal (PROPERTY_ID id);
+    property_mapping find_mapping_external (TCAM_PROPERTY_ID id);
+    property_mapping find_mapping_internal (TCAM_PROPERTY_ID id);
 
     /**
      *

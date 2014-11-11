@@ -11,7 +11,7 @@ using namespace tcam;
 
 struct aravis_property
 {
-    PROPERTY_ID id;
+    TCAM_PROPERTY_ID id;
     std::vector<std::string> genicam_name; // list of genicam identifiers that shall be mapped to control
 };
 
@@ -19,123 +19,123 @@ struct aravis_property
 static std::vector<struct aravis_property> aravis_mappings =
 {
     {
-        .id = PROPERTY_INVALID,
+        .id = TCAM_PROPERTY_INVALID,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_EXPOSURE,
+        .id = TCAM_PROPERTY_EXPOSURE,
         .genicam_name = {"ExposureTime"},
     },
     {
-        .id = PROPERTY_EXPOSURE_AUTO,
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO,
         .genicam_name = {"ExposureAuto"},
     },
     {
-        .id = PROPERTY_GAIN,
+        .id = TCAM_PROPERTY_GAIN,
         .genicam_name = {"Gain"},
     },
     {
-        .id = PROPERTY_GAIN_RED,
+        .id = TCAM_PROPERTY_GAIN_RED,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_GAIN_GREEN,
+        .id = TCAM_PROPERTY_GAIN_GREEN,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_GAIN_BLUE,
+        .id = TCAM_PROPERTY_GAIN_BLUE,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_GAIN_AUTO,
+        .id = TCAM_PROPERTY_GAIN_AUTO,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_TRIGGER_MODE,
+        .id = TCAM_PROPERTY_TRIGGER_MODE,
         .genicam_name = {"TriggerMode"},
     },
     {
-        .id = PROPERTY_TRIGGER_SOURCE,
+        .id = TCAM_PROPERTY_TRIGGER_SOURCE,
         .genicam_name = {"TriggerSource"},
     },
     {
-        .id = PROPERTY_TRIGGER_ACTIVATION,
+        .id = TCAM_PROPERTY_TRIGGER_ACTIVATION,
         .genicam_name = {"TriggerActivation"},
     },
     {
-        .id = PROPERTY_SOFTWARETRIGGER,
+        .id = TCAM_PROPERTY_SOFTWARETRIGGER,
         .genicam_name = {"TriggerSoftware"},
     },
     {
-        .id = PROPERTY_GPIO,
+        .id = TCAM_PROPERTY_GPIO,
         .genicam_name = {"GPIO"},
     },
     {
-        .id = PROPERTY_GPIN,
+        .id = TCAM_PROPERTY_GPIN,
         .genicam_name = {"GPIn"},
     },
     {
-        .id = PROPERTY_GPOUT,
+        .id = TCAM_PROPERTY_GPOUT,
         .genicam_name = {"GPOut"},
     },
     {
-        .id = PROPERTY_OFFSET_X,
+        .id = TCAM_PROPERTY_OFFSET_X,
         .genicam_name = {"OffsetX"},
     },
     {
-        .id = PROPERTY_OFFSET_Y,
+        .id = TCAM_PROPERTY_OFFSET_Y,
         .genicam_name = {"OffsetY"},
     },
     {
-        .id = PROPERTY_OFFSET_AUTO,
+        .id = TCAM_PROPERTY_OFFSET_AUTO,
         .genicam_name = {"OffsetAutoCenter"},
     },
     {
-        .id = PROPERTY_BRIGHTNESS,
+        .id = TCAM_PROPERTY_BRIGHTNESS,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_CONTRAST,
+        .id = TCAM_PROPERTY_CONTRAST,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_SATURATION,
+        .id = TCAM_PROPERTY_SATURATION,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_HUE,
+        .id = TCAM_PROPERTY_HUE,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_GAMMA,
+        .id = TCAM_PROPERTY_GAMMA,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_WB_AUTO,
+        .id = TCAM_PROPERTY_WB_AUTO,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_IRCUT,
+        .id = TCAM_PROPERTY_IRCUT,
         .genicam_name = {"IRCutFilter"},
     },
     {
-        .id = PROPERTY_IRIS,
+        .id = TCAM_PROPERTY_IRIS,
         .genicam_name = {"Iris"},
     },
     {
-        .id = PROPERTY_FOCUS,
+        .id = TCAM_PROPERTY_FOCUS,
         .genicam_name = {"Focus"},
     },
     {
-        .id = PROPERTY_ZOOM,
+        .id = TCAM_PROPERTY_ZOOM,
         .genicam_name = {"Zoom"},
     },
     {
-        .id = PROPERTY_FOCUS_AUTO,
+        .id = TCAM_PROPERTY_FOCUS_AUTO,
         .genicam_name = {},
     },
     {
-        .id = PROPERTY_STROBE_ENABLE,
+        .id = TCAM_PROPERTY_STROBE_ENABLE,
         .genicam_name = {"StrobeEnable"},
     },
     // {
@@ -157,7 +157,7 @@ static std::vector<struct aravis_property> aravis_mappings =
 };
 
 
-static PROPERTY_ID find_mapping (const std::string& genicam_id)
+static TCAM_PROPERTY_ID find_mapping (const std::string& genicam_id)
 {
     auto f = [&genicam_id] (std::string p)
         {
@@ -173,7 +173,7 @@ static PROPERTY_ID find_mapping (const std::string& genicam_id)
         if (match != m.genicam_name.end())
             return m.id;
     }
-    return PROPERTY_INVALID;
+    return TCAM_PROPERTY_INVALID;
 }
 
 
@@ -229,7 +229,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     TCAM_PROPERTY_TYPE type_to_use;
     camera_property prop = {};
 
-    if (ctrl_m.id == PROPERTY_INVALID)
+    if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
         tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. %s", feature);
         // pass through and do not associate with anything existing
