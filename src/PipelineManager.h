@@ -103,7 +103,7 @@ private:
      * @brief Additional buffer used for internal image copies
      */
     std::vector<std::shared_ptr<MemoryBuffer>> pipeline_buffer;
-
+    unsigned int current_ppl_buffer;
 
     /**
      * Informs all available transformation filter about the available

@@ -521,6 +521,9 @@ bool PipelineManager::allocate_conversion_buffer ()
 
         this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
     }
+
+    current_ppl_buffer = 0;
+
     return true;
 }
 
@@ -666,13 +669,17 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         }
         else if (f->getDescription().type == FILTER_TYPE_CONVERSION)
         {
-            auto next_buffer = pipeline_buffer.at(0);
+            auto next_buffer = pipeline_buffer.at(current_ppl_buffer);
 
             next_buffer->setStatistics(current_buffer->getStatistics());
 
             f->transform(*current_buffer, *next_buffer);
 
             current_buffer = next_buffer;
+
+            current_ppl_buffer++;
+            if (current_ppl_buffer == pipeline_buffer.size())
+                current_ppl_buffer = 0;
         }
     }
 
