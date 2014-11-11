@@ -24,7 +24,6 @@ std::string tcam::propertyType2String (PROPERTY_TYPE type)
         case PROPERTY_TYPE_STRING: return "STRING";
         case PROPERTY_TYPE_STRING_TABLE: return "STRING_TABLE";
         case PROPERTY_TYPE_BUTTON: return "BUTTON";
-        case PROPERTY_TYPE_BITMASK: return "BITMASK";
         case PROPERTY_TYPE_UNKNOWN:
         default:
             return "";

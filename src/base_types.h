@@ -188,7 +188,6 @@ enum PROPERTY_TYPE
     /* one time and no need for any kind of parameter for this but needs to */
     /* be triggered. */
     PROPERTY_TYPE_BUTTON       = 6,
-    PROPERTY_TYPE_BITMASK      = 7,
 };
 
 

@@ -163,7 +163,6 @@ std::string Property::toString () const
             }
             break;
         }
-        case PROPERTY_TYPE_BITMASK:
         case PROPERTY_TYPE_INTEGER:
         {
             property_string += std::to_string(prop.value.i.value);
@@ -217,7 +216,6 @@ bool Property::fromString (const std::string& s)
                 }
                 break;
             }
-            case PROPERTY_TYPE_BITMASK:
             case PROPERTY_TYPE_INTEGER:
             {
                 prop.value.i.value = stoi(s);
