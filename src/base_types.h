@@ -88,10 +88,10 @@ struct video_format_description
 
 
 /**
- * @name video_format
+ * @name tcam_video_format
  * @brief description of a specific video format
  */
-struct video_format
+struct tcam_video_format
 {
     uint32_t fourcc;
 
@@ -124,7 +124,7 @@ struct image_buffer
 {
     unsigned char*      pData;  /**< pointer to actual image buffer */
     unsigned int        length; /**< size if image buffer in bytes */
-    struct video_format format; /**< video_format the image buffer has */
+    struct tcam_video_format format; /**< tcam_video_format the image buffer has */
     unsigned int        pitch;  /**< length of single image line in bytes */
     struct tcam_stream_statistics statistics;
 };

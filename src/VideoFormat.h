@@ -19,7 +19,7 @@ public:
 
     VideoFormat ();
 
-    explicit VideoFormat (const struct video_format&);
+    explicit VideoFormat (const struct tcam_video_format&);
 
     VideoFormat (const VideoFormat&);
 
@@ -29,7 +29,7 @@ public:
 
     bool operator!= (const VideoFormat& other) const;
 
-    struct video_format getFormatDescription () const;
+    struct tcam_video_format getFormatDescription () const;
 
     uint32_t getFourcc () const;
 
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    struct video_format format;
+    struct tcam_video_format format;
 
 };
 

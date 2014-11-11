@@ -113,7 +113,7 @@ VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
 
     // TODO validity check
 
-    video_format f = {};
+    tcam_video_format f = {};
 
     f.fourcc = this->format.fourcc;
     f.width = width;

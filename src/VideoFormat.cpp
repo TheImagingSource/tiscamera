@@ -17,7 +17,7 @@ VideoFormat::VideoFormat ()
 {}
 
 
-VideoFormat::VideoFormat (const struct video_format& new_format)
+VideoFormat::VideoFormat (const struct tcam_video_format& new_format)
 {
     memcpy(&format, &new_format, sizeof(format));
 }
@@ -53,7 +53,7 @@ bool VideoFormat::operator!= (const VideoFormat& other) const
 }
 
 
-struct video_format VideoFormat::getFormatDescription () const
+struct tcam_video_format VideoFormat::getFormatDescription () const
 {
     return format;
 }
@@ -127,7 +127,7 @@ std::string VideoFormat::toString () const
 
 bool VideoFormat::fromString (const std::string& desc)
 {
-    video_format f = {};
+    tcam_video_format f = {};
 
     auto vec = split_string(desc, ",");
 

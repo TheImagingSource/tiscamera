@@ -111,7 +111,7 @@ void ImageSource::initialize_buffers ()
 
     VideoFormat f = device->getActiveVideoFormat();
 
-    struct video_format format = f.getFormatDescription();
+    struct tcam_video_format format = f.getFormatDescription();
     int bit_depth = img::getBitsPerPixel(format.fourcc);
 
     for (unsigned int i = 0; i < this->n_buffers; ++i)

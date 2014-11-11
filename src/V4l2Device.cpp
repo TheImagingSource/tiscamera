@@ -230,7 +230,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
         tcam_log(TCAM_LOG_ERROR, "VIDIOC_G_FMT failed with '%s'", strerror(errno));
     }
 
-    video_format f = {};
+    tcam_video_format f = {};
 
     f.fourcc = fmt.fmt.pix.pixelformat;
     f.width = fmt.fmt.pix.width;
@@ -719,7 +719,7 @@ void V4l2Device::determine_active_video_format ()
         return;
     }
 
-    video_format format = {};
+    tcam_video_format format = {};
     format.fourcc = fmt.fmt.pix.pixelformat;
     format.width = fmt.fmt.pix.width;
     format.height = fmt.fmt.pix.height;
