@@ -330,6 +330,7 @@ bool V4l2Device::setFramerate (double framerate)
     if (fps == framerate_conversions.end())
     {
         tcam_log(TCAM_LOG_ERROR,"unable to find corresponding framerate settings.");
+        setError(Error("Unable to find corresponding framerate settings.", EIO));
         return false;
     }
 
