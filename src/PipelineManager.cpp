@@ -401,6 +401,7 @@ bool PipelineManager::create_conversion_pipeline ()
     }
 
     auto device_fourcc = getDeviceFourcc();
+    create_input_format(output_format.getFourcc());
 
     for (auto f : available_filter)
     {
