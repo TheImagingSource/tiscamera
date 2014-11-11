@@ -846,11 +846,11 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 {
 
-    PROPERTY_TYPE type = prop_desc.prop->getType();
+    TCAM_PROPERTY_TYPE type = prop_desc.prop->getType();
 
-    if (type == PROPERTY_TYPE_STRING ||
-        type == PROPERTY_TYPE_UNKNOWN ||
-        type == PROPERTY_TYPE_DOUBLE)
+    if (type == TCAM_PROPERTY_TYPE_STRING ||
+        type == TCAM_PROPERTY_TYPE_UNKNOWN ||
+        type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
         tcam_log(TCAM_LOG_ERROR, "Property type not supported. Property changes not submitted to device.");
         return false;
@@ -860,11 +860,11 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     ctrl.id = prop_desc.id;
 
-    if (type == PROPERTY_TYPE_INTEGER)
+    if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
         ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->getValue();
     }
-    else if (type == PROPERTY_TYPE_BOOLEAN)
+    else if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
         if ((std::static_pointer_cast<PropertyBoolean>(prop_desc.prop))->getValue())
         {
@@ -875,7 +875,7 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
             ctrl.value = 0;
         }
     }
-    else if (type == PROPERTY_TYPE_BUTTON)
+    else if (type == TCAM_PROPERTY_TYPE_BUTTON)
     {
         ctrl.value = 1;
     }

@@ -85,13 +85,13 @@ bool AravisDevice::setProperty (const Property& p)
 
     Property::VALUE_TYPE value_type = pm->prop->getValueType();
 
-    PROPERTY_TYPE type = pm->prop->getType();
+    TCAM_PROPERTY_TYPE type = pm->prop->getType();
 
-    if (type == PROPERTY_TYPE_INTEGER)
+    if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
         auto prop_impl = (PropertyInteger&) (*pm->prop);
     }
-    else if (type == PROPERTY_TYPE_DOUBLE)
+    else if (type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
 
     }
@@ -146,7 +146,7 @@ bool AravisDevice::setProperty (const Property& p)
         case Property::ENUM:
         {
             tcam_log(TCAM_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
-            if (p.getType() == PROPERTY_TYPE_BOOLEAN)
+            if (p.getType() == TCAM_PROPERTY_TYPE_BOOLEAN)
             {
                 if (((PropertyBoolean&)p).getValue())
                     arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);

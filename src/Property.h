@@ -58,7 +58,7 @@ public:
 
     std::string getName () const;
 
-    PROPERTY_TYPE getType () const;
+    TCAM_PROPERTY_TYPE getType () const;
 
     bool isReadOnly () const;
     bool isWriteOnly () const;
@@ -104,7 +104,7 @@ protected:
     void notifyImpl ();
 };
 
-PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t);
+TCAM_PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t);
 
 } /* namespace tcam */
 

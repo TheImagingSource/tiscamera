@@ -14,7 +14,7 @@ void print_properties (const std::vector<Property>& properties)
         std::cout << std::left;
         switch (p.getType())
         {
-            case PROPERTY_TYPE_INTEGER:
+            case TCAM_PROPERTY_TYPE_INTEGER:
             {
                 PropertyInteger& i = (PropertyInteger&) p;
                 std::cout << std::setw(20) << i.getName()
@@ -27,16 +27,16 @@ void print_properties (const std::vector<Property>& properties)
                           << std::endl;
                 break;
             }
-            case PROPERTY_TYPE_DOUBLE:
+            case TCAM_PROPERTY_TYPE_DOUBLE:
             {
                 break;
             }
-            case PROPERTY_TYPE_STRING:
-            case PROPERTY_TYPE_STRING_TABLE:
+            case TCAM_PROPERTY_TYPE_STRING:
+            case TCAM_PROPERTY_TYPE_STRING_TABLE:
             {
 
             }
-            case PROPERTY_TYPE_BOOLEAN:
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
                 PropertyBoolean& s = (PropertyBoolean&) p;
 
@@ -56,15 +56,14 @@ void print_properties (const std::vector<Property>& properties)
                 std::cout << std::endl;
                 break;
             }
-            case PROPERTY_TYPE_BUTTON:
+            case TCAM_PROPERTY_TYPE_BUTTON:
             {
                 std::cout << std::setw(20) << p.getName()
                           << std::setw(10) << "(button)"
                           << std::endl;
                 break;
             }
-            case PROPERTY_TYPE_BITMASK:
-            case PROPERTY_TYPE_UNKNOWN:
+            case TCAM_PROPERTY_TYPE_UNKNOWN:
             default:
             {
                 std::cerr << "Unknown property type " << p.getName() << std::endl;
@@ -105,18 +104,18 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
             std::cout << "Found property!" << std::endl;
             switch(p.getType())
             {
-                case PROPERTY_TYPE_DOUBLE:
+                case TCAM_PROPERTY_TYPE_DOUBLE:
                 {
                     PropertyDouble& prop_d = (PropertyDouble&) p;
 
                     return prop_d.setValue(std::stod(value));
                 }
-                case PROPERTY_TYPE_STRING:
+                case TCAM_PROPERTY_TYPE_STRING:
                 {
                     PropertyString& prop_s = (PropertyString&) p;
                     return prop_s.setValue(value);
                 }
-                case PROPERTY_TYPE_STRING_TABLE:
+                case TCAM_PROPERTY_TYPE_STRING_TABLE:
                 {
                     PropertyStringMap& prop_m = (PropertyStringMap&) p;
 
@@ -124,20 +123,19 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
 
                     return prop_m.setValue(value);
                 }
-                case PROPERTY_TYPE_BUTTON:
+                case TCAM_PROPERTY_TYPE_BUTTON:
                 {
                     PropertyButton& button = (PropertyButton&) p;
 
                     return button.activate();
                 }
-                case PROPERTY_TYPE_BITMASK:
-                case PROPERTY_TYPE_INTEGER:
+                case TCAM_PROPERTY_TYPE_INTEGER:
                 {
                     PropertyInteger& prop_i = (PropertyInteger&) p;
 
                     return prop_i.setValue(std::stoi(value));
                 }
-                case PROPERTY_TYPE_BOOLEAN:
+                case TCAM_PROPERTY_TYPE_BOOLEAN:
                 {
                     PropertyBoolean& prop_s = (PropertyBoolean&) p;
                     if (value == "true" || value == "TRUE" || value == "1")
@@ -158,7 +156,7 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
                     }
 
                 }
-                case PROPERTY_TYPE_UNKNOWN:
+                case TCAM_PROPERTY_TYPE_UNKNOWN:
                 default:
                 {
                     std::cout << "Found property but am unable to determine correct property type."<< std::endl;

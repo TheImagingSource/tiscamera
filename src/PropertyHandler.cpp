@@ -144,25 +144,25 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (PROPER
 std::shared_ptr<Property> create_property(const std::shared_ptr<Property>& p,
                                           std::shared_ptr<PropertyImpl> impl)
 {
-    PROPERTY_TYPE type = p->getType();
+    TCAM_PROPERTY_TYPE type = p->getType();
 
-    if (type == PROPERTY_TYPE_BOOLEAN)
+    if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
         return std::make_shared<Property>(PropertyBoolean(impl, p->getStruct(), p->getValueType()));
     }
-    else if (type == PROPERTY_TYPE_INTEGER)
+    else if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
         return std::make_shared<Property>(PropertyInteger(impl, p->getStruct(), p->getValueType()));
     }
-    else if (type == PROPERTY_TYPE_DOUBLE)
+    else if (type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
         return std::make_shared<Property>(PropertyDouble(impl, p->getStruct(), p->getValueType()));
     }
-    else if (type == PROPERTY_TYPE_STRING)
+    else if (type == TCAM_PROPERTY_TYPE_STRING)
     {
         return std::make_shared<Property>(PropertyString(impl, p->getStruct(), p->getValueType()));
     }
-    else if (type == PROPERTY_TYPE_STRING_TABLE)
+    else if (type == TCAM_PROPERTY_TYPE_STRING_TABLE)
     {
         auto s = static_cast<PropertyStringMap&>(*p);
 
@@ -171,7 +171,7 @@ std::shared_ptr<Property> create_property(const std::shared_ptr<Property>& p,
                                                             s.getMapping(),
                                                             p->getValueType()));
     }
-    else if (type == PROPERTY_TYPE_BUTTON)
+    else if (type == TCAM_PROPERTY_TYPE_BUTTON)
     {
         return std::make_shared<Property>(PropertyButton(impl, p->getStruct(), p->getValueType()));
     }

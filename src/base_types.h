@@ -173,21 +173,21 @@ enum PROPERTY_ID
 
 /* Property types */
 
-enum PROPERTY_TYPE
+enum TCAM_PROPERTY_TYPE
 {
-    PROPERTY_TYPE_UNKNOWN      = 0,
-    PROPERTY_TYPE_BOOLEAN      = 1,
-    PROPERTY_TYPE_INTEGER      = 2,
-    PROPERTY_TYPE_DOUBLE       = 3,
-    PROPERTY_TYPE_STRING       = 4,
-    PROPERTY_TYPE_STRING_TABLE = 5,
+    TCAM_PROPERTY_TYPE_UNKNOWN      = 0,
+    TCAM_PROPERTY_TYPE_BOOLEAN      = 1,
+    TCAM_PROPERTY_TYPE_INTEGER      = 2,
+    TCAM_PROPERTY_TYPE_DOUBLE       = 3,
+    TCAM_PROPERTY_TYPE_STRING       = 4,
+    TCAM_PROPERTY_TYPE_STRING_TABLE = 5,
     /* the button type is just a command to trigger some functionality */
     /* which doesn't care about parameters because that is actually not necessary. */
     /* For instance, "adjusting white balance" button in digital camera could */
     /* be a good example which is performing adjustment of white balance for */
     /* one time and no need for any kind of parameter for this but needs to */
     /* be triggered. */
-    PROPERTY_TYPE_BUTTON       = 6,
+    TCAM_PROPERTY_TYPE_BUTTON       = 6,
 };
 
 
@@ -232,7 +232,7 @@ struct camera_property
 {
     PROPERTY_ID id;
     char name [32];              /* unique string identifier */
-    enum PROPERTY_TYPE type;     /* type identification */
+    enum TCAM_PROPERTY_TYPE type;     /* type identification */
 
     union
     {

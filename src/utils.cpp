@@ -14,17 +14,17 @@
 
 using namespace tcam;
 
-std::string tcam::propertyType2String (PROPERTY_TYPE type)
+std::string tcam::propertyType2String (TCAM_PROPERTY_TYPE type)
 {
     switch (type)
     {
-        case PROPERTY_TYPE_BOOLEAN: return "BOOLEAN";
-        case PROPERTY_TYPE_INTEGER: return "INTEGER";
-        case PROPERTY_TYPE_DOUBLE: return "DOUBLE";
-        case PROPERTY_TYPE_STRING: return "STRING";
-        case PROPERTY_TYPE_STRING_TABLE: return "STRING_TABLE";
-        case PROPERTY_TYPE_BUTTON: return "BUTTON";
-        case PROPERTY_TYPE_UNKNOWN:
+        case TCAM_PROPERTY_TYPE_BOOLEAN: return "BOOLEAN";
+        case TCAM_PROPERTY_TYPE_INTEGER: return "INTEGER";
+        case TCAM_PROPERTY_TYPE_DOUBLE: return "DOUBLE";
+        case TCAM_PROPERTY_TYPE_STRING: return "STRING";
+        case TCAM_PROPERTY_TYPE_STRING_TABLE: return "STRING_TABLE";
+        case TCAM_PROPERTY_TYPE_BUTTON: return "BUTTON";
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
             return "";
     }

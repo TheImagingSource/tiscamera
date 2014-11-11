@@ -260,7 +260,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
     auto ctrl_m = get_control_reference(prop_id);
 
-    PROPERTY_TYPE type_to_use;
+    TCAM_PROPERTY_TYPE type_to_use;
     camera_property cp = {};
 
     if (ctrl_m.id == PROPERTY_INVALID)
@@ -288,7 +288,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
     switch (type_to_use)
     {
-        case PROPERTY_TYPE_BOOLEAN:
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
             if (queryctrl->default_value == 0)
             {
@@ -327,7 +327,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
             return std::make_shared<Property>(PropertyBoolean(impl, cp, type));
         }
-        case PROPERTY_TYPE_INTEGER:
+        case TCAM_PROPERTY_TYPE_INTEGER:
         {
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;
@@ -342,7 +342,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
         // {
         // Does not exist in v4l2
         // }
-        case PROPERTY_TYPE_STRING:
+        case TCAM_PROPERTY_TYPE_STRING:
         {
             memcpy(cp.value.s.value,(char*)queryctrl->name, sizeof(cp.value.s.value));
             memcpy(cp.value.s.default_value, (char*)queryctrl->name, sizeof(cp.value.s.default_value));
@@ -350,7 +350,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
             return std::make_shared<Property>(PropertyString(impl, cp, type));
         }
-        case PROPERTY_TYPE_STRING_TABLE:
+        case TCAM_PROPERTY_TYPE_STRING_TABLE:
         {
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;
@@ -377,7 +377,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
             return std::make_shared<Property>(PropertyStringMap(impl, cp, m, type));
         }
-        case PROPERTY_TYPE_BUTTON:
+        case TCAM_PROPERTY_TYPE_BUTTON:
         {
             cp.flags = flags;
 

@@ -226,7 +226,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     auto ctrl_m = get_control_reference(prop_id);
 
     // type which the control shall use
-    PROPERTY_TYPE type_to_use;
+    TCAM_PROPERTY_TYPE type_to_use;
     camera_property prop = {};
 
     if (ctrl_m.id == PROPERTY_INVALID)
@@ -277,10 +277,10 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     if (strcmp(node_type, "Integer") == 0)
     {
         // IN/OUT types are identical
-        if (type_to_use == PROPERTY_TYPE_INTEGER)
+        if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
             //camera_property prop = {};
-            prop.type = PROPERTY_TYPE_INTEGER;
+            prop.type = TCAM_PROPERTY_TYPE_INTEGER;
             prop.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
             prop.value.i.default_value = prop.value.i.value;
 
@@ -294,10 +294,10 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             return std::make_shared<PropertyInteger>(impl, prop, type);
 
         }
-        else if (type_to_use == PROPERTY_TYPE_DOUBLE)
+        else if (type_to_use == TCAM_PROPERTY_TYPE_DOUBLE)
         {
 
-            prop.type = PROPERTY_TYPE_DOUBLE;
+            prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
             prop.value.d.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
             prop.value.d.default_value = prop.value.i.value;
 
@@ -340,9 +340,9 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     }
     else if (strcmp(node_type, "Float") == 0)
     {
-        if (type_to_use == PROPERTY_TYPE_INTEGER)
+        if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
-            prop.type = PROPERTY_TYPE_INTEGER;
+            prop.type = TCAM_PROPERTY_TYPE_INTEGER;
             prop.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
             prop.value.i.default_value = prop.value.i.value;
 
@@ -361,7 +361,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     else if (strcmp(node_type, "Boolean") == 0)
     {
         // struct camera_property ctrl = {};
-        prop.type = PROPERTY_TYPE_BOOLEAN;
+        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
 
         memcpy(prop.name, feature, sizeof(prop.name));
         prop.value.i.max = 1;
@@ -375,7 +375,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     else if (strcmp(node_type, "Enumeration") == 0)
     {
 
-        if (type_to_use == PROPERTY_TYPE_BOOLEAN)
+        if (type_to_use == TCAM_PROPERTY_TYPE_BOOLEAN)
         {
 
             // c_map.control.value.i.value = 0;
@@ -384,7 +384,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             return nullptr;
 
         }
-        else if (type_to_use == PROPERTY_TYPE_STRING_TABLE)
+        else if (type_to_use == TCAM_PROPERTY_TYPE_STRING_TABLE)
         {
             // printf ("??? %s: '%s'%s\n",
             //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),
@@ -397,7 +397,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
         }
 
         // IN/OUT types are identical
-        if (type_to_use == PROPERTY_TYPE_DOUBLE)
+        if (type_to_use == TCAM_PROPERTY_TYPE_DOUBLE)
         {
 
             // c_map.control.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
@@ -409,7 +409,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             //                                     &c_map.control.value.d.max);
 
         }
-        else if (type_to_use == PROPERTY_TYPE_INTEGER)
+        else if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
 
             // c_map.control.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
@@ -439,9 +439,9 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
         //         feature);
 
 
-        if (type_to_use == PROPERTY_TYPE_BUTTON)
+        if (type_to_use == TCAM_PROPERTY_TYPE_BUTTON)
         {
-            prop.type = PROPERTY_TYPE_BUTTON;
+            prop.type = TCAM_PROPERTY_TYPE_BUTTON;
 
             return std::make_shared<PropertyButton>(impl, prop, type);
         }

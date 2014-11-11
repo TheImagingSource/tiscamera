@@ -26,7 +26,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         camera_property cp = {};
         cp.id = PROPERTY_OFFSET_AUTO;
         strcpy(cp.name, "Offset Auto Center");
-        cp.type = PROPERTY_TYPE_BOOLEAN;
+        cp.type = TCAM_PROPERTY_TYPE_BOOLEAN;
         cp.value.b.default_value = false;
         cp.value.b.value = cp.value.b.default_value;
         cp.flags = set_bit(cp.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
@@ -49,7 +49,7 @@ bool tcam::handle_auto_center (const Property& new_property,
                                       const IMG_SIZE& sensor,
                                       const IMG_SIZE& current_format)
 {
-    if (new_property.getType() != PROPERTY_TYPE_BOOLEAN)
+    if (new_property.getType() != TCAM_PROPERTY_TYPE_BOOLEAN)
     {
         return false;
     }

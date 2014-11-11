@@ -12,7 +12,7 @@
 namespace tcam
 {
 
-std::string propertyType2String (PROPERTY_TYPE);
+std::string propertyType2String (TCAM_PROPERTY_TYPE);
 
 std::string fourcc2string (uint32_t fourcc);
 

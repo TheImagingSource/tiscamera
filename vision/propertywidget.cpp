@@ -75,7 +75,7 @@ void PropertyWidget::on_comboBox_activated (const QString &arg1)
 void PropertyWidget::on_horizontalSlider_sliderMoved (int position)
 {
 
-    if (property.getType() == PROPERTY_TYPE_INTEGER)
+    if (property.getType() == TCAM_PROPERTY_TYPE_INTEGER)
     {
         PropertyInteger& i = (PropertyInteger&) property;
         i.setValue(position);
@@ -104,9 +104,9 @@ void PropertyWidget::redraw ()
 {
     ui->propertyName->setText(QString(property.getName().c_str()));
 
-    PROPERTY_TYPE type = property.getType();
+    TCAM_PROPERTY_TYPE type = property.getType();
 
-    if (type == PROPERTY_TYPE_BOOLEAN)
+    if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
         ui->checkBox->setVisible(true);
         ui->horizontalSlider->setVisible(false);
@@ -116,7 +116,7 @@ void PropertyWidget::redraw ()
         PropertyBoolean& prop_sw = (PropertyBoolean&) property;
         ui->checkBox->setChecked(prop_sw.getValue());
     }
-    else if (type == PROPERTY_TYPE_INTEGER)
+    else if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(true);
@@ -133,7 +133,7 @@ void PropertyWidget::redraw ()
         //setStyleSheet("background-color:grey;");
 
     }
-    else if (type == PROPERTY_TYPE_DOUBLE)
+    else if (type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(true);
@@ -148,14 +148,14 @@ void PropertyWidget::redraw ()
         //ui->horizontalSlider->setRange(min * presicion, max * this->precision);
         //ui->horizontalSlider->setValue(prop_d.getValue() * precision);
     }
-    else if (type == PROPERTY_TYPE_STRING)
+    else if (type == TCAM_PROPERTY_TYPE_STRING)
     {
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(false);
         ui->pushButton->setVisible(false);
         ui->comboBox->setVisible(false);
     }
-    else if (type == PROPERTY_TYPE_STRING_TABLE)
+    else if (type == TCAM_PROPERTY_TYPE_STRING_TABLE)
     {
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(false);
@@ -169,7 +169,7 @@ void PropertyWidget::redraw ()
             ui->comboBox->addItem(s.c_str());
         }
     }
-    else if (type == PROPERTY_TYPE_BUTTON)
+    else if (type == TCAM_PROPERTY_TYPE_BUTTON)
     {
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(false);

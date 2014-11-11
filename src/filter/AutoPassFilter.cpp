@@ -308,7 +308,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         camera_property prop = {};
         prop.id = PROPERTY_EXPOSURE_AUTO;
         strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
-        prop.type = PROPERTY_TYPE_BOOLEAN;
+        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
@@ -333,7 +333,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         camera_property prop = {};
         prop.id = PROPERTY_GAIN_AUTO;
         strncpy(prop.name, "Gain Auto", sizeof(prop.name));
-        prop.type = PROPERTY_TYPE_BOOLEAN;
+        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
@@ -361,7 +361,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         camera_property prop = {};
         prop.id = PROPERTY_IRIS_AUTO;
         strncpy(prop.name, "Iris Auto", sizeof(prop.name));
-        prop.type = PROPERTY_TYPE_BOOLEAN;
+        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
@@ -374,7 +374,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     camera_property prop = {};
     prop.id = PROPERTY_WB;
     strncpy(prop.name, "Whitebalance", sizeof(prop.name));
-    prop.type = PROPERTY_TYPE_BOOLEAN;
+    prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
     prop.value.b.value = true;
     prop.value.b.default_value = true;
     prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
@@ -386,7 +386,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     camera_property prop_auto = {};
     prop.id = PROPERTY_WB_AUTO;
     strncpy(prop_auto.name, "Whitebalance Auto", sizeof(prop_auto.name));
-    prop_auto.type = PROPERTY_TYPE_BOOLEAN;
+    prop_auto.type = TCAM_PROPERTY_TYPE_BOOLEAN;
     prop_auto.value.b.value = true;
     prop_auto.value.b.default_value = true;
     prop_auto.flags = set_bit(prop_auto.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
@@ -397,7 +397,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     camera_property prop_wbr = {};
     prop.id = PROPERTY_WB_RED;
     strncpy(prop_wbr.name, "Whitebalance Red", sizeof(prop.name));
-    prop_wbr.type = PROPERTY_TYPE_INTEGER;
+    prop_wbr.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbr.value.i.min = 0;
     prop_wbr.value.i.max = 255;
     prop_wbr.value.i.value = 60;
@@ -408,7 +408,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     camera_property prop_wbg = {};
     prop.id = PROPERTY_WB_GREEN;
     strncpy(prop_wbg.name, "Whitebalance Green", sizeof(prop_wbg.name));
-    prop_wbg.type = PROPERTY_TYPE_INTEGER;
+    prop_wbg.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbg.value.i.min = 0;
     prop_wbg.value.i.max = 255;
     prop_wbg.value.i.value = 60;
@@ -419,7 +419,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     camera_property prop_wbb = {};
     prop.id = PROPERTY_WB_BLUE;
     strncpy(prop_wbb.name, "Whitebalance Blue", sizeof(prop_wbb.name));
-    prop_wbb.type = PROPERTY_TYPE_INTEGER;
+    prop_wbb.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbb.value.i.min = 0;
     prop_wbb.value.i.max = 255;
     prop_wbb.value.i.value = 60;

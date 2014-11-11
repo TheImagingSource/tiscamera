@@ -71,7 +71,7 @@ std::string Property::getName () const
 }
 
 
-PROPERTY_TYPE Property::getType () const
+TCAM_PROPERTY_TYPE Property::getType () const
 {
     return prop.type;
 }
@@ -111,24 +111,24 @@ bool Property::setStruct (const struct camera_property& p)
 {
     switch (prop.type)
     {
-        case PROPERTY_TYPE_STRING:
+        case TCAM_PROPERTY_TYPE_STRING:
             std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
-        case PROPERTY_TYPE_STRING_TABLE:
+        case TCAM_PROPERTY_TYPE_STRING_TABLE:
             prop.value.i.value = p.value.i.value;
             break;
-        case PROPERTY_TYPE_INTEGER:
+        case TCAM_PROPERTY_TYPE_INTEGER:
             prop.value.i.value = p.value.i.value;
             break;
-        case PROPERTY_TYPE_DOUBLE:
+        case TCAM_PROPERTY_TYPE_DOUBLE:
             prop.value.d.value = p.value.d.value;
             break;
-        case PROPERTY_TYPE_BUTTON:
+        case TCAM_PROPERTY_TYPE_BUTTON:
             // do nothing
             break;
-        case PROPERTY_TYPE_BOOLEAN:
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
             prop.value.b.value = p.value.b.value;
             break;
-        case PROPERTY_TYPE_UNKNOWN:
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
             return false;
     }
@@ -151,7 +151,7 @@ std::string Property::toString () const
 
     switch (prop.type)
     {
-        case PROPERTY_TYPE_BOOLEAN:
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
             if (prop.value.b.value)
             {
@@ -163,31 +163,31 @@ std::string Property::toString () const
             }
             break;
         }
-        case PROPERTY_TYPE_INTEGER:
+        case TCAM_PROPERTY_TYPE_INTEGER:
         {
             property_string += std::to_string(prop.value.i.value);
             break;
         }
-        case PROPERTY_TYPE_DOUBLE:
+        case TCAM_PROPERTY_TYPE_DOUBLE:
         {
             property_string += std::to_string(prop.value.d.value);
             break;
         }
-        case PROPERTY_TYPE_STRING:
+        case TCAM_PROPERTY_TYPE_STRING:
         {
             property_string += prop.value.s.value;
             break;
 
         }
-        case PROPERTY_TYPE_STRING_TABLE:
+        case TCAM_PROPERTY_TYPE_STRING_TABLE:
         {
 
         }
-        case PROPERTY_TYPE_BUTTON:
+        case TCAM_PROPERTY_TYPE_BUTTON:
         {
 
         }
-        case PROPERTY_TYPE_UNKNOWN:
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
         {
 
@@ -204,7 +204,7 @@ bool Property::fromString (const std::string& s)
     {
         switch (prop.type)
         {
-            case PROPERTY_TYPE_BOOLEAN:
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
                 if (s.compare("true") == 0)
                 {
@@ -216,29 +216,29 @@ bool Property::fromString (const std::string& s)
                 }
                 break;
             }
-            case PROPERTY_TYPE_INTEGER:
+            case TCAM_PROPERTY_TYPE_INTEGER:
             {
                 prop.value.i.value = stoi(s);
 
                 break;
             }
-            case PROPERTY_TYPE_DOUBLE:
+            case TCAM_PROPERTY_TYPE_DOUBLE:
             {
                 prop.value.d.value = stod(s);
                 break;
             }
-            case PROPERTY_TYPE_STRING:
+            case TCAM_PROPERTY_TYPE_STRING:
             {
                 strncpy(prop.value.s.value, s.c_str(), sizeof(prop.value.s.value));
                 prop.value.s.value[sizeof(prop.value.s.value)-1] = '\0';
                 break;
             }
-            case PROPERTY_TYPE_STRING_TABLE:
+            case TCAM_PROPERTY_TYPE_STRING_TABLE:
             {
 
             }
-            case PROPERTY_TYPE_BUTTON:
-            case PROPERTY_TYPE_UNKNOWN:
+            case TCAM_PROPERTY_TYPE_BUTTON:
+            case TCAM_PROPERTY_TYPE_UNKNOWN:
             default:
             {
                 return false;
@@ -336,25 +336,25 @@ void Property::notifyImpl ()
 }
 
 
-PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
+TCAM_PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
 {
     switch (t)
     {
         case Property::BOOLEAN:
-            return PROPERTY_TYPE_BOOLEAN;
+            return TCAM_PROPERTY_TYPE_BOOLEAN;
         case Property::STRING:
-            return PROPERTY_TYPE_STRING;
+            return TCAM_PROPERTY_TYPE_STRING;
         case Property::ENUM:
-            return PROPERTY_TYPE_STRING_TABLE;
+            return TCAM_PROPERTY_TYPE_STRING_TABLE;
         case Property::INTSWISSKNIFE:
         case Property::INTEGER:
-            return PROPERTY_TYPE_INTEGER;
+            return TCAM_PROPERTY_TYPE_INTEGER;
         case Property::FLOAT:
-            return PROPERTY_TYPE_DOUBLE;
+            return TCAM_PROPERTY_TYPE_DOUBLE;
         case Property::BUTTON:
-            return PROPERTY_TYPE_BUTTON;
+            return TCAM_PROPERTY_TYPE_BUTTON;
         case Property::COMMAND:
         default:
-            return PROPERTY_TYPE_UNKNOWN;
+            return TCAM_PROPERTY_TYPE_UNKNOWN;
     };
 }
