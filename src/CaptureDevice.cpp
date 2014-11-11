@@ -80,6 +80,9 @@ bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
         return false;
     }
 
+    pipeline = std::make_shared<PipelineManager>();
+    pipeline->setSource(device);
+
     property_handler = std::make_shared<PropertyHandler>();
 
     property_handler->set_properties(device->getProperties(), pipeline->getFilterProperties());
