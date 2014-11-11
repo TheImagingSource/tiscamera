@@ -660,7 +660,7 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
     buffer->lock();
 
-    auto current_buffer = buffer;
+    auto& current_buffer = buffer;
 
     for (auto& f : filter_pipeline)
     {
