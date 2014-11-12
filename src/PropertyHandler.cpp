@@ -101,8 +101,13 @@ bool PropertyHandler::getProperty (Property& p)
     if (prop.internal_property != nullptr)
     {
         auto i = prop.internal_property;
-        prop.external_property->setStruct(i->getStruct());
-        p.setStruct(i->getStruct());
+
+        auto ext_struct = prop.external_property->getStruct();
+
+        ext_struct.value = i->getStruct().value;
+
+        prop.external_property->setStruct(ext_struct);
+        p.setStruct(ext_struct);
         return true;
     }
 
