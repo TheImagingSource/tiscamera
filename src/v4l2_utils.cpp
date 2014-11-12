@@ -152,6 +152,10 @@ static std::vector<struct v4l2_property> v4l2_mappings =
         .id = TCAM_PROPERTY_BINNING,
         .v4l2_id = {0x980925},
     },
+    {
+        .id = TCAM_PROPERTY_SKIPPING,
+        .v4l2_id = { 0x980929 },
+    },
 };
 
 
