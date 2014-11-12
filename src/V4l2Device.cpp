@@ -721,15 +721,38 @@ void V4l2Device::determine_active_video_format ()
 
     tcam_video_format format = {};
     format.fourcc = fmt.fmt.pix.pixelformat;
+
+    if (format.fourcc == V4L2_PIX_FMT_GREY)
+    {
+        format.fourcc = FOURCC_Y800;
+    }
+
     format.width = fmt.fmt.pix.width;
     format.height = fmt.fmt.pix.height;
-    // TODO: determine binning
-    format.binning = 0;
-    format.framerate = parm.parm.capture.timeperframe.numerator / parm.parm.capture.timeperframe.denominator;
+
+    auto find_binning = [] (const property_description& d)
+        {
+            if (d.prop->getID() == TCAM_PROPERTY_BINNING)
+            {
+                return true;
+            }
+            return false;
+        };
+
+    auto bin_ptr = std::find_if(property_handler->special_properties.begin(),
+                                property_handler->special_properties.end(),
+                                find_binning);
+
+    if (bin_ptr == property_handler->special_properties.end())
+        format.binning = 1;
+    else
+    {
+        format.binning = ((PropertyInteger&)*((*bin_ptr).prop)).getValue();
+    }
+
+    format.framerate = getFramerate();
 
     this->active_video_format = VideoFormat(format);
-
-    return;
 }
 
 
