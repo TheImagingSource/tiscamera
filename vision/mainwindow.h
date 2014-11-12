@@ -8,6 +8,8 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 
+#include <QLabel>
+
 #include "capturedeviceselectiondialog.h"
 #include "propertywidget.h"
 
@@ -87,6 +89,8 @@ private:
     void start_stream ();
 
     void stop_stream ();
+
+    QLabel* status_label;
 };
 
 #endif // MAINWINDOW_H

@@ -21,6 +21,9 @@ MainWindow::MainWindow (QWidget *parent) :
 
     sink = std::make_shared<ImageSink>();
 
+    status_label = new QLabel(this);
+
+    statusBar()->addWidget(status_label);
 }
 
 
@@ -236,6 +239,8 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
 
     this->ui->videowidget->new_image = true;
     this->ui->videowidget->update();
+
+    this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
 
     emit newImage_received(buffer);
 }
