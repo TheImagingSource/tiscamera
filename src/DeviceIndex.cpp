@@ -7,7 +7,7 @@
 
 #include "utils.h"
 #include "logging.h"
-#include "device_discovery.h"
+#include "DeviceIndex.h"
 
 #include "Error.h"
 

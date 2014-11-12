@@ -2,7 +2,6 @@
 
 
 #include "DeviceInfo.h"
-#include "device_discovery.h"
 
 #include <cstring>
 

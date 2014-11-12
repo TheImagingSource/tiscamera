@@ -25,7 +25,7 @@ set( srcs
 
 logging.cpp
 DeviceInfo.cpp
-device_discovery.cpp
+DeviceIndex.cpp
 DeviceInterface.cpp
 Error.cpp
 FilterLoader.cpp
