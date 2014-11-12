@@ -258,51 +258,6 @@ bool Property::fromString (const std::string& s)
 }
 
 
-bool Property::setReadOnly (bool only_read)
-{
-    if (only_read)
-    {
-        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-    }
-    else
-    {
-        prop.flags = unset_bit(prop.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-    }
-
-    return true;
-}
-
-
-bool Property::setWriteOnly (bool only_write)
-{
-    if (only_write)
-    {
-        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
-    }
-    else
-    {
-        prop.flags = unset_bit(prop.flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
-    }
-
-    return true;
-}
-
-
-bool Property::setInactive (bool is_disabled)
-{
-    if (is_disabled)
-    {
-        prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_INACTIVE);
-    }
-    else
-    {
-        prop.flags = unset_bit(prop.flags, TCAM_PROPERTY_FLAG_INACTIVE);
-    }
-
-    return true;
-}
-
-
 bool Property::setProperty (const Property& p)
 {
     if (impl.expired())

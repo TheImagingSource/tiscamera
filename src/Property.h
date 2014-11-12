@@ -83,12 +83,6 @@ public:
 
 protected:
 
-    bool setReadOnly (bool);
-
-    bool setWriteOnly (bool);
-
-    bool setInactive (bool);
-
     std::weak_ptr<PropertyImpl> impl;
 
     Property::VALUE_TYPE value_type;
