@@ -15,8 +15,7 @@
 namespace tcam
 {
 
-
-class V4l2Device : public DeviceInterface, public std::enable_shared_from_this<V4l2Device>
+class V4l2Device : public DeviceInterface
 {
 
     struct property_description
