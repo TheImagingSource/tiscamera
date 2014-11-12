@@ -344,8 +344,9 @@ bool V4l2Device::setFramerate (double framerate)
     parm.parm.capture.timeperframe.denominator = fps->denominator;
 
     tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d", framerate,
-             parm.parm.capture.timeperframe.numerator,
-             parm.parm.capture.timeperframe.denominator);
+             parm.parm.capture.timeperframe.denominator,
+             parm.parm.capture.timeperframe.numerator);
+
     int ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
 
     if (ret < 0)
@@ -373,9 +374,9 @@ double V4l2Device::getFramerate ()
         return 0.0;
     }
 
-    tcam_log(TCAM_LOG_INFO, "Set framerate to %d / %d fps",
-             parm.parm.capture.timeperframe.numerator,
-             parm.parm.capture.timeperframe.denominator);
+    tcam_log(TCAM_LOG_INFO, "Current framerate is %d / %d fps",
+             parm.parm.capture.timeperframe.denominator,
+             parm.parm.capture.timeperframe.numerator);
 
     return (double)parm.parm.capture.timeperframe.denominator / (double)parm.parm.capture.timeperframe.numerator;
 }
@@ -446,9 +447,6 @@ bool V4l2Device::start_stream ()
     // return false;
     // }
 
-    // VideoFormat v;
-
-    // setVideoFormat(v);
     enum v4l2_buf_type type;
 
     tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());
@@ -463,10 +461,9 @@ bool V4l2Device::start_stream ()
 
         if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
         {
-            // TODO: error
             std::string s = "Unable to queue v4l2_buffer 'VIDIOC_QBUF'";
             tcam_log(TCAM_LOG_ERROR, s.c_str());
-            setError(Error(s, EIO));
+            setError(Error(s, errno));
             return false;
         }
         else
@@ -494,8 +491,6 @@ bool V4l2Device::start_stream ()
 
 bool V4l2Device::stop_stream ()
 {
-    bool wait_for_join = is_stream_on;
-
     is_stream_on = false;
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -633,9 +628,6 @@ void V4l2Device::index_formats ()
                     binnings.push_back(i);
             }
 
-        }
-        else
-        {
         }
 
         for (const auto& b : binnings)
