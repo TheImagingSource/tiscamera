@@ -111,6 +111,11 @@ DeviceInfo CaptureDevice::getDevice () const
 
 bool CaptureDevice::closeDevice ()
 {
+    if (!isDeviceOpen())
+    {
+        return true;
+    }
+
     std::string name = open_device.getName();
 
     pipeline->destroyPipeline();
