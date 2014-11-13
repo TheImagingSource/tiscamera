@@ -540,8 +540,6 @@ bool PipelineManager::create_pipeline ()
     // assure everything is in a defined state
     filter_pipeline.clear();
 
-    output_format.setBinning(0);
-
     if (!create_conversion_pipeline())
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to determine conversion pipeline.");
