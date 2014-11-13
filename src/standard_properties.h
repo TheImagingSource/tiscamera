@@ -30,7 +30,7 @@ struct control_reference
     enum TCAM_PROPERTY_TYPE type_to_use; // type outgoing control shall have
 };
 
-static control_reference INVALID_STD_PROPERTY
+static const control_reference INVALID_STD_PROPERTY
 {
     .id = TCAM_PROPERTY_INVALID,
     .name = "INVALID_PORPERTY",
@@ -38,7 +38,7 @@ static control_reference INVALID_STD_PROPERTY
 };
 
 
-static std::vector<struct control_reference> ctrl_reference_table =
+static const std::vector<struct control_reference> ctrl_reference_table =
 {
     {
         .id = TCAM_PROPERTY_INVALID,

@@ -26,7 +26,7 @@ struct v4l2_property
 };
 
 
-static std::vector<struct v4l2_property> v4l2_mappings =
+static const std::vector<struct v4l2_property> v4l2_mappings =
 {
     {
         .id = TCAM_PROPERTY_INVALID,
