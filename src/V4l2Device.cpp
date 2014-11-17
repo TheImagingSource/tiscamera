@@ -213,39 +213,42 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
         return false;
     }
 
-    // set framerate
+    /* framerate */
+
     if (!setFramerate(new_format.getFramerate()))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set framerate to %f", new_format.getFramerate());
-        // return false;
+        setError(Error("Unable to set framerate", errno));
+        return false;
     }
 
-    fmt = {};
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    /* binning */
 
-    ret = tcam_xioctl(this->fd, VIDIOC_G_FMT, &fmt);
+    auto find_binning = [] (const property_description& d)
+        {
+            if (d.prop->getID() == TCAM_PROPERTY_BINNING)
+            {
+                return true;
+            }
+            return false;
+        };
 
-    if (ret < 0)
+    auto bin_ptr = std::find_if(property_handler->special_properties.begin(),
+                                property_handler->special_properties.end(),
+                                find_binning);
+
+    if (bin_ptr == property_handler->special_properties.end())
     {
-        tcam_log(TCAM_LOG_ERROR, "VIDIOC_G_FMT failed with '%s'", strerror(errno));
+        // do nothing; binning will be ignored
     }
-
-    tcam_video_format f = {};
-
-    f.fourcc = fmt.fmt.pix.pixelformat;
-    f.width = fmt.fmt.pix.width;
-    f.height = fmt.fmt.pix.height;
-    f.binning = 0;
-    f.framerate = getFramerate();
-
-
-    if (f.fourcc == V4L2_PIX_FMT_GREY)
+    else
     {
-        f.fourcc = FOURCC_Y800;
+        ((PropertyInteger&)*((*bin_ptr).prop)).setValue(new_format.getBinning());
     }
 
-    // copy format as local reference
-    active_video_format = VideoFormat(f);
+    /* validation */
+
+    determine_active_video_format();
     tcam_log(TCAM_LOG_DEBUG, "Active format is: '%s'",
              active_video_format.toString().c_str() );
 
