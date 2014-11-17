@@ -325,7 +325,7 @@ bool MainWindow::getActiveVideoFormat ()
         //input_format.setFramerate(10.0);
     }
 
-    input_format.setBinning(0);
+    input_format.setBinning(1);
     active_format = input_format;
 
     return true;
