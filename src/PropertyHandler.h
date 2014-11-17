@@ -60,7 +60,13 @@ private:
      */
     void generate_properties ();
 
+    void handle_flags (std::shared_ptr<Property>&);
+
+    static void set_property_flag (std::shared_ptr<Property>&, TCAM_PROPERTY_FLAGS);
+    static void unset_property_flag (std::shared_ptr<Property>&, TCAM_PROPERTY_FLAGS);
+
 };
+
 
 } /* namespace tcam */
 

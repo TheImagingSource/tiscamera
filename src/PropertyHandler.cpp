@@ -210,8 +210,75 @@ void PropertyHandler::generate_properties ()
 
         if (new_p != nullptr)
         {
+            handle_flags(new_p);
+
+
             external_properties.push_back(new_p);
             properties.push_back({new_p, p});
         }
     }
+
+
+}
+
+
+void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
+{
+
+    switch (p->getID())
+    {
+        case TCAM_PROPERTY_EXPOSURE:
+        {
+            auto prop = find_mapping_internal(TCAM_PROPERTY_EXPOSURE_AUTO);
+
+            if (prop.internal_property != nullptr)
+            {
+                if (((PropertyBoolean&)(*prop.internal_property)).getValue())
+                {
+                    set_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
+                }
+                else
+                {
+                    unset_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
+                }
+            }
+            break;
+        }
+        case TCAM_PROPERTY_GAIN:
+        {
+            auto prop = find_mapping_internal(TCAM_PROPERTY_GAIN_AUTO);
+
+            if (prop.internal_property != nullptr)
+            {
+                if (((PropertyBoolean&)(*prop.internal_property)).getValue())
+                {
+                    set_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
+                }
+                else
+                {
+                    unset_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
+                }
+            }
+
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+
+void PropertyHandler::set_property_flag (std::shared_ptr<Property>& p, TCAM_PROPERTY_FLAGS flag)
+{
+    auto s = p->getStruct();
+    s.flags = set_bit(s.flags, flag);
+    p->setStruct(s);
+}
+
+
+void PropertyHandler::unset_property_flag (std::shared_ptr<Property>& p, TCAM_PROPERTY_FLAGS flag)
+{
+    auto s = p->getStruct();
+    s.flags = set_bit(s.flags, flag);
+    p->setStruct(s);
 }
