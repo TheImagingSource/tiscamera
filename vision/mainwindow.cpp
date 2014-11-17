@@ -197,13 +197,6 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
     }
 
     auto buf = buffer->getImageBuffer();
-
-#ifndef mmioFOURCC
-#define mmioFOURCC( ch0, ch1, ch2, ch3 )                                \
-    ( (uint32_t)(unsigned char)(ch0) | ( (uint32_t)(unsigned char)(ch1) << 8 ) | \
-      ( (uint32_t)(unsigned char)(ch2) << 16 ) | ( (uint32_t)(unsigned char)(ch3) << 24 ) )
-#endif
-
     unsigned int height = buffer->getImageBuffer().format.height;
     unsigned int width = buffer->getImageBuffer().format.width;
 
@@ -240,9 +233,28 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
     this->ui->videowidget->new_image = true;
     this->ui->videowidget->update();
 
-    this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
+    static int prop_counter;
 
-    emit newImage_received(buffer);
+    if (prop_counter >= 50)
+    {
+        for (unsigned int i = 0; i < ui->property_list->count(); ++i)
+        {
+            QListWidgetItem* item = ui->property_list->item(i);
+            PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item));
+            if (pw != nullptr)
+                pw->update();
+            else
+            {
+                std::cout << "NULLPTR" << std::endl;
+            }
+
+        }
+        prop_counter = 0;
+    }
+    else
+        prop_counter++;
+
+    this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
 }
 
 
