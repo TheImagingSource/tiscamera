@@ -63,6 +63,9 @@ bool PropertyHandler::setProperty (const Property& p)
             if (prop.external_property->isReadOnly())
             {
                 setError(Error("Property is read only.", EACCES));
+                tcam_log(TCAM_LOG_ERROR,
+                         "Property '%s' is read only",
+                         prop.external_property->getName().c_str());
                 return false;
             }
 
