@@ -9,6 +9,10 @@
 
 #include "MemoryBuffer.h"
 
+
+namespace tcam
+{
+
 inline img::img_descriptor to_img_desc (tcam::MemoryBuffer& buf)
 {
     tcam_image_buffer b = buf.getImageBuffer();
@@ -21,5 +25,7 @@ inline img::img_descriptor to_img_desc (tcam::MemoryBuffer& buf)
 
     return img;
 }
+
+} /* namespace tcam */
 
 #endif /* DUTILS_HEADER */
