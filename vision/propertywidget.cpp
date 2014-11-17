@@ -118,6 +118,7 @@ void PropertyWidget::redraw ()
     }
     else if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
+        ui->horizontalSlider->setDisabled(false);
         ui->checkBox->setVisible(false);
         ui->horizontalSlider->setVisible(true);
         ui->pushButton->setVisible(false);
@@ -129,9 +130,17 @@ void PropertyWidget::redraw ()
         ui->horizontalSlider->setValue(prop_int.getValue());
 
         ui->valueDisplay->setText(QString::number(prop_int.getValue()));
+
+        if (prop_int.isReadOnly())
+        {
+            ui->horizontalSlider->setDisabled(true);
+        }
+        else
+        {
+            ui->horizontalSlider->setDisabled(false);
+        }
         //ui->horizontalSlider->setEnabled (false);
         //setStyleSheet("background-color:grey;");
-
     }
     else if (type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
