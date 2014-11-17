@@ -30,8 +30,8 @@ option(BUILD_TOOLS    "Build additional utilities"           OFF)
 option(BUILD_GUI      "Build gui versions of tools"          ON)
 
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -flto -pthread")
-set(CMAKE_C_FLAGS " -flto -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -flto -pthread")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto -pthread")
 
 if (BUILD_USB)
   add_definitions(-DHAVE_USB)
