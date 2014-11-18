@@ -55,6 +55,8 @@ private slots:
 
     void on_size_box_currentIndexChanged(int index);
 
+    void update_properties ();
+
 private:
 
     Ui::MainWindow *ui;

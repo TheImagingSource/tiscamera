@@ -163,6 +163,7 @@ void MainWindow::my_newImage_received(std::shared_ptr<MemoryBuffer> buffer)
 void MainWindow::property_changed (PropertyWidget* pw)
 {
     std::cout << "Changing Property" << std::endl;
+    update_properties();
 }
 
 
@@ -230,26 +231,6 @@ void MainWindow::internal_callback(MemoryBuffer* buffer)
     this->ui->videowidget->new_image = true;
     this->ui->videowidget->update();
 
-    static int prop_counter;
-
-    if (prop_counter >= 50)
-    {
-        for (unsigned int i = 0; i < ui->property_list->count(); ++i)
-        {
-            QListWidgetItem* item = ui->property_list->item(i);
-            PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item));
-            if (pw != nullptr)
-                pw->update();
-            else
-            {
-                std::cout << "NULLPTR" << std::endl;
-            }
-
-        }
-        prop_counter = 0;
-    }
-    else
-        prop_counter++;
 
     this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
 }
@@ -402,4 +383,24 @@ void MainWindow::on_size_box_currentIndexChanged(int index)
         QString qs = QString::number(fps);
         ui->framerate_box->addItem(qs);
     }
+}
+
+
+void MainWindow::update_properties ()
+{
+    for (unsigned int i = 0; i < ui->property_list->count(); ++i)
+    {
+        QListWidgetItem* item = ui->property_list->item(i);
+        PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item));
+        if (pw != nullptr)
+        {
+            pw->update();
+        }
+        else
+        {
+            std::cout << "NULLPTR" << std::endl;
+        }
+
+    }
+
 }
