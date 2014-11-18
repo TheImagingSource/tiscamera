@@ -30,6 +30,7 @@ DeviceInterface.cpp
 Error.cpp
 FilterLoader.cpp
 CaptureDevice.cpp
+CaptureDeviceImpl.cpp
 image_transform_base.h
 MemoryBuffer.cpp
 Properties.cpp

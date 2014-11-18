@@ -1,31 +1,36 @@
 
 
-#ifndef CAPTUREDEVICE_H
-#define CAPTUREDEVICE_H
+#ifndef CAPTUREDEVICEIMPL_H
+#define CAPTUREDEVICEIMPL_H
 
 #include "DeviceInfo.h"
+#include "DeviceInterface.h"
 #include "Properties.h"
-#include "VideoFormat.h"
-#include "SinkInterface.h"
-#include "VideoFormatDescription.h"
+#include "PipelineManager.h"
+#include "PropertyHandler.h"
 
 #include <string>
 #include <vector>
 #include <memory>
 
+#include "internal.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
-class CaptureDeviceImpl;
-
-class CaptureDevice
+class CaptureDeviceImpl
 {
 
 public:
 
-    explicit CaptureDevice ();
+    explicit CaptureDeviceImpl ();
 
-    ~CaptureDevice ();
+    explicit CaptureDeviceImpl (const DeviceInfo& device);
+
+    ~CaptureDeviceImpl ();
+
 
     /**
      * @brief Load xml configuration and apply it to device
@@ -120,10 +125,18 @@ public:
 
 private:
 
-    std::unique_ptr<CaptureDeviceImpl> impl;
+    std::shared_ptr<PipelineManager> pipeline;
+    std::shared_ptr<PropertyHandler> property_handler;
 
-}; /* class CaptureDevice */
+    DeviceInfo open_device;
+    VideoFormat active_format;
+
+    std::shared_ptr<DeviceInterface> device;
+
+}; /* class CaptureDeviceImpl */
 
 } /* namespace tcam */
 
-#endif /* CAPTUREDEVICE_H */
+VISIBILITY_POP
+
+#endif /* CAPTUREDEVICEIMPL_H */
