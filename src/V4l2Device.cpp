@@ -5,6 +5,7 @@
 #include "v4l2_utils.h"
 #include "PropertyGeneration.h"
 #include "Error.h"
+#include <errno.h>
 
 #include <algorithm>
 #include <unistd.h>
@@ -657,7 +658,7 @@ void V4l2Device::determine_active_video_format ()
     if (ret < 0)
     {
 
-        fprintf (stderr, "Failed to set frame rate\n");
+        tcam_log(TCAM_LOG_ERROR, "Failed to set frame rate");
         return;
     }
 
