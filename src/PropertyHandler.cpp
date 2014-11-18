@@ -131,7 +131,7 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (TCAM_P
 }
 
 
-std::shared_ptr<Property> create_property(const std::shared_ptr<Property>& p,
+static std::shared_ptr<Property> create_property(const std::shared_ptr<Property>& p,
                                           std::shared_ptr<PropertyImpl> impl)
 {
     TCAM_PROPERTY_TYPE type = p->getType();

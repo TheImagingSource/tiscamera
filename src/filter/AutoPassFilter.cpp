@@ -520,7 +520,7 @@ std::vector<std::shared_ptr<Property>> AutoPassFilter::getFilterProperties ()
 }
 
 
-void set_int_property (std::weak_ptr<PropertyInteger> ptr, int val)
+static void set_int_property (std::weak_ptr<PropertyInteger> ptr, int val)
 {
     if (ptr.expired())
     {
