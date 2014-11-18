@@ -114,9 +114,6 @@ void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
         {
             continue;
         }
-
-
-        ui->binning_box->addItem(QString::number(desc.binning));
     }
 }
 
@@ -337,7 +334,6 @@ bool MainWindow::getActiveVideoFormat ()
         //input_format.setFramerate(10.0);
     }
 
-    input_format.setBinning(1);
     active_format = input_format;
 
     return true;

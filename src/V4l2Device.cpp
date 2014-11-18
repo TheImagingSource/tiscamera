@@ -222,30 +222,6 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
         return false;
     }
 
-    /* binning */
-
-    auto find_binning = [] (const property_description& d)
-        {
-            if (d.prop->getID() == TCAM_PROPERTY_BINNING)
-            {
-                return true;
-            }
-            return false;
-        };
-
-    auto bin_ptr = std::find_if(property_handler->special_properties.begin(),
-                                property_handler->special_properties.end(),
-                                find_binning);
-
-    if (bin_ptr == property_handler->special_properties.end())
-    {
-        // do nothing; binning will be ignored
-    }
-    else
-    {
-        ((PropertyInteger&)*((*bin_ptr).prop)).setValue(new_format.getBinning());
-    }
-
     /* validation */
 
     determine_active_video_format();
@@ -606,40 +582,11 @@ void V4l2Device::index_formats ()
             desc.fourcc = FOURCC_Y800;
         }
 
+        VideoFormatDescription format(desc, rf);
+        available_videoformats.push_back(format);
 
-        std::vector<int> binnings;
-
-        binnings.push_back(1); // default value; binning disabled
-
-        auto binning_desc = std::find_if(property_handler->special_properties.begin(),
-                                         property_handler->special_properties.end(),
-                                         [] (const property_description& d)
-                                         {
-                                             if (d.prop->getID() == TCAM_PROPERTY_BINNING)
-                                                 return true;
-                                             return false;
-                                         });
-
-        if (binning_desc != property_handler->special_properties.end())
-        {
-
-            auto bp = (PropertyInteger&) *(binning_desc->prop);
-
-            for (auto i = bp.getMin(); i <= bp.getMax(); i += bp.getStep())
-            {
-                if (i % 2 == 0)
-                    binnings.push_back(i);
-            }
-
-        }
-
-        for (const auto& b : binnings)
-        {
-            desc.binning = b;
-
-            VideoFormatDescription format(desc, rf);
-            available_videoformats.push_back(format);
-        }
+        tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.getFourcc()));
+        // }
     }
 
 }
@@ -724,26 +671,6 @@ void V4l2Device::determine_active_video_format ()
 
     format.width = fmt.fmt.pix.width;
     format.height = fmt.fmt.pix.height;
-
-    auto find_binning = [] (const property_description& d)
-        {
-            if (d.prop->getID() == TCAM_PROPERTY_BINNING)
-            {
-                return true;
-            }
-            return false;
-        };
-
-    auto bin_ptr = std::find_if(property_handler->special_properties.begin(),
-                                property_handler->special_properties.end(),
-                                find_binning);
-
-    if (bin_ptr == property_handler->special_properties.end())
-        format.binning = 1;
-    else
-    {
-        format.binning = ((PropertyInteger&)*((*bin_ptr).prop)).getValue();
-    }
 
     format.framerate = getFramerate();
 

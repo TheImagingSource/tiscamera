@@ -42,7 +42,6 @@ bool VideoFormat::operator== (const VideoFormat& other) const
     return format.fourcc == other.format.fourcc
         && format.width == other.format.width
         && format.height == other.format.height
-        && format.binning == other.format.binning
         && compare_double(format.framerate, other.format.framerate);
 }
 
@@ -97,18 +96,6 @@ void VideoFormat::setSize (unsigned int width, unsigned int height)
 }
 
 
-unsigned int VideoFormat::getBinning () const
-{
-    return format.binning;
-}
-
-
-void VideoFormat::setBinning (const unsigned int binning)
-{
-    format.binning = binning;
-}
-
-
 std::string VideoFormat::toString () const
 {
     std::string s;
@@ -118,7 +105,6 @@ std::string VideoFormat::toString () const
     s += ",";
     s += "width="     + std::to_string(format.width)   + ",";
     s += "height="    + std::to_string(format.height)  + ",";
-    s += "binning="   + std::to_string(format.binning) + ",";
     s += "framerate=" + std::to_string(format.framerate);
 
     return s;
@@ -154,10 +140,6 @@ bool VideoFormat::fromString (const std::string& desc)
         else if (val[0].compare("height") == 0)
         {
             f.height = stoi(val[1]);
-        }
-        else if (val[0].compare("binning") == 0)
-        {
-            f.binning = stoi(val[1]);
         }
         else if (val[0].compare("framerate") == 0)
         {

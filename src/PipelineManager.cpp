@@ -517,7 +517,6 @@ bool PipelineManager::allocate_conversion_buffer ()
         b.format.fourcc = output_format.getFourcc();
         b.format.width = output_format.getSize().width;
         b.format.height = output_format.getSize().height;
-        b.format.binning = output_format.getBinning();
         b.format.framerate = output_format.getFramerate();
 
         this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));

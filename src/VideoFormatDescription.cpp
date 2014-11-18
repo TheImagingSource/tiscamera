@@ -118,7 +118,6 @@ VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
     f.fourcc = this->format.fourcc;
     f.width = width;
     f.height = height;
-    f.binning = this->format.binning;
     f.framerate = framerate;
 
     return VideoFormat(f);
@@ -130,11 +129,6 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
     auto desc = to_check.getFormatDescription();
 
     if (format.fourcc != desc.fourcc)
-    {
-        return false;
-    }
-
-    if (format.binning != desc.binning)
     {
         return false;
     }

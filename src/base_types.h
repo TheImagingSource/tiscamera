@@ -81,8 +81,6 @@ struct tcam_video_format_description
     tcam_image_size min_size;
     tcam_image_size max_size;
 
-    uint32_t binning;
-
     enum TCAM_FRAMERATE_TYPE framerate_type;
 };
 
@@ -97,8 +95,6 @@ struct tcam_video_format
 
     uint32_t width;
     uint32_t height;
-
-    uint32_t binning;
 
     double   framerate;
 };

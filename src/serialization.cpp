@@ -246,14 +246,6 @@ bool tcam::save_xml_description (const std::string& filename,
     TiXmlText* height_text = new TiXmlText( std::to_string(format.getSize().height) );
     size_height->LinkEndChild( height_text );
 
-
-    TiXmlElement* format_binning = new TiXmlElement( "binning" );
-    format_node->LinkEndChild( format_binning );
-
-    TiXmlText* binning_text =new TiXmlText( std::to_string(format.getBinning()) );
-    format_binning->LinkEndChild( binning_text );
-
-
     TiXmlElement* format_framerate = new TiXmlElement( "fps" );
     format_node->LinkEndChild( format_framerate );
 

@@ -43,10 +43,6 @@ public:
 
     void setSize (unsigned int width, unsigned int height);
 
-    unsigned int getBinning () const;
-
-    void setBinning (unsigned int binning);
-
     std::string toString () const;
 
     bool fromString (const std::string&);

@@ -199,9 +199,6 @@ bool AravisDevice::setVideoFormat (const VideoFormat& new_format)
 
     arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.getFourcc()));
 
-    // TODO: validity check
-    arv_camera_set_binning(this->arv_camera, new_format.getBinning(), new_format.getBinning());
-
     // TODO: auto center
 
     arv_camera_set_region(this->arv_camera, 0, 0, new_format.getSize().width, new_format.getSize().height);
@@ -876,20 +873,15 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             res_vec.push_back ( rf );
 
-            // we create a format for every binning value and store it seperately
-            for ( const auto & b : binning )
-            {
-                struct tcam_video_format_description d = desc;
+            struct tcam_video_format_description d = desc;
 
-                d.binning = b;
-                d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
-                d.min_size = min;
-                d.max_size = max;
+            d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
+            d.min_size = min;
+            d.max_size = max;
 
-                tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
+            tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
 
-                this->available_videoformats.push_back ( VideoFormatDescription ( d, res_vec ) );
-            }
+            this->available_videoformats.push_back ( VideoFormatDescription ( d, res_vec ) );
 
         }
     }
