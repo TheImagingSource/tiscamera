@@ -291,6 +291,13 @@ bool MainWindow::getActiveVideoFormat ()
         input_format.setFourcc(FOURCC_Y800);
     }
 
+    if (format_index > available_formats.size())
+    {
+        std::cerr << "Faulty format index(" << format_index << ") max is "
+                  << available_formats.size() << std::endl;
+        return false;
+    }
+
     VideoFormatDescription active_desc = available_formats.at(format_index);
     uint32_t f = active_desc.getFormatDescription().fourcc;
 
