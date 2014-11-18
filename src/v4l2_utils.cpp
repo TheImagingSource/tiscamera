@@ -283,12 +283,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
         cp.type = ctrl_m.type_to_use;
     }
 
-    uint32_t flags;
-    // simply copy existing flags
-    if (queryctrl->flags)
-    {
-        flags = convertV4L2flags(queryctrl->flags);
-    }
+    uint32_t flags = convertV4L2flags(queryctrl->flags);
 
     switch (type_to_use)
     {
