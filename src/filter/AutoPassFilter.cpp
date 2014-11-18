@@ -31,35 +31,35 @@ AutoPassPropertyHandler::AutoPassPropertyHandler ()
 
 bool AutoPassPropertyHandler::setProperty (const Property& prop)
 {
-    if (prop.getName().compare("Exposure Auto") == 0)
+    if (prop.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
     {
         prop_auto_exposure->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Gain Auto") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_GAIN_AUTO)
     {
         prop_auto_gain->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Iris Auto") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_IRIS_AUTO)
     {
         prop_auto_iris->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Whitebalance") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_WB)
     {
         prop_wb->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Whitebalance Auto") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_WB_AUTO)
     {
         prop_auto_wb->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Whitebalance Red") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_WB_RED)
     {
         prop_wb_r->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Whitebalance Green") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_WB_GREEN)
     {
         prop_wb_g->setStruct(prop.getStruct());
     }
-    else if (prop.getName().compare("Whitebalance Blue") == 0)
+    else if (prop.getID() == TCAM_PROPERTY_WB_BLUE)
     {
         prop_wb_b->setStruct(prop.getStruct());
     }
@@ -75,7 +75,45 @@ bool AutoPassPropertyHandler::setProperty (const Property& prop)
 
 bool AutoPassPropertyHandler::getProperty (Property& prop)
 {
-    return false;
+    if (prop.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
+    {
+        prop.setStruct(prop_auto_exposure->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_GAIN_AUTO)
+    {
+        prop.setStruct(prop_auto_gain->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_IRIS_AUTO)
+    {
+        prop.setStruct(prop_auto_iris->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_WB)
+    {
+        prop.setStruct(prop_wb->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_WB_AUTO)
+    {
+        prop.setStruct(prop_auto_wb->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_WB_RED)
+    {
+        prop.setStruct(prop_wb_r->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_WB_GREEN)
+    {
+        prop.setStruct(prop_wb_g->getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_WB_BLUE)
+    {
+        prop.setStruct(prop_wb_b->getStruct());
+    }
+    else
+    {
+        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl");
+        return false;
+    }
+    tcam_log(TCAM_LOG_DEBUG, "Updated value for %s", prop.getName().c_str());
+    return true;
 }
 
 
