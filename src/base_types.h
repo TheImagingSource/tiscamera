@@ -77,8 +77,8 @@ struct tcam_video_format_description
     uint32_t fourcc;
     char description [256];
 
-    tcam_image_size min_size;
-    tcam_image_size max_size;
+    struct tcam_image_size min_size;
+    struct tcam_image_size max_size;
 
     enum TCAM_FRAMERATE_TYPE framerate_type;
 };
@@ -225,7 +225,7 @@ struct tcam_value_bool
  */
 struct tcam_camera_property
 {
-    TCAM_PROPERTY_ID id;
+    enum TCAM_PROPERTY_ID id;
     char name [32];              /* unique string identifier */
     enum TCAM_PROPERTY_TYPE type;     /* type identification */
 
