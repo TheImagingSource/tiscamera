@@ -8,9 +8,11 @@
 
 #include "base_types.h"
 #include "CaptureDevice.h"
+#include "Properties.h"
 #include "DeviceInfo.h"
 #include "DeviceIndex.h"
 #include "Error.h"
+#include "ImageSink.h"
 #include "serialization.h"
 
 #endif /* TCAM_H */
