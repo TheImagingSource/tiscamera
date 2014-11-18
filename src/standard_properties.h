@@ -10,6 +10,10 @@
 #include <vector>
 #include <cstring>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 /**
    This file contains the mapping between userspace properties and device properties.
    Alle devices will have to abide to this mapping.
@@ -265,5 +269,7 @@ inline tcam_camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
 }
 
 } /*namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* user_properties */

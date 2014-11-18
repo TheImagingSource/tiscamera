@@ -5,6 +5,7 @@
 #ifndef PIPELINEMANAGER_H_
 #define PIPELINEMANAGER_H_
 
+#include "compiler_defines.h"
 #include "base_types.h"
 #include "ImageSource.h"
 #include "ImageSink.h"
@@ -13,6 +14,8 @@
 #include "FilterLoader.h"
 
 #include <memory>
+
+VISIBILITY_INTERNAL
 
 namespace tcam
 {
@@ -142,5 +145,7 @@ private:
 };
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* PIPELINEMANAGER_H_ */

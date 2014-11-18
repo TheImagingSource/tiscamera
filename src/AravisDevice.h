@@ -8,6 +8,8 @@
 
 #include <arv.h>
 
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -100,5 +102,7 @@ private:
 }; /* class GigeCapture */
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* ARAVISDEVICE_H */

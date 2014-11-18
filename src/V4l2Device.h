@@ -12,6 +12,8 @@
 #include <memory>
 #include <thread>
 
+#pragma GCC visibility push (internal)
+
 namespace tcam
 {
 
@@ -163,5 +165,7 @@ private:
 };
 
 } /* namespace tcam */
+
+#pragma GCC visibility pop
 
 #endif /* V4L2DEVICE_H */

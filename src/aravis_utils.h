@@ -9,6 +9,10 @@
 
 #include "DeviceInfo.h"
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -20,5 +24,7 @@ std::shared_ptr<Property> createProperty (ArvCamera* camera,
 std::vector<DeviceInfo> get_aravis_device_list ();
 
 }; /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* ARAVIS_UTILS_H */

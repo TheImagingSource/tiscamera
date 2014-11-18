@@ -8,6 +8,10 @@
 
 #include <linux/videodev2.h>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -37,5 +41,7 @@ std::shared_ptr<Property> createProperty (int fd,
 std::vector<DeviceInfo> get_v4l2_device_list ();
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* V4L2_UTILS_H */

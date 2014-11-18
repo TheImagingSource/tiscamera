@@ -8,6 +8,8 @@
 #include <vector>
 #include <memory>
 
+#pragma GCC visibility push (internal)
+
 namespace tcam
 {
 
@@ -69,5 +71,7 @@ private:
 
 
 } /* namespace tcam */
+
+#pragma GCC visibility pop
 
 #endif /* PROPERTYHANDLER_H */

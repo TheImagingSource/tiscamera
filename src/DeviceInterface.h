@@ -18,6 +18,9 @@
 #include <vector>
 #include <memory>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
 
 namespace tcam
 {
@@ -101,5 +104,7 @@ public:
 std::shared_ptr<DeviceInterface> openDeviceInterface (const DeviceInfo& device);
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* CAPTUREINTERFACE_H_ */

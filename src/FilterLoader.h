@@ -11,6 +11,10 @@
 #include <vector>
 #include <memory>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -56,5 +60,7 @@ private:
 };
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* FILTERLOADER_H_ */

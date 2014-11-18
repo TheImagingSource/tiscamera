@@ -9,6 +9,10 @@
 #include <vector>
 #include <memory>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -134,5 +138,7 @@ bool compare_double (double val1, double val2);
 
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* UTILS_H */

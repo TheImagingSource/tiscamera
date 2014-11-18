@@ -8,6 +8,10 @@
 
 #include <vector>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -63,5 +67,8 @@ extern "C"
 
 }
 
-}
+} /* namespace tcam */
+
+VISIBILITY_POP
+
 #endif /* _BAYERRGBFILTER_H_ */

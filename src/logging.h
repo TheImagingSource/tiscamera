@@ -6,6 +6,9 @@
 #include <stdarg.h>             /* va_args */
 #include <string>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
 
 enum TCAM_LOG_TARGET
 {
@@ -119,5 +122,6 @@ void tcam_logging (const char* module,
 
 #define tcam__log(module, level, message, ...) (tcam_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
+VISIBILITY_POP
 
 #endif /* LOGGING_H */

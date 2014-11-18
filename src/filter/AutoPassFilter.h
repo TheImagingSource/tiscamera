@@ -6,6 +6,10 @@
 
 #include <FilterBase.h>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 // forward declaration
 class AutoPassFilter;
 
@@ -109,5 +113,7 @@ extern "C"
     void close (FB*);
 
 }
+
+VISIBILITY_POP
 
 #endif /* AUTOPASSFILTER_H_ */

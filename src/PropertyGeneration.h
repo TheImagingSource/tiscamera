@@ -9,6 +9,10 @@
 
 #include <memory>
 
+#include "compiler_defines.h"
+
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -35,5 +39,7 @@ bool handle_auto_center (const Property& new_property,
                          const tcam_image_size& current_format);
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* PROPERTYGENERATION_H_ */
