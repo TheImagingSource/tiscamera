@@ -1,7 +1,7 @@
 
 #include "PipelineManager.h"
 
-#include "logging.h"
+#include "internal.h"
 
 #include "Error.h"
 
@@ -509,7 +509,7 @@ bool PipelineManager::allocate_conversion_buffer ()
     for (int i = 0; i < 5; ++i)
     {
         tcam_image_buffer b = {};
-        b.pitch = output_format.getSize().width * img::getBitsPerPixel(output_format.getFourcc()) / 8;
+        b.pitch = output_format.getSize().width * img::get_bits_per_pixel(output_format.getFourcc()) / 8;
         b.length = b.pitch * output_format.getSize().height;
 
         b.pData = (unsigned char*)malloc(b.length);

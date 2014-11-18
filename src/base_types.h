@@ -10,11 +10,10 @@ This file contains basic c types that are used for:
 #ifndef BASE_TYPES_H_
 #define BASE_TYPES_H_
 
-#include "image_transform_base.h"
-
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "image_fourcc.h"
 
 /**
 * @name TCAM_PIPELINE_STATUS

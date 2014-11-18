@@ -1,7 +1,7 @@
 
 #include "utils.h"
 
-#include "logging.h"
+#include "internal.h"
 
 #include <algorithm>
 #include <cstring>
@@ -236,7 +236,7 @@ uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint3
         return 0;
     }
 
-    uint64_t size = width * height * (img::getBitsPerPixel(fourcc) / 8);
+    uint64_t size = width * height * (img::get_bits_per_pixel(fourcc) / 8);
 
     return size;
 }
@@ -249,7 +249,7 @@ uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
         return 0;
     }
 
-    return width * (img::getBitsPerPixel(fourcc) / 8);
+    return width * (img::get_bits_per_pixel(fourcc) / 8);
 }
 
 

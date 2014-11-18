@@ -5,7 +5,8 @@
 #include "AravisDevice.h"
 
 #include "aravis_utils.h"
-#include "logging.h"
+
+#include "internal.h"
 #include "utils.h"
 
 #include <algorithm>
@@ -380,7 +381,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             size_t size = 0;
             desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
             desc.length = size;
-            desc.pitch = desc.format.width * img::getBitsPerPixel(desc.format.fourcc) / 8;
+            desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
 
             if (desc.pData == NULL)
             {
