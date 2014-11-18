@@ -71,28 +71,10 @@ bool PropertyHandler::setProperty (const Property& p)
 
             prop.internal_property->setProperty(p);
             prop.external_property->setStruct(p.getStruct());
+            handle_flags(prop.external_property);
         }
     }
 
-    if (p.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
-    {
-        auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
-        bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
-        if (vla)
-        {
-            auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
-            auto s = pe->getStruct();
-            s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-            pe->setStruct(s);
-        }
-        else
-        {
-            auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
-            auto s = pe->getStruct();
-            s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-            pe->setStruct(s);
-        }
-    }
     return false;
 }
 
@@ -213,11 +195,9 @@ void PropertyHandler::generate_properties ()
 
         if (new_p != nullptr)
         {
-            handle_flags(new_p);
-
-
             external_properties.push_back(new_p);
             properties.push_back({new_p, p});
+            handle_flags(new_p);
         }
     }
 
@@ -247,6 +227,26 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
             }
             break;
         }
+        case TCAM_PROPERTY_EXPOSURE_AUTO:
+        {
+            auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
+            bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
+            if (vla)
+            {
+                auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
+                auto s = pe->getStruct();
+                s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
+                pe->setStruct(s);
+            }
+            else
+            {
+                auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
+                auto s = pe->getStruct();
+                s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
+                pe->setStruct(s);
+            }
+            break;
+        }
         case TCAM_PROPERTY_GAIN:
         {
             auto prop = find_mapping_internal(TCAM_PROPERTY_GAIN_AUTO);
@@ -263,6 +263,26 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
                 }
             }
 
+            break;
+        }
+        case TCAM_PROPERTY_GAIN_AUTO:
+        {
+            auto pea = find_property(emulated_properties, TCAM_PROPERTY_GAIN_AUTO);
+            bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
+            if (vla)
+            {
+                auto pe = find_property(external_properties, TCAM_PROPERTY_GAIN);
+                auto s = pe->getStruct();
+                s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
+                pe->setStruct(s);
+            }
+            else
+            {
+                auto pe = find_property(external_properties, TCAM_PROPERTY_GAIN);
+                auto s = pe->getStruct();
+                s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
+                pe->setStruct(s);
+            }
             break;
         }
         default:
