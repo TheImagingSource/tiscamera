@@ -50,6 +50,10 @@ if (BUILD_TOOLS)
   add_subdirectory(tools)
 endif (BUILD_TOOLS)
 
+if (BUILD_DOC)
+  add_subdirectory(doc)
+endif (BUILD_DOC)
+
 # Give overview over build configuration
 
 MESSAGE(STATUS "")
@@ -61,4 +65,3 @@ MESSAGE(STATUS "Support for USB cameras:       " ${BUILD_USB})
 MESSAGE(STATUS "Support for firewire devices:  " ${BUILD_FIREWIRE})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "")
-
