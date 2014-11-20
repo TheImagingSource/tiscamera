@@ -433,7 +433,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
 
     tcam_camera_property prop_wbr = {};
-    prop.id = TCAM_PROPERTY_WB_RED;
+    prop_wbr.id = TCAM_PROPERTY_WB_RED;
     strncpy(prop_wbr.name, "Whitebalance Red", sizeof(prop.name));
     prop_wbr.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbr.value.i.min = 0;
@@ -444,7 +444,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
 
     tcam_camera_property prop_wbg = {};
-    prop.id = TCAM_PROPERTY_WB_GREEN;
+    prop_wbg.id = TCAM_PROPERTY_WB_GREEN;
     strncpy(prop_wbg.name, "Whitebalance Green", sizeof(prop_wbg.name));
     prop_wbg.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbg.value.i.min = 0;
@@ -455,7 +455,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
 
     tcam_camera_property prop_wbb = {};
-    prop.id = TCAM_PROPERTY_WB_BLUE;
+    prop_wbb.id = TCAM_PROPERTY_WB_BLUE;
     strncpy(prop_wbb.name, "Whitebalance Blue", sizeof(prop_wbb.name));
     prop_wbb.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbb.value.i.min = 0;
