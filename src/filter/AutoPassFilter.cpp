@@ -121,6 +121,9 @@ AutoPassFilter::AutoPassFilter ()
     : valid(false),
       skipped_buffer(0),
       current_status(TCAM_PIPELINE_UNDEFINED),
+      wb_r(64),
+      wb_g(64),
+      wb_b(64),
       exposure_max(0)
 {
     description.name = "AutoPass";
@@ -135,6 +138,9 @@ void AutoPassFilter::reset ()
 {
     params = {};
     state = {};
+    wb_r = 64;
+    wb_g = 64;
+    wb_b = 64;
 
     handler = std::make_shared<AutoPassPropertyHandler>();
 }
