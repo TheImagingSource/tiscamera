@@ -200,10 +200,21 @@ void AutoPassFilter::update_params ()
 
     if (handler->prop_auto_wb != nullptr)
     {
-        params.wb.r = 64;
-        params.wb.g = 64;
-        params.wb.b = 64;
-        params.wb.auto_enabled = handler->prop_auto_wb->getValue();
+        // use default values if disabled
+        if (((PropertyBoolean&)*(handler->prop_auto_wb)).getValue())
+        {
+            params.wb.r = wb_r;
+            params.wb.g = wb_g;
+            params.wb.b = wb_b;
+        }
+        else
+        {
+            params.wb.r = ((PropertyBoolean&)*(handler->prop_wb_r)).getValue();
+            params.wb.g = ((PropertyBoolean&)*(handler->prop_wb_g)).getValue();
+            params.wb.b = ((PropertyBoolean&)*(handler->prop_wb_b)).getValue();
+        }
+
+        params.wb.auto_enabled = handler->prop_wb->getValue();
         params.wb.one_push_enabled = false;
         params.wb.is_software_applied_wb = true;
         params.wb.temperature_mode = true;
@@ -245,9 +256,12 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
         }
         else
         {
-            wb_r = handler->prop_wb_r->getValue();
-            wb_g = handler->prop_wb_g->getValue();
-            wb_b = handler->prop_wb_b->getValue();
+            res.wb_r = handler->prop_wb_r->getValue();
+            res.wb_g = handler->prop_wb_g->getValue();
+            res.wb_b = handler->prop_wb_b->getValue();
+            wb_r = res.wb_r;
+            wb_g = res.wb_g;
+            wb_b = res.wb_b;
         }
 
         if (params.exposure.do_auto == true)
