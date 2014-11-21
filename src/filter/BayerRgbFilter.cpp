@@ -4,6 +4,7 @@
 
 #include <by8/by8torgb_conv.h>
 #include <dutils_header.h>
+#include "logging.h"
 
 #include <type_traits>
 #include <algorithm>
@@ -107,8 +108,10 @@ bool BayerRgbFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& o
         return false;
     }
 
-    std::cout << "OUTPUT FOURCC IS : " << output_format.getFourcc() << std::endl;
-
+    tcam_log(TCAM_LOG_DEBUG,
+             "BayerRgb in:'%s' != out:'%s'",
+             input_format.toString().c_str(),
+             output_format.toString().c_str());
 
     return true;
 }

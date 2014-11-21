@@ -65,7 +65,7 @@ bool AutoPassPropertyHandler::setProperty (const Property& prop)
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl");
+        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl: %s(%d)", prop.getName().c_str(), prop.getID());
         return false;
     }
     tcam_log(TCAM_LOG_DEBUG, "Received change from %s", prop.getName().c_str());
