@@ -15,6 +15,8 @@
 
 #include <tcam.h>
 
+using namespace tcam;
+
 namespace Ui {
 class MainWindow;
 }

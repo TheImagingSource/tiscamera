@@ -7,6 +7,8 @@
 
 #include <thread>
 
+using namespace tcam;
+
 namespace Ui {
 class DeviceInfoSelectionDialog;
 }
