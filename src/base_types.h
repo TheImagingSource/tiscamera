@@ -219,6 +219,26 @@ struct tcam_value_bool
     bool default_value;
 };
 
+
+enum TCAM_PROPERTY_CATEGORY
+{
+    TCAM_PROPERTY_CATEGORY_UNKNOWN = 0,
+    TCAM_PROPERTY_CATEGORY_EXPOSURE,
+    TCAM_PROPERTY_CATEGORY_COLOR,
+    TCAM_PROPERTY_CATEGORY_LENS,
+    TCAM_PROPERTY_CATEGORY_SPECIAL,
+    TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN,
+    TCAM_PROPERTY_CATEGORY_IMAGE,
+};
+
+
+struct tcam_property_group
+{
+    enum TCAM_PROPERTY_CATEGORY property_category;
+    enum TCAM_PROPERTY_ID       property_group;
+};
+
+
 /**
  * @struct tcam_camera_property
  * @brief unified property description
@@ -228,6 +248,8 @@ struct tcam_camera_property
     enum TCAM_PROPERTY_ID id;
     char name [32];              /* unique string identifier */
     enum TCAM_PROPERTY_TYPE type;     /* type identification */
+
+    struct tcam_property_group group;
 
     union
     {
