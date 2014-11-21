@@ -82,6 +82,8 @@ private:
 
     unsigned int calculate_exposure_max ();
 
+    static const unsigned char default_color_value = 64;
+
     // general
     bool valid;
     unsigned int skipped_buffer;

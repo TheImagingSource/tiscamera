@@ -121,9 +121,9 @@ AutoPassFilter::AutoPassFilter ()
     : valid(false),
       skipped_buffer(0),
       current_status(TCAM_PIPELINE_UNDEFINED),
-      wb_r(64),
-      wb_g(64),
-      wb_b(64),
+      wb_r(default_color_value),
+      wb_g(default_color_value),
+      wb_b(default_color_value),
       exposure_max(0)
 {
     description.name = "AutoPass";
@@ -138,9 +138,9 @@ void AutoPassFilter::reset ()
 {
     params = {};
     state = {};
-    wb_r = 64;
-    wb_g = 64;
-    wb_b = 64;
+    wb_r = default_color_value;
+    wb_g = default_color_value;
+    wb_b = default_color_value;
 
     handler = std::make_shared<AutoPassPropertyHandler>();
 }
@@ -458,8 +458,8 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbr.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbr.value.i.min = 0;
     prop_wbr.value.i.max = 255;
-    prop_wbr.value.i.value = 60;
-    prop_wbr.value.i.default_value = 60;
+    prop_wbr.value.i.value = default_color_value;
+    prop_wbr.value.i.default_value = default_color_value;
     prop_wbr.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
 
@@ -469,8 +469,8 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbg.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbg.value.i.min = 0;
     prop_wbg.value.i.max = 255;
-    prop_wbg.value.i.value = 60;
-    prop_wbg.value.i.default_value = 60;
+    prop_wbg.value.i.value = default_color_value;
+    prop_wbg.value.i.default_value = default_color_value;
     prop_wbg.flags = set_bit(prop_wbg.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
 
@@ -480,15 +480,15 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbb.type = TCAM_PROPERTY_TYPE_INTEGER;
     prop_wbb.value.i.min = 0;
     prop_wbb.value.i.max = 255;
-    prop_wbb.value.i.value = 60;
-    prop_wbb.value.i.default_value = 60;
+    prop_wbb.value.i.value = default_color_value;
+    prop_wbb.value.i.default_value = default_color_value;
     prop_wbb.flags = set_bit(prop_wbb.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_b= std::make_shared<PropertyInteger>(handler, prop_wbb, Property::INTEGER);
 
 
-    params.wb.r = 60;
-    params.wb.g = 60;
-    params.wb.b = 60;
+    params.wb.r = default_color_value;
+    params.wb.g = default_color_value;
+    params.wb.b = default_color_value;
     params.wb.auto_enabled = true;
     params.wb.one_push_enabled = false;
     params.wb.is_software_applied_wb = true;
