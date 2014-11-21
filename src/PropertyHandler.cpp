@@ -302,6 +302,6 @@ void PropertyHandler::set_property_flag (std::shared_ptr<Property>& p, TCAM_PROP
 void PropertyHandler::unset_property_flag (std::shared_ptr<Property>& p, TCAM_PROPERTY_FLAGS flag)
 {
     auto s = p->getStruct();
-    s.flags = set_bit(s.flags, flag);
+    s.flags = unset_bit(s.flags, flag);
     p->setStruct(s);
 }
