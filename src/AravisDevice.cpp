@@ -718,17 +718,10 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
                         // this is the denominator of our framerate
                         uint64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-
-                        // std::cout << "FPS entry: "
-                        // << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
-                        // << " - "
-                        // << (uint32_t)val << "" << std::endl;
-
-                        double f = (double)1 / (uint32_t)val;
+                        double f = 1.0 / (uint32_t)val * 10000000;
 
                         fps.push_back(f);
                     }
-
                 }
             }
         }
