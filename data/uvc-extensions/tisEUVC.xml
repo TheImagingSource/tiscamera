@@ -102,6 +102,10 @@
       <id>V4L2_CID_SKIP</id>
       <value>0x00980929</value>
     </constant>
+    <constant type="integer">
+      <id>V4L2_CID_GLOBAL_RESET_SHUTTER</id>
+      <value>0x00980930</value>
+    </constant>
 
   </constants>
 
@@ -296,6 +300,19 @@
       <v4l2>
 	<id>V4L2_CID_TRIGGER</id>
 	<v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Global Reset Shutter</name>
+      <uvc>
+	    <control_ref idref="trigger"/>
+	    <size>1</size>
+	    <offset>1</offset>
+	    <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	    <id>V4L2_CID_GLOBAL_RESET_SHUTTER</id>
+	    <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
     <mapping>
