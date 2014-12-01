@@ -15,8 +15,29 @@
 
 using namespace tcam;
 
+
+AravisDevice::AravisPropertyHandler::AravisPropertyHandler (AravisDevice* dev)
+    : device(dev)
+{}
+
+
+bool AravisDevice::AravisPropertyHandler::getProperty (Property& p)
+{
+    return device->getProperty(p);
+
+    return false;
+}
+
+
+bool AravisDevice::AravisPropertyHandler::setProperty (const Property& p)
+{
+    return device->setProperty(p);
+    return false;
+}
+
+
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
-    : device(device_desc), current_buffer(0), stream(NULL)
+    : device(device_desc), handler(nullptr), current_buffer(0), stream(NULL)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
 
@@ -30,6 +51,9 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
+    handler = std::make_shared<AravisPropertyHandler>(this);
+
+    index_genicam();
     determine_active_video_format();
 }
 
@@ -52,13 +76,9 @@ DeviceInfo AravisDevice::getDeviceDescription () const
 
 std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
 {
-    if (this->properties.empty())
-    {
-        index_genicam();
-    }
     std::vector<std::shared_ptr<Property>> vec;
 
-    for (auto& p : properties)
+    for (auto& p : handler->properties)
     {
         vec.push_back(p.prop);
     }
@@ -75,9 +95,9 @@ bool AravisDevice::setProperty (const Property& p)
             return p.getName().compare(m.prop->getName()) == 0;
         };
 
-    auto pm = std::find_if(properties.begin(), properties.end(), f);
+    auto pm = std::find_if(handler->properties.begin(), handler->properties.end(), f);
 
-    if (pm == properties.end())
+    if (pm == handler->properties.end())
     {
         return false;
     }
@@ -588,6 +608,7 @@ void AravisDevice::index_genicam ()
     {
         return;
     }
+    genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
 
     iterate_genicam("Root");
     index_genicam_format(NULL);
@@ -597,7 +618,6 @@ void AravisDevice::index_genicam ()
 void AravisDevice::iterate_genicam (const char* feature)
 {
 
-    ArvGc* genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
 
     ArvGcNode* node = arv_gc_get_node (genicam, feature);
 
@@ -620,59 +640,56 @@ void AravisDevice::iterate_genicam (const char* feature)
             return;
         }
 
-// TODO: how to handle private settings
-        std::vector<std::string> private_settings = { "TLParamsLocked",
-                                                      "GevSCPSDoNotFragment",
-                                                      "GevTimestampTickFrequency",
-                                                      "GevTimeSCPD",
-                                                      "GevSCPD",
-                                                      "PayloadSize",
-                                                      "PayloadPerFrame",
-                                                      "PayloadPerPacket",
-                                                      "TotalPacketSize",
-                                                      "PacketsPerFrame",
-                                                      "PacketTimeUS",
-                                                      "GevSCPSPacketSize",
-                                                      "GevSCPSFireTestPacket"};
+        // TODO: how to handle private settings
+        static std::vector<std::string> private_settings = { "TLParamsLocked",
+                                                             "GevSCPSDoNotFragment",
+                                                             "GevTimestampTickFrequency",
+                                                             "GevTimeSCPD",
+                                                             "GevSCPD",
+                                                             "PayloadSize",
+                                                             "PayloadPerFrame",
+                                                             "PayloadPerPacket",
+                                                             "TotalPacketSize",
+                                                             "PacketsPerFrame",
+                                                             "PacketTimeUS",
+                                                             "GevSCPSPacketSize",
+                                                             "GevSCPSFireTestPacket"};
 
-        std::vector<std::string> format_member = { "AcquisitionStart",
-                                                   "AcquisitionStop",
-                                                   "AcquisitionMode",
-                                                   "Binning",
-                                                   "SensorWidth",
-                                                   "SensorHeight",
-                                                   "Width",
-                                                   "Height",
-                                                   "FPS",
-                                                   "PixelFormat"};
+        static std::vector<std::string> format_member = { "AcquisitionStart",
+                                                          "AcquisitionStop",
+                                                          "AcquisitionMode",
+                                                          // "Binning",
+                                                          "SensorWidth",
+                                                          "SensorHeight",
+                                                          "Width",
+                                                          "Height",
+                                                          "FPS",
+                                                          "PixelFormat"};
+        property_mapping m;
+
+        m.arv_ident = feature;
+        m.prop = createProperty(arv_camera, node, handler);
+
+        if (m.prop == nullptr)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+            return;
+        }
+
 
         if (std::find(private_settings.begin(), private_settings.end(), feature) != private_settings.end())
         {
             // TODO: implement handling
         }
         // is part of the format description
+        else if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
+        {
+            // index_genicam_format(camera, node, frmt_mapping);
+            this->format_nodes.push_back(node);
+        }
         else
         {
-            if (std::find(format_member.begin(), format_member.end(), feature) != format_member.end())
-            {
-                // index_genicam_format(camera, node, frmt_mapping);
-                this->format_nodes.push_back(node);
-            }
-            else
-            {
-                property_mapping m;
-
-                m.arv_ident = feature;
-                m.prop = createProperty(arv_camera, node, shared_from_this());
-
-                if (m.prop == nullptr)
-                {
-                    tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
-                    return;
-                }
-
-                properties.push_back(m);
-            }
+            handler->properties.push_back(m);
         }
     }
 }

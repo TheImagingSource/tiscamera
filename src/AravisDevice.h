@@ -13,8 +13,30 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-class AravisDevice : public DeviceInterface, public std::enable_shared_from_this<AravisDevice>
+class AravisDevice : public DeviceInterface
 {
+    struct property_mapping
+    {
+        std::shared_ptr<Property> prop;
+        std::string arv_ident;
+    };
+
+    class AravisPropertyHandler : public PropertyImpl
+    {
+        friend class AravisDevice;
+    public:
+        AravisPropertyHandler (AravisDevice*);
+
+        bool getProperty (Property&);
+        bool setProperty (const Property&);
+
+    protected:
+        std::vector<property_mapping> properties;
+        std::vector<property_mapping> special_properties;
+
+
+        AravisDevice* device;
+    };
 
 public:
 
@@ -53,11 +75,14 @@ private:
 
     DeviceInfo device;
 
+    std::shared_ptr<AravisPropertyHandler> handler;
+
     ArvCamera* arv_camera;
 
     std::shared_ptr<SinkInterface> external_sink;
 
     ArvStream* stream;
+    ArvGc* genicam;
 
     std::vector<std::shared_ptr<MemoryBuffer>> buffers;
     unsigned int current_buffer;
@@ -73,14 +98,6 @@ private:
     // these options are used to define aravis behaviour
     // they are generally set to assure well defined interaction
     struct aravis_options arv_options;
-
-    struct property_mapping
-    {
-        std::shared_ptr<Property> prop;
-        std::string arv_ident;
-    };
-
-    std::vector<property_mapping> properties;
 
     VideoFormat active_video_format;
 
