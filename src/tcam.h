@@ -9,6 +9,7 @@
 #include "base_types.h"
 #include "CaptureDevice.h"
 #include "Properties.h"
+#include "MemoryBuffer.h"
 #include "DeviceInfo.h"
 #include "DeviceIndex.h"
 #include "Error.h"
