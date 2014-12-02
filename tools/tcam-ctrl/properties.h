@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 
+using namespace tcam;
 
 /**
  * @brief print function for properties
