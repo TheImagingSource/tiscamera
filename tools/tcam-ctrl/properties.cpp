@@ -75,16 +75,33 @@ void print_properties (const std::vector<Property>& properties)
 }
 
 
+static std::vector<std::string> ctrl_split_string (const std::string& to_split,
+                                                   const std::string &delim)
+{
+    std::vector<std::string> vec;
+
+    size_t beg = 0;
+    size_t end = 0;
+
+    while (end != std::string::npos)
+    {
+        end = to_split.find_first_of(delim, beg);
+
+        std::string s = to_split.substr(beg, end - beg);
+
+        vec.push_back(s);
+
+        beg = end + delim.size();
+    }
+
+    return vec;
+}
+
+
 bool set_property (CaptureDevice& g, const std::string& new_prop)
 {
 
-    if (!g.isDeviceOpen())
-    {
-        std::cout << "An open device is required for setting properties!"<< std::endl;
-        return false;
-    }
-
-    std::vector<std::string> prop_vec = tcam::split_string(new_prop, "=");
+    std::vector<std::string> prop_vec = ctrl_split_string(new_prop, "=");
 
     if (prop_vec.size() != 2)
     {
@@ -118,8 +135,6 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
                 case TCAM_PROPERTY_TYPE_STRING_TABLE:
                 {
                     PropertyStringMap& prop_m = (PropertyStringMap&) p;
-
-                    //prop_m.getValues();
 
                     return prop_m.setValue(value);
                 }
