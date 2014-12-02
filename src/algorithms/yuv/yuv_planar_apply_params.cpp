@@ -5,8 +5,6 @@
 
 #include "../sse_helper/sse_utils.h"
 
-#include <emmintrin.h>
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "../img/cpu_features.h"

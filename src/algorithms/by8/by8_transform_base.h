@@ -8,8 +8,6 @@
 
 #include "by8_base.h"
 
-#include <emmintrin.h>              // sse2 intrinsic header, needed for __m128i
-
 #pragma warning ( disable : 4127 ) // conditional expression is constant
 
 //#define BY8_NORGB24_SUPPORT       // currently not working switch
@@ -68,14 +66,10 @@ namespace by8_transform
 			};
             struct
             {
-                int32_t 
+                int32_t
                     r_rfac_epi32[4], r_gfac_epi32[4], r_bfac_epi32[4],
                     g_rfac_epi32[4], g_gfac_epi32[4], g_bfac_epi32[4],
                     b_rfac_epi32[4], b_gfac_epi32[4], b_bfac_epi32[4];
-            };
-            struct
-            {
-                __m128i	clr_fac[9];
             };
         };
 
@@ -88,10 +82,6 @@ namespace by8_transform
                     g_rfac_float[4], g_gfac_float[4], g_bfac_float[4],
                     b_rfac_float[4], b_gfac_float[4], b_bfac_float[4];
             };
-            struct
-            {
-                __m128	clr_fac_float[9];
-            };
         };
 
 		int		plane_offset;
@@ -102,7 +92,7 @@ namespace by8_transform
 		unsigned int		alg_options;	// AlgOptions
 	};
 
-struct by8_add_packet 
+struct by8_add_packet
 {
 	byte*	pPreFirstLine;	// == 0 => pPreFirstLine = pLines - pitch
 	byte*	pLines;			// start of the lines to convert. if pPreFirstLine == 0 => pLines - pitch is touched to get the prev line
@@ -113,7 +103,7 @@ struct by8_add_packet
 	unsigned int	pitch;		// the pitch of the lines in this packet. pitch must be >= the pixel count of the destination buffer
 };
 
-struct line_data 
+struct line_data
 {
 	byte*			pPrevLine;
 	byte*			pCurLine;

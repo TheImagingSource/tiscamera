@@ -6,8 +6,6 @@
 
 #include "../sse_helper/sse_utils.h"
 
-#include <emmintrin.h>
-
 #pragma warning ( disable : 4127 )	// warning C4127: conditional expression is constant
 
 using namespace sse_utils;
