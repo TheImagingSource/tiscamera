@@ -9,12 +9,12 @@ if (BUILD_GST_1_0)
 endif (BUILD_GST_1_0)
 
 
+add_subdirectory(algorithms)
+include_directories("${PROJECT_SOURCE_DIR}/src/algorithms")
+
 # If you really want to set additional options from outside CMakeLists.txt you
 # can do this:
 # add_defintions($ENV{CFLAGS})
-
-include_directories(/home/edt/include)
-include_directories(/home/edt/work/drvbuildtools/trunk/lib/dutils_image/)
 
 find_package(TinyXML REQUIRED)
 include_directories(${TinyXML_INCLUDE_DIR})
@@ -98,7 +98,7 @@ if (BUILD_ARAVIS)
 endif (BUILD_ARAVIS)
 
 
-target_link_libraries(tcam "-L/home/edt/lib -ltis_auto_alg")
+target_link_libraries(tcam tcam_algorithms)
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)
