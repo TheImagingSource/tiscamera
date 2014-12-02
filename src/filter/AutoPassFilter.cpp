@@ -448,10 +448,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
 
 
-    tcam_camera_property prop_auto = {};
-    prop.id = TCAM_PROPERTY_WB_AUTO;
-    strncpy(prop_auto.name, "Whitebalance Auto", sizeof(prop_auto.name));
-    prop_auto.type = TCAM_PROPERTY_TYPE_BOOLEAN;
+    tcam_camera_property prop_auto = create_empty_property(TCAM_PROPERTY_WB_AUTO);
     prop_auto.value.b.value = true;
     prop_auto.value.b.default_value = true;
     prop_auto.flags = set_bit(prop_auto.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
@@ -459,10 +456,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     handler->prop_auto_wb = std::make_shared<PropertyBoolean>(handler, prop_auto, Property::BOOLEAN);
 
 
-    tcam_camera_property prop_wbr = {};
-    prop_wbr.id = TCAM_PROPERTY_WB_RED;
-    strncpy(prop_wbr.name, "Whitebalance Red", sizeof(prop.name));
-    prop_wbr.type = TCAM_PROPERTY_TYPE_INTEGER;
+    tcam_camera_property prop_wbr = create_empty_property(TCAM_PROPERTY_WB_RED);
     prop_wbr.value.i.min = 0;
     prop_wbr.value.i.max = 255;
     prop_wbr.value.i.value = default_color_value;
@@ -470,10 +464,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbr.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_r = std::make_shared<PropertyInteger>(handler, prop_wbr, Property::INTEGER);
 
-    tcam_camera_property prop_wbg = {};
-    prop_wbg.id = TCAM_PROPERTY_WB_GREEN;
-    strncpy(prop_wbg.name, "Whitebalance Green", sizeof(prop_wbg.name));
-    prop_wbg.type = TCAM_PROPERTY_TYPE_INTEGER;
+    tcam_camera_property prop_wbg = create_empty_property(TCAM_PROPERTY_WB_GREEN);
     prop_wbg.value.i.min = 0;
     prop_wbg.value.i.max = 255;
     prop_wbg.value.i.value = default_color_value;
@@ -481,10 +472,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     prop_wbg.flags = set_bit(prop_wbg.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
     handler->prop_wb_g= std::make_shared<PropertyInteger>(handler, prop_wbg, Property::INTEGER);
 
-    tcam_camera_property prop_wbb = {};
-    prop_wbb.id = TCAM_PROPERTY_WB_BLUE;
-    strncpy(prop_wbb.name, "Whitebalance Blue", sizeof(prop_wbb.name));
-    prop_wbb.type = TCAM_PROPERTY_TYPE_INTEGER;
+    tcam_camera_property prop_wbb = create_empty_property(TCAM_PROPERTY_WB_BLUE);
     prop_wbb.value.i.min = 0;
     prop_wbb.value.i.max = 255;
     prop_wbb.value.i.value = default_color_value;
