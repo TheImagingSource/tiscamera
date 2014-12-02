@@ -3,7 +3,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 --verbose -fPIC -flto")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -flto")
 
 set( TCAM_ALG_BACKEND_SRC
   auto_alg/auto_alg.cpp
