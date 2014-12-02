@@ -37,10 +37,10 @@
   <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>350</width>
-     <height>40</height>
+     <x>2</x>
+     <y>1</y>
+     <width>346</width>
+     <height>38</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -50,9 +50,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>0</y>
+      <y>4</y>
       <width>140</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
    </widget>
@@ -60,9 +60,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>0</y>
+      <y>4</y>
       <width>140</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="text">
@@ -73,9 +73,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>0</y>
+      <y>4</y>
       <width>140</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="orientation">
@@ -89,9 +89,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>0</y>
+      <y>4</y>
       <width>150</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -111,9 +111,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>0</y>
+      <y>4</y>
       <width>140</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -130,21 +130,21 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>0</y>
-      <width>50</width>
-      <height>40</height>
+      <y>4</y>
+      <width>40</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="sizePolicy">
-     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+     <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
     <property name="minimumSize">
      <size>
-      <width>50</width>
-      <height>40</height>
+      <width>40</width>
+      <height>30</height>
      </size>
     </property>
     <property name="text">

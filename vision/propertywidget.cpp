@@ -97,6 +97,8 @@ void PropertyWidget::on_pushButton_clicked ()
     PropertyButton& b = (PropertyButton&) property;
 
     b.activate();
+
+    emit changed(this);
 }
 
 
@@ -134,10 +136,12 @@ void PropertyWidget::redraw ()
         if (prop_int.isReadOnly())
         {
             ui->horizontalSlider->setDisabled(true);
+            setStyleSheet("background-color:grey;");
         }
         else
         {
             ui->horizontalSlider->setDisabled(false);
+            setStyleSheet("background-color:white;");
         }
         //ui->horizontalSlider->setEnabled (false);
         //setStyleSheet("background-color:grey;");
