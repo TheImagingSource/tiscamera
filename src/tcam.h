@@ -15,5 +15,6 @@
 #include "Error.h"
 #include "ImageSink.h"
 #include "serialization.h"
+#include "public_utils.h"
 
 #endif /* TCAM_H */

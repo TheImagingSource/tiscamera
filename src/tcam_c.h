@@ -14,6 +14,7 @@ extern "C"
 #include <string.h>
 
 #include "base_types.h"
+#include "public_utils.h"
 
 
     /* error / debug */

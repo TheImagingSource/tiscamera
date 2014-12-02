@@ -46,6 +46,7 @@ serialization.cpp
 filter/AutoPassFilter.cpp
 filter/BayerRgbFilter.cpp
 PropertyHandler.cpp
+public_utils.cpp
 )
 
 if (BUILD_USB)
