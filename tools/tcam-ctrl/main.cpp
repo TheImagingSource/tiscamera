@@ -3,7 +3,7 @@
 #include "formats.h"
 #include "multimedia.h"
 
-#include <tis.h>
+#include <tcam.h>
 
 #include <iostream>
 #include <iomanip>
