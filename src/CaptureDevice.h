@@ -23,7 +23,8 @@ class CaptureDevice
 
 public:
 
-    explicit CaptureDevice ();
+    CaptureDevice ();
+    CaptureDevice (const DeviceInfo&);
 
     ~CaptureDevice ();
 
@@ -44,34 +45,17 @@ public:
 
     // device related:
 
-
-    /**
-     * Open the described device for interaction
-     * @param device - DeviceInfo description of the device that shall be opened
-     * @return true on success; on error Error will be set
-     */
-    bool openDevice (const DeviceInfo& device);
-
-
     /**
      * Check if device is currently open
      * @return true if a device is open
      */
     bool isDeviceOpen () const;
 
-
     /**
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
     DeviceInfo getDevice() const;
-
-
-    /**
-     * Closes the open device. All streams will be stopped.
-     * @return true on success; on error Error will be set
-     */
-    bool closeDevice ();
 
     // property related:
 
@@ -120,7 +104,7 @@ public:
 
 private:
 
-    std::unique_ptr<CaptureDeviceImpl> impl;
+    std::shared_ptr<CaptureDeviceImpl> impl;
 
 }; /* class CaptureDevice */
 

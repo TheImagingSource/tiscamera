@@ -65,9 +65,9 @@ int tcam_device_index_get_device_infos (tcam_device_index* index,
 
 /* image source */
 
-tcam_capture_device* tcam_create_new_capture_device ()
+tcam_capture_device* tcam_create_new_capture_device (const tcam_device_info* info)
 {
-    return (tcam_capture_device*) new CaptureDevice();
+    return (tcam_capture_device*) new CaptureDevice(DeviceInfo(*info));
 }
 
 
@@ -78,20 +78,6 @@ void tcam_destroy_capture_device (tcam_capture_device* source)
 
 
 /* device related */
-
-//return reinterpret_cast<CaptureDevice*>(source)
-
-bool tcam_capture_device_open_device (tcam_capture_device* source, const tcam_device_info* info)
-{
-    return reinterpret_cast<CaptureDevice*>(source)->openDevice(DeviceInfo(*info));
-}
-
-
-bool tcam_capture_device_close_device (tcam_capture_device* source)
-{
-    return reinterpret_cast<CaptureDevice*>(source)->closeDevice();
-}
-
 
 bool tcam_capture_device_is_device_open (tcam_capture_device* source)
 {

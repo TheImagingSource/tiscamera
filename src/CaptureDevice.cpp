@@ -17,10 +17,17 @@ CaptureDevice::CaptureDevice ()
 {}
 
 
+CaptureDevice::CaptureDevice (const DeviceInfo& info)
+    : impl(new CaptureDeviceImpl())
+{
+    impl->openDevice(info);
+}
+
+
 CaptureDevice::~CaptureDevice ()
 {
     if (isDeviceOpen())
-        closeDevice();
+        impl->closeDevice();
 }
 
 
@@ -36,12 +43,6 @@ bool CaptureDevice::save_configuration (const std::string& filename)
 }
 
 
-bool CaptureDevice::openDevice (const DeviceInfo& device_desc)
-{
-    return impl->openDevice(device_desc);
-}
-
-
 bool CaptureDevice::isDeviceOpen () const
 {
     return impl->isDeviceOpen ();
@@ -51,12 +52,6 @@ bool CaptureDevice::isDeviceOpen () const
 DeviceInfo CaptureDevice::getDevice () const
 {
     return impl->getDevice();
-}
-
-
-bool CaptureDevice::closeDevice ()
-{
-    return impl->closeDevice ();
 }
 
 

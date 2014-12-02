@@ -30,7 +30,6 @@ MainWindow::MainWindow (QWidget *parent) :
 MainWindow::~MainWindow ()
 {
     delete ui;
-    grabber->closeDevice();
 
     delete grabber;
 
@@ -47,12 +46,8 @@ tcam::CaptureDevice* MainWindow::getCaptureDevice ()
 void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
 {
     reset_gui();
-    bool ret = grabber->openDevice(device);
+    grabber = new CaptureDevice(device);
 
-    if (ret == false)
-    {
-        return;
-    }
 
     open_device = device;
     std::cout << "Serial " << open_device.getSerial() << std::endl;
@@ -126,10 +121,12 @@ void MainWindow::on_actionOpen_Camera_triggered ()
 
 void MainWindow::on_actionQuit_triggered ()
 {
-    if (grabber->isDeviceOpen())
+
+    if (grabber != nullptr)
     {
-        grabber->closeDevice();
+        delete grabber;
     }
+
     QApplication::quit();
 }
 
@@ -267,7 +264,8 @@ void MainWindow::on_format_box_currentIndexChanged (int index)
 
 void MainWindow::on_actionClose_Camera_triggered ()
 {
-    grabber->closeDevice();
+    delete grabber;
+    grabber = nullptr;
 
     available_formats.clear();
 

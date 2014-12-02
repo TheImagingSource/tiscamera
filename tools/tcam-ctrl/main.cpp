@@ -145,8 +145,7 @@ int main (int argc, char *argv[])
     {
         if (d.getSerial().compare(serial) == 0)
         {
-            g.openDevice(d);
-
+            g = CaptureDevice(d);
         }
     }
 

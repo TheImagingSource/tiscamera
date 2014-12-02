@@ -83,7 +83,7 @@ extern "C"
     /**
      * @return newly created capture_device; NULL on error
      */
-    tcam_capture_device* tcam_create_new_capture_device ();
+    tcam_capture_device* tcam_create_new_capture_device (const tcam_device_info* info);
 
 
     /**
@@ -94,15 +94,6 @@ extern "C"
 
     /* device related */
 
-    /**
-     * Description for tcam_capture_device_open_device.
-     * @param[in] source - capture_device for device
-     * @param[in] info   - device description that shall be used
-     * @return true on success
-     */
-    bool tcam_capture_device_open_device (tcam_capture_device* source,
-                                          const struct tcam_device_info* info);
-
 
     /**
      * get info about the currently open device
@@ -112,15 +103,6 @@ extern "C"
      */
     bool tcam_capture_device_get_device_info (const tcam_capture_device* source,
                                               struct tcam_device_info* info);
-
-
-    /**
-     * Description for tcam_capture_device_close_device.
-     * @param source <doc>
-     * @return true on success
-     */
-    bool tcam_capture_device_close_device (tcam_capture_device* source);
-
 
     /**
      * Description for tcam_capture_device_load_configuration.
