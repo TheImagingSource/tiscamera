@@ -2,8 +2,8 @@
 
 #include "BayerRgbFilter.h"
 
-#include <by8/by8torgb_conv.h>
-#include <dutils_header.h>
+#include "tcam_algorithms.h"
+
 #include "logging.h"
 
 #include <type_traits>
@@ -36,17 +36,10 @@ struct FilterDescription BayerRgbFilter::getDescription () const
 bool BayerRgbFilter::transform (MemoryBuffer& in, MemoryBuffer& out)
 {
 
-    auto img_out = to_img_desc(out);
-    auto img_in  = to_img_desc(in);
+    auto i = in.getImageBuffer();
+    auto o = out.getImageBuffer();
 
-    by8_transform::transform_by8_options options = {};
-
-    options.options = 0;
-    options.opt_level = 0;
-
-    bool hflip = true;
-
-    by8_transform::transform_by8_to_dest(img_out, img_in, hflip, options);
+    convert_to_format(&i, &o);
 
     return true;
 }

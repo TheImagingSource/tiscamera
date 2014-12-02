@@ -2,11 +2,13 @@
 #ifndef AUTOPASSFILTER_H_
 #define AUTOPASSFILTER_H_
 
-#include <auto_alg/auto_alg_pass.h>
+#include "tcam_algorithms.h"
 
 #include <FilterBase.h>
 
 #include "compiler_defines.h"
+
+#include <vector>
 
 VISIBILITY_INTERNAL
 
@@ -97,8 +99,13 @@ private:
     TCAM_PIPELINE_STATUS current_status;
     tcam::VideoFormat input_format;
 
-    auto_alg::auto_pass_params params;
-    auto_alg::auto_pass_state state;
+    tcam_auto_alg_params params;
+
+    std::vector<unsigned char> context;
+    tcam_auto_alg_context state;
+
+
+    struct tcam_create_auto_alg_params init_params;
 
     std::shared_ptr<AutoPassPropertyHandler> handler;
 

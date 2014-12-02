@@ -7,12 +7,7 @@
 #include "utils.h"
 #include "standard_properties.h"
 
-#include <dutils_header.h>
-#include <by8/by8_apply_whitebalance.h>
-
 #include <algorithm>
-
-//#include <standard_properties.h>
 
 using namespace tcam;
 
@@ -124,20 +119,19 @@ AutoPassFilter::AutoPassFilter ()
       wb_r(default_color_value),
       wb_g(default_color_value),
       wb_b(default_color_value),
-      exposure_max(0)
+      exposure_max(0),
+      state(nullptr)
 {
     description.name = "AutoPass";
     description.type = FILTER_TYPE_INTERPRET;
     description.input_fourcc = {0};
     description.output_fourcc = {0};
-    state = {};
 }
 
 
 void AutoPassFilter::reset ()
 {
     params = {};
-    state = {};
     wb_r = default_color_value;
     wb_g = default_color_value;
     wb_b = default_color_value;
@@ -152,7 +146,7 @@ struct FilterDescription AutoPassFilter::getDescription () const
 }
 
 
-bool AutoPassFilter::transform (MemoryBuffer& in, MemoryBuffer& out )
+bool AutoPassFilter::transform (MemoryBuffer& /* in */, MemoryBuffer& /* out */ )
 {
     return false;
 }
@@ -163,39 +157,33 @@ void AutoPassFilter::update_params ()
     if (handler->prop_auto_exposure != nullptr)
     {
         auto exp = handler->property_exposure.lock();
-        params.exposure.min = exp->getMin();
-        params.exposure.max = exposure_max;
+        params.exposure.value.min = exp->getMin();
+        params.exposure.value.max = exposure_max;
 
-        params.exposure.def = exp->getDefault();
-        params.exposure.val = exp->getValue();
+        params.exposure.value.default_value = exp->getDefault();
+        params.exposure.value.value = exp->getValue();
         params.exposure.do_auto = handler->prop_auto_exposure->getValue();
-        params.exposure.flags = 0;
-        params.exposure.granularity = 1;
     }
 
     if (handler->prop_auto_gain != nullptr)
     {
         auto gain = handler->property_gain.lock();
-        params.gain.min = gain->getMin();
-        params.gain.max = gain->getMax();
-        params.gain.def = gain->getDefault();
-        params.gain.val = handler->property_gain.lock()->getValue();
+        params.gain.value.min = gain->getMin();
+        params.gain.value.max = gain->getMax();
+        params.gain.value.default_value = gain->getDefault();
+        params.gain.value.value = handler->property_gain.lock()->getValue();
         params.gain.do_auto = handler->prop_auto_gain->getValue();
-        params.gain.flags = 0;
         params.gain.steps_to_double_brightness = 1;
     }
 
     if (handler->prop_auto_iris != nullptr)
     {
         auto iris = handler->property_iris.lock();
-        params.iris.min = iris->getMin();
-        params.iris.max = iris->getMax();
-        params.iris.def = iris->getDefault();
-        params.iris.val = iris->getValue();
+        params.iris.value.min = iris->getMin();
+        params.iris.value.max = iris->getMax();
+        params.iris.value.default_value = iris->getDefault();
+        params.iris.value.value = iris->getValue();
         params.iris.do_auto = handler->prop_auto_iris->getValue();
-        params.iris.flags = 0;
-        params.iris.camera_fps = 30.0;   // not used
-        params.iris.is_pwm_iris = false; // not used
     }
 
     if (handler->prop_auto_wb != nullptr)
@@ -214,20 +202,18 @@ void AutoPassFilter::update_params ()
             params.wb.b = ((PropertyBoolean&)*(handler->prop_wb_b)).getValue();
         }
 
-        params.wb.auto_enabled = handler->prop_wb->getValue();
+        params.wb.auto_enabled = handler->prop_auto_wb->getValue();
         params.wb.one_push_enabled = false;
         params.wb.is_software_applied_wb = true;
-        params.wb.temperature_mode = true;
+        params.wb.temperature_mode = false;
 
     }
 
-
-    params.exposure_reference.min = 1;
-    params.exposure_reference.max = 255;
-    params.exposure_reference.def = 128;
-    params.exposure_reference.val = 128;
+    params.exposure_reference.value.min = 1;
+    params.exposure_reference.value.max = 255;
+    params.exposure_reference.value.default_value = 128;
+    params.exposure_reference.value.value = 128;
     params.exposure_reference.do_auto = params.exposure.do_auto;
-    params.exposure_reference.flags = params.exposure.flags;
 
     params.enable_auto_ref = false;
 }
@@ -235,7 +221,8 @@ void AutoPassFilter::update_params ()
 
 bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
-    img::img_descriptor img = to_img_desc(*buf);
+    auto img = buf->getImageBuffer();
+
     if (skipped_buffer < 3)
     {
         skipped_buffer++;
@@ -246,7 +233,7 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 
         update_params();
 
-        auto_alg::auto_pass_results res = auto_alg::auto_pass(img, params, state);
+        auto res = auto_pass(&img, &params, state);
 
         if (handler->prop_auto_wb->getValue())
         {
@@ -279,7 +266,7 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
     }
 
     if (handler->prop_wb->getValue())
-        by8_transform::apply_wb_to_bayer_img(img, wb_r, wb_g, wb_b, wb_g, 0);
+        apply_wb_to_bayer_img(&img, wb_r, wb_g, wb_b, wb_g);
 
     return true;
 }
@@ -293,6 +280,25 @@ bool AutoPassFilter::setStatus (TCAM_PIPELINE_STATUS s)
     }
 
     current_status = s;
+
+    if (current_status == TCAM_PIPELINE_PLAYING)
+    {
+        if (state == nullptr)
+        {
+            context.reserve(get_auto_pass_context_size());
+            state = create_auto_pass_context(context.data(),&init_params);
+
+            if (state == nullptr)
+                tcam_log(TCAM_LOG_ERROR, "Unable to determine initial state for algorithm library");
+        }
+
+        reinit_auto_pass_context(state);
+    }
+    else if (current_status == TCAM_PIPELINE_STOPPED)
+    {
+        if (state != nullptr)
+            destroy_auto_pass_context(state);
+    }
 
     return true;
 }
@@ -393,6 +399,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
         strncpy(prop.name, "Gain Auto", sizeof(prop.name));
         prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
         prop.value.b.value = true;
+        prop.value.b.default_value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_gain = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
@@ -495,6 +502,11 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     params.wb.temperature_mode = false;
 
     valid = true;
+
+    init_params.auto_apply_distance = true;
+    init_params.add_software_onepush_focus = false;
+    init_params.is_software_applied_wb = true;
+
 }
 
 
