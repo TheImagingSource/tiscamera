@@ -1,8 +1,6 @@
 
 #include "formats.h"
 
-#include "utils.h"
-
 #include <iostream>
 #include <iomanip>
 
@@ -30,7 +28,7 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 void print_active_format (const VideoFormat& format)
 {
     std::cout << "Active format:\n"
-              << "Format: \t" << fourcc2description(format.getFourcc())
+              << "Format: \t" << tcam_fourcc_to_description(format.getFourcc())
               << "\nResolution: \t" << format.getSize().width << "x" << format.getSize().height
               << "\nFramerate: \t" << format.getFramerate() << "\n" << std::endl;
 }
