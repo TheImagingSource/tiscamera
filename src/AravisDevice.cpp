@@ -514,7 +514,7 @@ struct aravis_fourcc
 };
 
 
-std::vector<aravis_fourcc> arv_fourcc_conversion_table =
+static std::vector<aravis_fourcc> arv_fourcc_conversion_table =
 {
     { FOURCC_Y800, ARV_PIXEL_FORMAT_MONO_8 },
     { 0, ARV_PIXEL_FORMAT_MONO_8_SIGNED },
