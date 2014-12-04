@@ -35,11 +35,14 @@ protected:
     std::weak_ptr<PropertyInteger> property_exposure;
     std::weak_ptr<PropertyInteger> property_gain;
     std::weak_ptr<PropertyInteger> property_iris;
+    std::weak_ptr<PropertyInteger> property_focus;
 
     // generated properties
     std::shared_ptr<PropertyBoolean> prop_auto_exposure;
     std::shared_ptr<PropertyBoolean> prop_auto_gain;
     std::shared_ptr<PropertyBoolean> prop_auto_iris;
+
+    std::shared_ptr<PropertyButton> focus_onepush;
 
     std::shared_ptr<PropertyBoolean> prop_wb;
     std::shared_ptr<PropertyBoolean> prop_auto_wb;
@@ -76,6 +79,8 @@ public:
 
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
 
+    void activate_focus_run ();
+
 private:
 
     void update_params ();
@@ -83,6 +88,7 @@ private:
     void set_gain     (int);
     void set_exposure (int);
     void set_iris     (int);
+    void set_focus    (int);
 
     unsigned int calculate_exposure_max ();
 

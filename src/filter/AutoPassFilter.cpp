@@ -17,6 +17,7 @@ AutoPassPropertyHandler::AutoPassPropertyHandler (AutoPassFilter* f)
       prop_auto_exposure(nullptr),
       prop_auto_gain(nullptr),
       prop_auto_iris(nullptr),
+      focus_onepush(nullptr),
       prop_wb(nullptr),
       prop_auto_wb(nullptr),
       prop_wb_r(nullptr),
@@ -38,6 +39,10 @@ bool AutoPassPropertyHandler::setProperty (const Property& prop)
     else if (prop.getID() == TCAM_PROPERTY_IRIS_AUTO)
     {
         prop_auto_iris->setStruct(prop.getStruct());
+    }
+    else if (prop.getID() == TCAM_PROPERTY_FOCUS_ONE_PUSH)
+    {
+        filter->activate_focus_run();
     }
     else if (prop.getID() == TCAM_PROPERTY_WB)
     {
@@ -189,6 +194,17 @@ void AutoPassFilter::update_params ()
         params.iris.do_auto = handler->prop_auto_iris->getValue();
     }
 
+    if (handler->focus_onepush != nullptr)
+    {
+        auto focus = handler->property_focus.lock();
+        params.focus_onepush_params.device_focus_val = focus->getValue();
+        params.focus_onepush_params.run_cmd_params.focus_range_min = focus->getMin();
+        params.focus_onepush_params.run_cmd_params.focus_range_max = focus->getMax();
+        params.focus_onepush_params.run_cmd_params.focus_device_speed = 10; // curr static
+        params.focus_onepush_params.run_cmd_params.auto_step_divisor = 4; // ? device value
+        params.focus_onepush_params.run_cmd_params.suggest_sweep = false; // ? device value
+    }
+
     if (handler->prop_auto_wb != nullptr)
     {
         // use default values if disabled
@@ -265,6 +281,11 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
         if (params.iris.do_auto == true)
         {
             set_iris(res.iris);
+        }
+        if (res.focus_onepush_running)
+        {
+            set_focus(res.focus_value);
+            params.focus_onepush_params.is_run_cmd = false;
         }
     }
 
@@ -437,6 +458,34 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     }
 
+
+    id = TCAM_PROPERTY_FOCUS;
+    auto focus = std::find_if(dev_properties.begin(), dev_properties.end(), f);
+
+    if (focus == dev_properties.end())
+    {
+        tcam_log(TCAM_LOG_INFO, "No focus properties found.");
+    }
+    else
+    {
+        id = TCAM_PROPERTY_FOCUS_AUTO;
+        auto focus_a = std::find_if(dev_properties.begin(), dev_properties.end(), f);
+        if (focus_a == dev_properties.end())
+        {
+            handler->property_focus = std::static_pointer_cast<PropertyInteger>(*focus);
+
+            auto prop = create_empty_property(TCAM_PROPERTY_FOCUS_ONE_PUSH);
+            prop.value.b.value = false;
+            prop.value.b.default_value = false;
+            prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
+
+            handler->focus_onepush = std::make_shared<PropertyButton>(handler, prop, Property::BOOLEAN);
+
+            // let back end know we want to calculate focus values
+            init_params.add_software_onepush_focus = true;
+        }
+    }
+
     // TODO check for device whitebalance
 
     tcam_camera_property prop = {};
@@ -494,8 +543,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     valid = true;
 
-    init_params.auto_apply_distance = true;
-    init_params.add_software_onepush_focus = false;
+    init_params.auto_apply_distance = 0;
     init_params.is_software_applied_wb = true;
 
 }
@@ -517,7 +565,10 @@ std::vector<std::shared_ptr<Property>> AutoPassFilter::getFilterProperties ()
     {
         vec.push_back(handler->prop_auto_iris);
     }
-
+    if (handler->focus_onepush != nullptr)
+    {
+        vec.push_back(handler->focus_onepush);
+    }
     if (handler->prop_auto_wb != nullptr)
     {
         vec.push_back(handler->prop_auto_wb);
@@ -574,6 +625,12 @@ void AutoPassFilter::set_iris (int iris)
 }
 
 
+void AutoPassFilter::set_focus (int focus)
+{
+    set_int_property(handler->property_focus, focus);
+}
+
+
 unsigned int AutoPassFilter::calculate_exposure_max ()
 {
     if (handler->property_exposure.expired())
@@ -584,4 +641,10 @@ unsigned int AutoPassFilter::calculate_exposure_max ()
     double fps = input_format.getFramerate();
 
     return exp_max / 10000 * fps;
+}
+
+
+void AutoPassFilter::activate_focus_run ()
+{
+    params.focus_onepush_params.is_run_cmd = true;
 }
