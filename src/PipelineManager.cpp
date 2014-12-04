@@ -118,9 +118,9 @@ void PipelineManager::index_output_formats ()
             tcam_log(TCAM_LOG_DEBUG,
                     "Testing %s against %s",
                     fourcc2description(fourcc),
-                    fourcc2description(vfd.getFormatDescription().fourcc));
+                    fourcc2description(vfd.getFourcc()));
 
-            return vfd.getFormatDescription().fourcc == fourcc;
+            return vfd.getFourcc() == fourcc;
         };
 
 
@@ -144,7 +144,7 @@ void PipelineManager::index_output_formats ()
                 {
                     for (uint32_t fcc : output)
                     {
-                        auto desc = format_match->getFormatDescription();
+                        auto desc = format_match->getStruct();
                         auto rf   = format_match-> getResolutionsFramesrates();
 
                         desc.fourcc = fcc;
@@ -281,10 +281,10 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
     {
         tcam_log(TCAM_LOG_DEBUG,
                 "Found device fourcc '%s' - %d",
-                fourcc2description(v.getFormatDescription().fourcc),
-                v.getFormatDescription().fourcc);
+                fourcc2description(v.getFourcc()),
+                v.getFourcc());
 
-        device_fourcc.push_back(v.getFormatDescription().fourcc);
+        device_fourcc.push_back(v.getFourcc());
     }
     return device_fourcc;
 }

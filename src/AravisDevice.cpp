@@ -396,7 +396,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
         {
             struct tcam_image_buffer desc = {};
 
-            desc.format = self->active_video_format.getFormatDescription();
+            desc.format = self->active_video_format.getStruct();
 
             size_t size = 0;
             desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
@@ -439,7 +439,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
                     // struct tcam_image_buffer desc = {0};
 
-                    // desc.format = self->active_video_format.getFormatDescription();
+                    // desc.format = self->active_video_format.getStruct();
 
 
                     // desc.pData = (unsigned char*)buffer->data;

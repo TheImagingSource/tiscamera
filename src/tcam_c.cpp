@@ -143,7 +143,7 @@ int tcam_capture_device_get_image_format_description (const tcam_capture_device*
     int i = 0;
     for (const auto& v : vec)
     {
-        arr[i] = v.getFormatDescription();
+        arr[i] = v.getStruct();
         i++;
     }
 

@@ -48,7 +48,7 @@ bool VideoFormatDescription::operator!= (const VideoFormatDescription& other) co
 }
 
 
-struct tcam_video_format_description VideoFormatDescription::getFormatDescription () const
+struct tcam_video_format_description VideoFormatDescription::getStruct () const
 {
     return format;
 }
@@ -126,7 +126,7 @@ VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
 
 bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) const
 {
-    auto desc = to_check.getFormatDescription();
+    auto desc = to_check.getStruct();
 
     if (format.fourcc != desc.fourcc)
     {
@@ -151,7 +151,7 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
 
 bool VideoFormatDescription::isValidFramerate (double framerate) const
 {
-    // auto desc = to_check.getFormatDescription();
+    // auto desc = to_check.getStruct();
 
     for (const auto& res: rf)
     {

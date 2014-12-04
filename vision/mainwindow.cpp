@@ -89,7 +89,7 @@ void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
     bool fill = false;
     for ( auto& a : available_formats)
     {
-        tcam_video_format_description desc = a.getFormatDescription();
+        tcam_video_format_description desc = a.getStruct();
         ui->format_box->addItem(desc.description);
 
         if (fill == false)

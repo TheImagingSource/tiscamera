@@ -9,7 +9,7 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
     std::cout << "Available format settings:" << std::endl;
     for (const VideoFormatDescription& f : available_formats)
     {
-        auto desc = f.getFormatDescription();
+        auto desc = f.getStruct();
 
         std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")" << std::endl;
         for (const auto& s : f.getResolutionsFramesrates())
