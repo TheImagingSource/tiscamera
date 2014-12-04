@@ -29,6 +29,17 @@ static bool convert_params (const tcam_auto_alg_params& t, auto_alg::auto_pass_p
     p.iris.camera_fps = t.iris.camera_fps;
     p.iris.is_pwm_iris = t.iris.is_pwm_iris;
 
+    p.focus_onepush_params.device_focus_val = t.focus_onepush_params.device_focus_val;
+    p.focus_onepush_params.run_cmd_params.focus_range_min = t.focus_onepush_params.run_cmd_params.focus_range_min;
+    p.focus_onepush_params.run_cmd_params.focus_range_max = t.focus_onepush_params.run_cmd_params.focus_range_max;
+    p.focus_onepush_params.run_cmd_params.focus_device_speed = t.focus_onepush_params.run_cmd_params.focus_device_speed;
+    p.focus_onepush_params.run_cmd_params.auto_step_divisor = t.focus_onepush_params.run_cmd_params.auto_step_divisor;
+    p.focus_onepush_params.run_cmd_params.suggest_sweep = t.focus_onepush_params.run_cmd_params.suggest_sweep;
+
+    p.focus_onepush_params.is_run_cmd = t.focus_onepush_params.is_run_cmd;
+    p.focus_onepush_params.is_end_cmd = t.focus_onepush_params.is_end_cmd;
+
+
     p.wb.r = t.wb.r;
     p.wb.g = t.wb.g;
     p.wb.b = t.wb.b;
@@ -59,6 +70,10 @@ static bool convert_results (const auto_alg::auto_pass_results& r, tcam_auto_alg
     t.wb_one_push_still_running = r.wb_one_push_still_running;
     t.wb_temperature = r.wb_temperature;
     t.brightness = r.brightness;
+
+    t.auto_pass_has_run = r.auto_pass_has_run;
+    t.focus_value = r.focus_value;
+    t.focus_onepush_running = r.focus_onepush_running;
 
     return true;
 }
