@@ -70,7 +70,7 @@ bool PropertyHandler::setProperty (const Property& p)
             }
 
             prop.internal_property->setProperty(p);
-            prop.external_property->setStruct(p.getStruct());
+            prop.external_property->setStructValue(prop.internal_property->getStruct());
             handle_flags(prop.external_property);
         }
     }
