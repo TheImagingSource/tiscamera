@@ -244,6 +244,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO },
     },
     {
+        .id = TCAM_PROPERTY_FOCUS_ONE_PUSH,
+        .name = "Focus One Push",
+        .type_to_use = TCAM_PROPERTY_TYPE_BUTTON,
+        .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS },
+    },
+    {
         .id = TCAM_PROPERTY_STROBE_ENABLE,
         .name = "Strobe Enable",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
