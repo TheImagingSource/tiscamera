@@ -70,6 +70,11 @@ public:
     struct tcam_camera_property getStruct () const;
     bool setStruct (const struct tcam_camera_property&);
 
+    /**
+     * Set value from given tcam_camera_property
+     * @return true on success
+     */
+    void setStructValue (const struct tcam_camera_property&);
     Property::VALUE_TYPE getValueType () const;
 
 

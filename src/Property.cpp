@@ -53,7 +53,6 @@ bool Property::update ()
 
     auto ptr = impl.lock();
 
-    tcam_log(TCAM_LOG_DEBUG, "Updating %s", prop.name);
 
     return ptr->getProperty(*this);
 }
@@ -109,6 +108,14 @@ struct tcam_camera_property Property::getStruct () const
 
 bool Property::setStruct (const struct tcam_camera_property& p)
 {
+    setStructValue(p);
+    prop.flags = p.flags;
+    return true;
+}
+
+
+void Property::setStructValue (const struct  tcam_camera_property& p)
+{
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_STRING:
@@ -130,13 +137,9 @@ bool Property::setStruct (const struct tcam_camera_property& p)
             break;
         case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
-            return false;
+            break;
     }
-
-    prop.flags = p.flags;
-
-    return true;
-}
+};
 
 
 Property::VALUE_TYPE Property::getValueType () const
@@ -264,7 +267,7 @@ bool Property::setProperty (const Property& p)
     {
         return false;
     }
-    setStruct(p.getStruct());
+    setStructValue(p.getStruct());
     notifyImpl();
 
     return true;
