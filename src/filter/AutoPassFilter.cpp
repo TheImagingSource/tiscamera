@@ -120,7 +120,6 @@ bool AutoPassPropertyHandler::getProperty (Property& prop)
 
 AutoPassFilter::AutoPassFilter ()
     : valid(false),
-      skipped_buffer(0),
       current_status(TCAM_PIPELINE_UNDEFINED),
       wb_r(default_color_value),
       wb_g(default_color_value),
@@ -242,51 +241,42 @@ bool AutoPassFilter::apply (std::shared_ptr<MemoryBuffer> buf)
 {
     auto img = buf->getImageBuffer();
 
-    if (skipped_buffer < 3)
+    update_params();
+
+    auto res = auto_pass(&img, &params, state);
+
+    if (handler->prop_auto_wb->getValue())
     {
-        skipped_buffer++;
+        wb_r = res.wb_r;
+        wb_g = res.wb_g;
+        wb_b = res.wb_b;
     }
     else
     {
-        skipped_buffer = 0;
+        res.wb_r = handler->prop_wb_r->getValue();
+        res.wb_g = handler->prop_wb_g->getValue();
+        res.wb_b = handler->prop_wb_b->getValue();
+        wb_r = res.wb_r;
+        wb_g = res.wb_g;
+        wb_b = res.wb_b;
+    }
 
-        update_params();
-
-        auto res = auto_pass(&img, &params, state);
-
-        if (handler->prop_auto_wb->getValue())
-        {
-            wb_r = res.wb_r;
-            wb_g = res.wb_g;
-            wb_b = res.wb_b;
-        }
-        else
-        {
-            res.wb_r = handler->prop_wb_r->getValue();
-            res.wb_g = handler->prop_wb_g->getValue();
-            res.wb_b = handler->prop_wb_b->getValue();
-            wb_r = res.wb_r;
-            wb_g = res.wb_g;
-            wb_b = res.wb_b;
-        }
-
-        if (params.exposure.do_auto == true)
-        {
-            set_exposure(res.exposure);
-        }
-        if (params.gain.do_auto == true)
-        {
-            set_gain(res.gain);
-        }
-        if (params.iris.do_auto == true)
-        {
-            set_iris(res.iris);
-        }
-        if (res.focus_onepush_running)
-        {
-            set_focus(res.focus_value);
-            params.focus_onepush_params.is_run_cmd = false;
-        }
+    if (params.exposure.do_auto == true)
+    {
+        set_exposure(res.exposure);
+    }
+    if (params.gain.do_auto == true)
+    {
+        set_gain(res.gain);
+    }
+    if (params.iris.do_auto == true)
+    {
+        set_iris(res.iris);
+    }
+    if (res.focus_onepush_running)
+    {
+        set_focus(res.focus_value);
+        params.focus_onepush_params.is_run_cmd = false;
     }
 
     if (handler->prop_wb->getValue())

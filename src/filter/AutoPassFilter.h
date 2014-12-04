@@ -96,7 +96,6 @@ private:
 
     // general
     bool valid;
-    unsigned int skipped_buffer;
 
     int		wb_r;
     int		wb_g;
