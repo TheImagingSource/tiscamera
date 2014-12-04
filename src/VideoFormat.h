@@ -29,7 +29,7 @@ public:
 
     bool operator!= (const VideoFormat& other) const;
 
-    struct tcam_video_format getFormatDescription () const;
+    struct tcam_video_format getStruct () const;
 
     uint32_t getFourcc () const;
 

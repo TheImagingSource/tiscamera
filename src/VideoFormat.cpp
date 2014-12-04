@@ -52,7 +52,7 @@ bool VideoFormat::operator!= (const VideoFormat& other) const
 }
 
 
-struct tcam_video_format VideoFormat::getFormatDescription () const
+struct tcam_video_format VideoFormat::getStruct () const
 {
     return format;
 }

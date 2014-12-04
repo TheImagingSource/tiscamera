@@ -1005,7 +1005,7 @@ void V4l2Device::init_mmap_buffers ()
                                    fd,
                                    buf.m.offset);
 
-        buffer.format = active_video_format.getFormatDescription();
+        buffer.format = active_video_format.getStruct();
 
         if (buffer.format.fourcc == mmioFOURCC('G', 'R', 'E', 'Y'))
         {

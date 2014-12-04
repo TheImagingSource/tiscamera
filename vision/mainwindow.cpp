@@ -297,7 +297,7 @@ bool MainWindow::getActiveVideoFormat ()
     }
 
     VideoFormatDescription active_desc = available_formats.at(format_index);
-    uint32_t f = active_desc.getFormatDescription().fourcc;
+    uint32_t f = active_desc.getFourcc();
 
     input_format.setFourcc(f);
 
