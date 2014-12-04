@@ -54,7 +54,7 @@ protected:
 };
 
 
-class AutoPassFilter : public FilterBase, public std::enable_shared_from_this<AutoPassFilter>
+class AutoPassFilter : public FilterBase
 {
 public:
 
