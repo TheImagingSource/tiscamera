@@ -331,18 +331,6 @@ void AutoPassFilter::getVideoFormat (VideoFormat& in, VideoFormat& out) const
 }
 
 
-bool AutoPassFilter::setVideoFormat (const VideoFormat& f)
-{
-    input_format = f;
-
-    exposure_max = calculate_exposure_max();
-
-    tcam_log(TCAM_LOG_INFO, "Exposure maximum will be %d", exposure_max);
-
-    return true;
-}
-
-
 bool AutoPassFilter::setVideoFormat (const VideoFormat& in, const VideoFormat& out)
 {
     if (in != out)

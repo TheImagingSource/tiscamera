@@ -72,7 +72,7 @@ public:
     TCAM_PIPELINE_STATUS getStatus () const;
 
     void getVideoFormat (VideoFormat& in, VideoFormat& out) const;
-    bool setVideoFormat(const VideoFormat&);
+
     bool setVideoFormat(const VideoFormat& in, const VideoFormat& out);
 
     void setDeviceProperties (std::vector<std::shared_ptr<Property>>);
