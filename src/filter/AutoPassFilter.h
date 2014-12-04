@@ -21,13 +21,15 @@ public:
 
     friend class AutoPassFilter;
 
-    AutoPassPropertyHandler ();
+    AutoPassPropertyHandler (AutoPassFilter*);
 
     bool setProperty (const Property&);
 
     bool getProperty (Property&);
 
 protected:
+
+    AutoPassFilter* filter;
 
     // device properties
     std::weak_ptr<PropertyInteger> property_exposure;

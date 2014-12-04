@@ -12,8 +12,9 @@
 using namespace tcam;
 
 
-AutoPassPropertyHandler::AutoPassPropertyHandler ()
-    : prop_auto_exposure(nullptr),
+AutoPassPropertyHandler::AutoPassPropertyHandler (AutoPassFilter* f)
+    : filter(f),
+      prop_auto_exposure(nullptr),
       prop_auto_gain(nullptr),
       prop_auto_iris(nullptr),
       prop_wb(nullptr),
@@ -126,6 +127,8 @@ AutoPassFilter::AutoPassFilter ()
     description.type = FILTER_TYPE_INTERPRET;
     description.input_fourcc = {0};
     description.output_fourcc = {0};
+
+    handler = std::make_shared<AutoPassPropertyHandler>(this);
 }
 
 
@@ -136,7 +139,7 @@ void AutoPassFilter::reset ()
     wb_g = default_color_value;
     wb_b = default_color_value;
 
-    handler = std::make_shared<AutoPassPropertyHandler>();
+    handler = std::make_shared<AutoPassPropertyHandler>(this);
 }
 
 
