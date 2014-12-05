@@ -371,16 +371,13 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     {
         handler->property_exposure = std::static_pointer_cast<PropertyInteger>(*exp);
 
-        tcam_camera_property prop = {};
-        prop.id = TCAM_PROPERTY_EXPOSURE_AUTO;
-        strncpy(prop.name, "Exposure Auto", sizeof(prop.name));
-        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
+        tcam_camera_property prop = create_empty_property(TCAM_PROPERTY_EXPOSURE_AUTO);
+
         prop.value.b.value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         handler->prop_auto_exposure = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
     }
-
 
     id = TCAM_PROPERTY_GAIN;
     auto gain = std::find_if(dev_properties.begin(), dev_properties.end(), f);
@@ -394,12 +391,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     {
         handler->property_gain = std::static_pointer_cast<PropertyInteger>(*gain);
 
-        // property_gain = *gain;
-        // create auto_gain property
-        tcam_camera_property prop = {};
-        prop.id = TCAM_PROPERTY_GAIN_AUTO;
-        strncpy(prop.name, "Gain Auto", sizeof(prop.name));
-        prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
+        tcam_camera_property prop = create_empty_property(TCAM_PROPERTY_GAIN_AUTO);
         prop.value.b.value = true;
         prop.value.b.default_value = true;
         prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
@@ -466,17 +458,12 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
 
     // TODO check for device whitebalance
 
-    tcam_camera_property prop = {};
-    prop.id = TCAM_PROPERTY_WB;
-    strncpy(prop.name, "Whitebalance", sizeof(prop.name));
-    prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
+    tcam_camera_property prop = create_empty_property(TCAM_PROPERTY_WB);
     prop.value.b.value = true;
     prop.value.b.default_value = true;
     prop.flags = set_bit(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
     handler->prop_wb = std::make_shared<PropertyBoolean>(handler, prop, Property::BOOLEAN);
-
-
 
     tcam_camera_property prop_auto = create_empty_property(TCAM_PROPERTY_WB_AUTO);
     prop_auto.value.b.value = true;
