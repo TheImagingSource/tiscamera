@@ -10,7 +10,6 @@ using namespace tcam;
 MainWindow::MainWindow (QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    grabber(nullptr),
     selection_dialog(NULL),
     playing(false),
     area(nullptr)
@@ -23,8 +22,6 @@ MainWindow::MainWindow (QWidget *parent) :
             this,
             SLOT(my_captureDevice_selected(tcam::DeviceInfo)));
 
-    sink = std::make_shared<ImageSink>();
-
     status_label = new QLabel(this);
 
     statusBar()->addWidget(status_label);
@@ -35,24 +32,11 @@ MainWindow::~MainWindow ()
 {
     delete ui;
 
-    if (grabber != nullptr)
-    {
-        delete grabber;
-        grabber = nullptr;
-    }
-
     if (area != nullptr)
     {
         delete area;
         area = nullptr;
     }
-}
-
-
-tcam::CaptureDevice* MainWindow::getCaptureDevice ()
-{
-
-    return grabber;
 }
 
 
@@ -68,23 +52,14 @@ void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
 
     ui->horizontalLayout->insertWidget(0,area);
 
-    grabber = new CaptureDevice(device);
-
     open_device = device;
-    std::cout << "Serial " << open_device.getSerial() << std::endl;
 
-    auto props = grabber->getAvailableProperties();
+    ui->property_list = area->get_property_tree(ui->property_list);
 
-    ui->property_list = tcam::create_property_tree(ui->property_list, props);
+    active_format = area->getVideoFormat();
+    available_formats = area->getAvailableVideoFormats();
 
-    ui->property_list->update();
-    ui->property_list->show();
-
-    active_format = grabber->getActiveVideoFormat();
-    available_formats = grabber->getAvailableVideoFormats();
-
-    std::cout << "Active format: " << active_format.toString() << std::endl;
-
+    // TODO: get rid of static definition
     active_format.setFourcc(FOURCC_RGB32);
 
     if (available_formats.empty())
@@ -128,12 +103,6 @@ void MainWindow::on_actionOpen_Camera_triggered ()
 
 void MainWindow::on_actionQuit_triggered ()
 {
-
-    if (grabber != nullptr)
-    {
-        delete grabber;
-    }
-
     if (area != nullptr)
     {
         delete area;
@@ -146,11 +115,6 @@ void MainWindow::on_actionQuit_triggered ()
 
 void MainWindow::on_actionPlay_Pause_triggered ()
 {
-    if (!grabber->isDeviceOpen())
-    {
-        return;
-    }
-
     if (playing != true)
     {
         start_stream();
@@ -162,21 +126,6 @@ void MainWindow::on_actionPlay_Pause_triggered ()
 }
 
 
-void MainWindow::my_newImage_received(std::shared_ptr<MemoryBuffer> buffer)
-{
-    std::cout << "working on image" << std::endl;
-
-    update();
-}
-
-
-void MainWindow::property_changed (PropertyWidget* pw)
-{
-    std::cout << "Changing Property" << std::endl;
-    update_properties();
-}
-
-
 void MainWindow::reset_gui ()
 {
     this->ui->format_box->clear();
@@ -185,20 +134,6 @@ void MainWindow::reset_gui ()
     this->ui->binning_box->clear();
 }
 
-
-void MainWindow::internal_callback(MemoryBuffer* buffer)
-{
-    this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
-}
-
-
-void MainWindow::callback (MemoryBuffer* buffer, void* user_data)
-{
-    MainWindow* win = static_cast<MainWindow*>(user_data);
-
-    win->internal_callback(buffer);
-
-}
 
 void MainWindow::on_format_box_currentIndexChanged (int index)
 {
@@ -223,12 +158,6 @@ void MainWindow::on_format_box_currentIndexChanged (int index)
 
 void MainWindow::on_actionClose_Camera_triggered ()
 {
-
-    if (grabber != nullptr)
-    {
-        delete grabber;
-        grabber = nullptr;
-    }
     available_formats.clear();
 
     ui->property_list->clear();
@@ -237,7 +166,6 @@ void MainWindow::on_actionClose_Camera_triggered ()
     ui->binning_box->clear();
 
     playing = false;
-
 
     if (area != nullptr)
     {
@@ -302,31 +230,11 @@ void MainWindow::start_stream ()
         return;
     }
 
-
     if (area != nullptr)
     {
         area->setVideoFormat(active_format);
         area->start();
         area->show();
-    }
-    else
-    {
-        ret = grabber->setVideoFormat(active_format);
-
-        if (ret == false)
-        {
-            std::cout << "Unable to set video format! Exiting...." << std::endl;
-            return;
-        }
-        sink->registerCallback(this->callback, this);
-
-        ret = grabber->startStream(sink);
-
-        if (ret == true)
-        {
-            std::cout << "RUNNING..." << std::endl;
-            playing = true;
-        }
     }
 }
 

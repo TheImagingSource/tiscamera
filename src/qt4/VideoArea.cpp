@@ -1,6 +1,8 @@
 #include "VideoArea.h"
 #include "ui_VideoArea.h"
 
+#include "tcam_qt4.h"
+
 #include <iostream>
 
 using namespace tcam;
@@ -49,8 +51,6 @@ void VideoArea::start ()
         std::cout << "RUNNING..." << std::endl;
         playing = true;
     }
-
-
 }
 
 
@@ -70,6 +70,24 @@ bool VideoArea::setVideoFormat (const tcam::VideoFormat& format)
     }
 
     return device->setVideoFormat(format);
+}
+
+
+tcam::VideoFormat VideoArea::getVideoFormat () const
+{
+    return device->getActiveVideoFormat();
+}
+
+
+std::vector<tcam::VideoFormatDescription> VideoArea::getAvailableVideoFormats () const
+{
+    return device->getAvailableVideoFormats();
+}
+
+
+QTreeWidget* VideoArea::get_property_tree (QWidget* p)
+{
+    return create_property_tree(p, device->getAvailableProperties());
 }
 
 

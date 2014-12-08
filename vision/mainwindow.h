@@ -28,12 +28,6 @@ public:
     explicit MainWindow (QWidget *parent = 0);
     ~MainWindow();
 
-    tcam::CaptureDevice* getCaptureDevice ();
-
-signals:
-
-    void newImage_received (MemoryBuffer*);
-
 private slots:
 
     void my_captureDevice_selected (tcam::DeviceInfo);
@@ -45,10 +39,6 @@ private slots:
     void on_actionQuit_triggered ();
 
     void on_actionPlay_Pause_triggered ();
-
-    void my_newImage_received (std::shared_ptr<MemoryBuffer>);
-
-    void property_changed (PropertyWidget*);
 
     void on_format_box_currentIndexChanged (int index);
 
@@ -64,17 +54,8 @@ private:
 
     Ui::MainWindow *ui;
 
-    QImage* current_frame;
-    QGraphicsScene* scene;
-    QImage* img;
-
-    QPixmap pixmap;
-
-    QPainter painter;
     bool playing;
 
-    tcam::CaptureDevice* grabber;
-    std::shared_ptr<tcam::ImageSink> sink;
     std::vector<tcam::VideoFormatDescription> available_formats;
 
     tcam::DeviceInfo open_device;
@@ -84,13 +65,8 @@ private:
     DeviceSelectionDialog* selection_dialog;
 
     VideoArea* area;
-    PropertyDialog* property_dialog;
 
     void reset_gui ();
-
-    void internal_callback (MemoryBuffer*);
-
-    static void callback (MemoryBuffer*, void*);
 
     bool getActiveVideoFormat ();
 

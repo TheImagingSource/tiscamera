@@ -2,6 +2,7 @@
 #define TCAM_QT4_VIDEOAREA_H
 
 #include <QWidget>
+#include <QTreeWidget>
 
 #include <tcam.h>
 
@@ -28,6 +29,12 @@ public slots:
     void stop();
 
     bool setVideoFormat(const tcam::VideoFormat&);
+
+    tcam::VideoFormat getVideoFormat () const;
+
+    std::vector<tcam::VideoFormatDescription> getAvailableVideoFormats () const;
+
+    QTreeWidget* get_property_tree (QWidget* p);
 
 protected:
 
