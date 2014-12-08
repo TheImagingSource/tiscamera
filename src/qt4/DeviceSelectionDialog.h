@@ -1,5 +1,5 @@
-#ifndef CAPTUREDEVICESELECTIONDIALOG_H
-#define CAPTUREDEVICESELECTIONDIALOG_H
+#ifndef DEVICESELECTIONDIALOG_H
+#define DEVICESELECTIONDIALOG_H
 
 #include <QDialog>
 
@@ -10,16 +10,16 @@
 using namespace tcam;
 
 namespace Ui {
-class DeviceInfoSelectionDialog;
+class DeviceSelectionDialog;
 }
 
-class DeviceInfoSelectionDialog : public QDialog
+class DeviceSelectionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit DeviceInfoSelectionDialog (QWidget *parent = 0);
-    ~DeviceInfoSelectionDialog ();
+    explicit DeviceSelectionDialog (QWidget* parent = 0);
+    ~DeviceSelectionDialog ();
 
     tcam::DeviceInfo getSelection ();
 
@@ -34,7 +34,7 @@ private slots:
     void on_buttonBox_rejected ();
 
 private:
-    Ui::DeviceInfoSelectionDialog *ui;
+    Ui::DeviceSelectionDialog* ui;
 
     std::vector<tcam::DeviceInfo> devices;
     std::shared_ptr<tcam::DeviceIndex> device_watch_dog;
@@ -42,4 +42,4 @@ private:
     std::thread work_thread;
 };
 
-#endif // CAPTUREDEVICESELECTIONDIALOG_H
+#endif // DEVICESELECTIONDIALOG_H

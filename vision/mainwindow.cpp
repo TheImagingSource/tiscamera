@@ -1,19 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "propertywidget.h"
+#include <tcam_qt4.h>
+
 #include <iostream>
+
+using namespace tcam;
 
 MainWindow::MainWindow (QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    grabber(new tcam::CaptureDevice),
+    grabber(nullptr),
     selection_dialog(NULL),
-    playing(false)
+    playing(false),
+    area(nullptr)
 {
     ui->setupUi(this);
 
-    selection_dialog = new DeviceInfoSelectionDialog();
+    selection_dialog = new DeviceSelectionDialog();
     connect(selection_dialog,
             SIGNAL(device_selected(tcam::DeviceInfo)),
             this,
@@ -31,8 +35,17 @@ MainWindow::~MainWindow ()
 {
     delete ui;
 
-    delete grabber;
+    if (grabber != nullptr)
+    {
+        delete grabber;
+        grabber = nullptr;
+    }
 
+    if (area != nullptr)
+    {
+        delete area;
+        area = nullptr;
+    }
 }
 
 
@@ -46,32 +59,26 @@ tcam::CaptureDevice* MainWindow::getCaptureDevice ()
 void MainWindow::my_captureDevice_selected (tcam::DeviceInfo device)
 {
     reset_gui();
-    grabber = new CaptureDevice(device);
 
+    area = create_video_area(this, &device);
+
+    // to move area into own window add
+    // area->setWindowFlags(Qt::Window);
+    // and do not add the widget to the rest of the application
+
+    ui->horizontalLayout->insertWidget(0,area);
+
+    grabber = new CaptureDevice(device);
 
     open_device = device;
     std::cout << "Serial " << open_device.getSerial() << std::endl;
 
     auto props = grabber->getAvailableProperties();
 
-    for (auto& p : props)
-    {
-        PropertyWidget* pw = new PropertyWidget(ui->property_list, &p);
+    ui->property_list = tcam::create_property_tree(ui->property_list, props);
 
-        connect(pw,
-                SIGNAL(changed(PropertyWidget*)),
-                this,
-                SLOT(property_changed(PropertyWidget*)));
-
-        QListWidgetItem* item;
-        item = new QListWidgetItem(ui->property_list);
-        ui->property_list->setGridSize(QSize(0, pw->height()));
-        ui->property_list->addItem(item);
-        ui->property_list->setItemWidget(item, pw);
-    }
-    ui->property_list->setDragEnabled(false);
-    ui->property_list->setFlow(QListView::TopToBottom);
     ui->property_list->update();
+    ui->property_list->show();
 
     active_format = grabber->getActiveVideoFormat();
     available_formats = grabber->getAvailableVideoFormats();
@@ -127,6 +134,12 @@ void MainWindow::on_actionQuit_triggered ()
         delete grabber;
     }
 
+    if (area != nullptr)
+    {
+        delete area;
+        area = nullptr;
+    }
+
     QApplication::quit();
 }
 
@@ -175,60 +188,6 @@ void MainWindow::reset_gui ()
 
 void MainWindow::internal_callback(MemoryBuffer* buffer)
 {
-    if (buffer->getData() == NULL || buffer->getImageBuffer().length == 0)
-    {
-        return;
-    }
-
-    if (buffer->getImageBuffer().format.height != active_format.getSize().height|| buffer->getImageBuffer().format.width != active_format.getSize().width)
-    {
-        std::cout << "Faulty format!!!" << std::endl;
-        return;
-    }
-
-    if (buffer->getImageBuffer().pitch == 0 || buffer->getImageBuffer().pitch > (1920 * 8))
-    {
-        return;
-    }
-
-    auto buf = buffer->getImageBuffer();
-    unsigned int height = buffer->getImageBuffer().format.height;
-    unsigned int width = buffer->getImageBuffer().format.width;
-
-    if (buf.format.fourcc == FOURCC_Y800)
-    {
-        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
-                                                             width, height,
-                                                             QImage::Format_Indexed8));
-    }
-    else if (buf.format.fourcc == FOURCC_Y16)
-    {
-        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
-                                                             width, height,
-                                                             QImage::Format_Mono));
-    }
-    else if (buf.format.fourcc == FOURCC_RGB24)
-    {
-        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
-                                                             width, height,
-                                                             QImage::Format_RGB666));
-    }
-    else if (buf.format.fourcc == FOURCC_RGB32)
-    {
-        this->ui->videowidget->m = QPixmap::fromImage(QImage(buf.pData,
-                                                             width, height,
-                                                             QImage::Format_RGB32));
-    }
-    else
-    {
-        std::cout << "Unable to interpret buffer format" << std::endl;
-        return;
-    }
-
-    this->ui->videowidget->new_image = true;
-    this->ui->videowidget->update();
-
-
     this->status_label->setText(QString(std::to_string (buffer->getStatistics().framerate).c_str ()));
 }
 
@@ -264,9 +223,12 @@ void MainWindow::on_format_box_currentIndexChanged (int index)
 
 void MainWindow::on_actionClose_Camera_triggered ()
 {
-    delete grabber;
-    grabber = nullptr;
 
+    if (grabber != nullptr)
+    {
+        delete grabber;
+        grabber = nullptr;
+    }
     available_formats.clear();
 
     ui->property_list->clear();
@@ -275,6 +237,13 @@ void MainWindow::on_actionClose_Camera_triggered ()
     ui->binning_box->clear();
 
     playing = false;
+
+
+    if (area != nullptr)
+    {
+        delete area;
+        area = nullptr;
+    }
 }
 
 
@@ -316,8 +285,6 @@ bool MainWindow::getActiveVideoFormat ()
         int fps_index = ui->framerate_box->currentIndex();
 
         input_format.setFramerate (res.fps.at(fps_index));
-
-        //input_format.setFramerate(10.0);
     }
 
     active_format = input_format;
@@ -335,33 +302,46 @@ void MainWindow::start_stream ()
         return;
     }
 
-    ret = grabber->setVideoFormat(active_format);
 
-    if (ret == false)
+    if (area != nullptr)
     {
-        std::cout << "Unable to set video format! Exiting...." << std::endl;
-        return;
+        area->setVideoFormat(active_format);
+        area->start();
+        area->show();
     }
-    sink->registerCallback(this->callback, this);
-
-    ret = grabber->startStream(sink);
-
-    if (ret == true)
+    else
     {
-        std::cout << "RUNNING..." << std::endl;
-        playing = true;
+        ret = grabber->setVideoFormat(active_format);
+
+        if (ret == false)
+        {
+            std::cout << "Unable to set video format! Exiting...." << std::endl;
+            return;
+        }
+        sink->registerCallback(this->callback, this);
+
+        ret = grabber->startStream(sink);
+
+        if (ret == true)
+        {
+            std::cout << "RUNNING..." << std::endl;
+            playing = true;
+        }
     }
 }
 
 
 void MainWindow::stop_stream ()
 {
-    grabber->stopStream();
+    if (area != nullptr)
+    {
+        area->stop();
+    }
     playing = false;
 }
 
 
-void MainWindow::on_size_box_currentIndexChanged(int index)
+void MainWindow::on_size_box_currentIndexChanged (int index)
 {
     int format_index = ui->format_box->currentIndex();
 
@@ -393,10 +373,11 @@ void MainWindow::on_size_box_currentIndexChanged(int index)
 
 void MainWindow::update_properties ()
 {
-    for (unsigned int i = 0; i < ui->property_list->count(); ++i)
+    for (unsigned int i = 0; i < ui->property_list->topLevelItemCount(); ++i)
     {
-        QListWidgetItem* item = ui->property_list->item(i);
-        PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item));
+        QTreeWidgetItem* item = ui->property_list->topLevelItem(i);
+
+        PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item, 0));
         if (pw != nullptr)
         {
             pw->update();
@@ -405,7 +386,11 @@ void MainWindow::update_properties ()
         {
             std::cout << "NULLPTR" << std::endl;
         }
-
     }
+}
+
+
+void MainWindow::on_actionContact_triggered()
+{
 
 }

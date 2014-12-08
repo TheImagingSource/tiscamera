@@ -105,4 +105,6 @@ target_link_libraries(tcam tcam_algorithms)
 install(FILES ${PUBLIC_HEADER} DESTINATION include)
 
 
-# target_compile_defiitions ()
+if (BUILD_QT4)
+  add_subdirectory(qt4)
+endif (BUILD_QT4)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CaptureDisplay</class>
- <widget class="QWidget" name="CaptureDisplay">
+ <class>VideoArea</class>
+ <widget class="QWidget" name="VideoArea">
   <property name="geometry">
    <rect>
     <x>0</x>

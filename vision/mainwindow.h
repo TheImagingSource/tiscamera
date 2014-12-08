@@ -10,8 +10,7 @@
 
 #include <QLabel>
 
-#include "capturedeviceselectiondialog.h"
-#include "propertywidget.h"
+#include <tcam_qt4.h>
 
 #include <tcam.h>
 
@@ -59,6 +58,8 @@ private slots:
 
     void update_properties ();
 
+    void on_actionContact_triggered ();
+
 private:
 
     Ui::MainWindow *ui;
@@ -80,7 +81,10 @@ private:
 
     VideoFormat active_format;
 
-    DeviceInfoSelectionDialog* selection_dialog;
+    DeviceSelectionDialog* selection_dialog;
+
+    VideoArea* area;
+    PropertyDialog* property_dialog;
 
     void reset_gui ();
 

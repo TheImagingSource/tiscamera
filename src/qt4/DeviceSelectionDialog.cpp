@@ -1,22 +1,26 @@
-#include "capturedeviceselectiondialog.h"
-#include "ui_capturedeviceselectiondialog.h"
+
+
+
+#include "DeviceSelectionDialog.h"
+#include "ui_DeviceSelectionDialog.h"
 
 #include <unistd.h>
 
-DeviceInfoSelectionDialog::DeviceInfoSelectionDialog (QWidget *parent) :
+
+DeviceSelectionDialog::DeviceSelectionDialog (QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DeviceInfoSelectionDialog),
+    ui(new Ui::DeviceSelectionDialog),
     device_watch_dog(tcam::getDeviceIndex())
 {
     ui->setupUi(this);
 
     run_thread = true;
 
-    work_thread = std::thread(&DeviceInfoSelectionDialog::update_list, this);
+    work_thread = std::thread(&DeviceSelectionDialog::update_list, this);
 }
 
 
-DeviceInfoSelectionDialog::~DeviceInfoSelectionDialog ()
+DeviceSelectionDialog::~DeviceSelectionDialog ()
 {
     run_thread = false;
     work_thread.join();
@@ -24,7 +28,7 @@ DeviceInfoSelectionDialog::~DeviceInfoSelectionDialog ()
 }
 
 
-void DeviceInfoSelectionDialog::on_buttonBox_accepted ()
+void DeviceSelectionDialog::on_buttonBox_accepted ()
 {
     auto selected_item = this->ui->device_table->selectedItems();
 
@@ -54,7 +58,7 @@ void DeviceInfoSelectionDialog::on_buttonBox_accepted ()
 }
 
 
-void DeviceInfoSelectionDialog::update_list ()
+void DeviceSelectionDialog::update_list ()
 {
 
     while (run_thread)
@@ -90,13 +94,13 @@ void DeviceInfoSelectionDialog::update_list ()
 }
 
 
-void DeviceInfoSelectionDialog::on_buttonBox_rejected ()
+void DeviceSelectionDialog::on_buttonBox_rejected ()
 {
     QWidget::close();
 }
 
 
-tcam::DeviceInfo DeviceInfoSelectionDialog::getSelection ()
+tcam::DeviceInfo DeviceSelectionDialog::getSelection ()
 {
     auto selected_item = this->ui->device_table->selectedItems();
 
