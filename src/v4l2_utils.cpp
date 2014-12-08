@@ -397,7 +397,6 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 {
     std::vector<DeviceInfo> device_list;
 
-
     struct udev* udev = udev_new();
     if (!udev)
     {
@@ -433,9 +432,9 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
            is changed to the path of the usb device behind it (/sys/class/....) */
         strcpy(needed_path, udev_device_get_devnode(dev));
 
-        dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+        struct udev_device* parent_device = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
 
-        if (!dev)
+        if (!parent_device)
         {
             setError(Error("udev_device_get_parent_with_subsystem_devtype failed", EIO));
             return device_list;
@@ -453,25 +452,26 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
         static const char* TCAM_VENDOR_ID_STRING = "199e";
 
-        if (strcmp(udev_device_get_sysattr_value(dev, "idVendor"), TCAM_VENDOR_ID_STRING) == 0)
+        if (strcmp(udev_device_get_sysattr_value(parent_device, "idVendor"), TCAM_VENDOR_ID_STRING) == 0)
         {
             tcam_device_info info = {};
             info.type = TCAM_DEVICE_TYPE_V4L2;
             strncpy(info.identifier, needed_path, sizeof(info.identifier));
 
-            if (udev_device_get_sysattr_value(dev, "product") != NULL)
-                strncpy(info.name, udev_device_get_sysattr_value(dev, "product"), sizeof(info.name));
+            if (udev_device_get_sysattr_value(parent_device, "product") != NULL)
+                strncpy(info.name, udev_device_get_sysattr_value(parent_device, "product"), sizeof(info.name));
             else
                 memcpy(info.name, "\0", sizeof(info.name));
 
-            if (udev_device_get_sysattr_value(dev, "serial") != NULL)
-                strncpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"), sizeof(info.serial_number));
+            if (udev_device_get_sysattr_value(parent_device, "serial") != NULL)
+                strncpy(info.serial_number, udev_device_get_sysattr_value(parent_device, "serial"), sizeof(info.serial_number));
             else
                 memcpy(info.serial_number, "\0", sizeof(info.serial_number));
 
             device_list.push_back(DeviceInfo(info));
         }
 
+        udev_device_unref(parent_device);
         udev_device_unref(dev);
     }
 
