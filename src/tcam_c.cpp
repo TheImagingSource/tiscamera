@@ -117,7 +117,7 @@ bool tcam_capture_device_set_property (tcam_capture_device* source,
 
 /* video format related */
 
-int tcam_capture_device_get_image_format_description_count (const tcam_capture_device* source)
+int tcam_capture_device_get_image_format_descriptions_count (const tcam_capture_device* source)
 {
     if (source == nullptr)
     {
@@ -128,7 +128,7 @@ int tcam_capture_device_get_image_format_description_count (const tcam_capture_d
 }
 
 
-int tcam_capture_device_get_image_format_description (const tcam_capture_device* source,
+int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device* source,
                                                       tcam_video_format_description* arr,
                                                       const size_t size)
 {
