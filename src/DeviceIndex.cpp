@@ -22,19 +22,14 @@
 using namespace tcam;
 
 
-std::vector<DeviceInfo> DeviceIndex::getDeviceList () const
-{
-    return device_list;
-}
-
-
 DeviceIndex::DeviceIndex ()
-    : continue_thread(false), wait_period(2)
+    : continue_thread(false),
+      wait_period(2),
+      device_list(std::vector<DeviceInfo>()),
+      callbacks(std::vector<dev_callback>())
 {
     continue_thread = true;
     std::thread (&DeviceIndex::run, this).detach();
-
-    device_list = std::vector<DeviceInfo>();
 }
 
 
@@ -46,22 +41,28 @@ DeviceIndex::~DeviceIndex ()
 
 void DeviceIndex::register_device_lost (dev_callback c)
 {
+    tcam_log(TCAM_LOG_DEBUG, "Registered device lost callback");
+    mtx.lock();
     callbacks.push_back(c);
+    mtx.unlock();
 }
 
 
 void DeviceIndex::updateDeviceList ()
 {
-    std::vector<DeviceInfo> tmp_dev_list;
+    std::vector<DeviceInfo> tmp_dev_list = std::vector<DeviceInfo>();
+    tmp_dev_list.reserve(10);
 
 #if HAVE_ARAVIS
     auto aravis_dev_list = get_aravis_device_list();
-    tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
+    if (!aravis_dev_list.empty())
+        tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
 #endif
 
 #if HAVE_USB
     auto v4l2_dev_list = get_v4l2_device_list();
-    tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
+    if (!v4l2_dev_list.empty())
+        tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
 #endif
 
     for (const auto& d : device_list)
@@ -103,10 +104,12 @@ void DeviceIndex::run ()
 
 void DeviceIndex::fire_device_lost (const DeviceInfo& d)
 {
+    mtx.lock();
     for (auto& c : callbacks)
     {
         c(d);
     }
+    mtx.unlock();
 }
 
 
@@ -135,9 +138,14 @@ bool DeviceIndex::fillDeviceInfo (DeviceInfo& info)
                 return true;
             }
         }
-        return false;
     }
     return false;
+}
+
+
+std::vector<DeviceInfo> DeviceIndex::getDeviceList () const
+{
+    return device_list;
 }
 
 
