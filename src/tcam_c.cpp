@@ -154,7 +154,9 @@ int tcam_capture_device_get_image_format_description (const tcam_capture_device*
 bool tcam_capture_device_set_image_format (tcam_capture_device* source,
                                            const tcam_video_format* format)
 {
+    VideoFormat f (*format);
 
+    return reinterpret_cast<CaptureDevice*>(source)->setVideoFormat(f);
 }
 
 
