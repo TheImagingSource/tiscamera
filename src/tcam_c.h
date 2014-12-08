@@ -84,7 +84,7 @@ extern "C"
     /**
      * @return newly created capture_device; NULL on error
      */
-    tcam_capture_device* tcam_create_new_capture_device (const tcam_device_info* info);
+    tcam_capture_device* tcam_create_new_capture_device (const struct tcam_device_info* info);
 
 
     /**
