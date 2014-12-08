@@ -163,7 +163,11 @@ bool tcam_capture_device_set_image_format (tcam_capture_device* source,
 bool tcam_capture_device_get_image_format (tcam_capture_device* source,
                                            tcam_video_format* format)
 {
+    VideoFormat f = reinterpret_cast<CaptureDevice*>(source)->getActiveVideoFormat();
 
+    *format = f.getStruct();
+
+    return true;
 }
 
 
