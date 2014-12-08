@@ -457,9 +457,17 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
         {
             tcam_device_info info = {};
             info.type = TCAM_DEVICE_TYPE_V4L2;
-            strcpy(info.identifier, needed_path);
-            strcpy(info.name, udev_device_get_sysattr_value(dev, "product"));
-            strcpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"));
+            strncpy(info.identifier, needed_path, sizeof(info.identifier));
+
+            if (udev_device_get_sysattr_value(dev, "product") != NULL)
+                strncpy(info.name, udev_device_get_sysattr_value(dev, "product"), sizeof(info.name));
+            else
+                memcpy(info.name, "\0", sizeof(info.name));
+
+            if (udev_device_get_sysattr_value(dev, "serial") != NULL)
+                strncpy(info.serial_number, udev_device_get_sysattr_value(dev, "serial"), sizeof(info.serial_number));
+            else
+                memcpy(info.serial_number, "\0", sizeof(info.serial_number));
 
             device_list.push_back(DeviceInfo(info));
         }
