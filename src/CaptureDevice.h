@@ -13,6 +13,11 @@
 #include <vector>
 #include <memory>
 
+/**
+ * @addtogroup API
+ * @{
+ */
+
 namespace tcam
 {
 
@@ -109,5 +114,7 @@ private:
 }; /* class CaptureDevice */
 
 } /* namespace tcam */
+
+/** @} */
 
 #endif /* CAPTUREDEVICE_H */

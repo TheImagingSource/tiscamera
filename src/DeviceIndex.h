@@ -12,6 +12,10 @@
 #include <thread>
 #include <mutex>
 
+/**
+ * @addtogroup API
+ * @{
+ */
 
 namespace tcam
 {
@@ -61,5 +65,7 @@ private:
 std::shared_ptr<DeviceIndex> getDeviceIndex ();
 
 } /* namespace tcam */
+
+/** @} */
 
 #endif /* CAMERA_INDEX_H */

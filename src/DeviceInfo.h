@@ -10,6 +10,10 @@
 #include <vector>
 #include <memory>
 
+/**
+ * @addtogroup API
+ * @{
+ */
 
 namespace tcam
 {
@@ -77,5 +81,7 @@ private:
 }; /* class DeviceInfo */
 
 } /* namespace tcam */
+
+/** @} */
 
 #endif /* DEVICEINFO_H */

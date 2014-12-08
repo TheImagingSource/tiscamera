@@ -11,6 +11,13 @@
 #include <vector>
 #include <memory>
 
+
+/**
+ * @addtogroup API
+ * @{
+ */
+
+
 namespace tcam
 {
 
@@ -140,5 +147,7 @@ public:
 
 
 } /* namespace tcam */
+
+/** @} */
 
 #endif /* PROPERTIES_H_ */

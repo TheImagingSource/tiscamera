@@ -1,10 +1,12 @@
 
-/**
- * Main header
- */
-
 #ifndef TCAM_H
 #define TCAM_H
+
+/**
+ * @addtogroup API
+ * @{
+ */
+
 
 #include "base_types.h"
 #include "CaptureDevice.h"
@@ -16,5 +18,7 @@
 #include "ImageSink.h"
 #include "serialization.h"
 #include "public_utils.h"
+
+/** @} */
 
 #endif /* TCAM_H */

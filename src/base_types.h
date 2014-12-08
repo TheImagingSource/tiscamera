@@ -1,14 +1,12 @@
 
 
-/**
-This file contains basic c types that are used for:
-- internal representation
-- C API
-*/
-
-
 #ifndef BASE_TYPES_H_
 #define BASE_TYPES_H_
+
+/**
+ * @addtogroup API
+ * @{
+*/
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -300,5 +298,7 @@ enum TCAM_PROPERTY_FLAGS
        (e. g. motor control) but no meaningful value can be returned. */
     TCAM_PROPERTY_FLAG_WRITE_ONLY = 0x0020,
 };
+
+/** @} */
 
 #endif /* BASE_TYPES_H_ */

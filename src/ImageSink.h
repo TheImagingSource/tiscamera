@@ -10,6 +10,12 @@
 
 #include <memory>
 
+/**
+ * @addtogroup API
+ * @{
+ * Main header
+ */
+
 typedef void (*sink_callback)(tcam::MemoryBuffer*, void*);
 
 namespace tcam
@@ -38,5 +44,6 @@ private:
 
 } /* namespace tcam */
 
+/** @} */
 
 #endif /* IMAGESINK_H_ */

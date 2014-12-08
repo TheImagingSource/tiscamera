@@ -7,6 +7,11 @@
 
 #include "base_types.h"
 
+/**
+ * @addtogroup API
+ * @{
+ */
+
 namespace tcam
 {
 
@@ -73,5 +78,7 @@ private:
 
 
 } /* namespace tcam*/
+
+/** @} */
 
 #endif /* MEMORYBUFFER_H_ */

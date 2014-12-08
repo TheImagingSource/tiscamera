@@ -6,6 +6,10 @@
 
 #include <string>
 
+/**
+ * @addtogroup API
+ * @{
+ */
 
 namespace tcam
 {
@@ -80,5 +84,7 @@ void setError (const Error& err);
 void resetError ();
 
 } /* namespace tcam */
+
+/** @} */
 
 #endif /* ERROR_H_ */
