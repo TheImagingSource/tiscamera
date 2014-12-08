@@ -39,8 +39,16 @@ public:
     bool operator== (const VideoFormatDescription& other) const;
     bool operator!= (const VideoFormatDescription& other) const;
 
+    /**
+     * Returns a struct representation of the format description
+     * @return tcam_video_format_description
+     */
     struct tcam_video_format_description getStruct () const;
 
+    /**
+     * Returns the pixel format used
+     * @return uint32 containging the fourcc
+     */
     uint32_t getFourcc () const;
 
     std::vector<res_fps> getResolutionsFramesrates () const;

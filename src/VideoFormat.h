@@ -12,6 +12,10 @@
 namespace tcam
 {
 
+/**
+ * @class VideoFormat
+ * Description of a specific format
+ */
 class VideoFormat
 {
 
@@ -29,12 +33,24 @@ public:
 
     bool operator!= (const VideoFormat& other) const;
 
+
+    /**
+     * Returns a struct representation of the format
+     * @return tcam_video_format
+     */
     struct tcam_video_format getStruct () const;
 
+    /**
+     * Returns the used pixel format
+     * @return uint32 containing the fourcc
+     */
     uint32_t getFourcc () const;
 
     void setFourcc (uint32_t);
 
+    /**
+     * @return framerate in frames/second
+     */
     double getFramerate () const;
 
     void setFramerate (double);
