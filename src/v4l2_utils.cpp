@@ -471,7 +471,6 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
             device_list.push_back(DeviceInfo(info));
         }
 
-        udev_device_unref(parent_device);
         udev_device_unref(dev);
     }
 
