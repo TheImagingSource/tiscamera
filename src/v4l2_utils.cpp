@@ -265,7 +265,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
     auto ctrl_m = get_control_reference(prop_id);
 
     TCAM_PROPERTY_TYPE type_to_use;
-    tcam_camera_property cp = {};
+    tcam_device_property cp = {};
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {

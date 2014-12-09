@@ -30,7 +30,7 @@ class PropertyString : public Property
 public:
 
     PropertyString (std::shared_ptr<PropertyImpl>,
-                    const tcam_camera_property&,
+                    const tcam_device_property&,
                     VALUE_TYPE);
     ~PropertyString ();
 
@@ -50,7 +50,7 @@ class PropertyStringMap : public Property
 public:
 
     PropertyStringMap (std::shared_ptr<PropertyImpl>,
-                       const tcam_camera_property&,
+                       const tcam_device_property&,
                        const std::map<std::string, int>&,
                        VALUE_TYPE);
 
@@ -76,7 +76,7 @@ class PropertyBoolean : public Property
 {
 public:
 
-    PropertyBoolean (std::shared_ptr<PropertyImpl>, const tcam_camera_property&, VALUE_TYPE);
+    PropertyBoolean (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
 
     ~PropertyBoolean ();
 
@@ -96,7 +96,7 @@ class PropertyInteger : public Property
 {
 public:
 
-    PropertyInteger (std::shared_ptr<PropertyImpl>, const tcam_camera_property&, VALUE_TYPE);
+    PropertyInteger (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
 
     ~PropertyInteger ();
 
@@ -118,7 +118,7 @@ class PropertyDouble : public Property
 {
 public:
 
-    PropertyDouble (std::shared_ptr<PropertyImpl>, const tcam_camera_property&, VALUE_TYPE);
+    PropertyDouble (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
     ~PropertyDouble ();
 
     double getDefault () const;
@@ -139,7 +139,7 @@ class PropertyButton : public Property
 {
 public:
 
-    PropertyButton (std::shared_ptr<PropertyImpl>, const tcam_camera_property&, VALUE_TYPE);
+    PropertyButton (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
     ~PropertyButton ();
 
     bool activate ();

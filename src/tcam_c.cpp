@@ -94,12 +94,12 @@ int tcam_capture_device_get_property_count (const tcam_capture_device* source)
 
 
 int tcam_capture_device_get_properties (const tcam_capture_device* source,
-                                        const tcam_camera_property* properties)
+                                        const tcam_device_property* properties)
 {}
 
 
 bool tcam_capture_device_set_property (tcam_capture_device* source,
-                                       const tcam_camera_property* property)
+                                       const tcam_device_property* property)
 {
     auto vec = reinterpret_cast<CaptureDevice*>(source)->getAvailableProperties();
 

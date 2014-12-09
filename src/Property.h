@@ -38,9 +38,9 @@ public:
 
     Property();
 
-    Property (const tcam_camera_property&, VALUE_TYPE);
+    Property (const tcam_device_property&, VALUE_TYPE);
 
-    Property (const tcam_camera_property&,
+    Property (const tcam_device_property&,
               const std::map<std::string, int>&,
               VALUE_TYPE);
 
@@ -69,14 +69,14 @@ public:
 
     uint32_t getFlags () const;
 
-    struct tcam_camera_property getStruct () const;
-    bool setStruct (const struct tcam_camera_property&);
+    struct tcam_device_property getStruct () const;
+    bool setStruct (const struct tcam_device_property&);
 
     /**
-     * Set value from given tcam_camera_property
+     * Set value from given tcam_device_property
      * @return true on success
      */
-    void setStructValue (const struct tcam_camera_property&);
+    void setStructValue (const struct tcam_device_property&);
     Property::VALUE_TYPE getValueType () const;
 
 
@@ -95,10 +95,10 @@ protected:
     Property::VALUE_TYPE value_type;
 
     // internal storage
-    struct tcam_camera_property prop;
+    struct tcam_device_property prop;
 
     // reference of initial state
-    const struct tcam_camera_property ref_prop;
+    const struct tcam_device_property ref_prop;
     std::map<std::string, int> string_map;
 
     // internal method that notifies implementations about requests

@@ -23,7 +23,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         find_property(props, TCAM_PROPERTY_OFFSET_X) != nullptr &&
         find_property(props, TCAM_PROPERTY_OFFSET_Y) != nullptr)
     {
-        tcam_camera_property cp = create_empty_property(TCAM_PROPERTY_OFFSET_AUTO);
+        tcam_device_property cp = create_empty_property(TCAM_PROPERTY_OFFSET_AUTO);
         cp.value.b.default_value = false;
         cp.value.b.value = cp.value.b.default_value;
         cp.flags = set_bit(cp.flags, TCAM_PROPERTY_FLAG_EXTERNAL);

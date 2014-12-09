@@ -18,12 +18,12 @@ Property::Property ()
 {}
 
 
-Property::Property (const tcam_camera_property& property, VALUE_TYPE t)
+Property::Property (const tcam_device_property& property, VALUE_TYPE t)
     : prop(property), ref_prop(property), value_type(t)
 {}
 
 
-Property::Property (const tcam_camera_property& property,
+Property::Property (const tcam_device_property& property,
                     const std::map<std::string, int>& mapping,
                     VALUE_TYPE t)
     : prop(property), ref_prop(property), string_map(mapping), value_type(t)
@@ -112,13 +112,13 @@ uint32_t Property::getFlags () const
 }
 
 
-struct tcam_camera_property Property::getStruct () const
+struct tcam_device_property Property::getStruct () const
 {
     return prop;
 }
 
 
-bool Property::setStruct (const struct tcam_camera_property& p)
+bool Property::setStruct (const struct tcam_device_property& p)
 {
     setStructValue(p);
     prop.flags = p.flags;
@@ -126,7 +126,7 @@ bool Property::setStruct (const struct tcam_camera_property& p)
 }
 
 
-void Property::setStructValue (const struct  tcam_camera_property& p)
+void Property::setStructValue (const struct  tcam_device_property& p)
 {
     switch (prop.type)
     {

@@ -13,7 +13,7 @@ using namespace tcam;
 
 
 PropertyString::PropertyString (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_camera_property& prop,
+                                const tcam_device_property& prop,
                                 VALUE_TYPE t)
     : Property(prop, t)
 {
@@ -60,7 +60,7 @@ std::string PropertyString::getValue () const
 
 
 PropertyStringMap::PropertyStringMap (std::shared_ptr<PropertyImpl> prop_impl,
-                                      const tcam_camera_property& prop,
+                                      const tcam_device_property& prop,
                                       const std::map<std::string, int>& values,
                                       VALUE_TYPE t)
     : Property(prop, values, t)
@@ -128,7 +128,7 @@ std::map<std::string, int> PropertyStringMap::getMapping () const
 
 
 PropertyBoolean::PropertyBoolean (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_camera_property& prop,
+                                const tcam_device_property& prop,
                                 VALUE_TYPE t)
     : Property(prop, t)
 {
@@ -171,7 +171,7 @@ bool PropertyBoolean::getValue () const
 
 
 PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> prop_impl,
-                                  const tcam_camera_property& prop,
+                                  const tcam_device_property& prop,
                                   VALUE_TYPE t)
     : Property (prop, t)
 {
@@ -236,7 +236,7 @@ bool PropertyInteger::setValue (int64_t new_value)
 
 
 PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_camera_property& prop,
+                                const tcam_device_property& prop,
                                 VALUE_TYPE t)
     : Property(prop, t)
 {
@@ -298,7 +298,7 @@ bool PropertyDouble::setValue (double new_value)
 
 
 PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_camera_property& prop,
+                                const tcam_device_property& prop,
                                 VALUE_TYPE t)
     : Property(prop, t)
 {

@@ -291,11 +291,11 @@ inline control_reference get_control_reference (enum TCAM_PROPERTY_ID wanted_id)
 
 
 
-inline tcam_camera_property create_empty_property (enum TCAM_PROPERTY_ID id)
+inline tcam_device_property create_empty_property (enum TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);
 
-    tcam_camera_property prop = {};
+    tcam_device_property prop = {};
     prop.type = ref.type_to_use;
     strncpy(prop.name, ref.name.c_str(), sizeof(prop.name));
     prop.id = ref.id;

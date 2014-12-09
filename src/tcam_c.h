@@ -141,7 +141,7 @@ extern "C"
      * @return number of elements copied; -1 on error
      */
     int tcam_capture_device_get_properties (const tcam_capture_device* source,
-                                            struct tcam_camera_property* array,
+                                            struct tcam_device_property* array,
                                             const size_t size);
 
     /* video format related */

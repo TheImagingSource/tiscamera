@@ -250,7 +250,7 @@ struct tcam_property_group
 {
     enum TCAM_PROPERTY_CATEGORY property_category; /**< category of the property */
     enum TCAM_PROPERTY_ID       property_group;    /**< group of the property
-                                                      if property_group and tcam_camera_property.id
+                                                      if property_group and tcam_device_property.id
                                                       are identical the property should be considered
                                                       the group master */
 
@@ -258,10 +258,10 @@ struct tcam_property_group
 
 
 /**
- * @struct tcam_camera_property
+ * @struct tcam_device_property
  * @brief unified property description
  */
-struct tcam_camera_property
+struct tcam_device_property
 {
     enum TCAM_PROPERTY_ID id;          /**< unique identifier */
     char name [32];                    /**< string identifier */

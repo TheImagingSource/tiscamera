@@ -227,7 +227,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
     // type which the control shall use
     TCAM_PROPERTY_TYPE type_to_use;
-    tcam_camera_property prop = {};
+    tcam_device_property prop = {};
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
