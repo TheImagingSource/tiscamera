@@ -287,7 +287,7 @@ struct tcam_camera_property
  */
 enum TCAM_PROPERTY_FLAGS
 {
-    TCAM_ROPERTY_FLAG_DISABLED = 0x0001,     /**< This control is permanently disabled and
+    TCAM_PROPERTY_FLAG_DISABLED = 0x0001,    /**< This control is permanently disabled and
                                                 should be ignored by the application. Any
                                                 attempt to change the control will
                                                 result in an EINVAL error code. */

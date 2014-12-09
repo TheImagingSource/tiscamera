@@ -102,7 +102,7 @@ bool Property::isWriteOnly () const
 
 bool Property::isDisabled () const
 {
-    return is_bit_set(prop.flags, TCAM_ROPERTY_FLAG_DISABLED);
+    return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_DISABLED);
 }
 
 

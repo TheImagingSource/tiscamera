@@ -165,7 +165,7 @@ uint32_t tcam::convertV4L2flags (uint32_t v4l2_flags)
 
     if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_DISABLED))
     {
-        internal_flags = set_bit(internal_flags, TCAM_ROPERTY_FLAG_DISABLED);
+        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_DISABLED);
     }
     if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_GRABBED))
     {
