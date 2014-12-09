@@ -14,7 +14,7 @@
 using namespace tcam;
 
 std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
-                                                                                   std::shared_ptr<PropertyImpl> impl)
+                                                                            std::shared_ptr<PropertyImpl> impl)
 {
     std::vector<std::shared_ptr<Property>> new_properties;
 
@@ -39,9 +39,9 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
 
 
 bool tcam::handle_auto_center (const Property& new_property,
-                                      std::vector<std::shared_ptr<Property>>& props,
-                                      const tcam_image_size& sensor,
-                                      const tcam_image_size& current_format)
+                               std::vector<std::shared_ptr<Property>>& props,
+                               const tcam_image_size& sensor,
+                               const tcam_image_size& current_format)
 {
     if (new_property.getType() != TCAM_PROPERTY_TYPE_BOOLEAN)
     {
@@ -59,17 +59,15 @@ bool tcam::handle_auto_center (const Property& new_property,
 
         std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(values.width);
         std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(values.height);
-
-        // TODO: set properties read only
     }
     else
     {
-        // TODO: remove read only
-
         auto prop_off_x = find_property(props, "Offset X");
         auto prop_off_y = find_property(props, "Offset Y");
 
         std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(0);
         std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(0);
     }
+
+    return true;
 }
