@@ -29,13 +29,17 @@ DeviceIndex::DeviceIndex ()
       callbacks(std::vector<dev_callback>())
 {
     continue_thread = true;
-    std::thread (&DeviceIndex::run, this).detach();
+    work_thread = std::thread (&DeviceIndex::run, this);
 }
 
 
 DeviceIndex::~DeviceIndex ()
 {
     continue_thread = false;
+    if (work_thread.joinable())
+    {
+        work_thread.join();
+    }
 }
 
 
