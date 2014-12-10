@@ -1,7 +1,7 @@
 
 
-#ifndef SINKINTERFACE_H_
-#define SINKINTERFACE_H_
+#ifndef TCAM_SINKINTERFACE_H
+#define TCAM_SINKINTERFACE_H
 
 #include "MemoryBuffer.h"
 
@@ -26,4 +26,4 @@ public:
 
 } /* namespace tcam */
 
-#endif /* SINKINTERFACE_H_ */
+#endif /* TCAM_SINKINTERFACE_H */

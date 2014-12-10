@@ -1,8 +1,8 @@
 
 
 
-#ifndef V4L2DEVICE_H
-#define V4L2DEVICE_H
+#ifndef TCAM_V4L2DEVICE_H
+#define TCAM_V4L2DEVICE_H
 
 #include "DeviceInterface.h"
 #include "VideoFormat.h"
@@ -168,4 +168,4 @@ private:
 
 #pragma GCC visibility pop
 
-#endif /* V4L2DEVICE_H */
+#endif /* TCAM_V4L2DEVICE_H */

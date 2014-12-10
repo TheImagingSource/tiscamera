@@ -2,8 +2,8 @@
 
 
 
-#ifndef PROPERTYGENERATION_H_
-#define PROPERTYGENERATION_H_
+#ifndef TCAM_PROPERTYGENERATION_H
+#define TCAM_PROPERTYGENERATION_H
 
 #include "Properties.h"
 
@@ -42,4 +42,4 @@ bool handle_auto_center (const Property& new_property,
 
 VISIBILITY_POP
 
-#endif /* PROPERTYGENERATION_H_ */
+#endif /* TCAM_PROPERTYGENERATION_H */

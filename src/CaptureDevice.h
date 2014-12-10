@@ -1,7 +1,7 @@
 
 
-#ifndef CAPTUREDEVICE_H
-#define CAPTUREDEVICE_H
+#ifndef TCAM_CAPTUREDEVICE_H
+#define TCAM_CAPTUREDEVICE_H
 
 #include "DeviceInfo.h"
 #include "Properties.h"
@@ -117,4 +117,4 @@ private:
 
 /** @} */
 
-#endif /* CAPTUREDEVICE_H */
+#endif /* TCAM_CAPTUREDEVICE_H */

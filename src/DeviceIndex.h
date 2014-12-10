@@ -2,8 +2,8 @@
 
 
 
-#ifndef CAMERA_INDEX_H
-#define CAMERA_INDEX_H
+#ifndef TCAM_CAMERA_INDEX_H
+#define TCAM_CAMERA_INDEX_H
 
 #include "base_types.h"
 #include "DeviceInfo.h"
@@ -68,4 +68,4 @@ std::shared_ptr<DeviceIndex> getDeviceIndex ();
 
 /** @} */
 
-#endif /* CAMERA_INDEX_H */
+#endif /* TCAM_CAMERA_INDEX_H */

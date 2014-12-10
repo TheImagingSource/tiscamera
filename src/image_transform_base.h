@@ -1,6 +1,6 @@
 
-#ifndef IMAGE_TRANSFORM_BASE_H_INC_
-#define IMAGE_TRANSFORM_BASE_H_INC_
+#ifndef TCAM_IMAGE_TRANSFORM_BASE_H
+#define TCAM_IMAGE_TRANSFORM_BASE_H
 
 #pragma once
 
@@ -223,4 +223,4 @@ namespace img
     }
 }
 
-#endif // IMAGE_TRANSFORM_BASE_H_INC_
+#endif // TCAM_IMAGE_TRANSFORM_BASE_H

@@ -1,7 +1,7 @@
 
 
-#ifndef LOGGING_H
-#define LOGGING_H
+#ifndef TCAM_LOGGING_H
+#define TCAM_LOGGING_H
 
 #include <stdarg.h>             /* va_args */
 #include <string>
@@ -124,4 +124,4 @@ void tcam_logging (const char* module,
 
 VISIBILITY_POP
 
-#endif /* LOGGING_H */
+#endif /* TCAM_LOGGING_H */

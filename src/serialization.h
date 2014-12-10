@@ -1,8 +1,8 @@
 
 
 
-#ifndef SERIALIZATION_H
-#define SERIALIZATION_H
+#ifndef TCAM_SERIALIZATION_H
+#define TCAM_SERIALIZATION_H
 
 
 #include "CaptureDevice.h"
@@ -34,4 +34,4 @@ bool save_xml_description (const std::string& filename,
 
 } /* namespace tcam */
 
-#endif /* SERIALIZATION_H */
+#endif /* TCAM_SERIALIZATION_H */

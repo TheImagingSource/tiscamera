@@ -1,6 +1,6 @@
 
-#ifndef AUTOPASSFILTER_H_
-#define AUTOPASSFILTER_H_
+#ifndef TCAM_AUTOPASSFILTER_H
+#define TCAM_AUTOPASSFILTER_H
 
 #include "tcam_algorithms.h"
 
@@ -132,4 +132,4 @@ extern "C"
 
 VISIBILITY_POP
 
-#endif /* AUTOPASSFILTER_H_ */
+#endif /* TCAM_AUTOPASSFILTER_H */

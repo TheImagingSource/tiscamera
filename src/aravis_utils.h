@@ -1,7 +1,7 @@
 
 
-#ifndef ARAVIS_UTILS_H
-#define ARAVIS_UTILS_H
+#ifndef TCAM_ARAVIS_UTILS_H
+#define TCAM_ARAVIS_UTILS_H
 
 #include "Properties.h"
 
@@ -27,4 +27,4 @@ std::vector<DeviceInfo> get_aravis_device_list ();
 
 VISIBILITY_POP
 
-#endif /* ARAVIS_UTILS_H */
+#endif /* TCAM_ARAVIS_UTILS_H */

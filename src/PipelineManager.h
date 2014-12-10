@@ -2,8 +2,8 @@
 
 
 
-#ifndef PIPELINEMANAGER_H_
-#define PIPELINEMANAGER_H_
+#ifndef TCAM_PIPELINEMANAGER_H
+#define TCAM_PIPELINEMANAGER_H
 
 #include "compiler_defines.h"
 #include "base_types.h"
@@ -148,4 +148,4 @@ private:
 
 VISIBILITY_POP
 
-#endif /* PIPELINEMANAGER_H_ */
+#endif /* TCAM_PIPELINEMANAGER_H */

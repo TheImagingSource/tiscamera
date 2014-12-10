@@ -2,8 +2,8 @@
 
 
 
-#ifndef IMAGESINK_H_
-#define IMAGESINK_H_
+#ifndef TCAM_IMAGESINK_H
+#define TCAM_IMAGESINK_H
 
 #include "base_types.h"
 #include "SinkInterface.h"
@@ -46,4 +46,4 @@ private:
 
 /** @} */
 
-#endif /* IMAGESINK_H_ */
+#endif /* TCAM_IMAGESINK_H */

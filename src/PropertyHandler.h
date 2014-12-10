@@ -1,7 +1,7 @@
 
 
-#ifndef PROPERTYHANDLER_H
-#define PROPERTYHANDLER_H
+#ifndef TCAM_PROPERTYHANDLER_H
+#define TCAM_PROPERTYHANDLER_H
 
 #include "Properties.h"
 
@@ -74,4 +74,4 @@ private:
 
 #pragma GCC visibility pop
 
-#endif /* PROPERTYHANDLER_H */
+#endif /* TCAM_PROPERTYHANDLER_H */

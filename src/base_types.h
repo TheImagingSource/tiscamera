@@ -1,7 +1,7 @@
 
 
-#ifndef BASE_TYPES_H_
-#define BASE_TYPES_H_
+#ifndef TCAM_BASE_TYPES_H
+#define TCAM_BASE_TYPES_H
 
 /**
  * @addtogroup API
@@ -325,4 +325,4 @@ enum TCAM_PROPERTY_FLAGS
 
 /** @} */
 
-#endif /* BASE_TYPES_H_ */
+#endif /* TCAM_BASE_TYPES_H */

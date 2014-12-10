@@ -2,8 +2,8 @@
 
 
 
-#ifndef FILTERLOADER_H_
-#define FILTERLOADER_H_
+#ifndef TCAM_FILTERLOADER_H
+#define TCAM_FILTERLOADER_H
 
 #include "FilterBase.h"
 
@@ -63,4 +63,4 @@ private:
 
 VISIBILITY_POP
 
-#endif /* FILTERLOADER_H_ */
+#endif /* TCAM_FILTERLOADER_H */

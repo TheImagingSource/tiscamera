@@ -2,8 +2,8 @@
 
 
 
-#ifndef PROPERTYIMPL_H_
-#define PROPERTYIMPL_H_
+#ifndef TCAM_PROPERTYIMPL_H
+#define TCAM_PROPERTYIMPL_H
 
 namespace tcam
 {
@@ -35,4 +35,4 @@ public:
 
 } /* namespace tcam */
 
-#endif /* PROPERTYIMPL_H_ */
+#endif /* TCAM_PROPERTYIMPL_H */

@@ -1,8 +1,8 @@
 
 
 
-#ifndef BAYERRGBFILTER_H_
-#define BAYERRGBFILTER_H_
+#ifndef TCAM_BAYERRGBFILTER_H
+#define TCAM_BAYERRGBFILTER_H
 
 #include <FilterBase.h>
 
@@ -71,4 +71,4 @@ extern "C"
 
 VISIBILITY_POP
 
-#endif /* _BAYERRGBFILTER_H_ */
+#endif /* _TCAM_BAYERRGBFILTER_H */

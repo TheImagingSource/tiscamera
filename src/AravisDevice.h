@@ -1,8 +1,8 @@
 
 
 
-#ifndef ARAVISDEVICE_H
-#define ARAVISDEVICE_H
+#ifndef TCAM_ARAVISDEVICE_H
+#define TCAM_ARAVISDEVICE_H
 
 #include "DeviceInterface.h"
 
@@ -122,4 +122,4 @@ private:
 
 VISIBILITY_POP
 
-#endif /* ARAVISDEVICE_H */
+#endif /* TCAM_ARAVISDEVICE_H */

@@ -1,7 +1,7 @@
 
 
-#ifndef CAPTUREDEVICEIMPL_H
-#define CAPTUREDEVICEIMPL_H
+#ifndef TCAM_CAPTUREDEVICEIMPL_H
+#define TCAM_CAPTUREDEVICEIMPL_H
 
 #include "DeviceInfo.h"
 #include "DeviceInterface.h"
@@ -139,4 +139,4 @@ private:
 
 VISIBILITY_POP
 
-#endif /* CAPTUREDEVICEIMPL_H */
+#endif /* TCAM_CAPTUREDEVICEIMPL_H */

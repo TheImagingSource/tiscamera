@@ -2,8 +2,8 @@
 
 
 
-#ifndef FILTERBASE_H_
-#define FILTERBASE_H_
+#ifndef TCAM_FILTERBASE_H
+#define TCAM_FILTERBASE_H
 
 #include "base_types.h"
 #include "Properties.h"
@@ -85,4 +85,4 @@ extern "C"
 
 // } /* namespace tcam */
 
-#endif /* FILTERBASE_H_ */
+#endif /* TCAM_FILTERBASE_H */

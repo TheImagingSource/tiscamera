@@ -1,6 +1,6 @@
 
-#ifndef IMAGE_FOURCC_H_INC_
-#define IMAGE_FOURCC_H_INC_
+#ifndef TCAM_IMAGE_FOURCC_H
+#define TCAM_IMAGE_FOURCC_H
 
 #pragma once
 
@@ -77,4 +77,4 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#endif // IMAGE_FOURCC_H_INC_
+#endif // TCAM_IMAGE_FOURCC_H

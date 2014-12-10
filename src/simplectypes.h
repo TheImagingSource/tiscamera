@@ -1,6 +1,6 @@
 
-#ifndef SIMPLECTYPES_H_INC
-#define SIMPLECTYPES_H_INC
+#ifndef TCAM_SIMPLECTYPES_H
+#define TCAM_SIMPLECTYPES_H
 
 
 // #include "udshl_defs.h"
@@ -223,4 +223,4 @@ typedef enum
 };
 // #endif
 
-#endif /* SIMPLECTYPES_H_INC */
+#endif /* TCAM_SIMPLECTYPES_H */

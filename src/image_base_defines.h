@@ -1,6 +1,8 @@
 
-#ifndef img_base_defines_h__
-#define img_base_defines_h__
+
+
+#ifndef TCAM_IMG_BASE_DEFINES_H
+#define TCAM_IMG_BASE_DEFINES_H
 
 #pragma once
 
@@ -100,4 +102,4 @@ typedef struct tagSIZE
 
 #define SSE_ALIGN   _ALIGNED(16)
 
-#endif
+#endif /* TCAM_IMG_BASE_DEFINES_H */

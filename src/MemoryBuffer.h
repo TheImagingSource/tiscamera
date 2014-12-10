@@ -2,8 +2,8 @@
 
 
 
-#ifndef MEMORYBUFFER_H_
-#define MEMORYBUFFER_H_
+#ifndef TCAM_MEMORYBUFFER_H
+#define TCAM_MEMORYBUFFER_H
 
 #include "base_types.h"
 
@@ -81,4 +81,4 @@ private:
 
 /** @} */
 
-#endif /* MEMORYBUFFER_H_ */
+#endif /* TCAM_MEMORYBUFFER_H */

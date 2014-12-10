@@ -2,8 +2,8 @@
 
 
 
-#ifndef VIDEOFORMATDESCRIPTION_H_
-#define VIDEOFORMATDESCRIPTION_H_
+#ifndef TCAM_VIDEOFORMATDESCRIPTION_H
+#define TCAM_VIDEOFORMATDESCRIPTION_H
 
 #include "base_types.h"
 
@@ -80,4 +80,4 @@ private:
 
 } /* namespace tcam */
 
-#endif /* VIDEOFORMATDESCRIPTION_H_ */
+#endif /* TCAM_VIDEOFORMATDESCRIPTION_H */

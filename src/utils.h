@@ -1,6 +1,6 @@
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef TCAM_UTILS_H
+#define TCAM_UTILS_H
 
 #include "base_types.h"
 #include "Property.h"
@@ -141,4 +141,4 @@ bool compare_double (double val1, double val2);
 
 VISIBILITY_POP
 
-#endif /* UTILS_H */
+#endif /* TCAM_UTILS_H */

@@ -2,8 +2,8 @@
 
 
 
-#ifndef DEVICEINFO_H
-#define DEVICEINFO_H
+#ifndef TCAM_DEVICEINFO_H
+#define TCAM_DEVICEINFO_H
 
 #include "base_types.h"
 
@@ -84,4 +84,4 @@ private:
 
 /** @} */
 
-#endif /* DEVICEINFO_H */
+#endif /* TCAM_DEVICEINFO_H */

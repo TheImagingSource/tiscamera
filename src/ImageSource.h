@@ -2,8 +2,8 @@
 
 
 
-#ifndef IMAGESOURCE_H_
-#define IMAGESOURCE_H_
+#ifndef TCAM_IMAGESOURCE_H
+#define TCAM_IMAGESOURCE_H
 
 #include "base_types.h"
 #include "SinkInterface.h"
@@ -64,4 +64,4 @@ private:
 
 VISIBILITY_POP
 
-#endif /* IMAGESOURCE_H_ */
+#endif /* TCAM_IMAGESOURCE_H */

@@ -1,6 +1,6 @@
 
-#ifndef USER_PROPERTIES_H_
-#define USER_PROPERTIES_H_
+#ifndef TCAM_STANDARD_PROPERTIES_H
+#define TCAM_STANDARD_PROPERTIES_H
 
 #include "base_types.h"
 
@@ -308,4 +308,4 @@ inline tcam_device_property create_empty_property (enum TCAM_PROPERTY_ID id)
 
 VISIBILITY_POP
 
-#endif /* user_properties */
+#endif /* TCAM_STANDARD_PROPERTIES_H */

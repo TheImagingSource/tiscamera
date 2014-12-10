@@ -1,7 +1,7 @@
 
 
-#ifndef V4L2_UTILS_H
-#define V4L2_UTILS_H
+#ifndef TCAM_V4L2_UTILS_H
+#define TCAM_V4L2_UTILS_H
 
 #include "Properties.h"
 #include "DeviceInfo.h"
@@ -44,4 +44,4 @@ std::vector<DeviceInfo> get_v4l2_device_list ();
 
 VISIBILITY_POP
 
-#endif /* V4L2_UTILS_H */
+#endif /* TCAM_V4L2_UTILS_H */

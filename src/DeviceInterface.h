@@ -2,8 +2,8 @@
 
 
 
-#ifndef CAPTUREINTERFACE_H_
-#define CAPTUREINTERFACE_H_
+#ifndef TCAM_CAPTUREINTERFACE_H
+#define TCAM_CAPTUREINTERFACE_H
 
 #include "DeviceInfo.h"
 #include "Properties.h"
@@ -107,4 +107,4 @@ std::shared_ptr<DeviceInterface> openDeviceInterface (const DeviceInfo& device);
 
 VISIBILITY_POP
 
-#endif /* CAPTUREINTERFACE_H_ */
+#endif /* TCAM_CAPTUREINTERFACE_H */

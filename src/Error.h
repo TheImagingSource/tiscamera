@@ -1,6 +1,6 @@
 
-#ifndef ERROR_H_
-#define ERROR_H_
+#ifndef TCAM_ERROR_H
+#define TCAM_ERROR_H
 
 #include "simplectypes.h"
 
@@ -87,4 +87,4 @@ void resetError ();
 
 /** @} */
 
-#endif /* ERROR_H_ */
+#endif /* TCAM_ERROR_H */

@@ -2,8 +2,8 @@
 
 
 
-#ifndef PROPERTIES_H_
-#define PROPERTIES_H_
+#ifndef TCAM_PROPERTIES_H
+#define TCAM_PROPERTIES_H
 
 #include "Property.h"
 
@@ -150,4 +150,4 @@ public:
 
 /** @} */
 
-#endif /* PROPERTIES_H_ */
+#endif /* TCAM_PROPERTIES_H */
