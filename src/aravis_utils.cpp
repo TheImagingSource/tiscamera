@@ -241,8 +241,8 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
     else
     {
         type_to_use = ctrl_m.type_to_use;
-        memcpy(prop.name, ctrl_m.name.c_str(), ctrl_m.name.size());
-        prop.type = ctrl_m.type_to_use;
+
+        prop = create_empty_property(ctrl_m.id);
     }
 
     if (ARV_IS_GC_ENUMERATION (node))
