@@ -117,7 +117,7 @@ void DeviceIndex::fire_device_lost (const DeviceInfo& d)
 }
 
 
-bool DeviceIndex::fillDeviceInfo (DeviceInfo& info)
+bool DeviceIndex::fillDeviceInfo (DeviceInfo& info) const
 {
     if (!info.getSerial().empty())
     {

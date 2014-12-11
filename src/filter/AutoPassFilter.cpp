@@ -120,11 +120,11 @@ bool AutoPassPropertyHandler::getProperty (Property& prop)
 
 AutoPassFilter::AutoPassFilter ()
     : valid(false),
-      current_status(TCAM_PIPELINE_UNDEFINED),
       wb_r(default_color_value),
       wb_g(default_color_value),
       wb_b(default_color_value),
       exposure_max(0),
+      current_status(TCAM_PIPELINE_UNDEFINED),
       state(nullptr)
 {
     description.name = "AutoPass";

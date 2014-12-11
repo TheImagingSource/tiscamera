@@ -24,20 +24,20 @@ AravisDevice::AravisPropertyHandler::AravisPropertyHandler (AravisDevice* dev)
 bool AravisDevice::AravisPropertyHandler::getProperty (Property& p)
 {
     return device->getProperty(p);
-
-    return false;
 }
 
 
 bool AravisDevice::AravisPropertyHandler::setProperty (const Property& p)
 {
     return device->setProperty(p);
-    return false;
 }
 
 
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
-    : device(device_desc), handler(nullptr), current_buffer(0), stream(NULL)
+    : device(device_desc),
+      handler(nullptr),
+      current_buffer(0),
+      stream(NULL)
 {
     this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
 
@@ -733,6 +733,8 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                     {
                         GError* error = NULL;
 
+                        // We want to store framerates as fps,m thus have to convert them from 0.XXXXX Hz to XX.YY FpS
+
                         // this is the denominator of our framerate
                         uint64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
                         double f = 1.0 / (uint32_t)val * 10000000;
@@ -862,10 +864,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             res_fps rf = {};
 
-            rf.resolution = {};
 
-            double fps_min;
-            double fps_max;
 
             //arv_camera_get_frame_rate_bounds ( this->arv_camera, &fps_min, &fps_max );
 
@@ -882,7 +881,6 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             rf.resolution = max;
 
-            res_vec.push_back ( rf );
 
             struct tcam_video_format_description d = desc;
 

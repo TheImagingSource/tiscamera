@@ -233,7 +233,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-bool V4l2Device::validateVideoFormat (const VideoFormat& format)
+bool V4l2Device::validateVideoFormat (const VideoFormat& format) const
 {
 
     for (const auto& f : available_videoformats)
@@ -1080,7 +1080,7 @@ void V4l2Device::free_mmap_buffers ()
 }
 
 
-tcam_image_size V4l2Device::get_sensor_size ()
+tcam_image_size V4l2Device::get_sensor_size () const
 {
     tcam_image_size size = {};
     for (const auto& f : available_videoformats)

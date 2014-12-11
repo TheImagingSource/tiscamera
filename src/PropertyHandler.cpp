@@ -56,6 +56,12 @@ void PropertyHandler::clear ()
 
 bool PropertyHandler::setProperty (const Property& p)
 {
+
+    // Do the following things:
+    // update the (internal)backend so that user values are used
+    // update the (internal) representation of the exposed properties
+    // check if other properties need to be changed (flags, etc).
+
     for (auto& prop : properties)
     {
         if (prop.external_property->getID() == p.getID())

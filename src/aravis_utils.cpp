@@ -311,10 +311,6 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             prop.value.d.max = max;
 
             return std::make_shared<PropertyDouble>(impl, prop, type);
-
-            // TODO: implement
-            tcam_log(TCAM_LOG_ERROR, "Trying to map int to double. not implemented.");
-            return nullptr;
         }
         else
         {

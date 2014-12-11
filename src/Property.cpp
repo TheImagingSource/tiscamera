@@ -19,14 +19,14 @@ Property::Property ()
 
 
 Property::Property (const tcam_device_property& property, VALUE_TYPE t)
-    : prop(property), ref_prop(property), value_type(t)
+    : value_type(t), prop(property), ref_prop(property)
 {}
 
 
 Property::Property (const tcam_device_property& property,
                     const std::map<std::string, int>& mapping,
                     VALUE_TYPE t)
-    : prop(property), ref_prop(property), string_map(mapping), value_type(t)
+    : value_type(t), prop(property), ref_prop(property), string_map(mapping)
 {}
 
 

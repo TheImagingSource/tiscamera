@@ -40,7 +40,7 @@ public:
      *                Must contain identifier or serial
      * @return true if device found and argument could be filled
      */
-    bool fillDeviceInfo (DeviceInfo&);
+    bool fillDeviceInfo (DeviceInfo&) const;
 
 private:
 

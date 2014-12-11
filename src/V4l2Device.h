@@ -70,7 +70,7 @@ public:
 
     bool setVideoFormat (const VideoFormat&);
 
-    bool validateVideoFormat (const VideoFormat&);
+    bool validateVideoFormat (const VideoFormat&) const;
 
     VideoFormat getActiveVideoFormat () const;
 
@@ -161,7 +161,7 @@ private:
 
     void free_mmap_buffers ();
 
-    tcam_image_size get_sensor_size ();
+    tcam_image_size get_sensor_size () const;
 };
 
 } /* namespace tcam */
