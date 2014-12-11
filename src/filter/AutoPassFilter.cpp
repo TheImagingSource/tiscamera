@@ -365,7 +365,6 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     if (exp == dev_properties.end())
     {
         tcam_log(TCAM_LOG_INFO, "Unable to find exposure property. Auto Exposure will be disabled.");
-        return;
     }
     else
     {
@@ -385,7 +384,6 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     if (gain == dev_properties.end())
     {
         tcam_log(TCAM_LOG_INFO, "Unable to find exposure property. Module will be disabled.");
-        return;
     }
     else
     {
