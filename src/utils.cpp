@@ -198,22 +198,26 @@ std::vector<double> tcam::create_steps_for_range (double min, double max)
 {
     std::vector<double> vec;
 
-    if (max >= min)
+    if (max <= min)
         return vec;
 
-    double current_step = min;
+    vec.push_back(min);
+
+    // we do not want every framerate to have unnecessary decimals
+    // e.g. 1.345678 instead of 1.00000
+    double current_step = (int)min;
+
+    // 0.0 is not a valid framerate
+    if (current_step < 1.0)
+        current_step = 1.0;
 
     while (current_step < max)
     {
         vec.push_back(current_step);
 
-        if (current_step < 10.0)
+        if (current_step < 20.0)
         {
             current_step += 1;
-        }
-        else if (current_step < 20.0)
-        {
-            current_step += 2.0;
         }
         else
         {
