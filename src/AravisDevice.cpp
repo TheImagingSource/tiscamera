@@ -701,6 +701,10 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     // All framerates are valid for all frame sizes
     // All frame sizes are valid for all formats
 
+    // we index genicam our selves because the aravis api does not allow
+    // the retrieval of all required information
+    // e.g. if the camera only offers certain framerates we want to know them
+
     // We search for the wanted node and save the intermediate result
     std::string node_to_use;
     auto find_node = [&node_to_use] (ArvGcNode* node)
@@ -750,8 +754,10 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             double max;
             arv_camera_get_frame_rate_bounds(this->arv_camera ,&min, &max);
 
-            fps.push_back(min);
-            fps.push_back(max);
+            fps = create_steps_for_range(min, max);
+
+            // fps.push_back(min);
+            // fps.push_back(max);
         }
     }
     else
@@ -760,7 +766,13 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
         // fallback and atleast try to not wreck the whole system
 
         // show that something went wrong
-        fps.push_back(0.0);
+
+        double min;
+        double max;
+        arv_camera_get_frame_rate_bounds(this->arv_camera ,&min, &max);
+
+        fps = create_steps_for_range(min, max);
+
     }
 
 
@@ -837,7 +849,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
         // use official API to retrieve info
         // if needed we can perform additional genicam interpretation here
 
-        unsigned  n_formats;
+        unsigned int n_formats;
         gint64* format_ptr = arv_camera_get_available_pixel_formats ( this->arv_camera, &n_formats );
         unsigned  n2_formats;
         const char** format_str = arv_camera_get_available_pixel_formats_as_strings ( this->arv_camera, &n2_formats );
@@ -847,7 +859,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             tcam_log ( TCAM_LOG_ERROR, "Format retrieval encountered nonsensical information" );
         }
 
-        for ( int i = 0; i < n_formats; ++i )
+        for (unsigned int i = 0; i < n_formats; ++i)
         {
             struct tcam_video_format_description desc = {};
 
@@ -864,22 +876,13 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             res_fps rf = {};
 
+            rf.resolution = max;
 
-
-            //arv_camera_get_frame_rate_bounds ( this->arv_camera, &fps_min, &fps_max );
-
-
-            rf.resolution = min;
-            // rf.fps.push_back ( fps_min );
-            // rf.fps.push_back ( fps_max );
-
-            rf.fps =fps;
+            rf.fps = fps;
 
             std::vector<res_fps> res_vec;
 
             res_vec.push_back ( rf );
-
-            rf.resolution = max;
 
 
             struct tcam_video_format_description d = desc;
