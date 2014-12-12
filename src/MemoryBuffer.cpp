@@ -60,34 +60,3 @@ void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);
 }
-
-
-void MemoryBuffer::lock ()
-{
-    lock_count++;
-}
-
-
-bool MemoryBuffer::isLocked ()
-{
-    if (lock_count > 0)
-    {
-        return true;
-    }
-    return false;
-}
-
-
-void MemoryBuffer::unlock ()
-{
-    if (lock_count > 0)
-    {
-        lock_count--;
-    }
-}
-
-
-void MemoryBuffer::forceUnlock ()
-{
-    lock_count = 0;
-}

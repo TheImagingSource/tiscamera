@@ -652,8 +652,6 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         return;
     }
 
-    buffer->lock();
-
     auto& current_buffer = buffer;
 
     for (auto& f : filter_pipeline)
@@ -687,5 +685,4 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
     {
       tcam_log(TCAM_LOG_ERROR, "Sink is NULL");
     }
-    buffer->unlock();
 }

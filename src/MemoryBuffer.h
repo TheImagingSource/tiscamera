@@ -48,26 +48,6 @@ public:
      */
     void clear ();
 
-    /**
-     * @brief Increases lock count by 1
-     */
-    void lock ();
-
-    /**
-     * @return true if user holds MemoryBuffer lock
-     */
-    bool isLocked ();
-
-    /**
-     * @brief Decreases lock count by 1
-     */
-    void unlock ();
-
-    /**
-     * Forcefully reset lock count to 0
-     */
-    void forceUnlock ();
-
 private:
 
     struct tcam_image_buffer buffer;
