@@ -47,6 +47,7 @@ filter/AutoPassFilter.cpp
 filter/BayerRgbFilter.cpp
 PropertyHandler.cpp
 public_utils.cpp
+gsttcambase.c
 )
 
 if (BUILD_USB)
