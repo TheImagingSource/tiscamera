@@ -25,10 +25,7 @@ CaptureDevice::CaptureDevice (const DeviceInfo& info)
 
 
 CaptureDevice::~CaptureDevice ()
-{
-    if (isDeviceOpen())
-        impl->closeDevice();
-}
+{}
 
 
 bool CaptureDevice::load_configuration (const std::string& filename)
