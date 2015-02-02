@@ -162,7 +162,7 @@ void PipelineManager::index_output_formats ()
 
     // to finalize iterate input formats and select those that shall be passed through
 
-    std::vector<uint32_t> pass_through = {FOURCC_Y800, FOURCC_Y16, FOURCC_UYVY};
+    std::vector<uint32_t> pass_through = {FOURCC_Y800, FOURCC_Y16, FOURCC_UYVY, FOURCC_GRBG8, FOURCC_GBRG8, FOURCC_RGGB8, FOURCC_BGGR8};
 
     for (auto f : pass_through)
     {
