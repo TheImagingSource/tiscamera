@@ -246,6 +246,16 @@ uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint3
 }
 
 
+unsigned int tcam::tcam_get_required_buffer_size (const struct tcam_video_format* format)
+{
+    if (format == nullptr)
+    {
+        return 0;
+    }
+
+    return get_buffer_length(format->width, format->height, format->fourcc);
+}
+
 uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
 {
     if (width == 0 || fourcc == 0)
