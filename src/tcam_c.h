@@ -70,9 +70,9 @@ extern "C"
      * @param[in]  size  - size of the given array
      * @return number of devices copied; -1 on error
      */
-    int tcam_device_index_get_device_infos (const tcam_device_index* index,
+    int tcam_device_index_get_device_infos (tcam_device_index* index,
                                             struct tcam_device_info* array,
-                                            const unsigned int size);
+                                            size_t size);
 
 
     /* image source */
