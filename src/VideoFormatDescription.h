@@ -51,6 +51,8 @@ public:
      */
     uint32_t getFourcc () const;
 
+    TCAM_FRAMERATE_TYPE getFramerateType () const;
+
     std::vector<res_fps> getResolutionsFramesrates () const;
 
     std::vector<tcam_image_size> getResolutions () const;
@@ -59,6 +61,7 @@ public:
     tcam_image_size getSizeMax () const;
 
     std::vector<double> getFrameRates (const tcam_image_size& size) const;
+    std::vector<double> getFrameRates (unsigned int width, unsigned height) const;
 
     VideoFormat createVideoFormat (unsigned int width,
                                    unsigned int height,

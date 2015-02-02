@@ -60,6 +60,12 @@ uint32_t VideoFormatDescription::getFourcc () const
 }
 
 
+TCAM_FRAMERATE_TYPE VideoFormatDescription::getFramerateType () const
+{
+    return format.framerate_type;
+}
+
+
 std::vector<res_fps> VideoFormatDescription::getResolutionsFramesrates () const
 {
     return rf;
@@ -93,16 +99,41 @@ tcam_image_size VideoFormatDescription::getSizeMax () const
 
 std::vector<double> VideoFormatDescription::getFrameRates (const tcam_image_size& size) const
 {
+    return getFrameRates(size.width, size.height);
+}
 
-    for (auto r : rf)
+
+std::vector<double> VideoFormatDescription::getFrameRates (unsigned int width, unsigned height) const
+{
+    std::vector<double> vec;
+
+    if (format.framerate_type == TCAM_FRAMERATE_TYPE_FIXED)
     {
-        if (size.width == r.resolution.width && size.height == r.resolution.height)
+        for (const auto& r :rf)
         {
-            return r.fps;
+            if (r.resolution.width == width && r.resolution.height == height)
+            {
+                vec = r.fps;
+            }
+        }
+    }
+    else // TCAM_FRAMERATE_RANGE
+    {
+        if (format.min_size.width <= width <= format.max_size.width &&
+            format.min_size.height <= height <= format.max_size.height)
+        {
+            // since this is range based we should only have one fps collection
+            if (rf.size() == 1)
+            {
+                vec = rf.at(0).fps;
+            }
+            {
+                tcam_log(TCAM_LOG_ERROR, "Unable to determine correct framerate collection");
+            }
         }
     }
 
-    return std::vector<double>();
+    return vec;
 }
 
 
