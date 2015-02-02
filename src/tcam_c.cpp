@@ -171,13 +171,25 @@ bool tcam_capture_device_get_image_format (tcam_capture_device* source,
 }
 
 
+struct tmp_stream_obj
+{
+    std::shared_ptr<ImageSink> sink;
+};
+
 /* streaming functions */
 
-bool tcam_capture_device_start_stream (tcam_capture_device* source,
-                                       tcam_image_callback callback,
-                                       void* user_data)
+stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
+                                             tcam_image_callback callback,
+                                             void* user_data)
 {
+    auto obj =  new tmp_stream_obj();
+    obj->sink = std::make_shared<ImageSink>();
 
+    obj->sink->registerCallback(callback, user_data);
+
+    bool ret = reinterpret_cast<CaptureDevice*>(source)->startStream(obj->sink);
+
+    return (stream_obj*)obj;
 }
 
 

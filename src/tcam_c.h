@@ -190,15 +190,18 @@ extern "C"
     /* callback that will be used to push images to the user */
     typedef void (*tcam_image_callback)(const struct tcam_image_buffer* buffer, void* user_data);
 
+    struct stream_obj;
+    typedef struct stream_obj stream_obj;
+
     /**
      * @param[in] source - capture_device that shall be used
      * @param[in] cb     - function that shall be called for new images
      * @param[in] data   - data that shall be given to data
      * @return true if stream could be started
      */
-    bool tcam_capture_device_start_stream (tcam_capture_device* source,
-                                           tcam_image_callback cb,
-                                           void* data);
+    stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
+                                                 tcam_image_callback cb,
+                                                 void* data);
 
     /**
      * Stops image capture in the device
