@@ -47,11 +47,24 @@ bool ImageSink::registerCallback (sink_callback sc, void* ud)
 }
 
 
+bool ImageSink::registerCallback (c_callback cc, void* ud)
+{
+    this->c_back = cc;
+    this->user_data = ud;
+
+    return true;
+}
+
 
 void ImageSink::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 {
+    last_image_buffer = buffer->getImageBuffer();
     if (callback != nullptr)
     {
         this->callback(&*buffer, user_data);
+    }
+    else if (c_back != nullptr)
+    {
+        this->c_back(&last_image_buffer, user_data);
     }
 }
