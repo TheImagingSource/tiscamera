@@ -67,11 +67,13 @@ if (BUILD_ARAVIS)
 
   add_definitions(-DHAVE_ARAVIS)
 
-  # TODO replace with find module
-  find_package(PkgConfig)
-  pkg_check_modules(ARAVIS REQUIRED aravis-0.4)
-  include_directories(${ARAVIS_INCLUDE_DIRS})
-  link_directories(${ARAVIS_LIBRARY_DIRS})
+  find_package(Aravis REQUIRED)
+  find_package(GObject REQUIRED) # dependency
+  find_package(GLIB2 REQUIRED)   # dependency
+
+  include_directories(${aravis_INCLUDE_DIR})
+  include_directories(${GObject_INCLUDE_DIR})
+  include_directories(${GLIB2_INCLUDE_DIR})
 
 endif (BUILD_ARAVIS)
 
@@ -96,7 +98,9 @@ endif(BUILD_USB)
 TARGET_LINK_LIBRARIES(tcam ${TinyXML_LIBRARIES})
 
 if (BUILD_ARAVIS)
-  TARGET_LINK_LIBRARIES(tcam ${ARAVIS_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam ${aravis_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam ${GObject_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam ${GLIB2_LIBRARIES})
 endif (BUILD_ARAVIS)
 
 
