@@ -8,6 +8,8 @@ set(PLUGINS
 
 list(REMOVE_ITEM CMAKE_C_FLAGS "-std=c99")
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 
 # find_package(GStreamer REQUIRED)
 # find_package(GLIB2 REQUIRED)
@@ -17,10 +19,19 @@ list(REMOVE_ITEM CMAKE_C_FLAGS "-std=c99")
 # include_directories(${GSTREAMER_CFLAGS})
 # include_directories(${GLIB2_INCLUDE_DIR})
 
+find_package(GStreamer010)
+
 find_package(PkgConfig)
 pkg_check_modules(GST_0_10 REQUIRED gstreamer-0.10)
+pkg_check_modules(GSTB_0_10 REQUIRED gstreamer-base-0.10)
+
 include_directories(${GST_0_10_INCLUDE_DIRS})
+include_directories(${GSTB_0_10_INCLUDE_DIRS})
+include_directories(${GSTREAMER010_INCLUDE_DIR})
+
 link_directories(${GST_0_10_LIBRARY_DIRS})
+link_directories(${GSTREAMER010_LIBRARY_DIRS})
+link_directories(${GSTB_0_10_LIBRARY_DIRS})
 
 
 add_library(gsttiswhitebalance SHARED gsttiswhitebalance.c image_sampling.c bayer.c)
@@ -38,6 +49,8 @@ add_library(gsttis_auto_focus SHARED gsttis_autofocus.c AutoFocus.cpp auto_focus
 foreach (t IN ITEMS ${PLUGINS})
 
   target_link_libraries(${t} ${GST_0_10_LIBARIES})
+  target_link_libraries(${t} ${GSTREAMER010_LIBARIES})
+  target_link_libraries(${t} ${GSTB_0_10_LIBARIES})
 
 endforeach (t)
   
