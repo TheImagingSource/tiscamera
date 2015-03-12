@@ -62,14 +62,16 @@ static GstStaticPadTemplate gst_tisvideobufferfilter_sink_template =
 	GST_STATIC_PAD_TEMPLATE ("sink",
 				 GST_PAD_SINK,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
+					 "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
 		);
 
 static GstStaticPadTemplate gst_tisvideobufferfilter_src_template =
 	GST_STATIC_PAD_TEMPLATE ("src",
 				 GST_PAD_SRC,
 				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX]")
+				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
+						  "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
 		);
 
 
@@ -169,25 +171,6 @@ static GstCaps *
 gst_tisvideobufferfilter_sink_getcaps (GstPad *pad)
 {
 	GstTisVideoBufferFilter *self = GST_TISVIDEOBUFFERFILTER (gst_pad_get_parent (pad));
-	GstPad *peerpad;
-	
-	peerpad = gst_pad_get_peer (self->srcpad);
-	if (peerpad){
-		GstCaps *caps;
-		GstStructure *s;
-		caps = gst_pad_get_caps (peerpad);
-		s = gst_caps_get_structure (caps, 0);
-		if (gst_structure_has_name (s, "video/x-raw-bayer")){
-			caps = gst_caps_make_writable (caps);
-			gst_structure_set_name (s, "video/x-raw-gray");
-		}
-
-		GST_DEBUG_OBJECT (self, "flt Caps: %s", gst_caps_to_string (caps));
-		
-		return caps;
-	}
-
-	GST_DEBUG_OBJECT (self, "%s", gst_caps_to_string (gst_pad_get_caps (self->srcpad)));
 		
 	return gst_pad_get_caps (self->srcpad);
 }
