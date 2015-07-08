@@ -134,22 +134,21 @@ guint buffer_brightness_gray (GstBuffer* buf)
     g_return_if_fail (gst_structure_get_int (structure, "width", &width));
     g_return_if_fail (gst_structure_get_int (structure, "height", &height));
 
-    gint pitch = 1;
     guint cnt = 0;
     guint y_accu = 0;
-    guint sampling_line_step = width / (SAMPLING_LINES + 1);
+    guint samplingRowStep = height / (SAMPLING_LINES + 1);
+    guint samplingColStep = width / (SAMPLING_COLUMNS + 1);
     
     guint y;
-    for (y = sampling_line_step; y < width; y += sampling_line_step )
+    for (y = samplingRowStep; y < height; y += samplingRowStep )
     {
-        guint samplingColStep = ((height) / (SAMPLING_COLUMNS+1));
-        byte* pLine = data + y * pitch;
+        byte* pLine = data + y * width;
 
-        guint col;
-        for (col = samplingColStep; col < height; col += samplingColStep)
+        guint x;
+        for (x = samplingColStep; x < width; x += samplingColStep)
         {
             ++cnt;
-            y_accu += pLine[col];
+            y_accu += pLine[x];
         }
     }
 
@@ -157,5 +156,8 @@ guint buffer_brightness_gray (GstBuffer* buf)
     {
         brightness = y_accu / cnt;
     }
+
+    g_print("brightness: %d\n", brightness);
+    
     return brightness;
 }
