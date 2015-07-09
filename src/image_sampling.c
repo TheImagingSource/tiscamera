@@ -157,7 +157,5 @@ guint buffer_brightness_gray (GstBuffer* buf)
         brightness = y_accu / cnt;
     }
 
-    g_print("brightness: %d\n", brightness);
-    
     return brightness;
 }
