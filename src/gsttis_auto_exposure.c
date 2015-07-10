@@ -725,10 +725,26 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
 static GstFlowReturn gst_tis_auto_exposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTis_Auto_Exposure* self = GST_TIS_AUTO_EXPOSURE (trans);
+    GstCaps *caps = GST_BUFFER_CAPS (buf);
+    GstStructure *s = gst_caps_get_structure (caps, 0);
+    gint width, height;
+
+    // We need at least a buffer with valid width and height
+    if (!gst_structure_get_int (s, "width", &width) ||
+	!gst_structure_get_int (s, "height", &height)){
+	    return GST_FLOW_ERROR;
+    }
 
     if (!self->auto_exposure)
     {
         return GST_FLOW_OK;
+    }
+
+    if (GST_BUFFER_SIZE (buf) < (width * height)){
+	// The buffer contains less than a full frame of data
+	// This might happen when the camera got interrupted during
+	// the transfer and delivered a corrupted frame
+	return GST_FLOW_OK;
     }
 
     if (self->frame_counter > 3)
