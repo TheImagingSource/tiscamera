@@ -187,6 +187,8 @@ static void gst_tis_auto_exposure_init (GstTis_Auto_Exposure *self)
     self->auto_exposure = TRUE;
 
     self->frame_counter = 0;
+    self->framerate_numerator = 15;
+    self->framerate_denominator = 1;
     self->camera_src = NULL;
 }
 
@@ -303,6 +305,7 @@ static void gst_tis_auto_exposure_fixate_caps (GstBaseTransform* base,
     GstStructure* ins;
     GstStructure* outs;
     gint width, height;
+    gint numerator, denominator;
     g_return_if_fail (gst_caps_is_fixed (incoming));
 
     GST_DEBUG_OBJECT (base, "trying to fixate outgoing %" GST_PTR_FORMAT
@@ -311,7 +314,15 @@ static void gst_tis_auto_exposure_fixate_caps (GstBaseTransform* base,
     ins = gst_caps_get_structure (incoming, 0);
     outs = gst_caps_get_structure (outgoing, 0);
 
-    gst_structure_get_fraction(ins, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+    gst_structure_get_fraction(ins, "framerate", &numerator, &denominator);
+
+    if ((self->framerate_numerator != 0) && (self->framerate_denominator!=0)){
+           self->framerate_numerator = numerator;
+           self->framerate_denominator = denominator;
+    } else {
+           // Invalid frame rate specification
+           GST_WARNING_OBJECT (base, "Invalid framerate received from caps");
+    }
 
     if (gst_structure_get_int (ins, "width", &width))
     {
