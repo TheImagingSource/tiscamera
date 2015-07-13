@@ -45,6 +45,7 @@ struct _Gsttisvideobufferfilter {
 	GstBaseTransform element;
 
 	guint dropcount;
+	guint framecount;
 };
 
 struct _GsttisvideobufferfilterClass {

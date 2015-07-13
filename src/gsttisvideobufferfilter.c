@@ -132,6 +132,10 @@ gst_tisvideobufferfilter_class_init (GsttisvideobufferfilterClass * klass)
     g_param_spec_uint ("dropcount", "DropCount", "Number of frames dropped",
 		       0, G_MAXUINT, 0, G_PARAM_READABLE));
 
+  g_object_class_install_property (gobject_class, PROP_FRAMECOUNT,
+    g_param_spec_uint ("framecount", "FrameCount", "Number of frames received (dropped + passed)",
+		       0, G_MAXUINT, 0, G_PARAM_READABLE));
+
   GST_BASE_TRANSFORM_CLASS (klass)->transform_ip =
       GST_DEBUG_FUNCPTR (gst_tisvideobufferfilter_transform_ip);
 }
@@ -143,6 +147,7 @@ static void
 gst_tisvideobufferfilter_init (Gsttisvideobufferfilter *filter, GsttisvideobufferfilterClass * klass)
 {
   filter->dropcount = 0;
+  filter->framecount = 0;
 }
 
 static void
@@ -168,6 +173,9 @@ gst_tisvideobufferfilter_get_property (GObject * object, guint prop_id,
     case PROP_DROPCOUNT:
       g_value_set_uint (value, filter->dropcount);
       break;
+    case PROP_FRAMECOUNT:
+      g_value_set_uint (value, filter->framecount);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -185,6 +193,8 @@ gst_tisvideobufferfilter_transform_ip (GstBaseTransform * base, GstBuffer * outb
   gint width, height;
   GstCaps *caps;
   GstStructure *s;
+
+  filter->framecount++;
 
   caps = GST_BUFFER_CAPS(outbuf);
   if (!caps){
