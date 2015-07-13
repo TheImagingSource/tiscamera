@@ -22,7 +22,7 @@
 /**
  * SECTION:element-tisvideobufferfilter
  *
- * FIXME:Describe tisvideobufferfilter here.
+ * Filters incomplete video buffers
  *
  * <refsect2>
  * <title>Example launch line</title>
@@ -62,8 +62,6 @@ enum
 };
 
 /* the capabilities of the inputs and outputs.
- *
- * FIXME:describe the real formats here.
  */
 static GstStaticPadTemplate sink_template =
 GST_STATIC_PAD_TEMPLATE (
@@ -86,7 +84,7 @@ GST_STATIC_PAD_TEMPLATE (
  * FIXME:exchange the string 'Template tisvideobufferfilter' with your description
  */
 #define DEBUG_INIT(bla) \
-  GST_DEBUG_CATEGORY_INIT (gst_tisvideobufferfilter_debug, "tisvideobufferfilter", 0, "Template tisvideobufferfilter");
+  GST_DEBUG_CATEGORY_INIT (gst_tisvideobufferfilter_debug, "tisvideobufferfilter", 0, "tisvideobufferfilter debug");
 
 GST_BOILERPLATE_FULL (Gsttisvideobufferfilter, gst_tisvideobufferfilter, GstBaseTransform,
     GST_TYPE_BASE_TRANSFORM, DEBUG_INIT);
@@ -109,8 +107,8 @@ gst_tisvideobufferfilter_base_init (gpointer klass)
   gst_element_class_set_details_simple (element_class,
     "tisvideobufferfilter",
     "Generic/Filter",
-    "FIXME:Generic Template Filter",
-    " <<user@hostname.org>>");
+    "Video Buffer Filter",
+    " <arne.caspari@theimagingsource.com>");
 
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&src_template));
@@ -219,9 +217,6 @@ gst_tisvideobufferfilter_transform_ip (GstBaseTransform * base, GstBuffer * outb
 	  return GST_BASE_TRANSFORM_FLOW_DROPPED;
   }
 
-  /* FIXME: do something interesting here.  This simply copies the source
-   * to the destination. */
-
   return GST_FLOW_OK;
 }
 
@@ -238,17 +233,15 @@ tisvideobufferfilter_init (GstPlugin * tisvideobufferfilter)
 }
 
 /* gstreamer looks for this structure to register tisvideobufferfilters
- *
- * FIXME:exchange the string 'Template tisvideobufferfilter' with you tisvideobufferfilter description
  */
 GST_PLUGIN_DEFINE (
     GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
     "tisvideobufferfilter",
-    "Template tisvideobufferfilter",
+    "Filters incomplete video buffers",
     tisvideobufferfilter_init,
     VERSION,
     "LGPL",
-    "GStreamer",
-    "http://gstreamer.net/"
+    "tiscamera",
+    "https://github.com/TheImagingSource/tiscamera"
 )
