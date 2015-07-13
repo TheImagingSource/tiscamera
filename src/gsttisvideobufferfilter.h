@@ -1,50 +1,58 @@
-/*
- * Copyright 2013 The Imaging Source Europe GmbH
+/* 
+ * GStreamer
+ * Copyright (C) 2006 Stefan Kost <ensonic@users.sf.net>
+ * Copyright (C) 2015  <<user@hostname.org>>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
  */
+ 
+#ifndef __GST_TISVIDEOBUFFERFILTER_H__
+#define __GST_TISVIDEOBUFFERFILTER_H__
 
-#ifndef _GST_TISVIDEOBUFFERFILTER_H_
-#define _GST_TISVIDEOBUFFERFILTER_H_
-
-#include <gst/gstelement.h>
+#include <gst/gst.h>
+#include <gst/base/gstbasetransform.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_TISVIDEOBUFFERFILTER   (gst_tisvideobufferfilter_get_type())
-#define GST_TISVIDEOBUFFERFILTER(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TISVIDEOBUFFERFILTER,GstTisVideoBufferFilter))
-#define GST_TISVIDEOBUFFERFILTER_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TISVIDEOBUFFERFILTER,GstTisVideoBufferFilterClass))
-#define GST_IS_TISVIDEOBUFFERFILTER(obj)   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_TISVIDEOBUFFERFILTER))
-#define GST_IS_TISVIDEOBUFFERFILTER_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TISVIDEOBUFFERFILTER))
+#define GST_TYPE_TISVIDEOBUFFERFILTER \
+  (gst_tisvideobufferfilter_get_type())
+#define GST_TISVIDEOBUFFERFILTER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TISVIDEOBUFFERFILTER,Gsttisvideobufferfilter))
+#define GST_TISVIDEOBUFFERFILTER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TISVIDEOBUFFERFILTER,GsttisvideobufferfilterClass))
+#define GST_IS_TISVIDEOBUFFERFILTER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_TISVIDEOBUFFERFILTER))
+#define GST_IS_TISVIDEOBUFFERFILTER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TISVIDEOBUFFERFILTER))
 
-typedef struct _GstTisVideoBufferFilter GstTisVideoBufferFilter;
-typedef struct _GstTisVideoBufferFilterClass GstTisVideoBufferFilterClass;
+typedef struct _Gsttisvideobufferfilter      Gsttisvideobufferfilter;
+typedef struct _GsttisvideobufferfilterClass GsttisvideobufferfilterClass;
 
-struct _GstTisVideoBufferFilter
-{
-  GstElement element;
+struct _Gsttisvideobufferfilter {
+	GstBaseTransform element;
 
-  GstPad *sinkpad;
-  GstPad *srcpad;
+	guint dropcount;
 };
 
-struct _GstTisVideoBufferFilterClass
-{
-  GstElementClass element_class;
+struct _GsttisvideobufferfilterClass {
+  GstBaseTransformClass parent_class;
 };
 
 GType gst_tisvideobufferfilter_get_type (void);
 
 G_END_DECLS
 
-#endif
+#endif /* __GST_TISVIDEOBUFFERFILTER_H__ */

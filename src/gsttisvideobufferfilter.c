@@ -1,30 +1,34 @@
 /*
- * Copyright 2013 The Imaging Source Europe GmbH
+ * GStreamer
+ * Copyright (C) 2006 Stefan Kost <ensonic@users.sf.net>
+ * Copyright (C) 2015  <<user@hostname.org>>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
  */
 
 /**
- * SECTION:element-gsttisvideobufferfilter
+ * SECTION:element-tisvideobufferfilter
  *
- * The tisvideobufferfilter element does FIXME stuff.
+ * FIXME:Describe tisvideobufferfilter here.
  *
  * <refsect2>
  * <title>Example launch line</title>
  * |[
- * gst-launch -v fakesrc ! tisvideobufferfilter ! FIXME ! fakesink
+ * gst-launch -v -m fakesrc ! tisvideobufferfilter ! fakesink silent=TRUE
  * ]|
- * FIXME Describe what the pipeline does.
  * </refsect2>
  */
 
@@ -33,199 +37,208 @@
 #endif
 
 #include <gst/gst.h>
-#include <gst/gstelement.h>
+#include <gst/base/gstbasetransform.h>
+
 #include "gsttisvideobufferfilter.h"
 
-GST_DEBUG_CATEGORY_STATIC (gst_tisvideobufferfilter_debug_category);
-#define GST_CAT_DEFAULT gst_tisvideobufferfilter_debug_category
+#define VERSION "0.2"
+#define PACKAGE "tisvideobufferfilter"
 
-/* prototypes */
+GST_DEBUG_CATEGORY_STATIC (gst_tisvideobufferfilter_debug);
+#define GST_CAT_DEFAULT gst_tisvideobufferfilter_debug
 
-
-static void gst_tisvideobufferfilter_set_property (GObject * object,
-						   guint property_id, const GValue * value, GParamSpec * pspec);
-static void gst_tisvideobufferfilter_get_property (GObject * object,
-						   guint property_id, GValue * value, GParamSpec * pspec);
-static void gst_tisvideobufferfilter_finalize (GObject * object);
-static GstFlowReturn
-gst_tisvideobufferfilter_sink_chain (GstPad *pad, GstBuffer *buffer);
-static GstCaps *
-gst_tisvideobufferfilter_sink_getcaps (GstPad *pad);
+/* Filter signals and args */
+enum
+{
+  /* FILL ME */
+  LAST_SIGNAL
+};
 
 enum
 {
-	PROP_0
+  PROP_0,
+  PROP_DROPCOUNT,
+  PROP_FRAMECOUNT,
 };
 
-/* pad templates */
-static GstStaticPadTemplate gst_tisvideobufferfilter_sink_template =
-	GST_STATIC_PAD_TEMPLATE ("sink",
-				 GST_PAD_SINK,
-				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
-					 "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
-		);
+/* the capabilities of the inputs and outputs.
+ *
+ * FIXME:describe the real formats here.
+ */
+static GstStaticPadTemplate sink_template =
+GST_STATIC_PAD_TEMPLATE (
+  "sink",
+  GST_PAD_SINK,
+  GST_PAD_ALWAYS,
+  GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
+		   "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]"));
 
-static GstStaticPadTemplate gst_tisvideobufferfilter_src_template =
-	GST_STATIC_PAD_TEMPLATE ("src",
-				 GST_PAD_SRC,
-				 GST_PAD_ALWAYS,
-				 GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
-						  "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]")
-		);
+static GstStaticPadTemplate src_template =
+GST_STATIC_PAD_TEMPLATE (
+  "src",
+  GST_PAD_SRC,
+  GST_PAD_ALWAYS,
+  GST_STATIC_CAPS ("video/x-raw-gray,bpp=8,framerate=(fraction)[0/1,1000/1],width=[1,MAX],height=[1,MAX];"\
+		   "video/x-raw-bayer,format=(string){bggr,grbg,gbrg,rggb},framerate=(fraction)[0/1,MAX],width=[1,MAX],height=[1,MAX]"));
 
+/* debug category for fltering log messages
+ *
+ * FIXME:exchange the string 'Template tisvideobufferfilter' with your description
+ */
+#define DEBUG_INIT(bla) \
+  GST_DEBUG_CATEGORY_INIT (gst_tisvideobufferfilter_debug, "tisvideobufferfilter", 0, "Template tisvideobufferfilter");
 
-/* class initialization */
+GST_BOILERPLATE_FULL (Gsttisvideobufferfilter, gst_tisvideobufferfilter, GstBaseTransform,
+    GST_TYPE_BASE_TRANSFORM, DEBUG_INIT);
 
-G_DEFINE_TYPE_WITH_CODE (GstTisVideoBufferFilter, gst_tisvideobufferfilter, GST_TYPE_ELEMENT,
-			 GST_DEBUG_CATEGORY_INIT (gst_tisvideobufferfilter_debug_category, "tisvideobufferfilter", 0,
-						  "debug category for tisvideobufferfilter element"));
+static void gst_tisvideobufferfilter_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec);
+static void gst_tisvideobufferfilter_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec);
 
-static void
-gst_tisvideobufferfilter_class_init (GstTisVideoBufferFilterClass * klass)
-{
-	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+static GstFlowReturn gst_tisvideobufferfilter_transform_ip (GstBaseTransform * base,
+    GstBuffer * outbuf);
 
-	/* Setting up pads and setting metadata should be moved to
-	   base_class_init if you intend to subclass this class. */
-	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-					    gst_static_pad_template_get (&gst_tisvideobufferfilter_sink_template));
-	gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-					    gst_static_pad_template_get (&gst_tisvideobufferfilter_src_template));
-
-	gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
-					      "The Imaging Source Video Buffer Filter", "Generic", "Filters(drops) corrupt raw video buffers from stream",
-					      "Arne Caspari <arne.caspari@gmail.com>");
-	/* gst_element_class_set_static_metadata (GST_ELEMENT_CLASS(klass), */
-	/* 				       "Tis Video Buffer Filter", "Generic", "Filters(drops) corrupt raw video buffers from stream", */
-	/* 				       "Arne Caspari <arne.caspari@gmail.com>"); */
-
-	gobject_class->set_property = gst_tisvideobufferfilter_set_property;
-	gobject_class->get_property = gst_tisvideobufferfilter_get_property;
-	gobject_class->finalize = gst_tisvideobufferfilter_finalize;
-
-}
+/* GObject vmethod implementations */
 
 static void
-gst_tisvideobufferfilter_init (GstTisVideoBufferFilter *self)
+gst_tisvideobufferfilter_base_init (gpointer klass)
 {
+  GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
 
-	self->sinkpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_sink_template,     
-							  "sink");
+  gst_element_class_set_details_simple (element_class,
+    "tisvideobufferfilter",
+    "Generic/Filter",
+    "FIXME:Generic Template Filter",
+    " <<user@hostname.org>>");
 
-	self->srcpad = gst_pad_new_from_static_template (&gst_tisvideobufferfilter_src_template,     
-							 "src");
-
-	gst_element_add_pad (GST_ELEMENT (self), 
-			     self->sinkpad);
-	gst_element_add_pad (GST_ELEMENT (self), 
-			     self->srcpad);
-
-	gst_pad_set_chain_function (self->sinkpad,
-				    GST_DEBUG_FUNCPTR(gst_tisvideobufferfilter_sink_chain));
-
-	gst_pad_set_getcaps_function (self->sinkpad,
-				      GST_DEBUG_FUNCPTR(gst_tisvideobufferfilter_sink_getcaps));
-
-				      
+  gst_element_class_add_pad_template (element_class,
+      gst_static_pad_template_get (&src_template));
+  gst_element_class_add_pad_template (element_class,
+      gst_static_pad_template_get (&sink_template));
 }
 
-void
-gst_tisvideobufferfilter_set_property (GObject * object, guint property_id,
-				       const GValue * value, GParamSpec * pspec)
+/* initialize the tisvideobufferfilter's class */
+static void
+gst_tisvideobufferfilter_class_init (GsttisvideobufferfilterClass * klass)
 {
-	/* GstTisVideoBufferFilter *tisvideobufferfilter = GST_TISVIDEOBUFFERFILTER (object); */
+  GObjectClass *gobject_class;
 
-	switch (property_id) {
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-		break;
-	}
+  gobject_class = (GObjectClass *) klass;
+  gobject_class->set_property = gst_tisvideobufferfilter_set_property;
+  gobject_class->get_property = gst_tisvideobufferfilter_get_property;
+
+  g_object_class_install_property (gobject_class, PROP_DROPCOUNT,
+    g_param_spec_uint ("dropcount", "DropCount", "Number of frames dropped",
+		       0, G_MAXUINT, 0, G_PARAM_READABLE));
+
+  GST_BASE_TRANSFORM_CLASS (klass)->transform_ip =
+      GST_DEBUG_FUNCPTR (gst_tisvideobufferfilter_transform_ip);
 }
 
-void
-gst_tisvideobufferfilter_get_property (GObject * object, guint property_id,
-				       GValue * value, GParamSpec * pspec)
+/* initialize the new element
+ * initialize instance structure
+ */
+static void
+gst_tisvideobufferfilter_init (Gsttisvideobufferfilter *filter, GsttisvideobufferfilterClass * klass)
 {
-	/* GstTisVideoBufferFilter *tisvideobufferfilter = GST_TISVIDEOBUFFERFILTER (object); */
-
-	switch (property_id) {
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-		break;
-	}
+  filter->dropcount = 0;
 }
 
-void
-gst_tisvideobufferfilter_finalize (GObject * object)
+static void
+gst_tisvideobufferfilter_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
 {
-	/* GstTisVideoBufferFilter *tisvideobufferfilter = GST_TISVIDEOBUFFERFILTER (object); */
+	//Gsttisvideobufferfilter *filter = GST_TISVIDEOBUFFERFILTER (object);
 
-	/* clean up object here */
-
-	G_OBJECT_CLASS (gst_tisvideobufferfilter_parent_class)->finalize (object);
+  switch (prop_id) {
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
 }
 
-
-static GstCaps *
-gst_tisvideobufferfilter_sink_getcaps (GstPad *pad)
+static void
+gst_tisvideobufferfilter_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec)
 {
-	GstTisVideoBufferFilter *self = GST_TISVIDEOBUFFERFILTER (gst_pad_get_parent (pad));
-		
-	return gst_pad_get_caps (self->srcpad);
+  Gsttisvideobufferfilter *filter = GST_TISVIDEOBUFFERFILTER (object);
+
+  switch (prop_id) {
+    case PROP_DROPCOUNT:
+      g_value_set_uint (value, filter->dropcount);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
 }
 
+/* GstBaseTransform vmethod implementations */
 
+/* this function does the actual processing
+ */
 static GstFlowReturn
-gst_tisvideobufferfilter_sink_chain (GstPad *pad, GstBuffer *buffer)
+gst_tisvideobufferfilter_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 {
-	GstTisVideoBufferFilter *filter;
-	GstCaps *caps = GST_BUFFER_CAPS (buffer);
-	GstStructure *s = gst_caps_get_structure (caps, 0);
-	gint width, height;
+  Gsttisvideobufferfilter *filter = GST_TISVIDEOBUFFERFILTER (base);
+  gint width, height;
+  GstCaps *caps;
+  GstStructure *s;
 
-	if (!gst_structure_get_int (s, "width", &width) || 
-	    !gst_structure_get_int (s, "height", &height)){
-		return GST_FLOW_ERROR;
-	}
+  caps = GST_BUFFER_CAPS(outbuf);
+  if (!caps){
+	  filter->dropcount++;
+	  return GST_BASE_TRANSFORM_FLOW_DROPPED;
+  }
+  
+  s = gst_caps_get_structure(caps, 0);
+  if (!s){
+	  filter->dropcount++;
+	  return GST_BASE_TRANSFORM_FLOW_DROPPED;
+  }
 
-	filter = GST_TISVIDEOBUFFERFILTER (gst_pad_get_parent (pad));
-	GST_DEBUG_OBJECT(filter, "chain");
-	
-	if (GST_BUFFER_SIZE (buffer) >=
-	    (width * height)){
-		// if buffer contains enough data for video format, push it to the src pad
-		gst_pad_push (filter->srcpad, buffer);
+  if (!gst_structure_get (s, "width", G_TYPE_INT, &width, "height", G_TYPE_INT, &height, NULL)){
+	  filter->dropcount++;
+	  return GST_BASE_TRANSFORM_FLOW_DROPPED;
+  }
 
-	}
-	gst_object_unref (filter);
-	return GST_FLOW_OK;
+  if (GST_BUFFER_SIZE (outbuf) <
+      (width * height)){
+	  filter->dropcount++;
+	  return GST_BASE_TRANSFORM_FLOW_DROPPED;
+  }
+
+  /* FIXME: do something interesting here.  This simply copies the source
+   * to the destination. */
+
+  return GST_FLOW_OK;
 }
 
+
+/* entry point to initialize the plug-in
+ * initialize the plug-in itself
+ * register the element factories and other features
+ */
 static gboolean
-plugin_init (GstPlugin * plugin)
+tisvideobufferfilter_init (GstPlugin * tisvideobufferfilter)
 {
-
-	return gst_element_register (plugin, "tisvideobufferfilter", GST_RANK_NONE,
-				     GST_TYPE_TISVIDEOBUFFERFILTER);
+  return gst_element_register (tisvideobufferfilter, "tisvideobufferfilter", GST_RANK_NONE,
+      GST_TYPE_TISVIDEOBUFFERFILTER);
 }
 
-#ifndef VERSION
-#define VERSION "0.0.FIXME"
-#endif
-#ifndef PACKAGE
-#define PACKAGE "FIXME_package"
-#endif
-#ifndef PACKAGE_NAME
-#define PACKAGE_NAME "FIXME_package_name"
-#endif
-#ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "http://FIXME.org/"
-#endif
-
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-		   GST_VERSION_MINOR,
-		   "tisvideobufferfilter",
-		   "FIXME plugin description",
-		   plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
-
+/* gstreamer looks for this structure to register tisvideobufferfilters
+ *
+ * FIXME:exchange the string 'Template tisvideobufferfilter' with you tisvideobufferfilter description
+ */
+GST_PLUGIN_DEFINE (
+    GST_VERSION_MAJOR,
+    GST_VERSION_MINOR,
+    "tisvideobufferfilter",
+    "Template tisvideobufferfilter",
+    tisvideobufferfilter_init,
+    VERSION,
+    "LGPL",
+    "GStreamer",
+    "http://gstreamer.net/"
+)
