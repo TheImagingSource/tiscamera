@@ -32,10 +32,10 @@ PLUGINS=libgsttiswhitebalance.so \
 all: $(PLUGINS)
 
 auto_focus.o: auto_focus.cpp
-	$(CXX) -std=c++11 -Wall -g -O0 -fPIC $(CPPFLAGS) $(CFLAGS) -c -o $@ $^  $(LDFLAGS)
+	$(CXX) -Wall -g -O0 -fPIC $(CPPFLAGS) $(CFLAGS) -c -o $@ $^  $(LDFLAGS)
 
 AutoFocus.o: AutoFocus.cpp
-	$(CXX) -std=c++11 -Wall -g -O0 -fPIC $(CPPFLAGS) $(CFLAGS) -c -o $@ $^  $(LDFLAGS)
+	$(CXX) -Wall -g -O0 -fPIC $(CPPFLAGS) $(CFLAGS) -c -o $@ $^  $(LDFLAGS)
 
 libgsttis_auto_focus.so: gsttis_autofocus.o AutoFocus.o auto_focus.o
 	$(CXX) -shared -g -O0 -o $@ $^ $(LDFLAGS)

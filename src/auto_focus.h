@@ -18,8 +18,8 @@
 #define AUTO_FOCUS_H_INC_
 
 #include "image_transform_base.h"
-#include <chrono>
-#include <mutex>
+#include <pthread.h>
+#include <ctime>
 
 
 namespace {
@@ -52,7 +52,7 @@ private:
     // this is the public interface mutex, and should never be taken by a function which is called by analyze_frame_
     // only setup/analyze_frame/run/end/update_focus/set_user_roi may take this
     // if any other function indirectly takes this lock, we run into an deadlock
-    std::mutex param_mtx_;
+    pthread_mutex_t param_mtx_;
 
 
     bool analyze_frame_ ( const img_descriptor& img, int& new_focus_vale );
@@ -112,8 +112,7 @@ private:
 
     bool sweep_suggested_;
 
-
-    std::chrono::time_point<std::chrono::high_resolution_clock> img_wait_endtime;
+    struct timespec img_wait_endtime;
     int img_wait_cnt;
 };
 };

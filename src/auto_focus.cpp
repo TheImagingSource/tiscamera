@@ -301,7 +301,7 @@ bool img::auto_focus::is_running () const
 void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
                             int speed, int auto_step_divisor, bool suggest_sweep )
 {
-    std::lock_guard<std::mutex> lck( param_mtx_ );
+    pthread_mutex_trylock(&param_mtx_);
 
     focus_min_ = min;
     focus_max_ = max;
@@ -316,18 +316,23 @@ void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
     focus_applied_ = 1;
     data.stepCount = 0;
     user_roi_ = roi;
+
+    pthread_mutex_unlock(&param_mtx_);
 }
 
 
 void img::auto_focus::end ()
 {
-    std::lock_guard<std::mutex> lck( param_mtx_ );
+    pthread_mutex_trylock(&param_mtx_);
+
     data.state = data_holder::ended;
 
     user_roi_.left = 0;
     user_roi_.top = 0;
     user_roi_.bottom = 0;
     user_roi_.right = 0;
+    pthread_mutex_unlock(&param_mtx_);
+
 }
 
 
@@ -349,16 +354,24 @@ void debug_out ( char* format, ... )
 bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_val )
 {
     // if we can't get the lock, then just ignore this frame and retry next frame
-    std::unique_lock<std::mutex> lck( param_mtx_, std::try_to_lock );
-    if ( !lck.owns_lock() )
+    int ret = pthread_mutex_trylock(&param_mtx_);
+    if (ret != 0)
         return false;
 
     // force this to prevent too small images
     if ( img.dim_x < REGION_SIZE || img.dim_y < REGION_SIZE )
+    {
+        pthread_mutex_unlock(&param_mtx_);
+
         return false;
+    }
 
     if ( data.state == data_holder::ended )
+    {
+        pthread_mutex_unlock(&param_mtx_);
+
         return false;
+    }
 
     bool rval = false;
     if ( data.state == data_holder::init )
@@ -413,10 +426,16 @@ bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, 
             sprintf_s( buf, __FUNCTION__ ", preconditions changed, just quit one-push-run\n" );
             OutputDebugStringA( buf );
 #endif
+            pthread_mutex_unlock(&param_mtx_);
+
             return false;
         }
         if ( !focus_applied_ )
+        {
+            pthread_mutex_unlock(&param_mtx_);
+
             return false;
+        }
         if ( check_wait_condition() )
         {
             rval = analyze_frame_( img, new_focus_val );
@@ -428,6 +447,7 @@ bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, 
         focus_applied_ = 0;
         arm_focus_timer( abs_(data.prev_focus - new_focus_val) );
     }
+    pthread_mutex_unlock(&param_mtx_);
 
     return rval;
 }
@@ -592,10 +612,15 @@ void img::auto_focus::restart_roi ( const RegionInfo& info )
 
 void img::auto_focus::update_focus ( int focus_val )
 {
-    std::unique_lock<std::mutex> lck( param_mtx_ );
+    int ret = pthread_mutex_trylock(&param_mtx_);
+
+    if (ret != 0)
+        return;
 
     data.focus_val = focus_val;
     focus_applied_ = 1;
+
+    pthread_mutex_unlock(&param_mtx_);
 }
 
 
@@ -603,7 +628,18 @@ bool img::auto_focus::check_wait_condition ()
 {
     if ( --img_wait_cnt < 0 )
     {
-        return std::chrono::high_resolution_clock::now() > img_wait_endtime;
+        timespec time2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+        if (time2.tv_sec > img_wait_endtime.tv_sec)
+        {
+            return true;
+        }
+
+        if (time2.tv_sec == img_wait_endtime.tv_sec)
+            if (time2.tv_nsec > img_wait_endtime.tv_nsec)
+            {
+                return true;
+            }
     }
     return false;
 }
@@ -619,7 +655,10 @@ void img::auto_focus::arm_focus_timer ( int diff )
     // we have to wait for at least n frames and at least for focus_min_move_speed_ milliseconds
     if( ms_to_use < min_time_to_wait_for_focus_change_ )
         ms_to_use = min_time_to_wait_for_focus_change_;
-    img_wait_endtime = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds( ms_to_use );
+
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &img_wait_endtime);
+    img_wait_endtime.tv_nsec = ms_to_use*1000*1000;
+
     img_wait_cnt = 3; // at least we have to wait 2 frames due to frame latency
 }
 
