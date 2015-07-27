@@ -860,6 +860,11 @@ void V4l2Device::stream ()
         }
         for (;;)
         {
+            if (!this->is_stream_on)
+            {
+                break;
+            }
+
             fd_set fds;
 
             FD_ZERO(&fds);
@@ -896,9 +901,22 @@ void V4l2Device::stream ()
                 statistics.frames_dropped++;
             }
 
-            if (get_frame())
+            ushort failure_counter = 0;
+            bool ret_value = get_frame();
+            if (ret_value)
             {
+                failure_counter = 0;
                 break;
+            }
+            else
+            {
+                failure_counter++;
+                if (failure_counter >= 3)
+                {
+                    tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
+                    setError(Error("Unable to retrieve buffer.", errno));
+                    break;
+                }
             }
             /* receive frame since device is ready */
             // if ( == 0)
