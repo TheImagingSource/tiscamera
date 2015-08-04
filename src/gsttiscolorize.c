@@ -383,19 +383,19 @@ char* device_bayer_pattern (int id)
 
 int check_bayer_pattern (char* desc)
 {
-    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0)
+    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GRBG Bayer (GRBG)"))
     {
         return GR;
     }
-    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0)
+    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (RGGB)"))
     {
         return RG;
     }
-    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0)
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (GBRG)"))
     {
         return GB;
     }
-    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0)
+    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0 || strcmp(desc, "BGGR Bayer (BGGR)"))
     {
         return BG;
     }
@@ -515,6 +515,14 @@ static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
             for (fmtdesc.index = 0; ! ioctl (dev_fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++)
             {
                 int pattern = check_bayer_pattern((char*)fmtdesc.description);
+
+                gst_debug_log (gst_tiscolorize_debug_category,
+                               GST_LEVEL_DEBUG,
+                               "tiscolorize",
+                               "gst_tiscolorize_transform_caps",
+                               __LINE__,
+                               NULL,
+                               "Checked format: %s ", (char*)fmtdesc.description);
 
                 if (pattern != -1)
                 {
