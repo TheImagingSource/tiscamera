@@ -35,11 +35,11 @@ std::vector<std::shared_ptr<Property>> V4l2Device::V4L2PropertyHandler::create_p
 }
 
 
-bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
+bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property)
 {
     auto f = [&new_property] (const property_description& d)
         {
-            return ((*d.prop).getName().compare(new_property.getName()) == 0);
+            return ((*d.prop).get_name().compare(new_property.get_name()) == 0);
         };
 
     auto desc = std::find_if(properties.begin(), properties.end(),f);
@@ -47,14 +47,14 @@ bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
     if (desc == properties.end())
     {
         setError(Error("", 0));
-        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.getName().c_str());
+        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
         // TODO: failure description
         return false;
     }
 
     if (desc->id == EMULATED_PROPERTY)
     {
-        if (new_property.getID() == TCAM_PROPERTY_OFFSET_AUTO)
+        if (new_property.get_ID() == TCAM_PROPERTY_OFFSET_AUTO)
         {
             auto props = create_property_vector();
             return handle_auto_center(new_property,
@@ -65,13 +65,13 @@ bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
         else
         {
             setError(Error("Emulated property not implemented", ENOENT));
-            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.getName().c_str());
+            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.get_name().c_str());
             return false;
         }
     }
     else
     {
-        desc->prop->setStruct(new_property.getStruct());
+        desc->prop->set_struct(new_property.get_struct());
 
         if (device->changeV4L2Control(*desc))
         {
@@ -82,24 +82,24 @@ bool V4l2Device::V4L2PropertyHandler::setProperty (const Property& new_property)
 }
 
 
-bool V4l2Device::V4L2PropertyHandler::getProperty (Property& p)
+bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
 {
     auto f = [&p] (const property_description& d)
         {
-            return ((*d.prop).getName().compare(p.getName()) == 0);
+            return ((*d.prop).get_name().compare(p.get_name()) == 0);
         };
 
     auto desc = std::find_if(properties.begin(), properties.end(),f);
 
     if (desc == properties.end())
     {
-        std::string s = "Unable to find Property \"" + p.getName() + "\"";
+        std::string s = "Unable to find Property \"" + p.get_name() + "\"";
         tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
         setError(Error(s, ENOENT));
         return false;
     }
 
-    p.setStruct(desc->prop->getStruct());
+    p.set_struct(desc->prop->get_struct());
 
     // TODO: ask device for current value
     return false;
@@ -111,9 +111,9 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
       property_handler(nullptr), is_stream_on(false)
 {
 
-    if ((fd = open(device.getInfo().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
+    if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'.", device.getInfo().identifier);
+        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'.", device.get_info().identifier);
         throw std::runtime_error("Failed opening device.");
     }
 
@@ -151,13 +151,13 @@ std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
 }
 
 
-bool V4l2Device::setProperty (const Property& new_property)
+bool V4l2Device::set_property (const Property& new_property)
 {
     return false;
 }
 
 
-bool V4l2Device::getProperty (Property& p)
+bool V4l2Device::get_property (Property& p)
 {
     return false;
 }
@@ -687,7 +687,7 @@ void V4l2Device::create_emulated_properties ()
     for (auto& p : tmp_props)
     {
         property_description pd = { EMULATED_PROPERTY, p};
-        tcam_log(TCAM_LOG_DEBUG, "Adding '%s' to property list", p->getName().c_str());
+        tcam_log(TCAM_LOG_DEBUG, "Adding '%s' to property list", p->get_name().c_str());
         property_handler->properties.push_back(pd);
     }
 }
@@ -772,7 +772,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
     static std::vector<TCAM_PROPERTY_ID> special_controls = {TCAM_PROPERTY_BINNING};
 
-    if (std::find(special_controls.begin(), special_controls.end(), p->getID()) != special_controls.end())
+    if (std::find(special_controls.begin(), special_controls.end(), p->get_ID()) != special_controls.end())
     {
         property_handler->special_properties.push_back(desc);
     }
@@ -792,7 +792,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 {
 
-    TCAM_PROPERTY_TYPE type = prop_desc.prop->getType();
+    TCAM_PROPERTY_TYPE type = prop_desc.prop->get_type();
 
     if (type == TCAM_PROPERTY_TYPE_STRING ||
         type == TCAM_PROPERTY_TYPE_UNKNOWN ||
@@ -808,11 +808,11 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
-        ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->getValue();
+        ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->get_value();
     }
     else if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
-        if ((std::static_pointer_cast<PropertyBoolean>(prop_desc.prop))->getValue())
+        if ((std::static_pointer_cast<PropertyBoolean>(prop_desc.prop))->get_value())
         {
             ctrl.value = 1;
         }
@@ -836,7 +836,7 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
     {
         // tcam_log(TCAM_LOG_ERROR,
         // "Changed ctrl %s to value %d.",
-        // prop_desc.prop->getName().c_str(),
+        // prop_desc.prop->get_name().c_str(),
         // ctrl.value);
     }
 
@@ -950,9 +950,9 @@ bool V4l2Device::get_frame ()
     // here they are converted to nanoseconds
     statistics.capture_time_ns = (buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
-    buffers.at(buf.index)->setStatistics(statistics);
+    buffers.at(buf.index)->set_statistics(statistics);
 
-    listener->pushImage(buffers.at(buf.index));
+    listener->push_image(buffers.at(buf.index));
 
     // requeue buffer
     ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
@@ -1046,7 +1046,7 @@ void V4l2Device::init_mmap_buffers ()
             return;
         }
 
-        buffers.at(n_buffers)->setImageBuffer(buffer);
+        buffers.at(n_buffers)->set_image_buffer(buffer);
     }
 
 }
@@ -1086,7 +1086,7 @@ void V4l2Device::free_mmap_buffers ()
             buf.pData = nullptr;
             buf.length = 0;
 
-            buffers.at(i)->setImageBuffer(buf);
+            buffers.at(i)->set_image_buffer(buf);
         }
     }
 

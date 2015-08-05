@@ -25,7 +25,7 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& de
 
     try
     {
-        TCAM_DEVICE_TYPE type = device.getDeviceType();
+        TCAM_DEVICE_TYPE type = device.get_device_type();
 
         switch (type)
         {

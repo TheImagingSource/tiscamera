@@ -288,7 +288,7 @@ std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Prope
 {
     for (auto& p : properties)
     {
-        if (p->getID() == property_id)
+        if (p->get_ID() == property_id)
         {
             return p;
         }
@@ -304,7 +304,7 @@ std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Prope
 
     auto f = [&property_name] (const std::shared_ptr<Property>& p)
         {
-            if (p->getName().compare(property_name) == 0)
+            if (p->get_name().compare(property_name) == 0)
                 return true;
             return false;
         };

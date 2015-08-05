@@ -2,6 +2,7 @@
 #include "ui_propertywidget.h"
 
 #include <memory>
+#include <iostream>
 
 using namespace tcam;
 
@@ -31,7 +32,7 @@ PropertyWidget::~PropertyWidget ()
 
 QString PropertyWidget::getName ()
 {
-    return property.getName().c_str();
+    return property.get_name().c_str();
 }
 
 
@@ -43,7 +44,7 @@ tcam::Property PropertyWidget::getProperty ()
 
 void PropertyWidget::setProperty (const tcam::Property& p)
 {
-    this->property.setStruct( p.getStruct());
+    this->property.set_struct(p.get_struct());
 }
 
 
@@ -58,7 +59,7 @@ void PropertyWidget::update ()
 void PropertyWidget::on_checkBox_toggled (bool val)
 {
     PropertyBoolean& s = (PropertyBoolean&) property;
-    s.setValue(ui->checkBox->isChecked());
+    s.set_value(ui->checkBox->isChecked());
 
     emit changed(this);
 }
@@ -67,7 +68,7 @@ void PropertyWidget::on_checkBox_toggled (bool val)
 void PropertyWidget::on_comboBox_activated (const QString &arg1)
 {
     PropertyStringMap& m = (PropertyStringMap&) property;
-    m.setValue(arg1.toStdString());
+    m.set_value(arg1.toStdString());
     emit changed(this);
 }
 
@@ -75,17 +76,17 @@ void PropertyWidget::on_comboBox_activated (const QString &arg1)
 void PropertyWidget::on_horizontalSlider_sliderMoved (int position)
 {
 
-    if (property.getType() == TCAM_PROPERTY_TYPE_INTEGER)
+    if (property.get_type() == TCAM_PROPERTY_TYPE_INTEGER)
     {
         PropertyInteger& i = (PropertyInteger&) property;
-        i.setValue(position);
-        ui->valueDisplay->setText(QString::number(i.getValue()));
+        i.set_value(position);
+        ui->valueDisplay->setText(QString::number(i.get_value()));
     }
     else
     {
         PropertyDouble& d = (PropertyDouble&) property;
-        d.setValue((double)(position / precision));
-        ui->valueDisplay->setText(QString::number(d.getValue()));
+        d.set_value((double) (position / precision));
+        ui->valueDisplay->setText(QString::number(d.get_value()));
     }
 
     emit changed(this);
@@ -104,9 +105,14 @@ void PropertyWidget::on_pushButton_clicked ()
 
 void PropertyWidget::redraw ()
 {
-    ui->propertyName->setText(QString(property.getName().c_str()));
+    ui->propertyName->setText(QString(property.get_name().c_str()));
 
-    TCAM_PROPERTY_TYPE type = property.getType();
+    TCAM_PROPERTY_TYPE type = property.get_type();
+
+    if (property.get_ID() == TCAM_PROPERTY_WB_RED)
+    {
+        std::cout << "BLA" << std::endl;
+    }
 
     if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
@@ -116,7 +122,7 @@ void PropertyWidget::redraw ()
         ui->comboBox->setVisible(false);
 
         PropertyBoolean& prop_sw = (PropertyBoolean&) property;
-        ui->checkBox->setChecked(prop_sw.getValue());
+        ui->checkBox->setChecked(prop_sw.get_value());
     }
     else if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
@@ -128,13 +134,14 @@ void PropertyWidget::redraw ()
 
         PropertyInteger& prop_int = (PropertyInteger&) property;
 
-        ui->horizontalSlider->setRange(prop_int.getMin(), prop_int.getMax());
-        ui->horizontalSlider->setValue(prop_int.getValue());
+        ui->horizontalSlider->setRange(prop_int.get_min(), prop_int.get_max());
+        ui->horizontalSlider->setValue(prop_int.get_value());
 
-        ui->valueDisplay->setText(QString::number(prop_int.getValue()));
+        ui->valueDisplay->setText(QString::number(prop_int.get_value()));
 
-        if (prop_int.isReadOnly())
+        if (prop_int.is_read_only())
         {
+            std::cout << "Is read only..."<< std::endl;
             ui->horizontalSlider->setDisabled(true);
             setStyleSheet("background-color:grey;");
         }
@@ -155,11 +162,23 @@ void PropertyWidget::redraw ()
 
         PropertyDouble& prop_d = (PropertyDouble&) property;
 
-        double min = prop_d.getMin();
-        double max =  prop_d.getMax();
-        ui->valueDisplay->setText(QString::number(prop_d.getValue()));
+        double min = prop_d.get_min();
+        double max = prop_d.get_max();
+        ui->valueDisplay->setText(QString::number(prop_d.get_value()));
         //ui->horizontalSlider->setRange(min * presicion, max * this->precision);
-        //ui->horizontalSlider->setValue(prop_d.getValue() * precision);
+        //ui->horizontalSlider->set_value(prop_d.get_value() * precision);
+        if (prop_d.is_read_only())
+        {
+            std::cout << "Is read only..."<< std::endl;
+            ui->horizontalSlider->setDisabled(true);
+            setStyleSheet("background-color:grey;");
+        }
+        else
+        {
+            std::cout << "Is read NOT only..."<< std::endl;
+            ui->horizontalSlider->setDisabled(false);
+            setStyleSheet("background-color:white;");
+        }
     }
     else if (type == TCAM_PROPERTY_TYPE_STRING)
     {
@@ -177,7 +196,7 @@ void PropertyWidget::redraw ()
 
         PropertyStringMap& m = (PropertyStringMap&) property;
 
-        for(auto s : m.getValues())
+        for(auto s : m.get_values())
         {
             ui->comboBox->addItem(s.c_str());
         }

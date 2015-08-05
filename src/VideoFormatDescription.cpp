@@ -182,7 +182,7 @@ bool VideoFormatDescription::isValidVideoFormat (const VideoFormat& to_check) co
 
 bool VideoFormatDescription::isValidFramerate (double framerate) const
 {
-    // auto desc = to_check.getStruct();
+    // auto desc = to_check.get_struct();
 
     for (const auto& res: rf)
     {

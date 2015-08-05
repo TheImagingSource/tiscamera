@@ -31,17 +31,17 @@ public:
      */
     tcam_image_buffer getImageBuffer ();
 
-    void setImageBuffer (tcam_image_buffer);
+    void set_image_buffer (tcam_image_buffer);
 
     /**
      * @return Pointer to actual image data
      */
-    unsigned char* getData ();
+    unsigned char* get_data ();
 
 
-    struct tcam_stream_statistics getStatistics () const;
+    struct tcam_stream_statistics get_statistics () const;
 
-    bool setStatistics (const struct tcam_stream_statistics&);
+    bool set_statistics (const struct tcam_stream_statistics&);
 
     /**
      * @brief Fills MemoryBuffer with 0

@@ -42,7 +42,7 @@ bool set_active_format (CaptureDevice& g, const std::string& new_format)
 
     if (ret)
     {
-        return g.setVideoFormat(v);
+        return g.set_video_format(v);
     }
     else
     {

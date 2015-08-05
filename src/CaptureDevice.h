@@ -54,20 +54,20 @@ public:
      * Check if device is currently open
      * @return true if a device is open
      */
-    bool isDeviceOpen () const;
+    bool is_device_open () const;
 
     /**
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    DeviceInfo getDevice() const;
+    DeviceInfo get_device () const;
 
     // property related:
 
     /**
      * @return vector containing all available properties
      */
-    std::vector<Property> getAvailableProperties () const;
+    std::vector<Property> get_available_properties () const;
 
     // videoformat related:
 
@@ -75,21 +75,21 @@ public:
     /**
      * @return vector containing all available video format settings
      */
-    std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
+    std::vector<VideoFormatDescription> get_available_video_formats () const;
 
 
     /**
-     * Description for setVideoFormat.
+     * Description for set_video_format.
      * @param new_format - format the device shall use
      * @return true if device accepted the given VideoFormat
      */
-    bool setVideoFormat (const VideoFormat& new_format);
+    bool set_video_format (const VideoFormat& new_format);
 
 
     /**
      * @return Currently used video format
      */
-    VideoFormat getActiveVideoFormat () const;
+    VideoFormat get_active_video_format () const;
 
     // playback related:
 
@@ -98,14 +98,14 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool startStream (std::shared_ptr<SinkInterface> sink);
+    bool start_stream (std::shared_ptr<SinkInterface> sink);
 
 
     /**
      * @brief Stop currently running stream
      * @return true if stream could successfully be stopped
      */
-    bool stopStream ();
+    bool stop_stream ();
 
 private:
 

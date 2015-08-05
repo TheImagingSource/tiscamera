@@ -54,7 +54,7 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
-bool PipelineManager::setStatus (TCAM_PIPELINE_STATUS s)
+bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
@@ -84,7 +84,7 @@ bool PipelineManager::setStatus (TCAM_PIPELINE_STATUS s)
 }
 
 
-TCAM_PIPELINE_STATUS PipelineManager::getStatus () const
+TCAM_PIPELINE_STATUS PipelineManager::get_status () const
 {
     return status;
 }
@@ -92,7 +92,7 @@ TCAM_PIPELINE_STATUS PipelineManager::getStatus () const
 
 bool PipelineManager::destroyPipeline ()
 {
-    setStatus(TCAM_PIPELINE_STOPPED);
+    set_status(TCAM_PIPELINE_STOPPED);
 
     source = nullptr;
     sink = nullptr;
@@ -295,7 +295,7 @@ bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS status)
         return false;
     }
 
-    if (!source->setStatus(status))
+    if (!source->set_status(status))
     {
         tcam_log(TCAM_LOG_ERROR, "Source did not accept status change");
         return false;
@@ -313,7 +313,7 @@ bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS status)
         return false;
     }
 
-    if (!sink->setStatus(status))
+    if (!sink->set_status(status))
     {
         tcam_log(TCAM_LOG_ERROR, "Sink spewed error");
         return false;
@@ -645,7 +645,7 @@ bool PipelineManager::stop_playing ()
 }
 
 
-void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
+void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
 {
     if (status == TCAM_PIPELINE_STOPPED)
     {
@@ -664,7 +664,7 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
         {
             auto next_buffer = pipeline_buffer.at(current_ppl_buffer);
 
-            next_buffer->setStatistics(current_buffer->getStatistics());
+            next_buffer->set_statistics(current_buffer->get_statistics());
 
             f->transform(*current_buffer, *next_buffer);
 
@@ -679,7 +679,7 @@ void PipelineManager::pushImage (std::shared_ptr<MemoryBuffer> buffer)
 
     if (sink != nullptr)
     {
-      sink->pushImage(current_buffer);
+        sink->push_image(current_buffer);
     }
     else
     {

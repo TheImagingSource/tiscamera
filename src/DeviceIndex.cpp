@@ -52,7 +52,7 @@ void DeviceIndex::register_device_lost (dev_callback c)
 }
 
 
-void DeviceIndex::updateDeviceList ()
+void DeviceIndex::update_device_list ()
 {
     std::vector<DeviceInfo> tmp_dev_list = std::vector<DeviceInfo>();
     tmp_dev_list.reserve(10);
@@ -73,7 +73,7 @@ void DeviceIndex::updateDeviceList ()
     {
         auto f = [&d] (const DeviceInfo& info)
             {
-                if (d.getSerial().compare( info.getSerial()) == 0)
+                if (d.get_serial().compare(info.get_serial()) == 0)
                     return true;
                 return false;
             };
@@ -100,7 +100,7 @@ void DeviceIndex::run ()
 {
     while (continue_thread)
     {
-        updateDeviceList();
+        update_device_list();
         std::this_thread::sleep_for(std::chrono::seconds(wait_period));
     }
 }
@@ -117,13 +117,13 @@ void DeviceIndex::fire_device_lost (const DeviceInfo& d)
 }
 
 
-bool DeviceIndex::fillDeviceInfo (DeviceInfo& info) const
+bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 {
-    if (!info.getSerial().empty())
+    if (!info.get_serial().empty())
     {
         for (const auto& d : device_list)
         {
-            if (info.getSerial() == d.getSerial())
+            if (info.get_serial() == d.get_serial())
             {
                 info = d;
                 return true;
@@ -132,11 +132,11 @@ bool DeviceIndex::fillDeviceInfo (DeviceInfo& info) const
         return false;
     }
 
-    if (!info.getIdentifier().empty())
+    if (!info.get_identifier().empty())
     {
         for (const auto& d : device_list)
         {
-            if (info.getIdentifier() == d.getIdentifier())
+            if (info.get_identifier() == d.get_identifier())
             {
                 info = d;
                 return true;
@@ -147,7 +147,7 @@ bool DeviceIndex::fillDeviceInfo (DeviceInfo& info) const
 }
 
 
-std::vector<DeviceInfo> DeviceIndex::getDeviceList () const
+std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 {
     return device_list;
 }

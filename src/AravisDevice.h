@@ -27,8 +27,8 @@ class AravisDevice : public DeviceInterface
     public:
         AravisPropertyHandler (AravisDevice*);
 
-        bool getProperty (Property&);
-        bool setProperty (const Property&);
+        bool get_property (Property&);
+        bool set_property (const Property&);
 
     protected:
         std::vector<property_mapping> properties;
@@ -50,9 +50,9 @@ public:
 
     std::vector<std::shared_ptr<Property>> getProperties () ;
 
-    bool setProperty (const Property&);
+    bool set_property (const Property&);
 
-    bool getProperty (Property&);
+    bool get_property (Property&);
 
     bool setVideoFormat (const VideoFormat&);
 

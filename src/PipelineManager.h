@@ -45,12 +45,12 @@ public:
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
 
-    bool setStatus (TCAM_PIPELINE_STATUS);
+    bool set_status (TCAM_PIPELINE_STATUS);
 
     /**
      * @return TCAM_PIPELINE_STATUS the pipeline currently has
      */
-    TCAM_PIPELINE_STATUS getStatus () const;
+    TCAM_PIPELINE_STATUS get_status () const;
 
     /**
      * @brief Reset the pipeline to PIPELINE_STOPPED.
@@ -72,7 +72,7 @@ public:
     std::shared_ptr<SinkInterface> getSink ();
 
     // @brief callback for ImageSource
-    void pushImage (std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<MemoryBuffer>);
 
 private:
 

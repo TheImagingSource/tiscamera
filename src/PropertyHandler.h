@@ -35,9 +35,9 @@ public:
      */
     void clear ();
 
-    bool setProperty (const Property&);
+    bool set_property (const Property&);
 
-    bool getProperty (Property&);
+    bool get_property (Property&);
 
 private:
 

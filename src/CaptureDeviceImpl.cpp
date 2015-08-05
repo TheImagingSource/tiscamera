@@ -123,7 +123,7 @@ bool CaptureDeviceImpl::closeDevice ()
         return true;
     }
 
-    std::string name = open_device.getName();
+    std::string name = open_device.get_name();
 
     pipeline->destroyPipeline();
 
@@ -203,7 +203,7 @@ bool CaptureDeviceImpl::startStream (std::shared_ptr<SinkInterface> sink)
     }
     pipeline->setSink(sink);
 
-    return pipeline->setStatus(TCAM_PIPELINE_PLAYING);
+    return pipeline->set_status(TCAM_PIPELINE_PLAYING);
 }
 
 
@@ -215,5 +215,5 @@ bool CaptureDeviceImpl::stopStream ()
         return false;
     }
 
-    return pipeline->setStatus(TCAM_PIPELINE_STOPPED);
+    return pipeline->set_status(TCAM_PIPELINE_STOPPED);
 }

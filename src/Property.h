@@ -56,37 +56,37 @@ public:
      */
     bool update ();
 
-    TCAM_PROPERTY_ID getID () const;
+    TCAM_PROPERTY_ID get_ID () const;
 
-    std::string getName () const;
+    std::string get_name () const;
 
-    TCAM_PROPERTY_TYPE getType () const;
+    TCAM_PROPERTY_TYPE get_type () const;
 
-    bool isReadOnly () const;
-    bool isWriteOnly () const;
+    bool is_read_only () const;
+    bool is_write_only () const;
 
-    bool isDisabled () const;
+    bool is_disabled () const;
 
-    uint32_t getFlags () const;
+    uint32_t get_flags () const;
 
-    struct tcam_device_property getStruct () const;
-    bool setStruct (const struct tcam_device_property&);
+    struct tcam_device_property get_struct () const;
+    bool set_struct (const struct tcam_device_property&);
 
     /**
      * Set value from given tcam_device_property
      * @return true on success
      */
-    void setStructValue (const struct tcam_device_property&);
-    Property::VALUE_TYPE getValueType () const;
+    void set_struct_value (const struct tcam_device_property&);
+    Property::VALUE_TYPE get_value_type () const;
 
 
-    std::string toString () const;
+    std::string to_string () const;
 
-    bool fromString (const std::string&);
+    bool from_string (const std::string&);
 
 
-    bool setProperty (const Property&);
-    bool getProperty (Property&);
+    bool set_property (const Property&);
+    bool get_property (Property&);
 
 protected:
 
@@ -102,7 +102,7 @@ protected:
     std::map<std::string, int> string_map;
 
     // internal method that notifies implementations about requests
-    void notifyImpl ();
+    void notify_impl ();
 };
 
 TCAM_PROPERTY_TYPE value_type_to_ctrl_type (const Property::VALUE_TYPE& t);

@@ -10,13 +10,13 @@ using namespace tcam;
 
 int tcam_last_errno ()
 {
-    return getError().getErrno();
+    return getError().get_errno();
 }
 
 
 const char* tcam_last_error_messsage ()
 {
-    return getError().getString().c_str();
+    return getError().get_string().c_str();
 }
 
 
@@ -44,7 +44,7 @@ int tcam_device_index_get_device_infos (tcam_device_index* index,
                                         tcam_device_info* arr,
                                         size_t size)
 {
-    auto vec = reinterpret_cast<DeviceIndex*>(index)->getDeviceList();
+    auto vec = reinterpret_cast<DeviceIndex*>(index)->get_device_list();
 
     if (vec.size() < size)
     {
@@ -55,7 +55,7 @@ int tcam_device_index_get_device_infos (tcam_device_index* index,
     int i = 0;
     for (const auto& v : vec)
     {
-        arr[i] = v.getInfo();
+        arr[i] = v.get_info();
         i++;
     }
 
@@ -81,7 +81,7 @@ void tcam_destroy_capture_device (tcam_capture_device* source)
 
 bool tcam_capture_device_is_device_open (tcam_capture_device* source)
 {
-    return reinterpret_cast<CaptureDevice*>(source)->isDeviceOpen();
+    return reinterpret_cast<CaptureDevice*>(source)->is_device_open();
 }
 
 
@@ -89,7 +89,7 @@ bool tcam_capture_device_is_device_open (tcam_capture_device* source)
 
 int tcam_capture_device_get_property_count (const tcam_capture_device* source)
 {
-    return reinterpret_cast<const CaptureDevice*>(source)->getAvailableProperties().size();
+    return reinterpret_cast<const CaptureDevice*>(source)->get_available_properties().size();
 }
 
 
@@ -124,7 +124,7 @@ int tcam_capture_device_get_image_format_descriptions_count (const tcam_capture_
         return -1;
     }
 
-    return reinterpret_cast<const CaptureDevice*>(source)->getAvailableVideoFormats().size();
+    return reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats().size();
 }
 
 
@@ -133,7 +133,7 @@ int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device
                                                       const size_t size)
 {
 
-    auto vec = reinterpret_cast<const CaptureDevice*>(source)->getAvailableVideoFormats();
+    auto vec = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
 
     if (vec.size() > size)
     {
@@ -156,14 +156,14 @@ bool tcam_capture_device_set_image_format (tcam_capture_device* source,
 {
     VideoFormat f (*format);
 
-    return reinterpret_cast<CaptureDevice*>(source)->setVideoFormat(f);
+    return reinterpret_cast<CaptureDevice*>(source)->set_video_format(f);
 }
 
 
 bool tcam_capture_device_get_image_format (tcam_capture_device* source,
                                            tcam_video_format* format)
 {
-    VideoFormat f = reinterpret_cast<CaptureDevice*>(source)->getActiveVideoFormat();
+    VideoFormat f = reinterpret_cast<CaptureDevice*>(source)->get_active_video_format();
 
     *format = f.getStruct();
 
@@ -187,7 +187,7 @@ stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
 
     obj->sink->registerCallback(callback, user_data);
 
-    bool ret = reinterpret_cast<CaptureDevice*>(source)->startStream(obj->sink);
+    bool ret = reinterpret_cast<CaptureDevice*>(source)->start_stream(obj->sink);
 
     return (stream_obj*)obj;
 }
@@ -195,5 +195,5 @@ stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
 
 bool tcam_capture_device_stop_stream (tcam_capture_device* source)
 {
-    return reinterpret_cast<CaptureDevice*>(source)->stopStream();
+    return reinterpret_cast<CaptureDevice*>(source)->stop_stream();
 }

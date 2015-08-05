@@ -28,9 +28,9 @@ public:
 
     ~ImageSource ();
 
-    bool setStatus (TCAM_PIPELINE_STATUS);
+    bool set_status (TCAM_PIPELINE_STATUS);
 
-    TCAM_PIPELINE_STATUS getStatus () const;
+    TCAM_PIPELINE_STATUS get_status () const;
 
     bool setDevice (std::shared_ptr<DeviceInterface>);
 
@@ -38,7 +38,7 @@ public:
 
     VideoFormat getVideoFormat () const;
 
-    void pushImage (std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<MemoryBuffer>);
 
     void initialize_buffers ();
 

@@ -37,8 +37,8 @@ class V4l2Device : public DeviceInterface
 
         std::vector<std::shared_ptr<Property>> create_property_vector ();
 
-        bool setProperty (const Property&);
-        bool getProperty (Property&);
+        bool set_property (const Property&);
+        bool get_property (Property&);
 
     protected:
 
@@ -64,9 +64,9 @@ public:
     // TODO: eval if weak_ptr should be distributed
     std::vector<std::shared_ptr<Property>> getProperties ();
 
-    bool setProperty (const Property&);
+    bool set_property (const Property&);
 
-    bool getProperty (Property&);
+    bool get_property (Property&);
 
     bool setVideoFormat (const VideoFormat&);
 

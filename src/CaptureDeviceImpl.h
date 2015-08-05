@@ -95,7 +95,7 @@ public:
 
 
     /**
-     * Description for setVideoFormat.
+     * Description for set_video_format.
      * @param new_format - format the device shall use
      * @return true if device accepted the given VideoFormat
      */

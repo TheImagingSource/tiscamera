@@ -30,25 +30,25 @@ tcam_image_buffer MemoryBuffer::getImageBuffer ()
     return buffer;
 }
 
-void MemoryBuffer::setImageBuffer (tcam_image_buffer buf)
+void MemoryBuffer::set_image_buffer (tcam_image_buffer buf)
 {
     this->buffer = buf;
 }
 
 
-unsigned char* MemoryBuffer::getData ()
+unsigned char* MemoryBuffer::get_data ()
 {
     return buffer.pData;
 }
 
 
-struct tcam_stream_statistics MemoryBuffer::getStatistics () const
+struct tcam_stream_statistics MemoryBuffer::get_statistics () const
 {
     return buffer.statistics;
 }
 
 
-bool MemoryBuffer::setStatistics (const struct tcam_stream_statistics& stats)
+bool MemoryBuffer::set_statistics (const struct tcam_stream_statistics& stats)
 {
     buffer.statistics = stats;;
 

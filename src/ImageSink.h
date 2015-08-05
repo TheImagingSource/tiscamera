@@ -28,13 +28,13 @@ public:
 
     ImageSink ();
 
-    bool setStatus (TCAM_PIPELINE_STATUS);
-    TCAM_PIPELINE_STATUS getStatus () const;
+    bool set_status (TCAM_PIPELINE_STATUS);
+    TCAM_PIPELINE_STATUS get_status () const;
 
     bool registerCallback (sink_callback, void*);
     bool registerCallback (c_callback, void*);
 
-    void pushImage(std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<MemoryBuffer>);
 
 private:
 

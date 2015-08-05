@@ -70,7 +70,7 @@ void PropertyDialog::populate_dialog ()
         return;
     }
 
-    properties = device->getAvailableProperties();
+    properties = device->get_available_properties();
 
     // tree structure for property ui creation
 
@@ -94,10 +94,10 @@ void PropertyDialog::populate_dialog ()
         {
             for (auto& c : categories)
             {
-                if (c.category == p.getStruct().group.property_category)
+                if (c.category == p.get_struct().group.property_category)
                 {
                     for (auto& g : c.groups)
-                        if (g.group == p.getStruct().group.property_group)
+                        if (g.group == p.get_struct().group.property_group)
                         {
                             g.props.push_back(p);
                             return;
@@ -105,7 +105,7 @@ void PropertyDialog::populate_dialog ()
                     // create new group
 
                     prop_category::prop_group pg = {};
-                    pg.group = p.getStruct().group.property_group;
+                    pg.group = p.get_struct().group.property_group;
 
                     pg.props.push_back(p);
                     c.groups.push_back(pg);
@@ -117,10 +117,10 @@ void PropertyDialog::populate_dialog ()
             // create a new branch
 
             prop_category pc = {};
-            pc.category = p.getStruct().group.property_category;
+            pc.category = p.get_struct().group.property_category;
 
             prop_category::prop_group pg = {};
-            pg.group = p.getStruct().group.property_group;
+            pg.group = p.get_struct().group.property_group;
 
             pg.props.push_back(p);
             pc.groups.push_back(pg);
@@ -157,7 +157,7 @@ void PropertyDialog::populate_dialog ()
                 // QTreeWidgetItem* ti = new QTreeWidgetItem();
 
                 // group master
-                if (p.getStruct().group.property_group == g.group)
+                if (p.get_struct().group.property_group == g.group)
                 {
                     master = new QTreeWidgetItem();;
                     tree->addTopLevelItem(master);
@@ -174,7 +174,7 @@ void PropertyDialog::populate_dialog ()
 
 
             //     // group master
-            //     if (p.getStruct().group.property_group == g.group)
+            //     if (p.get_struct().group.property_group == g.group)
             //     {
             //         master = ti;
             //         tree->addTopLevelItem(ti);

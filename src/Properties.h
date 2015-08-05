@@ -34,10 +34,10 @@ public:
                     VALUE_TYPE);
     ~PropertyString ();
 
-    std::string getDefault () const;
+    std::string get_default () const;
 
-    bool setValue (const std::string&);
-    std::string getValue () const;
+    bool set_value (const std::string&);
+    std::string get_value () const;
 };
 
 
@@ -56,14 +56,14 @@ public:
 
     ~PropertyStringMap ();
 
-    std::vector<std::string> getValues () const;
+    std::vector<std::string> get_values () const;
 
-    std::string getDefault () const;
+    std::string get_default () const;
 
-    bool setValue (const std::string&);
-    std::string getValue () const;
+    bool set_value (const std::string&);
+    std::string get_value () const;
 
-    std::map<std::string, int> getMapping () const;
+    std::map<std::string, int> get_mapping () const;
 
 };
 
@@ -80,11 +80,11 @@ public:
 
     ~PropertyBoolean ();
 
-    bool getDefault () const;
+    bool get_default () const;
 
-    bool setValue (bool);
+    bool set_value (bool);
 
-    bool getValue () const;
+    bool get_value () const;
 };
 
 
@@ -100,14 +100,14 @@ public:
 
     ~PropertyInteger ();
 
-    int64_t getDefault () const;
+    int64_t get_default () const;
 
-    int64_t getMin () const;
-    int64_t getMax () const;
-    int64_t getStep () const;
-    int64_t getValue () const;
+    int64_t get_min () const;
+    int64_t get_max () const;
+    int64_t get_step () const;
+    int64_t get_value () const;
 
-    bool setValue (int64_t);
+    bool set_value (int64_t);
 };
 
 
@@ -121,14 +121,14 @@ public:
     PropertyDouble (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
     ~PropertyDouble ();
 
-    double getDefault () const;
+    double get_default () const;
 
-    double getMin () const;
-    double getMax () const;
+    double get_min () const;
+    double get_max () const;
 
-    double getValue () const;
+    double get_value () const;
 
-    bool setValue (double);
+    bool set_value (double);
 };
 
 

@@ -30,37 +30,37 @@ DeviceInfo& DeviceInfo::operator= (const DeviceInfo& other)
 }
 
 
-struct tcam_device_info DeviceInfo::getInfo () const
+struct tcam_device_info DeviceInfo::get_info () const
 {
     return device;
 }
 
 
-std::string DeviceInfo::getName () const
+std::string DeviceInfo::get_name () const
 {
     return device.name;
 }
 
 
-std::string DeviceInfo::getSerial () const
+std::string DeviceInfo::get_serial () const
 {
     return device.serial_number;
 }
 
 
-std::string DeviceInfo::getIdentifier () const
+std::string DeviceInfo::get_identifier () const
 {
     return device.identifier;
 }
 
 
-enum TCAM_DEVICE_TYPE DeviceInfo::getDeviceType () const
+enum TCAM_DEVICE_TYPE DeviceInfo::get_device_type () const
 {
     return device.type;
 }
 
 
-std::string DeviceInfo::getDeviceTypeAsString () const
+std::string DeviceInfo::get_device_type_as_string () const
 {
     switch (device.type)
     {

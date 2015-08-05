@@ -45,15 +45,15 @@ bool tcam::save_image (CaptureDevice& g, const std::string& filename)
 
     VideoFormat v;
     v.fromString("format=RGB24,width=640,height=480,binning=0,framerate=30.000000");
-    g.setVideoFormat(v);
-    g.startStream(sink);
+    g.set_video_format(v);
+    g.start_stream(sink);
 
     // wait until image was captured
     while(d.wait)
     {
         usleep(500);
     }
-    d.g->stopStream();
+    d.g->stop_stream();
 
     std::cout << "Successfully saved image" << std::endl;
 

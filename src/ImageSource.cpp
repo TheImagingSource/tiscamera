@@ -16,7 +16,7 @@ ImageSource::~ImageSource ()
 }
 
 
-bool ImageSource::setStatus (TCAM_PIPELINE_STATUS status)
+bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 {
     current_status = status;
 
@@ -52,7 +52,7 @@ bool ImageSource::setStatus (TCAM_PIPELINE_STATUS status)
 }
 
 
-TCAM_PIPELINE_STATUS ImageSource::getStatus () const
+TCAM_PIPELINE_STATUS ImageSource::get_status () const
 {
     return current_status;
 }
@@ -85,9 +85,9 @@ VideoFormat ImageSource::getVideoFormat () const
 }
 
 
-void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
 {
-    auto stats = buffer->getStatistics();
+    auto stats = buffer->get_statistics();
     auto end = std::chrono::steady_clock::now();
     auto elapsed = end - stream_start;
 
@@ -95,10 +95,10 @@ void ImageSource::pushImage (std::shared_ptr<MemoryBuffer> buffer)
     {
         stats.framerate = (double)stats.frame_count / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
     }
-    buffer->setStatistics(stats);
+    buffer->set_statistics(stats);
 
     if (!pipeline.expired())
-        pipeline.lock()->pushImage(buffer);
+        pipeline.lock()->push_image(buffer);
     else
         tcam_log(TCAM_LOG_ERROR, "Pipeline over expiration date.");
 }

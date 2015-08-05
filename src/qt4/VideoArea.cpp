@@ -44,7 +44,7 @@ void VideoArea::start ()
 
     sink->registerCallback(this->callback, this);
 
-    bool ret = device->startStream(sink);
+    bool ret = device->start_stream(sink);
 
     if (ret == true)
     {
@@ -57,7 +57,7 @@ void VideoArea::start ()
 void VideoArea::stop ()
 {
 
-    device->stopStream();
+    device->stop_stream();
     playing = false;
 }
 
@@ -69,25 +69,25 @@ bool VideoArea::setVideoFormat (const tcam::VideoFormat& format)
         return false;
     }
 
-    return device->setVideoFormat(format);
+    return device->set_video_format(format);
 }
 
 
 tcam::VideoFormat VideoArea::getVideoFormat () const
 {
-    return device->getActiveVideoFormat();
+    return device->get_active_video_format();
 }
 
 
 std::vector<tcam::VideoFormatDescription> VideoArea::getAvailableVideoFormats () const
 {
-    return device->getAvailableVideoFormats();
+    return device->get_available_video_formats();
 }
 
 
 QTreeWidget* VideoArea::get_property_tree (QWidget* p)
 {
-    return create_property_tree(p, device->getAvailableProperties());
+    return create_property_tree(p, device->get_available_properties());
 }
 
 
@@ -101,7 +101,7 @@ void VideoArea::callback (MemoryBuffer* buffer, void* user_data)
 
 void VideoArea::internal_callback(MemoryBuffer* buffer)
 {
-    if (buffer->getData() == NULL || buffer->getImageBuffer().length == 0)
+    if (buffer->get_data() == NULL || buffer->getImageBuffer().length == 0)
     {
         return;
     }

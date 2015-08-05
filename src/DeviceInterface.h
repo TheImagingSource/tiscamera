@@ -42,9 +42,9 @@ public:
      */
     virtual std::vector<std::shared_ptr<Property>> getProperties () = 0;
 
-    virtual bool setProperty (const Property&) = 0;
+    virtual bool set_property (const Property&) = 0;
 
-    virtual bool getProperty (Property&) = 0;
+    virtual bool get_property (Property&) = 0;
 
     /**
      * @brief Set Format in he actual device

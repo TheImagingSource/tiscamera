@@ -40,49 +40,49 @@ bool CaptureDevice::save_configuration (const std::string& filename)
 }
 
 
-bool CaptureDevice::isDeviceOpen () const
+bool CaptureDevice::is_device_open () const
 {
     return impl->isDeviceOpen ();
 }
 
 
-DeviceInfo CaptureDevice::getDevice () const
+DeviceInfo CaptureDevice::get_device () const
 {
     return impl->getDevice();
 }
 
 
-std::vector<Property> CaptureDevice::getAvailableProperties () const
+std::vector<Property> CaptureDevice::get_available_properties () const
 {
     return impl->getAvailableProperties();
 }
 
 
-std::vector<VideoFormatDescription> CaptureDevice::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> CaptureDevice::get_available_video_formats () const
 {
     return impl->getAvailableVideoFormats();
 }
 
 
-bool CaptureDevice::setVideoFormat (const VideoFormat& new_format)
+bool CaptureDevice::set_video_format (const VideoFormat& new_format)
 {
     return impl->setVideoFormat(new_format);
 }
 
 
-VideoFormat CaptureDevice::getActiveVideoFormat () const
+VideoFormat CaptureDevice::get_active_video_format () const
 {
     return impl->getActiveVideoFormat();
 }
 
 
-bool CaptureDevice::startStream (std::shared_ptr<SinkInterface> sink)
+bool CaptureDevice::start_stream (std::shared_ptr<SinkInterface> sink)
 {
     return impl->startStream(sink);
 }
 
 
-bool CaptureDevice::stopStream ()
+bool CaptureDevice::stop_stream ()
 {
     return impl->stopStream();
 }

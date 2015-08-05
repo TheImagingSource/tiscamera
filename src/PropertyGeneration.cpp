@@ -43,30 +43,30 @@ bool tcam::handle_auto_center (const Property& new_property,
                                const tcam_image_size& sensor,
                                const tcam_image_size& current_format)
 {
-    if (new_property.getType() != TCAM_PROPERTY_TYPE_BOOLEAN)
+    if (new_property.get_type() != TCAM_PROPERTY_TYPE_BOOLEAN)
     {
         return false;
     }
 
     auto p = static_cast<const PropertyBoolean&>(new_property);
 
-    if (p.getValue())
+    if (p.get_value())
     {
         tcam_image_size values = calculate_auto_center(sensor, current_format);
 
         auto prop_off_x = find_property(props, "Offset X");
         auto prop_off_y = find_property(props, "Offset Y");
 
-        std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(values.width);
-        std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(values.height);
+        std::static_pointer_cast<PropertyInteger>(prop_off_x)->set_value(values.width);
+        std::static_pointer_cast<PropertyInteger>(prop_off_y)->set_value(values.height);
     }
     else
     {
         auto prop_off_x = find_property(props, "Offset X");
         auto prop_off_y = find_property(props, "Offset Y");
 
-        std::static_pointer_cast<PropertyInteger>(prop_off_x)->setValue(0);
-        std::static_pointer_cast<PropertyInteger>(prop_off_y)->setValue(0);
+        std::static_pointer_cast<PropertyInteger>(prop_off_x)->set_value(0);
+        std::static_pointer_cast<PropertyInteger>(prop_off_y)->set_value(0);
     }
 
     return true;

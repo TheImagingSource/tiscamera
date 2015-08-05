@@ -51,7 +51,7 @@ void Property::reset ()
     tcam_log(TCAM_LOG_INFO, "Resetting property to initial values.");
     prop = ref_prop;
 
-    notifyImpl();
+    notify_impl();
 }
 
 
@@ -66,67 +66,67 @@ bool Property::update ()
     auto ptr = impl.lock();
 
 
-    return ptr->getProperty(*this);
+    return ptr->get_property(*this);
 }
 
 
-TCAM_PROPERTY_ID Property::getID () const
+TCAM_PROPERTY_ID Property::get_ID () const
 {
     return prop.id;
 }
 
 
-std::string Property::getName () const
+std::string Property::get_name () const
 {
     return prop.name;
 }
 
 
-TCAM_PROPERTY_TYPE Property::getType () const
+TCAM_PROPERTY_TYPE Property::get_type () const
 {
     return prop.type;
 }
 
 
-bool Property::isReadOnly () const
+bool Property::is_read_only () const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
 }
 
 
-bool Property::isWriteOnly () const
+bool Property::is_write_only () const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
 }
 
 
-bool Property::isDisabled () const
+bool Property::is_disabled () const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_DISABLED);
 }
 
 
-uint32_t Property::getFlags () const
+uint32_t Property::get_flags () const
 {
     return prop.flags;
 }
 
 
-struct tcam_device_property Property::getStruct () const
+struct tcam_device_property Property::get_struct () const
 {
     return prop;
 }
 
 
-bool Property::setStruct (const struct tcam_device_property& p)
+bool Property::set_struct (const struct tcam_device_property& p)
 {
-    setStructValue(p);
+    set_struct_value(p);
     prop.flags = p.flags;
     return true;
 }
 
 
-void Property::setStructValue (const struct  tcam_device_property& p)
+void Property::set_struct_value (const struct tcam_device_property& p)
 {
     switch (prop.type)
     {
@@ -154,13 +154,13 @@ void Property::setStructValue (const struct  tcam_device_property& p)
 };
 
 
-Property::VALUE_TYPE Property::getValueType () const
+Property::VALUE_TYPE Property::get_value_type () const
 {
     return value_type;
 }
 
 
-std::string Property::toString () const
+std::string Property::to_string () const
 {
     std::string property_string;
 
@@ -213,7 +213,7 @@ std::string Property::toString () const
 }
 
 
-bool Property::fromString (const std::string& s)
+bool Property::from_string (const std::string& s)
 {
     try
     {
@@ -273,36 +273,36 @@ bool Property::fromString (const std::string& s)
 }
 
 
-bool Property::setProperty (const Property& p)
+bool Property::set_property (const Property& p)
 {
     if (impl.expired())
     {
         return false;
     }
-    setStructValue(p.getStruct());
-    notifyImpl();
+    set_struct_value(p.get_struct());
+    notify_impl();
 
     return true;
 }
 
 
-bool Property::getProperty (Property& p)
+bool Property::get_property (Property& p)
 {
-    p.setStruct(this->prop);
+    p.set_struct(this->prop);
     return true;
 }
 
 
-void Property::notifyImpl ()
+void Property::notify_impl ()
 {
     if (impl.expired())
     {
-        tcam_log(TCAM_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->getName().c_str());
+        tcam_log(TCAM_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->get_name().c_str());
     }
 
     auto ptr(impl.lock());
 
-    ptr->setProperty(*this);
+    ptr->set_property(*this);
 }
 
 

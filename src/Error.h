@@ -41,12 +41,12 @@ public:
      **/
     Error (const Error& e);
 
-    std::string getString () const
+    std::string get_string () const
     {
-        return toString();
+        return to_string();
     }
 
-    std::string toString () const
+    std::string to_string () const
     {
         return m_String;
     }
@@ -56,12 +56,12 @@ public:
         return m_Enum;
     }
 
-    int getErrno () const
+    int get_errno () const
     {
         return m_errno;
     }
 
-    bool isError () const
+    bool is_error () const
     {
         return eNOERROR != m_Enum;
     }

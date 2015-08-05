@@ -54,7 +54,7 @@ void PropertyHandler::clear ()
 }
 
 
-bool PropertyHandler::setProperty (const Property& p)
+bool PropertyHandler::set_property (const Property& p)
 {
 
     // Do the following things:
@@ -64,19 +64,19 @@ bool PropertyHandler::setProperty (const Property& p)
 
     for (auto& prop : properties)
     {
-        if (prop.external_property->getID() == p.getID())
+        if (prop.external_property->get_ID() == p.get_ID())
         {
-            if (prop.external_property->isReadOnly())
+            if (prop.external_property->is_read_only())
             {
                 setError(Error("Property is read only.", EACCES));
                 tcam_log(TCAM_LOG_ERROR,
                          "Property '%s' is read only",
-                         prop.external_property->getName().c_str());
+                         prop.external_property->get_name().c_str());
                 return false;
             }
 
-            prop.internal_property->setProperty(p);
-            prop.external_property->setStructValue(prop.internal_property->getStruct());
+            prop.internal_property->set_property(p);
+            prop.external_property->set_struct_value(prop.internal_property->get_struct());
             handle_flags(prop.external_property);
         }
     }
@@ -85,20 +85,20 @@ bool PropertyHandler::setProperty (const Property& p)
 }
 
 
-bool PropertyHandler::getProperty (Property& p)
+bool PropertyHandler::get_property (Property& p)
 {
-    auto prop = find_mapping_external(p.getID());
+    auto prop = find_mapping_external(p.get_ID());
 
     if (prop.internal_property != nullptr)
     {
         auto i = prop.internal_property;
 
-        auto ext_struct = prop.external_property->getStruct();
+        auto ext_struct = prop.external_property->get_struct();
 
-        ext_struct.value = i->getStruct().value;
+        ext_struct.value = i->get_struct().value;
 
-        prop.external_property->setStruct(ext_struct);
-        p.setStruct(ext_struct);
+        prop.external_property->set_struct(ext_struct);
+        p.set_struct(ext_struct);
         return true;
     }
 
@@ -108,7 +108,7 @@ bool PropertyHandler::getProperty (Property& p)
 
 static bool is_wanted_property (const std::string& prop_name,  const std::shared_ptr<Property>& p)
 {
-    if (prop_name.compare(p->getName()) == 0)
+    if (prop_name.compare(p->get_name()) == 0)
         return true;
     return false;
 }
@@ -119,7 +119,7 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_external (TCAM_P
 {
     for (auto& m : properties)
     {
-        if (m.external_property->getID() == id)
+        if (m.external_property->get_ID() == id)
             return m;
     }
     return {nullptr, nullptr};
@@ -130,7 +130,7 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (TCAM_P
 {
     for (auto& m : properties)
     {
-        if (m.internal_property->getID() == id)
+        if (m.internal_property->get_ID() == id)
             return m;
     }
     return {nullptr, nullptr};
@@ -140,36 +140,36 @@ PropertyHandler::property_mapping PropertyHandler::find_mapping_internal (TCAM_P
 static std::shared_ptr<Property> create_property(const std::shared_ptr<Property>& p,
                                           std::shared_ptr<PropertyImpl> impl)
 {
-    TCAM_PROPERTY_TYPE type = p->getType();
+    TCAM_PROPERTY_TYPE type = p->get_type();
 
     if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
-        return std::make_shared<Property>(PropertyBoolean(impl, p->getStruct(), p->getValueType()));
+        return std::make_shared<Property>(PropertyBoolean(impl, p->get_struct(), p->get_value_type()));
     }
     else if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
-        return std::make_shared<Property>(PropertyInteger(impl, p->getStruct(), p->getValueType()));
+        return std::make_shared<Property>(PropertyInteger(impl, p->get_struct(), p->get_value_type()));
     }
     else if (type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
-        return std::make_shared<Property>(PropertyDouble(impl, p->getStruct(), p->getValueType()));
+        return std::make_shared<Property>(PropertyDouble(impl, p->get_struct(), p->get_value_type()));
     }
     else if (type == TCAM_PROPERTY_TYPE_STRING)
     {
-        return std::make_shared<Property>(PropertyString(impl, p->getStruct(), p->getValueType()));
+        return std::make_shared<Property>(PropertyString(impl, p->get_struct(), p->get_value_type()));
     }
     else if (type == TCAM_PROPERTY_TYPE_STRING_TABLE)
     {
         auto s = static_cast<PropertyStringMap&>(*p);
 
         return std::make_shared<Property>(PropertyStringMap(impl,
-                                                            p->getStruct(),
-                                                            s.getMapping(),
-                                                            p->getValueType()));
+                                                            p->get_struct(),
+                                                            s.get_mapping(),
+                                                            p->get_value_type()));
     }
     else if (type == TCAM_PROPERTY_TYPE_BUTTON)
     {
-        return std::make_shared<Property>(PropertyButton(impl, p->getStruct(), p->getValueType()));
+        return std::make_shared<Property>(PropertyButton(impl, p->get_struct(), p->get_value_type()));
     }
     return nullptr;
 }
@@ -214,7 +214,7 @@ void PropertyHandler::generate_properties ()
 void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 {
 
-    switch (p->getID())
+    switch (p->get_ID())
     {
         case TCAM_PROPERTY_EXPOSURE:
         {
@@ -222,7 +222,7 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 
             if (prop.internal_property != nullptr)
             {
-                if (((PropertyBoolean&)(*prop.internal_property)).getValue())
+                if (((PropertyBoolean&) (*prop.internal_property)).get_value())
                 {
                     set_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
                 }
@@ -299,15 +299,15 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 
 void PropertyHandler::set_property_flag (std::shared_ptr<Property>& p, TCAM_PROPERTY_FLAGS flag)
 {
-    auto s = p->getStruct();
+    auto s = p->get_struct();
     s.flags = set_bit(s.flags, flag);
-    p->setStruct(s);
+    p->set_struct(s);
 }
 
 
 void PropertyHandler::unset_property_flag (std::shared_ptr<Property>& p, TCAM_PROPERTY_FLAGS flag)
 {
-    auto s = p->getStruct();
+    auto s = p->get_struct();
     s.flags = unset_bit(s.flags, flag);
-    p->setStruct(s);
+    p->set_struct(s);
 }

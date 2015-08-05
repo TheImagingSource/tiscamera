@@ -12,7 +12,7 @@ ImageSink::ImageSink ()
 {}
 
 
-bool ImageSink::setStatus (TCAM_PIPELINE_STATUS s)
+bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
@@ -32,7 +32,7 @@ bool ImageSink::setStatus (TCAM_PIPELINE_STATUS s)
 }
 
 
-TCAM_PIPELINE_STATUS ImageSink::getStatus () const
+TCAM_PIPELINE_STATUS ImageSink::get_status () const
 {
     return status;
 }
@@ -56,7 +56,7 @@ bool ImageSink::registerCallback (c_callback cc, void* ud)
 }
 
 
-void ImageSink::pushImage (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
 {
     last_image_buffer = buffer->getImageBuffer();
     if (callback != nullptr)

@@ -31,7 +31,7 @@ public:
 
     ~DeviceIndex ();
 
-    std::vector<DeviceInfo> getDeviceList () const;
+    std::vector<DeviceInfo> get_device_list () const;
 
     void register_device_lost (dev_callback);
 
@@ -40,7 +40,7 @@ public:
      *                Must contain identifier or serial
      * @return true if device found and argument could be filled
      */
-    bool fillDeviceInfo (DeviceInfo&) const;
+    bool fill_device_info (DeviceInfo&) const;
 
 private:
 
@@ -53,7 +53,7 @@ private:
 
     std::vector<dev_callback> callbacks;
 
-    void updateDeviceList ();
+    void update_device_list ();
 
     void run ();
 

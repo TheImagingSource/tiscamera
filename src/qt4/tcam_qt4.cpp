@@ -19,13 +19,13 @@ static std::vector<prop_category> categorize (std::vector<Property> props)
         {
             for (auto& c : categories)
             {
-                if (c.category == p.getStruct().group.property_category)
+                if (c.category == p.get_struct().group.property_category)
                 {
                     for (auto& g : c.groups)
                     {
-                        if (g.group == p.getStruct().group.property_group)
+                        if (g.group == p.get_struct().group.property_group)
                         {
-                            if (p.getID() == p.getStruct().group.property_group)
+                            if (p.get_ID() == p.get_struct().group.property_group)
                             {
                                 g.master = p;
                             }
@@ -39,9 +39,9 @@ static std::vector<prop_category> categorize (std::vector<Property> props)
                     // create new group
 
                     prop_category::prop_group pg = {};
-                    pg.group = p.getStruct().group.property_group;
+                    pg.group = p.get_struct().group.property_group;
 
-                    if (p.getID() == p.getStruct().group.property_group)
+                    if (p.get_ID() == p.get_struct().group.property_group)
                     {
                         pg.master = p;
                     }
@@ -58,16 +58,16 @@ static std::vector<prop_category> categorize (std::vector<Property> props)
             // create a new branch
 
             prop_category pc = {};
-            pc.category = p.getStruct().group.property_category;
+            pc.category = p.get_struct().group.property_category;
 
             prop_category::prop_group pg = {};
 
-            pg.group = p.getStruct().group.property_group;
+            pg.group = p.get_struct().group.property_group;
 
             // pg.props.push_back(p);
 
 
-            if (p.getID() == p.getStruct().group.property_group)
+            if (p.get_ID() == p.get_struct().group.property_group)
             {
                 pg.master = p;
             }

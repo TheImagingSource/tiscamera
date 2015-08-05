@@ -25,15 +25,15 @@ PropertyString::~PropertyString ()
 {}
 
 
-std::string PropertyString::getDefault () const
+std::string PropertyString::get_default () const
 {
     return prop.value.s.default_value;
 }
 
 
-bool PropertyString::setValue (const std::string& new_value)
+bool PropertyString::set_value (const std::string& new_value)
 {
-    if (isReadOnly())
+    if (is_read_only())
     {
         return false;
     }
@@ -43,13 +43,13 @@ bool PropertyString::setValue (const std::string& new_value)
 
     memcpy(this->prop.value.s.value, new_value.c_str(), sizeof(this->prop.value.s.value));
 
-    notifyImpl();
+    notify_impl();
 
     return true;
 }
 
 
-std::string PropertyString::getValue () const
+std::string PropertyString::get_value () const
 {
     return prop.value.s.value;
 }
@@ -73,7 +73,7 @@ PropertyStringMap::~PropertyStringMap ()
 {}
 
 
-std::vector<std::string> PropertyStringMap::getValues () const
+std::vector<std::string> PropertyStringMap::get_values () const
 {
     std::vector<std::string> vec;
 
@@ -86,15 +86,15 @@ std::vector<std::string> PropertyStringMap::getValues () const
 }
 
 
-std::string PropertyStringMap::getDefault () const
+std::string PropertyStringMap::get_default () const
 {
     return "";
 }
 
 
-bool PropertyStringMap::setValue (const std::string& new_value)
+bool PropertyStringMap::set_value (const std::string& new_value)
 {
-    if (isReadOnly())
+    if (is_read_only())
     {
         return false;
     }
@@ -106,19 +106,19 @@ bool PropertyStringMap::setValue (const std::string& new_value)
         return false;
     }
 
-    notifyImpl();
+    notify_impl();
 
     return false;
 }
 
 
-std::string PropertyStringMap::getValue () const
+std::string PropertyStringMap::get_value () const
 {
     return prop.value.s.value;
 }
 
 
-std::map<std::string, int> PropertyStringMap::getMapping () const
+std::map<std::string, int> PropertyStringMap::get_mapping () const
 {
     return string_map;
 }
@@ -140,27 +140,27 @@ PropertyBoolean::~PropertyBoolean ()
 {}
 
 
-bool PropertyBoolean::getDefault () const
+bool PropertyBoolean::get_default () const
 {
     return prop.value.b.default_value;
 }
 
 
-bool PropertyBoolean::setValue (bool value)
+bool PropertyBoolean::set_value (bool value)
 {
-    if (isReadOnly())
+    if (is_read_only())
     {
         return false;
     }
 
     prop.value.b.value = value;
-    notifyImpl();
+    notify_impl();
 
     return true;
 }
 
 
-bool PropertyBoolean::getValue () const
+bool PropertyBoolean::get_value () const
 {
     return prop.value.b.value;
 }
@@ -183,39 +183,39 @@ PropertyInteger::~PropertyInteger ()
 {}
 
 
-int64_t PropertyInteger::getDefault () const
+int64_t PropertyInteger::get_default () const
 {
     return prop.value.i.default_value;
 }
 
 
-int64_t PropertyInteger::getMin () const
+int64_t PropertyInteger::get_min () const
 {
     return this->prop.value.i.min;
 }
 
 
-int64_t PropertyInteger::getMax () const
+int64_t PropertyInteger::get_max () const
 {
     return this->prop.value.i.max;
 }
 
 
-int64_t PropertyInteger::getStep () const
+int64_t PropertyInteger::get_step () const
 {
   return this->prop.value.i.step;
 }
 
 
-int64_t PropertyInteger::getValue () const
+int64_t PropertyInteger::get_value () const
 {
     return this->prop.value.i.value;
 }
 
 
-bool PropertyInteger::setValue (int64_t new_value)
+bool PropertyInteger::set_value (int64_t new_value)
 {
-    // if (isReadOnly())
+    // if (is_read_only())
     // return false;
 
     tcam_value_int& i = this->prop.value.i;
@@ -225,7 +225,7 @@ bool PropertyInteger::setValue (int64_t new_value)
 
     i.value = new_value;
 
-    notifyImpl();
+    notify_impl();
 
     return true;
 }
@@ -248,33 +248,33 @@ PropertyDouble::~PropertyDouble ()
 {}
 
 
-double PropertyDouble::getDefault () const
+double PropertyDouble::get_default () const
 {
     return prop.value.d.default_value;
 }
 
 
-double PropertyDouble::getMin () const
+double PropertyDouble::get_min () const
 {
     return this->prop.value.d.min;
 }
 
 
-double PropertyDouble::getMax () const
+double PropertyDouble::get_max () const
 {
     return this->prop.value.d.max;
 }
 
 
-double PropertyDouble::getValue () const
+double PropertyDouble::get_value () const
 {
     return this->prop.value.d.value;
 }
 
 
-bool PropertyDouble::setValue (double new_value)
+bool PropertyDouble::set_value (double new_value)
 {
-    if (isReadOnly())
+    if (is_read_only())
     {
         return false;
     }
@@ -288,7 +288,7 @@ bool PropertyDouble::setValue (double new_value)
 
     d.value = new_value;
 
-    notifyImpl();
+    notify_impl();
 
     return false;
 }
@@ -312,10 +312,10 @@ PropertyButton::~PropertyButton ()
 
 bool PropertyButton::activate ()
 {
-    if (isReadOnly())
+    if (is_read_only())
         return false;
 
-    notifyImpl();
+    notify_impl();
 
     return true;
 }

@@ -34,26 +34,26 @@ bool tcam::export_device_list (const std::vector<DeviceInfo>& device_list,
         TiXmlElement* device_name_node = new TiXmlElement( "device_name" );
         device_node->LinkEndChild( device_name_node );
 
-        TiXmlText* name_text = new TiXmlText(open_device.getName().c_str());
+        TiXmlText* name_text = new TiXmlText(open_device.get_name().c_str());
         device_name_node->LinkEndChild( name_text );
 
         TiXmlElement* device_id_node = new TiXmlElement( "serialnumber" );
         device_node->LinkEndChild( device_id_node );
 
-        TiXmlText* id_text = new TiXmlText(open_device.getSerial().c_str());
+        TiXmlText* id_text = new TiXmlText(open_device.get_serial().c_str());
         device_id_node->LinkEndChild( id_text );
 
         TiXmlElement* device_identifier_node = new TiXmlElement( "identifier" );
         device_node->LinkEndChild( device_identifier_node );
 
-        TiXmlText* identifier_text = new TiXmlText(open_device.getIdentifier().c_str());
+        TiXmlText* identifier_text = new TiXmlText(open_device.get_identifier().c_str());
         device_identifier_node->LinkEndChild( identifier_text );
 
 
         TiXmlElement* device_type_node = new TiXmlElement( "type" );
         device_node->LinkEndChild( device_type_node );
 
-        TiXmlText* type_text = new TiXmlText(open_device.getDeviceTypeAsString().c_str());
+        TiXmlText* type_text = new TiXmlText(open_device.get_device_type_as_string().c_str());
         device_type_node->LinkEndChild( type_text );
     }
 
@@ -71,7 +71,7 @@ static bool load_single_property (TiXmlElement* prop_node,
 
     auto find_property = [&p_name] (std::shared_ptr<Property> p)
         {
-            return p->getName().compare(p_name) == 0;
+            return p->get_name().compare(p_name) == 0;
         };
 
 
@@ -170,7 +170,7 @@ bool tcam::load_xml_description (const std::string& filename,
 
     // TODO finish implementation
 
-    if (device.getSerial().compare("") == 0)
+    if (device.get_serial().compare("") == 0)
     {
         setError(Error("Xml configuration is not applicable to this device", ENXIO));
         return false;
@@ -213,7 +213,7 @@ bool tcam::save_xml_description (const std::string& filename,
     TiXmlElement* device_id_node = new TiXmlElement( "serialnumber" );
     device_node->LinkEndChild( device_id_node );
 
-    TiXmlText* id_text = new TiXmlText(open_device.getSerial().c_str());
+    TiXmlText* id_text = new TiXmlText(open_device.get_serial().c_str());
     device_id_node->LinkEndChild( id_text );
 
     TiXmlComment* comment2 = new TiXmlComment();
@@ -262,10 +262,10 @@ bool tcam::save_xml_description (const std::string& filename,
         TiXmlElement* property_node = new TiXmlElement ( "property" );
         properties_node->LinkEndChild( property_node );
 
-        property_node->SetAttribute("name", dp->getName().c_str());
-        property_node->SetAttribute("type", propertyType2String(dp->getType()).c_str());
+        property_node->SetAttribute("name", dp->get_name().c_str());
+        property_node->SetAttribute("type", propertyType2String(dp->get_type()).c_str());
 
-        if (is_bit_set(dp->getFlags(), TCAM_PROPERTY_FLAG_EXTERNAL))
+        if (is_bit_set(dp->get_flags(), TCAM_PROPERTY_FLAG_EXTERNAL))
         {
             TiXmlElement* emulated_node = new TiXmlElement( "emulated" );
             property_node->LinkEndChild( emulated_node );
@@ -277,7 +277,7 @@ bool tcam::save_xml_description (const std::string& filename,
         TiXmlElement* value_node = new TiXmlElement( "value" );
         property_node->LinkEndChild( value_node );
 
-        TiXmlText* text = new TiXmlText( dp->toString() );
+        TiXmlText* text = new TiXmlText(dp->to_string() );
         value_node->LinkEndChild( text );
     }
 

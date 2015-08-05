@@ -21,15 +21,15 @@ AravisDevice::AravisPropertyHandler::AravisPropertyHandler (AravisDevice* dev)
 {}
 
 
-bool AravisDevice::AravisPropertyHandler::getProperty (Property& p)
+bool AravisDevice::AravisPropertyHandler::get_property (Property& p)
 {
-    return device->getProperty(p);
+    return device->get_property(p);
 }
 
 
-bool AravisDevice::AravisPropertyHandler::setProperty (const Property& p)
+bool AravisDevice::AravisPropertyHandler::set_property (const Property& p)
 {
-    return device->setProperty(p);
+    return device->set_property(p);
 }
 
 
@@ -39,7 +39,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
       current_buffer(0),
       stream(NULL)
 {
-    this->arv_camera = arv_camera_new (this->device.getInfo().identifier);
+    this->arv_camera = arv_camera_new (this->device.get_info().identifier);
 
     if (this->arv_camera == NULL)
     {
@@ -88,11 +88,11 @@ std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
 }
 
 
-bool AravisDevice::setProperty (const Property& p)
+bool AravisDevice::set_property (const Property& p)
 {
     auto f = [p] (const property_mapping& m)
         {
-            return p.getName().compare(m.prop->getName()) == 0;
+            return p.get_name().compare(m.prop->get_name()) == 0;
         };
 
     auto pm = std::find_if(handler->properties.begin(), handler->properties.end(), f);
@@ -104,9 +104,9 @@ bool AravisDevice::setProperty (const Property& p)
 
     auto device = arv_camera_get_device(arv_camera);
 
-    Property::VALUE_TYPE value_type = pm->prop->getValueType();
+    Property::VALUE_TYPE value_type = pm->prop->get_value_type();
 
-    TCAM_PROPERTY_TYPE type = pm->prop->getType();
+    TCAM_PROPERTY_TYPE type = pm->prop->get_type();
 
     if (type == TCAM_PROPERTY_TYPE_INTEGER)
     {
@@ -125,23 +125,23 @@ bool AravisDevice::setProperty (const Property& p)
     {
         case Property::INTEGER:
         {
-            tcam_log(TCAM_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
+            tcam_log(TCAM_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
             // PropertyInteger&
-            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).getValue());
-            pm->prop->setStruct(p.getStruct());
+            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
+            pm->prop->set_struct(p.get_struct());
             break;
         }
         case Property::INTSWISSKNIFE:
         {
             tcam_log(TCAM_LOG_ERROR, "Swissknife");
-            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
+            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
             break;
         }
         case Property::FLOAT:
         {
-            tcam_log(TCAM_LOG_ERROR, "FLOAT");
-            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).getValue());
-            pm->prop->setStruct(p.getStruct());
+            tcam_log(TCAM_LOG_DEBUG, "Sending property change for (float) %s", p.get_name().c_str());
+            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
+            pm->prop->set_struct(p.get_struct());
 
             break;
         }
@@ -155,26 +155,26 @@ bool AravisDevice::setProperty (const Property& p)
         case Property::BOOLEAN:
         {
             tcam_log(TCAM_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
-            if (((PropertyBoolean&)p).getValue())
+            if (((PropertyBoolean&) p).get_value())
                 arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
             else
                 arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
 
-            pm->prop->setStruct(p.getStruct());
+            pm->prop->set_struct(p.get_struct());
             break;
         }
         case Property::STRING:
         case Property::ENUM:
         {
             tcam_log(TCAM_LOG_DEBUG, "====ENUMERATION %s", pm->arv_ident.c_str());
-            if (p.getType() == TCAM_PROPERTY_TYPE_BOOLEAN)
+            if (p.get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
             {
-                if (((PropertyBoolean&)p).getValue())
+                if (((PropertyBoolean&) p).get_value())
                     arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
                 else
                     arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
 
-                pm->prop->setStruct(p.getStruct());
+                pm->prop->set_struct(p.get_struct());
                 break;
             }
 
@@ -191,7 +191,7 @@ bool AravisDevice::setProperty (const Property& p)
 }
 
 
-bool AravisDevice::getProperty (Property&)
+bool AravisDevice::get_property (Property&)
 {
     return false;
 }
@@ -408,9 +408,9 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
             }
 
-            self->buffers.at(self->current_buffer)->setImageBuffer(desc);
+            self->buffers.at(self->current_buffer)->set_image_buffer(desc);
             //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-            self->external_sink->pushImage(self->buffers.at(self->current_buffer));
+            self->external_sink->push_image(self->buffers.at(self->current_buffer));
 
             if (self->current_buffer < self->buffers.size() -1)
             {
@@ -439,7 +439,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
                     // struct tcam_image_buffer desc = {0};
 
-                    // desc.format = self->active_video_format.getStruct();
+                    // desc.format = self->active_video_format.get_struct();
 
 
                     // desc.pData = (unsigned char*)buffer->data;
@@ -450,9 +450,9 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                     // tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
                     // }
 
-                    // self->buffers.at(self->current_buffer)->setImageBuffer(desc);
+                    // self->buffers.at(self->current_buffer)->set_image_buffer(desc);
                     // tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-                    // self->external_sink->pushImage(self->buffers.at(self->current_buffer));
+                    // self->external_sink->push_image(self->buffers.at(self->current_buffer));
 
                     // if (self->current_buffer < self->buffers.size() -1)
                     // self->current_buffer++;

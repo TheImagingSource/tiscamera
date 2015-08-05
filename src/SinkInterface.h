@@ -16,11 +16,11 @@ public:
 
     virtual ~SinkInterface () {};
 
-    virtual bool setStatus (TCAM_PIPELINE_STATUS) = 0;
+    virtual bool set_status (TCAM_PIPELINE_STATUS) = 0;
 
-    virtual TCAM_PIPELINE_STATUS getStatus () const = 0;
+    virtual TCAM_PIPELINE_STATUS get_status () const = 0;
 
-    virtual void pushImage (std::shared_ptr<MemoryBuffer>) = 0;
+    virtual void push_image (std::shared_ptr<MemoryBuffer>) = 0;
 
 };
 

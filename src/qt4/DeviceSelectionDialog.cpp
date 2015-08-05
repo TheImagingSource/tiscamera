@@ -42,7 +42,7 @@ void DeviceSelectionDialog::on_buttonBox_accepted ()
 
     auto f = [&serial] (const tcam::DeviceInfo& dev)
     {
-        return serial.toStdString().compare(dev.getSerial()) == 0;
+        return serial.toStdString().compare(dev.get_serial()) == 0;
     };
 
     auto d = std::find_if(devices.begin(), devices.end(), f);
@@ -66,7 +66,7 @@ void DeviceSelectionDialog::update_list ()
         if (device_watch_dog == nullptr)
             device_watch_dog = tcam::getDeviceIndex();
 
-        devices = device_watch_dog->getDeviceList();
+        devices = device_watch_dog->get_device_list();
         ui->device_table->clear();
         this->ui->device_table->setRowCount(devices.size());
 
@@ -80,9 +80,9 @@ void DeviceSelectionDialog::update_list ()
         unsigned int row = 0;
         for (auto& d : devices)
         {
-            QTableWidgetItem *newItem = new QTableWidgetItem( QString(d.getName().c_str()));
-            QTableWidgetItem *newSerial = new QTableWidgetItem( QString(d.getSerial().c_str()));
-            QTableWidgetItem *newType = new QTableWidgetItem( QString(d.getDeviceTypeAsString().c_str()));
+            QTableWidgetItem *newItem = new QTableWidgetItem( QString(d.get_name().c_str()));
+            QTableWidgetItem *newSerial = new QTableWidgetItem( QString(d.get_serial().c_str()));
+            QTableWidgetItem *newType = new QTableWidgetItem( QString(d.get_device_type_as_string().c_str()));
 
             ui->device_table->setItem(row, 0, newItem);
             ui->device_table->setItem(row, 1, newSerial);
@@ -113,7 +113,7 @@ tcam::DeviceInfo DeviceSelectionDialog::getSelection ()
 
     auto f = [&serial] (const tcam::DeviceInfo& dev)
     {
-        return serial.toStdString().compare(dev.getSerial()) == 0;
+        return serial.toStdString().compare(dev.get_serial()) == 0;
     };
 
     auto d = std::find_if(devices.begin(), devices.end(), f);

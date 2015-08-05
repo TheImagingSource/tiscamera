@@ -28,92 +28,92 @@ AutoPassPropertyHandler::AutoPassPropertyHandler (AutoPassFilter* f)
 
 bool AutoPassPropertyHandler::setProperty (const Property& prop)
 {
-    if (prop.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
+    if (prop.get_ID() == TCAM_PROPERTY_EXPOSURE_AUTO)
     {
-        prop_auto_exposure->setStruct(prop.getStruct());
+        prop_auto_exposure->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_GAIN_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_GAIN_AUTO)
     {
-        prop_auto_gain->setStruct(prop.getStruct());
+        prop_auto_gain->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_IRIS_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_IRIS_AUTO)
     {
-        prop_auto_iris->setStruct(prop.getStruct());
+        prop_auto_iris->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_FOCUS_ONE_PUSH)
+    else if (prop.get_ID() == TCAM_PROPERTY_FOCUS_ONE_PUSH)
     {
         filter->activate_focus_run();
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB)
     {
-        prop_wb->setStruct(prop.getStruct());
+        prop_wb->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_AUTO)
     {
-        prop_auto_wb->setStruct(prop.getStruct());
+        prop_auto_wb->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_RED)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_RED)
     {
-        prop_wb_r->setStruct(prop.getStruct());
+        prop_wb_r->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_GREEN)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_GREEN)
     {
-        prop_wb_g->setStruct(prop.getStruct());
+        prop_wb_g->set_struct(prop.get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_BLUE)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_BLUE)
     {
-        prop_wb_b->setStruct(prop.getStruct());
+        prop_wb_b->set_struct(prop.get_struct());
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl: %s(%d)", prop.getName().c_str(), prop.getID());
+        tcam_log(TCAM_LOG_ERROR, "Property not supported by impl: %s(%d)", prop.get_name().c_str(), prop.get_ID());
         return false;
     }
-    tcam_log(TCAM_LOG_DEBUG, "Received change from %s", prop.getName().c_str());
+    tcam_log(TCAM_LOG_DEBUG, "Received change from %s", prop.get_name().c_str());
     return true;
 }
 
 
 bool AutoPassPropertyHandler::getProperty (Property& prop)
 {
-    if (prop.getID() == TCAM_PROPERTY_EXPOSURE_AUTO)
+    if (prop.get_ID() == TCAM_PROPERTY_EXPOSURE_AUTO)
     {
-        prop.setStruct(prop_auto_exposure->getStruct());
+        prop.set_struct(prop_auto_exposure->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_GAIN_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_GAIN_AUTO)
     {
-        prop.setStruct(prop_auto_gain->getStruct());
+        prop.set_struct(prop_auto_gain->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_IRIS_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_IRIS_AUTO)
     {
-        prop.setStruct(prop_auto_iris->getStruct());
+        prop.set_struct(prop_auto_iris->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB)
     {
-        prop.setStruct(prop_wb->getStruct());
+        prop.set_struct(prop_wb->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_AUTO)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_AUTO)
     {
-        prop.setStruct(prop_auto_wb->getStruct());
+        prop.set_struct(prop_auto_wb->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_RED)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_RED)
     {
-        prop.setStruct(prop_wb_r->getStruct());
+        prop.set_struct(prop_wb_r->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_GREEN)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_GREEN)
     {
-        prop.setStruct(prop_wb_g->getStruct());
+        prop.set_struct(prop_wb_g->get_struct());
     }
-    else if (prop.getID() == TCAM_PROPERTY_WB_BLUE)
+    else if (prop.get_ID() == TCAM_PROPERTY_WB_BLUE)
     {
-        prop.setStruct(prop_wb_b->getStruct());
+        prop.set_struct(prop_wb_b->get_struct());
     }
     else
     {
         tcam_log(TCAM_LOG_ERROR, "Property not supported by impl");
         return false;
     }
-    tcam_log(TCAM_LOG_DEBUG, "Updated value for %s", prop.getName().c_str());
+    tcam_log(TCAM_LOG_DEBUG, "Updated value for %s", prop.get_name().c_str());
     return true;
 }
 
@@ -355,7 +355,7 @@ void AutoPassFilter::setDeviceProperties (std::vector<std::shared_ptr<Property>>
     TCAM_PROPERTY_ID id;
     auto f = [&id] (std::shared_ptr<Property> p)
         {
-            return id ==p->getID();
+            return id == p->get_ID();
         };
 
 
