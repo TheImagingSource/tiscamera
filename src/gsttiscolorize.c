@@ -383,19 +383,19 @@ char* device_bayer_pattern (int id)
 
 int check_bayer_pattern (char* desc)
 {
-    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GRBG Bayer (GRBG)"))
+    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GRBG Bayer (GRBG)") == 0)
     {
         return GR;
     }
-    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (RGGB)"))
+    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (RGGB)") == 0)
     {
         return RG;
     }
-    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (GBRG)"))
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (GBRG)") == 0)
     {
         return GB;
     }
-    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0 || strcmp(desc, "BGGR Bayer (BGGR)"))
+    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0 || strcmp(desc, "BGGR Bayer (BGGR)") == 0)
     {
         return BG;
     }
