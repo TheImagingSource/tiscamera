@@ -11,8 +11,6 @@
 #include "ImageSink.h"
 #include "FilterBase.h"
 
-#include "FilterLoader.h"
-
 #include <memory>
 
 VISIBILITY_INTERNAL
@@ -139,8 +137,6 @@ private:
     bool start_playing ();
 
     bool stop_playing ();
-
-    FilterLoader filter_loader;
 
 };
 

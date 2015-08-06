@@ -9,8 +9,6 @@ if (BUILD_GST_1_0)
 endif (BUILD_GST_1_0)
 
 
-add_subdirectory(algorithms)
-include_directories("${PROJECT_SOURCE_DIR}/src/algorithms")
 
 # If you really want to set additional options from outside CMakeLists.txt you
 # can do this:
@@ -28,7 +26,6 @@ DeviceInfo.cpp
 DeviceIndex.cpp
 DeviceInterface.cpp
 Error.cpp
-FilterLoader.cpp
 CaptureDevice.cpp
 CaptureDeviceImpl.cpp
 image_transform_base.h
@@ -43,8 +40,6 @@ ImageSink.cpp
 PipelineManager.cpp
 ImageSource.cpp
 serialization.cpp
-filter/AutoPassFilter.cpp
-filter/BayerRgbFilter.cpp
 PropertyHandler.cpp
 public_utils.cpp
 gsttcambase.c
@@ -104,7 +99,6 @@ if (BUILD_ARAVIS)
 endif (BUILD_ARAVIS)
 
 
-target_link_libraries(tcam tcam_algorithms)
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)

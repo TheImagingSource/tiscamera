@@ -13,12 +13,8 @@
 using namespace tcam;
 
 PipelineManager::PipelineManager ()
-    : status(TCAM_PIPELINE_UNDEFINED), current_ppl_buffer(0), filter_loader()
-{
-    filter_loader.index_possible_filter();
-    filter_loader.open_possible_filter();
-    available_filter = filter_loader.get_all_filter();
-}
+    : status(TCAM_PIPELINE_UNDEFINED), current_ppl_buffer(0)
+{}
 
 
 PipelineManager::~PipelineManager ()
@@ -31,7 +27,6 @@ PipelineManager::~PipelineManager ()
     available_filter.clear();
     filter_pipeline.clear();
     filter_properties.clear();
-    filter_loader.drop_all_filter();
 }
 
 
