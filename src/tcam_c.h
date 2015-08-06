@@ -144,6 +144,13 @@ extern "C"
                                             struct tcam_device_property* array,
                                             const size_t size);
 
+    /**
+     *
+     */
+    int tcam_capture_device_set_property (tcam_capture_device* source,
+                                          struct tcam_device_property* property);
+
+
     /* video format related */
 
     /**
