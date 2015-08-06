@@ -37,11 +37,12 @@ Logger::Logger ():
     {
         load_default_settings();
     }
+    // TODO interpret environment variable
 }
 
 void Logger::load_default_settings ()
 {
-    level = TCAM_LOG_DEBUG;
+    level = TCAM_LOG_ERROR;
     target = STDIO;
     log_file = "tmp/tis.log";
 }
