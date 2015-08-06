@@ -38,8 +38,10 @@ enum TCAM_DEVICE_TYPE
     TCAM_DEVICE_TYPE_ARAVIS,      /**< currently through aravis */
 };
 
+
 /**
  * @name tcam_device_info
+ * Simple device description containing all information to uniquely identify a device
  */
 struct tcam_device_info
 {
@@ -50,11 +52,15 @@ struct tcam_device_info
 };
 
 
+/**
+ * @name tcam_image_size
+ */
 struct tcam_image_size
 {
     uint32_t width;
     uint32_t height;
 };
+
 
 /**
  * format capabilities
@@ -123,6 +129,10 @@ struct tcam_image_buffer
 };
 
 
+/**
+ * @name TCAM_PROPERTY_ID
+ * @brief list of unique property identifiers
+ */
 enum TCAM_PROPERTY_ID
 {
     TCAM_PROPERTY_INVALID,
@@ -206,7 +216,7 @@ struct tcam_value_double
 {
     double min;
     double max;
-    double step;         /* 0 if steps not possible */
+    double step;         /* 0.0 if steps not possible */
     double default_value;
     double value;
 };
@@ -225,6 +235,14 @@ struct tcam_value_bool
     bool default_value;
 };
 
+
+/**
+ * Categorization of properties works by
+ * assigning every property a category and group.
+ * A group is defined by the property id of the leading member
+ * e.g. TCAM_PROPERTY_EXPOSURE_AUTO is a member of the group TCAM_PROPERTY_EXPOSURE.
+ * The resulting tree structure allows for a
+ */
 
 /**
  * @enum TCAM_PROPERTY_CATEGORY
@@ -253,7 +271,6 @@ struct tcam_property_group
                                                       if property_group and tcam_device_property.id
                                                       are identical the property should be considered
                                                       the group master */
-
 };
 
 
