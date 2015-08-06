@@ -57,9 +57,17 @@ private:
     property_mapping find_mapping_external (TCAM_PROPERTY_ID id);
     property_mapping find_mapping_internal (TCAM_PROPERTY_ID id);
 
-    /**
-     *
-     */
+    struct grouping
+    {
+        TCAM_PROPERTY_ID id;
+        std::shared_ptr<Property> master;
+        std::vector<std::shared_ptr<Property>> member;
+    };
+
+    std::vector<grouping> groups;
+
+    void group_properties ();
+
     void generate_properties ();
 
     void toggle_read_only (TCAM_PROPERTY_ID id, bool read_only);

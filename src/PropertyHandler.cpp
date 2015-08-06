@@ -20,6 +20,63 @@ PropertyHandler::~PropertyHandler ()
 {}
 
 
+static bool is_group_master (const Property& p)
+{
+    if (p.get_struct().id == p.get_struct().group.property_group)
+    {
+        return true;
+    }
+    return false;
+}
+
+
+void PropertyHandler::group_properties ()
+{
+    groups.clear();
+
+    for (auto& p : device_properties)
+    {
+
+
+        auto find_grouping = [&p] (const grouping& g)
+            {
+                if (g.id == p->get_struct().id)
+                {
+                    return true;
+                }
+                return false;
+            };
+
+        auto my_group = std::find_if(groups.begin(), groups.end(), find_grouping);
+
+        if (my_group == groups.end())
+        {
+            grouping new_g = {};
+            new_g.id = p->get_struct().id;
+            if (is_group_master(*p))
+            {
+                new_g.master = p;
+            }
+            else
+            {
+                new_g.member.push_back(p);
+            }
+            groups.push_back(new_g);
+        }
+        else
+        {
+            if (is_group_master(*p))
+            {
+                my_group->master = p;
+            }
+            else
+            {
+                my_group->member.push_back(p);
+            }
+        }
+    }
+}
+
 bool PropertyHandler::set_properties (std::vector<std::shared_ptr<Property>> device,
                                       std::vector<std::shared_ptr<Property>> emulated)
 {
