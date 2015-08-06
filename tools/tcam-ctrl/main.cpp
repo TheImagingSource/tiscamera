@@ -15,31 +15,31 @@ using namespace tcam;
 void print_help ()
 {
     std::cout << "Commandline camera manipulation utility." << std::endl
-              << std::endl
-              << "Options:" << std::endl
-              << "\t-l - list cameras" << std::endl
-              << "\t-p - list properties"  << std::endl
-              << "\t-f - list video formats" << std::endl
-              << std::endl
-              << "Examples:" << std::endl
-              << std::endl
-              << "Set video format:" << std::endl
-              << "\ttis-ctrl -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" 25410069" << std::endl
-              << std::endl
-              << "Set property" << std::endl
-              << "\ttis-ctrl -s -p \"Auto Exposure=false\""
-              << std::endl
-              << std::endl;
+    << std::endl
+    << "Options:" << std::endl
+    << "\t-l - list cameras" << std::endl
+    << "\t-p - list properties"  << std::endl
+    << "\t-f - list video formats" << std::endl
+    << std::endl
+    << "Examples:" << std::endl
+    << std::endl
+    << "Set video format:" << std::endl
+    << "\ttis-ctrl -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" 25410069" << std::endl
+    << std::endl
+    << "Set property" << std::endl
+    << "\ttis-ctrl -s -p \"Auto Exposure=false\""
+    << std::endl
+    << std::endl;
 }
 
 
 void print_capture_devices (const std::vector<DeviceInfo>& devices)
 {
-  std::cout << "Available devices:" << std::endl;
-  std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
+    std::cout << "Available devices:" << std::endl;
+    std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
     for (const auto& d : devices)
     {
-      std::cout << d.getName() << "\t" << d.getDeviceTypeAsString() << "\t" << d.getSerial() << std::endl;
+        std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t" << d.get_serial() << std::endl;
     }
     std::cout << std::endl;
 }
@@ -90,7 +90,7 @@ int main (int argc, char *argv[])
         {
             auto index = getDeviceIndex();
             sleep(3); // let camera detection do its magic
-            std::vector<DeviceInfo> device_list = index->getDeviceList();
+            std::vector<DeviceInfo> device_list = index->get_device_list();
             print_capture_devices(device_list);
             return 0;
         }
@@ -135,7 +135,7 @@ int main (int argc, char *argv[])
 
     auto device_index = getDeviceIndex();
     sleep(3);
-    std::vector<DeviceInfo> device_list = device_index->getDeviceList();
+    std::vector<DeviceInfo> device_list = device_index->get_device_list();
 
 
 
@@ -143,13 +143,13 @@ int main (int argc, char *argv[])
 
     for (auto& d : device_list)
     {
-        if (d.getSerial().compare(serial) == 0)
+        if (d.get_serial().compare(serial) == 0)
         {
             g = CaptureDevice(d);
         }
     }
 
-    if (!g.isDeviceOpen())
+    if (!g.is_device_open())
     {
         std::cout << "Unable to find device with serial '" << serial << "'" << std::endl;
         return 1;
@@ -159,12 +159,12 @@ int main (int argc, char *argv[])
     {
         case LIST_PROPERTIES:
         {
-            print_properties(g.getAvailableProperties());
+            print_properties(g.get_available_properties());
             break;
         }
         case LIST_FORMATS:
         {
-            list_formats(g.getAvailableVideoFormats());
+            list_formats(g.get_available_video_formats());
             break;
         }
         case SET_PROPERTY:
