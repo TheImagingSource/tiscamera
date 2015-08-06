@@ -203,7 +203,7 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
 
     tcam_capture_device_start_stream(self->device, gst_tcam_callback, self);
 
-    GST_ERROR("successfully set caps");
+    GST_INFO("successfully set caps");
 
     return TRUE;
 }
@@ -220,7 +220,7 @@ void gst_tcam_init_camera (GstTcam* self)
 
     /* wait for network cameras to be indexed */
     /* ? does this have to be incrreased ? */
-    sleep(2);
+    sleep(5);
 
     int dev_count = tcam_device_index_get_device_count(index);
 
@@ -515,7 +515,7 @@ static void gst_tcam_class_init (GstTcamClass* klass)
                                           "Tcam Video Source",
                                           "Source/Video",
                                           "Tcam based source",
-                                          "Edgar Thier <support@theimagingsource.com>");
+                                          "TheImaging Source <support@theimagingsource.com>");
 
     gst_element_class_add_pad_template (element_class,
                                         gst_static_pad_template_get (&tcam_src_template));
