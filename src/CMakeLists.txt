@@ -43,6 +43,7 @@ serialization.cpp
 PropertyHandler.cpp
 public_utils.cpp
 gsttcambase.c
+tcam_c.cpp
 )
 
 if (BUILD_USB)
