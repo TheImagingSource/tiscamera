@@ -54,6 +54,8 @@ if (BUILD_USB)
   include_directories(${UDEV_INCLUDE_DIR})
   add_definitions(-DHAVE_UDEV)
 
+  add_definitions(-DHAVE_USB)
+
 endif (BUILD_USB)
 
 if (BUILD_ARAVIS)
