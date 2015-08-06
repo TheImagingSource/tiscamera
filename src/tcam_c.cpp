@@ -2,6 +2,7 @@
 #include "tcam_c.h"
 
 #include "tcam.h"
+#include "internal.h"
 #include "Error.h"
 
 using namespace tcam;
@@ -36,7 +37,12 @@ void tcam_destroy_device_index (tcam_device_index* index)
 
 int tcam_device_index_get_device_count (tcam_device_index* index)
 {
-    return reinterpret_cast<DeviceIndex*>(index)->getDeviceList().size();
+    if (index == NULL)
+        return 0;
+
+    auto vec = reinterpret_cast<DeviceIndex*>(index)->get_device_list();
+
+    return vec.size();
 }
 
 
