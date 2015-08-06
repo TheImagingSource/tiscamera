@@ -260,10 +260,13 @@ void PropertyHandler::generate_properties ()
         {
             external_properties.push_back(new_p);
             properties.push_back({new_p, p});
-            handle_flags(new_p);
         }
     }
 
+    for (auto& p : external_properties)
+    {
+        handle_flags(p);
+    }
 
 }
 
