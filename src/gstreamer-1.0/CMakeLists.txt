@@ -9,6 +9,9 @@ include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+set(cflags " -w -Wall -Wextra -pedantic -Wundef -Wshadow")
+set(lflags "-fPIC -Wl,--gc-sections -ffunction-sections -fdata-sections")
+
 add_library(gsttcamsrc SHARED gsttcamsrc.c)
 target_link_libraries(gsttcamsrc tcam)
 target_link_libraries(gsttcamsrc ${GSTREAMER_LIBRARIES})
