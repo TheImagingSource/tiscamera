@@ -211,6 +211,20 @@ void PropertyHandler::generate_properties ()
 }
 
 
+void PropertyHandler::toggle_read_only (TCAM_PROPERTY_ID id, bool read_only)
+{
+    auto pe = find_property(external_properties, id);
+
+    if (pe == nullptr)
+        return;
+
+    if (read_only)
+        set_property_flag(pe, TCAM_PROPERTY_FLAG_READ_ONLY);
+    else
+        unset_property_flag(pe, TCAM_PROPERTY_FLAG_READ_ONLY);
+}
+
+
 void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 {
 
@@ -237,20 +251,8 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         {
             auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
             bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
-            if (vla)
-            {
-                auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
-                auto s = pe->getStruct();
-                s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-                pe->setStruct(s);
-            }
-            else
-            {
-                auto pe = find_property(external_properties, TCAM_PROPERTY_EXPOSURE);
-                auto s = pe->getStruct();
-                s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-                pe->setStruct(s);
-            }
+            toggle_read_only(TCAM_PROPERTY_EXPOSURE, vla);
+
             break;
         }
         case TCAM_PROPERTY_GAIN:
@@ -275,20 +277,17 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         {
             auto pea = find_property(emulated_properties, TCAM_PROPERTY_GAIN_AUTO);
             bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
-            if (vla)
-            {
-                auto pe = find_property(external_properties, TCAM_PROPERTY_GAIN);
-                auto s = pe->getStruct();
-                s.flags = set_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-                pe->setStruct(s);
-            }
-            else
-            {
-                auto pe = find_property(external_properties, TCAM_PROPERTY_GAIN);
-                auto s = pe->getStruct();
-                s.flags = unset_bit(s.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-                pe->setStruct(s);
-            }
+            toggle_read_only(TCAM_PROPERTY_GAIN, vla);
+            break;
+        }
+        case TCAM_PROPERTY_WB_AUTO:
+        {
+            // auto pea = find_property(emulated_properties, TCAM_PROPERTY_WB_RED);
+            bool vla = static_cast<PropertyBoolean&>(*p).getValue();
+            toggle_read_only(TCAM_PROPERTY_WB_RED,   vla);
+            toggle_read_only(TCAM_PROPERTY_WB_GREEN, vla);
+            toggle_read_only(TCAM_PROPERTY_WB_BLUE,  vla);
+
             break;
         }
         default:

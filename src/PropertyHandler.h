@@ -62,6 +62,8 @@ private:
      */
     void generate_properties ();
 
+    void toggle_read_only (TCAM_PROPERTY_ID id, bool read_only);
+
     void handle_flags (std::shared_ptr<Property>&);
 
     static void set_property_flag (std::shared_ptr<Property>&, TCAM_PROPERTY_FLAGS);
