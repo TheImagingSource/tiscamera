@@ -307,7 +307,8 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         case TCAM_PROPERTY_EXPOSURE_AUTO:
         {
             auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
-            bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
+
+            bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
             toggle_read_only(TCAM_PROPERTY_EXPOSURE, vla);
 
             break;
@@ -318,7 +319,7 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 
             if (prop.internal_property != nullptr)
             {
-                if (((PropertyBoolean&)(*prop.internal_property)).getValue())
+                if (((PropertyBoolean&) (*prop.internal_property)).get_value())
                 {
                     set_property_flag(p, TCAM_PROPERTY_FLAG_READ_ONLY);
                 }
@@ -333,14 +334,17 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         case TCAM_PROPERTY_GAIN_AUTO:
         {
             auto pea = find_property(emulated_properties, TCAM_PROPERTY_GAIN_AUTO);
-            bool vla = static_cast<PropertyBoolean&>(*pea).getValue();
+
+            bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
+
             toggle_read_only(TCAM_PROPERTY_GAIN, vla);
             break;
         }
         case TCAM_PROPERTY_WB_AUTO:
         {
             // auto pea = find_property(emulated_properties, TCAM_PROPERTY_WB_RED);
-            bool vla = static_cast<PropertyBoolean&>(*p).getValue();
+            bool vla = static_cast<PropertyBoolean&>(*p).get_value();
+
             toggle_read_only(TCAM_PROPERTY_WB_RED,   vla);
             toggle_read_only(TCAM_PROPERTY_WB_GREEN, vla);
             toggle_read_only(TCAM_PROPERTY_WB_BLUE,  vla);
