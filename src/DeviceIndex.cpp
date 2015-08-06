@@ -61,14 +61,20 @@ void DeviceIndex::update_device_list ()
     auto aravis_dev_list = get_aravis_device_list();
     if (!aravis_dev_list.empty())
         tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
+
+    tcam_log(TCAM_LOG_DEBUG, "Number of found aravis devices: %d", aravis_dev_list.size());
+
 #endif
 
 #if HAVE_USB
     auto v4l2_dev_list = get_v4l2_device_list();
     if (!v4l2_dev_list.empty())
         tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
+
+    tcam_log(TCAM_LOG_DEBUG, "Number of found v4l2 devices: %d", v4l2_dev_list.size());
 #endif
 
+    // check for lost devices
     for (const auto& d : device_list)
     {
         auto f = [&d] (const DeviceInfo& info)
@@ -82,6 +88,7 @@ void DeviceIndex::update_device_list ()
 
         if (found == tmp_dev_list.end())
         {
+            tcam_log(TCAM_LOG_INFO, "Lost device %s. Conntacting callbacks", d.get_name().c_str());
             fire_device_lost(d);
         }
     }
