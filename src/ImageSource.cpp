@@ -25,7 +25,7 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
         this->initialize_buffers();
 
         device->initialize_buffers(buffers);
-        device->setSink(shared_from_this());
+        device->set_sink(shared_from_this());
 
         stream_start = std::chrono::steady_clock::now();
 
@@ -75,13 +75,13 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 
 bool ImageSource::setVideoFormat (const VideoFormat& f)
 {
-    return device->setVideoFormat(f);
+    return device->set_video_format(f);
 }
 
 
 VideoFormat ImageSource::getVideoFormat () const
 {
-    return device->getActiveVideoFormat();
+    return device->get_active_video_format();
 }
 
 
@@ -109,7 +109,7 @@ void ImageSource::initialize_buffers ()
     device->release_buffers();
     buffers.clear();
 
-    VideoFormat f = device->getActiveVideoFormat();
+    VideoFormat f = device->get_active_video_format();
 
     struct tcam_video_format format = f.getStruct();
     int bit_depth = img::get_bits_per_pixel(format.fourcc);

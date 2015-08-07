@@ -46,7 +46,7 @@ public:
 
     ~AravisDevice ();
 
-    DeviceInfo getDeviceDescription () const;
+    DeviceInfo get_device_description () const;
 
     std::vector<std::shared_ptr<Property>> getProperties () ;
 
@@ -54,13 +54,13 @@ public:
 
     bool get_property (Property&);
 
-    bool setVideoFormat (const VideoFormat&);
+    bool set_video_format (const VideoFormat&);
 
-    VideoFormat getActiveVideoFormat () const;
+    VideoFormat get_active_video_format () const;
 
-    std::vector<VideoFormatDescription> getAvailableVideoFormats ();
+    std::vector<VideoFormatDescription> get_available_video_formats ();
 
-    bool setSink (std::shared_ptr<SinkInterface>);
+    bool set_sink (std::shared_ptr<SinkInterface>);
 
     bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
     bool release_buffers ();

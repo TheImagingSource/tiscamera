@@ -58,7 +58,7 @@ bool CaptureDeviceImpl::save_configuration (const std::string& filename)
 
     return save_xml_description(filename,
                                 open_device,
-                                device->getActiveVideoFormat(),
+                                device->get_active_video_format(),
                                 property_handler->get_properties());
 }
 
@@ -178,7 +178,7 @@ bool CaptureDeviceImpl::setVideoFormat (const VideoFormat& new_format)
 
     pipeline->setVideoFormat(new_format);
 
-    return this->device->setVideoFormat(new_format);
+    return this->device->set_video_format(new_format);
 }
 
 
@@ -190,7 +190,7 @@ VideoFormat CaptureDeviceImpl::getActiveVideoFormat () const
         return VideoFormat();
     }
 
-    return device->getActiveVideoFormat();
+    return device->get_active_video_format();
 }
 
 

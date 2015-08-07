@@ -59,7 +59,7 @@ public:
 
     ~V4l2Device ();
 
-    DeviceInfo getDeviceDescription () const;
+    DeviceInfo get_device_description () const;
 
     // TODO: eval if weak_ptr should be distributed
     std::vector<std::shared_ptr<Property>> getProperties ();
@@ -68,19 +68,19 @@ public:
 
     bool get_property (Property&);
 
-    bool setVideoFormat (const VideoFormat&);
+    bool set_video_format (const VideoFormat&);
 
-    bool validateVideoFormat (const VideoFormat&) const;
+    bool validate_video_format (const VideoFormat&) const;
 
-    VideoFormat getActiveVideoFormat () const;
+    VideoFormat get_active_video_format () const;
 
-    std::vector<VideoFormatDescription> getAvailableVideoFormats ();
+    std::vector<VideoFormatDescription> get_available_video_formats ();
 
-    bool setFramerate (double framerate);
+    bool set_framerate (double framerate);
 
-    double getFramerate ();
+    double get_framerate ();
 
-    bool setSink (std::shared_ptr<SinkInterface>);
+    bool set_sink (std::shared_ptr<SinkInterface>);
 
 
     bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);

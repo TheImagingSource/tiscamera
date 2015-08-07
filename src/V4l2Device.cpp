@@ -139,7 +139,7 @@ V4l2Device::~V4l2Device ()
 }
 
 
-DeviceInfo V4l2Device::getDeviceDescription () const
+DeviceInfo V4l2Device::get_device_description () const
 {
     return device;
 }
@@ -163,7 +163,7 @@ bool V4l2Device::get_property (Property& p)
 }
 
 
-bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
+bool V4l2Device::set_video_format (const VideoFormat& new_format)
 {
     if (is_stream_on == true)
     {
@@ -171,7 +171,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
         return false;
     }
 
-    // if (!validateVideoFormat(new_format))
+    // if (!validate_video_format(new_format))
     // {
     // tcam_log(TCAM_LOG_ERROR, "Not a valid format.");
     // return false;
@@ -216,7 +216,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
 
     /* framerate */
 
-    if (!setFramerate(new_format.getFramerate()))
+    if (!set_framerate(new_format.getFramerate()))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set framerate to %f", new_format.getFramerate());
         setError(Error("Unable to set framerate", errno));
@@ -233,7 +233,7 @@ bool V4l2Device::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-bool V4l2Device::validateVideoFormat (const VideoFormat& format) const
+bool V4l2Device::validate_video_format (const VideoFormat& format) const
 {
 
     for (const auto& f : available_videoformats)
@@ -247,19 +247,19 @@ bool V4l2Device::validateVideoFormat (const VideoFormat& format) const
 }
 
 
-VideoFormat V4l2Device::getActiveVideoFormat () const
+VideoFormat V4l2Device::get_active_video_format () const
 {
     return active_video_format;
 }
 
 
-std::vector<VideoFormatDescription> V4l2Device::getAvailableVideoFormats ()
+std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats ()
 {
     return available_videoformats;
 }
 
 
-bool V4l2Device::setFramerate (double framerate)
+bool V4l2Device::set_framerate (double framerate)
 {
     if (is_stream_on == true)
     {
@@ -339,7 +339,7 @@ bool V4l2Device::setFramerate (double framerate)
 }
 
 
-double V4l2Device::getFramerate ()
+double V4l2Device::get_framerate ()
 {
     // TODO what about range framerates?
     struct v4l2_streamparm parm = {};
@@ -362,7 +362,7 @@ double V4l2Device::getFramerate ()
 }
 
 
-bool V4l2Device::setSink (std::shared_ptr<SinkInterface> sink)
+bool V4l2Device::set_sink (std::shared_ptr<SinkInterface> sink)
 {
     if (is_stream_on)
     {
@@ -584,7 +584,7 @@ void V4l2Device::index_formats ()
         }
 
         VideoFormatDescription format(desc, rf);
-        available_videoformats.push_back(format);
+        this->available_videoformats.push_back(format);
 
         tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.getFourcc()));
         // }
@@ -673,7 +673,7 @@ void V4l2Device::determine_active_video_format ()
     format.width = fmt.fmt.pix.width;
     format.height = fmt.fmt.pix.height;
 
-    format.framerate = getFramerate();
+    format.framerate = get_framerate();
 
     this->active_video_format = VideoFormat(format);
 }

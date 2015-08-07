@@ -35,7 +35,7 @@ public:
     /**
      * @return the DeviceInfo describing the device
      */
-    virtual DeviceInfo getDeviceDescription () const = 0;
+    virtual DeviceInfo get_device_description () const = 0;
 
     /**
      * @brief Returns all device properties
@@ -50,25 +50,25 @@ public:
      * @brief Set Format in he actual device
      * @return True on success; False on error or invalid format
      */
-    virtual bool setVideoFormat (const VideoFormat&) = 0;
+    virtual bool set_video_format (const VideoFormat&) = 0;
 
     /**
      * @return The current VideoFormat that is set in the device
      */
-    virtual VideoFormat getActiveVideoFormat () const = 0;
+    virtual VideoFormat get_active_video_format () const = 0;
 
     /**
      * Retrieve all formats the device supports
      * @return vector containing all supported formats; empty on error
      */
-    virtual std::vector<VideoFormatDescription> getAvailableVideoFormats () = 0;
+    virtual std::vector<VideoFormatDescription> get_available_video_formats () = 0;
 
     /**
      * Set the ImageSource to which new images shall be delivered
      * This overwrites previously defined Sinks
      * @return true on successful registration; else false
      */
-    virtual bool setSink (std::shared_ptr<SinkInterface>) = 0;
+    virtual bool set_sink (std::shared_ptr<SinkInterface>) = 0;
 
     /**
      * @return true on successfull allocation/registration; else false
@@ -82,7 +82,7 @@ public:
 
     /**
      * Start image retrieval and wait for new images
-     * A SinkInterface has to be given via @setSink
+     * A SinkInterface has to be given via @set_sink
      * @return true on success; else false
      */
     virtual bool start_stream () = 0;

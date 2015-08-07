@@ -68,7 +68,7 @@ AravisDevice::~AravisDevice ()
 }
 
 
-DeviceInfo AravisDevice::getDeviceDescription () const
+DeviceInfo AravisDevice::get_device_description () const
 {
     return device;
 }
@@ -197,7 +197,7 @@ bool AravisDevice::get_property (Property&)
 }
 
 
-bool AravisDevice::setVideoFormat (const VideoFormat& new_format)
+bool AravisDevice::set_video_format (const VideoFormat& new_format)
 {
     // bool valid = false;
     // for (const auto& v : available_videoformats)
@@ -230,7 +230,7 @@ bool AravisDevice::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-VideoFormat AravisDevice::getActiveVideoFormat () const
+VideoFormat AravisDevice::get_active_video_format () const
 {
     return active_video_format;
 }
@@ -260,7 +260,7 @@ void AravisDevice::determine_active_video_format ()
 }
 
 
-std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
+std::vector<VideoFormatDescription> AravisDevice::get_available_video_formats ()
 {
     if (this->available_videoformats.empty())
     {
@@ -271,7 +271,7 @@ std::vector<VideoFormatDescription> AravisDevice::getAvailableVideoFormats ()
 }
 
 
-bool AravisDevice::setSink (std::shared_ptr<SinkInterface> s)
+bool AravisDevice::set_sink (std::shared_ptr<SinkInterface> s)
 {
     this->external_sink = s;
 
