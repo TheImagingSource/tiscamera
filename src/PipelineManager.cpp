@@ -182,7 +182,9 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
     }
 
     device_properties = device->getProperties();
-    available_input_formats = device->getAvailableVideoFormats();
+    available_input_formats = device->get_available_video_formats();
+
+    tcam_log(TCAM_LOG_DEBUG, "Received %zu formats.", available_input_formats.size());
 
     distributeProperties();
 
@@ -543,23 +545,23 @@ bool PipelineManager::create_pipeline ()
         tcam_log(TCAM_LOG_ERROR, "Unable to set video format in source.");
     }
 
-    if (!add_interpretation_filter())
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
-        return false;
-    }
+    // if (!add_interpretation_filter())
+    // {
+    //     tcam_log(TCAM_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
+    //     return false;
+    // }
 
-    if (!allocate_conversion_buffer())
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
-        return false;
-    }
+    // if (!allocate_conversion_buffer())
+    // {
+    //     tcam_log(TCAM_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
+    //     return false;
+    // }
 
-    if (!validate_pipeline())
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to validate pipeline. Aborting...");
-        return false;
-    }
+//    if (!validate_pipeline())
+//    {
+//        tcam_log(TCAM_LOG_ERROR, "Unable to validate pipeline. Aborting...");
+//        return false;
+//    }
 
     tcam_log(TCAM_LOG_INFO, "Pipeline creation successful.");
 
