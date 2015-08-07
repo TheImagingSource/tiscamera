@@ -98,9 +98,10 @@ bool PipelineManager::destroyPipeline ()
 
 void PipelineManager::index_output_formats ()
 {
-    if (available_input_formats.empty() || available_filter.empty())
+    if (available_input_formats.empty())
     {
         setError(Error("No input formats. Unable to determine output formats", EPIPE));
+        tcam_log(TCAM_LOG_ERROR, "No input formats available.");
         return;
     }
 
