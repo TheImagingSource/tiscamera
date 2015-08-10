@@ -234,7 +234,7 @@ static std::shared_ptr<Property> create_property(const std::shared_ptr<Property>
 
 void PropertyHandler::generate_properties ()
 {
-    if (device_properties.empty() || emulated_properties.empty())
+    if (device_properties.empty())
     {
         setError(Error("No properties to work with.", ENOENT));
         return;
