@@ -121,9 +121,9 @@ GstElement* get_camera_src (GstElement* object)
         else if (g_strcmp0(name, "GstV4l2Src") == 0)
         {
             gint fd;
-            g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
             self->camera_type = CAMERA_TYPE_USB;
             self->camera_src = l->data;
+            g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
 
             gst_debug_log (gst_tis_autofocus_debug_category,
                            GST_LEVEL_INFO,
