@@ -254,6 +254,7 @@ VideoFormat V4l2Device::get_active_video_format () const
 
 std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats ()
 {
+    tcam_log(TCAM_LOG_DEBUG, "Returning %zu formats.", available_videoformats.size());
     return available_videoformats;
 }
 

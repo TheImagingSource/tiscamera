@@ -424,7 +424,10 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
         }
         else
-        {}
+        {
+            tcam_log(TCAM_LOG_ERROR, "Enum conversion not implemented");
+
+        }
     }
     else if (strcmp(node_type, "Command") == 0)
     {
