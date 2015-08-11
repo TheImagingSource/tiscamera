@@ -46,9 +46,8 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
 
     if (desc == properties.end())
     {
-        setError(Error("", 0));
+        setError(Error("No such property.", ENOENT));
         tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
-        // TODO: failure description
         return false;
     }
 
