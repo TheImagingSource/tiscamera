@@ -160,7 +160,7 @@ std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 }
 
 
-std::shared_ptr<DeviceIndex> tcam::getDeviceIndex ()
+std::shared_ptr<DeviceIndex> tcam::get_device_index ()
 {
     return std::make_shared<DeviceIndex>();
 }

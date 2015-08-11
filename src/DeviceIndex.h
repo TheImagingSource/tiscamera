@@ -62,7 +62,7 @@ private:
 };
 
 
-std::shared_ptr<DeviceIndex> getDeviceIndex ();
+std::shared_ptr<DeviceIndex> get_device_index ();
 
 } /* namespace tcam */
 
