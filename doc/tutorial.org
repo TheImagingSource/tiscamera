@@ -134,12 +134,101 @@
 
       for (const Property& p : device->get_available_properties())
       {
+        std::cout << std::left;
+        switch (p.get_type())
+        {
+            case TCAM_PROPERTY_TYPE_INTEGER:
+            {
+                PropertyInteger& i = (PropertyInteger&) p;
+                std::cout << std::setw(20) << i.get_name()
+                << std::setw(10) << " (int)"<< std::right
+                << "min=" << std::setw(5)<< i.get_min()
+                << " max=" << std::setw(8) << i.get_max()
+                << " step="<< std::setw(2)  << i.get_step()
+                << " default=" << std::setw(5) << i.get_default()
+                << " value=" << i.get_value()
+                << std::endl;
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_DOUBLE:
+            {
+                PropertyDouble& i = (PropertyDouble&) p;
+                std::cout << std::setw(20) << i.get_name()
+                << std::setw(10) << " (double)"<< std::right
+                << "min=" << std::setw(5)<< i.get_min()
+                << " max=" << std::setw(8) << i.get_max()
+                << " step="<< std::setw(2)  << i.get_step()
+                << " default=" << std::setw(5) << i.get_default()
+                << " value=" << i.get_value()
+                << std::endl;
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_STRING:
+            case TCAM_PROPERTY_TYPE_STRING_TABLE:
+            {
+                // TODO
+            }
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
+            {
+                PropertyBoolean& s = (PropertyBoolean&) p;
 
+                std::cout << std::setw(20) << s.get_name()
+                << std::setw(10) << "(bool)"
+                << std::setw(31) << " "
+                << "default="<< std::setw(5) << s.get_default()
+                << "value=";
+                if (s.get_value())
+                {
+                    std::cout << "true";
+                }
+                else
+                {
+                    std::cout << "false";
+                }
+                std::cout << std::endl;
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_BUTTON:
+            {
+                std::cout << std::setw(20) << p.get_name()
+                << std::setw(10) << "(button)"
+                << std::endl;
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_UNKNOWN:
+            default:
+            {
+                std::cerr << "Unknown property type " << p.get_name() << std::endl;
+            }
+        }
       }
 
       #+END_SRC
 
+***** Setting properties
+
+      To set a property you convert it to its correct type and call set_value.
+
+      #+BEGIN_SRC C
+
+          PropertyInteger& prop_i = (PropertyInteger&) p;
+
+          int value = 42;
+
+          bool ret = prop_i.set_value(value);
+
+          if (ret == false)
+          {
+              Error err = getError();
+              std::cout << "Unable to set value. Received error: " << err.get_string() << std::endl;
+          }
+
+      #+END_SRC
+
+
 **** Getting and setting video formats
+
+
 
 **** Receiving images
 
