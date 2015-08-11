@@ -27,17 +27,48 @@ static const char* loglevel2string (const enum TCAM_LOG_LEVEL level)
 }
 
 
+static enum TCAM_LOG_LEVEL string2loglevel (const char* level)
+{
+
+    if (strcmp("OFF", level) == 0)
+    {
+        return TCAM_LOG_OFF;
+    }
+    else if (strcmp("DEBUG", level) == 0)
+    {
+        return TCAM_LOG_DEBUG;
+    }
+    else if (strcmp("INFO", level) == 0)
+    {
+        return TCAM_LOG_INFO;
+    }
+    else if (strcmp("WARNING", level) == 0)
+    {
+        return TCAM_LOG_WARNING;
+    }
+    else if (strcmp("ERROR", level) == 0)
+    {
+        return TCAM_LOG_ERROR;
+    }
+    else
+        return TCAM_LOG_ERROR;
+}
+
+
 Logger::Logger ():
     callback(nullptr),
     logfile(nullptr)
 {
+
+    load_default_settings();
     // TODO: make environment variable name configurable
     char* log_def = getenv("TCAM_LOG");
-    if (log_def == nullptr)
+    if (log_def != nullptr)
     {
-        load_default_settings();
+        printf("ENV: %s\n", log_def);
+
+        level = string2loglevel(log_def);
     }
-    // TODO interpret environment variable
 }
 
 void Logger::load_default_settings ()
