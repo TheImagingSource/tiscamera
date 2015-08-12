@@ -5,7 +5,7 @@
   Both offer the same functionality.
 
   Generally most classes you will interact with are wrappers around structs.
-  Thus all
+  Thus many actions can be done by manipulating the underlying structs.
 
 ** C++
 
