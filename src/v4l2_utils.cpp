@@ -308,7 +308,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
             {
                 cp.value.b.default_value = false;
             }
-            else if (queryctrl->default_value == 1)
+            else if (queryctrl->default_value > 0)
             {
                 cp.value.b.default_value = true;
             }
@@ -325,7 +325,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
             {
                 cp.value.b.value = false;
             }
-            else if (ctrl->value == 1)
+            else if (ctrl->value > 0)
             {
                 cp.value.b.value = true;
             }
