@@ -156,6 +156,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .id = TCAM_PROPERTY_SKIPPING,
         .v4l2_id = { 0x980929 },
     },
+    {
+        .id = TCAM_PROPERTY_SHARPNESS,
+        .v4l2_id = { 0x0098091b},
+
+    },
 };
 
 

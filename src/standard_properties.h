@@ -263,6 +263,11 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .name = "Binning",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
+    {
+        TCAM_PROPERTY_SHARPNESS,
+        .name = "Sharpness",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
     // {
     //     .name = "Strobe Polarity",
     //     .type_to_use = ,
