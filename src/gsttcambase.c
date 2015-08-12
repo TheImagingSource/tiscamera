@@ -122,6 +122,37 @@ static TcamGstMapping tcam_gst_caps_info[] =
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
+
+const char* tcam_fourcc_to_gst_0_10_caps_string (uint32_t fourcc)
+{
+	unsigned int i;
+	for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+	{
+		if (fourcc == tcam_gst_caps_info[i].fourcc)
+		{
+			return tcam_gst_caps_info[i].gst_0_10_caps_string;
+		}
+	}
+	return NULL;
+}
+
+
+uint32_t tcam_fourcc_from_gst_0_10_caps_string (const char* name, const char* format)
+{
+
+	unsigned int i;
+
+	for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+	{
+		if (strcmp(name, tcam_gst_caps_info[i].gst_0_10_name) == 0)
+		{
+			if (strcmp(format, tcam_gst_caps_info[i].gst_format) == 0)
+				return tcam_gst_caps_info[i].fourcc;
+		}
+	}
+	return 0;
+}
+
 const char* tcam_fourcc_to_gst_1_0_caps_string (uint32_t fourcc)
 {
     unsigned int i;
@@ -151,3 +182,4 @@ uint32_t tcam_fourcc_from_gst_1_0_caps_string (const char* name, const char* for
     }
     return 0;
 }
+
