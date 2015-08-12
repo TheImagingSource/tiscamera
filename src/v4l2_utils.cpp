@@ -122,7 +122,19 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_WB_AUTO,
+        .v4l2_id = {0x0098090c},
+    },
+    {
+        .id = TCAM_PROPERTY_WB_RED,
+        .v4l2_id = {0x0098090e},
+    },
+    {
+        .id = TCAM_PROPERTY_WB_GREEN,
         .v4l2_id = {},
+    },
+    {
+        .id = TCAM_PROPERTY_WB_BLUE,
+        .v4l2_id = {0x0098090f},
     },
     {
         .id = TCAM_PROPERTY_IRCUT,
