@@ -10,7 +10,7 @@
 DeviceSelectionDialog::DeviceSelectionDialog (QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DeviceSelectionDialog),
-    device_watch_dog(tcam::getDeviceIndex())
+    device_watch_dog(tcam::get_device_index())
 {
     ui->setupUi(this);
 
@@ -64,7 +64,7 @@ void DeviceSelectionDialog::update_list ()
     while (run_thread)
     {
         if (device_watch_dog == nullptr)
-            device_watch_dog = tcam::getDeviceIndex();
+            device_watch_dog = tcam::get_device_index();
 
         devices = device_watch_dog->get_device_list();
         ui->device_table->clear();

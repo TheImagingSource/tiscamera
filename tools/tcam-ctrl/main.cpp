@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
         }
         else if (arg == "-l" || arg == "--list")
         {
-            auto index = getDeviceIndex();
+            auto index = get_device_index();
             sleep(3); // let camera detection do its magic
             std::vector<DeviceInfo> device_list = index->get_device_list();
             print_capture_devices(device_list);
@@ -133,7 +133,7 @@ int main (int argc, char *argv[])
     }
 
 
-    auto device_index = getDeviceIndex();
+    auto device_index = get_device_index();
     sleep(3);
     std::vector<DeviceInfo> device_list = device_index->get_device_list();
 
