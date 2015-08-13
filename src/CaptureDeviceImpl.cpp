@@ -137,19 +137,19 @@ bool CaptureDeviceImpl::closeDevice ()
 }
 
 
-std::vector<Property> CaptureDeviceImpl::getAvailableProperties () const
+std::vector<Property*> CaptureDeviceImpl::getAvailableProperties ()
 {
     resetError();
     if (!isDeviceOpen())
     {
-        return std::vector<Property>();
+        return std::vector<Property*>();
     }
 
-    std::vector<Property> props;
+    std::vector<Property*> props;
 
     for ( const auto& p : property_handler->get_properties())
     {
-        props.push_back(*p);
+        props.push_back(&*p);
     }
 
     return props;

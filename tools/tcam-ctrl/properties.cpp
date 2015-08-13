@@ -6,24 +6,24 @@
 #include <iostream>
 #include <iomanip>
 
-void print_properties (const std::vector<Property>& properties)
+void print_properties (const std::vector<Property*>& properties)
 {
-
+    std::cout << "Found " << properties.size() << " propert(y/ies)" << std::endl;
     for (const auto& p : properties)
     {
         std::cout << std::left;
-        switch (p.get_type())
+        switch (p->get_type())
         {
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                PropertyInteger& i = (PropertyInteger&) p;
-                std::cout << std::setw(20) << i.get_name()
+                PropertyInteger* i = (PropertyInteger*) p;
+                std::cout << std::setw(20) << i->get_name()
                           << std::setw(10) << " (int)"<< std::right
-                          << "min=" << std::setw(5)<< i.get_min()
-                          << " max=" << std::setw(8) << i.get_max()
-                          << " step="<< std::setw(2)  << i.get_step()
-                          << " default=" << std::setw(5) << i.get_default()
-                          << " value=" << i.get_value()
+                          << "min=" << std::setw(5)<< i->get_min()
+                          << " max=" << std::setw(8) << i->get_max()
+                          << " step="<< std::setw(2)  << i->get_step()
+                          << " default=" << std::setw(5) << i->get_default()
+                          << " value=" << i->get_value()
                           << std::endl;
                 break;
             }
@@ -38,14 +38,14 @@ void print_properties (const std::vector<Property>& properties)
             }
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
-                PropertyBoolean& s = (PropertyBoolean&) p;
+                PropertyBoolean* s = (PropertyBoolean*) p;
 
-                std::cout << std::setw(20) << s.get_name()
+                std::cout << std::setw(20) << s->get_name()
                           << std::setw(10) << "(bool)"
                           << std::setw(31) << " "
-                          << "default="<< std::setw(5) << s.get_default()
+                          << "default="<< std::setw(5) << s->get_default()
                           << "value=";
-                if (s.get_value())
+                if (s->get_value())
                 {
                     std::cout << "true";
                 }
@@ -58,7 +58,7 @@ void print_properties (const std::vector<Property>& properties)
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
             {
-                std::cout << std::setw(20) << p.get_name()
+                std::cout << std::setw(20) << p->get_name()
                           << std::setw(10) << "(button)"
                           << std::endl;
                 break;
@@ -66,7 +66,7 @@ void print_properties (const std::vector<Property>& properties)
             case TCAM_PROPERTY_TYPE_UNKNOWN:
             default:
             {
-                std::cerr << "Unknown property type " << p.get_name() << std::endl;
+                std::cerr << "Unknown property type " << p->get_name() << std::endl;
             }
         }
 
@@ -114,55 +114,55 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
 
     auto properties = g.get_available_properties();
 
-    for (Property& p : properties)
+    for (Property* p : properties)
     {
-        if (p.get_name().compare(name) == 0)
+        if (p->get_name().compare(name) == 0)
         {
             std::cout << "Found property!" << std::endl;
-            switch(p.get_type())
+            switch(p->get_type())
             {
                 case TCAM_PROPERTY_TYPE_DOUBLE:
                 {
-                    PropertyDouble& prop_d = (PropertyDouble&) p;
+                    PropertyDouble* prop_d = (PropertyDouble*) p;
 
-                    return prop_d.set_value(std::stod(value));
+                    return prop_d->set_value(std::stod(value));
                 }
                 case TCAM_PROPERTY_TYPE_STRING:
                 {
-                    PropertyString& prop_s = (PropertyString&) p;
-                    return prop_s.set_value(value);
+                    PropertyString* prop_s = (PropertyString*) p;
+                    return prop_s->set_value(value);
                 }
                 case TCAM_PROPERTY_TYPE_STRING_TABLE:
                 {
-                    PropertyStringMap& prop_m = (PropertyStringMap&) p;
+                    PropertyStringMap* prop_m = (PropertyStringMap*) p;
 
-                    return prop_m.set_value(value);
+                    return prop_m->set_value(value);
                 }
                 case TCAM_PROPERTY_TYPE_BUTTON:
                 {
-                    PropertyButton& button = (PropertyButton&) p;
+                    PropertyButton* button = (PropertyButton*) p;
 
-                    return button.activate();
+                    return button->activate();
                 }
                 case TCAM_PROPERTY_TYPE_INTEGER:
                 {
-                    PropertyInteger& prop_i = (PropertyInteger&) p;
+                    PropertyInteger* prop_i = (PropertyInteger*) p;
 
-                    return prop_i.set_value(std::stoi(value));
+                    return prop_i->set_value(std::stoi(value));
                 }
                 case TCAM_PROPERTY_TYPE_BOOLEAN:
                 {
-                    PropertyBoolean& prop_s = (PropertyBoolean&) p;
+                    PropertyBoolean* prop_s = (PropertyBoolean*) p;
                     if (value == "true" || value == "TRUE" || value == "1")
                     {
                         std::cout << "Setting " << name << " to TRUE"<< std::endl;
 
-                        return prop_s.set_value(true);
+                        return prop_s->set_value(true);
                     }
                     else if (value == "false" || value == "FALSE" || value == "0")
                     {
                         std::cout << "Setting " << name << " to FALSE"<< std::endl;
-                        return prop_s.set_value(false);
+                        return prop_s->set_value(false);
                     }
                     else
                     {

@@ -23,15 +23,15 @@ struct prop_category
     struct prop_group
     {
         TCAM_PROPERTY_ID group;
-        Property master;
-        std::vector<Property> props;
+        Property* master;
+        std::vector<Property*> props;
     };
 
     std::vector<prop_group> groups;
 };
 
 
-QTreeWidget* create_property_tree (QWidget* parent, std::vector<Property>);
+QTreeWidget* create_property_tree (QWidget* parent, std::vector<Property*>);
 
 typedef void (*tcam_device_selected)(tcam::DeviceInfo);
 

@@ -93,9 +93,9 @@ bool tcam_capture_device_is_device_open (tcam_capture_device* source)
 
 /* property related*/
 
-int tcam_capture_device_get_property_count (const tcam_capture_device* source)
+int tcam_capture_device_get_property_count (tcam_capture_device* source)
 {
-    return reinterpret_cast<const CaptureDevice*>(source)->get_available_properties().size();
+    return reinterpret_cast<CaptureDevice*>(source)->get_available_properties().size();
 }
 
 
@@ -111,9 +111,9 @@ int tcam_capture_device_set_property (tcam_capture_device* source,
 
     for (auto& v :vec)
     {
-        if (v.get_ID() == property->id)
+        if (v->get_ID() == property->id)
         {
-            return v.set_struct(*property);
+            return v->set_struct(*property);
             //return v.set
         }
     }

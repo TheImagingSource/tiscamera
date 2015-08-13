@@ -52,7 +52,7 @@ DeviceInfo CaptureDevice::get_device () const
 }
 
 
-std::vector<Property> CaptureDevice::get_available_properties () const
+std::vector<Property*> CaptureDevice::get_available_properties ()
 {
     return impl->getAvailableProperties();
 }

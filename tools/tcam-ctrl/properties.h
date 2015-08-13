@@ -13,7 +13,7 @@ using namespace tcam;
  * @brief print function for properties
  * @param properties - Property collection that shall be printed
  */
-void print_properties (const std::vector<Property>& properties);
+void print_properties (const std::vector<Property*>& properties);
 
 
 /**

@@ -11,21 +11,21 @@
 
 using namespace tcam;
 
-static std::vector<prop_category> categorize (std::vector<Property> props)
+static std::vector<prop_category> categorize (std::vector<Property*> props)
 {
     std::vector<prop_category> categories;
 
-    auto add_to_category = [&categories] (const Property& p)
+    auto add_to_category = [&categories] (Property* p)
         {
             for (auto& c : categories)
             {
-                if (c.category == p.get_struct().group.property_category)
+                if (c.category == p->get_struct().group.property_category)
                 {
                     for (auto& g : c.groups)
                     {
-                        if (g.group == p.get_struct().group.property_group)
+                        if (g.group == p->get_struct().group.property_group)
                         {
-                            if (p.get_ID() == p.get_struct().group.property_group)
+                            if (p->get_ID() == p->get_struct().group.property_group)
                             {
                                 g.master = p;
                             }
@@ -39,9 +39,9 @@ static std::vector<prop_category> categorize (std::vector<Property> props)
                     // create new group
 
                     prop_category::prop_group pg = {};
-                    pg.group = p.get_struct().group.property_group;
+                    pg.group = p->get_struct().group.property_group;
 
-                    if (p.get_ID() == p.get_struct().group.property_group)
+                    if (p->get_ID() == p->get_struct().group.property_group)
                     {
                         pg.master = p;
                     }
@@ -58,16 +58,16 @@ static std::vector<prop_category> categorize (std::vector<Property> props)
             // create a new branch
 
             prop_category pc = {};
-            pc.category = p.get_struct().group.property_category;
+            pc.category = p->get_struct().group.property_category;
 
             prop_category::prop_group pg = {};
 
-            pg.group = p.get_struct().group.property_group;
+            pg.group = p->get_struct().group.property_group;
 
             // pg.props.push_back(p);
 
 
-            if (p.get_ID() == p.get_struct().group.property_group)
+            if (p->get_ID() == p->get_struct().group.property_group)
             {
                 pg.master = p;
             }
@@ -112,7 +112,7 @@ static QString getCategoryName (TCAM_PROPERTY_CATEGORY c)
 }
 
 
-QTreeWidget* tcam::create_property_tree (QWidget* parent, std::vector<Property> properties)
+QTreeWidget* tcam::create_property_tree (QWidget* parent, std::vector<Property*> properties)
 {
     auto categories = categorize (properties);
 
@@ -135,7 +135,7 @@ QTreeWidget* tcam::create_property_tree (QWidget* parent, std::vector<Property> 
         {
             QTreeWidgetItem* group_master = new QTreeWidgetItem(master);
 
-            PropertyWidget* pw_master = new PropertyWidget(tree, &g.master);
+            PropertyWidget* pw_master = new PropertyWidget(tree, g.master);
             tree->setItemWidget(group_master, 0, pw_master);
 
             // connect(pw_master,
@@ -146,7 +146,7 @@ QTreeWidget* tcam::create_property_tree (QWidget* parent, std::vector<Property> 
 
             for (auto& p : g.props)
             {
-                PropertyWidget* pw = new PropertyWidget(tree, &p);
+                PropertyWidget* pw = new PropertyWidget(tree, p);
 
                 // connect(pw,
                 //         SIGNAL(changed(PropertyWidget*)),

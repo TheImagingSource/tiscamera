@@ -82,7 +82,7 @@ void PropertyDialog::populate_dialog ()
         struct prop_group
         {
             TCAM_PROPERTY_ID group;
-            std::vector<Property> props;
+            std::vector<Property*> props;
         };
 
         std::vector<prop_group> groups;
@@ -90,14 +90,14 @@ void PropertyDialog::populate_dialog ()
 
     std::vector<prop_category> categories;
 
-    auto add_to_category = [&categories] (const Property& p)
+    auto add_to_category = [&categories] (Property* p)
         {
             for (auto& c : categories)
             {
-                if (c.category == p.get_struct().group.property_category)
+                if (c.category == p->get_struct().group.property_category)
                 {
                     for (auto& g : c.groups)
-                        if (g.group == p.get_struct().group.property_group)
+                        if (g.group == p->get_struct().group.property_group)
                         {
                             g.props.push_back(p);
                             return;
@@ -105,7 +105,7 @@ void PropertyDialog::populate_dialog ()
                     // create new group
 
                     prop_category::prop_group pg = {};
-                    pg.group = p.get_struct().group.property_group;
+                    pg.group = p->get_struct().group.property_group;
 
                     pg.props.push_back(p);
                     c.groups.push_back(pg);
@@ -117,10 +117,10 @@ void PropertyDialog::populate_dialog ()
             // create a new branch
 
             prop_category pc = {};
-            pc.category = p.get_struct().group.property_category;
+            pc.category = p->get_struct().group.property_category;
 
             prop_category::prop_group pg = {};
-            pg.group = p.get_struct().group.property_group;
+            pg.group = p->get_struct().group.property_group;
 
             pg.props.push_back(p);
             pc.groups.push_back(pg);
@@ -128,7 +128,7 @@ void PropertyDialog::populate_dialog ()
         };
 
     // index properties
-    for (const auto& p : properties)
+    for (auto p : properties)
     {
         add_to_category(p);
     }
@@ -157,11 +157,11 @@ void PropertyDialog::populate_dialog ()
                 // QTreeWidgetItem* ti = new QTreeWidgetItem();
 
                 // group master
-                if (p.get_struct().group.property_group == g.group)
+                if (p->get_struct().group.property_group == g.group)
                 {
                     master = new QTreeWidgetItem();;
                     tree->addTopLevelItem(master);
-                    tree->setItemWidget(master, 0, new PropertyWidget(tree, &p));
+                    tree->setItemWidget(master, 0, new PropertyWidget(tree, p));
                 }
             }
 

@@ -28,7 +28,7 @@ private:
 
     CaptureDevice* device;
 
-    std::vector<Property> properties;
+    std::vector<Property*> properties;
 };
 
 #endif // PROPERTYDIALOG_H
