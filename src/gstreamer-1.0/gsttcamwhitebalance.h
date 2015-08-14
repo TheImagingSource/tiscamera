@@ -39,7 +39,8 @@ typedef unsigned char byte;
 
 
 struct _GstTcamWhitebalance {
-    GstElement     element;
+    GstBaseTransform base_object;   
+    //GstElement     element;
 
     GstPad        *srcpad;
     GstPad        *sinkpad1;
@@ -73,7 +74,8 @@ struct _GstTcamWhitebalance {
 };
 
 struct _GstTcamWhitebalanceClass {
-    GstElementClass parent_class;
+    GstBaseTransformClass gstbasetransform_class;
+    //GstElementClass parent_class;
 };
 
 GType gst_tcamwhitebalance_get_type (void);

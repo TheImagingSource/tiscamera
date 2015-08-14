@@ -114,8 +114,9 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
                                           "Adjusts white balancing of video data buffers",
                                           "Edgar Thier <edgarthier@gmail.com>");
 
-
-    gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(base_transform_class), TRUE);
+    //GstBaseTransform *test = GST_BASE_TRANSFORM(base_transform_class);
+    
+    //gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(base_transform_class), TRUE);
 
     gobject_class->set_property = gst_tcamwhitebalance_set_property;
     gobject_class->get_property = gst_tcamwhitebalance_get_property;
@@ -159,6 +160,8 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
 
 static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
 {
+
+    gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(self), TRUE);
 
     self->rgb = (rgb_tripel){64, 64, 64};
     self->red = 64;
