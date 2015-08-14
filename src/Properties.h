@@ -108,6 +108,8 @@ public:
     int64_t get_value () const;
 
     bool set_value (int64_t);
+
+    static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_INTEGER;
 };
 
 
@@ -129,6 +131,8 @@ public:
     double get_value () const;
 
     bool set_value (double);
+
+    static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_DOUBLE;
 };
 
 
@@ -143,6 +147,9 @@ public:
     ~PropertyButton ();
 
     bool activate ();
+
+private:
+    static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_BUTTON;
 };
 
 
