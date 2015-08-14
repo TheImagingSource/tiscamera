@@ -309,8 +309,17 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         }
         case TCAM_PROPERTY_EXPOSURE_AUTO:
         {
-            auto pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
+            std::shared_ptr<Property> pea = find_property(device_properties, TCAM_PROPERTY_EXPOSURE_AUTO);;
 
+            if (pea == nullptr)
+            {
+                pea = find_property(emulated_properties, TCAM_PROPERTY_EXPOSURE_AUTO);
+            }
+
+            if (pea == nullptr)
+            {
+                tcam_log(TCAM_LOG_ERROR, "Auto Exposure property could not be found");
+            }
             bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
             toggle_read_only(TCAM_PROPERTY_EXPOSURE, vla);
 

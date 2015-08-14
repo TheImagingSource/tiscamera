@@ -8,6 +8,7 @@
 #include "VideoFormat.h"
 #include "SinkInterface.h"
 #include "VideoFormatDescription.h"
+#include "standard_properties.h"
 
 #include <string>
 #include <vector>
@@ -68,6 +69,33 @@ public:
      * @return vector containing all available properties
      */
     std::vector<Property*> get_available_properties ();
+
+
+    /**
+     *
+     */
+    template<typename TProperty>
+    TProperty* find_property (TCAM_PROPERTY_ID id)
+    {
+        for (auto p : get_available_properties())
+        {
+            if (p->get_ID() == id)
+            {
+
+                if (get_reference_property_type(id) != TProperty::type)
+                {
+                    // TODO replace with static_assert
+                    return nullptr;
+                }
+
+                static auto prop_desc = create_empty_property(id);
+
+                return (TProperty*) p;
+
+            }
+        }
+        return nullptr;
+    }
 
     // videoformat related:
 
