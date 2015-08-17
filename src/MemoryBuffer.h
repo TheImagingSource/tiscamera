@@ -43,6 +43,12 @@ public:
 
     bool set_statistics (const struct tcam_stream_statistics&);
 
+    bool lock ();
+
+    bool unlock ();
+
+    bool is_locked () const;
+
     /**
      * @brief Fills MemoryBuffer with 0
      */

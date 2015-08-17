@@ -56,6 +56,30 @@ bool MemoryBuffer::set_statistics (const struct tcam_stream_statistics& stats)
 }
 
 
+bool MemoryBuffer::lock ()
+{
+    lock_count = 1;
+    return true;
+}
+
+
+bool MemoryBuffer::unlock ()
+{
+    lock_count = 0;
+    return true;
+}
+
+
+bool MemoryBuffer::is_locked () const
+{
+    if (lock_count == 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);

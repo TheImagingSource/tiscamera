@@ -954,6 +954,12 @@ bool V4l2Device::get_frame ()
 
     listener->push_image(buffers.at(buf.index));
 
+    // keep buffer unqueued until user allows requeueing
+    while (buffers.at(buf.index)->is_locked())
+    {
+        usleep(500);
+    }
+
     // requeue buffer
     ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
     if (ret == -1)
