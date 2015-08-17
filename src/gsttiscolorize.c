@@ -391,7 +391,7 @@ int check_bayer_pattern (char* desc)
     {
         return RG;
     }
-    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (GBRG)") == 0)
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GBRG Bayer (GBRG)") == 0)
     {
         return GB;
     }
