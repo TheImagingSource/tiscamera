@@ -309,6 +309,13 @@ inline tcam_device_property create_empty_property (enum TCAM_PROPERTY_ID id)
     return prop;
 }
 
+
+inline TCAM_PROPERTY_TYPE get_reference_property_type (enum TCAM_PROPERTY_ID id)
+{
+    return get_control_reference(id).type_to_use;
+}
+
+
 } /*namespace tcam */
 
 VISIBILITY_POP
