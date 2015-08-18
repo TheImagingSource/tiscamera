@@ -18,12 +18,22 @@
 #include "image_sampling.h"
 
 /* retrieve sampling points for image analysis */
-void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern)
+void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern, gst_tcam_image_size size)
 {
-    /* guint8 *data = (guint8*)GST_BUFFER_DATA (buf); */
-    guint8 *data = (guint8*)gst_buffer_get_all_memory (buf);
+    GstMapInfo info;
 
-    /* GstCaps *caps = GST_BUFFER_CAPS (buf); */
+    gst_buffer_make_writable(buf);
+
+    gst_buffer_map(buf, &info, GST_MAP_WRITE);
+
+    guint* data = (guint*)info.data;
+
+
+    /* GstCaps* caps = gst_buffer_get_caps(buf); */
+
+    /* /\* guint8 *data = (guint8*)gst_buffer_get_all_memory (buf); *\/ */
+
+    /* /\* GstCaps *caps = GST_BUFFER_CAPS (buf); *\/ */
     /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
     /* gint width, height; */
     /* g_return_if_fail (gst_structure_get_int (structure, "width", &width)); */
@@ -31,8 +41,8 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
 
     /* TODO find from pad https://github.com/kkonopko/gstreamer/blob/master/docs/random/porting-to-1.0.txt#L267 */
 
-    gint width = 1920;
-    gint height = 1080;
+    guint width = size.width;
+    guint height = size.height;
 
     static const unsigned int bypp = 1;
 
@@ -49,7 +59,7 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
     {
         guint samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
 
-        byte* pLine = data + first_line_offset + y * bytes_per_line;
+        byte* pLine = (byte*)data + first_line_offset + y * bytes_per_line;
         byte* pNextLine = pLine + bytes_per_line;
 
         guint col;
@@ -97,6 +107,9 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
         }
     }
     points->cnt = cnt;
+
+    gst_buffer_unmap(buf, &info);
+
 }
 
 static unsigned int clip( unsigned int x )
@@ -106,11 +119,11 @@ static unsigned int clip( unsigned int x )
 }
 
 
-guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern)
+guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern, gst_tcam_image_size size)
 {
     auto_sample_points points = {};
 
-    get_sampling_points (buf, &points, pattern);
+    get_sampling_points (buf, &points, pattern, size);
 
     unsigned int r = 0;
     unsigned int g = 0;
@@ -131,10 +144,10 @@ guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern)
     return (r + g + b) / 3;
 }
 
-guint buffer_brightness_gray (GstBuffer* buf)
+guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size)
 {
     guint brightness = 0;
-    /* guint8 *data = (guint8*) GST_BUFFER_DATA (buf); */
+
     guint8 *data = (guint8*)gst_buffer_get_all_memory (buf);
 
     /* GstCaps *caps = GST_BUFFER_CAPS(buf); */
@@ -145,8 +158,8 @@ guint buffer_brightness_gray (GstBuffer* buf)
     /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
     /* TODO find from pad https://github.com/kkonopko/gstreamer/blob/master/docs/random/porting-to-1.0.txt#L267 */
 
-    gint width = 1920;
-    gint height = 1080;
+    gint width = 640;
+    gint height = 480;
 
 
     gint pitch = 1;

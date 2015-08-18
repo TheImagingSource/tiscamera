@@ -39,6 +39,14 @@ typedef struct auto_sample_points
     guint	cnt;
 } auto_sample_points;
 
+
+typedef struct gst_tcam_image_size
+{
+    unsigned int width;
+    unsigned int height;
+} gst_tcam_image_size;
+
+
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 
@@ -49,20 +57,20 @@ typedef struct auto_sample_points
  * @param bayer pattern of image
  * @brief analyzes given buffer and fills sample points
 */
-void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern);
+void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern, gst_tcam_image_size size);
 
 /**
  * @name image_brightness
  * @param buf - image buffer that shall be analyzed
  * @return guint containing the image brightness
  */
-guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern);
+guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern, gst_tcam_image_size size);
 
 /**
  * @name
  * @param
  * @return
  */
-guint buffer_brightness_gray (GstBuffer* buf);
+guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size);
 
 #endif /* _IMAGE_SAMPLING_H_ */

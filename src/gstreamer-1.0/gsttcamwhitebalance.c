@@ -169,6 +169,9 @@ static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
     self->blue = 64;
     self->auto_wb = TRUE;
 
+    self->width = 0;
+    self->height = 0;
+
 }
 
 
@@ -237,128 +240,6 @@ void gst_tcamwhitebalance_get_property (GObject* object,
 void gst_tcamwhitebalance_finalize (GObject* object)
 {
     G_OBJECT_CLASS (gst_tcamwhitebalance_parent_class)->finalize (object);
-}
-
-
-static GstCaps* gst_tcamwhitebalance_transform_caps (GstBaseTransform* trans,
-                                                    GstPadDirection direction,
-                                                    GstCaps* caps)
-{
-    GstCaps *outcaps = gst_caps_copy (caps);
-
-    return outcaps;
-}
-
-
-static void gst_tcamwhitebalance_fixate_caps (GstBaseTransform* base,
-                                             GstPadDirection direction,
-                                             GstCaps* incoming,
-                                             GstCaps* outgoing)
-{
-    GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(base);
-
-    GstStructure* ins;
-    GstStructure* outs;
-    gint width, height;
-    g_return_if_fail (gst_caps_is_fixed (incoming));
-
-    GST_DEBUG_OBJECT (base, "trying to fixate outgoing caps %" GST_PTR_FORMAT
-                      " based on caps %" GST_PTR_FORMAT, outgoing, incoming);
-
-    ins = gst_caps_get_structure (incoming, 0);
-    outs = gst_caps_get_structure (outgoing, 0);
-
-    if (gst_structure_get_int (ins, "width", &width))
-    {
-        if (gst_structure_has_field (outs, "width"))
-        {
-            gst_structure_fixate_field_nearest_int (outs, "width", width);
-        }
-        self->width = width;
-    }
-
-    if (gst_structure_get_int (ins, "height", &height))
-    {
-        if (gst_structure_has_field (outs, "height"))
-        {
-            gst_structure_fixate_field_nearest_int (outs, "height", height);
-        }
-        self->height = height;
-    }
-
-    const char* p = gst_structure_get_name (ins);
-    guint fourcc;
-    if (g_strcmp0(p, "video/x-raw-bayer") == 0)
-    {
-        if (gst_structure_get_field_type (ins, "format") == G_TYPE_STRING)
-        {
-            const char *string;
-            string = gst_structure_get_string (ins, "format");
-            fourcc = GST_STR_FOURCC (string);
-        }
-        else
-            fourcc = 0;
-
-        if (fourcc == 0)
-        {
-            gst_debug_log (gst_tcamwhitebalance_debug_category,
-                           GST_LEVEL_ERROR,
-                           "gst_tcamwhitebalance",
-                           "gst_tcamwhitebalance_fixate_caps",
-                           0,
-                           NULL,
-                           "Unable to determine video format.");
-            return;
-        }
-
-        if (fourcc == MAKE_FOURCC ('g','r','b','g'))
-        {
-            self->pattern = GR;
-        }
-        else if (fourcc == MAKE_FOURCC ('r', 'g', 'g', 'b'))
-        {
-            self->pattern = RG;
-        }
-        else if (fourcc == MAKE_FOURCC ('g', 'b', 'r', 'g'))
-        {
-            self->pattern = GB;
-        }
-        else if (fourcc == MAKE_FOURCC ('b', 'g', 'g', 'r'))
-        {
-            self->pattern = BG;
-        }
-        else
-        {
-            gst_debug_log (gst_tcamwhitebalance_debug_category,
-                           GST_LEVEL_ERROR,
-                           "gst_tcamwhitebalance",
-                           "gst_tcamwhitebalance_fixate_caps",
-                           0,
-                           NULL,
-                           "Unable to determine bayer pattern.");
-            return;
-        }
-
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "gst_tcamwhitebalance",
-                       "gst_tcamwhitebalance_fixate_caps",
-                       0,
-                       NULL,
-                       "Using bayer format %s for whitebalancing.", bayer_to_string(self->pattern));
-
-    }
-    else
-    {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "gst_tcamwhitebalance",
-                       "gst_tcamwhitebalance_fixate_caps",
-                       0,
-                       NULL,
-                       "Not a bayer format. White balance will be disabled.");
-    }
-
 }
 
 
@@ -586,9 +467,8 @@ static void wb_line_c (byte* dest_line,
 
 static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte wb_g, byte wb_b)
 {
-    /* guint8 *data = (guint8*)GST_BUFFER_DATA (buf); */
-
     GstMapInfo info;
+    gst_buffer_make_writable(buf);
 
     gst_buffer_map(buf, &info, GST_MAP_WRITE);
 
@@ -604,8 +484,8 @@ static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, by
     guint y;
     for (y = 0 ; y < (dim_y - 1); y += 2)
     {
-        byte* line0 = data + y * pitch;
-        byte* line1 = data + (y + 1) * pitch;
+        byte* line0 = (byte*)data + y * pitch;
+        byte* line1 = (byte*)data + (y + 1) * pitch;
 
         wb_line_c(line0, line0, dim_x, wb_r, wb_g, wb_b, self->pattern);
         wb_line_c(line1, line1, dim_x, wb_r, wb_g, wb_b, odd);
@@ -613,7 +493,7 @@ static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, by
 
     if (y == (dim_y - 1))
     {
-        byte* line = data + y * pitch;
+        byte* line = (byte*)data + y * pitch;
         wb_line_c(line, line, dim_x, wb_r, wb_g, wb_b, self->pattern);
     }
 
@@ -624,10 +504,10 @@ static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, by
 void apply_wb_by8_c ( GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte wb_g, byte wb_b)
 {
     gst_debug_log (gst_tcamwhitebalance_debug_category,
-                   GST_LEVEL_INFO,
+                   GST_LEVEL_DEBUG,
                    "tcamwhitebalance",
                    "",
-                   850,
+                   __LINE__,
                    NULL,
                    "Applying white balance with values: R:%d G:%d B:%d", wb_r, wb_g, wb_b);
 
@@ -641,7 +521,9 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
     auto_sample_points points;
     rgb_tripel rgb = self->rgb;
 
-    get_sampling_points (buf, &points, self->pattern);
+    gst_tcam_image_size size = {self->width, self->height};
+
+    get_sampling_points (buf, &points, self->pattern, size);
 
     guint resulting_brightness = 0;
     auto_whitebalance(&points, &rgb, &resulting_brightness );
@@ -664,10 +546,27 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 }
 
 
+static gboolean extract_resolution (GstTcamWhitebalance* self)
+{
+
+    GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
+    GstCaps* caps = gst_pad_get_current_caps(pad);
+    GstStructure *structure = gst_caps_get_structure (caps, 0);
+
+    g_return_if_fail (gst_structure_get_int (structure, "width", &self->width));
+    g_return_if_fail (gst_structure_get_int (structure, "height", &self->height));
+
+    return TRUE;
+}
+
+
 /* Entry point */
 static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE (trans);
+
+    if (self->width == 0 || self->height == 0)
+        extract_resolution(self);
 
     /* auto is completely disabled */
     if (!self->auto_enabled)
