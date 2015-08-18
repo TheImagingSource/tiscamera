@@ -412,11 +412,11 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
             self->external_sink->push_image(self->buffers.at(self->current_buffer));
 
-            // keep buffer unqueued until user allows requeueing
-            while (buffers.at(buf.index)->is_locked())
-            {
-                usleep(500);
-            }
+            // // keep buffer unqueued until user allows requeueing
+            // while (buffers.at(buf.index)->is_locked())
+            // {
+            //     usleep(500);
+            // }
 
             if (self->current_buffer < self->buffers.size() -1)
             {
