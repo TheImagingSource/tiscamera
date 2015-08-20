@@ -25,3 +25,12 @@ target_link_libraries(gsttcamwhitebalance ${GSTREAMER_LIBRARIES})
 target_link_libraries(gsttcamwhitebalance ${GSTREAMER_BASE_LIBRARIES})
 target_link_libraries(gsttcamwhitebalance ${GLIB2_LIBRARIES})
 target_link_libraries(gsttcamwhitebalance ${GObject_LIBRARIES})
+
+add_library(gsttcamautoexposure SHARED gsttcamautoexposure.c image_sampling.c bayer.c)
+target_link_libraries(gsttcamautoexposure tcam)
+target_link_libraries(gsttcamautoexposure ${GSTREAMER_LIBRARIES})
+target_link_libraries(gsttcamautoexposure ${GSTREAMER_BASE_LIBRARIES})
+target_link_libraries(gsttcamautoexposure ${GLIB2_LIBRARIES})
+target_link_libraries(gsttcamautoexposure ${GObject_LIBRARIES})
+
+
