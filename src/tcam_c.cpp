@@ -5,6 +5,8 @@
 #include "internal.h"
 #include "Error.h"
 
+#include <string.h>
+
 using namespace tcam;
 
 /* error / debug */
@@ -102,6 +104,35 @@ int tcam_capture_device_get_property_count (tcam_capture_device* source)
 int tcam_capture_device_get_properties (const tcam_capture_device* source,
                                         const tcam_device_property* properties)
 {}
+
+
+bool  tcam_capture_device_find_property (tcam_capture_device* source,
+                                         enum TCAM_PROPERTY_ID id,
+                                         struct tcam_device_property* property)
+{
+    if (source == nullptr)
+    {
+        return false;
+    }
+
+    // auto vec = reinterpret_cast<CaptureDevice*>(source)->get_available_properties();
+    auto vec = ((CaptureDevice*)source)->get_available_properties();
+
+    for (auto& v : vec)
+    {
+        if (v->get_ID() == id)
+        {
+            auto prop = v->get_struct();
+
+            tcam_log(TCAM_LOG_ERROR, "==================== name: %s - %d", prop.name , prop.value.i.value);
+
+            memcpy(property, &prop, sizeof(struct tcam_device_property));
+
+            return true;
+        }
+    }
+    return false;
+}
 
 
 int tcam_capture_device_set_property (tcam_capture_device* source,

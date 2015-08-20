@@ -144,6 +144,10 @@ extern "C"
                                             struct tcam_device_property* array,
                                             const size_t size);
 
+
+    bool  tcam_capture_device_find_property (tcam_capture_device* source,
+                                             enum TCAM_PROPERTY_ID id,
+                                             struct tcam_device_property* property);
     /**
      *
      */
