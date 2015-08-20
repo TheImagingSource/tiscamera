@@ -102,7 +102,7 @@ extern "C"
      * @param[out] info   - tcam_device_info about currently opened device
      * @return false on error
      */
-    bool tcam_capture_device_get_device_info (const tcam_capture_device* source,
+    bool tcam_capture_device_get_device_info (struct tcam_capture_device* source,
                                               struct tcam_device_info* info);
 
     /**
@@ -152,7 +152,7 @@ extern "C"
      *
      */
     int tcam_capture_device_set_property (tcam_capture_device* source,
-                                          struct tcam_device_property* property);
+                                          const struct tcam_device_property* property);
 
 
     /* video format related */

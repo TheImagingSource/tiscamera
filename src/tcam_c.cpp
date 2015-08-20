@@ -113,7 +113,8 @@ int tcam_capture_device_get_property_count (tcam_capture_device* source)
 
 
 int tcam_capture_device_get_properties (const tcam_capture_device* source,
-                                        const tcam_device_property* properties)
+                                        struct tcam_device_property* array,
+                                        const size_t size)
 {}
 
 
@@ -147,7 +148,7 @@ bool  tcam_capture_device_find_property (tcam_capture_device* source,
 
 
 int tcam_capture_device_set_property (tcam_capture_device* source,
-                                      const tcam_device_property* property)
+                                      const struct tcam_device_property* property)
 {
     auto vec = reinterpret_cast<CaptureDevice*>(source)->get_available_properties();
 
