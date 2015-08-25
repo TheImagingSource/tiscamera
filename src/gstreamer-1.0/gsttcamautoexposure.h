@@ -67,7 +67,7 @@ static const gdouble steps_to_double_brightness = 3.0;
 /* names of gstreamer elements used for camera interaction */
 static const char* CAMERASRC_NETWORK = "GstAravis";
 static const char* CAMERASRC_USB = "GstV4l2Src";
-static const char* CAMERASRC_TCAM = "tcamsrc";
+static const char* CAMERASRC_TCAM = "GstTcam";
 
 
 
@@ -92,7 +92,7 @@ typedef struct GstTcamautoexposure
     tBY8Pattern pattern;
     format color_format;
 
-    gst_tcam_image_size size;
+    gst_tcam_image_size image_size;
 
     gint framerate_numerator;
     gint framerate_denominator;

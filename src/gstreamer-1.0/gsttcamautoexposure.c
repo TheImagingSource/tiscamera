@@ -216,30 +216,30 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->auto_gain = g_value_get_boolean(value);
             break;
         case PROP_CAMERA:
-            tcamautoexposure->camera_src = g_value_get_object (value);
+            tcamautoexposure->camera_src = g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
-            tcamautoexposure->exposure.max = g_value_get_double (value);
+            tcamautoexposure->exposure.max = g_value_get_double(value);
             if (tcamautoexposure->exposure.max == 0.0)
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             break;
         case PROP_GAIN_MAX:
-            tcamautoexposure->gain.max = g_value_get_double (value);
+            tcamautoexposure->gain.max = g_value_get_double(value);
             if (tcamautoexposure->gain.max == 0.0)
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
     }
 }
 
 void gst_tcamautoexposure_get_property (GObject* object,
-                                         guint property_id,
-                                         GValue* value,
-                                         GParamSpec* pspec)
+                                        guint    property_id,
+                                        GValue*  value,
+                                        GParamSpec* pspec)
 {
-    GstTcamautoexposure* tcamautoexposure = GST_TCAMAUTOEXPOSURE (object);
+    GstTcamautoexposure* tcamautoexposure = GST_TCAMAUTOEXPOSURE(object);
 
     switch (property_id)
     {
@@ -337,9 +337,6 @@ static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
     GstStructure* outs;
     gint width, height;
     g_return_if_fail (gst_caps_is_fixed (incoming));
-//
-//    GST_DEBUG_OBJECT (base, "trying to fixate outgoing %" GST_PTR_FORMAT
-//                      " based on caps %" GST_PTR_FORMAT, outgoing, incoming);
 
     ins = gst_caps_get_structure (incoming, 0);
     outs = gst_caps_get_structure (outgoing, 0);
@@ -416,7 +413,7 @@ static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
                    GST_LEVEL_WARNING,
                    "tcamautoexposure",
                    "gst_tcamautoexposure_fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "Structure name %s\n", gst_structure_get_name (ins));
 
@@ -426,8 +423,6 @@ static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
 
 static void init_camera_resources (GstTcamautoexposure* self)
 {
-    g_return_if_fail (self->camera_src != NULL);
-
     /* retrieve the element name e.g. GstAravis or GstV4l2Src*/
     const char* element_name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(self->camera_src)));
 
@@ -512,39 +507,49 @@ static void init_camera_resources (GstTcamautoexposure* self)
     else if (g_strcmp0(element_name, CAMERASRC_TCAM) == 0)
     {
         self->source_type = TCAM;
-        self->exposure.value = 1.0;
-        self->gain.value = 4.0;
 
-        self->exposure.max = 300000.0;
-        self->gain.max = 63;
-        self->gain.min = 4;
+        tcam_capture_device* dev = NULL;
 
-    }
+        g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    if (self->gain.max == 0.0)
-    {
-        self->gain = self->default_gain_values;
-    }
-    else
-    {
-        self->gain.min = self->default_gain_values.min;
-    }
+        struct tcam_device_property p = {};
 
-    /* simply use the retrieved default values */
-    if (self->exposure.max == 0.0)
-    {
-        self->exposure = self->default_exposure_values;
-    }
-    else
-    {
-        self->exposure.min = self->default_exposure_values.min;
+        bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+
+        if (!ret)
+        {
+
+        }
+        else
+        {
+            self->exposure.min   = p.value.i.min;
+            self->exposure.max   = p.value.i.max;
+            self->exposure.value = p.value.i.value;
+
+            self->default_exposure_values.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
+
+        }
+
+
+        ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
+
+        if (!ret)
+        {
+
+        }
+        else
+        {
+            self->gain.min   = p.value.i.min;
+            self->gain.max   = p.value.i.max;
+            self->gain.value = p.value.i.value;
+        }
     }
 
     gst_debug_log (gst_tcamautoexposure_debug_category,
                    GST_LEVEL_INFO,
                    "tcamautoexposure",
                    "init_camera_resources",
-                   450,
+                   __LINE__,
                    NULL,
                    "Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
 
@@ -552,7 +557,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
                    GST_LEVEL_INFO,
                    "tcamautoexposure",
                    "init_camera_resources",
-                   450,
+                   __LINE__,
                    NULL,
                    "Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
@@ -569,7 +574,7 @@ static unsigned int calc_dist (unsigned int reference_val, unsigned int brightne
 static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 {
     gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_ERROR,
+                   GST_LEVEL_INFO,
                    "tcamautoexposure",
                    "set_exposure",
                    __LINE__,
@@ -655,13 +660,15 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
         ctrl.value = gain;
 
         if (ioctl(fd, VIDIOC_S_CTRL, &ctrl) == -1)
+        {
             gst_debug_log (gst_tcamautoexposure_debug_category,
                            GST_LEVEL_ERROR,
                            "tcamautoexposure",
                            "set_gain",
-                           493,
+                           __LINE__,
                            NULL,
                            "Unable to write gain for USB device");
+        }
     }
     else if (self->source_type == TCAM)
     {
@@ -680,6 +687,16 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 
 static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
 {
+
+    gst_debug_log (gst_tcamautoexposure_debug_category,
+                   GST_LEVEL_DEBUG,
+                   "calc_gain",
+                   "",
+                   __LINE__,
+                   NULL,
+                   "Calculating gain: cur: %f min: %f max: %f",
+                   self->gain.value, self->gain.min, self->gain.max);
+
     gdouble gain = self->gain.value;
 
     /* when we have to reduce, we reduce it faster */
@@ -691,6 +708,17 @@ static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
     double val = log( dist / (double)dist_mid ) / log( 2.0f );
 
     gain += (val * steps_to_double_brightness);
+
+
+    gst_debug_log (gst_tcamautoexposure_debug_category,
+                   GST_LEVEL_DEBUG,
+                   "calc_gain",
+                   "",
+                   __LINE__,
+                   NULL,
+                   "new gain: %f",
+                   gain);
+
 
     return CLIP( gain, self->gain.min, self->gain.max );
 }
@@ -741,15 +769,6 @@ void retrieve_current_values (GstTcamautoexposure* self)
         tcam_capture_device* dev = NULL;
         g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Tcam device has adress %p", dev);
-
-
         struct tcam_device_property p = {};
 
         if (dev == NULL)
@@ -778,7 +797,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
         else
         {
             gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
+                           GST_LEVEL_DEBUG,
                            "",
                            "",
                            __LINE__,
@@ -802,13 +821,13 @@ void retrieve_current_values (GstTcamautoexposure* self)
         else
         {
             gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
+                           GST_LEVEL_DEBUG,
                            "",
                            "",
                            __LINE__,
                            NULL,
-                           "Current gain is %d", p.value.d.value);
-            self->gain.value = p.value.d.value;
+                           "Current gain is %d", p.value.i.value);
+            self->gain.value = p.value.i.value;
         }
     }
     else
@@ -833,24 +852,24 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     {
 
         gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
+                       GST_LEVEL_DEBUG,
+                       "correct_brightness",
                        "",
                        __LINE__,
                        NULL,
                        "Calculating brightness");
-        brightness = image_brightness_bayer(buf, self->pattern, self->size);
+        brightness = image_brightness_bayer(buf, self->pattern, self->image_size);
     }
     else
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
+                       GST_LEVEL_DEBUG,
+                       "correct_brightness",
                        "",
                        __LINE__,
                        NULL,
                        "Calculating brightness for gray");
-        brightness = buffer_brightness_gray(buf, self->size);
+        brightness = buffer_brightness_gray(buf, self->image_size);
     }
     /* assure we have the current values */
     retrieve_current_values (self);
@@ -859,8 +878,8 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     guint dist = calc_dist(ref_val, brightness);
 
     gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_ERROR,
-                   "",
+                   GST_LEVEL_DEBUG,
+                   "correct_brightness",
                    "",
                    __LINE__,
                    NULL,
@@ -872,8 +891,8 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
         gdouble new_gain = calc_gain(self, dist);
 
         gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
+                       GST_LEVEL_DEBUG,
+                       "correct_brightness",
                        "",
                        __LINE__,
                        NULL,
@@ -883,13 +902,6 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
             set_gain(self, new_gain);
             return;
         }
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "HERE");
 
         /* exposure */
         gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
@@ -969,6 +981,20 @@ static gboolean find_camera_src (GstBaseTransform* trans)
 }
 
 
+gboolean find_image_values (GstTcamautoexposure* self)
+{
+    GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
+    GstCaps* caps = gst_pad_get_current_caps(pad);
+    GstStructure *structure = gst_caps_get_structure (caps, 0);
+
+    g_return_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width));
+    g_return_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height));
+
+    gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+
+    return TRUE;
+}
+
 
 /*
   Entry point for actual transformation
@@ -977,13 +1003,26 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 {
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE (trans);
 
-    if (self->camera_src == NULL)
+
+    if (self->image_size.width == 0 || self->image_size.height == 0)
     {
-        find_camera_src(trans);
+        if (!find_image_values(self))
+        {
+            return GST_FLOW_ERROR;
+        }
     }
 
-    self->size.width = 1920;
-    self->size.height = 1080;
+    if (self->camera_src == NULL)
+    {
+        if (!find_camera_src(trans))
+        {
+            return GST_FLOW_ERROR;
+        }
+        else
+        {
+            init_camera_resources(self);
+        }
+    }
 
     if (!self->auto_exposure)
     {
@@ -994,19 +1033,8 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
     {
         correct_brightness(self, buf);
         self->frame_counter = 0;
-
-
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Changed auto exposure");
     }
     self->frame_counter++;
-
-
 
     return GST_FLOW_OK;
 }
