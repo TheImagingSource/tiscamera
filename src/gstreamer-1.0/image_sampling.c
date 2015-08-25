@@ -28,19 +28,6 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
 
     guint* data = (guint*)info.data;
 
-
-    /* GstCaps* caps = gst_buffer_get_caps(buf); */
-
-    /* /\* guint8 *data = (guint8*)gst_buffer_get_all_memory (buf); *\/ */
-
-    /* /\* GstCaps *caps = GST_BUFFER_CAPS (buf); *\/ */
-    /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
-    /* gint width, height; */
-    /* g_return_if_fail (gst_structure_get_int (structure, "width", &width)); */
-    /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
-
-    /* TODO find from pad https://github.com/kkonopko/gstreamer/blob/master/docs/random/porting-to-1.0.txt#L267 */
-
     guint width = size.width;
     guint height = size.height;
 
@@ -158,9 +145,8 @@ guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size)
     /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
     /* TODO find from pad https://github.com/kkonopko/gstreamer/blob/master/docs/random/porting-to-1.0.txt#L267 */
 
-    gint width = 640;
-    gint height = 480;
-
+    gint width = size.width;
+    gint height = size.height;
 
     gint pitch = 1;
     guint cnt = 0;
