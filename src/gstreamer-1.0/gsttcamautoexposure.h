@@ -79,6 +79,8 @@ typedef struct GstTcamautoexposure
     GstPad *srcpad;
 
     gboolean auto_exposure;
+    gboolean auto_gain;
+
 
     Gain gain;
     Gain default_gain_values;

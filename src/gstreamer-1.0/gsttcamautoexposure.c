@@ -101,6 +101,7 @@ enum
 {
     PROP_0,
     PROP_AUTO_EXPOSURE,
+    PROP_AUTO_GAIN,
     PROP_CAMERA,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
@@ -157,8 +158,15 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
                                      g_param_spec_boolean ("auto-exposure",
-                                                           "Auto Exposure Balance",
-                                                           "Automatically adjust exposure balance",
+                                                           "Auto Exposure",
+                                                           "Automatically adjust exposure",
+                                                           TRUE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_AUTO_EXPOSURE,
+                                     g_param_spec_boolean ("auto-gain",
+                                                           "Auto Gain",
+                                                           "Automatically adjust gain",
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
@@ -202,7 +210,10 @@ void gst_tcamautoexposure_set_property (GObject* object,
     switch (property_id)
     {
         case PROP_AUTO_EXPOSURE:
-            tcamautoexposure->auto_exposure = g_value_get_boolean (value);
+            tcamautoexposure->auto_exposure = g_value_get_boolean(value);
+            break;
+        case PROP_AUTO_GAIN:
+            tcamautoexposure->auto_gain = g_value_get_boolean(value);
             break;
         case PROP_CAMERA:
             tcamautoexposure->camera_src = g_value_get_object (value);
@@ -234,6 +245,9 @@ void gst_tcamautoexposure_get_property (GObject* object,
     {
         case PROP_AUTO_EXPOSURE:
             g_value_set_boolean (value, tcamautoexposure->auto_exposure);
+            break;
+        case PROP_AUTO_GAIN:
+            g_value_set_boolean (value, tcamautoexposure->auto_gain);
             break;
         case PROP_CAMERA:
             g_value_set_object (value, tcamautoexposure->camera_src);
