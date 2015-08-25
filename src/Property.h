@@ -86,6 +86,7 @@ public:
 
 
     bool set_property (const Property&);
+    bool set_property_from_struct (const tcam_device_property&);
     bool get_property (Property&);
 
 protected:

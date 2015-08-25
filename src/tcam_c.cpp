@@ -156,8 +156,8 @@ int tcam_capture_device_set_property (tcam_capture_device* source,
     {
         if (v->get_ID() == property->id)
         {
-            return v->set_struct(*property);
-            //return v.set
+            v->set_property_from_struct(*property);
+            return true;
         }
     }
     setError(Error("No such property found", ENOENT));

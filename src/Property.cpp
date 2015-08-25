@@ -285,6 +285,21 @@ bool Property::set_property (const Property& p)
     return true;
 }
 
+bool Property::set_property_from_struct (const tcam_device_property& prop)
+{
+
+    if (impl.expired())
+    {
+        return false;
+    }
+    set_struct_value(prop);
+    notify_impl();
+
+    return true;
+
+
+}
+
 
 bool Property::get_property (Property& p)
 {
