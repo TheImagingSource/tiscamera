@@ -4,9 +4,9 @@
 #include "DeviceInfo.h"
 
 #include <cstring>
+#include <string>
 
 using namespace tcam;
-
 
 DeviceInfo::DeviceInfo (const struct tcam_device_info& device_desc)
     : device(device_desc)
