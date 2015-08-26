@@ -152,7 +152,9 @@ std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
 
 bool V4l2Device::set_property (const Property& new_property)
 {
-    return false;
+    tcam_log(TCAM_LOG_INFO, "Setting property \"%s\"", new_property.get_name().c_str());
+
+    return property_handler->set_property(new_property);
 }
 
 
