@@ -74,7 +74,7 @@ public:
     /**
      *
      */
-    template<typename TProperty>
+    template<class TProperty>
     TProperty* find_property (TCAM_PROPERTY_ID id)
     {
         for (auto p : get_available_properties())
