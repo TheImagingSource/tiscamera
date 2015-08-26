@@ -171,26 +171,7 @@ void VideoArea::paintEvent (QPaintEvent* e)
 
     if (received_new_image)
     {
-        unsigned int w = ui->label->width();
-        unsigned int h = ui->label->height();
-        auto l = this->layout();
-
-        int margin = l->margin();
-
-        // ui->label->setPixmap(m.scaled(w - margin,
-        //                               h -margin,
-        //                               Qt::KeepAspectRatio,
-        //                               Qt::FastTransformation ));
-
-
         ui->label->setPixmap(m);
-
-        // ui->label->setPixmap(m.scaled(w,
-        //                               h,
-        //                               Qt::KeepAspectRatio));
-
-        // ,
-                                      // Qt::FastTransformation ));
 
         new_image=false;
         received_new_image = false;
@@ -198,15 +179,8 @@ void VideoArea::paintEvent (QPaintEvent* e)
 }
 
 
-void VideoArea::resizeEvent (QResizeEvent* event)
+void VideoArea::resizeEvent (QResizeEvent* /* event */)
 {
-    //std::cout << "RESIZE!!!" << std::endl;
-
-
-  // get label dimensions
-  int w = ui->label->width();
-  int h = ui->label->height();
-
   // set a scaled pixmap to a w x h window keeping its aspect ratio
   // ui->label->setPixmap(m.scaled(w, h, Qt::KeepAspectRatio));
   ui->label->setPixmap(m);
