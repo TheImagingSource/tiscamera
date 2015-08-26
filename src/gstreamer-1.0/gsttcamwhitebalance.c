@@ -169,8 +169,8 @@ static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
     self->blue = 64;
     self->auto_wb = TRUE;
 
-    self->width = 0;
-    self->height = 0;
+    self->image_size.width = 0;
+    self->image_size.height = 0;
 
 }
 
@@ -474,8 +474,8 @@ static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, by
 
     guint* data = (guint*)info.data;
 
-    unsigned int dim_x = self->width;
-    unsigned int dim_y = self->height;
+    unsigned int dim_x = self->image_size.width;
+    unsigned int dim_y = self->image_size.height;
 
     guint pitch = 8 * dim_x / 8;
 
@@ -517,16 +517,7 @@ void apply_wb_by8_c ( GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte
 
 static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 {
-
-    auto_sample_points points;
     rgb_tripel rgb = self->rgb;
-
-    gst_tcam_image_size size = {self->width, self->height};
-
-    get_sampling_points (buf, &points, self->pattern, size);
-
-    guint resulting_brightness = 0;
-    auto_whitebalance(&points, &rgb, &resulting_brightness );
 
     /* we prefer to set our own values */
     if (self->auto_wb == FALSE)
@@ -537,9 +528,18 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
     }
     else /* update the permanent values to represent the current adjustments */
     {
+        auto_sample_points points = {};
+
+        get_sampling_points (buf, &points, self->pattern, self->image_size);
+
+        guint resulting_brightness = 0;
+        auto_whitebalance(&points, &rgb, &resulting_brightness);
+
         self->red = rgb.R;
         self->green = rgb.G;
         self->blue = rgb.B;
+
+        self->rgb = rgb;
     }
 
     apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
@@ -553,8 +553,45 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_if_fail (gst_structure_get_int (structure, "width", &self->width));
-    g_return_if_fail (gst_structure_get_int (structure, "height", &self->height));
+    g_return_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width));
+    g_return_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height));
+
+    guint fourcc;
+
+    if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+    {
+        const char *string;
+        string = gst_structure_get_string (structure, "format");
+        fourcc = GST_STR_FOURCC (string);
+    }
+
+    if (fourcc == MAKE_FOURCC ('g','r','b','g'))
+    {
+        self->pattern = GR;
+    }
+    else if (fourcc == MAKE_FOURCC ('r', 'g', 'g', 'b'))
+    {
+        self->pattern = RG;
+    }
+    else if (fourcc == MAKE_FOURCC ('g', 'b', 'r', 'g'))
+    {
+        self->pattern = GB;
+    }
+    else if (fourcc == MAKE_FOURCC ('b', 'g', 'g', 'r'))
+    {
+        self->pattern = BG;
+    }
+    else
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "gst_tiswhitebalance",
+                       "gst_tiswhitebalance_fixate_caps",
+                       __LINE__,
+                       NULL,
+                       "Unable to determine bayer pattern.");
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -565,7 +602,7 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
 {
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE (trans);
 
-    if (self->width == 0 || self->height == 0)
+    if (self->image_size.width == 0 || self->image_size.height == 0)
         extract_resolution(self);
 
     /* auto is completely disabled */
