@@ -14,15 +14,7 @@ MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf)
 
 
 MemoryBuffer::~MemoryBuffer ()
-{
-    if (buffer.pData != nullptr)
-    {
-        free(buffer.pData);
-        buffer.pData = nullptr;
-
-        buffer.length = 0;
-    }
-}
+{}
 
 
 tcam_image_buffer MemoryBuffer::getImageBuffer ()
