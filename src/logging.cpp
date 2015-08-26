@@ -75,7 +75,7 @@ void Logger::load_default_settings ()
 {
     level = TCAM_LOG_ERROR;
     target = STDIO;
-    log_file = "tmp/tis.log";
+    log_file = "/tmp/tis.log";
 }
 
 
