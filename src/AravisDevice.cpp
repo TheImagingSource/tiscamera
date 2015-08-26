@@ -671,16 +671,7 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                           "Height",
                                                           "FPS",
                                                           "PixelFormat"};
-        property_mapping m;
 
-        m.arv_ident = feature;
-        m.prop = createProperty(arv_camera, node, handler);
-
-        if (m.prop == nullptr)
-        {
-            tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
-            return;
-        }
 
 
         if (std::find(private_settings.begin(), private_settings.end(), feature) != private_settings.end())
@@ -695,6 +686,17 @@ void AravisDevice::iterate_genicam (const char* feature)
         }
         else
         {
+            property_mapping m;
+
+            m.arv_ident = feature;
+            m.prop = createProperty(arv_camera, node, handler);
+
+            if (m.prop == nullptr)
+            {
+                tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+                return;
+            }
+
             handler->properties.push_back(m);
         }
     }
@@ -892,6 +894,8 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
 
             struct tcam_video_format_description d = desc;
+
+            // TODO RANGES
 
             d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
             d.min_size = min;
