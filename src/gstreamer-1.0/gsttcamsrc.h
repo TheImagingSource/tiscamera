@@ -26,7 +26,7 @@ struct _GstTcam
 
     char* device_serial;
     tcam_capture_device* device;
-
+    stream_obj* streamobject;
 
     int n_buffers;
     const struct tcam_image_buffer* ptr;

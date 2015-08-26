@@ -201,7 +201,7 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
 
-    tcam_capture_device_start_stream(self->device, gst_tcam_callback, self);
+    self->streamobject = tcam_capture_device_start_stream(self->device, gst_tcam_callback, self);
 
     GST_INFO("successfully set caps");
 
