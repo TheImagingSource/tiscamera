@@ -138,6 +138,10 @@ static std::vector<struct aravis_property> aravis_mappings =
         .id = TCAM_PROPERTY_STROBE_ENABLE,
         .genicam_name = {"StrobeEnable"},
     },
+    {
+            .id = TCAM_PROPERTY_BINNING,
+            .genicam_name = {"Binning"},
+    }
     // {
     //     .name = "Strobe Polarity",
     //     .type_to_use = ,
