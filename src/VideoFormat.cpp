@@ -41,8 +41,8 @@ bool VideoFormat::operator== (const VideoFormat& other) const
 {
     return format.fourcc == other.format.fourcc
         && format.width == other.format.width
-        && format.height == other.format.height
-        && compare_double(format.framerate, other.format.framerate);
+        && format.height == other.format.height;
+        //&& compare_double(format.framerate, other.format.framerate);
 }
 
 
