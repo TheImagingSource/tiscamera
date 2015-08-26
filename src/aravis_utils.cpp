@@ -251,26 +251,38 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
     if (ARV_IS_GC_ENUMERATION (node))
     {
-        const GSList* children;
-        const GSList* iter;
-
-        children = arv_gc_enumeration_get_entries (ARV_GC_ENUMERATION (node));
-
-        std::map<std::string, int> var;
-
-        for (iter = children; iter != NULL; iter = iter->next)
+        if (type_to_use == TCAM_PROPERTY_TYPE_STRING_TABLE)
         {
-            if (arv_gc_feature_node_is_implemented ((ArvGcFeatureNode*)iter->data, NULL))
+            const GSList* children;
+            const GSList* iter;
+
+            children = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION (node));
+
+            std::map<std::string, int> var;
+
+            for (iter = children; iter != NULL; iter = iter->next)
             {
-                if (strcmp(arv_dom_node_get_node_name ((ArvDomNode*)iter->data), "EnumEntry") == 0)
+                if (arv_gc_feature_node_is_implemented((ArvGcFeatureNode*) iter->data, NULL))
                 {
-                    // TODO should enums be stored in separate vector
-                    var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
+                    if (strcmp(arv_dom_node_get_node_name((ArvDomNode*) iter->data), "EnumEntry") == 0)
+                    {
+                        // TODO should enums be stored in separate vector
+                        var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
+                    }
                 }
             }
+
+            return std::make_shared<PropertyStringMap>(impl, prop, var, type);
+        }
+        else if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
+        {
+            prop.type = TCAM_PROPERTY_TYPE_INTEGER;
+
+
+
+            return  std::make_shared<PropertyInteger>(impl, prop, type);
         }
 
-        return std::make_shared<PropertyStringMap>(impl, prop, var, type);
     }
 
 
