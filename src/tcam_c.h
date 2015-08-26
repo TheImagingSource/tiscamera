@@ -47,6 +47,7 @@ extern "C"
 
 
     /**
+     * @name tcam_destroy_device_index
      *
      * @param index - device_index that shall be destroyed
      */
@@ -88,7 +89,9 @@ extern "C"
 
 
     /**
-     *
+     * Destroys the given device.
+     * All running streams of the device will be stopped.
+     * ImageBuffer maintained by the device will be destroyed.
      */
     void tcam_destroy_capture_device (tcam_capture_device* source);
 
@@ -116,9 +119,9 @@ extern "C"
 
     /**
      * Description for tcam_capture_device_save_confguration.
-     * @param[in] source <doc>
-     * @param[in] filename <doc>
-     * @return <doc>
+     * @param[in] source - device
+     * @param[in] filename - file into which the current settings shall be exportet
+     * @return false on error
      */
     bool tcam_capture_device_save_confguration (const tcam_capture_device* source, const char* filename);
 
