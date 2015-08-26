@@ -199,9 +199,14 @@ bool CaptureDeviceImpl::startStream (std::shared_ptr<SinkInterface> sink)
     resetError();
     if (!isDeviceOpen())
     {
+        tcam_log(TCAM_LOG_ERROR, "Device is not open");
         return false;
     }
-    pipeline->setSink(sink);
+
+    if (!pipeline->setSink(sink))
+    {
+        return false;
+    }
 
     return pipeline->set_status(TCAM_PIPELINE_PLAYING);
 }
