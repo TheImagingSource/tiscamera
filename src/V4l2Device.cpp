@@ -902,7 +902,7 @@ void V4l2Device::stream ()
                 {
                     if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
                     {
-                        return dynamic_cast<PropertyBoolean*>((p.prop.get()))->get_value();
+                        return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
                     }
 
                 }
