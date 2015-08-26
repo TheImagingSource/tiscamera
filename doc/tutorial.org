@@ -132,7 +132,7 @@
 
       CaptureDevice device = new CaptureDevice(info);
 
-      for (const Property& p : device->get_available_properties())
+      for (const Property* p : device->get_available_properties())
       {
         std::cout << std::left;
         switch (p.get_type())
@@ -140,26 +140,26 @@
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
                 PropertyInteger& i = (PropertyInteger&) p;
-                std::cout << std::setw(20) << i.get_name()
+                std::cout << std::setw(20) << i->get_name()
                 << std::setw(10) << " (int)"<< std::right
-                << "min=" << std::setw(5)<< i.get_min()
-                << " max=" << std::setw(8) << i.get_max()
-                << " step="<< std::setw(2)  << i.get_step()
-                << " default=" << std::setw(5) << i.get_default()
-                << " value=" << i.get_value()
+                << "min=" << std::setw(5)<< i->get_min()
+                << " max=" << std::setw(8) << i->get_max()
+                << " step="<< std::setw(2)  << i->get_step()
+                << " default=" << std::setw(5) << i->get_default()
+                << " value=" << i->get_value()
                 << std::endl;
                 break;
             }
             case TCAM_PROPERTY_TYPE_DOUBLE:
             {
                 PropertyDouble& i = (PropertyDouble&) p;
-                std::cout << std::setw(20) << i.get_name()
+                std::cout << std::setw(20) << i->get_name()
                 << std::setw(10) << " (double)"<< std::right
-                << "min=" << std::setw(5)<< i.get_min()
-                << " max=" << std::setw(8) << i.get_max()
-                << " step="<< std::setw(2)  << i.get_step()
-                << " default=" << std::setw(5) << i.get_default()
-                << " value=" << i.get_value()
+                << "min=" << std::setw(5)<< i->get_min()
+                << " max=" << std::setw(8) << i->get_max()
+                << " step="<< std::setw(2)  << i->get_step()
+                << " default=" << std::setw(5) << i->get_default()
+                << " value=" << i->get_value()
                 << std::endl;
                 break;
             }
@@ -172,12 +172,12 @@
             {
                 PropertyBoolean& s = (PropertyBoolean&) p;
 
-                std::cout << std::setw(20) << s.get_name()
+                std::cout << std::setw(20) << s->get_name()
                 << std::setw(10) << "(bool)"
                 << std::setw(31) << " "
-                << "default="<< std::setw(5) << s.get_default()
+                << "default="<< std::setw(5) << s->get_default()
                 << "value=";
-                if (s.get_value())
+                if (s->get_value())
                 {
                     std::cout << "true";
                 }
@@ -190,7 +190,7 @@
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
             {
-                std::cout << std::setw(20) << p.get_name()
+                std::cout << std::setw(20) << p->get_name()
                 << std::setw(10) << "(button)"
                 << std::endl;
                 break;
@@ -198,7 +198,7 @@
             case TCAM_PROPERTY_TYPE_UNKNOWN:
             default:
             {
-                std::cerr << "Unknown property type " << p.get_name() << std::endl;
+                std::cerr << "Unknown property type " << p->get_name() << std::endl;
             }
         }
       }
