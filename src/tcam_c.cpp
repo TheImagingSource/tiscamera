@@ -239,6 +239,11 @@ stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
 
     bool ret = reinterpret_cast<CaptureDevice*>(source)->start_stream(obj->sink);
 
+    if (!ret)
+    {
+        return NULL;
+    }
+
     return (stream_obj*)obj;
 }
 
