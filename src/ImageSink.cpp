@@ -68,3 +68,21 @@ void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
         this->c_back(&last_image_buffer, user_data);
     }
 }
+
+
+bool ImageSink::set_buffer_number (size_t)
+{
+    return false;
+}
+
+
+bool ImageSink::add_buffer_collection (std::vector<MemoryBuffer>)
+{
+    return false;
+}
+
+
+bool ImageSink::delete_buffer_collection ()
+{
+    return false;
+}

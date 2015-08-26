@@ -9,6 +9,7 @@
 #include "SinkInterface.h"
 
 #include <memory>
+#include <vector>
 
 /**
  * @addtogroup API
@@ -35,6 +36,12 @@ public:
     bool registerCallback (c_callback, void*);
 
     void push_image (std::shared_ptr<MemoryBuffer>);
+
+    bool set_buffer_number (size_t);
+
+    bool add_buffer_collection (std::vector<MemoryBuffer>);
+    bool delete_buffer_collection ()
+;
 
 private:
 
