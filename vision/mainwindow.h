@@ -50,6 +50,8 @@ private slots:
 
     void on_actionContact_triggered ();
 
+    void on_actionRefresh_everything_triggered();
+
 private:
 
     Ui::MainWindow *ui;
@@ -73,6 +75,8 @@ private:
     void start_stream ();
 
     void stop_stream ();
+
+    void update_single_property (QTreeWidgetItem* item);
 
     QLabel* status_label;
 };

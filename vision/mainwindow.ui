@@ -190,9 +190,16 @@
     </property>
     <addaction name="actionStop"/>
    </widget>
+   <widget class="QMenu" name="menuRefresh">
+    <property name="title">
+     <string>Refresh</string>
+    </property>
+    <addaction name="actionRefresh_everything"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAbout"/>
    <addaction name="menuVideo"/>
+   <addaction name="menuRefresh"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -257,6 +264,11 @@
   <action name="actionStop">
    <property name="text">
     <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionRefresh_everything">
+   <property name="text">
+    <string>Refresh everything</string>
    </property>
   </action>
  </widget>

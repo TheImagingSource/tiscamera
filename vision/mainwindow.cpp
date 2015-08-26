@@ -279,11 +279,15 @@ void MainWindow::on_size_box_currentIndexChanged (int index)
 }
 
 
-void MainWindow::update_properties ()
+void MainWindow::update_single_property (QTreeWidgetItem* item)
 {
-    for (unsigned int i = 0; i < ui->property_list->topLevelItemCount(); ++i)
-    {
-        QTreeWidgetItem* item = ui->property_list->topLevelItem(i);
+        if (item->childCount() > 0)
+        {
+            for (unsigned int j = 0; j < item->childCount(); ++j)
+            {
+                update_single_property(item->child(j));
+            }
+        }
 
         PropertyWidget* pw = dynamic_cast<PropertyWidget*>(ui->property_list->itemWidget(item, 0));
         if (pw != nullptr)
@@ -294,6 +298,16 @@ void MainWindow::update_properties ()
         {
             std::cout << "NULLPTR" << std::endl;
         }
+}
+
+
+void MainWindow::update_properties ()
+{
+    for (unsigned int i = 0; i < ui->property_list->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem* item = ui->property_list->topLevelItem(i);
+
+        update_single_property(item);
     }
 }
 
@@ -301,4 +315,10 @@ void MainWindow::update_properties ()
 void MainWindow::on_actionContact_triggered()
 {
 
+}
+
+
+void MainWindow::on_actionRefresh_everything_triggered ()
+{
+    update_properties ();
 }
