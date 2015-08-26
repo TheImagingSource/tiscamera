@@ -237,6 +237,7 @@ void PropertyHandler::generate_properties ()
     if (device_properties.empty())
     {
         setError(Error("No properties to work with.", ENOENT));
+        tcam_log(TCAM_LOG_ERROR, "No device properties to work with");
         return;
     }
 
@@ -267,7 +268,7 @@ void PropertyHandler::generate_properties ()
     {
         handle_flags(p);
     }
-
+    tcam_log(TCAM_LOG_DEBUG, "Created %zu properties", external_properties.size());
 }
 
 

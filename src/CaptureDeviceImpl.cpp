@@ -20,7 +20,7 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
 {
     if (!openDevice(device))
     {
-
+        tcam_log(TCAM_LOG_ERROR, "Unable to open device");
     }
 }
 
