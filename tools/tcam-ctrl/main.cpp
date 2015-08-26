@@ -141,12 +141,20 @@ int main (int argc, char *argv[])
 
     CaptureDevice g;
 
+    bool opened_device = false;
     for (auto& d : device_list)
     {
         if (d.get_serial().compare(serial) == 0)
         {
             g = CaptureDevice(d);
+            opened_device = true;
         }
+    }
+
+    if (!opened_device)
+    {
+        std::cerr << "Could not open device." << std::endl;
+        return 1;
     }
 
     if (!g.is_device_open())
