@@ -889,14 +889,33 @@ void V4l2Device::stream ()
                 }
                 else
                 {
-                    // TODO: errno
                     /* error during select */
+                    setError(Error("Unable to retrieve image. Select threw error.", errno));
                     tcam_log(TCAM_LOG_ERROR, "Error during select");
                     return;
                 }
             }
 
-            /* timeout! */ // TODO: check if trigger is enabled
+            auto is_trigger_mode_enabled = [this] ()
+            {
+                for (auto& p : this->property_handler->properties)
+                {
+                    if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
+                    {
+                        return dynamic_cast<PropertyBoolean*>((p.prop.get()))->get_value();
+                    }
+
+                }
+                return false;
+            };
+
+            /* timeout! */
+            if (is_trigger_mode_enabled() && ret == 0)
+            {
+                continue;
+            }
+
+
             if (ret == 0)
             {
                 tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
