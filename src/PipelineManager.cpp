@@ -96,84 +96,6 @@ bool PipelineManager::destroyPipeline ()
 }
 
 
-void PipelineManager::index_output_formats ()
-{
-    if (available_input_formats.empty())
-    {
-        setError(Error("No input formats. Unable to determine output formats", EPIPE));
-        tcam_log(TCAM_LOG_ERROR, "No input formats available.");
-        return;
-    }
-
-    uint32_t fourcc = 0;
-    auto dev_formats = [&fourcc] (const VideoFormatDescription& vfd)
-        {
-            tcam_log(TCAM_LOG_DEBUG,
-                    "Testing %s against %s",
-                    fourcc2description(fourcc),
-                    fourcc2description(vfd.getFourcc()));
-
-            return vfd.getFourcc() == fourcc;
-        };
-
-
-    for (auto f : available_filter)
-    {
-        if (f->getDescription().type == FILTER_TYPE_CONVERSION)
-        {
-
-            auto output = f->getDescription().output_fourcc;
-            auto input = f->getDescription().input_fourcc;
-
-            bool match = false;
-            for (const uint32_t& fi : input)
-            {
-                fourcc = fi;
-                auto format_match = std::find_if (available_input_formats.begin(),
-                                                  available_input_formats.end(),
-                                                  dev_formats);
-
-                if (format_match != available_input_formats.end())
-                {
-                    for (uint32_t fcc : output)
-                    {
-                        auto desc = format_match->getStruct();
-                        auto rf   = format_match-> getResolutionsFramesrates();
-
-                        desc.fourcc = fcc;
-                        memcpy(desc.description, fourcc2description(fcc), sizeof(desc.description));
-
-                        VideoFormatDescription v (desc, rf);
-                        available_output_formats.push_back (v);
-                    }
-                }
-            }
-
-            if (match == false) // does not allow for input format
-            {
-                continue;
-            }
-        }
-    }
-
-    // to finalize iterate input formats and select those that shall be passed through
-
-    std::vector<uint32_t> pass_through = {FOURCC_Y800, FOURCC_Y16, FOURCC_UYVY, FOURCC_GRBG8, FOURCC_GBRG8, FOURCC_RGGB8, FOURCC_BGGR8};
-
-    for (auto f : pass_through)
-    {
-        fourcc = f;
-        auto match = std::find_if(available_input_formats.begin(), available_input_formats.end(), dev_formats);
-
-        if (match != available_input_formats.end())
-        {
-            tcam_log(TCAM_LOG_DEBUG, "Adding %s to format list", fourcc2description(match->getFourcc()));
-            available_output_formats.push_back(*match);
-        }
-    }
-}
-
-
 bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
@@ -203,7 +125,7 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
         }
     }
 
-    index_output_formats();
+    available_output_formats = available_input_formats;
 
     if (available_output_formats.empty())
     {

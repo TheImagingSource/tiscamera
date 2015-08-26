@@ -106,14 +106,6 @@ private:
     std::vector<std::shared_ptr<MemoryBuffer>> pipeline_buffer;
     unsigned int current_ppl_buffer;
 
-    /**
-     * Informs all available transformation filter about the available
-     * device formats to create a list about indirectly available formats
-     *
-     * requires defined source
-     */
-    void index_output_formats ();
-
     void distributeProperties ();
 
     void create_input_format (uint32_t fourcc);
