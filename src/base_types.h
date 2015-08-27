@@ -80,7 +80,8 @@ struct tcam_video_format_description
 {
     uint32_t fourcc;                         /**< pixel format that is used e.g. RGB32 or Y800 */
     char description [256];
-
+    uint32_t binning;
+    uint32_t skipping;
     struct tcam_image_size min_size;         /**< smallest available resolution */
     struct tcam_image_size max_size;         /**< biggest available resolution */
 
@@ -95,10 +96,10 @@ struct tcam_video_format_description
 struct tcam_video_format
 {
     uint32_t fourcc;  /**< pixel format that is used e.g. RGB32 or Y800 */
-
+    uint32_t binning;
+    uint32_t skipping;
     uint32_t width;
     uint32_t height;
-
     double   framerate;
 };
 
