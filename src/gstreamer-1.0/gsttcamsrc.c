@@ -246,20 +246,31 @@ void gst_tcam_init_camera (GstTcam* self)
 
     struct tcam_device_info info = {};
 
-    GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial);
+
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
+
+    if (self->device_serial != NULL)
+        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial);
+    else
+        GST_DEBUG_OBJECT (self, "No serial given. Opening first available device.");
 
 
     unsigned int i = 0;
     for (i; i < devs; ++i)
     {
-        if (strcmp(infos[i].serial_number, self->device_serial) == 0)
+        if (self->device_serial != NULL)
         {
-            GST_DEBUG_OBJECT (self, "Found device.");
+            if (strcmp(infos[i].serial_number, self->device_serial) == 0)
+            {
+                GST_DEBUG_OBJECT (self, "Found device.");
 
+                self->device = tcam_create_new_capture_device(&infos[i]);
+                break;
+            }
+        }
+        else
+        {
             self->device = tcam_create_new_capture_device(&infos[i]);
-
-            /* info = infos[i]; */
             break;
         }
     }
