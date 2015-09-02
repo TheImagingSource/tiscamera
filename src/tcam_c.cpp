@@ -208,11 +208,73 @@ int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device
     int i = 0;
     for (const auto& v : vec)
     {
-        arr[i] = v.getStruct();
+        arr[i] = v.get_struct();
         i++;
     }
 
     return vec.size();
+}
+
+
+
+int tcam_capture_device_get_format_resolution (const tcam_capture_device* source,
+                                               const tcam_video_format_description* desc,
+                                               struct tcam_resolution_description* array,
+                                               const size_t size)
+{
+    auto formats = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
+
+    for (const auto& f : formats)
+    {
+        if (f == *desc)
+        {
+            auto vec = f.get_resolutions();
+
+            if (vec.size() > size)
+            {
+                return -1;
+            }
+
+            memcpy(array, vec.data(), vec.size() * sizeof(struct tcam_resolution_description));
+            return vec.size();
+        }
+    }
+
+    return 0;
+}
+
+
+int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* source,
+                                                  const struct tcam_video_format_description* desc,
+                                                  const struct tcam_resolution_description* resolution,
+                                                  double* array,
+                                                  const size_t size)
+{
+    auto formats = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
+
+    for (const auto& f : formats)
+    {
+        if (f == *desc)
+        {
+            auto vec = f.get_frame_rates(*resolution);
+
+            if (vec.size() > size)
+            {
+                return -1;
+            }
+
+            if (vec.empty())
+            {
+                return 0;
+            }
+
+            memcpy(array, vec.data(), vec.size() * sizeof(double));
+            return vec.size();
+        }
+    }
+
+
+    return 0;
 }
 
 

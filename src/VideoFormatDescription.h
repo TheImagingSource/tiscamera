@@ -27,10 +27,11 @@ namespace tcam
 {
 
 
-struct res_fps
+struct framerate_mapping
 {
-    tcam_image_size resolution;
-    std::vector<double> fps;
+    struct tcam_resolution_description resolution;
+
+    std::vector<double> framerates;
 };
 
 
@@ -41,9 +42,12 @@ public:
     VideoFormatDescription () = delete;
 
     VideoFormatDescription (const struct tcam_video_format_description&,
-                            const std::vector<res_fps>&);
+                            const std::vector<framerate_mapping>&);
 
     VideoFormatDescription (const VideoFormatDescription&);
+
+
+    explicit VideoFormatDescription (const struct tcam_video_format_description&);
 
 
     VideoFormatDescription& operator= (const VideoFormatDescription&);
@@ -51,11 +55,14 @@ public:
     bool operator== (const VideoFormatDescription& other) const;
     bool operator!= (const VideoFormatDescription& other) const;
 
+    bool operator== (const struct tcam_video_format_description& other) const;
+    bool operator!= (const struct tcam_video_format_description& other) const;
+
     /**
      * Returns a struct representation of the format description
      * @return tcam_video_format_description
      */
-    struct tcam_video_format_description getStruct () const;
+    struct tcam_video_format_description get_struct () const;
 
     /**
      * Returns the pixel format used
@@ -63,33 +70,31 @@ public:
      */
     uint32_t getFourcc () const;
 
-    TCAM_FRAMERATE_TYPE getFramerateType () const;
+    /**
+     * Returns the binning used
+     * @return uint32 containging the fourcc
+     */
+    uint32_t get_binning () const;
 
-    std::vector<res_fps> getResolutionsFramesrates () const;
+    /**
+     * Returns the skipping used
+     */
+    uint32_t get_skipping () const;
 
-    std::vector<tcam_image_size> getResolutions () const;
 
-    tcam_image_size getSizeMin () const;
-    tcam_image_size getSizeMax () const;
+    std::vector<struct tcam_resolution_description> get_resolutions () const;
 
-    std::vector<double> getFrameRates (const tcam_image_size& size) const;
-    std::vector<double> getFrameRates (unsigned int width, unsigned height) const;
+    std::vector<double> get_frame_rates (const tcam_resolution_description& size) const;
 
     VideoFormat createVideoFormat (unsigned int width,
                                    unsigned int height,
                                    double framerate) const;
 
-    bool isValidVideoFormat (const VideoFormat&) const;
-
-    bool isValidFramerate (const double framerate) const;
-
-    bool isValidResolution (unsigned int width, unsigned int height) const;
-
 private:
 
     tcam_video_format_description format;
 
-    std::vector<res_fps> rf;
+    std::vector<framerate_mapping> res;
 
 };
 

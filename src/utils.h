@@ -152,6 +152,17 @@ std::shared_ptr<Property> find_property (std::vector<std::shared_ptr<Property>>&
 bool compare_double (double val1, double val2);
 
 
+bool are_equal (const tcam_image_size& s1,
+                const tcam_image_size& s2);
+
+
+bool are_equal (const struct tcam_resolution_description& res1,
+                const struct tcam_resolution_description& res2);
+
+
+bool are_equal (const struct tcam_video_format_description& res1,
+                const struct tcam_video_format_description& res2);
+
 } /* namespace tcam */
 
 VISIBILITY_POP

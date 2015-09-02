@@ -251,14 +251,6 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
 
 bool V4l2Device::validate_video_format (const VideoFormat& format) const
 {
-
-    for (const auto& f : available_videoformats)
-    {
-        if (f.isValidVideoFormat(format))
-        {
-            return true;
-        }
-    }
     return false;
 }
 
@@ -567,23 +559,25 @@ void V4l2Device::index_formats ()
         memcpy (desc.description, new_desc.description, 256);
         frms.pixel_format = fmtdesc.pixelformat;
 
-        std::vector<res_fps> rf;
+        std::vector<struct framerate_mapping> rf;
 
         for (frms.index = 0; ! tcam_xioctl (fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
             {
-                desc.min_size.width = frms.discrete.width;
-                desc.max_size.width = frms.discrete.width;
-                desc.min_size.height = frms.discrete.height;
-                desc.max_size.height = frms.discrete.height;
+                struct tcam_resolution_description res = {};
 
-                tcam_image_size s = { frms.discrete.width, frms.discrete.height };
+                res.min_size.width = frms.discrete.width;
+                res.max_size.width = frms.discrete.width;
+                res.min_size.height = frms.discrete.height;
+                res.max_size.height = frms.discrete.height;
 
-                desc.framerate_type = TCAM_FRAMERATE_TYPE_FIXED;
                 std::vector<double> f = index_framerates(frms);
 
-                res_fps r = { s, f };
+                res.framerate_count = f.size();
+                res.type = TCAM_RESOLUTION_TYPE_FIXED;
+
+                framerate_mapping r = { res, f };
                 rf.push_back(r);
             }
             else
@@ -592,6 +586,8 @@ void V4l2Device::index_formats ()
                 tcam_log(TCAM_LOG_ERROR, "Encountered unknown V4L2_FRMSIZE_TYPE");
             }
         }
+
+        desc.resolution_count = rf.size();
 
         // algorithms, etc. use Y800 as an identifier.
         // declare format as such.
@@ -604,7 +600,7 @@ void V4l2Device::index_formats ()
         this->available_videoformats.push_back(format);
 
         tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.getFourcc()));
-        // }
+
     }
 
 }
@@ -1145,11 +1141,11 @@ tcam_image_size V4l2Device::get_sensor_size () const
     tcam_image_size size = {};
     for (const auto& f : available_videoformats)
     {
-        for (const auto& r :f.getResolutions())
+        for (const auto& r :f.get_resolutions())
         {
-            if (r.width > size.width || r.height > size.width)
+            if (r.max_size.width > size.width || r.max_size.height > size.width)
             {
-                size = r;
+                size = r.max_size;
             }
         }
     }

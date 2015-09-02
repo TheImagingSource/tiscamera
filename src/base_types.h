@@ -76,13 +76,22 @@ struct tcam_image_size
 };
 
 
-/**
- * format capabilities
- */
-enum TCAM_FRAMERATE_TYPE
+enum TCAM_RESOLUTION_TYPE
 {
-    TCAM_FRAMERATE_TYPE_RANGE, /**< returned values should be interpreted as boundaries for value range */
-    TCAM_FRAMERATE_TYPE_FIXED, /**< only non-negotiable framerates are offered */
+    TCAM_RESOLUTION_TYPE_RANGE,
+    TCAM_RESOLUTION_TYPE_FIXED,
+};
+
+
+struct tcam_resolution_description
+{
+    enum TCAM_RESOLUTION_TYPE type;
+
+    // these are identical if type is FIXED
+    struct tcam_image_size min_size;         /**< smallest available resolution */
+    struct tcam_image_size max_size;         /**< biggest available resolution */
+
+    uint32_t framerate_count;                /**< number of framerates this resolution supports */
 };
 
 
@@ -96,10 +105,8 @@ struct tcam_video_format_description
     char description [256];
     uint32_t binning;
     uint32_t skipping;
-    struct tcam_image_size min_size;         /**< smallest available resolution */
-    struct tcam_image_size max_size;         /**< biggest available resolution */
 
-    enum TCAM_FRAMERATE_TYPE framerate_type; /**< type of available framerates*/
+    uint32_t resolution_count;               /**< number of resolutions this format supports */
 };
 
 

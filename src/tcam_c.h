@@ -190,6 +190,22 @@ extern "C"
                                                            struct tcam_video_format_description* array,
                                                            const size_t size);
 
+
+
+
+    int tcam_capture_device_get_format_resolution (const tcam_capture_device* source,
+                                                   const struct tcam_video_format_description* desc,
+                                                   struct tcam_resolution_description* array,
+                                                   const size_t size);
+
+
+    int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* source,
+                                                      const struct tcam_video_format_description* desc,
+                                                      const struct tcam_resolution_description* resolution,
+                                                      double* array,
+                                                      const size_t size);
+
+
     /**
      * Description for tcam_capture_device_set_image_format.
      * @param[in] source <doc>
