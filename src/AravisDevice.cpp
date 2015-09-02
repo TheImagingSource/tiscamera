@@ -228,7 +228,7 @@ bool AravisDevice::set_video_format (const VideoFormat& new_format)
 
     tcam_log(TCAM_LOG_DEBUG, "Setting format to '%s'", new_format.toString().c_str());
 
-    arv_camera_set_frame_rate (this->arv_camera, 3.75);
+    arv_camera_set_frame_rate (this->arv_camera, new_format.getFramerate());
 
     arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.getFourcc()));
 
