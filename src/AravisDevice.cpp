@@ -894,28 +894,22 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             memcpy(desc.description, format_str[i], sizeof(desc.description));
 
-            res_fps rf = {};
+            desc.resolution_count = 1;
+            framerate_mapping rf = {};
 
-            rf.resolution = max;
+            rf.resolution.max_size = max;
+            rf.resolution.min_size = min;
+            rf.resolution.type = TCAM_RESOLUTION_TYPE_RANGE;
+            rf.resolution.framerate_count = fps.size();
+            rf.framerates = fps;
 
-            rf.fps = fps;
-
-            std::vector<res_fps> res_vec;
-
-            res_vec.push_back ( rf );
-
-
-            struct tcam_video_format_description d = desc;
-
-            // TODO RANGES
-
-            d.framerate_type = TCAM_FRAMERATE_TYPE_RANGE;
-            d.min_size = min;
-            d.max_size = max;
+            std::vector<struct framerate_mapping> res_vec;
+            res_vec.push_back(rf);
+// TODO
 
             tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
 
-            this->available_videoformats.push_back ( VideoFormatDescription ( d, res_vec ) );
+            this->available_videoformats.push_back ( VideoFormatDescription ( desc, res_vec ) );
 
         }
     }
