@@ -479,8 +479,10 @@ static int euvc_check_fw_size (usb_dev_handle *dev, char *filename)
 	status = fstat (fd, &st);
 	close (fd);
 	szeeprom = euvc_get_eeprom_size (dev);
-	if (st.st_size > (szeeprom - DATA_SIZE)){
+	if (st.st_size > (szeeprom)){
 		ret = 0;
+	} else if (st.st_size > (szeeprom - DATA_SIZE)){
+		ret = 2;
 	} else {
 		ret = 1;
 	}
@@ -1059,10 +1061,15 @@ main(int argc, char *argv[])
 		unsigned short pid;
 		unsigned char file_id;
 		int file_version = get_file_firmware_version (filename);
+		int szflag = euvc_check_fw_size (dev, filename);
 
-		if (euvc_check_fw_size (dev, filename) != 1){
-			fprintf (stderr, "Upload failed: Firmware size is too big for this device\n");
-			return 1;
+		if ( szflag != 1){
+			if (options.force && (szflag == 2)){
+				fprintf (stderr, "Forced overwrite of whole EEPROM\n");
+			} else {
+				fprintf (stderr, "Upload failed: Firmware size is too big for this device\n");
+				return 1;
+			}
 		}
 
 		if (euvc_get_pid (dev, &pid) < 0 ){
