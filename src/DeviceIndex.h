@@ -32,20 +32,45 @@
 namespace tcam
 {
 
-typedef void (*dev_callback) (const DeviceInfo&);
+typedef void (*dev_callback) (const DeviceInfo&, void* user_data);
 
 class DeviceIndex
 {
 
 public:
 
-    DeviceIndex ();
-
-    ~DeviceIndex ();
 
     std::vector<DeviceInfo> get_device_list () const;
 
-    void register_device_lost (dev_callback);
+
+    /**
+     * @name register_device_lost
+     * @param callback - function pointer to use
+     * @brief
+     */
+    void register_device_lost (dev_callback callback,
+                               void* user_data);
+
+    /**
+     * @name register_device_lost
+     * @param callback - function pointer to use
+     * @param serial - serialnumber of the device that has to be \
+     *                 lost for the callback to be called
+     * @brief
+     */
+    void register_device_lost (dev_callback callback,
+                               void* user_data,
+                               const std::string& serial);
+
+
+    /**
+     * @name remove_device_lost
+     * @param callback - function pointer to use
+     * @brief
+     */
+    void remove_device_lost (dev_callback callback);
+
+    void remove_device_lost (dev_callback callback, const std::string& serial);
 
     /**
      * @param[in/out] DeviceInfo that shall be filled. \
@@ -54,16 +79,32 @@ public:
      */
     bool fill_device_info (DeviceInfo&) const;
 
+    static DeviceIndex& get_instance ();
+
 private:
+
+    DeviceIndex ();
+
+    ~DeviceIndex ();
 
     bool continue_thread;
     std::mutex mtx;
     unsigned int wait_period;
     std::thread work_thread;
 
+    static const unsigned int INIT_MAX = 2;
+    unsigned int init_count;
+
     std::vector<DeviceInfo> device_list;
 
-    std::vector<dev_callback> callbacks;
+    struct callback_data
+    {
+        dev_callback callback;
+        void* data;
+        std::string serial;
+    };
+
+    std::vector<callback_data> callbacks;
 
     void update_device_list ();
 
@@ -74,7 +115,7 @@ private:
 };
 
 
-std::shared_ptr<DeviceIndex> get_device_index ();
+std::vector<DeviceInfo> get_device_list ();
 
 } /* namespace tcam */
 

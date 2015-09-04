@@ -38,36 +38,19 @@ const char* tcam_last_error_messsage ()
 }
 
 
-/* device discovery / watchdog */
 
-tcam_device_index* tcam_create_device_index ()
+int tcam_device_index_get_device_count ()
 {
-    return (tcam_device_index*)new DeviceIndex();
-}
-
-
-void tcam_destroy_device_index (tcam_device_index* index)
-{
-    delete reinterpret_cast<DeviceIndex*>(index);
-}
-
-
-int tcam_device_index_get_device_count (tcam_device_index* index)
-{
-    if (index == NULL)
-        return 0;
-
-    auto vec = reinterpret_cast<DeviceIndex*>(index)->get_device_list();
+    auto vec = get_device_list();
 
     return vec.size();
 }
 
 
-int tcam_device_index_get_device_infos (tcam_device_index* index,
-                                        tcam_device_info* arr,
+int tcam_device_index_get_device_infos (tcam_device_info* arr,
                                         size_t size)
 {
-    auto vec = reinterpret_cast<DeviceIndex*>(index)->get_device_list();
+    auto vec = get_device_list();
 
     if (vec.size() < size)
     {

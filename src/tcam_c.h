@@ -46,32 +46,13 @@ extern "C"
 
     /* device discovery / watchdog */
 
-    struct tcam_device_index;
-    typedef struct tcam_device_index tcam_device_index;
-
-
-    /**
-     * Create a device indexer
-     * @return pointer to opaque object; NULL on error
-     */
-    tcam_device_index* tcam_create_device_index ();
-
-
-    /**
-     * @name tcam_destroy_device_index
-     *
-     * @param index - device_index that shall be destroyed
-     */
-    void tcam_destroy_device_index (tcam_device_index* index);
-
-
     /**
      * Description for tcam_device_index_get_device_count.
      *
      * @param index <doc>
      * @return number of found devices; -1 on error
      */
-    int tcam_device_index_get_device_count (tcam_device_index* index);
+    int tcam_device_index_get_device_count ();
 
 
     /**
@@ -82,8 +63,7 @@ extern "C"
      * @param[in]  size  - size of the given array
      * @return number of devices copied; -1 on error
      */
-    int tcam_device_index_get_device_infos (tcam_device_index* index,
-                                            struct tcam_device_info* array,
+    int tcam_device_index_get_device_infos (struct tcam_device_info* array,
                                             size_t size);
 
 

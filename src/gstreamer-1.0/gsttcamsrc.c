@@ -491,19 +491,12 @@ void gst_tcam_init_camera (GstTcam* self)
     if (self->device != NULL)
         tcam_destroy_capture_device(self->device);
 
-    tcam_device_index* index = tcam_create_device_index();
-
-    /* wait for network cameras to be indexed */
-    /* ? does this have to be incrreased ? */
-    sleep(5);
-
-    int dev_count = tcam_device_index_get_device_count(index);
+    int dev_count = tcam_device_index_get_device_count();
 
     struct tcam_device_info infos[dev_count];
 
-    int devs = tcam_device_index_get_device_infos (index,
-                                            infos,
-                                            dev_count);
+    int devs = tcam_device_index_get_device_infos (infos,
+                                                   dev_count);
 
     struct tcam_device_info info = {};
 
@@ -535,8 +528,6 @@ void gst_tcam_init_camera (GstTcam* self)
             break;
         }
     }
-
-    tcam_destroy_device_index (index);
 
     if (self->device == NULL)
     {

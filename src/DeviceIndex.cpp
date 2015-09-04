@@ -19,6 +19,7 @@
 #include <memory>
 #include <algorithm>
 #include <cstring>
+#include <unistd.h>
 
 #include "utils.h"
 #include "logging.h"
@@ -40,11 +41,14 @@ using namespace tcam;
 DeviceIndex::DeviceIndex ()
     : continue_thread(false),
       wait_period(2),
+      init_count(0),
       device_list(std::vector<DeviceInfo>()),
-      callbacks(std::vector<dev_callback>())
+      callbacks(std::vector<callback_data>())
 {
     continue_thread = true;
     work_thread = std::thread (&DeviceIndex::run, this);
+
+    work_thread.detach();
 }
 
 
@@ -58,11 +62,62 @@ DeviceIndex::~DeviceIndex ()
 }
 
 
-void DeviceIndex::register_device_lost (dev_callback c)
+void DeviceIndex::register_device_lost (dev_callback c, void* user_data)
 {
     tcam_log(TCAM_LOG_DEBUG, "Registered device lost callback");
     mtx.lock();
-    callbacks.push_back(c);
+    callbacks.push_back({c, user_data, ""});
+    mtx.unlock();
+}
+
+
+void DeviceIndex::register_device_lost (dev_callback c,
+                                        void* user_data,
+                                        const std::string& serial)
+{
+    tcam_log(TCAM_LOG_DEBUG, "Registered device lost callback for %s", serial.c_str());
+    mtx.lock();
+    callbacks.push_back({c, user_data, serial});
+    mtx.unlock();
+}
+
+
+void DeviceIndex::remove_device_lost (dev_callback callback)
+{
+    mtx.lock();
+
+    auto it = std::begin(callbacks); //std::begin is a free function in C++11
+    for (auto& value : callbacks)
+    {
+
+        if (value.callback == callback)
+        {
+            callbacks.erase(it);
+            break;
+        }
+        it++; //at the end OR make sure you do this in each iteration
+    }
+
+    mtx.unlock();
+}
+
+
+void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& serial)
+{
+    mtx.lock();
+
+    auto it = std::begin(callbacks); //std::begin is a free function in C++11
+    for (auto& value : callbacks)
+    {
+
+        if (value.callback == callback && value.serial.compare(serial) == 0)
+        {
+            callbacks.erase(it);
+            break;
+        }
+        it++; //at the end OR make sure you do this in each iteration
+    }
+
     mtx.unlock();
 }
 
@@ -114,6 +169,10 @@ void DeviceIndex::update_device_list ()
 
     device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
 
+    if (init_count < INIT_MAX)
+    {
+        init_count++;
+    }
     mtx.unlock();
 }
 
@@ -133,7 +192,10 @@ void DeviceIndex::fire_device_lost (const DeviceInfo& d)
     mtx.lock();
     for (auto& c : callbacks)
     {
-        c(d);
+        if (c.serial.empty() || c.serial.compare(d.get_serial()) == 0)
+        {
+            c.callback(d, c.data);
+        }
     }
     mtx.unlock();
 }
@@ -171,11 +233,25 @@ bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 
 std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 {
+
+    while (init_count < INIT_MAX)
+    {
+        usleep(500);
+    }
+
     return device_list;
 }
 
 
-std::shared_ptr<DeviceIndex> tcam::get_device_index ()
+DeviceIndex& DeviceIndex::get_instance()
 {
-    return std::make_shared<DeviceIndex>();
+    static DeviceIndex static_instance;
+
+    return static_instance;
+}
+
+
+std::vector<DeviceInfo> tcam::get_device_list ()
+{
+    return DeviceIndex::get_instance().get_device_list();
 }

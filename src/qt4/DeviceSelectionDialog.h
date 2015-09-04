@@ -37,7 +37,6 @@ private:
     Ui::DeviceSelectionDialog* ui;
 
     std::vector<tcam::DeviceInfo> devices;
-    std::shared_ptr<tcam::DeviceIndex> device_watch_dog;
     bool run_thread;
     std::thread work_thread;
 };
