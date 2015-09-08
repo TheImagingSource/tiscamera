@@ -610,14 +610,17 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
         usleep(500);
     }
 
+    self->new_buffer = false;
     if (self->ptr == NULL)
         return GST_FLOW_ERROR;
 
     *buffer = gst_buffer_new_wrapped_full (0, self->ptr->pData, self->ptr->length,
                                            0, self->ptr->length, NULL, NULL);
 
-    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src))) {
-        if (self->timestamp_offset == 0) {
+    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    {
+        if (self->timestamp_offset == 0)
+        {
             self->timestamp_offset = timestamp_ns;
             self->last_timestamp = timestamp_ns;
         }
