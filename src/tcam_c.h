@@ -232,6 +232,24 @@ extern "C"
      */
     bool tcam_capture_device_stop_stream (tcam_capture_device* source);
 
+    /**
+     * @param buffer that shall be locked
+     * @return current lock count
+     */
+    unsigned int tcam_image_buffer_lock (const struct tcam_image_buffer* buffer);
+
+    /**
+     * @param buffer
+     * @return current lock count
+     */
+    unsigned int tcam_image_buffer_get_lock_count (const struct tcam_image_buffer* buffer);
+
+    /**
+     * @param buffer that shall be unlocked
+     * @return current lock count
+     */
+    unsigned int tcam_image_buffer_unlock (const struct tcam_image_buffer* buffer);
+
 
 #ifdef __cplusplus
 }

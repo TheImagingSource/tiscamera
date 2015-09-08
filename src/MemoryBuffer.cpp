@@ -64,21 +64,24 @@ bool MemoryBuffer::set_statistics (const struct tcam_stream_statistics& stats)
 
 bool MemoryBuffer::lock ()
 {
-    lock_count = 1;
+    buffer.lock_count++;
     return true;
 }
 
 
 bool MemoryBuffer::unlock ()
 {
-    lock_count = 0;
+    if (buffer.lock_count >=1)
+    {
+        buffer.lock_count--;
+    }
     return true;
 }
 
 
 bool MemoryBuffer::is_locked () const
 {
-    if (lock_count == 0)
+    if (buffer.lock_count == 0)
     {
         return false;
     }

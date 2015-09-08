@@ -70,8 +70,6 @@ private:
 
     struct tcam_image_buffer buffer;
 
-    unsigned int lock_count;
-
 };
 
 

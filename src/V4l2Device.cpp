@@ -404,8 +404,14 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> 
     }
 
     this->buffers.clear();
+    this->buffers.reserve(b.size());
 
-    this->buffers = b;
+    for (unsigned int i = 0; i < b.size(); ++i)
+    {
+        buffer_info info = {b.at(i), false};
+
+        this->buffers.push_back(info);
+    }
 
     init_mmap_buffers();
 
@@ -962,6 +968,35 @@ void V4l2Device::stream ()
 }
 
 
+bool V4l2Device::requeue_mmap_buffer ()
+{
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+        if (!buffers[i].buffer->is_locked() && !buffers[i].is_queued)
+        {
+            struct v4l2_buffer buf = {};
+
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buf.memory = V4L2_MEMORY_MMAP;
+
+            buf.index = i;
+
+            // requeue buffer
+            int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
+            if (ret == -1)
+            {
+                setError(Error("Unable to requeue buffer. ioctl error", errno));
+                return false;
+            }
+            buffers[i].is_queued = true;
+        }
+    }
+
+
+    return true;
+}
+
+
 bool V4l2Device::get_frame ()
 {
     struct v4l2_buffer buf = {};
@@ -982,23 +1017,17 @@ bool V4l2Device::get_frame ()
     // here they are converted to nanoseconds
     statistics.capture_time_ns = (buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
-    buffers.at(buf.index)->set_statistics(statistics);
+    buffers.at(buf.index).buffer->set_statistics(statistics);
 
-    listener->push_image(buffers.at(buf.index));
+    buffers.at(buf.index).is_queued = false;
 
-    // keep buffer unqueued until user allows requeueing
-    while (buffers.at(buf.index)->is_locked())
+    listener->push_image(buffers.at(buf.index).buffer);
+
+    if (!requeue_mmap_buffer())
     {
-        usleep(500);
-    }
-
-    // requeue buffer
-    ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
-    if (ret == -1)
-    {
-        setError(Error("Unable to requeue buffer. ioctl error", errno));
         return false;
     }
+
     return true;
 }
 
@@ -1084,7 +1113,8 @@ void V4l2Device::init_mmap_buffers ()
             return;
         }
 
-        buffers.at(n_buffers)->set_image_buffer(buffer);
+        buffers.at(n_buffers).buffer->set_image_buffer(buffer);
+        buffers.at(n_buffers).is_queued = true;
     }
 
 }
@@ -1111,7 +1141,8 @@ void V4l2Device::free_mmap_buffers ()
 
     for (i = 0; i < buffers.size(); ++i)
     {
-        if (-1 == munmap(buffers.at(i)->getImageBuffer().pData, buffers.at(i)->getImageBuffer().length))
+        if (-1 == munmap(buffers.at(i).buffer->getImageBuffer().pData,
+                         buffers.at(i).buffer->getImageBuffer().length))
         {
             // TODO: error
 
@@ -1119,12 +1150,12 @@ void V4l2Device::free_mmap_buffers ()
         }
         else
         {
-            auto buf = buffers.at(i)->getImageBuffer();
+            auto buf = buffers.at(i).buffer->getImageBuffer();
 
             buf.pData = nullptr;
             buf.length = 0;
 
-            buffers.at(i)->set_image_buffer(buf);
+            buffers.at(i).buffer->set_image_buffer(buf);
         }
     }
 

@@ -162,13 +162,23 @@ private:
     bool is_stream_on;
     struct tcam_stream_statistics statistics;
     size_t current_buffer;
-    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+
+    struct buffer_info
+    {
+        std::shared_ptr<MemoryBuffer> buffer;
+        bool is_queued;
+    };
+
+    // std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+    std::vector<buffer_info> buffers;
 
     std::shared_ptr<SinkInterface> listener;
 
     void stream ();
 
     bool get_frame ();
+
+    bool requeue_mmap_buffer ();
 
     void init_mmap_buffers ();
 

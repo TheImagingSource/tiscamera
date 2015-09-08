@@ -275,7 +275,7 @@ bool tcam_capture_device_get_image_format (tcam_capture_device* source,
 {
     VideoFormat f = reinterpret_cast<CaptureDevice*>(source)->get_active_video_format();
 
-    *format = f.getStruct();
+    *format = f.get_struct();
 
     return true;
 }
@@ -311,4 +311,25 @@ stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
 bool tcam_capture_device_stop_stream (tcam_capture_device* source)
 {
     return reinterpret_cast<CaptureDevice*>(source)->stop_stream();
+}
+
+
+unsigned int tcam_image_buffer_lock (const struct tcam_image_buffer* buffer)
+{
+    const_cast<tcam_image_buffer*>(buffer)->lock_count++;
+    return buffer->lock_count;
+}
+
+
+unsigned int tcam_image_buffer_get_lock_count (const struct tcam_image_buffer* buffer)
+{
+    return buffer->lock_count;
+}
+
+
+unsigned int tcam_image_buffer_unlock (const struct tcam_image_buffer* buffer)
+{
+    if (buffer->lock_count >= 1)
+        const_cast<tcam_image_buffer*>(buffer)->lock_count--;
+    return buffer->lock_count;
 }

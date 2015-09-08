@@ -148,6 +148,8 @@ struct tcam_image_buffer
     struct tcam_video_format format;   /**< tcam_video_format the image buffer has */
     unsigned int             pitch;    /**< length of single image line in bytes */
     struct tcam_stream_statistics statistics;
+
+    uint32_t lock_count;
 };
 
 
