@@ -200,7 +200,7 @@ static bool isFilterApplicable (uint32_t fourcc,
 void PipelineManager::create_input_format (uint32_t fourcc)
 {
     input_format = output_format;
-    input_format.setFourcc(fourcc);
+    input_format.set_fourcc(fourcc);
 }
 
 
@@ -274,15 +274,15 @@ bool PipelineManager::validate_pipeline ()
     {
         tcam_log(TCAM_LOG_DEBUG,
                 "Video format in source does not match pipeline: '%s' != '%s'",
-                in_format.toString().c_str(),
-                input_format.toString().c_str());
+                in_format.to_string().c_str(),
+                input_format.to_string().c_str());
         return false;
     }
     else
     {
         tcam_log(TCAM_LOG_DEBUG,
                  "Starting pipeline with format: '%s'",
-                 in_format.toString().c_str());
+                 in_format.to_string().c_str());
     }
 
     VideoFormat in;
@@ -297,8 +297,8 @@ bool PipelineManager::validate_pipeline ()
             tcam_log(TCAM_LOG_ERROR,
                     "Ingoing video format for filter %s is not compatible with previous element. '%s' != '%s'",
                     f->getDescription().name.c_str(),
-                    in_format.toString().c_str(),
-                    in.toString().c_str());
+                    in_format.to_string().c_str(),
+                    in.to_string().c_str());
             setError(Error("Faulty pipeline creation.", EINVAL));
             return false;
         }
@@ -306,7 +306,7 @@ bool PipelineManager::validate_pipeline ()
         {
             tcam_log(TCAM_LOG_DEBUG, "Filter %s connected to pipeline -- %s",
                     f->getDescription().name.c_str(),
-                    out.toString().c_str());
+                    out.to_string().c_str());
             // save output for next comparison
             in_format = out;
         }
@@ -315,8 +315,8 @@ bool PipelineManager::validate_pipeline ()
     if (in_format != this->output_format)
     {
         tcam_log(TCAM_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
-                in_format.toString().c_str(),
-                output_format.toString().c_str());
+                in_format.to_string().c_str(),
+                output_format.to_string().c_str());
         return false;
     }
 
@@ -333,7 +333,7 @@ bool PipelineManager::create_conversion_pipeline ()
     }
 
     auto device_fourcc = getDeviceFourcc();
-    create_input_format(output_format.getFourcc());
+    create_input_format(output_format.get_fourcc());
 
     for (auto f : available_filter)
     {
@@ -342,7 +342,7 @@ bool PipelineManager::create_conversion_pipeline ()
         if (f->getDescription().type == FILTER_TYPE_CONVERSION)
         {
 
-            if (isFilterApplicable(output_format.getFourcc(), f->getDescription().output_fourcc))
+            if (isFilterApplicable(output_format.get_fourcc(), f->getDescription().output_fourcc))
             {
                 bool filter_valid = false;
                 uint32_t fourcc_to_use = 0;
@@ -412,7 +412,7 @@ bool PipelineManager::add_interpretation_filter ()
                 }
             }
 
-            if (all_formats ||isFilterApplicable(input_format.getFourcc(), f->getDescription().input_fourcc))
+            if (all_formats ||isFilterApplicable(input_format.get_fourcc(), f->getDescription().input_fourcc))
             {
                 tcam_log(TCAM_LOG_DEBUG, "Adding filter '%s' after source", s.c_str());
                 f->setVideoFormat(input_format, input_format);
@@ -441,15 +441,15 @@ bool PipelineManager::allocate_conversion_buffer ()
     for (int i = 0; i < 5; ++i)
     {
         tcam_image_buffer b = {};
-        b.pitch = output_format.getSize().width * img::get_bits_per_pixel(output_format.getFourcc()) / 8;
-        b.length = b.pitch * output_format.getSize().height;
+        b.pitch = output_format.get_size().width * img::get_bits_per_pixel(output_format.get_fourcc()) / 8;
+        b.length = b.pitch * output_format.get_size().height;
 
         b.pData = (unsigned char*)malloc(b.length);
 
-        b.format.fourcc = output_format.getFourcc();
-        b.format.width = output_format.getSize().width;
-        b.format.height = output_format.getSize().height;
-        b.format.framerate = output_format.getFramerate();
+        b.format.fourcc = output_format.get_fourcc();
+        b.format.width = output_format.get_size().width;
+        b.format.height = output_format.get_size().height;
+        b.format.framerate = output_format.get_framerate();
 
         this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
     }

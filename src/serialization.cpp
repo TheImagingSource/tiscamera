@@ -18,6 +18,7 @@
 
 #include "Error.h"
 #include "utils.h"
+#include "internal.h"
 
 #include <tinyxml.h>
 
@@ -242,7 +243,7 @@ bool tcam::save_xml_description (const std::string& filename,
     TiXmlElement* format_fourcc = new TiXmlElement ( "format" );
     format_node->LinkEndChild( format_fourcc );
 
-    TiXmlText* fourcc_text = new TiXmlText( fourcc2description(format.getFourcc()) );
+    TiXmlText* fourcc_text = new TiXmlText( fourcc2description(format.get_fourcc()) );
     format_fourcc->LinkEndChild( fourcc_text );
 
     TiXmlElement* format_size  = new TiXmlElement( "resolution" );
@@ -251,19 +252,19 @@ bool tcam::save_xml_description (const std::string& filename,
     TiXmlElement* size_width = new TiXmlElement( "width" );
     format_size->LinkEndChild( size_width );
 
-    TiXmlText* width_text = new TiXmlText ( std::to_string(format.getSize().width) );
+    TiXmlText* width_text = new TiXmlText ( std::to_string(format.get_size().width) );
     size_width->LinkEndChild( width_text );
 
     TiXmlElement* size_height = new TiXmlElement ( "height" );
     format_size->LinkEndChild( size_height );
 
-    TiXmlText* height_text = new TiXmlText( std::to_string(format.getSize().height) );
+    TiXmlText* height_text = new TiXmlText( std::to_string(format.get_size().height) );
     size_height->LinkEndChild( height_text );
 
     TiXmlElement* format_framerate = new TiXmlElement( "fps" );
     format_node->LinkEndChild( format_framerate );
 
-    TiXmlText* framerate_text = new TiXmlText( std::to_string(format.getFramerate()) );
+    TiXmlText* framerate_text = new TiXmlText( std::to_string(format.get_framerate()) );
     format_framerate->LinkEndChild( framerate_text );
 
     // property section

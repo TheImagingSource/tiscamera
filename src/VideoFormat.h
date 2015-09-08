@@ -50,42 +50,42 @@ public:
      * Returns a struct representation of the format
      * @return tcam_video_format
      */
-    struct tcam_video_format getStruct () const;
+    struct tcam_video_format get_struct () const;
 
     /**
      * Returns the used pixel format
      * @return uint32 containing the fourcc
      */
-    uint32_t getFourcc () const;
+    uint32_t get_fourcc () const;
 
-    void setFourcc (uint32_t);
+    void set_fourcc (uint32_t);
 
     /**
      * @return framerate in frames/second
      */
-    double getFramerate () const;
+    double get_framerate () const;
 
-    void setFramerate (double);
+    void set_framerate (double);
 
-    struct tcam_image_size getSize () const;
+    struct tcam_image_size get_size () const;
 
-    void setSize (unsigned int width, unsigned int height);
+    void set_size (unsigned int width, unsigned int height);
 
-    std::string toString () const;
+    std::string to_string () const;
 
-    bool fromString (const std::string&);
+    bool from_string (const std::string&);
 
     /**
      * Description for getRequiredBufferSize.
      * @return size in bytes an image with this format will have
      */
-    uint64_t getRequiredBufferSize () const;
+    uint64_t get_required_buffer_size () const;
 
     /**
      * Description for getPitchSize.
      * @return the size og an image line
      */
-    uint32_t getPitchSize () const;
+    uint32_t get_pitch_size () const;
 
 private:
 

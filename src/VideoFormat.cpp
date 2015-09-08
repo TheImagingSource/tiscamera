@@ -66,51 +66,51 @@ bool VideoFormat::operator!= (const VideoFormat& other) const
 }
 
 
-struct tcam_video_format VideoFormat::getStruct () const
+struct tcam_video_format VideoFormat::get_struct () const
 {
     return format;
 }
 
 
-uint32_t VideoFormat::getFourcc () const
+uint32_t VideoFormat::get_fourcc () const
 {
     return format.fourcc;
 }
 
 
-void VideoFormat::setFourcc (uint32_t fourcc)
+void VideoFormat::set_fourcc (uint32_t fourcc)
 {
     format.fourcc = fourcc;
 }
 
 
-double VideoFormat::getFramerate () const
+double VideoFormat::get_framerate () const
 {
     return format.framerate;
 }
 
 
-void VideoFormat::setFramerate (double framerate)
+void VideoFormat::set_framerate (double framerate)
 {
     format.framerate = framerate;
 }
 
 
-struct tcam_image_size VideoFormat::getSize () const
+struct tcam_image_size VideoFormat::get_size () const
 {
     tcam_image_size s = {format.width, format.height};
     return s;
 }
 
 
-void VideoFormat::setSize (unsigned int width, unsigned int height)
+void VideoFormat::set_size (unsigned int width, unsigned int height)
 {
     format.width = width;
     format.height = height;
 }
 
 
-std::string VideoFormat::toString () const
+std::string VideoFormat::to_string () const
 {
     std::string s;
 
@@ -125,7 +125,7 @@ std::string VideoFormat::toString () const
 }
 
 
-bool VideoFormat::fromString (const std::string& desc)
+bool VideoFormat::from_string (const std::string& desc)
 {
     tcam_video_format f = {};
 
@@ -172,13 +172,13 @@ bool VideoFormat::fromString (const std::string& desc)
 }
 
 
-uint64_t VideoFormat::getRequiredBufferSize () const
+uint64_t VideoFormat::get_required_buffer_size () const
 {
     return get_buffer_length(format.width, format.height, format.fourcc);
 }
 
 
-uint32_t VideoFormat::getPitchSize () const
+uint32_t VideoFormat::get_pitch_size () const
 {
     return get_pitch_length(format.width, format.fourcc);
 }

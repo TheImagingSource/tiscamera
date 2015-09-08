@@ -226,15 +226,15 @@ bool AravisDevice::set_video_format (const VideoFormat& new_format)
     // return false;
     // }
 
-    tcam_log(TCAM_LOG_DEBUG, "Setting format to '%s'", new_format.toString().c_str());
+    tcam_log(TCAM_LOG_DEBUG, "Setting format to '%s'", new_format.to_string().c_str());
 
-    arv_camera_set_frame_rate (this->arv_camera, new_format.getFramerate());
+    arv_camera_set_frame_rate (this->arv_camera, new_format.get_framerate());
 
-    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.getFourcc()));
+    arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.get_fourcc()));
 
     // TODO: auto center
 
-    arv_camera_set_region(this->arv_camera, 0, 0, new_format.getSize().width, new_format.getSize().height);
+    arv_camera_set_region(this->arv_camera, 0, 0, new_format.get_size().width, new_format.get_size().height);
 
     determine_active_video_format();
 
@@ -251,8 +251,8 @@ VideoFormat AravisDevice::get_active_video_format () const
 void AravisDevice::determine_active_video_format ()
 {
 
-    this->active_video_format.setFramerate(arv_camera_get_frame_rate(this->arv_camera));
-    active_video_format.setFourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera)));
+    this->active_video_format.set_framerate(arv_camera_get_frame_rate(this->arv_camera));
+    active_video_format.set_fourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera)));
 
     int dx = 0;
     int dy = 0;
@@ -267,7 +267,7 @@ void AravisDevice::determine_active_video_format ()
     unsigned int height = y2 - y1;
     unsigned int width = x2 - x1;
 
-    active_video_format.setSize(width, height);
+    active_video_format.set_size(width, height);
 
 }
 
@@ -408,7 +408,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
         {
             struct tcam_image_buffer desc = {};
 
-            desc.format = self->active_video_format.getStruct();
+            desc.format = self->active_video_format.get_struct();
 
             size_t size = 0;
             desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );

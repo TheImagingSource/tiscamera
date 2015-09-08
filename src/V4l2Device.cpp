@@ -74,7 +74,7 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
             return handle_auto_center(new_property,
                                       props,
                                       device->get_sensor_size(),
-                                      device->active_video_format.getSize());
+                                      device->active_video_format.get_size());
         }
         else
         {
@@ -194,7 +194,7 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     // }
 
 
-    uint32_t fourcc  = new_format.getFourcc();
+    uint32_t fourcc  = new_format.get_fourcc();
 
     // use greyscale for camera interaction
     if (emulate_bayer)
@@ -215,8 +215,8 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    fmt.fmt.pix.width = new_format.getSize().width;
-    fmt.fmt.pix.height = new_format.getSize().height;
+    fmt.fmt.pix.width = new_format.get_size().width;
+    fmt.fmt.pix.height = new_format.get_size().height;
 
     fmt.fmt.pix.pixelformat = fourcc;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
@@ -232,9 +232,9 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
 
     /* framerate */
 
-    if (!set_framerate(new_format.getFramerate()))
+    if (!set_framerate(new_format.get_framerate()))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set framerate to %f", new_format.getFramerate());
+        tcam_log(TCAM_LOG_ERROR, "Unable to set framerate to %f", new_format.get_framerate());
         setError(Error("Unable to set framerate", errno));
         return false;
     }
@@ -243,7 +243,7 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
 
     determine_active_video_format();
     tcam_log(TCAM_LOG_DEBUG, "Active format is: '%s'",
-             active_video_format.toString().c_str() );
+             active_video_format.to_string().c_str() );
 
     return true;
 }
@@ -1052,7 +1052,7 @@ void V4l2Device::init_mmap_buffers ()
 
         struct tcam_image_buffer buffer = {};
 
-        buffer.length = active_video_format.getRequiredBufferSize();
+        buffer.length = active_video_format.get_required_buffer_size();
         buffer.pData =
             (unsigned char*) mmap( NULL, /* start anywhere */
                                    buf.length,
@@ -1061,7 +1061,7 @@ void V4l2Device::init_mmap_buffers ()
                                    fd,
                                    buf.m.offset);
 
-        buffer.format = active_video_format.getStruct();
+        buffer.format = active_video_format.get_struct();
 
         if (buffer.format.fourcc == mmioFOURCC('G', 'R', 'E', 'Y'))
         {
@@ -1076,7 +1076,7 @@ void V4l2Device::init_mmap_buffers ()
             }
         }
 
-        buffer.pitch = active_video_format.getPitchSize();
+        buffer.pitch = active_video_format.get_pitch_size();
         if (buffer.pData == MAP_FAILED)
         {
             tcam_log(TCAM_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);

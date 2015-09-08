@@ -54,9 +54,9 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 void print_active_format (const VideoFormat& format)
 {
     std::cout << "Active format:\n"
-              << "Format: \t" << tcam_fourcc_to_description(format.getFourcc())
-              << "\nResolution: \t" << format.getSize().width << "x" << format.getSize().height
-              << "\nFramerate: \t" << format.getFramerate() << "\n" << std::endl;
+              << "Format: \t" << tcam_fourcc_to_description(format.get_fourcc())
+              << "\nResolution: \t" << format.get_size().width << "x" << format.get_size().height
+              << "\nFramerate: \t" << format.get_framerate() << "\n" << std::endl;
 }
 
 
@@ -64,11 +64,11 @@ bool set_active_format (CaptureDevice& g, const std::string& new_format)
 {
     VideoFormat v;
 
-    bool ret = v.fromString(new_format);
+    bool ret = v.from_string(new_format);
 
     if (ret)
     {
-        return g.set_video_format(v);
+        return dev->set_video_format(v);
     }
     else
     {
