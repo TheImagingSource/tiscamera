@@ -139,7 +139,7 @@ public:
 
     double get_min () const;
     double get_max () const;
-
+    double get_step () const;
     double get_value () const;
 
     bool set_value (double);

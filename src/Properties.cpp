@@ -280,6 +280,12 @@ double PropertyDouble::get_max () const
 }
 
 
+double PropertyDouble::get_step () const
+{
+    return this->prop.value.d.step;
+}
+
+
 double PropertyDouble::get_value () const
 {
     return this->prop.value.d.value;
