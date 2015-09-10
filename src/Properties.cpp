@@ -234,8 +234,8 @@ bool PropertyInteger::set_value (int64_t new_value)
 
     tcam_value_int& i = this->prop.value.i;
 
-    // if (i.min > _value || i.max < _value)
-    // return false;
+    if (i.min > new_value || i.max < new_value)
+        return false;
 
     i.value = new_value;
 
