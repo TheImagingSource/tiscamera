@@ -69,16 +69,16 @@ bool tcam::handle_auto_center (const Property& new_property,
     {
         tcam_image_size values = calculate_auto_center(sensor, current_format);
 
-        auto prop_off_x = find_property(props, "Offset X");
-        auto prop_off_y = find_property(props, "Offset Y");
+        auto prop_off_x = find_property(props, TCAM_PROPERTY_OFFSET_X);
+        auto prop_off_y = find_property(props, TCAM_PROPERTY_OFFSET_Y);
 
         std::static_pointer_cast<PropertyInteger>(prop_off_x)->set_value(values.width);
         std::static_pointer_cast<PropertyInteger>(prop_off_y)->set_value(values.height);
     }
     else
     {
-        auto prop_off_x = find_property(props, "Offset X");
-        auto prop_off_y = find_property(props, "Offset Y");
+        auto prop_off_x = find_property(props, TCAM_PROPERTY_OFFSET_X);
+        auto prop_off_y = find_property(props, TCAM_PROPERTY_OFFSET_Y);
 
         std::static_pointer_cast<PropertyInteger>(prop_off_x)->set_value(0);
         std::static_pointer_cast<PropertyInteger>(prop_off_y)->set_value(0);
