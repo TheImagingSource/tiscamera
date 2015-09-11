@@ -17,6 +17,7 @@
 #ifndef TCAM_CAPTUREDEVICE_H
 #define TCAM_CAPTUREDEVICE_H
 
+#include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "Properties.h"
 #include "VideoFormat.h"
@@ -154,6 +155,8 @@ private:
     std::shared_ptr<CaptureDeviceImpl> impl;
 
 }; /* class CaptureDevice */
+
+std::shared_ptr<CaptureDevice> open_device (const std::string& serial);
 
 } /* namespace tcam */
 

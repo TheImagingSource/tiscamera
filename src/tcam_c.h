@@ -73,6 +73,8 @@ extern "C"
     typedef struct tcam_capture_device tcam_capture_device;
 
 
+    tcam_capture_device* tcam_open_device (const char* serial);
+
     /**
      * @return newly created capture_device; NULL on error
      */

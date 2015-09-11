@@ -71,6 +71,22 @@ int tcam_device_index_get_device_infos (tcam_device_info* arr,
 
 /* image source */
 
+
+tcam_capture_device* tcam_open_device (const char* serial)
+{
+    auto dev = open_device(serial);
+
+    if (dev == nullptr)
+    {
+        return NULL;
+    }
+    else
+    {
+        //return (tcam_capture_device*) dev;
+    }
+}
+
+
 tcam_capture_device* tcam_create_new_capture_device (const tcam_device_info* info)
 {
     return (tcam_capture_device*) new CaptureDevice(DeviceInfo(*info));
@@ -134,7 +150,7 @@ bool  tcam_capture_device_find_property (tcam_capture_device* source,
         {
             auto prop = v->get_struct();
 
-            tcam_log(TCAM_LOG_ERROR, "==================== name: %s - %d", prop.name , prop.value.i.value);
+            //tcam_log(TCAM_LOG_ERROR, "==================== name: %s - %d", prop.name , prop.value.i.value);
 
             memcpy(property, &prop, sizeof(struct tcam_device_property));
 

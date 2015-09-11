@@ -22,7 +22,15 @@
 #include "utils.h"
 #include "serialization.h"
 
+#include <exception>
+
 using namespace tcam;
+
+
+struct bad_device : std::exception
+{
+    const char* what () const noexcept { return "Device did not comply with commands.";}
+};
 
 
 CaptureDeviceImpl::CaptureDeviceImpl ()
@@ -36,6 +44,8 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
     if (!openDevice(device))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to open device");
+        bad_device bd;
+        throw bd;
     }
 }
 

@@ -101,3 +101,26 @@ bool CaptureDevice::stop_stream ()
 {
     return impl->stopStream();
 }
+
+
+std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial)
+{
+    for (const auto& d : get_device_list())
+    {
+        if (d.get_serial().compare(serial) == 0)
+        {
+            try
+            {
+                return std::make_shared<CaptureDevice>(CaptureDevice(d));
+            }
+            catch (const std::exception& err)
+            {
+                // TODO: set up error
+                tcam_log(TCAM_LOG_ERROR, "Could not open CaptureDevice. Exception:\"%s\"", err.what());
+                return nullptr;
+            }
+        }
+    }
+
+    return nullptr;
+}
