@@ -19,7 +19,10 @@
 
 #include "MemoryBuffer.h"
 
+#include "VideoFormat.h"
+
 #include <memory>
+#include <vector>
 
 namespace tcam
 {
@@ -34,7 +37,13 @@ public:
 
     virtual TCAM_PIPELINE_STATUS get_status () const = 0;
 
+    virtual bool setVideoFormat (const VideoFormat&) = 0;
+
+    virtual VideoFormat getVideoFormat () const = 0;
+
     virtual void push_image (std::shared_ptr<MemoryBuffer>) = 0;
+
+    virtual std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection () = 0;
 
 };
 

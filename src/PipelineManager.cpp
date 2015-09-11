@@ -64,6 +64,12 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
+VideoFormat PipelineManager::getVideoFormat () const
+{
+    return this->output_format;
+}
+
+
 bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
@@ -480,25 +486,20 @@ bool PipelineManager::create_pipeline ()
     if (!source->setVideoFormat(input_format))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set video format in source.");
+        return false;
     }
 
-    // if (!add_interpretation_filter())
-    // {
-    //     tcam_log(TCAM_LOG_ERROR, "Unable to add filter to pipeline. Aborting...");
-    //     return false;
-    // }
+    if (!sink->setVideoFormat(output_format))
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to set video format in sink.");
+        return false;
+    }
 
-    // if (!allocate_conversion_buffer())
-    // {
-    //     tcam_log(TCAM_LOG_ERROR, "Unable to allocate conversion buffers. Aborting...");
-    //     return false;
-    // }
-
-//    if (!validate_pipeline())
-//    {
-//        tcam_log(TCAM_LOG_ERROR, "Unable to validate pipeline. Aborting...");
-//        return false;
-//    }
+    if (!source->set_buffer_collection(sink->get_buffer_collection()))
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to set buffer collection.");
+        return false;
+    }
 
     tcam_log(TCAM_LOG_INFO, "Pipeline creation successful.");
 
@@ -523,17 +524,6 @@ bool PipelineManager::start_playing ()
     {
         tcam_log(TCAM_LOG_ERROR, "Sink refused to change to state PLAYING");
         goto error;
-    }
-
-    for (auto& f : filter_pipeline)
-    {
-        if (!f->setStatus(TCAM_PIPELINE_PLAYING))
-        {
-            tcam_log(TCAM_LOG_ERROR,
-                    "Filter %s refused to change to state PLAYING",
-                    f->getDescription().name.c_str());
-            goto error;
-        }
     }
 
     if (!set_source_status(TCAM_PIPELINE_PLAYING))
@@ -620,4 +610,10 @@ void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
     {
       tcam_log(TCAM_LOG_ERROR, "Sink is NULL");
     }
+}
+
+
+std::vector<std::shared_ptr<MemoryBuffer>> PipelineManager::get_buffer_collection ()
+{
+    return std::vector<std::shared_ptr<MemoryBuffer>>();
 }

@@ -16,13 +16,17 @@
 
 #include "ImageSink.h"
 
+#include "internal.h"
+
 #include <iostream>
 
 using namespace tcam;
 
 
 ImageSink::ImageSink ()
-    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), user_data(nullptr)
+    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), c_back(nullptr),
+      user_data(nullptr), last_image_buffer(), external_buffer(false),
+      buffer_number(30), buffers()
 {}
 
 
@@ -35,11 +39,17 @@ bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
 
     if (status == TCAM_PIPELINE_PLAYING)
     {
-        std::cout << "Pipeline started playing" << std::endl;
+        if (!external_buffer && !initialize_internal_buffer())
+        {
+            return false;
+        }
+
+        tcam_log(TCAM_LOG_INFO, "Pipeline started playing");
+
     }
     else if (status == TCAM_PIPELINE_STOPPED)
     {
-        std::cout << "Pipeline stopped playing" << std::endl;
+        tcam_log(TCAM_LOG_INFO, "Pipeline stopped playing");
     }
 
     return true;
@@ -49,6 +59,25 @@ bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
 TCAM_PIPELINE_STATUS ImageSink::get_status () const
 {
     return status;
+}
+
+
+bool ImageSink::setVideoFormat (const VideoFormat& new_format)
+{
+    if (status == TCAM_PIPELINE_PLAYING)
+    {
+        return false;
+    }
+
+    format = new_format;
+
+    return true;
+}
+
+
+VideoFormat ImageSink::getVideoFormat () const
+{
+    return format;
 }
 
 
@@ -84,19 +113,83 @@ void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-bool ImageSink::set_buffer_number (size_t)
+bool ImageSink::set_buffer_number (size_t new_number)
 {
+    if (status == TCAM_PIPELINE_PLAYING)
+    {
+        return false;
+    }
+
+    if (external_buffer)
+    {
+        return false;
+    }
+
+    buffer_number = new_number;
+
+    return true;
+}
+
+
+bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers)
+{
+    if (status == TCAM_PIPELINE_PLAYING)
+    {
+        return false;
+    }
+
+    buffers = new_buffers;
+    buffer_number = buffers.size();
+    external_buffer = true;
+
     return false;
 }
 
 
-bool ImageSink::add_buffer_collection (std::vector<MemoryBuffer>)
+std::vector<std::shared_ptr<MemoryBuffer>> ImageSink::get_buffer_collection ()
 {
-    return false;
+    if (buffers.empty() && !external_buffer)
+    {
+        initialize_internal_buffer();
+    }
+
+    return buffers;
 }
 
 
 bool ImageSink::delete_buffer_collection ()
 {
+    if (status == TCAM_PIPELINE_PLAYING)
+    {
+        return false;
+    }
+
+    external_buffer = false;
+
     return false;
+}
+
+
+bool ImageSink::initialize_internal_buffer ()
+{
+    buffers.clear();
+
+    struct tcam_video_format f = format.get_struct();
+    int bit_depth = img::get_bits_per_pixel(f.fourcc);
+
+    for (unsigned int i = 0; i < this->buffer_number; ++i)
+    {
+        struct tcam_image_buffer b = {};
+
+        b.pData = NULL;
+        b.length = f.width * f.height * bit_depth;
+        b.format = f;
+        b.pitch = f.width * bit_depth / 8;
+
+        auto ptr = std::make_shared<MemoryBuffer>(MemoryBuffer(b));
+
+        this->buffers.push_back(ptr);
+    }
+
+    return true;
 }

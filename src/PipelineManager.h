@@ -49,6 +49,8 @@ public:
      */
     bool setVideoFormat (const VideoFormat&);
 
+    VideoFormat getVideoFormat () const;
+
     /**
      *
      * @return vector containing all filter properties; empty on error
@@ -83,6 +85,8 @@ public:
 
     // @brief callback for ImageSource
     void push_image (std::shared_ptr<MemoryBuffer>);
+
+    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
 
 private:
 

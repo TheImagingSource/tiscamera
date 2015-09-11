@@ -52,9 +52,11 @@ public:
 
     void push_image (std::shared_ptr<MemoryBuffer>);
 
-    void initialize_buffers ();
-
     bool setSink (std::shared_ptr<SinkInterface>);
+
+    bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);
+
+    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
 
 private:
 
@@ -62,11 +64,9 @@ private:
 
     std::shared_ptr<DeviceInterface> device;
 
-    unsigned int n_buffers;
-
     std::chrono::time_point<std::chrono::steady_clock> stream_start;
 
-    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+    std::vector<std::shared_ptr<MemoryBuffer>> buffer;
 
     std::weak_ptr<SinkInterface> pipeline;
 

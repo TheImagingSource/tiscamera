@@ -44,6 +44,10 @@ public:
     bool set_status (TCAM_PIPELINE_STATUS);
     TCAM_PIPELINE_STATUS get_status () const;
 
+    bool setVideoFormat (const VideoFormat&);
+
+    VideoFormat getVideoFormat () const;
+
     bool registerCallback (sink_callback, void*);
     bool registerCallback (c_callback, void*);
 
@@ -51,19 +55,31 @@ public:
 
     bool set_buffer_number (size_t);
 
-    bool add_buffer_collection (std::vector<MemoryBuffer>);
+    bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);
+
+    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
+
     bool delete_buffer_collection ()
 ;
 
 private:
 
+    bool initialize_internal_buffer ();
+
     TCAM_PIPELINE_STATUS status;
+    VideoFormat format;
 
     sink_callback callback;
     c_callback c_back;
     void* user_data;
 
     struct tcam_image_buffer last_image_buffer;
+
+    bool external_buffer;
+
+    size_t buffer_number;
+    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+
 };
 
 } /* namespace tcam */

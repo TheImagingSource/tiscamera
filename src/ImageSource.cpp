@@ -21,7 +21,7 @@
 using namespace tcam;
 
 ImageSource::ImageSource ()
-    : current_status(TCAM_PIPELINE_UNDEFINED), n_buffers(10)
+    : current_status(TCAM_PIPELINE_UNDEFINED)
 {}
 
 
@@ -37,9 +37,14 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 
     if (current_status == TCAM_PIPELINE_PLAYING)
     {
-        this->initialize_buffers();
 
-        device->initialize_buffers(buffers);
+        if (buffer.empty())
+        {
+            tcam_log(TCAM_LOG_ERROR, "ImageSource has no image buffer!");
+            return false;
+        }
+
+        device->initialize_buffers(buffer);
         device->set_sink(shared_from_this());
 
         stream_start = std::chrono::steady_clock::now();
@@ -119,35 +124,27 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-void ImageSource::initialize_buffers ()
-{
-    device->release_buffers();
-    buffers.clear();
-
-    VideoFormat f = device->get_active_video_format();
-
-    struct tcam_video_format format = f.get_struct();
-    int bit_depth = img::get_bits_per_pixel(format.fourcc);
-
-    for (unsigned int i = 0; i < this->n_buffers; ++i)
-    {
-        struct tcam_image_buffer b = {};
-
-        b.pData = NULL;
-        b.length = format.width * format.height * bit_depth;
-        b.format = format;
-        b.pitch = format.width * bit_depth / 8;
-
-        auto ptr = std::make_shared<MemoryBuffer>(MemoryBuffer(b));
-
-        this->buffers.push_back(ptr);
-    }
-}
-
-
 bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
 {
     this->pipeline = sink;
 
     return true;
+}
+
+
+bool ImageSource::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers)
+{
+    if (current_status == TCAM_PIPELINE_PLAYING)
+    {
+        return false;
+    }
+
+    this->buffer = new_buffers;
+
+    return true;
+}
+
+std::vector<std::shared_ptr<MemoryBuffer>> ImageSource::get_buffer_collection ()
+{
+    return this->buffer;
 }
