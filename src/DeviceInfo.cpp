@@ -81,9 +81,7 @@ std::string DeviceInfo::get_device_type_as_string () const
             return "V4L2";
         case TCAM_DEVICE_TYPE_ARAVIS:
             return "Aravis";
-        case TCAM_DEVICE_TYPE_FIREWIRE:
-            return "Firewire";
         default:
-            return "";
+            return "Unknown";
     }
 }

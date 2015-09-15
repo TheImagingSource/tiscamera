@@ -58,7 +58,6 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& de
                 break;
 #endif
             }
-            case TCAM_DEVICE_TYPE_FIREWIRE:
             case TCAM_DEVICE_TYPE_UNKNOWN:
             default:
             {
