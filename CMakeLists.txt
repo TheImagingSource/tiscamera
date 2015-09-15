@@ -18,13 +18,13 @@
 cmake_minimum_required(VERSION 2.6)
 
 #Name your project here
-project(tiscamera)
+project(tcam)
 
-set(TISCAMERA_VERSION 1.0.0)
+set(TCAM_VERSION_MAJOR 0)
+set(TCAM_VERSION_MINOR 2)
+set(TCAM_VERSION_PATCH 0)
 
-# configure_file(
-#   "${PROJECT_SOURCE_DIR}/src/config.h.in"
-#   "${PROJECT_BINARY_DIR}/config.h")
+set(TCAM_VERSION ${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH} CACHE STRING "Version number")
 
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
