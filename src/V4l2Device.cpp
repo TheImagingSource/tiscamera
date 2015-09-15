@@ -852,7 +852,7 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     if (ret < 0)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to submit property change.");
+        tcam_log(TCAM_LOG_ERROR, "Unable to submit property change for %s.", prop_desc.prop->get_name().c_str());
     }
     else
     {
