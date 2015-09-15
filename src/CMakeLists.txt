@@ -101,21 +101,28 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 set(PUBLIC_HEADER "tcam.h")
 add_library(tcam SHARED ${srcs} tcam_c.cpp)
 
+add_library(tcam-static STATIC ${srcs} tcam_c.cpp)
+SET_TARGET_PROPERTIES(tcam-static PROPERTIES OUTPUT_NAME tcam)
+
+
 if (BUILD_USB)
   if (UDEV_FOUND)
     TARGET_LINK_LIBRARIES(tcam ${UDEV_LIBRARIES})
+    TARGET_LINK_LIBRARIES(tcam-static ${UDEV_LIBRARIES})
   endif (UDEV_FOUND)
 endif(BUILD_USB)
 
 TARGET_LINK_LIBRARIES(tcam ${TinyXML_LIBRARIES})
+TARGET_LINK_LIBRARIES(tcam-static ${TinyXML_LIBRARIES})
 
 if (BUILD_ARAVIS)
   TARGET_LINK_LIBRARIES(tcam ${aravis_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam-static ${aravis_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam ${GObject_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam-static ${GObject_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam ${GLIB2_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam-static ${GLIB2_LIBRARIES})
 endif (BUILD_ARAVIS)
-
-
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)
