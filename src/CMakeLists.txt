@@ -98,7 +98,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 
 
 
-set(PUBLIC_HEADER "tcam.h")
+set(PUBLIC_HEADER tcam.h tcam_c.h)
 add_library(tcam SHARED ${srcs} tcam_c.cpp)
 
 add_library(tcam-static STATIC ${srcs} tcam_c.cpp)
@@ -126,7 +126,8 @@ endif (BUILD_ARAVIS)
 
 
 install(FILES ${PUBLIC_HEADER} DESTINATION include)
-
+install(TARGETS tcam LIBRARY DESTINATION lib )
+install(TARGETS tcam-static ARCHIVE DESTINATION lib )
 
 if (BUILD_QT4)
   add_subdirectory(qt4)
