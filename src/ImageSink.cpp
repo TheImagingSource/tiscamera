@@ -174,19 +174,9 @@ bool ImageSink::initialize_internal_buffer ()
 {
     buffers.clear();
 
-    struct tcam_video_format f = format.get_struct();
-    int bit_depth = img::get_bits_per_pixel(f.fourcc);
-
     for (unsigned int i = 0; i < this->buffer_number; ++i)
     {
-        struct tcam_image_buffer b = {};
-
-        b.pData = NULL;
-        b.length = f.width * f.height * bit_depth;
-        b.format = f;
-        b.pitch = f.width * bit_depth / 8;
-
-        auto ptr = std::make_shared<MemoryBuffer>(MemoryBuffer(b));
+        auto ptr = std::make_shared<MemoryBuffer>(format);
 
         this->buffers.push_back(ptr);
     }
