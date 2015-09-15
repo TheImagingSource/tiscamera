@@ -48,7 +48,6 @@ enum TCAM_DEVICE_TYPE
 {
     TCAM_DEVICE_TYPE_UNKNOWN = 0, /**< Unknown device type*/
     TCAM_DEVICE_TYPE_V4L2,        /**< device that uses the v4l2 API */
-    TCAM_DEVICE_TYPE_FIREWIRE,    /**< both 400 and 800 */
     TCAM_DEVICE_TYPE_ARAVIS,      /**< currently through aravis */
 };
 
