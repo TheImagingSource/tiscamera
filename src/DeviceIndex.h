@@ -92,8 +92,7 @@ private:
     unsigned int wait_period;
     std::thread work_thread;
 
-    static const unsigned int INIT_MAX = 2;
-    unsigned int init_count;
+    bool have_list;
 
     std::vector<DeviceInfo> device_list;
 

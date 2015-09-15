@@ -41,7 +41,7 @@ using namespace tcam;
 DeviceIndex::DeviceIndex ()
     : continue_thread(false),
       wait_period(2),
-      init_count(0),
+      have_list(false),
       device_list(std::vector<DeviceInfo>()),
       callbacks(std::vector<callback_data>())
 {
@@ -169,10 +169,7 @@ void DeviceIndex::update_device_list ()
 
     device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
 
-    if (init_count < INIT_MAX)
-    {
-        init_count++;
-    }
+    have_list = true;
     mtx.unlock();
 }
 
@@ -234,9 +231,12 @@ bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 {
 
-    while (init_count < INIT_MAX)
+    // wait for work_thread to deliver first valid list
+    // since get_aravis_device_list is a blocking function
+    // our thread would retrieve an empty list without this wait loop
+    while(!have_list)
     {
-        usleep(500);
+        // wait
     }
 
     return device_list;
