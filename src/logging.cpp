@@ -80,8 +80,6 @@ Logger::Logger ():
     char* log_def = getenv("TCAM_LOG");
     if (log_def != nullptr)
     {
-        printf("ENV: %s\n", log_def);
-
         level = string2loglevel(log_def);
     }
 }
@@ -112,6 +110,9 @@ void Logger::log (const char* module,
     /* fill user defined message */
     vsprintf(msg, message, args);
 
+    // use clock_t and not time_t
+    // we want the time the program uses based on the
+    // cpu and not on a human readable clock.
     clock_t t;
     t = clock();
     /* write complete message */
