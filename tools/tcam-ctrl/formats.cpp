@@ -60,7 +60,7 @@ void print_active_format (const VideoFormat& format)
 }
 
 
-bool set_active_format (CaptureDevice& g, const std::string& new_format)
+bool set_active_format (std::shared_ptr<CaptureDevice> dev, const std::string& new_format)
 {
     VideoFormat v;
 

@@ -69,6 +69,10 @@ enum modes
     LIST_DEVICES,
     SAVE_STREAM,
     SAVE_IMAGE,
+    SAVE_DEVICE_LIST,
+    SAVE_DEVICE_SETTINGS,
+    LOAD_DEVICE_SETTINGS,
+
 };
 
 enum INTERACTION
@@ -145,33 +149,16 @@ int main (int argc, char *argv[])
         std::cout << "No serial given!" << std::endl;
         return 1;
     }
-
-
-    std::vector<DeviceInfo> device_list = get_device_list();
-
-
-
-    CaptureDevice g;
-
-    bool opened_device = false;
-    for (auto& d : device_list)
+    else
     {
-        if (d.get_serial().compare(serial) == 0)
-        {
-            g = CaptureDevice(d);
-            opened_device = true;
-        }
+        std::cout << "serial:" << serial << std::endl;
     }
 
-    if (!opened_device)
-    {
-        std::cerr << "Could not open device." << std::endl;
-        return 1;
-    }
+    auto dev = open_device(serial);
 
-    if (!g.is_device_open())
+    if (!dev)
     {
-        std::cout << "Unable to find device with serial '" << serial << "'" << std::endl;
+        std::cerr << "Unable to open device with serial \" " << serial << "\"." << std::endl;
         return 1;
     }
 
@@ -179,22 +166,22 @@ int main (int argc, char *argv[])
     {
         case LIST_PROPERTIES:
         {
-            print_properties(g.get_available_properties());
+            print_properties(dev->get_available_properties());
             break;
         }
         case LIST_FORMATS:
         {
-            list_formats(g.get_available_video_formats());
+            list_formats(dev->get_available_video_formats());
             break;
         }
         case SET_PROPERTY:
         {
-            set_property(g, param);
+            set_property(dev, param);
             break;
         }
         case SET_FORMAT:
         {
-            set_active_format(g, param);
+            set_active_format(dev, param);
             break;
         }
         case SAVE_STREAM:
@@ -203,7 +190,7 @@ int main (int argc, char *argv[])
         }
         case SAVE_IMAGE:
         {
-            save_image(g, filename);
+            //save_image(g, filename);
             break;
         }
         default:

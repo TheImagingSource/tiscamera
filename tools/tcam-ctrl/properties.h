@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace tcam;
 
@@ -37,6 +38,6 @@ void print_properties (const std::vector<Property*>& properties);
  * @param new_prop - string describing the format
  * @return true on success
  */
-bool set_property (CaptureDevice& g, const std::string& new_prop);
+bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_prop);
 
 #endif /* CONTROLS_H */

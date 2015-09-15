@@ -112,8 +112,7 @@ static std::vector<std::string> ctrl_split_string (const std::string& to_split,
     return vec;
 }
 
-
-bool set_property (CaptureDevice& g, const std::string& new_prop)
+bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_prop)
 {
 
     std::vector<std::string> prop_vec = ctrl_split_string(new_prop, "=");
@@ -127,7 +126,7 @@ bool set_property (CaptureDevice& g, const std::string& new_prop)
     std::string name = prop_vec.at(0);
     std::string value = prop_vec.at(1);
 
-    auto properties = g.get_available_properties();
+    auto properties = dev->get_available_properties();
 
     for (Property* p : properties)
     {

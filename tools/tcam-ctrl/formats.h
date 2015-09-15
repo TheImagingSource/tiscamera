@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace tcam;
 
@@ -45,6 +46,6 @@ void print_active_format (const VideoFormat& format);
  * @param new_format - string describing the format that shall be set
  * @return true on success
  */
-bool set_active_format (CaptureDevice& g, const std::string& new_format);
+bool set_active_format (std::shared_ptr<CaptureDevice> dev, const std::string& new_format);
 
 #endif /* FORMATS_H */
