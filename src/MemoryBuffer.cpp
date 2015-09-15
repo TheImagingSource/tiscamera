@@ -16,6 +16,8 @@
 
 #include "MemoryBuffer.h"
 
+#include "internal.h"
+
 #include <cstring>
 #include <cstdlib>
 
@@ -23,12 +25,33 @@ using namespace tcam;
 
 
 MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf)
-    : buffer(buf), lock_count(0)
+    : is_own_memory(false), buffer(buf)
 {}
+
+
+MemoryBuffer::MemoryBuffer (const VideoFormat& format)
+    : is_own_memory(true), buffer()
+{
+
+    buffer.length = format.get_required_buffer_size();
+    buffer.pData = (unsigned char*)malloc(buffer.length);
+    buffer.format = format.get_struct();
+    buffer.pitch = format.get_pitch_size();
+
+    tcam_log(TCAM_LOG_DEBUG, "Adress is %p", buffer.pData);
+}
 
 
 MemoryBuffer::~MemoryBuffer ()
-{}
+{
+    if (is_own_memory)
+    {
+        if (buffer.pData != nullptr)
+        {
+            free(buffer.pData);
+        }
+    }
+}
 
 
 tcam_image_buffer MemoryBuffer::getImageBuffer ()

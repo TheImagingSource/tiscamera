@@ -19,6 +19,8 @@
 
 #include "base_types.h"
 
+#include "VideoFormat.h"
+
 /**
  * @addtogroup API
  * @{
@@ -32,7 +34,11 @@ class MemoryBuffer
 
 public:
 
-    MemoryBuffer (const struct tcam_image_buffer&);
+    // will not take ownership of memory given in tcam_image_buffer
+    explicit MemoryBuffer (const struct tcam_image_buffer&);
+
+    // will allocate buffer memory
+    explicit MemoryBuffer (const VideoFormat&);
 
     MemoryBuffer () = delete;
 
@@ -68,6 +74,7 @@ public:
 
 private:
 
+    const bool is_own_memory;
     struct tcam_image_buffer buffer;
 
 };
