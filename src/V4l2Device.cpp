@@ -175,7 +175,10 @@ bool V4l2Device::set_property (const Property& new_property)
 
 bool V4l2Device::get_property (Property& p)
 {
-    return false;
+
+    // TODO: make properties updateable
+
+    return property_handler->get_property(p);
 }
 
 
