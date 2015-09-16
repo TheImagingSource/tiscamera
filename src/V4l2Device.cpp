@@ -529,7 +529,7 @@ static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtde
         memcpy(new_desc.description, "BayerRG8", sizeof(new_desc.description));
         return true;
     }
-    else if (strcmp((const char*)fmtdesc.description, "52474742-0000-0010-8000-00aa003") == 0)
+    else if (strcmp((const char*)fmtdesc.description, "31384142-0000-0010-8000-00aa003") == 0)
     {
         // new_desc.pixelformat = FOURCC_RGGB8;
         new_desc.pixelformat = FOURCC_BGGR8;
