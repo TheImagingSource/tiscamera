@@ -128,7 +128,3 @@ endif (BUILD_ARAVIS)
 install(FILES ${PUBLIC_HEADER} DESTINATION include)
 install(TARGETS tcam LIBRARY DESTINATION lib )
 install(TARGETS tcam-static ARCHIVE DESTINATION lib )
-
-if (BUILD_QT4)
-  add_subdirectory(qt4)
-endif (BUILD_QT4)

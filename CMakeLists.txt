@@ -41,8 +41,6 @@ option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_USB      "Include support for USB cameras"      ON )
 option(BUILD_FIREWIRE "Include support for firewire devices" OFF)
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
-#option(BUILD_GUI      "Build gui versions of tools"          ON)
-#option(BUILD_QT4      "Build Qt 4 libraries"                 ON)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -flto -pthread")
@@ -50,13 +48,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto -pthread")
 
 if (BUILD_USB)
   add_definitions(-DHAVE_USB)
+  set(HAVE_USB 1)
 endif (BUILD_USB)
 
 add_subdirectory(src)
 
-# if (BUILD_GUI)
-#   add_subdirectory(vision)
-# endif (BUILD_GUI)
 
 add_subdirectory(data)
 
