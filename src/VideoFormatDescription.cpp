@@ -84,7 +84,7 @@ struct tcam_video_format_description VideoFormatDescription::get_struct () const
 }
 
 
-uint32_t VideoFormatDescription::getFourcc () const
+uint32_t VideoFormatDescription::get_fourcc () const
 {
     return format.fourcc;
 }
@@ -130,9 +130,9 @@ std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resoluti
 }
 
 
-VideoFormat VideoFormatDescription::createVideoFormat (unsigned int width,
-                                                       unsigned int height,
-                                                       double framerate) const
+VideoFormat VideoFormatDescription::create_video_format (unsigned int width,
+                                                         unsigned int height,
+                                                         double framerate) const
 {
 
     // TODO validity check

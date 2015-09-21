@@ -68,7 +68,7 @@ public:
      * Returns the pixel format used
      * @return uint32 containging the fourcc
      */
-    uint32_t getFourcc () const;
+    uint32_t get_fourcc () const;
 
     /**
      * Returns the binning used
@@ -86,9 +86,9 @@ public:
 
     std::vector<double> get_frame_rates (const tcam_resolution_description& size) const;
 
-    VideoFormat createVideoFormat (unsigned int width,
-                                   unsigned int height,
-                                   double framerate) const;
+    VideoFormat create_video_format (unsigned int width,
+                                     unsigned int height,
+                                     double framerate) const;
 
 private:
 

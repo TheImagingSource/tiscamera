@@ -608,7 +608,7 @@ void V4l2Device::index_formats ()
         VideoFormatDescription format(desc, rf);
         this->available_videoformats.push_back(format);
 
-        tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.getFourcc()));
+        tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.get_fourcc()));
 
     }
 
@@ -813,6 +813,12 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
 bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 {
+    if (prop_desc.prop->get_ID() == TCAM_PROPERTY_OFFSET_X)
+    {
+        int i =0;
+
+    }
+
 
     TCAM_PROPERTY_TYPE type = prop_desc.prop->get_type();
 
@@ -856,10 +862,10 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
     }
     else
     {
-        // tcam_log(TCAM_LOG_ERROR,
-        // "Changed ctrl %s to value %d.",
-        // prop_desc.prop->get_name().c_str(),
-        // ctrl.value);
+        tcam_log(TCAM_LOG_DEBUG,
+                 "Changed ctrl %s to value %d.",
+                 prop_desc.prop->get_name().c_str(),
+                 ctrl.value);
     }
 
     return true;
@@ -1024,6 +1030,8 @@ bool V4l2Device::get_frame ()
 
     buffers.at(buf.index).is_queued = false;
 
+    tcam_log(TCAM_LOG_INFO, "pushing new buffer");
+
     listener->push_image(buffers.at(buf.index).buffer);
 
     if (!requeue_mmap_buffer())
@@ -1086,8 +1094,9 @@ void V4l2Device::init_mmap_buffers ()
 
         buffer.length = active_video_format.get_required_buffer_size();
         buffer.pData =
-            (unsigned char*) mmap( NULL, /* start anywhere */
-                                   buf.length,
+            /* use pre-allocated memory */
+            (unsigned char*) mmap( buffers.at(n_buffers).buffer->get_data(),
+                                   buffer.length,
                                    PROT_READ | PROT_WRITE, /* required */
                                    MAP_SHARED, /* recommended */
                                    fd,
@@ -1115,6 +1124,9 @@ void V4l2Device::init_mmap_buffers ()
             // TODO: errno
             return;
         }
+
+        tcam_log(TCAM_LOG_DEBUG, "mmap pointer %p %p", buffer.pData,
+                 buffers.at(n_buffers).buffer->get_data());
 
         buffers.at(n_buffers).buffer->set_image_buffer(buffer);
         buffers.at(n_buffers).is_queued = true;
@@ -1153,12 +1165,12 @@ void V4l2Device::free_mmap_buffers ()
         }
         else
         {
-            auto buf = buffers.at(i).buffer->getImageBuffer();
+            // auto buf = buffers.at(i).buffer->getImageBuffer();
 
-            buf.pData = nullptr;
-            buf.length = 0;
+            // buf.pData = nullptr;
+            // buf.length = 0;
 
-            buffers.at(i).buffer->set_image_buffer(buf);
+            // buffers.at(i).buffer->set_image_buffer(buf);
         }
     }
 

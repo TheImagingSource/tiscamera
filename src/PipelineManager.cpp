@@ -219,10 +219,10 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
     {
         tcam_log(TCAM_LOG_DEBUG,
                 "Found device fourcc '%s' - %d",
-                fourcc2description(v.getFourcc()),
-                v.getFourcc());
+                fourcc2description(v.get_fourcc()),
+                v.get_fourcc());
 
-        device_fourcc.push_back(v.getFourcc());
+        device_fourcc.push_back(v.get_fourcc());
     }
     return device_fourcc;
 }
