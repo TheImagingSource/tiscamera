@@ -50,6 +50,10 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"Gain"},
     },
     {
+        .id = TCAM_PROPERTY_GAIN_AUTO,
+        .genicam_name = {"GainAuto"},
+    },
+    {
         .id = TCAM_PROPERTY_GAIN_RED,
         .genicam_name = {},
     },
