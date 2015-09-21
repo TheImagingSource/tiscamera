@@ -115,7 +115,7 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
                                           "Edgar Thier <edgarthier@gmail.com>");
 
     //GstBaseTransform *test = GST_BASE_TRANSFORM(base_transform_class);
-    
+
     //gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(base_transform_class), TRUE);
 
     gobject_class->set_property = gst_tcamwhitebalance_set_property;
@@ -160,8 +160,7 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
 
 static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
 {
-
-    gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(self), TRUE);
+    gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), TRUE);
 
     self->rgb = (rgb_tripel){64, 64, 64};
     self->red = 64;
