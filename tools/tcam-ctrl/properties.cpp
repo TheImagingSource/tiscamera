@@ -58,8 +58,16 @@ void print_properties (const std::vector<Property*>& properties)
                 std::cout << std::setw(20) << s->get_name()
                           << std::setw(10) << "(bool)"
                           << std::setw(31) << " "
-                          << "default="<< std::setw(5) << s->get_default()
-                          << "value=";
+                          << "default="<< std::setw(6);
+                if (s->get_default())
+                {
+                    std::cout << "true";
+                }
+                else
+                {
+                    std::cout << "false";
+                }
+                std::cout << "value=";
                 if (s->get_value())
                 {
                     std::cout << "true";
