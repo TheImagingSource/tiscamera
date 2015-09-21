@@ -189,13 +189,34 @@ bool AravisDevice::set_property (const Property& p)
                 pm->prop->set_struct(p.get_struct());
                 break;
             }
+            else if (p.get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+            {
+                guint value_count = 0;
+                gint64* values = arv_device_get_available_enumeration_feature_values(device,
+                                                                                     pm->arv_ident.c_str(),
+                                                                                     &value_count);
+
+                int64_t p_val = ((PropertyInteger&)p).get_value();
+
+                for (unsigned int i = 0; i < value_count; ++i)
+                {
+                    if (p_val == values[i])
+                    {
+                        arv_device_set_integer_feature_value(device,
+                                                             pm->arv_ident.c_str(),
+                                                             p_val);
+                        break;
+                    }
+                }
+                break;
+            }
 
             //break;
         }
         case Property::UNDEFINED:
         default:
         {
-            tcam_log(TCAM_LOG_ERROR, "NOT SUPPORTED!!!");
+            tcam_log(TCAM_LOG_ERROR, "%s NOT SUPPORTED!!!", p.get_name().c_str());
             break;
         }
     }
