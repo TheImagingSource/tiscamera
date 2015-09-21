@@ -27,23 +27,25 @@
 using namespace tcam;
 
 
-void print_help ()
+void print_help (const std::string& prog_name)
 {
     std::cout << "Commandline camera manipulation utility." << std::endl
     << std::endl
-    << "Options:" << std::endl
-    << "\t-l - list cameras" << std::endl
-    << "\t-p - list properties"  << std::endl
-    << "\t-f - list video formats" << std::endl
-    << std::endl
-    << "Examples:" << std::endl
-    << std::endl
-    << "Set video format:" << std::endl
-    << "\ttis-ctrl -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" 25410069" << std::endl
-    << std::endl
-    << "Set property" << std::endl
-    << "\ttis-ctrl -s -p \"Auto Exposure=false\""
-    << std::endl
+    << "Options:\n"
+    << "\t-l - list cameras\n"
+    << "\t-p - list properties\n"
+    << "\t-f - list video formats\n"
+    << "\n"
+    << "Examples:\n"
+    << "\n"
+    << "Set video format:\n"
+    << "\t" << prog_name << " -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" <SERIAL>\n"
+    << "\n"
+    << "Set property\n"
+    << "\t" << prog_name << " -s -p \"Auto Exposure=false\" <SERIAL>\n"
+    << "\n"
+    << "Save current settings\n"
+    << "\t" << prog_name << " -x <SERIAL>\n"
     << std::endl;
 }
 
@@ -84,9 +86,11 @@ enum INTERACTION
 int main (int argc, char *argv[])
 {
 
+    std::string executable = extract_filename(argv[0]);
+
     if (argc == 1)
     {
-        print_help();
+        print_help(executable);
         return 0;
     }
 
@@ -102,7 +106,7 @@ int main (int argc, char *argv[])
 
         if (arg == "-h" || arg == "--help")
         {
-            print_help();
+            print_help(executable);
             return 0;
         }
         else if (arg == "-l" || arg == "--list")
