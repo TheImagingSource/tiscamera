@@ -341,6 +341,12 @@ bool AravisDevice::start_stream ()
         return false;
     }
 
+    if (buffers.size() < 2)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Need at least two buffers.");
+        return false;
+    }
+
     this->stream = arv_camera_create_stream(this->arv_camera, NULL, NULL);
 
     if (this->stream == NULL)
