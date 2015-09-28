@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "general.h"
 #include "properties.h"
 #include "formats.h"
 #include "multimedia.h"
