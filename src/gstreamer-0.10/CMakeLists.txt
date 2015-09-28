@@ -58,7 +58,7 @@ link_directories(${GSTREAMER010_LIBRARY_DIRS})
 link_directories(${GSTB_0_10_LIBRARY_DIRS})
 
 
-add_library(gsttiswhitebalance SHARED gsttiswhitebalance.c image_sampling.c bayer.c)
+add_library(gsttiswhitebalance SHARED gsttiswhitebalance.c image_sampling.c bayer.c base.c)
 
 add_library(gsttisvideobufferfilter SHARED gsttisvideobufferfilter.c)
 

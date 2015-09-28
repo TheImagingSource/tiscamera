@@ -19,6 +19,7 @@
 
 #include <gst/base/gstbasetransform.h>
 #include "bayer.h"
+#include "base.h"
 
 
 G_BEGIN_DECLS
@@ -31,12 +32,12 @@ G_BEGIN_DECLS
 
 
 static const guint MAX_STEPS = 20;
-static const guint WB_IDENTITY = 64;
-static const guint WB_MAX = 255;
+static guint WB_IDENTITY = 64;
+static guint WB_MAX = 255;
 static const guint BREAK_DIFF = 2;
 
 const guint NEARGRAY_MIN_BRIGHTNESS      = 10;
-const guint NEARGRAY_MAX_BRIGHTNESS      = 253;
+guint NEARGRAY_MAX_BRIGHTNESS            = 253;
 const float NEARGRAY_MAX_COLOR_DEVIATION = 0.25f;
 const float NEARGRAY_REQUIRED_AMOUNT     = 0.08f;
 
@@ -69,6 +70,9 @@ typedef struct
 
     gboolean auto_wb;
     gboolean auto_enabled;
+
+    struct device_resources res;
+
 } GstTisWhiteBalance;
 
 typedef struct

@@ -97,6 +97,22 @@ G_DEFINE_TYPE_WITH_CODE (GstTisWhiteBalance,
                                                   "tiswhitebalance", 0,
                                                   "debug category for tiswhitebalance element"));
 
+
+static gboolean gst_tiswhitebalance_device_set_whiteblance (GstTisWhiteBalance* self)
+{
+    gst_debug_log (gst_tiswhitebalance_debug_category,
+                   GST_LEVEL_INFO,
+                   "tiswhitebalance",
+                   "",
+                   __LINE__,
+                   NULL,
+                   "Applying white balance to device with values: R:%d G:%d B:%d", self->res.color.rgb.R, self->res.color.rgb.G,
+                   self->res.color.rgb.B);
+
+    return device_set_rgb(&self->res);
+}
+
+
 static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
@@ -161,7 +177,7 @@ static void gst_tiswhitebalance_init (GstTisWhiteBalance *self)
     self->green = 64;
     self->blue = 64;
     self->auto_wb = TRUE;
-
+    self->res.source_element = NULL;
 }
 
 
@@ -628,6 +644,12 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 {
 
     auto_sample_points points;
+
+    if (self->res.color.has_whitebalance)
+    {
+        self->rgb = self->res.color.rgb;
+    }
+
     rgb_tripel rgb = self->rgb;
 
     get_sampling_points (buf, &points, self->pattern);
@@ -649,7 +671,15 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
         self->blue = rgb.B;
     }
 
-    apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    if (self->res.color.has_whitebalance)
+    {
+        self->res.color.rgb = rgb;
+        gst_tiswhitebalance_device_set_whiteblance(self);
+    }
+    else
+    {
+        apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    }
 }
 
 
@@ -657,6 +687,30 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTisWhiteBalance* self = GST_TISWHITEBALANCE (trans);
+    if (self->res.source_element == NULL)
+    {
+        gst_debug_log (gst_tiswhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "gst_tiswhitebalance",
+                       "gst_tiswhitebalance_fixate_caps",
+                       __LINE__,
+                       NULL,
+                       "Searching for source");
+        self->res = find_source(GST_ELEMENT(self));
+        WB_MAX = self->res.color.max;
+
+        self->rgb = self->res.color.rgb;
+
+        gst_debug_log (gst_tiswhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "gst_tiswhitebalance",
+                       "gst_tiswhitebalance_fixate_caps",
+                       __LINE__,
+                       NULL,
+                       "WB_MAX is %d", self->res.color.max);
+
+
+    }
 
     /* auto is completely disabled */
     if (!self->auto_enabled)
