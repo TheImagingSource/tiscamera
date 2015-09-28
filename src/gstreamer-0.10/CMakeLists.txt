@@ -33,6 +33,16 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 # include_directories(${GSTREAMER_CFLAGS})
 # include_directories(${GLIB2_INCLUDE_DIR})
 
+
+find_package(GLIB2     REQUIRED QUIET)
+find_package(GObject   REQUIRED QUIET)
+
+
+include_directories(${GLIB2_INCLUDE_DIR})
+include_directories(${GObject_INCLUDE_DIR})
+
+
+
 find_package(GStreamer010)
 
 find_package(PkgConfig)
@@ -52,7 +62,7 @@ add_library(gsttiswhitebalance SHARED gsttiswhitebalance.c image_sampling.c baye
 
 add_library(gsttisvideobufferfilter SHARED gsttisvideobufferfilter.c)
 
-add_library(gsttiscolorize SHARED gsttiscolorize.c)
+add_library(gsttiscolorize SHARED gsttiscolorize.c bayer.c)
 target_link_libraries(gsttiscolorize ${UDEV_LIBRARIES})
 
 add_library(gsttis_auto_exposure SHARED gsttis_auto_exposure.c image_sampling.c bayer.c)
@@ -62,10 +72,12 @@ add_library(gsttis_auto_focus SHARED gsttis_autofocus.c AutoFocus.cpp auto_focus
 
 foreach (t IN ITEMS ${PLUGINS})
 
-  target_link_libraries(${t} ${GST_0_10_LIBARIES})
-  target_link_libraries(${t} ${GSTREAMER010_LIBARIES})
-  target_link_libraries(${t} ${GSTB_0_10_LIBARIES})
-
+  target_link_libraries(${t} ${GST_0_10_LIBRARIES})
+  target_link_libraries(${t} ${GSTREAMER010_LIBRARIES})
+  target_link_libraries(${t} ${GSTREAMER010_BASE_LIBRARY})
+  target_link_libraries(${t} ${GSTB_0_10_LIBRARIES})
+  target_link_libraries(${t} ${GLIB2_LIBRARIES})
+  target_link_libraries(${t} ${GObject_LIBRARIES})
 endforeach (t)
 
 # PLUGIN_INSTALL_DIR=$(HOME)/.gstreamer-0.10/plugins
