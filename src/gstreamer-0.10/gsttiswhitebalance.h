@@ -32,7 +32,7 @@ G_BEGIN_DECLS
 
 
 static const guint MAX_STEPS = 20;
-static guint WB_IDENTITY = 64;
+static guint WB_IDENTITY =  64;
 static guint WB_MAX = 255;
 static const guint BREAK_DIFF = 2;
 

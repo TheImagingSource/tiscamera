@@ -37,6 +37,7 @@ struct device_resources find_source (GstElement* self)
 
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
+
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(self)));
 
     GList* l =  GST_BIN(e)->children;
@@ -122,6 +123,7 @@ static update_v4l2_device (struct device_resources* res)
             }
             res->color.rgb.R = ctrl.value;
             res->color.max = qctrl.maximum;
+            res->color.default_value = 36; // 36 for DFK 72
         }
         else if (qctrl.id == V4L2_CID_EUVC_GAIN_G)
         {
@@ -201,8 +203,10 @@ gboolean v4l2_set_rgb (struct device_resources* res)
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
     struct v4l2_control ctrl = { 0 };
 
+	
     ctrl.id = V4L2_CID_EUVC_GAIN_R;
     ctrl.value = res->color.rgb.R;
+    
 
     if (ioctl(fd, VIDIOC_S_CTRL, &ctrl))
     {
@@ -217,12 +221,13 @@ gboolean v4l2_set_rgb (struct device_resources* res)
         return FALSE;
     }
     ctrl.id = V4L2_CID_EUVC_GAIN_B;
-    ctrl.value = res->color.rgb.R;
+    ctrl.value = res->color.rgb.B;
 
     if (ioctl(fd, VIDIOC_S_CTRL, &ctrl))
     {
         return FALSE;
     }
+    
 
     return TRUE;
 }

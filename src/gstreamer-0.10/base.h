@@ -61,6 +61,7 @@ struct device_color
     gboolean has_auto_whitebalance;
     rgb_tripel rgb;
     gint max; // highest possible value. usually 255
+    gint default_value; // Availalbe for V4l2. Aravis may not.
 };
 
 

@@ -168,17 +168,26 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
+static void Init_WB_Values(GstTisWhiteBalance *self)
+{
+    self->rgb = (rgb_tripel){WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
+    self->red = WB_IDENTITY;
+    self->green = WB_IDENTITY;
+    self->blue = WB_IDENTITY;
+}
 
 static void gst_tiswhitebalance_init (GstTisWhiteBalance *self)
 {
-
-    self->rgb = (rgb_tripel){64, 64, 64};
-    self->red = 64;
-    self->green = 64;
-    self->blue = 64;
+	Init_WB_Values(self);
+	/*
+    self->rgb = (rgb_tripel){WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
+    self->red = WB_IDENTITY;
+    self->green = WB_IDENTITY;
+    self->blue = WB_IDENTITY;*/
     self->auto_wb = TRUE;
     self->res.source_element = NULL;
 }
+
 
 
 void gst_tiswhitebalance_set_property (GObject* object,
@@ -454,13 +463,38 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_trip
 }
 
 
+rgb_tripel average_color_cam (const auto_sample_points* data )
+{
+    rgb_tripel result = { 0, 0, 0 };
+
+	guint i;
+    for (i = 0; i < data->cnt; ++i)
+    {
+        unsigned int r =  data->samples[i].r ;
+        unsigned int g = data->samples[i].g ;
+        unsigned int b = data->samples[i].b ;
+
+        result.R += r;
+        result.G += g;
+        result.B += b;
+    }
+
+
+	result.R /= data->cnt;
+	result.G /= data->cnt;
+	result.B /= data->cnt;
+	return result;
+}
+
+
+
 gboolean wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 {
     unsigned int avg = ((clr->R + clr->G + clr->B) / 3);
     int dr = (int)avg - clr->R;
     int dg = (int)avg - clr->G;
     int db = (int)avg - clr->B;
-
+	
     if (abs(dr) < BREAK_DIFF && abs(dg) < BREAK_DIFF && abs(db) < BREAK_DIFF)
     {
         wb->R = clip( wb->R, WB_MAX );
@@ -551,23 +585,60 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
     return FALSE;
 }
 
+gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
+{
+    rgb_tripel old_wb = *wb;
+	
+    if (wb->R < WB_IDENTITY)
+        wb->R = WB_IDENTITY;
+    if (wb->G < WB_IDENTITY)
+        wb->G = WB_IDENTITY;
+    if (wb->B < WB_IDENTITY)
+        wb->B = WB_IDENTITY;
+    if (old_wb.R != wb->R || old_wb.G != wb->G || old_wb.B != wb->B)
+        return FALSE;
+
+    while ((wb->R > WB_IDENTITY) && (wb->G > WB_IDENTITY) && (wb->B > WB_IDENTITY))
+    {
+        wb->R -= 1;
+        wb->G -= 1;
+        wb->B -= 1;
+    }
+
+   rgb_tripel averageColor = average_color_cam( data);
+   if(wb_auto_step(&averageColor, wb ) )
+   {
+	   return TRUE;
+   }
+	   
+    
+    wb->R = clip( wb->R, WB_MAX );
+    wb->G = clip( wb->G, WB_MAX );
+    wb->B = clip( wb->B, WB_MAX );
+
+    return FALSE;
+}
+
+
+
 
 byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern pattern)
 {
     unsigned int val = pixel;
+	int divisor = 64;
     switch (pattern)
     {
         case BG:
-            val = (val * wb_b) / 64;
+            val = (val * wb_b) / divisor;
             break;
         case GB:
-            val = (val * wb_g) / 64;
+            val = (val * wb_g) / divisor;
             break;
         case GR:
-            val = (val * wb_g) / 64;
+            val = (val * wb_g) / divisor;
             break;
         case RG:
-            val = (val * wb_r) / 64;
+            val = (val * wb_r) / divisor;
             break;
     };
     return ( val > 0xFF ? 0xFF : (byte)(val));
@@ -655,7 +726,10 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     get_sampling_points (buf, &points, self->pattern);
 
     guint resulting_brightness = 0;
-    auto_whitebalance(&points, &rgb, &resulting_brightness );
+	if(self->res.color.has_whitebalance )
+		auto_whitebalance_cam(&points, &rgb );
+	else
+		auto_whitebalance(&points, &rgb, &resulting_brightness );
 
     /* we prefer to set our own values */
     if (self->auto_wb == FALSE)
@@ -687,6 +761,7 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTisWhiteBalance* self = GST_TISWHITEBALANCE (trans);
+    
     if (self->res.source_element == NULL)
     {
         gst_debug_log (gst_tiswhitebalance_debug_category,
@@ -696,19 +771,26 @@ static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, 
                        __LINE__,
                        NULL,
                        "Searching for source");
+        
+
+        
         self->res = find_source(GST_ELEMENT(self));
-        WB_MAX = self->res.color.max;
+        
+		if( self->res.color.has_whitebalance )
+		{
+			WB_MAX = self->res.color.max;
+			WB_IDENTITY = self->res.color.default_value;
+			
+			Init_WB_Values(self);
 
-        self->rgb = self->res.color.rgb;
-
-        gst_debug_log (gst_tiswhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "gst_tiswhitebalance",
-                       "gst_tiswhitebalance_fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "WB_MAX is %d", self->res.color.max);
-
+			gst_debug_log (gst_tiswhitebalance_debug_category,
+						GST_LEVEL_INFO,
+						"gst_tiswhitebalance",
+						"gst_tiswhitebalance_fixate_caps",
+						__LINE__,
+						NULL,
+						"WB_MAX is %d", self->res.color.max);
+		}
 
     }
 
