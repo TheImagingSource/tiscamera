@@ -70,6 +70,8 @@ typedef struct
 
     gboolean auto_wb;
     gboolean auto_enabled;
+	
+	gboolean hardware_wb_enabled;
 
     struct device_resources res;
 

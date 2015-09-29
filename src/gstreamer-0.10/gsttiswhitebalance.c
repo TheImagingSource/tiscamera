@@ -193,6 +193,7 @@ static void gst_tiswhitebalance_init (GstTisWhiteBalance *self)
     self->blue = WB_IDENTITY;*/
     self->auto_wb = TRUE;
     self->res.source_element = NULL;
+	self->hardware_wb_enabled = FALSE;
 }
 
 
@@ -219,7 +220,16 @@ void gst_tiswhitebalance_set_property (GObject* object,
             tiswhitebalance->auto_wb = g_value_get_boolean (value);
             break;
         case PROP_CAMERA_WB:
-            tiswhitebalance->res.color.has_whitebalance = g_value_get_boolean (value);
+			tiswhitebalance->hardware_wb_enabled = g_value_get_boolean (value);
+			if( !tiswhitebalance->hardware_wb_enabled  )
+			{
+				WB_IDENTITY = 64;
+				WB_MAX =255;
+				Init_WB_Values(tiswhitebalance);
+			}
+			else
+				tiswhitebalance->res.source_element = NULL;
+			
             break;
         case PROP_WHITEBALANCE_ENABLED:
             tiswhitebalance->auto_enabled = g_value_get_boolean (value);
@@ -739,7 +749,7 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     get_sampling_points (buf, &points, self->pattern);
 
     guint resulting_brightness = 0;
-	if(self->res.color.has_whitebalance )
+	if(self->res.color.has_whitebalance && self->hardware_wb_enabled )
 		auto_whitebalance_cam(&points, &rgb );
 	else
 		auto_whitebalance(&points, &rgb, &resulting_brightness );
@@ -758,7 +768,7 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
         self->blue = rgb.B;
     }
 
-    if (self->res.color.has_whitebalance)
+    if (self->res.color.has_whitebalance && self->hardware_wb_enabled) 
     {
         self->res.color.rgb = rgb;
         gst_tiswhitebalance_device_set_whiteblance(self);
@@ -774,21 +784,22 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTisWhiteBalance* self = GST_TISWHITEBALANCE (trans);
+	
+	if (self->res.source_element == NULL && self->hardware_wb_enabled )
+	{
+		gst_debug_log (gst_tiswhitebalance_debug_category,
+					GST_LEVEL_INFO,
+					"gst_tiswhitebalance",
+					"gst_tiswhitebalance_fixate_caps",
+					__LINE__,
+					NULL,
+					"Searching for source");
 
-    if (self->res.source_element == NULL)
-    {
-        gst_debug_log (gst_tiswhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "gst_tiswhitebalance",
-                       "gst_tiswhitebalance_fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "Searching for source");
-
-        self->res = find_source(GST_ELEMENT(self));
+		self->res = find_source(GST_ELEMENT(self));
 
 		if( self->res.color.has_whitebalance )
 		{
+			printf("Hallo\n");
 			WB_MAX = self->res.color.max;
 			WB_IDENTITY = self->res.color.default_value;
 
@@ -802,9 +813,8 @@ static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, 
 						NULL,
 						"WB_MAX is %d", self->res.color.max);
 		}
-
-    }
-
+	}
+	
     /* auto is completely disabled */
     if (!self->auto_enabled)
     {
