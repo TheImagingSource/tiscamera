@@ -115,7 +115,6 @@ static update_v4l2_device (struct device_resources* res)
         }
         else if (qctrl.id == V4L2_CID_EUVC_GAIN_R)
         {
-            res->color.has_whitebalance = TRUE;
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
@@ -127,7 +126,6 @@ static update_v4l2_device (struct device_resources* res)
         }
         else if (qctrl.id == V4L2_CID_EUVC_GAIN_G)
         {
-            res->color.has_whitebalance = TRUE;
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
@@ -140,7 +138,6 @@ static update_v4l2_device (struct device_resources* res)
         }
         else if (qctrl.id == V4L2_CID_EUVC_GAIN_B)
         {
-            res->color.has_whitebalance = TRUE;
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
@@ -207,10 +204,10 @@ gboolean v4l2_set_rgb (struct device_resources* res)
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
     struct v4l2_control ctrl = { 0 };
 
-	
+
     ctrl.id = V4L2_CID_EUVC_GAIN_R;
     ctrl.value = res->color.rgb.R;
-    
+
 
     if (ioctl(fd, VIDIOC_S_CTRL, &ctrl))
     {
@@ -231,7 +228,7 @@ gboolean v4l2_set_rgb (struct device_resources* res)
     {
         return FALSE;
     }
-    
+
 
     return TRUE;
 }
