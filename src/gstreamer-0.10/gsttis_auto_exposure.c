@@ -99,6 +99,7 @@ enum
 {
     PROP_0,
     PROP_AUTO_EXPOSURE,
+    PROP_AUTO_GAIN,
     PROP_CAMERA,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
@@ -167,6 +168,13 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_AUTO_GAIN,
+                                     g_param_spec_boolean ("auto-gain",
+                                                           "Auto Gain",
+                                                           "Automatically adjust gain",
+                                                           TRUE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
                                      g_param_spec_double ("gain-max",
                                                           "Gain Maximum",
@@ -185,6 +193,7 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
 static void gst_tis_auto_exposure_init (GstTis_Auto_Exposure *self)
 {
     self->auto_exposure = TRUE;
+    self->auto_gain = TRUE;
 
     self->frame_counter = 0;
     self->camera_src = NULL;
@@ -201,6 +210,9 @@ void gst_tis_auto_exposure_set_property (GObject* object,
     {
         case PROP_AUTO_EXPOSURE:
             tis_auto_exposure->auto_exposure = g_value_get_boolean (value);
+            break;
+        case PROP_AUTO_GAIN:
+            tis_auto_exposure->auto_gain = g_value_get_boolean(value);
             break;
         case PROP_CAMERA:
             tis_auto_exposure->camera_src = g_value_get_object (value);
@@ -232,6 +244,9 @@ void gst_tis_auto_exposure_get_property (GObject* object,
     {
         case PROP_AUTO_EXPOSURE:
             g_value_set_boolean (value, tis_auto_exposure->auto_exposure);
+            break;
+        case PROP_AUTO_GAIN:
+            g_value_set_boolean (value, tis_auto_exposure->auto_gain);
             break;
         case PROP_CAMERA:
             g_value_set_object (value, tis_auto_exposure->camera_src);
@@ -686,37 +701,55 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     if (dist < 98 || dist > 102)
     {
         /* set_gain */
-        gdouble new_gain = calc_gain(self, dist);
-        if (new_gain < self->gain.value)
+        gdouble new_gain = 0.0;
+
+        if (self->auto_gain == TRUE)
         {
-            set_gain(self, new_gain);
-            return;
+
+            new_gain = calc_gain(self, dist);
+            if (new_gain < self->gain.value)
+            {
+                set_gain(self, new_gain);
+                return;
+            }
+
         }
 
-        /* exposure */
-        gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
-
-        if (tmp_exposure != self->exposure.value)
+        if (self->auto_exposure == TRUE)
         {
-            set_exposure(self, tmp_exposure);
-            return;
+            /* exposure */
+            gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
+
+            if (tmp_exposure != self->exposure.value)
+            {
+                set_exposure(self, tmp_exposure);
+                return;
+            }
         }
 
-        /* when exposure is in a sweet spot, or cannot be increased anymore */
-        if (new_gain != self->gain.value && self->exposure.value >= self->exposure.max)
+        if (self->auto_gain == TRUE)
         {
-            set_gain(self, new_gain);
-            return;
+            if (self->auto_exposure == TRUE)
+            {
+                /* when exposure is in a sweet spot, or cannot be increased anymore */
+                if (new_gain != self->gain.value && self->exposure.value >= self->exposure.max)
+                {
+                    set_gain(self, new_gain);
+                    return;
+                }
+
+                // we can reduce gain, because we can increase exposure
+                if ( self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
+                {
+                    /* increase exposure by 5% */
+                    set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
+                }
+
+            }
+            else
+                set_gain(self,new_gain);
         }
     }
-
-    // we can reduce gain, because we can increase exposure
-    if ( self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
-    {
-        /* increase exposure by 5% */
-        set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
-    }
-
 }
 
 /*
@@ -726,7 +759,7 @@ static GstFlowReturn gst_tis_auto_exposure_transform_ip (GstBaseTransform* trans
 {
     GstTis_Auto_Exposure* self = GST_TIS_AUTO_EXPOSURE (trans);
 
-    if (!self->auto_exposure)
+    if (!self->auto_exposure && !self->auto_gain)
     {
         return GST_FLOW_OK;
     }
