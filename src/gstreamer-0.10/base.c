@@ -135,6 +135,8 @@ static update_v4l2_device (struct device_resources* res)
             }
             res->color.rgb.G = ctrl.value;
             res->color.max = qctrl.maximum;
+            res->color.default_value = 36; // 36 for DFK 72
+
         }
         else if (qctrl.id == V4L2_CID_EUVC_GAIN_B)
         {
@@ -146,6 +148,8 @@ static update_v4l2_device (struct device_resources* res)
             }
             res->color.rgb.B = ctrl.value;
             res->color.max = qctrl.maximum;
+            res->color.default_value = 36; // 36 for DFK 72
+
         }
 
 
