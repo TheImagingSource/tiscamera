@@ -74,6 +74,7 @@ typedef struct GstTis_Auto_Exposure
     GstPad *srcpad;
 
     gboolean auto_exposure;
+    gboolean auto_gain;
 
     Gain gain;
     Gain default_gain_values;
