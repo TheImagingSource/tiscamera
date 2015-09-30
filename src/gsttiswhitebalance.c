@@ -69,6 +69,7 @@ enum
     PROP_GAIN_BLUE,
     PROP_AUTO_ENABLED,
     PROP_WHITEBALANCE_ENABLED,
+    PROP_CAMERA_WB,
 };
 
 /* pad templates */
@@ -97,6 +98,22 @@ G_DEFINE_TYPE_WITH_CODE (GstTisWhiteBalance,
                                                   "tiswhitebalance", 0,
                                                   "debug category for tiswhitebalance element"));
 
+
+static gboolean gst_tiswhitebalance_device_set_whiteblance (GstTisWhiteBalance* self)
+{
+    gst_debug_log (gst_tiswhitebalance_debug_category,
+                   GST_LEVEL_INFO,
+                   "tiswhitebalance",
+                   "",
+                   __LINE__,
+                   NULL,
+                   "Applying white balance to device with values: R:%d G:%d B:%d", self->res.color.rgb.R, self->res.color.rgb.G,
+                   self->res.color.rgb.B);
+
+    return device_set_rgb(&self->res);
+}
+
+
 static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
@@ -124,25 +141,31 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
                                      PROP_GAIN_RED,
                                      g_param_spec_int ("red", "Red",
                                                        "Value for red",
-                                                       0, 255, 64,
+                                                       0, 255, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_GREEN,
                                      g_param_spec_int ("green", "Green Gain",
                                                        "Value for red gain",
-                                                       0, 255, 64,
+                                                       0, 255, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_BLUE,
                                      g_param_spec_int ("blue", "Blue Gain",
                                                        "Value for blue gain",
-                                                       0, 255, 64,
+                                                       0, 255, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_ENABLED,
                                      g_param_spec_boolean ("auto", "Auto Value Adjustment",
                                                            "Automatically adjust white balance values",
                                                            TRUE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_CAMERA_WB,
+                                     g_param_spec_boolean ("camera-whitebalance", "Device whitebalance settings",
+                                                           "Adjust white balance values in the camera",
+                                                           FALSE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_WHITEBALANCE_ENABLED,
@@ -153,15 +176,20 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
 }
 
 
+static void init_wb_values (GstTisWhiteBalance *self)
+{
+    self->rgb = (rgb_tripel){WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
+    self->red = WB_IDENTITY;
+    self->green = WB_IDENTITY;
+    self->blue = WB_IDENTITY;
+}
+
+
 static void gst_tiswhitebalance_init (GstTisWhiteBalance *self)
 {
-
-    self->rgb = (rgb_tripel){64, 64, 64};
-    self->red = 64;
-    self->green = 64;
-    self->blue = 64;
+	init_wb_values(self);
     self->auto_wb = TRUE;
-
+    self->res.source_element = NULL;
 }
 
 
@@ -185,6 +213,9 @@ void gst_tiswhitebalance_set_property (GObject* object,
             break;
         case PROP_AUTO_ENABLED:
             tiswhitebalance->auto_wb = g_value_get_boolean (value);
+            break;
+        case PROP_CAMERA_WB:
+            tiswhitebalance->res.color.has_whitebalance = g_value_get_boolean (value);
             break;
         case PROP_WHITEBALANCE_ENABLED:
             tiswhitebalance->auto_enabled = g_value_get_boolean (value);
@@ -216,6 +247,9 @@ void gst_tiswhitebalance_get_property (GObject* object,
             break;
         case PROP_AUTO_ENABLED:
             g_value_set_boolean (value, tiswhitebalance->auto_wb);
+            break;
+        case PROP_CAMERA_WB:
+            g_value_set_boolean (value, tiswhitebalance->res.color.has_whitebalance);
             break;
         case PROP_WHITEBALANCE_ENABLED:
             g_value_set_boolean (value, tiswhitebalance->auto_enabled);
@@ -438,6 +472,31 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_trip
 }
 
 
+rgb_tripel average_color_cam (const auto_sample_points* data )
+{
+    rgb_tripel result = { 0, 0, 0 };
+
+	guint i;
+    for (i = 0; i < data->cnt; ++i)
+    {
+        unsigned int r =  data->samples[i].r ;
+        unsigned int g = data->samples[i].g ;
+        unsigned int b = data->samples[i].b ;
+
+        result.R += r;
+        result.G += g;
+        result.B += b;
+    }
+
+
+	result.R /= data->cnt;
+	result.G /= data->cnt;
+	result.B /= data->cnt;
+	return result;
+}
+
+
+
 gboolean wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 {
     unsigned int avg = ((clr->R + clr->G + clr->B) / 3);
@@ -535,23 +594,68 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
     return FALSE;
 }
 
+gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
+{
+    rgb_tripel old_wb = *wb;
+
+    if (wb->R < WB_IDENTITY)
+        wb->R = WB_IDENTITY;
+    if (wb->G < WB_IDENTITY)
+        wb->G = WB_IDENTITY;
+    if (wb->B < WB_IDENTITY)
+        wb->B = WB_IDENTITY;
+    if (old_wb.R != wb->R || old_wb.G != wb->G || old_wb.B != wb->B)
+        return FALSE;
+
+    while ((wb->R > WB_IDENTITY) && (wb->G > WB_IDENTITY) && (wb->B > WB_IDENTITY))
+    {
+        wb->R -= 1;
+        wb->G -= 1;
+        wb->B -= 1;
+    }
+
+   rgb_tripel averageColor = average_color_cam( data);
+   if(wb_auto_step(&averageColor, wb ) )
+   {
+	   return TRUE;
+   }
+
+
+    wb->R = clip( wb->R, WB_MAX );
+    wb->G = clip( wb->G, WB_MAX );
+    wb->B = clip( wb->B, WB_MAX );
+
+    gst_debug_log (gst_tiswhitebalance_debug_category,
+                   GST_LEVEL_INFO,
+                   "tiswhitebalance",
+                   "",
+                   __LINE__,
+                   NULL,
+                   "Calculated white balance R:%d G:%d B:%d", wb->R, wb->G, wb->B);
+
+    return FALSE;
+}
+
+
+
 
 byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern pattern)
 {
     unsigned int val = pixel;
+	int divisor = 64;
     switch (pattern)
     {
         case BG:
-            val = (val * wb_b) / 64;
+            val = (val * wb_b) / divisor;
             break;
         case GB:
-            val = (val * wb_g) / 64;
+            val = (val * wb_g) / divisor;
             break;
         case GR:
-            val = (val * wb_g) / 64;
+            val = (val * wb_g) / divisor;
             break;
         case RG:
-            val = (val * wb_r) / 64;
+            val = (val * wb_r) / divisor;
             break;
     };
     return ( val > 0xFF ? 0xFF : (byte)(val));
@@ -628,12 +732,21 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 {
 
     auto_sample_points points;
+
+    if (self->res.color.has_whitebalance)
+    {
+        self->rgb = self->res.color.rgb;
+    }
+
     rgb_tripel rgb = self->rgb;
 
     get_sampling_points (buf, &points, self->pattern);
 
     guint resulting_brightness = 0;
-    auto_whitebalance(&points, &rgb, &resulting_brightness );
+	if(self->res.color.has_whitebalance )
+		auto_whitebalance_cam(&points, &rgb );
+	else
+		auto_whitebalance(&points, &rgb, &resulting_brightness );
 
     /* we prefer to set our own values */
     if (self->auto_wb == FALSE)
@@ -644,15 +757,20 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     }
     else /* update the permanent values to represent the current adjustments */
     {
-        self->rgb.R = rgb.R;
-        self->rgb.G = rgb.G;
-        self->rgb.B = rgb.B;
         self->red = rgb.R;
         self->green = rgb.G;
         self->blue = rgb.B;
     }
 
-    apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    if (self->res.color.has_whitebalance)
+    {
+        self->res.color.rgb = rgb;
+        gst_tiswhitebalance_device_set_whiteblance(self);
+    }
+    else
+    {
+        apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    }
 }
 
 
@@ -660,6 +778,27 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
 static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTisWhiteBalance* self = GST_TISWHITEBALANCE (trans);
+
+    if (self->res.source_element == NULL)
+    {
+        gst_debug_log (gst_tiswhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "gst_tiswhitebalance",
+                       "gst_tiswhitebalance_fixate_caps",
+                       __LINE__,
+                       NULL,
+                       "Searching for source");
+
+        self->res = find_source(GST_ELEMENT(self));
+
+		if (self->res.color.has_whitebalance)
+		{
+			WB_MAX = self->res.color.max;
+			WB_IDENTITY = self->res.color.default_value;
+
+			init_wb_values(self);
+		}
+    }
 
     /* auto is completely disabled */
     if (!self->auto_enabled)
