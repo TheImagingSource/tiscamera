@@ -75,6 +75,7 @@ endmacro()
 
 # 1.1. Find headers and libraries
 FIND_GSTREAMER_COMPONENT(GSTREAMER gstreamer-1.0 gst/gst.h gstreamer-1.0)
+FIND_GSTREAMER_COMPONENT(GSTREAMER_CONFIG gstreamer-1.0 gst/gstconfig.h gstreamer-1.0)
 FIND_GSTREAMER_COMPONENT(GSTREAMER_BASE gstreamer-base-1.0 gst/base/gstadapter.h gstbase-1.0)
 
 # 1.2. Check GStreamer version
@@ -111,6 +112,9 @@ FIND_GSTREAMER_COMPONENT(GSTREAMER_PBUTILS gstreamer-pbutils-1.0 gst/pbutils/pbu
 FIND_GSTREAMER_COMPONENT(GSTREAMER_TAG gstreamer-tag-1.0 gst/tag/tag.h gsttag-1.0)
 FIND_GSTREAMER_COMPONENT(GSTREAMER_VIDEO gstreamer-video-1.0 gst/video/video.h gstvideo-1.0)
 
+list(APPEND GSTREAMER_INCLUDE_DIRS ${GSTREAMER_CONFIG_INCLUDE_DIRS})
+list(APPEND GSTREAMER_LIBRARIES ${GSTREAMER_CONFIG_LIBRARIES})
+
 # ------------------------------------------------
 # 3. Process the COMPONENTS passed to FIND_PACKAGE
 # ------------------------------------------------
@@ -134,6 +138,8 @@ mark_as_advanced(
 	GSTREAMER_AUDIO_LIBRARIES
 	GSTREAMER_BASE_INCLUDE_DIRS
 	GSTREAMER_BASE_LIBRARIES
+	GSTREAMER_CONFIG_INCLUDE_DIRS
+	GSTREAMER_CONFIG_LIBRARIES
 	GSTREAMER_FFT_INCLUDE_DIRS
 	GSTREAMER_FFT_LIBRARIES
 	GSTREAMER_INCLUDE_DIRS
