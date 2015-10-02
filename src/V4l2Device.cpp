@@ -1030,7 +1030,7 @@ bool V4l2Device::get_frame ()
 
     buffers.at(buf.index).is_queued = false;
 
-    tcam_log(TCAM_LOG_INFO, "pushing new buffer");
+    tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
     listener->push_image(buffers.at(buf.index).buffer);
 
