@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "property_identifications.h"
 #include "image_fourcc.h"
 
 /**
@@ -153,58 +154,6 @@ struct tcam_image_buffer
 
 
 /**
- * @name TCAM_PROPERTY_ID
- * @brief list of unique property identifiers
- */
-enum TCAM_PROPERTY_ID
-{
-    TCAM_PROPERTY_INVALID,
-    TCAM_PROPERTY_EXPOSURE,
-    TCAM_PROPERTY_EXPOSURE_AUTO,
-    TCAM_PROPERTY_GAIN,
-    TCAM_PROPERTY_GAIN_RED,
-    TCAM_PROPERTY_GAIN_GREEN,
-    TCAM_PROPERTY_GAIN_BLUE,
-    TCAM_PROPERTY_GAIN_AUTO,
-    TCAM_PROPERTY_TRIGGER_MODE,
-    TCAM_PROPERTY_TRIGGER_SOURCE,
-    TCAM_PROPERTY_TRIGGER_ACTIVATION,
-    TCAM_PROPERTY_SOFTWARETRIGGER,
-    TCAM_PROPERTY_GPIO,
-    TCAM_PROPERTY_GPIN,
-    TCAM_PROPERTY_GPOUT,
-    TCAM_PROPERTY_OFFSET_X,
-    TCAM_PROPERTY_OFFSET_Y,
-    TCAM_PROPERTY_OFFSET_AUTO,
-    TCAM_PROPERTY_BRIGHTNESS,
-    TCAM_PROPERTY_CONTRAST,
-    TCAM_PROPERTY_SATURATION,
-    TCAM_PROPERTY_HUE,
-    TCAM_PROPERTY_GAMMA,
-    TCAM_PROPERTY_WB,
-    TCAM_PROPERTY_WB_AUTO,
-    TCAM_PROPERTY_WB_RED,
-    TCAM_PROPERTY_WB_GREEN,
-    TCAM_PROPERTY_WB_BLUE,
-    TCAM_PROPERTY_WB_ONCE,
-    TCAM_PROPERTY_WB_MODE,
-    TCAM_PROPERTY_IRCUT,
-    TCAM_PROPERTY_IRIS,
-    TCAM_PROPERTY_IRIS_AUTO,
-    TCAM_PROPERTY_FOCUS,
-    TCAM_PROPERTY_FOCUS_AUTO,
-    TCAM_PROPERTY_FOCUS_ONE_PUSH,
-    TCAM_PROPERTY_ZOOM,
-    TCAM_PROPERTY_STROBE_ENABLE,
-    TCAM_PROPERTY_SKIPPING,
-    TCAM_PROPERTY_BINNING,
-    TCAM_PROPERTY_SHARPNESS,
-    TCAM_PROPERTY_REVERSE_X,
-    TCAM_PROPERTY_REVERSE_Y,
-};
-
-
-/**
  * @enum TCAM_PROPERTY_TYPE
  * Available property types
 */
@@ -295,7 +244,7 @@ enum TCAM_PROPERTY_CATEGORY
 struct tcam_property_group
 {
     enum TCAM_PROPERTY_CATEGORY property_category; /**< category of the property */
-    enum TCAM_PROPERTY_ID       property_group;    /**< group of the property
+    TCAM_PROPERTY_ID            property_group;    /**< group of the property
                                                       if property_group and tcam_device_property.id
                                                       are identical the property should be considered
                                                       the group master */
@@ -308,7 +257,7 @@ struct tcam_property_group
  */
 struct tcam_device_property
 {
-    enum TCAM_PROPERTY_ID id;          /**< unique identifier */
+    TCAM_PROPERTY_ID id;               /**< unique identifier */
     char name [32];                    /**< string identifier */
 
     struct tcam_property_group group;  /**< grouping; if you simply want to

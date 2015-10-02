@@ -321,7 +321,7 @@ static const std::vector<struct control_reference> ctrl_reference_table =
 };
 
 
-inline control_reference get_control_reference (enum TCAM_PROPERTY_ID wanted_id)
+inline control_reference get_control_reference (TCAM_PROPERTY_ID wanted_id)
 {
     for (const auto& ref : ctrl_reference_table)
     {
@@ -333,7 +333,7 @@ inline control_reference get_control_reference (enum TCAM_PROPERTY_ID wanted_id)
 
 
 
-inline tcam_device_property create_empty_property (enum TCAM_PROPERTY_ID id)
+inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);
 
@@ -347,7 +347,7 @@ inline tcam_device_property create_empty_property (enum TCAM_PROPERTY_ID id)
 }
 
 
-inline TCAM_PROPERTY_TYPE get_reference_property_type (enum TCAM_PROPERTY_ID id)
+inline TCAM_PROPERTY_TYPE get_reference_property_type (TCAM_PROPERTY_ID id)
 {
     return get_control_reference(id).type_to_use;
 }
