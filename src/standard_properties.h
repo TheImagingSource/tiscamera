@@ -227,6 +227,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
     },
     {
+        .id = TCAM_PROPERTY_WB_ONCE,
+        .name = "Whitebalance Once",
+        .type_to_use = TCAM_PROPERTY_TYPE_BUTTON,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
+        .id = TCAM_PROPERTY_WB_MODE,
+        .name = "Whitebalance Mode",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
         .id = TCAM_PROPERTY_IRCUT,
         .name = "IRCutFilter",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
@@ -282,6 +294,16 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_SHARPNESS,
         .name = "Sharpness",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_REVERSE_X,
+        .name = "Reverse X",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        TCAM_PROPERTY_REVERSE_Y,
+        .name = "Reverse Y",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
     // {
     //     .name = "Strobe Polarity",
