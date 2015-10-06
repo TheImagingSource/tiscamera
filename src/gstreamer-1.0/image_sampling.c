@@ -22,9 +22,7 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
 {
     GstMapInfo info;
 
-    gst_buffer_make_writable(buf);
-
-    gst_buffer_map(buf, &info, GST_MAP_WRITE);
+    gst_buffer_map(buf, &info, GST_MAP_READ);
 
     guint* data = (guint*)info.data;
 
