@@ -67,20 +67,63 @@ public:
      */
     bool update ();
 
+    /**
+     * @return TCAM_PROPERTY_ID of the property
+     */
     TCAM_PROPERTY_ID get_ID () const;
 
+    /**
+     *
+     */
     std::string get_name () const;
 
+    /**
+     *
+     */
     TCAM_PROPERTY_TYPE get_type () const;
 
+
+    /**
+     * Convenience check for read-only and disabled
+     */
+    bool can_be_changed () const;
+
+    /**
+     * @return true if property can not be written
+     */
     bool is_read_only () const;
+
+    /**
+     * @return true if property can not be read
+     */
     bool is_write_only () const;
 
+    /**
+     *
+     */
     bool is_disabled () const;
 
+    /**
+     *
+     */
     uint32_t get_flags () const;
 
+
     struct tcam_device_property get_struct () const;
+
+    bool set_value (const struct tcam_device_property&);
+
+    bool set_value (const int64_t& value);
+    bool set_value (const double& value);
+    bool set_value (const bool& value);
+    bool set_value (const std::string& value);
+
+
+    bool set_flags (); // ??????
+
+
+
+
     bool set_struct (const struct tcam_device_property&);
 
     /**

@@ -298,6 +298,75 @@ bool Property::set_property (const Property& p)
     return true;
 }
 
+
+bool Property::set_value (const int64_t& value)
+{
+    if (impl.expired())
+    {
+        return false;
+    }
+    if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
+    {
+        prop.value.i.value = value;
+        notify_impl();
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Property::set_value (const double& value)
+{
+    if (impl.expired())
+    {
+        return false;
+    }
+    if (get_type() == TCAM_PROPERTY_TYPE_DOUBLE && !is_read_only())
+    {
+        prop.value.d.value = value;
+        notify_impl();
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Property::set_value (const bool& value)
+{
+    if (impl.expired())
+    {
+        return false;
+    }
+    if (get_type() == TCAM_PROPERTY_TYPE_BOOLEAN && !is_read_only())
+    {
+        prop.value.b.value = value;
+        notify_impl();
+        return true;
+    }
+
+    return false;
+}
+
+
+bool Property::set_value (const std::string& value)
+{
+    if (impl.expired())
+    {
+        return false;
+    }
+    if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
+    {
+        strcpy(prop.value.s.value, value.c_str());
+        notify_impl();
+        return true;
+    }
+
+    return false;
+}
+
+
 bool Property::set_property_from_struct (const tcam_device_property& prop)
 {
 
