@@ -79,7 +79,7 @@ struct device_resources find_source (GstElement* self)
 }
 
 
-static update_v4l2_device (struct device_resources* res)
+static void update_v4l2_device (struct device_resources* res)
 {
     gint fd;
     g_object_get(G_OBJECT(res->source_element), "device-fd", &fd, NULL);
