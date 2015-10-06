@@ -101,6 +101,12 @@ TCAM_PROPERTY_TYPE Property::get_type () const
 }
 
 
+bool Property::can_be_changed () const
+{
+    return (is_read_only() && is_disabled());
+}
+
+
 bool Property::is_read_only () const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_READ_ONLY);

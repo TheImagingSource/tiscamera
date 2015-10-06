@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_subdirectory(gobject)
+
 
 if (BUILD_GST_0_10)
   add_subdirectory(gstreamer-0.10)
