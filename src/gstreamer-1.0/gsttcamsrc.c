@@ -33,6 +33,7 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE,
+    PROP_GODEV,
     PROP_NUM_BUFFERS,
 };
 
@@ -741,6 +742,9 @@ static void gst_tcam_get_property (GObject* object,
         case PROP_DEVICE:
             g_value_set_pointer (value, self->device);
             break;
+        case PROP_GODEV:
+            g_value_set_object(value, self->dev);
+            break;
         case PROP_NUM_BUFFERS:
             g_value_set_int (value, self->n_buffers);
             break;
@@ -776,6 +780,14 @@ static void gst_tcam_class_init (GstTcamClass* klass)
          g_param_spec_pointer ("camera",
                               "Camera Object",
                               "Camera instance to retrieve additional information",
+                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+    g_object_class_install_property
+        (gobject_class,
+         PROP_GODEV,
+         g_param_spec_object ("dev",
+                              "Camera Object",
+                              "Camera instance to retrieve additional information",
+                              TCAM_TYPE_PROP,
                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
     g_object_class_install_property
