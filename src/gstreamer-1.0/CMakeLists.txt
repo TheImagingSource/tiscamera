@@ -13,36 +13,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(PLUGINS
+  gsttcamsrc
+  gsttcamwhitebalance
+  gsttcamautoexposure
+  gsttcamautofocus)
+
 find_package(GStreamer REQUIRED QUIET)
 find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
+find_package(GObjectIntrospection REQUIRED QUIET)
+
 
 include_directories(${GSTREAMER_INCLUDE_DIRS})
 include_directories(${GSTREAMER_BASE_INCLUDE_DIRS})
 include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/gobject)
 
 set(cflags " -w -Wall -Wextra -pedantic -Wundef -Wshadow")
 set(lflags "-fPIC -Wl,--gc-sections -ffunction-sections -fdata-sections")
 
+
+include_directories(${INTROSPECTION_INCLUDE_DIR})
+
 add_library(gsttcamsrc SHARED gsttcamsrc.c)
-target_link_libraries(gsttcamsrc tcam)
-target_link_libraries(gsttcamsrc ${GSTREAMER_LIBRARIES})
-target_link_libraries(gsttcamsrc ${GSTREAMER_BASE_LIBRARIES})
-target_link_libraries(gsttcamsrc ${GLIB2_LIBRARIES})
-target_link_libraries(gsttcamsrc ${GObject_LIBRARIES})
+
+target_link_libraries(gsttcamsrc tcam-gobject)
+target_link_libraries(gsttcamsrc ${INTROSPECTION_LIBS})
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.c image_sampling.c bayer.c)
-target_link_libraries(gsttcamwhitebalance tcam)
-target_link_libraries(gsttcamwhitebalance ${GSTREAMER_LIBRARIES})
-target_link_libraries(gsttcamwhitebalance ${GSTREAMER_BASE_LIBRARIES})
-target_link_libraries(gsttcamwhitebalance ${GLIB2_LIBRARIES})
-target_link_libraries(gsttcamwhitebalance ${GObject_LIBRARIES})
 
 add_library(gsttcamautoexposure SHARED gsttcamautoexposure.c image_sampling.c bayer.c)
-target_link_libraries(gsttcamautoexposure tcam)
-target_link_libraries(gsttcamautoexposure ${GSTREAMER_LIBRARIES})
-target_link_libraries(gsttcamautoexposure ${GSTREAMER_BASE_LIBRARIES})
-target_link_libraries(gsttcamautoexposure ${GLIB2_LIBRARIES})
-target_link_libraries(gsttcamautoexposure ${GObject_LIBRARIES})
+
+add_library(gsttcamautofocus SHARED gsttcamautofocus.c AutoFocus.cpp auto_focus.cpp)
+
+foreach (t IN ITEMS ${PLUGINS})
+
+    target_link_libraries(${t} tcam)
+    target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
+    target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
+    target_link_libraries(${t} ${GLIB2_LIBRARIES})
+    target_link_libraries(${t} ${GObject_LIBRARIES})
+
+endforeach (t)
+
+install(TARGETS ${PLUGINS} DESTINATION lib/gstreamer-1.0)
