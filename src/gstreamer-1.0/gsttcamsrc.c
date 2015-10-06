@@ -606,9 +606,7 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
     GstTcam* self = GST_TCAM (push_src);
 
     while (self->new_buffer == false)
-    {
-        usleep(500);
-    }
+    {}
 
     self->new_buffer = false;
     if (self->ptr == NULL)
