@@ -332,6 +332,19 @@ inline control_reference get_control_reference (TCAM_PROPERTY_ID wanted_id)
 }
 
 
+inline TCAM_PROPERTY_ID string2property_id (const std::string& name)
+{
+    for (const auto& ref : ctrl_reference_table)
+    {
+        if (name.compare(ref.name) == 0)
+        {
+            return ref.id;
+        }
+    }
+
+    return TCAM_PROPERTY_INVALID;
+}
+
 
 inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
 {
