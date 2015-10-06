@@ -27,10 +27,14 @@
 	( (uint32_t)(unsigned char)(ch2) << 16 ) | ( (uint32_t)(unsigned char)(ch3) << 24 ) )
 #endif
 
+#ifndef FOURCC_RGB8
+
 // these are pseudo FOURCC values used in the library to signify the formats
 #define FOURCC_RGB8			    mmioFOURCC( 'R', 'G', 'B', '8' )
 #define FOURCC_RGB24		    mmioFOURCC( 'R', 'G', 'B', '3' )
 #define FOURCC_RGB32		    mmioFOURCC( 'R', 'G', 'B', '4' )
+
+#endif
 
 // 16 bit per channel
 //#define FOURCC_RGB48		    mmioFOURCC( 'R', 'G', 'B', '5' )    // BGR with 16 bit per channel

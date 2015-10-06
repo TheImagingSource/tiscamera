@@ -28,10 +28,13 @@
     ((uint32_t)((ch0) | (ch1)<<8 | (ch2)<<16 | (ch3)<<24))
 #endif
 
+#ifndef FOURCC_RGB8
 // these are pseudo fourcc's used in the library to signify the formats
 #define FOURCC_RGB8         mmioFOURCC( 'R', 'G', 'B', '1' )
 #define FOURCC_RGB24        mmioFOURCC( 'R', 'G', 'B', '3' )
 #define FOURCC_RGB32        mmioFOURCC( 'R', 'G', 'B', '4' )
+
+#endif
 
 #define FOURCC_YUY2         mmioFOURCC('Y', 'U', 'Y', '2')
 #define FOURCC_Y800         mmioFOURCC('Y', '8', '0', '0')
@@ -47,12 +50,17 @@
 #define FOURCC_B800         mmioFOURCC('B', 'Y', '8', ' ')
 #define FOURCC_Y422         FOURCC_UYVY
 
+#ifndef FOURCC_GRBG
 #define FOURCC_GRBG         mmioFOURCC('G', 'R', 'B', 'G')
+#endif
 
+#ifndef FOURCC_BGGR8
 #define FOURCC_BGGR8        mmioFOURCC('B', 'A', '8', '1') /*  8  BGBG.. GRGR.. */
 #define FOURCC_GBRG8        mmioFOURCC('G', 'B', 'R', 'G') /*  8  GBGB.. RGRG.. */
 #define FOURCC_GRBG8        mmioFOURCC('G', 'R', 'B', 'G') /*  8  GRGR.. BGBG.. */
 #define FOURCC_RGGB8        mmioFOURCC('R', 'G', 'G', 'B') /*  8  RGRG.. GBGB.. */
+
+#endif
 
 #define FOURCC_BGGR10       mmioFOURCC('B', 'G', '1', '0') /* 10  BGBG.. GRGR.. */
 #define FOURCC_GBRG10       mmioFOURCC('G', 'B', '1', '0') /* 10  GBGB.. RGRG.. */
