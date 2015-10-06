@@ -73,6 +73,110 @@ std::vector<Property*> CaptureDevice::get_available_properties ()
 }
 
 
+Property* CaptureDevice::get_property (TCAM_PROPERTY_ID id)
+{
+    auto properties = get_available_properties();
+
+    for (auto& p :  properties)
+    {
+        if (p->get_ID() == id)
+        {
+            return p;
+        }
+    }
+    return nullptr;
+}
+
+
+Property* CaptureDevice::get_property_by_name (const std::string& name)
+{
+    TCAM_PROPERTY_ID id = string2property_id(name);
+
+    if (id == TCAM_PROPERTY_INVALID)
+    {
+        return nullptr;
+    }
+
+    return get_property(id);
+}
+
+
+bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const int64_t& value)
+{
+    auto vec = get_available_properties();
+
+    for (const auto& v : vec)
+    {
+        if (id == v->get_ID())
+        {
+            if (v->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+            {
+                return v->set_value(value);
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const double& value)
+{
+    auto vec = get_available_properties();
+
+    for (const auto& v : vec)
+    {
+        if (id == v->get_ID())
+        {
+            if (v->get_type() == TCAM_PROPERTY_TYPE_DOUBLE)
+            {
+                return v->set_value(value);
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const bool& value)
+{
+    auto vec = get_available_properties();
+
+    for (const auto& v : vec)
+    {
+        if (id == v->get_ID())
+        {
+            if (v->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
+            {
+                return v->set_value(value);
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const std::string& value)
+{
+    auto vec = get_available_properties();
+
+    for (const auto& v : vec)
+    {
+        if (id == v->get_ID())
+        {
+            if (v->get_type() == TCAM_PROPERTY_TYPE_STRING)
+            {
+                return v->set_value(value);
+            }
+        }
+    }
+
+    return false;
+}
+
+
 std::vector<VideoFormatDescription> CaptureDevice::get_available_video_formats () const
 {
     return impl->getAvailableVideoFormats();

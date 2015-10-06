@@ -86,6 +86,10 @@ public:
     std::vector<Property*> get_available_properties ();
 
 
+    Property* get_property (TCAM_PROPERTY_ID id);
+    Property* get_property_by_name (const std::string& name);
+
+
     /**
      *
      */
@@ -111,6 +115,12 @@ public:
         }
         return nullptr;
     }
+
+
+    bool set_property (TCAM_PROPERTY_ID, const int64_t& value);
+    bool set_property (TCAM_PROPERTY_ID, const double& value);
+    bool set_property (TCAM_PROPERTY_ID, const bool& value);
+    bool set_property (TCAM_PROPERTY_ID, const std::string& value);
 
     // videoformat related:
 
