@@ -71,6 +71,8 @@ typedef struct
     gboolean auto_wb;
     gboolean auto_enabled;
 
+    gboolean force_hardware_wb;
+
     struct device_resources res;
 
 } GstTisWhiteBalance;

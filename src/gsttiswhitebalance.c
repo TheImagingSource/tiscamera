@@ -215,6 +215,7 @@ void gst_tiswhitebalance_set_property (GObject* object,
             tiswhitebalance->auto_wb = g_value_get_boolean (value);
             break;
         case PROP_CAMERA_WB:
+            tiswhitebalance->force_hardware_wb = g_value_get_boolean (value);
             tiswhitebalance->res.color.has_whitebalance = g_value_get_boolean (value);
             break;
         case PROP_WHITEBALANCE_ENABLED:
@@ -249,7 +250,8 @@ void gst_tiswhitebalance_get_property (GObject* object,
             g_value_set_boolean (value, tiswhitebalance->auto_wb);
             break;
         case PROP_CAMERA_WB:
-            g_value_set_boolean (value, tiswhitebalance->res.color.has_whitebalance);
+            g_value_set_boolean (value, tiswhitebalance->force_hardware_wb);
+            /* g_value_set_boolean (value, tiswhitebalance->force_hardware_wb); */
             break;
         case PROP_WHITEBALANCE_ENABLED:
             g_value_set_boolean (value, tiswhitebalance->auto_enabled);
@@ -743,10 +745,15 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
     get_sampling_points (buf, &points, self->pattern);
 
     guint resulting_brightness = 0;
-	if(self->res.color.has_whitebalance )
-		auto_whitebalance_cam(&points, &rgb );
+
+	if (self->res.color.has_whitebalance)
+    {
+		auto_whitebalance_cam(&points, &rgb);
+    }
 	else
-		auto_whitebalance(&points, &rgb, &resulting_brightness );
+    {
+		auto_whitebalance(&points, &rgb, &resulting_brightness);
+    }
 
     /* we prefer to set our own values */
     if (self->auto_wb == FALSE)
@@ -790,6 +797,11 @@ static GstFlowReturn gst_tiswhitebalance_transform_ip (GstBaseTransform* trans, 
                        "Searching for source");
 
         self->res = find_source(GST_ELEMENT(self));
+
+        if (self->force_hardware_wb)
+        {
+            self->res.color.has_whitebalance = TRUE;
+        }
 
 		if (self->res.color.has_whitebalance)
 		{
