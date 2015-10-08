@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <stdio.h>
+
 #define GST_TCAM_DEFAULT_N_BUFFERS		10
 
 GST_DEBUG_CATEGORY_STATIC (tcam_debug);
@@ -97,6 +99,109 @@ struct property_type_map
     gchar *typename;
 };
 
+/* G_DEFINE_INTERFACE(TcamProp, tcam_prop, G_TYPE_OBJECT); */
+
+static GVariant* gst_tcam_get (GstTcamProp* self, gchar* cname);
+gboolean gst_tcam_set (GstTcamProp* self, gchar* cname, GVariant* value);
+
+
+static void gst_tcam_prop_default_init (GstTcamPropInterface *self)
+{
+    /* GObjectClass *object_class = G_OBJECT_CLASS (klass); */
+
+    /* object_class->get_property = tcam_prop_get_property; */
+    /* object_class->set_property = tcam_prop_set_property; */
+    // object_class->dispose = tcam_prop_dispose;
+    // object_class->finalize = tcam_prop_finalize;
+
+    self->set = gst_tcam_set;
+    self->get = gst_tcam_get;
+    /* self->get_property_type = gst_tcam_get_property_type; */
+}
+
+
+GType
+gst_tcam_prop_get_type (void)
+{
+    static volatile gsize type_id = 0;
+    if (g_once_init_enter (&type_id)) {
+        const GTypeInfo info = {
+            sizeof (GstTcamPropInterface),
+            NULL,   /* base_init */
+            NULL,   /* base_finalize */
+            gst_tcam_prop_default_init, /* class_init */
+            NULL,   /* class_finalize */
+            NULL,   /* class_data */
+            0,      /* instance_size */
+            0,      /* n_preallocs */
+            NULL    /* instance_init */
+        };
+        GType type = g_type_register_static (G_TYPE_INTERFACE,
+                                             "GstTcamProp",
+                                             &info, 0);
+        g_once_init_leave (&type_id, type);
+    }
+    return type_id;
+}
+
+/**
+ * gst_tcam_prop_enumerate:
+ * @self: a #TcamProp
+ *
+ * Enumerate all device properties
+ *
+ * Return value: List of device properties as #GVariant
+ */
+GVariant* gst_tcam_prop_enumerate (GstTcamProp* self)
+{
+    GVariantBuilder list_builder;
+
+    g_variant_builder_init (&list_builder, G_VARIANT_TYPE_ARRAY);
+
+    // for (const auto& p : self->device->get_available_properties())
+    // {
+    //     g_variant_builder_add (&list_builder,
+    //                            "{sv}", p->get_name().c_str(),
+    //                            variant_from_property(p));
+    // }
+    return g_variant_builder_end (&list_builder);
+}
+
+
+
+/**
+ * gst_tcam_set:
+ * @self: a #GstTcamProp
+ * @cname: a #gchar
+ * @value: a #GVariant
+ *
+ * Sets a property
+ *
+ * Returns: TRUE on success, FALSE otherwise
+ */
+gboolean gst_tcam_set (GstTcamProp* self, gchar* cname, GVariant* value)
+{
+    GstTcam* s = GST_TCAM(self);
+
+    printf("BLA %s\n", cname);
+    //return ((TcamProp*)self->dev)->set(cname, value);
+}
+
+/**
+ * gst_tcam_get:
+ * @self: a #GstTcamProp
+ * @cname: a #gchar*
+ *
+ * Get a property
+ *
+ * Returns: a #GVariant
+ */
+static GVariant* gst_tcam_get (GstTcamProp* self, gchar* cname)
+{
+    //return self->dev->get(cname);
+}
+
+
 /**
  * gst_tcam_get_property_type:
  * @self: a #GstTcamProp
@@ -106,6 +211,7 @@ struct property_type_map
  *
  * Returns: (transfer full): A string describing the property type
  */
+
 static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
 {
     gchar *ret = NULL;
@@ -174,8 +280,6 @@ GSList* gst_tcam_src_get_property_names(TcamProp* iface)
 	}
 	g_free (props);
     }
-
-    return ret;
 }
 
 
@@ -361,7 +465,11 @@ enum
     PROP_NUM_BUFFERS,
 };
 
+G_DEFINE_TYPE_WITH_CODE (GstTcam, gst_tcam, GST_TYPE_PUSH_SRC,
+                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
+                                                gst_tcam_prop_interface_init));
 
+/* G_DEFINE_INTERFACE (GstTcam, gst_tcam, TCAM_TYPE_PROP); */
 
 static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
                                                                          GST_PAD_SRC,
