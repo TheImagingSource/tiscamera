@@ -22,24 +22,37 @@
 
 G_BEGIN_DECLS
 
-#define TCAM_TYPE_PROP tcam_prop_get_type()
-G_DECLARE_FINAL_TYPE (TcamProp, tcam_prop, TCAM, PROP, GObject)
+#define TCAM_TYPE_PROP gst_tcam_prop_get_type()
+G_DECLARE_INTERFACE (GstTcamProp, gst_tcam_prop, TCAM, PROP, GObject)
 
-    TcamProp *tcam_prop_new (void);
-    GSList *tcam_prop_test (TcamProp *self);
-    GVariant *tcam_prop_enumerate (TcamProp *self);
-    GSList *tcam_prop_get_property_names (TcamProp *self);
-    gboolean tcam_prop_set (TcamProp *self, gchar *cname, GVariant *value);
-    GVariant *tcam_prop_get (TcamProp *self, gchar *cname);
-    gchar *tcam_prop_get_property_type (TcamProp *self, gchar *name);
-    gdouble tcam_prop_get_property_double(TcamProp *self, gchar *name);
-    gdouble tcam_prop_get_property_min(TcamProp *self, gchar *name);
-    gdouble tcam_prop_get_property_max(TcamProp *self, gchar *name);
-    gdouble tcam_prop_get_property_default_double(TcamProp *self,
-                                                  gchar *name);
-    gboolean tcam_prop_set_property_double(TcamProp *self,
-                                           gchar *name,
-                                           gdouble value);
+
+    struct _GstTcamPropInterface
+{
+    GTypeInterface parent_interface;
+
+    GVariant* (*enumerate) (GstTcamProp *self);
+    GSList* (*get_property_names) (GstTcamProp *self);
+    gboolean (*set) (GstTcamProp *self, gchar *cname, GVariant *value);
+    GVariant* (*get) (GstTcamProp *self, gchar *cname);
+    gchar* (*get_property_type) (GstTcamProp *self, gchar *name);
+
+};
+
+    /* TcamProp *tcam_prop_new (void); */
+    /* GSList *tcam_prop_test (TcamProp *self); */
+GVariant *tcam_prop_enumerate (GstTcamProp *self);
+GSList *tcam_prop_get_property_names (GstTcamProp *self);
+gboolean tcam_prop_set (GstTcamProp *self, gchar *cname, GVariant *value);
+GVariant *tcam_prop_get (GstTcamProp *self, gchar *cname);
+gchar *tcam_prop_get_property_type (GstTcamProp *self, gchar *name);
+    /* gdouble tcam_prop_get_property_double(TcamProp *self, gchar *name); */
+    /* gdouble tcam_prop_get_property_min(TcamProp *self, gchar *name); */
+    /* gdouble tcam_prop_get_property_max(TcamProp *self, gchar *name); */
+    /* gdouble tcam_prop_get_property_default_double(TcamProp *self, */
+    /*                                               gchar *name); */
+    /* gboolean tcam_prop_set_property_double(TcamProp *self, */
+    /*                                        gchar *name, */
+    /*                                        gdouble value); */
 
 
 

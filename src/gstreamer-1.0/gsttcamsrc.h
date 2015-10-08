@@ -43,7 +43,7 @@ struct _GstTcam
     GstPushSrc element;
 
     char* device_serial;
-    TcamProp* dev;
+    GstTcamProp* dev;
 
     tcam_capture_device* device;
     stream_obj* streamobject;

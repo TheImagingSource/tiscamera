@@ -17,13 +17,13 @@
 #include "tcam-gobject.h"
 #include <tcam.h>
 
-struct _TcamProp
-{
-    GObject parent_instance;
-    std::shared_ptr<tcam::CaptureDevice> device;
-};
+// struct _TcamProp
+// {
+//     GObject parent_instance;
+//     std::shared_ptr<tcam::CaptureDevice> device;
+// };
 
-G_DEFINE_TYPE (TcamProp, tcam_prop, G_TYPE_OBJECT)
+G_DEFINE_INTERFACE (GstTcamProp, tcam_prop, G_TYPE_OBJECT)
 
 
 static void tcam_prop_get_property (GObject    *object,
@@ -52,33 +52,33 @@ static void tcam_prop_set_property (GObject      *object,
 }
 
 
-static void tcam_prop_dispose (GObject *object)
-{
-    G_OBJECT_CLASS (tcam_prop_parent_class)->dispose (object);
-}
+// static void tcam_prop_dispose (GObject *object)
+// {
+//     G_OBJECT_CLASS (tcam_prop_parent_class)->dispose (object);
+// }
 
 
-static void tcam_prop_finalize (GObject *object)
-{
-    G_OBJECT_CLASS (tcam_prop_parent_class)->finalize (object);
-}
+// static void tcam_prop_finalize (GObject *object)
+// {
+//     G_OBJECT_CLASS (tcam_prop_parent_class)->finalize (object);
+// }
 
 
-static void tcam_prop_class_init (TcamPropClass *klass)
+static void tcam_prop_default_init (GstTcamPropInterface *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
     object_class->get_property = tcam_prop_get_property;
     object_class->set_property = tcam_prop_set_property;
-    object_class->dispose = tcam_prop_dispose;
-    object_class->finalize = tcam_prop_finalize;
+    // object_class->dispose = tcam_prop_dispose;
+    // object_class->finalize = tcam_prop_finalize;
 }
 
 
-static void tcam_prop_init (TcamProp *self)
+static void tcam_prop_init (GstTcamProp *self)
 {
-    self->device = tcam::open_device("123");
-    g_assert (self->device);
+    // self->device = tcam::open_device("123");
+    // g_assert (self->device);
 }
 
 
@@ -90,7 +90,7 @@ static void tcam_prop_init (TcamProp *self)
  *
  * Returns: (element-type utf8) (transfer full): list of strings.
  */
-GSList* tcam_prop_test (TcamProp *self)
+GSList* tcam_prop_test (GstTcamProp *self)
 {
     GSList *list = NULL;
     list = g_slist_append (list, g_strdup ("One"));
@@ -154,18 +154,18 @@ static GVariant* variant_from_property (tcam::Property* p)
  *
  * Return value: List of device properties as #GVariant
  */
-GVariant* tcam_prop_enumerate (TcamProp* self)
+GVariant* tcam_prop_enumerate (GstTcamProp* self)
 {
     GVariantBuilder list_builder;
 
     g_variant_builder_init (&list_builder, G_VARIANT_TYPE_ARRAY);
 
-    for (const auto& p : self->device->get_available_properties())
-    {
-        g_variant_builder_add (&list_builder,
-                               "{sv}", p->get_name().c_str(),
-                               variant_from_property(p));
-    }
+    // for (const auto& p : self->device->get_available_properties())
+    // {
+    //     g_variant_builder_add (&list_builder,
+    //                            "{sv}", p->get_name().c_str(),
+    //                            variant_from_property(p));
+    // }
     return g_variant_builder_end (&list_builder);
 }
 
@@ -178,25 +178,25 @@ GVariant* tcam_prop_enumerate (TcamProp* self)
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-GSList* tcam_prop_get_property_names (TcamProp* self)
+GSList* tcam_prop_get_property_names (GstTcamProp* self)
 {
     GSList *ret = NULL;
-    for (const auto& p : self->device->get_available_properties())
-    {
-        ret = g_slist_append (ret, g_strdup(p->get_name().c_str()));
-    }
+    // for (const auto& p : self->device->get_available_properties())
+    // {
+    //     ret = g_slist_append (ret, g_strdup(p->get_name().c_str()));
+    // }
 
     return ret;
 }
 
 
-static tcam::Property* find_property_by_name (TcamProp* self, std::string name)
+static tcam::Property* find_property_by_name (GstTcamProp* self, std::string name)
 {
-    for (const auto& p : self->device->get_available_properties())
-    {
-        if (p->get_name() == name)
-            return p;
-    }
+    // for (const auto& p : self->device->get_available_properties())
+    // {
+    //     if (p->get_name() == name)
+    //         return p;
+    // }
     return NULL;
 }
 
@@ -211,29 +211,29 @@ static tcam::Property* find_property_by_name (TcamProp* self, std::string name)
  *
  * Returns: TRUE on success, FALSE otherwise
  */
-gboolean tcam_prop_set (TcamProp* self, gchar* cname, GVariant* value)
+gboolean tcam_prop_set (GstTcamProp* self, gchar* cname, GVariant* value)
 {
     GVariantDict dict;
     gboolean ret = FALSE;
-    tcam::Property *tcam_ppty;
-    std::string name = std::string(cname);
-    tcam_ppty = find_property_by_name (self,name);
-    if (tcam_ppty)
-    {
-        switch (tcam_ppty->get_type())
-        {
-            case TCAM_PROPERTY_TYPE_INTEGER:
-            {
-                tcam::PropertyInteger* prop_i =
-                    (tcam::PropertyInteger*) tcam_ppty;
-                ret = prop_i->
-                    set_value(g_variant_get_int32(value));
-                break;
-            }
-            default:
-                break;
-        }
-    }
+    // tcam::Property *tcam_ppty;
+    // std::string name = std::string(cname);
+    // tcam_ppty = find_property_by_name (self,name);
+    // if (tcam_ppty)
+    // {
+    //     switch (tcam_ppty->get_type())
+    //     {
+    //         case TCAM_PROPERTY_TYPE_INTEGER:
+    //         {
+    //             tcam::PropertyInteger* prop_i =
+    //                 (tcam::PropertyInteger*) tcam_ppty;
+    //             ret = prop_i->
+    //                 set_value(g_variant_get_int32(value));
+    //             break;
+    //         }
+    //         default:
+    //             break;
+    //     }
+    // }
     return FALSE;
 }
 
@@ -247,17 +247,17 @@ gboolean tcam_prop_set (TcamProp* self, gchar* cname, GVariant* value)
  *
  * Returns: a #GVariant
  */
-GVariant* tcam_prop_get (TcamProp* self, gchar* cname)
+GVariant* tcam_prop_get (GstTcamProp* self, gchar* cname)
 {
-    tcam::Property* tcam_ppty;
-    std::string name = std::string(cname);
+    // tcam::Property* tcam_ppty;
+    // std::string name = std::string(cname);
     GVariant* ret = NULL;
 
-    tcam_ppty = find_property_by_name (self,name);
-    if (tcam_ppty)
-    {
-        ret = variant_from_property (tcam_ppty);
-    }
+    // tcam_ppty = find_property_by_name (self,name);
+    // if (tcam_ppty)
+    // {
+    //     ret = variant_from_property (tcam_ppty);
+    // }
     return ret;
 }
 
@@ -271,31 +271,31 @@ GVariant* tcam_prop_get (TcamProp* self, gchar* cname)
  *
  * Returns: (transfer full): A string describing the property type
  */
-gchar* tcam_prop_get_property_type (TcamProp* self, gchar* name)
+gchar* tcam_prop_get_property_type (GstTcamProp* self, gchar* name)
 {
     tcam::Property* tcam_ppty;
     gchar *ret = NULL;
 
-    tcam_ppty = find_property_by_name (self, std::string(name));
-    if (!tcam_ppty)
-    {
-        return g_strdup("invalid");
-    }
-    switch (tcam_ppty->get_type())
-    {
-        case TCAM_PROPERTY_TYPE_INTEGER:
-        case TCAM_PROPERTY_TYPE_DOUBLE:
-            ret = g_strdup("double");
-            break;
-        case TCAM_PROPERTY_TYPE_STRING:
-            ret = g_strdup("utf8");
-            break;
-        case TCAM_PROPERTY_TYPE_BOOLEAN:
-            ret = g_strdup("boolean");
-            break;
-        default:
-            break;
-    }
+    // tcam_ppty = find_property_by_name (self, std::string(name));
+    // if (!tcam_ppty)
+    // {
+    //     return g_strdup("invalid");
+    // }
+    // switch (tcam_ppty->get_type())
+    // {
+    //     case TCAM_PROPERTY_TYPE_INTEGER:
+    //     case TCAM_PROPERTY_TYPE_DOUBLE:
+    //         ret = g_strdup("double");
+    //         break;
+    //     case TCAM_PROPERTY_TYPE_STRING:
+    //         ret = g_strdup("utf8");
+    //         break;
+    //     case TCAM_PROPERTY_TYPE_BOOLEAN:
+    //         ret = g_strdup("boolean");
+    //         break;
+    //     default:
+    //         break;
+    // }
 
     return ret ? ret : g_strdup ("invalid");
 }
@@ -311,36 +311,36 @@ gchar* tcam_prop_get_property_type (TcamProp* self, gchar* name)
  *
  * Returns: TRUE on success, FALSE otherwise
  */
-gboolean tcam_prop_set_property_double(TcamProp* self,
+gboolean tcam_prop_set_property_double(GstTcamProp* self,
                                        gchar* name,
                                        gdouble value)
 {
     tcam::Property* p;
     gboolean ret = TRUE;
-    p = find_property_by_name (self, std::string(name));
-    if (!p)
-    {
-        return FALSE;
-    }
+    // p = find_property_by_name (self, std::string(name));
+    // if (!p)
+    // {
+    //     return FALSE;
+    // }
 
-    switch (p->get_type())
-    {
-        case TCAM_PROPERTY_TYPE_INTEGER:
-        {
-            tcam::PropertyInteger* prop_i = (tcam::PropertyInteger*) p;
-            prop_i->set_value(value);
-            break;
-        }
-        case TCAM_PROPERTY_TYPE_DOUBLE:
-        {
-            tcam::PropertyDouble* prop_d = (tcam::PropertyDouble*) p;
-            prop_d->set_value(value);
-            break;
-        }
-        default:
-            ret = FALSE;
-            break;
-    }
+    // switch (p->get_type())
+    // {
+    //     case TCAM_PROPERTY_TYPE_INTEGER:
+    //     {
+    //         tcam::PropertyInteger* prop_i = (tcam::PropertyInteger*) p;
+    //         prop_i->set_value(value);
+    //         break;
+    //     }
+    //     case TCAM_PROPERTY_TYPE_DOUBLE:
+    //     {
+    //         tcam::PropertyDouble* prop_d = (tcam::PropertyDouble*) p;
+    //         prop_d->set_value(value);
+    //         break;
+    //     }
+    //     default:
+    //         ret = FALSE;
+    //         break;
+    // }
 
     return ret;
 }
@@ -355,7 +355,7 @@ gboolean tcam_prop_set_property_double(TcamProp* self,
  *
  * Returns: a #gdouble
  */
-gdouble tcam_prop_get_property_double(TcamProp* self,
+gdouble tcam_prop_get_property_double(GstTcamProp* self,
                                       gchar* name)
 {
     tcam::Property* p;
@@ -397,7 +397,7 @@ gdouble tcam_prop_get_property_double(TcamProp* self,
  *
  * Returns: a #gdouble
  */
-gdouble tcam_prop_get_property_min (TcamProp* self,
+gdouble tcam_prop_get_property_min (GstTcamProp* self,
                                     gchar* name)
 {
     tcam::Property* p;
@@ -439,7 +439,7 @@ gdouble tcam_prop_get_property_min (TcamProp* self,
  *
  * Returns: a #gdouble
  */
-gdouble tcam_prop_get_property_max (TcamProp* self,
+gdouble tcam_prop_get_property_max (GstTcamProp* self,
                                     gchar* name)
 {
     tcam::Property* p;
@@ -481,7 +481,7 @@ gdouble tcam_prop_get_property_max (TcamProp* self,
  *
  * Returns: a #gdouble
  */
-gdouble tcam_prop_get_property_default_double (TcamProp* self,
+gdouble tcam_prop_get_property_default_double (GstTcamProp* self,
                                                gchar* name)
 {
     tcam::Property* p;
@@ -514,9 +514,9 @@ gdouble tcam_prop_get_property_default_double (TcamProp* self,
 }
 
 
-TcamProp* tcam_prop_new (void)
+GstTcamProp* tcam_prop_new (void)
 {
-    return (TcamProp*)g_object_new (TCAM_TYPE_PROP, NULL);
+    return (GstTcamProp*)g_object_new (TCAM_TYPE_PROP, NULL);
 }
 
 
