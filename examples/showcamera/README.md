@@ -23,14 +23,16 @@ Change into the showcamera directory
 
 create a build directory and change into it. Then call camake and make :
 
-```mkdir build
+```
+mkdir build
 cd build
 cmake ../
-make -j```
+make -j
+```
 
 Run the program with
 
-```./showcamera```
+``` ./showcamera ```
 
 in this build directory.
 
