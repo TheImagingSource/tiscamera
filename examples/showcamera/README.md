@@ -1,6 +1,6 @@
 ## showcamera
 
-This sample was creating for learing about using V4L2, GStreamer and a little bit QT4. It is a simple camera application, that
+This sample was creating for learning about using V4L2, GStreamer and a little bit QT4. It is a simple camera application, that
 
  - allows to select a camera from a list of connected cameras
  - allows to select the video format and frame rate
