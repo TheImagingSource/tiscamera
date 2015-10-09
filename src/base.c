@@ -28,6 +28,10 @@
 #include <arv.h>
 #endif
 
+/* names of gstreamer elements used for camera interaction */
+static const char* CAMERASRC_NETWORK = "GstAravis";
+static const char* CAMERASRC_USB = "GstV4l2Src";
+
 
 struct device_resources find_source (GstElement* self)
 {

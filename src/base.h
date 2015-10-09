@@ -20,10 +20,6 @@
 #include <gst/gst.h>
 #include "bayer.h"
 
-/* names of gstreamer elements used for camera interaction */
-static const char* CAMERASRC_NETWORK = "GstAravis";
-static const char* CAMERASRC_USB = "GstV4l2Src";
-
 
 static const unsigned int V4L2_CID_EUVC_GAIN_R = 0x980921;
 static const unsigned int V4L2_CID_EUVC_GAIN_G = 0x980922;
