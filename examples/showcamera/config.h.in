@@ -1,0 +1,7 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#cmakedefine USE_AFU050
+#cmakedefine USE_FRAMECOUNTER
+#cmakedefine USE_ARAVIS_GIGE
+#endif
