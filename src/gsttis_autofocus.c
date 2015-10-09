@@ -95,6 +95,8 @@ GstElement* get_camera_src (GstElement* object)
     GstTis_AutoFocus* self = GST_TIS_AUTOFOCUS(object);
 
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(object)));
+	if( e == NULL )
+		return NULL;
 
     GList* l = GST_BIN(e)->children;
 
@@ -404,7 +406,7 @@ static void gst_tis_autofocus_class_init (GstTis_AutoFocusClass* klass)
                                      PROP_AUTO,
                                      g_param_spec_boolean ("auto",
                                                            "Activate auto focus run",
-                                                           "Automatically adjust exposure balance",
+                                                           "Automatically adjust focus.",
                                                            FALSE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
