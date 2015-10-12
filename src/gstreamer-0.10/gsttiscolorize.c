@@ -256,7 +256,7 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                        GST_LEVEL_ERROR,
                        "tiscolorize",
                        "get_usbs_cameras",
-                       184,
+                       __LINE__,
                        NULL,
                        "Unable to create udev object");
 
@@ -298,7 +298,7 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                            GST_LEVEL_ERROR,
                            "tiscolorize",
                            "get_usbs_cameras",
-                           184,
+                           __LINE__,
                            NULL,
                            "Unable to retrieve usb device for %s", needed_path);
             return;
@@ -323,7 +323,7 @@ void get_usb_cameras (usb_cam (*cameras)[], int* camera_count)
                            GST_LEVEL_INFO,
                            "tiscolorize",
                            "get_usbs_cameras",
-                           250,
+                           __LINE__,
                            NULL,
                            "Found v4l2 device %s", needed_path);
 
@@ -355,7 +355,7 @@ int get_product_id (char* devnode)
                            GST_LEVEL_INFO,
                            "tiscolorize",
                            "get_product_id",
-                           280,
+                           __LINE__,
                            NULL,
                            "Found product id %d for device %s", cameras[i].productid, cameras[i].devnode);
 
@@ -486,7 +486,7 @@ static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
                            GST_LEVEL_INFO,
                            "tiscolorize",
                            "gst_tiscolorize_transform_caps",
-                           365,
+                           __LINE__,
                            NULL,
                            "Setting format to grbg while waiting for device init.");
 
@@ -536,7 +536,7 @@ static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
                                GST_LEVEL_ERROR,
                                "tiscolorize",
                                "gst_tiscolorize_transform_caps",
-                               447,
+                               __LINE__,
                                NULL,
                                "Unable to determine bayer pattern");
             }
@@ -547,7 +547,7 @@ static GstCaps* gst_tiscolorize_transform_caps (GstBaseTransform* trans,
                            GST_LEVEL_INFO,
                            "tiscolorize",
                            "gst_tiscolorize_transform_caps",
-                           380,
+                           __LINE__,
                            NULL,
                            "Setting real format for device %s to %s", dev, bayer_pattern);
 

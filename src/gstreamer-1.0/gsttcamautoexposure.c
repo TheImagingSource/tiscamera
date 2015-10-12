@@ -456,7 +456,7 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
                            GST_LEVEL_ERROR,
                            "tcamautoexposure",
                            "set_exposure",
-                           442,
+                           __LINE__,
                            NULL,
                            "Unable to write exposure for USB device");
         }

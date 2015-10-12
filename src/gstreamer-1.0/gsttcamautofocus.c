@@ -618,7 +618,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
                    GST_LEVEL_ERROR,
                    "tis_auto_exposure",
                    "gst_tcamautofocus_fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "Fixated caps %d %d %d %d %c%c%c%c",
                    FOURCC_GRBG8,
@@ -665,7 +665,7 @@ static void transform_aravis (GstTcamAutoFocus* self, GstBuffer* buf)
                    GST_LEVEL_ERROR,
                    "tcamautofocus",
                    "fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "cur focus %d ", current_focus);
 
@@ -697,7 +697,7 @@ static void transform_aravis (GstTcamAutoFocus* self, GstBuffer* buf)
                        GST_LEVEL_ERROR,
                        "tcamautofocus",
                        "fixate_caps",
-                       336,
+                       __LINE__,
                        NULL,
                        "Setting focus %d", new_focus_value);
         arv_device_set_integer_feature_value(device, "Focus", new_focus_value);
@@ -748,7 +748,7 @@ static void transform_usb (GstTcamAutoFocus* self, GstBuffer* buf)
                    GST_LEVEL_ERROR,
                    "tcamautofocus",
                    "fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "current focus %d - %dx%d ", self->cur_focus, self->width, self->height);
 
@@ -785,7 +785,7 @@ static void transform_usb (GstTcamAutoFocus* self, GstBuffer* buf)
                        GST_LEVEL_ERROR,
                        "tcamautofocus",
                        "fixate_caps",
-                       336,
+                       __LINE__,
                        NULL,
                        "Setting focus %d", new_focus_value);
 
@@ -825,7 +825,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
                    GST_LEVEL_ERROR,
                    "tcamautofocus",
                    "fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "current focus %d - %dx%d ", self->cur_focus, self->width, self->height);
 
@@ -862,7 +862,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
                        GST_LEVEL_ERROR,
                        "tcamautofocus",
                        "fixate_caps",
-                       336,
+                       __LINE__,
                        NULL,
                        "Setting focus %d", new_focus_value);
 
@@ -895,7 +895,7 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
                            GST_LEVEL_ERROR,
                            "tcamautofocus",
                            "fixate_caps",
-                           336,
+                           __LINE__,
                            NULL,
                            "Calling USB");
             transform_usb(self, buf);
@@ -906,7 +906,7 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
                            GST_LEVEL_ERROR,
                            "tcamautofocus",
                            "fixate_caps",
-                           336,
+                           __LINE__,
                            NULL,
                            "Calling ARAVIS");
             transform_aravis(self, buf);
@@ -921,7 +921,7 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
                            GST_LEVEL_ERROR,
                            "tcamautofocus",
                            "fixate_caps",
-                           336,
+                           __LINE__,
                            NULL,
                            "Unable to determine camera type. Aborting");
             return GST_FLOW_ERROR;
