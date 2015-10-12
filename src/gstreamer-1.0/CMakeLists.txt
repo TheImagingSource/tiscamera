@@ -40,7 +40,8 @@ include_directories(${INTROSPECTION_INCLUDE_DIR})
 
 add_library(gsttcamsrc SHARED gsttcamsrc.c)
 
-target_link_libraries(gsttcamsrc tcamprop)
+#target_link_libraries(gsttcamsrc tcam-gobject)
+target_link_libraries(gsttcamsrc ${INTROSPECTION_LIBS})
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.c image_sampling.c bayer.c)
 
@@ -57,5 +58,6 @@ foreach (t IN ITEMS ${PLUGINS})
     target_link_libraries(${t} ${GObject_LIBRARIES})
 
 endforeach (t)
+
 
 install(TARGETS ${PLUGINS} DESTINATION TCAM_INSTALL_GST_1_0)
