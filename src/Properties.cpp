@@ -237,6 +237,12 @@ bool PropertyInteger::set_value (int64_t new_value)
     if (i.min > new_value || i.max < new_value)
         return false;
 
+
+    if (i.step > 0 && new_value % i.step != 0)
+    {
+        return false;
+    }
+
     i.value = new_value;
 
     notify_impl();
