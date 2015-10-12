@@ -255,7 +255,12 @@ bool AravisDevice::set_video_format (const VideoFormat& new_format)
 
     // TODO: auto center
 
-    arv_camera_set_region(this->arv_camera, 0, 0, new_format.get_size().width, new_format.get_size().height);
+    unsigned int offset_x = 0;
+    unsigned int offset_y = 0;
+
+    arv_camera_set_region(this->arv_camera,
+                          offset_x, offset_y,
+                          new_format.get_size().width, new_format.get_size().height);
 
     determine_active_video_format();
 
@@ -314,8 +319,16 @@ bool AravisDevice::set_sink (std::shared_ptr<SinkInterface> s)
 
 bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> b)
 {
-    this->buffers = b;
 
+    this->buffers.clear();
+
+    this->buffers.reserve(b.size());
+
+    for (unsigned int i = 0; i < b.size(); ++i)
+    {
+        buffer_info info = {b.at(i), false};
+        this->buffers.push_back(info);
+    }
     return true;
 }
 
@@ -378,9 +391,9 @@ bool AravisDevice::start_stream ()
                       NULL);
     }
 
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < buffers.size(); ++i)
     {
-        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, NULL));
+        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, buffers.at(i).buffer->get_data()));
     }
 
     arv_stream_set_emit_signals (this->stream, TRUE);
@@ -433,23 +446,29 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            struct tcam_image_buffer desc = {};
+            // struct tcam_image_buffer desc = {};
 
-            desc.format = self->active_video_format.get_struct();
+            // desc.format = self->active_video_format.get_struct();
 
-            size_t size = 0;
-            desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
-            desc.length = size;
-            desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
+            // size_t size = 0;
+            // desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
+            // desc.length = size;
+            // desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
 
-            if (desc.pData == NULL)
-            {
-                tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
-            }
+            // if (desc.pData == NULL)
+            // {
+            //     tcam_log(TCAM_LOG_ERROR, "Received data pointer is NULL.");
+            // }
 
-            self->buffers.at(self->current_buffer)->set_image_buffer(desc);
+            // self->buffers.at(self->current_buffer).buffer->set_image_buffer(desc);
             //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-            self->external_sink->push_image(self->buffers.at(self->current_buffer));
+
+            // TODO check for image locking
+
+            self->buffers.at(self->current_buffer).is_queued = false;
+
+            self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
+
 
             // // keep buffer unqueued until user allows requeueing
             // while (buffers.at(buf.index)->is_locked())
@@ -698,7 +717,81 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                              "PacketsPerFrame",
                                                              "PacketTimeUS",
                                                              "GevSCPSPacketSize",
-                                                             "GevSCPSFireTestPacket"};
+                                                             "GevSCPSFireTestPacket",
+                                                             "DeviceVendorName",
+                                                             "DeviceType",
+                                                             "DeviceModelType",
+                                                             "DeviceVersion",
+                                                             "DeviceSerialNumber",
+                                                             "DeviceUserID",
+                                                             "DeviceSFNCVersionMajor",
+                                                             "DeviceSFNCVersionMinor",
+                                                             "DeviceTLType",
+                                                             "DeviceTLTypeMajor",
+                                                             "DeviceTLTypeMinor",
+                                                             "DeviceTLTypeSubMinor",
+                                                             "DeviceLinkSelector",
+                                                             "StrobeOperation",
+                                                             "StrobePolarity",
+                                                             "StrobeEnable",
+                                                             "BalanceRatioSelector",
+                                                             "GainAutoUpperLimit",
+                                                             "GainAutoLowerLimit",
+                                                             "BlackLevel",
+                                                             "BalanceRatio",
+                                                             "BalanceWhiteAutoPreset",
+                                                             "BalanceWhiteTemperaturePreset",
+                                                             "BinningVertical",
+                                                             "BinningHorizontal",
+                                                             "WidthMax",
+                                                             "HeightMax",
+                                                             "ChunkModeActive",
+                                                             "AutoFunctionsROIEnable",
+                                                             "AutoFunctionsROIPreset",
+                                                             "AutoFunctionsROILeft",
+                                                             "AutoFunctionsROITop",
+                                                             "AutoFunctionsROIWidth",
+                                                             "AutoFunctionsROIHeight",
+                                                             "ActionDeviceKey",
+                                                             "ActionSelector",
+                                                             "ActionGroupMask",
+                                                             "ActionGroupKey",
+                                                             "UserSetSelector",
+                                                             "UserSetLoad",
+                                                             "UserSetSave",
+                                                             "UserSetDefault",
+                                                             "DeviceScanType",
+                                                             "StringReg",
+                                                             "DeviceModelName",
+                                                             "DeviceSFNCVersionSubMinor",
+                                                             "MaskedIntReg",
+                                                             "DeviceTLVersionMajor",
+                                                             "MaskedIntReg",
+                                                             "DeviceTLVersionMinor",
+                                                             "DeviceTLVersionSubMinor",
+                                                             "DeviceLinkHeartbeatTimeout",
+                                                             "DeviceStreamChannelCount",
+                                                             "DeviceStreamChannelSelector",
+                                                             "DeviceStreamChannelType",
+                                                             "DeviceStreamChannelLink",
+                                                             "DeviceStreamChannelEndianness",
+                                                             "DeviceStreamChannelPacketSize",
+                                                             "DeviceEventChannelCount",
+                                                             "TriggerDenoise",
+                                                             "TriggerMask",
+                                                             "TriggerDebouncer",
+                                                             "TriggerDelay",
+                                                             "TriggerMode",
+                                                             "TriggerSelector",
+                                                             "ExposureAutoHighlighReduction",
+                                                             "ExposureAutoUpperLimitAuto",
+                                                             "ExposureAutoUpperLimit",
+                                                             "ExposureAutoLowerLimit",
+                                                             "ExposureAutoReference",
+                                                             "ExposureAuto",
+                                                             "AcquisitionFrameRate",
+        };
+
 
         static std::vector<std::string> format_member = { "AcquisitionStart",
                                                           "AcquisitionStop",

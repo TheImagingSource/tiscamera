@@ -97,7 +97,14 @@ private:
     ArvStream* stream;
     ArvGc* genicam;
 
-    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+    struct buffer_info
+    {
+        std::shared_ptr<MemoryBuffer> buffer;
+        bool is_queued;
+    };
+
+    //std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+    std::vector<buffer_info> buffers;
     unsigned int current_buffer;
 
     struct aravis_options
