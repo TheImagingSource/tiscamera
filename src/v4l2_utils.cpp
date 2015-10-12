@@ -378,7 +378,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
 
             return std::make_shared<Property>(PropertyString(impl, cp, type));
         }
-        case TCAM_PROPERTY_TYPE_STRING_TABLE:
+        case TCAM_PROPERTY_ENUMERATION:
         {
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;

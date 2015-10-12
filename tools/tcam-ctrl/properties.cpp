@@ -47,7 +47,7 @@ void print_properties (const std::vector<Property*>& properties)
                 break;
             }
             case TCAM_PROPERTY_TYPE_STRING:
-            case TCAM_PROPERTY_TYPE_STRING_TABLE:
+            case TCAM_PROPERTY_ENUMERATION:
             {
 
             }
@@ -154,7 +154,7 @@ bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_pr
                     PropertyString* prop_s = (PropertyString*) p;
                     return prop_s->set_value(value);
                 }
-                case TCAM_PROPERTY_TYPE_STRING_TABLE:
+                case TCAM_PROPERTY_ENUMERATION:
                 {
                     PropertyStringMap* prop_m = (PropertyStringMap*) p;
 

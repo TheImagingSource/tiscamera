@@ -270,7 +270,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
     if (ARV_IS_GC_ENUMERATION (node))
     {
-        if (type_to_use == TCAM_PROPERTY_TYPE_STRING_TABLE)
+        if (type_to_use == TCAM_PROPERTY_ENUMERATION)
         {
             const GSList* children;
             const GSList* iter;
@@ -415,7 +415,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             return nullptr;
 
         }
-        else if (type_to_use == TCAM_PROPERTY_TYPE_STRING_TABLE)
+        else if (type_to_use == TCAM_PROPERTY_ENUMERATION)
         {
             // printf ("??? %s: '%s'%s\n",
             //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),

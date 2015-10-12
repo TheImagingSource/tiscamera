@@ -37,7 +37,7 @@ std::string tcam::propertyType2String (TCAM_PROPERTY_TYPE type)
         case TCAM_PROPERTY_TYPE_INTEGER: return "INTEGER";
         case TCAM_PROPERTY_TYPE_DOUBLE: return "DOUBLE";
         case TCAM_PROPERTY_TYPE_STRING: return "STRING";
-        case TCAM_PROPERTY_TYPE_STRING_TABLE: return "STRING_TABLE";
+        case TCAM_PROPERTY_ENUMERATION: return "ENUMERATION";
         case TCAM_PROPERTY_TYPE_BUTTON: return "BUTTON";
         case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:

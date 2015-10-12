@@ -164,7 +164,7 @@ enum TCAM_PROPERTY_TYPE
     TCAM_PROPERTY_TYPE_INTEGER      = 2,
     TCAM_PROPERTY_TYPE_DOUBLE       = 3,
     TCAM_PROPERTY_TYPE_STRING       = 4,
-    TCAM_PROPERTY_TYPE_STRING_TABLE = 5,
+    TCAM_PROPERTY_ENUMERATION       = 5,
     TCAM_PROPERTY_TYPE_BUTTON       = 6, /**< the button type is just a command
                                             to trigger some functionality
                                             which doesn't care about parameters

@@ -229,7 +229,7 @@ static std::shared_ptr<Property> create_property(const std::shared_ptr<Property>
     {
         return std::make_shared<Property>(PropertyString(impl, p->get_struct(), p->get_value_type()));
     }
-    else if (type == TCAM_PROPERTY_TYPE_STRING_TABLE)
+    else if (type == TCAM_PROPERTY_ENUMERATION)
     {
         auto s = static_cast<PropertyStringMap&>(*p);
 

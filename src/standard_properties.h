@@ -115,13 +115,13 @@ static const std::vector<struct control_reference> ctrl_reference_table =
     {
         .id = TCAM_PROPERTY_TRIGGER_SOURCE,
         .name = "Trigger Source",
-        .type_to_use = TCAM_PROPERTY_TYPE_STRING_TABLE,
+        .type_to_use = TCAM_PROPERTY_ENUMERATION,
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         .id = TCAM_PROPERTY_TRIGGER_ACTIVATION,
         .name = "Trigger Activation",
-        .type_to_use = TCAM_PROPERTY_TYPE_STRING_TABLE,
+        .type_to_use = TCAM_PROPERTY_ENUMERATION,
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
