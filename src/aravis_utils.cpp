@@ -86,6 +86,26 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"TriggerSoftware"},
     },
     {
+        .id = TCAM_PROPERTY_TRIGGER_DENOISE,
+        .genicam_name = {"TriggerDenoise"},
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_MASK,
+        .genicam_name = {"TriggerMask"},
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_DEBOUNCER,
+        .genicam_name = {"TriggerDebouncer"},
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_DELAY,
+        .genicam_name = {"TriggerDelay"},
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_SELECTOR,
+        .genicam_name = {"TriggerSelector"},
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .genicam_name = {"GPIO"},
     },
@@ -158,25 +178,85 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"StrobeEnable"},
     },
     {
+        .id = TCAM_PROPERTY_STROBE_OPERATION,
+        .genicam_name = {"StrobeOperation"},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_POLARITY,
+        .genicam_name = {"StrobePolarity"},
+    },
+    {
         .id = TCAM_PROPERTY_BINNING,
         .genicam_name = {"Binning"},
-    }
-    // {
-    //     .name = "Strobe Polarity",
-    //     .type_to_use = ,
-    //     .genicam_name = {"StrobePolarity"},
-    // },
-    // {
-    //     .name = "Strobe Operation",
-    //     .type_to_use = ,
-    //     .genicam_name = {"StrobeOperation"},
-    // },
-    // {
-    //     .name = "",
-    //     .type_to_use = ,
-    //     .genicam_name = {},
-    // },
-
+    },
+    {
+        .id = TCAM_PROPERTY_BINNING_VERTICAL,
+        .genicam_name = {"BinningHorizontal"},
+    },
+    {
+        .id = TCAM_PROPERTY_BINNING_HORIZONTAL,
+        .genicam_name = {"BinningVertical"},
+    },
+    {
+        .id = TCAM_PROPERTY_BLACKLEVEL,
+        .genicam_name = {"BlackLevel"},
+    },
+    {
+        .id = TCAM_PROPERTY_CHUNK_MODE_ACTIVE,
+        .genicam_name = {"ChunkModeActive"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_COUNT,
+        .genicam_name = {"DeviceStreamChannelCount"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_SELECTOR,
+        .genicam_name = {"DeviceStreamChannelSelector"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_TYPE,
+        .genicam_name = {"DeviceStreamChannelType"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_LINK,
+        .genicam_name = {"DeviceStreamChannelLink"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_ENDIANNESS,
+        .genicam_name = {"DeviceStreamChannelEndianness"},
+    },
+    {
+        .id = TCAM_PROPERTY_STREAM_CHANNEL_PACKET_SIZE,
+        .genicam_name = {"DeviceStreamChannelPacketSize"},
+    },
+    {
+        .id = TCAM_PROPERTY_EVENT_CHANNEL_COUNT,
+        .genicam_name = {"DeviceStreamChannelPacketSize"},
+    },
+    {
+        .id = TCAM_PROPERTY_PAYLOAD_SIZE,
+        .genicam_name = {"PayloadSize"},
+    },
+    {
+        .id = TCAM_PROPERTY_PAYLOAD_PER_FRAME,
+        .genicam_name = {"PayloadPerFrame"},
+    },
+    {
+        .id = TCAM_PROPERTY_PAYLOAD_PER_PACKET,
+        .genicam_name = {"PayloadPerPacket"},
+    },
+    {
+        .id = TCAM_PROPERTY_TOTAL_PACKET_SIZE,
+        .genicam_name = {"TotalPacketSize"},
+    },
+    {
+        .id = TCAM_PROPERTY_PACKETS_PER_FRAME,
+        .genicam_name = {"PacketsPerFrame"},
+    },
+    {
+        .id = TCAM_PROPERTY_PACKET_TIME_US,
+        .genicam_name = {"PacketTimeUS"},
+    },
 };
 
 
@@ -270,7 +350,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
     if (ARV_IS_GC_ENUMERATION (node))
     {
-        if (type_to_use == TCAM_PROPERTY_ENUMERATION)
+        if (type_to_use == TCAM_PROPERTY_TYPE_ENUMERATION)
         {
             const GSList* children;
             const GSList* iter;
@@ -415,7 +495,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
             return nullptr;
 
         }
-        else if (type_to_use == TCAM_PROPERTY_ENUMERATION)
+        else if (type_to_use == TCAM_PROPERTY_TYPE_ENUMERATION)
         {
             // printf ("??? %s: '%s'%s\n",
             //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),

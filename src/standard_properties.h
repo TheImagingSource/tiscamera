@@ -131,6 +131,31 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
+        TCAM_PROPERTY_TRIGGER_DENOISE,
+        .name = "Trigger Denoise",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_MASK,
+        .name = "Trigger Mask",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_DEBOUNCER,
+        .name = "Trigger Debouncer",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_DELAY,
+        .name = "Trigger Delay (us)",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_SELECTOR,
+        .name = "Trigger Selector",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .name = "GPIO",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
@@ -281,6 +306,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
     },
     {
+        .id = TCAM_PROPERTY_STROBE_OPERATION,
+        .name = "Strobe Operation",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_POLARITY,
+        .name = "Strobe Polarity",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
         .id = TCAM_PROPERTY_SKIPPING,
         .name = "Skipping",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
@@ -289,6 +326,16 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_BINNING,
         .name = "Binning",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_BINNING_HORIZONTAL,
+        .name = "Binning Horizontal",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_BINNING_VERTICAL,
+        .name = "Binning Vertical",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
     },
     {
         TCAM_PROPERTY_SHARPNESS,
@@ -305,16 +352,93 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .name = "Reverse Y",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
+    {
+        TCAM_PROPERTY_BLACKLEVEL,
+        .name = "Black Level",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_CHUNK_MODE_ACTIVE,
+        .name = "Chunk Mode Active",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_COUNT,
+        .name = "Stream Channel Count",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_SELECTOR,
+        .name = "Stream Channel Selector",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_TYPE,
+        .name = "Stream Channel Type",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_LINK,
+        .name = "Stream Channel Link",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_ENDIANNESS,
+        .name = "Stream Channel Endianness",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
+        TCAM_PROPERTY_STREAM_CHANNEL_PACKET_SIZE,
+        .name = "Stream Channel Packet Size",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_EVENT_CHANNEL_COUNT,
+        .name = "Event Channel Count",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_PAYLOAD_SIZE,
+        .name = "Payload Size",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_PAYLOAD_PER_FRAME,
+        .name = "Payload Per Frame",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_PAYLOAD_PER_PACKET,
+        .name = "Payload Per Packet",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_TOTAL_PACKET_SIZE,
+        .name = "Total Packet Size",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_PACKETS_PER_FRAME,
+        .name = "Packets Per Frame",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_PACKET_TIME_US,
+        .name = "Packet Time (1000ns)",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    // {
+    //     TCAM_PROPERTY_,
+    //     .name = "",
+    //     .type_to_use = TCAM_PROPERTY_TYPE,
+    // },
+
     // {
     //     .name = "Strobe Polarity",
     //     .type_to_use = ,
     // },
     // {
     //     .name = "Strobe Operation",
-    //     .type_to_use = ,
-    // },
-    // {
-    //     .name = "",
     //     .type_to_use = ,
     // },
 
