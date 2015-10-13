@@ -151,7 +151,7 @@ void Property::set_struct_value (const struct tcam_device_property& p)
     {
         case TCAM_PROPERTY_TYPE_STRING:
             std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
-        case TCAM_PROPERTY_ENUMERATION:
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
             prop.value.i.value = p.value.i.value;
             break;
         case TCAM_PROPERTY_TYPE_INTEGER:
@@ -213,7 +213,7 @@ std::string Property::to_string () const
             break;
 
         }
-        case TCAM_PROPERTY_ENUMERATION:
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
 
         }
@@ -267,7 +267,7 @@ bool Property::from_string (const std::string& s)
                 prop.value.s.value[sizeof(prop.value.s.value)-1] = '\0';
                 break;
             }
-            case TCAM_PROPERTY_ENUMERATION:
+            case TCAM_PROPERTY_TYPE_ENUMERATION:
             {
 
             }
@@ -418,7 +418,7 @@ TCAM_PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
         case Property::STRING:
             return TCAM_PROPERTY_TYPE_STRING;
         case Property::ENUM:
-            return TCAM_PROPERTY_ENUMERATION;
+            return TCAM_PROPERTY_TYPE_ENUMERATION;
         case Property::INTSWISSKNIFE:
         case Property::INTEGER:
             return TCAM_PROPERTY_TYPE_INTEGER;
