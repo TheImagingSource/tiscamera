@@ -38,7 +38,7 @@ target_link_libraries(tcam-gobject ${INTROSPECTION_LIBS})
 #add_custom_target(tcam-0.1-gir tcam-gobject)
 
 add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/src/gobject/tcam.gir
+  OUTPUT ${CMAKE_BINARY_DIR}/src/gobject/Tcam.gir
   DEPENDS tcam-gobject
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject
   COMMAND
