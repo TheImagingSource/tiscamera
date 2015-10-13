@@ -43,8 +43,8 @@ option(BUILD_FIREWIRE "Include support for firewire devices" OFF)
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -flto -pthread")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -flto -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
 if (BUILD_USB)
   add_definitions(-DHAVE_USB)
