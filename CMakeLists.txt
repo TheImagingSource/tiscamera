@@ -39,7 +39,6 @@ option(BUILD_GST_0_10 "Build gstreamer-0.10 plugins?"        OFF)
 option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         OFF)
 option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_USB      "Include support for USB cameras"      ON )
-option(BUILD_FIREWIRE "Include support for firewire devices" OFF)
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 
 
