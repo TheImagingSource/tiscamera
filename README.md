@@ -4,12 +4,10 @@ This repository will give you additional ressources to control your TIS camera.
 
 ## What do we offer?
 
-* C/C++ library for image retrieval
 * gstreamer elements
 * uvc extensions
 * firmware update tools
 * examples on how to interact with your camera
-* GUI application that allows straight forward camera interaction
 
 ## How to install?
 
@@ -42,21 +40,14 @@ Build against v4l2 to enable support for USB cameras
 cmake
 libudev
 tinyxml
+libgstreamer-1.0
+libglib-2.0
 
 ### Additional aravis dependencies
 
 aravis-0.4
 libxml2
 libgobject
-
-### Additional gstreamer dependencies
-
-libgstreamer-0.10
-libglib-2.0
-
-### Qt4 dependencies
-
-
 
 ## Don't know where to start?
 
@@ -69,4 +60,3 @@ For questions simply open a ticket or write us a mail.
 ## Licensing
 
 All files are published under the Apache License 2.0, unless otherwise noted.
-
