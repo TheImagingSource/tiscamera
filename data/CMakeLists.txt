@@ -29,3 +29,5 @@ if (BUILD_USB)
 endif (BUILD_USB)
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
+
+install(FILE ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc DESTINATION lib/pkgconfig)
