@@ -47,7 +47,7 @@ default: OFF
 #### USB support
 default: ON
 
-    -DBUILD_USB:BOOL=ON/OFF
+    -DBUILD_V4L2:BOOL=ON/OFF
 
 #### gstreamer-0.10 support
 

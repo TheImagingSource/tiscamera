@@ -62,7 +62,7 @@ gsttcambase.c
 tcam_c.cpp
 )
 
-if (BUILD_USB)
+if (BUILD_V4L2)
   list(APPEND srcs V4l2Device.cpp)
   list(APPEND srcs v4l2_utils.cpp)
 
@@ -72,7 +72,7 @@ if (BUILD_USB)
 
   add_definitions(-DHAVE_USB)
 
-endif (BUILD_USB)
+endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
 
@@ -107,11 +107,11 @@ set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
 
-if (BUILD_USB)
+if (BUILD_V4L2)
   if (UDEV_FOUND)
     TARGET_LINK_LIBRARIES(tcam ${UDEV_LIBRARIES})
   endif (UDEV_FOUND)
-endif(BUILD_USB)
+endif(BUILD_V4L2)
 
 TARGET_LINK_LIBRARIES(tcam ${TinyXML_LIBRARIES})
 

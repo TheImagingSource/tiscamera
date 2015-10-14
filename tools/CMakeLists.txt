@@ -16,9 +16,9 @@
 
 add_subdirectory(tcam-ctrl)
 
-if (BUILD_USB)
+if (BUILD_V4L2)
   add_subdirectory(firmware-update)
-endif (BUILD_USB)
+endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
   add_subdirectory(camera-ip-conf)
