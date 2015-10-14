@@ -103,6 +103,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 set(PUBLIC_HEADER tcam.h tcam_c.h)
 add_library(tcam SHARED ${srcs} tcam_c.cpp)
 
+set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
+set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
+
 
 if (BUILD_USB)
   if (UDEV_FOUND)
