@@ -92,8 +92,10 @@ gst_tisvideobufferfilter_class_init (GstTisVideoBufferFilterClass * klass)
 					    gst_static_pad_template_get (&gst_tisvideobufferfilter_src_template));
 
 	gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
-					      "The Imaging Source Video Buffer Filter", "Generic", "Filters(drops) corrupt raw video buffers from stream",
-					      "Arne Caspari <arne.caspari@gmail.com>");
+                                          "The Imaging Source Video Buffer Filter",
+                                          "Generic",
+                                          "Filters(drops) corrupt raw video buffers from stream",
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 	/* gst_element_class_set_static_metadata (GST_ELEMENT_CLASS(klass), */
 	/* 				       "Tis Video Buffer Filter", "Generic", "Filters(drops) corrupt raw video buffers from stream", */
 	/* 				       "Arne Caspari <arne.caspari@gmail.com>"); */

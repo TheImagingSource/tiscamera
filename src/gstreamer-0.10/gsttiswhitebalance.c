@@ -128,7 +128,7 @@ static void gst_tiswhitebalance_class_init (GstTisWhiteBalanceClass * klass)
                                           "The Imaging Source White Balance Element",
                                           "Generic",
                                           "Adjusts white balancing of video data buffers",
-                                          "Edgar Thier <edgarthier@gmail.com>");
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
     gobject_class->set_property = gst_tiswhitebalance_set_property;
     gobject_class->get_property = gst_tiswhitebalance_get_property;

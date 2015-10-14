@@ -805,7 +805,7 @@ static void gst_tcam_class_init (GstTcamClass* klass)
                                           "Tcam Video Source",
                                           "Source/Video",
                                           "Tcam based source",
-                                          "TheImaging Source <support@theimagingsource.com>");
+                                          "The Imaging Source <support@theimagingsource.com>");
 
     gst_element_class_add_pad_template (element_class,
                                         gst_static_pad_template_get (&tcam_src_template));

@@ -144,7 +144,7 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                           "The Imaging Source Brightness Balance Element",
                                           "Generic",
                                           "Adjusts the image brightness by setting camera properties.",
-                                          "Edgar Thier <edgarthier@gmail.com>");
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
     gobject_class->set_property = gst_tis_auto_exposure_set_property;
     gobject_class->get_property = gst_tis_auto_exposure_get_property;

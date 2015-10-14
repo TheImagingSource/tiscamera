@@ -112,7 +112,7 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
                                           "The Imaging Source White Balance Element",
                                           "Generic",
                                           "Adjusts white balancing of video data buffers",
-                                          "Edgar Thier <edgarthier@gmail.com>");
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
     //GstBaseTransform *test = GST_BASE_TRANSFORM(base_transform_class);
 

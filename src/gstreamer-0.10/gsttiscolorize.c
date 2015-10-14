@@ -114,7 +114,7 @@ static void gst_tiscolorize_class_init (GstTisColorizeClass* klass)
                                           "The Imaging Source White Balance Element",
                                           "Generic",
                                           "Adjusts white balancing of RAW video data buffers",
-                                          "Arne Caspari <arne.caspari@gmail.com>");
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
 	g_object_class_install_property (gobject_class,
                                      PROP_PATTERN,
