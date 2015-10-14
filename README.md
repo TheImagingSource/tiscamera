@@ -33,7 +33,7 @@ Build additional gstreamer-0.10 modules
 Build additional gstreamer-1.0 modules
 * -DBUILD_TOOLS [default=OFF]
 Build additional tools (firmware-tools, ip-configuration)
-* -DBUILD_USB [default=ON]
+* -DBUILD_V4L2 [default=ON]
 Build against v4l2 to enable support for USB cameras
 
 
