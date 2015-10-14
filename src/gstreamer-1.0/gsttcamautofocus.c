@@ -400,7 +400,7 @@ static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
                                           "The Imaging Source auto focus Element",
                                           "Generic",
                                           "Adjusts the image focus by setting camera properties.",
-                                          "Edgar Thier <edgar.thier@theimagingsource.com>");
+                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
     gobject_class->set_property = gst_tcamautofocus_set_property;
     gobject_class->get_property = gst_tcamautofocus_get_property;
