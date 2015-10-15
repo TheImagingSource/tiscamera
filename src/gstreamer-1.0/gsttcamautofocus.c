@@ -140,6 +140,14 @@ GstElement* get_camera_src (GstElement* object)
         {
             self->camera_type = CAMERA_TYPE_TCAM;
             self->camera_src = l->data;
+
+            gst_debug_log (gst_tcamautofocus_debug_category,
+                           GST_LEVEL_INFO,
+                           "tcamautofocus",
+                           __FUNCTION__,
+                           __LINE__,
+                           NULL,
+                           "Identified camera source as tcamsrc.");
             break;
         }
 
@@ -373,15 +381,107 @@ static void focus_run_usb (GstTcamAutoFocus* self)
 }
 
 
+static void focus_run_tcam (GstTcamAutoFocus* self)
+{
+    if (self->camera_src == NULL)
+        get_camera_src (GST_ELEMENT(self));
+
+    if (self->camera_src == NULL)
+    {
+        gst_debug_log (gst_tcamautofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautofocus",
+                       "run",
+                       __LINE__,
+                       NULL,
+                       "Source empty! Aborting. ");
+        return;
+    }
+
+    tcam_capture_device* fd = NULL;
+    g_object_get (G_OBJECT (self->camera_src), "camera", &fd, NULL);
+
+    if (fd == NULL)
+    {
+        gst_debug_log (gst_tcamautofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautofocus",
+                       "run",
+                       __LINE__,
+                       NULL,
+                       "Unable to retrieve camera! Aborting. ");
+        return;
+    }
+
+    RECT r = {0, 0, 0, 0};
+
+    /* user defined rectangle */
+    if (self->x != 0 || self->y != 0)
+    {
+        r.left = (self->x - self->size < 0) ? 0 : self->x - self->size;
+        r.right =(self->x - self->size > self->width) ? self->width : self->x - self->size;
+        r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
+        r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
+    }
+
+    struct tcam_device_property prop = {};
+    gboolean ret = tcam_capture_device_find_property(fd, TCAM_PROPERTY_FOCUS, &prop);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamautofocus_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautofocus",
+                       "run",
+                       __LINE__,
+                       NULL,
+                       "Unable to retrieve focus property! Aborting. ");
+        return;
+    }
+
+    self->cur_focus = prop.value.i.value;
+    int min = prop.value.i.min;
+    int max = prop.value.i.max;
+
+    /* magic number */
+    int focus_auto_step_divisor = 4;
+
+    gst_debug_log (gst_tcamautofocus_debug_category,
+                   GST_LEVEL_ERROR,
+                   "tcamautofocus",
+                   "run",
+                   __LINE__,
+                   NULL,
+                   "Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
+                   self->cur_focus,
+                   min,
+                   max,
+                   focus_auto_step_divisor);
+
+    autofocus_run(self->focus,
+                  self->cur_focus,
+                  min,
+                  max,
+                  r,
+                  500,
+                  focus_auto_step_divisor,
+                  false);
+}
+
+
 static void focus_run (GstTcamAutoFocus* self)
 {
     if (self->camera_type == CAMERA_TYPE_ARAVIS)
     {
         focus_run_aravis(self);
     }
-    else
+    else if (self->camera_type == CAMERA_TYPE_USB)
     {
         focus_run_usb(self);
+    }
+    else
+    {
+        focus_run_tcam(self);
     }
 }
 
@@ -572,7 +672,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
     {
         if (gst_structure_has_field (outs, "height"))
         {
-            gst_structure_fixate_field_nearest_int (outs, "width", height);
+            gst_structure_fixate_field_nearest_int (outs, "height", height);
         }
         self->height = height;
     }
@@ -878,9 +978,34 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 }
 
 
+gboolean find_image_values (GstTcamAutoFocus* self)
+{
+    GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
+    GstCaps* caps = gst_pad_get_current_caps(pad);
+    GstStructure *structure = gst_caps_get_structure (caps, 0);
+
+    g_return_if_fail (gst_structure_get_int (structure, "width", &self->width));
+    g_return_if_fail (gst_structure_get_int (structure, "height", &self->height));
+
+    gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+
+    return TRUE;
+}
+
+
+
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (trans);
+
+
+    if (self->width == 0 || self->height == 0)
+    {
+        if (!find_image_values(self))
+        {
+            return GST_FLOW_ERROR;
+        }
+    }
 
     if (autofocus_is_running(self->focus))
     {
