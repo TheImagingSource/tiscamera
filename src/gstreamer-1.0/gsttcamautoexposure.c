@@ -57,6 +57,7 @@
 #include "tcam_c.h"
 
 #include <math.h>
+#include <stdlib.h>
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautoexposure.h"
