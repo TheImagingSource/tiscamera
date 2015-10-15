@@ -23,13 +23,11 @@ sudo make install
 Build against aravis to enable support for GigE cameras
 * -DBUILD_DOC [default=OFF]
 BUILD doxygen and other project documentations
-* -DBUILD_FIREWIRE [default=OFF]
-Build against 1394 libraries to enable support for Firewire cameras
 * -DBUILD_GST_0_10 [default=OFF]
 Build additional gstreamer-0.10 modules
-* -DBUILD_GST_1_0 [default=OFF]
+* -DBUILD_GST_1_0 [default=ON]
 Build additional gstreamer-1.0 modules
-* -DBUILD_TOOLS [default=OFF]
+* -DBUILD_TOOLS [default=ON]
 Build additional tools (firmware-tools, ip-configuration)
 * -DBUILD_V4L2 [default=ON]
 Build against v4l2 to enable support for USB cameras
@@ -42,12 +40,12 @@ libudev
 tinyxml
 libgstreamer-1.0
 libglib-2.0
+libgobject
 
 ### Additional aravis dependencies
 
 aravis-0.4
 libxml2
-libgobject
 
 ## Don't know where to start?
 
