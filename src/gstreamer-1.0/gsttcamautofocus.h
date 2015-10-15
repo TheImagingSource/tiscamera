@@ -55,6 +55,9 @@ typedef struct GstTcamAutoFocus
     unsigned int width;
     unsigned int height;
 
+    unsigned int framerate_numerator;
+    unsigned int framerate_denominator;
+
     gboolean focus_active;
 
     GstElement* camera_src;
