@@ -16,10 +16,6 @@
 add_subdirectory(gobject)
 
 
-if (BUILD_GST_0_10)
-  add_subdirectory(gstreamer-0.10)
-endif (BUILD_GST_0_10)
-
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
