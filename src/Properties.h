@@ -57,16 +57,16 @@ public:
 /*
 
  */
-class PropertyStringMap : public Property
+class PropertyEnumeration : public Property
 {
 public:
 
-    PropertyStringMap (std::shared_ptr<PropertyImpl>,
-                       const tcam_device_property&,
-                       const std::map<std::string, int>&,
-                       VALUE_TYPE);
+    PropertyEnumeration (std::shared_ptr<PropertyImpl>,
+                         const tcam_device_property&,
+                         const std::map<std::string, int>&,
+                         VALUE_TYPE);
 
-    ~PropertyStringMap ();
+    ~PropertyEnumeration ();
 
     std::vector<std::string> get_values () const;
 

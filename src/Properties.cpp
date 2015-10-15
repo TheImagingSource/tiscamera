@@ -73,21 +73,21 @@ std::string PropertyString::get_value () const
 
 
 
-PropertyStringMap::PropertyStringMap (std::shared_ptr<PropertyImpl> prop_impl,
-                                      const tcam_device_property& prop,
-                                      const std::map<std::string, int>& values,
-                                      VALUE_TYPE t)
+PropertyEnumeration::PropertyEnumeration (std::shared_ptr<PropertyImpl> prop_impl,
+                                          const tcam_device_property& prop,
+                                          const std::map<std::string, int>& values,
+                                          VALUE_TYPE t)
     : Property(prop, values, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyStringMap::~PropertyStringMap ()
+PropertyEnumeration::~PropertyEnumeration ()
 {}
 
 
-std::vector<std::string> PropertyStringMap::get_values () const
+std::vector<std::string> PropertyEnumeration::get_values () const
 {
     std::vector<std::string> vec;
 
@@ -100,13 +100,13 @@ std::vector<std::string> PropertyStringMap::get_values () const
 }
 
 
-std::string PropertyStringMap::get_default () const
+std::string PropertyEnumeration::get_default () const
 {
     return "";
 }
 
 
-bool PropertyStringMap::set_value (const std::string& new_value)
+bool PropertyEnumeration::set_value (const std::string& new_value)
 {
     if (is_read_only())
     {
@@ -126,13 +126,13 @@ bool PropertyStringMap::set_value (const std::string& new_value)
 }
 
 
-std::string PropertyStringMap::get_value () const
+std::string PropertyEnumeration::get_value () const
 {
     return prop.value.s.value;
 }
 
 
-std::map<std::string, int> PropertyStringMap::get_mapping () const
+std::map<std::string, int> PropertyEnumeration::get_mapping () const
 {
     return string_map;
 }

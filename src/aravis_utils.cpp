@@ -371,7 +371,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
                 }
             }
 
-            return std::make_shared<PropertyStringMap>(impl, prop, var, type);
+            return std::make_shared<PropertyEnumeration>(impl, prop, var, type);
         }
         else if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {

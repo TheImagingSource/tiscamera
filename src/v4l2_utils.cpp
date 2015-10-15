@@ -403,7 +403,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
                 m.emplace(map_string, i);
             }
 
-            return std::make_shared<Property>(PropertyStringMap(impl, cp, m, type));
+            return std::make_shared<Property>(PropertyEnumeration(impl, cp, m, type));
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {

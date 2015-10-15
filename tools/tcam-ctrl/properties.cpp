@@ -156,7 +156,7 @@ bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_pr
                 }
                 case TCAM_PROPERTY_TYPE_ENUMERATION:
                 {
-                    PropertyStringMap* prop_m = (PropertyStringMap*) p;
+                    PropertyEnumeration* prop_m = (PropertyEnumeration*) p;
 
                     return prop_m->set_value(value);
                 }

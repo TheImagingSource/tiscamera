@@ -231,9 +231,9 @@ static std::shared_ptr<Property> create_property(const std::shared_ptr<Property>
     }
     else if (type == TCAM_PROPERTY_TYPE_ENUMERATION)
     {
-        auto s = static_cast<PropertyStringMap&>(*p);
+        auto s = static_cast<PropertyEnumeration&>(*p);
 
-        return std::make_shared<Property>(PropertyStringMap(impl,
+        return std::make_shared<Property>(PropertyEnumeration(impl,
                                                             p->get_struct(),
                                                             s.get_mapping(),
                                                             p->get_value_type()));
