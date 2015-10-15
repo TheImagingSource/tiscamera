@@ -34,7 +34,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 
-option(BUILD_DOC      "Generate documentation?"              OFF)
 option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
 option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_V4L2     "Include support for USB cameras"      ON )
@@ -66,12 +65,9 @@ endif (BUILD_DOC)
 # Give overview over build configuration
 
 MESSAGE(STATUS "")
-MESSAGE(STATUS "Generate documentation:        " ${BUILD_DOC})
-MESSAGE(STATUS "Build gstreamer-0.10 plugins:  " ${BUILD_GST_0_10})
 MESSAGE(STATUS "Build gstreamer-1.0 plugins:   " ${BUILD_GST_1_0})
 MESSAGE(STATUS "Support for GigE via aravis:   " ${BUILD_ARAVIS})
 MESSAGE(STATUS "Support for USB cameras:       " ${BUILD_V4L2})
-MESSAGE(STATUS "Support for firewire devices:  " ${BUILD_FIREWIRE})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
