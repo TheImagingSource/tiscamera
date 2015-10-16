@@ -920,6 +920,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     tcam_capture_device_find_property(dev, TCAM_PROPERTY_FOCUS, &prop);
 
     int focus_auto_min = prop.value.i.min;
+    max = prop.value.i.max;
 
     gst_debug_log (gst_tcamautofocus_debug_category,
                    GST_LEVEL_ERROR,
