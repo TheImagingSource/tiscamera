@@ -156,28 +156,28 @@ class ConfigFile:
     def get_mapping_structs(self):
         for mapping in self.__mappings:
             s = struct.pack( 'I', mapping[5] ) # id
-        print len(s),
+            print len(s),
             s += str(mapping[0]) + (32 - len( mapping[0] )) * struct.pack( 'B', 0 ) # name ( 32 bytes )
-        print len(s),
+            print len(s),
             s += self.__parse_guid( mapping[1][0] ) # guid
-        print len(s),
+            print len(s),
             s += struct.pack( 'B', mapping[1][1] ) # selector
-        print len(s),
+            print len(s),
             s += struct.pack( 'B', mapping[2] ) # size
-        print len(s),
+            print len(s),
             s += struct.pack( 'B', mapping[3] ) # offset
             s += struct.pack( 'B', 0 ) # padding
-        print "offset:",len(s),
+            print "offset:",len(s),
             s += struct.pack( 'I', mapping[6] ) # v4l2_type
-        print len(s),
+            print len(s),
             s += struct.pack( 'I', mapping[4] ) # data_type
-        print len(s),
-        s += struct.pack( 'Q', 0 ) # menu_info.value
-        print len(s),
-        s += struct.pack ('I', 0) # menu_info.count
-        print len(s),
-        s += 4 * struct.pack ('I', 0) # reserved
-        print len(s)
+            print len(s),
+            s += struct.pack( 'Q', 0 ) # menu_info.value
+            print len(s),
+            s += struct.pack ('I', 0) # menu_info.count
+            print len(s),
+            s += 4 * struct.pack ('I', 0) # reserved
+            print len(s)
             yield s
 
 def get_usb_id(driver):
@@ -199,14 +199,14 @@ def get_usb_id(driver):
 def get_uvcvideo_drivers():
     drivers = []
     for dev in glob.glob('/dev/video[0-9]'):
-    try:
-        fd = open(dev)
-        if fcntl.ioctl( fd, VIDIOC_QUERYCAP, 'uvcvidex' ) == 'uvcvideo' :
-        drivers.append( (fd,dev) )
-        else:
-        fd.close()
-    except:
-        print "Failed to open:",dev
+        try:
+            fd = open(dev)
+            if fcntl.ioctl( fd, VIDIOC_QUERYCAP, 'uvcvidex' ) == 'uvcvideo' :
+                drivers.append( (fd,dev) )
+            else:
+                fd.close()
+        except:
+            print "Failed to open:",dev
 
     return drivers
 
