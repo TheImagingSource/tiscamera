@@ -561,7 +561,7 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
         }
         else
         {
-            tcam_log(TCAM_LOG_DEBUG,"SHIT");
+            tcam_log(TCAM_LOG_DEBUG,"Unknown property conversion required");
         }
     }
     else

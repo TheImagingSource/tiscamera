@@ -500,29 +500,6 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 case ARV_BUFFER_STATUS_MISSING_PACKETS:
                 {
                     msg = "Stream has missing packets";
-
-                    // struct tcam_image_buffer desc = {0};
-
-                    // desc.format = self->active_video_format.get_struct();
-
-
-                    // desc.pData = (unsigned char*)buffer->data;
-                    // desc.length = buffer->size;
-
-                    // if (buffer->data == NULL)
-                    // {
-                    // tcam_log(TCAM_LOG_ERROR, "FUCKING HELL");
-                    // }
-
-                    // self->buffers.at(self->current_buffer)->set_image_buffer(desc);
-                    // tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-                    // self->external_sink->push_image(self->buffers.at(self->current_buffer));
-
-                    // if (self->current_buffer < self->buffers.size() -1)
-                    // self->current_buffer++;
-                    // else
-                    // self->current_buffer = 0;
-
                     break;
                 }
                 case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
