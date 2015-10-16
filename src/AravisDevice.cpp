@@ -802,6 +802,7 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                           "Width",
                                                           "Height",
                                                           "FPS",
+                                                          "AcquisitionFrameRate",
                                                           "PixelFormat"};
 
 
@@ -857,6 +858,13 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
     node_to_use = "FPS";
     auto fps_node = std::find_if(format_nodes.begin() , format_nodes.end(), find_node);
+
+    if (fps_node == format_nodes.end())
+    {
+        node_to_use = "AcquisitionFrameRate";
+        fps_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
+    }
+
 
     std::vector<double> fps;
 
