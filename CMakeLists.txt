@@ -24,7 +24,7 @@ set(TCAM_VERSION_MAJOR 0)
 set(TCAM_VERSION_MINOR 2)
 set(TCAM_VERSION_PATCH 0)
 
-set(TCAM_VERSION ${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH} CACHE STRING "Version number")
+set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}" CACHE STRING "Version number")
 
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
@@ -47,6 +47,13 @@ if (BUILD_V4L2)
   add_definitions(-DHAVE_USB)
   set(HAVE_USB 1)
 endif (BUILD_V4L2)
+
+set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "library installation path")
+set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE STRING "header installation path")
+set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "binary installation path")
+set(TCAM_INSTALL_UDEV "/usr/lib/udev/rules.d" CACHE STRING "udev rules installation path")
+set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcdynctrl rules installation path")
+set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path")
 
 add_subdirectory(src)
 
@@ -71,4 +78,10 @@ MESSAGE(STATUS "Support for USB cameras:       " ${BUILD_V4L2})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
+MESSAGE(STATUS "Installing binaries to:        " ${TCAM_INSTALL_BIN})
+MESSAGE(STATUS "Installing libraries to        " ${TCAM_INSTALL_LIB})
+MESSAGE(STATUS "Installing header to:          " ${TCAM_INSTALL_INCLUDE})
+MESSAGE(STATUS "Installing udev rules to:      " ${TCAM_INSTALL_UDEV})
+MESSAGE(STATUS "Installing uvcdynctrl rules to:" ${TCAM_INSTALL_UVCDYNCTRL})
+MESSAGE(STATUS "Installing gstreamer-1.0 to:   " ${TCAM_INSTALL_GST_1_0})
 MESSAGE(STATUS "")
