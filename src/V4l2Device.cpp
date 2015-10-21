@@ -787,6 +787,12 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
     auto p = createProperty(fd, qctrl, &ext_ctrl, property_handler);
 
+    if (p == nullptr)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", qctrl->name);
+        return -1;
+    }
+
     struct property_description desc;
 
     desc.id = qctrl->id;
