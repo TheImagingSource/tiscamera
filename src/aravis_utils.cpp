@@ -106,6 +106,10 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"TriggerSelector"},
     },
     {
+        .id = TCAM_PROPERTY_TRIGGER_OPERATION,
+        .genicam_name = {"TriggerOperation"},
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .genicam_name = {"GPIO"},
     },
