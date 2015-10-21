@@ -91,6 +91,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {/* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209},
     },
     {
+        .id = TCAM_PROPERTY_WB_PRESET,
+        .v4l2_id = {/* usb 3: */ 0x0199e207},
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .v4l2_id = {/* usb 2: */ 0x980920, /* usb 3: */ 0x0199e217},
     },

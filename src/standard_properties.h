@@ -264,6 +264,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
     },
     {
+        .id = TCAM_PROPERTY_WB_PRESET,
+        .name = "Whitebalance Preset",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
         .id = TCAM_PROPERTY_IRCUT,
         .name = "IRCutFilter",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
