@@ -156,6 +156,11 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
     },
     {
+        TCAM_PROPERTY_TRIGGER_OPERATION,
+        .name = "Trigger Operation",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .name = "GPIO",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
