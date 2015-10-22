@@ -46,6 +46,26 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"ExposureAuto"},
     },
     {
+        .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
+        .genicam_name = {"ExposureAutoHighlighReduction"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_REFERENCE,
+        .genicam_name = {"ExposureAutoReference"},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
+        .genicam_name = {"ExposureAutoUpperLimitAuto"},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT,
+        .genicam_name = {"ExposureAutoUpperLimit"},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_LOWER_LIMIT,
+        .genicam_name = {"ExposureAutoLowerLimit"},
+    },
+    {
         .id = TCAM_PROPERTY_GAIN,
         .genicam_name = {"Gain"},
     },
@@ -158,6 +178,30 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"BalanceWhiteAuto"},
     },
     {
+        .id = TCAM_PROPERTY_WB_MODE,
+        .genicam_name = {"BalanceWhiteMode"},
+    },
+    {
+        .id = TCAM_PROPERTY_WB_TEMPERATURE,
+        .genicam_name = {"BalanceWhiteTemperature"},
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCERATIO_SELECTOR,
+        .genicam_name = {"BalanceRatioSelector"}
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCERATIO,
+        .genicam_name = {"BalanceRatio"}
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCE_WHITE_AUTO_PRESET,
+        .genicam_name = {"BalanceWhiteAutoPreset"}
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCE_WHITE_TEMPERATURE_PRESET,
+        .genicam_name = {"BalanceWhiteTemperaturePreset"}
+    },
+    {
         .id = TCAM_PROPERTY_IRCUT,
         .genicam_name = {"IRCutFilter"},
     },
@@ -188,6 +232,14 @@ static std::vector<struct aravis_property> aravis_mappings =
     {
         .id = TCAM_PROPERTY_STROBE_POLARITY,
         .genicam_name = {"StrobePolarity"},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_DELAY,
+        .genicam_name = {"StrobeDelay"},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_DURATION,
+        .genicam_name = {"StrobeDuration"},
     },
     {
         .id = TCAM_PROPERTY_BINNING,
@@ -260,6 +312,30 @@ static std::vector<struct aravis_property> aravis_mappings =
     {
         .id = TCAM_PROPERTY_PACKET_TIME_US,
         .genicam_name = {"PacketTimeUS"},
+    },
+    {
+        .id = TCAM_PROPERTY_REVERSE_X,
+        .genicam_name = {"ReverseX"},
+    },
+    {
+        .id = TCAM_PROPERTY_REVERSE_Y,
+        .genicam_name = {"ReverseY"},
+    },
+    {
+        .id = TCAM_PROPERTY_CHUNK_IMX174_FRAME_ID,
+        .genicam_name = {"ChunkIMX174FrameId"},
+    },
+    {
+        .id = TCAM_PROPERTY_CHUNK_IMX174_FRAME_SET,
+        .genicam_name = {"ChunkIMX174FrameSet"},
+    },
+    {
+        .id = TCAM_PROPERTY_IMX174_WDR_SHUTTER2,
+        .genicam_name = {"IMX174WDRShutter2"},
+    },
+    {
+        .id = TCAM_PROPERTY_IMX174_HARDWARE_WDR_ENABLE,
+        .genicam_name = {"IMX174HardwareWDREnable"},
     },
 };
 
