@@ -19,6 +19,8 @@
 #include "standard_properties.h"
 #include "logging.h"
 
+#include "internal.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -445,11 +447,20 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
                 {
                     if (strcmp(arv_dom_node_get_node_name((ArvDomNode*) iter->data), "EnumEntry") == 0)
                     {
+                        // tcam_log(TCAM_LOG_DEBUG, "    Adding enum entry: '%s' %s", arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data));
+
+
                         // TODO should enums be stored in separate vector
+                        // var.emplace(remove_prefix(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), "_"), var.size());
                         var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
                     }
                 }
             }
+
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+
+            prop.value.i.value = var.at(current_value);
+            prop.value.i.default_value = prop.value.i.value;
 
             return std::make_shared<PropertyEnumeration>(impl, prop, var, type);
         }
@@ -460,6 +471,12 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
 
             return  std::make_shared<PropertyInteger>(impl, prop, type);
+        }
+        else if (type_to_use == TCAM_PROPERTY_TYPE_BOOLEAN)
+        {
+            prop.type == TCAM_PROPERTY_TYPE_BOOLEAN;
+
+            return std::make_shared<PropertyBoolean>(impl, prop, type);
         }
 
     }
@@ -548,81 +565,35 @@ std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
 
             return std::make_shared<PropertyInteger>(impl, prop, type);
         }
+        else if (type_to_use == TCAM_PROPERTY_TYPE_DOUBLE)
+        {
+
+            double min, max;
+
+            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+
+            prop.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.d.min = min;
+            prop.value.d.max = max;
+            prop.value.d.default_value = prop.value.d.value;
+
+            return std::make_shared<PropertyDouble>(impl, prop, type);
+        }
     }
     else if (strcmp(node_type, "Boolean") == 0)
     {
         // struct camera_property ctrl = {};
         prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
 
-        memcpy(prop.name, feature, sizeof(prop.name));
+        // memcpy(prop.name, feature, sizeof(prop.name));
         prop.value.i.max = 1;
         prop.value.i.min = 0;
         prop.value.i.step = 1;
+
         // // TODO: default value
 
         return std::make_shared<PropertyBoolean>(impl, prop, type);
 
-    }
-    else if (strcmp(node_type, "Enumeration") == 0)
-    {
-
-        if (type_to_use == TCAM_PROPERTY_TYPE_BOOLEAN)
-        {
-
-            // c_map.control.value.i.value = 0;
-            // c_map.control.value.i.min = 0;
-            // c_map.control.value.i.max = c_map.values.size() - 1; // index begins with 0
-            return nullptr;
-
-        }
-        else if (type_to_use == TCAM_PROPERTY_TYPE_ENUMERATION)
-        {
-            // printf ("??? %s: '%s'%s\n",
-            //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),
-            //         feature,
-            //         arv_gc_feature_node_is_available (ARV_GC_FEATURE_NODE (node), NULL) ? "" : " (Not available)");
-
-            // c_map.control.value.i.value = 0;
-            // c_map.control.value.i.min = 0;
-            // c_map.control.value.i.max = c_map.values.size() - 1; // index begins with 0
-        }
-
-        // IN/OUT types are identical
-        if (type_to_use == TCAM_PROPERTY_TYPE_DOUBLE)
-        {
-
-            // c_map.control.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
-            // c_map.control.value.d.default_value = c_map.control.value.d.value;
-            // c_map.control.value.d.step = 0;
-            // arv_device_get_float_feature_bounds(arv_camera_get_device(camera),
-            //                                     feature,
-            //                                     &c_map.control.value.d.min,
-            //                                     &c_map.control.value.d.max);
-
-        }
-        else if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
-        {
-
-            // c_map.control.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
-            // c_map.control.value.i.default_value = c_map.control.value.i.value;
-            // c_map.control.value.i.step = 1;
-
-            // double min = 0.0;
-            // double max = 0.0;
-            // arv_device_get_float_feature_bounds(arv_camera_get_device(camera),
-            //                                     feature,
-            //                                     &min,
-            //                                     &max);
-
-            // c_map.control.value.i.min = round(min);
-            // c_map.control.value.i.max = round(max);
-
-        }
-        else
-        {
-            tcam_log(TCAM_LOG_ERROR, "Enum conversion not implemented");
-
-        }
     }
     else if (strcmp(node_type, "Command") == 0)
     {
