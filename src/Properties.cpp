@@ -102,6 +102,13 @@ std::vector<std::string> PropertyEnumeration::get_values () const
 
 std::string PropertyEnumeration::get_default () const
 {
+    for (const auto& s : string_map)
+    {
+        if (prop.value.i.default_value == s.second)
+        {
+            return s.first;
+        }
+    }
     return "";
 }
 
