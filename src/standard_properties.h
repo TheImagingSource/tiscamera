@@ -438,6 +438,22 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .name = "Packet Time (1000ns)",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
     },
+    {
+        TCAM_PROPERTY_NOISE_REDUCTION,
+        .name = "Noise Reduction",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        TCAM_PROPERTY_FACE_DETECTION,
+        .name = "Face Detection",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        TCAM_PROPERTY_IMAGE_STABILIZATION,
+        .name = "Image Stabilization",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+
     // {
     //     TCAM_PROPERTY_,
     //     .name = "",
