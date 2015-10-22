@@ -130,7 +130,15 @@ bool PropertyEnumeration::set_value (const std::string& new_value)
 
 std::string PropertyEnumeration::get_value () const
 {
-    return prop.value.s.value;
+    for (const auto& s : string_map)
+    {
+        if (prop.value.i.value == s.second)
+        {
+            return s.first;
+        }
+    }
+
+    return "";
 }
 
 
