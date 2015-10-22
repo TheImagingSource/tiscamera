@@ -191,6 +191,18 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = { 0x0098091b},
 
     },
+    {
+        .id = TCAM_PROPERTY_NOISE_REDUCTION,
+        .v4l2_id = { 0x199e232 },
+    },
+    {
+        .id = TCAM_PROPERTY_FACE_DETECTION,
+        .v4l2_id = { 0x199e233},
+    },
+    {
+        .id = TCAM_PROPERTY_IMAGE_STABILIZATION,
+        .v4l2_id = { 0x199e231 },
+    },
 };
 
 
