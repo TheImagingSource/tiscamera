@@ -77,6 +77,36 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
     },
     {
+        .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
+        .name = "Highlight Reduction",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_REFERENCE,
+        .name = "Exposure Auto Reference",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
+        .name = "Exposure Auto Upper Limit Auto",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT,
+        .name = "Exposure Auto Upper Limit",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_LOWER_LIMIT,
+        .name = "Exposure Auto Lower Limit",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
         .id = TCAM_PROPERTY_GAIN,
         .name = "Gain",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
@@ -133,7 +163,7 @@ static const std::vector<struct control_reference> ctrl_reference_table =
     {
         TCAM_PROPERTY_TRIGGER_DENOISE,
         .name = "Trigger Denoise",
-        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         TCAM_PROPERTY_TRIGGER_MASK,
@@ -143,7 +173,7 @@ static const std::vector<struct control_reference> ctrl_reference_table =
     {
         TCAM_PROPERTY_TRIGGER_DEBOUNCER,
         .name = "Trigger Debouncer",
-        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         TCAM_PROPERTY_TRIGGER_DELAY,
@@ -275,6 +305,36 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
     },
     {
+        .id = TCAM_PROPERTY_WB_TEMPERATURE,
+        .name = "Whitebalance Temerature",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCERATIO_SELECTOR,
+        .name = "Balance Ratio Selector",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB},
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCERATIO,
+        .name = "Balance Ratio",
+        .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB},
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCE_WHITE_AUTO_PRESET,
+        .name = "White Balance Auto Preset",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB},
+    },
+    {
+        .id = TCAM_PROPERTY_BALANCE_WHITE_TEMPERATURE_PRESET,
+        .name = "White Balance Temperature Preset",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB},
+    },
+    {
         .id = TCAM_PROPERTY_IRCUT,
         .name = "IRCutFilter",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
@@ -329,6 +389,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
     },
     {
+        .id = TCAM_PROPERTY_STROBE_DELAY,
+        .name = "Strobe Delay",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_DURATION,
+        .name = "Strobe Duration",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
         .id = TCAM_PROPERTY_SKIPPING,
         .name = "Skipping",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
@@ -366,7 +438,7 @@ static const std::vector<struct control_reference> ctrl_reference_table =
     {
         TCAM_PROPERTY_BLACKLEVEL,
         .name = "Black Level",
-        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         TCAM_PROPERTY_CHUNK_MODE_ACTIVE,
@@ -453,7 +525,26 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .name = "Image Stabilization",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
     },
-
+    {
+        TCAM_PROPERTY_CHUNK_IMX174_FRAME_ID,
+        .name = "IMX174 Frame ID",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_CHUNK_IMX174_FRAME_SET,
+        .name = "IMX174 Frame Set",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+    },
+    {
+        TCAM_PROPERTY_IMX174_WDR_SHUTTER2,
+        .name = "IMX174 WDR Shutter 2",
+        .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
+    },
+    {
+        TCAM_PROPERTY_IMX174_HARDWARE_WDR_ENABLE,
+        .name = "IMX174 WDR Enable",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
     // {
     //     TCAM_PROPERTY_,
     //     .name = "",
