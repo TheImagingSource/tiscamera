@@ -840,7 +840,7 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     ctrl.id = prop_desc.id;
 
-    if (type == TCAM_PROPERTY_TYPE_INTEGER)
+    if (type == TCAM_PROPERTY_TYPE_INTEGER || type == TCAM_PROPERTY_TYPE_ENUMERATION)
     {
         ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->get_value();
     }
