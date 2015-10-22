@@ -120,6 +120,8 @@ bool PropertyEnumeration::set_value (const std::string& new_value)
         return false;
     }
 
+    prop.value.i.value = element->second;
+
     notify_impl();
 
     return false;
