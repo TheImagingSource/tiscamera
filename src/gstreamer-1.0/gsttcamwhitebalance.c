@@ -36,6 +36,7 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamwhitebalance.h"
 #include "image_sampling.h"
+#include <stdlib.h>
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
 #define GST_CAT_DEFAULT gst_tcamwhitebalance_debug_category
@@ -552,8 +553,8 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width));
-    g_return_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height));
+    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
 
     guint fourcc;
 
