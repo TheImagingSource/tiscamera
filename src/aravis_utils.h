@@ -30,7 +30,7 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-std::shared_ptr<Property> createProperty (ArvCamera* camera,
+std::shared_ptr<Property> create_property (ArvCamera* camera,
                                           ArvGcNode* node,
                                           std::shared_ptr<PropertyImpl> impl);
 

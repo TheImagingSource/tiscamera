@@ -362,7 +362,7 @@ static TCAM_PROPERTY_ID find_mapping (const std::string& genicam_id)
 }
 
 
-std::shared_ptr<Property> tcam::createProperty (ArvCamera* camera,
+std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                 ArvGcNode* node,
                                                 std::shared_ptr<PropertyImpl> impl)
 {

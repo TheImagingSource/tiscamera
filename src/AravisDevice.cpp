@@ -794,7 +794,7 @@ void AravisDevice::iterate_genicam (const char* feature)
             property_mapping m;
 
             m.arv_ident = feature;
-            m.prop = createProperty(arv_camera, node, handler);
+            m.prop = create_property(arv_camera, node, handler);
 
             if (m.prop == nullptr)
             {
