@@ -41,7 +41,7 @@ CaptureDeviceImpl::CaptureDeviceImpl ()
 CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
     : pipeline(nullptr), property_handler(nullptr), device(nullptr)
 {
-    if (!openDevice(device))
+    if (!open_device(device))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to open device");
         bad_device bd;
@@ -58,7 +58,7 @@ bool CaptureDeviceImpl::load_configuration (const std::string& filename)
 {
     resetError();
 
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return false;
     }
@@ -66,7 +66,7 @@ bool CaptureDeviceImpl::load_configuration (const std::string& filename)
     auto vec = property_handler->get_properties();
 
     return load_xml_description(filename,
-                                open_device,
+                                open_device_info,
                                 active_format,
                                 vec);
 }
@@ -76,25 +76,25 @@ bool CaptureDeviceImpl::save_configuration (const std::string& filename)
 {
     resetError();
 
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return false;
     }
 
     return save_xml_description(filename,
-                                open_device,
+                                open_device_info,
                                 device->get_active_video_format(),
                                 property_handler->get_properties());
 }
 
 
-bool CaptureDeviceImpl::openDevice (const DeviceInfo& device_desc)
+bool CaptureDeviceImpl::open_device (const DeviceInfo& device_desc)
 {
     resetError();
 
-    if (isDeviceOpen())
+    if (is_device_open())
     {
-        bool ret = closeDevice();
+        bool ret = close_device();
         if (ret == false)
         {
             tcam_log(TCAM_LOG_ERROR, "Unable to close previous device.");
@@ -103,9 +103,9 @@ bool CaptureDeviceImpl::openDevice (const DeviceInfo& device_desc)
         }
     }
 
-    open_device = device_desc;
+    open_device_info = device_desc;
 
-    device = openDeviceInterface(open_device);
+    device = openDeviceInterface(open_device_info);
 
     if (device == nullptr)
     {
@@ -123,7 +123,7 @@ bool CaptureDeviceImpl::openDevice (const DeviceInfo& device_desc)
 }
 
 
-bool CaptureDeviceImpl::isDeviceOpen () const
+bool CaptureDeviceImpl::is_device_open () const
 {
     resetError();
     if (device != nullptr)
@@ -135,24 +135,24 @@ bool CaptureDeviceImpl::isDeviceOpen () const
 }
 
 
-DeviceInfo CaptureDeviceImpl::getDevice () const
+DeviceInfo CaptureDeviceImpl::get_device () const
 {
-    return this->open_device;
+    return this->open_device_info;
 }
 
 
-bool CaptureDeviceImpl::closeDevice ()
+bool CaptureDeviceImpl::close_device ()
 {
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return true;
     }
 
-    std::string name = open_device.get_name();
+    std::string name = open_device_info.get_name();
 
     pipeline->destroyPipeline();
 
-    open_device = DeviceInfo ();
+    open_device_info = DeviceInfo ();
     device.reset();
     property_handler = nullptr;
 
@@ -162,10 +162,10 @@ bool CaptureDeviceImpl::closeDevice ()
 }
 
 
-std::vector<Property*> CaptureDeviceImpl::getAvailableProperties ()
+std::vector<Property*> CaptureDeviceImpl::get_available_properties ()
 {
     resetError();
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return std::vector<Property*>();
     }
@@ -181,10 +181,10 @@ std::vector<Property*> CaptureDeviceImpl::getAvailableProperties ()
 }
 
 
-std::vector<VideoFormatDescription> CaptureDeviceImpl::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> CaptureDeviceImpl::get_available_video_formats () const
 {
     resetError();
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return std::vector<VideoFormatDescription>();
     }
@@ -193,10 +193,10 @@ std::vector<VideoFormatDescription> CaptureDeviceImpl::getAvailableVideoFormats 
 }
 
 
-bool CaptureDeviceImpl::setVideoFormat (const VideoFormat& new_format)
+bool CaptureDeviceImpl::set_video_format (const VideoFormat& new_format)
 {
     resetError();
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return false;
     }
@@ -207,10 +207,10 @@ bool CaptureDeviceImpl::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-VideoFormat CaptureDeviceImpl::getActiveVideoFormat () const
+VideoFormat CaptureDeviceImpl::get_active_video_format () const
 {
     resetError();
-    if(!isDeviceOpen())
+    if(!is_device_open())
     {
         return VideoFormat();
     }
@@ -219,10 +219,10 @@ VideoFormat CaptureDeviceImpl::getActiveVideoFormat () const
 }
 
 
-bool CaptureDeviceImpl::startStream (std::shared_ptr<SinkInterface> sink)
+bool CaptureDeviceImpl::start_stream (std::shared_ptr<SinkInterface> sink)
 {
     resetError();
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         tcam_log(TCAM_LOG_ERROR, "Device is not open");
         return false;
@@ -237,10 +237,10 @@ bool CaptureDeviceImpl::startStream (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool CaptureDeviceImpl::stopStream ()
+bool CaptureDeviceImpl::stop_stream ()
 {
     resetError();
-    if (!isDeviceOpen())
+    if (!is_device_open())
     {
         return false;
     }

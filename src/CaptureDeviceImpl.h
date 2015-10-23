@@ -69,35 +69,35 @@ public:
      * @param device - DeviceInfo description of the device that shall be opened
      * @return true on success; on error Error will be set
      */
-    bool openDevice (const DeviceInfo& device);
+    bool open_device (const DeviceInfo& device);
 
 
     /**
      * Check if device is currently open
      * @return true if a device is open
      */
-    bool isDeviceOpen () const;
+    bool is_device_open () const;
 
 
     /**
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    DeviceInfo getDevice() const;
+    DeviceInfo get_device() const;
 
 
     /**
      * Closes the open device. All streams will be stopped.
      * @return true on success; on error Error will be set
      */
-    bool closeDevice ();
+    bool close_device ();
 
     // property related:
 
     /**
      * @return vector containing all available properties
      */
-    std::vector<Property*> getAvailableProperties ();
+    std::vector<Property*> get_available_properties ();
 
     // videoformat related:
 
@@ -105,7 +105,7 @@ public:
     /**
      * @return vector containing all available video format settings
      */
-    std::vector<VideoFormatDescription> getAvailableVideoFormats () const;
+    std::vector<VideoFormatDescription> get_available_video_formats () const;
 
 
     /**
@@ -113,13 +113,13 @@ public:
      * @param new_format - format the device shall use
      * @return true if device accepted the given VideoFormat
      */
-    bool setVideoFormat (const VideoFormat& new_format);
+    bool set_video_format (const VideoFormat& new_format);
 
 
     /**
      * @return Currently used video format
      */
-    VideoFormat getActiveVideoFormat () const;
+    VideoFormat get_active_video_format () const;
 
     // playback related:
 
@@ -128,21 +128,21 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool startStream (std::shared_ptr<SinkInterface> sink);
+    bool start_stream (std::shared_ptr<SinkInterface> sink);
 
 
     /**
      * @brief Stop currently running stream
      * @return true if stream could successfully be stopped
      */
-    bool stopStream ();
+    bool stop_stream ();
 
 private:
 
     std::shared_ptr<PipelineManager> pipeline;
     std::shared_ptr<PropertyHandler> property_handler;
 
-    DeviceInfo open_device;
+    DeviceInfo open_device_info;
     VideoFormat active_format;
 
     std::shared_ptr<DeviceInterface> device;

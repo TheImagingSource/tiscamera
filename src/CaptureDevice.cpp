@@ -35,7 +35,7 @@ CaptureDevice::CaptureDevice ()
 CaptureDevice::CaptureDevice (const DeviceInfo& info)
     : impl(new CaptureDeviceImpl())
 {
-    impl->openDevice(info);
+    impl->open_device(info);
 }
 
 
@@ -57,19 +57,19 @@ bool CaptureDevice::save_configuration (const std::string& filename)
 
 bool CaptureDevice::is_device_open () const
 {
-    return impl->isDeviceOpen ();
+    return impl->is_device_open ();
 }
 
 
 DeviceInfo CaptureDevice::get_device () const
 {
-    return impl->getDevice();
+    return impl->get_device();
 }
 
 
 std::vector<Property*> CaptureDevice::get_available_properties ()
 {
-    return impl->getAvailableProperties();
+    return impl->get_available_properties();
 }
 
 
@@ -179,31 +179,31 @@ bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const std::string& value)
 
 std::vector<VideoFormatDescription> CaptureDevice::get_available_video_formats () const
 {
-    return impl->getAvailableVideoFormats();
+    return impl->get_available_video_formats();
 }
 
 
 bool CaptureDevice::set_video_format (const VideoFormat& new_format)
 {
-    return impl->setVideoFormat(new_format);
+    return impl->set_video_format(new_format);
 }
 
 
 VideoFormat CaptureDevice::get_active_video_format () const
 {
-    return impl->getActiveVideoFormat();
+    return impl->get_active_video_format();
 }
 
 
 bool CaptureDevice::start_stream (std::shared_ptr<SinkInterface> sink)
 {
-    return impl->startStream(sink);
+    return impl->start_stream(sink);
 }
 
 
 bool CaptureDevice::stop_stream ()
 {
-    return impl->stopStream();
+    return impl->stop_stream();
 }
 
 
