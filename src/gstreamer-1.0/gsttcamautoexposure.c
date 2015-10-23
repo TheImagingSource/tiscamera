@@ -861,8 +861,8 @@ gboolean find_image_values (GstTcamautoexposure* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width));
-    g_return_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height));
+    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
 
     gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
 
