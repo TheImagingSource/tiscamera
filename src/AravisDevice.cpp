@@ -137,7 +137,10 @@ bool AravisDevice::set_property (const Property& p)
     {
         case Property::INTEGER:
         {
-            tcam_log(TCAM_LOG_ERROR, "Integer %s: %d", pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
+            tcam_log(TCAM_LOG_DEBUG,
+                     "Integer %s: %d",
+                     pm->arv_ident.c_str(),
+                     ((PropertyInteger&) p).get_value());
             // PropertyInteger&
             arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
             pm->prop->set_struct(p.get_struct());
@@ -145,14 +148,18 @@ bool AravisDevice::set_property (const Property& p)
         }
         case Property::INTSWISSKNIFE:
         {
-            tcam_log(TCAM_LOG_ERROR, "Swissknife");
+            tcam_log(TCAM_LOG_DEBUG,
+                     "Swissknife");
             arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
             break;
         }
         case Property::FLOAT:
         {
-            tcam_log(TCAM_LOG_DEBUG, "Sending property change for (float) %s", p.get_name().c_str());
-            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
+            tcam_log(TCAM_LOG_DEBUG,
+                     "Sending property change for (float) %s",
+                     p.get_name().c_str());
+            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(),
+                                               ((PropertyInteger&) (p)).get_value());
             pm->prop->set_struct(p.get_struct());
 
             break;
@@ -208,6 +215,14 @@ bool AravisDevice::set_property (const Property& p)
                         break;
                     }
                 }
+                break;
+            }
+            else if (p.get_type()== TCAM_PROPERTY_TYPE_ENUMERATION)
+            {
+                std::string val = ((PropertyEnumeration&) p).get_value();
+
+                tcam_log(TCAM_LOG_DEBUG, "Setting '%s' to '%s'", pm->arv_ident.c_str(), val.c_str());
+                arv_device_set_string_feature_value(device, pm->arv_ident.c_str(), val.c_str());
                 break;
             }
 
