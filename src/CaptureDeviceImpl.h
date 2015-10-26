@@ -83,7 +83,7 @@ public:
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    DeviceInfo get_device() const;
+    DeviceInfo get_device () const;
 
 
     /**

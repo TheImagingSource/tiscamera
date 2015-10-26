@@ -52,19 +52,19 @@ Error::Error (const Error& e)
 
 Error global_last_error;
 
-Error tcam::getError ()
+Error tcam::get_error ()
 {
     return global_last_error;
 }
 
 
-void tcam::setError (const Error& err)
+void tcam::set_error (const Error& err)
 {
     global_last_error = err;
 }
 
 
-void tcam::resetError ()
+void tcam::reset_error ()
 {
-    setError(Error());
+    set_error(Error());
 }

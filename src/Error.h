@@ -92,11 +92,11 @@ private:
 };
 
 
-Error getError ();
+Error get_error ();
 
-void setError (const Error& err);
+void set_error (const Error& err);
 
-void resetError ();
+void reset_error ();
 
 } /* namespace tcam */
 

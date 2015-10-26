@@ -28,13 +28,13 @@ using namespace tcam;
 
 int tcam_last_errno ()
 {
-    return getError().get_errno();
+    return get_error().get_errno();
 }
 
 
 const char* tcam_last_error_messsage ()
 {
-    return getError().get_string().c_str();
+    return get_error().get_string().c_str();
 }
 
 
@@ -54,7 +54,7 @@ int tcam_device_index_get_device_infos (tcam_device_info* arr,
 
     if (vec.size() < size)
     {
-        setError(Error("Array is to small to contain all devices", EFAULT));
+        set_error(Error("Array is to small to contain all devices", EFAULT));
         return -1;
     }
 
@@ -158,6 +158,7 @@ bool  tcam_capture_device_find_property (tcam_capture_device* source,
 {
     if (source == nullptr)
     {
+        tcam_log(TCAM_LOG_ERROR, "Source is null");
         return false;
     }
 
@@ -194,7 +195,7 @@ int tcam_capture_device_set_property (tcam_capture_device* source,
             return true;
         }
     }
-    setError(Error("No such property found", ENOENT));
+    set_error(Error("No such property found", ENOENT));
     return -1;
 }
 

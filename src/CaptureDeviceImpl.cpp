@@ -56,7 +56,7 @@ CaptureDeviceImpl::~CaptureDeviceImpl ()
 
 bool CaptureDeviceImpl::load_configuration (const std::string& filename)
 {
-    resetError();
+    reset_error();
 
     if (!is_device_open())
     {
@@ -74,7 +74,7 @@ bool CaptureDeviceImpl::load_configuration (const std::string& filename)
 
 bool CaptureDeviceImpl::save_configuration (const std::string& filename)
 {
-    resetError();
+    reset_error();
 
     if (!is_device_open())
     {
@@ -90,7 +90,7 @@ bool CaptureDeviceImpl::save_configuration (const std::string& filename)
 
 bool CaptureDeviceImpl::open_device (const DeviceInfo& device_desc)
 {
-    resetError();
+    reset_error();
 
     if (is_device_open())
     {
@@ -125,7 +125,7 @@ bool CaptureDeviceImpl::open_device (const DeviceInfo& device_desc)
 
 bool CaptureDeviceImpl::is_device_open () const
 {
-    resetError();
+    reset_error();
     if (device != nullptr)
     {
         return true;
@@ -164,7 +164,7 @@ bool CaptureDeviceImpl::close_device ()
 
 std::vector<Property*> CaptureDeviceImpl::get_available_properties ()
 {
-    resetError();
+    reset_error();
     if (!is_device_open())
     {
         return std::vector<Property*>();
@@ -183,7 +183,7 @@ std::vector<Property*> CaptureDeviceImpl::get_available_properties ()
 
 std::vector<VideoFormatDescription> CaptureDeviceImpl::get_available_video_formats () const
 {
-    resetError();
+    reset_error();
     if (!is_device_open())
     {
         return std::vector<VideoFormatDescription>();
@@ -195,7 +195,7 @@ std::vector<VideoFormatDescription> CaptureDeviceImpl::get_available_video_forma
 
 bool CaptureDeviceImpl::set_video_format (const VideoFormat& new_format)
 {
-    resetError();
+    reset_error();
     if (!is_device_open())
     {
         return false;
@@ -209,7 +209,7 @@ bool CaptureDeviceImpl::set_video_format (const VideoFormat& new_format)
 
 VideoFormat CaptureDeviceImpl::get_active_video_format () const
 {
-    resetError();
+    reset_error();
     if(!is_device_open())
     {
         return VideoFormat();
@@ -221,7 +221,7 @@ VideoFormat CaptureDeviceImpl::get_active_video_format () const
 
 bool CaptureDeviceImpl::start_stream (std::shared_ptr<SinkInterface> sink)
 {
-    resetError();
+    reset_error();
     if (!is_device_open())
     {
         tcam_log(TCAM_LOG_ERROR, "Device is not open");
@@ -239,7 +239,7 @@ bool CaptureDeviceImpl::start_stream (std::shared_ptr<SinkInterface> sink)
 
 bool CaptureDeviceImpl::stop_stream ()
 {
-    resetError();
+    reset_error();
     if (!is_device_open())
     {
         return false;

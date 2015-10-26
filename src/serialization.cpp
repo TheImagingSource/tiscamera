@@ -103,7 +103,7 @@ static bool load_single_property (TiXmlElement* prop_node,
         }
         else
         {
-            setError(Error("No known attribute with that name", ENOENT));
+            set_error(Error("No known attribute with that name", ENOENT));
             return false;
         }
     }
@@ -112,7 +112,7 @@ static bool load_single_property (TiXmlElement* prop_node,
 
     if (iter == properties.end())
     {
-        setError(Error("No corresponding property found.", ENOENT));
+        set_error(Error("No corresponding property found.", ENOENT));
         return false;
     }
 
@@ -179,7 +179,7 @@ bool tcam::load_xml_description (const std::string& filename,
 
     if (!ret)
     {
-        setError(Error("Filename is not a loadable XML configuration.", ENOENT));
+        set_error(Error("Filename is not a loadable XML configuration.", ENOENT));
         return false;
     }
 
@@ -187,7 +187,7 @@ bool tcam::load_xml_description (const std::string& filename,
 
     if (device.get_serial().compare("") == 0)
     {
-        setError(Error("Xml configuration is not applicable to this device", ENXIO));
+        set_error(Error("Xml configuration is not applicable to this device", ENXIO));
         return false;
     }
 

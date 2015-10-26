@@ -29,7 +29,7 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-uint32_t convertV4L2flags (uint32_t v4l2_flags);
+uint32_t convert_v4l2_flags (uint32_t v4l2_flags);
 
 /**
  * @brief Create Property and return shared_ptr to base class
@@ -41,7 +41,7 @@ uint32_t convertV4L2flags (uint32_t v4l2_flags);
  *
  * @return shared_ptr to newly created Property; nullptr on failure
  */
-std::shared_ptr<Property> createProperty (int fd,
+std::shared_ptr<Property> create_property (int fd,
                                           struct v4l2_queryctrl* queryctrl,
                                           struct v4l2_ext_control* ctrl,
                                           std::shared_ptr<PropertyImpl> impl);
