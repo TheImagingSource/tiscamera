@@ -206,7 +206,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
 };
 
 
-uint32_t tcam::convertV4L2flags (uint32_t v4l2_flags)
+uint32_t tcam::convert_v4l2_flags (uint32_t v4l2_flags)
 {
     uint32_t internal_flags = 0;
 
@@ -263,7 +263,7 @@ static TCAM_PROPERTY_ID find_mapping (int v4l2_id)
 }
 
 
-std::shared_ptr<Property> tcam::createProperty (int fd,
+std::shared_ptr<Property> tcam::create_property (int fd,
                                                        struct v4l2_queryctrl* queryctrl,
                                                        struct v4l2_ext_control* ctrl,
                                                        std::shared_ptr<PropertyImpl> impl)
@@ -301,7 +301,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
         }
         default:
         {
-            setError(Error("undefined property type", ENOENT));
+            set_error(Error("undefined property type", ENOENT));
             type = Property::UNDEFINED;
             break;
         }
@@ -328,7 +328,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
         cp = create_empty_property(ctrl_m.id);
     }
 
-    uint32_t flags = convertV4L2flags(queryctrl->flags);
+    uint32_t flags = convert_v4l2_flags(queryctrl->flags);
 
     switch (type_to_use)
     {
@@ -432,7 +432,7 @@ std::shared_ptr<Property> tcam::createProperty (int fd,
             std::string s = "Unknown V4L2 Control type: ";
             s.append((char*)queryctrl->name);
             tcam_log(TCAM_LOG_ERROR, s.c_str());
-            setError(Error(s, EIO));
+            set_error(Error(s, EIO));
             break;
         }
     }
@@ -447,7 +447,7 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
     struct udev* udev = udev_new();
     if (!udev)
     {
-        setError(Error("Unable to create udev reference.", EIO));
+        set_error(Error("Unable to create udev reference.", EIO));
         return device_list;
     }
 
@@ -483,7 +483,7 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
         if (!parent_device)
         {
-            setError(Error("udev_device_get_parent_with_subsystem_devtype failed", EIO));
+            set_error(Error("udev_device_get_parent_with_subsystem_devtype failed", EIO));
             return device_list;
         }
 
