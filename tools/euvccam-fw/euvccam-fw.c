@@ -125,7 +125,7 @@ static GOptionEntry options_entries[] = {
 	{ "printeeprom", 'p', 0, G_OPTION_ARG_NONE, &options.print_eeprom, "Print eeprom contents", NULL },
 	{ "version", 'v', 0, G_OPTION_ARG_NONE, &options.get_version, "Get Firmware version", NULL },
 	{ "force", 'f', 0, G_OPTION_ARG_NONE, &options.force, "Force firmware upload (might break device!)", NULL},
-	{ "mode", 'm', 0, G_OPTION_ARG_STRING, &options.mode, "Obsolete option", NULL },
+	{ "mode", 'm', 0, G_OPTION_ARG_STRING, &options.mode, "Set interface mode", NULL },
 	{ NULL }
 };
 
@@ -1138,8 +1138,26 @@ main(int argc, char *argv[])
 	}
 
 	if (options.mode){
-		fprintf (stderr, "Mode setting option is removed from this version. \nThis setting is not required for latest firmware files\n");
-		return -1;
+		unsigned short pid = 0;
+		if (euvc_get_firmware_version (dev) < 129){
+			fprintf (stderr, "The firmware version of the device is too old. Please update!\n");
+			return 1;
+		}
+		switch (options.mode[0]){
+		case 'u':
+			printf ("Switching camera to UVC mode\n");
+			if (euvc_set_mode (dev, CAMERA_INTERFACE_MODE_UVC) < 0)
+				fprintf (stderr, "Failed\n");
+			break;
+		case 'p':
+			printf ("Switching camera to proprietary mode\n");
+			if (euvc_set_mode (dev, CAMERA_INTERFACE_MODE_PROPRIETARY) < 0)
+				fprintf (stderr, "Failed\n");
+			break;
+		default:
+			fprintf (stderr, "Invalid mode specification\n");
+			break;
+		}
 	}
 
 	if( options.print_eeprom ){
