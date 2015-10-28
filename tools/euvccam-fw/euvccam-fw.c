@@ -447,45 +447,6 @@ static int read_eeprom( usb_dev_handle *dev, int addr, unsigned char *buffer, in
 	return ret;
 }
 
-static int euvc_get_eeprom_size( usb_dev_handle *dev)
-{
-	unsigned char bufa[64];
-	unsigned char bufb[64];
-
-	if (!read_eeprom (dev, 0, bufa, sizeof(bufa))){
-		return 0;
-	}
-	if (!read_eeprom (dev, 16384, bufb, sizeof(bufb))){
-		return 0;
-	}
-	if (!memcmp(bufa, bufb, sizeof(bufa))){
-		return 16384;
-	}
-
-	return 32768;
-}
-
-static int euvc_check_fw_size (usb_dev_handle *dev, char *filename)
-{
-	int ret = -1;
-	struct stat st;
-	int status;
-	int fd;
-	int szeeprom;
-
-	fd = open (filename, O_RDWR);
-	if (fd == -1)
-		return -1;
-	status = fstat (fd, &st);
-	close (fd);
-	szeeprom = euvc_get_eeprom_size (dev);
-	if (st.st_size > (szeeprom - DATA_SIZE)){
-		ret = 0;
-	} else {
-		ret = 1;
-	}
-	return ret;
-}
 
 static int euvc_write_strings( usb_dev_handle *dev, const char *strvendor, const char *strproduct, const char *strserial )
 {
@@ -895,7 +856,6 @@ static void euvc_print_eeprom_info( usb_dev_handle *dev )
 	int res = 0;
 	unsigned short pid = 0;
 	unsigned char flags = 0;
-	int sz = 0;
 
 	usb_get_string_simple( dev, usbdev->descriptor.iManufacturer, buf, sizeof( buf ) );
 	printf( "Manufacturer String: %s\n", buf );
@@ -907,8 +867,6 @@ static void euvc_print_eeprom_info( usb_dev_handle *dev )
 	printf( "PID: %x\n", pid);
 	read_eeprom( dev, FLAGS_LOCATION, &flags, 1);
 	printf( "Flags: %x\n", flags);
-	sz = euvc_get_eeprom_size(dev);
-	printf( "EEProm size: %d\n", sz);
 }
 
 static void euvc_get_strings( usb_dev_handle *dev, char *strvendor, char *strproduct, char *strserial, int bufsize )
@@ -1059,11 +1017,6 @@ main(int argc, char *argv[])
 		unsigned short pid;
 		unsigned char file_id;
 		int file_version = get_file_firmware_version (filename);
-
-		if (euvc_check_fw_size (dev, filename) != 1){
-			fprintf (stderr, "Upload failed: Firmware size is too big for this device\n");
-			return 1;
-		}
 
 		if (euvc_get_pid (dev, &pid) < 0 ){
 			perror ("Upload failed: Failed to read device ID");
