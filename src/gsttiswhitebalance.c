@@ -767,6 +767,8 @@ static void whitebalance_buffer (GstTisWhiteBalance* self, GstBuffer* buf)
         self->red = rgb.R;
         self->green = rgb.G;
         self->blue = rgb.B;
+
+        self->rgb = rgb;
     }
 
     if (self->res.color.has_whitebalance)
