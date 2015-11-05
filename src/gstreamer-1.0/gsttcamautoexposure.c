@@ -19,39 +19,35 @@
  *
  * The tis_auto_exposure element handles automatic exposure and gain adjustments.
  *
- *  processing is done in a simple manner:
+ * processing is done in a simple manner:
  *
- *  process only a few frames to give the camera time to adjust
+ * process only a few frames to give the camera time to adjust
  *
- *  on selected frame determine brightness of the whole image
+ * on selected frame determine brightness of the whole image
  *
- *  The configuration from exposure and gain. Works under the following assumptions:
- *  Gain should always be as low as possible.
- *  Exposure can only be set to a certain value due to framerate limitations.
+ * The configuration from exposure and gain. Works under the following assumptions:
+ * Gain should always be as low as possible.
+ * Exposure can only be set to a certain value due to framerate limitations.
  *
- *  This leads to following workflow:
+ * This leads to following workflow:
  *
- *  Determine image brightness by taking sample pixel and analyzing them.
- *  If the brightness is not our prefered area, we have to adjust.
- *  Calculate a new gain value. Since we prefer it small we only set it if it is smaller to the current one.
- *  Next we calculate exposure
- *  If exposure can not be moved, we increase gain to the already calculated value.
+ * Determine image brightness by taking sample pixel and analyzing them.
+ * If the brightness is not our prefered area, we have to adjust.
+ * Calculate a new gain value. Since we prefer it small we only set it if it is smaller to the current one.
+ * Next we calculate exposure
+ * If exposure can not be moved, we increase gain to the already calculated value.
  *
- *  In every case we check if exposure and gain can be switched,
- *  meaning we try to reduce gain by increasing exposure.
+ * In every case we check if exposure and gain can be switched,
+ * meaning we try to reduce gain by increasing exposure.
  *
  *
- *  Currently v4l2 and aravis compatible cameras are supported.
+ * Currently v4l2 and aravis compatible cameras are supported.
  *
  */
 
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#ifdef ENABLE_ARAVIS
-#include <arv.h>
 #endif
 
 #include "tcam_c.h"
@@ -61,8 +57,6 @@
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautoexposure.h"
-#include <linux/videodev2.h>
-#include <sys/ioctl.h>
 
 #include "bayer.h"
 #include "image_sampling.h"
@@ -76,17 +70,17 @@ GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 /* prototypes */
 
 static void gst_tcamautoexposure_set_property (GObject* object,
-                                                guint property_id,
-                                                const GValue* value,
-                                                GParamSpec* pspec);
+                                               guint property_id,
+                                               const GValue* value,
+                                               GParamSpec* pspec);
 static void gst_tcamautoexposure_get_property (GObject* object,
-                                                guint property_id,
-                                                GValue* value,
-                                                GParamSpec* pspec);
+                                               guint property_id,
+                                               GValue* value,
+                                               GParamSpec* pspec);
 static void gst_tcamautoexposure_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
-                                                         GstBuffer* buf);
+                                                        GstBuffer* buf);
 
 static void init_camera_resources (GstTcamautoexposure* self);
 
@@ -146,7 +140,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
-//    base_transform_class->transform_caps = gst_tcamautoexposure_transform_caps;
+    // base_transform_class->transform_caps = gst_tcamautoexposure_transform_caps;
     //base_transform_class->fixate_caps = gst_tcamautoexposure_fixate_caps;
 
     g_object_class_install_property (gobject_class,
@@ -196,9 +190,9 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
 }
 
 void gst_tcamautoexposure_set_property (GObject* object,
-                                         guint property_id,
-                                         const GValue* value,
-                                         GParamSpec* pspec)
+                                        guint property_id,
+                                        const GValue* value,
+                                        GParamSpec* pspec)
 {
     GstTcamautoexposure* tcamautoexposure = GST_TCAMAUTOEXPOSURE (object);
 
@@ -230,8 +224,8 @@ void gst_tcamautoexposure_set_property (GObject* object,
 }
 
 void gst_tcamautoexposure_get_property (GObject* object,
-                                        guint    property_id,
-                                        GValue*  value,
+                                        guint property_id,
+                                        GValue* value,
                                         GParamSpec* pspec)
 {
     GstTcamautoexposure* tcamautoexposure = GST_TCAMAUTOEXPOSURE(object);
@@ -270,136 +264,54 @@ static void init_camera_resources (GstTcamautoexposure* self)
     /* retrieve the element name e.g. GstAravis or GstV4l2Src*/
     const char* element_name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(self->camera_src)));
 
-    if (g_strcmp0 (element_name, CAMERASRC_NETWORK) == 0)
+    tcam_capture_device* dev = NULL;
+
+    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+
+    struct tcam_device_property p = {};
+
+    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+
+    if (!ret)
     {
-        self->source_type = NETWORK;
-        self->exposure.value = 0.0;
-        self->gain.value = 0.0;
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Exposure could not be found!");
+    }
+    else
+    {
+        self->exposure.min = p.value.i.min;
+        self->exposure.max = p.value.i.max;
+        self->exposure.value = p.value.i.value;
 
-#ifdef ENABLE_ARAVIS
-
-        ArvCamera* cam;
-        g_object_get (G_OBJECT (self->camera_src), "camera", &cam, NULL);
-
-        arv_camera_get_exposure_time_bounds(cam,
-                                            &self->default_exposure_values.min,
-                                            &self->default_exposure_values.max);
-        arv_camera_get_gain_bounds(cam,
-                                   &self->default_gain_values.min,
-                                   &self->default_gain_values.max);
-        /* do not free camera; it is just a pointer to the internally used object */
-
-        /* all gige cameras use the same time unit, thus can be handled identically */
-        /* 1 000 000 = 1s */
         self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
 
-#endif
-
     }
-    else if (g_strcmp0(element_name, CAMERASRC_USB) == 0)
+
+
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
+
+    if (!ret)
     {
-        self->source_type = USB;
-        self->exposure.value = 0.0;
-        self->gain.value = 0.0;
-
-        gint fd;
-        g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
-
-        struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
-        struct v4l2_control ctrl = { 0 };
-
-        while (ioctl(fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
-        {
-            if (qctrl.id == V4L2_CID_GAIN)
-            {
-
-                ctrl.id = qctrl.id;
-                if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
-                {
-                    continue;
-                }
-                self->gain.value= ctrl.value;
-                self->default_gain_values.min = qctrl.minimum;
-                self->default_gain_values.max = qctrl.maximum;
-
-            }
-            else if (qctrl.id == V4L2_CID_EXPOSURE_ABSOLUTE)
-            {
-                ctrl.id = qctrl.id;
-                if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
-                {
-                    continue;
-                }
-                self->exposure.value = ctrl.value;
-                self->default_exposure_values.min = qctrl.minimum;
-                self->default_exposure_values.max = qctrl.maximum;
-            }
-            qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-        }
-        /* we know the framerate and adjust the maximum for exposure */
-        /* in order to always have exposure settings that are within range */
-
-        /* exposure_absolute is treated as follows: */
-        /* Determines the exposure time of the camera sensor.
-           The exposure time is limited by the frame interval.
-           Drivers should interpret the values as 100 µs units,
-           where the value 1 stands for 1/10000th of a second,
-           10000 for 1 second and 100000 for 10 seconds. */
-
-        self->default_exposure_values.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Gain could not be found!");
     }
-    else if (g_strcmp0(element_name, CAMERASRC_TCAM) == 0)
+    else
     {
-        self->source_type = TCAM;
-
-        tcam_capture_device* dev = NULL;
-
-        g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
-
-        struct tcam_device_property p = {};
-
-        bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
-
-        if (!ret)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautoexposure",
-                           "init_camera_resources",
-                           __LINE__,
-                           NULL,
-                           "Exposure could not be found!");
-        }
-        else
-        {
-            self->exposure.min   = p.value.i.min;
-            self->exposure.max   = p.value.i.max;
-            self->exposure.value = p.value.i.value;
-
-            self->default_exposure_values.max = 10000 / (self->framerate_numerator / self->framerate_denominator);
-
-        }
-
-
-        ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
-
-        if (!ret)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautoexposure",
-                           "init_camera_resources",
-                           __LINE__,
-                           NULL,
-                           "Gain could not be found!");
-        }
-        else
-        {
-            self->gain.min   = p.value.i.min;
-            self->gain.max   = p.value.i.max;
-            self->gain.value = p.value.i.value;
-        }
+        self->gain.min = p.value.i.min;
+        self->gain.max = p.value.i.max;
+        self->gain.value = p.value.i.value;
     }
+
 
     self->exposure.max = self->default_exposure_values.max;
 
@@ -439,41 +351,15 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
                    NULL,
                    "Setting exposure to %f", exposure);
 
-    if (self->source_type == NETWORK)
-        g_object_set(G_OBJECT(self->camera_src), "exposure", exposure, NULL);
-    else if (self->source_type == USB)
-    {
-        gint fd;
-        g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
+    struct tcam_capture_device* dev;
+    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-        struct v4l2_control ctrl;
+    struct tcam_device_property exp = {};
 
-        ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-        ctrl.value = exposure;
+    exp.id = TCAM_PROPERTY_EXPOSURE;
+    exp.value.i.value = exposure;
 
-        if(ioctl(fd, VIDIOC_S_CTRL, &ctrl) == -1)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautoexposure",
-                           "set_exposure",
-                           __LINE__,
-                           NULL,
-                           "Unable to write exposure for USB device");
-        }
-    }
-    else if (self->source_type == TCAM)
-    {
-        struct tcam_capture_device* dev;
-        g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
-
-        struct tcam_device_property exp = {};
-
-        exp.id = TCAM_PROPERTY_EXPOSURE;
-        exp.value.i.value = exposure;
-
-        tcam_capture_device_set_property(dev, &exp);
-    }
+    tcam_capture_device_set_property(dev, &exp);
 }
 
 
@@ -503,43 +389,15 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
                    NULL,
                    "Setting gain to %f", gain);
 
-    if (self->source_type == NETWORK)
-    {
-        g_object_set(G_OBJECT(self->camera_src), "gain", gain, NULL);
-    }
-    else if (self->source_type == USB)
-    {
-        gint fd;
-        g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
+    tcam_capture_device* dev;
+    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-        struct v4l2_control ctrl;
+    struct tcam_device_property exp = {};
 
-        ctrl.id = V4L2_CID_GAIN;
-        ctrl.value = gain;
+    exp.id = TCAM_PROPERTY_GAIN;
+    exp.value.i.value = gain;
 
-        if (ioctl(fd, VIDIOC_S_CTRL, &ctrl) == -1)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautoexposure",
-                           "set_gain",
-                           __LINE__,
-                           NULL,
-                           "Unable to write gain for USB device");
-        }
-    }
-    else if (self->source_type == TCAM)
-    {
-        tcam_capture_device* dev;
-        g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
-
-        struct tcam_device_property exp = {};
-
-        exp.id = TCAM_PROPERTY_GAIN;
-        exp.value.i.value = gain;
-
-        tcam_capture_device_set_property(dev, &exp);
-    }
+    tcam_capture_device_set_property(dev, &exp);
 }
 
 
@@ -584,111 +442,12 @@ static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
 
 void retrieve_current_values (GstTcamautoexposure* self)
 {
-    if (self->source_type == NETWORK)
-    {
-        g_object_get(G_OBJECT(self->camera_src), "gain", &self->gain.value, NULL);
-        g_object_get(G_OBJECT(self->camera_src), "exposure", &self->exposure.value, NULL);
+    tcam_capture_device* dev = NULL;
+    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    }
-    else if (self->source_type == USB)
-    {
-        gint fd;
-        g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
+    struct tcam_device_property p = {};
 
-        struct v4l2_control ctrl;
-
-        ctrl.id = V4L2_CID_GAIN;
-
-        if(ioctl(fd, VIDIOC_G_CTRL, &ctrl) == -1)
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Unable to read gain from USB device.");
-        self->gain.value = ctrl.value;
-
-        ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
-
-        if (ioctl(fd, VIDIOC_G_CTRL, &ctrl) == -1)
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Unable to read exposure from USB device.");
-
-        self->exposure.value = ctrl.value;
-    }
-    else if (self->source_type == TCAM)
-    {
-        tcam_capture_device* dev = NULL;
-        g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
-
-        struct tcam_device_property p = {};
-
-        if (dev == NULL)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Tcam did not return a valid device");
-        }
-
-        bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
-
-        if (ret == false)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Tcam did not return exposure");
-        }
-        else
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_DEBUG,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Current exposure is %d", p.value.i.value);
-            self->exposure.value = p.value.i.value;
-        }
-
-        ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
-
-        if (!ret)
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Tcam did not return gain");
-        }
-        else
-        {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_DEBUG,
-                           "",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Current gain is %d", p.value.i.value);
-            self->gain.value = p.value.i.value;
-        }
-    }
-    else
+    if (dev == NULL)
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_ERROR,
@@ -696,9 +455,57 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        "",
                        __LINE__,
                        NULL,
-                       "Unable to determine source type");
-
+                       "Tcam did not return a valid device");
     }
+
+    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+
+    if (ret == false)
+    {
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_ERROR,
+                       "",
+                       "",
+                       __LINE__,
+                       NULL,
+                       "Tcam did not return exposure");
+    }
+    else
+    {
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_DEBUG,
+                       "",
+                       "",
+                       __LINE__,
+                       NULL,
+                       "Current exposure is %d", p.value.i.value);
+        self->exposure.value = p.value.i.value;
+    }
+
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_ERROR,
+                       "",
+                       "",
+                       __LINE__,
+                       NULL,
+                       "Tcam did not return gain");
+    }
+    else
+    {
+        gst_debug_log (gst_tcamautoexposure_debug_category,
+                       GST_LEVEL_DEBUG,
+                       "",
+                       "",
+                       __LINE__,
+                       NULL,
+                       "Current gain is %d", p.value.i.value);
+        self->gain.value = p.value.i.value;
+    }
+
 }
 
 
@@ -810,25 +617,15 @@ static gboolean find_camera_src (GstBaseTransform* trans)
 
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(trans)));
 
-    GList* l =  GST_BIN(e)->children;
+    GList* l = GST_BIN(e)->children;
 
     while (1==1)
     {
         const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
 
-        if (g_strcmp0(name, "GstV4l2Src") == 0)
-        {
-            GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
-            break;
-        }
-        if (g_strcmp0(name, "GstAravis") == 0)
-        {
-            GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
-            break;
-        }
         if (g_strcmp0(name, "GstTcam") == 0)
         {
-            GST_TCAMAUTOEXPOSURE(trans)->source_type = TCAM;
+
             GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
             break;
         }
@@ -857,7 +654,7 @@ static gboolean find_camera_src (GstBaseTransform* trans)
 
 gboolean find_image_values (GstTcamautoexposure* self)
 {
-    GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
+    GstPad* pad = GST_BASE_TRANSFORM_SINK_PAD(self);
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
@@ -872,7 +669,7 @@ gboolean find_image_values (GstTcamautoexposure* self)
 
 /*
   Entry point for actual transformation
- */
+*/
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE (trans);

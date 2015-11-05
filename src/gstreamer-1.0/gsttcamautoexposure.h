@@ -48,14 +48,6 @@ typedef struct
 
 } Exposure;
 
-typedef enum
-{
-    NETWORK,
-    USB,
-    TCAM,
-    UNKNOWN
-} CameraType;
-
 
 typedef unsigned char byte;
 
@@ -87,7 +79,6 @@ typedef struct GstTcamautoexposure
     Exposure exposure;
     Exposure default_exposure_values;
 
-    CameraType source_type;
     GstElement* camera_src;
     tBY8Pattern pattern;
     format color_format;
