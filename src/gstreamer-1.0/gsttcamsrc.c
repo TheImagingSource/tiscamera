@@ -866,7 +866,7 @@ static void gst_tcam_close_camera (GstTcam* self)
 {
     if (self->device != NULL)
     {
-        tcam_capture_device_stop_stream();
+        tcam_capture_device_stop_stream(self->device);
         tcam_destroy_capture_device(self->device);
         self->device = NULL;
     }
