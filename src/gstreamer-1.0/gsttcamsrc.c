@@ -18,9 +18,7 @@
 #include "gsttcambase.h"
 
 #include "tcam_c.h"
-
 #include <unistd.h>
-
 
 #define GST_TCAM_DEFAULT_N_BUFFERS		10
 
@@ -538,6 +536,17 @@ void gst_tcam_init_camera (GstTcam* self)
 }
 
 
+static void gst_tcam_close_camera (GstTcam* self)
+{
+    if (self->device != NULL)
+    {
+        tcam_capture_device_stop_stream();
+        tcam_destroy_capture_device(self->device);
+        self->device = NULL;
+    }
+}
+
+
 static gboolean gst_tcam_start (GstBaseSrc *src)
 {
     GstTcam* self = GST_TCAM(src);
@@ -670,6 +679,8 @@ static void gst_tcam_init (GstTcam* self)
 
     self->all_caps = NULL;
     self->fixed_caps = NULL;
+
+    gst_tcam_init_camera(self);
 }
 
 
@@ -713,16 +724,31 @@ static void gst_tcam_set_property (GObject* object,
     switch (prop_id)
     {
         case PROP_SERIAL:
-            g_free (self->device_serial);
-            self->device_serial = g_strdup (g_value_get_string (value));
-            GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial);
+        {
+            GstState state;
+            gst_element_get_state(GST_ELEMENT(self), &state, NULL, 200);
+            if (state == GST_STATE_NULL)
+            {
+                g_free (self->device_serial);
+                self->device_serial = g_strdup (g_value_get_string (value));
+                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial);
+
+                gst_tcam_close_camera(self);
+
+                gst_tcam_init_camera(self);
+            }
             break;
+        }
         case PROP_NUM_BUFFERS:
+        {
             self->n_buffers = g_value_get_int (value);
             break;
+        }
         default:
+        {
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
             break;
+        }
     }
 }
 
