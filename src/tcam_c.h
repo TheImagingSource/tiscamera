@@ -126,7 +126,7 @@ extern "C"
      * @param source - device whichs properties shall be read
      * @return number of available properties; -1 on error
      */
-    int tcam_capture_device_get_properties_count (tcam_capture_device* source);
+    int tcam_capture_device_get_properties_count (const tcam_capture_device* source);
 
 
     /**

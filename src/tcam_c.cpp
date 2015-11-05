@@ -110,7 +110,7 @@ bool tcam_capture_device_is_device_open (tcam_capture_device* source)
 bool tcam_capture_device_get_device_info (struct tcam_capture_device* source,
                                           struct tcam_device_info* info)
 {
-    auto dev = reinterpret_cast<CaptureDevice*>(source)->get_device();
+    auto dev = reinterpret_cast<const CaptureDevice*>(source)->get_device();
 
     auto io = dev.get_info();
     memcpy(info, &io , sizeof(struct tcam_device_info));
@@ -120,16 +120,36 @@ bool tcam_capture_device_get_device_info (struct tcam_capture_device* source,
 
 /* property related*/
 
-int tcam_capture_device_get_property_count (tcam_capture_device* source)
+int tcam_capture_device_get_properties_count (const tcam_capture_device* source)
 {
-    return reinterpret_cast<CaptureDevice*>(source)->get_available_properties().size();
+    return ((CaptureDevice*)source)->get_available_properties().size();
 }
 
 
 int tcam_capture_device_get_properties (const tcam_capture_device* source,
                                         struct tcam_device_property* array,
                                         const size_t size)
-{}
+{
+    if (tcam_capture_device_get_properties_count(source) > size)
+    {
+        return 0;
+    }
+
+    auto vec = ((CaptureDevice*)source)->get_available_properties();
+
+    size_t x = 0;
+    for (auto& v : vec)
+    {
+        array[x] = v->get_struct();
+        if (x == size)
+        {
+            return size;
+        }
+        x++;
+    }
+
+    return tcam_capture_device_get_properties_count(source);
+}
 
 
 bool  tcam_capture_device_find_property (tcam_capture_device* source,
