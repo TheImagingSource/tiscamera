@@ -31,14 +31,6 @@ G_BEGIN_DECLS
 
 typedef unsigned char byte;
 
-enum CAMERA_TYPE
-{
-    CAMERA_TYPE_UNKNOWN = 0,
-    CAMERA_TYPE_ARAVIS,
-    CAMERA_TYPE_USB,
-    CAMERA_TYPE_TCAM,
-};
-
 
 /* names of gstreamer elements used for camera interaction */
 /* static const char* CAMERASRC_NETWORK = "GstAravis"; */
@@ -49,8 +41,6 @@ typedef struct GstTcamAutoFocus
 
     GstPad *sinkpad;
     GstPad *srcpad;
-
-    enum CAMERA_TYPE camera_type;
 
     unsigned int width;
     unsigned int height;

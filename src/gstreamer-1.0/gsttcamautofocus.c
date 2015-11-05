@@ -18,14 +18,6 @@
 #include "config.h"
 #endif
 
-#ifdef ENABLE_ARAVIS
-#include <arv.h>
-#endif
-
-#include <linux/videodev2.h>
-
-#include "sys/ioctl.h"
-
 #include <math.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -98,47 +90,15 @@ GstElement* get_camera_src (GstElement* object)
 
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(object)));
 
-    GList* l = GST_BIN(e)->children;
+    self->camera_src = NULL;
 
-    self->camera_type = CAMERA_TYPE_UNKNOWN;
+    GList* l = GST_BIN(e)->children;
 
     while (1==1)
     {
         const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
-
-        if (g_strcmp0(name, "GstAravis") == 0)
+        if (g_strcmp0(name, "GstTcam") == 0)
         {
-            self->camera_type = CAMERA_TYPE_ARAVIS;
-            self->camera_src = l->data;
-
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_INFO,
-                           "tcamautofocus",
-                           __FUNCTION__,
-                           __LINE__,
-                           NULL,
-                           "Identified camera source as aravissrc.");
-            break;
-        }
-        else if (g_strcmp0(name, "GstV4l2Src") == 0)
-        {
-            gint fd;
-            g_object_get(G_OBJECT(self->camera_src), "device-fd", &fd, NULL);
-            self->camera_type = CAMERA_TYPE_USB;
-            self->camera_src = l->data;
-
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_INFO,
-                           "tcamautofocus",
-                           __FUNCTION__,
-                           __LINE__,
-                           NULL,
-                           "Identified camera source as v4l2src.");
-            break;
-        }
-        else if (g_strcmp0(name, "GstTcam") == 0)
-        {
-            self->camera_type = CAMERA_TYPE_TCAM;
             self->camera_src = l->data;
 
             gst_debug_log (gst_tcamautofocus_debug_category,
@@ -158,7 +118,7 @@ GstElement* get_camera_src (GstElement* object)
         l = g_list_next(l);
     }
 
-    if (self->camera_type == CAMERA_TYPE_UNKNOWN)
+    if (self->camera_src == NULL)
     {
         gst_debug_log (gst_tcamautofocus_debug_category,
                        GST_LEVEL_ERROR,
@@ -171,213 +131,6 @@ GstElement* get_camera_src (GstElement* object)
 
 
     return self->camera_src;
-}
-
-
-static void focus_run_aravis (GstTcamAutoFocus* self)
-{
-#ifdef ENABLE_ARAVIS
-    if (self->camera_src == NULL)
-        get_camera_src (GST_ELEMENT(self));
-
-    if (self->camera_src == NULL)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Source empty! Aborting. ");
-        return;
-    }
-
-    ArvCamera* camera;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
-
-    if (camera == NULL)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve camera! Aborting. ");
-        return;
-    }
-
-    ArvDevice* device = arv_camera_get_device(camera);
-
-    if (device == NULL)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve device! Aborting. ");
-        return;
-    }
-
-    int current_focus = arv_device_get_integer_feature_value(device, "Focus");
-    int focus_auto_min = arv_device_get_integer_feature_value(device, "FocusAutoMin");
-    int focus_auto_step_divisor = arv_device_get_integer_feature_value(device, "FocusAutoStepDivisor");
-
-    gint64 min;
-    gint64 max;
-    arv_device_get_integer_feature_bounds(device, "Focus", &min, &max);
-
-    if (max < focus_auto_min)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Illogical values: Focus %d Min %d Max %d Divisor %d \nAborting run.",
-                       current_focus,
-                       focus_auto_min,
-                       max,
-                       focus_auto_step_divisor);
-    }
-
-    RECT r = {0, 0, 0, 0};
-
-    /* user defined rectangle */
-    if (self->x != 0 || self->y != 0)
-    {
-        r.left = (self->x - self->size < 0) ? 0 : self->x - self->size;
-        r.right =(self->x - self->size > self->width) ? self->width : self->x - self->size;
-        r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
-        r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
-    }
-
-    if (current_focus < focus_auto_min)
-    {
-        arv_device_set_integer_feature_value(device, "Focus", focus_auto_min);
-        current_focus = focus_auto_min;
-    }
-    self->cur_focus = current_focus;
-
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "run",
-                   __LINE__,
-                   NULL,
-                   "Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
-                   current_focus,
-                   focus_auto_min,
-                   max,
-                   focus_auto_step_divisor);
-
-    autofocus_run(self->focus,
-                  current_focus,
-                  focus_auto_min,
-                  max,
-                  r,
-                  500,
-                  focus_auto_step_divisor,
-                  false);
-#endif
-}
-
-
-static void focus_run_usb (GstTcamAutoFocus* self)
-{
-    if (self->camera_src == NULL)
-        get_camera_src (GST_ELEMENT(self));
-
-    if (self->camera_src == NULL)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Source empty! Aborting. ");
-        return;
-    }
-
-    gint fd = -1;
-    g_object_get (G_OBJECT (self->camera_src), "device-fd", &fd, NULL);
-
-    if (fd <= 0)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve camera! Aborting. ");
-        return;
-    }
-
-    RECT r = {0, 0, 0, 0};
-
-    /* user defined rectangle */
-    if (self->x != 0 || self->y != 0)
-    {
-        r.left = (self->x - self->size < 0) ? 0 : self->x - self->size;
-        r.right =(self->x - self->size > self->width) ? self->width : self->x - self->size;
-        r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
-        r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
-    }
-
-
-    int min = 0;
-    int max = 0;
-
-    struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
-    struct v4l2_control ctrl = { 0 };
-
-    while (ioctl(fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
-    {
-        if (qctrl.id == V4L2_CID_FOCUS_ABSOLUTE)
-        {
-
-            ctrl.id = qctrl.id;
-            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
-            {
-                continue;
-            }
-            self->cur_focus = ctrl.value;
-            min = qctrl.minimum;
-            max = qctrl.maximum;
-
-        }
-
-        qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-    }
-
-    /* magic number */
-    int focus_auto_step_divisor = 4;
-
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "run",
-                   __LINE__,
-                   NULL,
-                   "Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
-                   self->cur_focus,
-                   min,
-                   max,
-                   focus_auto_step_divisor);
-
-    autofocus_run(self->focus,
-                  self->cur_focus,
-                  min,
-                  max,
-                  r,
-                  500,
-                  focus_auto_step_divisor,
-                  false);
 }
 
 
@@ -471,18 +224,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
 
 static void focus_run (GstTcamAutoFocus* self)
 {
-    if (self->camera_type == CAMERA_TYPE_ARAVIS)
-    {
-        focus_run_aravis(self);
-    }
-    else if (self->camera_type == CAMERA_TYPE_USB)
-    {
-        focus_run_usb(self);
-    }
-    else
-    {
-        focus_run_tcam(self);
-    }
+    focus_run_tcam(self);
 }
 
 
@@ -739,169 +481,6 @@ static int clip (int min, int value, int max)
 }
 
 
-
-static void transform_aravis (GstTcamAutoFocus* self, GstBuffer* buf)
-{
-#ifdef ENABLE_ARAVIS
-
-    if (self->camera_src)
-    {
-        get_camera_src(GST_ELEMENT(self));
-    }
-
-    ArvCamera* camera;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &camera, NULL);
-
-    ArvDevice* device = arv_camera_get_device(camera);
-
-    int current_focus = arv_device_get_integer_feature_value(device, "Focus");
-    int focus_auto_min = arv_device_get_integer_feature_value(device, "FocusAutoMin");
-
-    gint64 min;
-    gint64 max;
-    arv_device_get_integer_feature_bounds(device, "Focus", &min, &max);
-
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "fixate_caps",
-                   __LINE__,
-                   NULL,
-                   "cur focus %d ", current_focus);
-
-    /* assure we use the current focus value */
-    autofocus_update_focus(self->focus, clip(focus_auto_min, current_focus, max));
-
-    img_descriptor img =
-        {
-            GST_BUFFER_DATA(buf),
-            GST_BUFFER_SIZE(buf),
-            FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
-            self->width,
-            self->height,
-            self->width
-        };
-
-    int new_focus_value;
-    POINT p = {0, 0};
-
-    bool ret = autofocus_analyze_frame(self->focus,
-                                       img,
-                                       p,
-                                       1,
-                                       &new_focus_value);
-
-    if (ret)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "Setting focus %d", new_focus_value);
-        arv_device_set_integer_feature_value(device, "Focus", new_focus_value);
-        self->cur_focus = new_focus_value;
-    }
-#endif /* ENABLE_ARAVIS*/
-}
-
-
-static void transform_usb (GstTcamAutoFocus* self, GstBuffer* buf)
-{
-    if (self->camera_src)
-    {
-        get_camera_src(GST_ELEMENT(self));
-    }
-
-    int fd = -1;
-    g_object_get (G_OBJECT (self->camera_src), "device-fd", &fd, NULL);
-
-    gint64 min = 0;
-    gint64 max = 0;
-
-    struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
-    struct v4l2_control ctrl = { 0 };
-
-    while (ioctl(fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
-    {
-        if (qctrl.id == V4L2_CID_FOCUS_ABSOLUTE)
-        {
-
-            ctrl.id = qctrl.id;
-            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
-            {
-                continue;
-            }
-            self->cur_focus = ctrl.value;
-            min = qctrl.minimum;
-            max = qctrl.maximum;
-
-        }
-
-        qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
-    }
-
-    int focus_auto_min = min;
-
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "fixate_caps",
-                   __LINE__,
-                   NULL,
-                   "current focus %d - %dx%d ", self->cur_focus, self->width, self->height);
-
-    /* assure we use the current focus value */
-    autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
-
-    GstMapInfo info = {};
-    gst_buffer_make_writable(buf);
-
-    gst_buffer_map(buf, &info, GST_MAP_WRITE);
-
-    img_descriptor img =
-        {
-            info.data,
-            info.size,
-            FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
-            self->width,
-            self->height,
-            self->width
-        };
-
-    int new_focus_value;
-    POINT p = {0, 0};
-
-    bool ret = autofocus_analyze_frame(self->focus,
-                                       img,
-                                       p,
-                                       500,
-                                       &new_focus_value);
-
-    if (ret)
-    {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "Setting focus %d", new_focus_value);
-
-        ctrl.id = V4L2_CID_FOCUS_ABSOLUTE;
-        ctrl.value = new_focus_value;
-
-        ioctl(fd, VIDIOC_S_CTRL, &ctrl);
-
-        self->cur_focus = new_focus_value;
-    }
-
-    gst_buffer_unmap(buf, &info);
-
-}
-
-
 static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 {
     if (self->camera_src)
@@ -1015,43 +594,8 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
             get_camera_src(GST_ELEMENT(self));
         }
 
-        if (self->camera_type == CAMERA_TYPE_USB)
-        {
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautofocus",
-                           "fixate_caps",
-                           __LINE__,
-                           NULL,
-                           "Calling USB");
-            transform_usb(self, buf);
-        }
-        else if (self->camera_type == CAMERA_TYPE_ARAVIS)
-        {
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautofocus",
-                           "fixate_caps",
-                           __LINE__,
-                           NULL,
-                           "Calling ARAVIS");
-            transform_aravis(self, buf);
-        }
-        else if (self->camera_type == CAMERA_TYPE_TCAM)
-        {
-            transform_tcam(self, buf);
-        }
-        else
-        {
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_ERROR,
-                           "tcamautofocus",
-                           "fixate_caps",
-                           __LINE__,
-                           NULL,
-                           "Unable to determine camera type. Aborting");
-            return GST_FLOW_ERROR;
-        }
+        transform_tcam(self, buf);
+
         return GST_FLOW_OK;
     }
 
