@@ -637,6 +637,6 @@ static gboolean plugin_init (GstPlugin* plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
-                   tcamwhitebalance,
+                   PACKAGE_NAME,
                    "The Imaging Source white balance plugin",
-                   plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+                   plugin_init, VERSION, "Proprietary", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
