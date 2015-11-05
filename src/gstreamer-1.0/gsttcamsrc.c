@@ -19,8 +19,6 @@
 
 #include "tcam_c.h"
 
-#include "../gobject/tcamprop.h"
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
