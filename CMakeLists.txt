@@ -26,6 +26,8 @@ set(TCAM_VERSION_PATCH 0)
 
 set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}" CACHE STRING "Version number")
 
+set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
+
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
 
@@ -65,9 +67,6 @@ if (BUILD_TOOLS)
   add_subdirectory(tools)
 endif (BUILD_TOOLS)
 
-if (BUILD_DOC)
-  add_subdirectory(doc)
-endif (BUILD_DOC)
 
 # Give overview over build configuration
 
