@@ -60,11 +60,11 @@ extern "C"
      *
      * @param[in]  index - index to use
      * @param[out] array - pointer to array tha shall be filled
-     * @param[in]  size  - size of the given array
+     * @param[in]  array_size - size of the given array
      * @return number of devices copied; -1 on error
      */
     int tcam_device_index_get_device_infos (struct tcam_device_info* array,
-                                            size_t size);
+                                            size_t array_size);
 
 
     /* image source */
@@ -133,12 +133,12 @@ extern "C"
      * Retrieve tcam_capture_device properties
      * @param[in] source - device whichs properties shall be read
      * @param[out] array  - property collection that shall be filled
-     * @param[in] size   - size of the given array
+     * @param[in] array_size - size of the given array
      * @return number of elements copied; -1 on error
      */
     int tcam_capture_device_get_properties (const tcam_capture_device* source,
                                             struct tcam_device_property* array,
-                                            const size_t size);
+                                            const size_t array_size);
 
 
     bool  tcam_capture_device_find_property (tcam_capture_device* source,
@@ -171,12 +171,12 @@ extern "C"
      * Description for tcam_capture_device_get_image_format_description.
      * @param[in]  source - source for which descriptions shall be queried
      * @param[out] array  - container into which descriptions shall be copied
-     * @param[in]  size   - size of array
+     * @param[in]  array_size - size of array
      * @return number of elements copied; -1 on error
      */
     int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device* source,
                                                            struct tcam_video_format_description* array,
-                                                           const size_t size);
+                                                           const size_t array_size);
 
 
 
@@ -184,14 +184,14 @@ extern "C"
     int tcam_capture_device_get_format_resolution (const tcam_capture_device* source,
                                                    const struct tcam_video_format_description* desc,
                                                    struct tcam_resolution_description* array,
-                                                   const size_t size);
+                                                   const size_t array_size);
 
 
     int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* source,
                                                       const struct tcam_video_format_description* desc,
                                                       const struct tcam_resolution_description* resolution,
                                                       double* array,
-                                                      const size_t size);
+                                                      const size_t array_size);
 
 
     /**

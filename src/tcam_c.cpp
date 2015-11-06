@@ -48,11 +48,11 @@ int tcam_device_index_get_device_count ()
 
 
 int tcam_device_index_get_device_infos (tcam_device_info* arr,
-                                        size_t size)
+                                        size_t array_size)
 {
     auto vec = get_device_list();
 
-    if (vec.size() < size)
+    if (vec.size() < array_size)
     {
         set_error(Error("Array is to small to contain all devices", EFAULT));
         return -1;
@@ -128,9 +128,9 @@ int tcam_capture_device_get_properties_count (const tcam_capture_device* source)
 
 int tcam_capture_device_get_properties (const tcam_capture_device* source,
                                         struct tcam_device_property* array,
-                                        const size_t size)
+                                        const size_t array_size)
 {
-    if (tcam_capture_device_get_properties_count(source) > size)
+    if (tcam_capture_device_get_properties_count(source) > array_size)
     {
         return 0;
     }
@@ -141,9 +141,9 @@ int tcam_capture_device_get_properties (const tcam_capture_device* source,
     for (auto& v : vec)
     {
         array[x] = v->get_struct();
-        if (x == size)
+        if (x == array_size)
         {
-            return size;
+            return array_size;
         }
         x++;
     }
@@ -232,12 +232,12 @@ int tcam_capture_device_get_image_format_descriptions_count (const tcam_capture_
 
 int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device* source,
                                                       tcam_video_format_description* arr,
-                                                      const size_t size)
+                                                      const size_t array_size)
 {
 
     auto vec = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
 
-    if (vec.size() > size)
+    if (vec.size() > array_size)
     {
         return -1;
     }
@@ -257,7 +257,7 @@ int tcam_capture_device_get_image_format_descriptions (const tcam_capture_device
 int tcam_capture_device_get_format_resolution (const tcam_capture_device* source,
                                                const tcam_video_format_description* desc,
                                                struct tcam_resolution_description* array,
-                                               const size_t size)
+                                               const size_t array_size)
 {
     auto formats = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
 
@@ -267,7 +267,7 @@ int tcam_capture_device_get_format_resolution (const tcam_capture_device* source
         {
             auto vec = f.get_resolutions();
 
-            if (vec.size() > size)
+            if (vec.size() > array_size)
             {
                 return -1;
             }
@@ -285,7 +285,7 @@ int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* sou
                                                   const struct tcam_video_format_description* desc,
                                                   const struct tcam_resolution_description* resolution,
                                                   double* array,
-                                                  const size_t size)
+                                                  const size_t array_size)
 {
     auto formats = reinterpret_cast<const CaptureDevice*>(source)->get_available_video_formats();
 
@@ -295,7 +295,7 @@ int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* sou
         {
             auto vec = f.get_frame_rates(*resolution);
 
-            if (vec.size() > size)
+            if (vec.size() > array_size)
             {
                 return -1;
             }
