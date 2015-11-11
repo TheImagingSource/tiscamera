@@ -40,8 +40,7 @@ include_directories(${INTROSPECTION_INCLUDE_DIR})
 
 add_library(gsttcamsrc SHARED gsttcamsrc.c)
 
-#target_link_libraries(gsttcamsrc tcam-gobject)
-target_link_libraries(gsttcamsrc ${INTROSPECTION_LIBS})
+target_link_libraries(gsttcamsrc tcamprop)
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.c image_sampling.c bayer.c)
 
