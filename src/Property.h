@@ -131,6 +131,7 @@ public:
      * @return true on success
      */
     void set_struct_value (const struct tcam_device_property&);
+    void get_struct_value (struct tcam_device_property& p);
     Property::VALUE_TYPE get_value_type () const;
 
 
@@ -142,6 +143,7 @@ public:
     bool set_property (const Property&);
     bool set_property_from_struct (const tcam_device_property&);
     bool get_property (Property&);
+    bool get_property_from_struct (tcam_device_property&);
 
 protected:
 
