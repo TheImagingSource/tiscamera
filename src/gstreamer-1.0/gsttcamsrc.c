@@ -351,7 +351,8 @@ gboolean gst_tcam_src_set_tcam_property (TcamProp *iface,
 	break;
     }
 
-    return ret;
+    return tcam_capture_device_set_property (self->device,
+					     &prop ) >= 0;
 }
 
 enum
