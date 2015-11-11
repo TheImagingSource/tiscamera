@@ -59,5 +59,4 @@ foreach (t IN ITEMS ${PLUGINS})
 
 endforeach (t)
 
-
 install(TARGETS ${PLUGINS} DESTINATION TCAM_INSTALL_GST_1_0)
