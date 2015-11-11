@@ -150,6 +150,12 @@ extern "C"
     int tcam_capture_device_set_property (tcam_capture_device* source,
                                           const struct tcam_device_property* property);
 
+    /**
+     *
+     */
+    int tcam_capture_device_get_property (tcam_capture_device* source,
+					  struct tcam_device_property* property);
+
 
     /* video format related */
 
