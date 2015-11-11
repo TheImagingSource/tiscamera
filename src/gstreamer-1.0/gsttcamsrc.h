@@ -20,7 +20,6 @@
 #include <gst/gst.h>
 #include <gst/base/gstpushsrc.h>
 
-#include "tcam-gobject.h"
 #include <girepository.h>
 
 #include <tcam_c.h>
@@ -43,7 +42,6 @@ struct _GstTcam
     GstPushSrc element;
 
     char* device_serial;
-    GstTcamProp* dev;
 
     tcam_capture_device* device;
     stream_obj* streamobject;
