@@ -196,6 +196,25 @@ int tcam_capture_device_set_property (tcam_capture_device* source,
         }
     }
     set_error(Error("No such property found", ENOENT));
+
+    return -1;
+}
+
+int tcam_capture_device_get_property (tcam_capture_device* source,
+					   struct tcam_device_property* property)
+{
+    auto vec = reinterpret_cast<CaptureDevice*>(source)->get_available_properties();
+
+    for (auto& v :vec)
+    {
+        if (v->get_ID() == property->id)
+        {
+            v->get_property_from_struct(*property);
+            return true;
+        }
+    }
+    setError(Error("No such property found", ENOENT));
+
     return -1;
 }
 

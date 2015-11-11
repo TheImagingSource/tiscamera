@@ -172,6 +172,47 @@ void Property::set_struct_value (const struct tcam_device_property& p)
     }
 };
 
+void Property::get_struct_value (struct tcam_device_property& p)
+{
+    switch (prop.type)
+    {
+        case TCAM_PROPERTY_TYPE_STRING:
+	    std::strncpy( p.value.s.value, prop.value.s.value, sizeof(prop.value.s.value));
+	    std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(prop.value.s.default_value));
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+            p.value.i.value = prop.value.i.value;
+	    p.value.i.min = prop.value.i.min;
+	    p.value.i.max = prop.value.i.max;
+	    p.value.i.default_value = prop.value.i.default_value;
+	    p.value.i.step = prop.value.i.step;
+            break;
+        case TCAM_PROPERTY_TYPE_INTEGER:
+            p.value.i.value = prop.value.i.value;
+	    p.value.i.min = prop.value.i.min;
+	    p.value.i.max = prop.value.i.max;
+	    p.value.i.default_value = prop.value.i.default_value;
+	    p.value.i.step = prop.value.i.step;
+            break;
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+            p.value.d.value = prop.value.d.value;
+	    p.value.d.min = prop.value.d.min;
+	    p.value.d.max = prop.value.d.max;
+	    p.value.d.default_value = prop.value.d.default_value;
+	    p.value.d.step = prop.value.d.step;
+            break;
+        case TCAM_PROPERTY_TYPE_BUTTON:
+            // do nothing
+            break;
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+            p.value.b.value = prop.value.b.value;
+	    p.value.b.default_value = prop.value.b.default_value;
+            break;
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
+        default:
+            break;
+    }
+};
+
 
 Property::VALUE_TYPE Property::get_value_type () const
 {
@@ -388,6 +429,18 @@ bool Property::set_property_from_struct (const tcam_device_property& prop)
 
 }
 
+bool Property::get_property_from_struct (tcam_device_property& prop)
+{
+
+    if (impl.expired())
+    {
+        return false;
+    }
+    get_struct_value(prop);
+    notify_impl();
+
+    return true;
+}
 
 bool Property::get_property (Property& p)
 {
