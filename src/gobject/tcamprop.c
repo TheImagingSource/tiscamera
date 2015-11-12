@@ -138,3 +138,69 @@ gboolean tcam_prop_set_tcam_property (TcamProp *self,
     return ret;
 }
 
+/**
+ * tcam_prop_get_device_serials:
+ * @self: a #TcamProp
+ *
+ * Retrieve a list of all connected device serial numbers
+ *
+ * Returns: (element-type utf8) (transfer full): a #GSList
+ */
+GSList *tcam_prop_get_device_serials (TcamProp *self)
+{
+    TcamPropInterface *iface;
+    GSList *ret = NULL;
+
+    g_return_val_if_fail (self != NULL, NULL);
+    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+
+    iface = TCAM_PROP_GET_IFACE (self);
+
+    if (iface->get_device_serials){
+	ret = iface->get_device_serials (self);
+    }
+
+    return ret;
+}
+
+/**
+ * tcam_prop_get_device_info:
+ * @self: a #TcamProp
+ * @serial: (in): serial number of camera to query
+ * @name: (out) (optional): location to store an allocated string.
+ *               Use g_free() to free the returned string
+ * @identifier: (out) (optional): location to store an allocated string.
+ *                     Use g_free() to free the returned string
+ * @connection_type: (out) (optional): location to store an allocated string.
+ *                          Use g_free() to free the returned string
+ *
+ * Get details of a given camera.
+ *
+ * Returns: True on success
+ */
+gboolean tcam_prop_get_device_info (TcamProp *self,
+				    const char *serial,
+				    char **name,
+				    char **identifier,
+				    char **connection_type)
+{
+    TcamPropInterface *iface;
+    gboolean *ret = FALSE;
+
+    g_return_val_if_fail (self != NULL, FALSE);
+    g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
+    g_return_val_if_fail (serial != NULL, FALSE);
+
+    iface = TCAM_PROP_GET_IFACE (self);
+
+    if (iface->get_device_info){
+	ret = iface->get_device_info (self,
+				      serial,
+				      name,
+				      identifier,
+				      connection_type);
+    }
+
+    return ret;
+}
+
