@@ -470,9 +470,6 @@ enum
 };
 
 
-/* G_DEFINE_INTERFACE (GstTcam, gst_tcam, TCAM_TYPE_PROP); */
-
-
 static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
                                                                          GST_PAD_SRC,
                                                                          GST_PAD_ALWAYS,
