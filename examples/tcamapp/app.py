@@ -4,7 +4,7 @@ gi.require_version ("Gtk", "3.0")
 gi.require_version ("Gst", "1.0")
 gi.require_version ("Tcam", "0.1")
 
-from gi.repository import Gtk, Tcam, Gst, GdkPixbuf
+from gi.repository import GdkX11, Gtk, Tcam, GstVideo, Gst, GdkPixbuf
 
 import sys
 
@@ -34,7 +34,7 @@ class DeviceDialog (Gtk.Dialog):
     def __get_devices(self):
         elem = Gst.ElementFactory.make("tcamsrc")
         if not elem:
-            raise RuntimeError, "Failed to create tcamsrc element"
+            raise (RuntimeError, "Failed to create tcamsrc element")
         ret = []
         for serial in elem.get_device_serials():
             result, name, ident, conn_type = elem.get_device_info(serial)
@@ -49,6 +49,7 @@ class AppWindow (Gtk.Window):
         Gtk.Window.__init__(self)
 
         self.serial = serial
+        self.pipeline = None
 
         self.set_title ("TCam Demo Applikation")
         self.connect ("destroy", Gtk.main_quit)
@@ -57,7 +58,9 @@ class AppWindow (Gtk.Window):
         hb.set_show_close_button (True)
         hb.props.title = ("TCam Demo Applikation")
         self.set_titlebar (hb)
-        hb.pack_start (self.create_format_combo())
+        combo = self.create_format_combo()
+        combo.connect ("changed", self.on_format_combo_changed)
+        hb.pack_start (combo)
         hb.show_all()
 
         vbox = Gtk.Box(Gtk.Orientation.VERTICAL)
@@ -65,21 +68,34 @@ class AppWindow (Gtk.Window):
 
         self.da = Gtk.DrawingArea()
         self.da.set_size_request (640, 480)
+        self.da.set_double_buffered (True)
         vbox.pack_start (self.da, True, True, 0)
 
         vbox.show_all()
+        self.da.realize()
 
     def create_format_combo (self):
         formats = self.get_format_list(self.serial)
-        model = Gtk.ListStore (str, Gst.Structure)
+        model = Gtk.ListStore (str, int)
         for fmt in formats:
             model.append (fmt)
         combo = Gtk.ComboBox.new_with_model (model)
         renderer_text = Gtk.CellRendererText()
         combo.pack_start (renderer_text, True)
         combo.add_attribute (renderer_text, "text", 0)
-        combo.set_active(0)
+        #combo.set_active(0)
         return combo
+
+    def on_format_combo_changed (self, combo):
+        if self.pipeline:
+            self.pipeline.set_state(Gst.State.NULL)
+            self.pipeline.get_state(0)
+        it = combo.get_active_iter()
+        if it != None:
+            model = combo.get_model()
+            fmt = model[it][1]
+            self.pipeline = self.create_pipeline(fmt)
+            self.pipeline.set_state(Gst.State.PLAYING)
 
     def get_format_list(self, serial):
         elem = Gst.ElementFactory.make("tcamsrc")
@@ -97,11 +113,57 @@ class AppWindow (Gtk.Window):
             text = "%s %dx%d" % (s.get_string("format"),
                                  s.get_int("width")[1],
                                  s.get_int("height")[1])
-            l.append((text, s))
+            l.append((text, i))
         elem.set_state(Gst.State.NULL)
 
         return l
 
+    def create_pipeline(self, fmt):
+        def bus_sync_handler(bus, msg, pipeline):
+            if not GstVideo.is_video_overlay_prepare_window_handle_message(msg):
+                return Gst.BusSyncReply.PASS
+            msg.src.set_window_handle (self.da.get_window().get_xid())
+            return Gst.BusSyncReply.DROP
+
+        p = Gst.Pipeline()
+        src = Gst.ElementFactory.make("tcamsrc")
+        src.set_property("serial", self.serial)
+        p.add(src)
+
+        p.set_state (Gst.State.PAUSED)
+        srccaps = src.pads[0].query_caps()
+        structure = srccaps.get_structure(fmt).copy()
+        structure.remove_field("framerate")
+
+        flt = Gst.ElementFactory.make("capsfilter")
+        caps = Gst.Caps.from_string (structure.to_string())
+        flt.set_property("caps", caps)
+        print ( "Caps String: " + structure.to_string())
+
+        converters = { "GRAY8": ("videoconvert",),
+                       "gbrg": ("bayer2rgb","videoconvert"),
+                       "GRAY16_LE" : ("videoconvert",) }
+
+        colorformat = structure.get_string("format")
+        prev_elem = src
+        for conv in converters[colorformat]:
+            elem = Gst.ElementFactory.make (conv)
+            p.add(elem)
+            prev_elem.link(elem)
+            prev_elem = elem
+
+        queue1 = Gst.ElementFactory.make ("queue")
+        p.add (queue1)
+        prev_elem.link(queue1)
+
+        sink = Gst.ElementFactory.make ("glimagesink")
+        p.add (sink)
+        queue1.link(sink)
+
+        bus = p.get_bus()
+        bus.set_sync_handler (bus_sync_handler, p)
+
+        return p
 
 if __name__ == "__main__":
     Gst.init()
