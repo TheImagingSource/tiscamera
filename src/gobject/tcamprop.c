@@ -108,7 +108,7 @@ gboolean tcam_prop_get_tcam_property (TcamProp *self,
 }
 
 /**
- * tcam_prop_get_tcam_property:
+ * tcam_prop_set_tcam_property:
  * @self: a #TcamProp
  * @name: a #char* identifying the property to query
  * @value: (in): a #GValue
