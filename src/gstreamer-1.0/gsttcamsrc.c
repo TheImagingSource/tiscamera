@@ -17,6 +17,7 @@
 #include "gsttcamsrc.h"
 #include "gsttcambase.h"
 
+#include "tcamprop.h"
 #include "tcam_c.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -48,63 +49,6 @@ gboolean gst_tcam_src_set_tcam_property (TcamProp *self,
 					 const GValue *value);
 
 static void gst_tcam_src_prop_init (TcamPropInterface *iface)
-{
-	iface->get_property_names = gst_tcam_src_get_property_names;
-	iface->get_property_type = gst_tcam_src_get_property_type;
-	iface->get_property = gst_tcam_src_get_tcam_property;
-	iface->set_property = gst_tcam_src_set_tcam_property;
-}
-
-G_DEFINE_TYPE_WITH_CODE (GstTcam, gst_tcam, GST_TYPE_PUSH_SRC,
-                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_src_prop_init));
-
-
-static gboolean
-get_property_by_name (GstTcam *self, gchar *name,
-		      struct tcam_device_property *prop)
-{
-    gboolean ret = FALSE;
-
-    int count = tcam_capture_device_get_properties_count (self->device);
-    if (count){
-	struct tcam_device_property *props;
-
-	props = g_malloc_n (sizeof (struct tcam_device_property), count);
-	if (tcam_capture_device_get_properties (self->device,
-						props,
-						count) > 0){
-	    int i;
-	    for (i = 0; i < count; i++ ){
-		if (!strcmp (props[i].name, name)){
-		    memcpy (prop,
-			    &props[i],
-			    sizeof(struct tcam_device_property));
-		    ret = TRUE;
-		    break;
-		}
-	    }
-	}
-	g_free (props);
-    }
-
-    return ret;
-}
-
-
-struct property_type_map
-{
-    enum TCAM_PROPERTY_TYPE typecode;
-    gchar *typename;
-};
-
-/* G_DEFINE_INTERFACE(TcamProp, tcam_prop, G_TYPE_OBJECT); */
-
-static GVariant* gst_tcam_get (GstTcamProp* self, gchar* cname);
-gboolean gst_tcam_set (GstTcamProp* self, gchar* cname, GVariant* value);
-
-
-static void gst_tcam_prop_default_init (GstTcamPropInterface *self)
 {
 	iface->get_property_names = gst_tcam_src_get_property_names;
 	iface->get_property_type = gst_tcam_src_get_property_type;

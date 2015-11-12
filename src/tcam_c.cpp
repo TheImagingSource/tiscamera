@@ -213,7 +213,7 @@ int tcam_capture_device_get_property (tcam_capture_device* source,
             return true;
         }
     }
-    setError(Error("No such property found", ENOENT));
+    set_error(Error("No such property found", ENOENT));
 
     return -1;
 }
