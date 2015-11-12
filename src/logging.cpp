@@ -86,7 +86,7 @@ Logger::Logger ():
 
 void Logger::load_default_settings ()
 {
-    level = TCAM_LOG_NONE;
+    level = TCAM_LOG_OFF;
     target = STDIO;
     log_file = "/tmp/tis.log";
 }
