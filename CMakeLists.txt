@@ -50,15 +50,15 @@ if (BUILD_V4L2)
   set(HAVE_USB 1)
 endif (BUILD_V4L2)
 
-set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "library installation path")
-set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE STRING "header installation path")
-set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "binary installation path")
+set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "library installation path" FORCE)
+set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE STRING "header installation path" FORCE)
+set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "binary installation path" FORCE)
 set(TCAM_INSTALL_UDEV "/usr/lib/udev/rules.d" CACHE STRING "udev rules installation path")
 set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcdynctrl rules installation path")
-set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path")
+set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path" FORCE)
 
-set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path")
-set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path")
+set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path" FORCE)
+set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path" FORCE)
 
 add_subdirectory(src)
 
