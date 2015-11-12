@@ -47,6 +47,14 @@ static
 gboolean gst_tcam_src_set_tcam_property (TcamProp *self,
 					 gchar *name,
 					 const GValue *value);
+static
+GSList *gst_tcam_src_get_device_serials (TcamProp *self);
+static
+gboolean gst_tcam_src_get_device_info (TcamProp *self,
+				       const char *serial,
+				       char **name,
+				       char **identifier,
+				       char **connection_type);
 
 static void gst_tcam_src_prop_init (TcamPropInterface *iface)
 {
@@ -54,6 +62,8 @@ static void gst_tcam_src_prop_init (TcamPropInterface *iface)
 	iface->get_property_type = gst_tcam_src_get_property_type;
 	iface->get_property = gst_tcam_src_get_tcam_property;
 	iface->set_property = gst_tcam_src_set_tcam_property;
+	iface->get_device_serials = gst_tcam_src_get_device_serials;
+	iface->get_device_info = gst_tcam_src_get_device_info;
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstTcam, gst_tcam, GST_TYPE_PUSH_SRC,
@@ -354,6 +364,102 @@ gboolean gst_tcam_src_set_tcam_property (TcamProp *iface,
     return tcam_capture_device_set_property (self->device,
 					     &prop ) >= 0;
 }
+
+static
+GSList *gst_tcam_src_get_device_serials (TcamProp *self)
+{
+    int count = tcam_device_index_get_device_count ();
+    GSList *ret = NULL;
+    struct tcam_device_info *info;
+
+    if (count <= 0){
+	return NULL;
+    }
+
+    info = g_new0 (struct tcam_device_info, count);
+    if (info == NULL){
+	return NULL;
+    }
+
+    if (tcam_device_index_get_device_infos (info,
+					    count) <= 0){
+	g_free (info);
+	return NULL;
+    }
+
+    int i;
+    for (i = 0; i < count; i++){
+	ret = g_slist_append (ret,
+			      g_strndup (info[i].serial_number,
+					 sizeof(info[i].serial_number)));
+    }
+
+    g_free (info);
+
+    return ret;
+}
+
+static
+gboolean gst_tcam_src_get_device_info (TcamProp *self,
+				       const char *serial,
+				       char **name,
+				       char **identifier,
+				       char **connection_type)
+{
+    int count = tcam_device_index_get_device_count ();
+    gboolean ret = FALSE;
+    struct tcam_device_info *info;
+
+    if (count <= 0){
+	return FALSE;
+    }
+
+    info = g_new0 (struct tcam_device_info, count);
+    if (info == NULL){
+	return FALSE;
+    }
+
+    if (tcam_device_index_get_device_infos (info,
+					    count) <= 0){
+	g_free (info);
+	return NULL;
+    }
+
+    int i;
+    for (i = 0; i < count; i++){
+	if (!strncmp (serial, info[i].serial_number,
+		      sizeof (info[i].serial_number))){
+	    ret = TRUE;
+	    if (name){
+		*name = g_strndup (info[i].name, sizeof (info[i].name));
+	    }
+	    if (identifier){
+		*identifier = g_strndup (info[i].identifier,
+					sizeof (info[i].identifier));
+	    }
+	    if (connection_type) {
+		switch (info[i].type){
+		case TCAM_DEVICE_TYPE_V4L2:
+		    *connection_type = g_strdup ("v4l2");
+		    break;
+		case TCAM_DEVICE_TYPE_ARAVIS:
+		    *connection_type = g_strdup ("aravis");
+		    break;
+		default:
+		    *connection_type = g_strdup ("unknown");
+		    break;
+		}
+	    }
+	    break;
+	}
+    }
+
+    g_free (info);
+
+    return ret;
+}
+
+
 
 enum
 {
