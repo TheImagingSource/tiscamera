@@ -72,3 +72,8 @@ add_custom_command(
 #add_dependencies(create_typelib create_gir)
 
 add_custom_target(create_gobject ALL DEPENDS ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib)
+
+install(TARGETS tcamprop LIBRARY DESTINATION "${TCAM_INSTALL_LIB}")
+
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir DESTINATION ${TCAM_INSTALL_GIR})
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib DESTINATION ${TCAM_INSTALL_TYPELIB})

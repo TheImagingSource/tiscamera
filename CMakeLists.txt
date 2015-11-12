@@ -57,6 +57,9 @@ set(TCAM_INSTALL_UDEV "/usr/lib/udev/rules.d" CACHE STRING "udev rules installat
 set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcdynctrl rules installation path")
 set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path")
 
+set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path")
+set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path")
+
 add_subdirectory(src)
 
 
@@ -83,4 +86,6 @@ MESSAGE(STATUS "Installing header to:          " ${TCAM_INSTALL_INCLUDE})
 MESSAGE(STATUS "Installing udev rules to:      " ${TCAM_INSTALL_UDEV})
 MESSAGE(STATUS "Installing uvcdynctrl rules to:" ${TCAM_INSTALL_UVCDYNCTRL})
 MESSAGE(STATUS "Installing gstreamer-1.0 to:   " ${TCAM_INSTALL_GST_1_0})
+MESSAGE(STATUS "Installing gobject-introspection to: " ${TCAM_INSTALL_GIR})
+MESSAGE(STATUS "Installing introspection typelib to: " ${TCAM_INSTALL_TYPELIB})
 MESSAGE(STATUS "")
