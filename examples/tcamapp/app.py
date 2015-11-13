@@ -11,8 +11,6 @@ import sys
 
 
 class DeviceDialog (Gtk.Dialog):
-    RESPONSE_OK = 1
-    RESPONSE_CANCEL = 2
     def __init__(self, parent=None):
         Gtk.Dialog.__init__(self, parent)
         self.add_buttons (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
