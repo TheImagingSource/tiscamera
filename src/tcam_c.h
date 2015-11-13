@@ -238,7 +238,7 @@ extern "C"
      * @param[in] source
      * @return true on success
      */
-    bool tcam_capture_device_stop_stream (tcam_capture_device* source);
+    bool tcam_capture_device_stop_stream (tcam_capture_device* source, stream_obj* obj);
 
     /**
      * @param buffer that shall be locked

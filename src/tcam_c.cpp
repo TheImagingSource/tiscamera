@@ -364,9 +364,14 @@ stream_obj* tcam_capture_device_start_stream (tcam_capture_device* source,
 }
 
 
-bool tcam_capture_device_stop_stream (tcam_capture_device* source)
+bool tcam_capture_device_stop_stream (tcam_capture_device* source, stream_obj* obj)
 {
-    return reinterpret_cast<CaptureDevice*>(source)->stop_stream();
+    bool ret = reinterpret_cast<CaptureDevice*>(source)->stop_stream();
+    if (obj != nullptr)
+    {
+        delete (tmp_stream_obj*)obj;
+    }
+    return ret;
 }
 
 

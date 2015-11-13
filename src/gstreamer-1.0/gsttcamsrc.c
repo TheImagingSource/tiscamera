@@ -838,7 +838,8 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
     GST_LOG_OBJECT (self, "Requested caps = %" GST_PTR_FORMAT, caps);
     GST_ERROR( "Requested caps = %" GST_PTR_FORMAT, caps);
 
-    tcam_capture_device_stop_stream(self->device);
+    tcam_capture_device_stop_stream(self->device, self->streamobject);
+    self->streamobject = NULL;
 
     structure = gst_caps_get_structure (caps, 0);
 
@@ -972,7 +973,8 @@ static void gst_tcam_close_camera (GstTcam* self)
 {
     if (self->device != NULL)
     {
-        tcam_capture_device_stop_stream(self->device);
+        tcam_capture_device_stop_stream(self->device, self->streamobject);
+        self->streamobject = NULL;
         tcam_destroy_capture_device(self->device);
         self->device = NULL;
     }
@@ -998,7 +1000,8 @@ gboolean gst_tcam_stop (GstBaseSrc* src)
 {
     GstTcam* self = GST_TCAM(src);
 
-    tcam_capture_device_stop_stream(self->device);
+    tcam_capture_device_stop_stream(self->device, self->streamobject);
+    self->streamobject = NULL;
 
     if (self->all_caps != NULL)
     {
@@ -1108,7 +1111,7 @@ static void gst_tcam_init (GstTcam* self)
     self->payload = 0;
 
     self->device = NULL;
-
+    self->streamobject = NULL;
     self->all_caps = NULL;
     self->fixed_caps = NULL;
 
