@@ -532,7 +532,7 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
 
                 structure = gst_structure_from_string (caps_string, NULL);
 
-                if (min_width < max_width)
+                if (res[j].type == TCAM_RESOLUTION_TYPE_RANGE)
                 {
 
                     gst_structure_set (structure,
@@ -543,49 +543,42 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
                                        120, 1,
                                        NULL);
                 }
-                else
+                else // fixed resolution
                 {
+                    double framerates[res[j].framerate_count];
+                    int framerate_count = tcam_capture_device_get_resolution_framerate(self->device,
+                                                                                       &format[i],
+                                                                                       &res[j],
+                                                                                       framerates,
+                                                                                       res[j].framerate_count);
 
-                    /* TODO how to handle framerates */
+                    GValue fps_list = {0};
+                    g_value_init(&fps_list, GST_TYPE_LIST);
+
+                    int f;
+                    for (f = 0; f < framerate_count; f++)
+                    {
+                        int frame_rate_numerator;
+                        int frame_rate_denominator;
+                        gst_util_double_to_fraction(framerates[f],
+                                                    &frame_rate_numerator,
+                                                    &frame_rate_denominator);
+
+                        GValue fraction = {0};
+                        g_value_init(&fraction, GST_TYPE_FRACTION);
+                        gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
+                        gst_value_list_append_value(&fps_list, &fraction);
+                        g_value_unset(&fraction);
+                    }
 
                     gst_structure_set (structure,
                                        "width", G_TYPE_INT, max_width,
                                        "height", G_TYPE_INT, max_height,
-                                       "framerate", GST_TYPE_FRACTION_RANGE,
-                                       1, 1,
-                                       120, 1,
                                        NULL);
 
-                    /* double framerates [res[j].framerate_count]; */
+                    gst_structure_take_value(structure, "framerate", &fps_list);
 
-                    /* int ret = tcam_capture_device_get_resolution_framerate(self->device, */
-                    /*                                                        &format[i], */
-                    /*                                                        &res[j], */
-                    /*                                                        framerates, */
-                    /*                                                        res[j].framerate_count); */
-
-                    /* unsigned int k; */
-                    /* for (k = 0; k < ret; k++) */
-                    /* { */
-                    /*     GST_DEBUG_OBJECT(self, "999999=============================%f", framerates[k]); */
-
-                    /*     int max_frame_rate_numerator; */
-                    /*     int max_frame_rate_denominator; */
-                    /*     gst_util_double_to_fraction(framerates[k], */
-                    /*                                 &max_frame_rate_numerator, */
-                    /*                                 &max_frame_rate_denominator); */
-
-
-                    /*     gst_structure_set (structure, */
-                    /*                        "framerate", GST_TYPE_FRACTION_RANGE, */
-                    /*                        max_frame_rate_numerator, max_frame_rate_denominator, */
-                    /*                        max_frame_rate_numerator, max_frame_rate_denominator, */
-                    /*                        NULL); */
-
-                    /*     gst_caps_append_structure (caps, structure); */
-
-                    /* } */
-
+                    g_value_unset(&fps_list);
                 }
                 gst_caps_append_structure (caps, structure);
             }

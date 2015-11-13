@@ -293,7 +293,11 @@ int tcam_capture_device_get_resolution_framerate (const tcam_capture_device* sou
 
     for (const auto& f : formats)
     {
-        if (f == *desc)
+        auto s = f.get_struct();
+        if (s.fourcc == desc->fourcc
+            && s.skipping == desc->skipping
+            && s.binning == desc->binning
+            && s.resolution_count == desc->resolution_count)
         {
             auto vec = f.get_frame_rates(*resolution);
 
