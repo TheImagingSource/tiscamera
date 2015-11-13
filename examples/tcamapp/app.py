@@ -22,17 +22,19 @@ class DeviceDialog (Gtk.Dialog):
         self.__iv.set_text_column(1)
         self.__iv.set_selection_mode (Gtk.SelectionMode.BROWSE)
 
-        for dev in self.__get_devices():
+        self.source = Gst.ElementFactory.make("tcamsrc")
+        if not self.source:
+            raise (RuntimeError, "Failed to create tcamsrc element")
+
+        for dev in self.__get_devices(self.source):
             pixbuf = Gtk.IconTheme.get_default().load_icon (
                 Gtk.STOCK_YES, 64, 0)
             label = "%s (%s)" % (dev[1], dev[0])
             model.append ((pixbuf, label, dev[0]))
         self.get_content_area().add(self.__iv)
 
-    def __get_devices(self):
-        elem = Gst.ElementFactory.make("tcamsrc")
-        if not elem:
-            raise (RuntimeError, "Failed to create tcamsrc element")
+    def __get_devices(self, elem):
+        elem.set_property("serial", None)
         ret = []
         for serial in elem.get_device_serials():
             result, name, ident, conn_type = elem.get_device_info(serial)
@@ -42,12 +44,75 @@ class DeviceDialog (Gtk.Dialog):
     def get_serial(self):
         return self.__iv.get_model()[self.__iv.get_selected_items()[0]][2]
 
+    def get_source(self):
+        if self.__iv.get_selected_items():
+            self.source.set_property("serial", self.__iv.get_model()[self.__iv.get_selected_items()[0]][2])
+        return self.source
+
+class PropertyDialog (Gtk.Dialog):
+    def __init__ (self, src):
+        Gtk.Dialog.__init__(self, title="Properties")
+        self.set_default_size (300,200)
+        self.src = src
+
+        vbox = self.__create_main_vbox ()
+        self.get_content_area().add (vbox)
+        vbox.show_all()
+
+    def __create_main_vbox (self):
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        for name in self.src.get_tcam_property_names():
+            (result, value, minval, maxval,
+             defval, step, valuetype) = self.src.get_tcam_property (name)
+            pptytype = self.src.get_tcam_property_type (name)
+
+            if pptytype == "integer":
+                ctrl = self.__create_range_control (
+                    name, minval, maxval, defval, value, step)
+            elif pptytype == "boolean":
+                ctrl = self.__create_toggle_control (name, value)
+            elif pptytype == "button":
+                ctrl = self.__create_button_control (name)
+            vbox.pack_start (ctrl, True, False, 6)
+
+        return vbox
+
+    def __create_control_vbox (self, name):
+        vbox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
+        label = Gtk.Label (name)
+        vbox.pack_start (label, True, False, 2)
+        return vbox
+
+    def __create_range_control (self,
+                                name, minval, maxval, defval, curval, step):
+        vbox = self.__create_control_vbox (name)
+        scale = Gtk.HScale.new_with_range (minval, maxval, step)
+        scale.set_value (curval)
+        scale.add_mark (defval, Gtk.PositionType.TOP, None)
+        vbox.pack_start (scale, True, True, 2)
+        return vbox
+
+    def __create_toggle_control (self, name, defval):
+        vbox = self.__create_control_vbox (name)
+        button = Gtk.ToggleButton.new_with_label (name)
+        button.set_active (defval)
+        vbox.pack_start (button, True, False, 2)
+        return vbox
+
+    def __create_button_control (self, name):
+        button = self.__create_control_vbox (name)
+        vbox.pack_start (button, True, False, 2)
+        return vbox
+
+
 class AppWindow (Gtk.Window):
-    def __init__ (self, serial):
+    def __init__ (self, source):
         Gtk.Window.__init__(self)
 
-        self.serial = serial
+        self.source = source
         self.pipeline = None
+        self.ppty_dialog = PropertyDialog(self.source)
+        self.ppty_dialog.present()
 
         self.set_title ("TCam Demo Applikation")
         self.connect ("destroy", Gtk.main_quit)
@@ -73,7 +138,7 @@ class AppWindow (Gtk.Window):
         self.da.realize()
 
     def create_format_combo (self):
-        formats = self.get_format_list(self.serial)
+        formats = self.get_format_list()
         model = Gtk.ListStore (str, int)
         for fmt in formats:
             model.append (fmt)
@@ -88,6 +153,9 @@ class AppWindow (Gtk.Window):
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
             self.pipeline.get_state(0)
+            self.source.unlink()
+            self.source.unparent()
+
         it = combo.get_active_iter()
         if it != None:
             model = combo.get_model()
@@ -95,13 +163,14 @@ class AppWindow (Gtk.Window):
             self.pipeline = self.create_pipeline(fmt)
             self.pipeline.set_state(Gst.State.PLAYING)
 
-    def get_format_list(self, serial):
-        elem = Gst.ElementFactory.make("tcamsrc")
-        elem.set_property("serial", serial)
+            if self.ppty_dialog:
+                self.ppty_dialog.destroy()
+                self.ppty_dialog = PropertyDialog(
+                    self.pipeline.get_by_name ("source"))
 
-        elem.set_state(Gst.State.PAUSED)
-
-        pad = elem.pads[0]
+    def get_format_list(self):
+        self.source.set_state (Gst.State.PAUSED)
+        pad = self.source.pads[0]
         caps = pad.query_caps()
 
         l = []
@@ -112,7 +181,8 @@ class AppWindow (Gtk.Window):
                                  s.get_int("width")[1],
                                  s.get_int("height")[1])
             l.append((text, i))
-        elem.set_state(Gst.State.NULL)
+
+        self.source.set_state (Gst.State.NULL)
 
         return l
 
@@ -123,13 +193,14 @@ class AppWindow (Gtk.Window):
             msg.src.set_window_handle (self.da.get_window().get_xid())
             return Gst.BusSyncReply.DROP
 
+        if self.source.get_parent() != None:
+            raise (RuntimeError, "tcamsrc already has a parent")
+
         p = Gst.Pipeline()
-        src = Gst.ElementFactory.make("tcamsrc")
-        src.set_property("serial", self.serial)
-        p.add(src)
+        p.add(self.source)
 
         p.set_state (Gst.State.PAUSED)
-        srccaps = src.pads[0].query_caps()
+        srccaps = self.source.pads[0].query_caps()
         structure = srccaps.get_structure(fmt).copy()
         structure.remove_field("framerate")
 
@@ -143,7 +214,7 @@ class AppWindow (Gtk.Window):
                        "GRAY16_LE" : ("videoconvert",) }
 
         colorformat = structure.get_string("format")
-        prev_elem = src
+        prev_elem = self.source
         for conv in converters[colorformat]:
             elem = Gst.ElementFactory.make (conv)
             p.add(elem)
@@ -167,10 +238,12 @@ if __name__ == "__main__":
     Gst.init()
     Gtk.init ()
 
-    serial = None
+    source = None
 
     if len(sys.argv) == 2:
         serial = sys.argv[1]
+        source = Gst.ElementFactory.make ("tcamsrc")
+        source.set_property ("serial", serial)
     else:
         dlg = DeviceDialog()
         dlg.show_all()
@@ -180,13 +253,15 @@ if __name__ == "__main__":
         if resp != Gtk.ResponseType.OK:
             sys.exit(0)
 
-            serial = dlg.get_serial()
+        source = dlg.get_source()
         dlg.destroy()
 
     #formats = get_format_list(serial)
     #print formats
 
-    win = AppWindow(serial)
+    print (source, source.get_property("serial"))
+
+    win = AppWindow(source)
     win.present()
 
     Gtk.main()
