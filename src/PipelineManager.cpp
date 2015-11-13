@@ -566,7 +566,7 @@ bool PipelineManager::stop_playing ()
 
     set_sink_status(TCAM_PIPELINE_STOPPED);
 
-    destroyPipeline();
+    //destroyPipeline();
 
     return true;
 }
