@@ -360,11 +360,11 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
         }
         case TCAM_PROPERTY_GAIN_AUTO:
         {
-            auto pea = find_property(emulated_properties, TCAM_PROPERTY_GAIN_AUTO);
+            // auto pea = find_property(emulated_properties, TCAM_PROPERTY_GAIN_AUTO);
 
-            bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
+            // bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
 
-            toggle_read_only(TCAM_PROPERTY_GAIN, vla);
+            // toggle_read_only(TCAM_PROPERTY_GAIN, vla);
             break;
         }
         case TCAM_PROPERTY_WB_AUTO:
