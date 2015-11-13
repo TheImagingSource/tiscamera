@@ -12,7 +12,7 @@ import sys
 
 class DeviceDialog (Gtk.Dialog):
     def __init__(self, parent=None):
-        Gtk.Dialog.__init__(self, parent)
+        Gtk.Dialog.__init__(self, parent=parent, title="Device Selection")
         self.add_buttons (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                           Gtk.STOCK_OK, Gtk.ResponseType.OK)
 
@@ -31,6 +31,7 @@ class DeviceDialog (Gtk.Dialog):
                 Gtk.STOCK_YES, 64, 0)
             label = "%s (%s)" % (dev[1], dev[0])
             model.append ((pixbuf, label, dev[0]))
+        self.__iv.select_path(Gtk.TreePath(0))
         self.get_content_area().add(self.__iv)
 
     def __get_devices(self, elem):
@@ -137,6 +138,11 @@ class AppWindow (Gtk.Window):
         vbox.show_all()
         self.da.realize()
 
+        # This selects the default video format and thus
+        # starts the live preview
+        combo.set_active(0)
+
+
     def create_format_combo (self):
         formats = self.get_format_list()
         model = Gtk.ListStore (str, int)
@@ -146,14 +152,12 @@ class AppWindow (Gtk.Window):
         renderer_text = Gtk.CellRendererText()
         combo.pack_start (renderer_text, True)
         combo.add_attribute (renderer_text, "text", 0)
-        #combo.set_active(0)
         return combo
 
     def on_format_combo_changed (self, combo):
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
             self.pipeline.get_state(0)
-            self.source.unlink()
             self.source.unparent()
 
         it = combo.get_active_iter()
@@ -163,10 +167,10 @@ class AppWindow (Gtk.Window):
             self.pipeline = self.create_pipeline(fmt)
             self.pipeline.set_state(Gst.State.PLAYING)
 
-            if self.ppty_dialog:
-                self.ppty_dialog.destroy()
-                self.ppty_dialog = PropertyDialog(
-                    self.pipeline.get_by_name ("source"))
+            #if self.ppty_dialog:
+            #    self.ppty_dialog.destroy()
+            #    self.ppty_dialog = PropertyDialog(
+            #        self.pipeline.get_by_name ("source"))
 
     def get_format_list(self):
         self.source.set_state (Gst.State.PAUSED)
