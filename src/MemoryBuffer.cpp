@@ -30,11 +30,18 @@ MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf)
 
 
 MemoryBuffer::MemoryBuffer (const VideoFormat& format)
-    : is_own_memory(true), buffer()
+    : is_own_memory(false), buffer()
 {
 
     buffer.length = format.get_required_buffer_size();
-    buffer.pData = (unsigned char*)malloc(buffer.length);
+    if (is_own_memory)
+    {
+        buffer.pData = (unsigned char*)malloc(buffer.length);
+    }
+    else
+    {
+        buffer.pData = nullptr;
+    }
     buffer.format = format.get_struct();
     buffer.pitch = format.get_pitch_size();
 
