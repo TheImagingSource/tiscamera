@@ -246,19 +246,20 @@ class AppWindow (Gtk.Window):
         flt.set_property("caps", caps)
         print ( "Caps String: " + caps.to_string())
 
-        converters = { "GRAY8": ("videoconvert",),
-                       "bggr": ("bayer2rgb","videoconvert"),
-                       "grbg": ("bayer2rgb","videoconvert"),
-                       "gbrg": ("bayer2rgb","videoconvert"),
-                       "rggb": ("bayer2rgb","videoconvert"),
-                       "GRAY16_LE" : ("videoconvert",) }
+        bayerconvert = [("tcamwhitebalance","whitebalance"), ("bayer2rgb",),("videoconvert",)]
+        converters = { "GRAY8": [("videoconvert",)],
+                       "bggr": bayerconvert,
+                       "grbg": bayerconvert,
+                       "gbrg": bayerconvert,
+                       "rggb": bayerconvert,
+                       "GRAY16_LE" : [("videoconvert",)] }
         p.add (flt)
         self.source.link(flt)
 
         colorformat = structure.get_string("format")
         prev_elem = flt
         for conv in converters[colorformat]:
-            elem = Gst.ElementFactory.make (conv)
+            elem = Gst.ElementFactory.make (*conv)
             p.add(elem)
             prev_elem.link(elem)
             prev_elem = elem
