@@ -62,6 +62,17 @@ class PropertyDialog (Gtk.Dialog):
         self.get_content_area().add (vbox)
         vbox.show_all()
 
+    def __on_set_property_range(self, scale, name):
+        self.src.set_tcam_property (name,
+                                    GObject.Value(int,int(scale.get_value())))
+
+    def __on_set_property_toggle(self, toggle, name):
+        self.src.set_tcam_property (name,
+                                    GObject.Value(bool,
+                                                  bool(toggle.get_active())))
+    def __on_set_property_button(self, button, name):
+        self.src.set_tcam_property (name, GObject.Value(bool,True))
+
     def __create_main_vbox (self):
         main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         nb = Gtk.Notebook()
@@ -103,9 +114,11 @@ class PropertyDialog (Gtk.Dialog):
     def __create_range_control (self,
                                 name, minval, maxval, defval, curval, step):
         vbox = self.__create_control_vbox (name)
-        scale = Gtk.HScale.new_with_range (minval, maxval, step)
+        scale = Gtk.Scale.new_with_range (Gtk.Orientation.HORIZONTAL,
+                                          minval, maxval, step)
         scale.set_value (curval)
         scale.add_mark (defval, Gtk.PositionType.TOP, None)
+        scale.connect ("value-changed", self.__on_set_property_range, name)
         vbox.pack_start (scale, True, True, 2)
         return vbox
 
@@ -113,11 +126,13 @@ class PropertyDialog (Gtk.Dialog):
         vbox = self.__create_control_vbox (name)
         button = Gtk.ToggleButton.new_with_label (name)
         button.set_active (defval)
+        button.connect ("toggled", self.__on_set_property_toggle, name)
         vbox.pack_start (button, True, False, 2)
         return vbox
 
     def __create_button_control (self, name):
-        button = self.__create_control_vbox (name)
+        button = Gtk.Button(label=name)
+        button.connect ("clicked", self.__on_set_property_button, name)
         return button
 
 
