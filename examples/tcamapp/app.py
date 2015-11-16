@@ -247,7 +247,10 @@ class AppWindow (Gtk.Window):
         print ( "Caps String: " + caps.to_string())
 
         converters = { "GRAY8": ("videoconvert",),
+                       "bggr": ("bayer2rgb","videoconvert"),
+                       "grbg": ("bayer2rgb","videoconvert"),
                        "gbrg": ("bayer2rgb","videoconvert"),
+                       "rggb": ("bayer2rgb","videoconvert"),
                        "GRAY16_LE" : ("videoconvert",) }
         p.add (flt)
         self.source.link(flt)
