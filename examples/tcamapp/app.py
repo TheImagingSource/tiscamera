@@ -274,8 +274,8 @@ class AppWindow (Gtk.Window):
         return p
 
 if __name__ == "__main__":
-    Gst.init()
-    Gtk.init ()
+    Gst.init ([])
+    Gtk.init ([])
 
     source = None
 
