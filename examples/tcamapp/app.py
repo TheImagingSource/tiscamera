@@ -63,6 +63,12 @@ class PropertyDialog (Gtk.Dialog):
         vbox.show_all()
 
     def __create_main_vbox (self):
+        main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        nb = Gtk.Notebook()
+        main_vbox.pack_start (nb, True, True, 6)
+        i = 0
+        pagenr = 1
+        controls_per_page = 5
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         for name in self.src.get_tcam_property_names():
             (result, value, minval, maxval,
@@ -77,11 +83,19 @@ class PropertyDialog (Gtk.Dialog):
             elif pptytype == "button":
                 ctrl = self.__create_button_control (name)
             vbox.pack_start (ctrl, True, False, 6)
+            i += 1
+            if i > controls_per_page:
+                nb.append_page (vbox, Gtk.Label ("%d" % pagenr))
+                vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                i = 0
+                pagenr += 1
+        if i:
+            nb.append_page (vbox, Gtk.Label ("%d" % pagenr))
 
-        return vbox
+        return main_vbox
 
     def __create_control_vbox (self, name):
-        vbox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
+        vbox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL)
         label = Gtk.Label (name)
         vbox.pack_start (label, True, False, 2)
         return vbox
@@ -104,8 +118,7 @@ class PropertyDialog (Gtk.Dialog):
 
     def __create_button_control (self, name):
         button = self.__create_control_vbox (name)
-        vbox.pack_start (button, True, False, 2)
-        return vbox
+        return button
 
 
 class AppWindow (Gtk.Window):
