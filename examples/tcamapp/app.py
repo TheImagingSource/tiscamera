@@ -57,20 +57,36 @@ class PropertyDialog (Gtk.Dialog):
         Gtk.Dialog.__init__(self, title="Properties")
         self.set_default_size (300,200)
         self.src = src
+        self.p = None
 
         vbox = self.__create_main_vbox ()
         self.get_content_area().add (vbox)
         vbox.show_all()
 
-    def __on_set_property_range(self, scale, name):
+    def update (self, pipeline):
+        self.p = pipeline
+        content = self.get_content_area()
+        content.foreach(lambda x:content.remove(x))
+        vbox = self.__create_main_vbox()
+        content.add(vbox)
+        vbox.show_all()
+
+    def __on_set_property_range(self, scale, name, data):
         self.src.set_tcam_property (name,
                                     GObject.Value(int,int(scale.get_value())))
 
-    def __on_set_property_toggle(self, toggle, name):
+    def __on_set_object_property_range (self, scale, name, element):
+        element.set_property (name, int(scale.get_value()))
+
+    def __on_set_property_toggle(self, toggle, name, data):
         self.src.set_tcam_property (name,
                                     GObject.Value(bool,
                                                   bool(toggle.get_active())))
-    def __on_set_property_button(self, button, name):
+
+    def __on_set_object_property_toggle (self, toggle, name, element):
+        element.set_property (name, toggle.get_active())
+
+    def __on_set_property_button(self, button, name, data):
         self.src.set_tcam_property (name, GObject.Value(bool,True))
 
     def __create_main_vbox (self):
@@ -103,6 +119,30 @@ class PropertyDialog (Gtk.Dialog):
         if i:
             nb.append_page (vbox, Gtk.Label ("%d" % pagenr))
 
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        if self.p and (self.p.get_by_name("whitebalance") or
+                       self.p.get_by_name("autoexposure")):
+            wb = self.p.get_by_name("whitebalance")
+            if wb:
+                range_ppties = ["red", "green", "blue"]
+                for p in range_ppties:
+                    pspec = wb.find_property(p)
+                    curval = wb.get_property(p)
+                    ctrl = self.__create_range_control(p,
+                                                       pspec.minimum,
+                                                       pspec.maximum,
+                                                       pspec.default_value,
+                                                       curval,
+                                                       1,
+                                                       self.__on_set_object_property_range,
+                                                       wb)
+                    vbox.pack_start (ctrl, True, False, 6)
+                curval = wb.get_property("auto")
+                ctrl = self.__create_toggle_control("auto", curval,
+                                                    self.__on_set_object_property_toggle,
+                                                    wb)
+                vbox.pack_start (ctrl, True, False, 6)
+            nb.append_page (vbox, Gtk.Label ("%d" % (pagenr+1)))
         return main_vbox
 
     def __create_control_vbox (self, name):
@@ -112,27 +152,37 @@ class PropertyDialog (Gtk.Dialog):
         return vbox
 
     def __create_range_control (self,
-                                name, minval, maxval, defval, curval, step):
+                                name, minval, maxval, defval, curval, step,
+                                cb = None,
+                                cb_data = None):
+        if not cb:
+            cb = self.__on_set_property_range
         vbox = self.__create_control_vbox (name)
         scale = Gtk.Scale.new_with_range (Gtk.Orientation.HORIZONTAL,
                                           minval, maxval, step)
         scale.set_value (curval)
         scale.add_mark (defval, Gtk.PositionType.TOP, None)
-        scale.connect ("value-changed", self.__on_set_property_range, name)
+        scale.connect ("value-changed", cb, name, cb_data)
         vbox.pack_start (scale, True, True, 2)
         return vbox
 
-    def __create_toggle_control (self, name, defval):
+    def __create_toggle_control (self, name, defval,
+                                 cb = None, cb_data = None):
+        if not cb:
+            cb = self.__on_set_property_toggle
         vbox = self.__create_control_vbox (name)
         button = Gtk.ToggleButton.new_with_label (name)
         button.set_active (defval)
-        button.connect ("toggled", self.__on_set_property_toggle, name)
+        button.connect ("toggled", cb, name, cb_data)
         vbox.pack_start (button, True, False, 2)
         return vbox
 
-    def __create_button_control (self, name):
+    def __create_button_control (self, name,
+                                 cb = None, cb_data = None):
+        if not cb:
+            cb = self.__on_set_property_button
         button = Gtk.Button(label=name)
-        button.connect ("clicked", self.__on_set_property_button, name)
+        button.connect ("clicked", cb, name, cb_data)
         return button
 
 
@@ -220,7 +270,7 @@ class AppWindow (Gtk.Window):
             fmt = model[it][2]
             self.pipeline = self.create_pipeline(fmt, rate)
             self.pipeline.set_state(Gst.State.PLAYING)
-        pass
+            self.ppty_dialog.update(self.pipeline)
 
     def get_format_list(self):
         self.source.set_state (Gst.State.PAUSED)
