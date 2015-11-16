@@ -6,10 +6,10 @@ gi.require_version ("Tcam", "0.1")
 gi.require_version ("GdkX11", "3.0")
 gi.require_version ("GstVideo", "1.0")
 
-from gi.repository import GdkX11, Gtk, Tcam, GstVideo, Gst, GdkPixbuf
+from gi.repository import GdkX11, Gtk, Tcam, GstVideo, Gst, GdkPixbuf, GObject
 
 import sys
-
+import re
 
 
 class DeviceDialog (Gtk.Dialog):
@@ -127,9 +127,12 @@ class AppWindow (Gtk.Window):
         combo = self.create_format_combo()
         combo.connect ("changed", self.on_format_combo_changed)
         hb.pack_start (combo)
+        self.fps_combo = self.create_fps_combo ()
+        self.fps_combo.connect ("changed", self.on_fps_combo_changed)
+        hb.pack_start (self.fps_combo)
         hb.show_all()
 
-        vbox = Gtk.Box(Gtk.Orientation.VERTICAL)
+        vbox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
         self.add(vbox)
 
         self.da = Gtk.DrawingArea()
@@ -147,7 +150,7 @@ class AppWindow (Gtk.Window):
 
     def create_format_combo (self):
         formats = self.get_format_list()
-        model = Gtk.ListStore (str, int)
+        model = Gtk.ListStore (str, int, GObject.TYPE_PYOBJECT)
         for fmt in formats:
             model.append (fmt)
         combo = Gtk.ComboBox.new_with_model (model)
@@ -156,7 +159,27 @@ class AppWindow (Gtk.Window):
         combo.add_attribute (renderer_text, "text", 0)
         return combo
 
+    def create_fps_combo (self):
+        combo = Gtk.ComboBox()
+        renderer_text = Gtk.CellRendererText()
+        combo.pack_start (renderer_text, True)
+        combo.add_attribute (renderer_text, "text", 0)
+        return combo
+
     def on_format_combo_changed (self, combo):
+        it = combo.get_active_iter()
+        if it != None:
+            model = combo.get_model()
+            fmt = model[it][1]
+            fps = model[it][2]
+
+            fps_model = Gtk.ListStore (str, str, int)
+            for rate in fps:
+                fps_model.append ((rate[0], rate[1], fmt))
+            self.fps_combo.set_model (fps_model)
+            self.fps_combo.set_active (0)
+
+    def on_fps_combo_changed (self, combo):
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
             self.pipeline.get_state(0)
@@ -165,14 +188,11 @@ class AppWindow (Gtk.Window):
         it = combo.get_active_iter()
         if it != None:
             model = combo.get_model()
-            fmt = model[it][1]
-            self.pipeline = self.create_pipeline(fmt)
+            rate = model[it][1]
+            fmt = model[it][2]
+            self.pipeline = self.create_pipeline(fmt, rate)
             self.pipeline.set_state(Gst.State.PLAYING)
-
-            #if self.ppty_dialog:
-            #    self.ppty_dialog.destroy()
-            #    self.ppty_dialog = PropertyDialog(
-            #        self.pipeline.get_by_name ("source"))
+        pass
 
     def get_format_list(self):
         self.source.set_state (Gst.State.PAUSED)
@@ -186,13 +206,22 @@ class AppWindow (Gtk.Window):
             text = "%s %dx%d" % (s.get_string("format"),
                                  s.get_int("width")[1],
                                  s.get_int("height")[1])
-            l.append((text, i))
+            try:
+                s.get_value("framerate")
+            except TypeError:
+                # Workaround for missing GstValueList support in GI
+                substr = s.to_string()[s.to_string().find("framerate="):]
+                field,values,remain = re.split("{|}", substr, maxsplit=3)
+                fpslist = [ ("%.0f" % (float(x.split("/")[0]) / float(x.split("/")[1])),
+                             x.strip())
+                            for x in values.split(",")]
+            l.append((text, i, fpslist))
 
         self.source.set_state (Gst.State.NULL)
 
         return l
 
-    def create_pipeline(self, fmt):
+    def create_pipeline(self, fmt, rate):
         def bus_sync_handler(bus, msg, pipeline):
             if not GstVideo.is_video_overlay_prepare_window_handle_message(msg):
                 return Gst.BusSyncReply.PASS
@@ -211,16 +240,20 @@ class AppWindow (Gtk.Window):
         structure.remove_field("framerate")
 
         flt = Gst.ElementFactory.make("capsfilter")
-        caps = Gst.Caps.from_string (structure.to_string())
+        capsstring = structure.to_string()[:-1]
+        capsstring += ",framerate=(fraction)%s;" % (rate,)
+        caps = Gst.Caps.from_string (capsstring)
         flt.set_property("caps", caps)
-        print ( "Caps String: " + structure.to_string())
+        print ( "Caps String: " + caps.to_string())
 
         converters = { "GRAY8": ("videoconvert",),
                        "gbrg": ("bayer2rgb","videoconvert"),
                        "GRAY16_LE" : ("videoconvert",) }
+        p.add (flt)
+        self.source.link(flt)
 
         colorformat = structure.get_string("format")
-        prev_elem = self.source
+        prev_elem = flt
         for conv in converters[colorformat]:
             elem = Gst.ElementFactory.make (conv)
             p.add(elem)
@@ -264,8 +297,6 @@ if __name__ == "__main__":
 
     #formats = get_format_list(serial)
     #print formats
-
-    print (source, source.get_property("serial"))
 
     win = AppWindow(source)
     win.present()
