@@ -629,7 +629,7 @@ static gboolean plugin_init (GstPlugin* plugin)
 #define PACKAGE "tcamwhitebalance"
 #endif
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "tcamwhitebalance"
+#define PACKAGE_NAME tcamwhitebalance
 #endif
 #ifndef GST_PACKAGE_ORIGIN
 #define GST_PACKAGE_ORIGIN "https://github.com/TheImagingSource/tcamcamera"
@@ -639,4 +639,4 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
                    PACKAGE_NAME,
                    "The Imaging Source white balance plugin",
-                   plugin_init, VERSION, "Proprietary", PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+                   plugin_init, VERSION, "Proprietary", PACKAGE, GST_PACKAGE_ORIGIN)

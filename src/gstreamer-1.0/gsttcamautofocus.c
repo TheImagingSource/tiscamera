@@ -618,10 +618,10 @@ static gboolean plugin_init (GstPlugin* plugin)
 #define VERSION "0.0.1"
 #endif
 #ifndef PACKAGE
-#define PACKAGE "tcamautofocus_package"
+#define PACKAGE "tcamautofocus"
 #endif
 #ifndef PACKAGE_NAME
-#define PACKAGE_NAME "tcamautofocus_package_name"
+#define PACKAGE_NAME tcamautofocus
 #endif
 #ifndef GST_PACKAGE_ORIGIN
 #define GST_PACKAGE_ORIGIN "https://github.com/TheImagingSource/tiscamera"
@@ -629,9 +629,9 @@ static gboolean plugin_init (GstPlugin* plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
-                   "tcamautofocus",
+                   PACKAGE_NAME,
                    "The Imaging Source auto exposure plugin",
                    plugin_init,
                    VERSION,
                    "Proprietary",
-                   PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+                   PACKAGE, GST_PACKAGE_ORIGIN)
