@@ -577,8 +577,6 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
                                        NULL);
 
                     gst_structure_take_value(structure, "framerate", &fps_list);
-
-                    g_value_unset(&fps_list);
                 }
                 gst_caps_append_structure (caps, structure);
             }
