@@ -379,6 +379,14 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             cp.value.i.max = queryctrl->maximum;
             cp.value.i.step = queryctrl->step;
 
+            if (cp.value.i.min > cp.value.i.max)
+            {
+                tcam_log(TCAM_LOG_ERROR,
+                         "Range boundaries for property '%s' are faulty. Ignoring property as a precaution.",
+                         cp.name);
+                return nullptr;
+            }
+
             if (cp.value.i.step == 0)
             {
                 tcam_log(TCAM_LOG_WARNING,
