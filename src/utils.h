@@ -163,6 +163,12 @@ bool are_equal (const struct tcam_resolution_description& res1,
 bool are_equal (const struct tcam_video_format_description& res1,
                 const struct tcam_video_format_description& res2);
 
+/**
+ * @brief generate new property ids
+ * @return new unique property id
+ */
+TCAM_PROPERTY_ID generate_unique_property_id ();
+
 } /* namespace tcam */
 
 VISIBILITY_POP

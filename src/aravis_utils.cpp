@@ -422,6 +422,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(prop.name, feature, sizeof(prop.name));
         prop.type = value_type_to_ctrl_type(type);
+        // generate id so that identfication of passed through properties is guaranteed
+        prop.id = generate_unique_property_id();
     }
     else
     {

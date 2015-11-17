@@ -321,6 +321,8 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
         cp.type = value_type_to_ctrl_type(type);
+        // generate id so that identfication of passed through properties is guaranteed
+        cp.id = generate_unique_property_id();
     }
     else
     {

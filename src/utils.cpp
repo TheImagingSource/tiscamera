@@ -385,3 +385,14 @@ bool tcam::are_equal (const struct tcam_video_format_description& fmt1,
 
     return false;
 }
+
+
+TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
+{
+    static unsigned int id_to_use;
+    static unsigned int id_prefix = 0x199f0000;
+
+    TCAM_PROPERTY_ID new_id = id_prefix ^ id_to_use;
+    id_to_use++;
+    return new_id;
+}
