@@ -378,6 +378,16 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             cp.value.i.min = queryctrl->minimum;
             cp.value.i.max = queryctrl->maximum;
             cp.value.i.step = queryctrl->step;
+
+            if (cp.value.i.step == 0)
+            {
+                tcam_log(TCAM_LOG_WARNING,
+                         "Detected stepsize 0 for property %s. Setting to 1.",
+                         cp.name);
+
+                cp.value.i.step = 1;
+            }
+
             cp.value.i.default_value = queryctrl->default_value;
             cp.value.i.value = ctrl->value;
             cp.flags = flags;
