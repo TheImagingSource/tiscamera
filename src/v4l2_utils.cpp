@@ -91,6 +91,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {/* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209},
     },
     {
+        .id = TCAM_PROPERTY_TRIGGER_DELAY,
+        .v4l2_id = {0x199e210},
+    },
+    {
         .id = TCAM_PROPERTY_WB_PRESET,
         .v4l2_id = {/* usb 3: */ 0x0199e207},
     },
@@ -179,6 +183,22 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {0x0199e211},
     },
     {
+        .id = TCAM_PROPERTY_STROBE_DELAY,
+        .v4l2_id = {0x199e215},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_POLARITY,
+        .v4l2_id = {0x199e212},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_EXPOSURE,
+        .v4l2_id = {0x199e213},
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_DURATION,
+        .v4l2_id = {0x199e214},
+    },
+    {
         .id = TCAM_PROPERTY_BINNING,
         .v4l2_id = {0x980925},
     },
@@ -189,7 +209,6 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     {
         .id = TCAM_PROPERTY_SHARPNESS,
         .v4l2_id = { 0x0098091b},
-
     },
     {
         .id = TCAM_PROPERTY_NOISE_REDUCTION,

@@ -377,6 +377,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
     },
     {
+        .id = TCAM_PROPERTY_STROBE_EXPOSURE,
+        .name = "Strobe Exposure",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
+        .id = TCAM_PROPERTY_STROBE_DURATION,
+        .name = "Strobe Duration",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_STROBE_ENABLE },
+    },
+    {
         .id = TCAM_PROPERTY_STROBE_OPERATION,
         .name = "Strobe Operation",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
