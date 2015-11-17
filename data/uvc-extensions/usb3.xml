@@ -678,7 +678,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
@@ -708,7 +708,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
@@ -738,7 +738,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
