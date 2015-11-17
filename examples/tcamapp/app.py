@@ -119,11 +119,11 @@ class PropertyDialog (Gtk.Dialog):
         if i:
             nb.append_page (vbox, Gtk.Label ("%d" % pagenr))
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         if self.p and (self.p.get_by_name("whitebalance") or
                        self.p.get_by_name("autoexposure")):
             wb = self.p.get_by_name("whitebalance")
             if wb:
+                vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
                 range_ppties = ["red", "green", "blue"]
                 for p in range_ppties:
                     pspec = wb.find_property(p)
@@ -142,7 +142,21 @@ class PropertyDialog (Gtk.Dialog):
                                                     self.__on_set_object_property_toggle,
                                                     wb)
                 vbox.pack_start (ctrl, True, False, 6)
-            nb.append_page (vbox, Gtk.Label ("White Balance"))
+                nb.append_page (vbox, Gtk.Label ("White Balance"))
+            exp = self.p.get_by_name("autoexposure")
+            if exp:
+                vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+                curval = exp.get_property("auto-exposure")
+                ctrl = self.__create_toggle_control("auto-exposure", curval,
+                                                    self.__on_set_object_property_toggle,
+                                                    exp)
+                vbox.pack_start (ctrl, True, False, 6)
+                curval = exp.get_property("auto-gain")
+                ctrl = self.__create_toggle_control("auto-gain", curval,
+                                                    self.__on_set_object_property_toggle,
+                                                    exp)
+                vbox.pack_start (ctrl, True, False, 6)
+                nb.append_page (vbox, Gtk.Label ("Auto Exposure"))
         return main_vbox
 
     def __create_control_vbox (self, name):
@@ -321,6 +335,12 @@ class AppWindow (Gtk.Window):
         caps = Gst.Caps.from_string (capsstring)
         flt.set_property("caps", caps)
         print ( "Caps String: " + caps.to_string())
+        p.add (flt)
+        self.source.link(flt)
+
+        autoexp = Gst.ElementFactory.make ("tcamautoexposure", "autoexposure")
+        p.add(autoexp)
+        flt.link(autoexp)
 
         bayerconvert = [("tcamwhitebalance","whitebalance"), ("bayer2rgb",),("videoconvert",)]
         converters = { "GRAY8": [("videoconvert",)],
@@ -329,11 +349,9 @@ class AppWindow (Gtk.Window):
                        "gbrg": bayerconvert,
                        "rggb": bayerconvert,
                        "GRAY16_LE" : [("videoconvert",)] }
-        p.add (flt)
-        self.source.link(flt)
 
         colorformat = structure.get_string("format")
-        prev_elem = flt
+        prev_elem = autoexp
         for conv in converters[colorformat]:
             elem = Gst.ElementFactory.make (*conv)
             p.add(elem)
