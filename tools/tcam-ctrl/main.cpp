@@ -101,7 +101,7 @@ int main (int argc, char *argv[])
     std::string filename;
     modes do_this;
 
-    for (int i = 0; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
         std::string arg = argv[i];
 
@@ -120,7 +120,6 @@ int main (int argc, char *argv[])
         else if (arg == "-p" || arg == "--list-properties")
         {
             do_this = LIST_PROPERTIES;
-            break;
         }
         else if (arg == "-s" || arg == "--set")
         {
@@ -136,12 +135,10 @@ int main (int argc, char *argv[])
             param = argv[tmp_i];
             i++;
 
-            // break;
         }
         else if (arg == "-f" || arg == "--format")
         {
             do_this = LIST_FORMATS;
-            // break;
         }
         else
         {
