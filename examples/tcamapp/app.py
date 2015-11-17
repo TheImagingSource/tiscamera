@@ -142,7 +142,7 @@ class PropertyDialog (Gtk.Dialog):
                                                     self.__on_set_object_property_toggle,
                                                     wb)
                 vbox.pack_start (ctrl, True, False, 6)
-            nb.append_page (vbox, Gtk.Label ("%d" % (pagenr+1)))
+            nb.append_page (vbox, Gtk.Label ("White Balance"))
         return main_vbox
 
     def __create_control_vbox (self, name):
@@ -170,12 +170,10 @@ class PropertyDialog (Gtk.Dialog):
                                  cb = None, cb_data = None):
         if not cb:
             cb = self.__on_set_property_toggle
-        vbox = self.__create_control_vbox (name)
         button = Gtk.ToggleButton.new_with_label (name)
         button.set_active (defval)
         button.connect ("toggled", cb, name, cb_data)
-        vbox.pack_start (button, True, False, 2)
-        return vbox
+        return button
 
     def __create_button_control (self, name,
                                  cb = None, cb_data = None):
