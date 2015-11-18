@@ -1041,12 +1041,23 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
 
     GstTcam* self = GST_TCAM (push_src);
 
+wait_again:
     while (self->new_buffer == false)
     {}
 
     self->new_buffer = false;
     if (self->ptr == NULL)
+    {
+        GST_DEBUG_OBJECT (self, "No valid buffer. Aborting");
+
         return GST_FLOW_ERROR;
+    }
+
+    if (self->ptr->pData == NULL || self->ptr->length == 0)
+    {
+        GST_DEBUG_OBJECT (self, "Received buffer is invalid. Returning to waiting position.");
+        goto wait_again;
+    }
 
     *buffer = gst_buffer_new_wrapped_full (0, self->ptr->pData, self->ptr->length,
                                            0, self->ptr->length, NULL, NULL);
@@ -1063,6 +1074,8 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
 
         self->last_timestamp = timestamp_ns;
     }
+
+    GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
     return GST_FLOW_OK;
 }
