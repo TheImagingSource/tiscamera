@@ -702,6 +702,29 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
     if (self->frame_counter > 3)
     {
+        // validity checks
+        GstMapInfo info;
+
+        gst_buffer_map(buf, &info, GST_MAP_READ);
+
+        guint* data = (guint*)info.data;
+        guint length = info.size;
+
+        gst_buffer_unmap(buf, &info);
+
+
+        if (data == NULL || length == 0)
+        {
+            gst_debug_log (gst_tcamautoexposure_debug_category,
+                           GST_LEVEL_ERROR,
+                           "gst_tcamautoexposure",
+                           "gst_tcamautoexposure",
+                           __LINE__,
+                           NULL,
+                           "Buffer is not valid! Ignoring buffer and trying to continue...");
+            return GST_FLOW_OK;
+        }
+
         correct_brightness(self, buf);
         self->frame_counter = 0;
     }

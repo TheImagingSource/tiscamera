@@ -593,6 +593,10 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
         return FALSE;
     }
 
+    // we only handle bayer 8 bit -> 1 byte
+    int bytes_per_pixel = 1;
+    self->expected_buffer_size = self->image_size.height * self->image_size.width * bytes_per_pixel;
+
     return TRUE;
 }
 
@@ -603,11 +607,47 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE (trans);
 
     if (self->image_size.width == 0 || self->image_size.height == 0)
-        extract_resolution(self);
+    {
+        if (!extract_resolution(self))
+        {
+            gst_debug_log (gst_tcamwhitebalance_debug_category,
+                           GST_LEVEL_ERROR,
+                           "gst_tcamwhitebalance",
+                           "gst_tcamwhitebalance",
+                           __LINE__,
+                           NULL,
+                           "Received format is not usable. Aborting");
+            return GST_FLOW_ERROR;
+        }
+    }
 
     /* auto is completely disabled */
     if (!self->auto_enabled)
     {
+        return GST_FLOW_OK;
+    }
+
+
+    // validity checks
+    GstMapInfo info;
+
+    gst_buffer_map(buf, &info, GST_MAP_READ);
+
+    guint* data = (guint*)info.data;
+    guint length = info.size;
+
+    gst_buffer_unmap(buf, &info);
+
+
+    if (data == NULL || length != self->expected_buffer_size)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "gst_tcamwhitebalance",
+                       "gst_tcamwhitebalance",
+                       __LINE__,
+                       NULL,
+                       "Buffer is not valid! Ignoring buffer and trying to continue...");
         return GST_FLOW_OK;
     }
 

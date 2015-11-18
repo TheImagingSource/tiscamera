@@ -593,6 +593,28 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
         {
             get_camera_src(GST_ELEMENT(self));
         }
+        // validity checks
+        GstMapInfo info;
+
+        gst_buffer_map(buf, &info, GST_MAP_READ);
+
+        guint* data = (guint*)info.data;
+        guint length = info.size;
+
+        gst_buffer_unmap(buf, &info);
+
+
+        if (data == NULL || length == 0)
+        {
+            gst_debug_log (gst_tcamautofocus_debug_category,
+                           GST_LEVEL_ERROR,
+                           "gst_tcamautofocus",
+                           "gst_tcamautofocus",
+                           __LINE__,
+                           NULL,
+                           "Buffer is not valid! Ignoring buffer and trying to continue...");
+            return GST_FLOW_OK;
+        }
 
         transform_tcam(self, buf);
 

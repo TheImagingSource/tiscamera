@@ -61,6 +61,8 @@ struct _GstTcamWhitebalance {
     gst_tcam_image_size image_size;
     gdouble        framerate;
     tBY8Pattern    pattern;
+    guint expected_buffer_size;
+
 
     /* user defined values */
     gint red;
