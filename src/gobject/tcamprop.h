@@ -18,7 +18,6 @@
 #define __TCAM_PROP_H__
 
 #include <glib-object.h>
-#include "glib_compat.h"
 
 G_BEGIN_DECLS
 
