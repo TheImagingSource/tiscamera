@@ -24,6 +24,8 @@
 
 #include "image_sampling.h"
 
+#include "tcam_c.h"
+
 #define GST_TYPE_TCAMWHITEBALANCE            (gst_tcamwhitebalance_get_type())
 #define GST_TCAMWHITEBALANCE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TCAMWHITEBALANCE,GstTcamWhitebalance))
 #define GST_TCAMWHITEBALANCE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TCAMWHITEBALANCE,GstTcamWhitebalanceClass))
@@ -35,8 +37,8 @@ typedef struct _GstTcamWhitebalanceClass GstTcamWhitebalanceClass;
 
 
 static const guint MAX_STEPS = 20;
-static const guint WB_IDENTITY = 64;
-static const guint WB_MAX = 255;
+static guint WB_IDENTITY = 64;
+static guint WB_MAX = 255;
 static const guint BREAK_DIFF = 2;
 
 const guint NEARGRAY_MIN_BRIGHTNESS      = 10;
@@ -51,6 +53,45 @@ static const guint b_factor = (guint32)((1 << 8) * 0.114f);
 
 typedef unsigned char byte;
 
+
+typedef struct
+{
+    gdouble min;
+    gdouble max;
+    gdouble value;
+
+} Gain;
+
+
+typedef struct
+{
+    gdouble min;
+    gdouble max;
+    gdouble value;
+
+} Exposure;
+
+
+struct device_color
+{
+
+    gboolean has_whitebalance;
+    gboolean has_auto_whitebalance;
+    rgb_tripel rgb;
+    gint max; // highest possible value. usually 255
+    gint default_value; // Availalbe for V4l2. Aravis may not.
+};
+
+
+struct device_resources
+{
+    GstElement* source_element;
+    Gain gain;
+    Exposure exposure;
+    gdouble framerate;
+
+    struct device_color color;
+};
 
 struct _GstTcamWhitebalance {
     GstBaseTransform base_object;
@@ -73,7 +114,8 @@ struct _GstTcamWhitebalance {
     rgb_tripel rgb;
     gboolean auto_wb;
     gboolean auto_enabled;
-
+    gboolean force_hardware_wb;
+    struct device_resources res;
 };
 
 struct _GstTcamWhitebalanceClass {

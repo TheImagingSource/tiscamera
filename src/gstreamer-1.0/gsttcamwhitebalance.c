@@ -38,6 +38,8 @@
 #include "image_sampling.h"
 #include <stdlib.h>
 
+#include "tcam_c.h"
+
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
 #define GST_CAT_DEFAULT gst_tcamwhitebalance_debug_category
 
@@ -71,6 +73,7 @@ enum
     PROP_GAIN_BLUE,
     PROP_AUTO_ENABLED,
     PROP_WHITEBALANCE_ENABLED,
+    PROP_CAMERA_WB,
 };
 
 /* pad templates */
@@ -151,6 +154,12 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_CAMERA_WB,
+                                     g_param_spec_boolean ("camera-whitebalance", "Device whitebalance settings",
+                                                           "Adjust whitebalance values in the camera",
+                                                           FALSE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_WHITEBALANCE_ENABLED,
                                      g_param_spec_boolean ("module-enabled", "Enable/Disable White Balance Module",
                                                            "Disable entire module",
@@ -159,14 +168,20 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
 }
 
 
+static void init_wb_values (GstTcamWhitebalance* self)
+{
+    self->rgb = (rgb_tripel){WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
+    self->red = WB_IDENTITY;
+    self->green = WB_IDENTITY;
+    self->blue = WB_IDENTITY;
+}
+
+
 static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
 {
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), TRUE);
 
-    self->rgb = (rgb_tripel){64, 64, 64};
-    self->red = 64;
-    self->green = 64;
-    self->blue = 64;
+    init_wb_values(self);
     self->auto_wb = TRUE;
 
     self->image_size.width = 0;
@@ -199,6 +214,9 @@ void gst_tcamwhitebalance_set_property (GObject* object,
         case PROP_WHITEBALANCE_ENABLED:
             tcamwhitebalance->auto_enabled = g_value_get_boolean (value);
             break;
+        case PROP_CAMERA_WB:
+            tcamwhitebalance->force_hardware_wb = g_value_get_boolean(value);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -230,6 +248,9 @@ void gst_tcamwhitebalance_get_property (GObject* object,
         case PROP_WHITEBALANCE_ENABLED:
             g_value_set_boolean (value, tcamwhitebalance->auto_enabled);
             break;
+        case PROP_CAMERA_WB:
+            g_value_set_boolean(value, tcamwhitebalance->force_hardware_wb);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -240,6 +261,71 @@ void gst_tcamwhitebalance_get_property (GObject* object,
 void gst_tcamwhitebalance_finalize (GObject* object)
 {
     G_OBJECT_CLASS (gst_tcamwhitebalance_parent_class)->finalize (object);
+}
+
+
+static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance* self)
+{
+    gst_debug_log (gst_tcamwhitebalance_debug_category,
+                   GST_LEVEL_INFO,
+                   "tcamwhitebalance",
+                   "device_set_whitebalance",
+                   __LINE__,
+                   NULL,
+                   "Applying white balance to device with values: R:%d G:%d B:%d",
+                   self->res.color.rgb.R,
+                   self->res.color.rgb.G,
+                   self->res.color.rgb.B);
+
+
+
+
+
+    /* bool  tcam_capture_device_find_property (tcam_capture_device* source, */
+    /*                                          TCAM_PROPERTY_ID id, */
+    /*                                          struct tcam_device_property* property); */
+    /* /\** */
+    /*  * */
+    /*  *\/ */
+    /* int tcam_capture_device_set_property (tcam_capture_device* source, */
+    /*                                       const struct tcam_device_property* property); */
+
+    tcam_capture_device* dev;
+    g_object_get(G_OBJECT(self->res.source_element), "camera", &dev, NULL);
+
+    int ret;
+    struct tcam_device_property exp = {};
+
+    exp.id = TCAM_PROPERTY_GAIN_RED;
+    exp.value.i.value = self->res.color.rgb.R;
+
+    ret = tcam_capture_device_set_property(dev, &exp);
+    if (ret < 0)
+    {
+        return FALSE;
+    }
+
+    exp.id = TCAM_PROPERTY_GAIN_GREEN;
+    exp.value.i.value = self->res.color.rgb.G;
+
+    ret = tcam_capture_device_set_property(dev, &exp);
+    if (ret < 0)
+    {
+        return FALSE;
+    }
+
+    exp.id = TCAM_PROPERTY_GAIN_BLUE;
+    exp.value.i.value = self->res.color.rgb.B;
+
+    ret = tcam_capture_device_set_property(dev, &exp);
+    if (ret < 0)
+    {
+        return FALSE;
+    }
+
+    return TRUE;
+
+    /* return device_set_rgb(&self->res); */
 }
 
 
@@ -319,6 +405,29 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_trip
         result_near_gray.B /= count_near_gray;
         return result_near_gray;
     }
+}
+
+
+static rgb_tripel average_color_cam (const auto_sample_points* data )
+{
+    rgb_tripel result = { 0, 0, 0 };
+
+	guint i;
+    for (i = 0; i < data->cnt; ++i)
+    {
+        unsigned int r =  data->samples[i].r ;
+        unsigned int g = data->samples[i].g ;
+        unsigned int b = data->samples[i].b ;
+
+        result.R += r;
+        result.G += g;
+        result.B += b;
+    }
+
+	result.R /= data->cnt;
+	result.G /= data->cnt;
+	result.B /= data->cnt;
+	return result;
 }
 
 
@@ -415,6 +524,48 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
     wb->R = clip( wb->R, WB_MAX );
     wb->G = clip( wb->G, WB_MAX );
     wb->B = clip( wb->B, WB_MAX );
+
+    return FALSE;
+}
+
+
+gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
+{
+    rgb_tripel old_wb = *wb;
+
+    if (wb->R < WB_IDENTITY)
+        wb->R = WB_IDENTITY;
+    if (wb->G < WB_IDENTITY)
+        wb->G = WB_IDENTITY;
+    if (wb->B < WB_IDENTITY)
+        wb->B = WB_IDENTITY;
+    if (old_wb.R != wb->R || old_wb.G != wb->G || old_wb.B != wb->B)
+        return FALSE;
+
+    while ((wb->R > WB_IDENTITY) && (wb->G > WB_IDENTITY) && (wb->B > WB_IDENTITY))
+    {
+        wb->R -= 1;
+        wb->G -= 1;
+        wb->B -= 1;
+    }
+
+    rgb_tripel averageColor = average_color_cam( data);
+    if(wb_auto_step(&averageColor, wb ) )
+    {
+        return TRUE;
+    }
+
+    wb->R = clip( wb->R, WB_MAX );
+    wb->G = clip( wb->G, WB_MAX );
+    wb->B = clip( wb->B, WB_MAX );
+
+    gst_debug_log (gst_tcamwhitebalance_debug_category,
+                   GST_LEVEL_INFO,
+                   "tcamwhitebalance",
+                   "auto_whitebalance_cam",
+                   __LINE__,
+                   NULL,
+                   "Calculated white balance R:%d G:%d B:%d", wb->R, wb->G, wb->B);
 
     return FALSE;
 }
@@ -542,7 +693,161 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
         self->rgb = rgb;
     }
 
-    apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    if (self->res.color.has_whitebalance)
+    {
+        self->res.color.rgb = rgb;
+        gst_tcamwhitebalance_device_set_whiteblance(self);
+    }
+    else
+    {
+        apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+    }
+}
+
+
+static void update_device_resources (struct device_resources* res)
+{
+    tcam_capture_device* dev = NULL;
+
+    g_object_get(G_OBJECT(res->source_element), "camera", &dev, NULL);
+
+    struct tcam_device_property p = {};
+
+    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Exposure could not be found!");
+    }
+    else
+    {
+        res->exposure.min = p.value.i.min;
+        res->exposure.max = p.value.i.max;
+        res->exposure.value = p.value.i.value;
+    }
+
+
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Gain could not be found!");
+    }
+    else
+    {
+        res->gain.min = p.value.i.min;
+        res->gain.max = p.value.i.max;
+        res->gain.value = p.value.i.value;
+    }
+
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_RED, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Gain Red could not be found!");
+    }
+    else
+    {
+        res->color.rgb.R = p.value.i.value;
+        res->exposure.max = p.value.i.max;
+        // hardcoded from dfk72
+        res->color.default_value = 36;
+    }
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_GREEN, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Gain Green could not be found!");
+    }
+    else
+    {
+        res->color.rgb.G = p.value.i.value;
+        res->exposure.max = p.value.i.max;
+        // hardcoded from dfk72
+        res->color.default_value = 36;
+    }
+
+    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_BLUE, &p);
+
+    if (!ret)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_INFO,
+                       "tcamautoexposure",
+                       "init_camera_resources",
+                       __LINE__,
+                       NULL,
+                       "Gain Blue could not be found!");
+    }
+    else
+    {
+        res->color.rgb.B = p.value.i.value;
+        res->exposure.max = p.value.i.max;
+        // hardcoded from dfk72
+        res->color.default_value = 36;
+    }
+
+
+}
+
+
+static struct device_resources find_source (GstElement* self)
+{
+
+    struct device_resources res = {};
+    res.color.max = 255;
+
+    /* if camera_src is not set we assume that the first default camera src found shall be used */
+
+    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(self)));
+
+    GList* l =  GST_BIN(e)->children;
+
+    while (1==1)
+    {
+
+        const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
+
+        if (g_strcmp0(name, "GstTcam") == 0)
+        {
+            GST_LOG_OBJECT(self, "Found v4l2 device");
+            res.source_element = l->data;
+            break;
+        }
+
+        if (g_list_next(l) == NULL)
+            break;
+
+        l = g_list_next(l);
+    }
+
+    update_device_resources (&res);
+
+    return res;
 }
 
 
@@ -597,6 +902,8 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
     int bytes_per_pixel = 1;
     self->expected_buffer_size = self->image_size.height * self->image_size.width * bytes_per_pixel;
 
+    self->res = find_source(GST_ELEMENT(self));
+
     return TRUE;
 }
 
@@ -619,6 +926,19 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
                            "Received format is not usable. Aborting");
             return GST_FLOW_ERROR;
         }
+
+        if (self->force_hardware_wb)
+        {
+            self->res.color.has_whitebalance = TRUE;
+        }
+
+		if (self->res.color.has_whitebalance)
+		{
+			WB_MAX = self->res.color.max;
+			WB_IDENTITY = self->res.color.default_value;
+
+			init_wb_values(self);
+		}
     }
 
     /* auto is completely disabled */
