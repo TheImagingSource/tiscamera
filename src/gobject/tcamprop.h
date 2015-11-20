@@ -22,7 +22,17 @@
 G_BEGIN_DECLS
 
 #define TCAM_TYPE_PROP tcam_prop_get_type()
+#ifdef G_DECLARE_INTERFACE
 G_DECLARE_INTERFACE (TcamProp, tcam_prop, TCAM, PROP, GObject)
+#else
+#define TCAM_PROP (G_TYPE_CHECK_INSTANCE_CAST ((obj), TCAM_TYPE_PROP, TcamProp))
+#define TCAM_IS_PROP(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TCAM_TYPE_PROP))
+#define TCAM_PROP_GET_IFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), TCAM_TYPE_PROP, TcamPropInterface))
+GType tcam_prop_get_type (void);
+
+typedef struct _TcamProp TcamProp; /* dummy object */
+typedef struct _TcamPropInterface TcamPropInterface;
+#endif
 
 struct _TcamPropInterface
 {
@@ -46,6 +56,8 @@ struct _TcamPropInterface
 				     char **identifier,
 				     char **connection_type);
 };
+
+
 
 GSList* tcam_prop_get_tcam_property_names (TcamProp* self);
 gchar *tcam_prop_get_tcam_property_type (TcamProp *self, gchar *name);
