@@ -54,7 +54,6 @@ add_custom_command(
   --include=GObject-2.0
   -I${CMAKE_SOURCE_DIR}/src
   --pkg=gobject-2.0
-  --library=tcam -L${CMAKE_BINARY_DIR}/src
   --library=tcamprop -L${CMAKE_BINARY_DIR}/src/gobject
   --output="${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
   )
