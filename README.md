@@ -21,31 +21,43 @@ sudo make install
 
 * -DBUILD_ARAVIS [default=OFF]
 Build against aravis to enable support for GigE cameras
-* -DBUILD_DOC [default=OFF]
-BUILD doxygen and other project documentations
-* -DBUILD_GST_0_10 [default=OFF]
-Build additional gstreamer-0.10 modules
 * -DBUILD_GST_1_0 [default=ON]
 Build additional gstreamer-1.0 modules
 * -DBUILD_TOOLS [default=ON]
 Build additional tools (firmware-tools, ip-configuration)
-* -DBUILD_V4L2 [default=ON]
+* -DBUILD_USB [default=ON]
 Build against v4l2 to enable support for USB cameras
 
 
 ## Dependencies
 
+To build all options:
+g++-4.8 or higher
 cmake
-libudev
-tinyxml
-libgstreamer-1.0
-libglib-2.0
-libgobject
+pkg-config
+libudev-dev
+libtinyxml-dev
+libgstreamer-10.
+libglib-2.0-dev
+libgobject-dev
+libgirepository1.0-dev
+libusb-1.0-0-dev
+libzip-dev
 
-### Additional aravis dependencies
+### aravis dependencies
 
-aravis-0.4
-libxml2
+To build aravis you require the following packages(assuming you are building all parts):
+
+libxml2-dev
+gtk-doc-tools
+intltool
+autoconf
+
+libgstreamer0.10-dev
+libgstreamer-plugins-base0.10-dev
+libnotify-dev
+libgtk-3-dev
+
 
 ## Don't know where to start?
 
