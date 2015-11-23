@@ -20,10 +20,8 @@
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include <gst/gstbuffer.h>
-#include <gst/video/video.h>
 
 #include "image_sampling.h"
-
 #include "tcam_c.h"
 
 #define GST_TYPE_TCAMWHITEBALANCE            (gst_tcamwhitebalance_get_type())
