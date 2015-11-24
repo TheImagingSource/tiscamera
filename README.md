@@ -37,9 +37,8 @@ cmake
 pkg-config
 libudev-dev
 libtinyxml-dev
-libgstreamer-10.
-libglib-2.0-dev
-libgobject-dev
+libgstreamer1.0-dev
+libglib2.0-dev
 libgirepository1.0-dev
 libusb-1.0-0-dev
 libzip-dev
