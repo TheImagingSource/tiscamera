@@ -98,7 +98,13 @@ static TcamGstMapping tcam_gst_caps_info[] =
 		"video/x-raw-bayer, format=(string)bggr, bpp=(int)8, depth=(int)8",
 		"video/x-raw-bayer"
 	},
-
+    {
+        FOURCC_YUYV,
+        "video/x-raw, format=(string)YUY2",
+        "video/x-raw", "YUY2",
+        "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
+		"video/x-raw-yuv"
+    },
 
 /* Non 8bit bayer formats are not supported by gstreamer bayer plugin.
  * This feature is discussed in bug https://bugzilla.gnome.org/show_bug.cgi?id=693666 .*/

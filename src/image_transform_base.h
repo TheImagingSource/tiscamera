@@ -36,6 +36,7 @@ namespace img
 		case FOURCC_RGB32:		return 32;
 		case FOURCC_YUY2:		return 16;
 		case FOURCC_UYVY:		return 16;
+        case FOURCC_YUYV:       return 16;
 		case FOURCC_Y800:		return 8;
 		case FOURCC_BY8:		return 8;
 

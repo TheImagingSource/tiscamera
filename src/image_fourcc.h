@@ -44,6 +44,7 @@
 #define FOURCC_Y800			    mmioFOURCC('Y', '8', '0', '0')
 #define FOURCC_BY8			    mmioFOURCC('B', 'Y', '8', ' ')
 #define FOURCC_UYVY			    mmioFOURCC('U', 'Y', 'V', 'Y')
+#define FOURCC_YUYV			    mmioFOURCC('Y', 'U', 'Y', 'V')
 
 #define FOURCC_YGB0			    mmioFOURCC('Y', 'G', 'B', '0')
 #define FOURCC_YGB1			    mmioFOURCC('Y', 'G', 'B', '1')
