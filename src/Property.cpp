@@ -153,6 +153,7 @@ void Property::set_struct_value (const struct tcam_device_property& p)
             std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             prop.value.i.value = p.value.i.value;
+            // BUG string representation is not copied
             break;
         case TCAM_PROPERTY_TYPE_INTEGER:
             prop.value.i.value = p.value.i.value;
@@ -437,7 +438,6 @@ bool Property::get_property_from_struct (tcam_device_property& prop)
         return false;
     }
     get_struct_value(prop);
-    notify_impl();
 
     return true;
 }
