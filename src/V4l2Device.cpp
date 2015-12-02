@@ -497,11 +497,14 @@ bool V4l2Device::stop_stream ()
 
     if (ret < 0)
     {
+        tcam_log(TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMOFF %d", errno);
         return false;
     }
 
     if (work_thread.joinable())
         work_thread.join();
+
+    tcam_log(TCAM_LOG_DEBUG, "Stopped stream");
 
     return true;
 }
@@ -1126,7 +1129,7 @@ void V4l2Device::init_mmap_buffers ()
         buffer.pitch = active_video_format.get_pitch_size();
         if (buffer.pData == MAP_FAILED)
         {
-            tcam_log(TCAM_LOG_ERROR, "MMAP failed for buffer %d. Aborting.", n_buffers);
+            tcam_log(TCAM_LOG_ERROR, "MMAP failed for buffer %d. Aborting. %s", n_buffers, strerror(errno));
             // TODO: errno
             return;
         }

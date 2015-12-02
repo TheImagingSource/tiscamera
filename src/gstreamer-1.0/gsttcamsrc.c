@@ -507,6 +507,8 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
     {
         const char* caps_string = tcam_fourcc_to_gst_1_0_caps_string(format[i].fourcc);
 
+        GST_DEBUG("Found '%s' pixel format string", caps_string);
+
         struct tcam_resolution_description res [format[i].resolution_count];
 
         int res_count = tcam_capture_device_get_format_resolution(self->device,
@@ -827,7 +829,6 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
     const char* format_string;
 
     GST_LOG_OBJECT (self, "Requested caps = %" GST_PTR_FORMAT, caps);
-    GST_ERROR( "Requested caps = %" GST_PTR_FORMAT, caps);
 
     tcam_capture_device_stop_stream(self->device, self->streamobject);
     self->streamobject = NULL;
