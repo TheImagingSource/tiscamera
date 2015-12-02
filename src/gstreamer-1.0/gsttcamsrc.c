@@ -536,14 +536,38 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
 
                 if (res[j].type == TCAM_RESOLUTION_TYPE_RANGE)
                 {
+                    double framerates[res[j].framerate_count];
+                    int framerate_count = tcam_capture_device_get_resolution_framerate(self->device,
+                                                                                       &format[i],
+                                                                                       &res[j],
+                                                                                       framerates,
+                                                                                       res[j].framerate_count);
+
+                    GValue fps_list = {0};
+                    g_value_init(&fps_list, GST_TYPE_LIST);
+
+                    int f;
+                    for (f = 0; f < framerate_count; f++)
+                    {
+                        int frame_rate_numerator;
+                        int frame_rate_denominator;
+                        gst_util_double_to_fraction(framerates[f],
+                                                    &frame_rate_numerator,
+                                                    &frame_rate_denominator);
+
+                        GValue fraction = {0};
+                        g_value_init(&fraction, GST_TYPE_FRACTION);
+                        gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
+                        gst_value_list_append_value(&fps_list, &fraction);
+                        g_value_unset(&fraction);
+                    }
 
                     gst_structure_set (structure,
                                        "width", GST_TYPE_INT_RANGE, min_width, max_width,
                                        "height", GST_TYPE_INT_RANGE, min_height, max_height,
-                                       "framerate", GST_TYPE_FRACTION_RANGE,
-                                       1, 1,
-                                       120, 1,
                                        NULL);
+
+                    gst_structure_take_value(structure, "framerate", &fps_list);
                 }
                 else // fixed resolution
                 {
