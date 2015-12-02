@@ -26,7 +26,7 @@ using namespace tcam;
 ImageSink::ImageSink ()
     : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), c_back(nullptr),
       user_data(nullptr), last_image_buffer(), external_buffer(false),
-      buffer_number(30), buffers()
+      buffer_number(10), buffers()
 {}
 
 
