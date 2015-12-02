@@ -1104,7 +1104,7 @@ void V4l2Device::init_mmap_buffers ()
         buffer.length = active_video_format.get_required_buffer_size();
         buffer.pData =
             /* use pre-allocated memory */
-            (unsigned char*) mmap( buffers.at(n_buffers).buffer->get_data(),
+            (unsigned char*) mmap( NULL,
                                    buffer.length,
                                    PROT_READ | PROT_WRITE, /* required */
                                    MAP_SHARED, /* recommended */
