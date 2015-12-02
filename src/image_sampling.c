@@ -134,7 +134,9 @@ guint buffer_brightness_gray (GstBuffer* buf)
     g_return_if_fail (gst_structure_get_int (structure, "width", &width));
     g_return_if_fail (gst_structure_get_int (structure, "height", &height));
 
-    gint pitch = 1;
+    // currently only 8bit formats are supported
+    guint byte_per_pixel = 1;
+    gint pitch = width * byte_per_pixel;
     guint cnt = 0;
     guint y_accu = 0;
     guint sampling_line_step = width / (SAMPLING_LINES + 1);
