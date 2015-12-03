@@ -23,7 +23,7 @@
 #include "Usb2Camera.h"
 #include "FileHandling.h"
 
-#define TIMEOUT 10000
+static const short TIMEOUT = 10000;
 
 #define EEPROM_SIZE 16384
 #define DATA_SIZE   512
@@ -113,7 +113,7 @@ int Usb2Camera::usbbuffer_to_string (unsigned char* usbbuffer,
 int Usb2Camera::string_to_usbbuffer (unsigned char* usbbuffer, int buffer_size, const char* string)
 {
     size_t length = strlen((char*) string );
-    int len = length * 2 + 4;
+    unsigned int len = length * 2 + 4;
 
     if ( buffer_size < len )
     {

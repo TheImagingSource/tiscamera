@@ -110,6 +110,7 @@ std::shared_ptr<UsbCamera> UsbHandler::open_camera (std::string serial_number)
             return std::make_shared<Usb3Camera>(this->session, d);
         case USB2:
             return std::make_shared<Usb2Camera>(this->session, d);
+        case UNKNOWN:
         default:
             return nullptr;
     }

@@ -22,6 +22,7 @@ namespace tis
 {
 
 UsbSession::UsbSession ()
+    : session(nullptr)
 {
     int ret = libusb_init(&this->session);
     if (ret < 0)
@@ -42,4 +43,4 @@ libusb_context* UsbSession::get_session ()
     return this->session;
 }
 
-}; /* namespace tis */
+} /* namespace tis */

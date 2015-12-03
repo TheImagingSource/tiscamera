@@ -24,7 +24,7 @@
 
 namespace {
 struct RegionInfo;
-};
+}
 
 namespace img
 {
@@ -115,8 +115,9 @@ private:
 
     std::chrono::time_point<std::chrono::high_resolution_clock> img_wait_endtime;
     int img_wait_cnt;
-};
-};
 
+}; // class auto_focus
+
+} // namespace img
 
 #endif // AUTO_FOCUS_H_INC_

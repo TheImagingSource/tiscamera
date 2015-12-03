@@ -143,6 +143,6 @@ private:
 
 }; /* class Usb2Camera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USB2CAMERA_H_ */

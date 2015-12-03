@@ -66,7 +66,7 @@ tBY8Pattern next_line (tBY8Pattern pattern);
  * @param pattern - bayer pattern that shall be represented via string
  * @return char* to a string representation of pattern
  */
-char* bayer_to_string (tBY8Pattern pattern);
+const char* bayer_to_string (tBY8Pattern pattern);
 
 
 /**
@@ -74,7 +74,7 @@ char* bayer_to_string (tBY8Pattern pattern);
  * @param pattern
  * @param line_width
  * @param bytes_per_pixel
- * @return 
+ * @return
  * @brief
  */
 unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsigned int bytes_per_pixel);

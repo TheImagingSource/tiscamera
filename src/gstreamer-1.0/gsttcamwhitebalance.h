@@ -104,9 +104,9 @@ struct _GstTcamWhitebalance {
 
 
     /* user defined values */
-    gint red;
-    gint green;
-    gint blue;
+    guint red;
+    guint green;
+    guint blue;
 
     /* persistent values */
     rgb_tripel rgb;

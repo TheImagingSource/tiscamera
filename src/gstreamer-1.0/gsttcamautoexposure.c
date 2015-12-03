@@ -118,7 +118,7 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamautoexposure,
                          GST_DEBUG_CATEGORY_INIT (gst_tcamautoexposure_debug_category,
                                                   "tcamautoexposure",
                                                   0,
-                                                  "debug category for tcamautoexposure element"));
+                                                  "debug category for tcamautoexposure element"))
 
 static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
 {
@@ -268,7 +268,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    struct tcam_device_property p = {};
+    struct tcam_device_property p = {0};
 
     bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
 
@@ -478,7 +478,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        "",
                        __LINE__,
                        NULL,
-                       "Current exposure is %d", p.value.i.value);
+                       "Current exposure is %ld", p.value.i.value);
         self->exposure.value = p.value.i.value;
     }
 
@@ -502,7 +502,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        "",
                        __LINE__,
                        NULL,
-                       "Current gain is %d", p.value.i.value);
+                       "Current gain is %ld", p.value.i.value);
         self->gain.value = p.value.i.value;
     }
 

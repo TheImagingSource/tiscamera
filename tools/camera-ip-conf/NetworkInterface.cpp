@@ -25,13 +25,13 @@
 namespace tis
 {
     NetworkInterface::NetworkInterface (const struct ifaddrs* _addrs)
+        : name(), flags(_addrs->ifa_flags), addr(), netmask(0)
     {
         if (_addrs->ifa_name != NULL)
         {
             name = std::string(_addrs->ifa_name);
         }
 
-        flags = _addrs->ifa_flags;
         addr = ((struct sockaddr_in*)_addrs->ifa_addr)->sin_addr.s_addr;
 
         netmask = ((struct sockaddr_in*)_addrs->ifa_netmask)->sin_addr.s_addr;

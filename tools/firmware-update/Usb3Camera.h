@@ -117,6 +117,6 @@ private:
 
 }; /* class Usb3Camera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USB3CAMERA_H_ */

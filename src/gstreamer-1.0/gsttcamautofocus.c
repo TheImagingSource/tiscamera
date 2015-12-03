@@ -177,7 +177,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
         r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
     }
 
-    struct tcam_device_property prop = {};
+    struct tcam_device_property prop = {0};
     gboolean ret = tcam_capture_device_find_property(fd, TCAM_PROPERTY_FOCUS, &prop);
 
     if (!ret)

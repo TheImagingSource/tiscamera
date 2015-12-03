@@ -34,7 +34,7 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
     guint first_line_offset = initial_offset(pattern, width, 8);
 
     /* bayer8; aravis currently does not support 16 and other */
-    gint bytes_per_line = 8 * width / 8;
+    guint bytes_per_line = 8 * width / 8;
 
     guint cnt = 0;
     guint sampling_line_step = height / (SAMPLING_LINES + 1);
@@ -106,7 +106,7 @@ static unsigned int clip( unsigned int x )
 
 guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern, gst_tcam_image_size size)
 {
-    auto_sample_points points = {};
+    auto_sample_points points = {0};
 
     get_sampling_points (buf, &points, pattern, size);
 
@@ -143,8 +143,8 @@ guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size)
     /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
     /* TODO find from pad https://github.com/kkonopko/gstreamer/blob/master/docs/random/porting-to-1.0.txt#L267 */
 
-    gint width = size.width;
-    gint height = size.height;
+    guint width = size.width;
+    guint height = size.height;
 
     // currently only 8nit formats are supported
     guint byte_per_pixel = 1;

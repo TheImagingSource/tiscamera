@@ -23,6 +23,7 @@ namespace tis
 {
 
 Socket::Socket (const sockaddr_in& address)
+    : fd(-1)
 {
     try
     {
@@ -71,7 +72,7 @@ int Socket::createSocket ()
 
 void Socket::bindTo (const sockaddr_in& address)
 {
-    int bind_res = bind(fd, (struct sockaddr*)&address, sizeof(address));
+    int bind_res = bind(fd, (const struct sockaddr*)&address, sizeof(address));
 
     if (bind_res < 0)
     {
@@ -100,8 +101,8 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
     sockaddr_in destAddr = fillAddr(destination_address, STANDARD_GVCP_PORT);
     setBroadcast(broadcast);
 
-    int send = sendto(fd, (uint8_t*)data, size, 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
-    if (send < 0)
+    ssize_t send = sendto(fd, (uint8_t*)data, size, 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
+    if (send <= 0)
     {
         throw SocketSendToException();
     }

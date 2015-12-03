@@ -182,7 +182,7 @@ sockaddr_in fillAddr (const std::string &address, const unsigned short port)
     {
         // TODO throw exception
     }
-    retv.sin_addr.s_addr = *((unsigned long *) host->h_addr_list[0]);
+    retv.sin_addr.s_addr = *((unsigned int*) host->h_addr_list[0]);
 
     retv.sin_port = htons(port);     // Assign port in network byte order
 

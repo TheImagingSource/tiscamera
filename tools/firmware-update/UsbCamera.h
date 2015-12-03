@@ -33,8 +33,8 @@ struct device_info
     char manufacturer[256];
     char product[256];
     char serial[256];
-    uint32_t idVendor;
-    uint32_t idProduct;
+    uint16_t idVendor;
+    uint16_t idProduct;
 };
 
 const camera_type find_camera_type (const unsigned int& idVendor,
@@ -101,6 +101,6 @@ private:
 
 }; /* class UsbCamera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USBCAMERA_H_ */

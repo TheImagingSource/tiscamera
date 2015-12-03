@@ -75,17 +75,16 @@ std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std:
 }
 
 
-Camera::Camera (const Packet::ACK_DISCOVERY& packet, std::shared_ptr<NetworkInterface> _interface, int timeoutIntervals)
+Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
+                std::shared_ptr<NetworkInterface> _interface,
+                int timeoutIntervals)
+    : packet(_packet), interface(_interface),
+      timeoutCounter(timeoutIntervals), timeoutCounterDefault(timeoutIntervals)
 {
-    this->packet = packet;
-
-    this->interface = _interface;
     this->socket = interface->createSocket();
 
     this->requestID = 1;
     this->isControlled = false;
-    this->timeoutCounter = timeoutIntervals;
-    this->timeoutCounterDefault = timeoutIntervals;
 }
 
 
@@ -615,7 +614,7 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
 }
 
 
-bool Camera::sendWriteMemory (const uint32_t address, const uint32_t size, void* data)
+bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* data)
 {
     if ((size % 4) != 0)
     {

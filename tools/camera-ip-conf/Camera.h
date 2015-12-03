@@ -199,7 +199,7 @@ public:
     /// @param size - size of data that shall be written
     /// @param data - pointer to information that shall be written
     /// @return int containing the return value of write attempt
-    bool sendWriteMemory (const uint32_t address, const uint32_t size, void* data);
+    bool sendWriteMemory (const uint32_t address, const size_t size, void* data);
 
 private:
 

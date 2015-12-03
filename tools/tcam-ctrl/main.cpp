@@ -195,6 +195,9 @@ int main (int argc, char *argv[])
             //save_image(g, filename);
             break;
         }
+        case SAVE_DEVICE_LIST:
+        case SAVE_DEVICE_SETTINGS:
+        case LOAD_DEVICE_SETTINGS:
         default:
         {
             std::cout << "Unknown command." << std::endl;
