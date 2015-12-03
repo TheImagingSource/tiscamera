@@ -146,7 +146,9 @@ guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size)
     gint width = size.width;
     gint height = size.height;
 
-    gint pitch = 1;
+    // currently only 8nit formats are supported
+    guint byte_per_pixel = 1;
+    gint pitch = width * byte_per_pixel;
     guint cnt = 0;
     guint y_accu = 0;
     guint sampling_line_step = width / (SAMPLING_LINES + 1);
