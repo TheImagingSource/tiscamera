@@ -164,31 +164,37 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_TRIGGER_DENOISE,
         .name = "Trigger Denoise",
         .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         TCAM_PROPERTY_TRIGGER_MASK,
         .name = "Trigger Mask",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         TCAM_PROPERTY_TRIGGER_DEBOUNCER,
         .name = "Trigger Debouncer",
         .type_to_use = TCAM_PROPERTY_TYPE_DOUBLE,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         TCAM_PROPERTY_TRIGGER_DELAY,
         .name = "Trigger Delay (us)",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         TCAM_PROPERTY_TRIGGER_SELECTOR,
         .name = "Trigger Selector",
         .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         TCAM_PROPERTY_TRIGGER_OPERATION,
         .name = "Trigger Operation",
         .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
         .id = TCAM_PROPERTY_GPIO,
