@@ -36,6 +36,7 @@ class V4l2Device : public DeviceInterface
     struct property_description
     {
         int id; // v4l2 identification
+        double conversion_factor;
         std::shared_ptr<Property> prop;
     };
     static const int EMULATED_PROPERTY = -1;
@@ -146,6 +147,11 @@ private:
     void create_emulated_properties ();
 
     void sort_properties ();
+
+    std::shared_ptr<Property> apply_conversion_factor (std::shared_ptr<Property> prop,
+                                                       const double factor);
+
+    void create_conversion_factors ();
 
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
 

@@ -712,7 +712,7 @@ void V4l2Device::create_emulated_properties ()
 
     for (auto& p : tmp_props)
     {
-        property_description pd = { EMULATED_PROPERTY, p};
+        property_description pd = { EMULATED_PROPERTY, 0, p};
         tcam_log(TCAM_LOG_DEBUG, "Adding '%s' to property list", p->get_name().c_str());
         property_handler->properties.push_back(pd);
     }
@@ -763,6 +763,85 @@ void V4l2Device::sort_properties ()
 }
 
 
+std::shared_ptr<Property> V4l2Device::apply_conversion_factor (std::shared_ptr<Property> prop,
+                                                               const double factor)
+{
+
+    auto s = prop->get_struct();
+
+    if (s.type == TCAM_PROPERTY_TYPE_INTEGER)
+    {
+        s.value.i.min *= factor;
+        s.value.i.max *= factor;
+        s.value.i.step *= factor;
+        s.value.i.value *= factor;
+        s.value.i.default_value *= factor;
+
+
+        return std::make_shared<Property>(PropertyInteger(property_handler, s, prop->get_value_type()));
+    }
+    else if (s.type == TCAM_PROPERTY_TYPE_DOUBLE)
+    {
+        s.value.d.min *= factor;
+        s.value.d.max *= factor;
+        s.value.d.step *= factor;
+        s.value.d.value *= factor;
+        s.value.d.default_value *= factor;
+
+        return std::make_shared<Property>(PropertyDouble(property_handler, s, prop->get_value_type()));
+    }
+    else
+    {
+        tcam_log(TCAM_LOG_ERROR, "Trying to apply conversion factor to property that does not represent numbers!");
+        return nullptr;
+    }
+}
+
+
+void V4l2Device::create_conversion_factors ()
+{
+    if (property_handler->properties.empty())
+    {
+        return;
+    }
+
+    TCAM_PROPERTY_ID id;
+    auto search_func = [&id] (const property_description& desc)
+        {
+            if (desc.prop->get_ID() == id)
+            {
+                return true;
+            }
+            return false;
+        };
+
+    id = TCAM_PROPERTY_EXPOSURE;
+    auto exposure = std::find_if(property_handler->properties.begin(),
+                                 property_handler->properties.end(),
+                                 search_func);
+
+    if (exposure != property_handler->properties.end())
+    {
+        if (exposure->id == TCAM_V4L2_EXPOSURE_TIME_US)
+        {
+            // do nothing already the correct unit
+            exposure->conversion_factor = 0.0;
+        }
+        else
+        {
+            // we have exposure_absolute which is in 100µs
+            exposure->conversion_factor = 100.0;
+            auto new_one = apply_conversion_factor(exposure->prop, exposure->conversion_factor);
+
+            if (new_one != nullptr)
+            {
+                exposure->prop = new_one;
+            }
+        }
+    }
+}
+
+
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
@@ -773,8 +852,11 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
 
-    //
+    // sort out duplicated interfaces
     sort_properties();
+    // create conversion factors so that properties allways use the same units
+    create_conversion_factors();
+    // create library only properties
     create_emulated_properties();
 }
 
@@ -846,6 +928,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     struct property_description desc;
 
     desc.id = qctrl->id;
+    desc.conversion_factor = 0.0;
     desc.prop = p;
 
     static std::vector<TCAM_PROPERTY_ID> special_controls = {TCAM_PROPERTY_BINNING};
@@ -869,12 +952,6 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
 bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 {
-    if (prop_desc.prop->get_ID() == TCAM_PROPERTY_OFFSET_X)
-    {
-        int i =0;
-
-    }
-
 
     TCAM_PROPERTY_TYPE type = prop_desc.prop->get_type();
 
@@ -893,6 +970,10 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
     if (type == TCAM_PROPERTY_TYPE_INTEGER || type == TCAM_PROPERTY_TYPE_ENUMERATION)
     {
         ctrl.value = (std::static_pointer_cast<PropertyInteger>(prop_desc.prop))->get_value();
+        if (prop_desc.conversion_factor != 0.0)
+        {
+            ctrl.value /= prop_desc.conversion_factor;
+        }
     }
     else if (type == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
