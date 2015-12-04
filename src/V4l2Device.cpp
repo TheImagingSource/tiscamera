@@ -21,6 +21,7 @@
 #include "PropertyGeneration.h"
 #include "Error.h"
 #include <errno.h>
+#include "v4l2_uvc_identifier.h"
 
 #include <algorithm>
 #include <unistd.h>
@@ -718,6 +719,50 @@ void V4l2Device::create_emulated_properties ()
 }
 
 
+void V4l2Device::sort_properties ()
+{
+    if (property_handler->properties.empty())
+    {
+        return;
+    }
+
+    TCAM_PROPERTY_ID id;
+    auto search_func = [&id] (const property_description& desc)
+        {
+            if (desc.id == id)
+            {
+                return true;
+            }
+            return false;
+        };
+
+    // ensure only one exposure interface is published
+    id = TCAM_V4L2_EXPOSURE_TIME_US;
+    auto exp_prop = std::find_if(property_handler->properties.begin(),
+                                 property_handler->properties.end(),
+                                 search_func);
+
+    if (exp_prop != property_handler->properties.end())
+    {
+        // exposure time us is similar to the interface we want to publish
+        // we therefor now search for all other exposure properties and move them
+        // to the special section in case we need them
+
+        auto p = property_handler->properties.begin();
+        while (p != property_handler->properties.end())
+        {
+            if (p->id != TCAM_V4L2_EXPOSURE_TIME_US
+                && p->prop->get_ID() == TCAM_PROPERTY_EXPOSURE)
+            {
+                property_handler->special_properties.push_back(*p);
+                p = property_handler->properties.erase(p);
+            }
+            p++;
+        }
+    }
+}
+
+
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
     struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
@@ -728,6 +773,8 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
 
+    //
+    sort_properties();
     create_emulated_properties();
 }
 

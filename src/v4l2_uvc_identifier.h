@@ -1,0 +1,63 @@
+/*
+ * Copyright 2015 The Imaging Source Europe GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef TCAM_V4L2_UVC_IDENTIFIER_H
+#define TCAM_V4L2_UVC_IDENTIFIER_H
+
+#include "property_identifications.h"
+
+/**
+ * The IDs in this file are a direct representation of identifier that
+ * can only exist when the uvc extension unit has been loaded.
+ * These Ids should only be referenced when handling special cases!
+ */
+
+const TCAM_PROPERTY_ID TCAM_V4L2_EXPOSURE_TIME_US = 0x0199e201;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_SHUTTER = 0x0199e202;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_EXPOSURE_REF = 0x0199e203;
+const TCAM_PROPERTY_ID TCAM_V4L2_GAIN_ABS = 0x0199e204;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_GAIN = 0x0199e205;
+const TCAM_PROPERTY_ID TCAM_V4L2_ONE_PUSH_WB = 0x0199e206;
+const TCAM_PROPERTY_ID TCAM_V4L2_WB_PRESET = 0x0199e207;
+const TCAM_PROPERTY_ID TCAM_V4L2_TRIGGER = 0x0199e208;
+const TCAM_PROPERTY_ID TCAM_V4L2_SOFTWARE_TRIGGER = 0x0199e209;
+const TCAM_PROPERTY_ID TCAM_V4L2_TRIGGER_DELAY = 0x0199e210;
+const TCAM_PROPERTY_ID TCAM_V4L2_STROBE_ENABLE = 0x0199e211;
+const TCAM_PROPERTY_ID TCAM_V4L2_STROBE_POLARITY = 0x0199e212;
+const TCAM_PROPERTY_ID TCAM_V4L2_STROBE_EXPOSURE = 0x0199e213;
+const TCAM_PROPERTY_ID TCAM_V4L2_STROBE_DURATION = 0x0199e214;
+const TCAM_PROPERTY_ID TCAM_V4L2_STROBE_DELAY = 0x0199e215;
+const TCAM_PROPERTY_ID TCAM_V4L2_GPOUT = 0x0199e216;
+const TCAM_PROPERTY_ID TCAM_V4L2_GPIN = 0x0199e217;
+const TCAM_PROPERTY_ID TCAM_V4L2_ROI_OFFSET_X = 0x0199e218;
+const TCAM_PROPERTY_ID TCAM_V4L2_ROI_OFFSET_Y = 0x0199e219;
+const TCAM_PROPERTY_ID TCAM_V4L2_ROI_AUTO_CENTER = 0x0199e220;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_FOCUS_ONE_PUSH = 0x0199e221;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_FOCUS_ROI_ENABLE = 0x0199e22;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_FOCUS_ROI_LEFT = 0x0199e223;
+const TCAM_PROPERTY_ID TCAM_V4L2_AUTO_FOCUS_ROI_TOP = 0x0199e224;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_ENABLE = 0x0199e225;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_GAIN = 0x0199e226;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_ENABLE_WIDE_D = 0x0199e227;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_CONTRAST = 0x0199e228;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_CONTRAST_AUTO = 0x0199e229;
+const TCAM_PROPERTY_ID TCAM_V4L2_ATR_CHROMA = 0x0199e230;
+const TCAM_PROPERTY_ID TCAM_V4L2_IMAGE_STABILIZATION = 0x0199e231;
+const TCAM_PROPERTY_ID TCAM_V4L2_NOISE_REDUCTION = 0x0199e232;
+const TCAM_PROPERTY_ID TCAM_V4L2_FACE_DETECTION = 0x0199e233;
+
+
+#endif /* TCAM_V4L2_UVC_IDENTIFIER_H */

@@ -145,6 +145,8 @@ private:
 
     void create_emulated_properties ();
 
+    void sort_properties ();
+
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
 
     int index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);

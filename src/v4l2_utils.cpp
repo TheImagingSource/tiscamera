@@ -17,6 +17,7 @@
 #include "v4l2_utils.h"
 
 #include "standard_properties.h"
+#include "v4l2_uvc_identifier.h"
 
 #include "utils.h"
 #include "logging.h"
@@ -48,7 +49,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_EXPOSURE,
-        .v4l2_id = { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE },
+        .v4l2_id = { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE, TCAM_V4L2_EXPOSURE_TIME_US },
     },
     {
         .id = TCAM_PROPERTY_EXPOSURE_AUTO,
