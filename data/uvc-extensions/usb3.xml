@@ -12,7 +12,7 @@
     <copyright>Copyright (c) 2014 The Imaging Source Europe GmbH</copyright>
     <history>
       1.0 - 24.06.2014
-          Initial release
+      Initial release
     </history>
   </meta>
 
@@ -197,15 +197,10 @@
     </constant>
 
     <constant type="integer">
-      <id>V4L2_HFLIP</id>
+      <id>V4L2_CID_BINNING</id>
       <value>0x0199e234</value>
     </constant>
-    
-    <constant type="integer">
-      <id>V4L2_VFLIP</id>
-      <value>0x0199e235</value>
-    </constant>
-    
+
     <!-- register values -->
 
     <!-- BM8, bit 0 = ENABLE -->
@@ -320,6 +315,12 @@
       <id>XU_ATR_CHROMA</id>
       <value>0x24</value>
     </constant>
+    <!-- XU_OVERRIDE_SCANNING_MODE MAKE_CONTROL_INFO(0x3A, 57) // U32 -->
+    <!-- u32 -->
+    <constant type="integer">
+      <id>XU_OVERRIDE_SCANNING_MODE</id>
+      <value>0x3A</value>
+    </constant>
 
     <!-- U16, AFU130 specific presets -->
     <constant type="integer">
@@ -357,16 +358,6 @@
       <id>XU_FACE_DETECTION</id>
       <value>0x28</value>
     </constant>
-    <!-- BM8 -->
-    <constant type="integer">
-      <id>XU_FLIPH</id>
-      <value>0x2E</value>
-    </constant>
-    <!-- BM8 -->
-    <constant type="integer">
-      <id>XU_FLIPV</id>
-      <value>0x2F</value>
-    </constant>
 
   </constants>
 
@@ -376,7 +367,7 @@
       <match>
         <vendor_id>0x199e</vendor_id>
       </match>
-      
+
       <controls>
         <control id="exp_time">
           <entity>UVC_GUID_TISEUVC_XU</entity>
@@ -560,7 +551,7 @@
             <request>GET_RES</request>
           </requests>
         </control>
-        
+
         <control id="gpio_in">
           <entity>UVC_GUID_TISEUVC_XU</entity>
           <selector>XU_GPIO</selector>
@@ -715,7 +706,7 @@
             <request>GET_RES</request>
           </requests>
         </control>
-        
+
         <!-- XU_ATR_CONTRAST				0x22 // U16 -->
         <control id="atr_contrast">
           <entity>UVC_GUID_TISEUVC_XU</entity>
@@ -745,7 +736,7 @@
             <request>GET_RES</request>
           </requests>
         </control>
-        
+
         <!-- XU_ATR_CHROMA				0x24 // U16 -->
         <control id="atr_chroma">
           <entity>UVC_GUID_TISEUVC_XU</entity>
@@ -804,11 +795,10 @@
           </requests>
         </control>
 
-        <!-- XU_FLIPH			0x2E // BM8 -->
-        <control id="fliph">
+        <control id="binning">
           <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_FLIPH</selector>
-          <index>45</index>
+          <selector>XU_OVERRIDE_SCANNING_MODE</selector>
+          <index>57</index>
           <size>1</size>
           <requests>
             <request>SET_CUR</request>
@@ -817,26 +807,28 @@
             <request>GET_RES</request>
           </requests>
         </control>
-
-        <!-- XU_FLIPV			0x2f // BM8 -->
-        <control id="flipv">
-          <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_FLIPV</selector>
-          <index>46</index>
-          <size>1</size>
-          <requests>
-            <request>SET_CUR</request>
-            <request>GET_CUR</request>
-            <request>GET_DEF</request>
-            <request>GET_RES</request>
-          </requests>
-        </control>
-        
       </controls>
     </device>
   </devices>
 
   <mappings>
+
+    <mapping>
+      <name>Binning</name>
+      <uvc>
+        <control_ref idref="binning"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_CID_BINNING</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="Binning-None" value="1"/>
+        <menu_entry name="Binning 2x" value="2"/>
+        <menu_entry name="Binning 4x" value="4"/>
+      </v4l2>
+    </mapping>
 
     <mapping>
       <name>Exposure Time (us)</name>
@@ -879,7 +871,7 @@
         <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
-    
+
     <mapping>
       <name>Gain (dB/100)</name>
       <uvc>
@@ -893,7 +885,7 @@
         <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
-    
+
     <mapping>
       <name>Gain Auto</name>
       <uvc>
@@ -956,7 +948,7 @@
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
-	
+
     <mapping>
       <name>Trigger Polarity</name>
       <uvc>
@@ -970,7 +962,7 @@
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
-	
+
     <mapping>
       <name>Trigger Global Reset Release</name>
       <uvc>
@@ -996,7 +988,7 @@
       <v4l2>
         <id>V4L2_SOFTWARE_TRIGGER</id>
         <v4l2_type>V4L2_CTRL_TYPE_BUTTON</v4l2_type>
-        
+
       </v4l2>
     </mapping>
 
@@ -1321,7 +1313,7 @@
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
-    
+
     <mapping>
       <name>Face Detection</name>
       <uvc>
@@ -1336,33 +1328,5 @@
       </v4l2>
     </mapping>
 
-    <mapping>
-      <name>Flip Horizontal</name>
-      <uvc>
-        <control_ref idref="fliph"/>
-        <size>1</size>
-        <offset>0</offset>
-        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
-      </uvc>
-      <v4l2>
-        <id>V4L2_HFLIP</id>
-        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
-      </v4l2>
-    </mapping>
-
-    <mapping>
-      <name>Flip Vertical</name>
-      <uvc>
-        <control_ref idref="flipv"/>
-        <size>1</size>
-        <offset>0</offset>
-        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
-      </uvc>
-      <v4l2>
-        <id>V4L2_VFLIP</id>
-        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
-      </v4l2>
-    </mapping>
-    
   </mappings>
 </config>

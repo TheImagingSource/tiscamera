@@ -40,6 +40,8 @@ AutoFocus.o: AutoFocus.cpp
 libgsttis_auto_focus.so: gsttis_autofocus.o AutoFocus.o auto_focus.o
 	$(CXX) -shared -g -O0 -o $@ $^ $(LDFLAGS)
 
+libgsttiswhitebalance.so: gsttiswhitebalance.o base.o image_sampling.o bayer.o
+	$(CXX) -shared -g -O0 -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -Wall -g -O0 -fPIC $(CPPFLAGS) $(CFLAGS) -c -o $(patsubst %.c,%.o,$<) $<  $(LDFLAGS)
