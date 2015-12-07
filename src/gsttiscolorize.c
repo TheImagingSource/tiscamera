@@ -383,19 +383,28 @@ char* device_bayer_pattern (int id)
 
 int check_bayer_pattern (char* desc)
 {
-    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GRBG Bayer (GRBG)") == 0)
+    if (strcmp(desc, "47425247-0000-0010-8000-00aa003") == 0
+        || strcmp(desc, "GRBG Bayer (GRBG)") == 0
+        || strcmp(desc, "8-bit Bayer GRGR/BGBG") == 0)
     {
         return GR;
     }
-    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0 || strcmp(desc, "RGGB Bayer (RGGB)") == 0)
+    else if (strcmp(desc, "42474752-0000-0010-8000-00aa003") == 0
+             || strcmp(desc, "RGGB Bayer (RGGB)") == 0
+             || strcmp(desc, "8-bit Bayer RGRG/GBGB") == 0)
     {
         return RG;
     }
-    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0 || strcmp(desc, "GBRG Bayer (GBRG)") == 0)
+    else if (strcmp(desc, "47524247-0000-0010-8000-00aa003") == 0
+             || strcmp(desc, "GBRG Bayer (GBRG)") == 0
+             || strcmp(desc, "8-bit Bayer GBGB/RGRG") == 0)
     {
         return GB;
     }
-    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0 || strcmp(desc, "BGGR Bayer (BGGR)") == 0 || strcmp(desc, "BGGR Bayer (BA81)") == 0)
+    else if (strcmp(desc, "31384142-0000-0010-8000-00aa003") == 0
+             || strcmp(desc, "BGGR Bayer (BGGR)") == 0
+             || strcmp(desc, "BGGR Bayer (BA81)") == 0
+             || strcmp(desc, "8-Bit Bayer BGBG/GRGR") == 0)
     {
         return BG;
     }
