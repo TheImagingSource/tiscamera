@@ -21,9 +21,12 @@
 #include "bayer.h"
 
 
-static const unsigned int V4L2_CID_EUVC_GAIN_R = 0x980921;
-static const unsigned int V4L2_CID_EUVC_GAIN_G = 0x980922;
-static const unsigned int V4L2_CID_EUVC_GAIN_B = 0x980923;
+static const unsigned int V4L2_CID_EUVC_GAIN_R_OLD = 0x980921;
+static const unsigned int V4L2_CID_EUVC_GAIN_G_OLD = 0x980922;
+static const unsigned int V4L2_CID_EUVC_GAIN_B_OLD = 0x980923;
+static const unsigned int V4L2_CID_EUVC_GAIN_R = 0x0199e921;
+static const unsigned int V4L2_CID_EUVC_GAIN_G = 0x0199e922;
+static const unsigned int V4L2_CID_EUVC_GAIN_B = 0x0199e923;
 
 
 typedef struct

@@ -97,6 +97,7 @@ static void update_v4l2_device (struct device_resources* res)
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
+                qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
                 continue;
             }
             res->gain.value= ctrl.value;
@@ -108,28 +109,31 @@ static void update_v4l2_device (struct device_resources* res)
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
+                qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
                 continue;
             }
             res->exposure.value = ctrl.value;
             res->exposure.min = qctrl.minimum;
             res->exposure.max = qctrl.maximum;
         }
-        else if (qctrl.id == V4L2_CID_EUVC_GAIN_R)
+        else if (qctrl.id == V4L2_CID_EUVC_GAIN_R || qctrl.id == V4L2_CID_EUVC_GAIN_G_OLD)
         {
             ctrl.id = qctrl.id;
-            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+            if (ioctl(fd, VIDIOC_G_CTRL, &ctrl) <= 0)
             {
+                qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
                 continue;
             }
             res->color.rgb.R = ctrl.value;
             res->color.max = qctrl.maximum;
             res->color.default_value = 36; // 36 for DFK 72
         }
-        else if (qctrl.id == V4L2_CID_EUVC_GAIN_G)
+        else if (qctrl.id == V4L2_CID_EUVC_GAIN_G || qctrl.id == V4L2_CID_EUVC_GAIN_G_OLD)
         {
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
+                qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
                 continue;
             }
             res->color.rgb.G = ctrl.value;
@@ -137,11 +141,13 @@ static void update_v4l2_device (struct device_resources* res)
             res->color.default_value = 36; // 36 for DFK 72
 
         }
-        else if (qctrl.id == V4L2_CID_EUVC_GAIN_B)
+        else if (qctrl.id == V4L2_CID_EUVC_GAIN_B || qctrl.id == V4L2_CID_EUVC_GAIN_B_OLD)
         {
             ctrl.id = qctrl.id;
             if (ioctl(fd, VIDIOC_G_CTRL, &ctrl))
             {
+                qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+
                 continue;
             }
             res->color.rgb.B = ctrl.value;
