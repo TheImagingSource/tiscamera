@@ -932,7 +932,7 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
 }
 
 
-void gst_tcam_init_camera (GstTcam* self)
+bool gst_tcam_init_camera (GstTcam* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
 
@@ -981,7 +981,9 @@ void gst_tcam_init_camera (GstTcam* self)
     {
         GST_ERROR("Unable to open device.");
         /* TODO add pipeline termination */
+        return false;
     }
+    return true;
 }
 
 
@@ -1004,7 +1006,10 @@ static gboolean gst_tcam_start (GstBaseSrc *src)
     self->run = 1000;
 
     if (self->device == NULL)
-        gst_tcam_init_camera(self);
+        if (!gst_tcam_init_camera(self))
+        {
+            return false;
+        }
 
     self->all_caps = gst_tcam_get_all_camera_caps (self);
 
