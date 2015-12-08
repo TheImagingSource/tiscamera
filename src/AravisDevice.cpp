@@ -358,7 +358,7 @@ bool AravisDevice::release_buffers ()
 
 bool AravisDevice::start_stream ()
 {
-    if (arv_camera == NULL)
+    if (arv_camera == nullptr)
     {
         tcam_log(TCAM_LOG_ERROR, "ArvCamera missing!");
         return false;
@@ -377,7 +377,7 @@ bool AravisDevice::start_stream ()
 
     this->stream = arv_camera_create_stream(this->arv_camera, NULL, NULL);
 
-    if (this->stream == NULL)
+    if (this->stream == nullptr)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to create ArvStream.");
         // TODO errno
@@ -461,19 +461,22 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            // struct tcam_image_buffer desc = {};
+            struct tcam_image_buffer desc = {};
+            tcam_log(TCAM_LOG_INFO, "Received new buffer.");
 
-            // desc.format = self->active_video_format.get_struct();
+            desc.format = self->active_video_format.get_struct();
 
-            // size_t size = 0;
-            // desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
-            // desc.length = size;
-            // desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
+            size_t size = 0;
+            desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
+            desc.length = size;
+            desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
 
-            // if (desc.pData == NULL)
-            // {
-            //     tcam_log(TCAM_LOG_ERROR, "Received data pointer is NULL.");
-            // }
+            if (desc.pData == NULL)
+            {
+                tcam_log(TCAM_LOG_ERROR, "Received data pointer is NULL.");
+            }
+
+            std::shared_ptr<MemoryBuffer> p = std::make_shared<MemoryBuffer>(desc);
 
             // self->buffers.at(self->current_buffer).buffer->set_image_buffer(desc);
             //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
@@ -482,8 +485,9 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
             self->buffers.at(self->current_buffer).is_queued = false;
 
-            self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
+            // self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
 
+            self->external_sink->push_image(p);
 
             // // keep buffer unqueued until user allows requeueing
             // while (buffers.at(buf.index)->is_locked())
