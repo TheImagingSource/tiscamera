@@ -925,7 +925,7 @@ static gboolean gst_tcam_set_caps (GstBaseSrc* src,
     self->last_timestamp = 0;
 
     self->streamobject = tcam_capture_device_start_stream(self->device, gst_tcam_callback, self);
-
+    self->is_running = TRUE;
     GST_INFO("successfully set caps to: %", GST_PTR_FORMAT, caps);
 
     return TRUE;
@@ -1004,6 +1004,7 @@ static gboolean gst_tcam_start (GstBaseSrc *src)
     GstTcam* self = GST_TCAM(src);
 
     self->run = 1000;
+    self->is_running = TRUE;
 
     if (self->device == NULL)
         if (!gst_tcam_init_camera(self))
@@ -1020,6 +1021,8 @@ static gboolean gst_tcam_start (GstBaseSrc *src)
 gboolean gst_tcam_stop (GstBaseSrc* src)
 {
     GstTcam* self = GST_TCAM(src);
+
+    self->is_running = FALSE;
 
     tcam_capture_device_stop_stream(self->device, self->streamobject);
     self->streamobject = NULL;
@@ -1072,8 +1075,14 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
     GstTcam* self = GST_TCAM (push_src);
 
 wait_again:
-    while (self->new_buffer == false)
+    // wait until new buffer arrives or stop waiting when wee have to shut down
+    while ((self->new_buffer == false) && (self->is_running == true))
     {}
+
+    if (self->is_running != TRUE)
+    {
+        return GST_FLOW_EOS;
+    }
 
     self->new_buffer = false;
     if (self->ptr == NULL)
@@ -1148,6 +1157,7 @@ static void gst_tcam_init (GstTcam* self)
     self->streamobject = NULL;
     self->all_caps = NULL;
     self->fixed_caps = NULL;
+    self->is_running = TRUE;
 
     gst_tcam_init_camera(self);
 }

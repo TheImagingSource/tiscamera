@@ -49,7 +49,7 @@ struct _GstTcam
     int n_buffers;
     const struct tcam_image_buffer* ptr;
     gboolean new_buffer;
-
+    gboolean is_running;
     int payload;
 
     int buffer_timeout_us;
