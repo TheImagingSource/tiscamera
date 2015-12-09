@@ -35,6 +35,9 @@ std::shared_ptr<Property> create_property (ArvCamera* camera,
                                           std::shared_ptr<PropertyImpl> impl);
 
 
+uint32_t aravis2fourcc (uint32_t aravis);
+uint32_t fourcc2aravis (uint32_t fourcc);
+
 std::vector<DeviceInfo> get_aravis_device_list ();
 
 }; /* namespace tcam */

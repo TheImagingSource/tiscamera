@@ -129,9 +129,6 @@ private:
 
     void determine_active_video_format ();
 
-    static uint32_t aravis2fourcc (uint32_t aravis);
-    static uint32_t fourcc2aravis (uint32_t fourcc);
-
     void index_genicam ();
     void iterate_genicam (const char* feature);
     void index_genicam_format (ArvGcNode* /* node */ );
