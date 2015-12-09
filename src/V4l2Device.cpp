@@ -512,13 +512,18 @@ bool V4l2Device::stop_stream ()
 
 
 /*
- * in kernel versions > 3.15 uvcvideo does not correctly interpret bayer 8-bit
+ * in kernel versions < 3.15 uvcvideo does not correctly interpret bayer 8-bit
  * this function detects those cases and corrects all settings
  */
 static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
 {
 
     new_desc = fmtdesc;
+    // when v4l2 does not recognize a format fourcc it will
+    // set the fourcc to 0 and pass the description string.
+    // we compare the possible strings and correct the fourcc
+    // for loater emulation of the correct pattern
+
     if (strcmp((const char*)fmtdesc.description, "47425247-0000-0010-8000-00aa003") == 0)
     {
         // new_desc.pixelformat = FOURCC_GBRG8;

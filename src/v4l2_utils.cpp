@@ -535,8 +535,6 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
            encoded, but the strings returned from
            udev_device_get_sysattr_value() are UTF-8 encoded. */
 
-        // TODO: no hard coded numbers find more general approach
-
         static const char* TCAM_VENDOR_ID_STRING = "199e";
 
         if (strcmp(udev_device_get_sysattr_value(parent_device, "idVendor"), TCAM_VENDOR_ID_STRING) == 0)
