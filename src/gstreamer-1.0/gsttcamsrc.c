@@ -505,6 +505,12 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
     unsigned int i;
     for (i = 0; i < n_pixel_formats; i++)
     {
+        if (format[i].fourcc == 0)
+        {
+            GST_ERROR("Format has empty fourcc. Ignoring.");
+            continue;
+        }
+
         const char* caps_string = tcam_fourcc_to_gst_1_0_caps_string(format[i].fourcc);
 
         GST_DEBUG("Found '%s' pixel format string", caps_string);
