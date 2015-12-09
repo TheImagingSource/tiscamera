@@ -17,6 +17,7 @@
 #include "public_utils.h"
 
 #include "utils.h"
+#include "format.h"
 
 using namespace tcam;
 

@@ -17,6 +17,7 @@
 #include "VideoFormat.h"
 #include "logging.h"
 #include "utils.h"
+#include "format.h"
 
 #include <iomanip>              // setprecision
 #include <sstream>

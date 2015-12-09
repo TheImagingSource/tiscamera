@@ -33,10 +33,6 @@ namespace tcam
 
 std::string propertyType2String (TCAM_PROPERTY_TYPE);
 
-std::string fourcc2string (uint32_t fourcc);
-
-uint32_t string2fourcc (const std::string& s);
-
 
 std::vector<std::string> split_string (const std::string& to_split, const std::string& delim);
 
@@ -81,19 +77,6 @@ int tcam_xioctl (int fd, int request, void* arg);
 
 unsigned int tcam_get_required_buffer_size (const struct tcam_video_format* format);
 
-/**
- * Description for fourcc2description.
- * @param fourcc - format type that shall be descriped
- * @return description of the fourcc; NULL if none
- */
-const char* fourcc2description (uint32_t fourcc);
-
-/**
- * @brief convert string to fourcc
- * @param description - string that shall be converted
- * @return fourcc of the description; 0 if none
- */
-uint32_t description2fourcc (const char* description);
 
 /**
  * @brief Create framerate list for range

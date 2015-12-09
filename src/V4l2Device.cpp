@@ -15,6 +15,7 @@
  */
 
 #include "V4l2Device.h"
+#include "format.h"
 #include "logging.h"
 #include "utils.h"
 #include "v4l2_utils.h"

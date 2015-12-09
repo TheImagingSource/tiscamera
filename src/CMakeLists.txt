@@ -32,7 +32,7 @@ include_directories(${TinyXML_INCLUDE_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set( srcs
-
+format.cpp
 logging.cpp
 DeviceInfo.cpp
 DeviceIndex.cpp

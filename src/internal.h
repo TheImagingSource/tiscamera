@@ -27,6 +27,7 @@
 #define TCAM_INTERNAL_H
 
 #include "base_types.h"
+#include "format.h"
 #include "DeviceInterface.h"
 #include "utils.h"
 #include "logging.h"
