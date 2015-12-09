@@ -61,15 +61,15 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_GAIN_RED,
-        .v4l2_id = { 0x980921 },
+        .v4l2_id = { 0x980921, TCAM_V4L2_CID_EUVC_GAIN_R },
     },
     {
         .id = TCAM_PROPERTY_GAIN_GREEN,
-        .v4l2_id = {  0x980922 },
+        .v4l2_id = {  0x980922, TCAM_V4L2_CID_EUVC_GAIN_G },
     },
     {
         .id = TCAM_PROPERTY_GAIN_BLUE,
-        .v4l2_id = {  0x980923 },
+        .v4l2_id = {  0x980923, TCAM_V4L2_CID_EUVC_GAIN_B },
     },
     {
         .id = TCAM_PROPERTY_GAIN_AUTO,
@@ -201,11 +201,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_BINNING,
-        .v4l2_id = {0x980925},
+        .v4l2_id = { 0x980925, TCAM_V4L2_CID_BINNING },
     },
     {
         .id = TCAM_PROPERTY_SKIPPING,
-        .v4l2_id = { 0x980929 },
+        .v4l2_id = { 0x980929, TCAM_V4L2_CID_SKIP },
     },
     {
         .id = TCAM_PROPERTY_SHARPNESS,
