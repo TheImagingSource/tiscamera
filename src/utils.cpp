@@ -145,6 +145,7 @@ fourcc_names fourcc_name_array [] =
 
     {FOURCC_YUY2, "YUY2"},
     {FOURCC_Y800, "Y800"},
+    {FOURCC_Y12P, "Y12 packed"},
     {FOURCC_BY8,   "BY8"},
     {FOURCC_UYVY, "UYVY"},
     {FOURCC_YUYV, "YUYV"},

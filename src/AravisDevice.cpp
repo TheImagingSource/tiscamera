@@ -581,7 +581,7 @@ static std::vector<aravis_fourcc> arv_fourcc_conversion_table =
     { 0, ARV_PIXEL_FORMAT_MONO_10 },
     { 0, ARV_PIXEL_FORMAT_MONO_10_PACKED },
     { 0, ARV_PIXEL_FORMAT_MONO_12 },
-    { 0, ARV_PIXEL_FORMAT_MONO_12_PACKED },
+    { FOURCC_Y12P, ARV_PIXEL_FORMAT_MONO_12_PACKED },
     { 0, ARV_PIXEL_FORMAT_MONO_14 },
     { FOURCC_Y16,    ARV_PIXEL_FORMAT_MONO_16 },
     { FOURCC_GRBG8,  ARV_PIXEL_FORMAT_BAYER_GR_8 },
