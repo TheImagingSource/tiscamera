@@ -105,12 +105,20 @@ class PropertyDialog(Gtk.Dialog):
             pptytype = self.src.get_tcam_property_type(name)
 
             if pptytype == "integer":
-                ctrl = self.__create_range_control(
-                    name, minval, maxval, defval, value, step)
+                try:
+                    ctrl = self.__create_range_control(
+                        name, minval, maxval, defval, value, step)
+                except(TypeError):
+                    print("Invalid property specification for '%s'" % name)
+                    continue
             elif pptytype == "boolean":
                 ctrl = self.__create_toggle_control(name, value)
             elif pptytype == "button":
                 ctrl = self.__create_button_control(name)
+            else:
+                print("Unhandled property type: %s:%s" % (name, pptytype))
+                continue
+
             vbox.pack_start(ctrl, True, False, 6)
             i += 1
             if i > controls_per_page:
@@ -285,6 +293,33 @@ class AppWindow (Gtk.Window):
             self.pipeline.set_state(Gst.State.PLAYING)
             self.ppty_dialog.update(self.pipeline)
 
+    def get_frame_rate_list(self, s):
+        fpslist = []
+        try:
+            s.get_value("framerate")
+        except TypeError:
+            # Workaround for missing GstValueList support in GI
+            substr = s.to_string()[s.to_string().find("framerate="):]
+            try:
+                # try for frame rate lists
+                field, values, remain = re.split("{|}", substr, maxsplit=3)
+                fpslist = [("%.0f" % (float(x.split("/")[0]) /
+                                      float(x.split("/")[1])),
+                            x.strip())
+                           for x in values.split(",")]
+            except ValueError:
+                # handle fraction range
+                field, values, remain = re.split("\[|\]", substr, maxsplit=3)
+                minfps, maxfps = [float(a) / float(b) for a, b in
+                                  [c.split("/") for c in values.split(",")]]
+                fpslist = [("%.0f" % (x), "1/%d" % (int(x)))
+                           for x in range(int(minfps), int(min(20.0, maxfps)))]
+                fpslist += [("%0.f" % (x), "1/%d" % (int(x)))
+                            for x in range(int(min(20.0, maxfps)),
+                                           int(maxfps), 5)]
+        fpslist.sort(cmp=lambda a, b: cmp(float(b[0]), float(a[0])))
+        return fpslist
+
     def get_format_list(self):
         self.source.set_state(Gst.State.PAUSED)
         pad = self.source.pads[0]
@@ -294,21 +329,50 @@ class AppWindow (Gtk.Window):
 
         for i in range(caps.get_size()):
             s = caps.get_structure(i)
-            text = "%s %dx%d" % (s.get_string("format"),
-                                 s.get_int("width")[1],
-                                 s.get_int("height")[1])
-            try:
-                s.get_value("framerate")
-            except TypeError:
-                # Workaround for missing GstValueList support in GI
-                substr = s.to_string()[s.to_string().find("framerate="):]
-                field, values, remain = re.split("{|}", substr, maxsplit=3)
-                fpslist = [("%.0f" % (float(x.split("/")[0]) /
-                                      float(x.split("/")[1])),
-                            x.strip())
-                           for x in values.split(",")]
-            l.append((text, i, fpslist))
+            if not s.get_int("width")[0] or not s.get_int("height")[0]:
+                # Handle sizes give as a range
+                # Workaround for missing GstIntRange in GI
+                format_tmpl = [(320, 240), (640, 480), (1024, 768),
+                               (1280, 720), (1920, 960)]
+                substr = s.to_string()[s.to_string().find("width="):]
+                try:
+                    field, values, remain = re.split("\[|\]",
+                                                     substr, maxsplit=2)
+                except(ValueError):
+                    print("Failed to parse caps string")
+                    print("Caps=%s" % s.to_string())
+                    continue
+                minw, maxw = [int(x) for x in values.split(",")]
+                substr = s.to_string()[s.to_string().find("height="):]
+                try:
+                    field, values, remain = re.split("\[|\]",
+                                                     substr, maxsplit=2)
+                except(ValueError):
+                    print("Failed to parse caps string")
+                    print("Caps=%s" % s.to_string())
+                    continue
+                minh, maxh = [int(x) for x in values.split(",")]
 
+                # formats = [(minw, minh)]
+                formats = []
+                formats += [(w, h) for w, h in format_tmpl
+                            if w > minw and w < maxw and
+                            h > minh and h < maxh]
+                formats.append((maxw, maxh))
+
+                for f in formats:
+                    text = "%s %dx%d" % (s.get_string("format"),
+                                         f[0],
+                                         f[1])
+                    fpslist = self.get_frame_rate_list(s)
+                    l.append((text, i, fpslist))
+            else:
+                text = "%s %dx%d" % (s.get_string("format"),
+                                     s.get_int("width")[1],
+                                     s.get_int("height")[1])
+
+                fpslist = self.get_frame_rate_list(s)
+                l.append((text, i, fpslist))
         self.source.set_state(Gst.State.NULL)
 
         return l
@@ -345,6 +409,7 @@ class AppWindow (Gtk.Window):
         flt.link(autoexp)
 
         bayerconvert = [("tcamwhitebalance", "whitebalance"),
+                        ("queue", ),
                         ("bayer2rgb", ),
                         ("videoconvert", )]
         converters = {"GRAY8": [("videoconvert", )],
@@ -366,9 +431,15 @@ class AppWindow (Gtk.Window):
         p.add(queue1)
         prev_elem.link(queue1)
 
+        scale = Gst.ElementFactory.make("videoscale")
+        p.add(scale)
+        queue1.link(scale)
+
         sink = Gst.ElementFactory.make("glimagesink")
+        # sink = Gst.ElementFactory.make("ximagesink")
+        # sink.set_property("handle-expose", True)
         p.add(sink)
-        queue1.link(sink)
+        scale.link(sink)
 
         bus = p.get_bus()
         bus.set_sync_handler(bus_sync_handler, p)
