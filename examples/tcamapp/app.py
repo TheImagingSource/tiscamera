@@ -212,6 +212,8 @@ class AppWindow (Gtk.Window):
     def __init__(self, source):
         Gtk.Window.__init__(self)
 
+        self.set_default_size(640, 480)
+
         self.source = source
         self.pipeline = None
         self.ppty_dialog = PropertyDialog(self.source)
@@ -235,13 +237,10 @@ class AppWindow (Gtk.Window):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.add(vbox)
 
-        self.da = Gtk.DrawingArea()
-        self.da.set_size_request(640, 480)
-        self.da.set_double_buffered(True)
-        vbox.pack_start(self.da, True, True, 0)
+        self.video_box = Gtk.EventBox()
+        vbox.pack_start(self.video_box, True, True, 0)
 
         vbox.show_all()
-        self.da.realize()
 
         # This selects the default video format and thus
         # starts the live preview
@@ -378,12 +377,6 @@ class AppWindow (Gtk.Window):
         return l
 
     def create_pipeline(self, fmt, rate):
-        def bus_sync_handler(bus, msg, pipeline):
-            if not GstVideo.is_video_overlay_prepare_window_handle_message(msg):
-                return Gst.BusSyncReply.PASS
-            msg.src.set_window_handle(self.da.get_window().get_xid())
-            return Gst.BusSyncReply.DROP
-
         if self.source.get_parent() != None:
             raise (RuntimeError, "tcamsrc already has a parent")
 
@@ -435,14 +428,14 @@ class AppWindow (Gtk.Window):
         p.add(scale)
         queue1.link(scale)
 
-        sink = Gst.ElementFactory.make("glimagesink")
-        # sink = Gst.ElementFactory.make("ximagesink")
-        # sink.set_property("handle-expose", True)
+        sink = Gst.ElementFactory.make("gtksink")
+        widget = sink.get_property("widget")
+        for c in self.video_box.get_children():
+            c.destroy()
+        self.video_box.add(widget)
+        widget.show()
         p.add(sink)
         scale.link(sink)
-
-        bus = p.get_bus()
-        bus.set_sync_handler(bus_sync_handler, p)
 
         return p
 
