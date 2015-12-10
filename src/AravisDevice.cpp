@@ -768,11 +768,13 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                     {
                         GError* error = NULL;
 
-                        // We want to store framerates as fps,m thus have to convert them from 0.XXXXX Hz to XX.YY FpS
+                        // We want to store framerates as fps, thus have to convert them from 0.XXXXX Hz to XX.YY FpS
 
                         // this is the denominator of our framerate
                         uint64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
                         double f = 1.0 / (uint32_t)val * 10000000;
+
+                        f = round(f * 1000.0) / 1000.0;
 
                         fps.push_back(f);
                     }
