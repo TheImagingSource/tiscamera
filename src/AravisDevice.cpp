@@ -910,7 +910,15 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             rf.resolution.max_size = max;
             rf.resolution.min_size = min;
-            rf.resolution.type = TCAM_RESOLUTION_TYPE_RANGE;
+
+            if (are_equal(min, max))
+            {
+                rf.resolution.type = TCAM_RESOLUTION_TYPE_FIXED;
+            }
+            else
+            {
+                rf.resolution.type = TCAM_RESOLUTION_TYPE_RANGE;
+            }
             rf.resolution.framerate_count = fps.size();
             rf.framerates = fps;
 
