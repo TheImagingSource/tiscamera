@@ -25,6 +25,12 @@
 #include <tcam_c.h>
 
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 G_BEGIN_DECLS
 
 
@@ -72,5 +78,11 @@ struct _GstTcamClass
 GType gst_tcam_get_type (void);
 
 G_END_DECLS
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* TCAM_GSTTCAMSRC_H */

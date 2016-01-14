@@ -81,7 +81,7 @@ static gboolean get_property_by_name (GstTcam* self,
     if (count){
         struct tcam_device_property *props;
 
-        props = g_malloc_n (sizeof (struct tcam_device_property), count);
+        props = (struct tcam_device_property*)g_malloc_n (sizeof (struct tcam_device_property), count);
         if (tcam_capture_device_get_properties (self->device,
                                                 props,
                                                 count) > 0)
@@ -109,7 +109,7 @@ static gboolean get_property_by_name (GstTcam* self,
 struct property_type_map
 {
     enum TCAM_PROPERTY_TYPE typecode;
-    gchar* typename;
+    const gchar* type_name;
 };
 
 
@@ -147,7 +147,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
     {
         if (prop.type == map[i].typecode)
         {
-            ret = g_strdup (map[i].typename);
+            ret = g_strdup (map[i].type_name);
             break;
         }
     }
@@ -180,7 +180,7 @@ static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
     {
         struct tcam_device_property *props;
 
-        props = g_malloc_n (sizeof (struct tcam_device_property), count);
+        props = (struct tcam_device_property*)g_malloc_n (sizeof (struct tcam_device_property), count);
         if (tcam_capture_device_get_properties (self->device,
                                                 props,
                                                 count) > 0)
@@ -469,7 +469,7 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                             count) <= 0)
     {
         g_free (info);
-        return NULL;
+        return FALSE;
     }
 
     int i;
@@ -1157,7 +1157,7 @@ wait_again:
         goto wait_again;
     }
 
-    *buffer = gst_buffer_new_wrapped_full (0, self->ptr->pData, self->ptr->length,
+    *buffer = gst_buffer_new_wrapped_full (GST_MEMORY_FLAG_NO_SHARE, self->ptr->pData, self->ptr->length,
                                            0, self->ptr->length, NULL, NULL);
 
     if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
