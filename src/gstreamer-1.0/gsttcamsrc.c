@@ -25,45 +25,45 @@
 #include <stdio.h>
 
 
-#define GST_TCAM_DEFAULT_N_BUFFERS		10
+#define GST_TCAM_DEFAULT_N_BUFFERS 10
 
 GST_DEBUG_CATEGORY_STATIC (tcam_debug);
 #define GST_CAT_DEFAULT tcam_debug
 
-static
-GSList* gst_tcam_src_get_property_names(TcamProp* self);
-static
-gchar *gst_tcam_src_get_property_type (TcamProp *self, gchar *name);
-static
-gboolean gst_tcam_src_get_tcam_property (TcamProp *self,
-					 gchar *name,
-					 GValue *value,
-					 GValue *min,
-					 GValue *max,
-					 GValue *def,
-					 GValue *step,
-					 GValue *type);
-static
-gboolean gst_tcam_src_set_tcam_property (TcamProp *self,
-					 gchar *name,
-					 const GValue *value);
-static
-GSList *gst_tcam_src_get_device_serials (TcamProp *self);
-static
-gboolean gst_tcam_src_get_device_info (TcamProp *self,
-				       const char *serial,
-				       char **name,
-				       char **identifier,
-				       char **connection_type);
 
-static void gst_tcam_src_prop_init (TcamPropInterface *iface)
+static GSList* gst_tcam_src_get_property_names(TcamProp* self);
+
+static gchar *gst_tcam_src_get_property_type (TcamProp* self, gchar* name);
+
+static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
+                                                gchar* name,
+                                                GValue* value,
+                                                GValue* min,
+                                                GValue* max,
+                                                GValue* def,
+                                                GValue* step,
+                                                GValue* type);
+
+static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
+                                                gchar* name,
+                                                const GValue* value);
+
+static GSList* gst_tcam_src_get_device_serials (TcamProp* self);
+
+static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+                                              const char* serial,
+                                              char** name,
+                                              char** identifier,
+                                              char** connection_type);
+
+static void gst_tcam_src_prop_init (TcamPropInterface* iface)
 {
-	iface->get_property_names = gst_tcam_src_get_property_names;
-	iface->get_property_type = gst_tcam_src_get_property_type;
-	iface->get_property = gst_tcam_src_get_tcam_property;
-	iface->set_property = gst_tcam_src_set_tcam_property;
-	iface->get_device_serials = gst_tcam_src_get_device_serials;
-	iface->get_device_info = gst_tcam_src_get_device_info;
+    iface->get_property_names = gst_tcam_src_get_property_names;
+    iface->get_property_type = gst_tcam_src_get_property_type;
+    iface->get_property = gst_tcam_src_get_tcam_property;
+    iface->set_property = gst_tcam_src_set_tcam_property;
+    iface->get_device_serials = gst_tcam_src_get_device_serials;
+    iface->get_device_info = gst_tcam_src_get_device_info;
 }
 
 G_DEFINE_TYPE_WITH_CODE (GstTcam, gst_tcam, GST_TYPE_PUSH_SRC,
@@ -71,32 +71,35 @@ G_DEFINE_TYPE_WITH_CODE (GstTcam, gst_tcam, GST_TYPE_PUSH_SRC,
                                                 gst_tcam_src_prop_init));
 
 
-static gboolean
-get_property_by_name (GstTcam *self, gchar *name,
-		      struct tcam_device_property *prop)
+static gboolean get_property_by_name (GstTcam* self,
+                                      gchar* name,
+                                      struct tcam_device_property* prop)
 {
     gboolean ret = FALSE;
 
     int count = tcam_capture_device_get_properties_count (self->device);
     if (count){
-	struct tcam_device_property *props;
+        struct tcam_device_property *props;
 
-	props = g_malloc_n (sizeof (struct tcam_device_property), count);
-	if (tcam_capture_device_get_properties (self->device,
-						props,
-						count) > 0){
-	    int i;
-	    for (i = 0; i < count; i++ ){
-		if (!strcmp (props[i].name, name)){
-		    memcpy (prop,
-			    &props[i],
-			    sizeof(struct tcam_device_property));
-		    ret = TRUE;
-		    break;
-		}
-	    }
-	}
-	g_free (props);
+        props = g_malloc_n (sizeof (struct tcam_device_property), count);
+        if (tcam_capture_device_get_properties (self->device,
+                                                props,
+                                                count) > 0)
+        {
+            int i;
+            for (i = 0; i < count; i++ )
+            {
+                if (!strcmp (props[i].name, name))
+                {
+                    memcpy (prop,
+                            &props[i],
+                            sizeof(struct tcam_device_property));
+                    ret = TRUE;
+                    break;
+                }
+            }
+        }
+        g_free (props);
     }
 
     return ret;
@@ -106,8 +109,9 @@ get_property_by_name (GstTcam *self, gchar *name,
 struct property_type_map
 {
     enum TCAM_PROPERTY_TYPE typecode;
-    gchar *typename;
+    gchar* typename;
 };
+
 
 /**
  * gst_tcam_get_property_type:
@@ -120,34 +124,37 @@ struct property_type_map
  */
 static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
 {
-    gchar *ret = NULL;
-    GstTcam *self = GST_TCAM (iface);
+    gchar* ret = NULL;
+    GstTcam* self = GST_TCAM (iface);
     struct tcam_device_property prop;
     struct property_type_map map[] = {
-	{ TCAM_PROPERTY_TYPE_BOOLEAN, "boolean" },
-	{ TCAM_PROPERTY_TYPE_INTEGER, "integer" },
-	{ TCAM_PROPERTY_TYPE_DOUBLE,  "double" },
-	{ TCAM_PROPERTY_TYPE_STRING,  "string" },
-	{ TCAM_PROPERTY_TYPE_ENUMERATION, "enum" },
-	{ TCAM_PROPERTY_TYPE_BUTTON,  "button" },
+        { TCAM_PROPERTY_TYPE_BOOLEAN, "boolean" },
+        { TCAM_PROPERTY_TYPE_INTEGER, "integer" },
+        { TCAM_PROPERTY_TYPE_DOUBLE, "double" },
+        { TCAM_PROPERTY_TYPE_STRING, "string" },
+        { TCAM_PROPERTY_TYPE_ENUMERATION, "enum" },
+        { TCAM_PROPERTY_TYPE_BUTTON, "button" },
     };
 
     g_return_val_if_fail (self->device != NULL, NULL);
 
     g_return_val_if_fail (get_property_by_name (self,
-						name,
-						&prop), NULL);
+                                                name,
+                                                &prop), NULL);
     int i;
 
-    for (i = 0; i < G_N_ELEMENTS (map); i++){
-	if (prop.type == map[i].typecode){
-	    ret = g_strdup (map[i].typename);
-	    break;
-	}
+    for (i = 0; i < G_N_ELEMENTS (map); i++)
+    {
+        if (prop.type == map[i].typecode)
+        {
+            ret = g_strdup (map[i].typename);
+            break;
+        }
     }
 
-    if (ret == NULL){
-	ret = g_strdup ("unknown");
+    if (ret == NULL)
+    {
+        ret = g_strdup ("unknown");
     }
 
     return ret;
@@ -161,237 +168,274 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-static
-GSList* gst_tcam_src_get_property_names(TcamProp* iface)
+static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
 {
-    GSList *ret = NULL;
-    GstTcam *self = GST_TCAM (iface);
+    GSList* ret = NULL;
+    GstTcam* self = GST_TCAM (iface);
 
     g_return_val_if_fail (self->device != NULL, NULL);
 
     int count = tcam_capture_device_get_properties_count (self->device);
-    if (count){
-	struct tcam_device_property *props;
+    if (count)
+    {
+        struct tcam_device_property *props;
 
-	props = g_malloc_n (sizeof (struct tcam_device_property), count);
-	if (tcam_capture_device_get_properties (self->device,
-						props,
-						count) > 0){
-	    int i;
+        props = g_malloc_n (sizeof (struct tcam_device_property), count);
+        if (tcam_capture_device_get_properties (self->device,
+                                                props,
+                                                count) > 0)
+        {
+            int i;
 
-	    for (i = 0; i < count; i++ ){
-		ret = g_slist_append (ret,
-				      g_strdup (props[i].name));
-	    }
-	}
-	g_free (props);
+            for (i = 0; i < count; i++ )
+            {
+                ret = g_slist_append (ret,
+                                      g_strdup (props[i].name));
+            }
+        }
+        g_free (props);
     }
 
     return ret;
 }
 
 
-static
-gboolean gst_tcam_src_get_tcam_property (TcamProp *iface,
-					 gchar *name,
-					 GValue *value,
-					 GValue *min,
-					 GValue *max,
-					 GValue *def,
-					 GValue *step,
-					 GValue *type)
+static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
+                                                gchar* name,
+                                                GValue* value,
+                                                GValue* min,
+                                                GValue* max,
+                                                GValue* def,
+                                                GValue* step,
+                                                GValue* type)
 {
     gboolean ret = TRUE;
     GstTcam *self = GST_TCAM (iface);
     struct tcam_device_property prop;
 
-    if (get_property_by_name (self, name, &prop) < 0){
-	return FALSE;
+    if (get_property_by_name (self, name, &prop) < 0)
+    {
+        return FALSE;
     }
 
     if (tcam_capture_device_get_property (self->device,
-					  &prop) < 0){
-	return FALSE;
+                                          &prop) < 0)
+    {
+        return FALSE;
     }
 
-    if (type){
-	g_value_init (type, G_TYPE_GTYPE);
+    if (type)
+    {
+        g_value_init (type, G_TYPE_GTYPE);
     }
 
-    switch (prop.type){
-    case TCAM_PROPERTY_TYPE_INTEGER:
-    case TCAM_PROPERTY_TYPE_ENUMERATION:
-	if (value){
-	    g_value_init (value, G_TYPE_INT);
-	    g_value_set_int (value, prop.value.i.value);
-	}
-	if (min){
-	    g_value_init (min, G_TYPE_INT);
-	    g_value_set_int (min, prop.value.i.min);
-	}
-	if (max){
-	    g_value_init (max, G_TYPE_INT);
-	    g_value_set_int (max, prop.value.i.max);
-	}
-	if (def){
-	    g_value_init (def, G_TYPE_INT);
-	    g_value_set_int (def, prop.value.i.default_value);
-	}
-	if (step){
-	    g_value_init (step, G_TYPE_INT);
-	    g_value_set_int (step, prop.value.i.step);
-	}
-	if (type){
-	    g_value_set_gtype (type, G_TYPE_INT);
-	}
-	break;
-    case TCAM_PROPERTY_TYPE_DOUBLE:
-	if (value){
-	    g_value_init (value, G_TYPE_DOUBLE);
-	    g_value_set_int (value, prop.value.d.value);
-	}
-	if (min){
-	    g_value_init (min, G_TYPE_DOUBLE);
-	    g_value_set_int (min, prop.value.d.min);
-	}
-	if (max){
-	    g_value_init (max, G_TYPE_DOUBLE);
-	    g_value_set_int (max, prop.value.d.max);
-	}
-	if (def){
-	    g_value_init (def, G_TYPE_DOUBLE);
-	    g_value_set_int (def, prop.value.d.default_value);
-	}
-	if (step){
-	    g_value_init (step, G_TYPE_DOUBLE);
-	    g_value_set_int (step, prop.value.d.step);
-	}
-	if (type){
-	    g_value_set_gtype (type, G_TYPE_DOUBLE);
-	}
-	break;
-    case TCAM_PROPERTY_TYPE_STRING:
-	if (value){
-	    g_value_init (value, G_TYPE_STRING);
-	    g_value_set_string (value, prop.value.s.value);
-	}
-	if (min){
-	    g_value_init (min, G_TYPE_STRING);
-	}
-	if (max){
-	    g_value_init (max, G_TYPE_STRING);
-	}
-	if (def){
-	    g_value_init (def, G_TYPE_STRING);
-	    g_value_set_string (def, prop.value.s.default_value);
-	}
-	if (step){
-	    g_value_init (def, G_TYPE_STRING);
-	}
-	if (type){
-	    g_value_set_gtype (type, G_TYPE_STRING);
-	}
-	break;
-    case TCAM_PROPERTY_TYPE_BOOLEAN:
-    case TCAM_PROPERTY_TYPE_BUTTON:
-	if (value){
-	    g_value_init (value, G_TYPE_BOOLEAN);
-	    g_value_set_boolean (value, prop.value.b.value);
-	}
-	if (min){
-	    g_value_init (min, G_TYPE_BOOLEAN);
-	}
-	if (max){
-	    g_value_init (max, G_TYPE_BOOLEAN);
-	    g_value_set_boolean (max, TRUE);
-	}
-	if (def){
-	    g_value_init (def, G_TYPE_BOOLEAN);
-	    g_value_set_boolean (def, prop.value.b.default_value);
-	}
-	if (step){
-	    g_value_init (step, G_TYPE_BOOLEAN);
-	}
-	if (type){
-	    g_value_set_gtype (type, G_TYPE_BOOLEAN);
-	}
-	break;
-    default:
-	if (value){
-	    g_value_init (value, G_TYPE_INT);
-	}
-	ret = FALSE;
-	break;
+    switch (prop.type)
+    {
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+            if (value)
+            {
+                g_value_init (value, G_TYPE_INT);
+                g_value_set_int (value, prop.value.i.value);
+            }
+            if (min)
+            {
+                g_value_init (min, G_TYPE_INT);
+                g_value_set_int (min, prop.value.i.min);
+            }
+            if (max)
+            {
+                g_value_init (max, G_TYPE_INT);
+                g_value_set_int (max, prop.value.i.max);
+            }
+            if (def)
+            {
+                g_value_init (def, G_TYPE_INT);
+                g_value_set_int (def, prop.value.i.default_value);
+            }
+            if (step)
+            {
+                g_value_init (step, G_TYPE_INT);
+                g_value_set_int (step, prop.value.i.step);
+            }
+            if (type)
+            {
+                g_value_set_gtype (type, G_TYPE_INT);
+            }
+            break;
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+            if (value)
+            {
+                g_value_init (value, G_TYPE_DOUBLE);
+                g_value_set_int (value, prop.value.d.value);
+            }
+            if (min)
+            {
+                g_value_init (min, G_TYPE_DOUBLE);
+                g_value_set_int (min, prop.value.d.min);
+            }
+            if (max)
+            {
+                g_value_init (max, G_TYPE_DOUBLE);
+                g_value_set_int (max, prop.value.d.max);
+            }
+            if (def)
+            {
+                g_value_init (def, G_TYPE_DOUBLE);
+                g_value_set_int (def, prop.value.d.default_value);
+            }
+            if (step)
+            {
+                g_value_init (step, G_TYPE_DOUBLE);
+                g_value_set_int (step, prop.value.d.step);
+            }
+            if (type)
+            {
+                g_value_set_gtype (type, G_TYPE_DOUBLE);
+            }
+            break;
+        case TCAM_PROPERTY_TYPE_STRING:
+            if (value)
+            {
+                g_value_init (value, G_TYPE_STRING);
+                g_value_set_string (value, prop.value.s.value);
+            }
+            if (min)
+            {
+                g_value_init (min, G_TYPE_STRING);
+            }
+            if (max)
+            {
+                g_value_init (max, G_TYPE_STRING);
+            }
+            if (def)
+            {
+                g_value_init (def, G_TYPE_STRING);
+                g_value_set_string (def, prop.value.s.default_value);
+            }
+            if (step)
+            {
+                g_value_init (def, G_TYPE_STRING);
+            }
+            if (type)
+            {
+                g_value_set_gtype (type, G_TYPE_STRING);
+            }
+            break;
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        case TCAM_PROPERTY_TYPE_BUTTON:
+            if (value)
+            {
+                g_value_init (value, G_TYPE_BOOLEAN);
+                g_value_set_boolean (value, prop.value.b.value);
+            }
+            if (min)
+            {
+                g_value_init (min, G_TYPE_BOOLEAN);
+            }
+            if (max)
+            {
+                g_value_init (max, G_TYPE_BOOLEAN);
+                g_value_set_boolean (max, TRUE);
+            }
+            if (def)
+            {
+                g_value_init (def, G_TYPE_BOOLEAN);
+                g_value_set_boolean (def, prop.value.b.default_value);
+            }
+            if (step)
+            {
+                g_value_init (step, G_TYPE_BOOLEAN);
+            }
+            if (type)
+            {
+                g_value_set_gtype (type, G_TYPE_BOOLEAN);
+            }
+            break;
+        default:
+            if (value)
+            {
+                g_value_init (value, G_TYPE_INT);
+            }
+            ret = FALSE;
+            break;
     }
 
     return ret;
 }
 
-static
-gboolean gst_tcam_src_set_tcam_property (TcamProp *iface,
-					 gchar *name,
-					 const GValue *value)
+
+static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
+                                                gchar* name,
+                                                const GValue* value)
 {
     gboolean ret = TRUE;
-    GstTcam *self = GST_TCAM (iface);
+    GstTcam* self = GST_TCAM (iface);
     struct tcam_device_property prop;
 
-    if (get_property_by_name (self, name, &prop) < 0){
-	return FALSE;
+    if (get_property_by_name (self, name, &prop) < 0)
+    {
+        return FALSE;
     }
     if (tcam_capture_device_get_property (self->device,
-					  &prop) < 0){
-	return FALSE;
+                                          &prop) < 0)
+    {
+        return FALSE;
     }
 
-    switch (prop.type){
-    case TCAM_PROPERTY_TYPE_INTEGER:
-    case TCAM_PROPERTY_TYPE_ENUMERATION:
-	prop.value.i.value = g_value_get_int (value);
-	break;
-    case TCAM_PROPERTY_TYPE_DOUBLE:
-	prop.value.d.value = g_value_get_double (value);
-	break;
-    case TCAM_PROPERTY_TYPE_STRING:
-	strcpy (prop.value.s.value, g_value_get_string (value));
-	break;
-    case TCAM_PROPERTY_TYPE_BOOLEAN:
-    case TCAM_PROPERTY_TYPE_BUTTON:
-	prop.value.b.value = g_value_get_boolean (value);
-	break;
+    switch (prop.type)
+    {
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+            prop.value.i.value = g_value_get_int (value);
+            break;
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+            prop.value.d.value = g_value_get_double (value);
+            break;
+        case TCAM_PROPERTY_TYPE_STRING:
+            strcpy (prop.value.s.value, g_value_get_string (value));
+            break;
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        case TCAM_PROPERTY_TYPE_BUTTON:
+            prop.value.b.value = g_value_get_boolean (value);
+            break;
     }
 
     return tcam_capture_device_set_property (self->device,
-					     &prop ) >= 0;
+                                             &prop ) >= 0;
 }
 
-static
-GSList *gst_tcam_src_get_device_serials (TcamProp *self)
+
+static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 {
     int count = tcam_device_index_get_device_count ();
-    GSList *ret = NULL;
-    struct tcam_device_info *info;
+    GSList* ret = NULL;
+    struct tcam_device_info* info;
 
-    if (count <= 0){
-	return NULL;
+    if (count <= 0)
+    {
+        return NULL;
     }
 
     info = g_new0 (struct tcam_device_info, count);
-    if (info == NULL){
-	return NULL;
+    if (info == NULL)
+    {
+        return NULL;
     }
 
     if (tcam_device_index_get_device_infos (info,
-					    count) <= 0){
-	g_free (info);
-	return NULL;
+                                            count) <= 0)
+    {
+        g_free (info);
+        return NULL;
     }
 
     int i;
-    for (i = 0; i < count; i++){
-	ret = g_slist_append (ret,
-			      g_strndup (info[i].serial_number,
-					 sizeof(info[i].serial_number)));
+    for (i = 0; i < count; i++)
+    {
+        ret = g_slist_append (ret,
+                              g_strndup (info[i].serial_number,
+                                         sizeof(info[i].serial_number)));
     }
 
     g_free (info);
@@ -399,59 +443,68 @@ GSList *gst_tcam_src_get_device_serials (TcamProp *self)
     return ret;
 }
 
-static
-gboolean gst_tcam_src_get_device_info (TcamProp *self,
-				       const char *serial,
-				       char **name,
-				       char **identifier,
-				       char **connection_type)
+
+static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+                                              const char* serial,
+                                              char** name,
+                                              char** identifier,
+                                              char** connection_type)
 {
     int count = tcam_device_index_get_device_count ();
     gboolean ret = FALSE;
     struct tcam_device_info *info;
 
-    if (count <= 0){
-	return FALSE;
+    if (count <= 0)
+    {
+        return FALSE;
     }
 
     info = g_new0 (struct tcam_device_info, count);
-    if (info == NULL){
-	return FALSE;
+    if (info == NULL)
+    {
+        return FALSE;
     }
 
     if (tcam_device_index_get_device_infos (info,
-					    count) <= 0){
-	g_free (info);
-	return NULL;
+                                            count) <= 0)
+    {
+        g_free (info);
+        return NULL;
     }
 
     int i;
-    for (i = 0; i < count; i++){
-	if (!strncmp (serial, info[i].serial_number,
-		      sizeof (info[i].serial_number))){
-	    ret = TRUE;
-	    if (name){
-		*name = g_strndup (info[i].name, sizeof (info[i].name));
-	    }
-	    if (identifier){
-		*identifier = g_strndup (info[i].identifier,
-					sizeof (info[i].identifier));
-	    }
-	    if (connection_type) {
-		switch (info[i].type){
-		case TCAM_DEVICE_TYPE_V4L2:
-		    *connection_type = g_strdup ("v4l2");
-		    break;
-		case TCAM_DEVICE_TYPE_ARAVIS:
-		    *connection_type = g_strdup ("aravis");
-		    break;
-		default:
-		    *connection_type = g_strdup ("unknown");
-		    break;
-		}
-	    }
-	    break;
-	}
+    for (i = 0; i < count; i++)
+    {
+        if (!strncmp (serial, info[i].serial_number,
+                      sizeof (info[i].serial_number)))
+        {
+            ret = TRUE;
+            if (name)
+            {
+                *name = g_strndup (info[i].name, sizeof (info[i].name));
+            }
+            if (identifier)
+            {
+                *identifier = g_strndup (info[i].identifier,
+                                         sizeof (info[i].identifier));
+            }
+            if (connection_type)
+            {
+                switch (info[i].type)
+                {
+                    case TCAM_DEVICE_TYPE_V4L2:
+                        *connection_type = g_strdup ("v4l2");
+                        break;
+                    case TCAM_DEVICE_TYPE_ARAVIS:
+                        *connection_type = g_strdup ("aravis");
+                        break;
+                    default:
+                        *connection_type = g_strdup ("unknown");
+                        break;
+                }
+            }
+            break;
+        }
     }
 
     g_free (info);
@@ -528,10 +581,10 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
         for (j = 0; j < res_count; j++)
         {
 
-            min_width  = res[j].min_size.width;
+            min_width = res[j].min_size.width;
             min_height = res[j].min_size.height;
 
-            max_width  = res[j].max_size.width;
+            max_width = res[j].max_size.width;
             max_height = res[j].max_size.height;
 
             if (caps_string != NULL)
@@ -1286,9 +1339,9 @@ static void gst_tcam_class_init (GstTcamClass* klass)
         (gobject_class,
          PROP_DEVICE,
          g_param_spec_pointer ("camera",
-                              "Camera Object",
-                              "Camera instance to retrieve additional information",
-                              G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+                               "Camera Object",
+                               "Camera instance to retrieve additional information",
+                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
     g_object_class_install_property
         (gobject_class,
          PROP_NUM_BUFFERS,
