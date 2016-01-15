@@ -46,7 +46,7 @@ target_link_libraries(gsttcamsrc tcamprop)
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.c image_sampling.c bayer.c)
 
-add_library(gsttcamautoexposure SHARED gsttcamautoexposure.c image_sampling.c bayer.c)
+add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp image_sampling.c bayer.c)
 
 add_library(gsttcamautofocus SHARED gsttcamautofocus.c AutoFocus.cpp auto_focus.cpp)
 

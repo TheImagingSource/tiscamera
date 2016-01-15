@@ -17,6 +17,13 @@
 #ifndef _BAYER_H_
 #define _BAYER_H_
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 /* available bayer patterns */
 typedef enum
 {
@@ -83,5 +90,9 @@ unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsig
 /* convert desc to int */
 #define MAKE_FOURCC(a,b,c,d)        ((guint32)((a)|(b)<<8|(c)<<16|(d)<<24))
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* _BAYER_H_ */

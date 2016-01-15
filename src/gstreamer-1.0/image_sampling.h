@@ -21,6 +21,13 @@
 #include <gst/gst.h>
 #include <glib.h>
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 /* number of sample points */
 #define SAMPLING_LINES      30
 #define SAMPLING_COLUMNS    40
@@ -72,5 +79,11 @@ guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern, gst_tcam_imag
  * @return
  */
 guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* _IMAGE_SAMPLING_H_ */

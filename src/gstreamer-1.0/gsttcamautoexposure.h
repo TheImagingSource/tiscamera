@@ -22,6 +22,12 @@
 
 #include "image_sampling.h"
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_TCAMAUTOEXPOSURE            (gst_tcamautoexposure_get_type())
@@ -100,5 +106,11 @@ typedef struct GstTcamautoexposureClass
 GType gst_tcamautoexposure_get_type (void);
 
 G_END_DECLS
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
