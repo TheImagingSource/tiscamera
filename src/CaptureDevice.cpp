@@ -90,14 +90,16 @@ Property* CaptureDevice::get_property (TCAM_PROPERTY_ID id)
 
 Property* CaptureDevice::get_property_by_name (const std::string& name)
 {
-    TCAM_PROPERTY_ID id = string2property_id(name);
+    auto properties = get_available_properties();
 
-    if (id == TCAM_PROPERTY_INVALID)
+    for (auto& p :  properties)
     {
-        return nullptr;
+        if (p->get_name().compare(name) == 0)
+        {
+            return p;
+        }
     }
-
-    return get_property(id);
+    return nullptr;
 }
 
 
