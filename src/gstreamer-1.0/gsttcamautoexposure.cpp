@@ -50,7 +50,7 @@
 #include "config.h"
 #endif
 
-#include "tcam_c.h"
+#include "tcam.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -264,15 +264,15 @@ static void init_camera_resources (GstTcamautoexposure* self)
     /* retrieve the element name e.g. GstAravis or GstV4l2Src*/
     const char* element_name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(self->camera_src)));
 
-    tcam_capture_device* dev = NULL;
+    tcam::CaptureDevice* dev = NULL;
 
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
     struct tcam_device_property p = {0};
 
-    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_ERROR,
@@ -284,18 +284,18 @@ static void init_camera_resources (GstTcamautoexposure* self)
     }
     else
     {
+        p = prop->get_struct();
         self->exposure.min = p.value.i.min;
         self->exposure.max = p.value.i.max;
         self->exposure.value = p.value.i.value;
 
         self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
-
     }
 
+    p = {0};
+    prop = dev->get_property(TCAM_PROPERTY_GAIN);
 
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
-
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_ERROR,
@@ -307,6 +307,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
     }
     else
     {
+        p = prop->get_struct();
         self->gain.min = p.value.i.min;
         self->gain.max = p.value.i.max;
         self->gain.value = p.value.i.value;
@@ -351,15 +352,12 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
                    NULL,
                    "Setting exposure to %f", exposure);
 
-    struct tcam_capture_device* dev;
+    tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    struct tcam_device_property exp = {};
+    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
-    exp.id = TCAM_PROPERTY_EXPOSURE;
-    exp.value.i.value = exposure;
-
-    tcam_capture_device_set_property(dev, &exp);
+    prop->set_value((int64_t) exposure);
 }
 
 
@@ -389,15 +387,12 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
                    NULL,
                    "Setting gain to %f", gain);
 
-    tcam_capture_device* dev;
+    tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    struct tcam_device_property exp = {};
+    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_GAIN);
 
-    exp.id = TCAM_PROPERTY_GAIN;
-    exp.value.i.value = gain;
-
-    tcam_capture_device_set_property(dev, &exp);
+    prop->set_value(gain);
 }
 
 
@@ -442,7 +437,7 @@ static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
 
 void retrieve_current_values (GstTcamautoexposure* self)
 {
-    tcam_capture_device* dev = NULL;
+    tcam::CaptureDevice* dev = NULL;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
     struct tcam_device_property p = {};
@@ -458,9 +453,9 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        "Tcam did not return a valid device");
     }
 
-    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
+    tcam::Property* prop =  dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
-    if (ret == false)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_ERROR,
@@ -479,12 +474,13 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        __LINE__,
                        NULL,
                        "Current exposure is %ld", p.value.i.value);
+        p = prop->get_struct();
         self->exposure.value = p.value.i.value;
     }
 
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
+    prop =  dev->get_property(TCAM_PROPERTY_GAIN);
 
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_ERROR,
@@ -503,6 +499,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        __LINE__,
                        NULL,
                        "Current gain is %ld", p.value.i.value);
+        p = prop->get_struct();
         self->gain.value = p.value.i.value;
     }
 
