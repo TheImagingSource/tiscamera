@@ -1261,7 +1261,7 @@ static void gst_tcam_get_property (GObject* object,
             g_value_set_string (value, self->device_serial);
             break;
         case PROP_DEVICE:
-            g_value_set_pointer (value, self->device);
+            g_value_set_pointer (value, ((struct device_state*)self->device)->dev.get());
             break;
         case PROP_NUM_BUFFERS:
             g_value_set_int (value, self->n_buffers);
