@@ -45,6 +45,29 @@ bool AravisDevice::AravisPropertyHandler::set_property (const Property& p)
 }
 
 
+AravisDevice::AravisFormatHandler::AravisFormatHandler (AravisDevice* dev)
+    : device(dev)
+{}
+
+
+std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const struct tcam_image_size& s)
+{
+    auto dev = arv_camera_get_device(device->arv_camera);
+
+    arv_device_set_integer_feature_value(dev, "TestWidth", s.width);
+    arv_device_set_integer_feature_value(dev, "TestHeight", s.height);
+
+    double min = arv_device_get_integer_feature_value(dev, "ResultingMinFPS");
+    double max = arv_device_get_integer_feature_value(dev, "ResultingMaxFPS");
+
+    tcam_log(TCAM_LOG_DEBUG, "Received min: %f max %f", min, max);
+
+    std::vector<double> ret = create_steps_for_range(min, max);
+
+    return ret;
+}
+
+
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     : device(device_desc),
       handler(nullptr),
@@ -64,6 +87,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.frame_retention = 200;
 
     handler = std::make_shared<AravisPropertyHandler>(this);
+    format_handler = std::make_shared<AravisFormatHandler>(this);
 
     index_genicam();
     determine_active_video_format();
@@ -930,7 +954,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
 
-            this->available_videoformats.push_back ( VideoFormatDescription ( desc, res_vec ) );
+            this->available_videoformats.push_back ( VideoFormatDescription (format_handler, desc, res_vec ) );
 
         }
     }

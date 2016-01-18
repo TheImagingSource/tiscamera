@@ -122,6 +122,19 @@ bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
 }
 
 
+V4l2Device::V4L2FormatHandler::V4L2FormatHandler (V4l2Device* dev)
+    : device(dev)
+{}
+
+
+std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s)
+{
+    std::vector<double> ret;
+
+    return ret;
+}
+
+
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
     : device(device_desc), emulate_bayer(false), emulated_fourcc(0),
       property_handler(nullptr), is_stream_on(false)
@@ -134,6 +147,7 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
     }
 
     property_handler = std::make_shared<V4L2PropertyHandler>(this);
+    format_handler = std::make_shared<V4L2FormatHandler>(this);
 
     determine_active_video_format();
 
@@ -615,7 +629,8 @@ void V4l2Device::index_formats ()
             desc.fourcc = FOURCC_Y800;
         }
 
-        VideoFormatDescription format(desc, rf);
+        // VideoFormatDescription format(format_handler, desc, rf);
+        VideoFormatDescription format(nullptr, desc, rf);
         this->available_videoformats.push_back(format);
 
         tcam_log(TCAM_LOG_DEBUG, "Found format: %s", fourcc2description(format.get_fourcc()));

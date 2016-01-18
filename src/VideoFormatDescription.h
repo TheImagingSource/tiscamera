@@ -22,10 +22,13 @@
 #include "VideoFormat.h"
 
 #include <vector>
+#include <memory>
 
 namespace tcam
 {
 
+// forward declarations
+class FormatHandlerInterface;
 
 struct framerate_mapping
 {
@@ -41,7 +44,8 @@ public:
 
     VideoFormatDescription () = delete;
 
-    VideoFormatDescription (const struct tcam_video_format_description&,
+    VideoFormatDescription (std::shared_ptr<FormatHandlerInterface> handler,
+                            const struct tcam_video_format_description&,
                             const std::vector<framerate_mapping>&);
 
     VideoFormatDescription (const VideoFormatDescription&);
@@ -86,6 +90,9 @@ public:
 
     std::vector<double> get_frame_rates (const tcam_resolution_description& size) const;
 
+    std::vector<double> get_framerates (const tcam_image_size& s) const;
+
+
     VideoFormat create_video_format (unsigned int width,
                                      unsigned int height,
                                      double framerate) const;
@@ -95,6 +102,8 @@ private:
     tcam_video_format_description format;
 
     std::vector<framerate_mapping> res;
+
+    std::weak_ptr<FormatHandlerInterface> format_handler;
 
 };
 

@@ -18,6 +18,7 @@
 
 #include "logging.h"
 #include "utils.h"
+#include "FormatHandlerInterface.h"
 
 #include <algorithm>
 #include <cstring>
@@ -25,9 +26,10 @@
 using namespace tcam;
 
 
-VideoFormatDescription::VideoFormatDescription (const struct tcam_video_format_description& f,
+VideoFormatDescription::VideoFormatDescription (std::shared_ptr<FormatHandlerInterface> handler,
+                                                const struct tcam_video_format_description& f,
                                                 const std::vector<framerate_mapping>& r)
-    : res(r)
+    : res(r), format_handler(handler)
 {
     memcpy(&format, &f, sizeof(format));
 }
@@ -36,6 +38,7 @@ VideoFormatDescription::VideoFormatDescription (const struct tcam_video_format_d
 VideoFormatDescription::VideoFormatDescription (const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
+    format_handler = other.format_handler;
     res = other.res;
 }
 
@@ -43,6 +46,7 @@ VideoFormatDescription::VideoFormatDescription (const VideoFormatDescription& ot
 VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
+    format_handler = other.format_handler;
     res = other.res;
 
     return *this;
@@ -123,6 +127,45 @@ std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resoluti
         if (are_equal(m.resolution, desc))
         {
             return m.framerates;
+        }
+    }
+
+    return std::vector<double>();
+}
+
+
+std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_size& s) const
+{
+    if (format_handler.expired() == false)
+    {
+        auto handler = format_handler.lock();
+
+        return handler->get_framerates(s);
+    }
+
+    for (const auto& r : res)
+    {
+        if (r.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
+        {
+            if (are_equal(s, r.resolution.min_size))
+            {
+                return r.framerates;
+            }
+        }
+        else
+        {
+            auto is_smaller = [] (const tcam_image_size& s1, const tcam_image_size& s2)
+                {
+                    if (s1.height <= s2.height && s1.width <= s2.width)
+                    {
+                        return true;
+                    }
+                    return false;
+                };
+            if (is_smaller(r.resolution.min_size, s) && is_smaller(s, r.resolution.max_size))
+            {
+                return r.framerates;
+            }
         }
     }
 

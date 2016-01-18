@@ -20,6 +20,7 @@
 #include "DeviceInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
+#include "FormatHandlerInterface.h"
 
 #include <linux/videodev2.h>
 #include <memory>
@@ -64,6 +65,17 @@ class V4l2Device : public DeviceInterface
         V4l2Device* device;
     };
 
+    class V4L2FormatHandler : public FormatHandlerInterface
+    {
+        friend class V4l2Device;
+
+    public:
+        V4L2FormatHandler (V4l2Device*);
+        std::vector<double> get_framerates (const struct tcam_image_size&);
+
+    protected:
+        V4l2Device* device;
+    };
 
 public:
 
@@ -133,6 +145,8 @@ private:
     std::vector<framerate_conv> framerate_conversions;
 
     std::shared_ptr<V4L2PropertyHandler> property_handler;
+
+    std::shared_ptr<V4L2FormatHandler> format_handler;
 
     /**
      * @brief iterate over all v4l2 format descriptions and convert them

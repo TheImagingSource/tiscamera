@@ -18,6 +18,7 @@
 #define TCAM_ARAVISDEVICE_H
 
 #include "DeviceInterface.h"
+#include "FormatHandlerInterface.h"
 
 #include <arv.h>
 
@@ -48,6 +49,17 @@ class AravisDevice : public DeviceInterface
         std::vector<property_mapping> special_properties;
 
 
+        AravisDevice* device;
+    };
+
+    class AravisFormatHandler : public FormatHandlerInterface
+    {
+        friend class AravisDevice;
+
+    public:
+        AravisFormatHandler (AravisDevice*);
+        std::vector<double> get_framerates (const struct tcam_image_size&);
+    protected:
         AravisDevice* device;
     };
 
@@ -89,6 +101,8 @@ private:
     DeviceInfo device;
 
     std::shared_ptr<AravisPropertyHandler> handler;
+
+    std::shared_ptr<AravisFormatHandler> format_handler;
 
     ArvCamera* arv_camera;
 
