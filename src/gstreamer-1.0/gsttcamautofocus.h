@@ -20,6 +20,12 @@
 #include <gst/base/gstbasetransform.h>
 #include "AutoFocus.h"
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_TCAMAUTOFOCUS            (gst_tcamautofocus_get_type())
@@ -69,5 +75,9 @@ typedef struct GstTcamAutoFocusClass
 GType gst_tcamautofocus_get_type (void);
 
 G_END_DECLS
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _GST_TCAMAUTOFOCUS_H_ */

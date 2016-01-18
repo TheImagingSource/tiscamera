@@ -48,7 +48,7 @@ add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.c image_sampling.c ba
 
 add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp image_sampling.c bayer.c)
 
-add_library(gsttcamautofocus SHARED gsttcamautofocus.c AutoFocus.cpp auto_focus.cpp)
+add_library(gsttcamautofocus SHARED gsttcamautofocus.cpp AutoFocus.cpp auto_focus.cpp)
 
 foreach (t IN ITEMS ${PLUGINS})
 
