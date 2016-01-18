@@ -55,7 +55,6 @@ serialization.cpp
 PropertyHandler.cpp
 public_utils.cpp
 gsttcambase.c
-tcam_c.cpp
 )
 
 if (BUILD_V4L2)
@@ -96,8 +95,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${cflags} ${lflags} -pthread")
 
 
 
-set(PUBLIC_HEADER tcam.h tcam_c.h)
-add_library(tcam SHARED ${srcs} tcam_c.cpp)
+set(PUBLIC_HEADER tcam.h)
+add_library(tcam SHARED ${srcs})
 
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
