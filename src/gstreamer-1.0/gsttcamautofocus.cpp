@@ -25,7 +25,7 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautofocus.h"
 
-#include "tcam_c.h"
+#include "tcam.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautofocus_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautofocus_debug_category
@@ -151,10 +151,10 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
         return;
     }
 
-    tcam_capture_device* fd = NULL;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &fd, NULL);
+    tcam::CaptureDevice* dev = nullptr;
+    g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
 
-    if (fd == NULL)
+    if (dev == nullptr)
     {
         gst_debug_log (gst_tcamautofocus_debug_category,
                        GST_LEVEL_ERROR,
@@ -177,10 +177,9 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
         r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
     }
 
-    struct tcam_device_property prop = {0};
-    gboolean ret = tcam_capture_device_find_property(fd, TCAM_PROPERTY_FOCUS, &prop);
+    tcam::Property* p = dev->get_property(TCAM_PROPERTY_FOCUS);
 
-    if (!ret)
+    if (p == nullptr)
     {
         gst_debug_log (gst_tcamautofocus_debug_category,
                        GST_LEVEL_ERROR,
@@ -191,6 +190,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
                        "Unable to retrieve focus property! Aborting. ");
         return;
     }
+    struct tcam_device_property prop = p->get_struct();
 
     self->cur_focus = prop.value.i.value;
     int min = prop.value.i.min;
@@ -488,15 +488,14 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         get_camera_src(GST_ELEMENT(self));
     }
 
-    tcam_capture_device* dev;
+    tcam::CaptureDevice* dev;
     g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
 
     gint64 min = 0;
     gint64 max = 0;
 
-    struct tcam_device_property prop = {};
-
-    tcam_capture_device_find_property(dev, TCAM_PROPERTY_FOCUS, &prop);
+    tcam::Property* focus_prop = dev->get_property(TCAM_PROPERTY_FOCUS);
+    struct tcam_device_property prop = focus_prop->get_struct();
 
     int focus_auto_min = prop.value.i.min;
     max = prop.value.i.max;
@@ -546,11 +545,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
                        NULL,
                        "Setting focus %d", new_focus_value);
 
-
-        prop.value.i.value = new_focus_value;
-
-        tcam_capture_device_set_property(dev, &prop);
-
+        focus_prop->set_value((int64_t)new_focus_value);
         self->cur_focus = new_focus_value;
     }
 
