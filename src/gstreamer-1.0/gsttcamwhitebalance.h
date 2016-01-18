@@ -22,7 +22,11 @@
 #include <gst/gstbuffer.h>
 
 #include "image_sampling.h"
-#include "tcam_c.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define GST_TYPE_TCAMWHITEBALANCE            (gst_tcamwhitebalance_get_type())
 #define GST_TCAMWHITEBALANCE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TCAMWHITEBALANCE,GstTcamWhitebalance))
@@ -122,5 +126,8 @@ struct _GstTcamWhitebalanceClass {
 
 GType gst_tcamwhitebalance_get_type (void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __GST_TCAMWHITEBALANCE_H__ */
