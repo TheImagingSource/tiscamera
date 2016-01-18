@@ -38,7 +38,7 @@
 #include "image_sampling.h"
 #include <stdlib.h>
 
-#include "tcam_c.h"
+#include "tcam.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
 #define GST_CAT_DEFAULT gst_tcamwhitebalance_debug_category
@@ -290,35 +290,60 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
     /* int tcam_capture_device_set_property (tcam_capture_device* source, */
     /*                                       const struct tcam_device_property* property); */
 
-    tcam_capture_device* dev;
+    tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->res.source_element), "camera", &dev, NULL);
 
-    int ret;
-    struct tcam_device_property exp = {};
 
-    exp.id = TCAM_PROPERTY_GAIN_RED;
-    exp.value.i.value = self->res.color.rgb.R;
+    tcam::Property* p = dev->get_property(TCAM_PROPERTY_GAIN_RED);
 
-    ret = tcam_capture_device_set_property(dev, &exp);
-    if (ret < 0)
+    if (p == nullptr)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamwhitebalance",
+                       "device_set_whitebalance",
+                       __LINE__,
+                       NULL,
+                       "Unable to retrieve gain red property");
+    }
+
+    if (p->set_value((int64_t)self->res.color.rgb.R))
     {
         return FALSE;
     }
 
-    exp.id = TCAM_PROPERTY_GAIN_GREEN;
-    exp.value.i.value = self->res.color.rgb.G;
+    p = dev->get_property(TCAM_PROPERTY_GAIN_GREEN);
 
-    ret = tcam_capture_device_set_property(dev, &exp);
-    if (ret < 0)
+    if (p == nullptr)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamwhitebalance",
+                       "device_set_whitebalance",
+                       __LINE__,
+                       NULL,
+                       "Unable to retrieve gain green property");
+    }
+
+    if (p->set_value((int64_t)self->res.color.rgb.G))
     {
         return FALSE;
     }
 
-    exp.id = TCAM_PROPERTY_GAIN_BLUE;
-    exp.value.i.value = self->res.color.rgb.B;
+    p = dev->get_property(TCAM_PROPERTY_GAIN_BLUE);
 
-    ret = tcam_capture_device_set_property(dev, &exp);
-    if (ret < 0)
+    if (p == nullptr)
+    {
+        gst_debug_log (gst_tcamwhitebalance_debug_category,
+                       GST_LEVEL_ERROR,
+                       "tcamwhitebalance",
+                       "device_set_whitebalance",
+                       __LINE__,
+                       NULL,
+                       "Unable to retrieve gain blue property");
+    }
+
+    if (p->set_value((int64_t)self->res.color.rgb.B))
     {
         return FALSE;
     }
@@ -707,15 +732,13 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 
 static void update_device_resources (struct device_resources* res)
 {
-    tcam_capture_device* dev = NULL;
+    tcam::CaptureDevice* dev = nullptr;
 
     g_object_get(G_OBJECT(res->source_element), "camera", &dev, NULL);
 
-    struct tcam_device_property p = {};
+    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
-    bool ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_EXPOSURE, &p);
-
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamwhitebalance_debug_category,
                        GST_LEVEL_ERROR,
@@ -727,15 +750,16 @@ static void update_device_resources (struct device_resources* res)
     }
     else
     {
+        struct tcam_device_property p = prop->get_struct();
+
         res->exposure.min = p.value.i.min;
         res->exposure.max = p.value.i.max;
         res->exposure.value = p.value.i.value;
     }
 
+    prop = dev->get_property(TCAM_PROPERTY_GAIN);
 
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN, &p);
-
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamwhitebalance_debug_category,
                        GST_LEVEL_ERROR,
@@ -747,14 +771,16 @@ static void update_device_resources (struct device_resources* res)
     }
     else
     {
+        struct tcam_device_property p = prop->get_struct();
+
         res->gain.min = p.value.i.min;
         res->gain.max = p.value.i.max;
         res->gain.value = p.value.i.value;
     }
 
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_RED, &p);
+    prop = dev->get_property(TCAM_PROPERTY_GAIN_RED);
 
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamwhitebalance_debug_category,
                        GST_LEVEL_INFO,
@@ -766,14 +792,15 @@ static void update_device_resources (struct device_resources* res)
     }
     else
     {
+        struct tcam_device_property p = prop->get_struct();
         res->color.rgb.R = p.value.i.value;
         res->exposure.max = p.value.i.max;
         // hardcoded from dfk72
         res->color.default_value = 36;
     }
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_GREEN, &p);
+    prop = dev->get_property(TCAM_PROPERTY_GAIN_GREEN);
 
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamwhitebalance_debug_category,
                        GST_LEVEL_INFO,
@@ -785,15 +812,16 @@ static void update_device_resources (struct device_resources* res)
     }
     else
     {
+        struct tcam_device_property p = prop->get_struct();
         res->color.rgb.G = p.value.i.value;
         res->exposure.max = p.value.i.max;
         // hardcoded from dfk72
         res->color.default_value = 36;
     }
 
-    ret = tcam_capture_device_find_property(dev, TCAM_PROPERTY_GAIN_BLUE, &p);
+    prop = dev->get_property(TCAM_PROPERTY_GAIN_BLUE);
 
-    if (!ret)
+    if (prop == nullptr)
     {
         gst_debug_log (gst_tcamwhitebalance_debug_category,
                        GST_LEVEL_INFO,
@@ -805,6 +833,7 @@ static void update_device_resources (struct device_resources* res)
     }
     else
     {
+        struct tcam_device_property p = prop->get_struct();
         res->color.rgb.B = p.value.i.value;
         res->exposure.max = p.value.i.max;
         // hardcoded from dfk72
