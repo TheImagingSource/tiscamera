@@ -492,6 +492,44 @@ static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
 static GstCaps* gst_tcam_fixate_caps (GstBaseSrc* bsrc,
                                       GstCaps* caps);
 
+
+static bool gst_tcam_fill_structure_fixed_resolution (GstStructure* structure,
+                                                      const tcam::VideoFormatDescription format,
+                                                      const tcam_resolution_description& res)
+{
+
+    std::vector<double> framerates = format.get_framerates(res.min_size);
+    int framerate_count = framerates.size();
+
+    GValue fps_list = {0};
+    g_value_init(&fps_list, GST_TYPE_LIST);
+
+    for (int f = 0; f < framerate_count; f++)
+    {
+        int frame_rate_numerator;
+        int frame_rate_denominator;
+        gst_util_double_to_fraction(framerates[f],
+                                    &frame_rate_numerator,
+                                    &frame_rate_denominator);
+
+        GValue fraction = {0};
+        g_value_init(&fraction, GST_TYPE_FRACTION);
+        gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
+        gst_value_list_append_value(&fps_list, &fraction);
+        g_value_unset(&fraction);
+    }
+
+    gst_structure_set (structure,
+                       "width", G_TYPE_INT, res.max_size.width,
+                       "height", G_TYPE_INT, res.max_size.height,
+                       NULL);
+
+    gst_structure_take_value(structure, "framerate", &fps_list);
+
+    return true;
+}
+
+
 static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
 {
     GstCaps* caps;
@@ -547,73 +585,70 @@ static GstCaps* gst_tcam_get_all_camera_caps (GstTcam* self)
 
             if (caps_string != NULL)
             {
-                GstStructure* structure;
 
-                structure = gst_structure_from_string (caps_string, NULL);
 
                 if (res[j].type == TCAM_RESOLUTION_TYPE_RANGE)
                 {
-                    std::vector<double> framerates = format[i].get_frame_rates(res[j]);
-                    int framerate_count = framerates.size();
-                    GValue fps_list = {0};
-                    g_value_init(&fps_list, GST_TYPE_LIST);
-
-                    for (int f = 0; f < framerate_count; f++)
+                    // std::vector<double> framerates = format[i].get_frame_rates(res[j]);
+                    std::vector<struct tcam_image_size> framesizes = tcam::get_standard_resolutions(res[j].min_size, res[j].max_size);
+                    framesizes.insert(framesizes.begin(), res[j].min_size);
+                    framesizes.push_back(res[j].max_size);
+                    for (const auto& reso : framesizes)
                     {
-                        int frame_rate_numerator;
-                        int frame_rate_denominator;
-                        gst_util_double_to_fraction(framerates[f],
-                                                    &frame_rate_numerator,
-                                                    &frame_rate_denominator);
+                        GstStructure* structure = gst_structure_from_string (caps_string, NULL);
 
-                        GValue fraction = {0};
-                        g_value_init(&fraction, GST_TYPE_FRACTION);
-                        gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
-                        gst_value_list_append_value(&fps_list, &fraction);
-                        g_value_unset(&fraction);
+                        std::vector<double> framerates = format[i].get_framerates(reso);
+
+                        GValue fps_list = {0};
+                        g_value_init(&fps_list, GST_TYPE_LIST);
+
+                        for (int f = 0; f < framerates.size(); f++)
+                        {
+                            int frame_rate_numerator;
+                            int frame_rate_denominator;
+                            gst_util_double_to_fraction(framerates[f],
+                                                        &frame_rate_numerator,
+                                                        &frame_rate_denominator);
+
+                            if ((frame_rate_denominator == 0) || (frame_rate_numerator == 0))
+                            {
+                                continue;
+                            }
+
+                            GValue fraction = {0};
+                            g_value_init(&fraction, GST_TYPE_FRACTION);
+                            gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
+                            gst_value_list_append_value(&fps_list, &fraction);
+                            g_value_unset(&fraction);
+                        }
+
+
+                        gst_structure_set (structure,
+                                           "width", G_TYPE_INT, reso.width,
+                                           "height", G_TYPE_INT, reso.height,
+                                           NULL);
+
+                        gst_structure_take_value(structure, "framerate", &fps_list);
+                        gst_caps_append_structure (caps, structure);
+
                     }
-
-                    gst_structure_set (structure,
-                                       "width", GST_TYPE_INT_RANGE, min_width, max_width,
-                                       "height", GST_TYPE_INT_RANGE, min_height, max_height,
-                                       NULL);
-
-                    gst_structure_take_value(structure, "framerate", &fps_list);
                 }
                 else // fixed resolution
                 {
-                    std::vector<double> framerates = format[i].get_frame_rates(res[j]);
-                    int framerate_count = framerates.size();
+                    GstStructure* structure = gst_structure_from_string (caps_string, NULL);
 
-                    GValue fps_list = {0};
-                    g_value_init(&fps_list, GST_TYPE_LIST);
+                    gst_tcam_fill_structure_fixed_resolution(structure, format[i], res[j]);
+                    gst_caps_append_structure (caps, structure);
 
-                    for (int f = 0; f < framerate_count; f++)
-                    {
-                        int frame_rate_numerator;
-                        int frame_rate_denominator;
-                        gst_util_double_to_fraction(framerates[f],
-                                                    &frame_rate_numerator,
-                                                    &frame_rate_denominator);
-
-                        GValue fraction = {0};
-                        g_value_init(&fraction, GST_TYPE_FRACTION);
-                        gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
-                        gst_value_list_append_value(&fps_list, &fraction);
-                        g_value_unset(&fraction);
-                    }
-
-                    gst_structure_set (structure,
-                                       "width", G_TYPE_INT, max_width,
-                                       "height", G_TYPE_INT, max_height,
-                                       NULL);
-
-                    gst_structure_take_value(structure, "framerate", &fps_list);
                 }
-                gst_caps_append_structure (caps, structure);
             }
         }
     }
+
+    GstStructure* structure = gst_structure_from_string ("ANY", NULL);
+
+    // gst_tcam_fill_structure_fixed_resolution(structure, format[i], res[j]);
+    gst_caps_append_structure (caps, structure);
 
     GST_INFO(gst_caps_to_string(caps));
 
