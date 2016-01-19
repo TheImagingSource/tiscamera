@@ -115,9 +115,17 @@ std::vector<double> tcam::create_steps_for_range (double min, double max)
         {
             current_step += 1;
         }
+        else if (current_step < 100.0)
+        {
+            current_step += 10.0;
+        }
+        else if (current_step < 1000.0)
+        {
+            current_step += 50.0;
+        }
         else
         {
-            current_step += 5.0;
+            current_step += 100.0;
         }
     }
 
