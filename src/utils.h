@@ -146,6 +146,9 @@ bool are_equal (const struct tcam_resolution_description& res1,
 bool are_equal (const struct tcam_video_format_description& res1,
                 const struct tcam_video_format_description& res2);
 
+bool is_smaller (const tcam_image_size& s1, const tcam_image_size& s2);
+
+
 /**
  * @brief generate new property ids
  * @return new unique property id

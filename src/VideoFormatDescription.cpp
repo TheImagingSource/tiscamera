@@ -154,14 +154,6 @@ std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_siz
         }
         else
         {
-            auto is_smaller = [] (const tcam_image_size& s1, const tcam_image_size& s2)
-                {
-                    if (s1.height <= s2.height && s1.width <= s2.width)
-                    {
-                        return true;
-                    }
-                    return false;
-                };
             if (is_smaller(r.resolution.min_size, s) && is_smaller(s, r.resolution.max_size))
             {
                 return r.framerates;

@@ -273,6 +273,16 @@ bool tcam::are_equal (const struct tcam_video_format_description& fmt1,
 }
 
 
+bool tcam::is_smaller(const tcam_image_size &s1, const tcam_image_size &s2)
+{
+    if (s1.height <= s2.height && s1.width <= s2.width)
+    {
+        return true;
+    }
+    return false;
+};
+
+
 TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
 {
     static unsigned int id_to_use;
