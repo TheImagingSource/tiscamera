@@ -21,20 +21,20 @@
 
 using namespace tcam;
 
-const char* tcam_fourcc_to_description (uint32_t fourcc)
+const char* tcam::fourcc_to_description (uint32_t fourcc)
 {
     return fourcc2description(fourcc);
 }
 
 
-uint32_t tcam_description_to_fourcc (const char* description)
+uint32_t tcam::description_to_fourcc (const char* description)
 {
     return description2fourcc(description);
 }
 
 
-struct tcam_image_buffer* tcam_allocate_image_buffers (const struct tcam_video_format* format,
-                                                       size_t n_buffers)
+struct tcam_image_buffer* tcam::allocate_image_buffers (const struct tcam_video_format* format,
+                                                             size_t n_buffers)
 {
     struct tcam_image_buffer* ptr = nullptr;
 
@@ -63,7 +63,7 @@ struct tcam_image_buffer* tcam_allocate_image_buffers (const struct tcam_video_f
 }
 
 
-void tcam_free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer)
+void tcam::free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer)
 {
     if (ptr == nullptr || n_buffer < 1)
         return;
