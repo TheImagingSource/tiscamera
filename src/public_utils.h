@@ -22,6 +22,7 @@
 #include <stddef.h> /* size_t */
 
 #include "base_types.h"
+#include <vector>
 
 namespace tcam
 {
@@ -47,6 +48,11 @@ struct tcam_image_buffer* allocate_image_buffers (const struct tcam_video_format
 void free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer);
 
 
+/**
+ *
+ */
+    std::vector<struct tcam_image_size> get_standard_resolutions (const struct tcam_image_size& min,
+                                                                  const struct tcam_image_size& max);
 
 } /* namespace tcam */
 

@@ -70,3 +70,45 @@ void tcam::free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer)
 
     free (ptr);
 }
+
+
+
+std::vector<struct tcam_image_size> tcam::get_standard_resolutions (const struct tcam_image_size& min,
+                                                                    const struct tcam_image_size& max)
+{
+    static const std::vector<struct tcam_image_size> resolutions =
+        {
+            {128, 96},
+            {320, 240},
+            {360, 280},
+            {533, 400},
+            {640, 480},
+            {352, 288},
+            {576, 480},
+            {720, 480},
+            {960, 720},
+            {1280, 720},
+            {1440, 1080},
+            {1920, 1080},
+            {1920, 1200},
+            {2048, 1152},
+            {2048, 1536},
+            {2560, 1440},
+            {3840, 2160},
+            {4096, 3072},
+            {7680, 4320},
+            {7680, 4800},
+        };
+
+    std::vector<struct tcam_image_size> ret;
+
+    for (const auto& r : resolutions)
+    {
+        if (is_smaller(min, r) && is_smaller(r, max))
+        {
+            ret.push_back(r);
+        }
+    }
+
+    return ret;
+}
