@@ -1,5 +1,5 @@
 
-# Copyright 2016 The Imaging Source Europe GmbH
+# Copyright 2014 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+find_package(TinyXML REQUIRED)
+include_directories(${TinyXML_INCLUDE_DIRS})
 
-# Set up QT4 and required components
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-include(${QT_USE_FILE})
-include_directories(${QT_USE_FILE})
+find_package(LibZip REQUIRED)
+include_directories(${LIBZIP_INCLUDE_DIR})
 
+add_library(tcam-network SHARED CameraDiscovery.cpp Camera.cpp Socket.cpp NetworkInterface.cpp utils.cpp FirmwareUpgrade.cpp)
 
-set(UIS
-  infobox.ui
-  mainwindow.ui)
-qt4_wrap_ui(GENERATED_SOURCES ${UIS})
+target_link_libraries(tcam-network ${TinyXML_LIBRARIES})
+target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 
-
-add_executable(camera-ip-conf gui_main.cpp InfoBox.cpp MainWindow.cpp UpdateHandler.cpp ${UIS})
-
-target_link_libraries(camera-ip-conf tcam-network)
-
-install(TARGETS camera-ip-conf DESTINATION bin)
+install(TARGETS tcam-network DESTINATION lib)

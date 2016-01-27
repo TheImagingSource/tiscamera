@@ -84,6 +84,8 @@ if (BUILD_ARAVIS)
   include_directories(${GObject_INCLUDE_DIR})
   include_directories(${GLIB2_INCLUDE_DIR})
 
+  add_subdirectory(tcam-network)
+
 endif (BUILD_ARAVIS)
 
 set(cflags "-fpic -w -Wall -Wextra -pedantic -Wundef -Wshadow")
