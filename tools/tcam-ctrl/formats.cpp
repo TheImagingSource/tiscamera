@@ -54,7 +54,7 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 void print_active_format (const VideoFormat& format)
 {
     std::cout << "Active format:\n"
-              << "Format: \t" << tcam_fourcc_to_description(format.get_fourcc())
+              << "Format: \t" << fourcc_to_description(format.get_fourcc())
               << "\nResolution: \t" << format.get_size().width << "x" << format.get_size().height
               << "\nFramerate: \t" << format.get_framerate() << "\n" << std::endl;
 }
