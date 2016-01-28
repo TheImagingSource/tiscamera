@@ -24,6 +24,14 @@
 #include <algorithm>
 #include <vector>
 
+// gige-daemon communication
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/msg.h>
+
+#include "gige-daemon.h"
+#include "tcam-semaphores.h"
+
 using namespace tcam;
 
 struct aravis_property
@@ -717,6 +725,51 @@ uint32_t tcam::fourcc2aravis (uint32_t fourcc)
     }
 
     return 0;
+}
+
+
+
+std::vector<DeviceInfo> tcam::get_gige_device_list ()
+{
+
+    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
+    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
+    int sem_id = semaphore_create(sem_key);
+
+    int shmid;
+    if ((shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 | IPC_CREAT)) == -1)
+    {
+        // perror("shmget");
+        // exit(1);
+        tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
+        return get_aravis_device_list();
+    }
+
+    semaphore_lock(sem_id);
+
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+
+    if (d == nullptr)
+    {
+        shmdt(d);
+        semaphore_unlock(sem_id);
+        return std::vector<DeviceInfo>();
+    }
+
+    std::vector<DeviceInfo> ret;
+
+    ret.reserve(d->device_count);
+
+    for (unsigned int i = 0; i < d->device_count; ++i)
+    {
+        ret.push_back(DeviceInfo(d->devices[i]));
+    }
+
+    shmdt(d);
+
+    semaphore_unlock(sem_id);
+
+    return ret;
 }
 
 

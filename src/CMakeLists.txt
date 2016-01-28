@@ -81,8 +81,11 @@ if (BUILD_ARAVIS)
   find_package(GLIB2 REQUIRED)   # dependency
 
   include_directories(${aravis_INCLUDE_DIR})
-  include_directories(${GObject_INCLUDE_DIR})
+  include_directories(${GOBJECT_INCLUDE_DIR})
   include_directories(${GLIB2_INCLUDE_DIR})
+
+
+  include_directories("${CMAKE_SOURCE_DIR}/tools/gige-daemon")
 
   add_subdirectory(tcam-network)
 

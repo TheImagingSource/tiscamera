@@ -1,5 +1,5 @@
 
-# Copyright 2014 The Imaging Source Europe GmbH
+# Copyright 2016 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
 # limitations under the License.
 
 
-add_subdirectory(tcam-ctrl)
+include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${CMAKE_SOURCE_DIR}/src")
 
-if (BUILD_V4L2)
-  add_subdirectory(firmware-update)
-endif (BUILD_V4L2)
 
-if (BUILD_ARAVIS)
-  add_subdirectory(camera-ip-conf)
-endif (BUILD_ARAVIS)
+set(cflags "-fPIC -w -Wall -Wextra -pedantic -Wundef -Wshadow")
+set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -l pthread")
 
-add_subdirectory(gige-daemon)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ")
+
+add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
+
+TARGET_LINK_LIBRARIES(gige-daemon tcam)
+TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
