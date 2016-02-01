@@ -128,7 +128,7 @@ void DeviceIndex::update_device_list ()
     tmp_dev_list.reserve(10);
 
 #if HAVE_ARAVIS
-    auto aravis_dev_list = get_aravis_device_list();
+    auto aravis_dev_list = get_gige_device_list();
     if (!aravis_dev_list.empty())
         tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
 
