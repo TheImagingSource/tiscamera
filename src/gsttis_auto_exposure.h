@@ -19,6 +19,7 @@
 
 #include <gst/base/gstbasetransform.h>
 #include "bayer.h"
+#include "image_sampling.h"
 
 G_BEGIN_DECLS
 
@@ -45,6 +46,16 @@ typedef struct
     gdouble value;
 
 } Exposure;
+
+
+typedef struct
+{
+    gint x0;
+    gint x1;
+    gint y0;
+    gint y1;
+} region;
+
 
 typedef enum
 {
@@ -85,6 +96,8 @@ typedef struct GstTis_Auto_Exposure
     GstElement* camera_src;
     tBY8Pattern pattern;
     format color_format;
+
+    region image_region;
 
     gint framerate_numerator;
     gint framerate_denominator;

@@ -103,6 +103,10 @@ enum
     PROP_CAMERA,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
+    PROP_REGION_X0,
+    PROP_REGION_X1,
+    PROP_REGION_Y0,
+    PROP_REGION_Y1,
 };
 
 /* pad templates */
@@ -182,6 +186,34 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_REGION_X0,
+                                     g_param_spec_int ("region-x0",
+                                                       "Upper x coordinate",
+                                                       "X coordinate of the upper, left corner of the region of interest.",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_REGION_Y0,
+                                     g_param_spec_int ("region-y0",
+                                                       "Upper y coordinate",
+                                                       "Y coordinate of the upper, left corner of the region of interest.",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_REGION_Y1,
+                                     g_param_spec_int ("region-x1",
+                                                       "Lower x coordinate",
+                                                       "X coordinate of the lower, right corner of the region of interest.",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_REGION_Y1,
+                                     g_param_spec_int ("region-y1",
+                                                       "Lower y coordinate",
+                                                       "Y coordinate of the lower, right corner of the region of interest.",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_CAMERA,
                                      g_param_spec_object ("camera",
                                                           "camera gst element",
@@ -227,6 +259,18 @@ void gst_tis_auto_exposure_set_property (GObject* object,
             if (tis_auto_exposure->gain.max == 0.0)
                 tis_auto_exposure->gain = tis_auto_exposure->default_gain_values;
             break;
+        case PROP_REGION_X0:
+            tis_auto_exposure->image_region.x0 = g_value_get_int(value);
+            break;
+        case PROP_REGION_X1:
+            tis_auto_exposure->image_region.x1 = g_value_get_int(value);
+            break;
+        case PROP_REGION_Y0:
+            tis_auto_exposure->image_region.y0 = g_value_get_int(value);
+            break;
+        case PROP_REGION_Y1:
+            tis_auto_exposure->image_region.y1 = g_value_get_int(value);
+            break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -256,6 +300,18 @@ void gst_tis_auto_exposure_get_property (GObject* object,
             break;
         case PROP_GAIN_MAX:
             g_value_set_double(value, tis_auto_exposure->gain.max);
+            break;
+        case PROP_REGION_X0:
+            g_value_set_int(value, tis_auto_exposure->image_region.x0);
+            break;
+        case PROP_REGION_X1:
+            g_value_set_int(value, tis_auto_exposure->image_region.x1);
+            break;
+        case PROP_REGION_Y0:
+            g_value_set_int(value, tis_auto_exposure->image_region.y0);
+            break;
+        case PROP_REGION_Y1:
+            g_value_set_int(value, tis_auto_exposure->image_region.y1);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -398,12 +454,72 @@ static void gst_tis_auto_exposure_fixate_caps (GstBaseTransform* base,
                    GST_LEVEL_WARNING,
                    "tis_auto_exposure",
                    "gst_tis_auto_exposure_fixate_caps",
-                   336,
+                   __LINE__,
                    NULL,
                    "Structure name %s\n", gst_structure_get_name (ins));
 
     init_camera_resources(self);
 }
+
+
+static tBY8Pattern calculate_pattern_from_offset (GstTis_Auto_Exposure* self)
+{
+    tBY8Pattern ret = self->pattern;
+    // check if we need to switch between pattern lines
+    if ((self->image_region.y0 % 2) != 0)
+    {
+        ret = next_line(self->pattern);
+    }
+
+    if ((self->image_region.x0 % 2) != 0)
+    {
+        ret = next_pixel(ret);
+    }
+
+    return ret;
+}
+
+
+static image_buffer retrieve_image_region (GstTis_Auto_Exposure* self, GstBuffer* buf)
+{
+    if (self->image_region.x0 == 0
+        && self->image_region.x1 == 0
+        && self->image_region.y0 == 0
+        && self->image_region.y1 == 0)
+    {
+        GstCaps *caps = GST_BUFFER_CAPS (buf);
+        GstStructure *structure = gst_caps_get_structure (caps, 0);
+        gint width, height;
+        gst_structure_get_int (structure, "width", &width);
+        gst_structure_get_int (structure, "height", &height);
+        self->image_region.x1 = width;
+        self->image_region.y1 = height;
+    }
+
+    const int bytes_per_pixel = 1;
+
+    image_buffer new_buf;
+
+    new_buf.image = GST_BUFFER_DATA(buf) + (self->image_region.x0 * bytes_per_pixel * self->image_region.y0);
+
+    new_buf.width = self->image_region.x1 - self->image_region.x0;
+    new_buf.height = self->image_region.y1 - self->image_region.y0;
+
+    new_buf.pattern = calculate_pattern_from_offset(self);
+
+    gst_debug_log (gst_tis_auto_exposure_debug_category,
+                   GST_LEVEL_INFO,
+                   "tis_auto_exposure",
+                   "init_camera_resources",
+                   __LINE__,
+                   NULL,
+                   "Region is from %d %d to %d %d", self->image_region.x0, self->image_region.y0,
+                   self->image_region.x1, self->image_region.y1);
+
+
+    return new_buf;
+}
+
 
 static void init_camera_resources (GstTis_Auto_Exposure* self)
 {
@@ -433,7 +549,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
 
         /* all gige cameras use the same time unit, thus can be handled identically */
         /* 1 000 000 = 1s */
-        self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 100000 / (self->framerate_numerator / self->framerate_denominator);
 
 #endif
 
@@ -514,7 +630,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                    GST_LEVEL_INFO,
                    "tis_auto_exposure",
                    "init_camera_resources",
-                   450,
+                   __LINE__,
                    NULL,
                    "Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
 
@@ -522,7 +638,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                    GST_LEVEL_INFO,
                    "tis_auto_exposure",
                    "init_camera_resources",
-                   450,
+                   __LINE__,
                    NULL,
                    "Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
@@ -541,7 +657,7 @@ static void set_exposure (GstTis_Auto_Exposure* self, gdouble exposure)
                    GST_LEVEL_INFO,
                    "tis_auto_exposure",
                    "set_exposure",
-                   420,
+                   __LINE__,
                    NULL,
                    "Setting exposure to %f", exposure);
 
@@ -563,7 +679,7 @@ static void set_exposure (GstTis_Auto_Exposure* self, gdouble exposure)
                            GST_LEVEL_ERROR,
                            "tis_auto_exposure",
                            "set_exposure",
-                           442,
+                           __LINE__,
                            NULL,
                            "Unable to write exposure for USB device");
         }
@@ -591,7 +707,7 @@ static void set_gain (GstTis_Auto_Exposure* self, gdouble gain)
                    GST_LEVEL_INFO,
                    "",
                    "",
-                   666,
+                   __LINE__,
                    NULL,
                    "Setting gain to %f", gain);
 
@@ -614,7 +730,7 @@ static void set_gain (GstTis_Auto_Exposure* self, gdouble gain)
                            GST_LEVEL_ERROR,
                            "tis_auto_exposure",
                            "set_gain",
-                           493,
+                           __LINE__,
                            NULL,
                            "Unable to write gain for USB device");
     }
@@ -660,7 +776,7 @@ void retrieve_current_values (GstTis_Auto_Exposure* self)
                            GST_LEVEL_ERROR,
                            "",
                            "",
-                           666,
+                           __LINE__,
                            NULL,
                            "Unable to read gain from USB device.");
         self->gain.value = ctrl.value;
@@ -672,7 +788,7 @@ void retrieve_current_values (GstTis_Auto_Exposure* self)
                            GST_LEVEL_ERROR,
                            "",
                            "",
-                           666,
+                           __LINE__,
                            NULL,
                            "Unable to read exposure fromUSB device.");
 
@@ -683,14 +799,34 @@ void retrieve_current_values (GstTis_Auto_Exposure* self)
 
 static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
 {
+    image_buffer buffer = retrieve_image_region(self, buf);
+
     guint brightness = 0;
     if (self->color_format == BAYER)
     {
-        brightness = image_brightness_bayer(buf, self->pattern);
+        brightness = image_brightness_bayer(&buffer);
     }
     else
     {
-        brightness = buffer_brightness_gray(buf);
+        brightness = buffer_brightness_gray(&buffer);
+
+        /* GstCaps *caps = GST_BUFFER_CAPS(buf); */
+        /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
+
+        /* gint width, height; */
+        /* g_return_if_fail (gst_structure_get_int (structure, "width", &width)); */
+        /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
+
+        guint width = buffer.width;
+        guint height = buffer.height;
+
+        gst_debug_log (gst_tis_auto_exposure_debug_category,
+                       GST_LEVEL_ERROR,
+                       "",
+                       "",
+                       __LINE__,
+                       NULL,
+                       "Width=%d Height=%d Brightness=%d", width, height, brightness);
     }
     /* assure we have the current values */
     retrieve_current_values (self);
@@ -802,4 +938,3 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    plugin_init, VERSION,
                    "LGPL",
                    PACKAGE_NAME, GST_PACKAGE_ORIGIN)
-

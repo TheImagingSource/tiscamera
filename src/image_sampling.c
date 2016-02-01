@@ -32,10 +32,85 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
 
     /* bayer8; aravis currently does not support 16 and other */
     gint bytes_per_line = 8 * width / 8;
-    
+
     guint cnt = 0;
     guint sampling_line_step = height / (SAMPLING_LINES + 1);
-    
+
+    guint y;
+    for (y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
+    {
+        guint samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
+
+        byte* pLine = data + first_line_offset + y * bytes_per_line;
+        byte* pNextLine = pLine + bytes_per_line;
+
+        guint col;
+        for (col = samplingColStep; col < (width - samplingColStep); col += samplingColStep)
+        {
+            unsigned int r = 0, g = 0, b = 0;
+            if ( y & 1 )
+            {
+                if (col & 1)
+                {
+                    r = pLine[col+bypp];
+                    g = pLine[col];
+                    b = pNextLine[col];
+                }
+                else
+                {
+                    r = pLine[col];
+                    g = pLine[col+bypp];
+                    b = pNextLine[col+bypp];
+                }
+            }
+            else
+            {
+                if (col & 1)
+                {
+                    r = pNextLine[col+bypp];
+                    g = pLine[col+bypp];
+                    b = pLine[col];
+                }
+                else
+                {
+                    r = pNextLine[col];
+                    g = pLine[col];
+                    b = pLine[col+bypp];
+                }
+            }
+
+            if (cnt < ARRAYSIZE( points->samples ))
+            {
+                points->samples[cnt].r = (byte)r;
+                points->samples[cnt].g = (byte)g;
+                points->samples[cnt].b = (byte)b;
+                ++cnt;
+            }
+        }
+    }
+    points->cnt = cnt;
+}
+
+
+
+/* retrieve sampling points for image analysis */
+void get_sampling_points_from_buffer (image_buffer* buf,
+                                      auto_sample_points* points)
+{
+    guint8 *data = (guint8*)buf->image;
+    guint width = buf->width;
+    guint height = buf->height;
+
+    static const unsigned int bypp = 1;
+
+    guint first_line_offset = initial_offset(buf->pattern, width, 8);
+
+    /* bayer8; aravis currently does not support 16 and other */
+    gint bytes_per_line = 8 * width / 8;
+
+    guint cnt = 0;
+    guint sampling_line_step = height / (SAMPLING_LINES + 1);
+
     guint y;
     for (y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
     {
@@ -98,16 +173,16 @@ static unsigned int clip( unsigned int x )
 }
 
 
-guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern)
+guint image_brightness_bayer (image_buffer* buf)
 {
     auto_sample_points points = {};
 
-    get_sampling_points (buf, &points, pattern);
+    get_sampling_points_from_buffer(buf, &points);
 
     unsigned int r = 0;
     unsigned int g = 0;
     unsigned int b = 0;
-    
+
     guint x;
     for (x = 0; x < points.cnt; ++x)
     {
@@ -115,24 +190,21 @@ guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern)
         g += clip(points.samples[x].g);
         b += clip(points.samples[x].b);
     }
-   
+
     r /= points.cnt;
     g /= points.cnt;
     b /= points.cnt;
-    
+
     return (r + g + b) / 3;
 }
 
-guint buffer_brightness_gray (GstBuffer* buf)
+guint buffer_brightness_gray (image_buffer* buf)
 {
     guint brightness = 0;
-    guint8 *data = (guint8*) GST_BUFFER_DATA (buf);
-    GstCaps *caps = GST_BUFFER_CAPS(buf);
-    GstStructure *structure = gst_caps_get_structure (caps, 0);
-    
-    gint width, height;
-    g_return_if_fail (gst_structure_get_int (structure, "width", &width));
-    g_return_if_fail (gst_structure_get_int (structure, "height", &height));
+    guint8 *data = (guint8*) buf->image;
+
+    guint width = buf->width;
+    guint height = buf->height;
 
     // currently only 8bit formats are supported
     guint byte_per_pixel = 1;
@@ -140,7 +212,7 @@ guint buffer_brightness_gray (GstBuffer* buf)
     guint cnt = 0;
     guint y_accu = 0;
     guint sampling_line_step = width / (SAMPLING_LINES + 1);
-    
+
     guint y;
     for (y = sampling_line_step; y < width; y += sampling_line_step )
     {

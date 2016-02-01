@@ -27,6 +27,17 @@
 
 typedef unsigned char byte;
 
+
+typedef struct
+{
+    byte* image;
+    guint width;
+    guint height;
+    format color_format;
+    tBY8Pattern pattern;
+} image_buffer;
+
+
 typedef struct auto_sample_points
 {
     struct pixel
@@ -51,18 +62,20 @@ typedef struct auto_sample_points
 */
 void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern);
 
+void get_sampling_points_from_buffer (image_buffer* buf,
+                                      auto_sample_points* points);
 /**
  * @name image_brightness
  * @param buf - image buffer that shall be analyzed
  * @return guint containing the image brightness
  */
-guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern);
+guint image_brightness_bayer (image_buffer* buf);
 
 /**
  * @name
  * @param
  * @return
  */
-guint buffer_brightness_gray (GstBuffer* buf);
+guint buffer_brightness_gray (image_buffer* buf);
 
 #endif /* _IMAGE_SAMPLING_H_ */
