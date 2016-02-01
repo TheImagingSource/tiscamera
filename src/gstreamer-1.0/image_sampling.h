@@ -54,6 +54,16 @@ typedef struct gst_tcam_image_size
 } gst_tcam_image_size;
 
 
+typedef struct
+{
+    byte* image;
+    guint width;
+    guint height;
+    format color_format;
+    tBY8Pattern pattern;
+} image_buffer;
+
+
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
 
 
@@ -66,19 +76,22 @@ typedef struct gst_tcam_image_size
 */
 void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern, gst_tcam_image_size size);
 
+void get_sampling_points_from_buffer (image_buffer* buf,
+                                      auto_sample_points* points);
+
 /**
  * @name image_brightness
  * @param buf - image buffer that shall be analyzed
  * @return guint containing the image brightness
  */
-guint image_brightness_bayer (GstBuffer* buf, tBY8Pattern pattern, gst_tcam_image_size size);
+guint image_brightness_bayer (image_buffer* buf);
 
 /**
  * @name
  * @param
  * @return
  */
-guint buffer_brightness_gray (GstBuffer* buf, gst_tcam_image_size size);
+guint buffer_brightness_gray (image_buffer* buf);
 
 
 #ifdef __cplusplus

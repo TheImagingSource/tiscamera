@@ -55,6 +55,15 @@ typedef struct
 } Exposure;
 
 
+typedef struct
+{
+    guint x0;
+    guint x1;
+    guint y0;
+    guint y1;
+} region;
+
+
 typedef unsigned char byte;
 
 static const guint dist_mid = 100;
@@ -88,6 +97,8 @@ typedef struct GstTcamautoexposure
     GstElement* camera_src;
     tBY8Pattern pattern;
     format color_format;
+
+    region image_region;
 
     gst_tcam_image_size image_size;
 

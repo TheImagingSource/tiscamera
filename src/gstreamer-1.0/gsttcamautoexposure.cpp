@@ -93,6 +93,10 @@ enum
     PROP_CAMERA,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
+    PROP_X0,
+    PROP_Y0,
+    PROP_X1,
+    PROP_Y1,
 };
 
 /* pad templates */
@@ -171,6 +175,38 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                           "Maximum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_X0,
+                                    g_param_spec_uint("region-x0",
+                                                      "Upper, left boundary",
+                                                      "",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+
+    g_object_class_install_property(gobject_class,
+                                    PROP_Y0,
+                                    g_param_spec_uint("region-y0",
+                                                      "Upper, left boundary",
+                                                      "",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+
+    g_object_class_install_property(gobject_class,
+                                    PROP_X1,
+                                    g_param_spec_uint("region-x1",
+                                                      "Lower, right boundary",
+                                                      "",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+
+    g_object_class_install_property(gobject_class,
+                                    PROP_Y1,
+                                    g_param_spec_uint("region-y1",
+                                                      "Lower, right boundary",
+                                                      "",
+                                                      0, G_MAXUINT, 0,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+
     g_object_class_install_property (gobject_class,
                                      PROP_CAMERA,
                                      g_param_spec_object ("camera",
@@ -205,7 +241,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->auto_gain = g_value_get_boolean(value);
             break;
         case PROP_CAMERA:
-            tcamautoexposure->camera_src = g_value_get_object(value);
+            tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
             tcamautoexposure->exposure.max = g_value_get_double(value);
@@ -216,6 +252,18 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->gain.max = g_value_get_double(value);
             if (tcamautoexposure->gain.max == 0.0)
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
+            break;
+        case PROP_X0:
+            tcamautoexposure->image_region.x0 = g_value_get_uint(value);
+            break;
+        case PROP_Y0:
+            tcamautoexposure->image_region.y0 = g_value_get_uint(value);
+            break;
+        case PROP_X1:
+            tcamautoexposure->image_region.x1 = g_value_get_uint(value);
+            break;
+        case PROP_Y1:
+            tcamautoexposure->image_region.y1 = g_value_get_uint(value);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -246,6 +294,18 @@ void gst_tcamautoexposure_get_property (GObject* object,
             break;
         case PROP_GAIN_MAX:
             g_value_set_double(value, tcamautoexposure->gain.max);
+            break;
+        case PROP_X0:
+            g_value_set_uint(value, tcamautoexposure->image_region.x0);
+            break;
+        case PROP_Y0:
+            g_value_set_uint(value, tcamautoexposure->image_region.y0);
+            break;
+        case PROP_X1:
+            g_value_set_uint(value, tcamautoexposure->image_region.x1);
+            break;
+        case PROP_Y1:
+            g_value_set_uint(value, tcamautoexposure->image_region.y1);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -355,9 +415,7 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
-
-    prop->set_value((int64_t) exposure);
+    dev->set_property(TCAM_PROPERTY_EXPOSURE, (int64_t)exposure);
 }
 
 
@@ -390,9 +448,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_GAIN);
-
-    prop->set_value(gain);
+    dev->set_property(TCAM_PROPERTY_GAIN, (int64_t)gain);
 }
 
 
@@ -467,6 +523,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
     }
     else
     {
+        p = prop->get_struct();
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_DEBUG,
                        "",
@@ -474,7 +531,6 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        __LINE__,
                        NULL,
                        "Current exposure is %ld", p.value.i.value);
-        p = prop->get_struct();
         self->exposure.value = p.value.i.value;
     }
 
@@ -492,6 +548,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
     }
     else
     {
+        p = prop->get_struct();
         gst_debug_log (gst_tcamautoexposure_debug_category,
                        GST_LEVEL_DEBUG,
                        "",
@@ -499,15 +556,74 @@ void retrieve_current_values (GstTcamautoexposure* self)
                        __LINE__,
                        NULL,
                        "Current gain is %ld", p.value.i.value);
-        p = prop->get_struct();
         self->gain.value = p.value.i.value;
     }
 
 }
 
 
+static tBY8Pattern calculate_pattern_from_offset (GstTcamautoexposure* self)
+{
+    tBY8Pattern ret = self->pattern;
+    // check if we need to switch between pattern lines
+    if ((self->image_region.y0 % 2) != 0)
+    {
+        ret = next_line(self->pattern);
+    }
+
+    if ((self->image_region.x0 % 2) != 0)
+    {
+        ret = next_pixel(ret);
+    }
+
+    return ret;
+}
+
+
+static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer* buf)
+{
+    GstMapInfo info;
+
+    gst_buffer_map(buf, &info, GST_MAP_READ);
+
+    if (self->image_region.x0 == 0
+        && self->image_region.x1 == 0
+        && self->image_region.y0 == 0
+        && self->image_region.y1 == 0)
+    {
+        self->image_region.x1 = self->image_size.width;
+        self->image_region.y1 = self->image_size.height;
+    }
+
+    const int bytes_per_pixel = 1;
+
+    image_buffer new_buf;
+
+    new_buf.image = info.data + (self->image_region.x0 * bytes_per_pixel * self->image_region.y0);
+
+    new_buf.width = self->image_region.x1 - self->image_region.x0;
+    new_buf.height = self->image_region.y1 - self->image_region.y0;
+
+    new_buf.pattern = calculate_pattern_from_offset(self);
+
+    gst_debug_log (gst_tcamautoexposure_debug_category,
+                   GST_LEVEL_INFO,
+                   "tis_auto_exposure",
+                   "init_camera_resources",
+                   __LINE__,
+                   NULL,
+                   "Region is from %d %d to %d %d", self->image_region.x0, self->image_region.y0,
+                   self->image_region.x1, self->image_region.y1);
+
+    gst_buffer_unmap(buf, &info);
+
+    return new_buf;
+}
+
+
 static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
 {
+    image_buffer buffer = retrieve_image_region(self, buf);
     guint brightness = 0;
 
     if (self->color_format == BAYER)
@@ -520,7 +636,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
                        __LINE__,
                        NULL,
                        "Calculating brightness");
-        brightness = image_brightness_bayer(buf, self->pattern, self->image_size);
+        brightness = image_brightness_bayer(&buffer);
     }
     else
     {
@@ -531,7 +647,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
                        __LINE__,
                        NULL,
                        "Calculating brightness for gray");
-        brightness = buffer_brightness_gray(buf, self->image_size);
+        brightness = buffer_brightness_gray(&buffer);
     }
     /* assure we have the current values */
     retrieve_current_values (self);
@@ -562,7 +678,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
                            "",
                            __LINE__,
                            NULL,
-                           "Comparing gain: %f < %f", new_gain, self->gain.value);
+                           "Comparing gain: %f(new) < %f(old)", new_gain, self->gain.value);
             if (new_gain < self->gain.value)
             {
                 set_gain(self, new_gain);
