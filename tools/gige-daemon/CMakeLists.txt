@@ -16,6 +16,7 @@
 
 include_directories("${PROJECT_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
 
 
 set(cflags "-fPIC -w -Wall -Wextra -pedantic -Wundef -Wshadow")
