@@ -353,6 +353,10 @@ bool Property::set_value (const int64_t& value)
     {
         return false;
     }
+    if (prop.value.i.min > value || prop.value.i.max < value)
+    {
+        return false;
+    }
     if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
     {
         prop.value.i.value = value;
@@ -367,6 +371,10 @@ bool Property::set_value (const int64_t& value)
 bool Property::set_value (const double& value)
 {
     if (impl.expired())
+    {
+        return false;
+    }
+    if (prop.value.d.min > value || prop.value.d.max < value)
     {
         return false;
     }
