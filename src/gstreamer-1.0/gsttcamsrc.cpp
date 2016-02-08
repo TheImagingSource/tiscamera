@@ -874,6 +874,10 @@ static void gst_tcam_callback (const struct tcam_image_buffer* buffer,
 
     self->ptr = buffer;
     self->new_buffer = TRUE;
+
+    std::unique_lock<std::mutex> lck(self->mtx);
+
+    self->cv.notify_all();
 }
 
 
@@ -1126,10 +1130,14 @@ static GstFlowReturn gst_tcam_create (GstPushSrc* push_src,
 
     GstTcam* self = GST_TCAM (push_src);
 
+    std::unique_lock<std::mutex> lck(self->mtx);
+
 wait_again:
     // wait until new buffer arrives or stop waiting when wee have to shut down
     while ((self->new_buffer == false) && (self->is_running == true))
-    {}
+    {
+        self->cv.wait_for(lck, std::chrono::milliseconds(1));
+    }
 
     if (self->is_running != TRUE)
     {

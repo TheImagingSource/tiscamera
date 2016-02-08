@@ -22,6 +22,10 @@
 
 #include <girepository.h>
 
+#include <mutex>
+#include <condition_variable>
+
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -63,6 +67,9 @@ struct _GstTcam
 
     guint64 timestamp_offset;
     guint64 last_timestamp;
+
+    std::mutex mtx;
+    std::condition_variable cv;
 };
 
 
