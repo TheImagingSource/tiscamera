@@ -1171,6 +1171,8 @@ wait_again:
 
         GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->last_timestamp;
 
+        (*buffer)->pts = timestamp_ns;
+
         self->last_timestamp = timestamp_ns;
     }
 
