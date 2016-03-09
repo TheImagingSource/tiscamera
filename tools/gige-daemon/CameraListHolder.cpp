@@ -230,5 +230,5 @@ void CameraListHolder::loop_function ()
         // release dataptr
         shmdt(tmp_ptr);
 
-        tcam::semaphore_lock(semaphore_id);
+        tcam::semaphore_unlock(semaphore_id);
 }
