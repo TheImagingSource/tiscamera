@@ -101,6 +101,7 @@ enum
     PROP_AUTO_EXPOSURE,
     PROP_AUTO_GAIN,
     PROP_CAMERA,
+    PROP_BRIGHTNESS_REFERENCE,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
     PROP_REGION_X0,
@@ -170,6 +171,13 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                           "Exposure Maximum",
                                                           "Maximum value exposure can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_BRIGHTNESS_REFERENCE,
+                                     g_param_spec_int ("brightness-reference",
+                                                          "Brightness Reference",
+                                                          "Ideal average brightness of buffer",
+                                                          0, 255, 128,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_GAIN,
@@ -249,6 +257,9 @@ void gst_tis_auto_exposure_set_property (GObject* object,
         case PROP_CAMERA:
             tis_auto_exposure->camera_src = g_value_get_object (value);
             break;
+        case PROP_BRIGHTNESS_REFERENCE:
+            tis_auto_exposure->brightness_reference = g_value_get_int(value);
+            break;
         case PROP_EXPOSURE_MAX:
             tis_auto_exposure->exposure.max = g_value_get_double (value);
             if (tis_auto_exposure->exposure.max == 0.0)
@@ -294,6 +305,9 @@ void gst_tis_auto_exposure_get_property (GObject* object,
             break;
         case PROP_CAMERA:
             g_value_set_object (value, tis_auto_exposure->camera_src);
+            break;
+        case PROP_BRIGHTNESS_REFERENCE:
+            g_value_set_int(value, tis_auto_exposure->brightness_reference);
             break;
         case PROP_EXPOSURE_MAX:
             g_value_set_double(value, tis_auto_exposure->exposure.max);
@@ -832,7 +846,7 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     retrieve_current_values (self);
 
     /* get distance from optimum */
-    guint dist = calc_dist(ref_val, brightness);
+    guint dist = calc_dist(self->brightness_reference, brightness);
 
     if (dist < 98 || dist > 102)
     {

@@ -69,7 +69,7 @@ typedef unsigned char byte;
 
 static const guint dist_mid = 100;
 /* reference value for "optimal" brightness */
-static const guint ref_val = 128;
+// static const guint ref_val = 128;
 static const gdouble steps_to_double_brightness = 3.0;
 
 /* names of gstreamer elements used for camera interaction */
@@ -91,6 +91,8 @@ typedef struct GstTis_Auto_Exposure
     Gain default_gain_values;
     Exposure exposure;
     Exposure default_exposure_values;
+
+    guint brightness_reference;
 
     CameraType source_type;
     GstElement* camera_src;
