@@ -289,6 +289,7 @@ img::auto_focus::auto_focus ()
     data.state = data_holder::ended;
     data.focus_val = 0;
     data.stepCount = 0;
+    pthread_mutex_init(&this->param_mtx_, NULL);
 }
 
 
@@ -354,7 +355,7 @@ void debug_out ( char* format, ... )
 bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_val )
 {
     // if we can't get the lock, then just ignore this frame and retry next frame
-    int ret = pthread_mutex_trylock(&param_mtx_);
+    int ret = pthread_mutex_lock(&param_mtx_);
     if (ret != 0)
         return false;
 
