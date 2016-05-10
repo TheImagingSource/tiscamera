@@ -72,6 +72,11 @@ void tcam::free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer)
 }
 
 
+bool tcam::is_image_buffer_complete (const struct tcam_image_buffer* buffer)
+{
+    return is_buffer_complete(buffer);
+}
+
 
 std::vector<struct tcam_image_size> tcam::get_standard_resolutions (const struct tcam_image_size& min,
                                                                     const struct tcam_image_size& max)

@@ -49,10 +49,17 @@ void free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer);
 
 
 /**
+ * Check if buffer has correct length
+ * @param buffer that shall be checked
+ * @return true if buffer has correct length
+ */
+bool is_image_buffer_complete (const struct tcam_image_buffer* buffer);
+
+/**
  *
  */
-    std::vector<struct tcam_image_size> get_standard_resolutions (const struct tcam_image_size& min,
-                                                                  const struct tcam_image_size& max);
+std::vector<struct tcam_image_size> get_standard_resolutions (const struct tcam_image_size& min,
+                                                              const struct tcam_image_size& max);
 
 } /* namespace tcam */
 

@@ -103,6 +103,12 @@ uint64_t get_buffer_length (unsigned int width, unsigned int height, uint32_t fo
  */
 uint32_t get_pitch_length (unsigned int width, uint32_t fourcc);
 
+/**
+ * Check if buffer has correct length
+ * @param buffer that shall be checked
+ * @return true if buffer has correct length
+ */
+bool is_buffer_complete (const struct tcam_image_buffer* buffer);
 
 /**
  * @name calculate_auto_center

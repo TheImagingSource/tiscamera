@@ -67,6 +67,8 @@ public:
 
     bool is_locked () const;
 
+    bool is_complete () const;
+
     /**
      * @brief Fills MemoryBuffer with 0
      */

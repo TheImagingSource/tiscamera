@@ -171,6 +171,20 @@ uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
 }
 
 
+bool tcam::is_buffer_complete (const struct tcam_image_buffer* buffer)
+{
+    auto size = tcam::get_buffer_length(buffer->format.width,
+                                        buffer->format.height,
+                                        buffer->format.fourcc);
+
+    if (size != buffer->length)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 tcam_image_size tcam::calculate_auto_center (const tcam_image_size& sensor, const tcam_image_size& image)
 {
     tcam_image_size ret = {};

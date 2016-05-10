@@ -119,6 +119,12 @@ bool MemoryBuffer::is_locked () const
 }
 
 
+bool MemoryBuffer::is_complete () const
+{
+    return tcam::is_buffer_complete(&this->buffer);
+}
+
+
 void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);
