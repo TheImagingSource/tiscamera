@@ -165,6 +165,12 @@ int main (int argc, char *argv[])
                 std::cout << "Started daemon. PID: " << ret << std::endl;
                 return 0;
             }
+            std::vector<std::string> interfaces;
+            for (unsigned int x = i; x < argc; ++x)
+            {
+                interfaces.push_back(argv[x]);
+            }
+            CameraListHolder::get_instance().set_interface_list(interfaces);
             CameraListHolder::get_instance().run();
 
             while (true)

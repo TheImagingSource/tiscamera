@@ -52,6 +52,7 @@ bool LockFile::create_lock_file ()
 
     file_handle = open(lockfile_name.c_str(), O_RDWR|O_CREAT, 0640);
 
+    // TODO
 	if (file_handle < 0)
     {
         exit(1); /* can not open */

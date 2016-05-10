@@ -114,6 +114,19 @@ std::vector<DeviceInfo> CameraListHolder::get_camera_list () const
 }
 
 
+std::vector<std::string> CameraListHolder::get_interface_list () const
+{
+    return interface_list;
+}
+
+void CameraListHolder::set_interface_list (std::vector<std::string> interfaces)
+{
+    // std::mutex cam_lock;
+    std::lock_guard<std::mutex> mutex_lock(mtx);
+    interface_list = interfaces;
+}
+
+
 void CameraListHolder::run ()
 {
     data = shmat(shmid, nullptr, 0);
@@ -142,7 +155,7 @@ void CameraListHolder::index_loop ()
 }
 
 
-camera_list getCameraList ()
+camera_list getCameraList (std::vector<std::string> interfaces)
 {
     camera_list cameras;
     std::mutex cam_lock;
@@ -153,16 +166,22 @@ camera_list getCameraList ()
             cameras.push_back(camera);
         };
 
-    discoverCameras(f);
-
+    if (interfaces.empty())
+    {
+        discoverCameras(f);
+    }
+    else
+    {
+        discoverCameras(interfaces, f);
+    }
     return cameras;
 }
 
 
-std::vector<struct tcam_device_info> get_gige_device_list ()
+std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string> interfaces)
 {
     // out of the tcam-network lib
-    auto l = getCameraList();
+    auto l = getCameraList(interfaces);
 
     std::vector<struct tcam_device_info> ret;
 
@@ -201,7 +220,7 @@ void CameraListHolder::loop_function ()
             return;
         }
 
-        std::vector<struct tcam_device_info> aravis_list = get_gige_device_list();
+        std::vector<struct tcam_device_info> aravis_list = get_gige_device_list(interface_list);
 
         if (aravis_list.size() > TCAM_DEVICE_LIST_MAX)
         {

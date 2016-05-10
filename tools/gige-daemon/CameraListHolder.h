@@ -35,6 +35,10 @@ public:
 
     std::vector<DeviceInfo> get_camera_list () const;
 
+    std::vector<std::string> get_interface_list () const;
+
+    void set_interface_list (std::vector<std::string>);
+
     void run ();
 
     void stop ();
@@ -49,6 +53,8 @@ private:
     std::vector<struct tcam_device_info> get_aravis_device_list ();
 
     std::vector<DeviceInfo> camera_list;
+
+    std::vector<std::string> interface_list;
 
     bool continue_loop;
     bool run_loop;
