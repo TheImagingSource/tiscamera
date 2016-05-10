@@ -30,7 +30,9 @@
 namespace tis
 {
 
-std::string getArgumentValue (const std::vector<std::string>& args, const std::string& long_name, const std::string& short_name)
+std::string getArgumentValue (const std::vector<std::string>& args,
+                              const std::string& long_name,
+                              const std::string& short_name)
 {
     std::string retv;
 
@@ -129,9 +131,9 @@ void listCameras ()
 
     // header for table
     std::cout << "\n" << std::setw(12) << "Model"
-              << std::setw(3)  << " - " 
+              << std::setw(3)  << " - "
               << std::setw(9)  << "Serial"
-              << std::setw(3)  << " - " 
+              << std::setw(3)  << " - "
               << std::setw(15) << "User Def. Name"
               << std::setw(3)  << " - "
               << std::setw(15) << "Current IP"
@@ -143,11 +145,11 @@ void listCameras ()
 
     for (const auto& cam : cameras)
     {
-        std::cout << std::setw(12) << cam->getModelName() 
-                  << std::setw(3)  << " - " 
-                  << std::setw(9)  << cam->getSerialNumber() 
-                  << std::setw(3)  << " - " 
-                  << std::setw(15) << cam->getUserDefinedName() 
+        std::cout << std::setw(12) << cam->getModelName()
+                  << std::setw(3)  << " - "
+                  << std::setw(9)  << cam->getSerialNumber()
+                  << std::setw(3)  << " - "
+                  << std::setw(15) << cam->getUserDefinedName()
                   << std::setw(3)  << " - "
                   << std::setw(15) << cam->getCurrentIP()
                   << std::setw(3)  << " - "
@@ -204,7 +206,10 @@ void printCameraInformation (const std::vector<std::string>& args)
 }
 
 
-void writeChanges (std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway)
+void writeChanges (std::shared_ptr<Camera> camera,
+                   const std::string ip,
+                   const std::string subnet,
+                   const std::string gateway)
 {
     std::cout << "Writing changes...." << std::endl;
     if (!camera->setPersistentIP(ip))
@@ -309,25 +314,30 @@ void setCamera (const std::vector<std::string>& args)
         bool staticIP = camera->isStaticIPactive();
 
         std::string d = getArgumentValue(args, "dhcp", "");
-        if (d.compare("on") == 0 || d.compare("off") == 0)
+        if (!d.empty())
         {
-            (d.compare("on") == 0) ? dhcp = true : dhcp = false;
-        }
-        else
-        {
-            throw std::invalid_argument("Unable to interpret dhcp argument as value: " + d);
+            if (d.compare("on") == 0 || d.compare("off") == 0)
+            {
+                (d.compare("on") == 0) ? dhcp = true : dhcp = false;
+            }
+            else
+            {
+                throw std::invalid_argument("Unable to interpret dhcp argument as value: " + d);
+            }
         }
 
         std::string s = getArgumentValue(args, "static", "");
-        if (s.compare("on") == 0 || s.compare("off") == 0)
+        if (!s.empty())
         {
-            (s.compare("on") == 0) ? staticIP = true : staticIP = false;
+            if (s.compare("on") == 0 || s.compare("off") == 0)
+            {
+                (s.compare("on") == 0) ? staticIP = true : staticIP = false;
+            }
+            else
+            {
+                throw std::invalid_argument("Unable to interpret static ip argument as value: " + s);
+            }
         }
-        else
-        {
-            throw std::invalid_argument("Unable to interpret static ip argument as value: " + s);
-        }
-
         std::cout << "DHCP will be: " << ((dhcp) ? "on" : "off")
                   << "\nStatic IP to: " << ((staticIP) ? "on" : "off")
                   << "\n\nWriting IP configuration...." << std::endl;
