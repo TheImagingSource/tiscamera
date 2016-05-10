@@ -72,6 +72,10 @@ public:
 
     Camera (const Packet::ACK_DISCOVERY& packet, std::shared_ptr<NetworkInterface> _interface, int timeoutIntervals = 3);
 
+    Camera (const Packet::ACK_DISCOVERY& _packet,
+            std::shared_ptr<NetworkInterface> _interface,
+            std::shared_ptr<Socket> _sock,
+            int timeoutIntervals = 3);
     /// copy constructor
     Camera (const Camera& _camera) = delete;
     Camera& operator=(const Camera& ) = delete;
@@ -161,9 +165,12 @@ public:
 
     /// @name uploadFirmware
     /// @param filename - string containing the location of the firmware that shall be used
+    /// @param overrideModelName - string containing the model name that shall be used. empty on default
     /// @param progressFunc callback function to inform over progress
     /// @return true on success
-    bool uploadFirmware (const std::string& filename, std::function<void(int)> progressFunc);
+    bool uploadFirmware (const std::string& filename,
+                         const std::string& overrideModelName,
+                         std::function<void(int)> progressFunc);
 
     /// @name getInterfaceName
     /// @return name of interface used for communication

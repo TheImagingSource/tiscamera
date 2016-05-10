@@ -58,13 +58,13 @@ public:
     }
 
 
-    virtual bool read (uint32_t addr, unsigned int data_size, void* pData, unsigned int& /* read_count */ , unsigned int /* timeout_in_ms = 2000 */)
+    virtual bool read (uint32_t addr, unsigned int data_size, void* pData, unsigned int& read_count , unsigned int /* timeout_in_ms = 2000 */)
     {
         auto hr = device_itf_.sendReadMemory (addr, data_size, (byte*) pData);
 
         if (hr)
         {
-            
+            read_count = data_size;
         }
         return hr;
 

@@ -446,6 +446,8 @@ void upgradeFirmware (const std::vector<std::string>& args)
 
     std::cout << "===========================" << firmware << " - " << cF << std::endl;
 
+    std::string overrideModelName = getArgumentValue(args, "overrideModelName", "");
+
     auto camera = findCamera(args);
 
     if (camera == NULL)
@@ -478,7 +480,7 @@ void upgradeFirmware (const std::vector<std::string>& args)
 
 
     std::cout << std::endl;
-    if (camera->uploadFirmware(cF, func))
+    if (camera->uploadFirmware(cF, overrideModelName, func))
     {
         std::cout << "\nSuccessfully uploaded firmware. \
 Please reconnect your camera to assure full functionality.\n";

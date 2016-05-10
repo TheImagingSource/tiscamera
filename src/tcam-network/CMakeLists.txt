@@ -19,7 +19,24 @@ include_directories(${TinyXML_INCLUDE_DIRS})
 find_package(LibZip REQUIRED)
 include_directories(${LIBZIP_INCLUDE_DIR})
 
-add_library(tcam-network SHARED CameraDiscovery.cpp Camera.cpp Socket.cpp NetworkInterface.cpp utils.cpp FirmwareUpgrade.cpp)
+set(NETWORK_SOURCES
+  CameraDiscovery.cpp
+  Camera.cpp
+  Socket.cpp
+  NetworkInterface.cpp
+  utils.cpp
+  FirmwareUpgrade.cpp
+  GigE3DevicePortFlashMemory.cpp
+  GigE3DevicePortMachXO2.cpp
+  GigE3Package.cpp
+  GigE3Update.cpp
+  FirmwarePackage.cpp
+  MachXO2.cpp
+  JedecFile.cpp)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
+add_library(tcam-network SHARED ${NETWORK_SOURCES})
 
 target_link_libraries(tcam-network ${TinyXML_LIBRARIES})
 target_link_libraries(tcam-network ${LIBZIP_LIBRARY})

@@ -35,6 +35,12 @@ namespace tis
     /// @param discover_call - function to call on discovery of a camera
     void discoverCameras (const std::function<void(std::shared_ptr<Camera>)> &discover_call);
 
+    /// @name discoverCameras
+    /// @param selectected_interfaces - vector of interface names that shall be queried
+    /// @param discover_call - function to call on discovery of a camera
+    void discoverCameras (std::vector<std::string> selectected_interfaces,
+                          std::function<void (std::shared_ptr<Camera>)> const & discover_call);
+
     /// @name
     /// @param interface - object describing the interface that shall be pinged
     /// @param discover_call - function to call on discovery of a camera

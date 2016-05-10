@@ -26,6 +26,7 @@
 #include <tinyxml.h>
 
 #include "FirmwareUpgrade.h"
+#include "GigE3Update.h"
 
 
 namespace
@@ -178,7 +179,7 @@ Status uploadBlackfinFirmware (IFirmwareWriter& dev, std::vector<unsigned char>&
 {
     if( !dev.write( 0xEF000000, 0xA35FB241 ) ) // unlock
     {
-        return WriteError;
+        return Status::WriteError;
     }
 
     dev.write( 0xEF000004, (1<<2), 3000 /* longer timeout, eeprom may take a while */ ); // erase app
@@ -187,12 +188,12 @@ Status uploadBlackfinFirmware (IFirmwareWriter& dev, std::vector<unsigned char>&
 
     if( !dev.write( 0xEE020000, &data[0], (uint32_t)data.size(), 3000 ) )
     {
-        return WriteVerificationError;
+        return Status::WriteVerificationError;
     }
 
     dev.write( 0xEF000000, 0x0 ); // lock
 
-    return SuccessDisconnectRequired;
+    return Status::SuccessDisconnectRequired;
 }
 
 
@@ -200,13 +201,13 @@ Status upgradeBlackfinFirmware (IFirmwareWriter& dev, const std::string& fileNam
 {
     if( isPackageFile(fileName) )
     {
-        return DeviceSupportsFwOnly;
+        return Status::DeviceSupportsFwOnly;
     }
 
     std::vector<unsigned char> data = loadFile( fileName );
     if( data.size() != 0x10000 )
     {
-        return InvalidFile;
+        return Status::InvalidFile;
     }
 
     return uploadBlackfinFirmware( dev, data );
@@ -227,7 +228,7 @@ Status findFirmwareInPackage (const std::string& fileName, const std::string& mo
     xdoc.Parse( (char*)&xmlData[0] );
     if( xdoc.Error() )
     {
-        return InvalidFile;
+        return Status::InvalidFile;
     }
 
     TiXmlHandle xhandle( &xdoc );
@@ -242,18 +243,18 @@ Status findFirmwareInPackage (const std::string& fileName, const std::string& mo
             const char* fpgaConfigurationAttr = fwnode->Attribute( "fpgafile" );
             int res = fwnode->QueryIntAttribute( "requiredfpga", (int*)&requiredFPGAVersion );
 
-            if( fwFileAttr == 0 ) return InvalidFile;
-            if( fpgaConfigurationAttr == 0 ) return InvalidFile;
-            if( res != TIXML_SUCCESS ) return InvalidFile;
+            if (fwFileAttr == 0) return Status::InvalidFile;
+            if (fpgaConfigurationAttr == 0) return Status::InvalidFile;
+            if (res != TIXML_SUCCESS) return Status::InvalidFile;
 
             firmwareName = fwFileAttr;
             FPGAConfigurationName = fpgaConfigurationAttr;
 
-            return Success;
+            return Status::Success;
         }
     }
 
-    return NoMatchFoundInPackage;
+    return Status::NoMatchFoundInPackage;
 }
 
 
@@ -289,7 +290,7 @@ Status uploadAndVerify (IFirmwareWriter& dev, unsigned int address, unsigned cha
     }
     while( false );
 
-    return success ? Success : WriteVerificationError;
+    return success ? Status::Success : Status::WriteVerificationError;
 }
 
 
@@ -299,11 +300,11 @@ Status uploadGigEFPGAFirmware (IFirmwareWriter& dev, std::vector<unsigned char>&
 
     if( !dev.write( 0xEF000000, 0xA35FB241 ) ) // unlock
     {
-        return WriteError;
+        return Status::WriteError;
     }
 
     unsigned int base = 0xEE000000;
-    Status status = Success;
+    Status status = Status::Success;
     for( unsigned int offset = 0; offset < data.size() && succeeded(status); offset += 128 )
     {
         unsigned int blockSize = std::min( 128u, (unsigned int)data.size() - offset );
@@ -330,7 +331,7 @@ Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, s
 
     if( !dev.write( 0xC1000000, 0xA35FB241 ) ) // unlock
     {
-        return WriteError;
+        return Status::WriteError;
     }
 
     unsigned int base = 0xC0000000;
@@ -340,7 +341,7 @@ Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, s
     {
         if( !dev.write( 0xC1000004, base + offset, 5000 ) ) // erase
         {
-            return WriteVerificationError;
+            return Status::WriteVerificationError;
         }
         progressFunc( 100 * offset / 0x80000 );
     }
@@ -349,7 +350,7 @@ Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, s
 
     progressFunc( 0 );
 
-    Status status = Success;
+    Status status = Status::Success;
     for (unsigned int offset = 0; offset < data.size() && succeeded(status); offset += 256)
     {
         unsigned int blockSize = std::min(256u, (unsigned int)data.size() - offset);
@@ -394,11 +395,11 @@ Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& 
     std::vector<byte> fwData = extractFileFromPackage(fileName, firmwareName);
     if (fpgaUpgradeRequired && fpgaData.size() == 0)
     {
-        return InvalidFile;
+        return Status::InvalidFile;
     }
     if (fwData.size() != 0xB000)
     {
-        return InvalidFile;
+        return Status::InvalidFile;
     }
 
     if (fpgaUpgradeRequired)
@@ -415,7 +416,7 @@ Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& 
     if (succeeded(status) && fpgaUpgradeRequired)
     {
         // We succeeded, but FPGA configuration was updated: hw disconnect is required!
-        return SuccessDisconnectRequired;
+        return Status::SuccessDisconnectRequired;
     }
     else
     {
@@ -426,7 +427,7 @@ Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& 
         else
         {
             // Automatic reboot did not work, hw disconnect required
-            return SuccessDisconnectRequired;
+            return Status::SuccessDisconnectRequired;
         }
     }
 }
@@ -437,7 +438,7 @@ Status upgradeFPGAFirmwareDirect (IFirmwareWriter& dev, const std::string& fileN
     std::vector<byte> fwData = loadFile(fileName);
     if (fwData.size() != 0xB000)
     {
-        return InvalidFile;
+        return Status::InvalidFile;
     }
 
     Status status = uploadGigEFPGAFirmware(dev, fwData, progressFunc);
@@ -451,7 +452,7 @@ Status upgradeFPGAFirmwareDirect (IFirmwareWriter& dev, const std::string& fileN
         else
         {
             // Automatic reboot did not work, hw disconnect required
-            return SuccessDisconnectRequired;
+            return Status::SuccessDisconnectRequired;
         }
     }
     return status;
@@ -471,29 +472,41 @@ Status upgradeFPGAFirmware (IFirmwareWriter& dev, const std::string& fileName, c
 }
 
 
-Status upgradeFirmware (IFirmwareWriter& dev, const Packet::ACK_DISCOVERY& disc, const std::string& fileName, std::function<void(int)> progressFunc)
+Status upgradeFirmware (IFirmwareWriter& dev,
+                        const Packet::ACK_DISCOVERY& disc,
+                        const std::string& fileName,
+                        const std::string& overrideModelName,
+                        std::function<void(int)> progressFunc)
 {
     int typeId;
-    std::string modelName;
-    if (!getDeviceInfo(disc, typeId, modelName))
+    std::string cameraModelName;
+    if (!getDeviceInfo(disc, typeId, cameraModelName))
     {
-        return DeviceNotRecognized;
+        return Status::DeviceNotRecognized;
     }
+
+    auto modelName = overrideModelName.empty() ? cameraModelName : overrideModelName;
 
     uint32_t version;
     queryDeviceFPGAVersion( dev, version);
 
-    Status rval = DeviceNotRecognized;
+    Status rval = Status::DeviceNotRecognized;
     switch (typeId)
     {
-        case 0:
+        case 0: // Blackfin-based GigECam
             rval = upgradeBlackfinFirmware(dev, fileName, progressFunc);
             break;
-        case 1:
+        case 1: // GigEFPGA
+        case 2: // GigEFPGA with MachXO2
             rval = upgradeFPGAFirmware(dev, fileName, modelName, progressFunc);
             break;
-        default:
-            return DeviceNotRecognized;
+        case 3: // GigE3 (new .fwpack format)
+            auto func = [=] (int i, const std::string& s)
+                {
+                    progressFunc(i);
+                };
+            rval = GigE3::upgradeFirmware(dev, fileName, modelName, cameraModelName, func);
+            break;
     }
 
     return rval;

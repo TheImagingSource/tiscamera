@@ -25,6 +25,8 @@
 
 typedef unsigned char byte;
 
+typedef std::function<void(int, const std::string&)> tReportProgressFunc;
+
 namespace FirmwareUpdate
 {
 
@@ -72,22 +74,28 @@ public:
 
 }; /* class IFirmwareWriter */
 
-enum Status
-{
-    Success                   =  0,
-    SuccessDisconnectRequired =  1,
-    DeviceNotRecognized       = -1,   // Unable to upgrade firmware for the selected device
-    DeviceSupportsFwOnly      = -2,   // The device only accepts plain *.fw files (Blackfin-devices),
-                                      // but a firmware package file was supplied
-    InvalidFile               = -3,   // The file is invalid (bad length or content)
-    NoMatchFoundInPackage     = -4,   // The firmware package file did not contain a matching firmware
-    WriteError                = -5,   // The firmware could not be written
-    WriteVerificationError    = -6,   // An error occurred while writing the firmware,
-                                      // the device is probably in a "broken" state
-    DeviceAccessFailed        = -7,   // Failed to lock the device
-};
 
-inline bool succeeded (Status status) { return status >= 0; }
+enum class Status
+{
+    Success						=  0,
+		SuccessDisconnectRequired	=  1,
+		SuccessNoActionRequired		=  2,
+		DeviceNotRecognized			= -1,	// Unable to upgrade firmware for the selected device
+		DeviceSupportsFwOnly		= -2,	// The device only accepts plain *.fw files (Blackfin-devices),
+    // but a firmware package file was supplied
+		InvalidFile					= -3,	// The file is invalid (bad length or content)
+		NoMatchFoundInPackage		= -4,	// The firmware package file did not contain a matching firmware
+		WriteError					= -5,	// The firmware could not be written
+		WriteVerificationError		= -6,	// An error occurred while writing the firmware,
+    // the device is probably in a "broken" state
+		DeviceAccessFailed			= -7,	// Failed to lock the device
+		MotorFirmwareUpdateFailed	= -8,	// Failed to update the motor controller firmware
+		FocusTableUpdateFailed		= -9,	// Failed to update the motor controller's focus table
+
+		MachXO2UpdateFailed			= -10,	// Failed to update the MachXO2 FPGA configuration
+        };
+
+inline bool succeeded (Status status) { return (int)status >= 0; }
 inline bool failed (Status status) { return !succeeded(status); }
 
 /// @name upgradeFirmware
@@ -99,6 +107,7 @@ inline bool failed (Status status) { return !succeeded(status); }
 Status upgradeFirmware (IFirmwareWriter& dev,
                         const Packet::ACK_DISCOVERY& disc,
                         const std::string& fileName,
+                        const std::string& overrideModelName,
                         std::function<void(int)> progressFunc);
 
 } /* namespace FirmwareUpdate */

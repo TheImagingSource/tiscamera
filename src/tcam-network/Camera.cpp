@@ -88,6 +88,20 @@ Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
 }
 
 
+Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
+                std::shared_ptr<NetworkInterface> _interface,
+                std::shared_ptr<Socket> _sock,
+                int timeoutIntervals)
+    : packet(_packet), interface(_interface),
+      timeoutCounter(timeoutIntervals), timeoutCounterDefault(timeoutIntervals)
+{
+    this->socket = _sock;
+
+    this->requestID = 1;
+    this->isControlled = false;
+}
+
+
 Camera::~Camera()
 {
     if (this->isControlled)
@@ -471,13 +485,19 @@ std::string Camera::getFirmwareVersion ()
 }
 
 
-bool Camera::uploadFirmware (const std::string& filename, std::function<void(int)> progressFunc)
+bool Camera::uploadFirmware (const std::string& filename,
+                             const std::string& overrideModelName,
+                             std::function<void(int)> progressFunc)
 {
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
 
-    FirmwareUpdate::Status retv = upgradeFirmware( writer, this->packet, filename, progressFunc);
+    FirmwareUpdate::Status retv = upgradeFirmware(writer,
+                                                  this->packet,
+                                                  filename, overrideModelName,
+                                                  progressFunc);
 
-    if (retv == FirmwareUpdate::Status::SuccessDisconnectRequired || retv == FirmwareUpdate::Status::Success)
+    if (retv == FirmwareUpdate::Status::SuccessDisconnectRequired
+        || retv == FirmwareUpdate::Status::Success)
     {
         return true;
     }
@@ -565,7 +585,7 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
         return -1;
     }
 
-    int id = generateRequestID();
+    unsigned short id = generateRequestID();
 
     Packet::CMD_READMEM packet = Packet::CMD_READMEM();
 
@@ -621,7 +641,7 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
         return -1;
     }
 
-    int id = generateRequestID();
+    unsigned short id = generateRequestID();
     size_t real_size = sizeof(Packet::CMD_WRITEMEM) + (size - sizeof(uint32_t));
 
     std::vector<uint8_t> packet_ (real_size);
@@ -670,7 +690,7 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
 
 void Camera::sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32_t gateway)
 {
-    int id = generateRequestID();
+    unsigned short id = generateRequestID();
     auto s = getSocket();
 
     Packet::CMD_FORCEIP packet;

@@ -43,7 +43,7 @@ Socket::Socket (const sockaddr_in& address)
         close(fd);
         throw;
     }
-    }
+}
 
 
 Socket::~Socket ()
@@ -115,7 +115,7 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
         }
 
         timeval timeout;
-        timeout.tv_sec = 1;
+        timeout.tv_sec = 3;
         timeout.tv_usec = 0;
 
         fd_set fds;
