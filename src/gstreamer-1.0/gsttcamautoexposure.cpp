@@ -91,6 +91,7 @@ enum
     PROP_AUTO_EXPOSURE,
     PROP_AUTO_GAIN,
     PROP_CAMERA,
+    PROP_BRIGHTNESS_REFERENCE,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
     PROP_X0,
@@ -175,6 +176,13 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                           "Maximum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_BRIGHTNESS_REFERENCE,
+                                     g_param_spec_int("brightness-reference",
+                                                      "Brightness Reference",
+                                                      "Ideal average brightness of buffer",
+                                                      0, 255, 128,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property(gobject_class,
                                     PROP_X0,
                                     g_param_spec_uint("region-x0",
@@ -253,6 +261,9 @@ void gst_tcamautoexposure_set_property (GObject* object,
             if (tcamautoexposure->gain.max == 0.0)
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
             break;
+        case PROP_BRIGHTNESS_REFERENCE:
+            tcamautoexposure->brightness_reference = g_value_get_int(value);
+            break;
         case PROP_X0:
             tcamautoexposure->image_region.x0 = g_value_get_uint(value);
             break;
@@ -294,6 +305,9 @@ void gst_tcamautoexposure_get_property (GObject* object,
             break;
         case PROP_GAIN_MAX:
             g_value_set_double(value, tcamautoexposure->gain.max);
+            break;
+        case PROP_BRIGHTNESS_REFERENCE:
+            g_value_set_int(value, tcamautoexposure->brightness_reference);
             break;
         case PROP_X0:
             g_value_set_uint(value, tcamautoexposure->image_region.x0);
@@ -653,7 +667,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     retrieve_current_values (self);
 
     /* get distance from optimum */
-    guint dist = calc_dist(ref_val, brightness);
+    guint dist = calc_dist(self->brightness_reference, brightness);
 
     gst_debug_log (gst_tcamautoexposure_debug_category,
                    GST_LEVEL_DEBUG,
@@ -872,6 +886,7 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
                    tcamautoexposure,
                    "The Imaging Source auto exposure plugin",
-                   plugin_init, VERSION,
+                   plugin_init,
+                   VERSION,
                    "Proprietary",
                    PACKAGE_NAME, GST_PACKAGE_ORIGIN)
