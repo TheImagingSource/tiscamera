@@ -1158,23 +1158,23 @@ wait_again:
         goto wait_again;
     }
 
-    *buffer = gst_buffer_new_wrapped_full (0, self->ptr->pData, self->ptr->length,
-                                           0, self->ptr->length, NULL, NULL);
+    *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
+                                          0, self->ptr->length, NULL, NULL);
 
-    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
-    {
-        if (self->timestamp_offset == 0)
-        {
-            self->timestamp_offset = timestamp_ns;
-            self->last_timestamp = timestamp_ns;
-        }
+    // if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    // {
+    //     if (self->timestamp_offset == 0)
+    //     {
+    //         self->timestamp_offset = timestamp_ns;
+    //         self->last_timestamp = timestamp_ns;
+    //     }
 
-        GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->last_timestamp;
+    //     GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->timestamp_offset;
 
-        (*buffer)->pts = timestamp_ns;
+    //     (*buffer)->pts = timestamp_ns - self->last_timestamp;
 
-        self->last_timestamp = timestamp_ns;
-    }
+    //     self->last_timestamp = timestamp_ns;
+    // }
 
     GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
