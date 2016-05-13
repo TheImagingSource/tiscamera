@@ -302,7 +302,11 @@ bool img::auto_focus::is_running () const
 void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
                             int speed, int auto_step_divisor, bool suggest_sweep )
 {
-    pthread_mutex_trylock(&param_mtx_);
+    int ret = pthread_mutex_trylock(&param_mtx_);
+    if (ret != 0)
+    {
+        return;
+    }
 
     focus_min_ = min;
     focus_max_ = max;
@@ -324,7 +328,11 @@ void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
 
 void img::auto_focus::end ()
 {
-    pthread_mutex_trylock(&param_mtx_);
+    int ret = pthread_mutex_trylock(&param_mtx_);
+    if (ret != 0)
+    {
+        return;
+    }
 
     data.state = data_holder::ended;
 
@@ -355,10 +363,11 @@ void debug_out ( char* format, ... )
 bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_val )
 {
     // if we can't get the lock, then just ignore this frame and retry next frame
-    int ret = pthread_mutex_lock(&param_mtx_);
+    int ret = pthread_mutex_trylock(&param_mtx_);
     if (ret != 0)
+    {
         return false;
-
+    }
     // force this to prevent too small images
     if ( img.dim_x < REGION_SIZE || img.dim_y < REGION_SIZE )
     {
