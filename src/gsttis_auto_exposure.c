@@ -32,14 +32,10 @@
  *  This leads to following workflow:
  *
  *  Determine image brightness by taking sample pixel and analyzing them.
- *  If the brightness is not our prefered area, we have to adjust.
- *  Calculate a new gain value. Since we prefer it small we only set it if it is smaller to the current one.
- *  Next we calculate exposure
- *  If exposure can not be moved, we increase gain to the already calculated value.
  *
- *  In every case we check if exposure and gain can be switched,
- *  meaning we try to reduce gain by increasing exposure.
- *
+ *  If the image is too bright try to reduce gain, if not possible reduce exposure time.
+ *  If the image is too dark try to increase exposure, if not possible increase gain.
+ *  If the brightness is acceptable try to reduce gain and increasing exposure a little.
  *
  *  Currently v4l2 and aravis compatible cameras are supported.
  *
@@ -67,8 +63,11 @@
 GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 #define GST_CAT_DEFAULT gst_tis_auto_exposure_debug_category
 
-#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h) : (val) )
-
+/* Constants */
+static gdouble K_g = 10.0;
+static gdouble K_e = 10000.0;
+static gdouble K_ge = 1.0;
+static gdouble K_eg = 1000.0;
 
 /* prototypes */
 
@@ -545,7 +544,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
     if (g_strcmp0 (element_name, CAMERASRC_NETWORK) == 0)
     {
         self->source_type = NETWORK;
-        self->exposure.value = 0.0;
+        self->exposure.value = 10000.0;
         self->gain.value = 0.0;
 
 #ifdef ENABLE_ARAVIS
@@ -563,7 +562,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
 
         /* all gige cameras use the same time unit, thus can be handled identically */
         /* 1 000 000 = 1s */
-        self->default_exposure_values.max = 100000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
 
 #endif
 
@@ -658,11 +657,12 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
 }
 
 
-static unsigned int calc_dist (unsigned int reference_val, unsigned int brightness_val)
+static gdouble calc_offset (unsigned int reference_val, unsigned int brightness_val)
 {
-    if ( brightness_val == 0 )
-        brightness_val = 1;
-    return (reference_val * dist_mid) / brightness_val;
+     const gdouble r = (gdouble) reference_val;
+     const gdouble y = (gdouble) brightness_val;
+
+     return (y - r) / 255.0;
 }
 
 static void set_exposure (GstTis_Auto_Exposure* self, gdouble exposure)
@@ -700,21 +700,6 @@ static void set_exposure (GstTis_Auto_Exposure* self, gdouble exposure)
     }
 }
 
-static gdouble calc_exposure (GstTis_Auto_Exposure* self, guint dist, gdouble exposure)
-{
-    gdouble ddist = ( dist + (dist_mid * 2) ) / 3;
-    exposure = ( exposure * ddist ) / dist_mid;
-
-    int granularity = 1;
-
-    /* If we do not want a significant change (on the sensor-scale), don't change anything */
-    /* This should avoid pumping caused by an abrupt brightness change caused by a small value change */
-    if ( abs(exposure - self->exposure.value) < (granularity / 2) )
-        return self->exposure.value;
-
-    return CLIP( exposure, self->exposure.min, self->exposure.max );
-}
-
 static void set_gain (GstTis_Auto_Exposure* self, gdouble gain)
 {
     gst_debug_log (gst_tis_auto_exposure_debug_category,
@@ -749,24 +734,6 @@ static void set_gain (GstTis_Auto_Exposure* self, gdouble gain)
                            "Unable to write gain for USB device");
     }
 }
-
-static gdouble calc_gain (GstTis_Auto_Exposure* self, guint dist)
-{
-    gdouble gain = self->gain.value;
-
-    /* when we have to reduce, we reduce it faster */
-    if ( dist >= dist_mid )
-    {
-        /* this dampens the change in dist factor */
-        dist = ( dist + (dist_mid * 2) ) / 3;
-    }
-    double val = log( dist / (double)dist_mid ) / log( 2.0f );
-
-    gain += (val * steps_to_double_brightness);
-
-    return CLIP( gain, self->gain.min, self->gain.max );
-}
-
 
 void retrieve_current_values (GstTis_Auto_Exposure* self)
 {
@@ -804,18 +771,72 @@ void retrieve_current_values (GstTis_Auto_Exposure* self)
                            "",
                            __LINE__,
                            NULL,
-                           "Unable to read exposure fromUSB device.");
+                           "Unable to read exposure from USB device.");
 
         self->exposure.value = ctrl.value;
     }
 }
 
+static void reduce_brightness (GstTis_Auto_Exposure* self, gdouble offset)
+{
+     g_assert_cmpfloat(offset, >, 0.0);
+
+     /* Reduce gain if possible, else reduce exposure time */
+     if (self->gain.value > self->gain.min)
+     {
+	  gdouble g = self->gain.value - K_g * offset;
+	  g = fmax(self->gain.min, g);
+	  set_gain(self, g);
+     }
+     else
+     {
+	  gdouble e = self->exposure.value - K_e * offset;
+	  e = fmax(self->exposure.min, e);
+	  set_exposure(self, e);
+     }
+}
+
+static void increase_brightness (GstTis_Auto_Exposure* self, gdouble offset)
+{
+     g_assert_cmpfloat(offset, <, 0.0);
+
+     /* Increase exposure if possible, else increase gain */
+     if (self->exposure.value < self->exposure.max)
+     {
+	  gdouble e = self->exposure.value - K_e * offset;
+	  e = fmin(self->exposure.max, e);
+	  set_exposure(self, e);
+     }
+     else
+     {
+	  gdouble g = self->gain.value - K_g * offset;
+	  g = fmin(self->gain.max, g);
+	  set_gain(self, g);
+     }
+}
+
+static void try_reduce_gain (GstTis_Auto_Exposure* self)
+{
+     gdouble g = self->gain.value;
+     gdouble e = self->exposure.value;
+
+     if (g > self->gain.min && e < self->exposure.max)
+     {
+	  g = fmax(self->gain.min, g - K_ge);
+	  e = fmin(self->exposure.max, e + K_eg);
+
+	  set_gain(self, g);
+	  set_exposure(self, e);
+     }
+}
 
 static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
 {
     image_buffer buffer = retrieve_image_region(self, buf);
 
     guint brightness = 0;
+
+    /* get brightness from buffer */
     if (self->color_format == BAYER)
     {
         brightness = image_brightness_bayer(&buffer);
@@ -823,82 +844,37 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     else
     {
         brightness = buffer_brightness_gray(&buffer);
-
-        /* GstCaps *caps = GST_BUFFER_CAPS(buf); */
-        /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
-
-        /* gint width, height; */
-        /* g_return_if_fail (gst_structure_get_int (structure, "width", &width)); */
-        /* g_return_if_fail (gst_structure_get_int (structure, "height", &height)); */
-
-        guint width = buffer.width;
-        guint height = buffer.height;
-
-        gst_debug_log (gst_tis_auto_exposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Width=%d Height=%d Brightness=%d", width, height, brightness);
     }
+
     /* assure we have the current values */
     retrieve_current_values (self);
 
-    /* get distance from optimum */
-    guint dist = calc_dist(self->brightness_reference, brightness);
+    /* get offset from reference */
+    gdouble offset = calc_offset(self->brightness_reference, brightness);
 
-    if (dist < 98 || dist > 102)
+    gst_debug_log (gst_tis_auto_exposure_debug_category,
+                   GST_LEVEL_INFO,
+                   "tis_auto_exposure",
+                   "correct_brightness",
+                   __LINE__,
+                   NULL,
+                   "o = %f, g = %f, e = %f", offset, self->gain.value, self->exposure.value);
+
+    /* Ignore offsets of +/- 5% or less */
+    if (fabs(offset) > 0.05)
     {
-        /* set_gain */
-        gdouble new_gain = 0.0;
-
-        if (self->auto_gain == TRUE)
-        {
-
-            new_gain = calc_gain(self, dist);
-            if (new_gain < self->gain.value)
-            {
-                set_gain(self, new_gain);
-                return;
-            }
-
-        }
-
-        if (self->auto_exposure == TRUE)
-        {
-            /* exposure */
-            gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
-
-            if (tmp_exposure != self->exposure.value)
-            {
-                set_exposure(self, tmp_exposure);
-                return;
-            }
-        }
-
-        if (self->auto_gain == TRUE)
-        {
-            if (self->auto_exposure == TRUE)
-            {
-                /* when exposure is in a sweet spot, or cannot be increased anymore */
-                if (new_gain != self->gain.value && self->exposure.value >= self->exposure.max)
-                {
-                    set_gain(self, new_gain);
-                    return;
-                }
-
-                // we can reduce gain, because we can increase exposure
-                if ( self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
-                {
-                    /* increase exposure by 5% */
-                    set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
-                }
-
-            }
-            else
-                set_gain(self,new_gain);
-        }
+	 if (offset > 0.0)
+	 {
+	      reduce_brightness(self, offset);
+	 }
+	 else
+	 {
+	      increase_brightness(self, offset);
+	 }
+    }
+    else
+    {
+	 try_reduce_gain(self);
     }
 }
 
