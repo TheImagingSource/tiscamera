@@ -56,7 +56,11 @@ CameraListHolder::CameraListHolder ()
     // http://beej.us/guide/bgipc/output/html/multipage/shm.html
 
     shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
-    shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 | IPC_CREAT);
+
+    /* the daemon should work as a system daemon,
+       thus we require the same rights for all users to prevent 'permission denied'
+       errors due to server/client being run by different users. */
+    shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0666 | IPC_CREAT);
 
     semaphore_key = ftok("/tmp/tcam-gige-semaphore", 'S');
     semaphore_id = tcam::semaphore_create(semaphore_key);
