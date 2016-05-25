@@ -167,14 +167,14 @@ int DaemonClass::daemonize (signal_callback callback)
     // another daemon is already running
     if (lock_file.file_exists())
     {
-        return -1;
+        return -2;
     }
 
     auto i = fork();
 
     if (i < 0)
     {
-        return -1;
+        return -3;
     }
     else if (i > 0)
     {
@@ -197,7 +197,7 @@ int DaemonClass::daemonize (signal_callback callback)
     // make this the only running instance
     if (!lock_file.lock())
     {
-        return -1;
+        return -4;
     }
 
     // register signals
