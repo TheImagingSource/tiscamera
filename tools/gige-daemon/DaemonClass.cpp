@@ -155,11 +155,14 @@ DaemonClass::~DaemonClass ()
 
 int DaemonClass::daemonize (signal_callback callback)
 {
-    // we are already a daemon
-    if (getppid() == 1)
-    {
-        return -1;
-    }
+    // we are already a daemon <- assuming this is a sysv type system
+    // systemd has pid 1 and starts system daemons.
+    // This check will cause the daemon to fail.
+    // Therefor this is disabled and left as a reminder.
+    // if (getppid() == 1)
+    // {
+    //     return -1;
+    // }
 
     // another daemon is already running
     if (lock_file.file_exists())
