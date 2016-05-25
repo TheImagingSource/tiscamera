@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
                 return 0;
             }
             std::vector<std::string> interfaces;
-            for (unsigned int x = i; x < argc; ++x)
+            for (unsigned int x = (i + 1); x < argc; ++x)
             {
                 interfaces.push_back(argv[x]);
             }
