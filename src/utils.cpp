@@ -23,6 +23,8 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <limits>
+#include <cmath>
+
 
 #define IOCTL_RETRY 4
 
