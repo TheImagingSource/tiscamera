@@ -27,13 +27,7 @@
 
 #include "Error.h"
 
-#if HAVE_ARAVIS
-#include "aravis_utils.h"
-#endif
-
-#if HAVE_USB
-#include "v4l2_utils.h"
-#endif
+#include "BackendLoader.h"
 
 using namespace tcam;
 
@@ -127,22 +121,11 @@ void DeviceIndex::update_device_list ()
     std::vector<DeviceInfo> tmp_dev_list = std::vector<DeviceInfo>();
     tmp_dev_list.reserve(10);
 
-#if HAVE_ARAVIS
-    auto aravis_dev_list = get_gige_device_list();
-    if (!aravis_dev_list.empty())
-        tmp_dev_list.insert(tmp_dev_list.end(), aravis_dev_list.begin(), aravis_dev_list.end());
+    auto dev_list = BackendLoader::getInstance().get_device_list_all_backends();
+    if (!dev_list.empty())
+        tmp_dev_list.insert(tmp_dev_list.end(), dev_list.begin(), dev_list.end());
 
-    tcam_log(TCAM_LOG_DEBUG, "Number of found aravis devices: %d", aravis_dev_list.size());
-
-#endif
-
-#if HAVE_USB
-    auto v4l2_dev_list = get_v4l2_device_list();
-    if (!v4l2_dev_list.empty())
-        tmp_dev_list.insert(tmp_dev_list.end(), v4l2_dev_list.begin(), v4l2_dev_list.end());
-
-    tcam_log(TCAM_LOG_DEBUG, "Number of found v4l2 devices: %d", v4l2_dev_list.size());
-#endif
+    tcam_log(TCAM_LOG_DEBUG, "Number of found devices: %d", dev_list.size());
 
     // check for lost devices
     for (const auto& d : device_list)
