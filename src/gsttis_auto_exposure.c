@@ -64,10 +64,10 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 #define GST_CAT_DEFAULT gst_tis_auto_exposure_debug_category
 
 /* Constants */
-static gdouble K_g = 10.0;
-static gdouble K_e = 10000.0;
-static gdouble K_ge = 1.0;
-static gdouble K_eg = 1000.0;
+static gdouble K_g = 1.0;
+static gdouble K_e = 1000.0;
+static gdouble K_ge = 0.1;
+static gdouble K_eg = 100.0;
 
 /* prototypes */
 
