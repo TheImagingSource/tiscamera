@@ -64,10 +64,11 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 #define GST_CAT_DEFAULT gst_tis_auto_exposure_debug_category
 
 /* Constants */
-static gdouble K_g = 1.0;
-static gdouble K_e = 1000.0;
+static gdouble K_g = 10.0;
+static gdouble K_e = 0.5;
 static gdouble K_ge = 0.1;
 static gdouble K_eg = 100.0;
+static gdouble DEADBAND = 0.025;
 
 /* prototypes */
 
@@ -562,7 +563,7 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
 
         /* all gige cameras use the same time unit, thus can be handled identically */
         /* 1 000 000 = 1s */
-        self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 1000000 * self->framerate_denominator / (2 * self->framerate_numerator);
 
 #endif
 
@@ -790,7 +791,7 @@ static void reduce_brightness (GstTis_Auto_Exposure* self, gdouble offset)
      }
      else
      {
-	  gdouble e = self->exposure.value - K_e * offset;
+	  gdouble e = self->exposure.value * (1.0 - K_e * offset);
 	  e = fmax(self->exposure.min, e);
 	  set_exposure(self, e);
      }
@@ -803,7 +804,7 @@ static void increase_brightness (GstTis_Auto_Exposure* self, gdouble offset)
      /* Increase exposure if possible, else increase gain */
      if (self->exposure.value < self->exposure.max)
      {
-	  gdouble e = self->exposure.value - K_e * offset;
+	  gdouble e = self->exposure.value * (1.0 - K_e * offset);
 	  e = fmin(self->exposure.max, e);
 	  set_exposure(self, e);
      }
@@ -860,8 +861,8 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
                    NULL,
                    "o = %f, g = %f, e = %f", offset, self->gain.value, self->exposure.value);
 
-    /* Ignore offsets of +/- 5% or less */
-    if (fabs(offset) > 0.05)
+    /* Check if outside deadband */
+    if (fabs(offset) > DEADBAND)
     {
 	 if (offset > 0.0)
 	 {
