@@ -66,7 +66,7 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 /* Constants */
 static gdouble K_GAIN     = 3.0;
 static gdouble K_CONTROL  = 4.0 / 255;
-static gdouble K_DEADBAND = 1.0 / 8;
+static gdouble K_DEADBAND = 5.0;
 static gdouble K_ADJUST   = 1.0 / 4;
 static gdouble K_SMALL    = 1e-9;
 
@@ -833,8 +833,7 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     retrieve_current_values (self);
 
     /* get offset and control difference from reference */
-    gdouble offset = calc_offset(self->brightness_reference, brightness);
-    gdouble change = pow(K_CONTROL * offset, 3);
+    const gdouble offset = calc_offset(self->brightness_reference, brightness);
 
     gst_debug_log (gst_tis_auto_exposure_debug_category,
                    GST_LEVEL_INFO,
@@ -842,11 +841,14 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
                    "correct_brightness",
                    __LINE__,
                    NULL,
-                   "o = %f, c = %f, g = %f, e = %f", offset, change, self->gain.value, self->exposure.value);
+                   "o = %f, g = %f, e = %f", offset, self->gain.value, self->exposure.value);
 
     /* Check if outside deadband */
-    if (fabs(change) > K_DEADBAND)
+    if (fabs(offset) > K_DEADBAND)
     {
+         /* Compute control change from offset */
+         const gdouble change = pow(K_CONTROL * offset, 3);
+
 	 /* Check if too bright */
 	 if (change < 0.0)
 	 {
