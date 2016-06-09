@@ -64,11 +64,11 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 #define GST_CAT_DEFAULT gst_tis_auto_exposure_debug_category
 
 /* Constants */
-static gdouble K_g = 10.0;
-static gdouble K_e = 0.5;
-static gdouble K_ge = 0.1;
-static gdouble K_eg = 100.0;
-static gdouble DEADBAND = 0.025;
+static gdouble K_GAIN     = 3.0;
+static gdouble K_CONTROL  = 4.0 / 255;
+static gdouble K_DEADBAND = 1.0 / 8;
+static gdouble K_ADJUST   = 1.0 / 4;
+static gdouble K_SMALL    = 1e-9;
 
 /* prototypes */
 
@@ -657,13 +657,12 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
                    "Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
 
-
 static gdouble calc_offset (unsigned int reference_val, unsigned int brightness_val)
 {
      const gdouble r = (gdouble) reference_val;
      const gdouble y = (gdouble) brightness_val;
 
-     return (y - r) / 255.0;
+     return r - y;
 }
 
 static void set_exposure (GstTis_Auto_Exposure* self, gdouble exposure)
@@ -778,57 +777,40 @@ void retrieve_current_values (GstTis_Auto_Exposure* self)
     }
 }
 
-static void reduce_brightness (GstTis_Auto_Exposure* self, gdouble offset)
+static gdouble modify_gain (GstTis_Auto_Exposure* self, gdouble diff)
 {
-     g_assert_cmpfloat(offset, >, 0.0);
-
-     /* Reduce gain if possible, else reduce exposure time */
-     if (self->gain.value > self->gain.min)
+     if (fabs(diff) < K_SMALL)
      {
-	  gdouble g = self->gain.value - K_g * offset;
-	  g = fmax(self->gain.min, g);
+	  return 0.0;
+     }
+
+     const gdouble g_ref = self->gain.value + K_GAIN * diff;
+     const gdouble g = fmax(fmin(g_ref, self->gain.max), self->gain.min);
+
+     if (fabs(self->gain.value - g) > K_SMALL)
+     {
 	  set_gain(self, g);
      }
-     else
-     {
-	  gdouble e = self->exposure.value * (1.0 - K_e * offset);
-	  e = fmax(self->exposure.min, e);
-	  set_exposure(self, e);
-     }
+
+     return (g_ref - g) / K_GAIN;
 }
 
-static void increase_brightness (GstTis_Auto_Exposure* self, gdouble offset)
+static gdouble modify_exposure (GstTis_Auto_Exposure* self, gdouble diff)
 {
-     g_assert_cmpfloat(offset, <, 0.0);
-
-     /* Increase exposure if possible, else increase gain */
-     if (self->exposure.value < self->exposure.max)
+     if (fabs(diff) < K_SMALL)
      {
-	  gdouble e = self->exposure.value * (1.0 - K_e * offset);
-	  e = fmin(self->exposure.max, e);
+	  return 0.0;
+     }
+
+     const gdouble e_ref = self->exposure.value * pow(2, diff);
+     const gdouble e = fmax(fmin(e_ref, self->exposure.max), self->exposure.min);
+
+     if (fabs(self->exposure.value - e) > K_SMALL)
+     {
 	  set_exposure(self, e);
      }
-     else
-     {
-	  gdouble g = self->gain.value - K_g * offset;
-	  g = fmin(self->gain.max, g);
-	  set_gain(self, g);
-     }
-}
 
-static void try_reduce_gain (GstTis_Auto_Exposure* self)
-{
-     gdouble g = self->gain.value;
-     gdouble e = self->exposure.value;
-
-     if (g > self->gain.min && e < self->exposure.max)
-     {
-	  g = fmax(self->gain.min, g - K_ge);
-	  e = fmin(self->exposure.max, e + K_eg);
-
-	  set_gain(self, g);
-	  set_exposure(self, e);
-     }
+     return log2(e_ref) - log2(e);
 }
 
 static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
@@ -850,8 +832,9 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     /* assure we have the current values */
     retrieve_current_values (self);
 
-    /* get offset from reference */
+    /* get offset and control difference from reference */
     gdouble offset = calc_offset(self->brightness_reference, brightness);
+    gdouble change = pow(K_CONTROL * offset, 3);
 
     gst_debug_log (gst_tis_auto_exposure_debug_category,
                    GST_LEVEL_INFO,
@@ -859,23 +842,30 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
                    "correct_brightness",
                    __LINE__,
                    NULL,
-                   "o = %f, g = %f, e = %f", offset, self->gain.value, self->exposure.value);
+                   "o = %f, c = %f, g = %f, e = %f", offset, change, self->gain.value, self->exposure.value);
 
     /* Check if outside deadband */
-    if (fabs(offset) > DEADBAND)
+    if (fabs(change) > K_DEADBAND)
     {
-	 if (offset > 0.0)
+	 /* Check if too bright */
+	 if (change < 0.0)
 	 {
-	      reduce_brightness(self, offset);
+	      /* Reduce gain first, then exposure */
+	      modify_exposure(self, modify_gain(self, change));
 	 }
 	 else
 	 {
-	      increase_brightness(self, offset);
+	      /* Increase exposure first, then gain */
+	      modify_gain(self, modify_exposure(self, change));
 	 }
     }
     else
     {
-	 try_reduce_gain(self);
+	 /* Try swapping gain for exposure */
+	 if (self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
+	 {
+	      modify_exposure(self, -modify_gain(self, -K_ADJUST));
+	 }
     }
 }
 
