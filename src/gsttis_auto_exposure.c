@@ -65,7 +65,7 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 
 /* Constants */
 static gdouble K_GAIN     = 3.0;
-static gdouble K_CONTROL  = 4.0 / 255;
+static gdouble K_CONTROL  = 1.3 / 255;
 static gdouble K_DEADBAND = 5.0;
 static gdouble K_ADJUST   = 1.0 / 4;
 static gdouble K_SMALL    = 1e-9;
@@ -235,7 +235,6 @@ static void gst_tis_auto_exposure_init (GstTis_Auto_Exposure *self)
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
 
-    self->frame_counter = 0;
     self->camera_src = NULL;
 }
 
@@ -847,7 +846,7 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     if (fabs(offset) > K_DEADBAND)
     {
          /* Compute control change from offset */
-         const gdouble change = pow(K_CONTROL * offset, 3);
+         const gdouble change = K_CONTROL * offset;
 
 	 /* Check if too bright */
 	 if (change < 0.0)
@@ -883,12 +882,7 @@ static GstFlowReturn gst_tis_auto_exposure_transform_ip (GstBaseTransform* trans
         return GST_FLOW_OK;
     }
 
-    if (self->frame_counter > 3)
-    {
-        correct_brightness(self, buf);
-        self->frame_counter = 0;
-    }
-    self->frame_counter++;
+    correct_brightness(self, buf);
 
     return GST_FLOW_OK;
 }

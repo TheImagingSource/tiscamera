@@ -104,8 +104,6 @@ typedef struct GstTis_Auto_Exposure
     gint framerate_numerator;
     gint framerate_denominator;
 
-    gint frame_counter;
-
 } GstTis_Auto_Exposure;
 
 typedef struct GstTis_Auto_ExposureClass
