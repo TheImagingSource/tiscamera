@@ -17,7 +17,9 @@ set(PLUGINS
   gsttcamsrc
   gsttcamwhitebalance
   gsttcamautoexposure
-  gsttcamautofocus)
+  gsttcamautofocus
+  gsttcambin
+  )
 
 find_package(GStreamer REQUIRED QUIET)
 find_package(GLIB2     REQUIRED QUIET)
@@ -27,6 +29,7 @@ find_package(GObjectIntrospection REQUIRED QUIET)
 
 include_directories(${GSTREAMER_INCLUDE_DIRS})
 include_directories(${GSTREAMER_BASE_INCLUDE_DIRS})
+include_directories(${GSTREAMER_VIDEO_INCLUDE_DIRS})
 include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -50,11 +53,14 @@ add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp image_sampling.c 
 
 add_library(gsttcamautofocus SHARED gsttcamautofocus.cpp AutoFocus.cpp auto_focus.cpp)
 
+add_library(gsttcambin SHARED gsttcambin.cpp)
+
 foreach (t IN ITEMS ${PLUGINS})
 
     target_link_libraries(${t} tcam)
     target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
     target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
+    target_link_libraries(${t} ${GSTREAMER_VIDEO_LIBRARIES})
     target_link_libraries(${t} ${GLIB2_LIBRARIES})
     target_link_libraries(${t} ${GObject_LIBRARIES})
 
