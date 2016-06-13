@@ -35,16 +35,16 @@ extern "C"
 G_BEGIN_DECLS
 
 
-#define GST_TYPE_TCAM           (gst_tcam_get_type())
-#define GST_TCAM(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAM, GstTcam))
-#define GST_TCAM_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAM, GstTcam))
-#define GST_IS_TCAM(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM))
-#define GST_IS_TCAM_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM))
+#define GST_TYPE_TCAM_SRC           (gst_tcam_src_get_type())
+#define GST_TCAM_SRC(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAM_SRC, GstTcamSrc))
+#define GST_TCAM_SRC_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAM_SRC, GstTcamSrc))
+#define GST_IS_TCAM_SRC(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM_SRC))
+#define GST_IS_TCAM_SRC_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM_SRC))
 
-typedef struct _GstTcam GstTcam;
-typedef struct _GstTcamClass GstTcamClass;
+typedef struct _GstTcamSrc GstTcamSrc;
+typedef struct _GstTcamSrcClass GstTcamSrcClass;
 
-struct _GstTcam
+struct _GstTcamSrc
 {
     GstPushSrc element;
 
@@ -73,12 +73,12 @@ struct _GstTcam
 };
 
 
-struct _GstTcamClass
+struct _GstTcamSrcClass
 {
     GstPushSrcClass parent_class;
 };
 
-GType gst_tcam_get_type (void);
+GType gst_tcam_src_get_type (void);
 
 G_END_DECLS
 
