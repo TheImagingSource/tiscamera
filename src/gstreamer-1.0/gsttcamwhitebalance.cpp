@@ -861,7 +861,7 @@ static struct device_resources find_source (GstElement* self)
 
         const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
 
-        if (g_strcmp0(name, "GstTcam") == 0)
+        if (g_strcmp0(name, "GstTcamSrc") == 0)
         {
             GST_LOG_OBJECT(self, "Found v4l2 device");
             res.source_element = l->data;

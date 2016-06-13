@@ -750,7 +750,7 @@ static gboolean find_camera_src (GstBaseTransform* trans)
     {
         const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
 
-        if (g_strcmp0(name, "GstTcam") == 0)
+        if (g_strcmp0(name, "GstTcamSrc") == 0)
         {
 
             GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
