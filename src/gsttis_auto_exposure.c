@@ -65,7 +65,7 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 
 /* Constants */
 static gdouble K_GAIN     = 3.0;
-static gdouble K_CONTROL  = 1.3 / 255;
+static gdouble K_CONTROL  = 0.5 / 255;
 static gdouble K_DEADBAND = 5.0;
 static gdouble K_ADJUST   = 1.0 / 4;
 static gdouble K_SMALL    = 1e-9;
