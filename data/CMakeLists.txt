@@ -13,10 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(uvc-extensions)
-
-add_subdirectory(udev)
-
 # define external dependencies for linkage
 set(tcam_pkgconfig_dependencies "tinyxml")
 
@@ -26,6 +22,11 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_V4L2)
   set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} libudev")
+
+  add_subdirectory(uvc-extensions)
+
+  add_subdirectory(udev)
+
 endif (BUILD_V4L2)
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)

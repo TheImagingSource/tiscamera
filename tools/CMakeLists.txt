@@ -22,6 +22,7 @@ endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
   add_subdirectory(camera-ip-conf)
-endif (BUILD_ARAVIS)
 
-add_subdirectory(gige-daemon)
+  add_subdirectory(gige-daemon)
+
+endif (BUILD_ARAVIS)
