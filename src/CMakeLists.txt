@@ -86,6 +86,14 @@ if (BUILD_V4L2)
   add_library(tcam-v4l2 SHARED ${lib_v4l2})
   TARGET_LINK_LIBRARIES(tcam-v4l2 ${UDEV_LIBRARIES})
 
+  set_property(TARGET tcam-v4l2 PROPERTY VERSION ${TCAM_VERSION})
+  set_property(TARGET tcam-v4l2 PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
+
+  install(TARGETS tcam-v4l2
+    LIBRARY
+    DESTINATION "${TCAM_INSTALL_LIB}"
+    COMPONENT libv4l2)
+
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
@@ -116,6 +124,9 @@ if (BUILD_ARAVIS)
   TARGET_LINK_LIBRARIES(tcam-aravis ${aravis_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam-aravis ${GObject_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam-aravis ${GLIB2_LIBRARIES})
+
+  set_property(TARGET tcam-aravis PROPERTY VERSION ${TCAM_VERSION})
+  set_property(TARGET tcam-aravis PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
   install(TARGETS tcam-aravis
     LIBRARY

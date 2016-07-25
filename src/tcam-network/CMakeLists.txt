@@ -41,4 +41,4 @@ add_library(tcam-network SHARED ${NETWORK_SOURCES})
 target_link_libraries(tcam-network ${TinyXML_LIBRARIES})
 target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 
-install(TARGETS tcam-network DESTINATION lib)
+install(TARGETS tcam-network DESTINATION ${TCAM_INSTALL_LIB})
