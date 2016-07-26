@@ -18,6 +18,8 @@ set(tcam_pkgconfig_dependencies "tinyxml")
 
 if (BUILD_ARAVIS)
   set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} aravis-0.4")
+
+  add_subdirectory(systemd)
 endif (BUILD_ARAVIS)
 
 if (BUILD_V4L2)
