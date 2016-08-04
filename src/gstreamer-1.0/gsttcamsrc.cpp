@@ -1085,12 +1085,6 @@ gboolean gst_tcam_src_stop (GstBaseSrc* src)
     ds->dev->stop_stream();
     ds->sink = nullptr;
 
-    if (self->all_caps != NULL)
-    {
-        gst_caps_unref (self->all_caps);
-        self->all_caps = NULL;
-    }
-
     GST_DEBUG_OBJECT (self, "Stopped acquisition");
 
     return TRUE;
