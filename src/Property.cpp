@@ -418,6 +418,18 @@ bool Property::set_value (const std::string& value)
         return true;
     }
 
+    if (get_type() == TCAM_PROPERTY_TYPE_ENUMERATION && !is_read_only())
+    {
+        for (const auto& s : string_map)
+        {
+            if (value.compare(s.first) == 0)
+            {
+                set_value((int64_t)s.second);
+            }
+        }
+        return false;
+    }
+
     return false;
 }
 
