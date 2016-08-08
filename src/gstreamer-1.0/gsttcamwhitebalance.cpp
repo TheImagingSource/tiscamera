@@ -35,6 +35,7 @@
 
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamwhitebalance.h"
+#include "tcamprop.h"
 #include "image_sampling.h"
 #include <stdlib.h>
 
@@ -42,28 +43,6 @@
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
 #define GST_CAT_DEFAULT gst_tcamwhitebalance_debug_category
-
-/* prototypes */
-
-static void gst_tcamwhitebalance_set_property (GObject* object,
-                                              guint property_id,
-                                              const GValue* value,
-                                              GParamSpec* pspec);
-static void gst_tcamwhitebalance_get_property (GObject* object,
-                                              guint property_id,
-                                              GValue* value,
-                                              GParamSpec* pspec);
-static void gst_tcamwhitebalance_finalize (GObject* object);
-
-static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
-static GstCaps* gst_tcamwhitebalance_transform_caps (GstBaseTransform* trans,
-                                                    GstPadDirection direction,
-                                                    GstCaps* caps);
-
-static void gst_tcamwhitebalance_fixate_caps (GstBaseTransform* base,
-                                             GstPadDirection direction,
-                                             GstCaps* caps,
-                                             GstCaps* othercaps);
 
 enum
 {
@@ -75,6 +54,539 @@ enum
     PROP_WHITEBALANCE_ENABLED,
     PROP_CAMERA_WB,
 };
+
+
+/* prototypes */
+
+static void gst_tcamwhitebalance_set_property (GObject* object,
+                                               guint property_id,
+                                               const GValue* value,
+                                               GParamSpec* pspec);
+static void gst_tcamwhitebalance_get_property (GObject* object,
+                                               guint property_id,
+                                               GValue* value,
+                                               GParamSpec* pspec);
+static void gst_tcamwhitebalance_finalize (GObject* object);
+
+static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
+static GstCaps* gst_tcamwhitebalance_transform_caps (GstBaseTransform* trans,
+                                                     GstPadDirection direction,
+                                                     GstCaps* caps);
+
+static void gst_tcamwhitebalance_fixate_caps (GstBaseTransform* base,
+                                              GstPadDirection direction,
+                                              GstCaps* caps,
+                                              GstCaps* othercaps);
+
+static GSList* gst_tcamwhitebalance_get_property_names(TcamProp* self);
+
+static gchar *gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name);
+
+static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        GValue* value,
+                                                        GValue* min,
+                                                        GValue* max,
+                                                        GValue* def,
+                                                        GValue* step,
+                                                        GValue* type,
+                                                        GValue* category,
+                                                        GValue* group);
+
+static gboolean gst_tcamwhitebalance_set_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        const GValue* value);
+
+static GSList* gst_tcamwhitebalance_get_tcam_menu_entries (TcamProp* self,
+                                                           const gchar* name);
+
+static GSList* gst_tcamwhitebalance_get_device_serials (TcamProp* self);
+
+static gboolean gst_tcamwhitebalance_get_device_info (TcamProp* self,
+                                                      const char* serial,
+                                                      char** name,
+                                                      char** identifier,
+                                                      char** connection_type);
+
+static void gst_tcamwhitebalance_prop_init (TcamPropInterface* iface)
+{
+    iface->get_property_names = gst_tcamwhitebalance_get_property_names;
+    iface->get_property_type = gst_tcamwhitebalance_get_property_type;
+    iface->get_property = gst_tcamwhitebalance_get_tcam_property;
+    iface->get_menu_entries = gst_tcamwhitebalance_get_tcam_menu_entries;
+    iface->set_property = gst_tcamwhitebalance_set_tcam_property;
+    iface->get_device_serials = gst_tcamwhitebalance_get_device_serials;
+    iface->get_device_info = gst_tcamwhitebalance_get_device_info;
+}
+
+
+
+G_DEFINE_TYPE_WITH_CODE (GstTcamWhitebalance, gst_tcamwhitebalance, GST_TYPE_BASE_TRANSFORM,
+                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
+                                                gst_tcamwhitebalance_prop_init));
+
+// g_object_class_install_property (gobject_class,
+//                                  PROP_GAIN_RED,
+//                                  g_param_spec_int ("red", "Red",
+//                                                    "Value for red",
+//                                                    0, 255, 0,
+//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// g_object_class_install_property (gobject_class,
+//                                  PROP_GAIN_GREEN,
+//                                  g_param_spec_int ("green", "Green Gain",
+//                                                    "Value for red gain",
+//                                                    0, 255, 0,
+//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// g_object_class_install_property (gobject_class,
+//                                  PROP_GAIN_BLUE,
+//                                  g_param_spec_int ("blue", "Blue Gain",
+//                                                    "Value for blue gain",
+//                                                    0, 255, 0,
+//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// g_object_class_install_property (gobject_class,
+//                                  PROP_AUTO_ENABLED,
+//                                  g_param_spec_boolean ("auto", "Auto Value Adjustment",
+//                                                        "Automatically adjust white balance values",
+//                                                        TRUE,
+//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// g_object_class_install_property (gobject_class,
+//                                  PROP_CAMERA_WB,
+//                                  g_param_spec_boolean ("camera-whitebalance", "Device whitebalance settings",
+//                                                        "Adjust whitebalance values in the camera",
+//                                                        FALSE,
+//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// g_object_class_install_property (gobject_class,
+//                                  PROP_WHITEBALANCE_ENABLED,
+//                                  g_param_spec_boolean ("module-enabled", "Enable/Disable White Balance Module",
+//                                                        "Disable entire module",
+//                                                        TRUE,
+//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+// }
+
+
+static char* tcamwhitebalance_property_id_to_string (guint id)
+{
+    switch (id)
+    {
+        case PROP_GAIN_RED:
+            return "whitebalance-red";
+        case PROP_GAIN_GREEN:
+            return "whitebalance-green";
+        case PROP_GAIN_BLUE:
+            return "whitebalance-blue";
+        case PROP_AUTO_ENABLED:
+            return "whitebalance-auto";
+        case PROP_WHITEBALANCE_ENABLED:
+            return "camera-whitebalance";
+        case PROP_CAMERA_WB:
+            return "whitebalance-module-enabled";
+        default:
+            return "";
+    }
+}
+
+
+static guint tcamwhitebalance_string_to_property_id (const char* name)
+{
+    if (strcmp(name, "whitebalance-red") == 0)
+    {
+        return PROP_GAIN_RED;
+    }
+    else if (strcmp(name, "whitebalance-green") == 0)
+    {
+        return PROP_GAIN_GREEN;
+    }
+    else if (strcmp(name, "whitebalance-blue") == 0)
+    {
+        return PROP_GAIN_BLUE;
+    }
+    else if (strcmp(name, "whitebalance-auto") == 0)
+    {
+        return PROP_AUTO_ENABLED;
+    }
+    else if (strcmp(name, "camera-whitebalance") == 0)
+    {
+        return PROP_CAMERA_WB;
+    }
+    else if (strcmp(name, "whitebalance-module-enabled") == 0)
+    {
+        return PROP_WHITEBALANCE_ENABLED;
+    }
+    else
+    {
+        return PROP_0;
+    }
+}
+
+
+
+static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self)
+{
+    GSList* names = nullptr;
+
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_RED));
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_GREEN));
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_BLUE));
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_AUTO_ENABLED));
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_CAMERA_WB));
+    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_WHITEBALANCE_ENABLED));
+
+    return names;
+}
+
+
+static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name)
+{
+    if (strcmp(name, "whitebalance-red") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (strcmp(name, "whitebalance-green") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (strcmp(name, "whitebalance-blue") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (strcmp(name, "whitebalance-auto") == 0)
+    {
+        return strdup("boolean");
+    }
+    else if (strcmp(name, "camera-whitebalance") == 0)
+    {
+        return strdup("boolean");
+    }
+    else if (strcmp(name, "whitebalance-module-enabled") == 0)
+    {
+        return strdup("boolean");
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
+                                                        gchar* name,
+                                                        GValue* value,
+                                                        GValue* min,
+                                                        GValue* max,
+                                                        GValue* def,
+                                                        GValue* step,
+                                                        GValue* type,
+                                                        GValue* category,
+                                                        GValue* group)
+{
+    GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(prop);
+
+    if (strcmp(name, "whitebalance-red") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->red);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, 255);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 64);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+
+        return TRUE;
+    }
+    else if (strcmp(name, "whitebalance-green") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->green);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, 255);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 64);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (strcmp(name, "whitebalance-blue") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->blue);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, 255);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 64);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (strcmp(name, "whitebalance-auto") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_enabled);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (strcmp(name, "camera-whitebalance") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_enabled);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, FALSE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }        return TRUE;
+    }
+    else if (strcmp(name, "whitebalance-module-enabled") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_enabled);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamwhitebalance_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+
+static gboolean gst_tcamwhitebalance_set_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        const GValue* value)
+{
+
+    gst_tcamwhitebalance_set_property(G_OBJECT(self), tcamwhitebalance_string_to_property_id(name), value, NULL);
+
+    return TRUE;
+}
+
+
+static GSList* gst_tcamwhitebalance_get_tcam_menu_entries (TcamProp* self,
+                                                           const gchar* name)
+{
+    return nullptr;
+}
+
+
+static GSList* gst_tcamwhitebalance_get_device_serials (TcamProp* self)
+{
+    return nullptr;
+}
+
+
+static gboolean gst_tcamwhitebalance_get_device_info (TcamProp* self,
+                                                      const char* serial,
+                                                      char** name,
+                                                      char** identifier,
+                                                      char** connection_type)
+{
+    return FALSE;
+}
+
+/* actual gstreamer element */
+
 
 /* pad templates */
 
@@ -94,13 +606,6 @@ static GstStaticPadTemplate gst_tcamwhitebalance_src_template =
 
 
 /* class initialization */
-
-G_DEFINE_TYPE_WITH_CODE (GstTcamWhitebalance,
-                         gst_tcamwhitebalance,
-                         GST_TYPE_BASE_TRANSFORM,
-                         GST_DEBUG_CATEGORY_INIT (gst_tcamwhitebalance_debug_category,
-                                                  "tcamwhitebalance", 0,
-                                                  "debug category for tcamwhitebalance element"));
 
 static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
 {
@@ -866,7 +1371,7 @@ static struct device_resources find_source (GstElement* self)
 
         if (g_strcmp0(name, "GstTcamSrc") == 0)
         {
-            GST_LOG_OBJECT(self, "Found v4l2 device");
+            GST_INFO("Found tcam source element");
             res.source_element = l->data;
             break;
         }
