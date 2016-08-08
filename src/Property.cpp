@@ -72,7 +72,6 @@ bool Property::update ()
 {
     if (impl.expired())
     {
-        set_error(Error("Property implementation has expired.", ENOENT));
         return false;
     }
 

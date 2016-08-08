@@ -321,7 +321,6 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         }
         default:
         {
-            set_error(Error("undefined property type", ENOENT));
             type = Property::UNDEFINED;
             break;
         }
@@ -472,7 +471,6 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             std::string s = "Unknown V4L2 Control type: ";
             s.append((char*)queryctrl->name);
             tcam_log(TCAM_LOG_ERROR, s.c_str());
-            set_error(Error(s, EIO));
             break;
         }
     }
@@ -487,7 +485,6 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
     struct udev* udev = udev_new();
     if (!udev)
     {
-        set_error(Error("Unable to create udev reference.", EIO));
         return device_list;
     }
 
@@ -523,7 +520,6 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
         if (!parent_device)
         {
-            set_error(Error("udev_device_get_parent_with_subsystem_devtype failed", EIO));
             return device_list;
         }
 

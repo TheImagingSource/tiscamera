@@ -87,7 +87,6 @@ bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
         else
         {
             status = TCAM_PIPELINE_ERROR;
-            set_error(Error("Unable to create pipeline", EPIPE));
             return false;
         }
     }
@@ -269,7 +268,6 @@ bool PipelineManager::validate_pipeline ()
     // check if pipeline is valid
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        set_error(Error("No image source", EPIPE));
         return false;
     }
 
@@ -305,7 +303,6 @@ bool PipelineManager::validate_pipeline ()
                     f->getDescription().name.c_str(),
                     in_format.to_string().c_str(),
                     in.to_string().c_str());
-            set_error(Error("Faulty pipeline creation.", EINVAL));
             return false;
         }
         else
@@ -334,7 +331,6 @@ bool PipelineManager::create_conversion_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        set_error(Error("No image source", EPIPE));
         return false;
     }
 
@@ -470,7 +466,6 @@ bool PipelineManager::create_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
-        set_error(Error("No image source", EPIPE));
         return false;
     }
 
@@ -537,7 +532,6 @@ bool PipelineManager::start_playing ()
     return true;
 
 error:
-    set_error(Error("Unable to start playback", EPIPE));
     stop_playing();
     return false;
 }

@@ -139,7 +139,6 @@ bool PropertyHandler::set_property (const Property& p)
         {
             if (prop.external_property->is_read_only())
             {
-                set_error(Error("Property is read only.", EACCES));
                 tcam_log(TCAM_LOG_ERROR,
                          "Property '%s' is read only",
                          prop.external_property->get_name().c_str());
@@ -250,7 +249,6 @@ void PropertyHandler::generate_properties ()
 {
     if (device_properties.empty())
     {
-        set_error(Error("No properties to work with.", ENOENT));
         tcam_log(TCAM_LOG_ERROR, "No device properties to work with");
         return;
     }

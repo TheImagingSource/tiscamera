@@ -63,7 +63,6 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
 
     if (desc == properties.end())
     {
-        set_error(Error("No such property.", ENOENT));
         tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
         return false;
     }
@@ -80,7 +79,6 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
         }
         else
         {
-            set_error(Error("Emulated property not implemented", ENOENT));
             tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.get_name().c_str());
             return false;
         }
@@ -111,7 +109,6 @@ bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
     {
         std::string s = "Unable to find Property \"" + p.get_name() + "\"";
         tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
-        set_error(Error(s, ENOENT));
         return false;
     }
 
@@ -245,7 +242,6 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     if (ret < 0)
     {
         tcam_log(TCAM_LOG_ERROR, "Error while setting format '%s'", strerror(errno));
-        set_error(Error("Unable to set format", errno));
         return false;
     }
 
@@ -254,7 +250,6 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     if (!set_framerate(new_format.get_framerate()))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set framerate to %f", new_format.get_framerate());
-        set_error(Error("Unable to set framerate", errno));
         return false;
     }
 
@@ -338,7 +333,6 @@ bool V4l2Device::set_framerate (double framerate)
     if (fps == framerate_conversions.end())
     {
         tcam_log(TCAM_LOG_ERROR,"unable to find corresponding framerate settings.");
-        set_error(Error("Unable to find corresponding framerate settings.", EIO));
         return false;
     }
 
@@ -477,7 +471,6 @@ bool V4l2Device::start_stream ()
         {
             std::string s = "Unable to queue v4l2_buffer 'VIDIOC_QBUF'";
             tcam_log(TCAM_LOG_ERROR, s.c_str());
-            set_error(Error(s, errno));
             return false;
         }
         else
@@ -691,7 +684,6 @@ void V4l2Device::determine_active_video_format ()
     {
         tcam_log(TCAM_LOG_ERROR, "Error while querying video format");
 
-        set_error(Error("VIDIOC_G_FMT failed", EIO));
         return;
     }
 
@@ -1074,7 +1066,6 @@ void V4l2Device::stream ()
                 else
                 {
                     /* error during select */
-                    set_error(Error("Unable to retrieve image. Select threw error.", errno));
                     tcam_log(TCAM_LOG_ERROR, "Error during select");
                     return;
                 }
@@ -1119,7 +1110,6 @@ void V4l2Device::stream ()
                 if (failure_counter >= 3)
                 {
                     tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
-                    set_error(Error("Unable to retrieve buffer.", errno));
                     break;
                 }
             }
@@ -1152,7 +1142,6 @@ bool V4l2Device::requeue_mmap_buffer ()
             int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
             if (ret == -1)
             {
-                set_error(Error("Unable to requeue buffer. ioctl error", errno));
                 return false;
             }
             buffers[i].is_queued = true;
@@ -1176,7 +1165,6 @@ bool V4l2Device::get_frame ()
     if (ret == -1)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to dequeue buffer.");
-        set_error(Error("Unable to dequeue buffer.", errno));
         return false;
     }
 
@@ -1217,7 +1205,6 @@ void V4l2Device::init_mmap_buffers ()
     if (buffers.empty())
     {
         tcam_log(TCAM_LOG_ERROR, "Number of used buffers has to be >= 2");
-        set_error(Error("Number of used buffers has to be >= 2", EINVAL));
         return;
     }
     else
@@ -1254,7 +1241,6 @@ void V4l2Device::init_mmap_buffers ()
 
         if (tcam_xioctl(fd, VIDIOC_QUERYBUF, &buf) == -1)
         {
-            set_error(Error("Unable to query v4l2_buffer ", EIO));
             return;
         }
 
