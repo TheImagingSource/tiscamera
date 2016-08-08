@@ -14,14 +14,287 @@
  * limitations under the License.
  */
 
+#include "gsttcambase.h"
 #include "gsttcambin.h"
+// #include <girepository.h>
+
+#include "tcamprop.h"
 
 #include <unistd.h>
+
+#include <vector>
+#include <string>
 
 #define gst_tcambin_parent_class parent_class
 
 GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 #define GST_CAT_DEFAULT gst_tcambin_debug
+
+
+//
+// introspection interface
+//
+
+
+
+static GSList* gst_tcam_bin_get_property_names (TcamProp* self);
+
+static gchar *gst_tcam_bin_get_property_type (TcamProp* self, gchar* name);
+
+static gboolean gst_tcam_bin_get_tcam_property (TcamProp* self,
+                                                gchar* name,
+                                                GValue* value,
+                                                GValue* min,
+                                                GValue* max,
+                                                GValue* def,
+                                                GValue* step,
+                                                GValue* type,
+                                                GValue* category,
+                                                GValue* group);
+
+static gboolean gst_tcam_bin_set_tcam_property (TcamProp* self,
+                                                gchar* name,
+                                                const GValue* value);
+
+static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
+                                                   const gchar* name);
+
+static GSList* gst_tcam_bin_get_device_serials (TcamProp* self);
+
+static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
+                                              const char* serial,
+                                              char** name,
+                                              char** identifier,
+                                              char** connection_type);
+
+static void gst_tcam_bin_prop_init (TcamPropInterface* iface)
+{
+    iface->get_property_names = gst_tcam_bin_get_property_names;
+    iface->get_property_type = gst_tcam_bin_get_property_type;
+    iface->get_property = gst_tcam_bin_get_tcam_property;
+    iface->get_menu_entries = gst_tcam_bin_get_tcam_menu_entries;
+    iface->set_property = gst_tcam_bin_set_tcam_property;
+    iface->get_device_serials = gst_tcam_bin_get_device_serials;
+    iface->get_device_info = gst_tcam_bin_get_device_info;
+}
+
+
+G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
+                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
+                                                gst_tcam_bin_prop_init));
+
+
+// struct property_type_map
+// {
+//     enum TCAM_PROPERTY_TYPE typecode;
+//     const gchar* type_name;
+// };
+
+/**
+ * gst_tcam_get_property_type:
+ * @self: a #GstTcamBin
+ * @name: a #char* identifying the property to query
+ *
+ * Return the type of a property
+ *
+ * Returns: (transfer full): A string describing the property type
+ */
+static gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
+{
+    gchar* ret = NULL;
+
+
+    GstTcamBin* self = GST_TCAMBIN (iface);
+
+    if (self->src != NULL)
+    {
+        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name);
+
+        if (ret != nullptr)
+        {
+            return ret;
+        }
+    }
+
+    if (self->whitebalance != NULL)
+    {
+        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->whitebalance), name);
+
+        if (ret != nullptr)
+        {
+            return ret;
+        }
+    }
+
+    return ret;
+}
+
+
+/**
+ * gst_tcam_bin_get_property_names:
+ * @self: a #GstTcamBin
+ *
+ * Return a list of property names
+ *
+ * Returns: (element-type utf8) (transfer full): list of property names
+ */
+static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
+{
+    GSList* ret = NULL;
+    GstTcamBin* self = GST_TCAMBIN(iface);
+
+    if (self->src != nullptr)
+    {
+        GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
+
+        for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
+        {
+            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
+        }
+    }
+
+    if (self->whitebalance != nullptr)
+    {
+        GSList* wb_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->whitebalance));
+
+        for (unsigned int i = 0; i < g_slist_length(wb_prop_names); i++)
+        {
+            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(wb_prop_names, i)->data));
+        }
+    }
+
+    return ret;
+}
+
+
+static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
+                                                gchar* name,
+                                                GValue* value,
+                                                GValue* min,
+                                                GValue* max,
+                                                GValue* def,
+                                                GValue* step,
+                                                GValue* type,
+                                                GValue* category,
+                                                GValue* group)
+{
+    GstTcamBin *self = GST_TCAMBIN(iface);
+
+    if (self->src != nullptr)
+    {
+        if (tcam_prop_get_tcam_property(TCAM_PROP(self->src),
+                                        name, value,
+                                        min, max,
+                                        def, step,
+                                        type,
+                                        category, group))
+        {
+            return TRUE;
+        }
+    }
+
+    if (self->whitebalance != nullptr)
+    {
+        if (tcam_prop_get_tcam_property(TCAM_PROP(self->whitebalance),
+                                        name, value,
+                                        min, max,
+                                        def, step,
+                                        type,
+                                        category, group))
+        {
+            return TRUE;
+        }
+    }
+
+
+    return FALSE;
+}
+
+
+/**
+ * gst_tcam_bin_get_tcam_manu_entrie:
+ * @self: a #GstTcamBin
+ * @name: a #char*
+ *
+ * Return a list of property names
+ *
+ * Returns: (element-type utf8) (transfer full): a #GSList
+ */
+static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
+                                                   const gchar* name)
+{
+    if (GST_TCAMBIN(self)->src != nullptr)
+    {
+        return tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
+    }
+    return nullptr;
+}
+
+static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
+                                                gchar* name,
+                                                const GValue* value)
+{
+    gboolean ret = FALSE;
+    GstTcamBin* self = GST_TCAMBIN(iface);
+    struct device_state* ds = (struct device_state*)self->device;
+
+    if (self->src != nullptr)
+    {
+        if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
+        {
+            return TRUE;
+        }
+    }
+
+    if (self->whitebalance != nullptr)
+    {
+        if (tcam_prop_set_tcam_property(TCAM_PROP(self->whitebalance), name, value))
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+
+static GSList* gst_tcam_bin_get_device_serials (TcamProp* self)
+{
+    if (GST_TCAMBIN(self)->src != nullptr)
+    {
+        return tcam_prop_get_device_serials(TCAM_PROP(GST_TCAMBIN(self)->src));
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
+                                              const char* serial,
+                                              char** name,
+                                              char** identifier,
+                                              char** connection_type)
+{
+    if (GST_TCAMBIN(self)->src != nullptr)
+    {
+        return tcam_prop_get_device_info(TCAM_PROP(GST_TCAMBIN(self)->src),
+                                         serial,
+                                         name,
+                                         identifier,
+                                         connection_type);
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+
+//
+// gstreamer module
+//
 
 static void gst_tcambin_class_init (GstTcamBinClass* klass);
 static void gst_tcambin_init (GstTcamBin* klass);
@@ -39,7 +312,7 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
                                                                    GST_PAD_SRC,
                                                                    GST_PAD_ALWAYS,
                                                                    GST_STATIC_CAPS_ANY);
-G_DEFINE_TYPE(GstTcamBin, gst_tcambin, GST_TYPE_BIN);
+
 
 static void gst_tcambin_clear_kid (GstTcamBin* src)
 {
@@ -232,66 +505,135 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
 
-    self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
-    gst_bin_add(GST_BIN(self), self->exposure);
+    if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
+    {
+        self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
+        gst_bin_add(GST_BIN(self), self->exposure);
+    }
 
     if (self->modules.bayer)
     {
-        self->whitebalance = gst_element_factory_make("tcamwhitebalance", "whitebalance");
-        gst_bin_add(GST_BIN(self), self->whitebalance);
+        // use this to see if the device already has the feature
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
+        {
+            self->whitebalance = gst_element_factory_make("tcamwhitebalance", "whitebalance");
+            if (self->whitebalance)
+            {
+                gst_bin_add(GST_BIN(self), self->whitebalance);
+            }
+            else
+            {
+                GST_ERROR("Could not create whitebalance element. Aborting.");
+                return FALSE;
+            }
+        }
 
         self->debayer = gst_element_factory_make("bayer2rgb", "debayer");
-        gst_bin_add(GST_BIN(self), self->debayer);
-    }
-
-    if (self->modules.convert)
-    {
-        self->convert = gst_element_factory_make("videoconvert", "convert");
-        gst_bin_add(GST_BIN(self), self->convert);
-    }
-
-    if (self->whitebalance != nullptr)
-    {
-        gst_element_link(self->src,
-                         self->pipeline_caps
-                         );
-        gst_element_link(self->pipeline_caps,
-                         self->whitebalance
-                         );
-        gst_element_link(self->whitebalance,
-                         self->exposure
-                         );
-        gst_element_link(self->exposure,
-                         self->debayer
-            );
-
-        if (self->modules.convert)
+        if (self->debayer)
         {
-            gst_element_link_pads_full(self->debayer, "src",
-                                       self->convert, "sink",
-                                       GST_PAD_LINK_CHECK_NOTHING);
-            self->target_pad = gst_element_get_static_pad(self->convert, "src");
-            GST_DEBUG("Using videoconvert as exit element for ghost pad");
+            gst_bin_add(GST_BIN(self), self->debayer);
         }
         else
         {
-            GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
-            self->target_pad = gst_element_get_static_pad(self->debayer, "src");
+            GST_ERROR("Could not create bayer2rgb element. Aborting.");
+            return FALSE;
+        }
+    }
+    if (self->modules.convert)
+    {
+        self->convert = gst_element_factory_make("videoconvert", "convert");
+        if (self->convert)
+        {
+            gst_bin_add(GST_BIN(self), self->convert);
+        }
+        else
+        {
+            GST_ERROR("Could not create videoconvert element. Aborting.");
+            return FALSE;
+        }
+    }
+
+    if (self->debayer != nullptr)
+    {
+        if (self->whitebalance != nullptr)
+        {
+            gst_element_link(self->src,
+                             self->pipeline_caps);
+            gst_element_link(self->pipeline_caps,
+                             self->whitebalance);
+            gst_element_link(self->whitebalance,
+                             self->exposure);
+            gst_element_link(self->exposure,
+                             self->debayer);
+
+            if (self->modules.convert)
+            {
+                gst_element_link_pads_full(self->debayer, "src",
+                                           self->convert, "sink",
+                                           GST_PAD_LINK_CHECK_NOTHING);
+                self->target_pad = gst_element_get_static_pad(self->convert, "src");
+                GST_DEBUG("Using videoconvert as exit element for ghost pad");
+            }
+            else
+            {
+                GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
+                self->target_pad = gst_element_get_static_pad(self->debayer, "src");
+            }
+        }
+        else
+        {
+            if (self->exposure != nullptr)
+            {
+                gst_element_link(self->src,
+                                 self->pipeline_caps);
+                gst_element_link(self->pipeline_caps,
+                                 self->exposure);
+                gst_element_link(self->exposure,
+                                 self->debayer);
+            }
+            else
+            {
+                gst_element_link(self->src,
+                                 self->pipeline_caps);
+                gst_element_link(self->pipeline_caps,
+                                 self->debayer);
+            }
+
+            if (self->modules.convert)
+            {
+                gst_element_link_pads_full(self->debayer, "src",
+                                           self->convert, "sink",
+                                           GST_PAD_LINK_CHECK_NOTHING);
+                self->target_pad = gst_element_get_static_pad(self->convert, "src");
+                GST_DEBUG("Using videoconvert as exit element for ghost pad");
+            }
+            else
+            {
+                GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
+                self->target_pad = gst_element_get_static_pad(self->debayer, "src");
+            }
         }
     }
     else
     {
-        gst_element_link(self->src,
-                         self->pipeline_caps
-            );
-        gst_element_link(self->pipeline_caps,
-                         self->exposure
-            );
+        if (self->exposure != nullptr)
+        {
+            gst_element_link(self->src,
+                             self->pipeline_caps);
+            gst_element_link(self->pipeline_caps,
+                             self->exposure);
 
+            self->target_pad = gst_element_get_static_pad(self->exposure, "src");
+            GST_DEBUG("Using exposure as exit element for ghost pad");
+        }
+        else
+        {
+            gst_element_link(self->src,
+                             self->pipeline_caps);
 
-        self->target_pad = gst_element_get_static_pad(self->exposure, "src");
-        GST_DEBUG("Using exposure as exit element for ghost pad");
-
+            self->target_pad = gst_element_get_static_pad(self->pipeline_caps, "src");
+            GST_DEBUG("Using source as exit element for ghost pad");
+        }
     }
 
     return TRUE;

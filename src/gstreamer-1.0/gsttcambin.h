@@ -18,6 +18,7 @@
 #define TCAM_GSTTCAMBIN_H
 
 #include <gst/gst.h>
+#include <girepository.h>
 
 #ifndef __cplusplus
 extern "C"
