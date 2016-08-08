@@ -33,6 +33,22 @@ uint32_t tcam::description_to_fourcc (const char* description)
 }
 
 
+std::string tcam::category2string (TCAM_PROPERTY_CATEGORY category)
+{
+    switch (category)
+    {
+        case TCAM_PROPERTY_CATEGORY_COLOR: return "Color";
+        case TCAM_PROPERTY_CATEGORY_EXPOSURE: return "Exposure";
+        case TCAM_PROPERTY_CATEGORY_IMAGE: return "Image";
+        case TCAM_PROPERTY_CATEGORY_LENS: return "Lens";
+        case TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN: return "Partial Scan";
+        case TCAM_PROPERTY_CATEGORY_SPECIAL: return "Special";
+        case TCAM_PROPERTY_CATEGORY_UNKNOWN: return "Unknown";
+        default: return "";
+    }
+}
+
+
 struct tcam_image_buffer* tcam::allocate_image_buffers (const struct tcam_video_format* format,
                                                              size_t n_buffers)
 {

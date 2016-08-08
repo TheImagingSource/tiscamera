@@ -49,7 +49,12 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
                                                 GValue* max,
                                                 GValue* def,
                                                 GValue* step,
-                                                GValue* type);
+                                                GValue* type,
+                                                GValue* category,
+                                                GValue* group);
+
+static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
+                                              const char* menu_name);
 
 static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
                                                 gchar* name,
@@ -63,11 +68,16 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                               char** identifier,
                                               char** connection_type);
 
+
+static bool gst_tcam_src_init_camera (GstTcamSrc* self);
+static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self);
+
 static void gst_tcam_src_prop_init (TcamPropInterface* iface)
 {
     iface->get_property_names = gst_tcam_src_get_property_names;
     iface->get_property_type = gst_tcam_src_get_property_type;
     iface->get_property = gst_tcam_src_get_tcam_property;
+    iface->get_menu_entries = gst_tcam_src_get_menu_entries;
     iface->set_property = gst_tcam_src_set_tcam_property;
     iface->get_device_serials = gst_tcam_src_get_device_serials;
     iface->get_device_info = gst_tcam_src_get_device_info;
@@ -82,11 +92,22 @@ static gboolean get_property_by_name (GstTcamSrc* self,
                                       gchar* name,
                                       struct tcam_device_property* prop)
 {
+
+    if (self->device == nullptr)
+    {
+        gst_tcam_src_init_camera(self);
+        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+    }
     struct device_state* ds = (struct device_state*)self->device;
 
     std::vector<tcam::Property*> properties = ds->dev->get_available_properties();
 
     tcam::Property* p = ds->dev->get_property_by_name(name);
+
+    if (p == nullptr)
+    {
+        return FALSE;
+    }
 
     if (prop != nullptr)
     {
@@ -122,6 +143,13 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
 {
     gchar* ret = NULL;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
+
+    if (self->device == nullptr)
+    {
+        gst_tcam_src_init_camera(self);
+        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+    }
+
     struct tcam_device_property prop;
     struct property_type_map map[] = {
         { TCAM_PROPERTY_TYPE_BOOLEAN, "boolean" },
@@ -132,11 +160,23 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
         { TCAM_PROPERTY_TYPE_BUTTON, "button" },
     };
 
-    g_return_val_if_fail (self->device != NULL, NULL);
+    //     g_return_val_if_fail (self->device != NULL, NULL);
+    // prefer this so that no gobject error appear
+    // this method is also used to check for property existence
+    // so unneccessary errors should be avoided
+    if (self->device == nullptr)
+    {
+        return nullptr;
+    }
 
-    g_return_val_if_fail (get_property_by_name (self,
-                                                name,
-                                                &prop), NULL);
+    if (!get_property_by_name (self, name, &prop))
+    {
+        return nullptr;
+    }
+
+    // g_return_val_if_fail (get_property_by_name (self,
+    //                                             name,
+    //                                             &prop), NULL);
     int i;
 
     for (i = 0; i < G_N_ELEMENTS (map); i++)
@@ -164,7 +204,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
+static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 {
     GSList* ret = NULL;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
@@ -191,10 +231,19 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
                                                 GValue* max,
                                                 GValue* def,
                                                 GValue* step,
-                                                GValue* type)
+                                                GValue* type,
+                                                GValue* category,
+                                                GValue* group)
 {
     gboolean ret = TRUE;
     GstTcamSrc *self = GST_TCAM_SRC (iface);
+
+    if (self->device == nullptr)
+    {
+        gst_tcam_src_init_camera(self);
+        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+    }
+
     struct device_state* ds = (struct device_state*)self->device;
 
     tcam::Property* property = ds->dev->get_property_by_name(name);
@@ -207,6 +256,17 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 
     struct tcam_device_property prop = property->get_struct();
 
+    if (category)
+    {
+        g_value_init(category, G_TYPE_STRING);
+        g_value_set_string(category, tcam::category2string(prop.group.property_category).c_str());
+    }
+    if (group)
+    {
+        g_value_init(group, G_TYPE_STRING);
+        g_value_set_string(category, tcam::get_control_reference(prop.group.property_group).name.c_str());
+    }
+
     if (type)
     {
         g_value_init (type, G_TYPE_GTYPE);
@@ -218,8 +278,16 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             if (value)
             {
-                g_value_init (value, G_TYPE_INT);
-                g_value_set_int (value, prop.value.i.value);
+                if (prop.type == TCAM_PROPERTY_TYPE_INTEGER)
+                {
+                    g_value_init (value, G_TYPE_INT);
+                    g_value_set_int (value, prop.value.i.value);
+                }
+                else if (prop.type == TCAM_PROPERTY_TYPE_ENUMERATION)
+                {
+                    g_value_init(value, G_TYPE_STRING);
+                    g_value_set_string(value, ((tcam::PropertyEnumeration*)property)->get_value().c_str());
+                }
             }
             if (min)
             {
@@ -348,6 +416,37 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 }
 
 
+static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
+                                              const char* menu_name)
+{
+    GSList* ret = NULL;
+
+    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    struct device_state* ds = (struct device_state*)self->device;
+
+    tcam::Property* property = ds->dev->get_property_by_name(menu_name);
+
+    if (property == nullptr)
+    {
+        return ret;
+    }
+
+    if (property->get_type() != TCAM_PROPERTY_TYPE_ENUMERATION)
+    {
+        return ret;
+    }
+
+    auto mapping = ((tcam::PropertyEnumeration*)property)->get_values();
+
+    for (const auto& m : mapping)
+    {
+        ret = g_slist_append(ret, g_strdup(m.c_str()));
+    }
+
+    return ret;
+}
+
+
 static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
                                                 gchar* name,
                                                 const GValue* value)
@@ -368,7 +467,6 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
-        case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
             return property->set_value((int64_t)g_value_get_int(value));
         }
@@ -387,6 +485,10 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
             return((tcam::PropertyButton*)property)->activate();
+        }
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+        {
+            return property->set_value(value);
         }
         default:
         {
@@ -776,7 +878,6 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                     }
                 }
 
-
                 /* caps = icaps; */
                 caps = gst_caps_copy_nth (icaps, best);
 
@@ -937,7 +1038,9 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     }
 
     if (self->fixed_caps != NULL)
+    {
         gst_caps_unref (self->fixed_caps);
+    }
 
     caps_string = tcam_fourcc_to_gst_1_0_caps_string(fourcc);
     if (caps_string != NULL)
@@ -953,7 +1056,9 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
                            NULL);
 
         if (frame_rate != NULL)
+        {
             gst_structure_set_value (structure, "framerate", frame_rate);
+        }
 
         gst_caps_append_structure (caps, structure);
 
@@ -963,6 +1068,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     {
         self->fixed_caps = NULL;
     }
+
     GST_LOG_OBJECT (self, "Start acquisition");
 
     self->timestamp_offset = 0;
@@ -1050,7 +1156,7 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
 }
 
 
-static gboolean gst_tcam_src_start (GstBaseSrc *src)
+static gboolean gst_tcam_src_start (GstBaseSrc* src)
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
     struct device_state* ds = (struct device_state*)self->device;
