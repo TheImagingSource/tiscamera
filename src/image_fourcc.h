@@ -32,6 +32,7 @@
 // these are pseudo FOURCC values used in the library to signify the formats
 #define FOURCC_RGB8			    mmioFOURCC( 'R', 'G', 'B', '8' )
 #define FOURCC_RGB24		    mmioFOURCC( 'R', 'G', 'B', '3' )
+#define FOURCC_BGR24		    mmioFOURCC( 'B', 'G', 'R', '3' )
 #define FOURCC_RGB32		    mmioFOURCC( 'R', 'G', 'B', '4' )
 
 #endif
