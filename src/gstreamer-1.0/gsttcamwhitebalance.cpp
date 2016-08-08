@@ -129,6 +129,9 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
     /* base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tcamwhitebalance_transform_caps); */
     /* base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tcamwhitebalance_fixate_caps); */
 
+
+    GST_DEBUG_CATEGORY_INIT (gst_tcamwhitebalance_debug_category, "tcamwhitebalance", 0, "tcam whitebalance");
+
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_RED,
                                      g_param_spec_int ("red", "Red",
