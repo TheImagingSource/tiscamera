@@ -45,8 +45,6 @@ include_directories(${INTROSPECTION_INCLUDE_DIR})
 
 add_library(gsttcamsrc SHARED gsttcamsrc.cpp)
 
-target_link_libraries(gsttcamsrc tcamprop)
-
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp image_sampling.c bayer.c)
 
 add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp image_sampling.c bayer.c)
@@ -58,6 +56,7 @@ add_library(gsttcambin SHARED gsttcambin.cpp)
 foreach (t IN ITEMS ${PLUGINS})
 
     target_link_libraries(${t} tcam)
+    target_link_libraries(${t} tcamprop)
     target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
     target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
     target_link_libraries(${t} ${GSTREAMER_VIDEO_LIBRARIES})
