@@ -53,7 +53,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_EXPOSURE_AUTO,
-        .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS, 0x009a0901 },
+        .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS, 0x009a0901, 0x0199e202},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
+        .v4l2_id = { 0x0199e203},
     },
     {
         .id = TCAM_PROPERTY_GAIN,
@@ -73,7 +77,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_GAIN_AUTO,
-        .v4l2_id = { 0 },
+        .v4l2_id = { 0x0199e205 },
     },
     {
         .id = TCAM_PROPERTY_TRIGGER_MODE,
@@ -95,6 +99,32 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .id = TCAM_PROPERTY_TRIGGER_DELAY,
         .v4l2_id = {0x199e210},
     },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_POLARITY,
+        .v4l2_id = { 0x0199e234 },
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_EXPOSURE_MODE,
+        .v4l2_id = { 0x0199e236 },
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_BURST_COUNT,
+        .v4l2_id = { 0x0199e237 },
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_DEBOUNCE_TIME_US,
+        .v4l2_id = { 0x0199e238 },
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_MASK_TIME_US,
+        .v4l2_id = { 0x0199e239 },
+    },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_NOISE_SURPRESSION_TIME_US,
+        .v4l2_id = { 0x0199e240 },
+    },
+
+
     {
         .id = TCAM_PROPERTY_WB_PRESET,
         .v4l2_id = {/* usb 3: */ 0x0199e207},
@@ -144,6 +174,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {V4L2_CID_GAMMA},
     },
     {
+        .id = TCAM_PROPERTY_WB,
+        .v4l2_id = { 0x199e246 },
+    },
+    {
         .id = TCAM_PROPERTY_WB_AUTO,
         .v4l2_id = {0x0098090c},
     },
@@ -153,11 +187,19 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_WB_GREEN,
-        .v4l2_id = {},
+        .v4l2_id = { 0x199e248 },
     },
     {
         .id = TCAM_PROPERTY_WB_BLUE,
         .v4l2_id = {0x0098090f},
+    },
+    {
+        .id = TCAM_PROPERTY_WB_AUTO_PRESET,
+        .v4l2_id = { 0x199e247 },
+    },
+    {
+        .id = TCAM_PROPERTY_WB_TEMPERATURE,
+        .v4l2_id = { 0x199e250 },
     },
     {
         .id = TCAM_PROPERTY_IRCUT,
@@ -223,6 +265,45 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .id = TCAM_PROPERTY_IMAGE_STABILIZATION,
         .v4l2_id = { 0x199e231 },
     },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL,
+        .v4l2_id = { 0x199e241 },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_LEFT,
+        .v4l2_id = { 0x199e242 },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_TOP,
+        .v4l2_id = { 0x199e243 },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_WIDTH,
+        .v4l2_id = { 0x199e244 },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_HEIGHT,
+        .v4l2_id = { 0x199e245 },
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
+        .v4l2_id = { 0x199e251 },
+    },
+    {
+        .id = TCAM_PROPERTY_REVERSE_X,
+        .v4l2_id = { 0x199e226 },
+    },
+    {
+        .id = TCAM_PROPERTY_REVERSE_Y,
+        .v4l2_id = { 0x199e227 },
+    },
+    {
+        .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
+        .v4l2_id = { 0x199e228 },
+    },
+
+
+
 };
 
 
@@ -284,9 +365,9 @@ static TCAM_PROPERTY_ID find_mapping (int v4l2_id)
 
 
 std::shared_ptr<Property> tcam::create_property (int fd,
-                                                       struct v4l2_queryctrl* queryctrl,
-                                                       struct v4l2_ext_control* ctrl,
-                                                       std::shared_ptr<PropertyImpl> impl)
+                                                 struct v4l2_queryctrl* queryctrl,
+                                                 struct v4l2_ext_control* ctrl,
+                                                 std::shared_ptr<PropertyImpl> impl)
 {
 
     // assure we have the typ
