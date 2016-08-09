@@ -77,6 +77,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
     },
     {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
+        .name = "Exposure Auto Reference",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
+    },
+    {
         .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
         .name = "Highlight Reduction",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
@@ -197,6 +203,42 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
     },
     {
+        TCAM_PROPERTY_TRIGGER_POLARITY,
+        .name = "Trigger Polarity",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_EXPOSURE_MODE,
+        .name = "Trigger Exposure Mode",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_BURST_COUNT,
+        .name = "Trigger Burst Count",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_DEBOUNCE_TIME_US,
+        .name = "Trigger Debounce Time (us)",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_MASK_TIME_US,
+        .name = "Trigger Mask Time (us)",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
+        TCAM_PROPERTY_TRIGGER_NOISE_SURPRESSION_TIME_US,
+        .name = "Trigger Noise Surpression Time (us)",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE },
+    },
+    {
         .id = TCAM_PROPERTY_GPIO,
         .name = "GPIO",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
@@ -290,6 +332,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .id = TCAM_PROPERTY_WB_BLUE,
         .name = "Whitebalance Blue",
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
+        .id = TCAM_PROPERTY_WB_TEMPERATURE,
+        .name = "Whitebalance Temperature",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
+    },
+    {
+        .id = TCAM_PROPERTY_WB_AUTO_PRESET,
+        .name = "Whitebalance Auto Preset",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
         .group = { TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_WB },
     },
     {
@@ -562,6 +616,42 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_IMX174_HARDWARE_WDR_ENABLE,
         .name = "IMX174 WDR Enable",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL,
+        .name = "Auto Functions ROI Control",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_LEFT,
+        .name = "Auto Functions ROI Left",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_TOP,
+        .name = "Auto Functions ROI Top",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_WIDTH,
+        .name = "Auto Functions ROI Width",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_HEIGHT,
+        .name = "Auto Functions ROI Height",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
+    },
+    {
+        TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
+        .name = "Auto Functions ROI Preset",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
     },
     // {
     //     TCAM_PROPERTY_,
