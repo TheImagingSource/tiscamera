@@ -125,44 +125,6 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamWhitebalance, gst_tcamwhitebalance, GST_TYPE_BAS
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
                                                 gst_tcamwhitebalance_prop_init));
 
-// g_object_class_install_property (gobject_class,
-//                                  PROP_GAIN_RED,
-//                                  g_param_spec_int ("red", "Red",
-//                                                    "Value for red",
-//                                                    0, 255, 0,
-//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// g_object_class_install_property (gobject_class,
-//                                  PROP_GAIN_GREEN,
-//                                  g_param_spec_int ("green", "Green Gain",
-//                                                    "Value for red gain",
-//                                                    0, 255, 0,
-//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// g_object_class_install_property (gobject_class,
-//                                  PROP_GAIN_BLUE,
-//                                  g_param_spec_int ("blue", "Blue Gain",
-//                                                    "Value for blue gain",
-//                                                    0, 255, 0,
-//                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// g_object_class_install_property (gobject_class,
-//                                  PROP_AUTO_ENABLED,
-//                                  g_param_spec_boolean ("auto", "Auto Value Adjustment",
-//                                                        "Automatically adjust white balance values",
-//                                                        TRUE,
-//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// g_object_class_install_property (gobject_class,
-//                                  PROP_CAMERA_WB,
-//                                  g_param_spec_boolean ("camera-whitebalance", "Device whitebalance settings",
-//                                                        "Adjust whitebalance values in the camera",
-//                                                        FALSE,
-//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// g_object_class_install_property (gobject_class,
-//                                  PROP_WHITEBALANCE_ENABLED,
-//                                  g_param_spec_boolean ("module-enabled", "Enable/Disable White Balance Module",
-//                                                        "Disable entire module",
-//                                                        TRUE,
-//                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-// }
-
 
 static char* tcamwhitebalance_property_id_to_string (guint id)
 {
