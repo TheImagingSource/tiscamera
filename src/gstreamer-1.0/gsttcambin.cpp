@@ -401,6 +401,8 @@ gboolean gst_tcam_is_fourcc_rgb (const guint fourcc)
 static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_caps,
                                                        const GstCaps* wanted)
 {
+    GST_DEBUG("Generating source caps and list of required modules");
+
     GstStructure* structure = gst_caps_get_structure(wanted, 0);
 
     struct required_modules modules = {FALSE, FALSE, FALSE, nullptr};
@@ -420,6 +422,9 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
     }
 
     GstCaps* input = gst_caps_copy(wanted);
+
+    GST_DEBUG("Comparing '%s' to '%s'", gst_caps_to_string(wanted), gst_caps_to_string(available_caps));
+
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
     if (gst_caps_is_empty(intersection))
@@ -456,13 +461,13 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
         if (gst_caps_is_empty(intersection))
         {
-            GST_INFO("Unable to determine caps for source.");
+            GST_ERROR("Unable to determine caps for source.");
 
             return modules;
         }
         else
         {
-            GST_INFO("Using source caps '%s'", gst_caps_to_string(intersection));
+            GST_INFO("Using caps for source element: '%s'", gst_caps_to_string(intersection));
 
             modules.caps = gst_caps_copy(intersection);
         }
@@ -473,6 +478,10 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
+    }
+    else
+    {
+        GST_INFO("Device has caps. No conversion needed.");
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
@@ -703,7 +712,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 gst_tcambin_create_source(self);
 
                 GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-                GST_ERROR("caps of src: %s", gst_caps_to_string(self->target_caps));
+                GST_ERROR("caps of src: %s", gst_caps_to_string(src_caps));
 
                 self->modules = gst_tcambin_generate_src_caps(src_caps, self->target_caps);
             }
