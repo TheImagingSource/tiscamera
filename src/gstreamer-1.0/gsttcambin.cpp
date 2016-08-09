@@ -126,6 +126,16 @@ static gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
         }
     }
 
+    if (self->exposure != NULL)
+    {
+        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->exposure), name);
+
+        if (ret != nullptr)
+        {
+            return ret;
+        }
+    }
+
     return ret;
 }
 
@@ -160,6 +170,16 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
         for (unsigned int i = 0; i < g_slist_length(wb_prop_names); i++)
         {
             ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(wb_prop_names, i)->data));
+        }
+    }
+
+    if (self->exposure != nullptr)
+    {
+        GSList* exp_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->exposure));
+
+        for (unsigned int i = 0; i < g_slist_length(exp_prop_names); i++)
+        {
+            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(exp_prop_names, i)->data));
         }
     }
 
@@ -206,6 +226,18 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
         }
     }
 
+    if (self->exposure != nullptr)
+    {
+        if (tcam_prop_get_tcam_property(TCAM_PROP(self->exposure),
+                                        name, value,
+                                        min, max,
+                                        def, step,
+                                        type,
+                                        category, group))
+        {
+            return TRUE;
+        }
+    }
 
     return FALSE;
 }
@@ -249,6 +281,14 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
     if (self->whitebalance != nullptr)
     {
         if (tcam_prop_set_tcam_property(TCAM_PROP(self->whitebalance), name, value))
+        {
+            return TRUE;
+        }
+    }
+
+    if (self->exposure != nullptr)
+    {
+        if (tcam_prop_set_tcam_property(TCAM_PROP(self->exposure), name, value))
         {
             return TRUE;
         }
