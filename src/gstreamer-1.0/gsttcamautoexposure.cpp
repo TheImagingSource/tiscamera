@@ -51,6 +51,7 @@
 #endif
 
 #include "tcam.h"
+#include  "tcamprop.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -100,6 +101,684 @@ enum
     PROP_Y1,
 };
 
+
+/* prototypes */
+
+static void gst_tcamautoexposure_set_property (GObject* object,
+                                               guint property_id,
+                                               const GValue* value,
+                                               GParamSpec* pspec);
+static void gst_tcamautoexposure_get_property (GObject* object,
+                                               guint property_id,
+                                               GValue* value,
+                                               GParamSpec* pspec);
+static void gst_tcamautoexposure_finalize (GObject* object);
+
+static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
+static GstCaps* gst_tcamautoexposure_transform_caps (GstBaseTransform* trans,
+                                                     GstPadDirection direction,
+                                                     GstCaps* caps);
+
+static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
+                                              GstPadDirection direction,
+                                              GstCaps* caps,
+                                              GstCaps* othercaps);
+
+static GSList* gst_tcamautoexposure_get_property_names(TcamProp* self);
+
+static gchar *gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name);
+
+static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        GValue* value,
+                                                        GValue* min,
+                                                        GValue* max,
+                                                        GValue* def,
+                                                        GValue* step,
+                                                        GValue* type,
+                                                        GValue* category,
+                                                        GValue* group);
+
+static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        const GValue* value);
+
+static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self,
+                                                           const gchar* name);
+
+static GSList* gst_tcamautoexposure_get_device_serials (TcamProp* self);
+
+static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self,
+                                                      const char* serial,
+                                                      char** name,
+                                                      char** identifier,
+                                                      char** connection_type);
+
+static void gst_tcamautoexposure_prop_init (TcamPropInterface* iface)
+{
+    iface->get_property_names = gst_tcamautoexposure_get_property_names;
+    iface->get_property_type = gst_tcamautoexposure_get_property_type;
+    iface->get_property = gst_tcamautoexposure_get_tcam_property;
+    iface->get_menu_entries = gst_tcamautoexposure_get_tcam_menu_entries;
+    iface->set_property = gst_tcamautoexposure_set_tcam_property;
+    iface->get_device_serials = gst_tcamautoexposure_get_device_serials;
+    iface->get_device_info = gst_tcamautoexposure_get_device_info;
+}
+
+
+G_DEFINE_TYPE_WITH_CODE (GstTcamautoexposure, gst_tcamautoexposure, GST_TYPE_BASE_TRANSFORM,
+                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
+                                                gst_tcamautoexposure_prop_init));
+
+
+static const char* tcamautoexposure_property_id_to_string (guint id)
+{
+    switch (id)
+    {
+        case PROP_AUTO_EXPOSURE:
+        {
+            return "Exposure Auto";
+        }
+        case PROP_AUTO_GAIN:
+        {
+            return "Gain Auto";
+        }
+        case PROP_BRIGHTNESS_REFERENCE:
+        {
+            return "Brightness Reference";
+        }
+        case PROP_EXPOSURE_MAX:
+        {
+            return "Exposure Max";
+        }
+        case PROP_GAIN_MAX:
+        {
+            return "Gain Max";
+        }
+        case PROP_X0:
+        {
+            return "ROI X0";
+        }
+        case PROP_X1:
+        {
+            return "ROI X1";
+        }
+        case PROP_Y0:
+        {
+            return "ROI Y0";
+        }
+        case PROP_Y1:
+        {
+            return "ROI Y1";
+        }
+        default:
+            return "";
+    }
+}
+
+static guint tcamautoexposure_string_to_property_id (const char* str)
+{
+    if (str == nullptr)
+    {
+        return 0;
+    }
+    if (g_strcmp0(str, "Exposure Auto") == 0)
+    {
+        return PROP_AUTO_EXPOSURE;
+    }
+    else if (g_strcmp0(str, "Gain Auto") == 0)
+    {
+        return PROP_AUTO_GAIN;
+    }
+    else if (g_strcmp0(str, "Brightness Reference") == 0)
+    {
+        return PROP_BRIGHTNESS_REFERENCE;
+    }
+    else if (g_strcmp0(str, "Exposure Max") == 0)
+    {
+        return PROP_EXPOSURE_MAX;
+    }
+    else if (g_strcmp0(str, "Gain Max") == 0)
+    {
+        return PROP_GAIN_MAX;
+    }
+    else if (g_strcmp0(str, "ROI X0") == 0)
+    {
+        return PROP_X0;
+    }
+    else if (g_strcmp0(str, "ROI X1") == 0)
+    {
+        return PROP_X1;
+    }
+    else if (g_strcmp0(str, "ROI Y0") == 0)
+    {
+        return PROP_Y0;
+    }
+    else if (g_strcmp0(str, "ROI Y1") == 0)
+    {
+        return PROP_Y1;
+    }
+    return 0;
+}
+
+
+
+static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
+{
+    GSList* names = nullptr;
+
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_X0));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_X1));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_Y0));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_Y1));
+
+    return names;
+}
+
+
+static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name)
+{
+    if (name == nullptr)
+    {
+        return 0;
+    }
+
+    if (g_strcmp0(name, "Exposure Auto") == 0)
+    {
+        return strdup("boolean");
+    }
+    else if (g_strcmp0(name, "Gain Auto") == 0)
+    {
+        return strdup("boolean");
+    }
+    else if (g_strcmp0(name, "Brightness Reference") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "Exposure Max") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "Gain Max") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "ROI X0") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "ROI X1") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "ROI Y0") == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, "ROI Y1") == 0)
+    {
+        return strdup("integer");
+    }
+    return nullptr;
+}
+
+
+static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
+                                                        gchar* name,
+                                                        GValue* value,
+                                                        GValue* min,
+                                                        GValue* max,
+                                                        GValue* def,
+                                                        GValue* step,
+                                                        GValue* type,
+                                                        GValue* category,
+                                                        GValue* group)
+{
+    if (name == nullptr)
+    {
+        return 0;
+    }
+
+    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(prop);
+
+    if (g_strcmp0(name, "Exposure Auto") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_exposure);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type, gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "Gain Auto") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_gain);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type, gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "Brightness Reference") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->brightness_reference);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, 255);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 128);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "Exposure Max") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->default_exposure_values.max);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "Gain Max") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->default_gain_values.value);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "ROI X0") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->image_region.x0);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "ROI X1") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->image_region.x1);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "ROI Y0") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->image_region.y0);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, "ROI Y1") == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->image_region.y1);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+
+    return 0;
+
+    return FALSE;
+}
+
+
+static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
+                                                        gchar* name,
+                                                        const GValue* value)
+{
+    gst_tcamautoexposure_set_property(G_OBJECT(self), tcamautoexposure_string_to_property_id(name), value, NULL);
+    return TRUE;
+}
+
+static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self,
+                                                           const gchar* name)
+{
+    return nullptr;
+}
+
+
+static GSList* gst_tcamautoexposure_get_device_serials (TcamProp* self)
+{
+    return nullptr;
+}
+
+
+static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self,
+                                                      const char* serial,
+                                                      char** name,
+                                                      char** identifier,
+                                                      char** connection_type)
+{
+    return FALSE;
+}
 /* pad templates */
 
 static GstStaticPadTemplate gst_tcamautoexposure_sink_template =
@@ -117,14 +796,6 @@ static GstStaticPadTemplate gst_tcamautoexposure_src_template =
 
 /* class initialization */
 
-G_DEFINE_TYPE_WITH_CODE (GstTcamautoexposure,
-                         gst_tcamautoexposure,
-                         GST_TYPE_BASE_TRANSFORM,
-                         GST_DEBUG_CATEGORY_INIT (gst_tcamautoexposure_debug_category,
-                                                  "tcamautoexposure",
-                                                  0,
-                                                  "debug category for tcamautoexposure element"))
-
 static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
 {
     GObjectClass* gobject_class = G_OBJECT_CLASS (klass);
@@ -140,6 +811,9 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                           "Generic",
                                           "Adjusts the image brightness by setting camera properties.",
                                           "The Imaging Source Europe GmbH <support@theimagingsource.com>");
+
+    GST_DEBUG_CATEGORY_INIT(gst_tcamautoexposure_debug_category, "tcamautoexposure", 0, "tcam autoexposure");
+
 
     gobject_class->set_property = gst_tcamautoexposure_set_property;
     gobject_class->get_property = gst_tcamautoexposure_get_property;
