@@ -409,12 +409,6 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
     guint fourcc = 0;
 
-    if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
-    {
-        const char *string = gst_structure_get_string (structure, "format");
-        fourcc = GST_STR_FOURCC (string);
-    }
-
     for (unsigned int i = 0; i < gst_caps_get_size(available_caps); ++i)
     {
         GstCaps* single_caps = gst_caps_copy_nth(available_caps, i);
@@ -482,6 +476,14 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
     else
     {
         GST_INFO("Device has caps. No conversion needed.");
+        structure = gst_caps_get_structure(intersection, 0);
+
+        if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+        {
+            const char *string = gst_structure_get_string (structure, "format");
+            fourcc = GST_STR_FOURCC (string);
+        }
+
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
@@ -556,6 +558,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
     {
+        GST_DEBUG("Adding autoexposure to pipeline");
         self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
         gst_bin_add(GST_BIN(self), self->exposure);
     }
@@ -568,6 +571,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             self->whitebalance = gst_element_factory_make("tcamwhitebalance", "whitebalance");
             if (self->whitebalance)
             {
+                GST_DEBUG("Adding whitebalance to pipeline");
                 gst_bin_add(GST_BIN(self), self->whitebalance);
             }
             else
@@ -580,6 +584,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         self->debayer = gst_element_factory_make("bayer2rgb", "debayer");
         if (self->debayer)
         {
+            GST_DEBUG("Adding bayer2rgb to pipeline");
             gst_bin_add(GST_BIN(self), self->debayer);
         }
         else
