@@ -954,9 +954,16 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
     GstCaps* caps;
 
     if (self->all_caps != NULL)
+    {
         caps = gst_caps_copy (self->all_caps);
+    }
     else
-        caps = gst_caps_new_any ();
+    {
+        gst_tcam_src_init_camera(self);
+
+        caps = gst_caps_copy (self->all_caps);
+
+    }
 
     GST_LOG_OBJECT (self, "Available caps = %" GST_PTR_FORMAT, caps);
 
@@ -1138,6 +1145,9 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         /* TODO add pipeline termination */
         return false;
     }
+
+    self->all_caps = gst_tcam_src_get_all_camera_caps(self);
+
     return true;
 }
 
