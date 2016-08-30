@@ -267,11 +267,6 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
         g_value_set_string(category, tcam::get_control_reference(prop.group.property_group).name.c_str());
     }
 
-    if (type)
-    {
-        g_value_init (type, G_TYPE_GTYPE);
-    }
-
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
@@ -297,7 +292,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             if (max)
             {
                 g_value_init (max, G_TYPE_INT);
-                g_value_set_int (max, prop.value.i.max);
+                g_value_set_int (max, (int)prop.value.i.max);
             }
             if (def)
             {
@@ -311,7 +306,9 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             }
             if (type)
             {
-                g_value_set_gtype (type, G_TYPE_INT);
+                // g_value_set_gtype (type, G_TYPE_INT);
+                g_value_init(type, G_TYPE_STRING);
+                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_DOUBLE:
@@ -342,7 +339,8 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             }
             if (type)
             {
-                g_value_set_gtype (type, G_TYPE_DOUBLE);
+                g_value_init(type, G_TYPE_STRING);
+                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_STRING:
@@ -370,7 +368,8 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             }
             if (type)
             {
-                g_value_set_gtype (type, G_TYPE_STRING);
+                g_value_init(type, G_TYPE_STRING);
+                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -400,7 +399,8 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             }
             if (type)
             {
-                g_value_set_gtype (type, G_TYPE_BOOLEAN);
+                g_value_init(type, G_TYPE_STRING);
+                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
             }
             break;
         default:
