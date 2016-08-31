@@ -483,17 +483,17 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->default_exposure_values.max);
+            g_value_set_int(value, self->exposure.value);
         }
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, self->exposure.min);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->exposure.max);
         }
         if (def)
         {
@@ -527,17 +527,17 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->default_gain_values.value);
+            g_value_set_int(value, self->gain.value);
         }
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, self->gain.min);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->gain.max);
         }
         if (def)
         {
