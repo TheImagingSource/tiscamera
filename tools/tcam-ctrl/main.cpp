@@ -53,13 +53,20 @@ void print_help (const std::string& prog_name)
 
 void print_capture_devices (const std::vector<DeviceInfo>& devices)
 {
-    std::cout << "Available devices:" << std::endl;
-    std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
-    for (const auto& d : devices)
+    if (devices.size() == 0)
     {
-        std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t" << d.get_serial() << std::endl;
+        std::cout << "No devices found." << std::endl;
     }
-    std::cout << std::endl;
+    else
+    {
+        std::cout << "Available devices:" << std::endl;
+        std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
+        for (const auto& d : devices)
+        {
+            std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t" << d.get_serial() << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -151,16 +158,12 @@ int main (int argc, char *argv[])
         std::cout << "No serial given!" << std::endl;
         return 1;
     }
-    else
-    {
-        std::cout << "serial:" << serial << std::endl;
-    }
 
     auto dev = open_device(serial);
 
     if (!dev)
     {
-        std::cerr << "Unable to open device with serial \" " << serial << "\"." << std::endl;
+        std::cerr << "Unable to open device with serial \"" << serial << "\"." << std::endl;
         return 1;
     }
 
