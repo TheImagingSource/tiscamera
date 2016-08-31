@@ -882,16 +882,14 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                 caps = gst_caps_copy_nth (icaps, best);
 
                 GstStructure* structure;
-                double frame_rate = 0.0;
+                double frame_rate = G_MAXINT;
 
                 structure = gst_caps_get_structure (caps, 0);
 
                 gst_structure_fixate_field_nearest_int (structure, "width", G_MAXINT);
                 gst_structure_fixate_field_nearest_int (structure, "height", G_MAXINT);
-                gst_structure_fixate_field_nearest_fraction (structure, "framerate", (double) (0.5 + frame_rate), 1);
-
+                gst_structure_fixate_field_nearest_fraction (structure, "framerate", frame_rate, 1);
                 gst_caps_unref (icaps);
-
             }
         }
         gst_caps_unref (thiscaps);
