@@ -32,7 +32,7 @@ include_directories(${TinyXML_INCLUDE_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(cflags "-fpic -w -Wall -Wextra -pedantic -Wundef -Wshadow")
-set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -ldl")
+set(lflags "-Wl,--gc-sections,--no-as-needed -ffunction-sections -fdata-sections -ldl")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ${lflags}")
 
