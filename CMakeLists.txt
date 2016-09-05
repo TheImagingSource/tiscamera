@@ -62,6 +62,7 @@ set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRIN
 
 set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path" FORCE)
 set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path" FORCE)
+set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE STRING "systemd unit installation path" FORCE)
 
 add_subdirectory(src)
 
