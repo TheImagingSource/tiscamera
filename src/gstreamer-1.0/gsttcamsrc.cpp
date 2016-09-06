@@ -1328,12 +1328,14 @@ wait_again:
         goto wait_again;
     }
 
-    if (!tcam::is_image_buffer_complete(self->ptr))
-    {
-        GST_DEBUG_OBJECT (self, "Received incomplete buffer. Returning to waiting position.");
+    /* TODO: check why aravis throws an incomplete buffer error
+       but the received images are still valid */
+    // if (!tcam::is_image_buffer_complete(self->ptr))
+    // {
+    //     GST_DEBUG_OBJECT (self, "Received incomplete buffer. Returning to waiting position.");
 
-        goto wait_again;
-    }
+    //     goto wait_again;
+    // }
 
     *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
                                           0, self->ptr->length, NULL, NULL);
