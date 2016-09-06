@@ -628,9 +628,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
             if (self->modules.convert)
             {
-                gst_element_link_pads_full(self->debayer, "src",
-                                           self->convert, "sink",
-                                           GST_PAD_LINK_CHECK_NOTHING);
+                gst_element_link(self->debayer,
+                                 self->convert);
                 self->target_pad = gst_element_get_static_pad(self->convert, "src");
                 GST_DEBUG("Using videoconvert as exit element for ghost pad");
             }
@@ -661,9 +660,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
             if (self->modules.convert)
             {
-                gst_element_link_pads_full(self->debayer, "src",
-                                           self->convert, "sink",
-                                           GST_PAD_LINK_CHECK_NOTHING);
+                gst_element_link(self->debayer,
+                                 self->convert);
                 self->target_pad = gst_element_get_static_pad(self->convert, "src");
                 GST_DEBUG("Using videoconvert as exit element for ghost pad");
             }
