@@ -1260,7 +1260,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
         default:
             break;
     }
-
+    ret = GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->change_state(element, change);
     return ret;
 }
 
