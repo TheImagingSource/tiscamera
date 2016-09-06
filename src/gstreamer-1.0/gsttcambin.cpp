@@ -490,6 +490,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
+        modules.caps = gst_caps_copy(intersection);
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
