@@ -95,8 +95,14 @@ static gboolean get_property_by_name (GstTcamSrc* self,
 
     if (self->device == nullptr)
     {
-        gst_tcam_src_init_camera(self);
-        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        if (gst_tcam_src_init_camera(self))
+        {
+            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        }
+        else
+        {
+            return FALSE;
+        }
     }
     struct device_state* ds = (struct device_state*)self->device;
 
@@ -146,8 +152,14 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
 
     if (self->device == nullptr)
     {
-        gst_tcam_src_init_camera(self);
-        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        if (gst_tcam_src_init_camera(self))
+        {
+            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        }
+        else
+        {
+            return NULL;
+        }
     }
 
     struct tcam_device_property prop;
@@ -240,8 +252,14 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 
     if (self->device == nullptr)
     {
-        gst_tcam_src_init_camera(self);
-        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        if (gst_tcam_src_init_camera(self))
+        {
+            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+        }
+        else
+        {
+            return FALSE;
+        }
     }
 
     struct device_state* ds = (struct device_state*)self->device;
@@ -957,7 +975,10 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
     }
     else
     {
-        gst_tcam_src_init_camera(self);
+        if (!gst_tcam_src_init_camera(self))
+        {
+            return NULL;
+        }
 
         caps = gst_caps_copy (self->all_caps);
 
@@ -1205,6 +1226,45 @@ gboolean gst_tcam_src_stop (GstBaseSrc* src)
 }
 
 
+static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
+                                                       GstStateChange change)
+{
+
+    GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
+
+    GstTcamSrc* self = GST_TCAM_SRC(element);
+
+    switch(change)
+    {
+        case GST_STATE_CHANGE_NULL_TO_READY:
+        {
+            if (self->device == nullptr)
+            {
+                if (!gst_tcam_src_init_camera(self))
+                {
+                    return GST_STATE_CHANGE_FAILURE;
+                }
+                self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+            }
+            break;
+        }
+        case GST_STATE_CHANGE_READY_TO_NULL:
+        {
+            if (self->device != nullptr)
+            {
+                gst_tcam_src_close_camera(self);
+            }
+
+            break;
+        }
+        default:
+            break;
+    }
+
+    return ret;
+}
+
+
 static void gst_tcam_src_get_times (GstBaseSrc* basesrc,
                                     GstBuffer* buffer,
                                     GstClockTime* start,
@@ -1387,9 +1447,10 @@ static void gst_tcam_src_set_property (GObject* object,
 
                 gst_tcam_src_close_camera(self);
 
-                gst_tcam_src_init_camera(self);
-                self->all_caps = gst_tcam_src_get_all_camera_caps (self);
-
+                if (gst_tcam_src_init_camera(self))
+                {
+                    self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+                }
             }
             break;
         }
@@ -1492,6 +1553,8 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
 
     gst_element_class_add_pad_template (element_class,
                                         gst_static_pad_template_get (&tcam_src_template));
+
+    element_class->change_state = gst_tcam_src_change_state;
 
     gstbasesrc_class->get_caps = gst_tcam_src_get_caps;
     gstbasesrc_class->set_caps = gst_tcam_src_set_caps;

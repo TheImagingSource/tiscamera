@@ -157,6 +157,13 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
     {
         GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
 
+        // special case
+        // when our src return no properties we have an invalid device and abort everything
+        if (src_prop_names == nullptr)
+        {
+            return nullptr;
+        }
+
         for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
         {
             ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
@@ -483,7 +490,6 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
-
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
