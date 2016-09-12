@@ -424,7 +424,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
     GstCaps* input = gst_caps_copy(wanted);
 
-    GST_DEBUG("Comparing '%s' to '%s'", gst_caps_to_string(wanted), gst_caps_to_string(available_caps));
+    GST_DEBUG("Comparing '%s' <==  to  ==> '%s'", gst_caps_to_string(wanted), gst_caps_to_string(available_caps));
 
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
@@ -633,15 +633,20 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                  self->convert);
                 self->target_pad = gst_element_get_static_pad(self->convert, "src");
                 GST_DEBUG("Using videoconvert as exit element for ghost pad");
+                GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamwhitebalance ! tcamautoexposure ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
             }
             else
             {
                 GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
+                GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamwhitebalance ! tcamautoexposure ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
+
                 self->target_pad = gst_element_get_static_pad(self->debayer, "src");
+
             }
         }
         else
         {
+            bool exposure_active = false;
             if (self->exposure != nullptr)
             {
                 gst_element_link(self->src,
@@ -650,6 +655,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                  self->exposure);
                 gst_element_link(self->exposure,
                                  self->debayer);
+                exposure_active = true;
             }
             else
             {
@@ -665,10 +671,27 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                  self->convert);
                 self->target_pad = gst_element_get_static_pad(self->convert, "src");
                 GST_DEBUG("Using videoconvert as exit element for ghost pad");
+                if (exposure_active)
+                {
+                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
+                }
+                else
+                {
+                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
+
+                }
             }
             else
             {
                 GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
+                if (exposure_active)
+                {
+                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
+                }
+                else
+                {
+                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
+                }
                 self->target_pad = gst_element_get_static_pad(self->debayer, "src");
             }
         }
@@ -684,6 +707,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
             self->target_pad = gst_element_get_static_pad(self->exposure, "src");
             GST_DEBUG("Using exposure as exit element for ghost pad");
+            GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! ghostpad", gst_caps_to_string(self->modules.caps));
+
         }
         else
         {
@@ -692,6 +717,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
             self->target_pad = gst_element_get_static_pad(self->pipeline_caps, "src");
             GST_DEBUG("Using source as exit element for ghost pad");
+            GST_DEBUG("Internal pipeline: tcamsrc ! %s ! ghostpad", gst_caps_to_string(self->modules.caps));
+
         }
     }
 
@@ -735,6 +762,11 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             if (self->target_set == FALSE)
             {
+                if (self->target_pad == nullptr)
+                {
+                    GST_ERROR("target_pad not defined");
+                }
+
                 gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad);
 
                 self->target_set = TRUE;
@@ -836,7 +868,7 @@ static void gst_tcambin_src_reset (GstTcamBin* self)
     gst_debug_log(gst_tcambin_debug,
                   GST_LEVEL_ERROR,
                   __FILE__, "reset", __LINE__,
-                  NULL, "reset ====================");
+                  NULL, "reset");
     GstPad* targetpad;
 
     GstTcamBin* src = self;
