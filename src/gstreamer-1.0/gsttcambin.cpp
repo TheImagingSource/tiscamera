@@ -428,6 +428,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
+    bool conversion_needed = false;
     if (gst_caps_is_empty(intersection))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
@@ -479,6 +480,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
+        conversion_needed = true;
     }
     else
     {
@@ -491,6 +493,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
             fourcc = GST_STR_FOURCC (string);
         }
         modules.caps = gst_caps_copy(intersection);
+        conversion_needed = false;
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
@@ -505,12 +508,18 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
     }
     else if (gst_tcam_is_fourcc_rgb(fourcc))
     {
-        modules.bayer = TRUE;
+        if (conversion_needed)
+        {
+            modules.bayer = TRUE;
+        }
         modules.whitebalance = TRUE;
     }
     else
     {
-        modules.bayer = TRUE;
+        if (conversion_needed)
+        {
+            modules.bayer = TRUE;
+        }
         modules.whitebalance = TRUE;
         modules.convert = TRUE;
     }
