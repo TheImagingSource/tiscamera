@@ -5,6 +5,7 @@ This repository will give you additional ressources to control your TIS camera.
 ## What do we offer?
 
 * gstreamer elements
+* gobject introspection
 * uvc extensions
 * firmware update tools
 * examples on how to interact with your camera
