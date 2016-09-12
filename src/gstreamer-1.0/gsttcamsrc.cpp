@@ -618,7 +618,7 @@ static bool gst_tcam_src_fill_structure_fixed_resolution (GstStructure* structur
                                                           const tcam_resolution_description& res)
 {
 
-    std::vector<double> framerates = format.get_framerates(res.min_size);
+    std::vector<double> framerates = format.get_frame_rates(res);
     int framerate_count = framerates.size();
 
     GValue fps_list = {0};

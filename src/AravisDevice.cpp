@@ -55,11 +55,21 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 {
     auto dev = arv_camera_get_device(device->arv_camera);
 
+// TODO implement better way to check for availability
+
     arv_device_set_integer_feature_value(dev, "TestWidth", s.width);
     arv_device_set_integer_feature_value(dev, "TestHeight", s.height);
 
     double min = arv_device_get_integer_feature_value(dev, "ResultingMinFPS");
     double max = arv_device_get_integer_feature_value(dev, "ResultingMaxFPS");
+
+    if (min == 0.0 && max == 0.0)
+    {
+        // TestWidth, TestHeight do not exists.
+        // return empty vector and let format handle it
+        return std::vector<double>();
+    }
+
 
     tcam_log(TCAM_LOG_DEBUG, "Received min: %f max %f", min, max);
 
