@@ -35,11 +35,19 @@ static TcamGstMapping tcam_gst_caps_info[] =
 {
 	{
 		FOURCC_RGB32,
-		"video/x-raw, format=(string)ARGB",
+		"video/x-raw, format=(string)RGB",
 		"video/x-raw",
-        "ARGB",
+        "RGB",
 		"video/x-raw-rgb, bpp=(int)32, depth=(int)8",
 		"video/x-raw-rgb"
+	},
+	{
+		FOURCC_BGR24,
+		"video/x-raw, format=(string)BGR",
+		"video/x-raw",
+        "BGR",
+		"video/x-raw-bgr, bpp=(int)24, depth=(int)8",
+		"video/x-raw-bgr"
 	},
 	{
 		FOURCC_Y800,
