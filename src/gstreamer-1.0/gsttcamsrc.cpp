@@ -1107,7 +1107,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     ds->dev->start_stream(ds->sink);
 
     self->is_running = TRUE;
-    GST_INFO("CCCCCCCCCC  successfully set caps to: %s", gst_caps_to_string(caps));
+    GST_INFO("Successfully set caps to: %s", gst_caps_to_string(caps));
 
     return TRUE;
 }
@@ -1238,10 +1238,13 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
+            GST_INFO("changing from NULL to READY");
             if (self->device == nullptr)
             {
+                GST_INFO("must initialize device");
                 if (!gst_tcam_src_init_camera(self))
                 {
+                    GST_INFO("FAILURE to initialize device. Aborting...");
                     return GST_STATE_CHANGE_FAILURE;
                 }
                 self->all_caps = gst_tcam_src_get_all_camera_caps (self);
