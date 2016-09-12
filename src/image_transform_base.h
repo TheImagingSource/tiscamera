@@ -33,6 +33,7 @@ namespace img
 		switch (fcc)
 		{
 		case FOURCC_RGB24:		return 24;
+		case FOURCC_BGR24:		return 24;
 		case FOURCC_RGB32:		return 32;
 		case FOURCC_YUY2:		return 16;
 		case FOURCC_UYVY:		return 16;
