@@ -111,10 +111,11 @@ void print_help (const char* prog_name)
     std::cout << prog_name <<" - GigE Indexing daemon\n"
               << "\n"
               << "Usage:\n"
-              << "\t" << prog_name << " list\n"
-              << "\t" << prog_name << " list-long\n"
-              << "\t" << prog_name << " start\n"
-              << "\t" << prog_name << " stop\n"
+              << "\t" << prog_name << " list      - list camera names\n"
+              << "\t" << prog_name << " list-long - list camera names, ip, mac\n"
+              << "\t" << prog_name << " start     - start daemon and fork\n"
+              << "\t\t" << " --no-fork            - run daemon without forking\n"
+              << "\t" << prog_name << " stop      - stop daemon\n"
               <<std::endl;
 }
 
@@ -127,10 +128,16 @@ void signal_handler (int sig)
             /* rehash the server */
             break;
         case SIGTERM:
+        case SIGINT:
             /* finalize the server */
-            daemon_instance.stop_daemon();
+
             CameraListHolder::get_instance().stop();
-            exit(0);
+            daemon_instance.stop_daemon();
+            _exit(0);
+
+            break;
+        default:
+            std::cout << "Received unhandled signal " << sig << std::endl;
             break;
     }
 }
@@ -152,7 +159,18 @@ int main (int argc, char *argv[])
         }
         else if (strcmp("start", argv[i]) == 0)
         {
-            int ret = daemon_instance.daemonize(&signal_handler);
+            bool daemonize = true;
+
+            for (unsigned int j = 1; j < argc; ++j)
+            {
+                if (strcmp("--no-fork", argv[j]) == 0)
+                {
+                    daemonize = false;
+                    break;
+                }
+            }
+
+            int ret = daemon_instance.daemonize(&signal_handler, false);
 
             if (ret < 0)
             {
@@ -165,23 +183,40 @@ int main (int argc, char *argv[])
                 std::cout << "Started daemon. PID: " << ret << std::endl;
                 return 0;
             }
+
             std::vector<std::string> interfaces;
             for (unsigned int x = (i + 1); x < argc; ++x)
             {
+                if (strcmp("--no-fork", argv[x]) == 0)
+                {
+                    continue;
+                }
+
                 interfaces.push_back(argv[x]);
             }
             CameraListHolder::get_instance().set_interface_list(interfaces);
             CameraListHolder::get_instance().run();
 
-            while (true)
-            {
-                sleep(5);
-            }
+            // we now suspend this thread and wait until a SIGTERM arrives
+            sigset_t mask;
+            sigprocmask(0, 0, &mask);
+            sigdelset(&mask, SIGTERM);
+            sigsuspend(&mask);
         }
         else if (strcmp("stop", argv[i]) == 0)
         {
-            daemon_instance.undaemonize();
-            return 0;
+            if (daemon_instance.undaemonize())
+            {
+                std::cout << "Successfully stopped daemon." << std::endl;
+
+                return 0;
+            }
+            else
+            {
+                std::cout << "Could not stop daemon." << std::endl;
+
+                return 1;
+            }
         }
 
     }

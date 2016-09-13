@@ -20,7 +20,7 @@
 
 #include "tcam-semaphores.h"
 
-#include <sys/sem.h>	 /* semaphore functions and structs.     */
+#include <sys/sem.h>     /* semaphore functions and structs.     */
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
@@ -37,20 +37,8 @@
 using namespace tis;
 
 
-
-void log_message (const char* filename, const char* message)
-{
-    FILE *logfile;
-	logfile=fopen(filename,"a");
-	if(!logfile)
-        return;
-	fprintf(logfile,"%s\n",message);
-	fclose(logfile);
-}
-
-
 CameraListHolder::CameraListHolder ()
-    : continue_loop(true), run_loop(false), data(nullptr)
+    : continue_loop(true), data(nullptr)
 {
     // to understand shared memory use this guide:
     // http://beej.us/guide/bgipc/output/html/multipage/shm.html
@@ -61,6 +49,11 @@ CameraListHolder::CameraListHolder ()
        thus we require the same rights for all users to prevent 'permission denied'
        errors due to server/client being run by different users. */
     shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0666 | IPC_CREAT);
+
+    if (shmid == -1)
+    {
+        throw;
+    }
 
     semaphore_key = ftok("/tmp/tcam-gige-semaphore", 'S');
     semaphore_id = tcam::semaphore_create(semaphore_key);
@@ -134,24 +127,27 @@ void CameraListHolder::set_interface_list (std::vector<std::string> interfaces)
 void CameraListHolder::run ()
 {
     data = shmat(shmid, nullptr, 0);
-    work_thread.detach();
 }
 
 
 void CameraListHolder::stop ()
 {
     this->continue_loop = false;
-    std::unique_lock<std::mutex> lck(mtx);
-    run_loop = true;
+    mtx.lock();
     cv.notify_all();
+    mtx.unlock();
     shmctl(shmid, IPC_RMID, NULL);
     data = nullptr;
+
+    if (this->work_thread.joinable())
+    {
+        this->work_thread.join();
+    }
 }
 
 
 void CameraListHolder::index_loop ()
 {
-
     while (continue_loop)
     {
         loop_function();
@@ -213,45 +209,43 @@ std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::stri
 
 void CameraListHolder::loop_function ()
 {
-        std::unique_lock<std::mutex> lck(mtx);
+    std::unique_lock<std::mutex> lck(mtx);
 
-        cv.wait_for(lck, std::chrono::seconds(2));
+    auto res = cv.wait_for(lck, std::chrono::seconds(2));
 
-        // preemptiv stop
-        if (!continue_loop)
-        {
-            log_message("/tmp/gige.log", "Preemptiv stop");
-            return;
-        }
+    // preemptiv stop
+    if (res == std::cv_status::no_timeout)
+    {
+        return;
+    }
 
-        std::vector<struct tcam_device_info> aravis_list = get_gige_device_list(interface_list);
+    std::vector<struct tcam_device_info> aravis_list = get_gige_device_list(interface_list);
 
-        if (aravis_list.size() > TCAM_DEVICE_LIST_MAX)
-        {
-            log_message("/tmp/gige.log", "To many devices. Unable to fill list");
-            return;
-        }
+    if (aravis_list.size() > TCAM_DEVICE_LIST_MAX)
+    {
+        return;
+    }
 
-        tcam::semaphore_lock(semaphore_id);
+    tcam::semaphore_lock(semaphore_id);
 
-        struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, NULL);
 
-        tmp_ptr->device_count = aravis_list.size();
+    tmp_ptr->device_count = aravis_list.size();
 
-        struct tcam_device_info* ptr = tmp_ptr->devices;
-        for (const auto dev : aravis_list)
-        {
-            memcpy(ptr, &dev, sizeof(struct tcam_device_info));
-            ++ptr;
-        }
+    struct tcam_device_info* ptr = tmp_ptr->devices;
+    for (const auto dev : aravis_list)
+    {
+        memcpy(ptr, &dev, sizeof(struct tcam_device_info));
+        ++ptr;
+    }
 
-        // force update to change time
-        struct shmid_ds ds = {};
-        shmctl(shmid, IPC_STAT, &ds);
-        shmctl(shmid, IPC_SET, &ds);
+    // force update to change time
+    struct shmid_ds ds = {};
+    shmctl(shmid, IPC_STAT, &ds);
+    shmctl(shmid, IPC_SET, &ds);
 
-        // release dataptr
-        shmdt(tmp_ptr);
+    // release dataptr
+    shmdt(tmp_ptr);
 
-        tcam::semaphore_unlock(semaphore_id);
+    tcam::semaphore_unlock(semaphore_id);
 }

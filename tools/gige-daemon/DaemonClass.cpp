@@ -9,6 +9,10 @@
 #include <sys/stat.h> // posix file checking via stat
 #include <csignal>
 
+#include <iostream>
+#include <cstdlib>
+
+
 LockFile::LockFile (const std::string filename)
     : lockfile_name(filename), lock_file(nullptr), file_handle(-1)
 {}
@@ -50,22 +54,22 @@ bool LockFile::create_lock_file ()
         return false;
     }
 
-    file_handle = open(lockfile_name.c_str(), O_RDWR|O_CREAT, 0640);
+    file_handle = open(lockfile_name.c_str(), O_RDWR|O_CREAT, 0644);
 
     // TODO
-	if (file_handle < 0)
+    if (file_handle < 0)
     {
         exit(1); /* can not open */
     }
-	if (lockf(file_handle, F_TLOCK, 0) < 0)
+    if (lockf(file_handle, F_TLOCK, 0) < 0)
     {
         exit(0); /* can not lock */
     }
-	/* only first instance continues */
+    /* only first instance continues */
 
     char str[10];
-	sprintf(str,"%d\n",getpid());
-	write(file_handle, str, strlen(str)); /* record pid to lockfile */
+    sprintf(str,"%d\n",getpid());
+    write(file_handle, str, strlen(str)); /* record pid to lockfile */
 
     return true;
 }
@@ -153,7 +157,7 @@ DaemonClass::~DaemonClass ()
 }
 
 
-int DaemonClass::daemonize (signal_callback callback)
+int DaemonClass::daemonize (signal_callback callback, bool fork_process)
 {
     // we are already a daemon <- assuming this is a sysv type system
     // systemd has pid 1 and starts system daemons.
@@ -170,27 +174,47 @@ int DaemonClass::daemonize (signal_callback callback)
         return -2;
     }
 
-    auto i = fork();
+    pid_t i;
 
-    if (i < 0)
+    if (fork_process)
     {
-        return -3;
-    }
-    else if (i > 0)
-    {
-        return i;
-    }
+        i = fork();
 
-    setsid(); /* obtain a new process group */
+        if (i < 0)
+        {
+            return -3;
+        }
+        else if (i > 0)
+        {
+            return i;
+        }
 
-	for (i = getdtablesize(); i >= 0; --i)
+
+        setsid(); /* obtain a new process group */
+
+        /* Fork off for the second time*/
+        pid_t pid = fork();
+
+        /* An error occurred */
+        if(pid < 0)
+        {
+            exit(EXIT_FAILURE);
+        }
+
+        /* Success: Let the parent terminate */
+        if(pid > 0)
+        {
+            exit(EXIT_SUCCESS);
+        }
+
+    for (i = getdtablesize(); i >= 0; --i)
     {
         close(i); /* close all descriptors */
     }
 
-	i = open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standart I/O */
+    i = open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standart I/O */
 
-	umask(027); /* set newly created file permissions */
+    umask(027); /* set newly created file permissions */
 
     chdir("/"); /* change to dir that always exists */
 
@@ -201,12 +225,13 @@ int DaemonClass::daemonize (signal_callback callback)
     }
 
     // register signals
-	signal(SIGCHLD,SIG_IGN); /* ignore child */
-	signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
-	signal(SIGTTOU,SIG_IGN);
-	signal(SIGTTIN,SIG_IGN);
-	signal(SIGHUP, callback); /* catch hangup signal */
-	signal(SIGTERM, callback); /* catch kill signal */
+    signal(SIGCHLD,SIG_IGN); /* ignore child */
+    signal(SIGTSTP,SIG_IGN); /* ignore tty signals */
+    signal(SIGTTOU,SIG_IGN);
+    signal(SIGTTIN,SIG_IGN);
+    signal(SIGHUP, callback); /* catch hangup signal */
+    signal(SIGTERM, callback); /* catch kill signal */
+    signal(SIGINT, callback); /* catch kill signal */
 
     return 0;
 }
@@ -221,6 +246,14 @@ bool DaemonClass::stop_daemon ()
 bool DaemonClass::undaemonize ()
 {
     int pid = get_daemon_pid();
+
+    if (pid == -1)
+    {
+        std::cout << "No valid PID found." << std::endl;
+        return false;
+    }
+
+    std::cout << "Killing daemon with PID " << pid << std::endl;
 
     int ret = kill(pid, SIGTERM);
 
@@ -250,11 +283,6 @@ int DaemonClass::get_daemon_pid ()
 
     return -1;
 }
-
-
-// receive data from daemon process
-int DaemonClass::receive_data ()
-{}
 
 
 void DaemonClass::open_port ()

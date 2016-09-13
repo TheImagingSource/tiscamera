@@ -68,7 +68,8 @@ public:
     //   -1 - unable to fork process
     //    0 - code is running the forked instance
     //  > 0 - PID of the forked instace; you are running the original caller
-    int daemonize (signal_callback);
+    // @param fork_process - true if fork shall be called
+    int daemonize (signal_callback, bool fork_process);
 
     // stop all daemon functions
     // should only be called from the forked process
@@ -85,9 +86,6 @@ public:
 
     // return pid of the daemon process
     int get_daemon_pid ();
-
-    // receive data from daemon process
-    int receive_data ();
 
 private:
 

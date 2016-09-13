@@ -57,7 +57,6 @@ private:
     std::vector<std::string> interface_list;
 
     bool continue_loop;
-    bool run_loop;
     std::thread work_thread;
     std::mutex mtx;
     std::mutex real_mutex;
