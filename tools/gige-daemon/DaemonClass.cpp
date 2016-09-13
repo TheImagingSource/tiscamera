@@ -206,7 +206,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
         {
             exit(EXIT_SUCCESS);
         }
-
+    }
     for (i = getdtablesize(); i >= 0; --i)
     {
         close(i); /* close all descriptors */
