@@ -568,9 +568,23 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     self->pipeline_caps = gst_element_factory_make("capsfilter", "src_caps");
 
+    if (self->pipeline_caps == nullptr)
+    {
+        GST_ERROR("Could not create internal pipeline caps. Aborting");
+        return FALSE;
+    }
+
     g_object_set(self->pipeline_caps, "caps", self->modules.caps, NULL);
 
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
+
+    gst_element_link(self->src,
+                     self->pipeline_caps);
+
+    std::string pipeline_description = "tcamscr ! ";
+    pipeline_description += gst_caps_to_string(self->modules.caps);
+
+    GstElement* previous_element = self->pipeline_caps;
 
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
     {
@@ -589,6 +603,10 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             {
                 GST_DEBUG("Adding whitebalance to pipeline");
                 gst_bin_add(GST_BIN(self), self->whitebalance);
+
+                pipeline_description += " ! tcamwhitebalance";
+                gst_element_link(previous_element, self->whitebalance);
+                previous_element = self->whitebalance;
             }
             else
             {
@@ -602,6 +620,11 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         {
             GST_DEBUG("Adding bayer2rgb to pipeline");
             gst_bin_add(GST_BIN(self), self->debayer);
+            pipeline_description += " ! bayer2rgb";
+
+            gst_element_link(previous_element, self->debayer);
+            previous_element = self->debayer;
+
         }
         else
         {
@@ -614,7 +637,14 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         self->convert = gst_element_factory_make("videoconvert", "convert");
         if (self->convert)
         {
+            // TODO: convert gets added to often.
+            // do more checks to prevent unneccessary plugins
+
+            GST_DEBUG("Adding videoconvert to pipeline.");
             gst_bin_add(GST_BIN(self), self->convert);
+            pipeline_description += " ! videoconvert";
+            gst_element_link(previous_element, self->convert);
+            previous_element = self->convert;
         }
         else
         {
@@ -623,113 +653,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
-    if (self->debayer != nullptr)
-    {
-        if (self->whitebalance != nullptr)
-        {
-            gst_element_link(self->src,
-                             self->pipeline_caps);
-            gst_element_link(self->pipeline_caps,
-                             self->whitebalance);
-            gst_element_link(self->whitebalance,
-                             self->exposure);
-            gst_element_link(self->exposure,
-                             self->debayer);
-
-            if (self->modules.convert)
-            {
-                gst_element_link(self->debayer,
-                                 self->convert);
-                self->target_pad = gst_element_get_static_pad(self->convert, "src");
-                GST_DEBUG("Using videoconvert as exit element for ghost pad");
-                GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamwhitebalance ! tcamautoexposure ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
-            }
-            else
-            {
-                GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
-                GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamwhitebalance ! tcamautoexposure ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
-
-                self->target_pad = gst_element_get_static_pad(self->debayer, "src");
-
-            }
-        }
-        else
-        {
-            bool exposure_active = false;
-            if (self->exposure != nullptr)
-            {
-                gst_element_link(self->src,
-                                 self->pipeline_caps);
-                gst_element_link(self->pipeline_caps,
-                                 self->exposure);
-                gst_element_link(self->exposure,
-                                 self->debayer);
-                exposure_active = true;
-            }
-            else
-            {
-                gst_element_link(self->src,
-                                 self->pipeline_caps);
-                gst_element_link(self->pipeline_caps,
-                                 self->debayer);
-            }
-
-            if (self->modules.convert)
-            {
-                gst_element_link(self->debayer,
-                                 self->convert);
-                self->target_pad = gst_element_get_static_pad(self->convert, "src");
-                GST_DEBUG("Using videoconvert as exit element for ghost pad");
-                if (exposure_active)
-                {
-                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
-                }
-                else
-                {
-                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! bayer2rgb ! videoconvert ! ghostpad", gst_caps_to_string(self->modules.caps));
-
-                }
-            }
-            else
-            {
-                GST_DEBUG("Using bayer2rgb as exit element for ghost pad");
-                if (exposure_active)
-                {
-                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
-                }
-                else
-                {
-                    GST_DEBUG("Internal pipeline: tcamsrc ! %s ! bayer2rgb ! ghostpad", gst_caps_to_string(self->modules.caps));
-                }
-                self->target_pad = gst_element_get_static_pad(self->debayer, "src");
-            }
-        }
-    }
-    else
-    {
-        if (self->exposure != nullptr)
-        {
-            gst_element_link(self->src,
-                             self->pipeline_caps);
-            gst_element_link(self->pipeline_caps,
-                             self->exposure);
-
-            self->target_pad = gst_element_get_static_pad(self->exposure, "src");
-            GST_DEBUG("Using exposure as exit element for ghost pad");
-            GST_DEBUG("Internal pipeline: tcamsrc ! %s ! tcamautoexposure ! ghostpad", gst_caps_to_string(self->modules.caps));
-
-        }
-        else
-        {
-            gst_element_link(self->src,
-                             self->pipeline_caps);
-
-            self->target_pad = gst_element_get_static_pad(self->pipeline_caps, "src");
-            GST_DEBUG("Using source as exit element for ghost pad");
-            GST_DEBUG("Internal pipeline: tcamsrc ! %s ! ghostpad", gst_caps_to_string(self->modules.caps));
-
-        }
-    }
+    GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
+    self->target_pad = gst_element_get_static_pad(previous_element, "src");
+    GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
 
     return TRUE;
 }
