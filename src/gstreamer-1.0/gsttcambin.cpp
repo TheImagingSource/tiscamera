@@ -136,6 +136,16 @@ static gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
         }
     }
 
+    if (self->focus != NULL)
+    {
+        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->focus), name);
+
+        if (ret != nullptr)
+        {
+            return ret;
+        }
+    }
+
     return ret;
 }
 
@@ -190,6 +200,16 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
         }
     }
 
+    if (self->focus != nullptr)
+    {
+        GSList* focus_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->focus));
+
+        for (unsigned int i = 0; i < g_slist_length(focus_prop_names); i++)
+        {
+            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(focus_prop_names, i)->data));
+        }
+    }
+
     return ret;
 }
 
@@ -236,6 +256,19 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
     if (self->exposure != nullptr)
     {
         if (tcam_prop_get_tcam_property(TCAM_PROP(self->exposure),
+                                        name, value,
+                                        min, max,
+                                        def, step,
+                                        type,
+                                        category, group))
+        {
+            return TRUE;
+        }
+    }
+
+    if (self->focus != nullptr)
+    {
+        if (tcam_prop_get_tcam_property(TCAM_PROP(self->focus),
                                         name, value,
                                         min, max,
                                         def, step,
@@ -296,6 +329,14 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
     if (self->exposure != nullptr)
     {
         if (tcam_prop_set_tcam_property(TCAM_PROP(self->exposure), name, value))
+        {
+            return TRUE;
+        }
+    }
+
+    if (self->focus != nullptr)
+    {
+        if (tcam_prop_set_tcam_property(TCAM_PROP(self->focus), name, value))
         {
             return TRUE;
         }
@@ -592,6 +633,23 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
         gst_bin_add(GST_BIN(self), self->exposure);
     }
+
+
+    if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
+        && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+    {
+        self->focus = gst_element_factory_make("tcamautofocus", "focus");
+        if (self->focus)
+        {
+            GST_DEBUG("Adding tcamautofocus to pipeline.");
+            gst_bin_add(GST_BIN(self), self->focus);
+
+            pipeline_description += " ! tcamautofocus";
+            gst_element_link(previous_element, self->focus);
+            previous_element = self->focus;
+        }
+    }
+
 
     if (self->modules.bayer)
     {
