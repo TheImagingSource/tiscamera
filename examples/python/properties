@@ -177,7 +177,6 @@ class CameraVideo(Gtk.Window):
             return
         # use introspection to get a property list
         prop_names = tbin.get_tcam_property_names()
-        print(prop_names)
         # we use this list to iterate all properties and create a widget list to allow
         # user interaction
         # each property is contained in a vbox
@@ -193,7 +192,6 @@ class CameraVideo(Gtk.Window):
             # group is a property name with which other properties are associated.
             # e.g. auto exposure has exposure as group
 
-            prop_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             name_label = Gtk.Label()
             name_label.set_text(name)
             row = Gtk.ListBoxRow()
@@ -210,21 +208,22 @@ class CameraVideo(Gtk.Window):
                 hbox.pack_start(label, True, True, 0)
                 hbox.pack_start(check, False, True, 0)
             elif prop_type == "integer":
+                if maxval <= minval:
+                    continue
                 label = Gtk.Label(name, xalign=0)
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
                 row.add(hbox)
-
                 scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
                                                  minval, maxval, step)
                 scale.set_value(value)
                 scale.add_mark(defval, Gtk.PositionType.TOP, None)
                 scale.connect("value-changed", self.slider_callback, name)
                 hbox.pack_start(label, False, True, 0)
-                hbox.pack_start(scale, False, True, 0)
+                hbox.pack_start(scale, True, True, 0)
             elif prop_type == "double":
-                print('todo')
+                print('not used')
             elif prop_type == "string":
-                print('todo')
+                print('not used')
             elif prop_type == "enum":
                 print("enum")
                 # for enums/menus get_tcam_property returns min/max
@@ -270,7 +269,9 @@ class CameraVideo(Gtk.Window):
         if tcam is None:
             print("No source element")
             return
-        tcam.set_tcam_property(name, GObject.Value(bool, checkbox.get_active()))
+        tcam.set_tcam_property(name,
+                               GObject.Value(bool,
+                                             checkbox.get_active()))
 
     def combobox_callback(self, combo_box, name):
         """"""
@@ -286,7 +287,9 @@ class CameraVideo(Gtk.Window):
         if tcam is None:
             print("No source element")
             return
-        return_value = tcam.set_tcam_property(name, GObject.Value(int, int(slider.get_value())))
+        return_value = tcam.set_tcam_property(name,
+                                              GObject.Value(int,
+                                                            int(slider.get_value())))
         if not return_value:
             print("Error setting value for {}".format(name))
 
