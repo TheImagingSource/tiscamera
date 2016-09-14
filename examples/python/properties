@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 #
 # This example will show you how to start a simple gstreamer pipeline
 # and manipulate device properties.
@@ -39,6 +37,7 @@ import time
 
 class CameraVideo(Gtk.Window):
     """This class streams a live video from a camera and allows saving of single frames."""
+
     def __init__(self):
         Gtk.Window.__init__(self)
 
@@ -46,7 +45,8 @@ class CameraVideo(Gtk.Window):
         self.stream_active = False
 
         self.set_title("TCam Camera Video")
-        self.connect("destroy", Gtk.main_quit)
+
+        self.connect("destroy", self.quit)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.add(hbox)
@@ -82,6 +82,14 @@ class CameraVideo(Gtk.Window):
         vbox.show_all()
         hbox.show_all()
         self.video_area.realize()
+
+    def quit(self, arg):
+        """"""
+        if self.pipeline is not None:
+            self.close_valve(False)
+            self.pipeline.set_state(Gst.State.NULL)
+            self.pipeline = None
+        Gtk.main_quit()
 
     def create_pipeline(self):
         """Creates the Gst.pipeline we will use."""
@@ -136,7 +144,6 @@ class CameraVideo(Gtk.Window):
 
         bus.add_signal_watch()
         bus.connect("message::element", self.bus_call)
-
 
     def bus_call(self, gst_bus, message):
         """Callback for gstreamer bus messages"""
@@ -313,7 +320,7 @@ def main():
     # will work
     Gst.init(sys.argv)
     Gtk.init(sys.argv)
-    # GObject.threads_init()
+
     win = CameraVideo()
     win.present()
     win.show_all()
