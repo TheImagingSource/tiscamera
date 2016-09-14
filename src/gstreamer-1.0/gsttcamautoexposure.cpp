@@ -754,7 +754,12 @@ static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
                                                         gchar* name,
                                                         const GValue* value)
 {
-    gst_tcamautoexposure_set_property(G_OBJECT(self), tcamautoexposure_string_to_property_id(name), value, NULL);
+    guint id = tcamautoexposure_string_to_property_id(name);
+    if (id == 0)
+    {
+        return FALSE;
+    }
+    gst_tcamautoexposure_set_property(G_OBJECT(self), id, value, NULL);
     return TRUE;
 }
 
