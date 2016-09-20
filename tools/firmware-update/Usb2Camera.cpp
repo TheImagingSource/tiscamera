@@ -363,6 +363,16 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
         throw std::runtime_error("Retrieved empty firmware file.");
     }
 
+    unsigned int eeprom_size = this->get_eeprom_size();
+
+    std::cout << "Firmware Size: " << fw.size() << " EEPROM Size: " << eeprom_size << std::endl;
+
+    if ((fw.size() + 512) >= eeprom_size)
+    {
+	std::cerr << "Firmware does not fit in EEPROM. Aborting!" << std::endl;
+	return false;
+    }
+
     char vendor[128];
     char model[128];
     char serial[128];
@@ -379,7 +389,7 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 
     patch_strings(model, vendor, serial, &fw[0]);
 
-    upload_firmware_file(&fw[0], FIRMWARE_END, map_progress(progress, 0, 49));
+    upload_firmware_file(&fw[0], fw.size(), map_progress(progress, 0, 49));
 
     std::vector<unsigned char> buffer (fw.size());
 
@@ -477,6 +487,23 @@ UVC_COMPLIANCE Usb2Camera::get_mode ()
 
 }
 
+unsigned int Usb2Camera::get_eeprom_size ()
+{
+    unsigned char bufa[64];
+    unsigned char bufb[64];
+
+    if (!read_eeprom (0, bufa, sizeof(bufa))){
+	return 0;
+    }
+    if (!read_eeprom (16384, bufb, sizeof(bufb))){
+	return 0;
+    }
+    if (!memcmp(bufa, bufb, sizeof(bufa))){
+	return 16384;
+    }
+
+    return 32768;
+}
 
 int Usb2Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
 {

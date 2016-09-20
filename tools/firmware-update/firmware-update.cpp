@@ -177,6 +177,9 @@ void print_device_info (const std::string& serial_number)
         else
             std::cout << "off" << std::endl;
 
+	std::cout << "Camera EEPROM size:  ";
+	std::cout << cam->get_eeprom_size();
+	std::cout << std::endl;
     }
 
     std::cout << std::endl;

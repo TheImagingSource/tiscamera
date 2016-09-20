@@ -93,6 +93,8 @@ public:
 
     virtual int set_mode (UVC_COMPLIANCE mode) = 0;
 
+    virtual unsigned int get_eeprom_size () = 0;
+
 private:
 
     void claim_interface ();

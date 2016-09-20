@@ -70,6 +70,7 @@ public:
                           std::function<void(int)> progress);
 
     UVC_COMPLIANCE get_mode ();
+    unsigned int get_eeprom_size ();
 
     int set_mode (UVC_COMPLIANCE mode);
 
