@@ -18,6 +18,7 @@ add_subdirectory(tcam-ctrl)
 
 if (BUILD_V4L2)
   add_subdirectory(firmware-update)
+  add_subdirectory(dfk73udev)
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)

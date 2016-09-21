@@ -23,6 +23,7 @@
 #include "Error.h"
 #include <errno.h>
 #include "v4l2_uvc_identifier.h"
+#include "dfk73.h"
 
 #include <algorithm>
 #include <unistd.h>
@@ -203,6 +204,8 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
         return false;
     }
 
+    tcam_log(TCAM_LOG_DEBUG, "Requested format change to '%s' %x", new_format.to_string().c_str(), new_format.get_fourcc());
+
     // if (!validate_video_format(new_format))
     // {
     // tcam_log(TCAM_LOG_ERROR, "Not a valid format.");
@@ -336,6 +339,23 @@ bool V4l2Device::set_framerate (double framerate)
         return false;
     }
 
+
+    // special case for dfk73
+    if (strcmp(this->device.get_info().additional_identifier, "8221") == 0)
+    {
+        // int ret = dfk73_v4l2_set_framerate_index(this->fd, fps - framerate_conversions.begin());
+        // TODO: use generic way
+        int ret = dfk73_v4l2_set_framerate_index(this->fd, 0);
+
+        if (ret == 0)
+        {
+            tcam_log(TCAM_LOG_DEBUG, "dfk73 set framerate successfull");
+            return true;
+        }
+
+        tcam_log(TCAM_LOG_ERROR, "dfk73 returned error while setting framerate: %s", strerror(errno));
+        return false;
+    }
 
     // TODO what about range framerates?
     struct v4l2_streamparm parm;
@@ -1246,7 +1266,8 @@ void V4l2Device::init_mmap_buffers ()
 
         struct tcam_image_buffer buffer = {};
 
-        buffer.length = active_video_format.get_required_buffer_size();
+        // buffer.length = active_video_format.get_required_buffer_size();
+        buffer.length = buf.length;
         buffer.pData =
             /* use pre-allocated memory */
             (unsigned char*) mmap( NULL,
