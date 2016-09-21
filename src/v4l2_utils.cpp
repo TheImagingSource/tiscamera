@@ -620,6 +620,11 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
             info.type = TCAM_DEVICE_TYPE_V4L2;
             strncpy(info.identifier, needed_path, sizeof(info.identifier));
 
+            if (udev_device_get_sysattr_value(parent_device, "idProduct") != NULL)
+            {
+                strncpy(info.additional_identifier, udev_device_get_sysattr_value(parent_device, "idProduct"), sizeof(info.additional_identifier));
+            }
+
             if (udev_device_get_sysattr_value(parent_device, "product") != NULL)
                 strncpy(info.name, udev_device_get_sysattr_value(parent_device, "product"), sizeof(info.name));
             else

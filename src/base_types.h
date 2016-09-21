@@ -63,6 +63,7 @@ struct tcam_device_info
     char name[128];             /**< Camera name (e.g. DFK 23UP031) */
     char identifier[128];       /**< identifier used for camera interaction (e.g. /dev/video0) */
     char serial_number[64];     /**< unique identifier */
+    char additional_identifier[128]; /**< additional information for identification of camera model / must not be required by user*/
 };
 
 
