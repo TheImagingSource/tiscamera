@@ -113,6 +113,12 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
 		"video/x-raw-yuv"
     },
+    {
+        FOURCC_MJPG,
+        "image/jpeg",
+        "image/jpeg", "",
+        "", ""
+    },
 
 /* Non 8bit bayer formats are not supported by gstreamer bayer plugin.
  * This feature is discussed in bug https://bugzilla.gnome.org/show_bug.cgi?id=693666 .*/
@@ -204,8 +210,17 @@ uint32_t tcam_fourcc_from_gst_1_0_caps_string (const char* name, const char* for
     {
         if (strcmp(name, tcam_gst_caps_info[i].gst_1_0_name) == 0)
         {
-            if (strcmp(format, tcam_gst_caps_info[i].gst_format) == 0)
+            if (format != NULL)
+            {
+                if (strcmp(format, tcam_gst_caps_info[i].gst_format) == 0)
+                {
+                    return tcam_gst_caps_info[i].fourcc;
+                }
+            }
+            else
+            {
                 return tcam_gst_caps_info[i].fourcc;
+            }
         }
     }
     return 0;
