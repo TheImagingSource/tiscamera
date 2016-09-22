@@ -103,7 +103,8 @@ void CUSBCamera::query_formats()
 	
 	while( ioctl(fd, VIDIOC_ENUM_FMT, &formats) == 0 )
 	{
-	  if( strstr((char*)formats.description, "Y800") != NULL  ) // Get Y800 format only. Will be debayered to color.
+        printf("%s\n", (char*)formats.description);
+	  if (strstr((char*)formats.description, "8-bit Greyscale") != NULL) // Get Y800 format only. Will be debayered to color.
 	  {
 	    g_print("\tFormat %d :  %s  %d\n", formats.index, formats.description, formats.type);
     
