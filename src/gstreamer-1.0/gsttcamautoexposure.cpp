@@ -385,12 +385,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Exposure");
         }
         return TRUE;
     }
@@ -429,12 +429,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Gain");
         }
         return TRUE;
     }
@@ -473,12 +473,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Exposure");
         }
         return TRUE;
     }
@@ -517,12 +517,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Exposure");
         }
         return TRUE;
     }
@@ -561,12 +561,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Gain");
         }
 
         return TRUE;
@@ -606,12 +606,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "ROI");
         }
         return TRUE;
     }
@@ -650,12 +650,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "ROI");
         }
         return TRUE;
     }
@@ -694,12 +694,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "ROI");
         }
         return TRUE;
     }
@@ -738,12 +738,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Exposure");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "ROI");
         }
         return TRUE;
     }

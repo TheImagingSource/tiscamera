@@ -250,12 +250,12 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Special");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Focus");
         }
         return TRUE;
     }

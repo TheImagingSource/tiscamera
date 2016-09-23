@@ -283,12 +283,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }
 
         return TRUE;
@@ -328,12 +328,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }
         return TRUE;
     }
@@ -372,12 +372,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }
         return TRUE;
     }
@@ -416,12 +416,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }
         return TRUE;
     }
@@ -460,12 +460,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }        return TRUE;
     }
     else if (strcmp(name, "whitebalance-module-enabled") == 0)
@@ -503,12 +503,12 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (category)
         {
             g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
+            g_value_set_string(category, "Color");
         }
         if (group)
         {
             g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
+            g_value_set_string(group, "Whitebalance");
         }
         return TRUE;
     }
