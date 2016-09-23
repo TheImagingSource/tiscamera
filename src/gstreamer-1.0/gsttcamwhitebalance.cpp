@@ -38,6 +38,7 @@
 #include "tcamprop.h"
 #include "image_sampling.h"
 #include <stdlib.h>
+#include <cstring>
 
 #include "tcam.h"
 
@@ -126,7 +127,7 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamWhitebalance, gst_tcamwhitebalance, GST_TYPE_BAS
                                                 gst_tcamwhitebalance_prop_init));
 
 
-static char* tcamwhitebalance_property_id_to_string (guint id)
+static const char* tcamwhitebalance_property_id_to_string (guint id)
 {
     switch (id)
     {
