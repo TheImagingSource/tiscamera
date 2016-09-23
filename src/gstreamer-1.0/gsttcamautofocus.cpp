@@ -84,6 +84,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* self,
                                                      GValue* def,
                                                      GValue* step,
                                                      GValue* type,
+                                                     GValue* flags,
                                                      GValue* category,
                                                      GValue* group);
 
@@ -206,10 +207,13 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
                                                      GValue* def,
                                                      GValue* step,
                                                      GValue* type,
+                                                     GValue* flags,
                                                      GValue* category,
                                                      GValue* group)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(prop);
+
+    flags = nullptr;
 
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {

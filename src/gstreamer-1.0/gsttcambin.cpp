@@ -49,6 +49,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* self,
                                                 GValue* def,
                                                 GValue* step,
                                                 GValue* type,
+                                                GValue* flags,
                                                 GValue* category,
                                                 GValue* group);
 
@@ -222,6 +223,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                                 GValue* def,
                                                 GValue* step,
                                                 GValue* type,
+                                                GValue* flags,
                                                 GValue* category,
                                                 GValue* group)
 {
@@ -234,6 +236,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                         min, max,
                                         def, step,
                                         type,
+                                        flags,
                                         category, group))
         {
             return TRUE;
@@ -247,6 +250,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                         min, max,
                                         def, step,
                                         type,
+                                        flags,
                                         category, group))
         {
             return TRUE;
@@ -260,6 +264,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                         min, max,
                                         def, step,
                                         type,
+                                        flags,
                                         category, group))
         {
             return TRUE;
@@ -273,6 +278,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                         min, max,
                                         def, step,
                                         type,
+                                        flags,
                                         category, group))
         {
             return TRUE;

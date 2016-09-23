@@ -50,6 +50,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
                                                 GValue* def,
                                                 GValue* step,
                                                 GValue* type,
+                                                GValue* flags,
                                                 GValue* category,
                                                 GValue* group);
 
@@ -244,6 +245,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
                                                 GValue* def,
                                                 GValue* step,
                                                 GValue* type,
+                                                GValue* flags,
                                                 GValue* category,
                                                 GValue* group)
 {
@@ -273,6 +275,12 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
     }
 
     struct tcam_device_property prop = property->get_struct();
+
+    if (flags)
+    {
+        g_value_init(flags, G_TYPE_INT);
+        g_value_set_int(flags, prop.flags);
+    }
 
     if (category)
     {

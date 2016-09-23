@@ -91,6 +91,7 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* self,
                                                         GValue* def,
                                                         GValue* step,
                                                         GValue* type,
+                                                        GValue* flags,
                                                         GValue* category,
                                                         GValue* group);
 
@@ -239,10 +240,13 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
                                                         GValue* def,
                                                         GValue* step,
                                                         GValue* type,
+                                                        GValue* flags,
                                                         GValue* category,
                                                         GValue* group)
 {
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(prop);
+
+    flags = nullptr;
 
     if (strcmp(name, "whitebalance-red") == 0)
     {

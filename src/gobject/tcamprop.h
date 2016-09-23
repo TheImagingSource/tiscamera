@@ -49,6 +49,7 @@ struct _TcamPropInterface
                               GValue* def,
                               GValue* step,
                               GValue* type,
+                              GValue* flags,
                               GValue* category,
                               GValue* group);
 
@@ -81,8 +82,9 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
                                       GValue* def,
                                       GValue* step,
                                       GValue* type,
-                                      GValue *category,
-                                      GValue *group);
+                                      GValue* flags,
+                                      GValue* category,
+                                      GValue* group);
 
 GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
                                          const char* name);

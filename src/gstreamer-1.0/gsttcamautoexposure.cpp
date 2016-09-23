@@ -136,6 +136,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* self,
                                                         GValue* def,
                                                         GValue* step,
                                                         GValue* type,
+                                                        GValue* flags,
                                                         GValue* category,
                                                         GValue* group);
 
@@ -336,6 +337,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
                                                         GValue* def,
                                                         GValue* step,
                                                         GValue* type,
+                                                        GValue* flags,
                                                         GValue* category,
                                                         GValue* group)
 {
@@ -345,6 +347,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
     }
 
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(prop);
+
+    flags = nullptr;
 
     if (g_strcmp0(name, "Exposure Auto") == 0)
     {

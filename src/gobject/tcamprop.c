@@ -79,6 +79,7 @@ gchar* tcam_prop_get_tcam_property_type (TcamProp* self, gchar* name)
  * @def: (out) (optional): a #GValue
  * @step: (out) (optional): a #GValue
  * @type: (out) (optional): a #GValue
+ * @flags: (out) (optional): a #GValue
  * @category: (out) (optional): a #GValue
  * @group: (out) (optional): a #GValue
  *
@@ -94,6 +95,7 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
                                       GValue* def,
                                       GValue* step,
                                       GValue* type,
+                                      GValue* flags,
                                       GValue* category,
                                       GValue* group)
 {
@@ -113,6 +115,7 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
                                    min, max,
                                    def, step,
                                    type,
+                                   flags,
                                    category, group);
     }
 
