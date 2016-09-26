@@ -34,6 +34,13 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 
 
 /**
+ * @brief print function for VideoFormatDescriptions as gstreamer-1.0 caps
+ * @param available_formats - format descriptions that shell be printed
+ */
+void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& available_formats);
+
+
+/**
  * @brief print function for VideoFormat
  * @param format - VideoFormat that shall be printed
  */

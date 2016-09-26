@@ -19,6 +19,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "gsttcambase.h"
+
 void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 {
     std::cout << "Available format settings:" << std::endl;
@@ -47,6 +49,42 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
         }
 
         std::cout << std::endl;
+    }
+}
+
+
+void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& available_formats)
+{
+    std::cout << "Available gstreamer-1.0 caps:" << std::endl;
+    for (const auto& f : available_formats)
+    {
+        const char* tmp = tcam_fourcc_to_gst_1_0_caps_string(f.get_fourcc());
+
+        if (tmp == nullptr)
+        {
+            continue;
+        }
+
+        std::string format = tmp;
+
+        for (const auto& res : f.get_resolutions())
+        {
+
+            std::string fps_string = ", fps={ ";
+            for (const auto& fps : f.get_framerates(res.min_size))
+            {
+                fps_string += std::to_string(fps) + " ";
+            }
+
+            fps_string += "}";
+
+            std::string output = format
+                + ", width=" + std::to_string(res.min_size.width)
+                + ", height=" + std::to_string(res.min_size.height)
+                + fps_string;
+
+            std::cout << output << std::endl;
+        }
     }
 }
 

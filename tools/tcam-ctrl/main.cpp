@@ -36,6 +36,7 @@ void print_help (const std::string& prog_name)
     << "\t-l - list cameras\n"
     << "\t-p - list properties\n"
     << "\t-f - list video formats\n"
+    << "\t-c - list gstreamer-1.0 caps\n"
     << "\n"
     << "Examples:\n"
     << "\n"
@@ -75,6 +76,7 @@ enum modes
     LIST_PROPERTIES = 0,
     SET_PROPERTY,
     LIST_FORMATS,
+    LIST_GST_1_0_FORMATS,
     SET_FORMAT,
     LIST_DEVICES,
     SAVE_STREAM,
@@ -147,6 +149,10 @@ int main (int argc, char *argv[])
         {
             do_this = LIST_FORMATS;
         }
+        else if (arg == "-c" || arg == "--caps")
+        {
+            do_this = LIST_GST_1_0_FORMATS;
+        }
         else
         {
             serial = arg;
@@ -177,6 +183,11 @@ int main (int argc, char *argv[])
         case LIST_FORMATS:
         {
             list_formats(dev->get_available_video_formats());
+            break;
+        }
+        case LIST_GST_1_0_FORMATS:
+        {
+            list_gstreamer_1_0_formats(dev->get_available_video_formats());
             break;
         }
         case SET_PROPERTY:
