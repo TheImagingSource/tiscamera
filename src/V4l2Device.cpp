@@ -346,74 +346,86 @@ bool V4l2Device::set_framerate (double framerate)
 
     if (strcmp(this->device.get_info().additional_identifier, "8221") == 0)
     {
-	int ret;
-	int fi_index = 0;
-	struct v4l2_frmivalenum frmival = {};
+        int ret;
+        int fi_index = 0;
+        struct v4l2_frmivalenum frmival = {};
 
-	VideoFormat fmt = this->get_active_video_format();
+        VideoFormat fmt = this->get_active_video_format();
 
-	frmival.pixel_format = fmt.get_fourcc();
-	frmival.width = fmt.get_size().width;
-	frmival.height = fmt.get_size().height;
+        frmival.pixel_format = fmt.get_fourcc();
+        frmival.width = fmt.get_size().width;
+        frmival.height = fmt.get_size().height;
 
-	for(frmival.index = 0; tcam_xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; frmival.index++){
-	    // Workaround for erratic frame rate handling of dfk73uc cameras:
-	    // Always set the highest possible frame rate for the current
-	    // video format via the UVC control. Then set the sensor clock
-	    // divider register to achieve the actual frame rate.
-	    if (frmival.type != V4L2_FRMIVAL_TYPE_DISCRETE)
-	    {
-		tcam_log (TCAM_LOG_ERROR, "Got invalid frame interval from camera\n");
-		return false;
-	    }
-	    if (frmival.index == 0){
-		// Always set the first frame rate in the list. The
-		// actual framerate is set by
-		// dfk73_v4l2_set_framerate_index(...)
-		parm.parm.capture.timeperframe.numerator = frmival.discrete.numerator;
-		parm.parm.capture.timeperframe.denominator = frmival.discrete.denominator;
-	    }
-	    if ((frmival.discrete.numerator == fps->numerator) &&
-		(frmival.discrete.denominator == fps->denominator))
-	    {
-		fi_index = frmival.index;
-		break;
-	    }
-	}
-	tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d and frame rate divisor to %d",
-		 framerate,
-		 parm.parm.capture.timeperframe.denominator,
-		 parm.parm.capture.timeperframe.numerator,
-		 fi_index);
+        for (frmival.index = 0; tcam_xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; frmival.index++)
+        {
+            tcam_log(TCAM_LOG_DEBUG,
+                     "F: %s %dx%d @ %d/%d",
+                     fourcc2description(frmival.pixel_format),
+                     frmival.width, frmival.height,
+                     frmival.discrete.numerator, frmival.discrete.denominator);
+            // Workaround for erratic frame rate handling of dfk73uc cameras:
+            // Always set the highest possible frame rate for the current
+            // video format via the UVC control. Then set the sensor clock
+            // divider register to achieve the actual frame rate.
+            if (frmival.type != V4L2_FRMIVAL_TYPE_DISCRETE)
+            {
+                tcam_log(TCAM_LOG_ERROR, "Got invalid frame interval from camera");
+                return false;
+            }
+            if (frmival.index == 0)
+            {
+                // Always set the first frame rate in the list. The
+                // actual framerate is set by
+                // dfk73_v4l2_set_framerate_index(...)
+                parm.parm.capture.timeperframe.numerator = frmival.discrete.numerator;
+                parm.parm.capture.timeperframe.denominator = frmival.discrete.denominator;
+            }
+            if ((frmival.discrete.numerator == fps->numerator) &&
+                (frmival.discrete.denominator == fps->denominator))
+            {
+                fi_index = frmival.index;
+                // fi_index = 1;
+                break;
+            }
+        }
+        tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d and frame rate divisor to %d",
+                 framerate,
+                 parm.parm.capture.timeperframe.denominator,
+                 parm.parm.capture.timeperframe.numerator,
+                 fi_index);
 
-	ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
-	if (ret < 0)
-	{
-	    tcam_log (TCAM_LOG_ERROR, "Failed to set frame rate\n");
-	    return false;
-	}
+        ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
+        if (ret < 0)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Failed to set frame rate");
+            return false;
+        }
 
+        errno = 0;
         ret = dfk73_v4l2_set_framerate_index(this->fd, fi_index);
 
         if (ret != 0)
         {
-            tcam_log(TCAM_LOG_DEBUG, "dfk73: Failed to set frame rate divisor");
+            tcam_log(TCAM_LOG_ERROR, "dfk73: Failed to set frame rate index, %s", strerror(errno));
             return false;
         }
-    } else {
-	    parm.parm.capture.timeperframe.numerator = fps->numerator;
-	    parm.parm.capture.timeperframe.denominator = fps->denominator;
-	    tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d", framerate,
-		     parm.parm.capture.timeperframe.denominator,
-		     parm.parm.capture.timeperframe.numerator);
+    }
+    else
+    {
+        parm.parm.capture.timeperframe.numerator = fps->numerator;
+        parm.parm.capture.timeperframe.denominator = fps->denominator;
+        tcam_log(TCAM_LOG_DEBUG, "Setting framerate to '%f' =  %d / %d",
+                 framerate,
+                 parm.parm.capture.timeperframe.denominator,
+                 parm.parm.capture.timeperframe.numerator);
 
-	    int ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
+        int ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
 
-	    if (ret < 0)
-	    {
-		tcam_log (TCAM_LOG_ERROR, "Failed to set frame rate\n");
-		return false;
-	    }
+        if (ret < 0)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Failed to set frame rate\n");
+            return false;
+        }
     }
 
     return true;
