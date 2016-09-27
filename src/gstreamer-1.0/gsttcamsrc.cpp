@@ -1114,6 +1114,9 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 
     ds->dev->start_stream(ds->sink);
 
+    self->timestamp_offset = 0;
+    self->last_timestamp = 0;
+
     self->is_running = TRUE;
     GST_INFO("Successfully set caps to: %s", gst_caps_to_string(caps));
 
@@ -1209,6 +1212,9 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
         }
         self->all_caps = gst_tcam_src_get_all_camera_caps (self);
     }
+
+    self->timestamp_offset = 0;
+    self->last_timestamp = 0;
 
     return TRUE;
 }
@@ -1351,20 +1357,22 @@ wait_again:
     *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
                                           0, self->ptr->length, NULL, NULL);
 
-    // if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
-    // {
-    //     if (self->timestamp_offset == 0)
-    //     {
-    //         self->timestamp_offset = timestamp_ns;
-    //         self->last_timestamp = timestamp_ns;
-    //     }
+    GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
 
-    //     GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->timestamp_offset;
+    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    {
+        timestamp_ns = self->ptr->statistics.capture_time_ns;
 
-    //     (*buffer)->pts = timestamp_ns - self->last_timestamp;
+        if (self->timestamp_offset == 0)
+        {
+            self->timestamp_offset = timestamp_ns;
+            self->last_timestamp = timestamp_ns;
+        }
 
-    //     self->last_timestamp = timestamp_ns;
-    // }
+        GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->last_timestamp;
+        GST_BUFFER_PTS(*buffer) = timestamp_ns - self->timestamp_offset;
+        self->last_timestamp = timestamp_ns;
+    }
 
     GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
