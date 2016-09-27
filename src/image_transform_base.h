@@ -28,48 +28,49 @@
 
 namespace img
 {
-    inline int		get_bits_per_pixel( uint32_t fcc )
+inline int get_bits_per_pixel (uint32_t fcc)
+{
+    switch (fcc)
     {
-		switch (fcc)
-		{
-		case FOURCC_RGB24:		return 24;
-		case FOURCC_BGR24:		return 24;
-		case FOURCC_RGB32:		return 32;
-		case FOURCC_YUY2:		return 16;
-		case FOURCC_UYVY:		return 16;
+        case FOURCC_RGB24:      return 24;
+        case FOURCC_BGR24:      return 24;
+        case FOURCC_RGB32:      return 32;
+        case FOURCC_YUY2:       return 16;
+        case FOURCC_UYVY:       return 16;
         case FOURCC_YUYV:       return 16;
-		case FOURCC_Y800:		return 8;
-		case FOURCC_BY8:		return 8;
+        case FOURCC_Y800:       return 8;
+        case FOURCC_BY8:        return 8;
 
-		case FOURCC_BGGR8:		return 8;
-		case FOURCC_GBRG8:		return 8;
-		case FOURCC_RGGB8:		return 8;
-		case FOURCC_GRBG8:		return 8;
+        case FOURCC_BGGR8:      return 8;
+        case FOURCC_GBRG8:      return 8;
+        case FOURCC_RGGB8:      return 8;
+        case FOURCC_GRBG8:      return 8;
 
-		case FOURCC_YGB0:		return 16;
-		case FOURCC_YGB1:		return 16;
-		case FOURCC_Y16:		return 16;
-		case FOURCC_YV16:		return 16;
-		case FOURCC_I420:		return 12;
-		case FOURCC_YUV8PLANAR:	return 24;
+        case FOURCC_YGB0:       return 16;
+        case FOURCC_YGB1:       return 16;
+        case FOURCC_Y16:        return 16;
+        case FOURCC_YV16:       return 16;
+        case FOURCC_I420:       return 12;
+        case FOURCC_YUV8PLANAR: return 24;
 
-		case FOURCC_BGGR16:		return 16;
-		case FOURCC_GBRG16:		return 16;
-		case FOURCC_GRBG16:		return 16;
-		case FOURCC_RGGB16:		return 16;
+        case FOURCC_BGGR16:     return 16;
+        case FOURCC_GBRG16:     return 16;
+        case FOURCC_GRBG16:     return 16;
+        case FOURCC_RGGB16:     return 16;
 
         case FOURCC_IYU1:       return 12;      // beware
         case FOURCC_IYU2:       return 24;
 
-        //case FOURCC_RGB48:          return 48;
+            //case FOURCC_RGB48:          return 48;
         case FOURCC_RGB64:          return 64;
 
         case FOURCC_YUV16PLANAR:    return 48;
         case FOURCC_YUVFLOATPLANAR: return 96;
-		default:
-			return 0;
-		}
-	}
+        case FOURCC_MJPG: return 16;
+        default:
+            return 0;
+    }
+}
 
     inline bool    is_known_fcc( uint32_t fcc )
     {
