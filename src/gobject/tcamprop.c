@@ -50,7 +50,7 @@ GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
  *
  * Returns: (transfer full): A string describing the property type
  */
-gchar* tcam_prop_get_tcam_property_type (TcamProp* self, gchar* name)
+const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, gchar* name)
 {
     TcamPropInterface* iface;
     gchar* ret;

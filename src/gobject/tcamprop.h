@@ -71,8 +71,8 @@ struct _TcamPropInterface
 
 GSList* tcam_prop_get_tcam_property_names (TcamProp* self);
 
-gchar *tcam_prop_get_tcam_property_type (TcamProp* self,
-                                         gchar* name);
+const gchar *tcam_prop_get_tcam_property_type (TcamProp* self,
+                                               gchar* name);
 
 gboolean tcam_prop_get_tcam_property (TcamProp* self,
                                       gchar* name,
