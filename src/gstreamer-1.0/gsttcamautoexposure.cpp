@@ -95,10 +95,10 @@ enum
     PROP_BRIGHTNESS_REFERENCE,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
-    PROP_X0,
-    PROP_Y0,
-    PROP_X1,
-    PROP_Y1,
+    PROP_ROI_LEFT,
+    PROP_ROI_TOP,
+    PROP_ROI_WIDTH,
+    PROP_ROI_HEIGHT,
 };
 
 
@@ -196,21 +196,21 @@ static const char* tcamautoexposure_property_id_to_string (guint id)
         {
             return "Gain Max";
         }
-        case PROP_X0:
+        case PROP_ROI_LEFT:
         {
-            return "ROI X0";
+            return "Exposure ROI Left";
         }
-        case PROP_X1:
+        case PROP_ROI_WIDTH:
         {
-            return "ROI X1";
+            return "Exposure ROI Width";
         }
-        case PROP_Y0:
+        case PROP_ROI_TOP:
         {
-            return "ROI Y0";
+            return "Exposure ROI Top";
         }
-        case PROP_Y1:
+        case PROP_ROI_HEIGHT:
         {
-            return "ROI Y1";
+            return "Exposure ROI Height";
         }
         default:
             return "";
@@ -243,21 +243,21 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
     {
         return PROP_GAIN_MAX;
     }
-    else if (g_strcmp0(str, "ROI X0") == 0)
+    else if (g_strcmp0(str, "Exposure ROI Left") == 0)
     {
-        return PROP_X0;
+        return PROP_ROI_LEFT;
     }
-    else if (g_strcmp0(str, "ROI X1") == 0)
+    else if (g_strcmp0(str, "Exposure ROI Width") == 0)
     {
-        return PROP_X1;
+        return PROP_ROI_WIDTH;
     }
-    else if (g_strcmp0(str, "ROI Y0") == 0)
+    else if (g_strcmp0(str, "Exposure ROI Top") == 0)
     {
-        return PROP_Y0;
+        return PROP_ROI_TOP;
     }
-    else if (g_strcmp0(str, "ROI Y1") == 0)
+    else if (g_strcmp0(str, "Exposure ROI Height") == 0)
     {
-        return PROP_Y1;
+        return PROP_ROI_HEIGHT;
     }
     return 0;
 }
@@ -273,55 +273,55 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
     names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE));
     names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX));
     names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_X0));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_X1));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_Y0));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_Y1));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_TOP));
+    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT));
 
     return names;
 }
 
 
-static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name)
+static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name)
 {
     if (name == nullptr)
     {
         return 0;
     }
 
-    if (g_strcmp0(name, "Exposure Auto") == 0)
+    if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)) == 0)
     {
         return strdup("boolean");
     }
-    else if (g_strcmp0(name, "Gain Auto") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)) == 0)
     {
         return strdup("boolean");
     }
-    else if (g_strcmp0(name, "Brightness Reference") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "Exposure Max") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "Gain Max") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "ROI X0") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "ROI X1") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "ROI Y0") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_TOP)) == 0)
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, "ROI Y1") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT)) == 0)
     {
         return strdup("integer");
     }
@@ -350,7 +350,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
 
     flags = nullptr;
 
-    if (g_strcmp0(name, "Exposure Auto") == 0)
+    if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)) == 0)
     {
         if (value)
         {
@@ -394,7 +394,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "Gain Auto") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)) == 0)
     {
         if (value)
         {
@@ -438,7 +438,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "Brightness Reference") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)) == 0)
     {
         if (value)
         {
@@ -482,7 +482,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "Exposure Max") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
     {
         if (value)
         {
@@ -526,7 +526,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "Gain Max") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
         if (value)
         {
@@ -571,7 +571,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
 
         return TRUE;
     }
-    else if (g_strcmp0(name, "ROI X0") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)) == 0)
     {
         if (value)
         {
@@ -615,7 +615,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "ROI X1") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH)) == 0)
     {
         if (value)
         {
@@ -659,7 +659,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "ROI Y0") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_TOP)) == 0)
     {
         if (value)
         {
@@ -703,7 +703,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, "ROI Y1") == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT)) == 0)
     {
         if (value)
         {
@@ -867,34 +867,34 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                       0, 255, 128,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property(gobject_class,
-                                    PROP_X0,
-                                    g_param_spec_uint("region-x0",
-                                                      "Upper, left boundary",
-                                                      "",
+                                    PROP_ROI_LEFT,
+                                    g_param_spec_uint("left",
+                                                      "Left boundary of ROI",
+                                                      "Left boundary of the region of interest",
                                                       0, G_MAXUINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
-                                    PROP_Y0,
-                                    g_param_spec_uint("region-y0",
-                                                      "Upper, left boundary",
-                                                      "",
+                                    PROP_ROI_TOP,
+                                    g_param_spec_uint("top",
+                                                      "Top boundary of ROI",
+                                                      "Top boundary of the region of interest",
                                                       0, G_MAXUINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
-                                    PROP_X1,
-                                    g_param_spec_uint("region-x1",
-                                                      "Lower, right boundary",
-                                                      "",
+                                    PROP_ROI_WIDTH,
+                                    g_param_spec_uint("width",
+                                                      "Width of ROI starting at 'left'",
+                                                      "Width of the region of interest",
                                                       0, G_MAXUINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
-                                    PROP_Y1,
-                                    g_param_spec_uint("region-y1",
-                                                      "Lower, right boundary",
-                                                      "",
+                                    PROP_ROI_HEIGHT,
+                                    g_param_spec_uint("height",
+                                                      "Lower, right boundary starting at 'top'",
+                                                      "Height of the region of interest",
                                                       0, G_MAXUINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
@@ -947,16 +947,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
         case PROP_BRIGHTNESS_REFERENCE:
             tcamautoexposure->brightness_reference = g_value_get_int(value);
             break;
-        case PROP_X0:
+        case PROP_ROI_LEFT:
             tcamautoexposure->image_region.x0 = g_value_get_uint(value);
             break;
-        case PROP_Y0:
+        case PROP_ROI_TOP:
             tcamautoexposure->image_region.y0 = g_value_get_uint(value);
             break;
-        case PROP_X1:
+        case PROP_ROI_WIDTH:
             tcamautoexposure->image_region.x1 = g_value_get_uint(value);
             break;
-        case PROP_Y1:
+        case PROP_ROI_HEIGHT:
             tcamautoexposure->image_region.y1 = g_value_get_uint(value);
             break;
         default:
@@ -992,16 +992,16 @@ void gst_tcamautoexposure_get_property (GObject* object,
         case PROP_BRIGHTNESS_REFERENCE:
             g_value_set_int(value, tcamautoexposure->brightness_reference);
             break;
-        case PROP_X0:
+        case PROP_ROI_LEFT:
             g_value_set_uint(value, tcamautoexposure->image_region.x0);
             break;
-        case PROP_Y0:
+        case PROP_ROI_TOP:
             g_value_set_uint(value, tcamautoexposure->image_region.y0);
             break;
-        case PROP_X1:
+        case PROP_ROI_WIDTH:
             g_value_set_uint(value, tcamautoexposure->image_region.x1);
             break;
-        case PROP_Y1:
+        case PROP_ROI_HEIGHT:
             g_value_set_uint(value, tcamautoexposure->image_region.y1);
             break;
         default:

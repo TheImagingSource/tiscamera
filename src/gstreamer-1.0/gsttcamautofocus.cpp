@@ -128,15 +128,15 @@ static const char* tcamautofocus_property_id_to_string (guint id)
     switch (id)
     {
         case PROP_AUTO:
-            return "focus-auto";
+            return "Focus Auto";
         case PROP_LEFT:
-            return "focus-roi-left";
+            return "Focus ROI Left";
         case PROP_TOP:
-            return "focus-roi-right";
+            return "Focus ROI Right";
         case PROP_WIDTH:
-            return "focus-roi-width";
+            return "Focus ROI Width";
         case PROP_HEIGHT:
-            return "focus-roi-height";
+            return "Focus ROI Height";
         default:
             return 0;
     }
