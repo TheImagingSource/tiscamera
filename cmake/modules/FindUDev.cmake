@@ -21,6 +21,7 @@ FIND_LIBRARY(
     UDEV_LIBRARIES
     NAMES udev libudev
     PATHS
+        /lib/${LIB_SUFFIX}
         /usr/lib${LIB_SUFFIX}
         /usr/local/lib${LIB_SUFFIX}
         ${UDEV_PATH_LIB}
