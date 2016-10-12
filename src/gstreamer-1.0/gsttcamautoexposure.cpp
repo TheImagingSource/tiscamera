@@ -14,37 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * SECTION:element-gsttis_auto_exposure
- *
- * The tis_auto_exposure element handles automatic exposure and gain adjustments.
- *
- * processing is done in a simple manner:
- *
- * process only a few frames to give the camera time to adjust
- *
- * on selected frame determine brightness of the whole image
- *
- * The configuration from exposure and gain. Works under the following assumptions:
- * Gain should always be as low as possible.
- * Exposure can only be set to a certain value due to framerate limitations.
- *
- * This leads to following workflow:
- *
- * Determine image brightness by taking sample pixel and analyzing them.
- * If the brightness is not our prefered area, we have to adjust.
- * Calculate a new gain value. Since we prefer it small we only set it if it is smaller to the current one.
- * Next we calculate exposure
- * If exposure can not be moved, we increase gain to the already calculated value.
- *
- * In every case we check if exposure and gain can be switched,
- * meaning we try to reduce gain by increasing exposure.
- *
- *
- * Currently v4l2 and aravis compatible cameras are supported.
- *
- */
-
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -937,12 +906,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
         case PROP_EXPOSURE_MAX:
             tcamautoexposure->exposure.max = g_value_get_double(value);
             if (tcamautoexposure->exposure.max == 0.0)
+            {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
+            }
             break;
         case PROP_GAIN_MAX:
             tcamautoexposure->gain.max = g_value_get_double(value);
             if (tcamautoexposure->gain.max == 0.0)
+            {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
+            }
             break;
         case PROP_BRIGHTNESS_REFERENCE:
             tcamautoexposure->brightness_reference = g_value_get_int(value);
@@ -1031,13 +1004,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Exposure could not be found!");
+        GST_ERROR("Exposure could not be found!");
     }
     else
     {
@@ -1054,13 +1021,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Gain could not be found!");
+        GST_ERROR("Gain could not be found!");
     }
     else
     {
@@ -1073,21 +1034,9 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
     self->exposure.max = self->default_exposure_values.max;
 
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_INFO,
-                   "tcamautoexposure",
-                   "init_camera_resources",
-                   __LINE__,
-                   NULL,
-                   "Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
+    GST_INFO("Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
 
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_INFO,
-                   "tcamautoexposure",
-                   "init_camera_resources",
-                   __LINE__,
-                   NULL,
-                   "Gain boundaries are %f %f", self->gain.min, self->gain.max);
+    GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
 
 
@@ -1101,13 +1050,7 @@ static unsigned int calc_dist (unsigned int reference_val, unsigned int brightne
 
 static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 {
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_INFO,
-                   "tcamautoexposure",
-                   "set_exposure",
-                   __LINE__,
-                   NULL,
-                   "Setting exposure to %f", exposure);
+    GST_INFO("Setting exposure to %f", exposure);
 
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
@@ -1134,13 +1077,7 @@ static gdouble calc_exposure (GstTcamautoexposure* self, guint dist, gdouble exp
 
 static void set_gain (GstTcamautoexposure* self, gdouble gain)
 {
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_INFO,
-                   "",
-                   "",
-                   __LINE__,
-                   NULL,
-                   "Setting gain to %f", gain);
+    GST_INFO("Setting gain to %f", gain);
 
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
@@ -1151,15 +1088,8 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 
 static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
 {
-
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_DEBUG,
-                   "calc_gain",
-                   "",
-                   __LINE__,
-                   NULL,
-                   "Calculating gain: cur: %f min: %f max: %f",
-                   self->gain.value, self->gain.min, self->gain.max);
+    GST_DEBUG("Calculating gain: cur: %f min: %f max: %f",
+              self->gain.value, self->gain.min, self->gain.max);
 
     gdouble gain = self->gain.value;
 
@@ -1173,16 +1103,7 @@ static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
 
     gain += (val * steps_to_double_brightness);
 
-
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_DEBUG,
-                   "calc_gain",
-                   "",
-                   __LINE__,
-                   NULL,
-                   "new gain: %f",
-                   gain);
-
+    GST_DEBUG("new gain: %f", gain);
 
     return CLIP( gain, self->gain.min, self->gain.max );
 }
@@ -1197,37 +1118,19 @@ void retrieve_current_values (GstTcamautoexposure* self)
 
     if (dev == NULL)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Tcam did not return a valid device");
+        GST_ERROR("Tcam did not return a valid device");
     }
 
     tcam::Property* prop =  dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Tcam did not return exposure");
+        GST_ERROR("Tcam did not return exposure");
     }
     else
     {
         p = prop->get_struct();
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_DEBUG,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Current exposure is %ld", p.value.i.value);
+        GST_DEBUG("Current exposure is %ld", p.value.i.value);
         self->exposure.value = p.value.i.value;
     }
 
@@ -1235,24 +1138,12 @@ void retrieve_current_values (GstTcamautoexposure* self)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Tcam did not return gain");
+        GST_ERROR("Tcam did not return gain");
     }
     else
     {
         p = prop->get_struct();
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_DEBUG,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Current gain is %ld", p.value.i.value);
+        GST_DEBUG("Current gain is %ld", p.value.i.value);
         self->gain.value = p.value.i.value;
     }
 
@@ -1303,14 +1194,9 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     new_buf.pattern = calculate_pattern_from_offset(self);
 
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_INFO,
-                   "tis_auto_exposure",
-                   "init_camera_resources",
-                   __LINE__,
-                   NULL,
-                   "Region is from %d %d to %d %d", self->image_region.x0, self->image_region.y0,
-                   self->image_region.x1, self->image_region.y1);
+    GST_INFO("Region is from %d %d to %d %d",
+             self->image_region.x0, self->image_region.y0,
+             self->image_region.x1, self->image_region.y1);
 
     gst_buffer_unmap(buf, &info);
 
@@ -1325,25 +1211,12 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
 
     if (self->color_format == BAYER)
     {
-
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_DEBUG,
-                       "correct_brightness",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Calculating brightness");
+        GST_DEBUG("Calculating brightness");
         brightness = image_brightness_bayer(&buffer);
     }
     else
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_DEBUG,
-                       "correct_brightness",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Calculating brightness for gray");
+        GST_DEBUG("Calculating brightness for gray");
         brightness = buffer_brightness_gray(&buffer);
     }
     /* assure we have the current values */
@@ -1352,13 +1225,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     /* get distance from optimum */
     guint dist = calc_dist(self->brightness_reference, brightness);
 
-    gst_debug_log (gst_tcamautoexposure_debug_category,
-                   GST_LEVEL_DEBUG,
-                   "correct_brightness",
-                   "",
-                   __LINE__,
-                   NULL,
-                   "Distance is %u", dist);
+    GST_DEBUG("Distance is %u", dist);
 
     if (dist < 98 || dist > 102)
     {
@@ -1369,13 +1236,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
             /* set_gain */
             new_gain = calc_gain(self, dist);
 
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_DEBUG,
-                           "correct_brightness",
-                           "",
-                           __LINE__,
-                           NULL,
-                           "Comparing gain: %f(new) < %f(old)", new_gain, self->gain.value);
+            GST_DEBUG("Comparing gain: %f(new) < %f(old)", new_gain, self->gain.value);
             if (new_gain < self->gain.value)
             {
                 set_gain(self, new_gain);
@@ -1412,13 +1273,13 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
                     /* increase exposure by 5% */
                     set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
                 }
-
             }
             else
+            {
                 set_gain(self,new_gain);
+            }
         }
     }
-
 }
 
 
@@ -1431,11 +1292,10 @@ static gboolean find_camera_src (GstBaseTransform* trans)
 
     while (1==1)
     {
-        const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
+        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
 
         if (g_strcmp0(name, "GstTcamSrc") == 0)
         {
-
             GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
             break;
         }
@@ -1448,13 +1308,7 @@ static gboolean find_camera_src (GstBaseTransform* trans)
 
     if (GST_TCAMAUTOEXPOSURE(trans)->camera_src == NULL)
     {
-        gst_debug_log (gst_tcamautoexposure_debug_category,
-                       GST_LEVEL_ERROR,
-                       "",
-                       "",
-                       __LINE__,
-                       NULL,
-                       "Camera source not set!");
+        GST_ERROR("Camera source not set!");
         return FALSE;
     }
     else
@@ -1471,7 +1325,8 @@ gboolean find_image_values (GstTcamautoexposure* self)
     g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
     g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
 
-    gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+    gst_structure_get_fraction(structure, "framerate",
+                               &self->framerate_numerator, &self->framerate_denominator);
 
     return TRUE;
 }
@@ -1525,13 +1380,7 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
         if (data == NULL || length == 0)
         {
-            gst_debug_log (gst_tcamautoexposure_debug_category,
-                           GST_LEVEL_ERROR,
-                           "gst_tcamautoexposure",
-                           "gst_tcamautoexposure",
-                           __LINE__,
-                           NULL,
-                           "Buffer is not valid! Ignoring buffer and trying to continue...");
+            GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
             return GST_FLOW_OK;
         }
 

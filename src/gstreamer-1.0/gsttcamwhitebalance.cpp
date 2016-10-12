@@ -574,72 +574,71 @@ static GstStaticPadTemplate gst_tcamwhitebalance_src_template =
 
 /* class initialization */
 
-static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass * klass)
+static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass* klass)
 {
-    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-    GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    GstBaseTransformClass *base_transform_class = GST_BASE_TRANSFORM_CLASS(klass);
 
     gst_element_class_add_pad_template(GST_ELEMENT_CLASS(klass),
                                        gst_static_pad_template_get(&gst_tcamwhitebalance_src_template));
     gst_element_class_add_pad_template(GST_ELEMENT_CLASS(klass),
                                        gst_static_pad_template_get(&gst_tcamwhitebalance_sink_template));
 
-    gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
-                                          "The Imaging Source White Balance Element",
-                                          "Generic",
-                                          "Adjusts white balancing of video data buffers",
-                                          "The Imaging Source Europe GmbH <support@theimagingsource.com>");
-
-    //GstBaseTransform *test = GST_BASE_TRANSFORM(base_transform_class);
-
-    //gst_base_transform_set_passthrough(GST_BASE_TRANSFORM(base_transform_class), TRUE);
+    gst_element_class_set_details_simple(GST_ELEMENT_CLASS(klass),
+                                         "The Imaging Source White Balance Element",
+                                         "Generic",
+                                         "Adjusts white balancing of video data buffers",
+                                         "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
     gobject_class->set_property = gst_tcamwhitebalance_set_property;
     gobject_class->get_property = gst_tcamwhitebalance_get_property;
     gobject_class->finalize = gst_tcamwhitebalance_finalize;
-    base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tcamwhitebalance_transform_ip);
-    /* base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tcamwhitebalance_transform_caps); */
-    /* base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tcamwhitebalance_fixate_caps); */
+    base_transform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_tcamwhitebalance_transform_ip);
 
+    GST_DEBUG_CATEGORY_INIT(gst_tcamwhitebalance_debug_category, "tcamwhitebalance", 0, "tcam whitebalance");
 
-    GST_DEBUG_CATEGORY_INIT (gst_tcamwhitebalance_debug_category, "tcamwhitebalance", 0, "tcam whitebalance");
-
-    g_object_class_install_property (gobject_class,
-                                     PROP_GAIN_RED,
-                                     g_param_spec_int ("red", "Red",
-                                                       "Value for red",
-                                                       0, 255, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_GAIN_GREEN,
-                                     g_param_spec_int ("green", "Green Gain",
-                                                       "Value for red gain",
-                                                       0, 255, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_GAIN_BLUE,
-                                     g_param_spec_int ("blue", "Blue Gain",
-                                                       "Value for blue gain",
-                                                       0, 255, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_AUTO_ENABLED,
-                                     g_param_spec_boolean ("auto", "Auto Value Adjustment",
-                                                           "Automatically adjust white balance values",
-                                                           TRUE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_CAMERA_WB,
-                                     g_param_spec_boolean ("camera-whitebalance", "Device whitebalance settings",
-                                                           "Adjust whitebalance values in the camera",
-                                                           FALSE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_WHITEBALANCE_ENABLED,
-                                     g_param_spec_boolean ("module-enabled", "Enable/Disable White Balance Module",
-                                                           "Disable entire module",
-                                                           TRUE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_GAIN_RED,
+                                    g_param_spec_int("red",
+                                                     "Red",
+                                                     "Value for red",
+                                                     0, 255, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_GAIN_GREEN,
+                                    g_param_spec_int("green",
+                                                     "Green",
+                                                     "Value for red",
+                                                     0, 255, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_GAIN_BLUE,
+                                    g_param_spec_int("blue",
+                                                     "Blue",
+                                                     "Value for blue",
+                                                     0, 255, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_AUTO_ENABLED,
+                                    g_param_spec_boolean("auto",
+                                                         "Auto Value Adjustment",
+                                                         "Automatically adjust white balance values",
+                                                         TRUE,
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_CAMERA_WB,
+                                    g_param_spec_boolean("camera-whitebalance",
+                                                         "Device whitebalance settings",
+                                                         "Adjust whitebalance values in the camera",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_WHITEBALANCE_ENABLED,
+                                    g_param_spec_boolean("module-enabled",
+                                                         "Enable/Disable White Balance Module",
+                                                         "Disable entire module",
+                                                         TRUE,
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 }
 
 
@@ -652,7 +651,7 @@ static void init_wb_values (GstTcamWhitebalance* self)
 }
 
 
-static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
+static void gst_tcamwhitebalance_init (GstTcamWhitebalance* self)
 {
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), TRUE);
 
@@ -661,73 +660,72 @@ static void gst_tcamwhitebalance_init (GstTcamWhitebalance *self)
 
     self->image_size.width = 0;
     self->image_size.height = 0;
-
 }
 
 
 void gst_tcamwhitebalance_set_property (GObject* object,
-                                       guint property_id,
-                                       const GValue* value,
-                                       GParamSpec* pspec)
+                                        guint property_id,
+                                        const GValue* value,
+                                        GParamSpec* pspec)
 {
-    GstTcamWhitebalance *tcamwhitebalance = GST_TCAMWHITEBALANCE (object);
+    GstTcamWhitebalance* tcamwhitebalance = GST_TCAMWHITEBALANCE(object);
 
     switch (property_id)
     {
         case PROP_GAIN_RED:
-            tcamwhitebalance->red = g_value_get_int (value);
+            tcamwhitebalance->red = g_value_get_int(value);
             break;
         case PROP_GAIN_GREEN:
-            tcamwhitebalance->green = g_value_get_int (value);
+            tcamwhitebalance->green = g_value_get_int(value);
             break;
         case PROP_GAIN_BLUE:
-            tcamwhitebalance->blue = g_value_get_int (value);
+            tcamwhitebalance->blue = g_value_get_int(value);
             break;
         case PROP_AUTO_ENABLED:
-            tcamwhitebalance->auto_wb = g_value_get_boolean (value);
+            tcamwhitebalance->auto_wb = g_value_get_boolean(value);
             break;
         case PROP_WHITEBALANCE_ENABLED:
-            tcamwhitebalance->auto_enabled = g_value_get_boolean (value);
+            tcamwhitebalance->auto_enabled = g_value_get_boolean(value);
             break;
         case PROP_CAMERA_WB:
             tcamwhitebalance->force_hardware_wb = g_value_get_boolean(value);
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
     }
 }
 
 
 void gst_tcamwhitebalance_get_property (GObject* object,
-                                       guint property_id,
-                                       GValue* value,
-                                       GParamSpec* pspec)
+                                        guint property_id,
+                                        GValue* value,
+                                        GParamSpec* pspec)
 {
-    GstTcamWhitebalance *tcamwhitebalance = GST_TCAMWHITEBALANCE (object);
+    GstTcamWhitebalance *tcamwhitebalance = GST_TCAMWHITEBALANCE(object);
 
     switch (property_id)
     {
         case PROP_GAIN_RED:
-            g_value_set_int (value, tcamwhitebalance->red);
+            g_value_set_int(value, tcamwhitebalance->red);
             break;
         case PROP_GAIN_GREEN:
-            g_value_set_int (value, tcamwhitebalance->green);
+            g_value_set_int(value, tcamwhitebalance->green);
             break;
         case PROP_GAIN_BLUE:
-            g_value_set_int (value, tcamwhitebalance->blue);
+            g_value_set_int(value, tcamwhitebalance->blue);
             break;
         case PROP_AUTO_ENABLED:
-            g_value_set_boolean (value, tcamwhitebalance->auto_wb);
+            g_value_set_boolean(value, tcamwhitebalance->auto_wb);
             break;
         case PROP_WHITEBALANCE_ENABLED:
-            g_value_set_boolean (value, tcamwhitebalance->auto_enabled);
+            g_value_set_boolean(value, tcamwhitebalance->auto_enabled);
             break;
         case PROP_CAMERA_WB:
             g_value_set_boolean(value, tcamwhitebalance->force_hardware_wb);
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
     }
 }
@@ -735,35 +733,16 @@ void gst_tcamwhitebalance_get_property (GObject* object,
 
 void gst_tcamwhitebalance_finalize (GObject* object)
 {
-    G_OBJECT_CLASS (gst_tcamwhitebalance_parent_class)->finalize (object);
+    G_OBJECT_CLASS(gst_tcamwhitebalance_parent_class)->finalize (object);
 }
 
 
 static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance* self)
 {
-    gst_debug_log (gst_tcamwhitebalance_debug_category,
-                   GST_LEVEL_INFO,
-                   "tcamwhitebalance",
-                   "device_set_whitebalance",
-                   __LINE__,
-                   NULL,
-                   "Applying white balance to device with values: R:%d G:%d B:%d",
-                   self->res.color.rgb.R,
-                   self->res.color.rgb.G,
-                   self->res.color.rgb.B);
-
-
-
-
-
-    /* bool  tcam_capture_device_find_property (tcam_capture_device* source, */
-    /*                                          TCAM_PROPERTY_ID id, */
-    /*                                          struct tcam_device_property* property); */
-    /* /\** */
-    /*  * */
-    /*  *\/ */
-    /* int tcam_capture_device_set_property (tcam_capture_device* source, */
-    /*                                       const struct tcam_device_property* property); */
+    GST_INFO("Applying white balance to device with values: R:%d G:%d B:%d",
+             self->res.color.rgb.R,
+             self->res.color.rgb.G,
+             self->res.color.rgb.B);
 
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->res.source_element), "camera", &dev, NULL);
@@ -773,13 +752,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
 
     if (p == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamwhitebalance",
-                       "device_set_whitebalance",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve gain red property");
+        GST_ERROR("Unable to retrieve gain red property");
     }
 
     if (p->set_value((int64_t)self->res.color.rgb.R))
@@ -791,13 +764,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
 
     if (p == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamwhitebalance",
-                       "device_set_whitebalance",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve gain green property");
+        GST_ERROR("Unable to retrieve gain green property");
     }
 
     if (p->set_value((int64_t)self->res.color.rgb.G))
@@ -809,13 +776,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
 
     if (p == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamwhitebalance",
-                       "device_set_whitebalance",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve gain blue property");
+        GST_ERROR("Unable to retrieve gain blue property");
     }
 
     if (p->set_value((int64_t)self->res.color.rgb.B))
@@ -863,7 +824,9 @@ gboolean is_near_gray (guint r, guint g, guint b)
 }
 
 
-rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_tripel* wb, gboolean enable_near_gray)
+rgb_tripel simulate_whitebalance (const auto_sample_points* data,
+                                  const rgb_tripel* wb,
+                                  gboolean enable_near_gray)
 {
     rgb_tripel result = { 0, 0, 0 };
     rgb_tripel result_near_gray = { 0, 0, 0 };
@@ -908,7 +871,7 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_trip
 }
 
 
-static rgb_tripel average_color_cam (const auto_sample_points* data )
+static rgb_tripel average_color_cam (const auto_sample_points* data)
 {
     rgb_tripel result = { 0, 0, 0 };
 
@@ -1013,8 +976,8 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
         rgb_tripel tmp = simulate_whitebalance( data, wb, TRUE );
 
         // Simulate white balance once more, this time always on the whole image
-        rgb_tripel tmp2 = simulate_whitebalance( data, wb, FALSE );
-        *resulting_brightness = calc_brightness_from_clr_avg( tmp2.R, tmp2.G, tmp2.B );
+        rgb_tripel tmp2 = simulate_whitebalance(data, wb, FALSE);
+        *resulting_brightness = calc_brightness_from_clr_avg(tmp2.R, tmp2.G, tmp2.B);
 
         if (wb_auto_step(&tmp, wb))
         {
@@ -1050,7 +1013,7 @@ gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
     }
 
     rgb_tripel averageColor = average_color_cam( data);
-    if(wb_auto_step(&averageColor, wb ) )
+    if (wb_auto_step(&averageColor, wb))
     {
         return TRUE;
     }
@@ -1059,13 +1022,7 @@ gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
     wb->G = clip( wb->G, WB_MAX );
     wb->B = clip( wb->B, WB_MAX );
 
-    gst_debug_log (gst_tcamwhitebalance_debug_category,
-                   GST_LEVEL_INFO,
-                   "tcamwhitebalance",
-                   "auto_whitebalance_cam",
-                   __LINE__,
-                   NULL,
-                   "Calculated white balance R:%d G:%d B:%d", wb->R, wb->G, wb->B);
+    GST_INFO("Calculated white balance R:%d G:%d B:%d", wb->R, wb->G, wb->B);
 
     return FALSE;
 }
@@ -1154,13 +1111,7 @@ static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, by
 
 void apply_wb_by8_c ( GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte wb_g, byte wb_b)
 {
-    gst_debug_log (gst_tcamwhitebalance_debug_category,
-                   GST_LEVEL_DEBUG,
-                   "tcamwhitebalance",
-                   "",
-                   __LINE__,
-                   NULL,
-                   "Applying white balance with values: R:%d G:%d B:%d", wb_r, wb_g, wb_b);
+    GST_DEBUG("Applying white balance with values: R:%d G:%d B:%d", wb_r, wb_g, wb_b);
 
     wb_image_c( self, buf, wb_r, wb_g, wb_b);
 }
@@ -1215,13 +1166,7 @@ static void update_device_resources (struct device_resources* res)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Exposure could not be found!");
+        GST_ERROR("Exposure could not be found!");
     }
     else
     {
@@ -1236,13 +1181,7 @@ static void update_device_resources (struct device_resources* res)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Gain could not be found!");
+        GST_ERROR("Gain could not be found!");
     }
     else
     {
@@ -1257,13 +1196,7 @@ static void update_device_resources (struct device_resources* res)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Gain Red could not be found!");
+        GST_INFO("Gain Red could not be found!");
     }
     else
     {
@@ -1277,13 +1210,7 @@ static void update_device_resources (struct device_resources* res)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Gain Green could not be found!");
+        GST_INFO("Gain Green could not be found!");
     }
     else
     {
@@ -1298,13 +1225,7 @@ static void update_device_resources (struct device_resources* res)
 
     if (prop == nullptr)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_INFO,
-                       "tcamautoexposure",
-                       "init_camera_resources",
-                       __LINE__,
-                       NULL,
-                       "Gain Blue could not be found!");
+        GST_INFO("Gain Blue could not be found!");
     }
     else
     {
@@ -1327,14 +1248,14 @@ static struct device_resources find_source (GstElement* self)
 
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
-    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(self)));
+    GstElement* e = GST_ELEMENT(gst_object_get_parent(GST_OBJECT(self)));
 
     GList* l =  GST_BIN(e)->children;
 
     while (1==1)
     {
 
-        const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
+        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
 
         if (g_strcmp0(name, "GstTcamSrc") == 0)
         {
@@ -1349,7 +1270,7 @@ static struct device_resources find_source (GstElement* self)
         l = g_list_next(l);
     }
 
-    update_device_resources (&res);
+    update_device_resources(&res);
 
     return res;
 }
@@ -1362,12 +1283,12 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
-    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
+    g_return_val_if_fail(gst_structure_get_int(structure, "width", &self->image_size.width), FALSE);
+    g_return_val_if_fail(gst_structure_get_int(structure, "height", &self->image_size.height), FALSE);
 
     guint fourcc;
 
-    if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+    if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
     {
         const char *string;
         string = gst_structure_get_string (structure, "format");
@@ -1392,13 +1313,7 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
     }
     else
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "gst_tiswhitebalance",
-                       "gst_tiswhitebalance_fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "Unable to determine bayer pattern.");
+        GST_ERROR("Unable to determine bayer pattern.");
         return FALSE;
     }
 
@@ -1421,13 +1336,7 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
     {
         if (!extract_resolution(self))
         {
-            gst_debug_log (gst_tcamwhitebalance_debug_category,
-                           GST_LEVEL_ERROR,
-                           "gst_tcamwhitebalance",
-                           "gst_tcamwhitebalance",
-                           __LINE__,
-                           NULL,
-                           "Received format is not usable. Aborting");
+            GST_ERROR("Received format is not usable. Aborting");
             return GST_FLOW_ERROR;
         }
 
@@ -1451,7 +1360,6 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
         return GST_FLOW_OK;
     }
 
-
     // validity checks
     GstMapInfo info;
 
@@ -1465,13 +1373,7 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
 
     if (data == NULL || length != self->expected_buffer_size)
     {
-        gst_debug_log (gst_tcamwhitebalance_debug_category,
-                       GST_LEVEL_ERROR,
-                       "gst_tcamwhitebalance",
-                       "gst_tcamwhitebalance",
-                       __LINE__,
-                       NULL,
-                       "Buffer is not valid! Ignoring buffer and trying to continue...");
+        GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
         return GST_FLOW_OK;
     }
 
