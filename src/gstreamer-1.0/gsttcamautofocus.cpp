@@ -38,9 +38,10 @@ enum
 {
     PROP_0,
     PROP_AUTO,
-    PROP_X,
-    PROP_Y,
-    PROP_SIZE,
+    PROP_LEFT,
+    PROP_TOP,
+    PROP_WIDTH,
+    PROP_HEIGHT,
 };
 
 
@@ -128,12 +129,14 @@ static const char* tcamautofocus_property_id_to_string (guint id)
     {
         case PROP_AUTO:
             return "focus-auto";
-        case PROP_X:
-            return "focus-roi-x";
-        case PROP_Y:
-            return "focus-roi-y";
-        case PROP_SIZE:
-            return "focus-roi-size";
+        case PROP_LEFT:
+            return "focus-roi-left";
+        case PROP_TOP:
+            return "focus-roi-right";
+        case PROP_WIDTH:
+            return "focus-roi-width";
+        case PROP_HEIGHT:
+            return "focus-roi-height";
         default:
             return 0;
     }
@@ -146,17 +149,21 @@ static guint tcamwhitebalance_string_to_property_id (const char* name)
     {
         return PROP_AUTO;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_X)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_LEFT)) == 0)
     {
-        return PROP_X;
+        return PROP_LEFT;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_Y)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_TOP)) == 0)
     {
-        return PROP_Y;
+        return PROP_TOP;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_SIZE)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_WIDTH)) == 0)
     {
-        return PROP_SIZE;
+        return PROP_WIDTH;
+    }
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_HEIGHT)) == 0)
+    {
+        return PROP_HEIGHT;
     }
 
     return 0;
@@ -168,9 +175,10 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
     GSList* names = nullptr;
 
     names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_AUTO));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_X));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_Y));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_SIZE));
+    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_LEFT));
+    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_TOP));
+    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_WIDTH));
+    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_HEIGHT));
 
     return names;
 }
@@ -182,15 +190,19 @@ static gchar* gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name)
     {
         return g_strdup("button");
     }
-    if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_X)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_LEFT)) == 0)
     {
         return g_strdup("integer");
     }
-    if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_Y)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_TOP)) == 0)
     {
         return g_strdup("integer");
     }
-    if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_SIZE)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_WIDTH)) == 0)
+    {
+        return g_strdup("integer");
+    }
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_HEIGHT)) == 0)
     {
         return g_strdup("integer");
     }
@@ -259,12 +271,12 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_X)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_LEFT)) == 0)
     {
         if (value)
         {
             g_value_init(value, G_TYPE_BOOLEAN);
-            g_value_set_boolean(value, self->x);
+            g_value_set_boolean(value, self->roi_left);
         }
         if (min)
         {
@@ -303,12 +315,12 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_Y)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_TOP)) == 0)
     {
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->y);
+            g_value_set_int(value, self->roi_left);
         }
         if (min)
         {
@@ -347,12 +359,56 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_SIZE)) == 0)
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_WIDTH)) == 0)
     {
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->size);
+            g_value_set_int(value, self->roi_width);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_boolean(min, 0);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_boolean(max, G_MAXINT);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_HEIGHT)) == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->roi_height);
         }
         if (min)
         {
@@ -525,12 +581,12 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
     RECT r = {0, 0, 0, 0};
 
     /* user defined rectangle */
-    if (self->x != 0 || self->y != 0)
+    if (self->roi_width != 0 && self->roi_height != 0)
     {
-        r.left = (self->x - self->size < 0) ? 0 : self->x - self->size;
-        r.right =(self->x - self->size > self->width) ? self->width : self->x - self->size;
-        r.top = (self->y - self->size < 0) ? 0 : self->y - self->size;
-        r.bottom = (self->y - self->size > self->height) ? self->height : self->y - self->size;
+        r.left = self->roi_left;
+        r.right = self->roi_left + self->roi_width;
+        r.top = self->roi_left;
+        r.bottom = self->roi_left + self->roi_height;
     }
 
     tcam::Property* p = dev->get_property(TCAM_PROPERTY_FOCUS);
@@ -604,37 +660,42 @@ static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
     gobject_class->get_property = gst_tcamautofocus_get_property;
     gobject_class->finalize = gst_tcamautofocus_finalize;
     base_transform_class->transform_ip = GST_DEBUG_FUNCPTR (gst_tcamautofocus_transform_ip);
-    /* base_transform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_tcamautofocus_transform_caps); */
-    /* base_transform_class->fixate_caps = GST_DEBUG_FUNCPTR (gst_tcamautofocus_fixate_caps); */
 
-    g_object_class_install_property (gobject_class,
-                                     PROP_AUTO,
-                                     g_param_spec_boolean ("auto",
-                                                           "Activate auto focus run",
-                                                           "Automatically adjust exposure balance",
-                                                           FALSE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_X,
-                                     g_param_spec_int ("x",
-                                                       "X Coordinate",
-                                                       "Coordinate for focus region.",
-                                                       0, G_MAXINT, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_Y,
-                                     g_param_spec_int ("y",
-                                                       "Y Coordinate",
-                                                       "Coordinate for focus region.",
-                                                       0, G_MAXINT, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
-                                     PROP_SIZE,
-                                     g_param_spec_int ("size",
-                                                       "Size of focus region",
-                                                       "Radius of the focus region around the given coordinates.",
-                                                       0, G_MAXINT, 50,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_AUTO,
+                                    g_param_spec_boolean("auto",
+                                                         "Activate auto focus run",
+                                                         "Automatically adjust camera focus",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_LEFT,
+                                    g_param_spec_int("left",
+                                                     "Left border of the focus region",
+                                                     "Coordinate for focus region.",
+                                                     0, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_TOP,
+                                    g_param_spec_int("top",
+                                                     "Top border of the focus region",
+                                                     "Coordinate for focus region.",
+                                                     0, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_WIDTH,
+                                    g_param_spec_int("width",
+                                                     "Width of focus region",
+                                                     "Width of the focus region beginning at 'left'",
+                                                     0, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property(gobject_class,
+                                    PROP_HEIGHT,
+                                    g_param_spec_int("height",
+                                                     "Height of focus region",
+                                                     "Height of the focus region beginning at 'top'.",
+                                                     0, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
 
     GST_DEBUG_CATEGORY_INIT (gst_tcamautofocus_debug_category,
@@ -649,9 +710,12 @@ static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
 {
     self->focus = autofocus_create();
     self->cur_focus = 0;
-    self->x = 0;
-    self->y = 0;
-    self->size = 50;
+    self->roi_left = 0;
+    self->roi_left = 0;
+    self->roi_width = 0;
+    self->roi_height = 0;
+    self->image_width = 0;
+    self->image_height = 0;
     self->camera_src = NULL;
 }
 
@@ -672,17 +736,20 @@ void gst_tcamautofocus_set_property (GObject* object,
                 focus_run(self);
             }
             break;
-        case PROP_X:
-            self->x = g_value_get_int (value);
+        case PROP_LEFT:
+            self->roi_left = g_value_get_int(value);
             break;
-        case PROP_Y:
-            self->y = g_value_get_int (value);
+        case PROP_TOP:
+            self->roi_left = g_value_get_int(value);
             break;
-        case PROP_SIZE:
-            self->size = g_value_get_int (value);
+        case PROP_WIDTH:
+            self->roi_width = g_value_get_int(value);
+            break;
+        case PROP_HEIGHT:
+            self->roi_height = g_value_get_int(value);
             break;
         default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
     }
 }
@@ -698,16 +765,19 @@ void gst_tcamautofocus_get_property (GObject* object,
     switch (property_id)
     {
         case PROP_AUTO:
-            g_value_set_boolean (value, self->focus_active);
+            g_value_set_boolean(value, self->focus_active);
             break;
-        case PROP_X:
-            g_value_set_int (value, self->x);
+        case PROP_LEFT:
+            g_value_set_int(value, self->roi_left);
             break;
-        case PROP_Y:
-            g_value_set_int (value, self->y);
+        case PROP_TOP:
+            g_value_set_int(value, self->roi_left);
             break;
-        case PROP_SIZE:
-            g_value_set_int (value, self->size);
+        case PROP_WIDTH:
+            g_value_set_int(value, self->roi_width);
+            break;
+        case PROP_HEIGHT:
+            g_value_set_int(value, self->roi_height);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -769,7 +839,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
         {
             gst_structure_fixate_field_nearest_int (outs, "width", width);
         }
-        self->width = width;
+        self->image_width = width;
     }
 
     if (gst_structure_get_int (ins, "height", &height))
@@ -778,7 +848,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
         {
             gst_structure_fixate_field_nearest_int (outs, "height", height);
         }
-        self->height = height;
+        self->image_height = height;
     }
 
     if (gst_structure_get_field_type (ins, "format") == G_TYPE_STRING)
@@ -868,7 +938,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
                    "fixate_caps",
                    __LINE__,
                    NULL,
-                   "current focus %d - %dx%d ", self->cur_focus, self->width, self->height);
+                   "current focus %d - %dx%d ", self->cur_focus, self->image_width, self->image_height);
 
     /* assure we use the current focus value */
     autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
@@ -883,9 +953,9 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
             info.data,
             info.size,
             FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
-            self->width,
-            self->height,
-            self->width
+            self->image_width,
+            self->image_height,
+            self->image_width
         };
 
     int new_focus_value;
@@ -921,8 +991,8 @@ gboolean find_image_values (GstTcamAutoFocus* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->width), FALSE);
-    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->height), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_width), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_height), FALSE);
 
     gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
 
@@ -936,7 +1006,7 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (trans);
 
 
-    if (self->width == 0 || self->height == 0)
+    if (self->image_width == 0 || self->image_height == 0)
     {
         if (!find_image_values(self))
         {
