@@ -455,7 +455,9 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
                                                      gchar* name,
                                                      const GValue* value)
 {
-    gst_tcamautofocus_set_property(G_OBJECT(self), tcamwhitebalance_string_to_property_id(name), value, NULL);
+    gst_tcamautofocus_set_property(G_OBJECT(self),
+                                   tcamwhitebalance_string_to_property_id(name),
+                                   value, NULL);
     return TRUE;
 }
 
@@ -513,13 +515,7 @@ GstElement* get_camera_src (GstElement* object)
         {
             self->camera_src = l->data;
 
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_INFO,
-                           "tcamautofocus",
-                           __FUNCTION__,
-                           __LINE__,
-                           NULL,
-                           "Identified camera source as tcamsrc.");
+            GST_DEBUG("Identified camera source as tcamsrc.");
             break;
         }
 
@@ -532,13 +528,7 @@ GstElement* get_camera_src (GstElement* object)
 
     if (self->camera_src == NULL)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unknown camera source. ");
+        GST_ERROR("Unknown camera source.");
     }
 
 
@@ -553,13 +543,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
 
     if (self->camera_src == NULL)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Source empty! Aborting. ");
+        GST_ERROR("Source empty! Aborting.");
         return;
     }
 
@@ -568,13 +552,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
 
     if (dev == nullptr)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve camera! Aborting. ");
+        GST_ERROR("Unable to retrieve camera! Aborting.");
         return;
     }
 
@@ -593,13 +571,7 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
 
     if (p == nullptr)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "run",
-                       __LINE__,
-                       NULL,
-                       "Unable to retrieve focus property! Aborting. ");
+        GST_ERROR("Unable to retrieve focus property! Aborting.");
         return;
     }
     struct tcam_device_property prop = p->get_struct();
@@ -611,17 +583,11 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
     /* magic number */
     int focus_auto_step_divisor = 4;
 
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "run",
-                   __LINE__,
-                   NULL,
-                   "Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
-                   self->cur_focus,
-                   min,
-                   max,
-                   focus_auto_step_divisor);
+    GST_INFO("Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
+             self->cur_focus,
+             min,
+             max,
+             focus_auto_step_divisor);
 
     autofocus_run(self->focus,
                   self->cur_focus,
@@ -863,13 +829,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 
     if (fourcc == 0)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "",
-                       555,
-                       NULL,
-                       "Unable to determine fourcc. Using Y800");
+        GST_ERROR("Unable to determine fourcc. Using Y800");
         fourcc = FOURCC_BY8;
     }
     else
@@ -887,19 +847,6 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
                                   toupper(bytes[3]));
 
     }
-
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tis_auto_exposure",
-                   "gst_tcamautofocus_fixate_caps",
-                   __LINE__,
-                   NULL,
-                   "Fixated caps %d %d %d %d %c%c%c%c",
-                   FOURCC_GRBG8,
-                   FOURCC_GBRG8,
-                   FOURCC_BGGR8,
-                   FOURCC_RGGB8,
-                   GST_FOURCC_ARGS(fourcc));
 }
 
 
@@ -932,14 +879,6 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     int focus_auto_min = prop.value.i.min;
     max = prop.value.i.max;
 
-    gst_debug_log (gst_tcamautofocus_debug_category,
-                   GST_LEVEL_ERROR,
-                   "tcamautofocus",
-                   "fixate_caps",
-                   __LINE__,
-                   NULL,
-                   "current focus %d - %dx%d ", self->cur_focus, self->image_width, self->image_height);
-
     /* assure we use the current focus value */
     autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
 
@@ -969,13 +908,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 
     if (ret)
     {
-        gst_debug_log (gst_tcamautofocus_debug_category,
-                       GST_LEVEL_ERROR,
-                       "tcamautofocus",
-                       "fixate_caps",
-                       __LINE__,
-                       NULL,
-                       "Setting focus %d", new_focus_value);
+        GST_DEBUG("Setting focus %d", new_focus_value);
 
         focus_prop->set_value((int64_t)new_focus_value);
         self->cur_focus = new_focus_value;
@@ -1005,7 +938,6 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (trans);
 
-
     if (self->image_width == 0 || self->image_height == 0)
     {
         if (!find_image_values(self))
@@ -1033,13 +965,7 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
 
         if (data == NULL || length == 0)
         {
-            gst_debug_log (gst_tcamautofocus_debug_category,
-                           GST_LEVEL_ERROR,
-                           "gst_tcamautofocus",
-                           "gst_tcamautofocus",
-                           __LINE__,
-                           NULL,
-                           "Buffer is not valid! Ignoring buffer and trying to continue...");
+            GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
             return GST_FLOW_OK;
         }
 
@@ -1056,10 +982,10 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
 
 static gboolean plugin_init (GstPlugin* plugin)
 {
-    return gst_element_register (plugin,
-                                 "tcamautofocus",
-                                 GST_RANK_NONE,
-                                 GST_TYPE_TCAMAUTOFOCUS);
+    return gst_element_register(plugin,
+                                "tcamautofocus",
+                                GST_RANK_NONE,
+                                GST_TYPE_TCAMAUTOFOCUS);
 }
 
 
