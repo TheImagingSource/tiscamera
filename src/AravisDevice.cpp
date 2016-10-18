@@ -458,6 +458,8 @@ bool AravisDevice::start_stream ()
 
     arv_camera_start_acquisition(this->arv_camera);
 
+    statistics = {};
+
     return true;
 }
 
@@ -505,6 +507,12 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
             desc.length = size;
             desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
+
+
+            self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
+            self->statistics.frame_count++;
+
+            desc.statistics = self->statistics;
 
             if (desc.pData == NULL)
             {

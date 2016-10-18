@@ -120,6 +120,7 @@ private:
     //std::vector<std::shared_ptr<MemoryBuffer>> buffers;
     std::vector<buffer_info> buffers;
     unsigned int current_buffer;
+    struct tcam_stream_statistics statistics;
 
     struct aravis_options
     {
