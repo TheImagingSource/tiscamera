@@ -81,7 +81,7 @@ static void gst_tcamwhitebalance_fixate_caps (GstBaseTransform* base,
 
 static GSList* gst_tcamwhitebalance_get_property_names(TcamProp* self);
 
-static gchar *gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name);
+static const gchar *gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name);
 
 static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* self,
                                                         gchar* name,
@@ -199,7 +199,7 @@ static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self)
 }
 
 
-static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name)
+static const gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self, gchar* name)
 {
     if (strcmp(name, "whitebalance-red") == 0)
     {

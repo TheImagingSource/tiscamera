@@ -95,7 +95,7 @@ static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
 
 static GSList* gst_tcamautoexposure_get_property_names(TcamProp* self);
 
-static const gchar *gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name);
+static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name);
 
 static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* self,
                                                         gchar* name,

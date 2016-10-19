@@ -75,7 +75,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 
 static GSList* gst_tcamautofocus_get_property_names (TcamProp* self);
 
-static gchar *gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name);
+static const gchar *gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name);
 
 static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* self,
                                                      gchar* name,
@@ -184,7 +184,7 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
 }
 
 
-static gchar* gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name)
+static const gchar* gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name)
 {
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
