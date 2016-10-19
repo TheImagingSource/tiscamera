@@ -46,8 +46,6 @@ void print_help (const std::string& prog_name)
     << "Set property\n"
     << "\t" << prog_name << " -s -p \"Auto Exposure=false\" <SERIAL>\n"
     << "\n"
-    << "Save current settings\n"
-    << "\t" << prog_name << " -x <SERIAL>\n"
     << std::endl;
 }
 
