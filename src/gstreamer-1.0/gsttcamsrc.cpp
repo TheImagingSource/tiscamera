@@ -817,14 +817,14 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
         int i;
 
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (i = 0; i < gst_caps_get_size (peercaps); i++)
+        for (i = gst_caps_get_size (peercaps); i >= 0 ; i--)
         {
             /* get intersection */
             GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
 
             GST_DEBUG_OBJECT (basesrc, "peer: %" GST_PTR_FORMAT, ipcaps);
 
-            icaps = gst_caps_intersect (thiscaps, ipcaps);
+            icaps = gst_caps_intersect_full(thiscaps, ipcaps, GST_CAPS_INTERSECT_FIRST);
             gst_caps_unref (ipcaps);
 
             if (!gst_caps_is_empty (icaps))
