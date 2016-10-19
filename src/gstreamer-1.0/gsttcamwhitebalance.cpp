@@ -275,6 +275,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
         }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
@@ -320,6 +325,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
         }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
@@ -363,6 +373,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         {
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
         }
         if (type)
         {
@@ -408,6 +423,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
         }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
@@ -452,6 +472,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
         }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
@@ -494,6 +519,11 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         {
             g_value_init(step, G_TYPE_INT);
             g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
         }
         if (type)
         {
