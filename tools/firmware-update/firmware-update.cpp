@@ -177,9 +177,9 @@ void print_device_info (const std::string& serial_number)
         else
             std::cout << "off" << std::endl;
 
-	std::cout << "Camera EEPROM size:  ";
-	std::cout << cam->get_eeprom_size();
-	std::cout << std::endl;
+        std::cout << "Camera EEPROM size:  ";
+        std::cout << cam->get_eeprom_size();
+        std::cout << std::endl;
     }
 
     std::cout << std::endl;
@@ -296,8 +296,6 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
         std::cout << std::endl << "There was a mistake. " << std::endl
                   << err.what() << std::endl;
     }
-
-    // cam->reset
 
     if (success)
     {
@@ -475,4 +473,3 @@ int main (int argc, char *argv[])
 
     return 0;
 }
-
