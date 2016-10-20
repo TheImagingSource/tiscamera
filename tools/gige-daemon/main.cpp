@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
                 }
             }
 
-            int ret = daemon_instance.daemonize(&signal_handler, false);
+            int ret = daemon_instance.daemonize(&signal_handler, daemonize);
 
             if (ret < 0)
             {
