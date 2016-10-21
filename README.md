@@ -10,26 +10,6 @@ This repository will give you additional ressources to control your TIS camera.
 * firmware update tools
 * examples on how to interact with your camera
 
-## How to install?
-
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-
-## Available options
-
-* -DBUILD_ARAVIS [default=OFF]
-Build against aravis to enable support for GigE cameras
-* -DBUILD_GST_1_0 [default=ON]
-Build additional gstreamer-1.0 modules
-* -DBUILD_TOOLS [default=ON]
-Build additional tools (firmware-tools, ip-configuration)
-* -DBUILD_USB [default=ON]
-Build against v4l2 to enable support for USB cameras
-
-
 ## Dependencies
 
 To build all options:
@@ -44,20 +24,68 @@ libgirepository1.0-dev
 libusb-1.0-0-dev
 libzip-dev
 
-### aravis dependencies
+    sudo apt-get install g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl
 
-To build aravis you require the following packages(assuming you are building all parts):
+If you use GigE cameras you will have to install aravis manually.
 
-libxml2-dev
-gtk-doc-tools
-intltool
-autoconf
+To install aravis you require the following additional packages.
 
-libgstreamer0.10-dev
-libgstreamer-plugins-base0.10-dev
-libnotify-dev
-libgtk-3-dev
+    sudo apt-get install libxml2-dev gtk-doc-tools intltool autoconf autoconflibnotify-dev libgtk-3-dev
 
+
+
+### Building tiscamera
+
+To build tiscamera follow these steps:
+
+mkdir build
+cd build
+
+cmake <OPTIONS> ..
+
+The most important options are:
+
+**-DBUILD_ARAVIS=<ON/OFF>**
+
+Build tiscamera with support for aravis devices.
+
+**-DBUILD_GST_1_0=<ON/OFF>**
+
+Build gstreamer 1.0 plugins.
+
+**-DBUILD_TOOLS=<ON/OFF>**
+
+Build additional tools for camera interaction.
+
+**-DBUILD_V4L2=<ON/OFF>**
+
+Build tiscamera with suppoort fpr v4l2 devices.
+
+After configuring the project you can proceed building it via:
+
+make
+
+After make ran successfully your build directory will contain all libraries and executables.
+
+To install them you can call:
+
+sudo make install
+
+**!! IMPORTANT !!**
+Currently some features like uvc-extension units for v4l2 cameras or systemd units for GigE cameras require root privileges as no user directories are used for these files. If you wish to install without root privileges you will have to change the paths for udev, uvcdynctrl via -DTCAM\_INSTALL\_UDEV, -DTCAM\_INSTALL\_UVCDYNCTRL, -DTCAM\_INSTALL\_GSTREAMER, -DTCAM\_INSTALL_ and -DTCAM\_INSTALL\_SYSTEMD
+
+Alternatively you can launch everything from within the build directory.
+To ensure that everything is reachable the following environment variables should be set:
+
+export GI\_TYPELIB\_PATH="<path\_to\_tiscamera>/build/src/gobject/:${GI\_TYPELIB\_PATH}"
+export GST\_PLUGIN\_SYSTEM\_PATH\_1\_0="<path\_to\_tiscamera>/build/src/gstreamer-1.0/:${GST\_PLUGIN\_SYSTEM\_PATH\_1\_0}"
+
+To enable the systemd unit you will have to execute:
+
+sudo systemctl daemon-reload                # make systemd aware of gige-daemon
+sudo sytemctl enable gige-daemon.service    # start on every boot
+sudo sytemctl start gige-daemon.service     # start the actual daemon
+sudo sytemctl status gige-daemon.service    # check if statemd say everything is ok
 
 ## Don't know where to start?
 
@@ -65,7 +93,7 @@ Take a look at our wiki to see where to begin.
 
 ## Questions, etc.
 
-For questions simply open a ticket or write us a mail.
+For questions simply open a ticket or write us a mail at support@theimagingsource.com.
 
 ## Licensing
 
