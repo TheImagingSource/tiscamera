@@ -10,9 +10,16 @@ This repository will give you additional ressources to control your TIS camera.
 * firmware update tools
 * examples on how to interact with your camera
 
+
+## Important Note
+
+The instructions in this manual will install the software in the system folders located under /usr. If you want to install the software to a different location (eg. /usr/local/), you need to change the path specifications in the respective instructions by yourself. Please note that in this case you may need to take additional steps to allow your system to locate the installed libraries and other components.
+
 ## Dependencies
 
-To build all options:
+The following packages are required to build our software:
+
+git
 g++-4.8 or higher
 cmake
 pkg-config
@@ -24,51 +31,87 @@ libgirepository1.0-dev
 libusb-1.0-0-dev
 libzip-dev
 
-    sudo apt-get install g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl
 
-If you use GigE cameras you will have to install aravis manually.
+On a Debian / Ubuntu system, the following command line could be used to install all required packages in one go:
 
-To install aravis you require the following additional packages.
+```
+sudo apt-get install git g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl
+```
 
-    sudo apt-get install libxml2-dev gtk-doc-tools intltool autoconf autoconflibnotify-dev libgtk-3-dev
+### Optional: ARAVIS installation
+
+*ARAVIS* is an open source library to control GigE-Vision compliant cameras. *The Imaging Source* Gigabit-Ethernet cameras are GigE-Vision compliant and thus need the *ARAVIS* library in order to be usable by our software. If the library is not available in the standard package repository of your Linux distribution, it has to be installed manually from source. You can skip the following steps if you do not intend to use the software with GigE-Vision compliant devices.
 
 
+The following packages are required to build and install *ARAVIS*:
+
+```
+sudo apt-get install libxml2-dev gtk-doc-tools intltool autoconf autoconf libnotify-dev libgtk-3-dev
+```
+
+
+The following steps will build and install *ARAVIS* on your system:
+
+```
+git clone https://github.com/AravisProject/aravis
+cd aravis
+./autogen.sh
+./configure --prefix=/usr
+make
+sudo make install
+```
 
 ### Building tiscamera
 
-To build tiscamera follow these steps:
+The following commands will build and install our software with default settings. A brief reference of compile time options could be found at the end of this document.
 
+```
 mkdir build
 cd build
 
-cmake <OPTIONS> -DCMAKE\_INSTALL\_PREFIX:PATH=/usr ..
-The most important options are:
-
-**-DBUILD_ARAVIS=<ON/OFF>**
-
-Build tiscamera with support for aravis devices.
-
-**-DBUILD_GST_1_0=<ON/OFF>**
-
-Build gstreamer 1.0 plugins.
-
-**-DBUILD_TOOLS=<ON/OFF>**
-
-Build additional tools for camera interaction.
-
-**-DBUILD_V4L2=<ON/OFF>**
-
-Build tiscamera with suppoort fpr v4l2 devices.
-
-After configuring the project you can proceed building it via:
+# With ARAVIS:
+cmake -DBUILD_ARAVIS=ON -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -CMAKE_INSTALL_PREFIX=/usr
+# Without ARAVIS
+cmake -DBUILD_ARAVIS=OFF -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -CMAKE_INSTALL_PREFIX=/usr
 
 make
-
-After make ran successfully your build directory will contain all libraries and executables.
-
-To install them you can call:
-
 sudo make install
+```
+
+### Optional for GigE-Vision devices: Start the gige-daemon
+
+GigE-Vision cameras have a several seconds long delay before they could be reliably detected on the network. To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system: 
+
+```
+sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
+sudo systemctl enable gige-daemon.service    # start on every boot
+sudo systemctl start gige-daemon.service     # start the actual daemon
+sudo systemctl status gige-daemon.service    # check if statemd say everything is ok
+```
+
+
+## cmake options
+
+- **-DBUILD_ARAVIS=<ON/OFF>**
+
+  Build tiscamera with support for aravis devices.
+
+- **-DBUILD_GST_1_0=<ON/OFF>**
+
+  Build gstreamer 1.0 plugins.
+
+- **-DBUILD_TOOLS=<ON/OFF>**
+
+  Build additional tools for camera interaction.
+
+- **-DBUILD_V4L2=<ON/OFF>**
+
+  Build tiscamera with suppoort for v4l2 devices.
+
+- **-DCMAKE_INSTALL_PREFIX**
+
+  Installation target prefix (defaults to /usr/local)
+
 
 **!! IMPORTANT !!**
 Currently some features like uvc-extension units for v4l2 cameras or systemd units for GigE cameras require root privileges as no user directories are used for these files. If you wish to install without root privileges you will have to change the paths for udev, uvcdynctrl via -DTCAM\_INSTALL\_UDEV, -DTCAM\_INSTALL\_UVCDYNCTRL, -DTCAM\_INSTALL\_GSTREAMER, -DTCAM\_INSTALL_GIR, -DTCAM_INSTALL_TYPELIB and -DTCAM\_INSTALL\_SYSTEMD
@@ -76,16 +119,8 @@ Currently some features like uvc-extension units for v4l2 cameras or systemd uni
 Alternatively you can launch everything from within the build directory.
 To ensure that everything is reachable the following environment variables should be set:
 
-To enable the systemd unit you will have to execute:
-
-sudo systemctl daemon-reload                # make systemd aware of gige-daemon
-sudo sytemctl enable gige-daemon.service    # start on every boot
-sudo sytemctl start gige-daemon.service     # start the actual daemon
-sudo sytemctl status gige-daemon.service    # check if statemd say everything is ok
-
-## Don't know where to start?
-
-Take a look at our wiki to see where to begin.
+export GI\_TYPELIB\_PATH="<path\_to\_tiscamera>/build/src/gobject/:${GI\_TYPELIB\_PATH}"
+export GST\_PLUGIN\_SYSTEM\_PATH\_1\_0="<path\_to\_tiscamera>/build/src/gstreamer-1.0/:${GST\_PLUGIN\_SYSTEM\_PATH\_1\_0}"
 
 ## Questions, etc.
 
