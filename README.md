@@ -41,8 +41,7 @@ To build tiscamera follow these steps:
 mkdir build
 cd build
 
-cmake <OPTIONS> ..
-
+cmake <OPTIONS> -DCMAKE\_INSTALL\_PREFIX:PATH=/usr ..
 The most important options are:
 
 **-DBUILD_ARAVIS=<ON/OFF>**
