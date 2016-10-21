@@ -728,7 +728,6 @@ uint32_t tcam::fourcc2aravis (uint32_t fourcc)
 }
 
 
-
 std::vector<DeviceInfo> tcam::get_gige_device_list ()
 {
 
@@ -736,8 +735,8 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
     int sem_id = semaphore_create(sem_key);
 
-    int shmid;
-    if ((shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 | IPC_CREAT)) == -1)
+    int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 );
+    if (shmid < 0)
     {
         // perror("shmget");
         // exit(1);
