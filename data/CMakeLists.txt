@@ -33,4 +33,4 @@ endif (BUILD_V4L2)
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc DESTINATION lib/pkgconfig)
+# install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc DESTINATION lib/pkgconfig)

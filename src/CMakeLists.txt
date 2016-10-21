@@ -13,6 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
+# helper funcion to receive the value of an arbitrary variable
+function(pkg_check_variable _pkg _name)
+  string(TOUPPER ${_pkg} _pkg_upper)
+  string(TOUPPER ${_name} _name_upper)
+  string(REPLACE "-" "_" _pkg_upper ${_pkg_upper})
+  string(REPLACE "-" "_" _name_upper ${_name_upper})
+  set(_output_name "${_pkg_upper}_${_name_upper}")
+
+  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=${_name} ${_pkg}
+    OUTPUT_VARIABLE _pkg_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set("${_output_name}" "${_pkg_result}" CACHE STRING "pkg-config variable ${_name} of ${_pkg}")
+endfunction()
+
+
 add_subdirectory(gobject)
 
 
@@ -77,7 +95,7 @@ if (BUILD_V4L2)
     v4l2library.cpp
     devicelibrary.h)
 
-  find_package(UDev REQUIRED)
+  find_package(UDev REQUIRED QUIET)
   include_directories(${UDEV_INCLUDE_DIR})
   add_definitions(-DHAVE_UDEV)
 
@@ -116,7 +134,7 @@ if (BUILD_ARAVIS)
 
   add_definitions(-DHAVE_ARAVIS)
 
-  find_package(Aravis REQUIRED)
+  find_package(Aravis REQUIRED QUIET)
   find_package(GObject REQUIRED) # dependency
   find_package(GLIB2 REQUIRED)   # dependency
 

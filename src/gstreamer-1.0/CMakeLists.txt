@@ -65,4 +65,10 @@ foreach (t IN ITEMS ${PLUGINS})
 
 endforeach (t)
 
+pkg_check_variable(gstreamer-1.0 pluginsdir)
+
+if (GSTREAMER_1.0_PLUGINSDIR)
+  set(TCAM_INSTALL_GST_1_0 ${GSTREAMER_1.0_PLUGINSDIR} CACHE STRING "gstreamer-1.0 module installation path")
+endif()
+
 install(TARGETS ${PLUGINS} DESTINATION ${TCAM_INSTALL_GST_1_0})

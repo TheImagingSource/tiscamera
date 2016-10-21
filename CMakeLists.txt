@@ -58,10 +58,6 @@ set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE STRING "header 
 set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "binary installation path" FORCE)
 set(TCAM_INSTALL_UDEV "/usr/lib/udev/rules.d" CACHE STRING "udev rules installation path")
 set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcdynctrl rules installation path")
-set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path" FORCE)
-
-set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path" FORCE)
-set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path" FORCE)
 set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE STRING "systemd unit installation path" FORCE)
 
 add_subdirectory(src)
@@ -74,6 +70,13 @@ if (BUILD_TOOLS)
   add_subdirectory(tools)
 endif (BUILD_TOOLS)
 
+
+# ensure we have the correct install directories
+# subdirectories make additional checks to find better suited install directories
+# to prevent the user having to set environment variables, etc
+get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
+get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
+get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
 
 # Give overview over build configuration
 
