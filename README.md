@@ -76,9 +76,6 @@ Currently some features like uvc-extension units for v4l2 cameras or systemd uni
 Alternatively you can launch everything from within the build directory.
 To ensure that everything is reachable the following environment variables should be set:
 
-export GI\_TYPELIB\_PATH="<path\_to\_tiscamera>/build/src/gobject/:${GI\_TYPELIB\_PATH}"
-export GST\_PLUGIN\_SYSTEM\_PATH\_1\_0="<path\_to\_tiscamera>/build/src/gstreamer-1.0/:${GST\_PLUGIN\_SYSTEM\_PATH\_1\_0}"
-
 To enable the systemd unit you will have to execute:
 
 sudo systemctl daemon-reload                # make systemd aware of gige-daemon
