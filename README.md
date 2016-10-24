@@ -31,11 +31,27 @@ libgirepository1.0-dev
 libusb-1.0-0-dev
 libzip-dev
 
+## Runtime Dependencies
+
+The following packages are required to execute the compiled binaries for our software:
+
+gstreamer-1.0
+libusb-1.0
+libglib2.0
+libgirepository1.0
+libudev
+libtinyxml
+libzip
+
 
 On a Debian / Ubuntu system, the following command line could be used to install all required packages in one go:
 
 ```
+# Build dependencies
 sudo apt-get install git g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl
+
+# Runtime dependencies
+sudo apt-get install gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
 ```
 
 ### Optional: ARAVIS installation
@@ -70,9 +86,9 @@ mkdir build
 cd build
 
 # With ARAVIS:
-cmake -DBUILD_ARAVIS=ON -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -CMAKE_INSTALL_PREFIX=/usr
+cmake -DBUILD_ARAVIS=ON -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -DCMAKE_INSTALL_PREFIX=/usr ..
 # Without ARAVIS
-cmake -DBUILD_ARAVIS=OFF -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -CMAKE_INSTALL_PREFIX=/usr
+cmake -DBUILD_ARAVIS=OFF -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -DCMAKE_INSTALL_PREFIX=/usr ..
 
 make
 sudo make install
