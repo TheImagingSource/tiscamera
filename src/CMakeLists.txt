@@ -121,6 +121,10 @@ if (BUILD_V4L2)
   target_link_libraries(tcam-v4l2 tcam-dfk73)
   target_link_libraries(tcam-dfk73 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
 
+  install(TARGETS tcam-dfk73
+    LIBRARY
+    DESTINATION "${TCAM_INSTALL_LIB}")
+
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
