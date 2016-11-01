@@ -112,7 +112,7 @@ if (BUILD_V4L2)
 
   install(TARGETS tcam-v4l2
     LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}"
+    DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
     COMPONENT libv4l2)
 
   # dfk73 special case
@@ -161,11 +161,13 @@ if (BUILD_ARAVIS)
 
   install(TARGETS tcam-aravis
     LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}"
+    DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
     COMPONENT libaravis)
 
 endif (BUILD_ARAVIS)
 
+
+set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
 
 set(PUBLIC_HEADER tcam.h)
 add_library(tcam SHARED ${srcs})
