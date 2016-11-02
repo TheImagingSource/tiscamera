@@ -317,8 +317,6 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
 
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(prop);
 
-    flags = nullptr;
-
     if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)) == 0)
     {
         if (value)
