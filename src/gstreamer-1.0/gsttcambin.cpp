@@ -638,6 +638,10 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         GST_DEBUG("Adding autoexposure to pipeline");
         self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
         gst_bin_add(GST_BIN(self), self->exposure);
+
+        pipeline_description += " ! tcamautoexposure";
+        gst_element_link(previous_element, self->exposure);
+        previous_element = self->exposure;
     }
 
 
