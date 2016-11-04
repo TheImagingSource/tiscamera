@@ -69,21 +69,46 @@ void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& avai
 
         for (const auto& res : f.get_resolutions())
         {
-
-            std::string fps_string = ", fps={ ";
-            for (const auto& fps : f.get_framerates(res.min_size))
+            if (res.type == TCAM_RESOLUTION_TYPE_FIXED)
             {
-                fps_string += std::to_string(fps) + " ";
+                std::string fps_string = ", fps={ ";
+                for (const auto& fps : f.get_framerates(res.min_size))
+                {
+                    fps_string += std::to_string(fps) + " ";
+                }
+
+                fps_string += "}";
+
+                std::string output = format
+                    + ", width=" + std::to_string(res.min_size.width)
+                    + ", height=" + std::to_string(res.min_size.height)
+                    + fps_string;
+
+                std::cout << output << std::endl;
             }
+            else
+            {
+                auto resolutions = tcam::get_standard_resolutions(res.min_size, res.max_size);
 
-            fps_string += "}";
+                for (const auto& r: resolutions)
+                {
+                    std::string fps_string = ", fps={ ";
+                    for (const auto& fps : f.get_framerates(r))
+                    {
+                        fps_string += std::to_string(fps) + " ";
+                    }
 
-            std::string output = format
-                + ", width=" + std::to_string(res.min_size.width)
-                + ", height=" + std::to_string(res.min_size.height)
-                + fps_string;
+                    fps_string += "}";
 
-            std::cout << output << std::endl;
+                    std::string output = format
+                        + ", width=" + std::to_string(r.width)
+                        + ", height=" + std::to_string(r.height)
+                        + fps_string;
+
+                    std::cout << output << std::endl;
+                }
+
+            }
         }
     }
 }
