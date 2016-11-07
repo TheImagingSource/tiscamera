@@ -463,12 +463,6 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
     guint fourcc = 0;
 
-    for (unsigned int i = 0; i < gst_caps_get_size(available_caps); ++i)
-    {
-        GstCaps* single_caps = gst_caps_copy_nth(available_caps, i);
-        gst_caps_unref(single_caps);
-    }
-
     GstCaps* input = gst_caps_copy(wanted);
 
     GST_DEBUG("Comparing '%s' <==  to  ==> '%s'", gst_caps_to_string(wanted), gst_caps_to_string(available_caps));
@@ -486,40 +480,40 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
         gint height = 0;
         double framerate = 0.0;
 
+        gst_structure_fixate_field_nearest_int (structure, "width", G_MAXINT);
+        gst_structure_fixate_field_nearest_int (structure, "height", G_MAXINT);
+        gst_structure_fixate_field_nearest_fraction (structure, "framerate", G_MAXINT, 1);
         gst_structure_get_int (structure, "width", &width);
         gst_structure_get_int (structure, "height", &height);
+
         const GValue* fps = gst_structure_get_value (structure, "framerate");
-        int frame_rate_numerator;
-        int frame_rate_denominator;
-        gst_util_double_to_fraction(framerate,
-                                    &frame_rate_numerator,
-                                    &frame_rate_denominator);
 
-
-        GstCaps* caps = gst_caps_new_simple ("video/x-bayer",
-                                             "framerate", GST_TYPE_FRACTION,
-                                             gst_value_get_fraction_numerator (fps),
-                                             gst_value_get_fraction_denominator (fps),
-                                             "width", G_TYPE_INT, width,
-                                             "height", G_TYPE_INT, height,
-                                             NULL);
+        GstCaps* caps;
+        if (gst_value_get_fraction_numerator (fps) == G_MAXINT)
+        {
+            caps = gst_caps_new_simple ("video/x-bayer",
+                                        "framerate", GST_TYPE_FRACTION,
+                                        10,
+                                        1,
+                                        "width", G_TYPE_INT, 460,
+                                        "height", G_TYPE_INT, 480,
+                                        NULL);
+        }
+        else
+        {
+            caps = gst_caps_new_simple ("video/x-bayer",
+                                        "framerate", GST_TYPE_FRACTION,
+                                        gst_value_get_fraction_numerator (fps),
+                                        gst_value_get_fraction_denominator (fps),
+                                        "width", G_TYPE_INT, width,
+                                        "height", G_TYPE_INT, height,
+                                        NULL);
+        }
         GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
 
         intersection = gst_caps_intersect(caps, available_caps);
 
-
-        if (gst_caps_is_empty(intersection))
-        {
-            GST_ERROR("Unable to determine caps for source.");
-
-            return modules;
-        }
-        else
-        {
-            GST_INFO("Using caps for source element: '%s'", gst_caps_to_string(intersection));
-
-            modules.caps = gst_caps_copy(intersection);
-        }
+        modules.bayer = TRUE;
 
         structure = gst_caps_get_structure(caps, 0);
         if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
@@ -643,7 +637,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         gst_element_link(previous_element, self->exposure);
         previous_element = self->exposure;
     }
-
 
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
         && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
