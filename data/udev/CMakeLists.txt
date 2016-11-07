@@ -16,4 +16,6 @@
 
 set(RULE_FILES 80-theimagingsource-cameras.rules)
 
-install(FILES ${RULE_FILES} DESTINATION ${TCAM_INSTALL_UDEV})
+install(FILES ${RULE_FILES}
+  DESTINATION ${TCAM_INSTALL_UDEV}
+  COMPONENT tcam-udev)

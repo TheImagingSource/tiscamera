@@ -75,7 +75,9 @@ add_custom_command(
 
 add_custom_target(create_gobject ALL DEPENDS ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib)
 
-install(TARGETS tcamprop LIBRARY DESTINATION ${TCAM_INSTALL_LIB})
+install(TARGETS tcamprop LIBRARY
+  DESTINATION ${TCAM_INSTALL_LIB}
+  COMPONENT tcam-introspection)
 
 # check for better suited install directories
 pkg_check_variable(gobject-introspection-1.0 girdir)
@@ -93,5 +95,9 @@ else()
   set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path")
 endif()
 
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir DESTINATION ${TCAM_INSTALL_GIR})
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib DESTINATION ${TCAM_INSTALL_TYPELIB})
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir
+  DESTINATION ${TCAM_INSTALL_GIR}
+  COMPONENT tcam-introspection)
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib
+  DESTINATION ${TCAM_INSTALL_TYPELIB}
+  COMPONENT tcam-introspection)

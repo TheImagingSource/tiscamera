@@ -14,4 +14,6 @@ add_definitions(-DHAVE_UDEV)
 add_executable(dfk73udev dfk73udev.c)
 target_link_libraries(dfk73udev tcam-dfk73 ${UDEV_LIBRARIES} rt)
 
-install(TARGETS dfk73udev DESTINATION ${TCAM_INSTALL_BIN})
+install(TARGETS dfk73udev
+  DESTINATION ${TCAM_INSTALL_BIN}
+  COMPONENT tcam-dfk73)

@@ -44,4 +44,6 @@ target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 set_property(TARGET tcam-network PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam-network PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
-install(TARGETS tcam-network DESTINATION ${TCAM_INSTALL_LIB})
+install(TARGETS tcam-network
+  DESTINATION ${TCAM_INSTALL_LIB}
+  COMPONENT tcam-network)

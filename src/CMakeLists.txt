@@ -113,7 +113,7 @@ if (BUILD_V4L2)
   install(TARGETS tcam-v4l2
     LIBRARY
     DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
-    COMPONENT libv4l2)
+    COMPONENT tcam-v4l2)
 
   # dfk73 special case
 
@@ -126,7 +126,8 @@ if (BUILD_V4L2)
 
   install(TARGETS tcam-dfk73
     LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}")
+    DESTINATION "${TCAM_INSTALL_LIB}"
+    COMPONENT tcam-libdfk73)
 
 endif (BUILD_V4L2)
 
@@ -165,7 +166,7 @@ if (BUILD_ARAVIS)
   install(TARGETS tcam-aravis
     LIBRARY
     DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
-    COMPONENT libaravis)
+    COMPONENT tcam-aravis)
 
 endif (BUILD_ARAVIS)
 
@@ -187,4 +188,4 @@ install(FILES ${PUBLIC_HEADER}
 install(TARGETS tcam
   LIBRARY
   DESTINATION "${TCAM_INSTALL_LIB}"
-  COMPONENT lib)
+  COMPONENT tcam)

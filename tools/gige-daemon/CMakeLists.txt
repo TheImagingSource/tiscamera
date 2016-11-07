@@ -29,4 +29,6 @@ add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
 TARGET_LINK_LIBRARIES(gige-daemon tcam)
 TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
 
-install(TARGETS gige-daemon DESTINATION ${TCAM_INSTALL_BIN})
+install(TARGETS gige-daemon
+  DESTINATION ${TCAM_INSTALL_BIN}
+  COMPONENT tcam-gige-daemon)

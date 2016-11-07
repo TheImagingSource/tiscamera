@@ -73,4 +73,6 @@ else()
   set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE STRING "gstreamer-1.0 module installation path")
 endif()
 
-install(TARGETS ${PLUGINS} DESTINATION ${TCAM_INSTALL_GST_1_0})
+install(TARGETS ${PLUGINS}
+  DESTINATION ${TCAM_INSTALL_GST_1_0}
+  COMPONENT tcam-gstreamer-1)

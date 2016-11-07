@@ -19,7 +19,9 @@ add_executable(camera-ip-conf-cli main.cpp ConsoleManager.cpp)
 
 target_link_libraries(camera-ip-conf-cli tcam-network)
 
-install(TARGETS camera-ip-conf-cli DESTINATION bin)
+install(TARGETS camera-ip-conf-cli
+  DESTINATION bin
+  COMPONENT tcam-camera-ip-conf)
 
 if (BUILD_GUI)
   add_subdirectory(gui)
