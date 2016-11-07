@@ -1106,6 +1106,8 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 
 static gdouble calc_exposure (GstTcamautoexposure* self, guint dist, gdouble exposure)
 {
+    GST_DEBUG("Calculating exposure: cur: %f min: %f max: %f",
+              self->exposure.value, self->exposure.min, self->exposure.max);
     gdouble ddist = ( dist + (dist_mid * 2) ) / 3;
     exposure = ( exposure * ddist ) / dist_mid;
 
@@ -1113,10 +1115,11 @@ static gdouble calc_exposure (GstTcamautoexposure* self, guint dist, gdouble exp
 
     /* If we do not want a significant change (on the sensor-scale), don't change anything */
     /* This should avoid pumping caused by an abrupt brightness change caused by a small value change */
-    if ( abs(exposure - self->exposure.value) < (granularity / 2) )
+    if (abs(exposure - self->exposure.value) < (granularity / 2))
+    {
         return self->exposure.value;
-
-    return CLIP( exposure, self->exposure.min, self->exposure.max );
+    }
+    return CLIP(exposure, self->exposure.min, self->exposure.max);
 }
 
 
@@ -1139,12 +1142,12 @@ static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
     gdouble gain = self->gain.value;
 
     /* when we have to reduce, we reduce it faster */
-    if ( dist >= dist_mid )
+    if (dist >= dist_mid)
     {
         /* this dampens the change in dist factor */
         dist = ( dist + (dist_mid * 2) ) / 3;
     }
-    double val = log( dist / (double)dist_mid ) / log( 2.0f );
+    double val = dist / (double)dist_mid  / 2.0f ;
 
     gain += (val * steps_to_double_brightness);
 
@@ -1294,7 +1297,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
             /* exposure */
             gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
 
-            if (tmp_exposure != self->exposure.value)
+            if (tmp_exposure != self->exposure.value && tmp_exposure <= self->exposure.max)
             {
                 set_exposure(self, tmp_exposure);
                 return;
@@ -1313,7 +1316,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
                 }
 
                 // we can reduce gain, because we can increase exposure
-                if ( self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
+                if ( self->gain.value > self->gain.min && self->exposure.value <= self->exposure.max)
                 {
                     /* increase exposure by 5% */
                     set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
