@@ -101,9 +101,8 @@ static gboolean get_property_by_name (GstTcamSrc* self,
             return FALSE;
         }
     }
-    struct device_state* ds = (struct device_state*)self->device;
 
-    std::vector<tcam::Property*> properties = ds->dev->get_available_properties();
+    struct device_state* ds = (struct device_state*)self->device;
 
     tcam::Property* p = ds->dev->get_property_by_name(name);
 
