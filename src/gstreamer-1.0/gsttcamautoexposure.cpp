@@ -859,18 +859,18 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
-                                     g_param_spec_double ("exposure-max",
-                                                          "Exposure Maximum",
-                                                          "Maximum value exposure can take",
-                                                          0.0, G_MAXDOUBLE, 0.0,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                     g_param_spec_uint ("exposure-max",
+                                                       "Exposure Maximum",
+                                                       "Maximum value exposure can take",
+                                                       0, G_MAXUINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
-                                     g_param_spec_double ("gain-max",
-                                                          "Gain Maximum",
-                                                          "Maximum value gain can take",
-                                                          0.0, G_MAXDOUBLE, 0.0,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                     g_param_spec_uint ("gain-max",
+                                                       "Gain Maximum",
+                                                       "Maximum value gain can take",
+                                                       0, G_MAXUINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_BRIGHTNESS_REFERENCE,
                                      g_param_spec_int("brightness-reference",
@@ -947,14 +947,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
-            tcamautoexposure->exposure.max = g_value_get_double(value);
+            tcamautoexposure->exposure.max = g_value_get_int(value);
             if (tcamautoexposure->exposure.max == 0.0)
             {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             }
             break;
         case PROP_GAIN_MAX:
-            tcamautoexposure->gain.max = g_value_get_double(value);
+            GST_DEBUG("Setting gain max to : %ud", g_value_get_int(value));
+
+            tcamautoexposure->gain.max = g_value_get_int(value);
             if (tcamautoexposure->gain.max == 0.0)
             {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
@@ -1000,13 +1002,13 @@ void gst_tcamautoexposure_get_property (GObject* object,
             g_value_set_object (value, tcamautoexposure->camera_src);
             break;
         case PROP_EXPOSURE_MAX:
-            g_value_set_double(value, tcamautoexposure->exposure.max);
+            g_value_set_uint(value, tcamautoexposure->exposure.max);
             break;
         case PROP_GAIN_MAX:
-            g_value_set_double(value, tcamautoexposure->gain.max);
+            g_value_set_uint(value, tcamautoexposure->gain.max);
             break;
         case PROP_BRIGHTNESS_REFERENCE:
-            g_value_set_int(value, tcamautoexposure->brightness_reference);
+            g_value_set_uint(value, tcamautoexposure->brightness_reference);
             break;
         case PROP_ROI_LEFT:
             g_value_set_uint(value, tcamautoexposure->image_region.x0);
