@@ -96,11 +96,7 @@ static gboolean get_property_by_name (GstTcamSrc* self,
 
     if (self->device == nullptr)
     {
-        if (gst_tcam_src_init_camera(self))
-        {
-            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
-        }
-        else
+        if (!gst_tcam_src_init_camera(self))
         {
             return FALSE;
         }
@@ -153,11 +149,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
 
     if (self->device == nullptr)
     {
-        if (gst_tcam_src_init_camera(self))
-        {
-            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
-        }
-        else
+        if (!gst_tcam_src_init_camera(self))
         {
             return NULL;
         }
@@ -254,11 +246,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 
     if (self->device == nullptr)
     {
-        if (gst_tcam_src_init_camera(self))
-        {
-            self->all_caps = gst_tcam_src_get_all_camera_caps (self);
-        }
-        else
+        if (!gst_tcam_src_init_camera(self))
         {
             return FALSE;
         }
@@ -1210,7 +1198,6 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
         {
             return FALSE;
         }
-        self->all_caps = gst_tcam_src_get_all_camera_caps (self);
     }
 
     self->timestamp_offset = 0;
@@ -1468,9 +1455,9 @@ static void gst_tcam_src_set_property (GObject* object,
 
                 gst_tcam_src_close_camera(self);
 
-                if (gst_tcam_src_init_camera(self))
+                if (!gst_tcam_src_init_camera(self))
                 {
-                    self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+                    GST_ERROR("Error while initializing camera.");
                 }
             }
             break;
