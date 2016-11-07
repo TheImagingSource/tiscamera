@@ -80,6 +80,9 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
+
+add_subdirectory(packaging)
+
 # ensure we have the correct install directories
 # subdirectories make additional checks to find better suited install directories
 # to prevent the user having to set environment variables, etc
