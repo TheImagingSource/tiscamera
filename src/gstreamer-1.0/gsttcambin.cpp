@@ -39,7 +39,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 
 static GSList* gst_tcam_bin_get_property_names (TcamProp* self);
 
-static gchar *gst_tcam_bin_get_property_type (TcamProp* self, gchar* name);
+static const gchar *gst_tcam_bin_get_property_type (TcamProp* self, gchar* name);
 
 static gboolean gst_tcam_bin_get_tcam_property (TcamProp* self,
                                                 gchar* name,
@@ -100,9 +100,9 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
  *
  * Returns: (transfer full): A string describing the property type
  */
-static gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
+static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
 {
-    gchar* ret = NULL;
+    const gchar* ret = NULL;
 
 
     GstTcamBin* self = GST_TCAMBIN (iface);
