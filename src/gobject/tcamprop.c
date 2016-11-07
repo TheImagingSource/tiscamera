@@ -100,7 +100,7 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
                                       GValue* group)
 {
     TcamPropInterface* iface;
-    gboolean ret;
+    gboolean ret = FALSE;
 
     g_return_val_if_fail (self != NULL, FALSE);
     g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
