@@ -67,11 +67,8 @@ typedef struct
 typedef unsigned char byte;
 
 static const guint dist_mid = 100;
-static const gdouble steps_to_double_brightness = 3.0;
+static const gdouble steps_to_double_brightness = 30.0;
 
-/* names of gstreamer elements used for camera interaction */
-static const char* CAMERASRC_NETWORK = "GstAravis";
-static const char* CAMERASRC_USB = "GstV4l2Src";
 static const char* CAMERASRC_TCAM = "GstTcam";
 
 

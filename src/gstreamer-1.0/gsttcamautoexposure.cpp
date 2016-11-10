@@ -34,7 +34,11 @@
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautoexposure_debug_category
 
-#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h) : (val) )
+/* Constants */
+static const gdouble K_CONTROL  = 0.5 / 255;
+static const gdouble K_DEADBAND = 5.0;
+static const gdouble K_ADJUST   = 4;
+static const gdouble K_SMALL    = 1e-9;
 
 
 /* prototypes */
@@ -1085,14 +1089,6 @@ static void init_camera_resources (GstTcamautoexposure* self)
 }
 
 
-static unsigned int calc_dist (unsigned int reference_val, unsigned int brightness_val)
-{
-    if ( brightness_val == 0 )
-        brightness_val = 1;
-    return (reference_val * dist_mid) / brightness_val;
-}
-
-
 static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 {
     GST_INFO("Setting exposure to %f", exposure);
@@ -1101,25 +1097,6 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
     dev->set_property(TCAM_PROPERTY_EXPOSURE, (int64_t)exposure);
-}
-
-
-static gdouble calc_exposure (GstTcamautoexposure* self, guint dist, gdouble exposure)
-{
-    GST_DEBUG("Calculating exposure: cur: %f min: %f max: %f",
-              self->exposure.value, self->exposure.min, self->exposure.max);
-    gdouble ddist = ( dist + (dist_mid * 2) ) / 3;
-    exposure = ( exposure * ddist ) / dist_mid;
-
-    int granularity = 1;
-
-    /* If we do not want a significant change (on the sensor-scale), don't change anything */
-    /* This should avoid pumping caused by an abrupt brightness change caused by a small value change */
-    if (abs(exposure - self->exposure.value) < (granularity / 2))
-    {
-        return self->exposure.value;
-    }
-    return CLIP(exposure, self->exposure.min, self->exposure.max);
 }
 
 
@@ -1134,26 +1111,86 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 }
 
 
-static gdouble calc_gain (GstTcamautoexposure* self, guint dist)
+static gdouble calc_offset (unsigned int reference_val, unsigned int brightness_val)
 {
-    GST_DEBUG("Calculating gain: cur: %f min: %f max: %f",
-              self->gain.value, self->gain.min, self->gain.max);
+    const gdouble r = (gdouble) reference_val;
+    const gdouble y = (gdouble) brightness_val;
 
-    gdouble gain = self->gain.value;
+    return r - y;
+}
 
-    /* when we have to reduce, we reduce it faster */
-    if (dist >= dist_mid)
+
+static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
+{
+    if (fabs(diff) < K_SMALL)
     {
-        /* this dampens the change in dist factor */
-        dist = ( dist + (dist_mid * 2) ) / 3;
+        return 0.0;
     }
-    double val = dist / (double)dist_mid  / 2.0f ;
 
-    gain += (val * steps_to_double_brightness);
+    gdouble K_GAIN_FAST = 30;
+    gdouble K_GAIN_SLOW = 0.1;
 
-    GST_DEBUG("new gain: %f", gain);
+    gdouble g_ref;
 
-    return CLIP( gain, self->gain.min, self->gain.max );
+    if (diff <= 40.0)
+    {
+        g_ref = self->gain.value + K_GAIN_FAST * diff;
+    }
+    else
+    {
+        g_ref = self->gain.value + K_GAIN_SLOW * diff;
+    }
+
+    gdouble new_gain = fmax(fmin(g_ref, self->gain.max), self->gain.min);
+    double percentage_new =  (new_gain / self->gain.max * 100) - (self->gain.value / self->gain.max * 100);
+
+    if (fabs(self->gain.value - new_gain) > K_SMALL)
+    {
+        GST_DEBUG("fabs(self->gain.value - new_gain) > K_SMALL == %f - %f =%f (g_ref %f diff %f)",
+                  self->gain.value, new_gain, fabs(self->gain.value - new_gain), g_ref, diff);
+
+        double percentage = self->gain.max / 100;
+        double setter = new_gain;
+        GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
+        if (fabs(percentage_new) > percentage)
+        {
+            if (percentage_new > 0.0)
+            {
+                setter = self->gain.value + percentage;
+            }
+            else
+            {
+                setter = self->gain.value - percentage;
+            }
+        }
+        set_gain(self, setter);
+    }
+
+    GST_DEBUG("NEW GAIN: g_ref %f - new_gain %f / K_GAIN %f = %f",
+              g_ref, new_gain, K_GAIN, (g_ref - new_gain) / K_GAIN);
+
+    return (g_ref - new_gain) / K_GAIN;
+}
+
+
+static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
+{
+    if (fabs(diff) < K_SMALL)
+    {
+        return 0;
+    }
+
+    const double e_ref = self->exposure.value * pow(2, diff);
+    const double new_exposure = fmax(fmin(e_ref, self->exposure.max), self->exposure.min);
+
+    if (fabs(self->exposure.value - new_exposure) > K_SMALL)
+    {
+        set_exposure(self, new_exposure);
+    }
+    GST_DEBUG("Returning (e_ref - new_exposure = diff) %f - %f = %f",
+              e_ref, new_exposure, (e_ref - new_exposure));
+
+    return e_ref - new_exposure;
 }
 
 
@@ -1270,62 +1307,38 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     /* assure we have the current values */
     retrieve_current_values (self);
 
-    /* get distance from optimum */
-    guint dist = calc_dist(self->brightness_reference, brightness);
+    /* get offset and control difference from reference */
+    const gdouble offset = calc_offset(self->brightness_reference, brightness);
 
-    GST_DEBUG("Distance is %u", dist);
+    GST_INFO("offset = %f, gain = %f, exposure = %f", offset, self->gain.value, self->exposure.value);
 
-    if (dist < 98 || dist > 102)
+    /* Check if outside deadband */
+    if (fabs(offset) > K_DEADBAND)
     {
-        gdouble new_gain = 0.0;
+        /* Compute control change from offset */
+        const gdouble change = K_CONTROL * offset;
 
-        if (self->auto_gain == TRUE)
+        /* Check if too bright */
+        if (change < 0.0)
         {
-            /* set_gain */
-            new_gain = calc_gain(self, dist);
-
-            GST_DEBUG("Comparing gain: %f(new) < %f(old)", new_gain, self->gain.value);
-            if (new_gain < self->gain.value)
-            {
-                set_gain(self, new_gain);
-                return;
-            }
+            GST_DEBUG("exposure");
+            /* Reduce gain first, then exposure */
+            modify_exposure(self, modify_gain(self, change));
         }
-
-        if (self->auto_exposure == TRUE)
+        else
         {
-            /* exposure */
-            gdouble tmp_exposure = calc_exposure(self, dist, self->exposure.value);
-
-            if (tmp_exposure != self->exposure.value && tmp_exposure <= self->exposure.max)
-            {
-                set_exposure(self, tmp_exposure);
-                return;
-            }
+            GST_DEBUG("gain");
+            /* Increase exposure first, then gain */
+            modify_gain(self, modify_exposure(self, change));
         }
-
-        if (self->auto_gain == TRUE)
+    }
+    else
+    {
+        /* Try swapping gain for exposure */
+        if (self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
         {
-            if (self->auto_exposure == TRUE)
-            {
-                /* when exposure is in a sweet spot, or cannot be increased anymore */
-                if (new_gain != self->gain.value && self->exposure.value >= self->exposure.max)
-                {
-                    set_gain(self, new_gain);
-                    return;
-                }
-
-                // we can reduce gain, because we can increase exposure
-                if ( self->gain.value > self->gain.min && self->exposure.value <= self->exposure.max)
-                {
-                    /* increase exposure by 5% */
-                    set_exposure(self, CLIP(((self->exposure.value * 105) / 100), self->exposure.min, self->exposure.max ));
-                }
-            }
-            else
-            {
-                set_gain(self,new_gain);
-            }
+            GST_DEBUG("reducing gain");
+            modify_exposure(self, -modify_gain(self, -K_ADJUST));
         }
     }
 }
