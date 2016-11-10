@@ -212,6 +212,15 @@ static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 {
     GSList* ret = NULL;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
+
+    if (self->device == nullptr)
+    {
+        if (!gst_tcam_src_init_camera(self))
+        {
+            return nullptr;
+        }
+    }
+
     struct device_state* ds = (struct device_state*)self->device;
 
     g_return_val_if_fail (self->device != NULL, NULL);
