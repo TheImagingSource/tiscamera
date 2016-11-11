@@ -19,6 +19,11 @@
 # and manipulate device properties.
 #
 
+
+import sys
+import time
+from math import exp, log
+
 import gi
 
 # the two lines import the tcam introspection
@@ -28,11 +33,9 @@ from gi.repository import Tcam
 gi.require_version("Gst", "1.0")
 gi.require_version("Gtk", "3.0")
 gi.require_version("GstVideo", "1.0")
+gi.require_version('Gdk', '3.0')
 
-from gi.repository import Gtk, Gst, GstVideo, GLib, Gdk, GObject
-
-import sys
-import time
+from gi.repository import GObject, Gdk, Gst, GstVideo, Gtk
 
 
 class CameraVideo(Gtk.Window):
@@ -169,6 +172,44 @@ class CameraVideo(Gtk.Window):
         """
         self.close_valve(False)
 
+    def logarithmic_slider(self, slider, name):
+        """Helper function for slider that should behave logarithmic due to their range."""
+
+        ABSVAL_SLIDER_TICKS = 100
+
+        tbin = self.pipeline.get_by_name("src")
+        if tbin is None:
+            print("No property source available.")
+            return
+
+        pos = slider.get_value()
+        (result, value,
+         minval, maxval,
+         defval, step,
+         valuetype,
+         flags,
+         category, group) = tbin.get_tcam_property(name)
+
+        if minval > 0:
+            minval = log(minval)
+        else:
+            minval = 0
+
+        rangelen = log(maxval) - minval
+        print(minval, rangelen, pos)
+        val = exp(minval + rangelen / ABSVAL_SLIDER_TICKS * pos)
+
+        if val < minval:
+            val = minval
+        if val < maxval:
+            val = maxval
+
+        return_value = tbin.set_tcam_property(name,
+                                              GObject.Value(int,
+                                                            int(val)))
+        if not return_value:
+            print("Error setting value for {}".format(name))
+
     def add_properties(self):
         """"""
         tbin = self.pipeline.get_by_name("src")
@@ -213,19 +254,49 @@ class CameraVideo(Gtk.Window):
                 label = Gtk.Label(name, xalign=0)
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
                 row.add(hbox)
+
+                # the following values should be treated as logarithmic
+                # the range of possible values is to big to be easily handled
+                # high values are rarely needed.
+                log_slider = ["Exposure"]
+
+                if name in log_slider:
+                    print("IS LOG", name)
+                    ABSVAL_SLIDER_TICKS = 100
+
+                    rangelen = log(maxval) - log(minval)
+                    val = ABSVAL_SLIDER_TICKS / rangelen * (log(value) - log(minval))
+                    scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
+                                                     0, 100, 1)
+                    scale.set_value(val)
+                    scale.add_mark(val, Gtk.PositionType.TOP, None)
+                    scale.connect("value-changed", self.logarithmic_slider, name)
+                else:
+                    scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
+                                                                     minval, maxval, step)
+                    scale.set_value(value)
+                    scale.add_mark(defval, Gtk.PositionType.TOP, None)
+
+                    scale.connect("value-changed", self.slider_callback, name)
+                hbox.pack_start(label, False, True, 0)
+                hbox.pack_start(scale, True, True, 0)
+            elif prop_type == "double":
+                if maxval <= minval:
+                    continue
+                label = Gtk.Label(name, xalign=0)
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+                row.add(hbox)
                 scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
                                                  minval, maxval, step)
                 scale.set_value(value)
                 scale.add_mark(defval, Gtk.PositionType.TOP, None)
+
                 scale.connect("value-changed", self.slider_callback, name)
                 hbox.pack_start(label, False, True, 0)
                 hbox.pack_start(scale, True, True, 0)
-            elif prop_type == "double":
-                print('not used')
             elif prop_type == "string":
                 print('not used')
             elif prop_type == "enum":
-                print("enum")
                 # for enums/menus get_tcam_property returns min/max
                 entry_list = tbin.get_tcam_menu_entries(name)
                 combo_box = Gtk.ComboBoxText()
