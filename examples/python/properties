@@ -227,6 +227,7 @@ class CameraVideo(Gtk.Window):
              minval, maxval,
              defval, step,
              valuetype,
+             flags,
              category, group) = tbin.get_tcam_property(name)
 
             # category and group allow us to create a tree structure for properties.
