@@ -90,6 +90,11 @@ Property* CaptureDevice::get_property (TCAM_PROPERTY_ID id)
 
 Property* CaptureDevice::get_property_by_name (const std::string& name)
 {
+    if (name.empty())
+    {
+        return nullptr;
+    }
+
     auto properties = get_available_properties();
 
     for (auto& p :  properties)
