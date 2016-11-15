@@ -222,6 +222,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {},
     },
     {
+        .id = TCAM_PROPERTY_FOCUS_ONE_PUSH,
+        .v4l2_id = {0x199e206},
+    },
+    {
         .id = TCAM_PROPERTY_STROBE_ENABLE,
         .v4l2_id = {0x0199e211},
     },
