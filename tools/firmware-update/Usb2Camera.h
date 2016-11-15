@@ -75,6 +75,11 @@ public:
     /// @return UVC_COMPLIANCE the camera currently has
     UVC_COMPLIANCE get_mode ();
 
+    /// @name get_eeprom_size
+    /// @return size of EEPROM present on the camera
+    unsigned int get_eeprom_size ();
+
+
 private:
 
     /// @name write_eeprom
@@ -143,6 +148,6 @@ private:
 
 }; /* class Usb2Camera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USB2CAMERA_H_ */

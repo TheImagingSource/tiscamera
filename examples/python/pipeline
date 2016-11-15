@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+
+# Copyright 2016 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+
+
+
+#
+# This example will show you how to start a simple gstreamer pipeline
+# and store single images to a folder.
+#
+
+import gi
+
+# the two lines import the tcam introspection
+gi.require_version("Tcam", "0.1")
+from gi.repository import Tcam
+
+gi.require_version("Gst", "1.0")
+gi.require_version("Gtk", "3.0")
+gi.require_version("GstVideo", "1.0")
+
+from gi.repository import Gtk, Gst, GstVideo, GLib, Gdk, GObject
+
+import sys
+
+
+class CameraVideo(Gtk.Window):
+    """This class streams a live video from a camera and allows saving of single frames."""
+    def __init__(self):
+        Gtk.Window.__init__(self)
+
+        self.pipeline = None
+        self.stream_active = False
+
+        self.set_title("TCam Camera Video")
+        self.connect("destroy", Gtk.main_quit)
+
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(vbox)
+
+        # The drawing area is used to display our live stream
+        self.video_area = Gtk.DrawingArea()
+        self.video_area.set_size_request(640, 480)
+        vbox.pack_start(self.video_area, True, True, 0)
+
+        self.snap_image_button = Gtk.Button.new_with_label("Snap Image")
+        self.snap_image_button.connect("clicked", self.snap_image)
+        vbox.pack_start(self.snap_image_button, True, True, 0)
+
+        self.start_button = Gtk.Button.new_with_label("Start")
+        self.start_button.connect("clicked", self.toggle_play)
+        vbox.pack_start(self.start_button, True, True, 0)
+
+        vbox.show_all()
+        self.video_area.realize()
+
+    def create_pipeline(self):
+        """Creates the Gst.pipeline we will use."""
+
+        def bus_sync_handler(bus, msg, pipeline):
+            """
+            This method is to ensure our xvimagesink is part of our window and
+            not in a separate one.
+            """
+            if not GstVideo.is_video_overlay_prepare_window_handle_message(msg):
+                return Gst.BusSyncReply.PASS
+            msg.src.set_window_handle(self.video_area.get_window().get_xid())
+            return Gst.BusSyncReply.DROP
+
+        # create pipeline from string. Don't bother with single elements
+
+        self.pipeline = Gst.parse_launch('tcambin '
+                                         + '! tee name=t t. '
+                                         + '! queue '
+                                         + '! valve name=valve '
+                                         + '! videoconvert '
+                                         + '! jpegenc '
+                                         + '! multifilesink '
+                                         + ' name=filesink post-messages=true '
+                                         + ' location=/tmp/image-%06d.jpg t. '
+                                         + '! queue '
+                                         + '! videoconvert '
+                                         + '! xvimagesink ')
+
+        # tcambin automatically creates a few elements that offer convenience functions
+        # if you wish to manually recreate the internal pipeline
+        # or want to disable elements for performance reasons,
+        # the internal pipelines look like this:
+        # color:
+        # tcamsrc ! <caps> ! tcamwhitebalance ! tcamautoexposure ! bayer2rgb
+        # mono:
+        # tcamsrc ! <caps> ! tcamautoexposure
+
+        # To change resolutions, etc, change the pipeline definition to this:
+        # format = "x-raw,format=GRAY8"  # can also be "x-bayer" or "x-raw,format=RGBx"
+        # width = 640
+        # height = 480
+        # framerate = "30/1"
+        # self.pipeline = Gst.parse_launch(('tcambin '
+        #                                   + '! video/{},width={},height={},framerate={}'
+        #                                   + '! videoconvert '
+        #                                   + '! ximagesink').format(format, width, height, framerate))
+
+        # register the handler for correct sink handling
+        bus = self.pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message::element", self.bus_call)
+
+    def bus_call(self, gst_bus, message):
+        """"""
+        t = message.type
+        if (t == Gst.MessageType.ELEMENT):
+            if (message.get_structure().has_name("GstMultiFileSink")):
+                self.close_valve(True)
+
+            else:
+                print("!!!!!Element message came from: {}".format(message.get_structure().get_name()))
+        if not GstVideo.is_video_overlay_prepare_window_handle_message(message):
+            return Gst.BusSyncReply.PASS
+        message.src.set_window_handle(self.video_area.get_window().get_xid())
+
+    def snap_image(self, button):
+        """
+        Saves an image to a folder by manipulating the pipeline
+        """
+        self.close_valve(False)
+
+    def close_valve(self, is_closed):
+        """"""
+        valve = self.pipeline.get_by_name("valve")
+
+        if valve is None:
+            print("Valve is broken. Cannot save image")
+            return
+        valve.set_property("drop", is_closed)
+
+    def toggle_play(self, button):
+        """"""
+        if (self.stream_active):
+            # open valve so that eos gets processed by all elements
+            self.close_valve(False)
+            self.pipeline.set_state(Gst.State.READY)
+            button.set_label("Play")
+            print("Stopping stream...")
+            self.stream_active = False
+        else:
+            if (self.pipeline is None):
+                self.create_pipeline()
+            # let signals through
+            self.close_valve(False)
+            self.pipeline.set_state(Gst.State.PLAYING)
+            button.set_label("Stop")
+            print("Starting stream...")
+            self.stream_active = True
+
+
+def main():
+    """Main function of our program"""
+    # call init functions to prevent problems with threading, etc.
+    # by passing commandline arguments things like --gst-debug-level
+    # will work
+    Gst.init(sys.argv)
+    Gtk.init(sys.argv)
+    win = CameraVideo()
+    win.present()
+    win.show_all()
+
+    # let gtk handle the lifetime of our program
+    Gdk.threads_enter()
+    Gtk.main()
+    Gdk.threads_leave()
+
+
+# actual beginning
+if __name__ == "__main__":
+    main()

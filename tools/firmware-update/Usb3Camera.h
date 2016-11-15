@@ -37,7 +37,9 @@ class Usb3Camera : public UsbCamera
 
 public:
 
-    Usb3Camera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface = 0);
+    Usb3Camera (std::shared_ptr<UsbSession> session,
+                device_info dev,
+                unsigned int _interface = 0);
 
     ~Usb3Camera ();
 
@@ -49,11 +51,13 @@ public:
     int get_firmware_version ();
 
     int delete_firmware (std::function<void(int)> progress);
+
     /// @name download_firmware
     /// @param firmware - vector containing the firmware file
     /// @param progress - callback function
     /// @return libusb return value; >= 0 on success
-    int download_firmware (std::vector<unsigned char>& firmware, std::function<void(int)> progress);
+    int download_firmware (std::vector<unsigned char>& firmware,
+                           std::function<void(int)> progress);
 
     /// @name upload_firmware
     /// @param firmware_package - path to firmware/firmwarepack that shall be used
@@ -66,6 +70,7 @@ public:
                           std::function<void(int)> progress);
 
     UVC_COMPLIANCE get_mode ();
+    unsigned int get_eeprom_size ();
 
     int set_mode (UVC_COMPLIANCE mode);
 
@@ -77,7 +82,9 @@ private:
     /// @param
     /// @return
     /// @brief
-    int write_eeprom (unsigned int addr, unsigned char* data, unsigned int size);
+    int write_eeprom (unsigned int addr,
+                      unsigned char* data,
+                      unsigned int size);
 
 
     /// @name read_eeprom
@@ -85,7 +92,9 @@ private:
     /// @param data - buffer in which read data shall be written
     /// @param size - size of data
     /// @return integer response from libusb; >= 0 on success
-    int read_eeprom (unsigned int addr, unsigned char* data, unsigned int size);
+    int read_eeprom (unsigned int addr,
+                     unsigned char* data,
+                     unsigned int size);
 
     /// @erase_sector
     /// @param addr - address of sector that shall be erased
@@ -104,10 +113,11 @@ private:
     /// @param progress - callback function
     /// @return
     /// @brief
-    int upload_firmware_file (std::vector<uint8_t> firmware, std::function<void(int)> progress);
+    int upload_firmware_file (std::vector<uint8_t> firmware,
+                              std::function<void(int)> progress);
 
 }; /* class Usb3Camera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USB3CAMERA_H_ */

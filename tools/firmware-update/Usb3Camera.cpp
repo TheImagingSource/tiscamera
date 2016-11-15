@@ -40,7 +40,9 @@
 namespace tis
 {
 
-Usb3Camera::Usb3Camera (std::shared_ptr<UsbSession> session, device_info _dev, unsigned int _interface):
+Usb3Camera::Usb3Camera (std::shared_ptr<UsbSession> session,
+                        device_info _dev,
+                        unsigned int _interface):
     UsbCamera(session, _dev, _interface)
 {}
 
@@ -88,7 +90,9 @@ int Usb3Camera::delete_firmware (std::function<void(int)> progress)
 }
 
 
-int Usb3Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
+int Usb3Camera::write_eeprom (unsigned int addr,
+                              unsigned char* data,
+                              unsigned int size)
 {
     return libusb_control_transfer(this->dev_handle,
                                    LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_VENDOR,
@@ -101,7 +105,9 @@ int Usb3Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned i
 }
 
 
-int Usb3Camera::read_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
+int Usb3Camera::read_eeprom (unsigned int addr,
+                             unsigned char* data,
+                             unsigned int size)
 {
     return libusb_control_transfer(this->dev_handle,
                                    LIBUSB_ENDPOINT_IN | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_VENDOR,
@@ -113,7 +119,8 @@ int Usb3Camera::read_eeprom (unsigned int addr, unsigned char* data, unsigned in
                                    TIMEOUT);
 }
 
-int Usb3Camera::download_firmware (std::vector<unsigned char>& firmware, std::function<void(int)> progress)
+int Usb3Camera::download_firmware (std::vector<unsigned char>& firmware,
+                                   std::function<void(int)> progress)
 {
     int ret = -1;
     unsigned int size = 4096;
@@ -147,6 +154,11 @@ UVC_COMPLIANCE Usb3Camera::get_mode ()
     return CAMERA_INTERFACE_MODE_UVC;
 }
 
+unsigned int Usb3Camera::get_eeprom_size ()
+{
+    return 0;
+}
+
 int Usb3Camera::set_mode (UVC_COMPLIANCE mode)
 {
     return -1;
@@ -174,7 +186,8 @@ int Usb3Camera::erase_eeprom (std::function<void(int)> progress)
 }
 
 
-int Usb3Camera::upload_firmware_file (std::vector<uint8_t> firmware ,std::function<void(int)> progress)
+int Usb3Camera::upload_firmware_file (std::vector<uint8_t> firmware,
+                                      std::function<void(int)> progress)
 {
     const size_t BLOCK_SIZE = 4096;
     int ret = 0;
@@ -215,7 +228,10 @@ int Usb3Camera::upload_firmware_file (std::vector<uint8_t> firmware ,std::functi
 #define GET_MSW(v)	((unsigned short)((v) >> 16))		// Get Most Significant Word part of an integer.
 
 
-static int fx3_ram_write (libusb_device_handle* h, unsigned char* buf, unsigned int ramAddress, int len)
+static int fx3_ram_write (libusb_device_handle* h,
+                          unsigned char* buf,
+                          unsigned int ramAddress,
+                          int len)
 {
 
     int index = 0;

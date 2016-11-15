@@ -14,99 +14,231 @@
  * limitations under the License.
  */
 
-#ifndef IMAGE_TRANSFORM_BASE_H_INC_
-#define IMAGE_TRANSFORM_BASE_H_INC_
-
-#include <stdint.h>
+#ifndef TCAM_IMAGE_TRANSFORM_BASE_H
+#define TCAM_IMAGE_TRANSFORM_BASE_H
 
 #pragma once
 
-#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h): (val) )
+#include "image_base_defines.h"
+#include "image_fourcc.h"
 
-#ifndef mmioFOURCC
-#define mmioFOURCC( ch0, ch1, ch2, ch3 )                                \
-    ((uint32_t)((ch0) | (ch1)<<8 | (ch2)<<16 | (ch3)<<24))
+#ifndef CLIP
+#define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h): (val) )
 #endif
 
-// these are pseudo fourcc's used in the library to signify the formats
-#define FOURCC_RGB8         mmioFOURCC( 'R', 'G', 'B', '1' )
-#define FOURCC_RGB24        mmioFOURCC( 'R', 'G', 'B', '3' )
-#define FOURCC_RGB32        mmioFOURCC( 'R', 'G', 'B', '4' )
-
-#define FOURCC_YUY2         mmioFOURCC('Y', 'U', 'Y', '2')
-#define FOURCC_Y800         mmioFOURCC('Y', '8', '0', '0')
-#define FOURCC_BY8          mmioFOURCC('B', 'Y', '8', ' ')
-#define FOURCC_UYVY         mmioFOURCC('U', 'Y', 'V', 'Y')
-
-#define FOURCC_YGB0         mmioFOURCC('Y', 'G', 'B', '0')
-#define FOURCC_YGB1         mmioFOURCC('Y', 'G', 'B', '1')
-#define FOURCC_Y16          mmioFOURCC('Y', '1', '6', ' ')
-
-#define FOURCC_Y444         mmioFOURCC('Y', '4', '4', '4')  // TIYUV: 1394 conferencing camera 4:4:4 mode 0
-#define FOURCC_Y411         mmioFOURCC('Y', '4', '1', '1')  // TIYUV: 1394 conferencing camera 4:1:1 mode 2
-#define FOURCC_B800         mmioFOURCC('B', 'Y', '8', ' ')
-#define FOURCC_Y422         FOURCC_UYVY
-
-#define FOURCC_GRBG         mmioFOURCC('G', 'R', 'B', 'G')
-
-#define FOURCC_BGGR8        mmioFOURCC('B', 'A', '8', '1') /*  8  BGBG.. GRGR.. */
-#define FOURCC_GBRG8        mmioFOURCC('G', 'B', 'R', 'G') /*  8  GBGB.. RGRG.. */
-#define FOURCC_GRBG8        mmioFOURCC('G', 'R', 'B', 'G') /*  8  GRGR.. BGBG.. */
-#define FOURCC_RGGB8        mmioFOURCC('R', 'G', 'G', 'B') /*  8  RGRG.. GBGB.. */
-
-#define FOURCC_BGGR10       mmioFOURCC('B', 'G', '1', '0') /* 10  BGBG.. GRGR.. */
-#define FOURCC_GBRG10       mmioFOURCC('G', 'B', '1', '0') /* 10  GBGB.. RGRG.. */
-#define FOURCC_GRBG10       mmioFOURCC('B', 'A', '1', '0') /* 10  GRGR.. BGBG.. */
-#define FOURCC_RGGB10       mmioFOURCC('R', 'G', '1', '0') /* 10  RGRG.. GBGB.. */
-
-#define FOURCC_BGGR12       mmioFOURCC('B', 'G', '1', '2') /* 12  BGBG.. GRGR.. */
-#define FOURCC_GBRG12       mmioFOURCC('G', 'B', '1', '2') /* 12  GBGB.. RGRG.. */
-#define FOURCC_GRBG12       mmioFOURCC('B', 'A', '1', '2') /* 12  GRGR.. BGBG.. */
-#define FOURCC_RGGB12       mmioFOURCC('R', 'G', '1', '2') /* 12  RGRG.. GBGB.. */
-
-#define FOURCC_BGGR16       mmioFOURCC('B', 'G', '1', '6') /* 16  BGBG.. GRGR.. */
-#define FOURCC_GBRG16       mmioFOURCC('G', 'B', '1', '6') /* 16  GBGB.. RGRG.. */
-#define FOURCC_GRBG16       mmioFOURCC('B', 'A', '1', '6') /* 16  GRGR.. BGBG.. */
-#define FOURCC_RGGB16       mmioFOURCC('R', 'G', '1', '6') /* 16  RGRG.. GBGB.. */
-
-#define FOURCC_I420         mmioFOURCC('I', '4', '2', '0')
-#define FOURCC_YV16         mmioFOURCC('Y', 'V', '1', '6')      // YUV planar Y plane, U plane, V plane. U and V sub sampled in horz
-//#define FOURCC_YV12           mmioFOURCC('Y', 'V', '1', '2')
-#define FOURCC_YUV8PLANAR   mmioFOURCC('Y', 'U', '8', 'p')      // unofficial, YUV planar, Y U V planes, all 8 bit, no sub-sampling
-
-#define FOURCC_H264         mmioFOURCC('H', '2', '6', '4')
-#define FOURCC_MJPG         mmioFOURCC('M', 'J', 'P', 'G')
-
-#define _MEDIASUBTYPE_FROMFCC( fcc ) { fcc, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } }
-
-typedef unsigned char  byte;
-
-typedef struct
+namespace img
 {
-    long x;
-    long y;
-} POINT;
-
-
-typedef struct
+inline int get_bits_per_pixel (uint32_t fcc)
 {
-    long left;
-    long top;
-    long right;
-    long bottom;
-} RECT;
+    switch (fcc)
+    {
+        case FOURCC_RGB24:      return 24;
+        case FOURCC_BGR24:      return 24;
+        case FOURCC_RGB32:      return 32;
+        case FOURCC_YUY2:       return 16;
+        case FOURCC_UYVY:       return 16;
+        case FOURCC_YUYV:       return 16;
+        case FOURCC_Y800:       return 8;
+        case FOURCC_BY8:        return 8;
+
+        case FOURCC_BGGR8:      return 8;
+        case FOURCC_GBRG8:      return 8;
+        case FOURCC_RGGB8:      return 8;
+        case FOURCC_GRBG8:      return 8;
+
+        case FOURCC_YGB0:       return 16;
+        case FOURCC_YGB1:       return 16;
+        case FOURCC_Y16:        return 16;
+        case FOURCC_YV16:       return 16;
+        case FOURCC_I420:       return 12;
+        case FOURCC_YUV8PLANAR: return 24;
+
+        case FOURCC_BGGR16:     return 16;
+        case FOURCC_GBRG16:     return 16;
+        case FOURCC_GRBG16:     return 16;
+        case FOURCC_RGGB16:     return 16;
+
+        case FOURCC_IYU1:       return 12;      // beware
+        case FOURCC_IYU2:       return 24;
+
+            //case FOURCC_RGB48:          return 48;
+        case FOURCC_RGB64:          return 64;
+
+        case FOURCC_YUV16PLANAR:    return 48;
+        case FOURCC_YUVFLOATPLANAR: return 96;
+        case FOURCC_MJPG: return 16;
+        default:
+            return 0;
+    }
+}
+
+    inline bool    is_known_fcc( uint32_t fcc )
+    {
+        return get_bits_per_pixel( fcc ) != 0;
+    }
 
 
-typedef struct
-{
-    byte*           pData;
-    unsigned int    length;
+    inline int      calc_minimum_pitch( uint32_t fcc, unsigned dim_x, int bpp )
+    {
+        switch( fcc )
+        {
+        case FOURCC_YV16:		    return dim_x * 1;       // these are sub-sampled in u and v, so specify the y plane pitch
+        case FOURCC_I420:		    return dim_x * 1;       // these are sub-sampled in u and v, so specify the y plane pitch
 
-    uint32_t        type;   // this must be at least 32 bit wide
+        case FOURCC_YUV8PLANAR:	    return dim_x * 1;
+        case FOURCC_YUV16PLANAR:    return dim_x * 2;
+        case FOURCC_YUVFLOATPLANAR: return dim_x * 4;
+        default:
+            return (dim_x * bpp) / 8;
+        }
+    }
 
-    unsigned int    dim_x;  // pixels
-    unsigned int    dim_y;  // lines
-    unsigned int    pitch;  // in bytes
-} img_descriptor;
+    inline int      calc_minimum_pitch( uint32_t fcc, unsigned dim_x )
+    {
+        switch( fcc )
+        {
+        case FOURCC_YV16:		    return dim_x * 1;       // these are sub-sampled in u and v, so specify the y plane pitch
+        case FOURCC_I420:		    return dim_x * 1;       // these are sub-sampled in u and v, so specify the y plane pitch
 
-#endif // IMAGE_TRANSFORM_BASE_H_INC_
+        case FOURCC_YUV8PLANAR:	    return dim_x * 1;
+        case FOURCC_YUV16PLANAR:    return dim_x * 2;
+        case FOURCC_YUVFLOATPLANAR: return dim_x * 4;
+        default:
+            return (dim_x * get_bits_per_pixel( fcc )) / 8;
+        }
+    }
+    inline int      calc_img_size_from_pitch( uint32_t fcc, int pitch, unsigned dim_y )
+    {
+        unsigned bytes_per_line = pitch < 0 ? -pitch : pitch;
+        switch( fcc )
+        {
+        case FOURCC_YV16:		    return (bytes_per_line * dim_y) + (bytes_per_line * dim_y / 2);     // u and v plane are sub-sampled 2x1
+        case FOURCC_I420:		    return (bytes_per_line * dim_y) + (bytes_per_line * dim_y / 4);     // u and v plane are sub-sampled 2x2
+
+        case FOURCC_YUV8PLANAR:	    return bytes_per_line * dim_y * 3;
+        case FOURCC_YUV16PLANAR:    return bytes_per_line * dim_y * 3;
+        case FOURCC_YUVFLOATPLANAR: return bytes_per_line * dim_y * 3;
+        default:
+            return bytes_per_line * dim_y;
+        }
+    }
+
+    inline int      calc_minimum_img_size( uint32_t fcc, unsigned dim_x, unsigned dim_y )
+    {
+        return calc_img_size_from_pitch( fcc, calc_minimum_pitch( fcc, dim_x ), dim_y );
+    }
+
+    inline bool     is_multi_plane_format( uint32_t fcc )
+    {
+        switch( fcc )
+        {
+        case FOURCC_YV16:		    return true;       // these are sub-sampled in u and v, so specify the y plane pitch
+        case FOURCC_I420:		    return true;       // these are sub-sampled in u and v, so specify the y plane pitch
+
+        case FOURCC_YUV8PLANAR:	    return true;
+        case FOURCC_YUV16PLANAR:    return true;
+        case FOURCC_YUVFLOATPLANAR: return true;
+        default:
+            return false;
+        }
+    }
+
+
+	struct img_type
+	{
+		uint32_t		type;
+
+		unsigned int	dim_x;	            // pixels
+		unsigned int	dim_y;	            // lines
+
+		unsigned int	bytes_per_line;     // this is the stride to get from one line to the next, this may be > then dim_x * get_bits_per_pixel( type )
+
+		unsigned int	buffer_length;      // this is the length of the buffer to be allocated for the full image
+	};
+
+	struct img_descriptor
+	{
+		uint32_t		type;	// this must be at least 32 bit wide
+
+		unsigned int	dim_x;	// pixels
+		unsigned int	dim_y;	// lines
+		int	            pitch;	// in bytes, this is the count of bytes it takes from the start of one line to get to the next line
+                                // for planar formats this contains the count of bytes to get from one line in one plane to the next line in the same
+                                // note that this can be negative
+
+        unsigned int	data_length;    // the actual data length valid in this buffer. this is in most cases calc_img_size( type, dim_x, dim_y ), but may be smaller for e.g. compressed formats
+
+        byte*			pData;  // this is the pointer of the 'first' byte of the image. this can be the first byte of the last line if pitch is negative
+	};
+
+
+
+
+    inline int      calc_plane_pitch( const img_descriptor& dsc )
+    {
+        ASSERT( dsc.type == FOURCC_YUV16PLANAR || dsc.type == FOURCC_YUV8PLANAR || dsc.type == FOURCC_YUVFLOATPLANAR );
+        int pitch = dsc.pitch < 0 ? -dsc.pitch : dsc.pitch;
+        return (int)dsc.dim_y * pitch;
+    }
+
+    inline img_type make_img_type( uint32_t fcc, unsigned width, unsigned height, unsigned bytes_per_line, unsigned size )
+    {
+        img::img_type rval = { fcc, width, height, bytes_per_line, size};
+        return rval;
+    }
+    inline img_type make_img_type( uint32_t fcc, unsigned width, unsigned height, unsigned bytes_per_line )
+    {
+        return make_img_type( fcc, width, height, bytes_per_line, calc_img_size_from_pitch( fcc, bytes_per_line, height ) );
+    }
+    inline img_type make_img_type( uint32_t fcc, unsigned width, unsigned height )
+    {
+        int bpp = img::get_bits_per_pixel( fcc );
+        ASSERT( bpp != 0 );
+        int pitch = calc_minimum_pitch( fcc, width, bpp );
+        return make_img_type( fcc, width, height, pitch, calc_img_size_from_pitch( fcc, pitch, height ) );
+    }
+
+    inline img_type make_img_type_with_bpp( uint32_t fcc, unsigned width, unsigned height, unsigned bpp )
+    {
+        int pitch = calc_minimum_pitch( fcc, width, bpp );
+        return make_img_type( fcc, width, height, pitch, calc_img_size_from_pitch( fcc, pitch, height ) );
+    }
+
+    inline img_descriptor	to_img_desc( void* data, uint32_t fcc, unsigned width, unsigned height, int pitch, unsigned size )
+    {
+        img_descriptor rval = {
+            fcc,
+            width,
+            height,
+            pitch,
+            size,
+            reinterpret_cast<byte*>(data),
+        };
+        return rval;
+    }
+	inline img_descriptor	to_img_desc( const img_type& t, void* data, unsigned int size )
+	{
+		return to_img_desc( data, t.type, t.dim_x, t.dim_y, t.bytes_per_line, size );
+	}
+	inline img_descriptor	to_img_desc( const img_type& t, void* data )
+	{
+        return to_img_desc( data, t.type, t.dim_x, t.dim_y, t.bytes_per_line, t.buffer_length );
+	}
+
+    inline img_descriptor	copy_img_desc( const img_descriptor& desc, uint32_t new_fcc )
+    {
+        return to_img_desc( desc.pData, new_fcc, desc.dim_x, desc.dim_y, desc.pitch, desc.data_length );
+    }
+
+    inline img_descriptor  flip_image_in_img_desc( const img_descriptor& dsc )
+    {
+        if( dsc.dim_y == 0 )
+            return dsc;
+        img_descriptor tmp = dsc;
+        tmp.pData = reinterpret_cast<byte*>( dsc.pData ) + (dsc.pitch * (dsc.dim_y - 1));
+        tmp.pitch = -dsc.pitch;
+        return tmp;
+    }
+}
+
+#endif // TCAM_IMAGE_TRANSFORM_BASE_H

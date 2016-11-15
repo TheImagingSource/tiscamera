@@ -23,7 +23,7 @@
 #include "Usb2Camera.h"
 #include "FileHandling.h"
 
-#define TIMEOUT 10000
+static const short TIMEOUT = 10000;
 
 #define EEPROM_SIZE 16384
 #define DATA_SIZE   512
@@ -113,7 +113,7 @@ int Usb2Camera::usbbuffer_to_string (unsigned char* usbbuffer,
 int Usb2Camera::string_to_usbbuffer (unsigned char* usbbuffer, int buffer_size, const char* string)
 {
     size_t length = strlen((char*) string );
-    int len = length * 2 + 4;
+    unsigned int len = length * 2 + 4;
 
     if ( buffer_size < len )
     {
@@ -273,38 +273,38 @@ void Usb2Camera::get_strings (char* strvendor,
 
 char* Usb2Camera::read_string_from_image ( unsigned char* image, int index )
 {
-	static char static_buffer[255];
+    static char static_buffer[255];
 
-	int addr = image[0x60 + index * 2] + 0x54;
-	int len = image[0x60 + index * 2 + 1];
+    int addr = image[0x60 + index * 2] + 0x54;
+    int len = image[0x60 + index * 2 + 1];
 
-	usbbuffer_to_string( image + addr, len, static_buffer, sizeof(static_buffer) );
+    usbbuffer_to_string( image + addr, len, static_buffer, sizeof(static_buffer) );
 
-	return static_buffer;
+    return static_buffer;
 }
 
 bool Usb2Camera::apply_strings ( const char** strings, unsigned char* eeprom_image )
 {
-	int pos0 = 0xbe;
-	int len0 = string_to_usbbuffer( eeprom_image + pos0, 512 - pos0, strings[0] );
-	int pos1 = pos0 + len0;
-	int len1 = string_to_usbbuffer( eeprom_image + pos1, 512 - pos1, strings[1] );
-	int pos2 = pos1 + len1;
-	int len2 = string_to_usbbuffer( eeprom_image + pos2, 512 - pos2, strings[2] );
+    int pos0 = 0xbe;
+    int len0 = string_to_usbbuffer( eeprom_image + pos0, 512 - pos0, strings[0] );
+    int pos1 = pos0 + len0;
+    int len1 = string_to_usbbuffer( eeprom_image + pos1, 512 - pos1, strings[1] );
+    int pos2 = pos1 + len1;
+    int len2 = string_to_usbbuffer( eeprom_image + pos2, 512 - pos2, strings[2] );
 
-	if( !len0 || !len1 || !len2 )
-	{
-		return false;
-	}
+    if( !len0 || !len1 || !len2 )
+    {
+        return false;
+    }
 
-	eeprom_image[0x60] = pos0 - 0x54;
-	eeprom_image[0x61] = len0;
-	eeprom_image[0x62] = pos1 - 0x54;
-	eeprom_image[0x63] = len1;
-	eeprom_image[0x64] = pos2 - 0x54;
-	eeprom_image[0x65] = len2;
+    eeprom_image[0x60] = pos0 - 0x54;
+    eeprom_image[0x61] = len0;
+    eeprom_image[0x62] = pos1 - 0x54;
+    eeprom_image[0x63] = len1;
+    eeprom_image[0x64] = pos2 - 0x54;
+    eeprom_image[0x65] = len2;
 
-	return true;
+    return true;
 }
 
 bool Usb2Camera::patch_strings (const char* model,
@@ -312,31 +312,31 @@ bool Usb2Camera::patch_strings (const char* model,
                                 const char* serial,
                                 unsigned char* eeprom_image)
 {
-	const char* strings[3] = { 0 };
+    const char* strings[3] = { 0 };
 
-	for (unsigned int i = 0; i < 3; ++i )
-	{
-		char* str = read_string_from_image( eeprom_image, i );
-		if( !strcmp( str, "vv" ) )
-		{
-			strings[i] = vendor;
-		}
-		else if( !strcmp( str, "pp") )
-		{
-			strings[i] = model;
-		}
-		else if( !strcmp( str, "123") )
-		{
-			strings[i] = serial;
-		}
-	}
+    for (unsigned int i = 0; i < 3; ++i )
+    {
+        char* str = read_string_from_image( eeprom_image, i );
+        if( !strcmp( str, "vv" ) )
+        {
+            strings[i] = vendor;
+        }
+        else if( !strcmp( str, "pp") )
+        {
+            strings[i] = model;
+        }
+        else if( !strcmp( str, "123") )
+        {
+            strings[i] = serial;
+        }
+    }
 
-	for (unsigned int i = 0; i < 3; ++i )
-	{
-		if( !strings[i] ) return false;
-	}
+    for (unsigned int i = 0; i < 3; ++i )
+    {
+        if( !strings[i] ) return false;
+    }
 
-	return apply_strings( strings, eeprom_image );
+    return apply_strings( strings, eeprom_image );
 
 }
 
@@ -363,6 +363,16 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
         throw std::runtime_error("Retrieved empty firmware file.");
     }
 
+    unsigned int eeprom_size = this->get_eeprom_size();
+
+    std::cout << "Firmware Size: " << fw.size() << " EEPROM Size: " << eeprom_size << std::endl;
+
+    if ((fw.size() + 512) >= eeprom_size)
+    {
+        std::cerr << "Firmware does not fit in EEPROM. Aborting!" << std::endl;
+        return false;
+    }
+
     char vendor[128];
     char model[128];
     char serial[128];
@@ -379,7 +389,7 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 
     patch_strings(model, vendor, serial, &fw[0]);
 
-    upload_firmware_file(&fw[0], FIRMWARE_END, map_progress(progress, 0, 49));
+    upload_firmware_file(&fw[0], fw.size(), map_progress(progress, 0, 49));
 
     std::vector<unsigned char> buffer (fw.size());
 
@@ -405,10 +415,10 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 
 int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
 {
-	unsigned short addr = FLAGS_LOCATION;
-	unsigned char buffer[3];
-	buffer[0] = ( addr >> 8 ) & 0xff;
-	buffer[1] = addr & 0xff;
+    unsigned short addr = FLAGS_LOCATION;
+    unsigned char buffer[3];
+    buffer[0] = ( addr >> 8 ) & 0xff;
+    buffer[1] = addr & 0xff;
 
     unsigned short pid;
     int ret = get_productid(pid);
@@ -419,14 +429,14 @@ int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
 
     if (mode == CAMERA_INTERFACE_MODE_UVC)
     {
-		pid = (0x83 << 8) | (pid & 0xff);
-		ret = set_productid(pid);
+        pid = (0x83 << 8) | (pid & 0xff);
+        ret = set_productid(pid);
         buffer[2] = 1 & 0xff;
     }
     else if (mode == CAMERA_INTERFACE_MODE_PROPRIETARY)
     {
         pid = (0x82 << 8) | (pid & 0xff);
-		ret = set_productid(pid);
+        ret = set_productid(pid);
         buffer[2] = 0 & 0xff;
     }
     usleep (10000);
@@ -477,6 +487,26 @@ UVC_COMPLIANCE Usb2Camera::get_mode ()
 
 }
 
+unsigned int Usb2Camera::get_eeprom_size ()
+{
+    unsigned char bufa[64];
+    unsigned char bufb[64];
+
+    if (!read_eeprom (0, bufa, sizeof(bufa)))
+    {
+        return 0;
+    }
+    if (!read_eeprom (16384, bufb, sizeof(bufb)))
+    {
+        return 0;
+    }
+    if (!memcmp(bufa, bufb, sizeof(bufa)))
+    {
+        return 16384;
+    }
+
+    return 32768;
+}
 
 int Usb2Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
 {
@@ -622,15 +652,15 @@ int Usb2Camera::get_productid (unsigned short& pid)
 
 int Usb2Camera::set_productid (unsigned short pid)
 {
-	unsigned short addr = PID_LOCATION_LO;
-	int ret;
-	unsigned char buffer[4];
-	buffer[0] = ( addr >> 8 ) & 0xff;
-	buffer[1] = addr & 0xff;
-	buffer[2] = pid & 0xff;
-	buffer[3] = (pid >> 8) & 0xff;
+    unsigned short addr = PID_LOCATION_LO;
+    int ret;
+    unsigned char buffer[4];
+    buffer[0] = ( addr >> 8 ) & 0xff;
+    buffer[1] = addr & 0xff;
+    buffer[2] = pid & 0xff;
+    buffer[3] = (pid >> 8) & 0xff;
 
-	ret = libusb_control_transfer(this->dev_handle,
+    ret = libusb_control_transfer(this->dev_handle,
                                   LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
                                   0x2,
                                   0,
@@ -639,7 +669,7 @@ int Usb2Camera::set_productid (unsigned short pid)
                                   sizeof(buffer),
                                   TIMEOUT);
 
-	return ret;
+    return ret;
 }
 
 }; /* namespace tis */

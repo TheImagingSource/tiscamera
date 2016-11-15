@@ -39,12 +39,12 @@ static const camera_type camera_type_list[] =
     { USB2, TIS_VENDOR_ID, 0x8307, "DFK 72xUC02 UVC"},
     { USB2, TIS_VENDOR_ID, 0x8208, "DFK 42xUC02"},
     { USB2, TIS_VENDOR_ID, 0x8308, "DFK 42xUC02 UVC"},
-    
+
     // { DBG_TEXT("BF-532"), DBG_TEXT("Dxx AU/BU"), eUSBCAM, 0x8101, &CTIS_AU_Camera_create },
     // { DBG_TEXT("BF-532"), DBG_TEXT("DxK 51xU03"), eEUVCCAM, 0x8102, &create_cam_ccd_51 },
     // { DBG_TEXT("MT9V023"), DBG_TEXT("DxK 21AUC02"), eEUVCCAM, 0x8201, &CDevice_MT9V023_create },
     // { DBG_TEXT("MT9V023"), DBG_TEXT("DxK 21AUC02"), eEUVCCAM, 0x8202, &CDevice_MT9V023_create },
-    
+
     { USB3, 0x04b4,        0x00f3, "Westbridge" },
     { USB3, TIS_VENDOR_ID, 0x8401, "DMK 23U618" },
     { USB3, TIS_VENDOR_ID, 0x8402, "DMK 23U445" },
@@ -75,7 +75,7 @@ const camera_type find_camera_type (const unsigned int& idVendor, const unsigned
 
     // type not known assure we still can handle the device
     // as long as it is one of ours
-        
+
     if ((idProduct & (0x8400)) == (0x8400))
     {
         return {USB3, idVendor, idProduct, "Unknown USB3 Camera"};
@@ -85,26 +85,29 @@ const camera_type find_camera_type (const unsigned int& idVendor, const unsigned
     {
         return {USB2, idVendor, idProduct, "Unknown USB2 Camera"};
     }
-    
+
     return camera_type_list[0];
-    
+
 }
 
 
-UsbCamera::UsbCamera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface):
+UsbCamera::UsbCamera (std::shared_ptr<UsbSession> session, device_info _dev, unsigned int _interface):
     usb_session(session),
-    dev(dev),
+    dev_handle(nullptr),
+    dev(_dev),
     interface(_interface)
 {
     try
     {
-        this->dev_handle = libusb_open_device_with_vid_pid(usb_session->get_session(), dev.idVendor, dev.idProduct);
+        this->dev_handle = libusb_open_device_with_vid_pid(usb_session->get_session(),
+                                                           dev.idVendor,
+                                                           dev.idProduct);
 
         if (this->dev_handle == NULL)
         {
             throw std::runtime_error("Unable to attain device handle.");
         }
-    
+
         claim_interface();
     }
     catch (std::runtime_error& err)
@@ -161,4 +164,4 @@ void UsbCamera::release_interface ()
     libusb_attach_kernel_driver(this->dev_handle, this->interface);
 }
 
-}; /* namespace tis */
+} /* namespace tis */

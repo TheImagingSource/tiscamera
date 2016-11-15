@@ -54,14 +54,17 @@ bool is_package_file (const std::string& fileName)
     if (fileName.length() >= ending.length())
     {
         if (fileName.compare (fileName.length() - ending.length(), ending.length(), ending) == 0)
+        {
             return true;
+        }
     }
 
     return false;
 }
 
 
-std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName, const std::string& fileName)
+std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName,
+                                                      const std::string& fileName)
 {
     //Open the ZIP archive
     int err = 0;
@@ -126,6 +129,6 @@ bool is_valid_firmware_file (const std::string& firmware)
     {
         return true;
     }
-    
+
     return false;
 }

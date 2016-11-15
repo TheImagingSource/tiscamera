@@ -36,9 +36,9 @@ public:
     UsbSession& operator=(const UsbSession&) = delete;
 
     libusb_context* get_session ();
-    
+
 }; /* class UsbSession */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USBSESSION_H_ */

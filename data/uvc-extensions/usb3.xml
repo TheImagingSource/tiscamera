@@ -197,8 +197,100 @@
     </constant>
 
     <constant type="integer">
-      <id>V4L2_CID_BINNING</id>
+      <id>V4L2_TRIGGER_POLARITY</id>
       <value>0x0199e234</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_OPERATION</id>
+      <value>0x0199e235</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_EXPOSURE_MODE</id>
+      <value>0x0199e236</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_BURST_COUNT</id>
+      <value>0x0199e237</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_DEBOUNCE_TIME_US</id>
+      <value>0x0199e238</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_MASK_TIME_US</id>
+      <value>0x0199e239</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+      <value>0x0199e240</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_CONTROL</id>
+      <value>0x0199e241</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_PRESET</id>
+      <value>0x0199e251</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_LEFT</id>
+      <value>0x0199e242</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_TOP</id>
+      <value>0x0199e243</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_WIDTH</id>
+      <value>0x0199e244</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_AUTO_ROI_HEIGHT</id>
+      <value>0x0199e245</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_WHITE_BALANCE_MODE</id>
+      <value>0x0199e246</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_WHITE_BALANCE_AUTO_PRESET</id>
+      <value>0x0199e247</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_WHITE_BALANCE_GREEN</id>
+      <value>0x0199e248</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_WHITE_BALANCE_TEMPERATURE_PRESET</id>
+      <value>0x0199e249</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_WHITE_BALANCE_TEMPERATURE</id>
+      <value>0x0199e250</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_REVERSE_X</id>
+      <value>0x0199e251</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_REVERSE_Y</id>
+      <value>0x0199e252</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_HIGHLIGHT_REDUCTION</id>
+      <value>0x0199e253</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT_AUTO</id>
+      <value>0x0199e254</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_EXPOSURE_AUTO_LOWER_LIMIT</id>
+      <value>0x0199e255</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT</id>
+      <value>0x0199e256</value>
     </constant>
 
     <!-- register values -->
@@ -359,6 +451,98 @@
       <value>0x28</value>
     </constant>
 
+    <constant type="integer">
+      <id>XU_FLIP_H</id>
+      <value>0x2E</value>
+    </constant>
+
+    <constant type="integer">
+      <id>XU_FLIP_V</id>
+      <value>0x2F</value>
+    </constant>
+
+    <constant type="integer">
+      <id>XU_HIGHLIGHT_REDUCTION</id>
+      <value>0x3B</value>
+    </constant>
+
+    <constant type="integer">
+      <id>XU_EXPOSURE_AUTO_UPPER_LIMIT_AUTO</id>
+      <value>0x3E</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_EXPOSURE_AUTO_LOWER_LIMIT_US</id>
+      <value>0x3C</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_EXPOSURE_AUTO_UPPER_LIMIT_US</id>
+      <value>0x3D</value>
+    </constant>
+
+    <constant type="integer">
+      <id>XU_TRIGGER_POLARITY</id>
+      <value>0x41</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_OPERATION</id>
+      <value>0x42</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_EXPOSURE_MODE</id>
+      <value>0x43</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_BURST_COUNT</id>
+      <value>0x44</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_DEBOUNCE_TIME_US</id>
+      <value>0x45</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_MASK_TIME_US</id>
+      <value>0x46</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+      <value>0x47</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_AUTO_ROI_CONTROL</id>
+      <value>0x48</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_AUTO_ROI_LEFT</id>
+      <value>0x49</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_AUTO_ROI_TOP</id>
+      <value>0x4A</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_AUTO_ROI_WIDTH</id>
+      <value>0x4B</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_AUTO_ROI_HEIGHT</id>
+      <value>0x4C</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_WHITE_BALANCE_MODE</id>
+      <value>0x4D</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_WHITE_BALANCE_AUTO_PRESET</id>
+      <value>0x4E</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_WHITE_BALANCE_GREEN</id>
+      <value>0x4F</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_WHITE_BALANCE_TEMPERATURE</id>
+      <value>0x50</value>
+    </constant>
   </constants>
 
   <devices>
@@ -689,7 +873,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
@@ -719,7 +903,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
@@ -749,7 +933,7 @@
             <request>GET_DEF</request>
             <request>GET_RES</request>
             <request>GET_MIN</request>
-            <request>GET_RAX</request>
+            <request>GET_MAX</request>
           </requests>
         </control>
 
@@ -794,11 +978,34 @@
             <request>GET_RES</request>
           </requests>
         </control>
-
-        <control id="binning">
+        <control id="exposure_auto_lower_limit_us">
           <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_OVERRIDE_SCANNING_MODE</selector>
-          <index>57</index>
+          <selector>XU_EXPOSURE_AUTO_LOWER_LIMIT_US</selector>
+          <index>59</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="exposure_auto_upper_limit_us">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_EXPOSURE_AUTO_UPPER_LIMIT_US</selector>
+          <index>60</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="exposure_auto_upper_limit_auto">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_EXPOSURE_AUTO_UPPER_LIMIT_AUTO</selector>
+          <index>61</index>
           <size>1</size>
           <requests>
             <request>SET_CUR</request>
@@ -807,28 +1014,241 @@
             <request>GET_RES</request>
           </requests>
         </control>
+        <control id="flip_horizontal">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_FLIP_H</selector>
+          <index>45</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="flip_vertical">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_FLIP_V</selector>
+          <index>46</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="highlight_reduction">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_HIGHLIGHT_REDUCTION</selector>
+          <index>58</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
+        <control id="trigger_polarity">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_POLARITY</selector>
+          <index>64</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_operation">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_OPERATION</selector>
+          <index>65</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_exposure_mode">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_EXPOSURE_MODE</selector>
+          <index>66</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_burst_count">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_BURST_COUNT</selector>
+          <index>67</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_debounce_time_us">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_DEBOUNCE_TIME_US</selector>
+          <index>68</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_mask_time_us">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_MASK_TIME_US</selector>
+          <index>69</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="trigger_noise_supression_time_us">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_TRIGGER_NOISE_SUPRRESSION_TIME_US</selector>
+          <index>70</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="auto_roi_control">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_AUTO_ROI_CONTROL</selector>
+          <index>71</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="auto_roi_left">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_AUTO_ROI_LEFT</selector>
+          <index>72</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="auto_roi_top">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_AUTO_ROI_TOP</selector>
+          <index>73</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="auto_roi_width">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_AUTO_ROI_WIDTH</selector>
+          <index>74</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="auto_roi_height">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_AUTO_ROI_HEIGHT</selector>
+          <index>75</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="whitebalance_mode">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_WHITE_BALANCE_MODE</selector>
+          <index>76</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="whitebalance_auto_preset">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_WHITE_BALANCE_AUTO_PRESET</selector>
+          <index>77</index>
+          <size>1</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="whitebalance_green_component">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_WHITE_BALANCE_GREEN</selector>
+          <index>78</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="whitebalance_temperature_preset">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_WHITE_BALANCE_TEMPERATURE</selector>
+          <index>79</index>
+          <size>2</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
       </controls>
     </device>
   </devices>
 
   <mappings>
-
-    <mapping>
-      <name>Binning</name>
-      <uvc>
-        <control_ref idref="binning"/>
-        <size>32</size>
-        <offset>0</offset>
-        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
-      </uvc>
-      <v4l2>
-        <id>V4L2_CID_BINNING</id>
-        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
-        <menu_entry name="Binning-None" value="1"/>
-        <menu_entry name="Binning 2x" value="2"/>
-        <menu_entry name="Binning 4x" value="4"/>
-      </v4l2>
-    </mapping>
 
     <mapping>
       <name>Exposure Time (us)</name>
@@ -996,7 +1416,7 @@
       <name>Trigger Delay</name>
       <uvc>
         <control_ref idref="trigger_delay"/>
-        <size>8</size>
+        <size>32</size>
         <offset>0</offset>
         <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
       </uvc>
@@ -1328,5 +1748,355 @@
       </v4l2>
     </mapping>
 
+    <mapping>
+      <name>Flip Horizontal</name>
+      <uvc>
+        <control_ref idref="flip_horizontal"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_REVERSE_X</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Flip Vertical</name>
+      <uvc>
+        <control_ref idref="flip_vertical"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_REVERSE_Y</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Highlight Reduction</name>
+      <uvc>
+        <control_ref idref="highlight_reduction"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_HIGHLIGHT_REDUCTION</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Trigger Polarity</name>
+      <uvc>
+        <control_ref idref="trigger_polarity"/>
+        <size>8</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_POLARITY</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="RisingEdge" value="0"/>
+        <menu_entry name="FallingEdge" value="1"/>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Operation</name>
+      <uvc>
+        <control_ref idref="trigger_operation"/>
+        <size>8</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_OPERATION</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="Default" value="0"/>
+        <menu_entry name="GlobalResetRelease" value="1"/>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Exposure Mode</name>
+      <uvc>
+        <control_ref idref="trigger_exposure_mode"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_EXPOSURE_MODE</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="FrameStart" value="0"/>
+        <menu_entry name="ExposureActive" value="1"/>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Burst Count</name>
+      <uvc>
+        <control_ref idref="trigger_burst_count"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_BURST_COUNT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Debounce Time (us)</name>
+      <uvc>
+        <control_ref idref="trigger_debounce_time_us"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_DEBOUNCE_TIME_US</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Mask Time (us)</name>
+      <uvc>
+        <control_ref idref="trigger_mask_time_us"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_MASK_TIME_US</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Trigger Noise Supression Time</name>
+      <uvc>
+        <control_ref idref="trigger_noise_supression_time_us"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Auto Functions ROI Preset</name>
+      <uvc>
+        <control_ref idref="auto_roi_control"/>
+        <size>8</size>
+        <offset>8</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_PRESET</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="Full Sensor" value="0"/>
+        <menu_entry name="Center 50%" value="2"/>
+        <menu_entry name="Center 25%" value="3"/>
+        <menu_entry name="Bottom Half" value="4"/>
+        <menu_entry name="Top Half" value="5"/>
+        <menu_entry name="Custom Rectangle" value="1"/>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Auto Functions ROI Control</name>
+      <uvc>
+        <control_ref idref="auto_roi_control"/>
+        <size>8</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_CONTROL</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Auto Functions ROI Left</name>
+      <uvc>
+        <control_ref idref="auto_roi_left"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_LEFT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Auto Functions ROI Top</name>
+      <uvc>
+        <control_ref idref="auto_roi_top"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_TOP</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Auto Functions ROI Width</name>
+      <uvc>
+        <control_ref idref="auto_roi_width"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_WIDTH</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Auto Functions ROI Height</name>
+      <uvc>
+        <control_ref idref="auto_roi_height"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_AUTO_ROI_HEIGHT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Whitebalance Mode</name>
+      <uvc>
+        <control_ref idref="whitebalance_mode"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_WHITE_BALANCE_MODE</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="Gray World" value="0"/>
+        <menu_entry name="Temperature" value="1"/>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>White Balance Temperature</name>
+      <uvc>
+        <control_ref idref="whitebalance_temperature_preset"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_WHITE_BALANCE_TEMPERATURE</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Whitebalance Temperature Preset</name>
+      <uvc>
+        <control_ref idref="whitebalance_temperature_preset"/>
+        <size>16</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_WHITE_BALANCE_TEMPERATURE_PRESET</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+
+        <menu_entry name="Sodium-Vapur Lamp" value="2500"/>
+        <menu_entry name="Warm Light" value="2700"/>
+        <menu_entry name="Halogen Light" value="3000"/>
+        <menu_entry name="Neutral White" value="3500"/>
+        <menu_entry name="Cool White Fluorescent Light" value="4000"/>
+        <menu_entry name="Cool White/Daylight (CFL)" value="5000"/>
+        <menu_entry name="Daylight" value="6000"/>
+        <menu_entry name="Cool White LED" value="7500"/>
+        <menu_entry name="Blue Sky" value="10000"/>
+
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>White Balance Green Component</name>
+      <uvc>
+        <control_ref idref="whitebalance_green_component"/>
+        <size>8</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_WHITE_BALANCE_GREEN</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>White Balance Auto Preset</name>
+      <uvc>
+        <control_ref idref="whitebalance_auto_preset"/>
+        <size>8</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_WHITE_BALANCE_AUTO_PRESET</id>
+        <v4l2_type>V4L2_CTRL_TYPE_MENU</v4l2_type>
+        <menu_entry name="Any" value="0"/>
+        <menu_entry name="Warm White" value="1"/>
+        <menu_entry name="Cool White" value="2"/>
+        <menu_entry name="Daylight" value="3"/>
+        <menu_entry name="Deep Shade" value="4"/>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Exposure Auto Lower Limit</name>
+      <uvc>
+        <control_ref idref="exposure_auto_lower_limit_us"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_EXPOSURE_AUTO_LOWER_LIMIT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+
+    <mapping>
+      <name>Exposure Auto Upper Limit</name>
+      <uvc>
+        <control_ref idref="exposure_auto_upper_limit_us"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Exposure Auto Upper Limit Auto</name>
+      <uvc>
+        <control_ref idref="exposure_auto_upper_limit_auto"/>
+        <size>1</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT_AUTO</id>
+        <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
   </mappings>
 </config>

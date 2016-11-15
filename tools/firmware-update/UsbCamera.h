@@ -33,11 +33,12 @@ struct device_info
     char manufacturer[256];
     char product[256];
     char serial[256];
-    uint32_t idVendor;
-    uint32_t idProduct;
+    uint16_t idVendor;
+    uint16_t idProduct;
 };
 
-const camera_type find_camera_type (const unsigned int& idVendor, const unsigned int& idProduct);
+const camera_type find_camera_type (const unsigned int& idVendor,
+                                    const unsigned int& idProduct);
 
 
 class UsbCamera
@@ -51,7 +52,9 @@ protected:
 
 public:
 
-    UsbCamera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface = 0);
+    UsbCamera (std::shared_ptr<UsbSession> session,
+               device_info dev,
+               unsigned int _interface = 0);
 
     virtual ~UsbCamera ();
 
@@ -90,6 +93,8 @@ public:
 
     virtual int set_mode (UVC_COMPLIANCE mode) = 0;
 
+    virtual unsigned int get_eeprom_size () = 0;
+
 private:
 
     void claim_interface ();
@@ -98,6 +103,6 @@ private:
 
 }; /* class UsbCamera */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USBCAMERA_H_ */

@@ -52,7 +52,7 @@ void printHelp ()
               << "    gateway=X.X.X.X          - specifiy persistent gateway that camera shall use\n"
               << "    dhcp=on/off              - toggle dhcp state\n"
               << "    static=on/off            - toggle static ip state\n"
-              << "    name=\"xyz\"               - set name for camera; maximum 15 characters\n"
+              << "    name=\"xyz\"             - set name for camera; maximum 15 characters\n"
               << "    firmware=firmware.zip    - file containing new firmware\n"
               << std::endl;
 
@@ -61,7 +61,7 @@ void printHelp ()
               << "    --name       -n          - user defined name of camera\n"
               << "    --mac        -m          - MAC of camera\n"
               << std::endl;
-    
+
     std::cout << "Examples:\n\n"
 
               << "    tis_network set gateway=192.168.0.1 -s 46210199\n"
@@ -133,7 +133,6 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
             else
             {
-                // TODO allow it to write camera before other args so that -c does not break it
                 std::cout << "Unknown parameter \"" << arg << "\"\n" << std::endl;
                 return;
             }

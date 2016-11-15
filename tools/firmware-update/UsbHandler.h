@@ -38,7 +38,7 @@ class UsbHandler
 {
 private:
     std::shared_ptr<UsbSession> session;
-    
+
 public:
     UsbHandler ();
     ~UsbHandler ();
@@ -57,6 +57,6 @@ public:
 
 }; /* class UsbHandler */
 
-}; /* namespace tis */
+} /* namespace tis */
 
 #endif /* _USBHANDLER_H_ */

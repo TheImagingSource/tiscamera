@@ -27,7 +27,8 @@ std::vector<unsigned char> load_file (const std::string& filename);
 
 bool is_package_file (const std::string& fileName);
 
-std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName, const std::string& fileName);
+std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName,
+                                                      const std::string& fileName);
 
 bool is_valid_firmware_file (const std::string& firmware);
 

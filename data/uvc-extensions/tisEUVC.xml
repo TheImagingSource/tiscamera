@@ -15,7 +15,7 @@
 			- Initial release to the public
 		</history>
 	</meta>
-  
+
   <constants>
     <constant type="guid">
       <id>UVC_GUID_TISEUVC_XU</id>
@@ -64,43 +64,43 @@
 
     <constant type="integer">
       <id>V4L2_CID_EUVC_EXT_IO</id>
-      <value>0x00980920</value>
+      <value>0x0199e920</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_EUVC_GAIN_R</id>
-      <value>0x00980921</value>
+      <value>0x0199e921</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_EUVC_GAIN_G</id>
-      <value>0x00980922</value>
+      <value>0x0199e922</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_EUVC_GAIN_B</id>
-      <value>0x00980923</value>
+      <value>0x0199e923</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_TRIGGER</id>
-      <value>0x00980924</value>
+      <value>0x0199e208</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_BINNING</id>
-      <value>0x00980925</value>
+      <value>0x0199e925</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_SOFTWARE_TRIGGER</id>
-      <value>0x00980926</value>
+      <value>0x0199e209</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_SCAN_X</id>
-      <value>0x00980927</value>
+      <value>0x0199e927</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_SCAN_Y</id>
-      <value>0x00980928</value>
+      <value>0x0199e928</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_SKIP</id>
-      <value>0x00980929</value>
+      <value>0x0199e929</value>
     </constant>
     <constant type="integer">
       <id>V4L2_CID_GLOBAL_RESET_SHUTTER</id>
@@ -235,7 +235,7 @@
       </controls>
     </device>
   </devices>
-  
+
   <mappings>
     <mapping>
       <name>ExtIO</name>
