@@ -37,6 +37,7 @@ GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 /* Constants */
 static const gdouble K_CONTROL  = 0.5 / 255;
 static const gdouble K_DEADBAND = 5.0;
+static const gdouble K_GAIN     = 3.0;
 static const gdouble K_ADJUST   = 4;
 static const gdouble K_SMALL    = 1e-9;
 
