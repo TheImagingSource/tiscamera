@@ -96,7 +96,7 @@ sudo make install
 
 ### Optional for GigE-Vision devices: Start the gige-daemon
 
-GigE-Vision cameras have a several seconds long delay before they could be reliably detected on the network. To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system: 
+GigE-Vision cameras have a several seconds long delay before they could be reliably detected on the network. To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system:
 
 ```
 sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
@@ -137,6 +137,12 @@ To ensure that everything is reachable the following environment variables shoul
 
 export GI\_TYPELIB\_PATH="<path\_to\_tiscamera>/build/src/gobject/:${GI\_TYPELIB\_PATH}"
 export GST\_PLUGIN\_SYSTEM\_PATH\_1\_0="<path\_to\_tiscamera>/build/src/gstreamer-1.0/:${GST\_PLUGIN\_SYSTEM\_PATH\_1\_0}"
+
+## Where to go from here
+
+After installation you could try one of our examples or directly start with a gstreamer pipeline like:
+
+`gst-launch-1.0 tcambin ! videoconvert ! autovideosink`
 
 ## Questions, etc.
 
