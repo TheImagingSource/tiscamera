@@ -27,7 +27,10 @@ ImageSource::ImageSource ()
 
 ImageSource::~ImageSource ()
 {
-    device->release_buffers();
+    if (device != nullptr)
+    {
+        device->release_buffers();
+    }
 }
 
 
