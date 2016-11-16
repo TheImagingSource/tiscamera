@@ -34,17 +34,6 @@ extern "C"
 
 typedef unsigned char byte;
 
-
-typedef struct
-{
-    byte* image;
-    guint width;
-    guint height;
-    format color_format;
-    tBY8Pattern pattern;
-} image_buffer;
-
-
 typedef struct auto_sample_points
 {
     struct pixel
