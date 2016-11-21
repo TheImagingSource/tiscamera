@@ -259,7 +259,7 @@ struct tcam_property_group
 struct tcam_device_property
 {
     TCAM_PROPERTY_ID id;               /**< unique identifier */
-    char name [32];                    /**< string identifier */
+    char name [64];                    /**< string identifier */
 
     struct tcam_property_group group;  /**< grouping; if you simply want to
                                           iterate properties you can ignore this */
