@@ -452,7 +452,40 @@ gboolean gst_tcam_is_fourcc_rgb (const guint fourcc)
 }
 
 
-static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_caps,
+static gboolean camera_has_bayer (GstTcamBin* self)
+{
+    GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+
+    for (unsigned int i = 0; i < gst_caps_get_size(src_caps); i++)
+    {
+        GstCaps* ipcaps = gst_caps_copy_nth(src_caps, i);
+
+        GstStructure* structure = gst_caps_get_structure(ipcaps, 0);
+
+        unsigned int fourcc = 0;
+        const char* string = gst_structure_get_string(structure, "format");
+
+        if (string == nullptr)
+        {
+            continue;
+        }
+
+        fourcc = GST_STR_FOURCC(string);
+
+        if (gst_tcam_is_fourcc_bayer(fourcc))
+        {
+            gst_caps_unref(ipcaps);
+            return TRUE;
+        }
+        gst_caps_unref(ipcaps);
+    }
+
+    return FALSE;
+}
+
+
+static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
+                                                       const GstCaps* available_caps,
                                                        const GstCaps* wanted)
 {
     GST_DEBUG("Generating source caps and list of required modules");
@@ -489,9 +522,19 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
         const GValue* fps = gst_structure_get_value (structure, "framerate");
 
         GstCaps* caps;
+
+        std::string base_string = "video/x-raw";
+
+        if (camera_has_bayer(self))
+        {
+            base_string = "video/x-bayer";
+
+            modules.bayer = TRUE;
+        }
+
         if (gst_value_get_fraction_numerator (fps) == G_MAXINT)
         {
-            caps = gst_caps_new_simple ("video/x-bayer",
+            caps = gst_caps_new_simple (base_string.c_str(),
                                         "framerate", GST_TYPE_FRACTION,
                                         10,
                                         1,
@@ -501,7 +544,7 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
         }
         else
         {
-            caps = gst_caps_new_simple ("video/x-bayer",
+            caps = gst_caps_new_simple (base_string.c_str(),
                                         "framerate", GST_TYPE_FRACTION,
                                         gst_value_get_fraction_numerator (fps),
                                         gst_value_get_fraction_denominator (fps),
@@ -513,15 +556,12 @@ static required_modules gst_tcambin_generate_src_caps (const GstCaps* available_
 
         intersection = gst_caps_intersect(caps, available_caps);
 
-        modules.bayer = TRUE;
-
         structure = gst_caps_get_structure(caps, 0);
         if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
         {
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
-        conversion_needed = true;
     }
     else
     {
@@ -612,6 +652,12 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     if (self->pipeline_caps == nullptr)
     {
         GST_ERROR("Could not create internal pipeline caps. Aborting");
+        return FALSE;
+    }
+
+    if (self->modules.caps = nullptr)
+    {
+        GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
         return FALSE;
     }
 
@@ -747,7 +793,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
                 GST_ERROR("caps of src: %s", gst_caps_to_string(src_caps));
 
-                self->modules = gst_tcambin_generate_src_caps(src_caps, self->target_caps);
+                self->modules = gst_tcambin_generate_src_caps(self, src_caps, self->target_caps);
             }
 
             if (! gst_tcambin_create_elements(self))
