@@ -538,7 +538,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
                                         "framerate", GST_TYPE_FRACTION,
                                         10,
                                         1,
-                                        "width", G_TYPE_INT, 460,
+                                        "width", G_TYPE_INT, 640,
                                         "height", G_TYPE_INT, 480,
                                         NULL);
         }
