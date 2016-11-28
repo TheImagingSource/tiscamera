@@ -20,79 +20,128 @@
 
 #include <iostream>
 #include <iomanip>
+#include <memory>
+
+#include "tcam.h"
+
+using namespace tcam;
+
+static const size_t name_width = 40;
+
+void print_integer (const Property* p)
+{
+    PropertyInteger* i = (PropertyInteger*) p;
+
+    std::cout << std::setw(name_width) <<  i->get_name()
+              << "(int)"<< std::right
+              << " min=" << i->get_min()
+              << " max=" << i->get_max()
+              << " step=" << i->get_step()
+              << " default=" << i->get_default()
+              << " value=" << i->get_value()
+              << std::endl;
+}
+
+
+void print_boolean (const Property* p)
+{
+    PropertyBoolean* s = (PropertyBoolean*) p;
+
+    std::cout << std::setw(name_width) << s->get_name()
+              << "(bool)"
+              << " default=";
+    if (s->get_default())
+    {
+        std::cout << "true";
+    }
+    else
+    {
+        std::cout << "false";
+    }
+    std::cout << " value=";
+    if (s->get_value())
+    {
+        std::cout << "true";
+    }
+    else
+    {
+        std::cout << "false";
+    }
+    std::cout << std::endl;
+}
+
+
+void print_button (const Property* p)
+{
+    std::cout << std::setw(name_width) << p->get_name()
+              << "(button)" << std::endl;
+}
+
+
+void print_enumeration (const Property* p)
+{
+    PropertyEnumeration* e = (PropertyEnumeration*) p;
+
+    std::cout << std::setw(name_width) << e->get_name()
+              << "(enum) "
+
+              << " default="<< std::setw(6) << e->get_default()
+              << "\n\t\t\t\t\t\tvalue=" << e->get_value() << std::endl;
+
+    for (const auto& val : e->get_values())
+    {
+        std::cout << "\t\t\t\t\t\t\t"<< val << std::endl;
+    }
+
+}
+
+
+void print_single_property (const Property* p)
+{
+    switch (p->get_type())
+    {
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        {
+            print_integer(p);
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+        case TCAM_PROPERTY_TYPE_STRING:
+        {
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+        {
+            print_enumeration(p);
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            print_boolean(p);
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_BUTTON:
+        {
+            print_button(p);
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
+        default:
+        {
+            std::cerr << "Unknown property type " << p->get_name() << std::endl;
+        }
+    }
+}
+
 
 void print_properties (const std::vector<Property*>& properties)
 {
+
     std::cout << "Found " << properties.size() << " propert(y/ies)" << std::endl;
     for (const auto& p : properties)
     {
         std::cout << std::left;
-        switch (p->get_type())
-        {
-            case TCAM_PROPERTY_TYPE_INTEGER:
-            {
-                PropertyInteger* i = (PropertyInteger*) p;
-                std::cout << std::setw(20) << i->get_name()
-                          << std::setw(10) << " (int)"<< std::right
-                          << "min=" << std::setw(5)<< i->get_min()
-                          << " max=" << std::setw(8) << i->get_max()
-                          << " step="<< std::setw(2)  << i->get_step()
-                          << " default=" << std::setw(5) << i->get_default()
-                          << " value=" << i->get_value()
-                          << std::endl;
-                break;
-            }
-            case TCAM_PROPERTY_TYPE_DOUBLE:
-            {
-                break;
-            }
-            case TCAM_PROPERTY_TYPE_STRING:
-            case TCAM_PROPERTY_TYPE_ENUMERATION:
-            {
-
-            }
-            case TCAM_PROPERTY_TYPE_BOOLEAN:
-            {
-                PropertyBoolean* s = (PropertyBoolean*) p;
-
-                std::cout << std::setw(20) << s->get_name()
-                          << std::setw(10) << "(bool)"
-                          << std::setw(31) << " "
-                          << "default="<< std::setw(6);
-                if (s->get_default())
-                {
-                    std::cout << "true";
-                }
-                else
-                {
-                    std::cout << "false";
-                }
-                std::cout << "value=";
-                if (s->get_value())
-                {
-                    std::cout << "true";
-                }
-                else
-                {
-                    std::cout << "false";
-                }
-                std::cout << std::endl;
-                break;
-            }
-            case TCAM_PROPERTY_TYPE_BUTTON:
-            {
-                std::cout << std::setw(20) << p->get_name()
-                          << std::setw(10) << "(button)"
-                          << std::endl;
-                break;
-            }
-            case TCAM_PROPERTY_TYPE_UNKNOWN:
-            default:
-            {
-                std::cerr << "Unknown property type " << p->get_name() << std::endl;
-            }
-        }
-
+        print_single_property(p);
     }
 
 }
@@ -119,6 +168,7 @@ static std::vector<std::string> ctrl_split_string (const std::string& to_split,
 
     return vec;
 }
+
 
 bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_prop)
 {
