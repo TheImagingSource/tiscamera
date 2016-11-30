@@ -101,3 +101,6 @@ install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir
 install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib
   DESTINATION ${TCAM_INSTALL_TYPELIB}
   COMPONENT tcam-introspection)
+install(FILES tcamprop.h
+  DESTINATION ${TCAM_INSTALL_INCLUDE}
+  COMPONENT tcam-introspection)
