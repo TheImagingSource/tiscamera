@@ -59,6 +59,7 @@ set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "binary installa
 set(TCAM_INSTALL_UDEV "/usr/lib/udev/rules.d" CACHE STRING "udev rules installation path")
 set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcdynctrl rules installation path")
 set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE STRING "systemd unit installation path" FORCE)
+set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE STRING "pkgconfig installation path" FORCE)
 
 add_subdirectory(src)
 
