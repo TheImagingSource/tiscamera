@@ -620,7 +620,7 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     if (self->device_serial != nullptr)
     {
         GST_INFO("Setting source serial to %s", self->device_serial);
-        g_object_set(G_OBJECT(self->src), "serial", self->device_serial);
+        g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
     }
 
     return TRUE;
