@@ -952,16 +952,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
-            tcamautoexposure->exposure.max = g_value_get_int(value);
+            tcamautoexposure->exposure.max = g_value_get_uint(value);
             if (tcamautoexposure->exposure.max == 0.0)
             {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             }
             break;
         case PROP_GAIN_MAX:
-            GST_DEBUG("Setting gain max to : %ud", g_value_get_int(value));
+            GST_DEBUG("Setting gain max to : %ud", g_value_get_uint(value));
 
-            tcamautoexposure->gain.max = g_value_get_int(value);
+            tcamautoexposure->gain.max = g_value_get_uint(value);
             if (tcamautoexposure->gain.max == 0.0)
             {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;

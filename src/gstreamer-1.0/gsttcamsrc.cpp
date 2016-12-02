@@ -908,9 +908,18 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
 
                 structure = gst_caps_get_structure (caps, 0);
 
-                gst_structure_fixate_field_nearest_int (structure, "width", G_MAXINT);
-                gst_structure_fixate_field_nearest_int (structure, "height", G_MAXINT);
-                gst_structure_fixate_field_nearest_fraction (structure, "framerate", frame_rate, 1);
+                if (gst_structure_has_field(structure, "width"))
+                {
+                    gst_structure_fixate_field_nearest_int (structure, "width", G_MAXUINT);
+                }
+                if (gst_structure_has_field(structure, "height"))
+                {
+                    gst_structure_fixate_field_nearest_int (structure, "height", G_MAXUINT);
+                }
+                if (gst_structure_has_field(structure, "framerate"))
+                {
+                    gst_structure_fixate_field_nearest_fraction (structure, "framerate", frame_rate, 1);
+                }
                 gst_caps_unref (icaps);
             }
         }
@@ -1038,9 +1047,16 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 
     uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name (structure), format_string);
 
-    double framerate = (double) gst_value_get_fraction_numerator (frame_rate) /
-        (double) gst_value_get_fraction_denominator (frame_rate);
-
+    double framerate;
+    if (frame_rate != nullptr)
+    {
+        framerate= (double) gst_value_get_fraction_numerator (frame_rate) /
+            (double) gst_value_get_fraction_denominator (frame_rate);
+    }
+    else
+    {
+        framerate = 1.0;
+    }
     struct tcam_video_format format = {};
 
     format.fourcc = fourcc;
@@ -1387,9 +1403,18 @@ static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
 
     structure = gst_caps_get_structure (caps, 0);
 
-    gst_structure_fixate_field_nearest_int (structure, "width", width);
-    gst_structure_fixate_field_nearest_int (structure, "height", height);
-    gst_structure_fixate_field_nearest_fraction (structure, "framerate", (double) (0.5 + frame_rate), 1);
+    if (gst_structure_has_field(structure, "width"))
+    {
+        gst_structure_fixate_field_nearest_int (structure, "width", width);
+    }
+    if (gst_structure_has_field(structure, "height"))
+    {
+        gst_structure_fixate_field_nearest_int (structure, "height", height);
+    }
+    if (gst_structure_has_field(structure, "framerate"))
+    {
+        gst_structure_fixate_field_nearest_fraction (structure, "framerate", (double) (0.5 + frame_rate), 1);
+    }
 
     GST_DEBUG_OBJECT (self, "Fixated caps to %s", gst_caps_to_string(caps));
 
