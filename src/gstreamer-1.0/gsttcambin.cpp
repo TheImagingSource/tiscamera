@@ -34,6 +34,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 //
 // introspection interface
 //
+static gboolean gst_tcambin_create_source (GstTcamBin* self);
 
 
 
@@ -107,14 +108,15 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
 
     GstTcamBin* self = GST_TCAMBIN (iface);
 
-    if (self->src != NULL)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
-        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name);
+        gst_tcambin_create_source(GST_TCAMBIN(self));
+    }
+    ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name);
 
-        if (ret != nullptr)
-        {
-            return ret;
-        }
+    if (ret != nullptr)
+    {
+        return ret;
     }
 
     if (self->whitebalance != NULL)
@@ -164,21 +166,23 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
     GSList* ret = NULL;
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (self->src != nullptr)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
-        GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
+        gst_tcambin_create_source(GST_TCAMBIN(self));
+    }
 
-        // special case
-        // when our src return no properties we have an invalid device and abort everything
-        if (src_prop_names == nullptr)
-        {
-            return nullptr;
-        }
+    GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
 
-        for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
-        {
-            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
-        }
+    // special case
+    // when our src return no properties we have an invalid device and abort everything
+    if (src_prop_names == nullptr)
+    {
+        return nullptr;
+    }
+
+    for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
+    {
+        ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
     }
 
     if (self->whitebalance != nullptr)
@@ -227,20 +231,23 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
                                                 GValue* category,
                                                 GValue* group)
 {
-    GstTcamBin *self = GST_TCAMBIN(iface);
+    GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (self->src != nullptr)
+    if (self->src == nullptr)
+
     {
-        if (tcam_prop_get_tcam_property(TCAM_PROP(self->src),
-                                        name, value,
-                                        min, max,
-                                        def, step,
-                                        type,
-                                        flags,
-                                        category, group))
-        {
-            return TRUE;
-        }
+        gst_tcambin_create_source(self);
+    }
+
+    if (tcam_prop_get_tcam_property(TCAM_PROP(self->src),
+                                    name, value,
+                                    min, max,
+                                    def, step,
+                                    type,
+                                    flags,
+                                    category, group))
+    {
+        return TRUE;
     }
 
     if (self->whitebalance != nullptr)
@@ -301,11 +308,12 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
 static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
                                                    const gchar* name)
 {
-    if (GST_TCAMBIN(self)->src != nullptr)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
-        return tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
+        gst_tcambin_create_source(GST_TCAMBIN(self));
     }
-    return nullptr;
+    return tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
+
 }
 
 static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
@@ -314,14 +322,15 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
 {
     gboolean ret = FALSE;
     GstTcamBin* self = GST_TCAMBIN(iface);
-    struct device_state* ds = (struct device_state*)self->device;
 
-    if (self->src != nullptr)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
-        if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
-        {
-            return TRUE;
-        }
+        gst_tcambin_create_source(GST_TCAMBIN(self));
+    }
+
+    if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
+    {
+        return TRUE;
     }
 
     if (self->whitebalance != nullptr)
@@ -354,14 +363,11 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
 
 static GSList* gst_tcam_bin_get_device_serials (TcamProp* self)
 {
-    if (GST_TCAMBIN(self)->src != nullptr)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
-        return tcam_prop_get_device_serials(TCAM_PROP(GST_TCAMBIN(self)->src));
+        gst_tcambin_create_source(GST_TCAMBIN(self));
     }
-    else
-    {
-        return nullptr;
-    }
+    return tcam_prop_get_device_serials(TCAM_PROP(GST_TCAMBIN(self)->src));
 }
 
 
@@ -371,18 +377,15 @@ static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
                                               char** identifier,
                                               char** connection_type)
 {
-    if (GST_TCAMBIN(self)->src != nullptr)
+    if (GST_TCAMBIN(self)->src == nullptr)
     {
+        gst_tcambin_create_source(GST_TCAMBIN(self));
+    }
         return tcam_prop_get_device_info(TCAM_PROP(GST_TCAMBIN(self)->src),
                                          serial,
                                          name,
                                          identifier,
                                          connection_type);
-    }
-    else
-    {
-        return FALSE;
-    }
 }
 
 
@@ -611,6 +614,13 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
 static gboolean gst_tcambin_create_source (GstTcamBin* self)
 {
+
+    if (self->src != nullptr)
+    {
+        gst_bin_remove(GST_BIN(self), self->src);
+        g_object_unref(self->src);
+        self->src = nullptr;
+    }
 
     GST_DEBUG("Creating source...");
 
