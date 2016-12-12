@@ -529,6 +529,11 @@ GstElement* get_camera_src (GstElement* object)
 
     GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(object)));
 
+    if (e == nullptr)
+    {
+        return nullptr;
+    }
+
     self->camera_src = NULL;
 
     GList* l = GST_BIN(e)->children;
