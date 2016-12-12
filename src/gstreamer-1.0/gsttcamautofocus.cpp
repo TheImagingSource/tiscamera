@@ -1003,6 +1003,10 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
 
         return GST_FLOW_OK;
     }
+    else if (self->focus_active)
+    {
+        focus_run(self);
+    }
 
     autofocus_end(self->focus);
     self->focus_active = FALSE;
