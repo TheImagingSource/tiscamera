@@ -225,8 +225,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(prop);
 
-    flags = nullptr;
-
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
         if (value)
@@ -384,17 +382,17 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_boolean(min, 0);
+            g_value_set_int(min, 0);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_boolean(max, G_MAXINT);
+            g_value_set_int(max, G_MAXINT);
         }
         if (def)
         {
-            g_value_init(def, G_TYPE_BOOLEAN);
-            g_value_set_boolean(def, TRUE);
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
         }
         if (step)
         {
@@ -433,17 +431,17 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_boolean(min, 0);
+            g_value_set_int(min, 0);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_boolean(max, G_MAXINT);
+            g_value_set_int(max, G_MAXINT);
         }
         if (def)
         {
-            g_value_init(def, G_TYPE_BOOLEAN);
-            g_value_set_boolean(def, TRUE);
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, 0);
         }
         if (step)
         {
@@ -538,12 +536,14 @@ GstElement* get_camera_src (GstElement* object)
 
     GList* l = GST_BIN(e)->children;
 
+    const char* source_name = "GstTcamSrc";
     while (1==1)
     {
-        const char* name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(l->data)));
-        if (g_strcmp0(name, "GstTcam") == 0)
+        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
+        GST_DEBUG("Comparing '%s' to '%s'", name, source_name);
+        if (g_strcmp0(name, source_name) == 0)
         {
-            self->camera_src = l->data;
+            self->camera_src = (GstElement*)l->data;
 
             GST_DEBUG("Identified camera source as tcamsrc.");
             break;
@@ -569,7 +569,7 @@ GstElement* get_camera_src (GstElement* object)
 static void focus_run_tcam (GstTcamAutoFocus* self)
 {
     if (self->camera_src == NULL)
-        get_camera_src (GST_ELEMENT(self));
+        self->camera_src = get_camera_src (GST_ELEMENT(self));
 
     if (self->camera_src == NULL)
     {
