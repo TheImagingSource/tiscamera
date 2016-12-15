@@ -337,27 +337,27 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             if (value)
             {
                 g_value_init (value, G_TYPE_DOUBLE);
-                g_value_set_int (value, prop.value.d.value);
+                g_value_set_double (value, prop.value.d.value);
             }
             if (min)
             {
                 g_value_init (min, G_TYPE_DOUBLE);
-                g_value_set_int (min, prop.value.d.min);
+                g_value_set_double (min, prop.value.d.min);
             }
             if (max)
             {
                 g_value_init (max, G_TYPE_DOUBLE);
-                g_value_set_int (max, prop.value.d.max);
+                g_value_set_double (max, prop.value.d.max);
             }
             if (def)
             {
                 g_value_init (def, G_TYPE_DOUBLE);
-                g_value_set_int (def, prop.value.d.default_value);
+                g_value_set_double (def, prop.value.d.default_value);
             }
             if (step)
             {
                 g_value_init (step, G_TYPE_DOUBLE);
-                g_value_set_int (step, prop.value.d.step);
+                g_value_set_double (step, prop.value.d.step);
             }
             if (type)
             {
