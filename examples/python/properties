@@ -273,6 +273,8 @@ class CameraVideo(Gtk.Window):
                     scale.add_mark(val, Gtk.PositionType.TOP, None)
                     scale.connect("value-changed", self.logarithmic_slider, name)
                 else:
+                    if step == 0.0:
+                        step = 1.0
                     scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
                                                                      minval, maxval, step)
                     scale.set_value(value)
@@ -287,6 +289,9 @@ class CameraVideo(Gtk.Window):
                 label = Gtk.Label(name, xalign=0)
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
                 row.add(hbox)
+                if step == 0.0:
+                    step = 1.0
+
                 scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL,
                                                  minval, maxval, step)
                 scale.set_value(value)
