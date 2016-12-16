@@ -1199,6 +1199,12 @@ static void update_device_resources (struct device_resources* res)
 
     g_object_get(G_OBJECT(res->source_element), "camera", &dev, NULL);
 
+    if (dev == nullptr)
+    {
+        GST_ERROR("Could not retrieve device. Aborting");
+        return;
+    }
+
     tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
     if (prop == nullptr)
