@@ -554,7 +554,14 @@ static gboolean gst_tcamwhitebalance_set_tcam_property (TcamProp* self,
                                                         const GValue* value)
 {
 
-    gst_tcamwhitebalance_set_property(G_OBJECT(self), tcamwhitebalance_string_to_property_id(name), value, NULL);
+    guint id = tcamwhitebalance_string_to_property_id(name);
+
+    if (id == PROP_0)
+    {
+        return FALSE;
+    }
+
+    gst_tcamwhitebalance_set_property(G_OBJECT(self), id, value, NULL);
 
     return TRUE;
 }
