@@ -577,6 +577,11 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
         return;
     }
 
+    if (autofocus_is_running(self->focus))
+    {
+        return;
+    }
+
     tcam::CaptureDevice* dev = nullptr;
     g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
 
@@ -892,7 +897,7 @@ static int clip (int min, int value, int max)
 
 static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 {
-    if (self->camera_src)
+    if (self->camera_src == nullptr)
     {
         get_camera_src(GST_ELEMENT(self));
     }
@@ -963,6 +968,30 @@ gboolean find_image_values (GstTcamAutoFocus* self)
 }
 
 
+static GstFlowReturn gst_tcamautofocus_analyze_buffer (GstTcamAutoFocus* self, GstBuffer* buf)
+{
+    // validity checks
+    GstMapInfo info;
+
+    gst_buffer_map(buf, &info, GST_MAP_READ);
+
+    guint* data = (guint*)info.data;
+    guint length = info.size;
+
+    if (data == NULL || length == 0)
+    {
+        GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
+        return GST_FLOW_OK;
+    }
+
+    GST_DEBUG("transform_tcam");
+    transform_tcam(self, buf);
+
+    gst_buffer_unmap(buf, &info);
+
+    return GST_FLOW_OK;
+}
+
 
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
@@ -982,30 +1011,14 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
         {
             get_camera_src(GST_ELEMENT(self));
         }
-        // validity checks
-        GstMapInfo info;
-
-        gst_buffer_map(buf, &info, GST_MAP_READ);
-
-        guint* data = (guint*)info.data;
-        guint length = info.size;
-
-        gst_buffer_unmap(buf, &info);
-
-
-        if (data == NULL || length == 0)
-        {
-            GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
-            return GST_FLOW_OK;
-        }
-
-        transform_tcam(self, buf);
-
-        return GST_FLOW_OK;
+        return gst_tcamautofocus_analyze_buffer(self, buf);
     }
-    else if (self->focus_active)
+    else if (self->focus_active) // entered if set to true with gst-launch
     {
+        self->focus_active = FALSE;
         focus_run(self);
+
+        return gst_tcamautofocus_analyze_buffer(self, buf);
     }
 
     autofocus_end(self->focus);
