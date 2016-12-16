@@ -624,7 +624,7 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
 
     GST_DEBUG("Creating source...");
 
-    self->src = gst_element_factory_make("tcamsrc", "source");
+    self->src = gst_element_factory_make("tcamsrc", "tcambin-source");
     gst_bin_add(GST_BIN(self), self->src);
 
     if (self->device_serial != nullptr)
@@ -657,7 +657,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         return FALSE;
     }
 
-    self->pipeline_caps = gst_element_factory_make("capsfilter", "src_caps");
+    self->pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
 
     if (self->pipeline_caps == nullptr)
     {
@@ -686,7 +686,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
     {
         GST_DEBUG("Adding autoexposure to pipeline");
-        self->exposure = gst_element_factory_make("tcamautoexposure", "exposure");
+        self->exposure = gst_element_factory_make("tcamautoexposure", "tcambin-exposure");
         gst_bin_add(GST_BIN(self), self->exposure);
 
         pipeline_description += " ! tcamautoexposure";
@@ -697,7 +697,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
         && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
     {
-        self->focus = gst_element_factory_make("tcamautofocus", "focus");
+        self->focus = gst_element_factory_make("tcamautofocus", "tcambin-focus");
         if (self->focus)
         {
             GST_DEBUG("Adding tcamautofocus to pipeline.");
@@ -715,7 +715,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         // use this to see if the device already has the feature
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
         {
-            self->whitebalance = gst_element_factory_make("tcamwhitebalance", "whitebalance");
+            self->whitebalance = gst_element_factory_make("tcamwhitebalance", "tcambin-whitebalance");
             if (self->whitebalance)
             {
                 GST_DEBUG("Adding whitebalance to pipeline");
@@ -732,7 +732,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             }
         }
 
-        self->debayer = gst_element_factory_make("bayer2rgb", "debayer");
+        self->debayer = gst_element_factory_make("bayer2rgb", "tcambin-debayer");
         if (self->debayer)
         {
             GST_DEBUG("Adding bayer2rgb to pipeline");
@@ -751,7 +751,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     }
     if (self->modules.convert)
     {
-        self->convert = gst_element_factory_make("videoconvert", "convert");
+        self->convert = gst_element_factory_make("videoconvert", "tcambin-convert");
         if (self->convert)
         {
             // TODO: convert gets added to often.
