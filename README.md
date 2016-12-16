@@ -82,6 +82,7 @@ sudo make install
 The following commands will build and install our software with default settings. A brief reference of compile time options could be found at the end of this document.
 
 ```
+git clone https://github.com/TheImagingSource/tiscamera.git
 mkdir build
 cd build
 
