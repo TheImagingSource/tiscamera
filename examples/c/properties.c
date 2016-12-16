@@ -117,7 +117,7 @@ static gboolean bus_call (GstBus* bus, GstMessage* msg, gpointer data)
 static void create_pipeline ()
 {
     GError* err = NULL;
-    pipeline = gst_parse_launch("tcamsrc name=src ! tee name=t t. ! queue ! valve name=valve ! videoconvert ! jpegenc ! multifilesink name=filesink post-messages=true location=/tmp/image-%06d.jpg t. ! queue ! videoconvert ! xvimagesink ", &err);
+    pipeline = gst_parse_launch("tcambin name=src ! tee name=t t. ! queue ! valve name=valve ! videoconvert ! jpegenc ! multifilesink name=filesink post-messages=true location=/tmp/image-%06d.jpg t. ! queue ! videoconvert ! xvimagesink ", &err);
 
     if (pipeline == NULL)
     {
