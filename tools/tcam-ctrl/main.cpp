@@ -35,6 +35,7 @@ void print_help (const std::string& prog_name)
     << "Options:\n"
     << "\t-l - list cameras\n"
     << "\t-p - list properties\n"
+    << "\t-s - set property\n"
     << "\t-f - list video formats\n"
     << "\t-c - list gstreamer-1.0 caps\n"
     << "\n"
@@ -44,7 +45,7 @@ void print_help (const std::string& prog_name)
     << "\t" << prog_name << " -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" <SERIAL>\n"
     << "\n"
     << "Set property\n"
-    << "\t" << prog_name << " -s -p \"Auto Exposure=false\" <SERIAL>\n"
+    << "\t" << prog_name << " -s \"Auto Exposure=false\" <SERIAL>\n"
     << "\n"
     << std::endl;
 }
