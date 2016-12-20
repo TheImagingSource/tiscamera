@@ -535,8 +535,8 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
     for (const auto& d : devices)
     {
         ret = g_slist_append (ret,
-                              g_strndup (d.get_serial().c_str(),
-                                         sizeof(d.get_serial().size())));
+                              g_strndup(d.get_serial().c_str(),
+                                        d.get_serial().size()));
     }
 
     return ret;
