@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <algorithm>
 
 #define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10
 
@@ -756,6 +757,46 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
                         gst_caps_append_structure (caps, structure);
 
                     }
+
+                    // finally also add the range to allow unusual settings like 1920x96@90fps
+                    GstStructure* structure = gst_structure_from_string (caps_string, NULL);
+
+                    GValue w = {};
+                    g_value_init(&w, GST_TYPE_INT_RANGE);
+                    gst_value_set_int_range(&w, min_width, max_width);
+
+                    GValue h = {};
+                    g_value_init(&h, GST_TYPE_INT_RANGE);
+                    gst_value_set_int_range(&h, min_height, max_height);
+
+                    std::vector<double> fps = format[i].get_frame_rates(res[j]);
+
+                    double fps_min = *std::min_element(fps.begin(), fps.end());
+                    double fps_max = *std::max_element(fps.begin(), fps.end());
+
+                    int fps_min_num;
+                    int fps_min_den;
+                    int fps_max_num;
+                    int fps_max_den;
+                    gst_util_double_to_fraction(fps_min,
+                                                &fps_min_num,
+                                                &fps_min_den);
+                    gst_util_double_to_fraction(fps_max,
+                                                &fps_max_num,
+                                                &fps_max_den);
+
+                    GValue f = {};
+                    g_value_init(&f, GST_TYPE_FRACTION_RANGE);
+
+                    gst_value_set_fraction_range_full(&f,
+                                                      fps_min_num, fps_min_den,
+                                                      fps_max_num, fps_max_den);
+
+                    gst_structure_set_value(structure, "width", &w);
+                    gst_structure_set_value(structure,"height", &h);
+                    gst_structure_set_value(structure,"framerate", &f);
+                    gst_caps_append_structure(caps, structure);
+
                 }
                 else // fixed resolution
                 {
