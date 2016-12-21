@@ -367,7 +367,7 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 
     std::cout << "Firmware Size: " << fw.size() << " EEPROM Size: " << eeprom_size << std::endl;
 
-    if ((fw.size() + 512) >= eeprom_size)
+    if ((fw.size() + 512) > eeprom_size)
     {
         std::cerr << "Firmware does not fit in EEPROM. Aborting!" << std::endl;
         return false;
