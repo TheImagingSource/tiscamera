@@ -68,9 +68,11 @@ sudo apt-get install libxml2-dev gtk-doc-tools intltool autoconf autoconf libnot
 
 The following steps will build and install *ARAVIS* on your system:
 
+Download the latest stable release here:
+http://ftp.gnome.org/pub/GNOME/sources/aravis/0.4/
+
+Extract the archive and enter the new directory.
 ```
-git clone https://github.com/AravisProject/aravis
-cd aravis
 ./autogen.sh
 ./configure --prefix=/usr
 make

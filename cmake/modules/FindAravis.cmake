@@ -20,20 +20,16 @@ find_path(aravis_INCLUDE_DIR
 	${aravis_PKGCONF_INCLUDE_DIRS}
 	/usr/local/include
 	/usr/local/include/aravis-0.4
-	/usr/local/include/aravis-0.6
 	/usr/include
 	/usr/include/aravis-0.4
-	/usr/include/aravis-0.6
 )
 
 # Finally the library itself
 find_library(aravis_LIBRARY
 	NAMES
 	libaravis-0.4
-	libaravis-0.6
 	aravis
 	aravis-0.4
-	aravis-0.6
 	libaravis
 	PATHS
 	${aravis_PKGCONF_LIBRARY_DIRS}
