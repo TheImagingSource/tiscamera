@@ -73,7 +73,6 @@ http://ftp.gnome.org/pub/GNOME/sources/aravis/0.4/
 
 Extract the archive and enter the new directory.
 ```
-./autogen.sh
 ./configure --prefix=/usr
 make
 sudo make install
