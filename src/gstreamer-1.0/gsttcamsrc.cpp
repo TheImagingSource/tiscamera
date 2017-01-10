@@ -1242,6 +1242,7 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
         struct device_state* ds = (struct device_state*)self->device;
 
         ds->dev->stop_stream();
+        ds->dev = nullptr;
         ds->sink = nullptr;
         delete self->device;
         self->device = NULL;
