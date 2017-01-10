@@ -1530,9 +1530,12 @@ static void gst_tcam_src_set_property (GObject* object,
 
                 gst_tcam_src_close_camera(self);
 
-                if (!gst_tcam_src_init_camera(self))
+                if (self->device_serial != nullptr)
                 {
-                    GST_ERROR("Error while initializing camera.");
+                    if (!gst_tcam_src_init_camera(self))
+                    {
+                        GST_ERROR("Error while initializing camera.");
+                    }
                 }
             }
             break;
