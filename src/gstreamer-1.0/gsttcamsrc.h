@@ -24,7 +24,7 @@
 
 #include <mutex>
 #include <condition_variable>
-
+#include <string>
 
 #ifdef __cplusplus
 extern "C"
@@ -48,7 +48,7 @@ struct _GstTcamSrc
 {
     GstPushSrc element;
 
-    char* device_serial;
+    std::string device_serial;
 
     void* device;
 

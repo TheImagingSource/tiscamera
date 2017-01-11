@@ -1191,9 +1191,9 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
 
-    if (self->device_serial != NULL)
+    if (!self->device_serial.empty())
     {
-        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial);
+        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial.c_str());
     }
     else
     {
@@ -1202,10 +1202,10 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     for (unsigned int i = 0; i < infos.size(); ++i)
     {
-        if (self->device_serial != NULL)
+        if (!self->device_serial.empty())
         {
-            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), self->device_serial);
-            if (strcmp(infos[i].get_serial().c_str(), self->device_serial) == 0)
+            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), self->device_serial.c_str());
+            if (strcmp(infos[i].get_serial().c_str(), self->device_serial.c_str()) == 0)
             {
                 GST_DEBUG_OBJECT (self, "Found device.");
 
@@ -1470,8 +1470,6 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     gst_base_src_set_live (GST_BASE_SRC (self), TRUE);
     gst_base_src_set_format (GST_BASE_SRC (self), GST_FORMAT_TIME);
 
-    self->device_serial = NULL;
-
     self->n_buffers = GST_TCAM_SRC_DEFAULT_N_BUFFERS;
     self->payload = 0;
 
@@ -1499,12 +1497,6 @@ static void gst_tcam_src_finalize (GObject* object)
         self->fixed_caps = NULL;
     }
 
-    if (self->device_serial != NULL)
-    {
-        g_free (self->device_serial);
-        self->device_serial = NULL;
-    }
-
     G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
 }
 
@@ -1524,13 +1516,20 @@ static void gst_tcam_src_set_property (GObject* object,
             gst_element_get_state(GST_ELEMENT(self), &state, NULL, 200);
             if (state == GST_STATE_NULL)
             {
-                g_free (self->device_serial);
-                self->device_serial = g_strdup (g_value_get_string (value));
-                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial);
+                if (g_value_get_string(value) == NULL)
+                {
+                    self->device_serial.clear();
+                }
+                else
+                {
+                    self->device_serial = g_value_get_string (value);
+                }
+
+                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial.c_str());
 
                 gst_tcam_src_close_camera(self);
 
-                if (self->device_serial != nullptr)
+                if (!self->device_serial.empty())
                 {
                     if (!gst_tcam_src_init_camera(self))
                     {
@@ -1565,7 +1564,7 @@ static void gst_tcam_src_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            g_value_set_string (value, self->device_serial);
+            g_value_set_string(value, self->device_serial.c_str());
             break;
         }
         case PROP_DEVICE:
