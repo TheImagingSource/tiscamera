@@ -147,38 +147,20 @@ std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::D
 }
 
 
-std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends ()
+std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoader::backend& b)
 {
+    std::vector<struct tcam_device_info> temp;
+
+    size_t t = b.get_device_list_size();
+
+    temp.resize(t);
+
+    auto copied_elements = b.get_device_list(temp.data(), temp.size());
+
     std::vector<DeviceInfo> ret;
-    for (auto& b : backends)
+    for (const auto& info : temp)
     {
-        if (b.get_device_list != nullptr)
-        {
-
-            // std::vector<struct tcam_device_info> v;
-
-            size_t v_size = b.get_device_list_size();
-
-            if (v_size == 0)
-            {
-                continue;
-            }
-
-
-            struct tcam_device_info v[v_size];
-
-            // v.reserve(v_size);
-
-            // auto vec =
-            auto copied_elements = b.get_device_list(v, v_size);
-
-            ret.reserve(copied_elements);
-            for (const auto& info : v)
-            {
-                ret.push_back(DeviceInfo(info));
-            }
-
-        }
+        ret.push_back(DeviceInfo(info));
     }
 
     return ret;
@@ -187,30 +169,29 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends ()
 
 std::vector<DeviceInfo> BackendLoader::get_device_list (enum TCAM_DEVICE_TYPE type)
 {
-    std::vector<DeviceInfo> ret;
-
     for (auto& b : backends)
     {
         if (b.type == type && b.get_device_list != nullptr)
         {
-            std::vector<struct tcam_device_info> v;
-
-            size_t v_size = 10;
-
-            v.reserve(v_size);
-
-
-            // auto vec =
-            auto copied_elements = b.get_device_list(v.data(), v.size());
-
-            ret.reserve(copied_elements);
-            for (const auto& info : v)
-            {
-                ret.push_back(DeviceInfo(info));
-            }
-
+            return get_device_list_from_backend(b);
         }
     }
 
+    return {};
+}
+
+
+std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends ()
+{
+    std::vector<DeviceInfo> ret;
+    for (auto& b : backends)
+    {
+        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN)
+        {
+            continue;
+        }
+        auto tmp = get_device_list_from_backend(b);
+        ret.insert(ret.begin(), tmp.begin(), tmp.end());
+    }
     return ret;
 }

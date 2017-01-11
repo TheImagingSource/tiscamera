@@ -58,6 +58,8 @@ private:
 
     void unload_backends ();
 
+    std::vector<DeviceInfo> get_device_list_from_backend (BackendLoader::backend& b);
+
 public:
 
     static BackendLoader& getInstance ();
