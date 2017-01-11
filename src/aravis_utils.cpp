@@ -486,6 +486,48 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         {
             prop.type == TCAM_PROPERTY_TYPE_BOOLEAN;
 
+            const GSList* children;
+            const GSList* iter;
+
+            children = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION (node));
+
+            std::map<std::string, int> var;
+
+            for (iter = children; iter != NULL; iter = iter->next)
+            {
+                if (arv_gc_feature_node_is_implemented((ArvGcFeatureNode*) iter->data, NULL))
+                {
+                    if (strcmp(arv_dom_node_get_node_name((ArvDomNode*) iter->data), "EnumEntry") == 0)
+                    {
+                        var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
+                    }
+                }
+            }
+
+            if (var.size() != 2)
+            {
+                tcam_log(TCAM_LOG_ERROR,
+                         "'%s' has more values that expected and can not be properly mapped.",
+                         prop.name);
+                return std::make_shared<PropertyBoolean>(impl, prop, type);
+            }
+
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+
+            if (strcmp(current_value, "On") == 0)
+            {
+                prop.value.b.value = true;
+            }
+            else
+            {
+                prop.value.b.value = false;
+            }
+
+            // prop.value.b.value = var.at(current_value);
+            prop.value.b.default_value = prop.value.b.value;
+
+            tcam_log(TCAM_LOG_DEBUG, "Returning BooleanProperty for %s", prop.name);
+
             return std::make_shared<PropertyBoolean>(impl, prop, type);
         }
 
