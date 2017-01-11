@@ -1036,8 +1036,6 @@ static void gst_tcam_src_callback (const struct tcam_image_buffer* buffer,
     self->ptr = buffer;
     self->new_buffer = TRUE;
 
-    std::unique_lock<std::mutex> lck(self->mtx);
-
     self->cv.notify_all();
 }
 
