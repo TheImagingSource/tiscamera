@@ -165,6 +165,7 @@ bool PropertyHandler::get_property (Property& p)
 
         auto ext_struct = prop.external_property->get_struct();
 
+        i->update();
         ext_struct.value = i->get_struct().value;
 
         prop.external_property->set_struct(ext_struct);

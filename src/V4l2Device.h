@@ -177,6 +177,8 @@ private:
 
     bool propertyChangeEvent (const Property&);
 
+    void updateV4L2Property (V4l2Device::property_description& desc);
+
     bool changeV4L2Control (const property_description&);
 
     // streaming related

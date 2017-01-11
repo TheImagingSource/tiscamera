@@ -113,6 +113,8 @@ bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
         return false;
     }
 
+    device->updateV4L2Property(*desc);
+
     p.set_struct(desc->prop->get_struct());
 
     // TODO: ask device for current value
@@ -1031,6 +1033,68 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
         free(ext_ctrl.string);
     }
     return 1;
+}
+
+bool save_value_of_control (const v4l2_control* ctrl, tcam_device_property* cp)
+{
+    switch (cp->type)
+    {
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            if (ctrl->value == 0)
+            {
+                cp->value.b.value = false;
+            }
+            else if (ctrl->value > 0)
+            {
+                cp->value.b.value = true;
+            }
+            else
+            {
+                tcam_log(TCAM_LOG_ERROR,
+                         "Boolean '%s' has impossible value: %d Setting to false",
+                         cp->name,
+                         ctrl->value);
+                cp->value.b.value = false;
+            }
+            return true;
+        }
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        {
+            cp->value.i.value = ctrl->value;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+
+}
+
+
+void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
+{
+    struct v4l2_control ctrl = {};
+    ctrl.id = desc.id;
+
+    if (desc.prop->get_type() == TCAM_PROPERTY_TYPE_BUTTON)
+    {
+        return;
+    }
+
+    if (tcam_xioctl(fd, VIDIOC_G_CTRL, &ctrl))
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not retrieve current value of %s. ioctl return '%s'", desc.prop->get_name().c_str(), strerror(errno));
+    }
+
+    auto cp = desc.prop->get_struct();
+
+
+    save_value_of_control(&ctrl, &cp);
+    tcam_log(TCAM_LOG_INFO, "Upadted property!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+    desc.prop->set_struct(cp);
 }
 
 
