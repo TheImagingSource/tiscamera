@@ -516,13 +516,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 {
     std::vector<tcam::DeviceInfo> devices = tcam::get_device_list();
-    int count = devices.size();
     GSList* ret = NULL;
-
-    if (count <= 0)
-    {
-        return NULL;
-    }
 
     for (const auto& d : devices)
     {
