@@ -44,13 +44,15 @@ G_BEGIN_DECLS
 typedef struct _GstTcamSrc GstTcamSrc;
 typedef struct _GstTcamSrcClass GstTcamSrcClass;
 
+struct device_state;
+
 struct _GstTcamSrc
 {
     GstPushSrc element;
 
     std::string device_serial;
 
-    void* device;
+    struct device_state* device;
 
     int n_buffers;
     const struct tcam_image_buffer* ptr;

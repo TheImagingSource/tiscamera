@@ -103,9 +103,7 @@ static gboolean get_property_by_name (GstTcamSrc* self,
         }
     }
 
-    struct device_state* ds = (struct device_state*)self->device;
-
-    tcam::Property* p = ds->dev->get_property_by_name(name);
+    tcam::Property* p = self->device->dev->get_property_by_name(name);
 
     if (p == nullptr)
     {
@@ -222,11 +220,9 @@ static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
         }
     }
 
-    struct device_state* ds = (struct device_state*)self->device;
-
     g_return_val_if_fail (self->device != NULL, NULL);
 
-    std::vector<tcam::Property*> vec = ds->dev->get_available_properties();
+    std::vector<tcam::Property*> vec = self->device->dev->get_available_properties();
 
     for (const auto& v : vec)
     {
@@ -261,9 +257,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
         }
     }
 
-    struct device_state* ds = (struct device_state*)self->device;
-
-    tcam::Property* property = ds->dev->get_property_by_name(name);
+    tcam::Property* property = self->device->dev->get_property_by_name(name);
 
     if (property == nullptr)
     {
@@ -445,9 +439,8 @@ static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
     GSList* ret = NULL;
 
     GstTcamSrc* self = GST_TCAM_SRC (iface);
-    struct device_state* ds = (struct device_state*)self->device;
 
-    tcam::Property* property = ds->dev->get_property_by_name(menu_name);
+    tcam::Property* property = self->device->dev->get_property_by_name(menu_name);
 
     if (property == nullptr)
     {
@@ -476,9 +469,8 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 {
     gboolean ret = TRUE;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
-    struct device_state* ds = (struct device_state*)self->device;
 
-    tcam::Property* property = ds->dev->get_property_by_name(name);
+    tcam::Property* property = self->device->dev->get_property_by_name(name);
 
     if (property == nullptr)
     {
@@ -671,9 +663,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
         return NULL;
     }
 
-    struct device_state* ds = (struct device_state*)self->device;
-
-    std::vector<tcam::VideoFormatDescription> format = ds->dev->get_available_video_formats();
+    std::vector<tcam::VideoFormatDescription> format = self->device->dev->get_available_video_formats();
     n_pixel_formats = format.size();
 
     GST_DEBUG("Found %i pixel formats", n_pixel_formats);
@@ -1064,7 +1054,6 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     GST_DEBUG("In tcam_set_caps");
 
     GstTcamSrc* self = GST_TCAM_SRC(src);
-    struct device_state* ds = (struct device_state*)self->device;
 
     GstStructure *structure;
 
@@ -1076,8 +1065,8 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 
     GST_LOG_OBJECT (self, "Requested caps = %" GST_PTR_FORMAT, caps);
 
-    ds->dev->stop_stream();
-    ds->sink = nullptr;
+    self->device->dev->stop_stream();
+    self->device->sink = nullptr;
 
     structure = gst_caps_get_structure (caps, 0);
 
@@ -1105,9 +1094,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     format.height = height;
     format.framerate = framerate;
 
-    bool ret = ds->dev->set_video_format(tcam::VideoFormat(format));
-
-    if (!ret)
+    if (!self->device->dev->set_video_format(tcam::VideoFormat(format)))
     {
         GST_ERROR("Unable to set format in device");
 
@@ -1161,11 +1148,11 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
 
-    ds->sink = std::make_shared<tcam::ImageSink>();
+    self->device->sink = std::make_shared<tcam::ImageSink>();
 
-    ds->sink->registerCallback(gst_tcam_src_callback, self);
+    self->device->sink->registerCallback(gst_tcam_src_callback, self);
 
-    ds->dev->start_stream(ds->sink);
+    self->device->dev->start_stream(self->device->sink);
 
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
@@ -1210,14 +1197,14 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
                 GST_DEBUG_OBJECT (self, "Found device.");
 
                 self->device = new struct device_state;
-                ((struct device_state*)self->device)->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
+                self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
                 break;
             }
         }
         else
         {
             self->device = new struct device_state;
-            ((struct device_state*)self->device)->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
+            self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
             break;
         }
     }
@@ -1239,11 +1226,9 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
 {
     if (self->device != NULL)
     {
-        struct device_state* ds = (struct device_state*)self->device;
-
-        ds->dev->stop_stream();
-        ds->dev = nullptr;
-        ds->sink = nullptr;
+        self->device->dev->stop_stream();
+        self->device->dev = nullptr;
+        self->device->sink = nullptr;
         delete self->device;
         self->device = NULL;
     }
@@ -1253,7 +1238,6 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
 static gboolean gst_tcam_src_start (GstBaseSrc* src)
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
-    struct device_state* ds = (struct device_state*)self->device;
 
     self->run = 1000;
     self->is_running = TRUE;
@@ -1276,7 +1260,6 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
 gboolean gst_tcam_src_stop (GstBaseSrc* src)
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
-    struct device_state* ds = (struct device_state*)self->device;
 
     self->is_running = FALSE;
 
@@ -1284,8 +1267,8 @@ gboolean gst_tcam_src_stop (GstBaseSrc* src)
 
     self->cv.notify_all();
 
-    ds->dev->stop_stream();
-    ds->sink = nullptr;
+    self->device->dev->stop_stream();
+    self->device->sink = nullptr;
 
     GST_DEBUG_OBJECT (self, "Stopped acquisition");
 
@@ -1571,7 +1554,7 @@ static void gst_tcam_src_get_property (GObject* object,
         {
             if (self->device != nullptr)
             {
-                g_value_set_pointer (value, ((struct device_state*)self->device)->dev.get());
+                g_value_set_pointer(value, self->device->dev.get());
             }
             else
             {
