@@ -487,6 +487,78 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 }
 
 
+static bool fixate_caps (GstCaps* caps)
+{
+    GstStructure* structure = gst_caps_get_structure(caps, 0);
+
+    if (gst_structure_has_field(structure, "width"))
+    {
+        gst_structure_fixate_field_nearest_int(structure, "width", G_MAXUINT);
+    }
+    if (gst_structure_has_field(structure, "height"))
+    {
+        gst_structure_fixate_field_nearest_int(structure, "height", G_MAXUINT);
+    }
+    if (gst_structure_has_field(structure, "framerate"))
+    {
+        gst_structure_fixate_field_nearest_fraction(structure, "framerate", G_MAXUINT, 1);
+    }
+
+    return true;
+}
+
+
+static GstCaps* find_largest_caps (const GstCaps* incoming)
+{
+    int largest_index = -1;
+    int largest_width = -1;
+    int largest_height = -1;
+
+    for (int i = 0; i < gst_caps_get_size(incoming); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(incoming, i);
+
+        int width = -1;
+        int height = -1;
+        bool new_width = false;
+        bool new_height = false;
+
+        if (gst_structure_get_int(struc, "width", &width))
+        {
+            if (largest_width < width)
+            {
+                largest_width = width;
+                new_width = true;
+            }
+        }
+
+        if (gst_structure_get_int(struc, "height", &height))
+        {
+            if (largest_height < height)
+            {
+                largest_height = height;
+                new_height = true;
+            }
+        }
+
+        if (new_width && new_height)
+        {
+            largest_index = i;
+        }
+    }
+
+    GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
+
+    if (!fixate_caps(largest_caps))
+    {
+        GST_ERROR("Cannot fixate largest caps. Returning NULL");
+        return nullptr;
+    }
+
+    return largest_caps;
+}
+
+
 static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
                                                        const GstCaps* available_caps,
                                                        const GstCaps* wanted)
@@ -512,20 +584,6 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
         gst_caps_unref(intersection);
 
-        gint width = 0;
-        gint height = 0;
-        double framerate = 0.0;
-
-        gst_structure_fixate_field_nearest_int (structure, "width", G_MAXINT);
-        gst_structure_fixate_field_nearest_int (structure, "height", G_MAXINT);
-        gst_structure_fixate_field_nearest_fraction (structure, "framerate", G_MAXINT, 1);
-        gst_structure_get_int (structure, "width", &width);
-        gst_structure_get_int (structure, "height", &height);
-
-        const GValue* fps = gst_structure_get_value (structure, "framerate");
-
-        GstCaps* caps;
-
         std::string base_string = "video/x-raw";
 
         if (camera_has_bayer(self))
@@ -535,48 +593,58 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
             modules.bayer = TRUE;
         }
 
-        if (gst_value_get_fraction_numerator (fps) == G_MAXINT)
-        {
-            caps = gst_caps_new_simple (base_string.c_str(),
-                                        "framerate", GST_TYPE_FRACTION,
-                                        10,
-                                        1,
-                                        "width", G_TYPE_INT, 640,
-                                        "height", G_TYPE_INT, 480,
-                                        NULL);
-        }
-        else
-        {
-            caps = gst_caps_new_simple (base_string.c_str(),
-                                        "framerate", GST_TYPE_FRACTION,
-                                        gst_value_get_fraction_numerator (fps),
-                                        gst_value_get_fraction_denominator (fps),
-                                        "width", G_TYPE_INT, width,
-                                        "height", G_TYPE_INT, height,
-                                        NULL);
-        }
+        GstCaps* caps = gst_caps_new_simple (base_string.c_str(),
+                                             "framerate", GST_TYPE_FRACTION_RANGE,
+                                             1, 1, G_MAXINT, 1,
+                                             NULL);
+
+        GValue w = {};
+        g_value_init(&w, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range(&w, 1, G_MAXINT);
+
+        GValue h = {};
+        g_value_init(&h, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range(&h, 1, G_MAXINT);
+
+        gst_caps_set_value(caps, "width", &w);
+        gst_caps_set_value(caps, "heigth", &h);
+
         GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
 
         intersection = gst_caps_intersect(caps, available_caps);
-
-        structure = gst_caps_get_structure(caps, 0);
-        if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+        if (gst_caps_is_empty(intersection))
         {
-            const char *string = gst_structure_get_string (structure, "format");
-            fourcc = GST_STR_FOURCC (string);
+            GST_ERROR("Unable to find intersecting caps. Continuing with empty caps.");
+        }
+        else
+        {
+            structure = gst_caps_get_structure(intersection, 0);
+            if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+            {
+                const char *string = gst_structure_get_string (structure, "format");
+                fourcc = GST_STR_FOURCC (string);
+            }
+
+            modules.caps = find_largest_caps(intersection);
         }
     }
     else
     {
         GST_INFO("Device has caps. No conversion needed.");
-        structure = gst_caps_get_structure(intersection, 0);
+        GST_DEBUG("Intersecting caps: %s", gst_caps_to_string(intersection));
+
+        modules.caps = find_largest_caps(intersection);
+        gst_caps_unref(intersection);
+
+        GST_INFO("Using caps: %s", gst_caps_to_string(modules.caps));
+
+        structure = gst_caps_get_structure(modules.caps, 0);
 
         if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
         {
             const char *string = gst_structure_get_string (structure, "format");
             fourcc = GST_STR_FOURCC (string);
         }
-        modules.caps = gst_caps_copy(intersection);
         conversion_needed = false;
     }
 
@@ -665,7 +733,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         return FALSE;
     }
 
-    if (self->modules.caps = nullptr)
+    if (self->modules.caps == nullptr)
     {
         GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
         return FALSE;
