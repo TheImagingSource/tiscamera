@@ -59,6 +59,7 @@ struct _GstTcamBin
     GstElement* debayer;
     GstElement* focus;
     GstElement* convert;
+    GstElement* out_caps;
 
     GstElement* kid;
 

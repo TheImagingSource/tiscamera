@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <string>
+#include <cstring>
 
 #define gst_tcambin_parent_class parent_class
 
@@ -85,12 +86,6 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
                                                 gst_tcam_bin_prop_init));
 
-
-// struct property_type_map
-// {
-//     enum TCAM_PROPERTY_TYPE typecode;
-//     const gchar* type_name;
-// };
 
 /**
  * gst_tcam_get_property_type:
@@ -493,15 +488,15 @@ static bool fixate_caps (GstCaps* caps)
 
     if (gst_structure_has_field(structure, "width"))
     {
-        gst_structure_fixate_field_nearest_int(structure, "width", G_MAXUINT);
+        gst_structure_fixate_field_nearest_int(structure, "width", G_MAXINT);
     }
     if (gst_structure_has_field(structure, "height"))
     {
-        gst_structure_fixate_field_nearest_int(structure, "height", G_MAXUINT);
+        gst_structure_fixate_field_nearest_int(structure, "height", G_MAXINT);
     }
     if (gst_structure_has_field(structure, "framerate"))
     {
-        gst_structure_fixate_field_nearest_fraction(structure, "framerate", G_MAXUINT, 1);
+        gst_structure_fixate_field_nearest_fraction(structure, "framerate", G_MAXINT, 1);
     }
 
     return true;
@@ -523,6 +518,8 @@ static GstCaps* find_largest_caps (const GstCaps* incoming)
         bool new_width = false;
         bool new_height = false;
 
+        // will fail if width is a range so we only handle
+        // halfway fixated caps
         if (gst_structure_get_int(struc, "width", &width))
         {
             if (largest_width < width)
@@ -555,6 +552,29 @@ static GstCaps* find_largest_caps (const GstCaps* incoming)
         return nullptr;
     }
 
+    GstStructure* s = gst_caps_get_structure(largest_caps, 0);
+
+    int h;
+    gst_structure_get_int(s, "height", &h);
+    int w;
+    gst_structure_get_int(s, "width", &w);
+
+    int num;
+    int den;
+    gst_structure_get_fraction(s, "framerate", &num, &den);
+
+    GValue vh = {};
+
+    g_value_init(&vh, G_TYPE_INT);
+    g_value_set_int(&vh, h);
+
+    gst_caps_set_value(largest_caps, "height", &vh);
+    largest_caps = gst_caps_new_simple (gst_structure_get_name(s),
+                                        "framerate", GST_TYPE_FRACTION, num, den,
+                                        "width", G_TYPE_INT, w,
+                                        "height", G_TYPE_INT, h,
+                                        NULL);
+
     return largest_caps;
 }
 
@@ -564,6 +584,11 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
                                                        const GstCaps* wanted)
 {
     GST_DEBUG("Generating source caps and list of required modules");
+
+    if (wanted == NULL)
+    {
+        wanted = gst_caps_new_any();
+    }
 
     GstStructure* structure = gst_caps_get_structure(wanted, 0);
 
@@ -593,40 +618,81 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
             modules.bayer = TRUE;
         }
 
-        GstCaps* caps = gst_caps_new_simple (base_string.c_str(),
-                                             "framerate", GST_TYPE_FRACTION_RANGE,
-                                             1, 1, G_MAXINT, 1,
-                                             NULL);
+        GstStructure* struc = gst_caps_get_structure(wanted, 0);
 
-        GValue w = {};
-        g_value_init(&w, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range(&w, 1, G_MAXINT);
+        int w;
+        int h;
 
-        GValue h = {};
-        g_value_init(&h, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range(&h, 1, G_MAXINT);
+        // when get int fails we do not have a request for fixed caps
+        // thus we must use ranges and fix them manually
 
-        gst_caps_set_value(caps, "width", &w);
-        gst_caps_set_value(caps, "heigth", &h);
+        bool values_are_fixed = true;
+
+        if (!gst_structure_get_int(struc, "width", &w))
+        {
+            values_are_fixed = false;
+        }
+        if (!gst_structure_get_int(struc, "height", &h))
+        {
+            values_are_fixed = false;
+        }
+
+        GstCaps* caps;
+
+        if (values_are_fixed)
+        {
+            int num;
+            int den;
+
+            gst_structure_get_fraction(struc, "framerate", &num, &den);
+
+            caps = gst_caps_new_simple (base_string.c_str(),
+                                        "framerate", GST_TYPE_FRACTION,
+                                        num, den,
+                                        "width", G_TYPE_INT, w,
+                                        "height", G_TYPE_INT, h,
+                                        NULL);
+        }
+        else
+        {
+            caps = gst_caps_new_simple (base_string.c_str(),
+                                        "framerate", GST_TYPE_FRACTION_RANGE,
+                                        1, 1, G_MAXINT, 1,
+                                        NULL);
+
+            GValue w = {};
+            g_value_init(&w, GST_TYPE_INT_RANGE);
+            gst_value_set_int_range(&w, 1, G_MAXINT);
+
+            GValue h = {};
+            g_value_init(&h, GST_TYPE_INT_RANGE);
+            gst_value_set_int_range(&h, 1, G_MAXINT);
+
+            gst_caps_set_value(caps, "width", &w);
+            gst_caps_set_value(caps, "heigth", &h);
+        }
 
         GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
 
         intersection = gst_caps_intersect(caps, available_caps);
+
+        GST_INFO("Found possible caps %s", gst_caps_to_string(intersection));
+
         if (gst_caps_is_empty(intersection))
         {
             GST_ERROR("Unable to find intersecting caps. Continuing with empty caps.");
         }
         else
         {
-            structure = gst_caps_get_structure(intersection, 0);
+            modules.caps = find_largest_caps(intersection);
+            structure = gst_caps_get_structure(modules.caps, 0);
             if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
             {
                 const char *string = gst_structure_get_string (structure, "format");
                 fourcc = GST_STR_FOURCC (string);
             }
-
-            modules.caps = find_largest_caps(intersection);
         }
+        gst_caps_unref(caps);
     }
     else
     {
@@ -838,6 +904,12 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
+    self->out_caps =gst_element_factory_make("capsfilter", "tcambin-out_caps");
+
+    gst_bin_add(GST_BIN(self), self->out_caps);
+    gst_element_link(previous_element, self->out_caps);
+    previous_element = self->out_caps;
+
     GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
     self->target_pad = gst_element_get_static_pad(previous_element, "src");
     GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
@@ -861,7 +933,20 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             GstPad* sinkpad = gst_pad_get_peer(self->pad);
 
-            self->target_caps = gst_pad_query_caps (sinkpad, NULL);
+            GstElement* par = gst_pad_get_parent_element(sinkpad);
+
+            if (strcmp(g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(par))),
+                       "GstCapsFilter") == 0)
+            {
+                self->target_caps = gst_caps_new_empty();
+
+                g_object_get(par, "caps", &self->target_caps, NULL);
+            }
+            else
+            {
+                self->target_caps = gst_pad_query_caps (sinkpad, NULL);
+            }
+            gst_object_unref(par);
             GST_ERROR("caps of sink: %s", gst_caps_to_string(self->target_caps));
 
             if (self->src == nullptr)
@@ -889,9 +974,45 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
                 gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad);
 
-                self->target_set = TRUE;
+                if (gst_caps_is_fixed(self->target_caps))
+                {
+                    g_object_set(self->out_caps, "caps", self->target_caps, NULL);
+                    GST_DEBUG("Using caps '%s' for external linkage.",
+                              gst_caps_to_string(self->target_caps));
 
-                GST_DEBUG("Using caps '%s' for external linkage.", gst_caps_to_string(gst_pad_get_current_caps(self->target_pad)));
+                }
+                else
+                {
+                    // we have to fixate the caps
+                    // gst_caps_fixate() takes the first value in ranges.
+                    // since we want large resolutions we have to do it manually
+                    GstStructure* s = gst_caps_get_structure(self->target_caps, 0);
+                    const char* name = gst_structure_get_name(s);
+                    GstStructure* internal = gst_caps_get_structure(self->modules.caps, 0);
+
+                    int w;
+                    int h;
+                    int num;
+                    int den;
+
+                    gst_structure_get_int(internal, "width", &w);
+                    gst_structure_get_int(internal, "height", &h);
+                    gst_structure_get_fraction(internal, "framerate", &num, &den);
+
+                    GstCaps* out = gst_caps_new_simple(name,
+                                                       "width", G_TYPE_INT, w,
+                                                       "height", G_TYPE_INT, h,
+                                                       "framerate", GST_TYPE_FRACTION, num, den,
+                                                       NULL);
+
+                    g_object_set(self->out_caps, "caps", out, NULL);
+
+                    GST_DEBUG("Using caps '%s' for external linkage.",
+                              gst_caps_to_string(out));
+                    gst_caps_unref(out);
+                }
+
+                self->target_set = TRUE;
             }
 
             break;
