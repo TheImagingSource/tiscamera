@@ -26,6 +26,9 @@
 #include <vector>
 #include <algorithm>
 
+std::string device_serial;
+
+
 #define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10
 
 GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
@@ -1170,9 +1173,9 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
 
-    if (!self->device_serial.empty())
+    if (!device_serial.empty())
     {
-        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial.c_str());
+        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", device_serial.c_str());
     }
     else
     {
@@ -1181,10 +1184,10 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     for (unsigned int i = 0; i < infos.size(); ++i)
     {
-        if (!self->device_serial.empty())
+        if (!device_serial.empty())
         {
-            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), self->device_serial.c_str());
-            if (strcmp(infos[i].get_serial().c_str(), self->device_serial.c_str()) == 0)
+            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), device_serial.c_str());
+            if (strcmp(infos[i].get_serial().c_str(), device_serial.c_str()) == 0)
             {
                 GST_DEBUG_OBJECT (self, "Found device.");
 
@@ -1493,18 +1496,20 @@ static void gst_tcam_src_set_property (GObject* object,
             {
                 if (g_value_get_string(value) == NULL)
                 {
-                    self->device_serial.clear();
+                    device_serial.clear();
                 }
                 else
                 {
-                    self->device_serial = g_value_get_string (value);
+                    const char* tmp = g_value_get_string(value);
+
+                    device_serial = g_value_get_string(value);
                 }
 
-                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial.c_str());
+                GST_LOG_OBJECT (self, "Set camera name to %s",device_serial.c_str());
 
                 gst_tcam_src_close_camera(self);
 
-                if (!self->device_serial.empty())
+                if (!device_serial.empty())
                 {
                     if (!gst_tcam_src_init_camera(self))
                     {
@@ -1539,7 +1544,7 @@ static void gst_tcam_src_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            g_value_set_string(value, self->device_serial.c_str());
+            g_value_set_string(value, device_serial.c_str());
             break;
         }
         case PROP_DEVICE:
