@@ -134,6 +134,12 @@ DeviceInfo CaptureDeviceImpl::get_device () const
 }
 
 
+bool CaptureDeviceImpl::register_device_lost_callback (tcam_device_lost_callback callback, void* user_data)
+{
+    return device->register_device_lost_callback(callback, user_data);
+}
+
+
 bool CaptureDeviceImpl::close_device ()
 {
     if (!is_device_open())

@@ -108,7 +108,6 @@ public:
 
     bool set_sink (std::shared_ptr<SinkInterface>);
 
-
     bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
 
     bool release_buffers ();
@@ -117,12 +116,9 @@ public:
 
     bool stop_stream ();
 
-
 private:
 
     std::thread work_thread;
-
-    DeviceInfo device;
 
     int fd;
 
@@ -147,6 +143,13 @@ private:
     std::shared_ptr<V4L2PropertyHandler> property_handler;
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
+
+    unsigned char lost_countdown;
+    bool stop_all;
+
+    std::thread udev_monitor;
+
+    void lost_device ();
 
     /**
      * @brief iterate over all v4l2 format descriptions and convert them
@@ -209,6 +212,8 @@ private:
     void free_mmap_buffers ();
 
     tcam_image_size get_sensor_size () const;
+
+    void monitor_v4l2_device ();
 };
 
 } /* namespace tcam */

@@ -603,6 +603,7 @@ static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
 
 static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
                                           GstCaps* caps);
+static gboolean gst_tcam_src_stop (GstBaseSrc* src);
 
 
 static bool gst_tcam_src_fill_structure_fixed_resolution (GstStructure* structure,
@@ -1157,6 +1158,16 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 }
 
 
+static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* info, void* user_data)
+{
+    GstTcamSrc* self = (GstTcamSrc*) user_data;
+
+    GST_ERROR("Received lost device notification. Stopping stream.");
+
+    gst_tcam_src_stop(GST_BASE_SRC(self));
+}
+
+
 bool gst_tcam_src_init_camera (GstTcamSrc* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
@@ -1191,6 +1202,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
                 self->device = new struct device_state;
                 self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
+                self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
                 break;
             }
         }
@@ -1198,6 +1210,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         {
             self->device = new struct device_state;
             self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
+            self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
             break;
         }
     }

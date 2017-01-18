@@ -68,6 +68,13 @@ struct tcam_device_info
 
 
 /**
+ * @name device_lost_callback
+ *
+ */
+typedef void (*tcam_device_lost_callback)(const struct tcam_device_info* info, void* user_data);
+
+
+/**
  * @name tcam_image_size
  */
 struct tcam_image_size

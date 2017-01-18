@@ -78,6 +78,10 @@ public:
      */
     DeviceInfo get_device () const;
 
+
+    bool register_device_lost_callback (tcam_device_lost_callback callback, void* user_data);
+
+
     // property related:
 
     /**

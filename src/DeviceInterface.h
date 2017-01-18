@@ -105,6 +105,37 @@ public:
      */
     virtual bool stop_stream () = 0;
 
+    virtual bool register_device_lost_callback (tcam_device_lost_callback callback, void* user_data)
+    {
+        struct callback_container cc = {callback, user_data};
+
+        lost_callbacks.push_back(cc);
+
+        return true;
+    }
+
+protected:
+
+    DeviceInfo device;
+
+    struct callback_container
+    {
+        tcam_device_lost_callback callback;
+        void* user_data;
+    };
+
+    std::vector<callback_container> lost_callbacks;
+
+    virtual void notify_device_lost ()
+    {
+        auto dev = device.get_info();
+
+        for (const auto& cc : lost_callbacks)
+        {
+            cc.callback(&dev, cc.user_data);
+        }
+    }
+
 }; /* class Camera_Interface */
 
 

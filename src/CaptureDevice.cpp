@@ -67,6 +67,12 @@ DeviceInfo CaptureDevice::get_device () const
 }
 
 
+bool CaptureDevice::register_device_lost_callback (tcam_device_lost_callback callback, void* user_data)
+{
+    return impl->register_device_lost_callback(callback, user_data);
+}
+
+
 std::vector<Property*> CaptureDevice::get_available_properties ()
 {
     return impl->get_available_properties();
@@ -222,7 +228,7 @@ std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial)
         {
             try
             {
-                return std::make_shared<CaptureDevice>(CaptureDevice(d));
+                return std::make_shared<CaptureDevice>(d);
             }
             catch (const std::exception& err)
             {

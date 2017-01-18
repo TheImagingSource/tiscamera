@@ -31,6 +31,7 @@
 #include <sys/mman.h>           /* mmap PROT_READ*/
 #include <linux/videodev2.h>
 #include <cstring>              /* memcpy*/
+#include <libudev.h>
 
 using namespace tcam;
 
@@ -135,10 +136,17 @@ std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct t
 }
 
 
+static const unsigned char lost_countdown_default = 5;
+
+
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
-    : device(device_desc), emulate_bayer(false), emulated_fourcc(0),
-      property_handler(nullptr), is_stream_on(false)
+    : emulate_bayer(false), emulated_fourcc(0),
+      property_handler(nullptr), is_stream_on(false), lost_countdown(lost_countdown_default), stop_all(false)
 {
+    device = device_desc;
+
+    udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
+    udev_monitor.detach();
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
@@ -161,10 +169,17 @@ V4l2Device::~V4l2Device ()
     if (is_stream_on)
         stop_stream();
 
+    stop_all = true;
+
     if (this->fd != -1)
     {
         close(fd);
         fd = -1;
+    }
+
+    if (udev_monitor.joinable())
+    {
+        udev_monitor.join();
     }
 }
 
@@ -589,6 +604,12 @@ bool V4l2Device::stop_stream ()
     tcam_log(TCAM_LOG_DEBUG, "Stopped stream");
 
     return true;
+}
+
+
+void V4l2Device::lost_device ()
+{
+    this->notify_device_lost();
 }
 
 
@@ -1092,7 +1113,7 @@ void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
 
 
     save_value_of_control(&ctrl, &cp);
-    tcam_log(TCAM_LOG_INFO, "Upadted property!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    tcam_log(TCAM_LOG_DEBUG, "Updated property");
 
     desc.prop->set_struct(cp);
 }
@@ -1232,20 +1253,20 @@ void V4l2Device::stream ()
                 statistics.frames_dropped++;
             }
 
-            ushort failure_counter = 0;
             bool ret_value = get_frame();
             if (ret_value)
             {
-                failure_counter = 0;
+                this->lost_countdown = lost_countdown_default;
                 break;
             }
             else
             {
-                failure_counter++;
-                if (failure_counter >= 3)
+                this->lost_countdown--;
+                if (this->lost_countdown <= 0)
                 {
                     tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
-                    break;
+                    lost_device();
+                    // break;
                 }
             }
             /* receive frame since device is ready */
@@ -1487,4 +1508,72 @@ tcam_image_size V4l2Device::get_sensor_size () const
     }
 
     return size;
+}
+
+
+void V4l2Device::monitor_v4l2_device ()
+{
+    auto udev = udev_new();
+    /* Set up a monitor to monitor hidraw devices */
+    auto mon = udev_monitor_new_from_netlink(udev, "udev");
+    udev_monitor_filter_add_match_subsystem_devtype(mon, "video4linux", NULL);
+    udev_monitor_enable_receiving(mon);
+    /* Get the file descriptor (fd) for the monitor.
+       This fd will get passed to select() */
+    fd = udev_monitor_get_fd(mon);
+
+    /* This section will run continuously, calling usleep() at
+       the end of each pass. This is to demonstrate how to use
+       a udev_monitor in a non-blocking way. */
+    while (!stop_all)
+    {
+        /* Set up the call to select(). In this case, select() will
+           only operate on a single file descriptor, the one
+           associated with our udev_monitor. Note that the timeval
+           object is set to 0, which will cause select() to not
+           block. */
+        fd_set fds;
+        struct timeval tv;
+        int ret;
+
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+
+        ret = select(fd+1, &fds, NULL, NULL, &tv);
+
+        /* Check if our file descriptor has received data. */
+        if (ret > 0 && FD_ISSET(fd, &fds))
+        {
+            /* Make the call to receive the device.
+               select() ensured that this will not block. */
+            auto dev = udev_monitor_receive_device(mon);
+            if (dev)
+            {
+                if (strcmp(udev_device_get_devnode(dev), device.get_identifier().c_str()) == 0)
+                {
+                    if (strcmp(udev_device_get_action(dev), "remove") == 0)
+                    {
+                        tcam_log(TCAM_LOG_ERROR, "Lost device! %s", device.get_name().c_str());
+                        this->lost_device();
+                        break;
+                    }
+                    else
+                    {
+                        tcam_log(TCAM_LOG_WARNING,
+                                 "Received an event for device: '%s' This should not happen.",
+                                 udev_device_get_action(dev));
+                    }
+                }
+
+                udev_device_unref(dev);
+            }
+            else
+            {
+                tcam_log(TCAM_LOG_ERROR, "No Device from udev_monitor_receive_device. An error occured.");
+            }
+        }
+        usleep(250*1000);
+    }
 }

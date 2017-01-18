@@ -80,11 +80,11 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
 
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
-    : device(device_desc),
-      handler(nullptr),
+    : handler(nullptr),
       current_buffer(0),
       stream(NULL)
 {
+    device = device_desc;
     this->arv_camera = arv_camera_new (this->device.get_info().identifier);
 
     if (this->arv_camera == NULL)
@@ -102,6 +102,12 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
 
     index_genicam();
     determine_active_video_format();
+
+    // make aravis notify us when the device can not be reached
+    g_signal_connect(arv_camera_get_device(arv_camera),
+                     "control-lost",
+                     G_CALLBACK(device_lost), this);
+
 }
 
 
@@ -109,6 +115,7 @@ AravisDevice::~AravisDevice ()
 {
     if (arv_camera != NULL)
     {
+        tcam_log(TCAM_LOG_INFO, "Destroying arvcamera");
         g_object_unref (arv_camera);
         arv_camera = NULL;
     }
@@ -606,6 +613,17 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
         // break;
         // }
     }
+
+}
+
+
+void AravisDevice::device_lost (ArvGvDevice* device, void* user_data)
+{
+    AravisDevice* self = (AravisDevice*)user_data;
+
+    struct tcam_device_info info = self->device.get_info();
+
+    self->notify_device_lost();
 
 }
 

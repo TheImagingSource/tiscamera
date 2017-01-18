@@ -98,7 +98,7 @@ private:
 
     static void callback(ArvStream* stream, void* user_data);
 
-    DeviceInfo device;
+    static void device_lost (ArvGvDevice* device, void* user_data);
 
     std::shared_ptr<AravisPropertyHandler> handler;
 
