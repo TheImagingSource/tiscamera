@@ -50,7 +50,7 @@ struct _GstTcamSrc
 {
     GstPushSrc element;
 
-    // std::string device_serial;
+    std::string device_serial;
 
     struct device_state* device;
 

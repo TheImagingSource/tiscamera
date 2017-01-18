@@ -26,8 +26,6 @@
 #include <vector>
 #include <algorithm>
 
-std::string device_serial;
-
 
 #define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10
 
@@ -1173,9 +1171,9 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
 
-    if (!device_serial.empty())
+    if (!self->device_serial.empty())
     {
-        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", device_serial.c_str());
+        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial.c_str());
     }
     else
     {
@@ -1184,10 +1182,10 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
 
     for (unsigned int i = 0; i < infos.size(); ++i)
     {
-        if (!device_serial.empty())
+        if (!self->device_serial.empty())
         {
-            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), device_serial.c_str());
-            if (strcmp(infos[i].get_serial().c_str(), device_serial.c_str()) == 0)
+            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), self->device_serial.c_str());
+            if (strcmp(infos[i].get_serial().c_str(), self->device_serial.c_str()) == 0)
             {
                 GST_DEBUG_OBJECT (self, "Found device.");
 
@@ -1252,7 +1250,7 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
 }
 
 
-gboolean gst_tcam_src_stop (GstBaseSrc* src)
+static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
 
@@ -1451,6 +1449,13 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->n_buffers = GST_TCAM_SRC_DEFAULT_N_BUFFERS;
     self->payload = 0;
 
+    // explicitly init c++ objects
+    // older compiler (e.g. gcc-4.8) can cause segfaults
+    // when not explicitly initialized
+    new (&self->device_serial) std::string("");
+    new (&self->mtx) std::mutex();
+    new (&self->cv) std::condition_variable();
+
     self->device = NULL;
     self->all_caps = NULL;
     self->fixed_caps = NULL;
@@ -1475,6 +1480,10 @@ static void gst_tcam_src_finalize (GObject* object)
         self->fixed_caps = NULL;
     }
 
+    (&self->device_serial)->std::string::~string();
+    (&self->mtx)->std::mutex::~mutex();
+    (&self->cv)->std::condition_variable::~condition_variable();
+
     G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
 }
 
@@ -1496,20 +1505,20 @@ static void gst_tcam_src_set_property (GObject* object,
             {
                 if (g_value_get_string(value) == NULL)
                 {
-                    device_serial.clear();
+                    self->device_serial.clear();
                 }
                 else
                 {
                     const char* tmp = g_value_get_string(value);
 
-                    device_serial = g_value_get_string(value);
+                    self->device_serial = g_value_get_string(value);
                 }
 
-                GST_LOG_OBJECT (self, "Set camera name to %s",device_serial.c_str());
+                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial.c_str());
 
                 gst_tcam_src_close_camera(self);
 
-                if (!device_serial.empty())
+                if (!self->device_serial.empty())
                 {
                     if (!gst_tcam_src_init_camera(self))
                     {
@@ -1544,7 +1553,7 @@ static void gst_tcam_src_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            g_value_set_string(value, device_serial.c_str());
+            g_value_set_string(value, self->device_serial.c_str());
             break;
         }
         case PROP_DEVICE:
