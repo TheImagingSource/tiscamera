@@ -47,6 +47,10 @@ public:
     CaptureDevice ();
     CaptureDevice (const DeviceInfo&);
 
+    CaptureDevice (const CaptureDevice&) = delete;
+
+    CaptureDevice operator= (const CaptureDevice&) = delete;
+
     ~CaptureDevice ();
 
     /**
@@ -166,7 +170,7 @@ public:
 
 private:
 
-    std::shared_ptr<CaptureDeviceImpl> impl;
+    std::unique_ptr<CaptureDeviceImpl> impl;
 
 }; /* class CaptureDevice */
 
