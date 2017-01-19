@@ -481,16 +481,6 @@ bool V4l2Device::set_sink (std::shared_ptr<SinkInterface> sink)
 
     this->listener = sink;
 
-    // if (listener.expired())
-    // {
-    // tcam_log(TCAM_LOG_ERROR,"WAIT WHAT");
-    // }
-    // else
-    // {
-    // tcam_log(TCAM_LOG_ERROR,"VALID LISTENER");
-
-    // }
-
     return true;
 }
 
@@ -536,13 +526,6 @@ bool V4l2Device::release_buffers ()
 
 bool V4l2Device::start_stream ()
 {
-
-    // if (listener.expired())
-    // {
-    // tcam_log(TCAM_LOG_ERROR, "Expired listener.");
-    // return false;
-    // }
-
     enum v4l2_buf_type type;
 
     tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());

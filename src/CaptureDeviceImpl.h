@@ -142,6 +142,9 @@ public:
 
 private:
 
+    // both need to be shared_ptr and not unique_ptr
+    // the property handler is used for callbacks of properties
+    // the pipeline is used for callbacks of ImageSource instances
     std::shared_ptr<PipelineManager> pipeline;
     std::shared_ptr<PropertyHandler> property_handler;
 

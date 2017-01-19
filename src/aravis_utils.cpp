@@ -472,13 +472,15 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             prop.value.i.value = var.at(current_value);
             prop.value.i.default_value = prop.value.i.value;
 
+            tcam_log(TCAM_LOG_DEBUG, "Returning EnumerationProperty for %s", prop.name);
+
             return std::make_shared<PropertyEnumeration>(impl, prop, var, type);
         }
         else if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
 
-
+            tcam_log(TCAM_LOG_DEBUG, "Returning IntegerProperty for %s", prop.name);
 
             return  std::make_shared<PropertyInteger>(impl, prop, type);
         }
