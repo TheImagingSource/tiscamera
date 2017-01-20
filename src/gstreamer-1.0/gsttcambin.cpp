@@ -952,12 +952,11 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             if (self->src == nullptr)
             {
                 gst_tcambin_create_source(self);
-
-                GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-                GST_ERROR("caps of src: %s", gst_caps_to_string(src_caps));
-
-                self->modules = gst_tcambin_generate_src_caps(self, src_caps, self->target_caps);
             }
+
+            GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+            GST_INFO("caps of src: %s", gst_caps_to_string(src_caps));
+            self->modules = gst_tcambin_generate_src_caps(self, src_caps, self->target_caps);
 
             if (! gst_tcambin_create_elements(self))
             {
