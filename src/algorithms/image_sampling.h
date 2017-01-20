@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _IMAGE_SAMPLING_H_
-#define _IMAGE_SAMPLING_H_
+#ifndef TCAM_ALGORITHM_IMAGE_SAMPLING_H
+#define TCAM_ALGORITHM_IMAGE_SAMPLING_H
 
 #include "bayer.h"
-#include <gst/gst.h>
-#include <glib.h>
-
 
 #ifdef __cplusplus
 extern "C"
@@ -43,7 +40,7 @@ typedef struct auto_sample_points
         byte b;
     } samples[1500];
 
-    guint	cnt;
+    unsigned int cnt;
 } auto_sample_points;
 
 
@@ -57,8 +54,8 @@ typedef struct gst_tcam_image_size
 typedef struct
 {
     byte* image;
-    guint width;
-    guint height;
+    unsigned int width;
+    unsigned int height;
     format color_format;
     tBY8Pattern pattern;
 } image_buffer;
@@ -74,7 +71,10 @@ typedef struct
  * @param bayer pattern of image
  * @brief analyzes given buffer and fills sample points
 */
-void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Pattern pattern, gst_tcam_image_size size);
+void get_sampling_points (unsigned char* buf,
+                          auto_sample_points* points,
+                          tBY8Pattern pattern,
+                          gst_tcam_image_size size);
 
 void get_sampling_points_from_buffer (image_buffer* buf,
                                       auto_sample_points* points);
@@ -86,17 +86,17 @@ void get_sampling_points_from_buffer (image_buffer* buf,
  * @param buf - image buffer that shall be analyzed
  * @return guint containing the image brightness
  */
-guint image_brightness_bayer (image_buffer* buf);
+unsigned int image_brightness_bayer (image_buffer* buf);
 
 /**
  * @name
  * @param
  * @return
  */
-guint buffer_brightness_gray (image_buffer* buf);
+unsigned int buffer_brightness_gray (image_buffer* buf);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _IMAGE_SAMPLING_H_ */
+#endif /* TCAM_ALGORITHM_IMAGE_SAMPLING_H */

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _BAYER_H_
-#define _BAYER_H_
+#ifndef TCAM_ALGORITHM_BAYER_H
+#define TCAM_ALGORITHM_BAYER_H
 
 
 #ifdef __cplusplus
@@ -88,11 +88,11 @@ unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsig
 
 
 /* convert desc to int */
-#define MAKE_FOURCC(a,b,c,d)        ((guint32)((a)|(b)<<8|(c)<<16|(d)<<24))
+#define MAKE_FOURCC(a,b,c,d)        ((uint32_t)((a)|(b)<<8|(c)<<16|(d)<<24))
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* _BAYER_H_ */
+#endif  /* TCAM_ALGORITHM_BAYER_H */

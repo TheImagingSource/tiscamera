@@ -38,7 +38,7 @@ if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
-
+add_subdirectory(algorithms)
 
 # If you really want to set additional options from outside CMakeLists.txt you
 # can do this:

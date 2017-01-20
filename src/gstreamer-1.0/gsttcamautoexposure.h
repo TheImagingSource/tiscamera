@@ -18,10 +18,8 @@
 #define _GST_TCAMAUTOEXPOSURE_H_
 
 #include <gst/base/gstbasetransform.h>
-#include "bayer.h"
-#include "image_sampling.h"
 
-#include "image_sampling.h"
+#include "algorithms/tcam-algorithm.h"
 
 
 #ifdef __cplusplus

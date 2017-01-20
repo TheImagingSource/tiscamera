@@ -28,9 +28,6 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautoexposure.h"
 
-#include "bayer.h"
-#include "image_sampling.h"
-
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautoexposure_debug_category
 

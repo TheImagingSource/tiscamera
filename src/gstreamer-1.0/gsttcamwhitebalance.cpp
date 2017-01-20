@@ -36,7 +36,6 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamwhitebalance.h"
 #include "tcamprop.h"
-#include "image_sampling.h"
 #include <stdlib.h>
 #include <cstring>
 
@@ -1169,7 +1168,14 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
     {
         auto_sample_points points = {};
 
-        get_sampling_points (buf, &points, self->pattern, self->image_size);
+        GstMapInfo info;
+
+        gst_buffer_map(buf, &info, GST_MAP_READ);
+
+        unsigned char* data = (unsigned char*)info.data;
+
+        get_sampling_points(data, &points, self->pattern, self->image_size);
+        gst_buffer_unmap(buf, &info);
 
         guint resulting_brightness = 0;
         auto_whitebalance(&points, &rgb, &resulting_brightness);

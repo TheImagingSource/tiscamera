@@ -21,7 +21,7 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/gstbuffer.h>
 
-#include "image_sampling.h"
+#include "algorithms/tcam-algorithm.h"
 
 #ifdef __cplusplus
 extern "C"

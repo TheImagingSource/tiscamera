@@ -18,7 +18,7 @@
 #define _GST_TCAMAUTOFOCUS_H_
 
 #include <gst/base/gstbasetransform.h>
-#include "AutoFocus.h"
+#include "algorithms/tcam-algorithm.h"
 
 
 #ifdef __cplusplus
