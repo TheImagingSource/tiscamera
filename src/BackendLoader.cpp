@@ -138,7 +138,7 @@ std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::D
 
     if (b.type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
-        throw std::runtime_error("Unsupported device");
+        throw std::runtime_error("Unsupported device type");
     }
 
     auto dev = device.get_info();
@@ -150,6 +150,12 @@ std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::D
 std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoader::backend& b)
 {
     std::vector<struct tcam_device_info> temp;
+    std::vector<DeviceInfo> ret;
+
+    if (b.handle == nullptr)
+    {
+        return ret;
+    }
 
     size_t t = b.get_device_list_size();
 
@@ -157,7 +163,6 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoad
 
     auto copied_elements = b.get_device_list(temp.data(), temp.size());
 
-    std::vector<DeviceInfo> ret;
     for (const auto& info : temp)
     {
         ret.push_back(DeviceInfo(info));
@@ -186,7 +191,7 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends ()
     std::vector<DeviceInfo> ret;
     for (auto& b : backends)
     {
-        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN)
+        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN || b.handle == nullptr)
         {
             continue;
         }
