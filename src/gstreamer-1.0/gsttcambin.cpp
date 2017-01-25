@@ -484,6 +484,11 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 
 static bool fixate_caps (GstCaps* caps)
 {
+    if (caps == nullptr || gst_caps_is_empty(caps))
+    {
+        return false;
+    }
+
     GstStructure* structure = gst_caps_get_structure(caps, 0);
 
     if (gst_structure_has_field(structure, "width"))
@@ -585,12 +590,20 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 {
     GST_DEBUG("Generating source caps and list of required modules");
 
-    if (wanted == NULL)
+    GstStructure* structure;
+
+    if (wanted == NULL || gst_caps_is_empty(wanted))
     {
-        wanted = gst_caps_new_any();
+        GST_INFO("No sink caps specified. Continuing with caps 'ANY'");
+        wanted = gst_caps_copy(available_caps);
+    }
+    else
+    {
+        GST_INFO("%s", gst_caps_to_string(wanted));
+        structure = gst_caps_get_structure(wanted, 0);
     }
 
-    GstStructure* structure = gst_caps_get_structure(wanted, 0);
+
 
     struct required_modules modules = {FALSE, FALSE, FALSE, nullptr};
 
@@ -702,14 +715,22 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
         modules.caps = find_largest_caps(intersection);
         gst_caps_unref(intersection);
 
-        GST_INFO("Using caps: %s", gst_caps_to_string(modules.caps));
-
-        structure = gst_caps_get_structure(modules.caps, 0);
-
-        if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+        if (modules.caps == nullptr)
         {
-            const char *string = gst_structure_get_string (structure, "format");
-            fourcc = GST_STR_FOURCC (string);
+            GST_ERROR("Unable to determine caps.");
+
+        }
+        else
+        {
+            GST_INFO("Using caps: %s", gst_caps_to_string(modules.caps));
+
+            structure = gst_caps_get_structure(modules.caps, 0);
+
+            if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+            {
+                const char *string = gst_structure_get_string (structure, "format");
+                fourcc = GST_STR_FOURCC (string);
+            }
         }
         conversion_needed = false;
     }
@@ -933,22 +954,28 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             GstPad* sinkpad = gst_pad_get_peer(self->pad);
 
-            GstElement* par = gst_pad_get_parent_element(sinkpad);
-
-            if (strcmp(g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(par))),
-                       "GstCapsFilter") == 0)
+            if (sinkpad == nullptr)
             {
                 self->target_caps = gst_caps_new_empty();
-
-                g_object_get(par, "caps", &self->target_caps, NULL);
             }
             else
             {
-                self->target_caps = gst_pad_query_caps (sinkpad, NULL);
-            }
-            gst_object_unref(par);
-            GST_ERROR("caps of sink: %s", gst_caps_to_string(self->target_caps));
+                GstElement* par = gst_pad_get_parent_element(sinkpad);
 
+                if (strcmp(g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(par))),
+                           "GstCapsFilter") == 0)
+                {
+                    self->target_caps = gst_caps_new_empty();
+
+                    g_object_get(par, "caps", &self->target_caps, NULL);
+                }
+                else
+                {
+                    self->target_caps = gst_pad_query_caps (sinkpad, NULL);
+                }
+                gst_object_unref(par);
+                GST_ERROR("caps of sink: %s", gst_caps_to_string(self->target_caps));
+            }
             if (self->src == nullptr)
             {
                 gst_tcambin_create_source(self);
@@ -970,9 +997,10 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 {
                     GST_ERROR("target_pad not defined");
                 }
-
-                gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad);
-
+                else
+                {
+                    gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad);
+                }
                 if (gst_caps_is_fixed(self->target_caps))
                 {
                     g_object_set(self->out_caps, "caps", self->target_caps, NULL);
@@ -985,30 +1013,38 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                     // we have to fixate the caps
                     // gst_caps_fixate() takes the first value in ranges.
                     // since we want large resolutions we have to do it manually
-                    GstStructure* s = gst_caps_get_structure(self->target_caps, 0);
-                    const char* name = gst_structure_get_name(s);
-                    GstStructure* internal = gst_caps_get_structure(self->modules.caps, 0);
+                    if (gst_caps_is_empty(self->target_caps))
+                    {
+                        // TODO should not happen find causes
 
-                    int w;
-                    int h;
-                    int num;
-                    int den;
+                    }
+                    else
+                    {
+                        GstStructure* s = gst_caps_get_structure(self->target_caps, 0);
+                        const char* name = gst_structure_get_name(s);
+                        GstStructure* internal = gst_caps_get_structure(self->modules.caps, 0);
 
-                    gst_structure_get_int(internal, "width", &w);
-                    gst_structure_get_int(internal, "height", &h);
-                    gst_structure_get_fraction(internal, "framerate", &num, &den);
+                        int w;
+                        int h;
+                        int num;
+                        int den;
 
-                    GstCaps* out = gst_caps_new_simple(name,
-                                                       "width", G_TYPE_INT, w,
-                                                       "height", G_TYPE_INT, h,
-                                                       "framerate", GST_TYPE_FRACTION, num, den,
-                                                       NULL);
+                        gst_structure_get_int(internal, "width", &w);
+                        gst_structure_get_int(internal, "height", &h);
+                        gst_structure_get_fraction(internal, "framerate", &num, &den);
 
-                    g_object_set(self->out_caps, "caps", out, NULL);
+                        GstCaps* out = gst_caps_new_simple(name,
+                                                           "width", G_TYPE_INT, w,
+                                                           "height", G_TYPE_INT, h,
+                                                           "framerate", GST_TYPE_FRACTION, num, den,
+                                                           NULL);
 
-                    GST_DEBUG("Using caps '%s' for external linkage.",
-                              gst_caps_to_string(out));
-                    gst_caps_unref(out);
+                        g_object_set(self->out_caps, "caps", out, NULL);
+
+                        GST_DEBUG("Using caps '%s' for external linkage.",
+                                  gst_caps_to_string(out));
+                        gst_caps_unref(out);
+                    }
                 }
 
                 self->target_set = TRUE;
