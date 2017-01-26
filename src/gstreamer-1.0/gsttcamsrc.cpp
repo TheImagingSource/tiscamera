@@ -782,7 +782,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
                     gst_structure_set_value(structure,"height", &h);
                     gst_structure_set_value(structure,"framerate", &f);
                     gst_caps_append_structure(caps, structure);
-
                 }
                 else // fixed resolution
                 {
@@ -790,7 +789,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
                     gst_tcam_src_fill_structure_fixed_resolution(structure, format[i], res[j]);
                     gst_caps_append_structure (caps, structure);
-
                 }
             }
         }
@@ -836,14 +834,21 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
 
     if (!gst_caps_is_empty(peercaps) && !gst_caps_is_any (peercaps))
     {
+        GST_DEBUG("Peer gave us something to work with.");
+
         GstCaps *icaps = NULL;
         int i;
 
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (i = gst_caps_get_size (peercaps); i >= 0 ; i--)
+        for (i = 0; i <= gst_caps_get_size (peercaps)-1; i--)
         {
             /* get intersection */
             GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
+
+            if (gst_caps_is_any(ipcaps) || strcmp(gst_caps_to_string(ipcaps), "ANY") == 0)
+            {
+                continue;
+            }
 
             GST_DEBUG_OBJECT (basesrc, "peer: %" GST_PTR_FORMAT, ipcaps);
 

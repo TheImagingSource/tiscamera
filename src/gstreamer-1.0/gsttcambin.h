@@ -42,7 +42,6 @@ typedef struct _GstTcamBinClass GstTcamBinClass;
 struct required_modules
 {
     gboolean bayer;
-    gboolean convert;
     gboolean whitebalance;
     GstCaps* caps;
 };
@@ -58,7 +57,6 @@ struct _GstTcamBin
     GstElement* whitebalance;
     GstElement* debayer;
     GstElement* focus;
-    GstElement* convert;
     GstElement* out_caps;
 
     GstElement* kid;
