@@ -145,8 +145,8 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
-    udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
-    udev_monitor.detach();
+    // udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
+    // udev_monitor.detach();
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
