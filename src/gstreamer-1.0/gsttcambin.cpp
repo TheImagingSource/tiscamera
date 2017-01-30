@@ -907,15 +907,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
-    gst_bin_add(GST_BIN(self), self->out_caps);
-    gst_element_link(previous_element, self->out_caps);
-    previous_element = self->out_caps;
-
     GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
     self->target_pad = gst_element_get_static_pad(previous_element, "src");
     GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
-
-
 
     if (gst_caps_is_any(self->target_caps) || gst_caps_is_empty(self->target_caps))
     {
@@ -1037,7 +1031,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), gst_element_get_static_pad(self->out_caps, "src"));
             GstCaps* all_caps = generate_all_caps(self);
             g_object_set(self->out_caps, "caps", all_caps, NULL);
-
             break;
         }
         case GST_STATE_CHANGE_PAUSED_TO_READY:
@@ -1074,59 +1067,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                         GST_ERROR("Could not set target for ghostpad.");
                     }
                 }
-
-                if (gst_caps_is_fixed(self->target_caps))
-                {
-                    g_object_set(self->out_caps, "caps", self->target_caps, NULL);
-                    GST_DEBUG("Using caps '%s' for external linkage.",
-                              gst_caps_to_string(self->target_caps));
-
-                }
-                else
-                {
-                    // we have to fixate the caps
-                    // gst_caps_fixate() takes the first value in ranges.
-                    // since we want large resolutions we have to do it manually
-                    if (gst_caps_is_empty(self->target_caps))
-                    {
-                        // If we end here we are in a situation where there simply are no external
-                        // caps. This means we pass through the caps of the source.
-
-                        GstPad* pad = gst_element_get_static_pad(self->src, "src");
-
-                        GstCaps* caps = gst_pad_get_current_caps(pad);
-
-                        g_object_set(self->out_caps, "caps", caps, NULL);
-                    }
-                    else
-                    {
-                        GstStructure* s = gst_caps_get_structure(self->target_caps, 0);
-                        const char* name = gst_structure_get_name(s);
-                        GstStructure* internal = gst_caps_get_structure(self->modules.caps, 0);
-
-                        int w;
-                        int h;
-                        int num;
-                        int den;
-
-                        gst_structure_get_int(internal, "width", &w);
-                        gst_structure_get_int(internal, "height", &h);
-                        gst_structure_get_fraction(internal, "framerate", &num, &den);
-
-                        GstCaps* out = gst_caps_new_simple(name,
-                                                           "width", G_TYPE_INT, w,
-                                                           "height", G_TYPE_INT, h,
-                                                           "framerate", GST_TYPE_FRACTION, num, den,
-                                                           NULL);
-
-                        g_object_set(self->out_caps, "caps", out, NULL);
-
-                        GST_DEBUG("Using caps '%s' for external linkage.",
-                                  gst_caps_to_string(out));
-                        gst_caps_unref(out);
-                    }
-                }
-
                 self->target_set = TRUE;
             }
 
