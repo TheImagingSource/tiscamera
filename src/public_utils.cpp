@@ -102,7 +102,7 @@ std::vector<struct tcam_image_size> tcam::get_standard_resolutions (const struct
             {128, 96},
             {320, 240},
             {360, 280},
-            {533, 400},
+            {544, 480},
             {640, 480},
             {352, 288},
             {576, 480},
