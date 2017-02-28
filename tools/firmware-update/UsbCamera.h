@@ -58,6 +58,11 @@ public:
 
     virtual ~UsbCamera ();
 
+    virtual bool open ();
+
+    virtual bool close ();
+
+
     /// @name get_firmware_version
     /// @return number of firmware version
     virtual int get_firmware_version () = 0;

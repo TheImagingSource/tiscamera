@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Imaging Source Europe GmbH
+ * Copyright 2017 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,40 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef _DEFINITIONS_H_
-#define _DEFINITIONS_H_
+#pragma once
 
 #include <cstdint>
 
-namespace tis
+namespace lib33u
 {
-
-#define TIS_VENDOR_ID 0x199e
-
-
-enum UVC_COMPLIANCE
+namespace device_interface
 {
-    CAMERA_INTERFACE_MODE_PROPRIETARY,
-    CAMERA_INTERFACE_MODE_UVC,
-};
-
-
-enum TYPE
-{
-    UNKNOWN = 0,
-    USB2,
-    USB3,
-    USB33,
-};
-
-struct camera_type
-{
-    TYPE camera_type;
-    uint32_t idVendor;
-    uint32_t idProduct;
-    const char* product_name;
-};
-
-} /* namespace tis */
-
-#endif /* _DEFINITIONS_H_ */
+	namespace MemoryMap
+	{
+		const uint64_t CAMERA_INFO = 0x4C52544300000000;	// CTRL'0000'0000
+		const uint64_t CAMERA_FLASH = 0x4C525443EE000000;	// CTRL'EE00'0000
+	};
+}
+}

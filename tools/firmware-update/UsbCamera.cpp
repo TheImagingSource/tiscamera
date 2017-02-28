@@ -76,6 +76,11 @@ const camera_type find_camera_type (const unsigned int& idVendor, const unsigned
     // type not known assure we still can handle the device
     // as long as it is one of ours
 
+    if ((idProduct & (0x9000)) == (0x9000))
+    {
+        return {USB33, idVendor, idProduct, "Unkown USB33 Camera"};
+    }
+
     if ((idProduct & (0x8400)) == (0x8400))
     {
         return {USB3, idVendor, idProduct, "Unknown USB3 Camera"};
@@ -96,6 +101,16 @@ UsbCamera::UsbCamera (std::shared_ptr<UsbSession> session, device_info _dev, uns
     dev_handle(nullptr),
     dev(_dev),
     interface(_interface)
+{}
+
+
+UsbCamera::~UsbCamera ()
+{
+    close();
+}
+
+
+bool UsbCamera::open ()
 {
     try
     {
@@ -114,13 +129,19 @@ UsbCamera::UsbCamera (std::shared_ptr<UsbSession> session, device_info _dev, uns
     {
         throw;
     }
+    return true;
 }
 
 
-UsbCamera::~UsbCamera ()
+bool UsbCamera::close ()
 {
-    release_interface();
-    libusb_close(this->dev_handle);
+    if (this->dev_handle != nullptr)
+    {
+        release_interface();
+        libusb_close(this->dev_handle);
+        this->dev_handle = nullptr;
+    }
+    return true;
 }
 
 

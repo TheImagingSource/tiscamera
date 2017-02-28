@@ -39,7 +39,9 @@ namespace tis
 
 Usb2Camera::Usb2Camera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface):
     UsbCamera(session, dev, _interface)
-{}
+{
+    open();
+}
 
 
 Usb2Camera::~Usb2Camera ()

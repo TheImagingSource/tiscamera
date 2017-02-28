@@ -209,7 +209,7 @@ void set_device_mode (const std::string& serial_number, const std::string& mode)
     }
     auto type = cam->get_camera_type();
 
-    if (type.camera_type == USB3)
+    if (type.camera_type != USB2)
     {
         std::cerr << "Mode settings only available for USB2 cameras." << std::endl;
         exit(69);
@@ -246,7 +246,10 @@ void set_device_mode (const std::string& serial_number, const std::string& mode)
 }
 
 
-void upload_to_device (const std::string& serial_number, const std::string& firmware)
+void upload_to_device (const std::string& serial_number,
+                       const std::string& firmware,
+                       std::string model = "",
+                       bool assume_yes = false)
 {
     UsbHandler usb;
 
@@ -260,24 +263,27 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
     }
     std::cout << std::endl;
 
-    std::cout << "!!! Attention !!!" << std::endl
-              << "This action could break your camera." << std::endl << std::endl
-              << "Do you really want to proceed? [y/N] ";
-
-    while (1)
+    if (!assume_yes)
     {
-        std::string s;
-        std::getline(std::cin, s);
-        if (s.compare("y") == 0 || s.compare("Y") == 0 )
-            break;
-        else if (s.empty() || s.compare("n") == 0 || s.compare("N") == 0 )
+        std::cout << "!!! Attention !!!" << std::endl
+                  << "This action could break your camera." << std::endl << std::endl
+                  << "Do you really want to proceed? [y/N] ";
+
+        while (1)
         {
-            std::cout << "Aborting..." << std::endl;
-            return;
-        }
-        else
-        {
-            std::cout << "Please answer yes or no." << std::endl;
+            std::string s;
+            std::getline(std::cin, s);
+            if (s.compare("y") == 0 || s.compare("Y") == 0 )
+                break;
+            else if (s.empty() || s.compare("n") == 0 || s.compare("N") == 0 )
+            {
+                std::cout << "Aborting..." << std::endl;
+                return;
+            }
+            else
+            {
+                std::cout << "Please answer yes or no." << std::endl;
+            }
         }
     }
 
@@ -289,14 +295,20 @@ void upload_to_device (const std::string& serial_number, const std::string& firm
         };
 
     device_info dev = cam->get_device_info();
-    std::stringstream sstream;
-    sstream << std::hex << dev.idProduct;
 
-    std::string fw_name = sstream.str() + ".fw";
+    // automatically determine which fw to write
+    if (model.empty() && cam->get_camera_type().camera_type != USB33)
+    {
+        std::stringstream sstream;
+        sstream << std::hex << dev.idProduct;
+
+        model = sstream.str() + ".fw";
+    }
+
     bool success = false;
     try
     {
-        success = cam->upload_firmware(firmware, fw_name, func);
+        success = cam->upload_firmware(firmware, model, func);
     }
     catch (const std::runtime_error& err)
     {
@@ -363,7 +375,8 @@ int main (int argc, char *argv[])
     std::string firmware_file = "";
     std::string serial_number = "";
     std::string mode_string = "";
-
+    std::string firmware_model = "";
+    bool assume_yes = false;
 
     enum mode
     {
@@ -385,8 +398,10 @@ int main (int argc, char *argv[])
             {"upload", required_argument, 0, 'u'},
             {"mode",   required_argument, 0, 'm'},
             {"file",   required_argument, 0, 'f'},
+            {"model",  required_argument, 0, 'o'},
             {"set",    no_argument,       0, 's'},
-            {"delete", no_argument, 0, '9'},
+            {"yes",    no_argument,       0, 'y'},
+            {"delete", no_argument,       0, '9'},
             {0,        0,                 0, 0}
         };
 
@@ -394,7 +409,7 @@ int main (int argc, char *argv[])
     {
         int option_index = 0;
 
-        int c = getopt_long (argc, argv, "ud:lim:f:s:h",
+        int c = getopt_long (argc, argv, "uyd:lim:f:s:o:h",
                              long_options, &option_index);
 
         if (c == -1)
@@ -424,10 +439,16 @@ int main (int argc, char *argv[])
             case 'f':
                 firmware_file = optarg;
                 break;
+            case 'o':
+                firmware_model = optarg;
+                break;
             case 'i':
                 active_mode = DETAILS;
                 break;
             case 's':
+                break;
+            case 'y':
+                assume_yes = true;
                 break;
             case '9':
                 active_mode = DELETE;
@@ -471,7 +492,7 @@ int main (int argc, char *argv[])
     }
     else if (active_mode == UPLOAD)
     {
-        upload_to_device(serial_number, firmware_file);
+        upload_to_device(serial_number, firmware_file, firmware_model, assume_yes);
     }
     else if (active_mode == DELETE)
     {

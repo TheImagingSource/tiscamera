@@ -44,7 +44,9 @@ Usb3Camera::Usb3Camera (std::shared_ptr<UsbSession> session,
                         device_info _dev,
                         unsigned int _interface):
     UsbCamera(session, _dev, _interface)
-{}
+{
+    open();
+}
 
 
 Usb3Camera::~Usb3Camera ()

@@ -154,3 +154,7 @@ For questions simply open a ticket or write us a mail at support@theimagingsourc
 ## Licensing
 
 All files are published under the Apache License 2.0, unless otherwise noted.
+
+Included libraries:
+7z under Public Domain
+PugiXml under MIT

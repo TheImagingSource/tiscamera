@@ -106,6 +106,8 @@ std::shared_ptr<UsbCamera> UsbHandler::open_camera (std::string serial_number)
 
     switch(t.camera_type)
     {
+        case USB33:
+            return std::make_shared<Usb33Camera>(this->session, d);
         case USB3:
             return std::make_shared<Usb3Camera>(this->session, d);
         case USB2:
@@ -114,6 +116,12 @@ std::shared_ptr<UsbCamera> UsbHandler::open_camera (std::string serial_number)
         default:
             return nullptr;
     }
+}
+
+
+std::shared_ptr<UsbSession> UsbHandler::get_session ()
+{
+    return this->session;
 }
 
 }; /* namespace tis */

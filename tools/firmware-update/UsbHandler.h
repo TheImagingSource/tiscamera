@@ -25,6 +25,7 @@
 
 #include "UsbSession.h"
 #include "UsbCamera.h"
+#include "Usb33Camera.h"
 #include "Usb3Camera.h"
 #include "Usb2Camera.h"
 #include "FileHandling.h"
@@ -54,6 +55,8 @@ public:
     /// @param serial - string containing the serial number of the camera that shall be opened
     /// @return shared pointer to the opened usb camera; Reutrns nullptr on failure
     std::shared_ptr<UsbCamera> open_camera (std::string serial);
+
+    std::shared_ptr<UsbSession> get_session ();
 
 }; /* class UsbHandler */
 
