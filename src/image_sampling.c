@@ -214,13 +214,13 @@ guint buffer_brightness_gray (image_buffer* buf)
     guint sampling_line_step = width / (SAMPLING_LINES + 1);
 
     guint y;
-    for (y = sampling_line_step; y < width; y += sampling_line_step )
+    for (y = sampling_line_step; y < height; y += sampling_line_step )
     {
         guint samplingColStep = ((height) / (SAMPLING_COLUMNS+1));
         byte* pLine = data + y * pitch;
 
         guint col;
-        for (col = samplingColStep; col < height; col += samplingColStep)
+        for (col = samplingColStep; col < width; col += samplingColStep)
         {
             ++cnt;
             y_accu += pLine[col];
