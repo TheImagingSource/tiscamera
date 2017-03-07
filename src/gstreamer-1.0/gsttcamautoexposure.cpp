@@ -861,17 +861,17 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
-                                     g_param_spec_uint ("exposure-max",
+                                     g_param_spec_int ("exposure-max",
                                                        "Exposure Maximum",
                                                        "Maximum value exposure can take",
-                                                       0, G_MAXUINT, 0,
+                                                       0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
-                                     g_param_spec_uint ("gain-max",
+                                     g_param_spec_int ("gain-max",
                                                        "Gain Maximum",
                                                        "Maximum value gain can take",
-                                                       0, G_MAXUINT, 0,
+                                                       0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_BRIGHTNESS_REFERENCE,
@@ -882,34 +882,34 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_LEFT,
-                                    g_param_spec_uint("left",
+                                    g_param_spec_int("left",
                                                       "Left boundary of ROI",
                                                       "Left boundary of the region of interest",
-                                                      0, G_MAXUINT, 0,
+                                                      0, G_MAXINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_TOP,
-                                    g_param_spec_uint("top",
+                                    g_param_spec_int("top",
                                                       "Top boundary of ROI",
                                                       "Top boundary of the region of interest",
-                                                      0, G_MAXUINT, 0,
+                                                      0, G_MAXINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_WIDTH,
-                                    g_param_spec_uint("width",
+                                    g_param_spec_int("width",
                                                       "Width of ROI starting at 'left'",
                                                       "Width of the region of interest",
-                                                      0, G_MAXUINT, 0,
+                                                      0, G_MAXINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_HEIGHT,
-                                    g_param_spec_uint("height",
+                                    g_param_spec_int("height",
                                                       "Lower, right boundary starting at 'top'",
                                                       "Height of the region of interest",
-                                                      0, G_MAXUINT, 0,
+                                                      0, G_MAXINT, 0,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
 
     g_object_class_install_property (gobject_class,
@@ -949,16 +949,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
-            tcamautoexposure->exposure.max = g_value_get_uint(value);
+            tcamautoexposure->exposure.max = g_value_get_int(value);
             if (tcamautoexposure->exposure.max == 0.0)
             {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             }
             break;
         case PROP_GAIN_MAX:
-            GST_DEBUG("Setting gain max to : %ud", g_value_get_uint(value));
+            GST_DEBUG("Setting gain max to : %ud", g_value_get_int(value));
 
-            tcamautoexposure->gain.max = g_value_get_uint(value);
+            tcamautoexposure->gain.max = g_value_get_int(value);
             if (tcamautoexposure->gain.max == 0.0)
             {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
@@ -968,16 +968,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->brightness_reference = g_value_get_int(value);
             break;
         case PROP_ROI_LEFT:
-            tcamautoexposure->image_region.x0 = g_value_get_uint(value);
+            tcamautoexposure->image_region.x0 = g_value_get_int(value);
             break;
         case PROP_ROI_TOP:
-            tcamautoexposure->image_region.y0 = g_value_get_uint(value);
+            tcamautoexposure->image_region.y0 = g_value_get_int(value);
             break;
         case PROP_ROI_WIDTH:
-            tcamautoexposure->image_region.x1 = g_value_get_uint(value);
+            tcamautoexposure->image_region.x1 = g_value_get_int(value);
             break;
         case PROP_ROI_HEIGHT:
-            tcamautoexposure->image_region.y1 = g_value_get_uint(value);
+            tcamautoexposure->image_region.y1 = g_value_get_int(value);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -1004,25 +1004,25 @@ void gst_tcamautoexposure_get_property (GObject* object,
             g_value_set_object (value, tcamautoexposure->camera_src);
             break;
         case PROP_EXPOSURE_MAX:
-            g_value_set_uint(value, tcamautoexposure->exposure.max);
+            g_value_set_int(value, tcamautoexposure->exposure.max);
             break;
         case PROP_GAIN_MAX:
-            g_value_set_uint(value, tcamautoexposure->gain.max);
+            g_value_set_int(value, tcamautoexposure->gain.max);
             break;
         case PROP_BRIGHTNESS_REFERENCE:
-            g_value_set_uint(value, tcamautoexposure->brightness_reference);
+            g_value_set_int(value, tcamautoexposure->brightness_reference);
             break;
         case PROP_ROI_LEFT:
-            g_value_set_uint(value, tcamautoexposure->image_region.x0);
+            g_value_set_int(value, tcamautoexposure->image_region.x0);
             break;
         case PROP_ROI_TOP:
-            g_value_set_uint(value, tcamautoexposure->image_region.y0);
+            g_value_set_int(value, tcamautoexposure->image_region.y0);
             break;
         case PROP_ROI_WIDTH:
-            g_value_set_uint(value, tcamautoexposure->image_region.x1);
+            g_value_set_int(value, tcamautoexposure->image_region.x1);
             break;
         case PROP_ROI_HEIGHT:
-            g_value_set_uint(value, tcamautoexposure->image_region.y1);
+            g_value_set_int(value, tcamautoexposure->image_region.y1);
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
