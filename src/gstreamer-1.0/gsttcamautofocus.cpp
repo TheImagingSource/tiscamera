@@ -478,6 +478,13 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
                                                      gchar* name,
                                                      const GValue* value)
 {
+    guint id = tcamwhitebalance_string_to_property_id(name);
+
+    if (id == 0)
+    {
+        return FALSE;
+    }
+
     gst_tcamautofocus_set_property(G_OBJECT(self),
                                    tcamwhitebalance_string_to_property_id(name),
                                    value, NULL);
