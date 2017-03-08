@@ -762,8 +762,6 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         return TRUE;
     }
 
-    return 0;
-
     return FALSE;
 }
 
