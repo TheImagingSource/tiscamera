@@ -132,7 +132,7 @@ static const char* tcamautofocus_property_id_to_string (guint id)
         case PROP_LEFT:
             return "Focus ROI Left";
         case PROP_TOP:
-            return "Focus ROI Right";
+            return "Focus ROI Top";
         case PROP_WIDTH:
             return "Focus ROI Width";
         case PROP_HEIGHT:
@@ -278,22 +278,22 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
     {
         if (value)
         {
-            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_init(value, G_TYPE_INT);
             g_value_set_boolean(value, self->roi_left);
         }
         if (min)
         {
-            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_init(min, G_TYPE_INT);
             g_value_set_boolean(min, FALSE);
         }
         if (max)
         {
-            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_init(max, G_TYPE_INT);
             g_value_set_boolean(max, TRUE);
         }
         if (def)
         {
-            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_init(def, G_TYPE_INT);
             g_value_set_boolean(def, TRUE);
         }
         if (step)
@@ -741,7 +741,7 @@ void gst_tcamautofocus_set_property (GObject* object,
             self->roi_left = g_value_get_int(value);
             break;
         case PROP_TOP:
-            self->roi_left = g_value_get_int(value);
+            self->roi_top = g_value_get_int(value);
             break;
         case PROP_WIDTH:
             self->roi_width = g_value_get_int(value);
