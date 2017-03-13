@@ -25,6 +25,8 @@
 #include <linux/videodev2.h>
 #include <memory>
 #include <thread>
+#include <mutex>              // std::mutex, std::unique_lock
+#include <condition_variable> // std::condition_variable
 
 VISIBILITY_INTERNAL
 
@@ -120,6 +122,11 @@ private:
 
     std::thread work_thread;
 
+    std::thread notification_thread;
+
+    std::condition_variable cv;
+    std::mutex mtx;
+
     int fd;
 
     VideoFormat active_video_format;
@@ -146,8 +153,12 @@ private:
 
     unsigned char lost_countdown;
     bool stop_all;
+    bool device_is_lost;
+    bool abort_all;
 
     std::thread udev_monitor;
+
+    void notification_loop ();
 
     void lost_device ();
 

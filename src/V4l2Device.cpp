@@ -141,7 +141,12 @@ static const unsigned char lost_countdown_default = 5;
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
     : emulate_bayer(false), emulated_fourcc(0),
-      property_handler(nullptr), is_stream_on(false), lost_countdown(lost_countdown_default), stop_all(false)
+      property_handler(nullptr),
+      is_stream_on(false),
+      lost_countdown(lost_countdown_default),
+      stop_all(false),
+      abort_all(false),
+      device_is_lost(false)
 {
     device = device_desc;
 
@@ -560,6 +565,8 @@ bool V4l2Device::start_stream ()
 
     is_stream_on = true;
 
+    this->notification_thread = std::thread(&V4l2Device::notification_loop, this);
+
     tcam_log(TCAM_LOG_INFO, "Starting stream in work thread.");
     this->work_thread = std::thread(&V4l2Device::stream, this);
 
@@ -582,11 +589,44 @@ bool V4l2Device::stop_stream ()
     }
 
     if (work_thread.joinable())
-        work_thread.join();
-
+    {
+        try
+        {
+            work_thread.join();
+        }
+        catch (const std::runtime_error& e)
+        {
+            tcam_log(TCAM_LOG_ERROR, "%s", e.what());
+        }
+    }
     tcam_log(TCAM_LOG_DEBUG, "Stopped stream");
 
+    this->abort_all = true;
+
     return true;
+}
+
+
+void V4l2Device::notification_loop ()
+{
+
+    while(this->is_stream_on)
+    {
+        std::unique_lock<std::mutex> lck(this->mtx);
+        this->cv.wait(lck);
+
+        if (this->abort_all)
+        {
+            break;
+        }
+
+        if (this->device_is_lost)
+        {
+            tcam_log(TCAM_LOG_DEBUG, "notifying callbacks about lost device");
+            this->lost_device();
+
+        }
+    }
 }
 
 
@@ -1234,6 +1274,17 @@ void V4l2Device::stream ()
             {
                 tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
                 statistics.frames_dropped++;
+
+                this->lost_countdown--;
+                if (this->lost_countdown <= 0)
+                {
+                    this->device_is_lost = true;
+                    tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
+                    std::unique_lock<std::mutex> lck(this->mtx);
+                    this->cv.notify_all();
+                    break;
+                }
+                continue;
             }
 
             bool ret_value = get_frame();
@@ -1247,9 +1298,12 @@ void V4l2Device::stream ()
                 this->lost_countdown--;
                 if (this->lost_countdown <= 0)
                 {
+                    this->device_is_lost = true;
+
                     tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
-                    lost_device();
-                    // break;
+                    std::unique_lock<std::mutex> lck(this->mtx);
+                    this->cv.notify_all();
+                    break;
                 }
             }
             /* receive frame since device is ready */
