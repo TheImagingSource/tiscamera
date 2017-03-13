@@ -96,6 +96,21 @@ void print_enumeration (const Property* p)
 }
 
 
+void print_double (const Property* p)
+{
+    PropertyDouble* d = (PropertyDouble*) p;
+
+    std::cout << std::setw(name_width) <<  d->get_name()
+              << "(double)"<< std::right
+              << " min=" << d->get_min()
+              << " max=" << d->get_max()
+              << " step=" << d->get_step()
+              << " default=" << d->get_default()
+              << " value=" << d->get_value()
+              << std::endl;
+}
+
+
 void print_single_property (const Property* p)
 {
     switch (p->get_type())
@@ -106,6 +121,10 @@ void print_single_property (const Property* p)
             break;
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
+        {
+            print_double(p);
+            break;
+        }
         case TCAM_PROPERTY_TYPE_STRING:
         {
             break;
