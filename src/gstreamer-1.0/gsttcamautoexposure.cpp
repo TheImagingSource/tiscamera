@@ -1055,7 +1055,11 @@ static void init_camera_resources (GstTcamautoexposure* self)
     {
         p = prop->get_struct();
         self->exposure.min = p.value.i.min;
-        self->exposure.max = p.value.i.max;
+        // do not set exposure.max
+        // we default to 0
+        // if 0 -> use max setting according to framerate
+        // if max is set by user we use that
+        // self->exposure.max = p.value.i.max;
         self->exposure.value = p.value.i.value;
 
         self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
