@@ -1144,49 +1144,55 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
         return 0.0;
     }
 
-    gdouble K_GAIN_FAST = 30;
-    gdouble K_GAIN_SLOW = 0.1;
-
-    gdouble g_ref;
-
-    if (diff <= 40.0)
+    if (self->auto_gain)
     {
-        g_ref = self->gain.value + K_GAIN_FAST * diff;
+        gdouble K_GAIN_FAST = 30;
+        gdouble K_GAIN_SLOW = 0.1;
+
+        gdouble g_ref;
+
+        if (diff <= 40.0)
+        {
+            g_ref = self->gain.value + K_GAIN_FAST * diff;
+        }
+        else
+        {
+            g_ref = self->gain.value + K_GAIN_SLOW * diff;
+        }
+
+        gdouble new_gain = fmax(fmin(g_ref, self->gain.max), self->gain.min);
+        double percentage_new =  (new_gain / self->gain.max * 100) - (self->gain.value / self->gain.max * 100);
+
+        if (fabs(self->gain.value - new_gain) > K_SMALL)
+        {
+            GST_DEBUG("fabs(self->gain.value - new_gain) > K_SMALL == %f - %f =%f (g_ref %f diff %f)",
+                      self->gain.value, new_gain, fabs(self->gain.value - new_gain), g_ref, diff);
+
+            double percentage = self->gain.max / 100;
+            double setter = new_gain;
+            GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
+            if (fabs(percentage_new) > percentage)
+            {
+                if (percentage_new > 0.0)
+                {
+                    setter = self->gain.value + percentage;
+                }
+                else
+                {
+                    setter = self->gain.value - percentage;
+                }
+            }
+            set_gain(self, setter);
+        }
+        GST_DEBUG("NEW GAIN: g_ref %f - new_gain %f / K_GAIN %f = %f",
+                  g_ref, new_gain, K_GAIN, (g_ref - new_gain) / K_GAIN);
+
+        return (g_ref - new_gain) / K_GAIN;
     }
     else
     {
-        g_ref = self->gain.value + K_GAIN_SLOW * diff;
+        return diff;
     }
-
-    gdouble new_gain = fmax(fmin(g_ref, self->gain.max), self->gain.min);
-    double percentage_new =  (new_gain / self->gain.max * 100) - (self->gain.value / self->gain.max * 100);
-
-    if (fabs(self->gain.value - new_gain) > K_SMALL)
-    {
-        GST_DEBUG("fabs(self->gain.value - new_gain) > K_SMALL == %f - %f =%f (g_ref %f diff %f)",
-                  self->gain.value, new_gain, fabs(self->gain.value - new_gain), g_ref, diff);
-
-        double percentage = self->gain.max / 100;
-        double setter = new_gain;
-        GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
-        if (fabs(percentage_new) > percentage)
-        {
-            if (percentage_new > 0.0)
-            {
-                setter = self->gain.value + percentage;
-            }
-            else
-            {
-                setter = self->gain.value - percentage;
-            }
-        }
-        set_gain(self, setter);
-    }
-
-    GST_DEBUG("NEW GAIN: g_ref %f - new_gain %f / K_GAIN %f = %f",
-              g_ref, new_gain, K_GAIN, (g_ref - new_gain) / K_GAIN);
-
-    return (g_ref - new_gain) / K_GAIN;
 }
 
 
@@ -1197,17 +1203,24 @@ static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
         return 0;
     }
 
-    const double e_ref = self->exposure.value * pow(2, diff);
-    const double new_exposure = fmax(fmin(e_ref, self->exposure.max), self->exposure.min);
-
-    if (fabs(self->exposure.value - new_exposure) > K_SMALL)
+    if (self->auto_exposure)
     {
-        set_exposure(self, new_exposure);
-    }
-    GST_DEBUG("Returning (e_ref - new_exposure = diff) %f - %f = %f",
-              e_ref, new_exposure, (e_ref - new_exposure));
+        const double e_ref = self->exposure.value * pow(2, diff);
+        const double new_exposure = fmax(fmin(e_ref, self->exposure.max), self->exposure.min);
 
-    return e_ref - new_exposure;
+        if (fabs(self->exposure.value - new_exposure) > K_SMALL)
+        {
+            set_exposure(self, new_exposure);
+        }
+        GST_DEBUG("Returning (e_ref - new_exposure = diff) %f - %f = %f",
+                  e_ref, new_exposure, (e_ref - new_exposure));
+
+        return e_ref - new_exposure;
+    }
+    else
+    {
+        return diff;
+    }
 }
 
 
