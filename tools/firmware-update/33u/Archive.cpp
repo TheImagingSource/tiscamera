@@ -18,7 +18,17 @@
 
 #include "lib/7z/7zCrc.h"
 
+// gcc only offers a full c++11 implementation with >= v5.1
+// codecvt for unicode conversions is not always available
+// thus use iconv in such cases
+#include <features.h>
+#if __GNUC_PREREQ(5,1)
 #include <codecvt>
+#else
+#include <iconv.h>
+#endif
+
+
 #include <string>
 #include <locale>
 #include <stdexcept>
@@ -100,6 +110,7 @@ Archive::Data::Data( const std::string& fn )
 #else
     typedef std::wstring utf16string;
 #endif
+
     utf16string utf16name;
     auto buffer = std::make_shared<ArchiveBuffer>();
 
@@ -111,9 +122,33 @@ Archive::Data::Data( const std::string& fn )
 
         SzArEx_GetFileNameUtf16( &db_, i, (UInt16*)utf16name.data() );
 
+
+#if __GNUC_PREREQ(5,1)
+
         std::wstring_convert<std::codecvt_utf8_utf16<utf16string::value_type>,
                              utf16string::value_type> conversion;
         std::string utf8name = conversion.to_bytes( utf16name );
+
+#else
+
+        iconv_t ico = iconv_open("UTF8", "UTF16");
+
+        size_t out_size = 1024;
+
+        char buf [out_size];
+
+        char* tmp = buf;
+        const char16_t* tmp16 = utf16name.data();
+
+        size_t in_size = len*2;
+
+        size_t ret = iconv(ico, (char**)&tmp16, &in_size, &tmp, &out_size);
+
+        std::string utf8name(buf);
+
+        iconv_close(ico);
+
+#endif
 
         while( utf8name.back() == '\0' )
             utf8name.pop_back();
