@@ -501,6 +501,7 @@ Status upgradeFirmware (IFirmwareWriter& dev,
             rval = upgradeFPGAFirmware(dev, fileName, modelName, progressFunc);
             break;
         case 3: // GigE3 (new .fwpack format)
+        case 4:
             auto func = [=] (int i, const std::string& s)
                 {
                     progressFunc(i);
