@@ -418,6 +418,35 @@ static void gst_tcambin_clear_kid (GstTcamBin* src)
     }
 }
 
+/*
+  extracts video/x-raw from caps and checks if only mono is present
+ */
+static gboolean gst_tcam_raw_only_has_mono (const GstCaps* src_caps)
+{
+    GstCaps* raw_filter = gst_caps_from_string("video/x-raw");
+
+    GstCaps* caps = gst_caps_intersect(src_caps, raw_filter);
+
+    gst_caps_unref(raw_filter);
+
+    GstCaps* filter = gst_caps_from_string("video/x-raw,format={GRAY8, GRAY16_LE}; ANY");
+
+    GstCaps* sub = gst_caps_subtract(caps, filter);
+
+    gst_caps_unref(filter);
+
+    if (gst_caps_is_empty(sub))
+    {
+        gst_caps_unref(sub);
+        return TRUE;
+    }
+    gst_caps_unref(sub);
+
+    gst_caps_unref(caps);
+
+    return FALSE;
+}
+
 
 gboolean gst_tcam_is_fourcc_bayer (const guint fourcc)
 {
@@ -609,7 +638,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
     bool conversion_needed = false;
-    if (gst_caps_is_empty(intersection))
+    if (gst_caps_is_empty(intersection) || (gst_tcam_raw_only_has_mono(available_caps) && camera_has_bayer(self)))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
 
