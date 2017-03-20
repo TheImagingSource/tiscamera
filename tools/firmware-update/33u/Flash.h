@@ -29,7 +29,7 @@ namespace device_interface
 
 	public:
 		Flash( GenCPFacade& gencp )
-			: gencp_ { gencp }
+			: gencp_ (gencp)
 		{
 		}
 

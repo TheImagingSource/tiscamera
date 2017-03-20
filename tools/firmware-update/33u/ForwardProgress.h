@@ -28,7 +28,7 @@ namespace progress
 	{
 	public:
 		ForwardProgress (IReportProgress& fwd)
-			: fwd_ { fwd }
+			: fwd_(fwd)
 		{}
 
 	public:
