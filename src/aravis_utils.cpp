@@ -435,9 +435,19 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else
     {
-        type_to_use = ctrl_m.type_to_use;
+        // type_to_use = ctrl_m.type_to_use;
+        type_to_use = value_type_to_ctrl_type(type);
 
         prop = create_empty_property(ctrl_m.id);
+
+        prop.type = type_to_use;
+
+        if (prop.id == TCAM_PROPERTY_EXPOSURE)
+        {
+            prop.type = TCAM_PROPERTY_TYPE_INTEGER;
+            type_to_use = TCAM_PROPERTY_TYPE_INTEGER;
+
+        }
     }
 
     if (ARV_IS_GC_ENUMERATION (node))
