@@ -1064,7 +1064,7 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     desc.conversion_factor = 0.0;
     desc.prop = p;
 
-    static std::vector<TCAM_PROPERTY_ID> special_controls = {TCAM_PROPERTY_BINNING};
+    static std::vector<TCAM_PROPERTY_ID> special_controls = {};
 
     if (std::find(special_controls.begin(), special_controls.end(), p->get_ID()) != special_controls.end())
     {
