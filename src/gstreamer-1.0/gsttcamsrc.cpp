@@ -1316,6 +1316,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
         {
             if (self->device != nullptr)
             {
+                // do not close camera, as a restart with the same device might be wanted
                 gst_tcam_src_close_camera(self);
             }
 

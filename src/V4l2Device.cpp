@@ -565,7 +565,10 @@ bool V4l2Device::start_stream ()
 
     is_stream_on = true;
 
-    this->notification_thread = std::thread(&V4l2Device::notification_loop, this);
+    if (!this->notification_thread.joinable())
+    {
+        this->notification_thread = std::thread(&V4l2Device::notification_loop, this);
+    }
 
     tcam_log(TCAM_LOG_INFO, "Starting stream in work thread.");
     this->work_thread = std::thread(&V4l2Device::stream, this);

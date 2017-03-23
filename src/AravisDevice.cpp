@@ -417,6 +417,11 @@ bool AravisDevice::start_stream ()
         return false;
     }
 
+    if (this->stream != nullptr)
+    {
+        g_object_unref(this->stream);
+    }
+
     this->stream = arv_camera_create_stream(this->arv_camera, NULL, NULL);
 
     if (this->stream == nullptr)
