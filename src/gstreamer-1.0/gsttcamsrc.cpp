@@ -282,7 +282,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
     if (group)
     {
         g_value_init(group, G_TYPE_STRING);
-        g_value_set_string(category, tcam::get_control_reference(prop.group.property_group).name.c_str());
+        g_value_set_string(group, tcam::get_control_reference(prop.group.property_group).name.c_str());
     }
 
     switch (prop.type)
