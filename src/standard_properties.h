@@ -696,6 +696,19 @@ inline TCAM_PROPERTY_ID string2property_id (const std::string& name)
 }
 
 
+inline std::string property_id2string (TCAM_PROPERTY_ID id)
+{
+    for (const auto& ref : ctrl_reference_table)
+    {
+        if (ref.id == id)
+        {
+            return ref.name;
+        }
+    }
+    return "";
+}
+
+
 inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);

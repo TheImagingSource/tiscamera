@@ -17,6 +17,7 @@
 #include "public_utils.h"
 
 #include "utils.h"
+#include "standard_properties.h"
 #include "format.h"
 
 using namespace tcam;
@@ -46,6 +47,11 @@ std::string tcam::category2string (TCAM_PROPERTY_CATEGORY category)
         case TCAM_PROPERTY_CATEGORY_UNKNOWN: return "Unknown";
         default: return "";
     }
+}
+
+std::string tcam::property_id_to_string (TCAM_PROPERTY_ID id)
+{
+    return property_id2string(id);
 }
 
 
