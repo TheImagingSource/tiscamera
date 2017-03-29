@@ -538,6 +538,14 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
             // TODO check for image locking
 
+            // this can happen when the gstreamer pipeline is abruptly killed.
+            // we want to exit gracefully and not cause a segfault
+            if (self->buffers.empty())
+            {
+                arv_stream_push_buffer(self->stream, buffer);
+                return;
+            }
+
             self->buffers.at(self->current_buffer).is_queued = false;
 
             // self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
