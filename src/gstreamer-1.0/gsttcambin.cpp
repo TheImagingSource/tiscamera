@@ -1089,18 +1089,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
         }
         case GST_STATE_CHANGE_READY_TO_PAUSED:
         {
-            GstEvent* event = gst_event_new_reconfigure();
-            if (gst_pad_send_event(gst_pad_get_peer(self->pad), event))
-            {
-                GST_INFO("Reconfigure successful");
-            }
-            else
-            {
-                GST_ERROR("Could not reconfigure");
-            }
-
             GST_INFO("READY_TO_PAUSED");
-
 
             GstPad* sinkpad = gst_pad_get_peer(self->pad);
 
