@@ -828,8 +828,8 @@ static void gst_tcambin_clear_source (GstTcamBin* self)
 {
     if (self->src)
     {
+        gst_element_set_state(self->src, GST_STATE_NULL);
         gst_bin_remove(GST_BIN(self), self->src);
-        g_object_unref(self->src);
         self->src = nullptr;
     }
 }
@@ -839,33 +839,33 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
     if (self->pipeline_caps)
     {
+        gst_element_set_state(self->pipeline_caps, GST_STATE_NULL);
         gst_element_unlink_pads(self->src, "src", self->pipeline_caps, "sink");
         gst_bin_remove(GST_BIN(self), self->pipeline_caps);
-        g_object_unref(self->pipeline_caps);
         self->pipeline_caps = nullptr;
     }
     if (self->exposure)
     {
+        gst_element_set_state(self->exposure, GST_STATE_NULL);
         gst_bin_remove(GST_BIN(self), self->exposure);
-        g_object_unref(self->exposure);
         self->exposure = nullptr;
     }
     if (self->whitebalance)
     {
+        gst_element_set_state(self->whitebalance, GST_STATE_NULL);
         gst_bin_remove(GST_BIN(self), self->whitebalance);
-        g_object_unref(self->whitebalance);
         self->whitebalance = nullptr;
     }
     if (self->debayer)
     {
+        gst_element_set_state(self->debayer, GST_STATE_NULL);
         gst_bin_remove(GST_BIN(self), self->debayer);
-        g_object_unref(self->debayer);
         self->debayer = nullptr;
     }
     if (self->focus)
     {
+        gst_element_set_state(self->focus, GST_STATE_NULL);
         gst_bin_remove(GST_BIN(self), self->focus);
-        g_object_unref(self->focus);
         self->focus = nullptr;
     }
 }
@@ -1274,6 +1274,9 @@ static void gst_tcambin_init (GstTcamBin* self)
 
 static void gst_tcambin_finalize (GObject* object)
 {
+    gst_tcambin_clear_elements(GST_TCAMBIN(object));
+    gst_tcambin_clear_source(GST_TCAMBIN(object));
+
     G_OBJECT_CLASS (parent_class)->finalize(object);
 }
 
