@@ -245,8 +245,6 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
 {
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(prop);
 
-    flags = nullptr;
-
     if (strcmp(name, "whitebalance-red") == 0)
     {
         if (value)

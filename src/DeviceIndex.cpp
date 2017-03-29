@@ -141,7 +141,7 @@ void DeviceIndex::update_device_list ()
 
         if (found == tmp_dev_list.end())
         {
-            tcam_log(TCAM_LOG_INFO, "Lost device %s. Conntacting callbacks", d.get_name().c_str());
+            tcam_log(TCAM_LOG_INFO, "Lost device %s. Contacting callbacks", d.get_name().c_str());
             fire_device_lost(d);
         }
     }

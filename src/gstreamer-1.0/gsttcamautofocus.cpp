@@ -75,7 +75,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 
 static GSList* gst_tcamautofocus_get_property_names (TcamProp* self);
 
-static const gchar *gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name);
+static gchar *gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name);
 
 static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* self,
                                                      gchar* name,
@@ -184,7 +184,7 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
 }
 
 
-static const gchar* gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name)
+static gchar* gst_tcamautofocus_get_property_type (TcamProp* self, gchar* name)
 {
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
@@ -225,6 +225,17 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(prop);
 
+    if (category)
+    {
+        g_value_init(category, G_TYPE_STRING);
+        g_value_set_string(category, "Special");
+    }
+    if (group)
+    {
+        g_value_init(group, G_TYPE_STRING);
+        g_value_set_string(group, "Focus");
+    }
+
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
         if (value)
@@ -249,8 +260,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         }
         if (step)
         {
-            g_value_init(step, G_TYPE_INT);
-            g_value_set_int(step, 1);
+            g_value_init(step, G_TYPE_BOOLEAN);
         }
         if (flags)
         {
@@ -261,16 +271,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         {
             g_value_init(type, G_TYPE_STRING);
             g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
-        }
-        if (category)
-        {
-            g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "Special");
-        }
-        if (group)
-        {
-            g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "Focus");
         }
         return TRUE;
     }
@@ -284,17 +284,17 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_boolean(min, FALSE);
+            g_value_set_int(min, 0);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_boolean(max, TRUE);
+            g_value_set_int(max, G_MAXINT);
         }
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_boolean(def, TRUE);
+            g_value_set_int(def, 0);
         }
         if (step)
         {
@@ -310,16 +310,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         {
             g_value_init(type, G_TYPE_STRING);
             g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
-        }
-        if (category)
-        {
-            g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
-        }
-        if (group)
-        {
-            g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
         }
         return TRUE;
     }
@@ -360,16 +350,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
             g_value_init(type, G_TYPE_STRING);
             g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
         }
-        if (category)
-        {
-            g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
-        }
-        if (group)
-        {
-            g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
-        }
         return TRUE;
     }
     else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_WIDTH)) == 0)
@@ -409,16 +389,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
             g_value_init(type, G_TYPE_STRING);
             g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
         }
-        if (category)
-        {
-            g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
-        }
-        if (group)
-        {
-            g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
-        }
         return TRUE;
     }
     else if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_HEIGHT)) == 0)
@@ -457,16 +427,6 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         {
             g_value_init(type, G_TYPE_STRING);
             g_value_set_string(type, gst_tcamautofocus_get_property_type(prop, name));
-        }
-        if (category)
-        {
-            g_value_init(category, G_TYPE_STRING);
-            g_value_set_string(category, "");
-        }
-        if (group)
-        {
-            g_value_init(group, G_TYPE_STRING);
-            g_value_set_string(group, "");
         }
         return TRUE;
     }
