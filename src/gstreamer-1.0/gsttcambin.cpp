@@ -1263,9 +1263,6 @@ static void gst_tcambin_init (GstTcamBin* self)
 
 static void gst_tcambin_finalize (GObject* object)
 {
-    gst_tcambin_clear_elements(GST_TCAMBIN(object));
-    gst_tcambin_clear_source(GST_TCAMBIN(object));
-
     G_OBJECT_CLASS (parent_class)->finalize(object);
 }
 
