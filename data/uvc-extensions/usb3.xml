@@ -292,6 +292,10 @@
       <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT</id>
       <value>0x0199e256</value>
     </constant>
+    <constant type="integer">
+      <id>V4L2_OVERRIDE_SCANNING_MODE</id>
+      <value>0x0199e257</value>
+    </constant>
 
     <!-- register values -->
 
@@ -1244,6 +1248,19 @@
           </requests>
         </control>
 
+        <control id="override_scanning_mode">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_OVERRIDE_SCANNING_MODE</selector>
+          <index>57</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
       </controls>
     </device>
   </devices>
@@ -2096,6 +2113,19 @@
       <v4l2>
         <id>V4L2_EXPOSURE_AUTO_UPPER_LIMIT_AUTO</id>
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Override Scanning Mode</name>
+      <uvc>
+        <control_ref idref="override_scanning_mode"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_OVERRIDE_SCANNING_MODE</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
   </mappings>
