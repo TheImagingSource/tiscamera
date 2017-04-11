@@ -59,9 +59,9 @@ DeviceIndex::~DeviceIndex ()
 void DeviceIndex::register_device_lost (dev_callback c, void* user_data)
 {
     tcam_log(TCAM_LOG_DEBUG, "Registered device lost callback");
-    mtx.lock();
+
+    std::lock_guard<std::mutex> lock(mtx);
     callbacks.push_back({c, user_data, ""});
-    mtx.unlock();
 }
 
 
@@ -70,15 +70,14 @@ void DeviceIndex::register_device_lost (dev_callback c,
                                         const std::string& serial)
 {
     tcam_log(TCAM_LOG_DEBUG, "Registered device lost callback for %s", serial.c_str());
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
     callbacks.push_back({c, user_data, serial});
-    mtx.unlock();
 }
 
 
 void DeviceIndex::remove_device_lost (dev_callback callback)
 {
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
 
     auto it = std::begin(callbacks); //std::begin is a free function in C++11
     for (auto& value : callbacks)
@@ -91,19 +90,16 @@ void DeviceIndex::remove_device_lost (dev_callback callback)
         }
         it++; //at the end OR make sure you do this in each iteration
     }
-
-    mtx.unlock();
 }
 
 
 void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& serial)
 {
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
 
     auto it = std::begin(callbacks); //std::begin is a free function in C++11
     for (auto& value : callbacks)
     {
-
         if (value.callback == callback && value.serial.compare(serial) == 0)
         {
             callbacks.erase(it);
@@ -111,8 +107,6 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
         }
         it++; //at the end OR make sure you do this in each iteration
     }
-
-    mtx.unlock();
 }
 
 
@@ -145,15 +139,13 @@ void DeviceIndex::update_device_list ()
             fire_device_lost(d);
         }
     }
-
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
 
     device_list.clear();
 
     device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
 
     have_list = true;
-    mtx.unlock();
 }
 
 
@@ -169,7 +161,8 @@ void DeviceIndex::run ()
 
 void DeviceIndex::fire_device_lost (const DeviceInfo& d)
 {
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
+
     for (auto& c : callbacks)
     {
         if (c.serial.empty() || c.serial.compare(d.get_serial()) == 0)
@@ -177,7 +170,6 @@ void DeviceIndex::fire_device_lost (const DeviceInfo& d)
             c.callback(d, c.data);
         }
     }
-    mtx.unlock();
 }
 
 
