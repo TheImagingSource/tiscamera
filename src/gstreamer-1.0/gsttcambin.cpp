@@ -745,8 +745,24 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
             GST_ERROR(gst_caps_to_string(intersection));
         }
 
+        // since no caps are given, assume that only displayable
+        // formats are wished. thus silently drop bayer
+        // This ensure something usable (i.e. displayable) is selected
+        // BUT only do this when other formats than bayer are available
+        // possible pipeline is tcambin ! bayer2rgb ! fakesink
+        GstCaps* temp = gst_caps_subtract(intersection,
+                                          gst_caps_from_string("video/x-bayer"));
 
-        modules.caps = find_largest_caps(intersection);
+        if (gst_caps_is_empty(temp))
+        {
+            modules.caps = find_largest_caps(intersection);
+        }
+        else
+        {
+            modules.caps = find_largest_caps(temp);
+        }
+
+        gst_caps_unref(temp);
         gst_caps_unref(intersection);
 
         if (modules.caps == nullptr)
