@@ -22,6 +22,8 @@
 
 #include <vector>
 
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -35,5 +37,7 @@ public:
 };
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* TCAM_FORMATHANDLERINTERFACE_H */

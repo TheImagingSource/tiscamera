@@ -26,6 +26,8 @@
 
 #include "DeviceInterface.h"
 
+VISIBILITY_INTERNAL
+
 namespace tcam
 {
 
@@ -74,5 +76,7 @@ public:
 
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* TCAM_BACKEND_LOADER_H */

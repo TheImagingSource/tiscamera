@@ -18,6 +18,9 @@
 #define TCAM_V4L2_UVC_IDENTIFIER_H
 
 #include "property_identifications.h"
+#include "compiler_defines.h"12
+
+VISIBILITY_INTERNAL
 
 /**
  * The IDs in this file are a direct representation of identifier that
@@ -71,5 +74,6 @@ const TCAM_PROPERTY_ID TCAM_V4L2_CID_SCAN_X = 0x0199e927;
 const TCAM_PROPERTY_ID TCAM_V4L2_CID_SCAN_Y = 0x0199e928;
 const TCAM_PROPERTY_ID TCAM_V4L2_CID_SKIP = 0x0199e929;
 
+VISIBILITY_POP
 
 #endif /* TCAM_V4L2_UVC_IDENTIFIER_H */
