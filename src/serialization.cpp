@@ -16,7 +16,6 @@
 
 #include "serialization.h"
 
-#include "Error.h"
 #include "utils.h"
 #include "internal.h"
 

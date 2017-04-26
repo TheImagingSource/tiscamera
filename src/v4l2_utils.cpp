@@ -21,7 +21,6 @@
 
 #include "utils.h"
 #include "logging.h"
-#include "Error.h"
 
 #if HAVE_UDEV
 #include <libudev.h>

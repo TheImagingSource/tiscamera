@@ -16,8 +16,6 @@
 
 #include "CaptureDevice.h"
 
-#include "Error.h"
-
 #include "logging.h"
 #include "utils.h"
 #include "serialization.h"

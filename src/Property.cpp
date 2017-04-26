@@ -18,7 +18,6 @@
 #include "base_types.h"
 #include "logging.h"
 #include "utils.h"
-#include "Error.h"
 
 #include <cstring>
 #include <algorithm>

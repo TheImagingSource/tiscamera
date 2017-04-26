@@ -29,7 +29,6 @@
 #include "MemoryBuffer.h"
 #include "DeviceInfo.h"
 #include "DeviceIndex.h"
-#include "Error.h"
 #include "ImageSink.h"
 #include "serialization.h"
 #include "public_utils.h"

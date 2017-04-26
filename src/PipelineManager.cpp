@@ -18,8 +18,6 @@
 
 #include "internal.h"
 
-#include "Error.h"
-
 #include <ctime>
 #include <cstring>
 #include <algorithm>

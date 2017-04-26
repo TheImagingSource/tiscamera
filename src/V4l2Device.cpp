@@ -20,7 +20,6 @@
 #include "utils.h"
 #include "v4l2_utils.h"
 #include "PropertyGeneration.h"
-#include "Error.h"
 #include <errno.h>
 #include "v4l2_uvc_identifier.h"
 #include "dfk73.h"

@@ -60,7 +60,6 @@ set(base
   format.cpp
   logging.cpp
   DeviceInfo.cpp
-  # Error.cpp
   image_transform_base.h
   MemoryBuffer.cpp
   Properties.cpp

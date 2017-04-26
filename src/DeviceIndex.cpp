@@ -25,8 +25,6 @@
 #include "logging.h"
 #include "DeviceIndex.h"
 
-#include "Error.h"
-
 #include "BackendLoader.h"
 
 using namespace tcam;

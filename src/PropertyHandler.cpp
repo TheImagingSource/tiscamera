@@ -16,7 +16,6 @@
 
 #include "PropertyHandler.h"
 
-#include "Error.h"
 #include "standard_properties.h"
 #include "utils.h"
 #include "logging.h"
