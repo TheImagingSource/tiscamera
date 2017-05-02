@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+
+# Copyright 2017 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys
+import functools
+# from argparse import ArgParse
+import tcam_capture
+from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
+from tcam_capture.TcamSignal import TcamSignals
+from tcam_capture.TcamCaptureData import TcamCaptureData
+from tcam_capture.PropertyDialog import PropertyDialog
+from tcam_capture.TcamView import TcamView, TcamScreen
+from tcam_capture.OptionsDialog import OptionsDialog
+from tcam_capture.Settings import Settings
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
+                             QDockWidget, QAction, QStyle, QPushButton)
+
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QObject
+from PyQt5.QtGui import QIcon
+
+import gi
+
+gi.require_version("Gst", "1.0")
+
+from gi.repository import Gst
+
+import logging
+
+log = logging.getLogger(__name__)
+
+
+class TCamCapture(QMainWindow):
+
+    open_options = pyqtSignal()
+
+    def __init__(self, app):
+        super().__init__()
+        app.aboutToQuit.connect(self.quit)
+        self.app = app
+        logging.basicConfig(level=logging.DEBUG)
+        self.settings = Settings()
+        self.settings.load()
+
+        self.data = TcamCaptureData()
+        self.data.signals = TcamSignals()
+
+        self.data.work_thread = QtCore.QThread()
+
+        self.indexer = TcamDeviceIndex()
+        self.indexer.update_device_list.connect(self.update_device_list)
+        self.indexer.moveToThread(self.data.work_thread)
+
+        self.data.work_thread.start()
+
+        self.setWindowTitle("TCam Capture")
+
+        self.setup_ui()
+
+        self.serial = None
+        self.pipeline = None
+        self.props = None
+        self.show()
+
+    def __del__(self):
+        self.data.work_thread.quit()
+
+    def toggle_fullscreen(self):
+
+        if self.view is not None:
+            self.view.toggle_fullscreen()
+        else:
+            if self.isFullScreen():
+                self.showNormal()
+            else:
+                self.showFullScreen()
+
+    def toggle_maximized(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
+
+    def keyPressEvent(self, event):
+        """Overwrite of QMainWindow::keyPressEvent"""
+        if event.key() == QtCore.Qt.Key_F11 or event.key() == QtCore.Qt.Key_F:
+            log.info("Toggling fullscreen")
+            self.toggle_fullscreen()
+        elif event.key() == QtCore.Qt.Key_F10:
+            log.info("Toggling maximize")
+            self.toggle_maximized()
+
+    def saved_image(self, image_path: str):
+        """Slot for saving an image """
+
+        self.statusBar().showMessage("Saved image {}".format(image_path), 10)
+
+    def setup_ui(self):
+
+        self.pixel_label = QLabel("", self)
+        self.statusBar().addPermanentWidget(self.pixel_label)
+
+        exit_action = QAction('&Exit', self)
+        exit_action.setShortcut('Ctrl+Q')
+        exit_action.setStatusTip('Exit application')
+        exit_action.triggered.connect(self.app.quit)
+        self.file_menu = self.menuBar().addMenu("File")
+        self.file_menu.addAction(exit_action)
+
+        preferences_action = QAction('&Preferences', self)
+        preferences_action.triggered.connect(self.open_preferences)
+        self.open_options.connect(self.open_preferences)
+        self.file_menu.addAction(preferences_action)
+
+        self.open_menu = self.menuBar().addMenu("Device")
+
+        close = QAction("Close", self)
+        close.triggered.connect(self.close)
+        self.menuBar().addAction(close)
+        self.format_menu = None
+        self.save_image = QAction("Save Image", self)
+        self.save_image.triggered.connect(self.save_image_action)
+        self.menuBar().addAction(self.save_image)
+
+        self.recording_action = QAction("", self)
+        # self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+        self.recording_action.setIconText("Start recording")
+        self.recording_action.setText("Start recording")
+        self.recording_action.triggered.connect(self.start_recording_video)
+        # self.recording_action.clicked.connect(self.start_recording_video)
+        self.menuBar().addAction(self.recording_action)
+        self.set_device_menus_enabled(False)
+
+        self.view = None
+
+    def open_preferences(self):
+        (result, location,
+         image, video) = OptionsDialog.get_options(self.settings)
+
+        if result:
+            self.settings.set_location(location)
+            self.settings.set_image_type(image)
+            self.settings.set_video_type(video)
+            self.settings.save()
+
+    def save_image_action(self):
+        """"""
+        self.view.save_image(self.settings.get_image_type())
+
+    def start_recording_video(self):
+        """"""
+        self.view.start_recording_video(self.settings.get_video_type())
+        # self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaStop))
+        self.recording_action.setText("Stop recording")
+        self.recording_action.triggered.connect(self.stop_recording_video)
+        # self.recording_action.clicked.connect(self.stop_recording_video)
+
+    def stop_recording_video(self):
+        """"""
+        self.view.stop_recording_video()
+        self.recording_action.setText("Start recording")
+        # self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+        # self.recording_action.clicked.connect(self.start_recording_video)
+        self.recording_action.triggered.connect(self.start_recording_video)
+
+    def update_device_list(self, device_list):
+        """"""
+        self.open_menu.clear()
+
+        # ensure our devices are always listed in the same order
+        device_list.sort(key=lambda x: x.serial)
+
+        for d in device_list:
+            device_action = QAction(d.model + " - " + d.serial, self)
+            device_action.setStatusTip("Open this device.")
+            device_action.triggered.connect(functools.partial(self.open_device,
+                                                              d.serial))
+            self.open_menu.addAction(device_action)
+
+    def new_pixel_under_mouse(self, color: QtGui.QColor):
+        """Slot for TcamView.new_pixel_under_mouse"""
+        self.pixel_label.setText(color.name())
+
+    def open_device(self, serial: str):
+        """Open device and starts video stream"""
+        self.close()
+        self.serial = serial
+        self.view = TcamView(self.serial, self)
+        self.view.create_pipeline()
+        self.view.image_saved.connect(self.saved_image)
+        self.view.new_pixel_under_mouse.connect(self.new_pixel_under_mouse)
+        self.view.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                QtWidgets.QSizePolicy.Expanding)
+        self.setCentralWidget(self.view)
+        self.format_menu = self.view.get_format_menu(self)
+        self.menuBar().addMenu(self.format_menu)
+        self.data.tcam = self.view.get_tcam()
+        self.view.pause()
+        self.props = QDockWidget("Properties", self)
+        self.props.setWidget(PropertyDialog(self.data))
+        self.props.setFloating(False)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.props)
+        self.set_device_menus_enabled(True)
+        self.play()
+
+    def play(self, video_format=None):
+        """"""
+        if self.view is not None:
+            self.view.play(video_format)
+
+    def stop(self):
+        """Stops the video stream"""
+        if self.view is not None:
+            self.view.stop()
+
+    def close(self):
+        """Stops the video stream and closes the device"""
+        if self.view is not None:
+            self.stop()
+            self.removeDockWidget(self.props)
+            self.props = None
+            self.set_device_menus_enabled(False)
+            self.view = None
+            log.info("Closed device")
+
+    def set_device_menus_enabled(self, enabled):
+        self.save_image.setEnabled(enabled)
+        if self.format_menu is not None:
+            self.format_menu.setEnabled(enabled)
+        self.recording_action.setEnabled(enabled)
+
+    def quit(self):
+        log.info("Shutting down...")
+        self.close()
+
+        self.data.work_thread.quit()
+        self.data.work_thread.wait()
+        print("Have a nice day.")
+
+
+if __name__ == '__main__':
+
+    Gst.init(sys.argv)
+    app = QApplication(sys.argv)
+    tcam_capture = TCamCapture(app)
+
+    sys.exit(app.exec_())
