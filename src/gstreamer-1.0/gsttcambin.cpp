@@ -1241,6 +1241,12 @@ static void gst_tcambin_set_property (GObject* object,
         case PROP_SERIAL:
         {
             self->device_serial = g_strdup(g_value_get_string(value));
+            if (self->src != nullptr)
+            {
+                GST_INFO("Setting source serial to %s", self->device_serial);
+                g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
+            }
+
             break;
         }
         case PROP_CAPS:
