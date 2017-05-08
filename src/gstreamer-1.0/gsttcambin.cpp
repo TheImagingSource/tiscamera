@@ -853,6 +853,16 @@ static void gst_tcambin_clear_source (GstTcamBin* self)
 
 static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
+
+    auto remove_element = [=] (GstElement* element)
+        {
+            gst_element_set_state(element, GST_STATE_NULL);
+            gst_bin_remove(GST_BIN(self), element);
+            // not needed bin_remove automatically does that
+            // gst_object_unref(element);
+            element = nullptr;
+        };
+
     if (self->pipeline_caps)
     {
         gst_element_set_state(self->pipeline_caps, GST_STATE_NULL);
@@ -862,28 +872,47 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     }
     if (self->exposure)
     {
-        gst_element_set_state(self->exposure, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->exposure);
-        self->exposure = nullptr;
+        remove_element(self->exposure);
     }
     if (self->whitebalance)
     {
-        gst_element_set_state(self->whitebalance, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->whitebalance);
-        self->whitebalance = nullptr;
+        remove_element(self->whitebalance);
     }
     if (self->debayer)
     {
-        gst_element_set_state(self->debayer, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->debayer);
-        self->debayer = nullptr;
+        remove_element(self->debayer);
     }
     if (self->focus)
     {
-        gst_element_set_state(self->focus, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->focus);
-        self->focus = nullptr;
+        remove_element(self->focus);
     }
+}
+
+
+static gboolean create_and_add_element (GstElement** element,
+                                        const char* factory_name,
+                                        const char* element_name,
+                                        GstElement** previous_element,
+                                        GstBin* bin,
+                                        std::string& pipeline_description)
+{
+    *element = gst_element_factory_make(factory_name, element_name);
+    if (element)
+    {
+        GST_DEBUG("Adding %s(%p) to pipeline", factory_name, *element);
+        gst_bin_add(bin, *element);
+        pipeline_description += " ! ";
+        pipeline_description += factory_name;
+
+        gst_element_link(*previous_element, *element);
+        *previous_element = *element;
+    }
+    else
+    {
+        GST_ERROR("Could not create %s element. Aborting.", factory_name);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 
@@ -937,27 +966,24 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
     {
-        GST_DEBUG("Adding autoexposure to pipeline");
-        self->exposure = gst_element_factory_make("tcamautoexposure", "tcambin-exposure");
-        gst_bin_add(GST_BIN(self), self->exposure);
-
-        pipeline_description += " ! tcamautoexposure";
-        gst_element_link(previous_element, self->exposure);
-        previous_element = self->exposure;
+        if (!create_and_add_element(&self->exposure,
+                                    "tcamautoexposure", "tcambin-exposure",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
+        {
+            return FALSE;
+        }
     }
 
     if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
         && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
     {
-        self->focus = gst_element_factory_make("tcamautofocus", "tcambin-focus");
-        if (self->focus)
+        if (!create_and_add_element(&self->focus,
+                                    "tcamautofocus", "tcambin-focus",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
         {
-            GST_DEBUG("Adding tcamautofocus to pipeline.");
-            gst_bin_add(GST_BIN(self), self->focus);
-
-            pipeline_description += " ! tcamautofocus";
-            gst_element_link(previous_element, self->focus);
-            previous_element = self->focus;
+            return FALSE;
         }
     }
 
@@ -966,37 +992,20 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         // use this to see if the device already has the feature
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
         {
-            self->whitebalance = gst_element_factory_make("tcamwhitebalance", "tcambin-whitebalance");
-            if (self->whitebalance)
+            if (!create_and_add_element(&self->whitebalance,
+                                        "tcamwhitebalance", "tcambin-whitebalance",
+                                        &previous_element,
+                                        GST_BIN(self), pipeline_description))
             {
-                GST_DEBUG("Adding whitebalance to pipeline");
-                gst_bin_add(GST_BIN(self), self->whitebalance);
-
-                pipeline_description += " ! tcamwhitebalance";
-                gst_element_link(previous_element, self->whitebalance);
-                previous_element = self->whitebalance;
-            }
-            else
-            {
-                GST_ERROR("Could not create whitebalance element. Aborting.");
                 return FALSE;
             }
         }
 
-        self->debayer = gst_element_factory_make("bayer2rgb", "tcambin-debayer");
-        if (self->debayer)
+        if (!create_and_add_element(&self->debayer,
+                                    "bayer2rgb", "tcambin-debayer",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
         {
-            GST_DEBUG("Adding bayer2rgb to pipeline");
-            gst_bin_add(GST_BIN(self), self->debayer);
-            pipeline_description += " ! bayer2rgb";
-
-            gst_element_link(previous_element, self->debayer);
-            previous_element = self->debayer;
-
-        }
-        else
-        {
-            GST_ERROR("Could not create bayer2rgb element. Aborting.");
             return FALSE;
         }
     }
