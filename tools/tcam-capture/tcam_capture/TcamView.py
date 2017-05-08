@@ -156,6 +156,8 @@ class TcamView(QWidget):
         self.current_width = 0
         self.current_height = 0
 
+        self.format_list = ["YUV2", "YUY2", "BGR", "BGRx", "GRAY16_LE", "GRAY8"]
+
         self.format_dict = {
             "GRAY8": QtGui.QImage.Format_Indexed8,
             "Y16": QtGui.QImage.Format_Mono,
@@ -260,6 +262,7 @@ class TcamView(QWidget):
                         "! tee name=tee tee. "
                         "! queue "
                         "! videoconvert "
+                        "! video/x-raw,format=BGR "
                         "! appsink name=sink emit-signals=true")
 
         self.pipeline = None
@@ -374,8 +377,16 @@ class TcamView(QWidget):
                 action.triggered.connect(functools.partial(self.play, f))
                 f_menu.addAction(action)
 
-        for key, value in format_dict.items():
-            self.format_menu.addMenu(value)
+        # do not iterate the dict, but add manually
+        # this is neccessary to ensure the order is always correct
+        # for key, value in format_dict.items():
+        #     self.format_menu.addMenu(value)
+
+        for f in self.format_list:
+            try:
+                self.format_menu.addMenu(format_dict[f])
+            except:
+                continue
 
     def get_format_menu(self, parent=None):
         """Returns a QMenu which endpoints are connected
