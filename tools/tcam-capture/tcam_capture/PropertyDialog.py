@@ -42,6 +42,10 @@ class PropertyTree(QWidget):
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
+    def finish_setup(self):
+        # insert spacer only after all other elements have been added
+        self.layout.insertStretch(-1, 1)
+
     def add_property(self, prop: Prop):
         wid = PropertyWidget(self.data, prop)
         self.layout.addWidget(wid)
@@ -173,9 +177,10 @@ class PropertyDialog(QWidget):
         for key, value in self.tab_dict.items():
             if value.get_property_count() > 0:
                 self.tabs.addTab(value, key)
+                value.finish_setup()
             else:
                 value.setVisible(False)
-                self.tabs.addTab(value, key)
+                # self.tabs.addTab(value, key)
 
         self.worker = PropertyWorker(self.data.tcam,
                                      self.data.signals,
