@@ -1422,22 +1422,24 @@ wait_again:
     *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
                                           0, self->ptr->length, NULL, NULL);
 
-    GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
+    // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
 
-    // if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
-    // {
-    //     timestamp_ns = self->ptr->statistics.capture_time_ns;
+    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    {
+        timestamp_ns = self->ptr->statistics.capture_time_ns;
+        GST_DEBUG("Timestamp(ns): %ld", timestamp_ns);
+        if (self->timestamp_offset == 0)
+        {
+            self->timestamp_offset = timestamp_ns;
+            self->last_timestamp = timestamp_ns;
+        }
 
-    //     if (self->timestamp_offset == 0)
-    //     {
-    //         self->timestamp_offset = timestamp_ns;
-    //         self->last_timestamp = timestamp_ns;
-    //     }
-
-    //     GST_BUFFER_DURATION (*buffer) = timestamp_ns - self->last_timestamp;
-    //     GST_BUFFER_PTS(*buffer) = timestamp_ns - self->timestamp_offset;
-    //     self->last_timestamp = timestamp_ns;
-    // }
+        GST_BUFFER_DURATION(*buffer) = timestamp_ns - self->last_timestamp;
+        GST_BUFFER_PTS(*buffer) = timestamp_ns - self->timestamp_offset;
+        // GST_DEBUG("duration %ld", timestamp_ns - self->last_timestamp);
+        // GST_DEBUG("pts %ld", timestamp_ns - self->last_timestamp);
+        self->last_timestamp = timestamp_ns;
+    }
 
     GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
