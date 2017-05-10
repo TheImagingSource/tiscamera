@@ -613,11 +613,103 @@ static GstCaps* find_largest_caps (const GstCaps* incoming)
 }
 
 
+static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* self,
+                                                                  const GstCaps* available_caps,
+                                                                  const GstCaps* wanted,
+                                                                  unsigned int* fourcc)
+{
+    struct required_modules modules = {FALSE, FALSE, nullptr};
+
+    std::string base_string = "video/x-raw";
+
+    if (camera_has_bayer(self))
+    {
+        base_string = "video/x-bayer";
+
+        modules.bayer = TRUE;
+    }
+
+    GstStructure* struc = gst_caps_get_structure(wanted, 0);
+
+    // when get int fails we do not have a request for fixed caps
+    // thus we must use ranges and fix them manually
+
+    bool values_are_fixed = true;
+
+    int w;
+    int h;
+
+    if (!gst_structure_get_int(struc, "width", &w)
+        || !gst_structure_get_int(struc, "height", &h))
+    {
+        values_are_fixed = false;
+    }
+
+    GstCaps* caps;
+
+    if (values_are_fixed)
+    {
+        int num;
+        int den;
+
+        gst_structure_get_fraction(struc, "framerate", &num, &den);
+
+        caps = gst_caps_new_simple (base_string.c_str(),
+                                    "framerate", GST_TYPE_FRACTION,
+                                    num, den,
+                                    "width", G_TYPE_INT, w,
+                                    "height", G_TYPE_INT, h,
+                                    NULL);
+    }
+    else
+    {
+        caps = gst_caps_new_simple (base_string.c_str(),
+                                    "framerate", GST_TYPE_FRACTION_RANGE,
+                                    1, 1, G_MAXINT, 1,
+                                    NULL);
+
+        GValue w = {};
+        g_value_init(&w, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range(&w, 1, G_MAXINT);
+
+        GValue h = {};
+        g_value_init(&h, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range(&h, 1, G_MAXINT);
+
+        gst_caps_set_value(caps, "width", &w);
+        gst_caps_set_value(caps, "heigth", &h);
+    }
+
+    GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
+
+    GstCaps* intersection = gst_caps_intersect(caps, available_caps);
+
+    GST_INFO("Found possible caps %s", gst_caps_to_string(intersection));
+
+    if (gst_caps_is_empty(intersection))
+    {
+        GST_ERROR("Unable to find intersecting caps. Continuing with empty caps.");
+    }
+    else
+    {
+        modules.caps = find_largest_caps(intersection);
+        GstStructure* structure = gst_caps_get_structure(modules.caps, 0);
+        if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
+        {
+            const char *string = gst_structure_get_string(structure, "format");
+            unsigned int fourcc = GST_STR_FOURCC(string);
+        }
+    }
+    gst_caps_unref(caps);
+    return modules;
+}
+
+
 static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
                                                        const GstCaps* available_caps,
                                                        const GstCaps* wanted)
 {
-    GST_DEBUG("Generating source caps and list of required modules");
+    // GST_DEBUG("Generating source caps and list of required modules");
 
     GstStructure* structure;
 
@@ -633,106 +725,28 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
     GstCaps* input = gst_caps_copy(wanted);
 
-    GST_DEBUG("Comparing '%s' <==  to  ==> '%s'", gst_caps_to_string(wanted), gst_caps_to_string(available_caps));
+    // GST_DEBUG("Comparing '%s' <==  to  ==> '%s'",
+    //           gst_caps_to_string(wanted),
+    //           gst_caps_to_string(available_caps));
 
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
-    bool conversion_needed = false;
+    // bool conversion_needed = false;
     if (gst_caps_is_empty(intersection) && (gst_tcam_raw_only_has_mono(available_caps) && camera_has_bayer(self)))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
 
         gst_caps_unref(intersection);
 
-        std::string base_string = "video/x-raw";
-
-        if (camera_has_bayer(self))
-        {
-            base_string = "video/x-bayer";
-
-            modules.bayer = TRUE;
-        }
-
-        GstStructure* struc = gst_caps_get_structure(wanted, 0);
-
-        int w;
-        int h;
-
-        // when get int fails we do not have a request for fixed caps
-        // thus we must use ranges and fix them manually
-
-        bool values_are_fixed = true;
-
-        if (!gst_structure_get_int(struc, "width", &w))
-        {
-            values_are_fixed = false;
-        }
-        if (!gst_structure_get_int(struc, "height", &h))
-        {
-            values_are_fixed = false;
-        }
-
-        GstCaps* caps;
-
-        if (values_are_fixed)
-        {
-            int num;
-            int den;
-
-            gst_structure_get_fraction(struc, "framerate", &num, &den);
-
-            caps = gst_caps_new_simple (base_string.c_str(),
-                                        "framerate", GST_TYPE_FRACTION,
-                                        num, den,
-                                        "width", G_TYPE_INT, w,
-                                        "height", G_TYPE_INT, h,
-                                        NULL);
-        }
-        else
-        {
-            caps = gst_caps_new_simple (base_string.c_str(),
-                                        "framerate", GST_TYPE_FRACTION_RANGE,
-                                        1, 1, G_MAXINT, 1,
-                                        NULL);
-
-            GValue w = {};
-            g_value_init(&w, GST_TYPE_INT_RANGE);
-            gst_value_set_int_range(&w, 1, G_MAXINT);
-
-            GValue h = {};
-            g_value_init(&h, GST_TYPE_INT_RANGE);
-            gst_value_set_int_range(&h, 1, G_MAXINT);
-
-            gst_caps_set_value(caps, "width", &w);
-            gst_caps_set_value(caps, "heigth", &h);
-        }
-
-        GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
-
-        intersection = gst_caps_intersect(caps, available_caps);
-
-        GST_INFO("Found possible caps %s", gst_caps_to_string(intersection));
-
-        if (gst_caps_is_empty(intersection))
-        {
-            GST_ERROR("Unable to find intersecting caps. Continuing with empty caps.");
-        }
-        else
-        {
-            modules.caps = find_largest_caps(intersection);
-            structure = gst_caps_get_structure(modules.caps, 0);
-            if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
-            {
-                const char *string = gst_structure_get_string (structure, "format");
-                fourcc = GST_STR_FOURCC (string);
-            }
-        }
-        gst_caps_unref(caps);
+        modules = gst_tcambin_generate_conversion_src_caps(self,
+                                                           available_caps,
+                                                           wanted,
+                                                           &fourcc);
     }
     else
     {
         GST_INFO("Device has caps. No conversion needed.");
-        GST_DEBUG("Intersecting caps: %s", gst_caps_to_string(intersection));
+        // GST_DEBUG("Intersecting caps: %s", gst_caps_to_string(intersection));
 
         // gst_caps_is_any does not return true when gst_caps_to_string(intersection) says
         // caps are ANY. This is a ugly workaround
@@ -778,11 +792,11 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
             if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
             {
-                const char *string = gst_structure_get_string (structure, "format");
-                fourcc = GST_STR_FOURCC (string);
+                const char *string = gst_structure_get_string(structure, "format");
+                fourcc = GST_STR_FOURCC(string);
             }
         }
-        conversion_needed = false;
+        // conversion_needed = false;
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
@@ -794,22 +808,22 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     {
         modules.whitebalance = TRUE;
     }
-    else if (gst_tcam_is_fourcc_rgb(fourcc))
-    {
-        if (conversion_needed)
-        {
-            modules.bayer = TRUE;
-        }
-        modules.whitebalance = TRUE;
-    }
-    else
-    {
-        if (conversion_needed)
-        {
-            modules.bayer = TRUE;
-        }
-        modules.whitebalance = TRUE;
-    }
+    // else if (gst_tcam_is_fourcc_rgb(fourcc))
+    // {
+    //     if (conversion_needed)
+    //     {
+    //         modules.bayer = TRUE;
+    //     }
+    //     modules.whitebalance = TRUE;
+    // }
+    // else
+    // {
+    //     if (conversion_needed)
+    //     {
+    //         modules.bayer = TRUE;
+    //     }
+    //     modules.whitebalance = TRUE;
+    // }
 
     return modules;
 }
