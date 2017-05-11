@@ -1147,6 +1147,16 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             break;
         }
+    }
+
+    ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
+    if (ret == GST_STATE_CHANGE_FAILURE)
+    {
+        return ret;
+    }
+
+    switch(trans)
+    {
         case GST_STATE_CHANGE_PAUSED_TO_READY:
         {
             self->elements_created = FALSE;
@@ -1165,10 +1175,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             break;
         }
     }
-
-    ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
-
-    gst_element_sync_state_with_parent(GST_ELEMENT(self));
 
     return ret;
 }

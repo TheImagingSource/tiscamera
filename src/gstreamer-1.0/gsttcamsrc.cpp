@@ -1299,7 +1299,8 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            GST_INFO("changing from NULL to READY");
+            GST_DEBUG("State change: NULL -> READY");
+
             if (self->device == nullptr)
             {
                 GST_INFO("must initialize device");
@@ -1312,6 +1313,23 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
             }
             break;
         }
+        default:
+        {
+            break;
+        }
+    }
+
+    gst_element_set_locked_state(element, TRUE);
+    ret = GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->change_state(element, change);
+    gst_element_set_locked_state(element, FALSE);
+
+    if (ret == GST_STATE_CHANGE_FAILURE)
+    {
+        return ret;
+    }
+
+    switch(change)
+    {
         case GST_STATE_CHANGE_READY_TO_NULL:
         {
             if (self->device != nullptr)
@@ -1325,7 +1343,6 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
         default:
             break;
     }
-    ret = GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->change_state(element, change);
     return ret;
 }
 
