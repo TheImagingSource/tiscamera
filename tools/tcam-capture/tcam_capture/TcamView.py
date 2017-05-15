@@ -37,7 +37,7 @@ gi.require_version("GstVideo", "1.0")
 
 from gi.repository import Tcam, Gst, GLib, GstVideo
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class TcamScreen(QtWidgets.QGraphicsView):
@@ -214,6 +214,7 @@ class TcamView(QWidget):
         self.pipeline.set_state(Gst.State.READY)
 
         if video_format is not None:
+            log.debug("Setting format to {}".format(video_format))
             caps = self.pipeline.get_by_name("caps")
             caps.set_property("caps", Gst.Caps.from_string(video_format))
         self.pipeline.set_state(Gst.State.PLAYING)
@@ -242,7 +243,7 @@ class TcamView(QWidget):
                 else:
                     self.container.new_pixmap.emit(self.image)
             else:
-                logger.error("Format {} is not supported. Unable to display.".format(buffer_format))
+                log.error("Format {} is not supported. Unable to display.".format(buffer_format))
 
         finally:
              b.unmap(buffer_map)
@@ -281,15 +282,17 @@ class TcamView(QWidget):
         self.data.tcam = self.pipeline.get_by_name("bin")
 
         self.pipeline.set_state(Gst.State.READY)
-        logger.debug("Created pipeline and set to READY")
+        log.debug("Created pipeline and set to READY")
 
     def pause(self):
-        logger.info("Setting state to PAUSED")
+        log.info("Setting state to PAUSED")
         self.pipeline.set_state(Gst.State.PAUSED)
 
     def stop(self):
-        logger.info("Setting state to NULL")
+        log.info("Setting state to NULL")
+
         self.pipeline.set_state(Gst.State.NULL)
+        log.info("is NULL")
 
     # this function is called when the pipeline changes states.
     # we use it to keep track of the current state
@@ -306,7 +309,7 @@ class TcamView(QWidget):
             caps = pad.query_caps()
             fmt = caps.get_structure(0)
             if fmt is None:
-                logger.error("Unable to determine format.")
+                log.error("Unable to determine format.")
                 return
 
             width = fmt.get_value("width")
@@ -361,7 +364,7 @@ class TcamView(QWidget):
                 f_menu = format_dict[format_string].addMenu("{}x{}".format(width, height))
 
             except TypeError as e:
-                logger.warning("Could not interpret structure. Omitting.")
+                log.warning("Could not interpret structure. Omitting.")
                 continue
 
             rates = get_framerates(fmt)
