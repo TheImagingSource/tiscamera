@@ -89,6 +89,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         mouse_position = event.pos()
         self.mouse_position_x = mouse_position.x()
         self.mouse_position_y = mouse_position.y()
+        super().mouseMoveEvent(event)
 
     def wheelEvent(self, event):
         # Zoom Factor
