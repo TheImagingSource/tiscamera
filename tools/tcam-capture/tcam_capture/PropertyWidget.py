@@ -45,14 +45,14 @@ class PropertyWidget(QWidget):
         self.tcam = data.tcam
         self.signals = data.signals
         self.prop = prop
-
         self.setup_ui()
 
     def setup_ui(self):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
-        self.name_label = QtWidgets.QLabel(self.prop.name)
-        self.layout.addWidget(self.name_label)
+        if self.prop.valuetype != "boolean":
+            self.name_label = QtWidgets.QLabel(self.prop.name)
+            self.layout.addWidget(self.name_label)
         if self.prop.valuetype == "integer":
             self.value_label = QtWidgets.QLabel(str(self.prop.value))
             self.layout.addWidget(self.value_label)
@@ -77,9 +77,11 @@ class PropertyWidget(QWidget):
             self.checkbox.clicked.connect(self.set_property)
             self.layout.addWidget(self.checkbox)
         elif self.prop.valuetype == "boolean":
-            self.toggle = QCheckBox(self)
+            self.toggle = QPushButton(self.prop.name)
+            self.toggle.setCheckable(True)
             if self.prop.value:
                 self.toggle.toggle()
+            self.toggle.toggled.connect(self.button_clicked)
             self.layout.addWidget(self.toggle)
         elif self.prop.valuetype == "string":
             pass
@@ -92,6 +94,11 @@ class PropertyWidget(QWidget):
                 self.combo.setCurrentText(self.prop.value)
                 self.combo.currentIndexChanged['QString'].connect(self.set_property)
                 self.layout.addWidget(self.combo)
+
+    def button_clicked(self):
+        log.debug("button clicked")
+        self.signals.change_property.emit(self.tcam, self.prop.name,
+                                          self.toggle.isChecked(), self.prop.valuetype)
 
     def set_property(self, value):
         if self.prop.valuetype == "integer":
@@ -117,16 +124,13 @@ class PropertyWidget(QWidget):
 
         elif self.prop.valuetype == "button":
             pass
-            # self.checkbox.blockSignals(True)
-            # self.checkbox.blockSignals(False)
 
         elif self.prop.valuetype == "boolean":
-            self.toggle.blockSignals(True)
-            if prop.value:
-                self.toggle.setChecked(True)
-            else:
-                self.toggle.setChecked(False)
-            self.toggle.blockSignals(True)
+
+            if self.prop.value and not self.toggle.isChecked():
+                self.toggle.blockSignals(True)
+                self.toggle.toggle()
+                self.toggle.blockSignals(False)
 
         elif self.prop.valuetype == "string":
             pass
