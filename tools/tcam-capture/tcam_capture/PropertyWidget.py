@@ -65,7 +65,7 @@ class PropertyWidget(QWidget):
             self.layout.addWidget(self.sld)
         elif self.prop.valuetype == "double":
             self.value_label = QtWidgets.QLabel(str(self.prop.value))
-
+            self.layout.addWidget(self.value_label)
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             self.sld.setRange(self.prop.minval, self.prop.maxval)
