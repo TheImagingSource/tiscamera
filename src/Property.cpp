@@ -432,6 +432,17 @@ bool Property::set_value (const std::string& value)
     return false;
 }
 
+bool Property::set_value ()
+{
+    if (impl.expired())
+    {
+        return false;
+    }
+    notify_impl();
+
+    return true;
+}
+
 
 bool Property::set_property_from_struct (const tcam_device_property& prop)
 {
