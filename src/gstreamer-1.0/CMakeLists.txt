@@ -43,6 +43,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ${lflags} -fpermissive")
 
 include_directories(${INTROSPECTION_INCLUDE_DIR})
 
+add_library(tcamgstbase SHARED tcamgstbase.cpp)
+target_link_libraries(tcamgstbase tcam)
+target_link_libraries(tcamgstbase tcam-algorithms)
+target_link_libraries(tcamgstbase ${GOBJECT_LIBRARIES})
+target_link_libraries(tcamgstbase ${GLIB2_LIBRARIES})
+target_link_libraries(tcamgstbase ${GSTREAMER_LIBRARIES})
+target_link_libraries(tcamgstbase ${GSTREAMER_BASE_LIBRARIES})
+target_link_libraries(tcamgstbase ${GSTREAMER_VIDEO_LIBRARIES})
+
+
 add_library(gsttcamsrc SHARED gsttcamsrc.cpp)
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp)
@@ -59,11 +69,13 @@ foreach (t IN ITEMS ${PLUGINS})
     target_link_libraries(${t} tcam)
     target_link_libraries(${t} tcamprop)
     target_link_libraries(${t} tcam-algorithms)
+    target_link_libraries(${t} tcamgstbase)
+    target_link_libraries(${t} ${GOBJECT_LIBRARIES})
+    target_link_libraries(${t} ${GLIB2_LIBRARIES})
+
     target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
     target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
     target_link_libraries(${t} ${GSTREAMER_VIDEO_LIBRARIES})
-    target_link_libraries(${t} ${GLIB2_LIBRARIES})
-    target_link_libraries(${t} ${GObject_LIBRARIES})
 
 endforeach (t)
 

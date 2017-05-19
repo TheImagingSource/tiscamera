@@ -26,7 +26,7 @@
 #include "gsttcamautofocus.h"
 
 #include "tcam.h"
-
+#include "tcamgstbase.h"
 #include "tcamprop.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautofocus_debug_category);
@@ -488,56 +488,8 @@ static GstStaticPadTemplate gst_tcamautofocus_src_template =
                              GST_STATIC_CAPS ("ANY"));
 
 
-GstElement* get_camera_src (GstElement* object)
-{
-    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(object);
-
-    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(object)));
-
-    if (e == nullptr)
-    {
-        return nullptr;
-    }
-
-    self->camera_src = NULL;
-
-    GList* l = GST_BIN(e)->children;
-
-    const char* source_name = "GstTcamSrc";
-    while (1==1)
-    {
-        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
-        GST_DEBUG("Comparing '%s' to '%s'", name, source_name);
-        if (g_strcmp0(name, source_name) == 0)
-        {
-            self->camera_src = (GstElement*)l->data;
-
-            GST_DEBUG("Identified camera source as tcamsrc.");
-            break;
-        }
-
-
-        if (g_list_next(l) == NULL)
-            break;
-
-        l = g_list_next(l);
-    }
-
-    if (self->camera_src == NULL)
-    {
-        GST_ERROR("Unknown camera source.");
-    }
-
-
-    return self->camera_src;
-}
-
-
 static void focus_run_tcam (GstTcamAutoFocus* self)
 {
-    if (self->camera_src == NULL)
-        self->camera_src = get_camera_src (GST_ELEMENT(self));
-
     if (self->camera_src == NULL)
     {
         GST_ERROR("Source empty! Aborting.");
@@ -776,8 +728,6 @@ static GstCaps* gst_tcamautofocus_transform_caps (GstBaseTransform* trans,
     }
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
-    get_camera_src(GST_ELEMENT(trans));
-
     return outcaps;
 }
 
@@ -866,7 +816,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 {
     if (self->camera_src == nullptr)
     {
-        get_camera_src(GST_ELEMENT(self));
+        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
     }
 
     tcam::CaptureDevice* dev;
@@ -976,12 +926,15 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
     {
         if (self->camera_src == NULL)
         {
-            get_camera_src(GST_ELEMENT(self));
+            self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
         }
+        find_image_values(self);
+
         return gst_tcamautofocus_analyze_buffer(self, buf);
     }
     else if (self->focus_active) // entered if set to true with gst-launch
     {
+        find_image_values(self);
         self->focus_active = FALSE;
         focus_run(self);
 

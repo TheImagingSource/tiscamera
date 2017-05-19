@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "gsttcambase.h"
 #include "gsttcambin.h"
 // #include <girepository.h>
 
+#include "tcamgstbase.h"
 #include "tcamprop.h"
+#include <glib-object.h>
 
 #include <unistd.h>
 
@@ -418,66 +419,6 @@ static void gst_tcambin_clear_kid (GstTcamBin* src)
     }
 }
 
-/*
-  extracts video/x-raw from caps and checks if only mono is present
- */
-static gboolean gst_tcam_raw_only_has_mono (const GstCaps* src_caps)
-{
-    GstCaps* raw_filter = gst_caps_from_string("video/x-raw");
-
-    GstCaps* caps = gst_caps_intersect(src_caps, raw_filter);
-
-    gst_caps_unref(raw_filter);
-
-    GstCaps* filter = gst_caps_from_string("video/x-raw,format={GRAY8, GRAY16_LE}; ANY");
-
-    GstCaps* sub = gst_caps_subtract(caps, filter);
-
-    gst_caps_unref(filter);
-
-    if (gst_caps_is_empty(sub))
-    {
-        gst_caps_unref(sub);
-        return TRUE;
-    }
-    gst_caps_unref(sub);
-
-    gst_caps_unref(caps);
-
-    return FALSE;
-}
-
-
-gboolean gst_tcam_is_fourcc_bayer (const guint fourcc)
-{
-    if (fourcc == GST_MAKE_FOURCC('g', 'b', 'r', 'g')
-        || fourcc == GST_MAKE_FOURCC('g', 'r', 'b', 'g')
-        || fourcc == GST_MAKE_FOURCC('r', 'g', 'g', 'b')
-        || fourcc == GST_MAKE_FOURCC('b', 'g', 'g', 'r'))
-    {
-        return TRUE;
-    }
-    return FALSE;
-}
-
-
-gboolean gst_tcam_is_fourcc_rgb (const guint fourcc)
-{
-    if (fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'x')
-        || fourcc == GST_MAKE_FOURCC('x', 'R', 'G', 'B')
-        || fourcc == GST_MAKE_FOURCC('B', 'G', 'R', 'x')
-        || fourcc == GST_MAKE_FOURCC('x', 'B', 'G', 'R')
-        || fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'A')
-        || fourcc == GST_MAKE_FOURCC('A', 'R', 'G', 'B')
-        || fourcc == GST_MAKE_FOURCC('B', 'G', 'R', 'A')
-        || fourcc == GST_MAKE_FOURCC('A', 'B', 'G', 'R'))
-    {
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
 
 static gboolean camera_has_bayer (GstTcamBin* self)
 {
@@ -499,7 +440,7 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 
         fourcc = GST_STR_FOURCC(string);
 
-        if (gst_tcam_is_fourcc_bayer(fourcc))
+        if (tcam_gst_is_fourcc_bayer(fourcc))
         {
             gst_caps_unref(ipcaps);
             return TRUE;
@@ -508,108 +449,6 @@ static gboolean camera_has_bayer (GstTcamBin* self)
     }
 
     return FALSE;
-}
-
-
-static bool fixate_caps (GstCaps* caps)
-{
-    if (caps == nullptr || gst_caps_is_empty(caps))
-    {
-        return false;
-    }
-
-    GstStructure* structure = gst_caps_get_structure(caps, 0);
-
-    if (gst_structure_has_field(structure, "width"))
-    {
-        gst_structure_fixate_field_nearest_int(structure, "width", G_MAXINT);
-    }
-    if (gst_structure_has_field(structure, "height"))
-    {
-        gst_structure_fixate_field_nearest_int(structure, "height", G_MAXINT);
-    }
-    if (gst_structure_has_field(structure, "framerate"))
-    {
-        gst_structure_fixate_field_nearest_fraction(structure, "framerate", G_MAXINT, 1);
-    }
-
-    return true;
-}
-
-
-static GstCaps* find_largest_caps (const GstCaps* incoming)
-{
-    int largest_index = -1;
-    int largest_width = -1;
-    int largest_height = -1;
-
-    for (int i = 0; i < gst_caps_get_size(incoming); ++i)
-    {
-        GstStructure* struc = gst_caps_get_structure(incoming, i);
-
-        int width = -1;
-        int height = -1;
-        bool new_width = false;
-        bool new_height = false;
-
-        // will fail if width is a range so we only handle
-        // halfway fixated caps
-        if (gst_structure_get_int(struc, "width", &width))
-        {
-            if (largest_width < width)
-            {
-                largest_width = width;
-                new_width = true;
-            }
-        }
-
-        if (gst_structure_get_int(struc, "height", &height))
-        {
-            if (largest_height < height)
-            {
-                largest_height = height;
-                new_height = true;
-            }
-        }
-
-        if (new_width && new_height)
-        {
-            largest_index = i;
-        }
-    }
-
-    GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
-
-    if (!fixate_caps(largest_caps))
-    {
-        GST_ERROR("Cannot fixate largest caps. Returning NULL");
-        return nullptr;
-    }
-
-    GstStructure* s = gst_caps_get_structure(largest_caps, 0);
-
-    int h;
-    gst_structure_get_int(s, "height", &h);
-    int w;
-    gst_structure_get_int(s, "width", &w);
-
-    int num;
-    int den;
-    gst_structure_get_fraction(s, "framerate", &num, &den);
-
-    GValue vh = {};
-
-    g_value_init(&vh, G_TYPE_INT);
-    g_value_set_int(&vh, h);
-
-    gst_caps_set_value(largest_caps, "height", &vh);
-    largest_caps = gst_caps_new_simple (gst_structure_get_name(s),
-                                        "framerate", GST_TYPE_FRACTION, num, den,
-                                        "width", G_TYPE_INT, w,
-                                        "height", G_TYPE_INT, h,
-                                        NULL);
-
-    return largest_caps;
 }
 
 
@@ -692,7 +531,7 @@ static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* se
     }
     else
     {
-        modules.caps = find_largest_caps(intersection);
+        modules.caps = tcam_gst_find_largest_caps(intersection);
         GstStructure* structure = gst_caps_get_structure(modules.caps, 0);
         if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {
@@ -732,7 +571,8 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
     // bool conversion_needed = false;
-    if (gst_caps_is_empty(intersection) && (gst_tcam_raw_only_has_mono(available_caps) && camera_has_bayer(self)))
+    if (gst_caps_is_empty(intersection)
+        && (tcam_gst_raw_only_has_mono(available_caps) && camera_has_bayer(self)))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
 
@@ -769,11 +609,11 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
         if (gst_caps_is_empty(temp))
         {
-            modules.caps = find_largest_caps(intersection);
+            modules.caps = tcam_gst_find_largest_caps(intersection);
         }
         else
         {
-            modules.caps = find_largest_caps(temp);
+            modules.caps = tcam_gst_find_largest_caps(temp);
         }
 
         gst_caps_unref(temp);
@@ -804,7 +644,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
         modules.bayer = FALSE;
         modules.whitebalance = FALSE;
     }
-    else if (gst_tcam_is_fourcc_bayer(fourcc))
+    else if (tcam_gst_is_fourcc_bayer(fourcc))
     {
         modules.whitebalance = TRUE;
     }
@@ -1068,7 +908,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
             if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
             {
                 const char *string = gst_structure_get_string (struc, "format");
-                if (gst_tcam_is_fourcc_bayer(GST_STR_FOURCC(string)))
+                if (tcam_gst_is_fourcc_bayer(GST_STR_FOURCC(string)))
                 {
                     const GValue* width = gst_structure_get_value(struc, "width");
                     const GValue* height = gst_structure_get_value(struc, "height");
@@ -1175,7 +1015,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 }
                 else
                 {
-
                     if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad))
                     {
                         GST_ERROR("Could not set target for ghostpad.");

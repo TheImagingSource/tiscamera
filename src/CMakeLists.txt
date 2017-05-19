@@ -82,7 +82,6 @@ set( srcs
   serialization.cpp
   PropertyHandler.cpp
   public_utils.cpp
-  gsttcambase.c
 )
 
 if (BUILD_V4L2)

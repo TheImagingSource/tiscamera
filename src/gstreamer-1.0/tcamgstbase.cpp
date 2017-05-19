@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "gsttcambase.h"
+#include "tcamgstbase.h"
 
 #include "base_types.h"
 
@@ -112,6 +112,11 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-raw", "YUY2",
         "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
 		"video/x-raw-yuv"
+        // FOURCC_YUYV,
+        // "video/x-raw, format=(string)YUY2",
+        // "video/x-raw", "YUY2",
+        // "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
+		// "video/x-raw-yuv"
     },
     {
         FOURCC_MJPG,
@@ -225,3 +230,213 @@ uint32_t tcam_fourcc_from_gst_1_0_caps_string (const char* name, const char* for
     }
     return 0;
 }
+
+
+GstElement* tcam_gst_find_camera_src (GstElement* element)
+{
+
+    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(element)));
+
+    GList* l = GST_BIN(e)->children;
+    GstElement* ret = nullptr;
+    while (1==1)
+    {
+        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory((GstElement*)l->data)));
+
+        if (g_strcmp0(name, "GstTcamSrc") == 0)
+        {
+            ret = (GstElement*)l->data;
+            break;
+        }
+
+        if (g_list_next(l) == NULL)
+            break;
+
+        l = g_list_next(l);
+    }
+
+    if (ret == nullptr)
+    {
+        GST_ERROR("Camera source not set!");
+    }
+    return ret;
+}
+
+
+gboolean tcam_gst_raw_only_has_mono (const GstCaps* src_caps)
+{
+    GstCaps* raw_filter = gst_caps_from_string("video/x-raw");
+
+    GstCaps* caps = gst_caps_intersect(src_caps, raw_filter);
+
+    gst_caps_unref(raw_filter);
+
+    GstCaps* filter = gst_caps_from_string("video/x-raw,format={GRAY8, GRAY16_LE}; ANY");
+
+    GstCaps* sub = gst_caps_subtract(caps, filter);
+
+    gst_caps_unref(filter);
+
+    if (gst_caps_is_empty(sub))
+    {
+        gst_caps_unref(sub);
+        return TRUE;
+    }
+    gst_caps_unref(sub);
+
+    gst_caps_unref(caps);
+
+    return FALSE;
+}
+
+
+gboolean tcam_gst_is_fourcc_bayer (const guint fourcc)
+{
+    if (fourcc == GST_MAKE_FOURCC('g', 'b', 'r', 'g')
+        || fourcc == GST_MAKE_FOURCC('g', 'r', 'b', 'g')
+        || fourcc == GST_MAKE_FOURCC('r', 'g', 'g', 'b')
+        || fourcc == GST_MAKE_FOURCC('b', 'g', 'g', 'r'))
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+
+gboolean tcam_gst_is_fourcc_rgb (const guint fourcc)
+{
+    if (fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'x')
+        || fourcc == GST_MAKE_FOURCC('x', 'R', 'G', 'B')
+        || fourcc == GST_MAKE_FOURCC('B', 'G', 'R', 'x')
+        || fourcc == GST_MAKE_FOURCC('x', 'B', 'G', 'R')
+        || fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'A')
+        || fourcc == GST_MAKE_FOURCC('A', 'R', 'G', 'B')
+        || fourcc == GST_MAKE_FOURCC('B', 'G', 'R', 'A')
+        || fourcc == GST_MAKE_FOURCC('A', 'B', 'G', 'R'))
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+
+gboolean tcam_gst_fixate_caps (GstCaps* caps)
+{
+    if (caps == nullptr || gst_caps_is_empty(caps))
+    {
+        return FALSE;
+    }
+
+    GstStructure* structure = gst_caps_get_structure(caps, 0);
+
+    if (gst_structure_has_field(structure, "width"))
+    {
+        gst_structure_fixate_field_nearest_int(structure, "width", G_MAXINT);
+    }
+    if (gst_structure_has_field(structure, "height"))
+    {
+        gst_structure_fixate_field_nearest_int(structure, "height", G_MAXINT);
+    }
+    if (gst_structure_has_field(structure, "framerate"))
+    {
+        gst_structure_fixate_field_nearest_fraction(structure, "framerate", G_MAXINT, 1);
+    }
+
+    return TRUE;
+}
+
+
+GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
+{
+    int largest_index = -1;
+    int largest_width = -1;
+    int largest_height = -1;
+
+    for (int i = 0; i < gst_caps_get_size(incoming); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(incoming, i);
+
+        int width = -1;
+        int height = -1;
+        bool new_width = false;
+        bool new_height = false;
+
+        // will fail if width is a range so we only handle
+        // halfway fixated caps
+        if (gst_structure_get_int(struc, "width", &width))
+        {
+            if (largest_width < width)
+            {
+                largest_width = width;
+                new_width = true;
+            }
+        }
+
+        if (gst_structure_get_int(struc, "height", &height))
+        {
+            if (largest_height < height)
+            {
+                largest_height = height;
+                new_height = true;
+            }
+        }
+
+        if (new_width && new_height)
+        {
+            largest_index = i;
+        }
+    }
+
+    GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
+
+    if (!tcam_gst_fixate_caps(largest_caps))
+    {
+        GST_ERROR("Cannot fixate largest caps. Returning NULL");
+        return nullptr;
+    }
+
+    GstStructure* s = gst_caps_get_structure(largest_caps, 0);
+
+    int h;
+    gst_structure_get_int(s, "height", &h);
+    int w;
+    gst_structure_get_int(s, "width", &w);
+
+    int num;
+    int den;
+    gst_structure_get_fraction(s, "framerate", &num, &den);
+
+    GValue vh = {};
+
+    g_value_init(&vh, G_TYPE_INT);
+    g_value_set_int(&vh, h);
+
+    gst_caps_set_value(largest_caps, "height", &vh);
+    largest_caps = gst_caps_new_simple (gst_structure_get_name(s),
+                                        "framerate", GST_TYPE_FRACTION, num, den,
+                                        "width", G_TYPE_INT, w,
+                                        "height", G_TYPE_INT, h,
+                                        NULL);
+
+    return largest_caps;
+}
+
+// bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, tcam_image_buffer* buf)
+// {
+//     if (buffer == NULL || buf == NULL)
+//     {
+//         return false;
+//     }
+
+//     // *buf = {};
+
+//     GstMapInfo info;
+
+//     gst_buffer_map(buffer, &info, GST_MAP_READ);
+
+//     buf->length = info.size;
+//     buf->pData = info.data
+
+//     return false;
+// }

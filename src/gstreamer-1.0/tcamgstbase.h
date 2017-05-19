@@ -19,6 +19,9 @@
 
 #include <stdint.h>
 
+#include "tcam.h"
+
+#include <gst/gst.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -32,6 +35,27 @@ uint32_t tcam_fourcc_from_gst_0_10_caps_string (const char* name, const char* fo
 const char* tcam_fourcc_to_gst_1_0_caps_string (uint32_t);
 
 uint32_t tcam_fourcc_from_gst_1_0_caps_string (const char* name, const char* format);
+
+GstElement* tcam_gst_find_camera_src (GstElement* element);
+
+/*
+  extracts video/x-raw from caps and checks if only mono is present
+*/
+gboolean tcam_gst_raw_only_has_mono (const GstCaps* src_caps);
+
+
+gboolean tcam_gst_is_fourcc_bayer (const guint fourcc);
+
+
+gboolean tcam_gst_is_fourcc_rgb (const guint fourcc);
+
+
+gboolean tcam_gst_fixate_caps (GstCaps* caps);
+
+
+GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming);
+
+// bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, tcam_image_buffer* buf);
 
 #ifdef __cplusplus
 }

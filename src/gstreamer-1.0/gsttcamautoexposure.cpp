@@ -20,7 +20,9 @@
 #endif
 
 #include "tcam.h"
-#include  "tcamprop.h"
+#include "base_types.h"
+#include "tcamgstbase.h"
+#include "tcamprop.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -1374,39 +1376,6 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
 }
 
 
-static gboolean find_camera_src (GstBaseTransform* trans)
-{
-
-    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(trans)));
-
-    GList* l = GST_BIN(e)->children;
-
-    while (1==1)
-    {
-        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
-
-        if (g_strcmp0(name, "GstTcamSrc") == 0)
-        {
-            GST_TCAMAUTOEXPOSURE(trans)->camera_src = l->data;
-            break;
-        }
-
-        if (g_list_next(l) == NULL)
-            break;
-
-        l = g_list_next(l);
-    }
-
-    if (GST_TCAMAUTOEXPOSURE(trans)->camera_src == NULL)
-    {
-        GST_ERROR("Camera source not set!");
-        return FALSE;
-    }
-    else
-        return TRUE;
-}
-
-
 gboolean find_image_values (GstTcamautoexposure* self)
 {
     GstPad* pad = GST_BASE_TRANSFORM_SINK_PAD(self);
@@ -1441,8 +1410,10 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
     if (self->camera_src == NULL)
     {
-        if (!find_camera_src(trans))
+        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+        if (self->camera_src == nullptr)
         {
+            GST_ERROR("Could not find source element");
             return GST_FLOW_ERROR;
         }
         else
@@ -1458,6 +1429,7 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
     if (self->frame_counter > 3)
     {
+        find_image_values(self);
         // validity checks
         GstMapInfo info;
 

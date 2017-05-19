@@ -35,11 +35,13 @@
 
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamwhitebalance.h"
+#include "tcamgstbase.h"
 #include "tcamprop.h"
 #include <stdlib.h>
 #include <cstring>
 
 #include "tcam.h"
+#include <glib-object.h>
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
 #define GST_CAT_DEFAULT gst_tcamwhitebalance_debug_category
@@ -1295,26 +1297,11 @@ static struct device_resources find_source (GstElement* self)
 
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
-    GstElement* e = GST_ELEMENT(gst_object_get_parent(GST_OBJECT(self)));
+    res.source_element = tcam_gst_find_camera_src(self);
 
-    GList* l =  GST_BIN(e)->children;
-
-    while (1==1)
+    if (res.source_element == nullptr)
     {
-
-        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(l->data)));
-
-        if (g_strcmp0(name, "GstTcamSrc") == 0)
-        {
-            GST_INFO("Found tcam source element");
-            res.source_element = l->data;
-            break;
-        }
-
-        if (g_list_next(l) == NULL)
-            break;
-
-        l = g_list_next(l);
+        GST_ERROR("Could not find source element");
     }
 
     update_device_resources(&res);
