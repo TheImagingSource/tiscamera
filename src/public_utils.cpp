@@ -55,6 +55,14 @@ std::string tcam::property_id_to_string (TCAM_PROPERTY_ID id)
 }
 
 
+uint64_t tcam::get_image_size (uint32_t fourcc,
+                               unsigned int width,
+                               unsigned int height)
+{
+    return get_buffer_length(width, height, fourcc);
+}
+
+
 struct tcam_image_buffer* tcam::allocate_image_buffers (const struct tcam_video_format* format,
                                                              size_t n_buffers)
 {

@@ -38,6 +38,10 @@ std::string category2string (TCAM_PROPERTY_CATEGORY);
 
 std::string property_id_to_string (TCAM_PROPERTY_ID);
 
+uint64_t get_image_size (uint32_t fourcc,
+                         unsigned int width,
+                         unsigned int height);
+
 /**
  * @param format - format description that shall be used
  * @param n_buffers - number of buffers that shall be allocated
@@ -56,7 +60,7 @@ void free_image_buffers (struct tcam_image_buffer* ptr, size_t n_buffer);
 /**
  * Check if buffer has correct length
  * @param buffer that shall be checked
- * @return true if buffer has correct length
+ * @return true if buffer has correct length or is large enough for the image
  */
 bool is_image_buffer_complete (const struct tcam_image_buffer* buffer);
 
