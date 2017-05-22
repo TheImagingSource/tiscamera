@@ -31,6 +31,7 @@ static const size_t name_width = 40;
 void print_integer (const Property* p)
 {
     PropertyInteger* i = (PropertyInteger*) p;
+    auto s = p->get_struct();
 
     std::cout << std::setw(name_width) <<  i->get_name()
               << "(int)"<< std::right
@@ -39,6 +40,7 @@ void print_integer (const Property* p)
               << " step=" << i->get_step()
               << " default=" << i->get_default()
               << " value=" << i->get_value()
+              << " category=" << tcam::category2string(s.group.property_category)
               << std::endl;
 }
 
@@ -46,6 +48,7 @@ void print_integer (const Property* p)
 void print_boolean (const Property* p)
 {
     PropertyBoolean* s = (PropertyBoolean*) p;
+    auto st = p->get_struct();
 
     std::cout << std::setw(name_width) << s->get_name()
               << "(bool)"
@@ -67,25 +70,32 @@ void print_boolean (const Property* p)
     {
         std::cout << "false";
     }
-    std::cout << std::endl;
+    std::cout               << " category=" << tcam::category2string(st.group.property_category)
+                            << std::endl;
 }
 
 
 void print_button (const Property* p)
 {
+    auto s = p->get_struct();
+
     std::cout << std::setw(name_width) << p->get_name()
-              << "(button)" << std::endl;
+              << "(button)"
+              << " category=" << tcam::category2string(s.group.property_category)
+              << std::endl;
 }
 
 
 void print_enumeration (const Property* p)
 {
     PropertyEnumeration* e = (PropertyEnumeration*) p;
+    auto s = p->get_struct();
 
     std::cout << std::setw(name_width) << e->get_name()
               << "(enum) "
 
               << " default="<< std::setw(6) << e->get_default()
+              << " category=" << tcam::category2string(s.group.property_category)
               << "\n\t\t\t\t\t\tvalue=" << e->get_value() << std::endl;
 
     for (const auto& val : e->get_values())
@@ -100,6 +110,8 @@ void print_double (const Property* p)
 {
     PropertyDouble* d = (PropertyDouble*) p;
 
+    auto s = d->get_struct();
+
     std::cout << std::setw(name_width) <<  d->get_name()
               << "(double)"<< std::right
               << " min=" << d->get_min()
@@ -107,6 +119,8 @@ void print_double (const Property* p)
               << " step=" << d->get_step()
               << " default=" << d->get_default()
               << " value=" << d->get_value()
+              << " category=" << tcam::category2string(s.group.property_category)
+              << " group=" << s.group.property_group
               << std::endl;
 }
 
