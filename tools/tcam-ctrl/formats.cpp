@@ -16,10 +16,11 @@
 
 #include "formats.h"
 
+#include "tcamgststrings.h"
+
 #include <iostream>
 #include <iomanip>
 
-#include "gsttcambase.h"
 
 void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 {

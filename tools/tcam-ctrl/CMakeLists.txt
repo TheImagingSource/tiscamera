@@ -14,6 +14,7 @@
 # limitations under the License.
 
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/src/gstreamer-1.0")
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 add_executable(tcam-ctrl main.cpp properties.cpp formats.cpp multimedia.cpp)
