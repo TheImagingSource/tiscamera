@@ -55,6 +55,12 @@ std::string tcam::property_id_to_string (TCAM_PROPERTY_ID id)
 }
 
 
+std::string tcam::property_type_to_string (TCAM_PROPERTY_TYPE type)
+{
+    return propertyType2String(type);
+}
+
+
 uint64_t tcam::get_image_size (uint32_t fourcc,
                                unsigned int width,
                                unsigned int height)

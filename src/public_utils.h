@@ -38,6 +38,8 @@ std::string category2string (TCAM_PROPERTY_CATEGORY);
 
 std::string property_id_to_string (TCAM_PROPERTY_ID);
 
+std::string property_type_to_string (TCAM_PROPERTY_TYPE);
+
 uint64_t get_image_size (uint32_t fourcc,
                          unsigned int width,
                          unsigned int height);
