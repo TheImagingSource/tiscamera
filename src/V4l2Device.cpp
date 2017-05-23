@@ -1363,7 +1363,7 @@ bool V4l2Device::get_frame ()
         return false;
     }
 
-    if (buf.length != (this->active_video_format.get_required_buffer_size()))
+    if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
     {
         tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Dropping...");
         if (!requeue_mmap_buffer())
