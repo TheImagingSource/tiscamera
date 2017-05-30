@@ -130,7 +130,7 @@ void listCameras ()
     }
 
     // header for table
-    std::cout << "\n" << std::setw(12) << "Model"
+    std::cout << "\n" << std::left << std::setw(15) << "Model"
               << std::setw(3)  << " - "
               << std::setw(9)  << "Serial"
               << std::setw(3)  << " - "
@@ -145,7 +145,7 @@ void listCameras ()
 
     for (const auto& cam : cameras)
     {
-        std::cout << std::setw(12) << cam->getModelName()
+        std::cout << std::left << std::setw(15) << cam->getModelName()
                   << std::setw(3)  << " - "
                   << std::setw(9)  << cam->getSerialNumber()
                   << std::setw(3)  << " - "
