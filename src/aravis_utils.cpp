@@ -173,15 +173,15 @@ static std::vector<struct aravis_property> aravis_mappings =
     },
     {
         .id = TCAM_PROPERTY_SATURATION,
-        .genicam_name = {},
+        .genicam_name = {"Saturation"},
     },
     {
         .id = TCAM_PROPERTY_HUE,
-        .genicam_name = {},
+        .genicam_name = {"Hue"},
     },
     {
         .id = TCAM_PROPERTY_GAMMA,
-        .genicam_name = {},
+        .genicam_name = {"Gamma"},
     },
     {
         .id = TCAM_PROPERTY_WB_AUTO,
