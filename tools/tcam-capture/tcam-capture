@@ -190,9 +190,12 @@ class TCamCapture(QMainWindow):
                                                               d.serial))
             self.open_menu.addAction(device_action)
 
-    def new_pixel_under_mouse(self, color: QtGui.QColor):
+    def new_pixel_under_mouse(self, active: bool, color: QtGui.QColor):
         """Slot for TcamView.new_pixel_under_mouse"""
-        self.pixel_label.setText(color.name())
+        if active:
+            self.pixel_label.setText(color.name())
+        else:
+            self.pixel_label.setText("")
 
     def open_device(self, serial: str):
         """Open device and starts video stream"""

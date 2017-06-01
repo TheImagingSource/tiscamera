@@ -40,10 +40,40 @@ from gi.repository import Tcam, Gst, GLib, GstVideo
 log = logging.getLogger(__name__)
 
 
+class ViewItem(QtWidgets.QGraphicsPixmapItem):
+    """Derived class enables mouse tracking for color under mouse retrieval"""
+    def __init__(self, parent=None):
+        super(ViewItem, self).__init__(parent)
+        self.setAcceptHoverEvents(True)
+        self.mouse_over = False  # flag if mouse is over our widget
+        self.mouse_position_x = -1
+        self.mouse_position_y = -1
+
+    def hoverEnterEvent(self, event):
+        self.mouse_over = True
+
+    def hoverLeaveEvent(self, event):
+        self.mouse_over = False
+
+    def hoverMoveEvent(self, event):
+        mouse_position = event.pos()
+
+        self.mouse_position_x = mouse_position.x()
+        self.mouse_position_y = mouse_position.y()
+        super().hoverMoveEvent(event)
+
+    def get_mouse_color(self):
+        if self.mouse_over:
+            return self.pixmap().toImage().pixelColor(self.mouse_position_x,
+                                                      self.mouse_position_y)
+        else:
+            return QtGui.QColor(0, 0, 0)
+
+
 class TcamScreen(QtWidgets.QGraphicsView):
 
     new_pixmap = pyqtSignal(QtGui.QPixmap)
-    new_pixel_under_mouse = pyqtSignal(QtGui.QColor)
+    new_pixel_under_mouse = pyqtSignal(bool, QtGui.QColor)
     destroy_widget = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -55,7 +85,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
         self.new_pixmap.connect(self.on_new_pixmap)
-        self.pix = QGraphicsPixmapItem()
+        self.pix = ViewItem()
         self.scene.addItem(self.pix)
 
         self.factor = 1.0
@@ -77,13 +107,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
 
     def send_mouse_pixel(self):
 
-        if (self.mouse_position_x == -1
-            or self.mouse_position_y == -1):
-            return
-        rgb_value = self.pix.pixmap().toImage().pixelColor(self.mouse_position_x,
-                                                           self.mouse_position_y)
-
-        self.new_pixel_under_mouse.emit(rgb_value)
+        self.new_pixel_under_mouse.emit(self.pix.mouse_over, self.pix.get_mouse_color())
 
     def mouseMoveEvent(self, event):
         mouse_position = event.pos()
@@ -137,7 +161,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
 class TcamView(QWidget):
 
     image_saved = pyqtSignal(str)
-    new_pixel_under_mouse = pyqtSignal(QtGui.QColor)
+    new_pixel_under_mouse = pyqtSignal(bool, QtGui.QColor)
 
     def __init__(self, serial, parent=None):
         super(TcamView, self).__init__(parent)
@@ -169,8 +193,8 @@ class TcamView(QWidget):
 
         self.format_menu = None
 
-    def new_pixel_under_mouse_slot(self, color: QtGui.QColor):
-        self.new_pixel_under_mouse.emit(color)
+    def new_pixel_under_mouse_slot(self, active: bool, color: QtGui.QColor):
+        self.new_pixel_under_mouse.emit(active, color)
 
     def eventFilter(self, obj, event):
         """"""
