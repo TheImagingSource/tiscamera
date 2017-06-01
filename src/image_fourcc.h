@@ -73,6 +73,7 @@
 // planar formats with no color channel sub-sampling
 #define FOURCC_YUV8PLANAR	    mmioFOURCC('Y', 'U', '8', 'p')		// unofficial, YUV planar, Y U V planes, all 8 bit, no sub-sampling
 #define FOURCC_YUV16PLANAR	    mmioFOURCC('Y', 'U', 'G', 'p')		// unofficial, YUV planar, Y U V planes, all 16 bit, no sub-sampling
+#define FOURCC_YUVF32PLANAR         mmioFOURCC('Y', 'U', 'f', 'p')              // unofficial, YUV planar, Y U V planes, all float, no sub-sampling, float range [0.f;1.f] (may be greater for unclipped)
 #define FOURCC_YUVFLOATPLANAR	mmioFOURCC('Y', 'U', 'f', 'p')		// unofficial, YUV planar, Y U V planes, all float, no sub-sampling
 
 #define FOURCC_H264			    mmioFOURCC('H', '2', '6', '4')
@@ -86,10 +87,30 @@
 #define FOURCC_GRBG10		    mmioFOURCC('B', 'A', '1', '0') /* 10  GRGR.. BGBG.. */
 #define FOURCC_RGGB10		    mmioFOURCC('R', 'G', '1', '0') /* 10  RGRG.. GBGB.. */
 
+#define FOURCC_GRBG10_SPACKED   mmioFOURCC('G', 'R', 'A', 'p') /* 10  u8, 4 pix, 5 bytes */
+#define FOURCC_RGGB10_SPACKED   mmioFOURCC('R', 'G', 'A', 'p') /* 10   */
+#define FOURCC_GBRG10_SPACKED   mmioFOURCC('G', 'B', 'A', 'p') /* 10   */
+#define FOURCC_BGGR10_SPACKED   mmioFOURCC('B', 'G', 'A', 'p') /* 10   */
+
 #define FOURCC_BGGR12		    mmioFOURCC('B', 'G', '1', '2') /* 12  BGBG.. GRGR.. */
 #define FOURCC_GBRG12		    mmioFOURCC('G', 'B', '1', '2') /* 12  GBGB.. RGRG.. */
 #define FOURCC_GRBG12		    mmioFOURCC('B', 'A', '1', '2') /* 12  GRGR.. BGBG.. */
 #define FOURCC_RGGB12		    mmioFOURCC('R', 'G', '1', '2') /* 12  RGRG.. GBGB.. */
+
+#define FOURCC_GRBG12_SPACKED   mmioFOURCC('G', 'R', 'C', 'p') /* 12  u8, [pix0_lo][pix0_hi | pix1_hi][pix1_lo] */
+#define FOURCC_RGGB12_SPACKED   mmioFOURCC('R', 'G', 'C', 'p') /* 12   */
+#define FOURCC_GBRG12_SPACKED   mmioFOURCC('G', 'B', 'C', 'p') /* 12   */
+#define FOURCC_BGGR12_SPACKED   mmioFOURCC('B', 'G', 'C', 'p') /* 12   */
+
+#define FOURCC_GRBG12_PACKED    mmioFOURCC('G', 'R', 'C', 'P') /* 12  u8, [pix0_hi][pix0_lo | pix1_lo][pix1_hi] */
+#define FOURCC_RGGB12_PACKED    mmioFOURCC('R', 'G', 'C', 'P') /* 12   */
+#define FOURCC_GBRG12_PACKED    mmioFOURCC('G', 'B', 'C', 'P') /* 12   */
+#define FOURCC_BGGR12_PACKED    mmioFOURCC('B', 'G', 'C', 'P') /* 12   */
+
+#define FOURCC_GRBG12_MIPI_PACKED       mmioFOURCC('G', 'R', 'D', 'P') /* 12  u8, [pix0_hi][pix1_hi][pix0_lo | pix1_lo] */
+#define FOURCC_RGGB12_MIPI_PACKED       mmioFOURCC('R', 'G', 'D', 'P') /* 12   */
+#define FOURCC_GBRG12_MIPI_PACKED       mmioFOURCC('G', 'B', 'D', 'P') /* 12   */
+#define FOURCC_BGGR12_MIPI_PACKED       mmioFOURCC('B', 'G', 'D', 'P') /* 12   */
 
 #define FOURCC_BGGR16		    mmioFOURCC('B', 'G', '1', '6') /* 16  BGBG.. GRGR.. */
 #define FOURCC_GBRG16		    mmioFOURCC('G', 'B', '1', '6') /* 16  GBGB.. RGRG.. */
@@ -97,6 +118,22 @@
 #define FOURCC_RGGB16		    mmioFOURCC('R', 'G', '1', '6') /* 16  RGRG.. GBGB.. */
 
 //////////////////////////////////////////////////////////////////////////
+
+
+#define FOURCC_Y10_PACKED                   mmioFOURCC('Y', '1', '0', 'p') /* 10  u8, 5 pix, 4 bytes */
+#define FOURCC_Y12_SPACKED                  mmioFOURCC('Y', '1', '2', 'p') /* 12  u8, [pix0_hi][pix0_lo | pix1_hi][pix1_lo] */
+#define FOURCC_Y12_PACKED                   mmioFOURCC('Y', '1', '2', 'P') /* 12  u8, [pix0_hi][pix0_lo | pix1_lo][pix1_hi] */
+#define FOURCC_Y12_MIPI_PACKED          mmioFOURCC('Y', '1', 'D', 'P') /* 12  u8, [pix0_hi][pix1_hi][pix0_lo | pix1_lo] */
+
+// Compression format used by GigE3L
+
+#define FOURCC_BY8_GR_NIBBLE_RLE_COMPRESSED     mmioFOURCC( 'C', 'B', 'Y', '0' )
+#define FOURCC_BY8_RG_NIBBLE_RLE_COMPRESSED     mmioFOURCC( 'C', 'B', 'Y', '1' )
+#define FOURCC_BY8_GB_NIBBLE_RLE_COMPRESSED     mmioFOURCC( 'C', 'B', 'Y', '2' )
+#define FOURCC_BY8_BG_NIBBLE_RLE_COMPRESSED     mmioFOURCC( 'C', 'B', 'Y', '3' )
+
+
+#define FOURCC_Y800_NIBBLE_RLE_COMPRESSED       mmioFOURCC( 'C', 'Y', '6', '0' )
 
 
 #endif // TCAM_IMAGE_FOURCC_H
