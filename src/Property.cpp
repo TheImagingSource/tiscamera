@@ -423,7 +423,9 @@ bool Property::set_value (const std::string& value)
         {
             if (value.compare(s.first) == 0)
             {
-                set_value((int64_t)s.second);
+                prop.value.i.value = s.second;
+                notify_impl();
+                return true;
             }
         }
         return false;
