@@ -574,34 +574,50 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             switch (status)
             {
                 case ARV_BUFFER_STATUS_SUCCESS:
+                {
                     msg = "the buffer is cleared";
                     break;
+                }
                 case ARV_BUFFER_STATUS_TIMEOUT:
+                {
                     msg = "Timeout has been reached before all packets were received";
                     break;
+                }
                 case ARV_BUFFER_STATUS_MISSING_PACKETS:
                 {
                     msg = "Stream has missing packets";
                     break;
                 }
                 case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
+                {
                     msg = "Stream has packet with wrong id";
                     break;
+                }
                 case ARV_BUFFER_STATUS_SIZE_MISMATCH:
+                {
                     msg = "The received image did not fit in the buffer data space";
                     break;
+                }
                 case ARV_BUFFER_STATUS_FILLING:
+                {
                     msg = "The image is currently being filled";
                     break;
+                }
                 case ARV_BUFFER_STATUS_ABORTED:
+                {
                     msg = "The filling was aborted before completion";
                     break;
+                }
                 case ARV_BUFFER_STATUS_CLEARED:
+                {
                     msg = "Buffer cleared";
                     break;
+                }
                 case ARV_BUFFER_STATUS_UNKNOWN:
+                {
                     msg = "This should not happen";
                     break;
+                }
             }
             tcam_log(TCAM_LOG_WARNING, msg.c_str());
         }
