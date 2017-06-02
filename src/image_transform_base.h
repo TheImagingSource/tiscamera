@@ -57,11 +57,12 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_GBRG16:     return 16;
         case FOURCC_GRBG16:     return 16;
         case FOURCC_RGGB16:     return 16;
-
-        case FOURCC_IYU1:       return 12;      // beware
+        case FOURCC_Y411:
+        case FOURCC_IYU1:       return 14;      // beware
         case FOURCC_IYU2:       return 24;
 
-            //case FOURCC_RGB48:          return 48;
+        //case FOURCC_RGB48:          return 48;
+        case FOURCC_RGB8:           return 8;
         case FOURCC_RGB64:          return 64;
 
         case FOURCC_YUV16PLANAR:    return 48;
