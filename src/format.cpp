@@ -43,10 +43,11 @@ fourcc_names fourcc_name_array [] =
     {FOURCC_YUYV, "YUYV"},
     {FOURCC_YGB0, "YGB0"},
     {FOURCC_YGB1, "YGB1"},
-    {FOURCC_Y16, "Y16"},
+    {FOURCC_Y16,  "Y16"},
 
     {FOURCC_Y444, "Y444"},
     {FOURCC_Y411, "Y411"},
+    {FOURCC_IYU1, "Y411_8"},
 
     {FOURCC_BGGR8, "BA81"},
     {FOURCC_GBRG8, "GBRG"},
@@ -62,6 +63,12 @@ fourcc_names fourcc_name_array [] =
     {FOURCC_GBRG12, "GB12"},
     {FOURCC_GRBG12, "BA12"},
     {FOURCC_RGGB12, "RG12"},
+
+    {FOURCC_BGGR12_PACKED, "BG12 Packed"},
+    {FOURCC_GBRG12_PACKED, "GB12 Packed"},
+    {FOURCC_GRBG12_PACKED, "BA12 Packed"},
+    {FOURCC_RGGB12_PACKED, "RG12 Packed"},
+
     {FOURCC_BGGR16, "BG16"},
     {FOURCC_GBRG16, "GB16"},
     {FOURCC_GRBG16, "BA16"},
