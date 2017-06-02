@@ -56,20 +56,6 @@ static TcamGstMapping tcam_gst_caps_info[] =
 		"video/x-raw-gray, bpp=(int)8, depth=(int)8",
 		"video/x-raw-gray"
 	},
-	/* { */
-	/* 	FOURCC_Y16, */
-	/* 	"video/x-raw, format=(string)GRAY16_LE", */
-	/* 	"video/x-raw", 	"GRAY16_LE", */
-	/* 	"video/x-raw-gray, bpp=(int)16, depth=(int)10", */
-	/* 	"video/x-raw-gray" */
-	/* }, */
-	/* { */
-    /*     FOURCC_Y16, */
-	/* 	"video/x-raw, format=(string)GRAY16_LE", */
-	/* 	"video/x-raw", 	"GRAY16_LE", */
-	/* 	"video/x-raw-gray, bpp=(int)16, depth=(int)10", */
-	/* 	"video/x-raw-gray" */
-	/* }, */
 	{
         FOURCC_Y16,
         "video/x-raw, format=(string)GRAY16_LE",
@@ -111,11 +97,31 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-raw", "YUY2",
         "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
 		"video/x-raw-yuv"
-        // FOURCC_YUYV,
-        // "video/x-raw, format=(string)YUY2",
-        // "video/x-raw", "YUY2",
-        // "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
-		// "video/x-raw-yuv"
+    },
+    {
+        FOURCC_YUY2,
+        "video/x-raw, format=(string)YUY2",
+        "video/x-raw", "YUY2",
+        "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
+		"video/x-raw-yuv"
+    },
+    {
+        FOURCC_UYVY,
+		"video/x-raw, format=(string)UYVY",
+		"video/x-raw",	"UYVY",
+    },
+    {
+        FOURCC_Y422,
+        "video/x-raw, format=(string)Y422",
+        "video/x-raw", "Y422",
+        "",
+		""
+    },
+    {
+        FOURCC_Y411,
+        "video/x-raw, format=(string)IYU1",
+        "video/x-raw", "IYU1",
+        "", ""
     },
     {
         FOURCC_MJPG,
@@ -123,37 +129,6 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "image/jpeg", "",
         "", ""
     },
-
-/* Non 8bit bayer formats are not supported by gstreamer bayer plugin.
- * This feature is discussed in bug https://bugzilla.gnome.org/show_bug.cgi?id=693666 .*/
-
-	/* { */
-	/* 	ARV_PIXEL_FORMAT_YUV_422_PACKED, */
-	/* 	"video/x-raw, format=(string)UYVY", */
-	/* 	"video/x-raw",	"UYVY", */
-	/* 	"video/x-raw-yuv, format=(fourcc)UYVY", */
-	/* 	"video/x-raw-yuv",	0,	0,	ARV_MAKE_FOURCC ('U','Y','V','Y') */
-	/* }, */
-	/* { */
-	/* 	ARV_PIXEL_FORMAT_YUV_422_YUYV_PACKED, */
-	/* 	"video/x-raw, format=(string)YUY2", */
-	/* 	"video/x-raw-yuv, format=(fourcc)YUYU2", */
-	/* 	"video/x-raw-yuv",	0,	0,	ARV_MAKE_FOURCC ('Y','U','Y','2') */
-	/* }, */
-	/* { */
-	/* 	ARV_PIXEL_FORMAT_RGB_8_PACKED, */
-	/* 	"video/x-raw, format=(string)RGB", */
-	/* 	"video/x-raw",	"RGB", */
-	/* 	"video/x-raw-rgb, format=(string)RGB, bpp=(int)24, depth=(int)24", */
-	/* 	"video/x-raw-rgb",	24,	24,	0 */
-	/* }, */
-	/* { */
-	/* 	ARV_PIXEL_FORMAT_CUSTOM_YUV_422_YUYV_PACKED, */
-	/* 	"video/x-raw, format=(string)YUY2", */
-	/* 	"video/x-raw",	"YUY2", */
-	/* 	"video/x-raw-yuv, format=(fourcc)YUYU2", */
-	/* 	"video/x-raw-yuv",	0,	0,	ARV_MAKE_FOURCC ('Y','U','Y','2') */
-	/* } */
 };
 
 #ifndef ARRAYSIZE
