@@ -1030,7 +1030,7 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
 
     }
 
-    GST_LOG_OBJECT (self, "Available caps = %" GST_PTR_FORMAT, caps);
+    GST_INFO("Available caps = %s", gst_caps_to_string(caps));
 
     return caps;
 }
@@ -1063,7 +1063,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     const char* caps_string;
     const char* format_string;
 
-    GST_LOG_OBJECT (self, "Requested caps = %" GST_PTR_FORMAT, caps);
+    GST_INFO("Requested caps = %" GST_PTR_FORMAT, caps);
 
     self->device->dev->stop_stream();
     self->device->sink = nullptr;
@@ -1143,7 +1143,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
         self->fixed_caps = NULL;
     }
 
-    GST_LOG_OBJECT (self, "Start acquisition");
+    GST_INFO("Start acquisition");
 
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
@@ -1553,7 +1553,7 @@ static void gst_tcam_src_set_property (GObject* object,
                     self->device_serial = g_value_get_string(value);
                 }
 
-                GST_LOG_OBJECT (self, "Set camera name to %s", self->device_serial.c_str());
+                GST_INFO("Set camera name to %s", self->device_serial.c_str());
 
                 gst_tcam_src_close_camera(self);
 
