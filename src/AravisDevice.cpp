@@ -986,7 +986,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             if (desc.fourcc == 0)
             {
-                tcam_log(TCAM_LOG_ERROR, "Input format no supported! \"%x\"", format_ptr[i]);
+                tcam_log(TCAM_LOG_ERROR, "Input format no supported! \"%x\" - %s", format_ptr[i], format_str[i]);
             }
 
             memcpy(desc.description, format_str[i], sizeof(desc.description));
