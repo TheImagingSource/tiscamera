@@ -607,13 +607,17 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
         GstCaps* temp = gst_caps_subtract(intersection,
                                           gst_caps_from_string("video/x-bayer"));
 
-        if (gst_caps_is_empty(temp))
+        if (gst_caps_is_empty(temp)
+            || gst_caps_is_any(temp)
+            || strcmp(gst_caps_to_string(temp), "ANY") == 0)
         {
             modules.caps = tcam_gst_find_largest_caps(intersection);
+            GST_INFO("Using largest caps of intersection");
         }
         else
         {
             modules.caps = tcam_gst_find_largest_caps(temp);
+            GST_INFO("Reduced caps.(%s)", gst_caps_to_string(modules.caps));
         }
 
         gst_caps_unref(temp);
@@ -630,13 +634,23 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
             structure = gst_caps_get_structure(modules.caps, 0);
 
-            if (gst_structure_get_field_type (structure, "format") == G_TYPE_STRING)
+            auto type = gst_structure_get_field_type(structure, "format");
+            if (type == G_TYPE_STRING)
             {
                 const char *string = gst_structure_get_string(structure, "format");
                 fourcc = GST_STR_FOURCC(string);
             }
+            else if (type ==  G_TYPE_INVALID)
+            {
+                GST_ERROR("Could not handle format description. Attempting alternatives.");
+
+                if (strcmp("video/x-bayer", gst_structure_get_name(structure)) == 0)
+                {
+                    // random by8 fourcc to trigger modules flags
+                    fourcc = GST_MAKE_FOURCC('b', 'g', 'g', 'r');
+                }
+            }
         }
-        // conversion_needed = false;
     }
 
     if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
@@ -647,23 +661,12 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     else if (tcam_gst_is_fourcc_bayer(fourcc))
     {
         modules.whitebalance = TRUE;
+        modules.bayer = TRUE;
     }
-    // else if (gst_tcam_is_fourcc_rgb(fourcc))
-    // {
-    //     if (conversion_needed)
-    //     {
-    //         modules.bayer = TRUE;
-    //     }
-    //     modules.whitebalance = TRUE;
-    // }
-    // else
-    // {
-    //     if (conversion_needed)
-    //     {
-    //         modules.bayer = TRUE;
-    //     }
-    //     modules.whitebalance = TRUE;
-    // }
+    else
+    {
+        GST_WARNING("Unsure if caps are correctly generated. Trying anyway.");
+    }
 
     return modules;
 }
