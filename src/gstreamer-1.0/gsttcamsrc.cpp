@@ -505,7 +505,8 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            return property->set_value(value);
+            std::string s = g_value_get_string(value);
+            return property->set_value(s);
         }
         default:
         {
