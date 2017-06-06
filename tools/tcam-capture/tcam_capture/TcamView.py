@@ -186,7 +186,7 @@ class TcamView(QWidget):
         self.format_dict = {
             "GRAY8": QtGui.QImage.Format_Indexed8,
             "Y16": QtGui.QImage.Format_Mono,
-            "BGRx": QtGui.QImage.Format_RGB32,
+            "BGRx": QtGui.QImage.Format_ARGB32,
             "BGR": QtGui.QImage.Format_RGB888
             # "YUY2": QtGui.QImage.Format_
         }
@@ -293,7 +293,7 @@ class TcamView(QWidget):
                         "! tee name=tee tee. "
                         "! queue "
                         "! videoconvert "
-                        "! video/x-raw,format=BGR "
+                        "! video/x-raw,format=BGRx "
                         "! appsink name=sink emit-signals=true")
 
         self.pipeline = None
