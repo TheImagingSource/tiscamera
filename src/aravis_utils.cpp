@@ -100,6 +100,14 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {},
     },
     {
+        .id = TCAM_PROPERTY_GAIN_AUTO_UPPER_LIMIT,
+        .genicam_name = {"GainAutoUpperLimit"},
+    },
+    {
+        .id = TCAM_PROPERTY_GAIN_AUTO_LOWER_LIMIT,
+        .genicam_name = {"GainAutoLowerLimit"},
+    },
+    {
         .id = TCAM_PROPERTY_TRIGGER_MODE,
         .genicam_name = {"TriggerMode"},
     },
@@ -165,11 +173,11 @@ static std::vector<struct aravis_property> aravis_mappings =
     },
     {
         .id = TCAM_PROPERTY_BRIGHTNESS,
-        .genicam_name = {},
+        .genicam_name = {"Brightness"},
     },
     {
         .id = TCAM_PROPERTY_CONTRAST,
-        .genicam_name = {},
+        .genicam_name = {"Contrast"},
     },
     {
         .id = TCAM_PROPERTY_SATURATION,
