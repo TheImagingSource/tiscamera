@@ -511,6 +511,7 @@ TCAM_PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
         case Property::BUTTON:
             return TCAM_PROPERTY_TYPE_BUTTON;
         case Property::COMMAND:
+            return TCAM_PROPERTY_TYPE_BUTTON;
         default:
             return TCAM_PROPERTY_TYPE_UNKNOWN;
     };
