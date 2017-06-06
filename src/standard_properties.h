@@ -143,6 +143,18 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_GAIN },
     },
     {
+        .id = TCAM_PROPERTY_GAIN_AUTO_UPPER_LIMIT,
+        .name = "Gain Auto Upper Limit",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_GAIN },
+    },
+    {
+        .id = TCAM_PROPERTY_GAIN_AUTO_LOWER_LIMIT,
+        .name = "Gain Auto Lower Limit",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_GAIN },
+    },
+    {
         .id = TCAM_PROPERTY_TRIGGER_MODE,
         .name = "Trigger Mode",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
