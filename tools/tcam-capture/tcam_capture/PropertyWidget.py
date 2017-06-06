@@ -47,6 +47,10 @@ class PropertyWidget(QWidget):
         self.prop = prop
         self.setup_ui()
 
+    def __repr__(self):
+        return repr((self.prop.name, self.prop.valuetype,
+                     self.prop.category, self.prop.group))
+
     def setup_ui(self):
         self.layout = QHBoxLayout()
 
