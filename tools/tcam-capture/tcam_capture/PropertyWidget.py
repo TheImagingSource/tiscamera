@@ -14,7 +14,7 @@
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
-                             QCheckBox, QComboBox, QWidget)
+                             QCheckBox, QComboBox, QWidget, QSpacerItem)
 from PyQt5.QtCore import Qt, pyqtSignal
 from . import TcamSignal, TcamCaptureData
 import logging
@@ -49,6 +49,11 @@ class PropertyWidget(QWidget):
 
     def setup_ui(self):
         self.layout = QHBoxLayout()
+
+        if self.prop.name != self.prop.group:
+            self.spacer = QSpacerItem(30, 10)
+            self.layout.addItem(self.spacer)
+
         self.setLayout(self.layout)
         if self.prop.valuetype != "boolean":
             self.name_label = QtWidgets.QLabel(self.prop.name)
