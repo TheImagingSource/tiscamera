@@ -1363,6 +1363,8 @@ bool V4l2Device::get_frame ()
         return false;
     }
 
+    buffers.at(buf.index).is_queued = false;
+
     if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
     {
         tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Dropping...");
@@ -1379,7 +1381,6 @@ bool V4l2Device::get_frame ()
     statistics.frame_count++;
     buffers.at(buf.index).buffer->set_statistics(statistics);
 
-    buffers.at(buf.index).is_queued = false;
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
