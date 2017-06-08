@@ -489,7 +489,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            property->set_value(g_value_get_double(value));
+            return property->set_value(g_value_get_double(value));
         }
         case TCAM_PROPERTY_TYPE_STRING:
         {
