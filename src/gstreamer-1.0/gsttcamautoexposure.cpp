@@ -1292,11 +1292,14 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
     if (self->image_region.x0 == 0
-        && self->image_region.x1 == 0
-        && self->image_region.y0 == 0
-        && self->image_region.y1 == 0)
+        && self->image_region.x1 == 0)
     {
         self->image_region.x1 = self->image_size.width;
+    }
+
+    if( self->image_region.y0 == 0
+        && self->image_region.y1 == 0)
+    {
         self->image_region.y1 = self->image_size.height;
     }
 
@@ -1304,16 +1307,19 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     image_buffer new_buf;
 
-    new_buf.image = info.data + (self->image_region.x0 * bytes_per_pixel * self->image_region.y0);
+    new_buf.rowstride = self->image_size.width * bytes_per_pixel;
 
-    new_buf.width = self->image_region.x1 - self->image_region.x0;
-    new_buf.height = self->image_region.y1 - self->image_region.y0;
+    new_buf.image = info.data + (self->image_region.x0 * bytes_per_pixel
+				 + self->image_region.y0 * new_buf.rowstride * bytes_per_pixel);
+
+    new_buf.width = self->image_region.x1;
+    new_buf.height = self->image_region.y1;
 
     new_buf.pattern = calculate_pattern_from_offset(self);
 
     GST_INFO("Region is from %d %d to %d %d",
              self->image_region.x0, self->image_region.y0,
-             self->image_region.x1, self->image_region.y1);
+             self->image_region.x0 + self->image_region.x1, self->image_region.y0 + self->image_region.y1);
 
     gst_buffer_unmap(buf, &info);
 

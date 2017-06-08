@@ -101,8 +101,7 @@ void get_sampling_points_from_buffer (image_buffer* buf,
 
     unsigned int first_line_offset = initial_offset(buf->pattern, width, 8);
 
-    /* bayer8; aravis currently does not support 16 and other */
-    unsigned int bytes_per_line = 8 * width / 8;
+    unsigned int bytes_per_line = buf->rowstride;
 
     unsigned int cnt = 0;
     unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);

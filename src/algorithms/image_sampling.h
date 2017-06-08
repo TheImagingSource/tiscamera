@@ -56,6 +56,7 @@ typedef struct
     byte* image;
     unsigned int width;
     unsigned int height;
+    unsigned int rowstride;
     format color_format;
     tBY8Pattern pattern;
 } image_buffer;
