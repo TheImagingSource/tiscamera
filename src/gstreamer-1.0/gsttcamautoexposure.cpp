@@ -1313,14 +1313,14 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 				  self->image_region.x1))
     {
         self->image_region.x0 = self->image_size.width -
-	   ( self->image_region.x1 + 1);
+	   ( self->image_region.x1);
     }
 
     if (self->image_region.y0 >= (self->image_size.height -
 				  self->image_region.y1))
     {
         self->image_region.y0 = self->image_size.height -
-	   ( self->image_region.y1 + 1);
+	   ( self->image_region.y1);
     }
 
     const int bytes_per_pixel = 1;
