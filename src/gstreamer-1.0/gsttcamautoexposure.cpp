@@ -280,7 +280,7 @@ static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gcha
     }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
-        return strdup("integer");
+        return strdup("double");
     }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)) == 0)
     {
