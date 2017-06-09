@@ -28,6 +28,8 @@ extern "C"
 /* number of sample points */
 #define SAMPLING_LINES      30
 #define SAMPLING_COLUMNS    40
+#define SAMPLING_MIN_WIDTH  8
+#define SAMPLING_MIN_HEIGHT 8
 
 typedef unsigned char byte;
 

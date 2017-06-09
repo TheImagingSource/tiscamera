@@ -582,7 +582,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_size.width - (SAMPLING_MIN_WIDTH+1));
         }
         if (def)
         {
@@ -626,12 +626,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, SAMPLING_MIN_WIDTH);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_size.width);
         }
         if (def)
         {
@@ -680,7 +680,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_size.height - (SAMPLING_MIN_HEIGHT + 1));
         }
         if (def)
         {
@@ -724,12 +724,12 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, SAMPLING_MIN_HEIGHT);
         }
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_size.height);
         }
         if (def)
         {
@@ -1291,16 +1291,36 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
-    if (self->image_region.x0 == 0
-        && self->image_region.x1 == 0)
+    if (self->image_region.x1 == 0)
     {
         self->image_region.x1 = self->image_size.width;
     }
+    else if (self->image_region.x1 < SAMPLING_MIN_WIDTH)
+    {
+        self->image_region.x1 = SAMPLING_MIN_WIDTH;
+    }
 
-    if( self->image_region.y0 == 0
-        && self->image_region.y1 == 0)
+    if (self->image_region.y1 == 0)
     {
         self->image_region.y1 = self->image_size.height;
+    }
+    else if (self->image_region.y1 < SAMPLING_MIN_HEIGHT)
+    {
+        self->image_region.y1 = SAMPLING_MIN_HEIGHT;
+    }
+
+    if (self->image_region.x0 >= (self->image_size.width -
+				  self->image_region.x1))
+    {
+        self->image_region.x0 = self->image_size.width -
+	   ( self->image_region.x1 + 1);
+    }
+
+    if (self->image_region.y0 >= (self->image_size.height -
+				  self->image_region.y1))
+    {
+        self->image_region.y0 = self->image_size.height -
+	   ( self->image_region.y1 + 1);
     }
 
     const int bytes_per_pixel = 1;
