@@ -33,6 +33,7 @@ typedef struct
     byte* image;
     guint width;
     guint height;
+    guint rowstride;
     format color_format;
     tBY8Pattern pattern;
 } image_buffer;

@@ -56,12 +56,12 @@ char* bayer_to_string (tBY8Pattern pattern)
 }
 
 
-unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsigned int bytes_per_pixel)
+unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsigned int bits_per_pixel)
 {
     unsigned int first_line_offset = 0;
 
     /* bayer8; aravis currently does not support 16 and other */
-    int bytes_per_line = bytes_per_pixel * line_width / 8;
+    int bytes_per_line = bits_per_pixel * line_width / 8;
 
     switch (pattern)
     {

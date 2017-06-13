@@ -496,17 +496,19 @@ static tBY8Pattern calculate_pattern_from_offset (GstTis_Auto_Exposure* self)
 
 static image_buffer retrieve_image_region (GstTis_Auto_Exposure* self, GstBuffer* buf)
 {
-    if (self->image_region.x0 == 0
-        && self->image_region.x1 == 0
-        && self->image_region.y0 == 0
-        && self->image_region.y1 == 0)
+    GstCaps *caps = GST_BUFFER_CAPS (buf);
+    GstStructure *structure = gst_caps_get_structure (caps, 0);
+    gint width, height;
+    gst_structure_get_int (structure, "width", &width);
+    gst_structure_get_int (structure, "height", &height);
+
+    if (self->image_region.x1 == 0)
     {
-        GstCaps *caps = GST_BUFFER_CAPS (buf);
-        GstStructure *structure = gst_caps_get_structure (caps, 0);
-        gint width, height;
-        gst_structure_get_int (structure, "width", &width);
-        gst_structure_get_int (structure, "height", &height);
         self->image_region.x1 = width;
+    }
+
+    if (self->image_region.y1 == 0)
+    {
         self->image_region.y1 = height;
     }
 
@@ -514,10 +516,12 @@ static image_buffer retrieve_image_region (GstTis_Auto_Exposure* self, GstBuffer
 
     image_buffer new_buf;
 
-    new_buf.image = GST_BUFFER_DATA(buf) + (self->image_region.x0 * bytes_per_pixel * self->image_region.y0);
+    new_buf.image = GST_BUFFER_DATA(buf) + ((self->image_region.x0 * bytes_per_pixel) +
+					    (self->image_region.y0 * bytes_per_pixel * width));
 
-    new_buf.width = self->image_region.x1 - self->image_region.x0;
-    new_buf.height = self->image_region.y1 - self->image_region.y0;
+    new_buf.width = self->image_region.x1;
+    new_buf.height = self->image_region.y1;
+    new_buf.rowstride = width * bytes_per_pixel;
 
     new_buf.pattern = calculate_pattern_from_offset(self);
 

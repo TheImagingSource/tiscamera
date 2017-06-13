@@ -92,6 +92,9 @@ void get_sampling_points (GstBuffer* buf, auto_sample_points* points, tBY8Patter
 }
 
 
+// #define DBG_COLORIZE {pLine[col] = 0;pLine[col+1] = 0;pNextLine[col] = 0; pNextLine[col+1] = 0;}
+#define DBG_COLORIZE {}
+
 
 /* retrieve sampling points for image analysis */
 void get_sampling_points_from_buffer (image_buffer* buf,
@@ -103,10 +106,10 @@ void get_sampling_points_from_buffer (image_buffer* buf,
 
     static const unsigned int bypp = 1;
 
-    guint first_line_offset = initial_offset(buf->pattern, width, 8);
+    guint first_line_offset = initial_offset(buf->pattern, buf->rowstride, 8);
 
     /* bayer8; aravis currently does not support 16 and other */
-    gint bytes_per_line = 8 * width / 8;
+    gint bytes_per_line = buf->rowstride;
 
     guint cnt = 0;
     guint sampling_line_step = height / (SAMPLING_LINES + 1);
@@ -130,12 +133,14 @@ void get_sampling_points_from_buffer (image_buffer* buf,
                     r = pLine[col+bypp];
                     g = pLine[col];
                     b = pNextLine[col];
+		    DBG_COLORIZE;
                 }
                 else
                 {
                     r = pLine[col];
                     g = pLine[col+bypp];
                     b = pNextLine[col+bypp];
+		    DBG_COLORIZE;
                 }
             }
             else
@@ -145,12 +150,14 @@ void get_sampling_points_from_buffer (image_buffer* buf,
                     r = pNextLine[col+bypp];
                     g = pLine[col+bypp];
                     b = pLine[col];
+		    DBG_COLORIZE;
                 }
                 else
                 {
                     r = pNextLine[col];
                     g = pLine[col];
                     b = pLine[col+bypp];
+		    DBG_COLORIZE;
                 }
             }
 
