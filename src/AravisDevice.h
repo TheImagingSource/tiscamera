@@ -106,7 +106,7 @@ private:
 
     ArvCamera* arv_camera;
 
-    std::shared_ptr<SinkInterface> external_sink;
+    std::weak_ptr<SinkInterface> external_sink;
 
     ArvStream* stream;
     ArvGc* genicam;
