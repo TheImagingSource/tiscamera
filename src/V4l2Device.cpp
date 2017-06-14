@@ -149,8 +149,8 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
-    // udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
-    // udev_monitor.detach();
+    udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
+    udev_monitor.detach();
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
@@ -1560,7 +1560,7 @@ void V4l2Device::monitor_v4l2_device ()
     udev_monitor_enable_receiving(mon);
     /* Get the file descriptor (fd) for the monitor.
        This fd will get passed to select() */
-    fd = udev_monitor_get_fd(mon);
+    int udev_fd = udev_monitor_get_fd(mon);
 
     /* This section will run continuously, calling usleep() at
        the end of each pass. This is to demonstrate how to use
@@ -1581,10 +1581,10 @@ void V4l2Device::monitor_v4l2_device ()
         tv.tv_sec = 0;
         tv.tv_usec = 0;
 
-        ret = select(fd+1, &fds, NULL, NULL, &tv);
+        ret = select(udev_fd+1, &fds, NULL, NULL, &tv);
 
         /* Check if our file descriptor has received data. */
-        if (ret > 0 && FD_ISSET(fd, &fds))
+        if (ret > 0 && FD_ISSET(udev_fd, &fds))
         {
             /* Make the call to receive the device.
                select() ensured that this will not block. */
