@@ -51,7 +51,9 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
 
 
 CaptureDeviceImpl::~CaptureDeviceImpl ()
-{}
+{
+    close_device();
+}
 
 
 bool CaptureDeviceImpl::load_configuration (const std::string& filename)
