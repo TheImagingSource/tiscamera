@@ -174,7 +174,10 @@ V4l2Device::~V4l2Device ()
     if (is_stream_on)
         stop_stream();
 
-    stop_all = true;
+    this->stop_all = true;
+    this->abort_all = true;
+
+    this->cv.notify_all();
 
     if (this->fd != -1)
     {
@@ -182,10 +185,21 @@ V4l2Device::~V4l2Device ()
         fd = -1;
     }
 
+    if (work_thread.joinable())
+    {
+        work_thread.join();
+    }
+
     if (udev_monitor.joinable())
     {
         udev_monitor.join();
     }
+
+    if (notification_thread.joinable())
+    {
+        notification_thread.join();
+    }
+
 }
 
 
@@ -1283,7 +1297,6 @@ void V4l2Device::stream ()
                 {
                     this->device_is_lost = true;
                     tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
-                    std::unique_lock<std::mutex> lck(this->mtx);
                     this->cv.notify_all();
                     break;
                 }
@@ -1304,7 +1317,6 @@ void V4l2Device::stream ()
                     this->device_is_lost = true;
 
                     tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
-                    std::unique_lock<std::mutex> lck(this->mtx);
                     this->cv.notify_all();
                     break;
                 }
@@ -1384,7 +1396,15 @@ bool V4l2Device::get_frame ()
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
-    listener->push_image(buffers.at(buf.index).buffer);
+    if (listener.expired())
+    {
+        tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
+        requeue_mmap_buffer();
+        return false;
+    }
+
+    auto ptr(listener.lock());
+    ptr->push_image(buffers.at(buf.index).buffer);
 
     if (!requeue_mmap_buffer())
     {
