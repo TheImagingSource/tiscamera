@@ -211,14 +211,14 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                      PROP_REGION_X1,
                                      g_param_spec_int ("region-x1",
                                                        "Lower x coordinate",
-                                                       "X coordinate of the lower, right corner of the region of interest.",
+                                                       "Width of the region of interest.",
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_REGION_Y1,
                                      g_param_spec_int ("region-y1",
                                                        "Lower y coordinate",
-                                                       "Y coordinate of the lower, right corner of the region of interest.",
+                                                       "Height of the region of interest.",
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
