@@ -11,3 +11,14 @@ RUN+="/sbin/modprobe -b uvcvideo"
 ACTION=="add", SUBSYSTEM=="drivers", \
                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
                ATTR{new_id}="199e 8101"
+# templates for those using non standard locations
+
+# load uvc extensions for usb2 cameras
+# ACTION=="add", SUBSYSTEM=="video4linux", \
+#               ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
+#               RUN+="/usr/bin/uvcdynctrl --device=/dev/%k -i /path/to/tiscamera/uvc-extensions/tisEUVC.xml"
+
+# load uvc extensions for usb3 cameras
+# ACTION=="add", SUBSYSTEM=="video4linux", \
+#               ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
+#               RUN+="/usr/bin/uvcdynctrl --device=/dev/%k -i /path/to/tiscamera/uvc-extensions/usb3.xml"
