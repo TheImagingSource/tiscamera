@@ -70,6 +70,12 @@ GST_DEBUG_CATEGORY_STATIC (gst_tis_auto_exposure_debug_category);
 #define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h) : (val) )
 
 
+#define EXPOSURE_MIN_DEFAULT (10000.0 * (1.0 / 10000.0))
+//#define EXPOSURE_MAX_DEFAULT (10000.0 * (1.0 / 30.0))
+#define EXPOSURE_MAX_DEFAULT (0)
+
+
+
 /* prototypes */
 
 static void gst_tis_auto_exposure_set_property (GObject* object,
@@ -102,6 +108,7 @@ enum
     PROP_AUTO_GAIN,
     PROP_CAMERA,
     PROP_BRIGHTNESS_REFERENCE,
+    PROP_EXPOSURE_MIN,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MAX,
     PROP_REGION_X0,
@@ -166,11 +173,18 @@ static void gst_tis_auto_exposure_class_init (GstTis_Auto_ExposureClass* klass)
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_EXPOSURE_MIN,
+                                     g_param_spec_double ("exposure-min",
+                                                          "Exposure Minimum",
+                                                          "Minimum value exposure can take",
+                                                          0.0, G_MAXDOUBLE, EXPOSURE_MIN_DEFAULT,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
                                      g_param_spec_double ("exposure-max",
                                                           "Exposure Maximum",
                                                           "Maximum value exposure can take",
-                                                          0.0, G_MAXDOUBLE, 0.0,
+                                                          0.0, G_MAXDOUBLE, EXPOSURE_MAX_DEFAULT,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_BRIGHTNESS_REFERENCE,
@@ -260,10 +274,23 @@ void gst_tis_auto_exposure_set_property (GObject* object,
         case PROP_BRIGHTNESS_REFERENCE:
             tis_auto_exposure->brightness_reference = g_value_get_int(value);
             break;
+        case PROP_EXPOSURE_MIN:
+	{
+	    gdouble val = g_value_get_double (value);
+	    if (val < tis_auto_exposure->default_exposure_values.min)
+		tis_auto_exposure->exposure.min = tis_auto_exposure->default_exposure_values.min;
+	    else if (val < tis_auto_exposure->exposure.max)
+		tis_auto_exposure->exposure.min = tis_auto_exposure->exposure.max;
+	    else
+		tis_auto_exposure->exposure.min = val;
+	    break;
+	}
         case PROP_EXPOSURE_MAX:
             tis_auto_exposure->exposure.max = g_value_get_double (value);
             if (tis_auto_exposure->exposure.max == 0.0)
-                tis_auto_exposure->exposure = tis_auto_exposure->default_exposure_values;
+                tis_auto_exposure->exposure.max = tis_auto_exposure->default_exposure_values.max;
+	    else if(tis_auto_exposure->exposure.max < tis_auto_exposure->exposure.min)
+		tis_auto_exposure->exposure.max = tis_auto_exposure->exposure.min;
             break;
         case PROP_GAIN_MAX:
             tis_auto_exposure->gain.max = g_value_get_double (value);
@@ -308,6 +335,9 @@ void gst_tis_auto_exposure_get_property (GObject* object,
             break;
         case PROP_BRIGHTNESS_REFERENCE:
             g_value_set_int(value, tis_auto_exposure->brightness_reference);
+            break;
+        case PROP_EXPOSURE_MIN:
+            g_value_set_double(value, tis_auto_exposure->exposure.min);
             break;
         case PROP_EXPOSURE_MAX:
             g_value_set_double(value, tis_auto_exposure->exposure.max);
@@ -637,11 +667,8 @@ static void init_camera_resources (GstTis_Auto_Exposure* self)
     /* simply use the retrieved default values */
     if (self->exposure.max == 0.0)
     {
-        self->exposure = self->default_exposure_values;
-    }
-    else
-    {
-        self->exposure.min = self->default_exposure_values.min;
+	self->exposure.value = self->default_exposure_values.value;
+        self->exposure.max = self->default_exposure_values.max;
     }
 
     gst_debug_log (gst_tis_auto_exposure_debug_category,
