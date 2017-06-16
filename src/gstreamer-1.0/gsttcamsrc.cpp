@@ -315,8 +315,16 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             }
             if (def)
             {
-                g_value_init (def, G_TYPE_INT);
-                g_value_set_int (def, prop.value.i.default_value);
+                if (prop.type == TCAM_PROPERTY_TYPE_INTEGER)
+                {
+                    g_value_init (def, G_TYPE_INT);
+                    g_value_set_int (def, prop.value.i.default_value);
+                }
+                else if (prop.type == TCAM_PROPERTY_TYPE_ENUMERATION)
+                {
+                    g_value_init(def, G_TYPE_STRING);
+                    g_value_set_string(def, ((tcam::PropertyEnumeration*)property)->get_default().c_str());
+                }
             }
             if (step)
             {
