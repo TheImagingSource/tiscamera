@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <functional>
 
 #include "base_types.h"
 

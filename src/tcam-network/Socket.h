@@ -20,6 +20,7 @@
 #include <memory>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <functional>
 
 #include "gigevision.h"
 #include "utils.h"
