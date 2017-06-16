@@ -31,17 +31,40 @@ CFLAGS+=$(shell pkg-config tcam --cflags)
 .PHONY: all clean
 
 
-all: tcam_pipeline tcam_properties
+all: save-video list-devices list-properties list-formats pipeline properties trigger-images appsink
 
-tcam_pipeline: pipeline.c
+save-video: save-video.c
 	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
 
-tcam_properties: properties.c
+list-devices: list-devices.c
 	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
 
+list-properties: list-properties.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+
+list-formats: list-formats.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+
+pipeline: pipeline.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+
+properties: properties.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+
+trigger-images: trigger-images.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+
+appsink: appsink.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
 
 
 clean:
 	$(RM) *.o
-	$(RM) tcam_pipeline
-	$(RM) tcam_properties
+	$(RM) save-video
+	$(RM) list-devices
+	$(RM) list-properties
+	$(RM)list-formats
+	$(RM) pipeline
+	$(RM) properties
+	$(RM) trigger-images
+	$(RM) appsink
