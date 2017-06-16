@@ -136,10 +136,8 @@ std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resoluti
 
 std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_size& s) const
 {
-    if (format_handler.expired() == false)
+    if (auto handler = format_handler.lock())
     {
-        auto handler = format_handler.lock();
-
         return handler->get_framerates(s);
     }
 

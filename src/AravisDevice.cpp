@@ -405,11 +405,6 @@ bool AravisDevice::start_stream ()
         tcam_log(TCAM_LOG_ERROR, "ArvCamera missing!");
         return false;
     }
-    if (external_sink.expired())
-    {
-        tcam_log(TCAM_LOG_ERROR, "No sink specified");
-        return false;
-    }
 
     if (buffers.size() < 2)
     {
@@ -555,14 +550,16 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
             // self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
 
-            if (self->external_sink.expired())
+            if (auto ptr = self->external_sink.lock())
+            {
+                ptr->push_image(p);
+            }
+            else
             {
                 tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
                 arv_stream_push_buffer(self->stream, buffer);
                 return;
             }
-            auto ptr(self->external_sink.lock());
-            ptr->push_image(p);
 
             // // keep buffer unqueued until user allows requeueing
             // while (buffers.at(buf.index)->is_locked())

@@ -120,10 +120,14 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
     }
     buffer->set_statistics(stats);
 
-    if (!pipeline.expired())
-        pipeline.lock()->push_image(buffer);
+    if (auto ptr = pipeline.lock())
+    {
+        ptr->push_image(buffer);
+    }
     else
+    {
         tcam_log(TCAM_LOG_ERROR, "Pipeline over expiration date.");
+    }
 }
 
 

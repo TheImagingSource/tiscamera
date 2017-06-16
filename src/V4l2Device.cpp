@@ -1396,15 +1396,16 @@ bool V4l2Device::get_frame ()
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
-    if (listener.expired())
+    if (auto ptr = listener.lock())
+    {
+        ptr->push_image(buffers.at(buf.index).buffer);
+    }
+    else
     {
         tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
         requeue_mmap_buffer();
         return false;
     }
-
-    auto ptr(listener.lock());
-    ptr->push_image(buffers.at(buf.index).buffer);
 
     if (!requeue_mmap_buffer())
     {

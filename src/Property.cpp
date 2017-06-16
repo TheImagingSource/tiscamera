@@ -69,15 +69,11 @@ void Property::reset ()
 
 bool Property::update ()
 {
-    if (impl.expired())
+    if (auto ptr = impl.lock())
     {
-        return false;
+        return ptr->get_property(*this);
     }
-
-    auto ptr = impl.lock();
-
-
-    return ptr->get_property(*this);
+    return false;
 }
 
 
@@ -482,14 +478,14 @@ bool Property::get_property (Property& p)
 
 void Property::notify_impl ()
 {
-    if (impl.expired())
+    if (auto ptr = impl.lock())
+    {
+        ptr->set_property(*this);
+    }
+    else
     {
         tcam_log(TCAM_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->get_name().c_str());
     }
-
-    auto ptr(impl.lock());
-
-    ptr->set_property(*this);
 }
 
 
