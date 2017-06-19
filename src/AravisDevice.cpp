@@ -201,7 +201,7 @@ bool AravisDevice::set_property (const Property& p)
                      "Sending property change for (float) %s",
                      p.get_name().c_str());
             arv_device_set_float_feature_value(device, pm->arv_ident.c_str(),
-                                               ((PropertyInteger&) (p)).get_value());
+                                               ((PropertyDouble&) (p)).get_value());
             pm->prop->set_struct(p.get_struct());
 
             break;
