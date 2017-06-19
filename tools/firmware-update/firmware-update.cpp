@@ -162,8 +162,16 @@ void print_device_info (const std::string& serial_number)
               << "Device manufacturer: " << d.manufacturer << std::endl
               << "Product name:        " << d.product << std::endl
               << "Serial number:       " << d.serial << std::endl
-              << "VendorID:ProductID:  " << std::hex << d.idVendor << ":" << d.idProduct << std::dec << std::endl
-              << "Firmware version:    " << cam->get_firmware_version() << std::endl;
+              << "VendorID:ProductID:  " << std::hex << d.idVendor << ":" << d.idProduct << std::dec << std::endl;
+
+    if (cam->get_firmware_version() != -1)
+    {
+        std::cout << "Firmware version:    " << cam->get_firmware_version() << std::endl;
+    }
+    else
+    {
+        std::cout << "Firmware version:    " << cam->get_firmware_version_string() << std::endl;
+    }
 
     auto type = cam->get_camera_type();
 

@@ -67,6 +67,8 @@ public:
     /// @return number of firmware version
     virtual int get_firmware_version () = 0;
 
+    virtual std::string get_firmware_version_string () = 0;
+
     virtual int delete_firmware (std::function<void(int)> progress) = 0;
 
     /// @name download_firmware

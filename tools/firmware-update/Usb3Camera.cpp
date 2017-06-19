@@ -76,6 +76,12 @@ int Usb3Camera::get_firmware_version ()
 }
 
 
+std::string Usb3Camera::get_firmware_version_string ()
+{
+    return std::to_string(get_firmware_version());
+}
+
+
 int Usb3Camera::delete_firmware (std::function<void(int)> progress)
 {
     auto map_progress = [] ( std::function<void(int)> progress, int begin, int end )

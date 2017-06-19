@@ -48,6 +48,8 @@ public:
     /// @return integer containing the currently used firmware version
     int get_firmware_version ();
 
+    std::string  get_firmware_version_string ();
+
     int delete_firmware (std::function<void(int)> progress);
 
     /// @name download_firmware

@@ -75,6 +75,12 @@ int Usb2Camera::get_firmware_version ()
 }
 
 
+std::string Usb2Camera::get_firmware_version_string ()
+{
+    return std::to_string(get_firmware_version());
+}
+
+
 int Usb2Camera::delete_firmware (std::function<void(int)> progress)
 {
     return -1;

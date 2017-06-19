@@ -61,7 +61,13 @@ Usb33Camera::~Usb33Camera ()
 
 int Usb33Camera::get_firmware_version ()
 {
-    return std::stoi(cam.fpga_version());
+    return -1;
+}
+
+
+std::string Usb33Camera::get_firmware_version_string ()
+{
+    return cam.fpga_version();
 }
 
 
