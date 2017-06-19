@@ -77,8 +77,8 @@ class PropertyWidget(QWidget):
             self.layout.addWidget(self.value_label)
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
-            self.sld.setRange(self.prop.minval, self.prop.maxval)
-
+            self.sld.setRange(self.prop.minval * 1000, self.prop.maxval * 1000)
+            self.sld.valueChanged[int].connect(self.set_property)
             self.sld.setGeometry(30, 40, 100, 30)
             self.layout.addWidget(self.sld)
         elif self.prop.valuetype == "button":
@@ -113,7 +113,10 @@ class PropertyWidget(QWidget):
         if self.prop.valuetype == "integer":
             self.value_label.setText(str(value))
         if self.prop.valuetype == "double":
-            self.value_label.setText(str(value))
+            self.value_label.setText(str(value / 1000))
+            self.signals.change_property.emit(self.tcam, self.prop.name,
+                                              float(value) / 1000, self.prop.valuetype)
+            return
 
         self.signals.change_property.emit(self.tcam, self.prop.name,
                                           value, self.prop.valuetype)
