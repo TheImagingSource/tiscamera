@@ -103,6 +103,9 @@ public:
      */
     bool is_disabled () const;
 
+
+    bool is_external () const;
+
     /**
      *
      */

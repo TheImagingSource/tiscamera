@@ -119,6 +119,12 @@ bool Property::is_disabled () const
 }
 
 
+bool Property::is_external () const
+{
+    return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
+}
+
+
 uint32_t Property::get_flags () const
 {
     return prop.flags;
