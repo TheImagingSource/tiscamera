@@ -267,6 +267,8 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
         return FALSE;
     }
 
+    property->update();
+
     struct tcam_device_property prop = property->get_struct();
 
     if (flags)

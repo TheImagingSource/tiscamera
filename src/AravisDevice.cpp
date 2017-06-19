@@ -36,7 +36,20 @@ AravisDevice::AravisPropertyHandler::AravisPropertyHandler (AravisDevice* dev)
 
 bool AravisDevice::AravisPropertyHandler::get_property (Property& p)
 {
-    return device->get_property(p);
+    for (auto& pr : properties)
+    {
+        if (pr.prop->get_ID() == p.get_ID())
+        {
+            if (!pr.prop->is_external())
+            {
+                device->update_property(pr);
+            }
+
+            p.set_struct(pr.prop->get_struct());
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -281,9 +294,54 @@ bool AravisDevice::set_property (const Property& p)
 }
 
 
-bool AravisDevice::get_property (Property&)
+bool AravisDevice::get_property (Property& p)
 {
-    return false;
+    return handler->get_property(p);
+}
+
+
+void AravisDevice::update_property (struct property_mapping& mapping)
+{
+    auto& p = mapping.prop;
+
+    auto device = arv_camera_get_device(arv_camera);
+
+    switch (p->get_value_type())
+    {
+        case Property::VALUE_TYPE::BOOLEAN:
+        {
+            p->set_value((bool)arv_device_get_boolean_feature_value(device,
+                                                                    mapping.arv_ident.c_str()));
+            break;
+        }
+        case Property::VALUE_TYPE::STRING:
+        case Property::VALUE_TYPE::ENUM:
+        {
+            p->set_value(arv_device_get_string_feature_value(device,
+                                                             mapping.arv_ident.c_str()));
+            break;
+        }
+        case Property::VALUE_TYPE::INTEGER:
+        {
+            p->set_value(arv_device_get_integer_feature_value(device,
+                                                              mapping.arv_ident.c_str()));
+            break;
+        }
+        case Property::VALUE_TYPE::INTSWISSKNIFE:
+        case Property::VALUE_TYPE::FLOAT:
+        {
+            p->set_value(arv_device_get_float_feature_value(device,
+                                                            mapping.arv_ident.c_str()));
+            break;
+        }
+        case Property::VALUE_TYPE::COMMAND:
+        case Property::VALUE_TYPE::BUTTON:
+        case Property::VALUE_TYPE::UNDEFINED:
+        default:
+        {
+            break;
+        }
+    }
 }
 
 

@@ -79,6 +79,8 @@ public:
 
     bool get_property (Property&);
 
+    void update_property (struct property_mapping& mapping);
+
     bool set_video_format (const VideoFormat&);
 
     VideoFormat get_active_video_format () const;
