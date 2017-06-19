@@ -321,17 +321,36 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                              mapping.arv_ident.c_str()));
             break;
         }
+        case Property::VALUE_TYPE::INTSWISSKNIFE:
         case Property::VALUE_TYPE::INTEGER:
         {
             p->set_value(arv_device_get_integer_feature_value(device,
                                                               mapping.arv_ident.c_str()));
             break;
         }
-        case Property::VALUE_TYPE::INTSWISSKNIFE:
         case Property::VALUE_TYPE::FLOAT:
         {
-            p->set_value(arv_device_get_float_feature_value(device,
-                                                            mapping.arv_ident.c_str()));
+            if (p->get_type() == TCAM_PROPERTY_TYPE_DOUBLE)
+            {
+                double d = arv_device_get_float_feature_value(device,
+                                                              mapping.arv_ident.c_str());
+                auto struc = p->get_struct();
+
+                struc.value.d.value = d;
+
+                p->set_struct(struc);
+            }
+            else
+            {
+
+                double d = arv_device_get_float_feature_value(device,
+                                                              mapping.arv_ident.c_str());
+                auto struc = p->get_struct();
+
+                struc.value.i.value = d;
+
+                p->set_struct(struc);
+            }
             break;
         }
         case Property::VALUE_TYPE::COMMAND:
