@@ -84,6 +84,8 @@ typedef struct GstTcamautoexposure
     gboolean gain_is_double;
     Gain gain;
     Gain default_gain_values;
+    int exposure_max;
+    double gain_max;
     Exposure exposure;
     Exposure default_exposure_values;
 

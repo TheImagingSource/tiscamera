@@ -473,7 +473,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->exposure.value);
+            g_value_set_int(value, self->exposure_max);
         }
         if (min)
         {
@@ -926,6 +926,8 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
     self->gain_is_double = FALSE;
+    self->exposure_max = 0;
+    self->gain_max = 0.0;
     self->frame_counter = 0;
     self->camera_src = NULL;
 }
@@ -949,8 +951,8 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
         case PROP_EXPOSURE_MAX:
-            tcamautoexposure->exposure.max = g_value_get_int(value);
-            if (tcamautoexposure->exposure.max == 0.0)
+            tcamautoexposure->exposure_max = g_value_get_int(value);
+            if (tcamautoexposure->exposure_max == 0.0)
             {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             }
@@ -958,8 +960,8 @@ void gst_tcamautoexposure_set_property (GObject* object,
         case PROP_GAIN_MAX:
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
 
-            tcamautoexposure->gain.max = g_value_get_double(value);
-            if (tcamautoexposure->gain.max == 0.0)
+            tcamautoexposure->gain_max = g_value_get_double(value);
+            if (tcamautoexposure->gain_max == 0.0)
             {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
             }
@@ -1004,10 +1006,10 @@ void gst_tcamautoexposure_get_property (GObject* object,
             g_value_set_object (value, tcamautoexposure->camera_src);
             break;
         case PROP_EXPOSURE_MAX:
-            g_value_set_int(value, tcamautoexposure->exposure.max);
+            g_value_set_int(value, tcamautoexposure->exposure_max);
             break;
         case PROP_GAIN_MAX:
-            g_value_set_double(value, tcamautoexposure->gain.max);
+            g_value_set_double(value, tcamautoexposure->gain_max);
             break;
         case PROP_BRIGHTNESS_REFERENCE:
             g_value_set_int(value, tcamautoexposure->brightness_reference);
@@ -1061,7 +1063,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         // we default to 0
         // if 0 -> use max setting according to framerate
         // if max is set by user we use that
-        // self->exposure.max = p.value.i.max;
+        self->exposure.max = p.value.i.max;
         self->exposure.value = p.value.i.value;
 
         self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
@@ -1089,13 +1091,14 @@ static void init_camera_resources (GstTcamautoexposure* self)
             self->gain.max = p.value.d.max;
             self->gain.value = p.value.d.value;
         }
+        self->gain_max = self->gain.max;
     }
 
-    if (self->exposure.max == 0)
+    if (self->exposure_max == 0)
     {
-        self->exposure.max = self->default_exposure_values.max;
+        self->exposure_max = self->default_exposure_values.max;
     }
-    GST_INFO("Exposure boundaries are %f %f", self->exposure.min, self->exposure.max);
+    GST_INFO("Exposure boundaries are %f %f", self->exposure.min, self->exposure_max);
 
     GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
@@ -1162,15 +1165,15 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
             g_ref = self->gain.value + K_GAIN_SLOW * diff;
         }
 
-        gdouble new_gain = fmax(fmin(g_ref, self->gain.max), self->gain.min);
-        double percentage_new =  (new_gain / self->gain.max * 100) - (self->gain.value / self->gain.max * 100);
+        gdouble new_gain = fmax(fmin(g_ref, self->gain_max), self->gain.min);
+        double percentage_new = (new_gain / self->gain_max * 100) - (self->gain.value / self->gain_max * 100);
 
         if (fabs(self->gain.value - new_gain) > K_SMALL)
         {
             GST_DEBUG("fabs(self->gain.value - new_gain) > K_SMALL == %f - %f =%f (g_ref %f diff %f)",
                       self->gain.value, new_gain, fabs(self->gain.value - new_gain), g_ref, diff);
 
-            double percentage = self->gain.max / 100;
+            double percentage = self->gain_max / 100;
             double setter = new_gain;
             GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
             if (fabs(percentage_new) > percentage)
@@ -1208,7 +1211,7 @@ static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
     if (self->auto_exposure)
     {
         const double e_ref = self->exposure.value * pow(2, diff);
-        const double new_exposure = fmax(fmin(e_ref, self->exposure.max), self->exposure.min);
+        const double new_exposure = fmax(fmin(e_ref, self->exposure_max), self->exposure.min);
 
         if (fabs(self->exposure.value - new_exposure) > K_SMALL)
         {
@@ -1260,8 +1263,17 @@ void retrieve_current_values (GstTcamautoexposure* self)
     else
     {
         p = prop->get_struct();
-        GST_DEBUG("Current gain is %ld", p.value.i.value);
-        self->gain.value = p.value.i.value;
+
+        if (prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+        {
+            GST_DEBUG("Current gain is %ld", p.value.i.value);
+            self->gain.value = p.value.i.value;
+        }
+        else
+        {
+            GST_DEBUG("Current gain is %f", p.value.d.value);
+            self->gain.value = p.value.d.value;
+        }
     }
 
 }
@@ -1393,7 +1405,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     else
     {
         /* Try swapping gain for exposure */
-        if (self->gain.value > self->gain.min && self->exposure.value < self->exposure.max)
+        if (self->gain.value > self->gain.min && self->exposure.value < self->exposure_max)
         {
             GST_DEBUG("reducing gain");
             modify_exposure(self, -modify_gain(self, -K_ADJUST));
