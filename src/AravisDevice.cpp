@@ -333,8 +333,13 @@ void AravisDevice::update_property (struct property_mapping& mapping)
         case Property::VALUE_TYPE::INTSWISSKNIFE:
         case Property::VALUE_TYPE::INTEGER:
         {
-            p->set_value(arv_device_get_integer_feature_value(device,
-                                                              mapping.arv_ident.c_str()));
+            int i = arv_device_get_integer_feature_value(device,
+                                                         mapping.arv_ident.c_str());
+            auto struc = p->get_struct();
+
+            struc.value.i.value = i;
+
+            p->set_struct(struc);
             break;
         }
         case Property::VALUE_TYPE::FLOAT:
