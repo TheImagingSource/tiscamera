@@ -308,8 +308,19 @@ void AravisDevice::update_property (struct property_mapping& mapping)
     {
         case Property::VALUE_TYPE::BOOLEAN:
         {
-            p->set_value((bool)arv_device_get_boolean_feature_value(device,
-                                                                    mapping.arv_ident.c_str()));
+            // bool b = arv_device_get_boolean_feature_value(device,
+            //                                               mapping.arv_ident.c_str());
+            int b = arv_device_get_integer_feature_value(device,
+                                                         mapping.arv_ident.c_str());
+            if (b < 0 || b > 1)
+            {
+                tcam_log(TCAM_LOG_ERROR, "WHA? %s %d", mapping.arv_ident.c_str(), b);
+            }
+            auto struc = p->get_struct();
+
+            struc.value.b.value = b;
+
+            p->set_struct(struc);
             break;
         }
         case Property::VALUE_TYPE::STRING:
