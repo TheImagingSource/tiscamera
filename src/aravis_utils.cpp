@@ -96,10 +96,6 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {},
     },
     {
-        .id = TCAM_PROPERTY_GAIN_AUTO,
-        .genicam_name = {},
-    },
-    {
         .id = TCAM_PROPERTY_GAIN_AUTO_UPPER_LIMIT,
         .genicam_name = {"GainAutoUpperLimit"},
     },
