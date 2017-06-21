@@ -237,7 +237,7 @@ static std::vector<struct aravis_property> aravis_mappings =
     },
     {
         .id = TCAM_PROPERTY_FOCUS_AUTO,
-        .genicam_name = {},
+        .genicam_name = {"FocusAuto"},
     },
     {
         .id = TCAM_PROPERTY_STROBE_ENABLE,
