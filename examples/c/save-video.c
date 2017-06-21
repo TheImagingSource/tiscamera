@@ -24,44 +24,9 @@
 void print_help ()
 {
     printf("Print available gstreamer caps for device.\n"
-           "Usage:\n\trigger-images [<serial>]\n"
+           "Usage:\n\nsave-video [<serial>]\n"
            "Help options:\n\t-h, --help\t\tPrint this text.\n"
            "\n\n");
-}
-
-
-/*
-  This function will be called in a separate thread when our appsink
-  says there is data for us. user_data has to be defined when calling g_signal_connect.
-*/
-GstFlowReturn callback (GstElement* sink, void* user_data)
-{
-    GstSample* sample = NULL;
-    /* Retrieve the buffer */
-    g_signal_emit_by_name (sink, "pull-sample", &sample, NULL);
-
-    if (sample)
-    {
-        g_print ("*");
-
-        /* if you want to have information about the format the image has
-           you can look at the caps */
-        /* GstCaps* caps gst_sample_get_caps(sample) */
-
-        GstBuffer* buffer = gst_sample_get_buffer(sample);
-        GstMapInfo info; // contains the actual image
-        if (gst_buffer_map(buffer, &info, GST_MAP_READ))
-        {
-            unsigned char* data = info.data;
-
-            /* do things here */
-
-            gst_buffer_unmap(buffer, &info);
-        }
-        // delete our reference so that gstreamer can handle the sample
-        gst_sample_unref (sample);
-    }
-    return GST_FLOW_OK;
 }
 
 
@@ -99,19 +64,22 @@ int main (int argc, char *argv[])
     GstElement* pipeline = gst_pipeline_new("pipeline");
 
     GstElement* convert = gst_element_factory_make("videoconvert", "convert");
-    GstElement* sink = gst_element_factory_make("appsink", "sink");
+    GstElement* encoder = gst_element_factory_make("x264enc", "encoder");
+    GstElement* mux = gst_element_factory_make("mpegtsmux", "mux");
+    GstElement* sink = gst_element_factory_make("filesink", "filesink");
 
-    // tell appsink to notify us when it receives an image
-    g_object_set(G_OBJECT(sink), "emit-signals", TRUE);
-
-    g_signal_connect(sink, "new-sample", G_CALLBACK(callback), NULL);
+    g_object_set(G_OBJECT(sink), "location", "/tmp/stream.ts");
 
     gst_bin_add(GST_BIN(pipeline), source);
     gst_bin_add(GST_BIN(pipeline), convert);
+    gst_bin_add(GST_BIN(pipeline), encoder);
+    gst_bin_add(GST_BIN(pipeline), mux);
     gst_bin_add(GST_BIN(pipeline), sink);
 
     gst_element_link(source, convert);
-    gst_element_link(convert, sink);
+    gst_element_link(convert, encoder);
+    gst_element_link(encoder, mux);
+    gst_element_link(mux, sink);
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
