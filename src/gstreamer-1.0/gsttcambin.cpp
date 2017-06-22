@@ -452,6 +452,38 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 }
 
 
+static gboolean camera_has_only_bayer (GstTcamBin* self)
+{
+    GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+
+    for (unsigned int i = 0; i < gst_caps_get_size(src_caps); i++)
+    {
+        GstCaps* ipcaps = gst_caps_copy_nth(src_caps, i);
+
+        GstStructure* structure = gst_caps_get_structure(ipcaps, 0);
+
+        unsigned int fourcc = 0;
+        const char* string = gst_structure_get_string(structure, "format");
+
+        if (string == nullptr)
+        {
+            continue;
+        }
+
+        fourcc = GST_STR_FOURCC(string);
+
+        if (!tcam_gst_is_fourcc_bayer(fourcc))
+        {
+            gst_caps_unref(ipcaps);
+            return FALSE;
+        }
+        gst_caps_unref(ipcaps);
+    }
+
+    return TRUE;
+}
+
+
 static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* self,
                                                                   const GstCaps* available_caps,
                                                                   const GstCaps* wanted,
@@ -572,7 +604,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
     // bool conversion_needed = false;
     if (gst_caps_is_empty(intersection)
-        && (tcam_gst_raw_only_has_mono(available_caps) && camera_has_bayer(self)))
+        || (tcam_gst_raw_only_has_mono(available_caps) || camera_has_only_bayer(self)))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
 
