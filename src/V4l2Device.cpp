@@ -1598,7 +1598,7 @@ void V4l2Device::monitor_v4l2_device ()
         int ret;
 
         FD_ZERO(&fds);
-        FD_SET(fd, &fds);
+        FD_SET(udev_fd, &fds);
         tv.tv_sec = 0;
         tv.tv_usec = 0;
 
