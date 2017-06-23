@@ -500,18 +500,27 @@ static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* se
         modules.bayer = TRUE;
     }
 
-    GstStructure* struc = gst_caps_get_structure(wanted, 0);
-
     // when get int fails we do not have a request for fixed caps
     // thus we must use ranges and fix them manually
 
     bool values_are_fixed = true;
+    GstStructure* struc;
 
     int w;
     int h;
 
-    if (!gst_structure_get_int(struc, "width", &w)
-        || !gst_structure_get_int(struc, "height", &h))
+    if (!gst_caps_is_any(wanted) || gst_caps_get_size(wanted) > 0)
+    {
+
+        struc = gst_caps_get_structure(wanted, 0);
+
+        if (!gst_structure_get_int(struc, "width", &w)
+            || !gst_structure_get_int(struc, "height", &h))
+        {
+            values_are_fixed = false;
+        }
+    }
+    else
     {
         values_are_fixed = false;
     }
