@@ -1001,7 +1001,7 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
     // sort out duplicated interfaces
     sort_properties();
     // create conversion factors so that properties allways use the same units
-    create_conversion_factors();
+    //create_conversion_factors();
     // create library only properties
     create_emulated_properties();
 }
