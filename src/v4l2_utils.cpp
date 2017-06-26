@@ -290,7 +290,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
-        .v4l2_id = { 0x199e251 },
+        .v4l2_id = { 0x199e2510 },
     },
     {
         .id = TCAM_PROPERTY_REVERSE_X,
