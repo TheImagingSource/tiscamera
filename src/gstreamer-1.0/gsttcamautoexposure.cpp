@@ -522,7 +522,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_DOUBLE);
-            g_value_set_double(value, self->gain.value);
+            g_value_set_double(value, self->gain_max);
         }
         if (min)
         {
@@ -1124,7 +1124,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 
     if (!self->gain_is_double)
     {
-        dev->set_property(TCAM_PROPERTY_GAIN, (int64_t)gain);
+        dev->set_property(TCAM_PROPERTY_GAIN, (int64_t)std::lround(gain));
     }
     else
     {
@@ -1266,8 +1266,13 @@ void retrieve_current_values (GstTcamautoexposure* self)
 
         if (prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
         {
-            GST_DEBUG("Current gain is %ld", p.value.i.value);
             self->gain.value = p.value.i.value;
+            if (self->gain.value < self->gain.min)
+            {
+                self->gain.value = self->gain.min;
+            }
+            GST_DEBUG("Current gain is %f", self->gain.value);
+
         }
         else
         {
