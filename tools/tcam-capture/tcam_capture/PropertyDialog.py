@@ -174,13 +174,18 @@ class PropertyDialog(QWidget):
 
         self.setLayout(self.layout)
 
-        for key, value in self.tab_dict.items():
-            if value.get_property_count() > 0:
-                self.tabs.addTab(value, key)
-                value.finish_setup()
+        # the order of these entries is equivalent to the tab order
+        # in the application
+        tab_list = ["Exposure", "Image", "Color",
+                    "Lens", "Special", "Partial Scan", "Unknown"]
+
+        for t in tab_list:
+            tab = self.tab_dict[t]
+            if tab.get_property_count() > 0:
+                self.tabs.addTab(tab, t)
+                tab.finish_setup()
             else:
-                value.setVisible(False)
-                # self.tabs.addTab(value, key)
+                tab.setVisible(False)
 
         self.worker = PropertyWorker(self.data.tcam,
                                      self.data.signals,
