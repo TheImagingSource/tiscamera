@@ -613,7 +613,8 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
     // bool conversion_needed = false;
     if (gst_caps_is_empty(intersection)
-        || (tcam_gst_raw_only_has_mono(available_caps) || camera_has_only_bayer(self)))
+        || (!tcam_gst_raw_only_has_mono(available_caps)
+            || camera_has_only_bayer(self)))
     {
         GST_INFO("No intersecting caps found. Trying caps with conversion.");
 
