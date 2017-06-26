@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
                              QDockWidget, QAction, QStyle, QPushButton)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QObject
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 
 import gi
 
@@ -120,12 +120,12 @@ class TCamCapture(QMainWindow):
         self.file_menu.addAction(preferences_action)
 
         exit_action = QAction('&Exit', self)
-        exit_action.setShortcut('Ctrl+Q')
+        exit_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Q))
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(self.app.quit)
         self.file_menu.addAction(exit_action)
 
-        self.open_menu = self.menuBar().addMenu("Device")
+        self.open_menu = self.menuBar().addMenu("&Device")
 
         close = QAction("Close", self)
         close.triggered.connect(self.close)
@@ -182,13 +182,18 @@ class TCamCapture(QMainWindow):
 
         # ensure our devices are always listed in the same order
         device_list.sort(key=lambda x: x.serial)
-
+        index = 1
         for d in device_list:
-            device_action = QAction(d.model + " - " + d.serial, self)
+            action_string = "{model:<17} - {contype:<7} - {serial}\t&{ind}".format(model=d.model,
+                                                                                   contype=d.device_type,
+                                                                                   serial=d.serial,
+                                                                                   ind=str(index))
+            device_action = QAction(action_string, self)
             device_action.setStatusTip("Open this device.")
             device_action.triggered.connect(functools.partial(self.open_device,
                                                               d.serial))
             self.open_menu.addAction(device_action)
+            index = index + 1
 
     def new_pixel_under_mouse(self, active: bool, color: QtGui.QColor):
         """Slot for TcamView.new_pixel_under_mouse"""
