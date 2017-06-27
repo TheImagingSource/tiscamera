@@ -484,6 +484,33 @@ static gboolean camera_has_only_bayer (GstTcamBin* self)
 }
 
 
+static void gst_caps_change_name (GstCaps* caps, const char* name)
+{
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (struc != nullptr)
+        {
+            gst_structure_set_name(struc, name);
+        }
+    }
+}
+
+
+static GstCaps* bayer_transform_intersect (GstCaps* bayer, GstCaps* raw)
+{
+    //GstCaps* caps1 = gst_caps_copy(bayer);
+    GstCaps* caps2 = gst_caps_copy(raw);
+
+    gst_caps_change_name(caps2, "video/x-bayer");
+    GST_ERROR("%s == %s", gst_caps_to_string(bayer), gst_caps_to_string(caps2));
+    GstCaps* caps1 = gst_caps_intersect(bayer, caps2);
+    GST_ERROR("%s ==1=1=1=1", gst_caps_to_string(caps1));
+    return caps1;
+}
+
+
 static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* self,
                                                                   const GstCaps* available_caps,
                                                                   const GstCaps* wanted,
@@ -572,7 +599,18 @@ static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* se
     }
     else
     {
-        modules.caps = tcam_gst_find_largest_caps(intersection);
+        if (wanted == nullptr)
+        {
+            GST_INFO("No wanted caps. Using current intersection.");
+            modules.caps = tcam_gst_find_largest_caps(intersection);
+        }
+        else
+        {
+            GstCaps* int2 = bayer_transform_intersect(intersection, wanted);
+            modules.caps = tcam_gst_find_largest_caps(int2);
+            GST_INFO("Caps are: %s", gst_caps_to_string(int2));
+        }
+
         GstStructure* structure = gst_caps_get_structure(modules.caps, 0);
         if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {
@@ -597,6 +635,11 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     {
         GST_INFO("No sink caps specified. Continuing with caps from source device.");
         wanted = gst_caps_copy(available_caps);
+    }
+
+    if (self->target_caps != nullptr && GST_IS_CAPS(self->target_caps))
+    {
+        wanted = gst_caps_copy(self->target_caps);
     }
 
     struct required_modules modules = {FALSE, FALSE, nullptr};
