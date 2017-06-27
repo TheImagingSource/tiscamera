@@ -493,6 +493,7 @@ static void gst_caps_change_name (GstCaps* caps, const char* name)
         if (struc != nullptr)
         {
             gst_structure_set_name(struc, name);
+            gst_structure_remove_field(struc, "format");
         }
     }
 }
@@ -500,13 +501,9 @@ static void gst_caps_change_name (GstCaps* caps, const char* name)
 
 static GstCaps* bayer_transform_intersect (GstCaps* bayer, GstCaps* raw)
 {
-    //GstCaps* caps1 = gst_caps_copy(bayer);
     GstCaps* caps2 = gst_caps_copy(raw);
-
     gst_caps_change_name(caps2, "video/x-bayer");
-    GST_ERROR("%s == %s", gst_caps_to_string(bayer), gst_caps_to_string(caps2));
     GstCaps* caps1 = gst_caps_intersect(bayer, caps2);
-    GST_ERROR("%s ==1=1=1=1", gst_caps_to_string(caps1));
     return caps1;
 }
 
