@@ -24,7 +24,7 @@
 #include "tcamgstbase.h"
 #include "tcamprop.h"
 
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
