@@ -676,6 +676,8 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
     caps = gst_caps_new_empty ();
 
+    unsigned int number_of_valid_caps = 0;
+
     for (unsigned int i = 0; i < n_pixel_formats; i++)
     {
         if (format[i].get_fourcc() == 0)
@@ -706,8 +708,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
             if (caps_string != NULL)
             {
-
-
                 if (res[j].type == TCAM_RESOLUTION_TYPE_RANGE)
                 {
                     // std::vector<double> framerates = format[i].get_frame_rates(res[j]);
@@ -719,6 +719,12 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
                         GstStructure* structure = gst_structure_from_string (caps_string, NULL);
 
                         std::vector<double> framerates = format[i].get_framerates(reso);
+
+                        if (framerates.empty())
+                        {
+                            GST_ERROR("No available framerates. Ignoring format.");
+                            continue;
+                        }
 
                         GValue fps_list = {0};
                         g_value_init(&fps_list, GST_TYPE_LIST);
@@ -767,6 +773,12 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
                     std::vector<double> fps = format[i].get_frame_rates(res[j]);
 
+                    if (fps.empty())
+                    {
+                        GST_ERROR("Could not find any framerates for format");
+                        continue;
+                    }
+
                     double fps_min = *std::min_element(fps.begin(), fps.end());
                     double fps_max = *std::max_element(fps.begin(), fps.end());
 
@@ -792,6 +804,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
                     gst_structure_set_value(structure,"height", &h);
                     gst_structure_set_value(structure,"framerate", &f);
                     gst_caps_append_structure(caps, structure);
+                    number_of_valid_caps++;
                 }
                 else // fixed resolution
                 {
@@ -799,9 +812,17 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
                     gst_tcam_src_fill_structure_fixed_resolution(structure, format[i], res[j]);
                     gst_caps_append_structure (caps, structure);
+
+                    number_of_valid_caps++;
                 }
             }
         }
+    }
+
+    if (number_of_valid_caps == 0)
+    {
+        GST_ERROR("Device did not provide ANY valid caps. Refusing playback.");
+        gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
     }
 
     GstStructure* structure = gst_structure_from_string ("ANY", NULL);
