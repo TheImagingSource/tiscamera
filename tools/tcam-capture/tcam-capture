@@ -133,15 +133,13 @@ class TCamCapture(QMainWindow):
         self.format_menu = None
         self.save_image = QAction("Save Image", self)
         self.save_image.triggered.connect(self.save_image_action)
-        self.menuBar().addAction(self.save_image)
+        # self.menuBar().addAction(self.save_image)
 
         self.recording_action = QAction("", self)
-        # self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.recording_action.setIconText("Start recording")
         self.recording_action.setText("Start recording")
         self.recording_action.triggered.connect(self.start_recording_video)
-        # self.recording_action.clicked.connect(self.start_recording_video)
-        self.menuBar().addAction(self.recording_action)
+        # self.menuBar().addAction(self.recording_action)
         self.set_device_menus_enabled(False)
 
         self.view = None
