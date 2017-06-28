@@ -401,6 +401,7 @@ class TcamView(QWidget):
             if rates is None:
                 continue
             for rate in rates:
+                rate = str(rate)
                 action = QAction(rate, self)
                 action.setToolTip("Set format to '{}'".format(f_str + "@" + rate))
                 f = "video/x-raw,format={},width={},height={},framerate={}".format(format_string,
