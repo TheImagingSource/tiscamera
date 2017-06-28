@@ -130,7 +130,7 @@ class PropertyWidget(QWidget):
             self.sld.blockSignals(False)
         elif self.prop.valuetype == "double":
             self.sld.blockSignals(True)
-            self.value_label.setText(str(self.prop.value))
+            self.value_label.setText("{:.3f}".format(self.prop.value))
             self.sld.setValue((self.prop.value * 1000))
             self.sld.blockSignals(False)
 
