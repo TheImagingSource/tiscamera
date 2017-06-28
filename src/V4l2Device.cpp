@@ -1001,7 +1001,7 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
     // sort out duplicated interfaces
     sort_properties();
     // create conversion factors so that properties allways use the same units
-    //create_conversion_factors();
+    create_conversion_factors();
     // create library only properties
     create_emulated_properties();
 }
@@ -1095,7 +1095,9 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     return 1;
 }
 
-bool save_value_of_control (const v4l2_control* ctrl, tcam_device_property* cp)
+bool save_value_of_control (const v4l2_control* ctrl,
+                            tcam_device_property* cp,
+                            double conversion_factor)
 {
     switch (cp->type)
     {
@@ -1123,6 +1125,11 @@ bool save_value_of_control (const v4l2_control* ctrl, tcam_device_property* cp)
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
             cp->value.i.value = ctrl->value;
+
+            if (conversion_factor != 0.0)
+            {
+                cp->value.i.value *= conversion_factor;
+            }
         }
         default:
         {
@@ -1150,9 +1157,8 @@ void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
 
     auto cp = desc.prop->get_struct();
 
-
-    save_value_of_control(&ctrl, &cp);
-    tcam_log(TCAM_LOG_DEBUG, "Updated property");
+    save_value_of_control(&ctrl, &cp, desc.conversion_factor);
+    tcam_log(TCAM_LOG_DEBUG, "Updated property %s to %d", desc.prop->get_name().c_str(), cp.value.i.value);
 
     desc.prop->set_struct(cp);
 }
