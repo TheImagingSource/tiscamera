@@ -489,9 +489,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
         return FALSE;
     }
 
-    struct tcam_device_property prop = property->get_struct();
-
-    switch (prop.type)
+    switch (property->get_type())
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
