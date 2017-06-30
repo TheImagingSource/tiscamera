@@ -73,7 +73,7 @@ class V4l2Device : public DeviceInterface
 
     public:
         V4L2FormatHandler (V4l2Device*);
-        std::vector<double> get_framerates (const struct tcam_image_size&);
+        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
 
     protected:
         V4l2Device* device;

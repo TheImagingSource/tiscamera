@@ -58,7 +58,7 @@ class AravisDevice : public DeviceInterface
 
     public:
         AravisFormatHandler (AravisDevice*);
-        std::vector<double> get_framerates (const struct tcam_image_size&);
+        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
     protected:
         AravisDevice* device;
     };
