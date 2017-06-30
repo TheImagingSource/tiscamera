@@ -1254,7 +1254,6 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     if (self->device == NULL)
     {
         GST_ERROR("Unable to open device.");
-        /* TODO add pipeline termination */
         return false;
     }
 
@@ -1288,6 +1287,7 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
     {
         if (!gst_tcam_src_init_camera(self))
         {
+            gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
             return FALSE;
         }
     }
@@ -1311,7 +1311,7 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 
     self->device->dev->stop_stream();
     self->device->sink = nullptr;
-
+    gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
     GST_DEBUG_OBJECT (self, "Stopped acquisition");
 
     return TRUE;
@@ -1592,6 +1592,7 @@ static void gst_tcam_src_set_property (GObject* object,
                     if (!gst_tcam_src_init_camera(self))
                     {
                         GST_ERROR("Error while initializing camera.");
+                        gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
                     }
                 }
             }
