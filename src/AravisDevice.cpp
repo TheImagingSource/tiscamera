@@ -575,8 +575,9 @@ bool AravisDevice::stop_stream ()
 
     if (this->stream != nullptr)
     {
+        arv_stream_set_emit_signals(this->stream, FALSE);
         g_object_unref(this->stream);
-	this->stream = NULL;
+        this->stream = NULL;
     }
 
     return true;
