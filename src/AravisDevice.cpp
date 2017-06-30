@@ -64,12 +64,16 @@ AravisDevice::AravisFormatHandler::AravisFormatHandler (AravisDevice* dev)
 {}
 
 
-std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const struct tcam_image_size& s)
+std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const struct tcam_image_size& s, int pixelformat)
 {
     auto dev = arv_camera_get_device(device->arv_camera);
 
 // TODO implement better way to check for availability
 
+    if (pixelformat != 0)
+    {
+        arv_device_set_integer_feature_value(dev, "TestPixelFormat", fourcc2aravis(pixelformat));
+    }
     arv_device_set_integer_feature_value(dev, "TestWidth", s.width);
     arv_device_set_integer_feature_value(dev, "TestHeight", s.height);
 

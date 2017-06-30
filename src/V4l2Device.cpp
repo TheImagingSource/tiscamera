@@ -127,7 +127,7 @@ V4l2Device::V4L2FormatHandler::V4L2FormatHandler (V4l2Device* dev)
 {}
 
 
-std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s)
+std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s, int pixelformat)
 {
     std::vector<double> ret;
 

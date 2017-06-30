@@ -33,7 +33,7 @@ public:
 
     virtual ~FormatHandlerInterface () {};
 
-    virtual std::vector<double> get_framerates (const struct tcam_image_size&) = 0;
+    virtual std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0) = 0;
 };
 
 } /* namespace tcam */

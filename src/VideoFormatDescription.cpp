@@ -138,7 +138,7 @@ std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_siz
 {
     if (auto handler = format_handler.lock())
     {
-        return handler->get_framerates(s);
+        return handler->get_framerates(s, format.fourcc);
     }
 
     for (const auto& r : res)
