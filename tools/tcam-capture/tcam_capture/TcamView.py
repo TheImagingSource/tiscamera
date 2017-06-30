@@ -391,6 +391,8 @@ class TcamView(QWidget):
                                             height)
                 if "None" in f_str:
                     continue
+                if "range" in format_string:
+                    continue
                 f_menu = format_dict[format_string].addMenu("{}x{}".format(width, height))
 
             except TypeError as e:
@@ -399,6 +401,8 @@ class TcamView(QWidget):
 
             rates = get_framerates(fmt)
             if rates is None:
+                continue
+            if type(rates) is Gst.FractionRange:
                 continue
             for rate in rates:
                 rate = str(rate)
