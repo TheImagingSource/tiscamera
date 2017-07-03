@@ -21,17 +21,19 @@
 #include <iostream>
 #include <exception>
 #include <stdexcept>
+#include <libgen.h>
 
 using namespace tis;
 
 
 /// @name printHelp
+/// @param name - program name
 /// @brief prints complete overview over possible actions
-void printHelp ()
+void printHelp (const char* name)
 {
-    std::cout << "\ntis_network - network module for GigE cameras"
-              << "\n\nusage: tis_network [command]             - execute specified command"
-              << "\n   or: tis_network [command] -c <camera> - execute command for given camera\n\n\n"
+    std::cout << "\n" << name << " - network module for GigE cameras"
+              << "\n\nusage: " << name << " [command]             - execute specified command"
+              << "\n   or: " << name << "[command] -c <camera> - execute command for given camera\n\n\n"
 
               << "Available commands:\n"
               << "    list     - list all available GigE cameras\n"
@@ -43,7 +45,7 @@ void printHelp ()
               << "    help     - print this text\n"
               << std::endl;
 
-    std::cout << "\nAvailable parameter:\n"
+    std::cout << "\nAvailable parameters:\n"
               << "    -h                       - same as help\n"
               << "    -i                       - same as info\n"
               << "    -l                       - same as list\n"
@@ -56,16 +58,16 @@ void printHelp ()
               << "    firmware=firmware.zip    - file containing new firmware\n"
               << std::endl;
 
-    std::cout << "Camera identification is possible via:\n"
-              << "    --serial     -s          - serial number of camera\n"
-              << "    --name       -n          - user defined name of camera\n"
-              << "    --mac        -m          - MAC of camera\n"
+    std::cout << "Camera identification via:\n"
+              << "    --serial     -s          - serial number of camera e.g. 23519996\n"
+              << "    --name       -n          - user defined name of camera e.g. \"Camera Front\"\n"
+              << "    --mac        -m          - MAC of camera e.g. 00:07:48:00:99:96\n"
               << std::endl;
 
     std::cout << "Examples:\n\n"
 
-              << "    tis_network set gateway=192.168.0.1 -s 46210199\n"
-              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -s 46210199\n\n"
+              << "    " << name << " set gateway=192.168.0.1 -s 46210199\n"
+              << "    " << name << " forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -s 46210199\n\n"
               << std::endl;
 }
 
@@ -74,7 +76,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
 {
     if (argc == 1)
     {
-        printHelp();
+        printHelp(basename(argv[0]));
         return;
     }
 
@@ -88,7 +90,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
         {
             if ((arg.compare("help") == 0) || (arg.compare("-h") == 0))
             {
-                printHelp();
+                printHelp(basename(argv[0]));
                 return;
             }
             else if ((arg.compare("list") == 0) || (arg.compare("-l") == 0))
