@@ -192,16 +192,22 @@ void combobox_callback (GtkWidget* combo_box, gpointer user_data)
 
     TcamProp* cam = TCAM_PROP(get_element("src"));
 
-    const gchar* str = gtk_combo_box_get_active_id(GTK_COMBO_BOX(combo_box));
+    gchar* str = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_box));
+
+    if (str == NULL)
+    {
+        fprintf(stderr, "Unable to retrieve active entry\n");
+        return;
+    }
 
     GValue val = {};
 
     g_value_init(&val, G_TYPE_STRING);
     g_value_set_string(&val, str);
 
-    if (tcam_prop_set_tcam_property(cam, (gchar*)user_data, &val))
+    if (!tcam_prop_set_tcam_property(cam, (gchar*)user_data, &val))
     {
-        printf("Could not set %s", user_data);
+        printf("Could not set %s\n", user_data);
     }
 }
 
@@ -341,14 +347,13 @@ static void add_properties ()
             }
 
             GtkWidget* combo_box = gtk_combo_box_text_new();
-
             GSList* e = entry_list;
             gint index = 0;
             do
             {
-                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), p->data);
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), e->data);
 
-                if (g_strcmp0(p->data, g_value_get_string(&value)) == 0)
+                if (g_strcmp0(e->data, g_value_get_string(&value)) == 0)
                 {
                     gtk_combo_box_set_active(GTK_COMBO_BOX(combo_box), index);
                 }
@@ -357,6 +362,18 @@ static void add_properties ()
                 index++;
             }
             while (e != NULL);
+
+            g_signal_connect(G_OBJECT(combo_box), "changed", G_CALLBACK(combobox_callback), p->data);
+
+            GtkWidget* label = gtk_label_new(p->data);
+
+            GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+            gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+            gtk_box_pack_start(GTK_BOX(hbox), combo_box, TRUE, TRUE, 0);
+
+            gtk_container_add(GTK_CONTAINER(row), hbox);
+
         }
         else
         {
