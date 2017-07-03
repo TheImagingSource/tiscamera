@@ -71,6 +71,11 @@ sockaddr_in fillAddr (const std::string &address, const unsigned short port);
 /// @return true if valid IP
 bool isValidIpAddress (const std::string& ipAddress);
 
+/// @name isValidIpMAC
+/// @param mac - string containing mac that shall be checked
+/// @return true if valid mac
+bool isValidMAC (const std::string& mac);
+
 } /* namespace tis */
 
 #endif /* _UTILS_H_ */

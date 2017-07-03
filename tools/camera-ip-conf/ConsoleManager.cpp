@@ -512,6 +512,12 @@ void rescue (std::vector<std::string> args)
         return;
     }
 
+    if (!isValidMAC(mac))
+    {
+        std::cout << "Not a valid MAC address. Format is XX:XX:XX:XX:XX:XX" << std::endl;
+        return;
+    }
+
     std::string ip = getArgumentValue(args, "ip", "");
     if (ip.empty() || !isValidIpAddress(ip))
     {

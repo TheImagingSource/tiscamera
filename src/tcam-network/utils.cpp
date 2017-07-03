@@ -63,6 +63,28 @@ bool isValidIpAddress (const std::string& ipAddress)
 }
 
 
+bool isValidMAC (const std::string& mac)
+{
+    const char* s = mac.c_str();
+    for(int i = 0; i < 17; i++)
+    {
+        if(i % 3 != 2 && !isxdigit(s[i]))
+        {
+            return false;
+        }
+        if(i % 3 == 2 && s[i] != ':')
+        {
+            return false;
+        }
+    }
+    if(s[17] != '\0')
+    {
+        return false;
+    }
+    return true;
+}
+
+
 std::string int2ip (const uint32_t addr)
 {
     std::string s = std::to_string(addr);
