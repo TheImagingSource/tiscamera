@@ -249,8 +249,6 @@ static void add_properties ()
     GSList* p = prop_names;
     do
     {
-        printf ("Working on '%s'\n", p->data);
-
         GValue value = {};
         GValue min = {};
         GValue max = {};
@@ -270,13 +268,6 @@ static void add_properties ()
             printf ("Unable to retrieve tcam property '%s'\n", p->data);
             goto end;
         }
-
-
-        printf("%s\n%d\n%s\n%s\n",
-               g_value_get_string(&type),
-               g_value_get_int(&flags),
-               g_value_get_string(&category),
-               g_value_get_string(&group));
 
         GtkWidget* row = gtk_list_box_row_new();
 
@@ -309,6 +300,14 @@ static void add_properties ()
         }
         else if (g_strcmp0(g_value_get_string(&type), "integer") == 0)
         {
+            if (g_value_get_int(&min) >= g_value_get_int(&max))
+            {
+                fprintf(stderr, "%s has weird range. ignoring. min: %lld max: %lld\n",
+                       p->data,
+                       g_value_get_int(&min), g_value_get_int(&max));
+                goto end;
+            }
+
             GtkWidget* slider = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
                                                          g_value_get_int(&min),
                                                          g_value_get_int(&max),
@@ -488,8 +487,7 @@ int main (int argc, char *argv[])
 
 
     status = g_application_run (G_APPLICATION (app), argc, argv);
-    g_object_unref (app);
+    /* g_object_unref (app); */
 
     return status;
-    return 0;
 }
