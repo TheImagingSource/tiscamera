@@ -45,6 +45,8 @@ std::string tcam::category2string (TCAM_PROPERTY_CATEGORY category)
         case TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN: return "Partial Scan";
         case TCAM_PROPERTY_CATEGORY_SPECIAL: return "Special";
         case TCAM_PROPERTY_CATEGORY_UNKNOWN: return "Unknown";
+        case TCAM_PROPERTY_CATEGORY_AUTO_ROI: return "Auto ROI";
+        case TCAM_PROPERTY_CATEGORY_WDR: return "WDR";
         default: return "";
     }
 }
