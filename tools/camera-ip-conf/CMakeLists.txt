@@ -15,11 +15,11 @@
 
 include_directories(${CMAKE_SOURCE_DIR}/src/tcam-network)
 
-add_executable(camera-ip-conf-cli main.cpp ConsoleManager.cpp)
+add_executable(camera-ip-conf main.cpp ConsoleManager.cpp)
 
-target_link_libraries(camera-ip-conf-cli tcam-network)
+target_link_libraries(camera-ip-conf tcam-network)
 
-install(TARGETS camera-ip-conf-cli
+install(TARGETS camera-ip-conf
   DESTINATION bin
   COMPONENT tcam-camera-ip-conf)
 
