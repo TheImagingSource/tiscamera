@@ -198,17 +198,17 @@ void sendIpRecovery (const std::string mac, const uint32_t ip, const uint32_t ne
         };
 
     auto interfaces = detectNetworkInterfaces();
-    std::thread t[interfaces.size()];
+    std::vector<std::thread> t;
 
     // Send through each interface
-    for (unsigned int i = 0; i < interfaces.size(); i++)
+    for (auto& i :interfaces)
     {
-        t[i] = std::thread( [&] () { bf(interfaces.at(i)); } );
+        t.push_back(std::thread( [&] () { bf(i); } ));
     }
 
-    for (unsigned int i = 0; i < interfaces.size(); i++)
+    for (auto& th : t)
     {
-        t[i].join();
+        th.join();
     }
 }
 

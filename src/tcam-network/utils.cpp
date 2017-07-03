@@ -168,7 +168,7 @@ int ip2int (const std::string& ip)
     {
         return -1;
     }
-    return addr.s_addr;
+    return htonl(addr.s_addr);
 }
 
 
