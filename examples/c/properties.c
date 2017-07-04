@@ -212,7 +212,7 @@ void combobox_callback (GtkWidget* combo_box, gpointer user_data)
 }
 
 
-static void slider_callback (GtkRange* scale, gpointer user_data)
+static void slider_callback_int (GtkRange* scale, gpointer user_data)
 {
     /* int value = gtk_scale_button_get_value(GTK_SCALE_BUTTON(scale)); */
 
@@ -224,6 +224,21 @@ static void slider_callback (GtkRange* scale, gpointer user_data)
 
     g_value_init(&val, G_TYPE_INT);
     g_value_set_int(&val, value);
+
+    tcam_prop_set_tcam_property(TCAM_PROP(get_element("src")), (char*)user_data, &val);
+}
+
+
+static void slider_callback_double (GtkRange* scale, gpointer user_data)
+{
+    double value = gtk_range_get_value(scale);
+
+    printf("Setting '%s' to %f\n", (char*)user_data, value);
+
+    GValue val = {};
+
+    g_value_init(&val, G_TYPE_DOUBLE);
+    g_value_set_double(&val, value);
 
     tcam_prop_set_tcam_property(TCAM_PROP(get_element("src")), (char*)user_data, &val);
 }
@@ -316,7 +331,7 @@ static void add_properties ()
             gtk_scale_set_draw_value(GTK_SCALE(slider), TRUE);
             gtk_range_set_value(GTK_RANGE(slider), g_value_get_int(&value));
 
-            g_signal_connect(G_OBJECT(GTK_RANGE(slider)), "value-changed", G_CALLBACK(slider_callback), p->data);
+            g_signal_connect(G_OBJECT(GTK_RANGE(slider)), "value-changed", G_CALLBACK(slider_callback_int), p->data);
 
             GtkWidget* label = gtk_label_new(p->data);
 
@@ -329,7 +344,26 @@ static void add_properties ()
         }
         else if (g_strcmp0(g_value_get_string(&type), "double") == 0)
         {
-            // currently not used
+            GtkWidget* slider = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL,
+                                                         g_value_get_double(&min),
+                                                         g_value_get_double(&max),
+                                                         g_value_get_double(&step));
+
+            gtk_scale_set_draw_value(GTK_SCALE(slider), TRUE);
+            gtk_range_set_value(GTK_RANGE(slider), g_value_get_double(&value));
+
+            g_signal_connect(G_OBJECT(GTK_RANGE(slider)),
+                             "value-changed", G_CALLBACK(slider_callback_double),
+                             p->data);
+
+            GtkWidget* label = gtk_label_new(p->data);
+
+            GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+            gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+            gtk_box_pack_start(GTK_BOX(hbox), slider, TRUE, TRUE, 0);
+
+            gtk_container_add(GTK_CONTAINER(row), hbox);
         }
         else if (g_strcmp0(g_value_get_string(&type), "string") == 0)
         {
