@@ -644,6 +644,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             prop.value.d.min = min;
             prop.value.d.max = max;
             prop.value.d.default_value = prop.value.d.value;
+            prop.value.d.step = 0.001;
 
             return std::make_shared<PropertyDouble>(impl, prop, type);
         }
