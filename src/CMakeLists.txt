@@ -97,7 +97,7 @@ if (BUILD_V4L2)
   include_directories(${UDEV_INCLUDE_DIR})
   add_definitions(-DHAVE_UDEV)
 
-  find_package(libusb-1.0 REQUIRED)
+  find_package(libusb-1.0 REQUIRED QUIET)
   include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
   add_definitions(-DHAVE_USB)

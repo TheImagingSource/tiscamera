@@ -1,5 +1,5 @@
 
-find_package(libusb-1.0 REQUIRED)
+find_package(libusb-1.0 REQUIRED QUIET)
 include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
 find_package(LibZip REQUIRED)
