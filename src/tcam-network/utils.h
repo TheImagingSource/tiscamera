@@ -27,6 +27,8 @@
 namespace tis
 {
 
+bool isRPFilterActive ();
+
 /// @name startsWith
 /// @param searchThrough - string that shall be examined
 /// @param searchFor - string that shall be searched
