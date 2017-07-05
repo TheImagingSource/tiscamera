@@ -123,6 +123,14 @@ void listCameras ()
 {
     camera_list cameras = getCameraList();
 
+    if (isRPFilterActive())
+    {
+        std::cout << "Your system has active rp_filter." << std::endl;
+        std::cout << "This can prevent misconfigured cameras from being detected." << std::endl;
+        std::cout << "To temporarily disable rp_filter execute:" << std::endl;
+        std::cout << "\tsudo sysctl -w net.ipv4.conf.all.rp_filter=0" << std::endl;
+    }
+
     if (cameras.size() == 0)
     {
         std::cout << "\nNo cameras found.\n" << std::endl;

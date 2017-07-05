@@ -22,13 +22,42 @@
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <glob.h>
 #include <cstring>
 #include <sstream>
 #include <exception>
+#include <fstream>
 #include <stdexcept>
 
 namespace tis
 {
+
+bool isRPFilterActive ()
+{
+    bool ret = false;
+    glob_t glob_result;
+    glob("/proc/sys/net/ipv4/conf/**/rp_filter", GLOB_TILDE, NULL, &glob_result);
+    for(unsigned int i=0; i < glob_result.gl_pathc; ++i)
+    {
+        std::string s;
+        std::ifstream f;
+        f.open(glob_result.gl_pathv[i]);
+
+        getline(f, s);
+        if (s.compare("1") == 0)
+        {
+            ret = true;
+            f.close();
+            break;
+        }
+
+        f.close();
+    }
+    globfree(&glob_result);
+
+    return ret;
+}
+
 
 bool startsWith (const std::string& searchThrough, const std::string& searchFor)
 {
