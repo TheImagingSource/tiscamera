@@ -29,7 +29,7 @@ find_path(aravis_INCLUDE_DIR
 )
 
 # Finally the library itself
-find_library(aravis_LIBRARY
+find_library(aravis_LIBRARIES
 	NAMES
 	libaravis-0.4
 	libaravis-0.6
@@ -44,8 +44,8 @@ find_library(aravis_LIBRARY
 	/usr/lib
 )
 
-# # Set the include dir variables and the libraries and let libfind_process do the rest.
-# # NOTE: Singular variables for this library, plural for libraries this this lib depends on.
-set(aravis_PROCESS_INCLUDES aravis_INCLUDE_DIR aravis_INCLUDE_DIRS)
-set(aravis_PROCESS_LIBS aravis_LIBRARY aravis_LIBRARIES)
-libfind_process(aravis)
+include(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set TCAM_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args(Aravis  DEFAULT_MSG
+  aravis_LIBRARIES aravis_INCLUDE_DIR)
