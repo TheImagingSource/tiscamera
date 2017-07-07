@@ -63,6 +63,7 @@ def main():
         print(s)
 
     # cleanup
+    # state NULL will close any internal device handles should they exist
     source.set_state(Gst.State.NULL)
 
 
