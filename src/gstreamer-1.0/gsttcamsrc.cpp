@@ -1545,7 +1545,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     gst_base_src_set_live (GST_BASE_SRC (self), TRUE);
     gst_base_src_set_format (GST_BASE_SRC (self), GST_FORMAT_TIME);
 
-    self->n_buffers = GST_TCAM_SRC_DEFAULT_N_BUFFERS;
+    self->n_buffers = 0;
     self->payload = 0;
 
     // explicitly init c++ objects
