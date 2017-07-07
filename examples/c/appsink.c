@@ -24,8 +24,8 @@
 
 void print_help ()
 {
-    printf("Print available gstreamer caps for device.\n"
-           "Usage:\n\trigger-images [<serial>]\n"
+    printf("Show how to use appsink to receive images in an appliaction.\n"
+           "Usage:\n\appsink [<serial>]\n"
            "Help options:\n\t-h, --help\t\tPrint this text.\n"
            "\n\n");
 }
