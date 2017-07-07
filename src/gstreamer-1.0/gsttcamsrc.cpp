@@ -682,7 +682,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
     {
         if (format[i].get_fourcc() == 0)
         {
-            GST_ERROR("Format has empty fourcc. Ignoring.");
+            GST_WARNING("Format has empty fourcc. Ignoring.");
             continue;
         }
 
@@ -722,7 +722,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
                         if (framerates.empty())
                         {
-                            GST_ERROR("No available framerates. Ignoring format.");
+                            GST_WARNING("No available framerates. Ignoring format.");
                             continue;
                         }
 

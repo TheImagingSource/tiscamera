@@ -781,7 +781,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 
     if (fourcc == 0)
     {
-        GST_ERROR("Unable to determine fourcc. Using Y800");
+        GST_WARNING("Unable to determine fourcc. Using Y800");
         fourcc = FOURCC_BY8;
     }
     else

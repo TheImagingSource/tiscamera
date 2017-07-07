@@ -1486,7 +1486,7 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
         if (data == NULL || length == 0)
         {
-            GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
+            GST_WARNING("Buffer is not valid! Ignoring buffer and trying to continue...");
             return GST_FLOW_OK;
         }
 

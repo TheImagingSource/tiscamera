@@ -293,7 +293,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
 
 
 /**
- * gst_tcam_bin_get_tcam_manu_entrie:
+ * gst_tcam_bin_get_tcam_manu_entries:
  * @self: a #GstTcamBin
  * @name: a #char*
  *
@@ -592,7 +592,7 @@ static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* se
 
     if (gst_caps_is_empty(intersection))
     {
-        GST_ERROR("Unable to find intersecting caps. Continuing with empty caps.");
+        GST_WARNING("Unable to find intersecting caps. Continuing with empty caps.");
     }
     else
     {
@@ -644,11 +644,6 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     guint fourcc = 0;
 
     GstCaps* input = gst_caps_copy(wanted);
-
-    // GST_DEBUG("Comparing '%s' <==  to  ==> '%s'",
-    //           gst_caps_to_string(wanted),
-    //           gst_caps_to_string(available_caps));
-
     GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
 
     // bool conversion_needed = false;
@@ -668,7 +663,6 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     else
     {
         GST_INFO("Device has caps. No conversion needed.");
-        // GST_DEBUG("Intersecting caps: %s", gst_caps_to_string(intersection));
 
         // gst_caps_is_any does not return true when gst_caps_to_string(intersection) says
         // caps are ANY. This is a ugly workaround
@@ -678,7 +672,6 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
             gst_caps_unref(intersection);
             intersection = gst_caps_copy(available_caps);
-            GST_ERROR(gst_caps_to_string(intersection));
         }
 
         // since no caps are given, assume that only displayable
@@ -724,7 +717,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
             }
             else if (type ==  G_TYPE_INVALID)
             {
-                GST_ERROR("Could not handle format description. Attempting alternatives.");
+                GST_WARNING("Could not handle format description. Attempting alternatives.");
 
                 if (strcmp("video/x-bayer", gst_structure_get_name(structure)) == 0)
                 {
@@ -747,7 +740,7 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
     }
     else
     {
-        GST_WARNING("Unsure if caps are correctly generated. Trying anyway.");
+        GST_WARNING("Unsure if caps are correctly generated. Trying anyway. %s", gst_caps_to_string(modules.caps));
     }
 
     return modules;
@@ -1077,7 +1070,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                     self->target_caps = gst_pad_query_caps (sinkpad, NULL);
                 }
                 gst_object_unref(par);
-                GST_ERROR("caps of sink: %s", gst_caps_to_string(self->target_caps));
+                GST_INFO("caps of sink: %s", gst_caps_to_string(self->target_caps));
             }
 
             GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
@@ -1212,11 +1205,7 @@ static void gst_tcambin_set_property (GObject* object,
 
 static void gst_tcambin_src_reset (GstTcamBin* self)
 {
-
-    gst_debug_log(gst_tcambin_debug,
-                  GST_LEVEL_ERROR,
-                  __FILE__, "reset", __LINE__,
-                  NULL, "reset");
+    GST_DEBUG("reset");
     GstPad* targetpad;
 
     GstTcamBin* src = self;
