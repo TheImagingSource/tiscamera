@@ -1474,6 +1474,15 @@ wait_again:
 
     GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
+    if (self->n_buffers != 0)
+    {
+        if (self->ptr->statistics.frame_count >= self->n_buffers)
+        {
+            GST_INFO("Stopping stream after %d buffers.", self->ptr->statistics.frame_count);
+            return GST_FLOW_EOS;
+        }
+    }
+
     return GST_FLOW_OK;
 }
 
@@ -1683,8 +1692,8 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
          PROP_NUM_BUFFERS,
          g_param_spec_int ("num-buffers",
                            "Number of Buffers",
-                           "Number of video buffers to allocate for video frames",
-                           1, G_MAXINT, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
+                           "Number of buffers to send before ending pipeline",
+                           0, G_MAXINT, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
     GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
