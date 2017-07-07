@@ -493,18 +493,34 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
+            if (!G_VALUE_HOLDS(value, G_TYPE_INT))
+            {
+                return FALSE;
+            }
             return property->set_value((int64_t)g_value_get_int(value));
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
+            if (!G_VALUE_HOLDS(value, G_TYPE_DOUBLE))
+            {
+                return FALSE;
+            }
             return property->set_value(g_value_get_double(value));
         }
         case TCAM_PROPERTY_TYPE_STRING:
         {
+            if (!G_VALUE_HOLDS(value, G_TYPE_STRING))
+            {
+                return FALSE;
+            }
             return property->set_value(g_value_get_string (value));
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
+            if (!G_VALUE_HOLDS(value, G_TYPE_BOOLEAN))
+            {
+                return FALSE;
+            }
             return property->set_value((bool)g_value_get_boolean(value));
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
@@ -513,6 +529,11 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
+            if (!G_VALUE_HOLDS(value, G_TYPE_STRING))
+            {
+                return FALSE;
+            }
+
             std::string s = g_value_get_string(value);
             return property->set_value(s);
         }
