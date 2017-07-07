@@ -6,49 +6,12 @@ What is it?
 camera-ip-conf is a tool that allows the ip configuration of GigE network cameras.
 It offers the possibility to configure via cli or gui.
 
-Installation
-------------
-
-    To build everything simply run:
-
-       make
-
-    To only build the cli program run:
-
-       make cli
-
-    To only build the gui version run:
-
-       make gui
-
-Dependencies
-------------
-
-GCC with c++11 support; confirmed compilation with gcc 4.7.3
-                        confirmed compilation with gcc 4.6
-
-tinyxml
-sudo apt-get install libtinyxml-dev
-
-libzip
-sudo apt-get install libzip-dev
-
-QT 4.8 for gui-version
-
-To install qt dependencies execute:
-sudo apt-get install qt4-default
-
-Dokumentation
--------------
-
-Currently no external documentation is available.
-
 Examples
 --------
 
 To list all cameras:
 
-   camera-ip-conf-cli -l
+   camera-ip-conf -l
 
 Cameras can be named using the following methods:
    -s  --serial - The serial number of the camera
@@ -57,36 +20,29 @@ Cameras can be named using the following methods:
 
 To get information about a single camera:
 
-   camera-ip-conf-cli -i -s <CAMERA_SERIAL>
+   camera-ip-conf -i -s <CAMERA_SERIAL>
 
 To set the name of a camera:
 
-   camera-ip-conf-cli set name="CAMERA_NAME" -s <CAMERA_SERIAL>
+   camera-ip-conf set name="CAMERA_NAME" -s <CAMERA_SERIAL>
 
 To delete the name simply set it to an empty name
 
-   camera-ip-conf-cli set name="" -s <CAMERA_SERIAL>
+   camera-ip-conf set name="" -s <CAMERA_SERIAL>
 
 To set the static ip configuration of a camera:
 
-   camera-ip-conf-cli set ip=192.168.100.100 subnet=255.255.0.0 gateway=192.168.100.1
+   camera-ip-conf set ip=192.168.100.100 subnet=255.255.0.0 gateway=192.168.100.1
 
 To toggle static ip usage:
 
-   camera-ip-conf-cli set static=on -s <CAMERA_SERIAL>
+   camera-ip-conf set static=on -s <CAMERA_SERIAL>
 
 To upload a new firmware:
 
-   camera-ip-conf-cli upload firmware=<FILE> -s <CAMERA_SERIAL>
+   camera-ip-conf upload firmware=<FILE> -s <CAMERA_SERIAL>
 
    CAUTION: This can break your camera. Use at own risk!
-
-Contacts
---------
-
-For questions, bugs reports, etc., please refer to :
-
-https://github.com/TheImagingSource/tiscamera
 
 
 Troubleshooting
@@ -126,7 +82,7 @@ Troubleshooting
       that can not be represented in a reliable way (e.g. broadcast
       addresses such as 192.168.0.255/24), execute
       ====================
-      camera-ip-conf-cli rescue ip=<IP> subnet=<SUBNET> gateway=<GATEWAY> mac=<MAC>
+      camera-ip-conf rescue ip=<IP> subnet=<SUBNET> gateway=<GATEWAY> mac=<MAC>
       ====================
 
       To get the mac address of your camera use tools like wireshark
