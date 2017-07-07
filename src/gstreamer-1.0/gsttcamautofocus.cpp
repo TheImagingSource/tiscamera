@@ -318,7 +318,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->roi_left);
+            g_value_set_int(value, self->roi_top);
         }
         if (min)
         {
