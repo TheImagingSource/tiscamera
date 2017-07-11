@@ -385,6 +385,8 @@ void setCamera (const std::vector<std::string>& args)
         }
     }
     std::cout << std::endl;
+    std::cout << "Configuration written to camera EEPROM.\n"
+    "Power-cycle the camera to activate the new settings." << std::endl;
 }
 
 
@@ -600,6 +602,9 @@ void rescue (std::vector<std::string> args)
     {
         std::cout << "An Error occured while sending the rescue packet." << std::endl;
     }
+
+    std::cout << "Rescue packet sent. Camera configuration will be lost on next power cycle.\n"
+    "Use 'set' command to make permanent configuration changes." << std::endl;
 }
 
 } /* namespace tis */
