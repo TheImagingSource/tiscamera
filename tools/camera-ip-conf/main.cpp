@@ -118,7 +118,10 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
             else if (arg.compare("forceip") == 0)
             {
-                forceIP(args);
+                std::cout << "\n!!! Using the 'forceip' is DEPRECATED !!!"
+                "\nThis command got replaced by the 'rescue' command and will be "
+                "removed in the future!\n" << std::endl;
+                rescue(args);
                 break;
             }
             else if (arg.compare("upload") == 0)
