@@ -22,6 +22,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include <thread>
 #include <mutex>
@@ -510,14 +512,62 @@ Please reconnect your camera to assure full functionality.\n";
     std::cout << std::endl;
 }
 
+std::string string_format(const std::string &fmt, ...) {
+    int n, size=1;
+    std::string str;
+    va_list ap;
+
+    while (1) {
+        str.resize(size);
+        va_start(ap, fmt);
+        int n = vsnprintf(&str[0], size, fmt.c_str(), ap);
+        va_end(ap);
+
+        if (n > -1 && n < size)
+            return str;
+        if (n > -1)
+            size = n + 1;
+        else
+            size *= 2;
+    }
+}
+
+std::string parseHexMac(std::string hexmac)
+{
+    if (hexmac.length() != 13)
+        return "";
+
+    std::string mac = hexmac.substr(0,2);
+    for (int i=2; i < 12; i+=2)
+        mac += ":" + hexmac.substr(i,2);
+    return mac;
+}
+
+std::string serialToMac(std::string serial)
+{
+    if(serial.length() != 8)
+        return "";
+    std::string tmp = serial.substr(2,2);
+    tmp = tmp.substr(1,1) + tmp.substr(0,1);
+    int macPart = std::stoi(serial.substr(4,4)) + (10000 * (std::stoi(tmp) - 9)) + (10000 * 30 * (std::stoi(serial.substr(0,2)) - 1));
+    std::string prefix = "000748";
+    std::string macString = prefix + std::string(string_format("%06x", macPart));
+    return parseHexMac(macString);
+}
 
 void rescue (std::vector<std::string> args)
 {
     std::string mac = getArgumentValue(args, "--mac", "-m");
     if (mac.empty())
     {
-        std::cout << "Please specify the MAC address to use." << std::endl;
-        return;
+        std::string serial = getArgumentValue(args, "--serial", "-s");
+        if (serial.empty())
+        {
+            std::cout << "Please specify a MAC address or serial number." << std::endl;
+            return;
+        }
+        mac = serialToMac(serial);
+        std::cout << "Using MAC address " << mac << "." << std::endl;
     }
 
     std::string ip = getArgumentValue(args, "ip", "");
