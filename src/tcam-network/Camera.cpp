@@ -192,19 +192,19 @@ const std::string Camera::getMAC ()
 
 const std::string Camera::getCurrentIP ()
 {
-    return int2ip(ntohl(this->packet.CurrentIP));
+    return int2ip(this->packet.CurrentIP);
 }
 
 
 const std::string Camera::getCurrentSubnet ()
 {
-    return int2ip(ntohl(this->packet.CurrentSubnetMask));
+    return int2ip(this->packet.CurrentSubnetMask);
 }
 
 
 const std::string Camera::getCurrentGateway ()
 {
-    return int2ip(ntohl(this->packet.DefaultGateway));
+    return int2ip(this->packet.DefaultGateway);
 }
 
 
@@ -381,7 +381,7 @@ const std::string Camera::getPersistentIP ()
 
     if (sendReadMemory(Register::PERSISTANT_IPADDRESS_REGISTER, 4, &ip))
     {
-        return int2ip(ntohl(ip));
+        return int2ip(ip);
     }
     else
     {
@@ -435,7 +435,7 @@ const std::string Camera::getPersistentGateway ()
     uint32_t ip;
     if (sendReadMemory(Register::PERSISTANT_DEFAULTGATEWAY_REGISTER, 4, &ip))
     {
-        return int2ip(ntohl(ip));
+        return int2ip(ip);
     }
     else
     {

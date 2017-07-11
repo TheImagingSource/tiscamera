@@ -24,6 +24,9 @@
 #include <linux/if.h>
 #include <netdb.h>
 
+// ip address, network byte order
+typedef uint32_t ip4_address_t;
+
 namespace tis
 {
 
@@ -36,9 +39,9 @@ bool isRPFilterActive ();
 bool startsWith (const std::string& searchThrough, const std::string& searchFor);
 
 /// @name int2ip
-/// @param addr - uint32_t containg the IP
+/// @param addr - ip4_address_t containing the IP
 /// @return string containing IP
-std::string int2ip (const uint32_t addr);
+std::string int2ip (const ip4_address_t addr);
 
 /// @name int2mac
 /// @param mac - uint64 containing the mac address to be converted
@@ -60,7 +63,7 @@ uint64_t mac2int (const std::string& mac);
 /// @name ip2int
 /// @param ip - string containing the ip to be converted
 /// @return ip as int or -1 on failure
-int ip2int (const std::string& ip);
+ip4_address_t ip2int (const std::string& ip);
 
 /// @name fillAddr
 /// @param address - ip address from recipient
