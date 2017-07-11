@@ -22,50 +22,54 @@
 #include <exception>
 #include <stdexcept>
 
+#include <libgen.h>
+
 using namespace tis;
 
 
 /// @name printHelp
 /// @brief prints complete overview over possible actions
-void printHelp ()
+void printHelp (char *execName)
 {
-    std::cout << "\ntis_network - network module for GigE cameras"
-              << "\n\nusage: tis_network [command]             - execute specified command"
-              << "\n   or: tis_network [command] -c <camera> - execute command for given camera\n\n\n"
+    std::cout << "\n" << execName << " - configuration tool for The Imaging Source GigE cameras"
+              << "\n\nusage: " << execName << " [command] [args]        - execute specified command\n\n"
 
               << "Available commands:\n"
               << "    list     - list all available GigE cameras\n"
               << "    info     - print all information for camera\n"
-              << "    set      - configure camera settings\n"
-              << "    forceip  - force ip onto camera\n"
-              << "    rescue   - broadcasts to MAC given settings\n"
+              << "    set      - permanently configure camera settings\n"
+              << "    rescue   - temporarily set network addresses\n"
               << "    upload   - upload new firmware to camera\n"
               << "    help     - print this text\n"
               << std::endl;
 
-    std::cout << "\nAvailable parameter:\n"
+    std::cout << "\nAvailable parameters:\n"
               << "    -h                       - same as help\n"
               << "    -i                       - same as info\n"
               << "    -l                       - same as list\n"
-              << "    ip=X.X.X.X               - specifiy persistent ip that camera shall use\n"
-              << "    subnet=X.X.X.X           - specifiy persistent subnetmask that camera shall use\n"
-              << "    gateway=X.X.X.X          - specifiy persistent gateway that camera shall use\n"
+              << "    ip=X.X.X.X               - ip address to be set\n"
+              << "    subnet=X.X.X.X           - subnetmask to be set\n"
+              << "    gateway=X.X.X.X          - gateway to be set\n"
               << "    dhcp=on/off              - toggle dhcp state\n"
               << "    static=on/off            - toggle static ip state\n"
               << "    name=\"xyz\"             - set name for camera; maximum 15 characters\n"
               << "    firmware=firmware.zip    - file containing new firmware\n"
               << std::endl;
 
-    std::cout << "Camera identification is possible via:\n"
+    std::cout << "Camera identification:\n"
               << "    --serial     -s          - serial number of camera\n"
               << "    --name       -n          - user defined name of camera\n"
               << "    --mac        -m          - MAC of camera\n"
               << std::endl;
 
     std::cout << "Examples:\n\n"
-
-              << "    tis_network set gateway=192.168.0.1 -s 46210199\n"
-              << "    tis_network forceip ip=192.168.0.100 subnet=255.255.255.0 gateway=192.168.0.1 -s 46210199\n\n"
+              << "  Temporarily set a fixed IP address, gateway and subnet mask for the camera\n"
+              << "  with the serial number 27710767. The camera does not need to be on the same\n"
+              << "  subnet:\n\n"
+              << "    " << execName << " rescue ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n\n"
+              << "  Permanently set a fixed IP adress on the same camera. Camera needs to be\n"
+              << "  on the same subnet:\n\n"
+              << "    " << execName << " set ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n"
               << std::endl;
 }
 
@@ -74,7 +78,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
 {
     if (argc == 1)
     {
-        printHelp();
+        printHelp(basename(argv[0]));
         return;
     }
 
@@ -88,7 +92,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
         {
             if ((arg.compare("help") == 0) || (arg.compare("-h") == 0))
             {
-                printHelp();
+                printHelp(basename(argv[0]));
                 return;
             }
             else if ((arg.compare("list") == 0) || (arg.compare("-l") == 0))
