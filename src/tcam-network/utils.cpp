@@ -92,37 +92,11 @@ bool isValidIpAddress (const std::string& ipAddress)
 }
 
 
-bool isValidMAC (const std::string& mac)
+std::string int2ip (const ip4_address_t addr)
 {
-    const char* s = mac.c_str();
-    for(int i = 0; i < 17; i++)
-    {
-        if(i % 3 != 2 && !isxdigit(s[i]))
-        {
-            return false;
-        }
-        if(i % 3 == 2 && s[i] != ':')
-        {
-            return false;
-        }
-    }
-    if(s[17] != '\0')
-    {
-        return false;
-    }
-    return true;
-}
+    struct in_addr addrs = {addr};
 
-
-std::string int2ip (const uint32_t addr)
-{
-    std::string s = std::to_string(addr);
-    struct in_addr addrs;
-
-    if (inet_aton(s.c_str(), &addrs) == 0)
-    {
-        return "";
-    }
+    // inet_ntoa expects network byte order
     std::string a = inet_ntoa(addrs);
     return a;
 }
@@ -211,15 +185,16 @@ uint64_t mac2int (const std::string& mac)
 }
 
 
-int ip2int (const std::string& ip)
+ip4_address_t ip2int (const std::string& ip)
 {
     struct in_addr addr;
 
+    // inet_aton always returns network byte order
     if (inet_aton(ip.c_str(), &addr) != 1)
     {
         return -1;
     }
-    return htonl(addr.s_addr);
+    return addr.s_addr;
 }
 
 

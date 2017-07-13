@@ -162,7 +162,7 @@ void sendDiscovery (std::shared_ptr<NetworkInterface> interface, std::function<v
     }
 }
 
-void sendIpRecovery (const std::string mac, const uint32_t ip, const uint32_t netmask, const uint32_t gateway)
+void sendIpRecovery (const std::string mac, const ip4_address_t ip, const ip4_address_t netmask, const ip4_address_t gateway)
 {
     int id = 2;
     uint64_t macmac  = mac2int(mac);
@@ -180,9 +180,9 @@ void sendIpRecovery (const std::string mac, const uint32_t ip, const uint32_t ne
     packet.DeviceMACHigh = htons(machigh) ;
     packet.DeviceMACLow = htonl(maclow) ;
 
-    packet.StaticIP = htonl(ip);
-    packet.StaticSubnetMask = htonl(netmask);
-    packet.StaticGateway = htonl(gateway);
+    packet.StaticIP = ip;
+    packet.StaticSubnetMask = netmask;
+    packet.StaticGateway = gateway;
 
     auto bf = [&] (std::shared_ptr<NetworkInterface> interface)
         {
