@@ -216,4 +216,26 @@ sockaddr_in fillAddr (const std::string &address, const unsigned short port)
 }
 
 
+bool isValidMAC (const std::string& mac)
+{
+    const char* s = mac.c_str();
+    for(int i = 0; i < 17; i++)
+    {
+        if(i % 3 != 2 && !isxdigit(s[i]))
+        {
+            return false;
+        }
+        if(i % 3 == 2 && s[i] != ':')
+        {
+            return false;
+        }
+    }
+    if(s[17] != '\0')
+    {
+        return false;
+    }
+    return true;
+}
+
+
 } /* namespace tis */
