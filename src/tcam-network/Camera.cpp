@@ -487,7 +487,7 @@ std::string Camera::getFirmwareVersion ()
 
 bool Camera::uploadFirmware (const std::string& filename,
                              const std::string& overrideModelName,
-                             std::function<void(int)> progressFunc)
+                             std::function<void(int, const std::string&)> progressFunc)
 {
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
 

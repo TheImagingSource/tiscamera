@@ -171,7 +171,7 @@ public:
     /// @return true on success
     bool uploadFirmware (const std::string& filename,
                          const std::string& overrideModelName,
-                         std::function<void(int)> progressFunc);
+                         std::function<void(int, const std::string&)> progressFunc);
 
     /// @name getInterfaceName
     /// @return name of interface used for communication
