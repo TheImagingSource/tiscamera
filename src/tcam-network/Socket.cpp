@@ -96,7 +96,7 @@ bool Socket::setBroadcast (bool enable)
 }
 
 
-void Socket::sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*)> callback, const bool broadcast)
+void Socket::sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*, unsigned int*)> callback, unsigned int *response, const bool broadcast)
 {
     sockaddr_in destAddr = fillAddr(destination_address, STANDARD_GVCP_PORT);
     setBroadcast(broadcast);
@@ -131,7 +131,7 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
 
             if (recvfrom(fd, msg, sizeof(msg), 0, (sockaddr*)&sender, &sendsize) >= 0)
             {
-                if (callback(msg) == SendAndReceiveSignals::END)
+                if (callback(msg, response) == SendAndReceiveSignals::END)
                 {
                     return;
                 }

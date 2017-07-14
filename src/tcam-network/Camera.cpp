@@ -526,7 +526,7 @@ bool Camera::getControl ()
             std::cerr << exc.what() << std::endl;
         }
 
-        if (retv == Status::SUCCESS)
+        if (retv)
         {
             retv = true;
             this->isControlled = true;
@@ -598,7 +598,7 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
     packet.count = htons(size);
     packet.address = htonl(address);
 
-    auto callback_function = [&data, &id, &size] (void* msg) -> int
+    auto callback_function = [&data, &id, &size] (void* msg, unsigned int* response) -> int
     {
         Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*) msg;
 
@@ -608,15 +608,16 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
             {
                 memcpy(data, ack->data, size);
             }
+            *response = Status::SUCCESS;
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
     };
 
-    unsigned int response = 0;
+    unsigned int response = Status::FAILURE;
     try
     {
-        socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function);
+        socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function, &response);
     }
     catch (SocketSendToException& exc)
     {
@@ -656,35 +657,30 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     memcpy(&packet->data, data, size);
     packet->address = htonl(address);
 
-    auto callback_function = [id] (void* msg) -> int
+    auto callback_function = [id] (void* msg, unsigned int* response) -> int
     {
         Packet::ACK_WRITEMEM* ack = (Packet::ACK_WRITEMEM*) msg;
 
         if (ntohs(ack->header.ack_id) == id)
         {
+            *response = Status::SUCCESS;
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
     };
 
-    unsigned int response = 0;
+    unsigned int response = Status::FAILURE;
+
     try
     {
-        socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function);
+        socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function, &response);
     }
     catch (SocketSendToException& exc)
     {
         std::cerr << exc.what() << std::endl;
     }
 
-    if (response == Status::SUCCESS)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return response == Status::SUCCESS;
 }
 
 
@@ -710,7 +706,7 @@ void Camera::sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32
 
     try
     {
-        s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
+        s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, NULL, true);
     }
     catch (SocketSendToException& e)
     {

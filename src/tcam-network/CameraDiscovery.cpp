@@ -144,17 +144,17 @@ void sendDiscovery (std::shared_ptr<NetworkInterface> interface, std::function<v
 
     auto s = interface->createSocket();
 
-    auto callback = [&interface, &discover_call, &s] (void* msg)
+    auto callback = [&interface, &discover_call, &s] (void* msg, unsigned int *response)
         {
             Packet::ACK_DISCOVERY* ack = (Packet::ACK_DISCOVERY*) msg;
             auto cam = std::shared_ptr<Camera>(new Camera(*ack, interface, s));
             discover_call(cam);
             return Socket::SendAndReceiveSignals::CONTINUE;
         };
-
+    unsigned int response;
     try
     {
-        s->sendAndReceive("255.255.255.255", &discovery_packet, sizeof(discovery_packet), callback, true);
+        s->sendAndReceive("255.255.255.255", &discovery_packet, sizeof(discovery_packet), callback, &response, true);
     }
     catch (SocketSendToException& e)
     {
@@ -189,7 +189,7 @@ void sendIpRecovery (const std::string mac, const ip4_address_t ip, const ip4_ad
             auto s = interface->createSocket();
             try
             {
-                s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
+                s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, NULL, true);
             }
             catch (SocketSendToException& e)
             {

@@ -238,6 +238,32 @@ void writeChanges (std::shared_ptr<Camera> camera,
     }
 }
 
+int isAccessible (const std::vector<std::string>& args)
+{
+    auto camera = findCamera(args);
+    int ret = false;
+
+    if (camera == NULL)
+    {
+        ret = false;
+    } else {
+        if (camera->getControl())
+        {
+            ret = true;
+            camera->abandonControl();
+        }
+    }
+
+    if (ret == false)
+    {
+        std::cout << "Could not gain read/write access to the camera.\n"
+        "Please make sure the camera is on the same network as the host computer \n"
+        "and no other application is currently accessing the device." << std::endl;
+    }
+
+    return ret;
+}
+
 
 void setCamera (const std::vector<std::string>& args)
 {

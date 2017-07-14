@@ -117,6 +117,10 @@ void handleCommandlineArguments (const int argc, char* argv[])
                     std::cout << "Not enough arguments." << std::endl;
                     return;
                 }
+                if (!isAccessible(args))
+                {
+                    return;
+                }
                 setCamera(args);
                 break;
             }
@@ -130,6 +134,10 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
             else if (arg.compare("upload") == 0)
             {
+                if (!isAccessible(args))
+                {
+                    return;
+                }
                 upgradeFirmware(args);
                 break;
             }
