@@ -1,44 +1,66 @@
+# Copyright 2017 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 include(CPackComponent)
 
-# set(CPACK_COMPONENTS_ALL tiscamera)
-
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL tiscamera)
 
 set(CPACK_MONOLITHIC_INSTALL TRUE)
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Imaging Source Europe GmbH <support@theimagingsource.com>")
 
-SET(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
-SET(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
-SET(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
+set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
+set(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
+set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
 
-# cpack_add_component(gige-daemon
-#   DESCRIPTION "GigE camera indexing daemon"
-#   DISABLED
-#   DEPENDS lib libaravis libnetwork
-#   INSTALL_TYPES "DEB" )
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "uvcdynctrl")
+set(CPACK_SET_DESTDIR "on")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_GENERATOR "DEB")
 
-set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-# SET(CPACK_DEBIAN_PACKAGE_DEPENDS " tinyxml , libzip, python3 ")
-SET(CPACK_SET_DESTDIR "on")
-SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
-SET(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software Collection")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
+set(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
+set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
+set(CPACK_PACKAGE_VERSION_MAJOR "${TCAM_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${TCAM_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${TCAM_VERSION_PATCH}")
+set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
-SET(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Production Suite")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
-SET(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
-SET(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
-SET(CPACK_PACKAGE_VERSION_MAJOR "${TCAM_VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${TCAM_VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${TCAM_VERSION_PATCH}")
-# SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
-# SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}-src")
-SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-# SET(CPACK_DEBIAN_PACKAGE_SECTION "kde")
-SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+set(CPACK_PACKAGE_NAME "tiscamera")
+
+string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if(DPKG_PROGRAM)
+  execute_process(
+    COMMAND ${DPKG_PROGRAM} --print-architecture
+    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  set(CPACK_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+else(DPKG_PROGRAM)
+  set(CPACK_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${CMAKE_SYSTEM_NAME}")
+endif(DPKG_PROGRAM)
+
+
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+
 
 # always last
 include(CPack)
