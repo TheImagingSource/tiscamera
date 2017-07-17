@@ -7,5 +7,5 @@ Name: Tcam
 Description: Camera control and image acquisition library
 Version: @TCAM_VERSION@
 Requires: @tcam_pkgconfig_dependencies@
-Libs: -L${libdir} -ltcam -ltcamprop
+Libs: -L${libdir} -ltcamprop
 Cflags: -I${includedir}/

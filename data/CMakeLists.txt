@@ -14,16 +14,27 @@
 # limitations under the License.
 
 # define external dependencies for linkage
-set(tcam_pkgconfig_dependencies "tinyxml")
+set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
 
 if (BUILD_ARAVIS)
-  set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} aravis-0.4")
+
+  # leave as a reminder on how to handle aravis versions should a
+  # more internal pkg-config file be needed
+
+  # find_package(Aravis REQUIRED)
+  # string(FIND ${aravis_LIBRARY} "0.6" aravis_VERSION)
+  # if (${aravis_VERSION} MATCHES "-1")
+  #   set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} aravis-0.4")
+  # else()
+  #   set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} aravis-0.6")
+  # endif (${aravis_VERSION} MATCHES "-1")
 
   add_subdirectory(systemd)
 endif (BUILD_ARAVIS)
 
 if (BUILD_V4L2)
-  set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} libudev")
+
+  # set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} libudev libusb-1.0")
 
   add_subdirectory(uvc-extensions)
 
