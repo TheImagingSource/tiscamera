@@ -63,7 +63,7 @@ clean:
 	$(RM) save-video
 	$(RM) list-devices
 	$(RM) list-properties
-	$(RM)list-formats
+	$(RM) list-formats
 	$(RM) pipeline
 	$(RM) properties
 	$(RM) trigger-images
