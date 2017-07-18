@@ -66,6 +66,8 @@ namespace tis
     /// succeed.
     int isAccessible (const std::vector<std::string>& args);
 
+    int isAccessible (std::shared_ptr<Camera> camera);
+
     /// @name setCamera
     /// @param args - vector containing string that shall be searched
     /// sets the values described in args for described camera

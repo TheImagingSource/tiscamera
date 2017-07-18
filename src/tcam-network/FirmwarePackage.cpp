@@ -53,7 +53,7 @@ namespace
             return;
         }
 
-        std::copy(contents, contents + st.size, std::back_inserter(dest));
+        dest.assign(contents, contents + st.size);
 
         zip_close(z);
 	}

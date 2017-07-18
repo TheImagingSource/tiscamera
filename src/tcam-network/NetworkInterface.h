@@ -33,6 +33,7 @@ private:
     uint32_t flags;
     uint32_t addr;
     uint32_t netmask;
+    int timeout_ms;
 
 public:
 
@@ -41,7 +42,7 @@ public:
     /// @name NetworkInterface
     /// @param _addrs - ifaddrs struct describing the interface that shall be represented
     /// @brief Constructor
-    NetworkInterface (const struct ifaddrs* _addrs);
+    NetworkInterface (const struct ifaddrs* _addrs, int timeout=1500);
 
     /// @name getInterfaceName
     /// @return string containing the name
