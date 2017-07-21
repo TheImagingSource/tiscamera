@@ -112,16 +112,24 @@ class CameraController:
 def print_usage():
     print("""Usage:
 {0} list
-
-{0} upload CAMERA_IDENTIFIER FIRMWARE_FILE
-
-{0} store CAMERA_IDENTIFIER [KEY=VALUE..]
+    :: Display a list of all available cameras
 
 {0} rescue CAMERA_IDENTIFIER ip=IPADRESS netmask=NETMASK gateway=GATEWAY
+    :: Temporarily set the IP address configuration of the camera
 
 {0} set CAMERA_IDENTIFIER [ip=IPADDRESS netmask=NETMASK gateway=GATEWAY static=True | dhcp=True]
+    :: Store permanent IP configuration settings
 
-{0} batchupload FIRMWARE_FILE""".format(sys.argv[0]))
+{0} upload CAMERA_IDENTIFIER FIRMWARE_FILE
+    :: Upload a firmware file to a camera
+
+{0} batchupload INTERFACE_NAME FIRMWARE_FILE
+    :: Auto-configure the IP-Adresses of all cameras detected on the given interface to
+       the IP addresses in the subnet, starting with the IP address x.x.x.10 .
+       Then start up to 8 threads simultaneously to upload the given firmware file.abs
+
+CAMERA_IDENTIFIER: Can be either the serial number, the user defined name or the MAC address
+""".format(sys.argv[0]))
 
 
 def list():
