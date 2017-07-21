@@ -128,8 +128,8 @@ def list():
         s = (cam["model_name"].ljust(20) +
              cam["serial_number"].ljust(10) +
              cam["user_defined_name"].ljust(20) +
-             cam["current_ip"].ljust(15) +
-             cam["interface_name"].ljust(10))
+             cam["current_ip"].ljust(17) +
+             cam["interface_name"].ljust(12))
         print(s)
 
 def rescue():
