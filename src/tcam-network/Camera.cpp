@@ -87,21 +87,6 @@ Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
     this->isControlled = false;
 }
 
-
-Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
-                std::shared_ptr<NetworkInterface> _interface,
-                std::shared_ptr<Socket> _sock,
-                int timeoutIntervals)
-    : packet(_packet), interface(_interface),
-      timeoutCounter(timeoutIntervals), timeoutCounterDefault(timeoutIntervals)
-{
-    this->socket = _sock;
-
-    this->requestID = 1;
-    this->isControlled = false;
-}
-
-
 Camera::~Camera()
 {
     if (this->isControlled)

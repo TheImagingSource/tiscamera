@@ -73,10 +73,6 @@ public:
 
     Camera (const Packet::ACK_DISCOVERY& packet, std::shared_ptr<NetworkInterface> _interface, int timeoutIntervals = 3);
 
-    Camera (const Packet::ACK_DISCOVERY& _packet,
-            std::shared_ptr<NetworkInterface> _interface,
-            std::shared_ptr<Socket> _sock,
-            int timeoutIntervals = 3);
     /// copy constructor
     Camera (const Camera& _camera) = delete;
     Camera& operator=(const Camera& ) = delete;
