@@ -96,6 +96,8 @@ public:
     /// @brief resets counter to initial value
     int resetCounter ();
 
+    std::string getNetworkInterfaceName ();
+
     /// @name updateCamera
     /// @param cam - new camera instance
     /// @brief updates this camera with the information given by cam

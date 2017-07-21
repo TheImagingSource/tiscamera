@@ -123,6 +123,11 @@ int Camera::resetCounter ()
     return timeoutCounter;
 }
 
+std::string Camera::getNetworkInterfaceName ()
+{
+    return interface->getInterfaceName();
+}
+
 
 void Camera::updateCamera (std::shared_ptr<Camera> cam)
 {
