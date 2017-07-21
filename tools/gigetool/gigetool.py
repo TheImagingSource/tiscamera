@@ -87,6 +87,11 @@ class CameraController:
     def upload_firmware(self, identifier, _path, callback):
         return self.dll.upload_firmware(bytes(identifier, "utf-8"), bytes(_path, "utf-8"), callback)
 
+    def get_camera_details(self, identifier):
+        cam = TcamCamera()
+        self.dll.get_camera_details(bytes(identifier, "utf-8"), byref(cam))
+        return self.__getdict(cam)
+
     def rescue(self, identifier, ip, netmask, gateway):
         mac = None
         for cam in self.cameras:
@@ -335,6 +340,37 @@ def set_persistent():
     if res != 0:
         print("Failed to set parameter '%s'" % (key))
 
+def show_info():
+    ctrl = CameraController()
+    ctrl.discover()
+
+    def bool_to_txt(val):
+        if val:
+            return "enabled"
+        else:
+            return "disabled"
+
+    identifier = sys.argv[2]
+    cam = ctrl.get_camera_details(identifier)
+
+    print("Model:".ljust(16) + cam["model_name"])
+    print("Serial:".ljust(16) + cam["serial_number"])
+    print("Firmware:".ljust(16) + cam["firmware_version"])
+    print("UserName:".ljust(16) + cam["user_defined_name"])
+    print()
+    print("MAC Address:".ljust(30) + cam["mac_address"])
+    print("Current IP:".ljust(30) + cam["current_ip"])
+    print("Current Netmask:".ljust(30) + cam["current_netmask"])
+    print("Current Gateway:".ljust(30) + cam["current_gateway"])
+    print("")
+    print("DHCP is: ".ljust(16) + bool_to_txt(cam["is_dhcp_enabled"]))
+    print("Static is: ".ljust(16) + bool_to_txt(cam["is_static_ip"]))
+    print("")
+    print("Persistent IP:".ljust(30) + cam["persistent_ip"])
+    print("Persistent Netmask:".ljust(30) + cam["persistent_netmask"])
+    print("Persistent Gateway:".ljust(30) + cam["persistent_gateway"])
+
+
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description="The Imaging Source Gigabit Ethernet camera configuration tool")
     # parser.add_argument("command", nargs="+", help="command to execute")
@@ -354,6 +390,8 @@ if __name__ == "__main__":
         batchupload()
     elif sys.argv[1] == "set":
         set_persistent()
+    elif sys.argv[1] == "info":
+        show_info()
     else:
         print_usage()
 
