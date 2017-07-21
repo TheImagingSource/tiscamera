@@ -530,9 +530,8 @@ bool Camera::abandonControl ()
     bool retv = false;
     uint32_t data = 0;
     retv = this->sendWriteMemory(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, 4, &data);
-    if (retv == Status::SUCCESS)
+    if (retv)
     {
-        retv = true;
         this->isControlled = false;
     }
     return retv;
