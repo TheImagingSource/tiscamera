@@ -115,7 +115,7 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::UploadItems (IFirmwareWrite
 
     for (auto&& i : items)
     {
-        auto data = PadData(i.Data, 4);
+        auto data = PadData(*i.Data, 4);
         auto offset = i.Params.at("Offset");
 
         auto writeProgress = mapProgress(uploadItemsProgress, 0, 50);
@@ -156,9 +156,9 @@ void GigE3::DevicePortFlashMemory::AddEraseRequests (const GigE3::UploadItem& it
     requests.insert(item.Params.at("Offset") - startBlockOffset);
 
     uint32_t spaceToEndOfBlock = blockSize_ - startBlockOffset;
-    if (item.Data.size() > spaceToEndOfBlock)
+    if (item.Data->size() > spaceToEndOfBlock)
     {
-        uint32_t remainingLength = (uint32_t) item.Data.size() - spaceToEndOfBlock;
+        uint32_t remainingLength = (uint32_t) item.Data->size() - spaceToEndOfBlock;
         uint32_t offset = item.Params.at("Offset") + spaceToEndOfBlock;
 
         while (remainingLength > 0)
