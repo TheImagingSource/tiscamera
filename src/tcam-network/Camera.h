@@ -43,7 +43,7 @@ namespace tis
     /// @return shared pointer to the wished camera, else null
     std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type = CAMERA_SERIAL);
 
-
+    const int PACKET_RETRY_COUNT = 5;
 class Camera
 {
 private:

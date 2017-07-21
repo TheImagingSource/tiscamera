@@ -605,7 +605,12 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
 
     try
     {
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
             socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function);
+            retries--;
+        }
     }
     catch (SocketSendToException& exc)
     {
@@ -655,7 +660,12 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
 
     try
     {
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
             socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function);
+            retries--;
+        }
     }
     catch (SocketSendToException& exc)
     {
