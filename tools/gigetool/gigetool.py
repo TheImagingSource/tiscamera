@@ -7,7 +7,10 @@ import threading
 import socket
 import fcntl
 import struct
-import queue
+try:
+    import queue
+except:
+    import Queue as queue
 
 import argparse
 
@@ -69,7 +72,7 @@ class CameraController:
         self.cameras.append(self.__getdict(camera))
 
     def discover(self, get_persistent_values=False):
-        self.cameras.clear()
+        self.cameras = []
         return self.dll.get_camera_list(DISCOVER_CALLBACK_FUNC(self.__discover_callback), get_persistent_values)
 
     def set_persistent_parameter(self, identifier, key, value):
