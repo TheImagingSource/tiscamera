@@ -306,6 +306,7 @@ def _parsebool(value):
 
 def set_persistent():
     BOOLARGS = ["dhcp", "static"]
+    EXCLUSIVE = ["dhcp", "static"]
     identifier = sys.argv[2]
     args = sys.argv[3:]
 
@@ -313,14 +314,24 @@ def set_persistent():
     ctrl.discover()
 
     for arg in args:
-        print(arg)
+        note = ""
+        sys.stdout.write(arg)
         key, value = arg.split("=")
         if key in BOOLARGS:
             value = _parsebool(value)
 
+        if key in EXCLUSIVE and value:
+            for excl in EXCLUSIVE:
+                if excl != key:
+                    args.append("%s=false" % (excl))
+                    note = "(disabling '%s' because '%s' is enabled)" % (excl, key)
+
         res = ctrl.set_persistent_parameter(identifier, key, value)
         if res != 0:
+            print(" -> FAILED")
             break
+        else:
+            print(" -> OK " + note)
     if res != 0:
         print("Failed to set parameter '%s'" % (key))
 

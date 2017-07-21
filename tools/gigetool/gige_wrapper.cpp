@@ -108,6 +108,7 @@ int set_persistent_parameter_s(char *identifier, char *key, char *value)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
+    int ret = 0;
 
     camera = getCameraFromList(g_camera_info->cameras, identifier, CAMERA_SERIAL);
     if (!camera)
@@ -120,32 +121,33 @@ int set_persistent_parameter_s(char *identifier, char *key, char *value)
 
     if(!strcmp(key, "ip"))
     {
-        camera->setPersistentIP(value);
+        ret = camera->setPersistentIP(value);
     }
     else if (!strcmp(key, "gateway"))
     {
-        camera->setPersistentGateway(value);
+        ret = camera->setPersistentGateway(value);
     }
     else if (!strcmp(key, "netmask"))
     {
-        camera->setPersistentSubnet(value);
+        ret = camera->setPersistentSubnet(value);
     }
     else if (!strcmp(key, "name"))
     {
-        camera->setUserDefinedName(value);
+        ret = camera->setUserDefinedName(value);
     }
     else
     {
         return INVALID_PARAMETER;
     }
 
-    return 0;
+    return ret != 0 ? SUCCESS : FAILURE;
 }
 
 int set_persistent_parameter_i(char *identifier, char *key, int value)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
+    int ret = 0;
 
     camera = getCameraFromList(g_camera_info->cameras, identifier, CAMERA_SERIAL);
     if (!camera)
@@ -158,17 +160,17 @@ int set_persistent_parameter_i(char *identifier, char *key, int value)
 
     if(!strcmp(key, "dhcp"))
     {
-        camera->setDHCPstate(value != 0);
+        ret = camera->setDHCPstate(value != 0);
     }
     else if (!strcmp(key, "static"))
     {
-        camera->setStaticIPstate(value != 0);
+        ret = camera->setStaticIPstate(value != 0);
     }
     else{
         return INVALID_PARAMETER;
     }
 
-    return 0;
+    return ret != 0 ? SUCCESS : FAILURE;
 }
 
 int upload_firmware(char *identifier, char *path, upload_callback_t callback)
