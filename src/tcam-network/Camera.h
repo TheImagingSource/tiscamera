@@ -192,6 +192,8 @@ public:
     /// @return true on success
     bool abandonControl();
 
+    bool getIsControlled();
+
     /// @name sendReadMemory
     /// @param address - address that shall be read
     /// @param size - size of memory to read

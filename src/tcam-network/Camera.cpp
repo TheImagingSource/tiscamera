@@ -538,6 +538,11 @@ bool Camera::abandonControl ()
     return retv;
 }
 
+bool Camera::getIsControlled()
+{
+    return this->isControlled;
+}
+
 
 void Camera::resetIP ()
 {
