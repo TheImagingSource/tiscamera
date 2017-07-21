@@ -145,12 +145,24 @@ def rescue():
     ctrl.discover()
 
     identifier = sys.argv[2]
-    ip = sys.argv[3]
-    netmask = sys.argv[4]
-    gateway = sys.argv[5]
+    args = sys.argv[3:]
+    ip = None
+    netmask = None
+    gateway = None
+    for arg in args:
+        key, value = arg.split("=")
+        if key == "ip":
+            ip = value
+        elif key == "netmask":
+            netmask = value
+        elif key == "gateway":
+            gateway = value
 
-    ctrl.rescue(identifier, ip, netmask, gateway)
-    ctrl.discover()
+    if ip is None or netmask is None or gateway is None:
+        print("Argument error")
+        return -2
+
+    return ctrl.rescue(identifier, ip, netmask, gateway)
 
 class FirmwareUploadCallback:
     def __init__(self):
