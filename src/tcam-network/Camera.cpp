@@ -398,7 +398,7 @@ const std::string Camera::getPersistentSubnet ()
     uint32_t ip;
     if (sendReadMemory(Register::PERSISTANT_SUBNETMASK_REGISTER, 4, &ip))
     {
-        return int2ip(ntohl(ip));
+        return int2ip(ip);
     }
     else
     {
