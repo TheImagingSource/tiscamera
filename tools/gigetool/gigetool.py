@@ -325,7 +325,7 @@ def batchupload():
 
 def _parsebool(value):
     TRUES = ["true", "on", "1", "yes"]
-    if value in TRUES:
+    if value.lower() in TRUES:
         return 1
     return 0
 
