@@ -470,9 +470,9 @@ std::string Camera::getFirmwareVersion ()
 }
 
 
-bool Camera::uploadFirmware (const std::string& filename,
-                             const std::string& overrideModelName,
-                             std::function<void(int, const std::string&)> progressFunc)
+int Camera::uploadFirmware (const std::string& filename,
+                            const std::string& overrideModelName,
+                            std::function<void(int, const std::string&)> progressFunc)
 {
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
 
@@ -481,12 +481,7 @@ bool Camera::uploadFirmware (const std::string& filename,
                                                   filename, overrideModelName,
                                                   progressFunc);
 
-    if (retv == FirmwareUpdate::Status::SuccessDisconnectRequired
-        || retv == FirmwareUpdate::Status::Success)
-    {
-        return true;
-    }
-    return false;
+    return (int)retv;
 }
 
 

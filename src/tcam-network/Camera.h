@@ -165,9 +165,9 @@ public:
     /// @param overrideModelName - string containing the model name that shall be used. empty on default
     /// @param progressFunc callback function to inform over progress
     /// @return true on success
-    bool uploadFirmware (const std::string& filename,
-                         const std::string& overrideModelName,
-                         std::function<void(int, const std::string&)> progressFunc);
+    int uploadFirmware (const std::string& filename,
+                        const std::string& overrideModelName,
+                        std::function<void(int, const std::string&)> progressFunc);
 
     /// @name getInterfaceName
     /// @return name of interface used for communication
