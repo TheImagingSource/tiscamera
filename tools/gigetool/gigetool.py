@@ -42,6 +42,8 @@ UPLOAD_CALLBACK_FUNC = CFUNCTYPE(None, c_char_p, c_int)
 class CameraController:
     def __init__(self):
         _path = os.path.dirname(__file__)
+        if not _path:
+            _path = "."
         self.dll = cdll.LoadLibrary(os.path.join(_path,"gigewrapper.so"))
         self.dll.init()
         self.dll.set_persistent_parameter_s.argtypes = [c_char_p, c_char_p, c_char_p]
