@@ -61,7 +61,7 @@ int Socket::createSocket ()
         throw SocketCreationException();
     }
 
-    int val = 1;
+    int val = 0;
 
     // assure that in case of error we still can use the port and no EADDRINUSE will be returned for new sockets
     setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof (val));
