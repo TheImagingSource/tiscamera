@@ -98,7 +98,7 @@ public :
     /// @param size - size of data
     /// @param callback - callback function that should be called on response; can return -1 to end waiting for additional response packages
     /// @param broadcast - wether this shall be broadcasted or not
-    void sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*, unsigned int*)> callback, unsigned int *response, const bool broadcast = false);
+    void sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*)> callback, const bool broadcast = false);
 
 private:
     /// @name createSocket
