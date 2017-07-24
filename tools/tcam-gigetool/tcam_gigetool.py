@@ -42,6 +42,12 @@ class TcamCamera(Structure):
 DISCOVER_CALLBACK_FUNC = CFUNCTYPE(None, TcamCamera)
 UPLOAD_CALLBACK_FUNC = CFUNCTYPE(None, c_char_p, c_int)
 
+def _tobytes(value):
+    if bytes == str:
+        return bytes(value)
+    else:
+        return bytes(value, "utf-8")
+
 class CameraController:
     def __init__(self):
         try:
@@ -80,19 +86,19 @@ class CameraController:
 
     def set_persistent_parameter(self, identifier, key, value):
         if type(value) == str:
-            return self.dll.set_persistent_parameter_s(bytes(identifier, "utf-8"),
-                                                       bytes(key, "utf-8"),
-                                                       bytes(value, "utf-8"))
+            return self.dll.set_persistent_parameter_s(_tobytes(identifier),
+                                                       _tobytes(key),
+                                                       _tobytes(value))
         else:
-            return self.dll.set_persistent_parameter_i(bytes(identifier, "utf-8"),
-                                                       bytes(key, "utf-8"), value)
+            return self.dll.set_persistent_parameter_i(_tobytes(identifier),
+                                                       _tobytes(key), value)
 
     def upload_firmware(self, identifier, _path, callback):
-        return self.dll.upload_firmware(bytes(identifier, "utf-8"), bytes(_path, "utf-8"), callback)
+        return self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), callback)
 
     def get_camera_details(self, identifier):
         cam = TcamCamera()
-        self.dll.get_camera_details(bytes(identifier, "utf-8"), byref(cam))
+        self.dll.get_camera_details(_tobytes(identifier), byref(cam))
         return self.__getdict(cam)
 
     def rescue(self, identifier, ip, netmask, gateway):
@@ -110,7 +116,7 @@ class CameraController:
 
         # print("send rescue to: ", mac, ip, netmask, gateway)
 
-        self.dll.rescue(bytes(mac, "utf-8"), bytes(ip, "utf-8"), bytes(netmask, "utf-8"), bytes(gateway, "utf-8"))
+        self.dll.rescue(_tobytes(mac), _tobytes(ip), _tobytes(netmask), _tobytes(gateway))
 
 def print_usage():
     print("""Usage:
@@ -224,7 +230,7 @@ def get_ip_address(ifname):
     return socket.inet_ntoa(fcntl.ioctl(
         s.fileno(),
         0x8915,  # SIOCGIFADDR
-        struct.pack('256s', bytes(ifname[:15], "utf-8"))
+        struct.pack('256s', _tobytes(ifname[:15]))
     )[20:24])
 
 def batchrescue(ctrl, cameras, baseip):
