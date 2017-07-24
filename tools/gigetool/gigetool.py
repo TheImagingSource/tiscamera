@@ -44,10 +44,13 @@ UPLOAD_CALLBACK_FUNC = CFUNCTYPE(None, c_char_p, c_int)
 
 class CameraController:
     def __init__(self):
-        _path = os.path.dirname(__file__)
-        if not _path:
-            _path = "."
-        self.dll = cdll.LoadLibrary(os.path.join(_path,"gigewrapper.so"))
+        try:
+            self.dll = cdll.LoadLibrary("libtcam_gigewrapper.so")
+        except OSError:
+            _path = os.path.dirname(__file__)
+            if not _path:
+                _path = "."
+            self.dll = cdll.LoadLibrary(os.path.join(_path,"libtcam_gigewrapper.so"))
         self.dll.init()
         self.dll.set_persistent_parameter_s.argtypes = [c_char_p, c_char_p, c_char_p]
         self.dll.set_persistent_parameter_i.argtypes = [c_char_p, c_char_p, c_int]
@@ -391,7 +394,7 @@ def show_info():
     print("Persistent Gateway:".ljust(30) + cam["persistent_gateway"])
 
 
-if __name__ == "__main__":
+def main():
     # parser = argparse.ArgumentParser(description="The Imaging Source Gigabit Ethernet camera configuration tool")
     # parser.add_argument("command", nargs="+", help="command to execute")
     # parser.add_argument("identifier", nargs="?", help="")
@@ -415,9 +418,5 @@ if __name__ == "__main__":
     else:
         print_usage()
 
-    # camctl = CameraController()
-    # camctl.discover()
-    # print(camctl.cameras)
-    # #print(hex(camctl.set_persistent_parameter(b"11719912", b"foo", b"bar")))
-    # fwupcb = FirmwareUploadCallback()
-    # camctl.upload_firmware(b"11719912", b"GigE3Firmware.1672-All.fwpack", UPLOAD_CALLBACK_FUNC(fwupcb.func))
+if __name__ == "__main__":
+    main()
