@@ -25,12 +25,15 @@ install(TARGETS tcam_gigewrapper
 find_program(PYTHON "python")
 
 if (PYTHON)
-    set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-    set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
-    set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/tcam_gigetool.py")
-    set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
+    set(SETUP_PY_IN   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+    set(SETUP_PY      "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+    set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py.in")
+    set(VERSION_PY    "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py")
+    set(DEPS          "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/tcam_gigetool.py")
+    set(OUTPUT        "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
 
     configure_file(${SETUP_PY_IN} ${SETUP_PY})
+    configure_file(${VERSION_PY_IN} ${VERSION_PY})
 
     add_custom_command(OUTPUT ${OUTPUT}
                        COMMAND ${PYTHON} ${SETUP_PY} build

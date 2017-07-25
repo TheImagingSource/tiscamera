@@ -15,111 +15,14 @@ except:
 
 import argparse
 
-from ctypes import *
-
 from operator import itemgetter
+
+from .version import TCAM_VERSION, TCAM_GIGETOOL_VERSION, TCAM_GIGETOOL_GIT_REVISION
+from .controller import CameraController
 
 _ = gettext.gettext
 
-MAX_CAMERAS = 64
-
-class TcamCamera(Structure):
-    _fields_ = [("model_name", c_char * 64),
-                ("serial_number", c_char * 64),
-                ("current_ip", c_char * 16),
-                ("current_gateway", c_char * 16),
-                ("current_netmask", c_char * 16),
-                ("persistent_ip", c_char * 16),
-                ("persistent_gateway", c_char * 16),
-                ("persistent_netmask", c_char * 16),
-                ("user_defined_name", c_char * 64),
-                ("firmware_version", c_char * 64),
-                ("mac_address", c_char * 64),
-                ("interface_name", c_char * 64),
-                ("is_static_ip", c_int),
-                ("is_dhcp_enabled", c_int),
-                ("is_reachable", c_int),
-                ("is_controllable", c_int)
-    ]
-
-DISCOVER_CALLBACK_FUNC = CFUNCTYPE(None, TcamCamera)
-UPLOAD_CALLBACK_FUNC = CFUNCTYPE(None, c_char_p, c_int)
-
-def _tobytes(value):
-    if bytes == str:
-        return bytes(value)
-    else:
-        return bytes(value, "utf-8")
-
-class CameraController:
-    def __init__(self):
-        try:
-            self.dll = cdll.LoadLibrary("libtcam_gigewrapper.so")
-        except OSError:
-            _path = os.path.dirname(__file__)
-            if not _path:
-                _path = "."
-            self.dll = cdll.LoadLibrary(os.path.join(_path,"libtcam_gigewrapper.so"))
-        self.dll.init()
-        self.dll.set_persistent_parameter_s.argtypes = [c_char_p, c_char_p, c_char_p]
-        self.dll.set_persistent_parameter_i.argtypes = [c_char_p, c_char_p, c_int]
-        self.dll.rescue.argtypes = [c_char_p, c_char_p, c_char_p, c_char_p]
-        self.dll.upload_firmware.argtypes = [c_char_p, c_char_p, UPLOAD_CALLBACK_FUNC]
-        self.cameras = []
-
-    SUCCESS = 0x0
-    FAILURE = 0x8000
-    NO_DEVICE = 0x8001
-    INVALID_PARAMETER = 0x8002
-
-    @staticmethod
-    def __getdict(struct):
-        d = dict((field, getattr(struct, field)) for field, _ in struct._fields_)
-        for f in d:
-            if type(d[f]) == bytes:
-                d[f] = d[f].decode("utf-8")
-        return d
-
-    def __discover_callback(self, camera):
-        self.cameras.append(self.__getdict(camera))
-
-    def discover(self, get_persistent_values=False):
-        self.cameras = []
-        return self.dll.get_camera_list(DISCOVER_CALLBACK_FUNC(self.__discover_callback), get_persistent_values)
-
-    def set_persistent_parameter(self, identifier, key, value):
-        if type(value) == str:
-            return self.dll.set_persistent_parameter_s(_tobytes(identifier),
-                                                       _tobytes(key),
-                                                       _tobytes(value))
-        else:
-            return self.dll.set_persistent_parameter_i(_tobytes(identifier),
-                                                       _tobytes(key), value)
-
-    def upload_firmware(self, identifier, _path, callback):
-        return self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), callback)
-
-    def get_camera_details(self, identifier):
-        cam = TcamCamera()
-        self.dll.get_camera_details(_tobytes(identifier), byref(cam))
-        return self.__getdict(cam)
-
-    def rescue(self, identifier, ip, netmask, gateway):
-        mac = None
-        for cam in self.cameras:
-            if identifier in [cam["serial_number"], cam["user_defined_name"], cam["mac_address"]]:
-                if mac is not None:
-                    print("Camera identifier is ambiguous")
-                    return -2
-                mac = cam["mac_address"]
-
-        if mac is None:
-            print("No matching camera")
-            return -1
-
-        # print("send rescue to: ", mac, ip, netmask, gateway)
-
-        self.dll.rescue(_tobytes(mac), _tobytes(ip), _tobytes(netmask), _tobytes(gateway))
+PROGNAME = os.path.basename(sys.argv[0])
 
 def handle_list(args):
     ctrl = CameraController()
@@ -401,10 +304,20 @@ def _add_common_argument(parser, a):
                             help=_("assume 'yes' to all security questions"))
 
 def main():
-    parser = argparse.ArgumentParser(description=_("The Imaging Source Gigabit Ethernet camera configuration tool"))
+    TCAM_GIGETOOL_VERSION_DESC = _("tcam-gigetool version:")
+    TCAM_GIGETOOL_REVISION_DESC = _("git revision:")
+    TCAM_VERSION_DESC = _("tcam library version:")
+    fill = max(len(TCAM_GIGETOOL_VERSION_DESC), max(len(TCAM_GIGETOOL_REVISION_DESC), len(TCAM_VERSION_DESC))) + 1
+    version_text = TCAM_GIGETOOL_VERSION_DESC.ljust(fill) + TCAM_GIGETOOL_VERSION + "\n"
+    version_text += TCAM_GIGETOOL_REVISION_DESC.ljust(fill) + TCAM_GIGETOOL_GIT_REVISION + "\n"
+    version_text += TCAM_VERSION_DESC.ljust(fill) + TCAM_VERSION
+    help_text = _("Run '%s <COMMAND> -h' to get help on individual commands." % (PROGNAME))
+    parser = argparse.ArgumentParser(description=_("The Imaging Source Gigabit Ethernet camera configuration tool"),
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog=(help_text + "\n\nVersion information:\n" + version_text))
     subparsers = parser.add_subparsers(help="subcommand-help", dest="cmd")
     parsers = [("list", _("list connected cameras"), "", []),
-               ("info", "show details of a camera", "i", []),
+               ("info", _("show details of a camera"), "i", []),
                ("set", _("permanently set configuration options on the camera"), "i",
                 [
                     ("--ip", str, _("IP address to be set"), False),
@@ -457,9 +370,13 @@ def main():
                 subparser.add_argument(a[0], type=a[1], help=a[2], nargs=nargs)
 
     args = vars(parser.parse_args(sys.argv[1:]))
-    this = sys.modules[__name__]
-    handler = getattr(this, "handle_" + args["cmd"])
-    handler(args)
+    if args["cmd"]:
+        this = sys.modules[__name__]
+        handler = getattr(this, "handle_" + args["cmd"])
+        handler(args)
+    else:
+        print(_("Nothing to do. Run '%s -h' for usage information." % (PROGNAME)))
+
 
 if __name__ == "__main__":
     main()
