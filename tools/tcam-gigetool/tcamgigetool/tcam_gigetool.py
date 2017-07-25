@@ -374,20 +374,25 @@ def handle_info(args):
 
     print("Model:".ljust(16) + cam["model_name"])
     print("Serial:".ljust(16) + cam["serial_number"])
-    print("Firmware:".ljust(16) + cam["firmware_version"])
-    print("UserName:".ljust(16) + cam["user_defined_name"])
+    if cam["is_reachable"]:
+        print("Firmware:".ljust(16) + cam["firmware_version"])
+        print("UserName:".ljust(16) + cam["user_defined_name"])
     print("")
     print("MAC Address:".ljust(30) + cam["mac_address"])
     print("Current IP:".ljust(30) + cam["current_ip"])
     print("Current Netmask:".ljust(30) + cam["current_netmask"])
     print("Current Gateway:".ljust(30) + cam["current_gateway"])
-    print("")
-    print("DHCP is: ".ljust(16) + bool_to_txt(cam["is_dhcp_enabled"]))
-    print("Static is: ".ljust(16) + bool_to_txt(cam["is_static_ip"]))
-    print("")
-    print("Persistent IP:".ljust(30) + cam["persistent_ip"])
-    print("Persistent Netmask:".ljust(30) + cam["persistent_netmask"])
-    print("Persistent Gateway:".ljust(30) + cam["persistent_gateway"])
+    if cam["is_reachable"]:
+        print("")
+        print("DHCP is: ".ljust(16) + bool_to_txt(cam["is_dhcp_enabled"]))
+        print("Static is: ".ljust(16) + bool_to_txt(cam["is_static_ip"]))
+        print("")
+        print("Persistent IP:".ljust(30) + cam["persistent_ip"])
+        print("Persistent Netmask:".ljust(30) + cam["persistent_netmask"])
+        print("Persistent Gateway:".ljust(30) + cam["persistent_gateway"])
+    else:
+        print("\nCamera is currently not reachable.")
+        print("Correctly set the IP configuration of the camera to see more information.")
 
 
 class StoreNameValuePair(argparse.Action):
