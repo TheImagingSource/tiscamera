@@ -58,7 +58,7 @@ private:
     std::shared_ptr<Socket> socket;
 
     /// unique paket id
-    uint64_t requestID;
+    unsigned short requestID;
 
     // flag if we have control over camera
     bool isControlled;

@@ -105,6 +105,10 @@ std::shared_ptr<Socket> Camera::getSocket ()
 int Camera::generateRequestID ()
 {
     this->requestID++;
+    if (this->requestID == 0)
+    {
+        this->requestID++;
+    }
 
     return this->requestID;
 }
