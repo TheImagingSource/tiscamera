@@ -19,6 +19,8 @@ add_executable(camera-ip-conf-cli main.cpp ConsoleManager.cpp)
 
 target_link_libraries(camera-ip-conf-cli tcam-network)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
+
 install(TARGETS camera-ip-conf-cli
   DESTINATION bin
   COMPONENT tcam-camera-ip-conf)

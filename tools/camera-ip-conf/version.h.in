@@ -1,0 +1,7 @@
+#ifndef __VERSION_H__
+#define __VERSION_H__
+
+#define GIT_REVISION "${GIT_BRANCH}/${GIT_COMMIT_HASH} rev: ${GIT_COMMIT_COUNT}"
+#define TCAM_VERSION "${TCAM_VERSION}"
+
+#endif//__VERSION_H__
