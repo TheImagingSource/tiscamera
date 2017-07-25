@@ -483,12 +483,17 @@ int Camera::uploadFirmware (const std::string& filename,
                             const std::string& overrideModelName,
                             std::function<void(int, const std::string&)> progressFunc)
 {
+    FirmwareUpdate::Status retv = FirmwareUpdate::Status::DeviceAccessFailed;
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
 
-    FirmwareUpdate::Status retv = upgradeFirmware(writer,
-                                                  this->packet,
-                                                  filename, overrideModelName,
-                                                  progressFunc);
+    if (getControl())
+    {
+        retv = upgradeFirmware(writer,
+                                                    this->packet,
+                                                    filename, overrideModelName,
+                                                    progressFunc);
+        abandonControl();
+    }
 
     return (int)retv;
 }
