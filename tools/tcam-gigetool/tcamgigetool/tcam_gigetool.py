@@ -66,7 +66,7 @@ def handle_upload(args):
     identifier = args["IDENTIFIER"]
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
     fwupcb = FirmwareUploadCallback()
-    res = ctrl.upload_firmware(identifier, _path, UPLOAD_CALLBACK_FUNC(fwupcb.func))
+    res = ctrl.upload_firmware(identifier, _path, fwupcb.func)
 
     if res != 0:
         print ("Upload failed, result: %d" % (res,))
@@ -90,10 +90,17 @@ class BatchUploadThread(threading.Thread):
                 camctrl, cam, fwpath = self.workqueue.get_nowait()
             except queue.QueueEmpty:
                 break
-            result = camctrl.upload_firmware(cam["serial_number"], fwpath, UPLOAD_CALLBACK_FUNC(self.func))
+            result = camctrl.upload_firmware(cam["serial_number"], fwpath, self.func)
             self.results.append((cam, result, self.progress))
             self.workqueue.task_done()
         self.progress = None
+
+def _tobytes(value):
+    if bytes == str:
+        return bytes(value)
+    else:
+        return bytes(value, "utf-8")
+
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -209,7 +216,7 @@ def handle_batchupload(args):
         for cam in failed:
             print("Uploading to device: %s" % (cam["serial_number"]))
             fwupcb = FirmwareUploadCallback()
-            res = ctrl.upload_firmware(cam["serial_number"], _path, UPLOAD_CALLBACK_FUNC(fwupcb.func))
+            res = ctrl.upload_firmware(cam["serial_number"], _path, fwupcb.func)
 
             if res != 0:
                 print ("Upload failed, result: %d" % (res,))

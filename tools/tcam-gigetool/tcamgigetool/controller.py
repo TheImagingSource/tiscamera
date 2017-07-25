@@ -1,3 +1,4 @@
+import os
 from ctypes import *
 
 MAX_CAMERAS = 64
@@ -77,7 +78,7 @@ class CameraController:
                                                        _tobytes(key), value)
 
     def upload_firmware(self, identifier, _path, callback):
-        return self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), callback)
+        return self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), UPLOAD_CALLBACK_FUNC(callback))
 
     def get_camera_details(self, identifier):
         cam = TcamCamera()
