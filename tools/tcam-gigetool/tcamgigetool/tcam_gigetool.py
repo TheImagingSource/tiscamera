@@ -27,18 +27,21 @@ PROGNAME = os.path.basename(sys.argv[0])
 def handle_list(args):
     ctrl = CameraController()
     ctrl.discover()
+    ifaces = frozenset([x["interface_name"] for x in ctrl.cameras])
     lst = sorted(ctrl.cameras, key=itemgetter("model_name"))
     lst = sorted(lst, key=itemgetter("serial_number"))
     lst = sorted(lst, key=itemgetter("user_defined_name"))
-    lst = sorted(lst, key=itemgetter("interface_name"))
 
-    for cam in lst:
-        s = (cam["model_name"].ljust(20) +
-             cam["serial_number"].ljust(10) +
-             cam["user_defined_name"].ljust(20) +
-             cam["current_ip"].ljust(17) +
-             cam["interface_name"].ljust(12))
-        print(s)
+    for iface in ifaces:
+        print(("-"*10) + " Interface: " + iface + " [%s]" % (get_ip_address(iface)) + " " + "-" * 10)
+        for cam in lst:
+            if cam["interface_name"] == iface:
+                s = (cam["model_name"].ljust(20) +
+                        cam["serial_number"].ljust(10) +
+                        cam["user_defined_name"].ljust(20) +
+                        cam["current_ip"].ljust(17) +
+                        cam["interface_name"].ljust(12))
+                print(s)
 
 def handle_rescue(args):
     ctrl = CameraController()
