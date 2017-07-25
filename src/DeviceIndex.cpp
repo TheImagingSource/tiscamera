@@ -144,6 +144,7 @@ void DeviceIndex::update_device_list ()
     device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
 
     have_list = true;
+    wait_for_list.notify_all();
 }
 
 
@@ -203,13 +204,14 @@ bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 
 std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 {
+    std::unique_lock<std::mutex> lock(mtx);
 
     // wait for work_thread to deliver first valid list
     // since get_aravis_device_list is a blocking function
     // our thread would retrieve an empty list without this wait loop
-    while(!have_list)
+    if (!have_list)
     {
-        // wait
+        wait_for_list.wait_for(lock, std::chrono::seconds(wait_period));
     }
 
     return device_list;
