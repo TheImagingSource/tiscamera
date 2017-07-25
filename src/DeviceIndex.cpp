@@ -210,6 +210,7 @@ std::vector<DeviceInfo> DeviceIndex::get_device_list () const
     while(!have_list)
     {
         // wait
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     return device_list;
