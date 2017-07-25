@@ -602,9 +602,10 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
         struct udev_device* parent_device = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
 
+        /* skip this device if we can't get the usb parent */
         if (!parent_device)
         {
-            return device_list;
+            continue;
         }
 
         /* From here, we can call get_sysattr_value() for each file
