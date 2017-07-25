@@ -25,19 +25,40 @@ _ = gettext.gettext
 PROGNAME = os.path.basename(sys.argv[0])
 
 def handle_list(args):
+    def trans_reachable(cam, x):
+        if x:
+            return "Yes"
+        else:
+            return "No"
+    def trans_flag(cam, x):
+        if not cam["is_reachable"]:
+            return "?"
+        if x:
+            return "On"
+        else:
+            return "Off"
+    def trans_str(cam, x):
+        return str(x)
+    def trans_rstr(cam, x):
+        if not cam["is_reachable"]:
+            return "?"
+        return str(x)
+
     namemap = {
-        "m": ("model_name", _("Model Name"), 20),
-        "s": ("serial_number", _("Serial Number"), 16),
-        "u": ("user_defined_name", _("User Defined Name"), 20),
-        "i": ("current_ip", _("Current IP"), 17),
-        "n": ("current_netmask", _("Current Netmask"), 17),
-        "g": ("current_gateway", _("Current Gateway"), 17),
-        "I": ("permanent_ip", _("Permanent IP"), 17),
-        "N": ("permanent_netmask", _("Permanent Netmask"), 17),
-        "G": ("permanent_gateway", _("Permanent Gateway"), 17),
-        "f": ("interface_name", _("Interface"), 12),
-        "d": ("is_dhcp_enabled", _("DHCP"), 6),
-        "S": ("is_static_ip", _("Static"), 8)
+        "m": ("model_name", _("Model Name"), 20, trans_str),
+        "s": ("serial_number", _("Serial Number"), 16, trans_str),
+        "u": ("user_defined_name", _("User Defined Name"), 20, trans_rstr),
+        "i": ("current_ip", _("Current IP"), 17, trans_str),
+        "n": ("current_netmask", _("Current Netmask"), 17, trans_str),
+        "g": ("current_gateway", _("Current Gateway"), 17, trans_str),
+        "I": ("persistent_ip", _("Persistent IP"), 17, trans_rstr),
+        "N": ("persistent_netmask", _("Persistent Netmask"), 17, trans_rstr),
+        "G": ("persistent_gateway", _("Persistent Gateway"), 17, trans_rstr),
+        "f": ("interface_name", _("Interface"), 12, trans_str),
+        "d": ("is_dhcp_enabled", _("DHCP"), 6, trans_flag),
+        "S": ("is_static_ip", _("Static"), 8, trans_flag),
+        "M": ("mac_address", _("MAC Address"), 18, trans_str),
+        "r": ("is_reachable", _("Reachable"), 10, trans_reachable)
     }
     ctrl = CameraController()
     ctrl.discover()
@@ -60,9 +81,13 @@ def handle_list(args):
                 i += 1
                 c = fmt_string[i]
                 if c in namemap:
-                    s += namemap[c][1].center(namemap[c][2]) + " | "
+                    s += namemap[c][1].center(namemap[c][2])
+                    if fmt_string[i:].find("%") > 0:
+                        s += " | "
                 else:
                     s += " "
+            else:
+                s += " "
             i += 1
         if twidth is None:
             twidth = len(s)-1
@@ -84,9 +109,14 @@ def handle_list(args):
                         i += 1
                         c = fmt_string[i]
                         if c in namemap:
-                            s += cam[namemap[c][0]].ljust(namemap[c][2]) + " | "
+                            val = namemap[c][3](cam, cam[namemap[c][0]])
+                            s += val.ljust(namemap[c][2])
+                            if fmt_string[i:].find("%") > 0:
+                                s += " | "
                         else:
                             s += c
+                    else:
+                        s += c
                     i += 1
                 print(s)
         print("")
