@@ -64,6 +64,12 @@ def handle_upload(args):
     ctrl.discover()
 
     identifier = args["IDENTIFIER"]
+
+    cam = ctrl.get_camera_details(identifier)
+    if cam["is_busy"]:
+        raise RuntimeError("Camera '%s' is already controlled by a different application" %
+                            (cam["serial_number"]))
+
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
     fwupcb = FirmwareUploadCallback()
     res = ctrl.upload_firmware(identifier, _path, fwupcb.func)
@@ -129,6 +135,11 @@ def handle_batchupload(args):
     cameras = []
     for cam in ctrl.cameras:
         if cam["interface_name"] == iface:
+            if cam["is_reachable"]:
+                camdet = ctrl.get_camera_details(cam["serial_number"])
+                if camdet["is_busy"]:
+                    print("The camera '%s' is busy. Aborting." % (cam["serial_number"]))
+                    return
             cameras.append(cam)
 
     if not cameras:
@@ -157,10 +168,13 @@ def handle_batchupload(args):
     print("Rediscovering cameras")
     del ctrl
     ctrl = CameraController()
-    ctrl.discover()
+    ctrl.discover(True)
     cameras = []
     for cam in ctrl.cameras:
         if cam["interface_name"] == iface:
+            if cam["is_busy"]:
+                raise RuntimeError("Camera '%s' is already controlled by a different application" %
+                                    (cam["serial_number"]))
             cameras.append(cam)
 
     print("Starting Threads...")

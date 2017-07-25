@@ -19,7 +19,7 @@ class TcamCamera(Structure):
                 ("is_static_ip", c_int),
                 ("is_dhcp_enabled", c_int),
                 ("is_reachable", c_int),
-                ("is_controllable", c_int)
+                ("is_busy", c_int)
     ]
 
 DISCOVER_CALLBACK_FUNC = CFUNCTYPE(None, TcamCamera)

@@ -48,6 +48,7 @@ void copy_to_tcam(struct tcam_camera *tcam, std::shared_ptr<Camera> camera, int 
     COPY_STRING(tcam->interface_name, camera->getNetworkInterfaceName().c_str());
     COPY_STRING(tcam->mac_address, camera->getMAC().c_str());
     tcam->is_reachable = camera->isReachable();
+    tcam->is_busy = camera->getIsBusy();
     if (tcam->is_reachable && get_persistent_values){
         COPY_STRING(tcam->persistent_ip, camera->getPersistentIP().c_str());
         COPY_STRING(tcam->persistent_netmask, camera->getPersistentSubnet().c_str());

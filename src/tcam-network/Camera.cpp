@@ -546,9 +546,18 @@ bool Camera::abandonControl ()
     return retv;
 }
 
-bool Camera::getIsControlled()
+bool Camera::getIsBusy()
 {
-    return this->isControlled;
+    if (isControlled)
+        return false;
+
+    bool retv = true;
+    if(getControl())
+    {
+        retv = false;
+        abandonControl();
+    }
+    return retv;
 }
 
 

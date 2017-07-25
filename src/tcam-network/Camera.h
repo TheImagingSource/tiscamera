@@ -192,7 +192,14 @@ public:
     /// @return true on success
     bool abandonControl();
 
-    bool getIsControlled();
+    /// @name isBusy
+    /// @brief returns true if camera is controlled by another application
+    /// @return true if busy
+    ///
+    /// !!! The return value is for informational purposes only since the
+    /// camera could be locked by another application immediately after this
+    /// call returns
+    bool getIsBusy();
 
     /// @name sendReadMemory
     /// @param address - address that shall be read

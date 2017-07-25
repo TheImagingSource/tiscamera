@@ -29,7 +29,7 @@ extern "C"
         int is_static_ip;
         int is_dhcp_enabled;
         int is_reachable;
-        int is_controllable;
+        int is_busy;
     };
 
     void init(void);
