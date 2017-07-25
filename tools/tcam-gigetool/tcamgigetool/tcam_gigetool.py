@@ -25,6 +25,20 @@ _ = gettext.gettext
 PROGNAME = os.path.basename(sys.argv[0])
 
 def handle_list(args):
+    namemap = {
+        "m": ("model_name", _("Model Name"), 20),
+        "s": ("serial_number", _("Serial Number"), 16),
+        "u": ("user_defined_name", _("User Defined Name"), 20),
+        "i": ("current_ip", _("Current IP"), 17),
+        "n": ("current_netmask", _("Current Netmask"), 17),
+        "g": ("current_gateway", _("Current Gateway"), 17),
+        "I": ("permanent_ip", _("Permanent IP"), 17),
+        "N": ("permanent_netmask", _("Permanent Netmask"), 17),
+        "G": ("permanent_gateway", _("Permanent Gateway"), 17),
+        "f": ("interface_name", _("Interface"), 12),
+        "d": ("is_dhcp_enabled", _("DHCP"), 6),
+        "S": ("is_static_ip", _("Static"), 8)
+    }
     ctrl = CameraController()
     ctrl.discover()
     ifaces = frozenset([x["interface_name"] for x in ctrl.cameras])
@@ -32,16 +46,50 @@ def handle_list(args):
     lst = sorted(lst, key=itemgetter("serial_number"))
     lst = sorted(lst, key=itemgetter("user_defined_name"))
 
-    for iface in ifaces:
-        print(("-"*10) + " Interface: " + iface + " [%s]" % (get_ip_address(iface)) + " " + "-" * 10)
+    fmt_string = args["format"]
+    if not fmt_string:
+        fmt_string = "%m%s%u%i"
+
+    twidth = None
+    for iface in sorted(ifaces):
+        s = ""
+        i = 0
+        while i < len(fmt_string):
+            c = fmt_string[i]
+            if c == "%":
+                i += 1
+                c = fmt_string[i]
+                if c in namemap:
+                    s += namemap[c][1].center(namemap[c][2]) + " | "
+                else:
+                    s += " "
+            i += 1
+        if twidth is None:
+            twidth = len(s)-1
+        ifacedesc = " Interface: " + iface + " [%s]" % (get_ip_address(iface)) + " "
+        print("")
+        print(ifacedesc.center(twidth, "-"))
+        print("")
+        print(s)
+
         for cam in lst:
             if cam["interface_name"] == iface:
-                s = (cam["model_name"].ljust(20) +
-                        cam["serial_number"].ljust(10) +
-                        cam["user_defined_name"].ljust(20) +
-                        cam["current_ip"].ljust(17) +
-                        cam["interface_name"].ljust(12))
+                s = ""
+                i = 0
+                if cam["is_reachable"]:
+                    cam = ctrl.get_camera_details(cam["serial_number"])
+                while i < len(fmt_string):
+                    c = fmt_string[i]
+                    if c == "%":
+                        i += 1
+                        c = fmt_string[i]
+                        if c in namemap:
+                            s += cam[namemap[c][0]].ljust(namemap[c][2]) + " | "
+                        else:
+                            s += c
+                    i += 1
                 print(s)
+        print("")
 
 def handle_rescue(args):
     ctrl = CameraController()
@@ -340,7 +388,8 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog=(help_text + "\n\nVersion information:\n" + version_text))
     subparsers = parser.add_subparsers(help="subcommand-help", dest="cmd")
-    parsers = [("list", _("list connected cameras"), "", []),
+    parsers = [("list", _("list connected cameras"), "", 
+                [("--format", str, "Format of list", False, "?")]),
                ("info", _("show details of a camera"), "i", []),
                ("set", _("permanently set configuration options on the camera"), "i",
                 [
