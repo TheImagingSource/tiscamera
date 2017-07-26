@@ -484,30 +484,6 @@ static gboolean camera_has_only_bayer (GstTcamBin* self)
 }
 
 
-static void gst_caps_change_name (GstCaps* caps, const char* name)
-{
-    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
-    {
-        GstStructure* struc = gst_caps_get_structure(caps, i);
-
-        if (struc != nullptr)
-        {
-            gst_structure_set_name(struc, name);
-            gst_structure_remove_field(struc, "format");
-        }
-    }
-}
-
-
-static GstCaps* bayer_transform_intersect (GstCaps* bayer, GstCaps* raw)
-{
-    GstCaps* caps2 = gst_caps_copy(raw);
-    gst_caps_change_name(caps2, "video/x-bayer");
-    GstCaps* caps1 = gst_caps_intersect(bayer, caps2);
-    return caps1;
-}
-
-
 static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* self,
                                                                   const GstCaps* available_caps,
                                                                   const GstCaps* wanted,

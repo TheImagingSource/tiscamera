@@ -136,6 +136,30 @@ bool tcam_gst_fixate_caps (GstCaps* caps)
 }
 
 
+void gst_caps_change_name (GstCaps* caps, const char* name)
+{
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (struc != nullptr)
+        {
+            gst_structure_set_name(struc, name);
+            gst_structure_remove_field(struc, "format");
+        }
+    }
+}
+
+
+GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw)
+{
+    GstCaps* caps2 = gst_caps_copy(raw);
+    gst_caps_change_name(caps2, "video/x-bayer");
+    GstCaps* caps1 = gst_caps_intersect((GstCaps*)bayer, caps2);
+    return caps1;
+}
+
+
 GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 {
     int largest_index = -1;

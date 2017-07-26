@@ -46,6 +46,18 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc);
 bool tcam_gst_fixate_caps (GstCaps* caps);
 
 
+/**
+ * Change the name of the given caps to name
+ */
+void gst_caps_change_name (GstCaps* caps, const char* name);
+
+
+/**
+ * Create intersecting caps between bayer and gst_caps_change_name(raw, "video/x-bayer")
+ */
+GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw);
+
+
 GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming);
 
 // bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, tcam_image_buffer* buf);
