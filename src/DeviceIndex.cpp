@@ -108,6 +108,33 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
 }
 
 
+void DeviceIndex::sort_device_list ()
+{
+    /*
+      Sorting of devices shall create the following order:
+
+      local before remote/network meaing v4l2, libusb, aravis
+      sorted after user defined names
+      sorted serials, if no name is given
+     */
+
+    auto compareDeviceInfo = [] (const DeviceInfo& info1, const DeviceInfo& info2)
+        {
+            if (info1.get_device_type() >= info2.get_device_type())
+            {
+                if (info1.get_serial() > info2.get_serial())
+                {
+                    return false;
+                }
+
+            }
+            return true;
+        };
+
+    std::sort(device_list.begin(), device_list.end(), compareDeviceInfo);
+}
+
+
 void DeviceIndex::update_device_list ()
 {
     std::vector<DeviceInfo> tmp_dev_list = std::vector<DeviceInfo>();
@@ -142,6 +169,8 @@ void DeviceIndex::update_device_list ()
     device_list.clear();
 
     device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
+
+    sort_device_list();
 
     have_list = true;
 }

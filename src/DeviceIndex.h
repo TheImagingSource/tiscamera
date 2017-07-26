@@ -105,6 +105,8 @@ private:
 
     std::vector<callback_data> callbacks;
 
+    void sort_device_list ();
+
     void update_device_list ();
 
     void run ();
