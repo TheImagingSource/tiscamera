@@ -18,7 +18,7 @@ import argparse
 from operator import itemgetter
 
 from .version import TCAM_VERSION, TCAM_GIGETOOL_VERSION, TCAM_GIGETOOL_GIT_REVISION
-from .controller import CameraController
+from .controller import CameraController, CameraNotFoundError
 
 _ = gettext.gettext
 
@@ -146,12 +146,21 @@ def handle_upload(args):
 
     identifier = args["IDENTIFIER"]
 
+    cam = get_camera(identifier, ctrl.cameras)
+    if not cam:
+        raise CameraNotFoundError
+
+    if not cam["is_reachable"]:
+        print(_("The camera is not reachable with the current IP configuration. Aborting."))
+        return
+
     cam = ctrl.get_camera_details(identifier)
     if cam["is_busy"]:
         raise RuntimeError("Camera '%s' is already controlled by a different application" %
                             (cam["serial_number"]))
 
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
+    check_fwpath(_path)
     fwupcb = FirmwareUploadCallback()
     res = ctrl.upload_firmware(identifier, _path, fwupcb.func)
 
@@ -187,6 +196,21 @@ def _tobytes(value):
         return bytes(value)
     else:
         return bytes(value, "utf-8")
+
+def get_camera(identifier, lst):
+    ret = None
+    for cam in lst:
+        if cam["serial_number"] == identifier:
+            ret = cam
+        elif cam["user_defined_name"] == identifier:
+            ret = cam
+        elif cam["mac_address"] == identifier:
+            ret = cam
+    return ret
+
+def check_fwpath(_path):
+    if not os.path.isfile(_path):
+        raise IOError("Invalid file: '%s" % (_path))
 
 def is_reachable(cam):
     if 0:
@@ -234,6 +258,7 @@ def handle_batchupload(args):
 
     iface = args["INTERFACE"]
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
+    check_fwpath(_path)
 
     cameras = []
     for cam in ctrl.cameras:
@@ -352,6 +377,9 @@ def handle_set(args):
 
     ctrl = CameraController()
     ctrl.discover()
+
+    if not get_camera(identifier, ctrl.cameras):
+        raise CameraNotFoundError
 
     res = None
 
@@ -503,7 +531,12 @@ def main():
     if args["cmd"]:
         this = sys.modules[__name__]
         handler = getattr(this, "handle_" + args["cmd"])
-        handler(args)
+        try:
+            handler(args)
+        except CameraNotFoundError:
+            print(_("Could not find camera '%s'. Aborting." % (args["IDENTIFIER"])))
+        except OSError as e:
+            print(e)
     else:
         print(_("Nothing to do. Run '%s -h' for usage information." % (PROGNAME)))
 

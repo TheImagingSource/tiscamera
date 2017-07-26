@@ -3,6 +3,9 @@ from ctypes import *
 
 MAX_CAMERAS = 64
 
+class CameraNotFoundError(Exception):
+    pass
+
 class TcamCamera(Structure):
     _fields_ = [("model_name", c_char * 64),
                 ("serial_number", c_char * 64),
@@ -78,12 +81,36 @@ class CameraController:
                                                        _tobytes(key), value)
 
     def upload_firmware(self, identifier, _path, callback):
-        return self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), UPLOAD_CALLBACK_FUNC(callback))
+        ret = self.dll.upload_firmware(_tobytes(identifier), _tobytes(_path), UPLOAD_CALLBACK_FUNC(callback))
+        if ret == -1:
+            raise RuntimeError("DeviceNotRecognized")
+        elif ret == -2:
+            raise RuntimeError("DeviceSupportsFwOnly")
+        elif ret == -3:
+            raise IOError("File not found or corrupt")
+        elif ret == -4:
+            raise RuntimeError("NoMatchFoundInPackage")
+        elif ret == -5:
+            raise RuntimeError("WriteError")
+        elif ret == -6:
+            raise RuntimeError("WriteVerificationError")
+        elif ret == -7:
+            raise RuntimeError("DeviceAccessFailed")
+        elif ret == -8:
+            raise RuntimeError("MotorFirmwareUpdateFailed")
+        elif ret == -9:
+            raise RuntimeError("FocusTableUpdateFailed")
+        elif ret == -10:
+            raise RuntimeError("MachXO2UpdateFailed")
+        return ret
 
     def get_camera_details(self, identifier):
-        cam = TcamCamera()
-        self.dll.get_camera_details(_tobytes(identifier), byref(cam))
-        return self.__getdict(cam)
+        tcam = TcamCamera()
+        self.dll.get_camera_details(_tobytes(identifier), byref(tcam))
+        cam = self.__getdict(tcam)
+        if not cam["serial_number"]:
+            raise CameraNotFoundError("No such camera: '%s'" % (identifier))
+        return cam
 
     def rescue(self, identifier, ip, netmask, gateway):
         mac = None
@@ -95,9 +122,6 @@ class CameraController:
                 mac = cam["mac_address"]
 
         if mac is None:
-            print("No matching camera")
-            return -1
-
-        # print("send rescue to: ", mac, ip, netmask, gateway)
+            raise CameraNotFoundError("No such camera: '%s'" % (identifier))
 
         self.dll.rescue(_tobytes(mac), _tobytes(ip), _tobytes(netmask), _tobytes(gateway))
