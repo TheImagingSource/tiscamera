@@ -370,9 +370,7 @@ def _parsebool(value):
     return 0
 
 def handle_set(args):
-    KEYS = ["ip", "netmask", "gateway", "name", "dhcp", "static"]
-    EXCLUSIVE = ["dhcp", "static"]
-    BOOLARGS = ["dhcp", "static"]
+    KEYS = ["ip", "netmask", "gateway", "name", "mode"]
     identifier = args["IDENTIFIER"]
 
     ctrl = CameraController()
@@ -391,19 +389,28 @@ def handle_set(args):
         value = args[key]
         sys.stdout.write(str(value))
 
-        if key in EXCLUSIVE and value:
-            for excl in EXCLUSIVE:
-                if excl != key:
-                    args[excl] = False
-                    KEYS.append(excl)
-                    note = "(disabling '%s' because '%s' is enabled)" % (excl, key)
-
-        res = ctrl.set_persistent_parameter(identifier, key, value)
-        if res != 0:
-            print(" -> FAILED")
-            break
+        if key == "mode":
+            if args["mode"] == "dhcp":
+                res = ctrl.set_persistent_parameter(identifier, "dhcp", 1)
+                res = ctrl.set_persistent_parameter(identifier, "static", 0)
+                print(" -> OK")
+            elif args["mode"] == "static":
+                res = ctrl.set_persistent_parameter(identifier, "dhcp", 0)
+                res = ctrl.set_persistent_parameter(identifier, "static", 1)
+                print(" -> OK")
+            elif args["mode"] == "linklocal":
+                res = ctrl.set_persistent_parameter(identifier, "dhcp", 0)
+                res = ctrl.set_persistent_parameter(identifier, "static", 0)
+                print(" -> OK")
+            else:
+                raise RuntimeError("Invalid mode")
         else:
-            print(" -> OK " + note)
+            res = ctrl.set_persistent_parameter(identifier, key, value)
+            if res != 0:
+                print(" -> FAILED")
+                break
+            else:
+                print(" -> OK " + note)
 
     if res is None:
         print("Nothing to set.")
@@ -476,28 +483,31 @@ def main():
 
     subparser = subparsers.add_parser("list", help=_("list connected cameras"))
     subparser.add_argument("--format", type=str, help=_("Format of list"), required=False, nargs="?")
-    subparser = subparsers.add_parser("info", _("show details of a camera"))
+    subparser = subparsers.add_parser("info", help=_("show details of a camera"))
     _add_common_argument(subparser, "i")
-    subparser = subparsers.add_parser("set", _("permanently set configuration options on the camera"))
+    subparser = subparsers.add_parser("set", help=_("permanently set configuration options on the camera"))
     _add_common_argument(subparser, "i")
     subparser.add_argument("--ip", type=str, help=_("IP address to be set"), required=False)
-    subparser.add_argument("--netmask", tye=str, help=_("netmask to be set"), required=False)
+    subparser.add_argument("--netmask", type=str, help=_("netmask to be set"), required=False)
     subparser.add_argument("--gateway", type=str, help=_("gateway address to be set"), required=False)
-    subparser.add_argument("--name", type=str, _("set a user defined name"), required=False)
+    subparser.add_argument("--mode", type=str,
+                           help=_("IP configuration mode to be set"), required=False,
+                           choices=["dhcp", "static", "linklocal"])
+    subparser.add_argument("--name", type=str, help=_("set a user defined name"), required=False)
     subparser = subparsers.add_parser("rescue", help=_("remporarily set IP configuration on the camera"))
     _add_common_argument(subparser, "i")
     subparser.add_argument("--ip", type=str, help=_("temporary IP address to be assigned"), required=True)
     subparser.add_argument("--netmask", type=str, help=_("temporary netmask to be assigned"), required=True)
-    subparser.add_argument("--gateway", type=str, _("temporary gateway address to be assigned"), required=True)
+    subparser.add_argument("--gateway", type=str, help=_("temporary gateway address to be assigned"), required=True)
     subparser = subparsers.add_parser("upload", help=_("upload a firmware file to the camera"))
     _add_common_argument(subparser, "i")
     _add_common_argument(subparser, "y")
-    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"), required=True)
+    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
     subparser = subparsers.add_parser("batchupload",
                                       help=_("upload a firmeare file to all cameras connected to a network interface"))
     _add_common_argument(subparser, "y")
-    subparser.add_argument("INTERFACE", type=str, help=_("network interface to scan for cameras"), required=True)
-    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"), required=True)
+    subparser.add_argument("INTERFACE", type=str, help=_("network interface to scan for cameras"))
+    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
     subparser.add_argument("-n", "--noconfigure", type=bool,
                            help=_("do not auto-configure IP addresses before upload"), required=False)
     subparser.add_argument("-b", "--baseaddress", type=str,
