@@ -26,12 +26,12 @@ PROGNAME = os.path.basename(sys.argv[0])
 
 def handle_list(args):
     def trans_reachable(cam, x):
-        if x:
+        if is_reachable(cam):
             return "Yes"
         else:
             return "No"
     def trans_flag(cam, x):
-        if not cam["is_reachable"]:
+        if not is_reachable(cam):
             return "?"
         if x:
             return "On"
@@ -40,7 +40,7 @@ def handle_list(args):
     def trans_str(cam, x):
         return str(x)
     def trans_rstr(cam, x):
-        if not cam["is_reachable"]:
+        if not is_reachable(cam):
             return "?"
         return str(x)
 
@@ -101,7 +101,7 @@ def handle_list(args):
             if cam["interface_name"] == iface:
                 s = ""
                 i = 0
-                if cam["is_reachable"]:
+                if is_reachable(cam):
                     cam = ctrl.get_camera_details(cam["serial_number"])
                 while i < len(fmt_string):
                     c = fmt_string[i]
@@ -188,6 +188,16 @@ def _tobytes(value):
     else:
         return bytes(value, "utf-8")
 
+def is_reachable(cam):
+    iface_ip = get_ip_address(cam["interface_name"])
+    iface_netmask = get_netmask(cam["interface_name"])
+    return address_in_network(iface_ip, cam["current_ip"], iface_netmask)
+
+def address_in_network(iface_ip, net_ip, netmask):
+   ipaddr = struct.unpack('<L', socket.inet_aton(iface_ip))[0]
+   netaddr = struct.unpack('<L', socket.inet_aton(net_ip))[0]
+   netmask = struct.unpack('<L', socket.inet_aton(netmask))[0]
+   return ipaddr & netmask == netaddr & netmask
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -196,6 +206,15 @@ def get_ip_address(ifname):
         0x8915,  # SIOCGIFADDR
         struct.pack('256s', _tobytes(ifname[:15]))
     )[20:24])
+
+def get_netmask(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x891b,  # SIOCGIFNETMASK
+        struct.pack('256s', _tobytes(ifname[:15]))
+    )[20:24])
+
 
 def batchrescue(ctrl, cameras, baseip):
     ip_a, ip_b, ip_c, ip_d = baseip
@@ -216,7 +235,7 @@ def handle_batchupload(args):
     cameras = []
     for cam in ctrl.cameras:
         if cam["interface_name"] == iface:
-            if cam["is_reachable"]:
+            if is_reachable(cam):
                 camdet = ctrl.get_camera_details(cam["serial_number"])
                 if camdet["is_busy"]:
                     print("The camera '%s' is busy. Aborting." % (cam["serial_number"]))
@@ -374,7 +393,7 @@ def handle_info(args):
 
     print("Model:".ljust(16) + cam["model_name"])
     print("Serial:".ljust(16) + cam["serial_number"])
-    if cam["is_reachable"]:
+    if is_reachable(cam):
         print("Firmware:".ljust(16) + cam["firmware_version"])
         print("UserName:".ljust(16) + cam["user_defined_name"])
     print("")
@@ -382,7 +401,7 @@ def handle_info(args):
     print("Current IP:".ljust(30) + cam["current_ip"])
     print("Current Netmask:".ljust(30) + cam["current_netmask"])
     print("Current Gateway:".ljust(30) + cam["current_gateway"])
-    if cam["is_reachable"]:
+    if is_reachable(cam):
         print("")
         print("DHCP is: ".ljust(16) + bool_to_txt(cam["is_dhcp_enabled"]))
         print("Static is: ".ljust(16) + bool_to_txt(cam["is_static_ip"]))
