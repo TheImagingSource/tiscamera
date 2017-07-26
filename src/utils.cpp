@@ -111,7 +111,6 @@ std::vector<double> tcam::create_steps_for_range (double min, double max)
 
     while (current_step < max)
     {
-        vec.push_back(current_step);
 
         if (current_step < 20.0)
         {
@@ -128,6 +127,10 @@ std::vector<double> tcam::create_steps_for_range (double min, double max)
         else
         {
             current_step += 100.0;
+        }
+        if (current_step < max)
+        {
+            vec.push_back(current_step);
         }
     }
 
