@@ -287,29 +287,30 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const TiXmlElement& uploa
     {
         if (attr->Name() == std::string("File"))
         {
-            if (!item.Data.empty())
+            if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
-            item.Data = FirmwarePackage::extractFile(packageFileName_, attr->Value());
-            if (item.Data.empty())
+            item.Data = ExtractFile( attr->Value() );
+            if (item.Data->empty())
             {
                 int a = 0;
             }
         }
         else if (attr->Name() == std::string("String"))
         {
-            if (!item.Data.empty())
+            if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
             auto str = attr->ValueStr();
-            item.Data.resize(str.length());
-            memcpy(item.Data.data(), str.data(), str.length());
+            item.Data = std::make_shared<std::vector<uint8_t>>();
+            item.Data->resize(str.length());
+            memcpy(item.Data->data(), str.data(), str.length());
         }
         else if (attr->Name() == std::string("U32"))
         {
-            if (!item.Data.empty())
+            if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
@@ -318,8 +319,9 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const TiXmlElement& uploa
             {
                 return Status::InvalidFile;
             }
-            item.Data.resize( sizeof(data) );
-            memcpy( item.Data.data(), &data, sizeof(data) );
+            item.Data = std::make_shared<std::vector<uint8_t>>();
+            item.Data->resize( sizeof(data) );
+            memcpy( item.Data->data(), &data, sizeof(data) );
         }
         else
         {
@@ -335,7 +337,7 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const TiXmlElement& uploa
     auto len = item.Params.find("Length");
     if (len != item.Params.end())
     {
-        item.Data.resize( len->second, 0 );
+        item.Data->resize( len->second, 0 );
     }
 
     return Status::Success;
@@ -353,4 +355,14 @@ std::shared_ptr<GigE3::IDevicePort> GigE3::Package::CreateDevicePort (const std:
         return std::make_shared<GigE3::DevicePortMachXO2>();
     }
     return nullptr;
+}
+
+std::shared_ptr<std::vector<uint8_t>> GigE3::Package::ExtractFile( const std::string& fileName )
+{
+    auto& cached = file_data_cache_[fileName];
+    if( cached == nullptr )
+    {
+        cached = std::make_shared<std::vector<uint8_t>>( FirmwarePackage::extractFile(packageFileName_, fileName) );
+    }
+    return cached;
 }

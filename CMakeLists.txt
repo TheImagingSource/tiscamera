@@ -31,6 +31,36 @@ set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 # version number for gobject introspection API
 set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
 
+# Version number for tcam_gigetool
+set(TCAM_GIGETOOL_VERSION "1.0" CACHE STRING "Version number for tcam_gigetool")
+
+# Generate a git revision description
+#
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+#
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+#
+# Get commit count
+execute_process(
+  COMMAND git rev-list --count HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_COUNT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
 

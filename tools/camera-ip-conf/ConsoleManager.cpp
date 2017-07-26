@@ -241,6 +241,12 @@ void writeChanges (std::shared_ptr<Camera> camera,
 int isAccessible (const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
+
+    return isAccessible(camera);
+}
+
+int isAccessible (std::shared_ptr<Camera> camera)
+{
     int ret = false;
 
     if (camera == NULL)
@@ -272,6 +278,11 @@ void setCamera (const std::vector<std::string>& args)
     if (camera == NULL)
     {
         std::cout << "No camera found." << std::endl;
+        return;
+    }
+
+    if (!isAccessible(camera))
+    {
         return;
     }
 
@@ -511,6 +522,11 @@ void upgradeFirmware (const std::vector<std::string>& args)
     if (camera == NULL)
     {
         std::cout << "No camera found." << std::endl;
+        return;
+    }
+
+    if (!isAccessible(camera))
+    {
         return;
     }
 

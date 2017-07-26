@@ -18,6 +18,7 @@
 
 #include <map>
 #include <vector>
+#include <memory>
 #include <stdint.h>
 
 typedef uint8_t byte;
@@ -30,7 +31,7 @@ namespace GigE3
 
 struct UploadItem
 {
-    std::vector<byte> Data;
+    std::shared_ptr<std::vector<byte>> Data;
     std::map<std::string, uint32_t> Params;
 }; /*struct UploadItem */
 

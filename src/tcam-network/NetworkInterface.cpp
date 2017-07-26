@@ -24,8 +24,8 @@
 
 namespace tis
 {
-    NetworkInterface::NetworkInterface (const struct ifaddrs* _addrs)
-        : name(), flags(_addrs->ifa_flags), addr(), netmask(0)
+    NetworkInterface::NetworkInterface (const struct ifaddrs* _addrs, int timeout)
+        : name(), flags(_addrs->ifa_flags), addr(), netmask(0), timeout_ms(timeout)
     {
         if (_addrs->ifa_name != NULL)
         {
@@ -67,7 +67,7 @@ namespace tis
         socka.sin_addr = address;
         socka.sin_port = 0;
 
-        auto s = std::shared_ptr<Socket>(new Socket(socka));
+        auto s = std::shared_ptr<Socket>(new Socket(socka, timeout_ms));
 
         return s;
     }

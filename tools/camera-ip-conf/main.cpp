@@ -24,6 +24,8 @@
 
 #include <libgen.h>
 
+#include "version.h"
+
 using namespace tis;
 
 
@@ -71,6 +73,10 @@ void printHelp (char *execName)
               << "  on the same subnet:\n\n"
               << "    " << execName << " set ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n"
               << std::endl;
+
+    std::cout << "Version Information:\n\n"
+              << "git revision: " << GIT_REVISION << std::endl;
+    std::cout << "tcam lib version: " << TCAM_VERSION << std::endl;
 }
 
 
@@ -117,10 +123,6 @@ void handleCommandlineArguments (const int argc, char* argv[])
                     std::cout << "Not enough arguments." << std::endl;
                     return;
                 }
-                if (!isAccessible(args))
-                {
-                    return;
-                }
                 setCamera(args);
                 break;
             }
@@ -134,10 +136,6 @@ void handleCommandlineArguments (const int argc, char* argv[])
             }
             else if (arg.compare("upload") == 0)
             {
-                if (!isAccessible(args))
-                {
-                    return;
-                }
                 upgradeFirmware(args);
                 break;
             }

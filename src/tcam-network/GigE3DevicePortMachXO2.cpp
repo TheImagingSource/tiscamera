@@ -42,7 +42,7 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems (const std::vector<U
 
     for (auto&& i : items)
     {
-        auto jedec = MachXO2::JedecFile::Parse( i.Data );
+        auto jedec = MachXO2::JedecFile::Parse( *i.Data );
 
         // If the data is not valid jedec, the device type should not be detectable
         if (jedec.deviceType() == MachXO2::DeviceType::MachXO2_Unknown)
@@ -201,7 +201,7 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems (IFirmwareWriter& d
 
     try
     {
-        auto jedec = MachXO2::JedecFile::Parse(item.Data);
+        auto jedec = MachXO2::JedecFile::Parse(*item.Data);
 
         I2C::I2CDevice i2c(0x80, forwardI2CWrite(dev), forwardI2CRead(dev), queryMaxI2cReadLength(dev));
         MachXO2::MachXO2Device dev(i2c);

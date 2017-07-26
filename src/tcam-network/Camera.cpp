@@ -87,21 +87,6 @@ Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
     this->isControlled = false;
 }
 
-
-Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
-                std::shared_ptr<NetworkInterface> _interface,
-                std::shared_ptr<Socket> _sock,
-                int timeoutIntervals)
-    : packet(_packet), interface(_interface),
-      timeoutCounter(timeoutIntervals), timeoutCounterDefault(timeoutIntervals)
-{
-    this->socket = _sock;
-
-    this->requestID = 1;
-    this->isControlled = false;
-}
-
-
 Camera::~Camera()
 {
     if (this->isControlled)
@@ -120,6 +105,10 @@ std::shared_ptr<Socket> Camera::getSocket ()
 int Camera::generateRequestID ()
 {
     this->requestID++;
+    if (this->requestID == 0)
+    {
+        this->requestID++;
+    }
 
     return this->requestID;
 }
@@ -136,6 +125,11 @@ int Camera::resetCounter ()
 {
     timeoutCounter = timeoutCounterDefault;
     return timeoutCounter;
+}
+
+std::string Camera::getNetworkInterfaceName ()
+{
+    return interface->getInterfaceName();
 }
 
 
@@ -408,7 +402,7 @@ const std::string Camera::getPersistentSubnet ()
     uint32_t ip;
     if (sendReadMemory(Register::PERSISTANT_SUBNETMASK_REGISTER, 4, &ip))
     {
-        return int2ip(ntohl(ip));
+        return int2ip(ip);
     }
     else
     {
@@ -485,23 +479,23 @@ std::string Camera::getFirmwareVersion ()
 }
 
 
-bool Camera::uploadFirmware (const std::string& filename,
-                             const std::string& overrideModelName,
-                             std::function<void(int, const std::string&)> progressFunc)
+int Camera::uploadFirmware (const std::string& filename,
+                            const std::string& overrideModelName,
+                            std::function<void(int, const std::string&)> progressFunc)
 {
+    FirmwareUpdate::Status retv = FirmwareUpdate::Status::DeviceAccessFailed;
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
 
-    FirmwareUpdate::Status retv = upgradeFirmware(writer,
-                                                  this->packet,
-                                                  filename, overrideModelName,
-                                                  progressFunc);
-
-    if (retv == FirmwareUpdate::Status::SuccessDisconnectRequired
-        || retv == FirmwareUpdate::Status::Success)
+    if (getControl())
     {
-        return true;
+        retv = upgradeFirmware(writer,
+                                                    this->packet,
+                                                    filename, overrideModelName,
+                                                    progressFunc);
+        abandonControl();
     }
-    return false;
+
+    return (int)retv;
 }
 
 
@@ -545,10 +539,23 @@ bool Camera::abandonControl ()
     bool retv = false;
     uint32_t data = 0;
     retv = this->sendWriteMemory(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, 4, &data);
-    if (retv == Status::SUCCESS)
+    if (retv)
     {
-        retv = true;
         this->isControlled = false;
+    }
+    return retv;
+}
+
+bool Camera::getIsBusy()
+{
+    if (isControlled)
+        return false;
+
+    bool retv = true;
+    if(getControl())
+    {
+        retv = false;
+        abandonControl();
     }
     return retv;
 }
@@ -585,6 +592,8 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
         return -1;
     }
 
+    unsigned int response = Status::TIMEOUT;
+
     unsigned short id = generateRequestID();
 
     Packet::CMD_READMEM packet = Packet::CMD_READMEM();
@@ -598,9 +607,11 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
     packet.count = htons(size);
     packet.address = htonl(address);
 
-    auto callback_function = [&data, &id, &size] (void* msg, unsigned int* response) -> int
+    auto callback_function = [&data, &id, &size, &response] (void* msg) -> int
     {
         Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*) msg;
+
+        response = Status::FAILURE;
 
         if (ntohs(ack->header.ack_id) == id)
         {
@@ -608,30 +619,27 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
             {
                 memcpy(data, ack->data, size);
             }
-            *response = Status::SUCCESS;
+            response = ntohs(ack->header.status);
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
     };
 
-    unsigned int response = Status::FAILURE;
     try
     {
-        socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function, &response);
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
+            socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function);
+            retries--;
+        }
     }
     catch (SocketSendToException& exc)
     {
         std::cerr << exc.what() << std::endl;
     }
 
-    if (response == Status::SUCCESS)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return response == Status::SUCCESS;
 }
 
 
@@ -641,6 +649,8 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     {
         return -1;
     }
+
+    unsigned int response = Status::TIMEOUT;
 
     unsigned short id = generateRequestID();
     size_t real_size = sizeof(Packet::CMD_WRITEMEM) + (size - sizeof(uint32_t));
@@ -657,23 +667,27 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     memcpy(&packet->data, data, size);
     packet->address = htonl(address);
 
-    auto callback_function = [id] (void* msg, unsigned int* response) -> int
+    auto callback_function = [id, &response] (void* msg) -> int
     {
         Packet::ACK_WRITEMEM* ack = (Packet::ACK_WRITEMEM*) msg;
+        response = Status::FAILURE;
 
         if (ntohs(ack->header.ack_id) == id)
         {
-            *response = Status::SUCCESS;
+            response = ntohs(ack->header.status);
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
     };
 
-    unsigned int response = Status::FAILURE;
-
     try
     {
-        socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function, &response);
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
+            socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function);
+            retries--;
+        }
     }
     catch (SocketSendToException& exc)
     {
@@ -706,7 +720,7 @@ void Camera::sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32
 
     try
     {
-        s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, NULL, true);
+        s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
     }
     catch (SocketSendToException& e)
     {

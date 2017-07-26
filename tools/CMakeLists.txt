@@ -26,4 +26,6 @@ if (BUILD_ARAVIS)
 
   add_subdirectory(gige-daemon)
 
+  add_subdirectory(tcam-gigetool)
+
 endif (BUILD_ARAVIS)
