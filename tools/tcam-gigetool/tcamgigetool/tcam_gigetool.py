@@ -189,9 +189,12 @@ def _tobytes(value):
         return bytes(value, "utf-8")
 
 def is_reachable(cam):
-    iface_ip = get_ip_address(cam["interface_name"])
-    iface_netmask = get_netmask(cam["interface_name"])
-    return address_in_network(iface_ip, cam["current_ip"], iface_netmask)
+    if 0:
+        iface_ip = get_ip_address(cam["interface_name"])
+        iface_netmask = get_netmask(cam["interface_name"])
+        return address_in_network(iface_ip, cam["current_ip"], iface_netmask)
+    else:
+        return cam["is_reachable"]
 
 def address_in_network(iface_ip, net_ip, netmask):
    ipaddr = struct.unpack('<L', socket.inet_aton(iface_ip))[0]
