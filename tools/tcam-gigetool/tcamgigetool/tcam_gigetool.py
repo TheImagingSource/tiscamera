@@ -473,59 +473,35 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog=(help_text + "\n\nVersion information:\n" + version_text))
     subparsers = parser.add_subparsers(help="subcommand-help", dest="cmd")
-    parsers = [("list", _("list connected cameras"), "", 
-                [("--format", str, "Format of list", False, "?")]),
-               ("info", _("show details of a camera"), "i", []),
-               ("set", _("permanently set configuration options on the camera"), "i",
-                [
-                    ("--ip", str, _("IP address to be set"), False),
-                    ("--netmask", str, _("netmask to be set"), False),
-                    ("--gateway", str, _("gateway address to be set"), False),
-                    ("--static", _parsebool, _("set to static IP"), False, "?"),
-                    ("--dhcp", _parsebool, _("enable ip configuration via DHCP"), False, "?"),
-                    ("--name", str, _("set a user defined name"), False)
-                ]
-               ),
-               ("rescue", _("remporarily set IP configuration on the camera"), "i",
-                [
-                    ("--ip", str, _("temporary IP address to be assigned"), True),
-                    ("--netmask", str, _("temporary netmask to be assigned"), True),
-                    ("--gateway", str, _("temporary gateway address to be assigned"), True)
-                ]
-               ),
-               ("upload", _("upload a firmware file to the camera"), "iy",
-                [
-                    ("FILENAME", str, _("filename of firmware file to upload"), True),
-                ]
-               ),
-               ("batchupload", _("upload a firmeare file to all cameras connected to a network interface"), "y",
-                [
-                    ("INTERFACE", str, _("network interface to scan for cameras"), True),
-                    ("FILENAME", str, _("filename of firmware file to upload"), True),
-                    (["-n", "--noconfigure"], bool, _("do not auto-configure IP addresses before upload"), False),
-                    (["-b", "--baseaddress"], bool, _("lowest IP address to use for auto-configurtion (default=x.x.x.10)"), False),
-                ]
-               )
-            ]
 
-    for cmd, helptxt, commonargs, args in parsers:
-        subparser = subparsers.add_parser(cmd, help=helptxt)
-        for a in commonargs:
-            _add_common_argument(subparser, a)
-        for a in args:
-            is_option = a[0][0].startswith("-")
-            action = "store"
-            if len(a) > 4:
-                nargs = a[4]
-            else:
-                nargs= None
-            if is_option:
-                if issubclass(type([]), type(a[0])):
-                    subparser.add_argument(*a[0], type=a[1], help=a[2], required=a[3], nargs=nargs)
-                else:
-                    subparser.add_argument(a[0], type=a[1], help=a[2], required=a[3], nargs=nargs)
-            else:
-                subparser.add_argument(a[0], type=a[1], help=a[2], nargs=nargs)
+    subparser = subparsers.add_parser("list", help=_("list connected cameras"))
+    subparser.add_argument("--format", type=str, help=_("Format of list"), required=False, nargs="?")
+    subparser = subparsers.add_parser("info", _("show details of a camera"))
+    _add_common_argument(subparser, "i")
+    subparser = subparsers.add_parser("set", _("permanently set configuration options on the camera"))
+    _add_common_argument(subparser, "i")
+    subparser.add_argument("--ip", type=str, help=_("IP address to be set"), required=False)
+    subparser.add_argument("--netmask", tye=str, help=_("netmask to be set"), required=False)
+    subparser.add_argument("--gateway", type=str, help=_("gateway address to be set"), required=False)
+    subparser.add_argument("--name", type=str, _("set a user defined name"), required=False)
+    subparser = subparsers.add_parser("rescue", help=_("remporarily set IP configuration on the camera"))
+    _add_common_argument(subparser, "i")
+    subparser.add_argument("--ip", type=str, help=_("temporary IP address to be assigned"), required=True)
+    subparser.add_argument("--netmask", type=str, help=_("temporary netmask to be assigned"), required=True)
+    subparser.add_argument("--gateway", type=str, _("temporary gateway address to be assigned"), required=True)
+    subparser = subparsers.add_parser("upload", help=_("upload a firmware file to the camera"))
+    _add_common_argument(subparser, "i")
+    _add_common_argument(subparser, "y")
+    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"), required=True)
+    subparser = subparsers.add_parser("batchupload",
+                                      help=_("upload a firmeare file to all cameras connected to a network interface"))
+    _add_common_argument(subparser, "y")
+    subparser.add_argument("INTERFACE", type=str, help=_("network interface to scan for cameras"), required=True)
+    subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"), required=True)
+    subparser.add_argument("-n", "--noconfigure", type=bool,
+                           help=_("do not auto-configure IP addresses before upload"), required=False)
+    subparser.add_argument("-b", "--baseaddress", type=str,
+                           help=_("lowest IP address to use for auto-configurtion (default=x.x.x.10)"), required=False)
 
     args = vars(parser.parse_args(sys.argv[1:]))
     if args["cmd"]:
