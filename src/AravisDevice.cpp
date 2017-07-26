@@ -77,8 +77,8 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
     arv_device_set_integer_feature_value(dev, "TestWidth", s.width);
     arv_device_set_integer_feature_value(dev, "TestHeight", s.height);
 
-    double min = arv_device_get_integer_feature_value(dev, "ResultingMinFPS");
-    double max = arv_device_get_integer_feature_value(dev, "ResultingMaxFPS");
+    double min = arv_device_get_float_feature_value(dev, "ResultingMinFPS");
+    double max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS");
 
     if (min == 0.0 && max == 0.0)
     {
