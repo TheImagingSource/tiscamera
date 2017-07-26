@@ -160,6 +160,21 @@ GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw)
 }
 
 
+bool gst_caps_are_bayer_only (const GstCaps* caps)
+{
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (strcmp(gst_structure_get_name(struc), "video/x-bayer") != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 {
     int largest_index = -1;

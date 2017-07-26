@@ -58,6 +58,12 @@ void gst_caps_change_name (GstCaps* caps, const char* name);
 GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw);
 
 
+/**
+ * caps only contain bayer
+ */
+bool gst_caps_are_bayer_only (const GstCaps* caps);
+
+
 GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming);
 
 // bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, tcam_image_buffer* buf);
