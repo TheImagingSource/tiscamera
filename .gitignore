@@ -118,3 +118,4 @@ compile_commands.json
 CTestTestfile.cmake
 tools/tcam-gigetool/tcamgigetool/version.py
 tools/camera-ip-conf/version.h
+tools/tcam-gigetool/TisGigETool.egg-info/
