@@ -141,6 +141,8 @@ class FirmwareUploadCallback:
         sys.stdout.write("\r%s%% %s" % (str(progress).rjust(3), msg))
 
 def handle_upload(args):
+    print("Preparing upload, please wait...")
+
     ctrl = CameraController()
     ctrl.discover()
 
@@ -522,7 +524,6 @@ def main():
                            help=_("lowest IP address to use for auto-configurtion (default=x.x.x.10)"), required=False)
 
     args = vars(parser.parse_args(sys.argv[1:]))
-    print (args)
     if args["cmd"]:
         this = sys.modules[__name__]
         handler = getattr(this, "handle_" + args["cmd"])
