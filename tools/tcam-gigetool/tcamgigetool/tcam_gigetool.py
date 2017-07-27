@@ -473,7 +473,7 @@ def _add_common_argument(parser, a):
     if a == "i":
         parser.add_argument("IDENTIFIER",
                             type=str,
-                            help=_("Unique identifier of the camera: serial number, name or MAC address"))
+                            help=_("Unique identifier of the camera: serial number or MAC address"))
     elif a == "y":
         parser.add_argument("-y", "--assume-yes",
                             type=bool,
