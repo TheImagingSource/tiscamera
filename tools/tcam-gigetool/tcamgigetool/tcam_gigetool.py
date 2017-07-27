@@ -186,7 +186,12 @@ class BatchUploadThread(threading.Thread):
                 camctrl, cam, fwpath = self.workqueue.get_nowait()
             except queue.QueueEmpty:
                 break
-            result = camctrl.upload_firmware(cam["serial_number"], fwpath, self.func)
+            try:
+                result = camctrl.upload_firmware(cam["serial_number"], fwpath, self.func)
+            except IOError as e:
+                result = e
+            except RuntimeError as e:
+                result = e
             self.results.append((cam, result, self.progress))
             self.workqueue.task_done()
         self.progress = None
@@ -344,7 +349,7 @@ def handle_batchupload(args):
         if result[1] == 0:
             restxt = "Update completed successfully"
         else:
-            restxt = "Firmware update FAILED! Upload will be retried (%d)." % (result[1])
+            restxt = "Firmware update FAILED! Upload will be retried (%s)." % (str(result[1]))
             failed.append(result[0])
         print("Device: %s, completed: %d%%, result: %s" % (result[0]["serial_number"], result[2], restxt))
 

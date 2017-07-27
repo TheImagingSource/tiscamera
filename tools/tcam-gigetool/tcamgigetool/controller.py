@@ -87,7 +87,7 @@ class CameraController:
         elif ret == -2:
             raise RuntimeError("DeviceSupportsFwOnly")
         elif ret == -3:
-            raise IOError("File not found or corrupt")
+            raise IOError("File not found, corrupt or not matching the camera model")
         elif ret == -4:
             raise RuntimeError("NoMatchFoundInPackage")
         elif ret == -5:
