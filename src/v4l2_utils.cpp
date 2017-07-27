@@ -634,10 +634,15 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
                 memcpy(info.name, "\0", sizeof(info.name));
 
             if (udev_device_get_sysattr_value(parent_device, "serial") != NULL)
-                strncpy(info.serial_number, udev_device_get_sysattr_value(parent_device, "serial"), sizeof(info.serial_number));
+            {
+                std::string tmp = udev_device_get_sysattr_value(parent_device, "serial");
+                tmp.erase(remove_if(tmp.begin(), tmp.end(), isspace), tmp.end());
+                strncpy(info.serial_number, tmp.c_str(), sizeof(info.serial_number));
+            }
             else
+            {
                 memcpy(info.serial_number, "\0", sizeof(info.serial_number));
-
+            }
             device_list.push_back(DeviceInfo(info));
         }
 
