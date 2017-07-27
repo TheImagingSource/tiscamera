@@ -258,10 +258,13 @@ def batchrescue(ctrl, cameras, baseip):
         ip_d += 1
 
 def handle_batchupload(args):
+    iface = args["INTERFACE"]
+
+    print("Discovering cameras on interface '%s'." % (iface,))
+
     ctrl = CameraController()
     ctrl.discover()
 
-    iface = args["INTERFACE"]
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
     check_fwpath(_path)
 
@@ -294,21 +297,23 @@ def handle_batchupload(args):
             print("Failed to get IP for interface '%s'" % (iface))
             return
         d = 10
-    print("Configuring cameras for address range: {0}.{1}.{2}.{3} .. {0}.{1}.{2}.{4}".format(a,b,c,d,d+len(cameras)-1))
-    batchrescue(ctrl, cameras, (a,b,c,d))
-    time.sleep(1)
 
-    print("Rediscovering cameras")
-    del ctrl
-    ctrl = CameraController()
-    ctrl.discover(True)
-    cameras = []
-    for cam in ctrl.cameras:
-        if cam["interface_name"] == iface:
-            if cam["is_busy"]:
-                raise RuntimeError("Camera '%s' is already controlled by a different application" %
-                                    (cam["serial_number"]))
-            cameras.append(cam)
+    if not args["noconfigure"]:
+        print("Configuring cameras for address range: {0}.{1}.{2}.{3} .. {0}.{1}.{2}.{4}".format(a,b,c,d,d+len(cameras)-1))
+        batchrescue(ctrl, cameras, (a,b,c,d))
+        time.sleep(1)
+
+        print("Rediscovering cameras")
+        del ctrl
+        ctrl = CameraController()
+        ctrl.discover(True)
+        cameras = []
+        for cam in ctrl.cameras:
+            if cam["interface_name"] == iface:
+                if cam["is_busy"]:
+                    raise RuntimeError("Camera '%s' is already controlled by a different application" %
+                                        (cam["serial_number"]))
+                cameras.append(cam)
 
     print("Starting Threads...")
     threads = []
@@ -506,19 +511,18 @@ def main():
     subparser.add_argument("--gateway", type=str, help=_("temporary gateway address to be assigned"), required=True)
     subparser = subparsers.add_parser("upload", help=_("upload a firmware file to the camera"))
     _add_common_argument(subparser, "i")
-    _add_common_argument(subparser, "y")
     subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
     subparser = subparsers.add_parser("batchupload",
                                       help=_("upload a firmeare file to all cameras connected to a network interface"))
-    _add_common_argument(subparser, "y")
     subparser.add_argument("INTERFACE", type=str, help=_("network interface to scan for cameras"))
     subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
-    subparser.add_argument("-n", "--noconfigure", type=bool,
+    subparser.add_argument("-n", "--noconfigure", action="store_true", dest="noconfigure",
                            help=_("do not auto-configure IP addresses before upload"), required=False)
     subparser.add_argument("-b", "--baseaddress", type=str,
                            help=_("lowest IP address to use for auto-configurtion (default=x.x.x.10)"), required=False)
 
     args = vars(parser.parse_args(sys.argv[1:]))
+    print (args)
     if args["cmd"]:
         this = sys.modules[__name__]
         handler = getattr(this, "handle_" + args["cmd"])
