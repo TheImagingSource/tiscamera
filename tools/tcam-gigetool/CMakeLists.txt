@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Version number for tcam_gigetool
+set(TCAM_GIGETOOL_VERSION "1.0" STRING "Version number for tcam_gigetool")
+
 include_directories(${CMAKE_SOURCE_DIR}/src/tcam-network)
 
 add_library(tcam_gigewrapper SHARED gige_wrapper.cpp)
