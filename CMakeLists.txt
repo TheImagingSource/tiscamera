@@ -26,7 +26,7 @@ set(TCAM_VERSION_PATCH 0)
 set(CPACK_PACKAGE_VERSION_MAJOR ${TCAM_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${TCAM_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${TCAM_VERSION_PATCH})
-set(CPACK_PACKAGE_VERSION_SUFFIX "-rc2")
+set(CPACK_PACKAGE_VERSION_SUFFIX "")
 
 set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}" CACHE STRING "Version number")
 
@@ -36,7 +36,7 @@ set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
 
 # Version number for tcam_gigetool
-set(TCAM_GIGETOOL_VERSION "1.0" CACHE STRING "Version number for tcam_gigetool")
+set(TCAM_GIGETOOL_VERSION "1.0" STRING "Version number for tcam_gigetool")
 
 
 # Generate a git revision description
