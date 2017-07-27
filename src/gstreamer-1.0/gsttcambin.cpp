@@ -497,7 +497,10 @@ static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* se
     {
         base_string = "video/x-bayer";
 
-        modules.bayer = TRUE;
+        if (!gst_caps_are_bayer_only(wanted))
+        {
+            modules.bayer = TRUE;
+        }
     }
 
     // when get int fails we do not have a request for fixed caps
@@ -697,8 +700,8 @@ static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
 
                 if (strcmp("video/x-bayer", gst_structure_get_name(structure)) == 0)
                 {
-                    // random by8 fourcc to trigger modules flags
-                    fourcc = GST_MAKE_FOURCC('b', 'g', 'g', 'r');
+                    modules.bayer = FALSE;
+                    modules.whitebalance = TRUE;
                 }
             }
         }
