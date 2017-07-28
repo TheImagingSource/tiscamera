@@ -71,12 +71,14 @@ namespace Status
                                                               // is currently/momentary not accessible. This depends on the
                                                               // current state of the device, in particular the current
                                                               // privilege of the application.
-    static const unsigned int BUSY                 = 0x8007;  // A required resource to service the request isn’t currently
+    static const unsigned int BUSY                 = 0x8007;  // A required resource to service the request isn't currently
                                                               // available. The request may be retried at a later time.
     static const unsigned int NO_MSG               = 0x800B;  // Timeout, no message received
     static const unsigned int PACKET_UNAVAILABLE   = 0x800C;  // The request packet is not available anymore.
     static const unsigned int INVALID_HEADER       = 0x800E;  // The message header is not valid. Some of its fields do not
 
+    static const unsigned int TIMEOUT              = 0x8FFE;  // The packet response timed out
+    static const unsigned int FAILURE              = 0x8FFF;  // Generic/unknown failure
 } /* namespace Status */
 
 namespace Register

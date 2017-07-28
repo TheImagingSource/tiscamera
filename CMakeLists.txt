@@ -21,8 +21,8 @@ cmake_minimum_required(VERSION 2.6)
 project(tcam)
 
 set(TCAM_VERSION_MAJOR 0)
-set(TCAM_VERSION_MINOR 8)
-set(TCAM_VERSION_PATCH 2)
+set(TCAM_VERSION_MINOR 9)
+set(TCAM_VERSION_PATCH 0)
 
 set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}" CACHE STRING "Version number")
 
@@ -30,6 +30,33 @@ set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 
 # version number for gobject introspection API
 set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
+
+# Generate a git revision description
+#
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+#
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+#
+# Get commit count
+execute_process(
+  COMMAND git rev-list --count HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_COUNT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
@@ -90,6 +117,10 @@ add_subdirectory(packaging)
 get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
 get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
 get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
+
+#
+#
+#
 
 # Give overview over build configuration
 

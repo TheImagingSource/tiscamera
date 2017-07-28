@@ -108,6 +108,6 @@ Status upgradeFirmware (IFirmwareWriter& dev,
                         const Packet::ACK_DISCOVERY& disc,
                         const std::string& fileName,
                         const std::string& overrideModelName,
-                        std::function<void(int)> progressFunc);
+                        std::function<void(int,const std::string&)> progressFunc);
 
 } /* namespace FirmwareUpdate */

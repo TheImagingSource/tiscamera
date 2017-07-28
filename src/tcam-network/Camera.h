@@ -43,7 +43,7 @@ namespace tis
     /// @return shared pointer to the wished camera, else null
     std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type = CAMERA_SERIAL);
 
-
+    const int PACKET_RETRY_COUNT = 5;
 class Camera
 {
 private:
@@ -58,7 +58,7 @@ private:
     std::shared_ptr<Socket> socket;
 
     /// unique paket id
-    uint64_t requestID;
+    unsigned short requestID;
 
     // flag if we have control over camera
     bool isControlled;
@@ -73,10 +73,6 @@ public:
 
     Camera (const Packet::ACK_DISCOVERY& packet, std::shared_ptr<NetworkInterface> _interface, int timeoutIntervals = 3);
 
-    Camera (const Packet::ACK_DISCOVERY& _packet,
-            std::shared_ptr<NetworkInterface> _interface,
-            std::shared_ptr<Socket> _sock,
-            int timeoutIntervals = 3);
     /// copy constructor
     Camera (const Camera& _camera) = delete;
     Camera& operator=(const Camera& ) = delete;
@@ -99,6 +95,8 @@ public:
     /// @return new value of value
     /// @brief resets counter to initial value
     int resetCounter ();
+
+    std::string getNetworkInterfaceName ();
 
     /// @name updateCamera
     /// @param cam - new camera instance
@@ -169,9 +167,9 @@ public:
     /// @param overrideModelName - string containing the model name that shall be used. empty on default
     /// @param progressFunc callback function to inform over progress
     /// @return true on success
-    bool uploadFirmware (const std::string& filename,
-                         const std::string& overrideModelName,
-                         std::function<void(int)> progressFunc);
+    int uploadFirmware (const std::string& filename,
+                        const std::string& overrideModelName,
+                        std::function<void(int, const std::string&)> progressFunc);
 
     /// @name getInterfaceName
     /// @return name of interface used for communication
@@ -193,6 +191,15 @@ public:
     /// @brief sets control bits on camera to give up exclusive control
     /// @return true on success
     bool abandonControl();
+
+    /// @name isBusy
+    /// @brief returns true if camera is controlled by another application
+    /// @return true if busy
+    ///
+    /// !!! The return value is for informational purposes only since the
+    /// camera could be locked by another application immediately after this
+    /// call returns
+    bool getIsBusy();
 
     /// @name sendReadMemory
     /// @param address - address that shall be read

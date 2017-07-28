@@ -238,6 +238,38 @@ void writeChanges (std::shared_ptr<Camera> camera,
     }
 }
 
+int isAccessible (const std::vector<std::string>& args)
+{
+    auto camera = findCamera(args);
+
+    return isAccessible(camera);
+}
+
+int isAccessible (std::shared_ptr<Camera> camera)
+{
+    int ret = false;
+
+    if (camera == NULL)
+    {
+        ret = false;
+    } else {
+        if (camera->getControl())
+        {
+            ret = true;
+            camera->abandonControl();
+        }
+    }
+
+    if (ret == false)
+    {
+        std::cout << "Could not gain read/write access to the camera.\n"
+        "Please make sure the camera is on the same network as the host computer \n"
+        "and no other application is currently accessing the device." << std::endl;
+    }
+
+    return ret;
+}
+
 
 void setCamera (const std::vector<std::string>& args)
 {
@@ -246,6 +278,11 @@ void setCamera (const std::vector<std::string>& args)
     if (camera == NULL)
     {
         std::cout << "No camera found." << std::endl;
+        return;
+    }
+
+    if (!isAccessible(camera))
+    {
         return;
     }
 
@@ -466,7 +503,17 @@ void upgradeFirmware (const std::vector<std::string>& args)
     char actualpath [PATH_MAX+1];
     std::string cF (realpath(firmware.c_str(), actualpath));
 
-    std::cout << "===========================" << firmware << " - " << cF << std::endl;
+    std::cout << "Updating the camera using the file: " << cF << std::endl;
+    std::cout << "\n!!! IMPORTANT NOTE !!!\n"
+    "Do not interrupt the firmware update process.\n"
+    "Do not disconnect the camera during the firmware update process.\n"
+    "A failed firmware update may render the camera unusable.\n\n"
+    "Start the update process [y/N]";
+
+    std::string really;
+    std::cin >> really;
+    if (really.compare("y") != 0 )
+        return;
 
     std::string overrideModelName = getArgumentValue(args, "overrideModelName", "");
 
@@ -478,25 +525,20 @@ void upgradeFirmware (const std::vector<std::string>& args)
         return;
     }
 
-    auto func = [] (int progress)
+    if (!isAccessible(camera))
+    {
+        return;
+    }
+
+    auto func = [] (int progress,const std::string& s)
         {
             std::cout << "\r";
-            std::string progressSign = "[";
 
-            int i = progress*10 / 100;
-            for (int x = 0; x < i; ++x)
+            std::cout << std::setw(5) << progress << "%";
+            if (s != "")
             {
-                progressSign += "XX";
+                std::cout << std::setw(40) << s;
             }
-            for (int x = 0; x < 20 - (i*2); ++x)
-            {
-                progressSign += " ";
-            }
-
-
-            progressSign += "] ";
-
-            std::cout << progressSign;
             std::cout.flush();
         };
 
@@ -504,12 +546,14 @@ void upgradeFirmware (const std::vector<std::string>& args)
     std::cout << std::endl;
     if (camera->uploadFirmware(cF, overrideModelName, func))
     {
-        std::cout << "\nSuccessfully uploaded firmware. \
+        std::cout << "\n\nSuccessfully uploaded firmware. \
 Please reconnect your camera to assure full functionality.\n";
     }
     else
     {
-        std::cout << "\nERROR aborted upgrade.\n";
+        std::cout << "\n\nERROR during upgrade. Firmware upload aborted.\n"
+        "Do not disconnect the camera yet. Please retry the firmware update.\n"
+        "Contact the technical support if this message keeps comming up.\n";
     }
     std::cout << std::endl;
 }

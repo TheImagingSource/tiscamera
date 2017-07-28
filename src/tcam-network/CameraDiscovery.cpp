@@ -142,18 +142,16 @@ void sendDiscovery (std::shared_ptr<NetworkInterface> interface, std::function<v
     discovery_packet.header.magic   = 0x42;
     discovery_packet.header.req_id  = htons( 1 );
 
-    auto s = interface->createSocket();
-
-    auto callback = [&interface, &discover_call, &s] (void* msg)
+    auto callback = [&interface, &discover_call] (void* msg)
         {
             Packet::ACK_DISCOVERY* ack = (Packet::ACK_DISCOVERY*) msg;
-            auto cam = std::shared_ptr<Camera>(new Camera(*ack, interface, s));
+            auto cam = std::shared_ptr<Camera>(new Camera(*ack, interface));
             discover_call(cam);
             return Socket::SendAndReceiveSignals::CONTINUE;
         };
-
     try
     {
+        auto s = interface->createSocket();
         s->sendAndReceive("255.255.255.255", &discovery_packet, sizeof(discovery_packet), callback, true);
     }
     catch (SocketSendToException& e)

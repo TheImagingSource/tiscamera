@@ -28,6 +28,7 @@
 #include <exception>
 #include <fstream>
 #include <stdexcept>
+#include <mutex>
 
 namespace tis
 {
@@ -200,6 +201,10 @@ ip4_address_t ip2int (const std::string& ip)
 
 sockaddr_in fillAddr (const std::string &address, const unsigned short port)
 {
+    static std::mutex mutex;
+
+    std::lock_guard<std::mutex>lck(mutex);
+
     sockaddr_in retv = sockaddr_in();
     retv.sin_family = AF_INET;
 

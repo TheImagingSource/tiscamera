@@ -23,6 +23,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 /**
  * @addtogroup API
@@ -88,11 +89,12 @@ private:
     ~DeviceIndex ();
 
     bool continue_thread;
-    std::mutex mtx;
+    mutable std::mutex mtx;
     unsigned int wait_period;
     std::thread work_thread;
 
     bool have_list;
+    mutable std::condition_variable wait_for_list;
 
     std::vector<DeviceInfo> device_list;
 

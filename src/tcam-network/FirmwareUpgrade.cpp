@@ -197,7 +197,7 @@ Status uploadBlackfinFirmware (IFirmwareWriter& dev, std::vector<unsigned char>&
 }
 
 
-Status upgradeBlackfinFirmware (IFirmwareWriter& dev, const std::string& fileName, std::function<void(int)> /* progressFunc */)
+Status upgradeBlackfinFirmware (IFirmwareWriter& dev, const std::string& fileName, std::function<void(int, const std::string&)> /* progressFunc */)
 {
     if( isPackageFile(fileName) )
     {
@@ -294,9 +294,9 @@ Status uploadAndVerify (IFirmwareWriter& dev, unsigned int address, unsigned cha
 }
 
 
-Status uploadGigEFPGAFirmware (IFirmwareWriter& dev, std::vector<unsigned char>& data, std::function<void(int)> progressFunc)
+Status uploadGigEFPGAFirmware (IFirmwareWriter& dev, std::vector<unsigned char>& data, std::function<void(int,const std::string&)> progressFunc)
 {
-    progressFunc( 0 );
+    progressFunc( 0, "Uploading" );
 
     if( !dev.write( 0xEF000000, 0xA35FB241 ) ) // unlock
     {
@@ -311,23 +311,23 @@ Status uploadGigEFPGAFirmware (IFirmwareWriter& dev, std::vector<unsigned char>&
 
         status = uploadAndVerify( dev, base + offset, &data[0] + offset, blockSize );
 
-        progressFunc( (offset * 100) / data.size() );
+        progressFunc( (offset * 100) / data.size(), "" );
     }
 
     dev.write( 0xEF000000, 0x0 ); // lock
 
     if( succeeded(status) )
     {
-        progressFunc( 100 );
+        progressFunc( 100, "Finished" );
     }
 
     return status;
 }
 
 
-Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, std::function<void(int)> progressFunc)
+Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, std::function<void(int, const std::string&)> progressFunc)
 {
-    progressFunc( 0 );
+    progressFunc( 0, "Start Erase" );
 
     if( !dev.write( 0xC1000000, 0xA35FB241 ) ) // unlock
     {
@@ -343,12 +343,12 @@ Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, s
         {
             return Status::WriteVerificationError;
         }
-        progressFunc( 100 * offset / 0x80000 );
+        progressFunc( 100 * offset / 0x80000, "Erasing" );
     }
 
-    progressFunc( 100 );
+    progressFunc( 100, "" );
 
-    progressFunc( 0 );
+    progressFunc( 0, "Uploading" );
 
     Status status = Status::Success;
     for (unsigned int offset = 0; offset < data.size() && succeeded(status); offset += 256)
@@ -357,21 +357,21 @@ Status uploadFPGAConfiguration (IFirmwareWriter& dev, std::vector<byte>& data, s
 
         status = uploadAndVerify(dev, base + offset, &data[0] + offset, blockSize);
 
-        progressFunc((offset * 100) / data.size());
+        progressFunc((offset * 100) / data.size(), "");
     }
 
     dev.write(0xC1000000, 0x0); // lock
 
     if (succeeded(status))
     {
-        progressFunc(100);
+        progressFunc(100, "Finished");
     }
 
     return status;
 }
 
 
-Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& fileName, const std::string& modelName, std::function<void(int)> progressFunc)
+Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& fileName, const std::string& modelName, std::function<void(int, const std::string&)> progressFunc)
 {
     std::string firmwareName;
     std::string fpgaConfigurationName;
@@ -433,7 +433,7 @@ Status upgradeFPGAFirmwareFromPackage (IFirmwareWriter& dev, const std::string& 
 }
 
 
-Status upgradeFPGAFirmwareDirect (IFirmwareWriter& dev, const std::string& fileName, std::function<void(int)> progressFunc)
+Status upgradeFPGAFirmwareDirect (IFirmwareWriter& dev, const std::string& fileName, std::function<void(int, const std::string&)> progressFunc)
 {
     std::vector<byte> fwData = loadFile(fileName);
     if (fwData.size() != 0xB000)
@@ -459,7 +459,7 @@ Status upgradeFPGAFirmwareDirect (IFirmwareWriter& dev, const std::string& fileN
 }
 
 
-Status upgradeFPGAFirmware (IFirmwareWriter& dev, const std::string& fileName, const std::string& modelName, std::function<void(int)> progressFunc)
+Status upgradeFPGAFirmware (IFirmwareWriter& dev, const std::string& fileName, const std::string& modelName, std::function<void(int, const std::string&)> progressFunc)
 {
     if (isPackageFile(fileName))
     {
@@ -476,7 +476,7 @@ Status upgradeFirmware (IFirmwareWriter& dev,
                         const Packet::ACK_DISCOVERY& disc,
                         const std::string& fileName,
                         const std::string& overrideModelName,
-                        std::function<void(int)> progressFunc)
+                        std::function<void(int,const std::string&)> progressFunc)
 {
     int typeId;
     std::string cameraModelName;
@@ -504,7 +504,7 @@ Status upgradeFirmware (IFirmwareWriter& dev,
         case 4:
             auto func = [=] (int i, const std::string& s)
                 {
-                    progressFunc(i);
+                    progressFunc(i, s);
                 };
             rval = GigE3::upgradeFirmware(dev, fileName, modelName, cameraModelName, func);
             break;

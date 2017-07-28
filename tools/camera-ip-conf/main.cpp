@@ -25,6 +25,8 @@
 
 #include <libgen.h>
 
+#include "version.h"
+
 using namespace tis;
 
 
@@ -73,6 +75,10 @@ void printHelp (char *execName)
               << "  on the same subnet:\n\n"
               << "    " << execName << " set ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n"
               << std::endl;
+
+    std::cout << "Version Information:\n\n"
+              << "git revision: " << GIT_REVISION << std::endl;
+    std::cout << "tcam lib version: " << TCAM_VERSION << std::endl;
 }
 
 

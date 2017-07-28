@@ -54,6 +54,7 @@ private:
 
     std::vector<std::shared_ptr<IDevicePort>> ports_;
     std::map<std::string, std::vector<UploadGroup>> device_types_;
+    std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> file_data_cache_;
 
 private:
     Status ReadPackageInfo (const TiXmlDocument& doc);
@@ -63,6 +64,8 @@ private:
     Status ReadUploadItem (const TiXmlElement& uploadItemElem, UploadItem& item);
 
     std::shared_ptr<IDevicePort> CreateDevicePort (const std::string& portType);
+
+    std::shared_ptr<std::vector<uint8_t>> ExtractFile( const std::string& fileName );
 }; /* class Package */
 
 } /* namespace GigE3 */

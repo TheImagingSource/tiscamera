@@ -1,0 +1,14 @@
+from setuptools import setup
+from setuptools.extension import Extension
+
+setup (name = 'TisGigETool',
+       version = '${TCAM_VERSION}',
+       description = 'The Imaging Source gigabit ethernet camera support package',
+       package_dir={ '': '${CMAKE_CURRENT_SOURCE_DIR}' },
+       packages = ["tcamgigetool"],
+       entry_points={
+            'console_scripts': [
+                'tcam-gigetool=tcamgigetool:main',
+            ],
+        },
+    )

@@ -22,8 +22,8 @@
 namespace tis
 {
 
-Socket::Socket (const sockaddr_in& address)
-    : fd(-1)
+Socket::Socket (const sockaddr_in& address, int timeout)
+    : fd(-1), timeout_ms(timeout)
 {
     try
     {
@@ -61,7 +61,7 @@ int Socket::createSocket ()
         throw SocketCreationException();
     }
 
-    int val = 1;
+    int val = 0;
 
     // assure that in case of error we still can use the port and no EADDRINUSE will be returned for new sockets
     setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof (val));
@@ -115,8 +115,8 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
         }
 
         timeval timeout;
-        timeout.tv_sec = 3;
-        timeout.tv_usec = 0;
+        timeout.tv_sec = timeout_ms / 1000;
+        timeout.tv_usec = (timeout_ms % 1000) * 1000;
 
         fd_set fds;
         FD_ZERO(&fds);

@@ -60,6 +60,14 @@ namespace tis
     /// @brief writes given arguments in given camera
     void writeChanges (std::shared_ptr<Camera> camera, const std::string ip, const std::string subnet, const std::string gateway);
 
+    /// @name isAccessible
+    /// @param args - vector containing camera identification options
+    /// Tests whether a camera could be accessed, ie. whether write/read operations will
+    /// succeed.
+    int isAccessible (const std::vector<std::string>& args);
+
+    int isAccessible (std::shared_ptr<Camera> camera);
+
     /// @name setCamera
     /// @param args - vector containing string that shall be searched
     /// sets the values described in args for described camera

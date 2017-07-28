@@ -66,6 +66,9 @@ private:
     // actual file descriptor
     int fd;
 
+    // timeout in milliseconds
+    int timeout_ms;
+
 public :
 
     // send and receive signals
@@ -76,7 +79,7 @@ public :
     };
 
     /// Constructor
-    explicit Socket (const sockaddr_in& address);
+    explicit Socket (const sockaddr_in& address, int timeout=1500);
 
     /// copy constructor
     Socket (const Socket& _socket) = delete;
