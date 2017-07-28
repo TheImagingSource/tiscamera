@@ -21,7 +21,7 @@ target_link_libraries(camera-ip-conf tcam-network)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
-install(TARGETS camera-ip-conf-cli
+install(TARGETS camera-ip-conf
   DESTINATION bin
   COMPONENT tcam-camera-ip-conf)
 
