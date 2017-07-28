@@ -28,9 +28,6 @@ set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PAT
 
 set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 
-# version number for gobject introspection API
-set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
-
 # Generate a git revision description
 #
 # Get the current working branch
