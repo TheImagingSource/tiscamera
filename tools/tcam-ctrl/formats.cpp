@@ -72,10 +72,16 @@ void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& avai
         {
             if (res.type == TCAM_RESOLUTION_TYPE_FIXED)
             {
-                std::string fps_string = ", fps={ ";
-                for (const auto& fps : f.get_framerates(res.min_size))
+                std::string fps_string = ", fps={";
+                auto rates = f.get_framerates(res.min_size);
+                for (unsigned int i = 0; i < rates.size(); ++i)
                 {
-                    fps_string += std::to_string(fps) + " ";
+                    fps_string += std::to_string(rates.at(i));
+
+                    if (i < rates.size()-1)
+                    {
+                        fps_string += ", ";
+                    }
                 }
 
                 fps_string += "}";
@@ -93,12 +99,17 @@ void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& avai
 
                 for (const auto& r: resolutions)
                 {
-                    std::string fps_string = ", fps={ ";
-                    for (const auto& fps : f.get_framerates(r))
+                    std::string fps_string = ", fps={";
+                    auto rates = f.get_framerates(res.min_size);
+                    for (unsigned int i = 0; i < rates.size(); ++i)
                     {
-                        fps_string += std::to_string(fps) + " ";
-                    }
+                        fps_string += std::to_string(rates.at(i));
 
+                        if (i < rates.size()-1)
+                        {
+                            fps_string += ", ";
+                        }
+                    }
                     fps_string += "}";
 
                     std::string output = format
