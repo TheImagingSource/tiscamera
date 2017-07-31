@@ -722,9 +722,21 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                     GValue format = {};
 
-                    // TODO find method to get formats from bayer2rgb
+                    std::string tmp_format_string;
+                    GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
+
+                    GstStructure* struc = gst_caps_get_structure(tmp, 0);
+
+                    const GValue* lsit = gst_structure_get_value(struc, "format");
+
+                    for (unsigned int i = 0; i < gst_value_list_get_size(lsit); ++i)
+                    {
+                        const GValue* val = gst_value_list_get_value(lsit, i);
+                        tmp_format_string += g_value_get_string(val);
+                    }
+
                     g_value_init(&format, G_TYPE_STRING);
-                    g_value_set_string(&format, "{ RGBx, xRGB, BGRx, xBGR, RGBA, ARGB, BGRA, ABGR }");
+                    g_value_set_string(&format, tmp_format_string.c_str());
 
                     gst_structure_set_value(s, "format", &format);
 
