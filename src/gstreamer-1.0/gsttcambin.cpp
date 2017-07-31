@@ -452,279 +452,6 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 }
 
 
-static gboolean camera_has_only_bayer (GstTcamBin* self)
-{
-    GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-
-    for (unsigned int i = 0; i < gst_caps_get_size(src_caps); i++)
-    {
-        GstCaps* ipcaps = gst_caps_copy_nth(src_caps, i);
-
-        GstStructure* structure = gst_caps_get_structure(ipcaps, 0);
-
-        unsigned int fourcc = 0;
-        const char* string = gst_structure_get_string(structure, "format");
-
-        if (string == nullptr)
-        {
-            continue;
-        }
-
-        fourcc = GST_STR_FOURCC(string);
-
-        if (!tcam_gst_is_fourcc_bayer(fourcc))
-        {
-            gst_caps_unref(ipcaps);
-            return FALSE;
-        }
-        gst_caps_unref(ipcaps);
-    }
-
-    return TRUE;
-}
-
-
-static required_modules gst_tcambin_generate_conversion_src_caps (GstTcamBin* self,
-                                                                  const GstCaps* available_caps,
-                                                                  const GstCaps* wanted,
-                                                                  unsigned int* fourcc)
-{
-    struct required_modules modules = {FALSE, FALSE, nullptr};
-
-    std::string base_string = "video/x-raw";
-
-    if (camera_has_bayer(self))
-    {
-        base_string = "video/x-bayer";
-
-        if (!gst_caps_are_bayer_only(wanted))
-        {
-            modules.bayer = TRUE;
-        }
-    }
-
-    // when get int fails we do not have a request for fixed caps
-    // thus we must use ranges and fix them manually
-
-    bool values_are_fixed = true;
-    GstStructure* struc;
-
-    int w;
-    int h;
-
-    if (!gst_caps_is_any(wanted) || gst_caps_get_size(wanted) > 0)
-    {
-
-        struc = gst_caps_get_structure(wanted, 0);
-
-        if (!gst_structure_get_int(struc, "width", &w)
-            || !gst_structure_get_int(struc, "height", &h))
-        {
-            values_are_fixed = false;
-        }
-    }
-    else
-    {
-        values_are_fixed = false;
-    }
-
-    GstCaps* caps;
-
-    if (values_are_fixed)
-    {
-        int num;
-        int den;
-
-        gst_structure_get_fraction(struc, "framerate", &num, &den);
-
-        caps = gst_caps_new_simple (base_string.c_str(),
-                                    "framerate", GST_TYPE_FRACTION,
-                                    num, den,
-                                    "width", G_TYPE_INT, w,
-                                    "height", G_TYPE_INT, h,
-                                    NULL);
-    }
-    else
-    {
-        caps = gst_caps_new_simple (base_string.c_str(),
-                                    "framerate", GST_TYPE_FRACTION_RANGE,
-                                    1, 1, G_MAXINT, 1,
-                                    NULL);
-
-        GValue w = {};
-        g_value_init(&w, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range(&w, 1, G_MAXINT);
-
-        GValue h = {};
-        g_value_init(&h, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range(&h, 1, G_MAXINT);
-
-        gst_caps_set_value(caps, "width", &w);
-        gst_caps_set_value(caps, "heigth", &h);
-    }
-
-    GST_INFO("Testing caps: '%s'", gst_caps_to_string(caps));
-
-    GstCaps* intersection = gst_caps_intersect(caps, available_caps);
-
-    GST_INFO("Found possible caps %s", gst_caps_to_string(intersection));
-
-    if (gst_caps_is_empty(intersection))
-    {
-        GST_WARNING("Unable to find intersecting caps. Continuing with empty caps.");
-    }
-    else
-    {
-        if (wanted == nullptr)
-        {
-            GST_INFO("No wanted caps. Using current intersection.");
-            modules.caps = tcam_gst_find_largest_caps(intersection);
-        }
-        else
-        {
-            GstCaps* int2 = bayer_transform_intersect(intersection, wanted);
-            modules.caps = tcam_gst_find_largest_caps(int2);
-            GST_INFO("Caps are: %s", gst_caps_to_string(int2));
-        }
-
-        GstStructure* structure = gst_caps_get_structure(modules.caps, 0);
-        if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
-        {
-            const char *string = gst_structure_get_string(structure, "format");
-            unsigned int fourcc = GST_STR_FOURCC(string);
-        }
-    }
-    gst_caps_unref(caps);
-    return modules;
-}
-
-
-static required_modules gst_tcambin_generate_src_caps (GstTcamBin* self,
-                                                       const GstCaps* available_caps,
-                                                       const GstCaps* wanted)
-{
-    // GST_DEBUG("Generating source caps and list of required modules");
-
-    GstStructure* structure;
-
-    if (wanted == NULL || gst_caps_is_empty(wanted))
-    {
-        GST_INFO("No sink caps specified. Continuing with caps from source device.");
-        wanted = gst_caps_copy(available_caps);
-    }
-
-    if (self->target_caps != nullptr && GST_IS_CAPS(self->target_caps))
-    {
-        wanted = gst_caps_copy(self->target_caps);
-    }
-
-    struct required_modules modules = {FALSE, FALSE, nullptr};
-
-    guint fourcc = 0;
-
-    GstCaps* input = gst_caps_copy(wanted);
-    GstCaps* intersection = gst_caps_intersect(wanted, available_caps);
-
-    // bool conversion_needed = false;
-    if (gst_caps_is_empty(intersection)
-        || (!tcam_gst_raw_only_has_mono(available_caps)
-            || camera_has_only_bayer(self)))
-    {
-        GST_INFO("No intersecting caps found. Trying caps with conversion.");
-
-        gst_caps_unref(intersection);
-
-        modules = gst_tcambin_generate_conversion_src_caps(self,
-                                                           available_caps,
-                                                           wanted,
-                                                           &fourcc);
-    }
-    else
-    {
-        GST_INFO("Device has caps. No conversion needed.");
-
-        // gst_caps_is_any does not return true when gst_caps_to_string(intersection) says
-        // caps are ANY. This is a ugly workaround
-        if (strcmp(gst_caps_to_string(intersection), "ANY") == 0)
-        {
-            GST_INFO("Caps are 'ANY' using source caps.");
-
-            gst_caps_unref(intersection);
-            intersection = gst_caps_copy(available_caps);
-        }
-
-        // since no caps are given, assume that only displayable
-        // formats are wished. thus silently drop bayer
-        // This ensure something usable (i.e. displayable) is selected
-        // BUT only do this when other formats than bayer are available
-        // possible pipeline is tcambin ! bayer2rgb ! fakesink
-        GstCaps* temp = gst_caps_subtract(intersection,
-                                          gst_caps_from_string("video/x-bayer"));
-
-        if (gst_caps_is_empty(temp)
-            || gst_caps_is_any(temp)
-            || strcmp(gst_caps_to_string(temp), "ANY") == 0)
-        {
-            modules.caps = tcam_gst_find_largest_caps(intersection);
-            GST_INFO("Using largest caps of intersection");
-        }
-        else
-        {
-            modules.caps = tcam_gst_find_largest_caps(temp);
-            GST_INFO("Reduced caps.(%s)", gst_caps_to_string(modules.caps));
-        }
-
-        gst_caps_unref(temp);
-        gst_caps_unref(intersection);
-
-        if (modules.caps == nullptr)
-        {
-            GST_ERROR("Unable to determine caps.");
-
-        }
-        else
-        {
-            GST_INFO("Using caps: %s", gst_caps_to_string(modules.caps));
-
-            structure = gst_caps_get_structure(modules.caps, 0);
-
-            auto type = gst_structure_get_field_type(structure, "format");
-            if (type == G_TYPE_STRING)
-            {
-                const char *string = gst_structure_get_string(structure, "format");
-                fourcc = GST_STR_FOURCC(string);
-            }
-            else if (type ==  G_TYPE_INVALID)
-            {
-                GST_WARNING("Could not handle format description. Attempting alternatives.");
-
-                if (strcmp("video/x-bayer", gst_structure_get_name(structure)) == 0)
-                {
-                    modules.bayer = FALSE;
-                    modules.whitebalance = TRUE;
-                }
-            }
-        }
-    }
-
-    if (fourcc == GST_MAKE_FOURCC('G', 'R', 'A', 'Y'))
-    {
-        modules.bayer = FALSE;
-        modules.whitebalance = FALSE;
-    }
-    else if (tcam_gst_is_fourcc_bayer(fourcc))
-    {
-        modules.whitebalance = TRUE;
-        modules.bayer = TRUE;
-    }
-    else
-    {
-        GST_WARNING("Unsure if caps are correctly generated. Trying anyway. %s", gst_caps_to_string(modules.caps));
-    }
-
-    return modules;
-}
-
 
 static gboolean gst_tcambin_create_source (GstTcamBin* self)
 {
@@ -857,13 +584,19 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         return FALSE;
     }
 
-    if (self->modules.caps == nullptr)
+    if (self->src_caps == nullptr)
     {
         GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
         return FALSE;
     }
 
-    g_object_set(self->pipeline_caps, "caps", self->modules.caps, NULL);
+    if (!gst_caps_is_fixed(self->src_caps))
+    {
+        self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
+        GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
+    }
+
+    g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
 
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
 
@@ -871,34 +604,44 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                      self->pipeline_caps);
 
     std::string pipeline_description = "tcamscr ! ";
-    pipeline_description += gst_caps_to_string(self->modules.caps);
+    pipeline_description += gst_caps_to_string(self->src_caps);
 
     GstElement* previous_element = self->pipeline_caps;
 
-    if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
+    // the following elements only support mono or bayer
+    // security check to prevent faulty pipelines
+
+    if (gst_caps_are_bayer_only(self->src_caps)
+        || tcam_gst_raw_only_has_mono(self->src_caps))
     {
-        if (!create_and_add_element(&self->exposure,
-                                    "tcamautoexposure", "tcambin-exposure",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
         {
-            return FALSE;
+            if (!create_and_add_element(&self->exposure,
+                                        "tcamautoexposure", "tcambin-exposure",
+                                        &previous_element,
+                                        GST_BIN(self), pipeline_description))
+            {
+                return FALSE;
+            }
+        }
+
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
+            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+        {
+            if (!create_and_add_element(&self->focus,
+                                        "tcamautofocus", "tcambin-focus",
+                                        &previous_element,
+                                        GST_BIN(self), pipeline_description))
+            {
+                return FALSE;
+            }
         }
     }
 
-    if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-        && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
-    {
-        if (!create_and_add_element(&self->focus,
-                                    "tcamautofocus", "tcambin-focus",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
-        {
-            return FALSE;
-        }
-    }
-
-    if (self->modules.bayer)
+    // always add whitebalance when using bayer
+    // we want it when debayering
+    // users may still want it when asking for bayer
+    if (contains_bayer(self->src_caps))
     {
         // use this to see if the device already has the feature
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
@@ -911,7 +654,10 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                 return FALSE;
             }
         }
+    }
 
+    if (self->needs_debayer)
+    {
         if (!create_and_add_element(&self->debayer,
                                     "bayer2rgb", "tcambin-debayer",
                                     &previous_element,
@@ -927,10 +673,11 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     if (gst_caps_is_any(self->target_caps) || gst_caps_is_empty(self->target_caps))
     {
-        self->target_caps = gst_caps_copy(self->modules.caps);
+        self->target_caps = gst_caps_copy(self->src_caps);
     }
 
     GST_INFO("Working with exit caps: %s", gst_caps_to_string(self->target_caps));
+    self->elements_created = TRUE;
 
     return TRUE;
 }
@@ -953,7 +700,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     // 2. camera has video/x-raw,format=SOMETHING => passed through
 
     // this boils down to:
-    // if camera is mono => pass mono and be done
+    // if camera is mono,jpeg,yuv => pass through and be done
     // if camera has bayer => add video/x-raw,format{EVERYTHING} with the correct settings
 
     if (camera_has_bayer(self))
@@ -992,6 +739,29 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     }
 
     return all_caps;
+}
+
+
+void set_target_pad(GstTcamBin* self, GstPad* pad)
+{
+
+    gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
+
+    if (self->target_set == FALSE)
+    {
+        if (self->target_pad == nullptr)
+        {
+            GST_ERROR("target_pad not defined");
+        }
+        else
+        {
+            if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad))
+            {
+                GST_ERROR("Could not set target for ghostpad.");
+            }
+        }
+        self->target_set = TRUE;
+    }
 }
 
 
@@ -1037,7 +807,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             {
                 GstElement* par = gst_pad_get_parent_element(sinkpad);
 
-                if (strcmp(g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(par))),
+                if (strcmp(g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(par))),
                            "GstCapsFilter") == 0)
                 {
                     self->target_caps = gst_caps_new_empty();
@@ -1055,30 +825,23 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
             GST_INFO("caps of src: %s", gst_caps_to_string(src_caps));
 
-            self->modules = gst_tcambin_generate_src_caps(self, src_caps, self->target_caps);
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
+
+            self->src_caps = find_input_caps(src_caps, self->target_caps, self->needs_debayer);
+
+            gst_caps_unref(src_caps);
+
+            if (!self->src_caps)
+            {
+                GST_ERROR("Unable to work with given caps \"%s\"", gst_caps_to_string(self->target_caps));
+                return GST_STATE_CHANGE_FAILURE;
+            }
 
             if (! gst_tcambin_create_elements(self))
             {
                 GST_ERROR("Error while creating elements");
             }
-            self->elements_created = TRUE;
 
-            if (self->target_set == FALSE)
-            {
-                if (self->target_pad == nullptr)
-                {
-                    GST_ERROR("target_pad not defined");
-                }
-                else
-                {
-                    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad))
-                    {
-                        GST_ERROR("Could not set target for ghostpad.");
-                    }
-                }
-                self->target_set = TRUE;
-            }
+            set_target_pad(self, self->target_pad);
 
             break;
         }
@@ -1096,7 +859,14 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
         {
             self->elements_created = FALSE;
             self->target_set = FALSE;
-            self->modules = {FALSE, FALSE, nullptr};
+            self->needs_debayer = false;
+
+            if (self->src_caps)
+            {
+                gst_caps_unref(self->src_caps);
+                self->src_caps = nullptr;
+            }
+
             gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
             break;
         }
@@ -1198,8 +968,6 @@ static void gst_tcambin_init (GstTcamBin* self)
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
 
-    self->caps = gst_static_caps_get(&raw_caps);
-
     GST_OBJECT_FLAG_SET(self, GST_ELEMENT_FLAG_SOURCE);
 }
 
@@ -1213,11 +981,6 @@ static void gst_tcambin_finalize (GObject* object)
 static void gst_tcambin_dispose (GstTcamBin* self)
 {
     GST_DEBUG("dispose");
-    if (self->caps)
-    {
-        gst_caps_unref(self->caps);
-    }
-    self->caps = NULL;
 
     G_OBJECT_CLASS(parent_class)->dispose((GObject*) self);
 }

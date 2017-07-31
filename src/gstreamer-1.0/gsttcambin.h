@@ -39,14 +39,6 @@ typedef struct _GstTcamBin GstTcamBin;
 typedef struct _GstTcamBinClass GstTcamBinClass;
 
 
-struct required_modules
-{
-    gboolean bayer;
-    gboolean whitebalance;
-    GstCaps* caps;
-};
-
-
 struct _GstTcamBin
 {
     GstBin parent;
@@ -63,11 +55,6 @@ struct _GstTcamBin
 
     char* device_serial;
 
-    void* device;
-
-    int run;
-
-    GstCaps* caps;
     GstCaps* target_caps;
     GstPad* target_pad;
     GstPad* pad;
@@ -75,15 +62,10 @@ struct _GstTcamBin
     GstCaps* user_caps;
 
     gboolean elements_created;
-    gboolean is_mono;
-    gboolean wants_rgb;
     gboolean target_set;
 
-
-    struct required_modules modules;
-
-    guint probe_id;
-
+    GstCaps* src_caps;
+    bool needs_debayer;
 };
 
 

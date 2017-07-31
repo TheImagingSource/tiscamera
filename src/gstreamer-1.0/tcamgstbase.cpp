@@ -250,21 +250,80 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     return largest_caps;
 }
 
-// bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, tcam_image_buffer* buf)
-// {
-//     if (buffer == NULL || buf == NULL)
-//     {
-//         return false;
-//     }
 
-//     // *buf = {};
+bool contains_bayer (const GstCaps* caps)
+{
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        if (strcmp("video/x-bayer", gst_structure_get_name(gst_caps_get_structure(caps, i))) == 0)
+        {
+            return true;
+        }
+    }
 
-//     GstMapInfo info;
+    return false;
+}
 
-//     gst_buffer_map(buffer, &info, GST_MAP_READ);
 
-//     buf->length = info.size;
-//     buf->pData = info.data
+GstCaps* get_caps_from_element (const char* elementname, const char* padname)
+{
 
-//     return false;
-// }
+    GstElement* ele = gst_element_factory_make(elementname, "tmp-element");
+
+    if (!ele)
+    {
+        return nullptr;
+    }
+
+    GstCaps* ret = gst_pad_query_caps(gst_element_get_static_pad(ele, padname), NULL);
+
+    gst_object_unref(ele);
+
+    return ret;
+}
+
+
+GstCaps* find_input_caps (const GstCaps* available_caps,
+                          const GstCaps* wanted_caps,
+                          bool& requires_conversion)
+{
+    GstCaps* ret = nullptr;
+    requires_conversion = false;
+
+    if (!GST_IS_CAPS(available_caps))
+    {
+        return nullptr;
+    }
+
+    if (wanted_caps == nullptr || gst_caps_is_empty(wanted_caps))
+    {
+        GST_INFO("No sink caps specified. Continuing with caps from source device.");
+        wanted_caps = gst_caps_copy(available_caps);
+    }
+
+    GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
+
+    if (gst_caps_is_empty(intersect))
+    {
+        GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
+
+        if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+            && gst_element_factory_can_sink_any_caps(debayer, available_caps))
+        {
+            requires_conversion = true;
+            GstCaps* temp = get_caps_from_element("bayer2rgb", "sink");
+
+            ret = gst_caps_intersect(available_caps, temp);
+
+            gst_caps_unref(temp);
+        }
+
+        gst_object_unref(debayer);
+    }
+    else
+    {
+        return intersect;
+    }
+
+    return ret;
+}
