@@ -19,7 +19,7 @@
 
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
-
+#include <algorithm> //std::find
 
 GstElement* tcam_gst_find_camera_src (GstElement* element)
 {
@@ -52,30 +52,46 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
 }
 
 
-bool tcam_gst_raw_only_has_mono (const GstCaps* src_caps)
+bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
 {
-    GstCaps* raw_filter = gst_caps_from_string("video/x-raw");
-
-    GstCaps* caps = gst_caps_intersect(src_caps, raw_filter);
-
-    gst_caps_unref(raw_filter);
-
-    GstCaps* filter = gst_caps_from_string("video/x-raw,format={GRAY8, GRAY16_LE}; ANY");
-
-    GstCaps* sub = gst_caps_subtract(caps, filter);
-
-    gst_caps_unref(filter);
-
-    if (gst_caps_is_empty(sub))
+    auto correct_format = [] (const char* str)
     {
-        gst_caps_unref(sub);
-        return TRUE;
+        const static std::vector<std::string> formats = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
+
+        if (std::find(formats.begin(), formats.end(), str) == formats.end())
+        {
+            return false;
+        }
+        return true;
+    };
+
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (strcmp("video/x-raw", gst_structure_get_name(struc)) == 0)
+        {
+            if (gst_structure_has_field(struc, "format"))
+            {
+                if (!correct_format(gst_structure_get_string(struc, "format")))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // since raw can be anything
+                // do not assume it is gray but color
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
-    gst_caps_unref(sub);
 
-    gst_caps_unref(caps);
-
-    return FALSE;
+    return true;
 }
 
 
