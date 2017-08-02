@@ -603,7 +603,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     gst_element_link(self->src,
                      self->pipeline_caps);
 
-    std::string pipeline_description = "tcamscr ! ";
+    std::string pipeline_description = "tcamsrc ! ";
     pipeline_description += gst_caps_to_string(self->src_caps);
 
     GstElement* previous_element = self->pipeline_caps;
