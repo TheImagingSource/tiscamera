@@ -210,7 +210,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // halfway fixated caps
         if (gst_structure_get_int(struc, "width", &width))
         {
-            if (largest_width < width)
+            if (largest_width <= width)
             {
                 largest_width = width;
                 new_width = true;
@@ -219,7 +219,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
         if (gst_structure_get_int(struc, "height", &height))
         {
-            if (largest_height < height)
+            if (largest_height <= height)
             {
                 largest_height = height;
                 new_height = true;
@@ -262,6 +262,11 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                                         "width", G_TYPE_INT, w,
                                         "height", G_TYPE_INT, h,
                                         NULL);
+
+    if (gst_structure_has_field(s, "format"))
+    {
+        gst_caps_set_value(largest_caps, "format", gst_structure_get_value(s, "format"));
+    }
 
     return largest_caps;
 }
