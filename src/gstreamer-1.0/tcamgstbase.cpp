@@ -332,10 +332,13 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
             && gst_element_factory_can_sink_any_caps(debayer, available_caps))
         {
             requires_conversion = true;
-            GstCaps* temp = get_caps_from_element("bayer2rgb", "sink");
+            // wanted_caps can be fixed, etc.
+            // thus change name to be compatible to bayer2rgb sink pad
+            // and create a correct intersection
+            GstCaps* temp = gst_caps_copy(wanted_caps);
+            gst_caps_change_name(temp, "video/x-bayer");
 
             ret = gst_caps_intersect(available_caps, temp);
-
             gst_caps_unref(temp);
         }
 
