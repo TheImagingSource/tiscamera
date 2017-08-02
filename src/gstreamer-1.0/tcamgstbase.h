@@ -88,6 +88,14 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
                           const GstCaps* wanted_caps,
                           bool& requires_conversion);
 
+
+bool fill_structure_fixed_resolution (GstStructure* structure,
+                                      const tcam::VideoFormatDescription& format,
+                                      const tcam_resolution_description& res);
+
+
+GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatDescription> descriptions);
+
 #ifdef __cplusplus
 }
 #endif
