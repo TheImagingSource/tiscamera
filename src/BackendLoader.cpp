@@ -82,6 +82,7 @@ void tcam::BackendLoader::load_backends ()
         if (handle == nullptr)
         {
             tcam_log(TCAM_LOG_INFO, "Could not load backend %s", b.name.c_str());
+            tcam_log(TCAM_LOG_INFO, "    Reason: %s", dlerror());
             continue;
         }
         b.handle = handle;
