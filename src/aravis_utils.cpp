@@ -777,9 +777,18 @@ uint32_t tcam::fourcc2aravis (uint32_t fourcc)
     return 0;
 }
 
+static const std::string gige_daemon_lock_file = "/var/lock/gige-daemon.lock";
+
 
 unsigned int tcam::get_gige_device_count ()
 {
+    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
+
+    if (!is_running)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
+        return get_aravis_device_count();
+    }
 
     key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
     key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
@@ -815,6 +824,11 @@ unsigned int tcam::get_gige_device_count ()
 
 std::vector<DeviceInfo> tcam::get_gige_device_list ()
 {
+    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
+
+    if (!is_running)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
         return get_aravis_device_list();
     }
 
