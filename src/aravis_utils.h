@@ -38,7 +38,11 @@ std::shared_ptr<Property> create_property (ArvCamera* camera,
 uint32_t aravis2fourcc (uint32_t aravis);
 uint32_t fourcc2aravis (uint32_t fourcc);
 
+unsigned int get_gige_device_count ();
+
 std::vector<DeviceInfo> get_gige_device_list ();
+
+unsigned int get_aravis_device_count ();
 
 std::vector<DeviceInfo> get_aravis_device_list ();
 
