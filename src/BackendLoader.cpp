@@ -150,19 +150,21 @@ std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::D
 
 std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoader::backend& b)
 {
-    std::vector<struct tcam_device_info> temp;
     std::vector<DeviceInfo> ret;
 
     if (b.handle == nullptr)
     {
         return ret;
     }
-
+    tcam_log(TCAM_LOG_DEBUG, "retrieving list for %s", b.name.c_str());
     size_t t = b.get_device_list_size();
 
-    temp.resize(t);
+    tcam_debug("Amount of devices: %d", t);
 
-    auto copied_elements = b.get_device_list(temp.data(), temp.size());
+    struct tcam_device_info temp[t];
+
+    auto copied_elements = b.get_device_list(temp, t);
+    ret.reserve(copied_elements);
 
     for (const auto& info : temp)
     {
