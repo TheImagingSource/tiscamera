@@ -31,8 +31,7 @@ DeviceInterface* open_device (const struct tcam_device_info* device)
 
 size_t get_device_list_size ()
 {
-    auto vec = get_gige_device_list();
-    return vec.size();
+    return get_gige_device_count();
 }
 
 
