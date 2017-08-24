@@ -97,22 +97,46 @@ int main (int argc, char *argv[])
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
 
-    GstElement* pipeline = gst_pipeline_new("pipeline");
+    // Get the caps from the source and use the first one in the list
+    // for the capsfilter.
+    // This sets the first video format supported by the device as
+    // the target format for the appsink
+    gst_element_set_state(source, GST_STATE_READY);
+    GstPad* pad = gst_element_get_static_pad(source, "src");
+    GstCaps* caps = gst_pad_query_caps(pad, NULL);
+    if (caps == NULL)
+    {
+        g_error("Failed to query caps from device!");
+    }
+    GstStructure *structure = gst_caps_get_structure(caps, 0);
+    gint width, height;
+    gst_structure_get_int(structure, "width", &width);
+    gst_structure_get_int(structure, "height", &height);
+    GstCaps* formatcaps = gst_caps_new_simple("video/x-raw",
+                        "format", G_TYPE_STRING, gst_structure_get_string(structure, "format"),
+                        "width", G_TYPE_INT, width,
+                        "height", G_TYPE_INT, height,
+                        NULL);
+    g_print("Using video format '%s' for appsink.\n", gst_caps_to_string(formatcaps));
 
-    GstElement* convert = gst_element_factory_make("videoconvert", "convert");
+    gst_element_set_state(source, GST_STATE_NULL);
+
+    GstElement* pipeline = gst_pipeline_new("pipeline");
+    GstElement* capsfilter = gst_element_factory_make("capsfilter", "caps");
     GstElement* sink = gst_element_factory_make("appsink", "sink");
 
+    g_object_set(G_OBJECT(capsfilter), "caps", formatcaps, NULL);
+
     // tell appsink to notify us when it receives an image
-    g_object_set(G_OBJECT(sink), "emit-signals", TRUE);
+    g_object_set(G_OBJECT(sink), "emit-signals", TRUE, NULL);
 
     g_signal_connect(sink, "new-sample", G_CALLBACK(callback), NULL);
 
     gst_bin_add(GST_BIN(pipeline), source);
-    gst_bin_add(GST_BIN(pipeline), convert);
+    gst_bin_add(GST_BIN(pipeline), capsfilter);
     gst_bin_add(GST_BIN(pipeline), sink);
 
-    gst_element_link(source, convert);
-    gst_element_link(convert, sink);
+    gst_element_link_many(source, capsfilter, sink, NULL);
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
