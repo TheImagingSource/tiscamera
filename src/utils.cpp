@@ -17,14 +17,14 @@
 #include "utils.h"
 
 #include "internal.h"
-
+#include <fstream>
 #include <algorithm>
 #include <cstring>
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <limits>
 #include <cmath>
-
+#include <signal.h> // kill
 
 #define IOCTL_RETRY 4
 
@@ -315,4 +315,38 @@ TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
     TCAM_PROPERTY_ID new_id = id_prefix ^ id_to_use;
     id_to_use++;
     return new_id;
+}
+
+
+unsigned int tcam::get_pid_from_lockfile (const std::string filename)
+{
+    std::ifstream f(filename);
+    unsigned int ret = 0;
+    if (f.is_open())
+    {
+        std::string line;
+        getline(f, line);
+
+        try
+        {
+            ret = std::stoi(line);
+        }
+        catch (const std::invalid_argument& e)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Could not convert line \"%s\" to valid pid.", line.c_str());
+        }
+        f.close();
+    }
+    else
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not open file \"%s\"", filename.c_str());
+    }
+
+    return ret;
+}
+
+
+bool tcam::is_process_running (unsigned int pid)
+{
+    return 0 == kill(pid, 0);
 }

@@ -161,6 +161,11 @@ bool is_smaller (const tcam_image_size& s1, const tcam_image_size& s2);
  */
 TCAM_PROPERTY_ID generate_unique_property_id ();
 
+unsigned int get_pid_from_lockfile (const std::string filename);
+
+bool is_process_running (unsigned int pid);
+
+
 } /* namespace tcam */
 
 VISIBILITY_POP

@@ -778,9 +778,18 @@ uint32_t tcam::fourcc2aravis (uint32_t fourcc)
     return 0;
 }
 
+static const std::string gige_daemon_lock_file = "/var/lock/gige-daemon.lock";
 
-std::vector<DeviceInfo> tcam::get_gige_device_list ()
+
+unsigned int tcam::get_gige_device_count ()
 {
+    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
+
+    if (!is_running)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
+        return get_aravis_device_count();
+    }
 
     key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
     key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
@@ -789,10 +798,52 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 );
     if (shmid < 0)
     {
-        // perror("shmget");
-        // exit(1);
         tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
+        return get_aravis_device_count();
+    }
+
+    semaphore_lock(sem_id);
+
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+
+    if (d == nullptr)
+    {
+        shmdt(d);
+        semaphore_unlock(sem_id);
+        tcam_log(TCAM_LOG_WARNING, "shmat return nullptr. Returning device count: 0");
+        return 0;
+    }
+
+    unsigned int ret = d->device_count;
+
+    shmdt(d);
+    semaphore_unlock(sem_id);
+
+    return ret;
+}
+
+
+std::vector<DeviceInfo> tcam::get_gige_device_list ()
+{
+    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
+
+    if (!is_running)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
         return get_aravis_device_list();
+    }
+
+    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
+    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
+    int sem_id = semaphore_create(sem_key);
+
+    int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 );
+    if (shmid < 0)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
+        auto vec =  get_aravis_device_list();
+        tcam_log(TCAM_LOG_ERROR, "Aravis gave us %d", vec.size());
+        return vec;
     }
 
     semaphore_lock(sem_id);
@@ -820,6 +871,14 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     semaphore_unlock(sem_id);
 
     return ret;
+}
+
+
+unsigned int tcam::get_aravis_device_count ()
+{
+    arv_update_device_list();
+
+    return arv_get_n_devices();
 }
 
 
