@@ -20,7 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <gst/gst.h>
+#include <unistd.h>
 #include <tcamprop.h>
+
+GMainLoop *mainloop = NULL;
+
 
 void print_help ()
 {
@@ -30,6 +34,25 @@ void print_help ()
            "\n\n");
 }
 
+
+static gboolean
+stdin_callback (GIOChannel * io, GIOCondition condition, gpointer data)
+{
+    gchar in;
+
+    GError *error = NULL;
+
+    if (g_io_channel_read_chars (io, &in, 1, NULL, &error) ==  G_IO_STATUS_NORMAL)
+    {
+        if ('q' == in)
+        {
+            g_main_loop_quit (mainloop);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
 
 /*
   This function will be called in a separate thread when our appsink
@@ -43,13 +66,18 @@ GstFlowReturn callback (GstElement* sink, void* user_data)
 
     if (sample)
     {
-        g_print ("*");
-
         /* if you want to have information about the format the image has
            you can look at the caps */
         /* GstCaps* caps gst_sample_get_caps(sample) */
+        static guint framecount = 0;
+
+        framecount++;
 
         GstBuffer* buffer = gst_sample_get_buffer(sample);
+        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
+        g_print("Captured frame %d, Timestamp=%" GST_TIME_FORMAT "            \r",
+                framecount,
+                GST_TIME_ARGS(timestamp));
         GstMapInfo info; // contains the actual image
         if (gst_buffer_map(buffer, &info, GST_MAP_READ))
         {
@@ -70,6 +98,8 @@ int main (int argc, char *argv[])
 {
 
     gst_init(&argc, &argv); // init gstreamer
+
+    mainloop = g_main_loop_new(NULL, FALSE);
 
     char* serial = NULL; // the serial number of the camera we want to use
 
@@ -140,16 +170,16 @@ int main (int argc, char *argv[])
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-    printf("Press 'q' then 'enter' to stop the stream.\n");
-    while(0 == 0)
-    {
-        char c = getchar();
+    // Create an IO Channel for the standard input to register a key press callback
+    GIOChannel *io = NULL;
+    guint io_watch_id = 0;
+    /* standard input callback */
+    io = g_io_channel_unix_new (STDIN_FILENO);
+    io_watch_id = g_io_add_watch (io, G_IO_IN, stdin_callback, NULL);
+    g_io_channel_unref (io);
 
-        if (c == 'q')
-        {
-            break;
-        }
-    }
+    printf("Press 'q' then 'enter' to stop the stream.\n");
+    g_main_loop_run(mainloop);    
 
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);
