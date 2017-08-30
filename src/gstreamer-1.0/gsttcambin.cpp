@@ -727,18 +727,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                     GstStructure* struc = gst_caps_get_structure(tmp, 0);
 
-                    const GValue* lsit = gst_structure_get_value(struc, "format");
-
-                    for (unsigned int i = 0; i < gst_value_list_get_size(lsit); ++i)
-                    {
-                        const GValue* val = gst_value_list_get_value(lsit, i);
-                        tmp_format_string += g_value_get_string(val);
-                    }
-
-                    g_value_init(&format, G_TYPE_STRING);
-                    g_value_set_string(&format, tmp_format_string.c_str());
-
-                    gst_structure_set_value(s, "format", &format);
+                    gst_structure_set_value(s, "format", gst_structure_get_value(struc, "format"));
 
                     gst_structure_set_value(s, "width", width);
                     gst_structure_set_value(s, "height", height);
