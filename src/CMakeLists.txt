@@ -169,6 +169,35 @@ if (BUILD_ARAVIS)
 endif (BUILD_ARAVIS)
 
 
+if (BUILD_LIBUSB)
+
+  set(lib_libusb
+    ${base}
+    AFU050Device.cpp
+    libusb_utils.cpp
+    UsbSession.cpp
+    UsbHandler.cpp
+    LibusbDevice.cpp
+    libusblibrary.cpp
+    devicelibrary.h)
+
+  find_package(libusb-1.0 REQUIRED)
+  include_directories(${LIBUSB_1_INCLUDE_DIRS})
+
+  add_library(tcam-libusb SHARED ${lib_libusb})
+  target_link_libraries(tcam-libusb ${LIBUSB_1_LIBRARIES})
+
+  set_property(TARGET tcam-libusb PROPERTY VERSION ${TCAM_VERSION})
+  set_property(TARGET tcam-libusb PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
+
+  install(TARGETS tcam-libusb
+    LIBRARY
+    DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
+    COMPONENT tcam-libusb)
+
+endif (BUILD_LIBUSB)
+
+
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
 
 set(PUBLIC_HEADER tcam.h)

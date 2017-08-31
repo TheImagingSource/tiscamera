@@ -68,6 +68,7 @@ void tcam::BackendLoader::load_backends ()
         {
             {TCAM_DEVICE_TYPE_V4L2,    "libtcam-v4l2.so",   nullptr, nullptr, nullptr, nullptr},
             {TCAM_DEVICE_TYPE_ARAVIS,  "libtcam-aravis.so", nullptr, nullptr, nullptr, nullptr},
+            {TCAM_DEVICE_TYPE_LIBUSB,  "libtcam-libusb.so", nullptr, nullptr, nullptr, nullptr},
             {TCAM_DEVICE_TYPE_UNKNOWN, "none",              nullptr, nullptr, nullptr, nullptr}
         };
 

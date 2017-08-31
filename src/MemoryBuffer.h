@@ -35,10 +35,10 @@ class MemoryBuffer
 public:
 
     // will not take ownership of memory given in tcam_image_buffer
-    explicit MemoryBuffer (const struct tcam_image_buffer&);
+    explicit MemoryBuffer (const struct tcam_image_buffer&, bool owns_memory=false);
 
     // will allocate buffer memory
-    explicit MemoryBuffer (const VideoFormat&);
+    explicit MemoryBuffer (const VideoFormat&, bool owns_memory=false);
 
     MemoryBuffer () = delete;
 

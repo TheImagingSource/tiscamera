@@ -11,6 +11,17 @@ RUN+="/sbin/modprobe -b uvcvideo"
 ACTION=="add", SUBSYSTEM=="drivers", \
                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
                ATTR{new_id}="199e 8101"
+
+# afu050
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8201", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8202", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8203", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8204", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8205", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8206", GROUP="video", MODE="0660"
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8207", GROUP="video", MODE="0660"
+
+
 # templates for those using non standard locations
 
 # load uvc extensions for usb2 cameras

@@ -50,6 +50,7 @@ enum TCAM_DEVICE_TYPE
     TCAM_DEVICE_TYPE_UNKNOWN = 0, /**< Unknown device type*/
     TCAM_DEVICE_TYPE_V4L2,        /**< device that uses the v4l2 API */
     TCAM_DEVICE_TYPE_ARAVIS,      /**< currently through aravis */
+    TCAM_DEVICE_TYPE_LIBUSB,      /**< libusb backends */
 };
 
 
@@ -152,7 +153,8 @@ struct tcam_stream_statistics
 struct tcam_image_buffer
 {
     unsigned char*           pData;    /**< pointer to actual image buffer */
-    unsigned int             length;   /**< size if image buffer in bytes */
+    unsigned int             length;   /**< size of image in bytes */
+    unsigned int             size;     /**< size of image buffer in bytes */
     struct tcam_video_format format;   /**< tcam_video_format the image buffer has */
     unsigned int             pitch;    /**< length of single image line in bytes */
     struct tcam_stream_statistics statistics;
