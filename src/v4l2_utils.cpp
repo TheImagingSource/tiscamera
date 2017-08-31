@@ -59,6 +59,18 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = { 0x0199e203},
     },
     {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
+        .v4l2_id = {0x199e254},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT,
+        .v4l2_id = {0x199e256},
+    },
+    {
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_LOWER_LIMIT,
+        .v4l2_id = {0x199e255},
+    },
+    {
         .id = TCAM_PROPERTY_GAIN,
         .v4l2_id = { V4L2_CID_GAIN },
     },
@@ -201,6 +213,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = { 0x199e250 },
     },
     {
+        .id = TCAM_PROPERTY_BALANCE_WHITE_TEMPERATURE_PRESET,
+        .v4l2_id = { 0x199e249 },
+    },
+    {
         .id = TCAM_PROPERTY_IRCUT,
         .v4l2_id = {},
     },
@@ -294,11 +310,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_REVERSE_X,
-        .v4l2_id = { 0x199e226 },
+        .v4l2_id = { 0x199e226, 0x199e251 },
     },
     {
         .id = TCAM_PROPERTY_REVERSE_Y,
-        .v4l2_id = { 0x199e227 },
+        .v4l2_id = { 0x199e227, 0x199e252 },
     },
     {
         .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
