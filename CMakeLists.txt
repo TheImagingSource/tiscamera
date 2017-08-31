@@ -69,6 +69,8 @@ option(BUILD_V4L2     "Include support for USB cameras"      ON )
 option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 
+set(TCAM_INTERNAL_ARAVIS ON CACHE STRING "Use internal aravis dependency instead of system libraries")
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
@@ -86,6 +88,7 @@ set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE STRING "uvcd
 set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE STRING "systemd unit installation path" FORCE)
 set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE STRING "pkgconfig installation path" FORCE)
 
+add_subdirectory(dependencies)
 add_subdirectory(src)
 
 
