@@ -136,6 +136,11 @@ void tcam_logging (const char* module,
 
 #define tcam__log(module, level, message, ...) (tcam_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
+#define tcam_error(message, ...) (tcam_log(TCAM_LOG_ERROR, message, ##__VA_ARGS__))
+#define tcam_warning(message, ...) (tcam_log(TCAM_LOG_WARNING, message, ##__VA_ARGS__))
+#define tcam_info(message, ...) (tcam_log(TCAM_LOG_INFO, message, ##__VA_ARGS__))
+#define tcam_debug(message, ...) (tcam_log(TCAM_LOG_DEBUG, message, ##__VA_ARGS__))
+
 VISIBILITY_POP
 
 #endif /* TCAM_LOGGING_H */
