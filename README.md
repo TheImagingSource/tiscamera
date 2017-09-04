@@ -32,6 +32,12 @@ libusb-1.0-0-dev
 libzip-dev
 python-setuptools
 
+For aravis:
+
+libxml2
+libaudit
+libpcap
+
 ## Runtime Dependencies
 
 The following packages are required to execute the compiled binaries for our software:
@@ -43,42 +49,30 @@ libgirepository1.0
 libudev
 libtinyxml
 libzip
+libnotify
+
+For aravis:
+
+libxml2-dev
+libaudit-dev
+libpcap-dev
+libnotify-dev
 
 
 On a Debian / Ubuntu system, the following command line could be used to install all required packages in one go:
 
 ```
 # Build dependencies
-sudo apt-get install git g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl
-python-setuptools
+sudo apt-get install git g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl python-setuptools libxml2-dev libpcap-dev libaudit-dev libnotify-dev
 
 # Runtime dependencies
-sudo apt-get install gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+sudo apt-get install gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly libxml2 libpcap libaudit1 libnotify4
 ```
 
-### Optional: ARAVIS installation
+### aravis installation
 
-*ARAVIS* is an open source library to control GigE-Vision compliant cameras. *The Imaging Source* Gigabit-Ethernet cameras are GigE-Vision compliant and thus need the *ARAVIS* library in order to be usable by our software. If the library is not available in the standard package repository of your Linux distribution, it has to be installed manually from source. You can skip the following steps if you do not intend to use the software with GigE-Vision compliant devices.
-
-
-The following packages are required to build and install *ARAVIS*:
-
-```
-sudo apt-get install libxml2-dev gtk-doc-tools intltool autoconf autoconf libnotify-dev libgtk-3-dev
-```
-
-
-The following steps will build and install *ARAVIS* on your system:
-
-Download the latest stable release here:
-http://ftp.gnome.org/pub/GNOME/sources/aravis/0.4/
-
-Extract the archive and enter the new directory.
-```
-./configure --prefix=/usr
-make
-sudo make install
-```
+We ship a aravis git submodule. A systemwide installation can be done but does not affect tiscamera.
+If you want to build against an external aravis version set TCAM\_INTERNAL\_ARAVIS=OFF
 
 ### Building tiscamera
 

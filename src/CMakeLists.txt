@@ -142,13 +142,20 @@ if (BUILD_ARAVIS)
 
   find_package(GObject REQUIRED) # dependency
   find_package(GLIB2 REQUIRED)   # dependency
-  if (${TCAM_INTERNAL_ARAVIS})
+  find_package(GIO REQUIRED)   # dependency
+
+  if (TCAM_INTERNAL_ARAVIS)
+
+    include_directories("${GIO_INCLUDE_DIR}")
     include_directories("${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
     include_directories("${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
-  else (${TCAM_INTERNAL_ARAVIS})
+
+  else (TCAM_INTERNAL_ARAVIS)
+
     find_package(Aravis REQUIRED QUIET)
     include_directories(${aravis_INCLUDE_DIR})
-  endif(${TCAM_INTERNAL_ARAVIS})
+
+  endif(TCAM_INTERNAL_ARAVIS)
 
   include_directories(${GOBJECT_INCLUDE_DIR})
   include_directories(${GLIB2_INCLUDE_DIR})
@@ -160,15 +167,29 @@ if (BUILD_ARAVIS)
 
   add_library(tcam-aravis SHARED ${lib_aravis})
 
-  TARGET_LINK_LIBRARIES(tcam-aravis ${GObject_LIBRARIES})
+  TARGET_LINK_LIBRARIES(tcam-aravis ${GOBJECT_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam-aravis ${GLIB2_LIBRARIES})
 
-  if (${TCAM_INTERNAL_ARAVIS})
-    target_link_libraries(tcam-aravis "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
-  else (${TCAM_INTERNAL_ARAVIS})
+  if (TCAM_INTERNAL_ARAVIS)
+
+    set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
+    #add_dependencies(tcam_aravis aravis)
+    find_package(LibXml2 REQUIRED)
+    find_package(audit REQUIRED)
+    find_package(PCAP REQUIRED)
+
+    target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
+    target_link_libraries(tcam-aravis "${AUDIT_LIBRARIES}")
+    target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
+
+    target_link_libraries(tcam-aravis "${LIBXML2_LIBRARIES}")
+    target_link_libraries(tcam-aravis "${ARAVIS_LIB}")
+
+  else (TCAM_INTERNAL_ARAVIS)
+
     target_link_libraries(tcam-aravis ${aravis_LIBRARIES})
 
-  endif (${TCAM_INTERNAL_ARAVIS})
+  endif (TCAM_INTERNAL_ARAVIS)
 
 
   set_property(TARGET tcam-aravis PROPERTY VERSION ${TCAM_VERSION})
