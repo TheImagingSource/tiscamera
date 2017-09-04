@@ -88,7 +88,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
     }
 
 
-    tcam_log(TCAM_LOG_DEBUG, "Received min: %f max %f", min, max);
+    tcam_log(TCAM_LOG_DEBUG, "Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
 
     std::vector<double> ret = create_steps_for_range(min, max);
 
@@ -938,66 +938,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
         fps_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
     }
 
-
     std::vector<double> fps;
-
-    if (fps_node != format_nodes.end())
-    {
-
-        if (ARV_IS_GC_ENUMERATION (*fps_node))
-        {
-            const GSList* childs;
-            const GSList* iter;
-
-            childs = arv_gc_enumeration_get_entries (ARV_GC_ENUMERATION (*fps_node));
-            for (iter = childs; iter != NULL; iter = iter->next)
-            {
-                if (arv_gc_feature_node_is_implemented ((ArvGcFeatureNode*)iter->data, NULL))
-                {
-                    if (strcmp(arv_dom_node_get_node_name ((ArvDomNode*)iter->data), "EnumEntry") == 0)
-                    {
-                        GError* error = NULL;
-
-                        // We want to store framerates as fps, thus have to convert them from 0.XXXXX Hz to XX.YY FpS
-
-                        // this is the denominator of our framerate
-                        uint64_t val = arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-                        double f = 1.0 / (uint32_t)val * 10000000;
-
-                        f = round(f * 1000.0) / 1000.0;
-
-                        fps.push_back(f);
-                    }
-                }
-            }
-        }
-        else
-        {
-            double min;
-            double max;
-            arv_camera_get_frame_rate_bounds(this->arv_camera ,&min, &max);
-
-            fps = create_steps_for_range(min, max);
-
-            // fps.push_back(min);
-            // fps.push_back(max);
-        }
-    }
-    else
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to find fps node.");
-        // fallback and atleast try to not wreck the whole system
-
-        // show that something went wrong
-
-        double min;
-        double max;
-        arv_camera_get_frame_rate_bounds(this->arv_camera ,&min, &max);
-
-        fps = create_steps_for_range(min, max);
-
-    }
-
 
     node_to_use = "Binning";
     auto binning_node = std::find_if(format_nodes.begin() , format_nodes.end(), find_node);
@@ -1111,6 +1052,9 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             {
                 rf.resolution.type = TCAM_RESOLUTION_TYPE_RANGE;
             }
+
+            fps = this->format_handler->get_framerates(max, desc.fourcc);
+
             rf.resolution.framerate_count = fps.size();
             rf.framerates = fps;
 
