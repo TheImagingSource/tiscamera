@@ -66,7 +66,7 @@ GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
  *
  * Returns: (transfer full): A string describing the property type
  */
-const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, gchar* name)
+const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name)
 {
     TcamPropInterface* iface;
     gchar* ret;
@@ -104,7 +104,7 @@ const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, gchar* name)
  * Returns: True on success
  */
 gboolean tcam_prop_get_tcam_property (TcamProp* self,
-                                      gchar* name,
+                                      const gchar* name,
                                       GValue* value,
                                       GValue* min,
                                       GValue* max,
@@ -178,7 +178,7 @@ GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
  * Returns: true on success
  */
 gboolean tcam_prop_set_tcam_property (TcamProp* self,
-                                      gchar* name,
+                                      const gchar* name,
                                       const GValue* value)
 {
     TcamPropInterface *iface;

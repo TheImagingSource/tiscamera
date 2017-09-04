@@ -40,9 +40,9 @@ struct _TcamPropInterface
 
 	GSList* (*get_property_names) (TcamProp* self);
 	gchar* (*get_property_type) (TcamProp* self,
-                                 gchar* name);
+                                 const gchar* name);
 	gboolean (*get_property) (TcamProp* self,
-                              gchar* name,
+                              const gchar* name,
                               GValue* value,
                               GValue* min,
                               GValue* max,
@@ -57,7 +57,7 @@ struct _TcamPropInterface
                                  const char* menu_name);
 
 	gboolean (*set_property) (TcamProp* self,
-                              gchar* name,
+                              const gchar* name,
                               const GValue* value);
 	GSList* (*get_device_serials) (TcamProp* self);
 	gboolean (*get_device_info) (TcamProp* self,
@@ -72,10 +72,10 @@ struct _TcamPropInterface
 GSList* tcam_prop_get_tcam_property_names (TcamProp* self);
 
 const gchar *tcam_prop_get_tcam_property_type (TcamProp* self,
-                                               gchar* name);
+                                               const gchar* name);
 
 gboolean tcam_prop_get_tcam_property (TcamProp* self,
-                                      gchar* name,
+                                      const gchar* name,
                                       GValue* value,
                                       GValue* min,
                                       GValue* max,
@@ -90,7 +90,7 @@ GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
                                          const char* name);
 
 gboolean tcam_prop_set_tcam_property (TcamProp* self,
-                                      gchar* name,
+                                      const gchar* name,
                                       const GValue* value);
 
 GSList* tcam_prop_get_device_serials (TcamProp* self);
