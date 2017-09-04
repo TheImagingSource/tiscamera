@@ -26,10 +26,7 @@ using namespace tcam;
 
 MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf, bool owns_memory)
     : is_own_memory(owns_memory), buffer(buf)
-{
-    tcam_log(TCAM_LOG_DEBUG, "Adress is %p", buffer.pData);
-
-}
+{}
 
 
 MemoryBuffer::MemoryBuffer (const VideoFormat& format, bool owns_memory)
@@ -47,8 +44,6 @@ MemoryBuffer::MemoryBuffer (const VideoFormat& format, bool owns_memory)
     }
     buffer.format = format.get_struct();
     buffer.pitch = format.get_pitch_size();
-
-    tcam_log(TCAM_LOG_DEBUG, "Adress is %p", buffer.pData);
 }
 
 
