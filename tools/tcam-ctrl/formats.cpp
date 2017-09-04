@@ -100,7 +100,7 @@ void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& avai
                 for (const auto& r: resolutions)
                 {
                     std::string fps_string = ", fps={";
-                    auto rates = f.get_framerates(res.min_size);
+                    auto rates = f.get_framerates(r);
                     for (unsigned int i = 0; i < rates.size(); ++i)
                     {
                         fps_string += std::to_string(rates.at(i));
