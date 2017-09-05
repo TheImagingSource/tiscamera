@@ -175,11 +175,9 @@ if (BUILD_ARAVIS)
     set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
     #add_dependencies(tcam_aravis aravis)
     find_package(LibXml2 REQUIRED)
-    find_package(audit REQUIRED)
     find_package(PCAP REQUIRED)
 
     target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
-    target_link_libraries(tcam-aravis "${AUDIT_LIBRARIES}")
     target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
 
     target_link_libraries(tcam-aravis "${LIBXML2_LIBRARIES}")
