@@ -1284,7 +1284,7 @@ wait_again:
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
 
-    if (!gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    if (gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
     {
         timestamp_ns = self->ptr->statistics.capture_time_ns;
         GST_DEBUG("Timestamp(ns): %ld", timestamp_ns);
