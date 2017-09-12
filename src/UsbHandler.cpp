@@ -137,13 +137,6 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
 
         d.type = TCAM_DEVICE_TYPE_LIBUSB;
 
-        // d.idVendor = desc.idVendor;
-        // d.idProduct = desc.idProduct;
-
-        // strcpy(d.name, "AFU050");
-        // strcpy(d.serial_number, "47614135");
-        // strcpy(d.additional_identifier, "9209");
-
         libusb_device_handle* dh;
         r = libusb_open(devs[i], &dh);
 
@@ -154,10 +147,6 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
         }
 
         libusb_get_string_descriptor_ascii(dh, desc.iProduct, (unsigned char*)d.name, sizeof(d.name));
-
-        // libusb_get_string_descriptor_ascii(dh, desc.iManufacturer, (unsigned char*)d.manufacturer, sizeof(d.manufacturer));
-        // int lib_ret = libusb_get_port_numbers(dh, (uint8_t*)d.identifier, sizeof(d.identifier))
-
         libusb_get_string_descriptor_ascii(dh, desc.idProduct, (unsigned char*)d.additional_identifier, sizeof(d.additional_identifier));
         libusb_get_string_descriptor_ascii(dh, desc.iSerialNumber, (unsigned char*)d.serial_number, sizeof(d.serial_number));
 
@@ -169,40 +158,6 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
 
     return ret;
 }
-
-
-// std::shared_ptr<UsbCamera> UsbHandler::open_camera (std::string serial_number)
-// {
-//     auto list = get_device_list();
-//     device_info d;
-
-//     for (auto& dev : list)
-//     {
-//         // std::cout << "Comparing |" << dev.serial << "|" << (unsigned char*)serial_number.c_str() << "|" << std::endl;
-//         if (serial_number.compare(dev.serial) == 0)
-//         {
-//              // std::cout << "dev.serial " << dev.serial << ";serial " << serial_number << std::endl;
-//             d = dev;
-//             break;
-//         }
-//     }
-
-//     camera_type t = find_camera_type(d.idVendor, d.idProduct);
-
-
-//     switch(t.camera_type)
-//     {
-//         case USB33:
-//             return std::make_shared<Usb33Camera>(this->session, d);
-//         case USB3:
-//             return std::make_shared<Usb3Camera>(this->session, d);
-//         case USB2:
-//             return std::make_shared<Usb2Camera>(this->session, d);
-//         case UNKNOWN:
-//         default:
-//             return nullptr;
-//     }
-// }
 
 
 std::shared_ptr<UsbSession> UsbHandler::get_session ()
