@@ -70,7 +70,7 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
         if (desc.idVendor != 0x199e)
             continue;
 
-        if (desc.idProduct != 0x8209)
+        if (desc.idProduct != 0x8209 && desc.idProduct != 0x0804)
             continue;
 
         r = libusb_open(devs[i], &ret);
@@ -130,7 +130,7 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
         if (desc.idVendor != 0x199e)
             continue;
 
-        if (desc.idProduct != 0x8209)
+        if (desc.idProduct != 0x8209 && desc.idProduct != 0x0804)
             continue;
 
         tcam_device_info d = { };
