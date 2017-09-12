@@ -22,6 +22,9 @@ ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8206", GROUP="video", MODE="0660"
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8207", GROUP="video", MODE="0660"
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8209", GROUP="video", MODE="0660"
 
+# afu420
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="0804", GROUP="video", MODE="0660"
+
 # templates for those using non standard locations
 
 # load uvc extensions for usb2 cameras
