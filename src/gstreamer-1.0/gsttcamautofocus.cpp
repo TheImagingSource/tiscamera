@@ -174,11 +174,16 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
 {
     GSList* names = nullptr;
 
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_AUTO));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_LEFT));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_TOP));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_WIDTH));
-    names = g_slist_append(names, tcamautofocus_property_id_to_string(PROP_HEIGHT));
+    names = g_slist_append(names,
+        g_strdup(tcamautofocus_property_id_to_string(PROP_AUTO)));
+    names = g_slist_append(names,
+        g_strdup(tcamautofocus_property_id_to_string(PROP_LEFT)));
+    names = g_slist_append(names,
+        g_strdup(tcamautofocus_property_id_to_string(PROP_TOP)));
+    names = g_slist_append(names,
+        g_strdup(tcamautofocus_property_id_to_string(PROP_WIDTH)));
+    names = g_slist_append(names,
+        g_strdup(tcamautofocus_property_id_to_string(PROP_HEIGHT)));
 
     return names;
 }
