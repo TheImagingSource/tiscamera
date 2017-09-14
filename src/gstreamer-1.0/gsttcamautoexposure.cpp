@@ -241,15 +241,24 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 {
     GSList* names = nullptr;
 
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_TOP));
-    names = g_slist_append(names, tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_TOP)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT)));
 
     return names;
 }
