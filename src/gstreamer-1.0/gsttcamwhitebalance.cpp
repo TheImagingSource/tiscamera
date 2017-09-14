@@ -189,12 +189,18 @@ static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self)
 {
     GSList* names = nullptr;
 
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_RED));
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_GREEN));
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_GAIN_BLUE));
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_AUTO_ENABLED));
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_CAMERA_WB));
-    names = g_slist_append(names, tcamwhitebalance_property_id_to_string(PROP_WHITEBALANCE_ENABLED));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_GAIN_RED)));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_GAIN_GREEN)));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_GAIN_BLUE)));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_AUTO_ENABLED)));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_CAMERA_WB)));
+    names = g_slist_append(names,
+        g_strdup(tcamwhitebalance_property_id_to_string(PROP_WHITEBALANCE_ENABLED)));
 
     return names;
 }
