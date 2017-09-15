@@ -16,14 +16,21 @@
 include(ExternalProject)
 
 if (BUILD_ARAVIS)
-
   if (TCAM_INTERNAL_ARAVIS)
-  ExternalProject_Add(aravis
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
-    CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no
-    BUILD_COMMAND make -j4 CFLAGS=-fPIC
-    INSTALL_COMMAND ""
-    ALWAYS 1)
+
+    if( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/aravis/.git" )
+      message( FATAL_ERROR "The git submodules are not available. Please run:
+    git submodule update --init --recursive"
+        )
+    endif()
+
+    ExternalProject_Add(aravis
+      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
+      CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no
+      BUILD_COMMAND make -j4 CFLAGS=-fPIC
+      INSTALL_COMMAND ""
+      ALWAYS 1)
+
   endif (TCAM_INTERNAL_ARAVIS)
 
 endif (BUILD_ARAVIS)
