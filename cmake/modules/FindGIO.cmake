@@ -20,8 +20,9 @@ if (NOT WIN32)
     pkgconfig(gio-2.0 _LibGIOIncDir _LibGIOLinkDir _LibGIOLinkFlags _LibGIOCflags)
 endif(NOT WIN32)
 
+if (NOT GIO_FIND_QUIETLY)
 MESSAGE(STATUS "gio include dir: ${_LibGIOIncDir}")
-
+endif (NOT GIO_FIND_QUIETLY)
 # first try without default paths to respect PKG_CONFIG_PATH
 
 find_path(GIO_MAIN_INCLUDE_DIR glib.h
@@ -33,7 +34,9 @@ find_path(GIO_MAIN_INCLUDE_DIR glib.h
         PATH_SUFFIXES glib-2.0
         PATHS ${_LibGIOIncDir} )
 
-MESSAGE(STATUS "found gio main include dir: ${GIO_MAIN_INCLUDE_DIR}")
+if (NOT GIO_FIND_QUIETLY)
+  MESSAGE(STATUS "found gio main include dir: ${GIO_MAIN_INCLUDE_DIR}")
+endif (NOT GIO_FIND_QUIETLY)
 
 # search the glibconfig.h include dir under the same root where the library is found
 find_library(GIO_LIBRARIES
@@ -69,4 +72,3 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GIO  DEFAULT_MSG  GIO_LIBRARIES GIO_MAIN_INCLUDE_DIR)
 
 mark_as_advanced(GIO_INCLUDE_DIR GIO_LIBRARIES)
-
