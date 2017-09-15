@@ -16,8 +16,6 @@ include(CPackComponent)
 
 set(CPACK_COMPONENTS_ALL tiscamera)
 
-set(CPACK_MONOLITHIC_INSTALL TRUE)
-
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Imaging Source Europe GmbH <support@theimagingsource.com>")
 
 set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software")
