@@ -44,7 +44,7 @@ add_subdirectory(algorithms)
 # can do this:
 # add_defintions($ENV{CFLAGS})
 
-find_package(TinyXML REQUIRED)
+find_package(TinyXML REQUIRED QUIET)
 include_directories(${TinyXML_INCLUDE_DIR})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -140,9 +140,9 @@ if (BUILD_ARAVIS)
 
   add_definitions(-DHAVE_ARAVIS)
 
-  find_package(GObject REQUIRED) # dependency
-  find_package(GLIB2 REQUIRED)   # dependency
-  find_package(GIO REQUIRED)   # dependency
+  find_package(GObject REQUIRED QUIET) # dependency
+  find_package(GLIB2 REQUIRED QUIET)   # dependency
+  find_package(GIO REQUIRED QUIET)   # dependency
 
   if (TCAM_INTERNAL_ARAVIS)
 
@@ -174,8 +174,8 @@ if (BUILD_ARAVIS)
     add_dependencies(tcam-aravis aravis)
     set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
     #add_dependencies(tcam_aravis aravis)
-    find_package(LibXml2 REQUIRED)
-    find_package(PCAP REQUIRED)
+    find_package(LibXml2 REQUIRED QUIET)
+    find_package(PCAP REQUIRED QUIET)
 
     target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
     target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
@@ -200,7 +200,6 @@ if (BUILD_ARAVIS)
 
 endif (BUILD_ARAVIS)
 
-
 if (BUILD_LIBUSB)
 
   set(lib_libusb
@@ -213,7 +212,7 @@ if (BUILD_LIBUSB)
     libusblibrary.cpp
     devicelibrary.h)
 
-  find_package(libusb-1.0 REQUIRED)
+  find_package(libusb-1.0 REQUIRED QUIET)
   include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
   add_library(tcam-libusb SHARED ${lib_libusb})
