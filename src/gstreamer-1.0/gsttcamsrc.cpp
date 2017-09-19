@@ -624,6 +624,7 @@ enum
     PROP_SERIAL,
     PROP_DEVICE,
     PROP_NUM_BUFFERS,
+    PROP_DO_TIMESTAMP,
 };
 
 
@@ -1441,6 +1442,12 @@ static void gst_tcam_src_set_property (GObject* object,
             self->n_buffers = g_value_get_int (value);
             break;
         }
+        case PROP_DO_TIMESTAMP:
+        {
+            gst_base_src_set_do_timestamp(GST_BASE_SRC(object),
+                                          g_value_get_boolean(value));
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1479,6 +1486,12 @@ static void gst_tcam_src_get_property (GObject* object,
         case PROP_NUM_BUFFERS:
         {
             g_value_set_int (value, self->n_buffers);
+            break;
+        }
+        case PROP_DO_TIMESTAMP:
+        {
+            g_value_set_boolean (value,
+                                 gst_base_src_get_do_timestamp(GST_BASE_SRC(object)));
             break;
         }
         default:
@@ -1524,7 +1537,14 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                            "Number of buffers to send before ending pipeline",
                            0, G_MAXINT, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
+    g_object_class_install_property
+        (gobject_class,
+         PROP_DO_TIMESTAMP,
+         g_param_spec_boolean ("do-timestamp",
+                               "Do timestamp",
+                               "Apply current stream time to buffers",
+                               true,
+                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT));
     GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
     gst_element_class_set_details_simple (element_class,
