@@ -143,7 +143,7 @@ static const char* tcamautofocus_property_id_to_string (guint id)
 }
 
 
-static guint tcamwhitebalance_string_to_property_id (const char* name)
+static guint tcamautofocus_string_to_property_id (const char* name)
 {
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
@@ -294,7 +294,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_width);
         }
         if (def)
         {
@@ -333,7 +333,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_height);
         }
         if (def)
         {
@@ -372,7 +372,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_width);
         }
         if (def)
         {
@@ -411,7 +411,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, G_MAXINT);
+            g_value_set_int(max, self->image_height);
         }
         if (def)
         {
@@ -443,7 +443,7 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
                                                      gchar* name,
                                                      const GValue* value)
 {
-    guint id = tcamwhitebalance_string_to_property_id(name);
+    guint id = tcamautofocus_string_to_property_id(name);
 
     if (id == 0)
     {
@@ -451,7 +451,7 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
     }
 
     gst_tcamautofocus_set_property(G_OBJECT(self),
-                                   tcamwhitebalance_string_to_property_id(name),
+                                   tcamautofocus_string_to_property_id(name),
                                    value, NULL);
     return TRUE;
 }
