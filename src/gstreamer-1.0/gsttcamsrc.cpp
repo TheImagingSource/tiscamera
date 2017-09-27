@@ -1284,7 +1284,7 @@ wait_again:
                                           0, self->ptr->length, NULL, NULL);
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
-
+    /*
     if (gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
     {
         timestamp_ns = self->ptr->statistics.capture_time_ns;
@@ -1301,7 +1301,7 @@ wait_again:
         // GST_DEBUG("pts %ld", timestamp_ns - self->last_timestamp);
         self->last_timestamp = timestamp_ns;
     }
-
+    */
     GST_DEBUG_OBJECT (self, "Pushing buffer...");
 
     if (self->n_buffers != 0)
