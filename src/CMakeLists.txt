@@ -72,8 +72,9 @@ set(base
   VideoFormatDescription.cpp
   ImageSink.cpp)
 
+add_library(tcam-base OBJECT ${base})
+
 set( srcs
-  ${base}
   BackendLoader.cpp
   DeviceIndex.cpp
   DeviceInterface.cpp
@@ -89,7 +90,6 @@ set( srcs
 if (BUILD_V4L2)
 
   set(lib_v4l2
-    ${base}
     V4l2Device.cpp
     v4l2_utils.cpp
     v4l2library.cpp
@@ -104,7 +104,7 @@ if (BUILD_V4L2)
 
   add_definitions(-DHAVE_USB)
 
-  add_library(tcam-v4l2 SHARED ${lib_v4l2})
+  add_library(tcam-v4l2 SHARED ${lib_v4l2} $<TARGET_OBJECTS:tcam-base>)
   TARGET_LINK_LIBRARIES(tcam-v4l2 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
 
   set_property(TARGET tcam-v4l2 PROPERTY VERSION ${TCAM_VERSION})
@@ -134,7 +134,6 @@ endif (BUILD_V4L2)
 if (BUILD_ARAVIS)
 
   set(lib_aravis
-    ${base}
     AravisDevice.cpp
     aravis_utils.cpp
     aravislibrary.cpp
@@ -167,7 +166,7 @@ if (BUILD_ARAVIS)
 
   add_subdirectory(tcam-network)
 
-  add_library(tcam-aravis SHARED ${lib_aravis})
+  add_library(tcam-aravis SHARED ${lib_aravis} $<TARGET_OBJECTS:tcam-base>)
 
   TARGET_LINK_LIBRARIES(tcam-aravis ${GOBJECT_LIBRARIES})
   TARGET_LINK_LIBRARIES(tcam-aravis ${GLIB2_LIBRARIES})
@@ -205,19 +204,20 @@ endif (BUILD_ARAVIS)
 if (BUILD_LIBUSB)
 
   set(lib_libusb
-    ${base}
     AFU050Device.cpp
     libusb_utils.cpp
     UsbSession.cpp
     UsbHandler.cpp
     LibusbDevice.cpp
     libusblibrary.cpp
-    devicelibrary.h)
+    )
+
+  include_directories("..")
 
   find_package(libusb-1.0 REQUIRED QUIET)
   include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
-  add_library(tcam-libusb SHARED ${lib_libusb})
+  add_library(tcam-libusb SHARED ${lib_libusb} $<TARGET_OBJECTS:tcam-base>)
   target_link_libraries(tcam-libusb ${LIBUSB_1_LIBRARIES})
 
   set_property(TARGET tcam-libusb PROPERTY VERSION ${TCAM_VERSION})
@@ -234,7 +234,7 @@ endif (BUILD_LIBUSB)
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
 
 set(PUBLIC_HEADER tcam.h)
-add_library(tcam SHARED ${srcs})
+add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
 
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
