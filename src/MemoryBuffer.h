@@ -56,6 +56,9 @@ public:
      */
     unsigned char* get_data ();
 
+    size_t get_buffer_size () const;
+    size_t get_image_size () const;
+
 
     struct tcam_stream_statistics get_statistics () const;
 
