@@ -149,7 +149,7 @@ bool ImageSink::set_buffer_number (size_t new_number)
 
 bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers)
 {
-    if (status == TCAM_PIPELINE_PLAYING)
+    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
         return false;
     }
@@ -175,7 +175,7 @@ std::vector<std::shared_ptr<MemoryBuffer>> ImageSink::get_buffer_collection ()
 
 bool ImageSink::delete_buffer_collection ()
 {
-    if (status == TCAM_PIPELINE_PLAYING)
+    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
         return false;
     }
