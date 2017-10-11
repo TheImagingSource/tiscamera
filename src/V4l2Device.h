@@ -114,6 +114,8 @@ public:
 
     bool release_buffers ();
 
+    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+
     bool start_stream ();
 
     bool stop_stream ();
@@ -219,6 +221,7 @@ private:
     bool requeue_mmap_buffer ();
 
     void init_mmap_buffers ();
+    void init_userptr_buffers ();
 
     void free_mmap_buffers ();
 

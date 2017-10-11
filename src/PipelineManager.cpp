@@ -170,6 +170,8 @@ bool PipelineManager::setSink (std::shared_ptr<SinkInterface> s)
 
     this->sink = s;
 
+    this->sink->set_source(shared_from_this());
+
     return true;
 }
 
@@ -603,6 +605,15 @@ void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
     else
     {
       tcam_log(TCAM_LOG_ERROR, "Sink is NULL");
+    }
+}
+
+
+void PipelineManager::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+    if (source)
+    {
+        source->requeue_buffer(buffer);
     }
 }
 

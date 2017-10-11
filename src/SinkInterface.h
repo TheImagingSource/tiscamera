@@ -43,7 +43,11 @@ public:
 
     virtual void push_image (std::shared_ptr<MemoryBuffer>) = 0;
 
+    virtual void requeue_buffer (std::shared_ptr<MemoryBuffer>) = 0;
+
     virtual std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection () = 0;
+
+    virtual void set_source (std::weak_ptr<SinkInterface>) {};
 
 };
 

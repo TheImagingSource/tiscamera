@@ -52,6 +52,8 @@ public:
 
     void push_image (std::shared_ptr<MemoryBuffer>);
 
+    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+
     bool setSink (std::shared_ptr<SinkInterface>);
 
     bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);

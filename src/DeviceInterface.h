@@ -92,6 +92,8 @@ public:
      */
     virtual bool release_buffers () = 0;
 
+    virtual void requeue_buffer (std::shared_ptr<MemoryBuffer>) = 0;
+
     /**
      * Start image retrieval and wait for new images
      * A SinkInterface has to be given via @set_sink

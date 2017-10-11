@@ -387,6 +387,18 @@ bool tcam::AFU050Device::release_buffers ()
 }
 
 
+void tcam::AFU050Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buf)
+{
+    for (auto& b : buffers)
+    {
+        if (b.buffer->get_data() == buf->get_data())
+        {
+            b.is_queued = true;
+        }
+    }
+}
+
+
 void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
 {
     if (transfer->status != LIBUSB_TRANSFER_COMPLETED)
@@ -551,7 +563,6 @@ bool tcam::AFU050Device::start_stream ()
     }
 
     tcam_log(TCAM_LOG_INFO, "Starting stream...");
-    init_buffers();
     current_buffer = 0;
     stop_all = false;
     is_stream_on = true;
