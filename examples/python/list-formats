@@ -36,19 +36,9 @@ def print_help():
     print("\n\n")
 
 
-def main():
-    Gst.init(sys.argv)  # init gstreamer
-    serial = None
-
-    if len(sys.argv) > 1:
-        if "-h" in sys.argv[1] or "--help" in sys.argv[1]:
-            print_help()
-            return
-        serial = sys.argv[1]
-
+def list_formats(serial):
     source = Gst.ElementFactory.make("tcamsrc")
 
-    # if we have a serial we clearly do not want the default device
     if serial:
         source.set_property("serial", serial)
 
@@ -68,4 +58,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    Gst.init(sys.argv)  # init gstreamer
+    serial_ = None
+
+    if len(sys.argv) > 1:
+        if "-h" in sys.argv[1] or "--help" in sys.argv[1]:
+            print_help()
+            sys.exit(0)
+        serial_ = sys.argv[1]
+
+    list_formats(serial_)

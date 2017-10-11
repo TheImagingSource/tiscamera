@@ -84,17 +84,9 @@ class CameraVideo(Gtk.Window):
         # create pipeline from string. Don't bother with single elements
 
         self.pipeline = Gst.parse_launch('tcambin '
-                                         + '! tee name=t t. '
-                                         + '! queue '
-                                         + '! valve name=valve '
-                                         + '! videoconvert '
-                                         + '! jpegenc '
-                                         + '! multifilesink '
-                                         + ' name=filesink post-messages=true '
-                                         + ' location=/tmp/image-%06d.jpg t. '
                                          + '! queue '
                                          + '! videoconvert '
-                                         + '! xvimagesink ')
+                                         + '! xvimagesink sync=false')
 
         # tcambin automatically creates a few elements that offer convenience functions
         # if you wish to manually recreate the internal pipeline
