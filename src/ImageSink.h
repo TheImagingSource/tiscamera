@@ -53,18 +53,27 @@ public:
 
     void push_image (std::shared_ptr<MemoryBuffer>);
 
+    void requeue_buffer(std::shared_ptr<MemoryBuffer>);
+
     bool set_buffer_number (size_t);
 
     bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);
 
     std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
 
-    bool delete_buffer_collection ()
-;
+    bool delete_buffer_collection ();
+
+    /**
+     * used to set the pipelinemanager instance that is called
+     * for things like requeue_buffer
+     */
+    void set_source (std::weak_ptr<SinkInterface>);
 
 private:
 
     bool initialize_internal_buffer ();
+
+    std::weak_ptr<SinkInterface> source_;
 
     TCAM_PIPELINE_STATUS status;
     VideoFormat format;

@@ -522,8 +522,6 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> 
         this->buffers.push_back(info);
     }
 
-    init_mmap_buffers();
-
     return true;
 }
 
@@ -542,29 +540,40 @@ bool V4l2Device::release_buffers ()
 }
 
 
+void V4l2Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+
+        auto& b = buffers.at(i);
+        if (!b.is_queued && b.buffer == buffer)
+        {
+            struct v4l2_buffer buf = {};
+
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buf.memory = V4L2_MEMORY_USERPTR;
+            buf.index = i;
+            buf.m.userptr = (unsigned long)b.buffer->get_data();
+            buf.length = b.buffer->get_buffer_size();
+
+            // requeue buffer
+            int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
+            if (ret == -1)
+            {
+                tcam_error("Could not requeue buffer");
+                return;
+            }
+            b.is_queued = true;
+        }
+    }
+}
+
+
 bool V4l2Device::start_stream ()
 {
     enum v4l2_buf_type type;
 
-    tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());
-
-    for (unsigned int i = 0; i < buffers.size(); ++i)
-    {
-        struct v4l2_buffer buf = {};
-
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-
-        if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
-        {
-            std::string s = "Unable to queue v4l2_buffer 'VIDIOC_QBUF'";
-            tcam_log(TCAM_LOG_ERROR, s.c_str());
-            return false;
-        }
-        else
-            tcam_log(TCAM_LOG_DEBUG, "Successfully queued v4l2_buffer");
-    }
+    init_userptr_buffers();
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(fd, VIDIOC_STREAMON, &type))
@@ -1371,7 +1380,7 @@ bool V4l2Device::get_frame ()
     struct v4l2_buffer buf = {};
 
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf.memory = V4L2_MEMORY_MMAP;
+    buf.memory = V4L2_MEMORY_USERPTR;
 
     int ret = tcam_xioctl(fd, VIDIOC_DQBUF, &buf);
 
@@ -1383,15 +1392,20 @@ bool V4l2Device::get_frame ()
 
     buffers.at(buf.index).is_queued = false;
 
-    if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
-    {
-        tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Dropping...");
-        if (!requeue_mmap_buffer())
-        {
-            return false;
-        }
-        return true;
-    }
+    // buf.bytesused
+    /* The number of bytes occupied by the data in the buffer. It depends on the negotiated data format and may change with each buffer for compressed variable size data like JPEG images. Drivers must set this field when type refers to a capture stream, applications when it refers to an output stream. If the application sets this to 0 for an output stream, then bytesused will be set to the size of the buffer (see the length field of this struct) by the driver. For multiplanar formats this field is ignored and the planes pointer is used instead.
+     */
+    // if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
+    // {
+    //     tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
+    //              buf.bytesused, this->active_video_format.get_required_buffer_size());
+    //     requeue_buffer(buffers.at(buf.index).buffer);
+    //     // if (!requeue_mmap_buffer())
+    //     // {
+    //     //     return false;
+    //     // }
+    //     return true;
+    // }
 
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
@@ -1409,16 +1423,58 @@ bool V4l2Device::get_frame ()
     else
     {
         tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
-        requeue_mmap_buffer();
-        return false;
-    }
-
-    if (!requeue_mmap_buffer())
-    {
         return false;
     }
 
     return true;
+}
+
+
+void V4l2Device::init_userptr_buffers ()
+{
+
+    tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());
+
+    struct v4l2_requestbuffers req = {};
+
+    req.count  = buffers.size();
+    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_USERPTR;
+
+    if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req)) {
+        if (EINVAL == errno) {
+            tcam_error("%s does not support user pointer i/o", device.get_serial().c_str());
+            return;
+        } else {
+            tcam_error("VIDIOC_REQBUFS");
+        }
+    }
+
+
+
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_USERPTR;
+        buf.index = i;
+        buf.m.userptr = (unsigned long)buffers.at(i).buffer->get_data();
+        buf.length = buffers.at(i).buffer->get_buffer_size();
+
+        tcam_debug("Queueing buffer(%p) with length %zu", buffers.at(i).buffer->get_data(),buf.length);
+
+        if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
+        {
+            tcam_error("Unable to queue v4l2_buffer 'VIDIOC_QBUF' %s", strerror(errno));
+            return;
+        }
+        else
+        {
+            tcam_log(TCAM_LOG_DEBUG, "Successfully queued v4l2_buffer");
+            buffers.at(i).is_queued = true;
+        }
+    }
 }
 
 

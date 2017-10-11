@@ -33,19 +33,22 @@ ImageSink::ImageSink ()
 bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
+    {
         return true;
+    }
 
     status = s;
 
     if (status == TCAM_PIPELINE_PLAYING)
     {
-        if (!external_buffer && !initialize_internal_buffer())
+        if (!external_buffer && buffers.empty())
         {
-            return false;
+            if (!initialize_internal_buffer())
+            {
+                return false;
+            }
         }
-
         tcam_log(TCAM_LOG_INFO, "Pipeline started playing");
-
     }
     else if (status == TCAM_PIPELINE_STOPPED)
     {
@@ -113,6 +116,19 @@ void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
+void ImageSink::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+    if (auto ptr = source_.lock())
+    {
+        ptr->requeue_buffer(buffer);
+    }
+    else
+    {
+        tcam_error("Could not requeue buffer. No Source.");
+    }
+}
+
+
 bool ImageSink::set_buffer_number (size_t new_number)
 {
     if (status == TCAM_PIPELINE_PLAYING)
@@ -148,7 +164,7 @@ bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>
 
 std::vector<std::shared_ptr<MemoryBuffer>> ImageSink::get_buffer_collection ()
 {
-    if (buffers.empty() && !external_buffer)
+    if (buffers.empty())
     {
         initialize_internal_buffer();
     }
@@ -170,16 +186,25 @@ bool ImageSink::delete_buffer_collection ()
 }
 
 
+void ImageSink::set_source (std::weak_ptr<SinkInterface> source)
+{
+    if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
+    {
+        return;
+    }
+
+    source_ = source;
+}
+
+
 bool ImageSink::initialize_internal_buffer ()
 {
     buffers.clear();
 
     for (unsigned int i = 0; i < this->buffer_number; ++i)
     {
-        auto ptr = std::make_shared<MemoryBuffer>(format);
-
+        auto ptr = std::make_shared<MemoryBuffer>(format, true);
         this->buffers.push_back(ptr);
     }
-
     return true;
 }

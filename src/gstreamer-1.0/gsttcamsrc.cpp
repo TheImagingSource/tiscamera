@@ -1009,8 +1009,8 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->last_timestamp = 0;
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
-
     self->device->sink->registerCallback(gst_tcam_src_callback, self);
+    self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->dev->start_stream(self->device->sink);
 
@@ -1140,7 +1140,6 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
     self->cv.notify_all();
 
     self->device->dev->stop_stream();
-    self->device->sink = nullptr;
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
     GST_DEBUG_OBJECT (self, "Stopped acquisition");
 
@@ -1236,6 +1235,23 @@ static void gst_tcam_src_get_times (GstBaseSrc* basesrc,
 }
 
 
+void* destroyer;
+
+static void buffer_destroy_callback (gpointer data)
+{
+    GstTcamSrc* self = GST_TCAM_SRC(destroyer);
+    tcam_image_buffer* tmp_ptr = (tcam_image_buffer*) data;
+    for (auto& b : self->device->sink->get_buffer_collection())
+    {
+        if (b->get_data() == tmp_ptr->pData)
+        {
+            self->device->sink->requeue_buffer(b);
+            break;
+        }
+    }
+}
+
+
 static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
                                           GstBuffer** buffer)
 {
@@ -1244,6 +1260,7 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
     GstTcamSrc* self = GST_TCAM_SRC (push_src);
 
     std::unique_lock<std::mutex> lck(self->mtx);
+    destroyer = self;
 
 wait_again:
     // wait until new buffer arrives or stop waiting when wee have to shut down
@@ -1265,9 +1282,10 @@ wait_again:
         return GST_FLOW_ERROR;
     }
 
-    if (self->ptr->pData == NULL || self->ptr->length == 0)
+    if (self->ptr->pData == NULL)// || self->ptr->length == 0)
     {
         GST_DEBUG_OBJECT (self, "Received buffer is invalid. Returning to waiting position.");
+        buffer_destroy_callback((gpointer)self->ptr);
         goto wait_again;
     }
 
@@ -1280,8 +1298,8 @@ wait_again:
     //     goto wait_again;
     // }
 
-    *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
-                                          0, self->ptr->length, NULL, NULL);
+    *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->size,
+                                          0, self->ptr->length, self->ptr, buffer_destroy_callback);
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
     /*

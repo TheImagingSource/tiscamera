@@ -131,6 +131,12 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
+void ImageSource::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+    device->requeue_buffer(buffer);
+}
+
+
 bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
 {
     this->pipeline = sink;

@@ -475,10 +475,15 @@ bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>
     this->buffers.clear();
 
     this->buffers.reserve(b.size());
+    int payload = arv_camera_get_payload(this->arv_camera);
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        buffer_info info = {b.at(i), false};
+        ArvBuffer* ab = arv_buffer_new(payload, b.at(i)->get_data());
+        buffer_info info = {};
+        info.buffer = b.at(i);
+        info.arv_buffer = ab;
+        info.is_queued = false;
         this->buffers.push_back(info);
     }
     return true;
@@ -490,6 +495,21 @@ bool AravisDevice::release_buffers ()
     buffers.clear();
 
     return true;
+}
+
+
+void AravisDevice::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+
+    for (auto& b : buffers)
+    {
+        if (b.buffer == buffer)
+        {
+            //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
+            arv_stream_push_buffer(this->stream, b.arv_buffer);
+            b.is_queued = true;
+        }
+    }
 }
 
 
@@ -520,7 +540,6 @@ bool AravisDevice::start_stream ()
         // TODO errno
         return false;
     }
-    int payload = arv_camera_get_payload(this->arv_camera);
 
     if (ARV_IS_GV_STREAM (this->stream))
     {
@@ -545,7 +564,7 @@ bool AravisDevice::start_stream ()
 
     for (int i = 0; i < buffers.size(); ++i)
     {
-        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, buffers.at(i).buffer->get_data()));
+        arv_stream_push_buffer(this->stream, buffers.at(i).arv_buffer);
     }
 
     arv_stream_set_emit_signals (this->stream, TRUE);
@@ -727,8 +746,6 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
             }
             tcam_log(TCAM_LOG_WARNING, msg.c_str());
         }
-        //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
-        arv_stream_push_buffer(self->stream, buffer);
     }
     else
     {
