@@ -76,6 +76,18 @@ unsigned char* MemoryBuffer::get_data ()
 }
 
 
+size_t MemoryBuffer::get_buffer_size () const
+{
+    return buffer.size;
+}
+
+
+size_t MemoryBuffer::get_image_size () const
+{
+    return buffer.length;
+}
+
+
 struct tcam_stream_statistics MemoryBuffer::get_statistics () const
 {
     return buffer.statistics;
