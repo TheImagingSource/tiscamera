@@ -28,6 +28,8 @@ static const char* loglevel2string (const enum TCAM_LOG_LEVEL level)
     {
         case TCAM_LOG_OFF:
             return "OFF";
+        case TCAM_LOG_TRACE:
+            return "TRACE";
         case TCAM_LOG_DEBUG:
             return "DEBUG";
         case TCAM_LOG_INFO:
@@ -48,6 +50,10 @@ static enum TCAM_LOG_LEVEL string2loglevel (const char* level)
     if (strcmp("OFF", level) == 0)
     {
         return TCAM_LOG_OFF;
+    }
+    else if (strcmp("TRACE", level) == 0)
+    {
+        return TCAM_LOG_TRACE;
     }
     else if (strcmp("DEBUG", level) == 0)
     {

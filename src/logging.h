@@ -45,10 +45,11 @@ const char* tcam_get_logging_file ();
 enum TCAM_LOG_LEVEL
 {
     TCAM_LOG_OFF     = 0,
-    TCAM_LOG_DEBUG   = 1,
-    TCAM_LOG_INFO    = 2,
-    TCAM_LOG_WARNING = 3,
-    TCAM_LOG_ERROR   = 4,
+    TCAM_LOG_TRACE   = 1,
+    TCAM_LOG_DEBUG   = 2,
+    TCAM_LOG_INFO    = 3,
+    TCAM_LOG_WARNING = 4,
+    TCAM_LOG_ERROR   = 5,
 };
 
 typedef void (*logging_callback) (enum TCAM_LOG_LEVEL, const char*, int, const char*, ...);
@@ -140,6 +141,7 @@ void tcam_logging (const char* module,
 #define tcam_warning(message, ...) (tcam_log(TCAM_LOG_WARNING, message, ##__VA_ARGS__))
 #define tcam_info(message, ...) (tcam_log(TCAM_LOG_INFO, message, ##__VA_ARGS__))
 #define tcam_debug(message, ...) (tcam_log(TCAM_LOG_DEBUG, message, ##__VA_ARGS__))
+#define tcam_trace(message, ...) (tcam_log(TCAM_LOG_TRACE, message, ##__VA_ARGS__))
 
 VISIBILITY_POP
 
