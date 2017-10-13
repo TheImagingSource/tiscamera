@@ -42,10 +42,10 @@ void print_help (const std::string& prog_name)
     << "Examples:\n"
     << "\n"
     << "Set video format:\n"
-    << "\t" << prog_name << " -s -f \"format=RGB32,width=1920,height=1080,framerate=15.0,binning=0\" <SERIAL>\n"
+    << "\t" << prog_name << " -f -s \"format=GRBG,width=1920,height=1080,framerate=15.0\" <SERIAL>\n"
     << "\n"
     << "Set property\n"
-    << "\t" << prog_name << " -s \"Auto Exposure=false\" <SERIAL>\n"
+    << "\t" << prog_name << " -p -s \"Auto Exposure=false\" <SERIAL>\n"
     << "\n"
     << std::endl;
 }
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
         else if (arg == "-s" || arg == "--set")
         {
             way = SET;
-            do_this = SET_PROPERTY;
+            //do_this = SET_PROPERTY;
             int tmp_i = i;
             tmp_i++;
             if (tmp_i >= argc)
@@ -176,12 +176,26 @@ int main (int argc, char *argv[])
     {
         case LIST_PROPERTIES:
         {
-            print_properties(dev->get_available_properties());
+            if (way == GET)
+            {
+                print_properties(dev->get_available_properties());
+            }
+            else
+            {
+                set_property(dev, param);
+            }
             break;
         }
         case LIST_FORMATS:
         {
-            list_formats(dev->get_available_video_formats());
+            if (way == GET)
+            {
+                list_formats(dev->get_available_video_formats());
+            }
+            else
+            {
+                set_active_format(dev, param);
+            }
             break;
         }
         case LIST_GST_1_0_FORMATS:
