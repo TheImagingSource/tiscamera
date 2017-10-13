@@ -24,6 +24,18 @@ if (BUILD_ARAVIS)
         )
     endif()
 
+    #
+    # Get the latest abbreviated commit hash of the working branch
+    execute_process(
+      COMMAND git log -1 --format=%h
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/aravis"
+      OUTPUT_VARIABLE ARAVIS_GIT_COMMIT_HASH_INTERNAL
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+
+    set(ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH_INTERNAL}" PARENT_SCOPE)
+    set(ARAVIS_VERSION "0.6" PARENT_SCOPE)
+
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no
@@ -31,6 +43,16 @@ if (BUILD_ARAVIS)
       INSTALL_COMMAND ""
       ALWAYS 1)
 
+  else (TCAM_INTERNAL_ARAVIS)
+
+    set(ARAVIS_GIT_COMMIT_HASH "external" PARENT_SCOPE)
+    set(ARAVIS_VERSION "unknown" PARENT_SCOPE)
+
   endif (TCAM_INTERNAL_ARAVIS)
+
+else (BUILD_ARAVIS)
+
+  set(ARAVIS_GIT_COMMIT_HASH "not_configured" PARENT_SCOPE)
+  set(ARAVIS_VERSION "not_configured" PARENT_SCOPE)
 
 endif (BUILD_ARAVIS)

@@ -22,7 +22,7 @@
  * @{
  */
 
-
+#include "version.h"
 #include "base_types.h"
 #include "CaptureDevice.h"
 #include "Properties.h"
