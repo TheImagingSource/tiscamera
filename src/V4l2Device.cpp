@@ -114,10 +114,8 @@ bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
     }
 
     device->updateV4L2Property(*desc);
-
     p.set_struct(desc->prop->get_struct());
 
-    // TODO: ask device for current value
     return false;
 }
 
@@ -224,9 +222,6 @@ bool V4l2Device::set_property (const Property& new_property)
 
 bool V4l2Device::get_property (Property& p)
 {
-
-    // TODO: make properties updateable
-
     return property_handler->get_property(p);
 }
 
@@ -508,7 +503,6 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> 
     if (is_stream_on)
     {
         tcam_log(TCAM_LOG_ERROR, "Stream running.");
-
         return false;
     }
 
@@ -578,7 +572,6 @@ bool V4l2Device::start_stream ()
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(fd, VIDIOC_STREAMON, &type))
     {
-        // TODO: error
         tcam_log(TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMON %d", errno);
         return false;
     }
@@ -1369,8 +1362,6 @@ bool V4l2Device::requeue_mmap_buffer ()
             buffers[i].is_queued = true;
         }
     }
-
-
     return true;
 }
 
@@ -1450,8 +1441,6 @@ void V4l2Device::init_userptr_buffers ()
         }
     }
 
-
-
     for (unsigned int i = 0; i < buffers.size(); ++i)
     {
         struct v4l2_buffer buf = {};
@@ -1478,7 +1467,6 @@ void V4l2Device::init_userptr_buffers ()
 }
 
 
-// TODO: look into mmap with existing memory
 void V4l2Device::init_mmap_buffers ()
 {
     if (buffers.empty())
@@ -1499,14 +1487,12 @@ void V4l2Device::init_mmap_buffers ()
 
     if (tcam_xioctl(fd, VIDIOC_REQBUFS, &req) == -1)
     {
-        // TODO: error
         return;
     }
 
     if (req.count < 2)
     {
         tcam_log(TCAM_LOG_ERROR, "Insufficient memory for memory mapping");
-        // TODO: errno
         return;
     }
 

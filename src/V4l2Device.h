@@ -89,7 +89,6 @@ public:
 
     DeviceInfo get_device_description () const;
 
-    // TODO: eval if weak_ptr should be distributed
     std::vector<std::shared_ptr<Property>> getProperties ();
 
     bool set_property (const Property&);

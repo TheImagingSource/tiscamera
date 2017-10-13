@@ -230,7 +230,6 @@ std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial)
             }
             catch (const std::exception& err)
             {
-                // TODO: set up error
                 tcam_log(TCAM_LOG_ERROR, "Could not open CaptureDevice. Exception:\"%s\"", err.what());
                 return nullptr;
             }
