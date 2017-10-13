@@ -38,6 +38,7 @@ void print_help (const std::string& prog_name)
     << "\t-s - set property\n"
     << "\t-f - list video formats\n"
     << "\t-c - list gstreamer-1.0 caps\n"
+    << "\t--version - list used library versions\n"
     << "\n"
     << "Examples:\n"
     << "\n"
@@ -48,6 +49,14 @@ void print_help (const std::string& prog_name)
     << "\t" << prog_name << " -p -s \"Auto Exposure=false\" <SERIAL>\n"
     << "\n"
     << std::endl;
+}
+
+
+void print_version ()
+{
+    std::cout << "Versions: "<< std::endl
+              << "\tTcam:\t" << get_version() << std::endl
+              << "\tAravis:\t" << get_aravis_version() << std::endl;
 }
 
 
@@ -83,7 +92,7 @@ enum modes
     SAVE_DEVICE_LIST,
     SAVE_DEVICE_SETTINGS,
     LOAD_DEVICE_SETTINGS,
-
+    PRINT_VERSION,
 };
 
 enum INTERACTION
@@ -116,6 +125,12 @@ int main (int argc, char *argv[])
         if (arg == "-h" || arg == "--help")
         {
             print_help(executable);
+            return 0;
+        }
+        else if (arg == "--version")
+        {
+            print_version();
+
             return 0;
         }
         else if (arg == "-l" || arg == "--list")

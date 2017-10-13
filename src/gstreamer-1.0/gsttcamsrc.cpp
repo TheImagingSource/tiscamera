@@ -1386,6 +1386,8 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->all_caps = NULL;
     self->fixed_caps = NULL;
     self->is_running = FALSE;
+
+    GST_INFO("Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
 
 
