@@ -1,0 +1,55 @@
+/*
+ * Copyright 2017 The Imaging Source Europe GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef TCAM_VERSION_H
+#define TCAM_VERSION_H
+
+#define GIT_REVISION "${GIT_BRANCH}/${GIT_COMMIT_HASH} rev: ${GIT_COMMIT_COUNT}"
+#define TCAM_VERSION "${TCAM_VERSION}"
+#define ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH}"
+#define ARAVIS_VERSION "${ARAVIS_VERSION}"
+
+inline const char* get_commit_id ()
+{
+    return "${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}";
+}
+
+inline const char* get_version_number ()
+{
+    return "${TCAM_VERSION}";
+}
+
+inline const char* get_version ()
+{
+    return "${TCAM_VERSION}_${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}";
+}
+
+inline const char* get_aravis_commit_id ()
+{
+    return "${ARAVIS_GIT_COMMIT_HASH}";
+}
+
+inline const char* get_aravis_version_number ()
+{
+    return "${ARAVIS_VERSION}";
+}
+
+inline const char* get_aravis_version ()
+{
+    return "${ARAVIS_VERSION}_version_${ARAVIS_GIT_COMMIT_HASH}";
+}
+
+#endif /* TCAM_VERSION_H */
