@@ -575,27 +575,27 @@ void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
 
     auto& current_buffer = buffer;
 
-    for (auto& f : filter_pipeline)
-    {
-        if (f->getDescription().type == FILTER_TYPE_INTERPRET)
-        {
-            f->apply(current_buffer);
-        }
-        else if (f->getDescription().type == FILTER_TYPE_CONVERSION)
-        {
-            auto next_buffer = pipeline_buffer.at(current_ppl_buffer);
+    // for (auto& f : filter_pipeline)
+    // {
+    //     if (f->getDescription().type == FILTER_TYPE_INTERPRET)
+    //     {
+    //         f->apply(current_buffer);
+    //     }
+    //     else if (f->getDescription().type == FILTER_TYPE_CONVERSION)
+    //     {
+    //         auto next_buffer = pipeline_buffer.at(current_ppl_buffer);
 
-            next_buffer->set_statistics(current_buffer->get_statistics());
+    //         next_buffer->set_statistics(current_buffer->get_statistics());
 
-            f->transform(*current_buffer, *next_buffer);
+    //         f->transform(*current_buffer, *next_buffer);
 
-            current_buffer = next_buffer;
+    //         current_buffer = next_buffer;
 
-            current_ppl_buffer++;
-            if (current_ppl_buffer == pipeline_buffer.size())
-                current_ppl_buffer = 0;
-        }
-    }
+    //         current_ppl_buffer++;
+    //         if (current_ppl_buffer == pipeline_buffer.size())
+    //             current_ppl_buffer = 0;
+    //     }
+    // }
 
 
     if (sink != nullptr)
