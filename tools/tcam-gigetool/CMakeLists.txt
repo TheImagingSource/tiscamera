@@ -45,6 +45,6 @@ if (PYTHON)
 
     add_custom_target(target ALL DEPENDS ${OUTPUT})
 
-    install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)"
-            COMPONENT tcam-gigetool)
+    # install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)"
+            # COMPONENT tcam-gigetool)
 endif()

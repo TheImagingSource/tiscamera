@@ -16,6 +16,8 @@ include(CPackComponent)
 
 set(CPACK_COMPONENTS_ALL tiscamera)
 
+#set(CPACK_MONOLITHIC_INSTALL ON)
+
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Imaging Source Europe GmbH <support@theimagingsource.com>")
 
 set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software")
@@ -26,7 +28,8 @@ set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "uvcdynctrl")
 set(CPACK_SET_DESTDIR "on")
-set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+
+# set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 set(CPACK_GENERATOR "DEB")
 
 set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software Collection")
@@ -37,6 +40,27 @@ set(CPACK_PACKAGE_VERSION_MAJOR "${TCAM_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${TCAM_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${TCAM_VERSION_PATCH}")
 set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+if (BUILD_ARAVIS)
+
+  set(ARAVIS_PRERM "systemctl stop gige-daemon.service
+        systemctl disable gige-daemon.service")
+  set(ARAVIS_POSTINST "systemctl enable gige-daemon.service
+        systemctl start gige-daemon.service")
+
+else (BUILD_ARAVIS)
+
+  set(ARAVIS_PRERM "")
+  set(ARAVIS_POSTINST "")
+
+endif (BUILD_ARAVIS)
+
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
+
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
 
 set(CPACK_PACKAGE_NAME "tiscamera")
 
