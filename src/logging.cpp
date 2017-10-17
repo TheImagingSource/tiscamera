@@ -84,14 +84,18 @@ Logger::Logger ():
         level = string2loglevel(log_def);
     }
 
-    char b[1024];
-    sprintf(b,
-            "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s",
-            get_version(),
-            get_aravis_version());
+    if (level >= TCAM_LOG_DEBUG)
+    {
+        char b[1024];
+        sprintf(b,
+                "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s",
+                get_version(),
+                get_aravis_version());
 
-    va_list args;
-    log("", TCAM_LOG_INFO, "Logger", __LINE__, b, args);
+        auto tmp_level = level;
+        va_list args;
+        log("", TCAM_LOG_DEBUG, "Logger", __LINE__, b, args);
+    }
 }
 
 void Logger::load_default_settings ()
