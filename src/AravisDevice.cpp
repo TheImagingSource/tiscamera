@@ -66,6 +66,7 @@ AravisDevice::AravisFormatHandler::AravisFormatHandler (AravisDevice* dev)
 
 std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const struct tcam_image_size& s, int pixelformat)
 {
+    std::vector<double> ret;
     auto dev = arv_camera_get_device(device->arv_camera);
 
 // TODO implement better way to check for availability
@@ -82,15 +83,39 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
     if (min == 0.0 && max == 0.0)
     {
+        // this means either the camera is broken or we have a FPS enum
+        // hope for the second and try it
+        guint n_fps_values = 0;
+        auto fps_values = arv_device_get_available_enumeration_feature_values(dev,
+                                                                              "FPS",
+                                                                              &n_fps_values);
+
+        if (n_fps_values == 0)
+        {
+            // alternative failed
+            // return empty vector and let format handle it
+            tcam_error("Unable to determine what framerate settings are used.");
+            return ret;
+        }
+
+        ret.reserve(n_fps_values);
+
+        for (unsigned int i = 0; i < n_fps_values; ++i)
+        {
+            auto val = fps_values + i;
+
+            ret.push_back((int)((10000000/(double) *val) * 100 + 0.5) / 100.0);
+        }
+
+
         // TestWidth, TestHeight do not exists.
         // return empty vector and let format handle it
-        return std::vector<double>();
+        return ret;
     }
-
 
     tcam_log(TCAM_LOG_DEBUG, "Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
 
-    std::vector<double> ret = create_steps_for_range(min, max);
+    ret = create_steps_for_range(min, max);
 
     return ret;
 }
