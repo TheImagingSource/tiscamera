@@ -110,7 +110,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     }
 
     arv_options.auto_socket_buffer = false;
-    arv_options.no_packet_resend = true;
+    arv_options.no_packet_resend = false;
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
