@@ -23,6 +23,7 @@
 #include "logging.h"
 
 #include <cstring>
+#include <cstdio>
 
 namespace tcam
 {
@@ -146,8 +147,10 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
             continue;
         }
 
+        snprintf((char*)d.additional_identifier, sizeof(d.additional_identifier),
+                 "%x", desc.idProduct);
+
         libusb_get_string_descriptor_ascii(dh, desc.iProduct, (unsigned char*)d.name, sizeof(d.name));
-        libusb_get_string_descriptor_ascii(dh, desc.idProduct, (unsigned char*)d.additional_identifier, sizeof(d.additional_identifier));
         libusb_get_string_descriptor_ascii(dh, desc.iSerialNumber, (unsigned char*)d.serial_number, sizeof(d.serial_number));
 
         libusb_close(dh);
