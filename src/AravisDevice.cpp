@@ -540,6 +540,12 @@ bool AravisDevice::start_stream ()
                           "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER,
                           NULL);
         }
+        else
+        {
+            g_object_set (this->stream,
+                          "packet-resend", ARV_GV_STREAM_PACKET_RESEND_ALWAYS,
+                          NULL);
+        }
         g_object_set (this->stream,
                       "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
