@@ -22,7 +22,6 @@
 
 #include "compiler_defines.h"
 
-VISIBILITY_INTERNAL
 
 enum TCAM_LOG_TARGET
 {
@@ -88,6 +87,9 @@ private:
     Logger (const Logger&) = delete;
     Logger& operator= (const Logger&) = delete;
 
+    Logger(Logger &&) = delete;
+    Logger operator=(Logger &&) = delete;
+
     void load_default_settings ();
 
     void log_to_stdout (const char* message);
@@ -142,7 +144,5 @@ void tcam_logging (const char* module,
 #define tcam_info(message, ...) (tcam_log(TCAM_LOG_INFO, message, ##__VA_ARGS__))
 #define tcam_debug(message, ...) (tcam_log(TCAM_LOG_DEBUG, message, ##__VA_ARGS__))
 #define tcam_trace(message, ...) (tcam_log(TCAM_LOG_TRACE, message, ##__VA_ARGS__))
-
-VISIBILITY_POP
 
 #endif /* TCAM_LOGGING_H */
