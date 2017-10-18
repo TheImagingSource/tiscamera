@@ -69,6 +69,11 @@ fourcc_names fourcc_name_array [] =
     {FOURCC_GRBG12_PACKED, "BA12 Packed"},
     {FOURCC_RGGB12_PACKED, "RG12 Packed"},
 
+    {FOURCC_BGGR12_MIPI_PACKED, "BG12 Mipi Packed"},
+    {FOURCC_GBRG12_MIPI_PACKED, "GB12 Mipi Packed"},
+    {FOURCC_GRBG12_MIPI_PACKED, "BA12 Mipi Packed"},
+    {FOURCC_RGGB12_MIPI_PACKED, "RG12 Mipi Packed"},
+
     {FOURCC_BGGR16, "BG16"},
     {FOURCC_GBRG16, "GB16"},
     {FOURCC_GRBG16, "BA16"},
