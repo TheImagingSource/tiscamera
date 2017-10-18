@@ -114,6 +114,9 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
+    guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera);
+    tcam_info("Automatically set packet size to %u bytes", packet_size);
+
     handler = std::make_shared<AravisPropertyHandler>(this);
     format_handler = std::make_shared<AravisFormatHandler>(this);
 
