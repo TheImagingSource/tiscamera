@@ -1395,18 +1395,21 @@ bool V4l2Device::get_frame ()
     // buf.bytesused
     /* The number of bytes occupied by the data in the buffer. It depends on the negotiated data format and may change with each buffer for compressed variable size data like JPEG images. Drivers must set this field when type refers to a capture stream, applications when it refers to an output stream. If the application sets this to 0 for an output stream, then bytesused will be set to the size of the buffer (see the length field of this struct) by the driver. For multiplanar formats this field is ignored and the planes pointer is used instead.
      */
-    // if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
-    // {
-    //     tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
-    //              buf.bytesused, this->active_video_format.get_required_buffer_size());
-    //     requeue_buffer(buffers.at(buf.index).buffer);
-    //     // if (!requeue_mmap_buffer())
-    //     // {
-    //     //     return false;
-    //     // }
-    //     return true;
-    // }
 
+    if (active_video_format.get_fourcc() != FOURCC_MJPG)
+    {
+        if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
+        {
+            tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
+                     buf.bytesused, this->active_video_format.get_required_buffer_size());
+            requeue_buffer(buffers.at(buf.index).buffer);
+            // if (!requeue_mmap_buffer())
+            // {
+            //     return false;
+            // }
+            return true;
+        }
+    }
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
     statistics.capture_time_ns = ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
