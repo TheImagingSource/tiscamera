@@ -779,6 +779,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 }
             }
             tcam_log(TCAM_LOG_WARNING, msg.c_str());
+            arv_stream_push_buffer(self->stream, buffer);
         }
     }
     else
