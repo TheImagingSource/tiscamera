@@ -1416,6 +1416,9 @@ bool V4l2Device::get_frame ()
     statistics.frame_count++;
     buffers.at(buf.index).buffer->set_statistics(statistics);
 
+    auto desc = buffers.at(buf.index).buffer->getImageBuffer();
+    desc.length =  buf.bytesused;
+    buffers.at(buf.index).buffer->set_image_buffer(desc);
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
