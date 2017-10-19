@@ -507,7 +507,10 @@ bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        ArvBuffer* ab = arv_buffer_new(payload, b.at(i)->get_data());
+        ArvBuffer* ab = arv_buffer_new_full(payload,
+                                            b.at(i)->get_data(),
+                                            b.at(i).get(),
+                                            nullptr);
         buffer_info info = {};
         info.buffer = b.at(i);
         info.arv_buffer = ab;
@@ -656,74 +659,40 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
     {
         ArvBufferStatus status = arv_buffer_get_status(buffer);
 
-        //ArvBufferStatus status = buffer->;
-
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            struct tcam_image_buffer desc = {};
             tcam_log(TCAM_LOG_INFO, "Received new buffer.");
-
-            desc.format = self->active_video_format.get_struct();
-
-            size_t size = 0;
-            desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
-            desc.length = size;
-            desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
-
 
             self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
             self->statistics.frame_count++;
 
-            desc.statistics = self->statistics;
+            // only way to retrieve actual image size
+            size_t image_size = 0;
+            arv_buffer_get_data(buffer, &image_size);
 
-            if (desc.pData == NULL)
+            for (auto& b : self->buffers)
             {
-                tcam_log(TCAM_LOG_ERROR, "Received data pointer is NULL.");
-            }
+                const void* user_data = arv_buffer_get_user_data(buffer);
+                if (b.buffer.get() != user_data)
+                {
+                    continue;
+                }
 
-            std::shared_ptr<MemoryBuffer> p = std::make_shared<MemoryBuffer>(desc);
-
-            // self->buffers.at(self->current_buffer).buffer->set_image_buffer(desc);
-            //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-
-            // TODO check for image locking
-
-            // this can happen when the gstreamer pipeline is abruptly killed.
-            // we want to exit gracefully and not cause a segfault
-            if (self->buffers.empty())
-            {
-                arv_stream_push_buffer(self->stream, buffer);
-                return;
-            }
-
-            self->buffers.at(self->current_buffer).is_queued = false;
-
-            // self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
-
-            if (auto ptr = self->external_sink.lock())
-            {
-                ptr->push_image(p);
-            }
-            else
-            {
-                tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
-                arv_stream_push_buffer(self->stream, buffer);
-                return;
-            }
-
-            // // keep buffer unqueued until user allows requeueing
-            // while (buffers.at(buf.index)->is_locked())
-            // {
-            //     usleep(500);
-            // }
-
-            if (self->current_buffer < self->buffers.size() -1)
-            {
-                self->current_buffer++;
-            }
-            else
-            {
-                self->current_buffer = 0;
+                b.buffer->set_statistics(self->statistics);
+                if (auto ptr = self->external_sink.lock())
+                {
+                    b.is_queued = false;
+                    auto desc = b.buffer->getImageBuffer();
+                    desc.length = image_size;
+                    b.buffer->set_image_buffer(desc);
+                    ptr->push_image(b.buffer);
+                }
+                else
+                {
+                    tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
+                    arv_stream_push_buffer(self->stream, buffer);
+                    return;
+                }
             }
         }
         else
