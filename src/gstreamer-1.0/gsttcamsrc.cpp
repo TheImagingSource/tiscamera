@@ -1298,8 +1298,8 @@ wait_again:
     //     goto wait_again;
     // }
 
-    *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->size,
-                                          0, self->ptr->length, self->ptr, buffer_destroy_callback);
+    *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
+                                          0, self->ptr->size, self->ptr, buffer_destroy_callback);
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
     /*
