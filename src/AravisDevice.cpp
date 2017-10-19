@@ -672,8 +672,8 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
             for (auto& b : self->buffers)
             {
-                const void* user_data = arv_buffer_get_user_data(buffer);
-                if (b.buffer.get() != user_data)
+                const void* arv_user_data = arv_buffer_get_user_data(buffer);
+                if (b.buffer.get() != arv_user_data)
                 {
                     continue;
                 }
