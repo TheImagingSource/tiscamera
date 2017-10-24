@@ -149,6 +149,11 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
+    if (pipe(udev_monitor_pipe) != 0)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to create udev monitor pipe");
+        throw std::runtime_error("Failed opening device.");
+    }
     udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
@@ -174,6 +179,9 @@ V4l2Device::~V4l2Device ()
 
     this->stop_all = true;
     this->abort_all = true;
+    // signal the udev monitor to exit it's poll/select
+    write(udev_monitor_pipe[0], "q", 1);
+    close(udev_monitor_pipe[0]);
 
     this->cv.notify_all();
 
@@ -1661,15 +1669,17 @@ void V4l2Device::monitor_v4l2_device ()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
+        int select_fd = (udev_fd > udev_monitor_pipe[1] ? udev_fd : udev_monitor_pipe[1]);
         struct timeval tv;
         int ret;
 
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);
-        tv.tv_sec = 0;
+        FD_SET(udev_monitor_pipe[1], &fds);
+        tv.tv_sec = 1000000;
         tv.tv_usec = 0;
 
-        ret = select(udev_fd+1, &fds, NULL, NULL, &tv);
+        ret = select(select_fd, &fds, NULL, NULL, &tv);
 
         /* Check if our file descriptor has received data. */
         if (ret > 0 && FD_ISSET(udev_fd, &fds))
@@ -1702,6 +1712,7 @@ void V4l2Device::monitor_v4l2_device ()
                 tcam_log(TCAM_LOG_ERROR, "No Device from udev_monitor_receive_device. An error occured.");
             }
         }
-        usleep(250*1000);
     }
+
+    close(udev_monitor_pipe[1]);
 }
