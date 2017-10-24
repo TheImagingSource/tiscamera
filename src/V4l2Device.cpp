@@ -1715,4 +1715,6 @@ void V4l2Device::monitor_v4l2_device ()
     }
 
     close(udev_monitor_pipe[1]);
+
+    udev_monitor_unref(mon);
 }
