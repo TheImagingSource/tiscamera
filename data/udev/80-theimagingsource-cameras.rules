@@ -20,7 +20,7 @@ ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8204", GROUP="video", MODE="0660"
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8205", GROUP="video", MODE="0660"
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8206", GROUP="video", MODE="0660"
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8207", GROUP="video", MODE="0660"
-
+ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8209", GROUP="video", MODE="0660"
 
 # templates for those using non standard locations
 
