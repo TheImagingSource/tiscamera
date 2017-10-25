@@ -435,6 +435,7 @@ static gboolean camera_has_bayer (GstTcamBin* self)
 
         if (string == nullptr)
         {
+            gst_caps_unref(ipcaps);
             continue;
         }
 
