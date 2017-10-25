@@ -49,13 +49,13 @@ struct _GstTcamBin
     GstElement* whitebalance;
     GstElement* debayer;
     GstElement* focus;
-    GstElement* out_caps;
+    GstElement* out_caps = nullptr;
 
     GstElement* kid;
 
     char* device_serial;
 
-    GstCaps* target_caps;
+    GstCaps* target_caps = nullptr;
     GstPad* target_pad;
     GstPad* pad;
 
@@ -64,7 +64,7 @@ struct _GstTcamBin
     gboolean elements_created;
     gboolean target_set;
 
-    GstCaps* src_caps;
+    GstCaps* src_caps = nullptr;
     bool needs_debayer;
 };
 

@@ -654,7 +654,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
     GstCaps* caps = convert_videoformatsdescription_to_caps(format);
 
-
     if (gst_caps_get_size(caps) == 0)
     {
         GST_ERROR("Device did not provide ANY valid caps. Refusing playback.");
@@ -706,7 +705,12 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
             /* get intersection */
             GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
 
-            if (gst_caps_is_any(ipcaps) || strcmp(gst_caps_to_string(ipcaps), "ANY") == 0)
+            /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
+            gchar *capsstr = gst_caps_to_string(ipcaps);
+            bool is_any_caps = strcmp(capsstr, "ANY") == 0;
+            g_free (capsstr);
+
+            if (gst_caps_is_any(ipcaps) || is_any_caps)
             {
                 continue;
             }
@@ -1041,6 +1045,12 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     if (self->device != NULL)
     {
         delete self->device;
+    }
+
+    if (self->all_caps != nullptr)
+    {
+        gst_caps_unref(self->all_caps);
+        self->all_caps = nullptr;
     }
 
     std::vector<tcam::DeviceInfo> infos = tcam::get_device_list();
