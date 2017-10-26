@@ -382,7 +382,7 @@ bool V4l2Device::set_framerate (double framerate)
     }
 
     // TODO what about range framerates?
-    struct v4l2_streamparm parm;
+    struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
@@ -1650,8 +1650,20 @@ tcam_image_size V4l2Device::get_sensor_size () const
 void V4l2Device::monitor_v4l2_device ()
 {
     auto udev = udev_new();
+    if (!udev)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev context");
+        return;
+    }
+
     /* Set up a monitor to monitor hidraw devices */
     auto mon = udev_monitor_new_from_netlink(udev, "udev");
+    if (!mon)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev monitor");
+        udev_unref(udev);
+        return;
+    }
     udev_monitor_filter_add_match_subsystem_devtype(mon, "video4linux", NULL);
     udev_monitor_enable_receiving(mon);
     /* Get the file descriptor (fd) for the monitor.
@@ -1717,4 +1729,5 @@ void V4l2Device::monitor_v4l2_device ()
     close(udev_monitor_pipe[1]);
 
     udev_monitor_unref(mon);
+    udev_unref(udev);
 }
