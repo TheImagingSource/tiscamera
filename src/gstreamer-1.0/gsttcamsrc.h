@@ -64,8 +64,8 @@ struct _GstTcamSrc
 
     int run;
 
-    GstCaps *all_caps;
-    GstCaps *fixed_caps;
+    GstCaps *all_caps = nullptr;
+    GstCaps *fixed_caps = nullptr;
 
     guint64 timestamp_offset;
     guint64 last_timestamp;

@@ -86,6 +86,8 @@ public:
     // @brief callback for ImageSource
     void push_image (std::shared_ptr<MemoryBuffer>);
 
+    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+
     std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
 
 private:

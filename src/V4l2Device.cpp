@@ -149,8 +149,12 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
+    if (pipe(udev_monitor_pipe) != 0)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to create udev monitor pipe");
+        throw std::runtime_error("Failed opening device.");
+    }
     udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
-    udev_monitor.detach();
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
@@ -175,6 +179,9 @@ V4l2Device::~V4l2Device ()
 
     this->stop_all = true;
     this->abort_all = true;
+    // signal the udev monitor to exit it's poll/select
+    write(udev_monitor_pipe[0], "q", 1);
+    close(udev_monitor_pipe[0]);
 
     this->cv.notify_all();
 
@@ -375,7 +382,7 @@ bool V4l2Device::set_framerate (double framerate)
     }
 
     // TODO what about range framerates?
-    struct v4l2_streamparm parm;
+    struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
@@ -522,8 +529,6 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> 
         this->buffers.push_back(info);
     }
 
-    init_mmap_buffers();
-
     return true;
 }
 
@@ -542,29 +547,40 @@ bool V4l2Device::release_buffers ()
 }
 
 
+void V4l2Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+
+        auto& b = buffers.at(i);
+        if (!b.is_queued && b.buffer == buffer)
+        {
+            struct v4l2_buffer buf = {};
+
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buf.memory = V4L2_MEMORY_USERPTR;
+            buf.index = i;
+            buf.m.userptr = (unsigned long)b.buffer->get_data();
+            buf.length = b.buffer->get_buffer_size();
+
+            // requeue buffer
+            int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
+            if (ret == -1)
+            {
+                tcam_error("Could not requeue buffer");
+                return;
+            }
+            b.is_queued = true;
+        }
+    }
+}
+
+
 bool V4l2Device::start_stream ()
 {
     enum v4l2_buf_type type;
 
-    tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());
-
-    for (unsigned int i = 0; i < buffers.size(); ++i)
-    {
-        struct v4l2_buffer buf = {};
-
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-
-        if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
-        {
-            std::string s = "Unable to queue v4l2_buffer 'VIDIOC_QBUF'";
-            tcam_log(TCAM_LOG_ERROR, s.c_str());
-            return false;
-        }
-        else
-            tcam_log(TCAM_LOG_DEBUG, "Successfully queued v4l2_buffer");
-    }
+    init_userptr_buffers();
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(fd, VIDIOC_STREAMON, &type))
@@ -1371,7 +1387,7 @@ bool V4l2Device::get_frame ()
     struct v4l2_buffer buf = {};
 
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf.memory = V4L2_MEMORY_MMAP;
+    buf.memory = V4L2_MEMORY_USERPTR;
 
     int ret = tcam_xioctl(fd, VIDIOC_DQBUF, &buf);
 
@@ -1383,22 +1399,33 @@ bool V4l2Device::get_frame ()
 
     buffers.at(buf.index).is_queued = false;
 
-    if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
-    {
-        tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Dropping...");
-        if (!requeue_mmap_buffer())
-        {
-            return false;
-        }
-        return true;
-    }
+    // buf.bytesused
+    /* The number of bytes occupied by the data in the buffer. It depends on the negotiated data format and may change with each buffer for compressed variable size data like JPEG images. Drivers must set this field when type refers to a capture stream, applications when it refers to an output stream. If the application sets this to 0 for an output stream, then bytesused will be set to the size of the buffer (see the length field of this struct) by the driver. For multiplanar formats this field is ignored and the planes pointer is used instead.
+     */
 
+    if (active_video_format.get_fourcc() != FOURCC_MJPG)
+    {
+        if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
+        {
+            tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
+                     buf.bytesused, this->active_video_format.get_required_buffer_size());
+            requeue_buffer(buffers.at(buf.index).buffer);
+            // if (!requeue_mmap_buffer())
+            // {
+            //     return false;
+            // }
+            return true;
+        }
+    }
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
     statistics.capture_time_ns = ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
     buffers.at(buf.index).buffer->set_statistics(statistics);
 
+    auto desc = buffers.at(buf.index).buffer->getImageBuffer();
+    desc.length =  buf.bytesused;
+    buffers.at(buf.index).buffer->set_image_buffer(desc);
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
@@ -1409,16 +1436,58 @@ bool V4l2Device::get_frame ()
     else
     {
         tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
-        requeue_mmap_buffer();
-        return false;
-    }
-
-    if (!requeue_mmap_buffer())
-    {
         return false;
     }
 
     return true;
+}
+
+
+void V4l2Device::init_userptr_buffers ()
+{
+
+    tcam_log(TCAM_LOG_DEBUG, "Will use %d buffers", buffers.size());
+
+    struct v4l2_requestbuffers req = {};
+
+    req.count  = buffers.size();
+    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_USERPTR;
+
+    if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req)) {
+        if (EINVAL == errno) {
+            tcam_error("%s does not support user pointer i/o", device.get_serial().c_str());
+            return;
+        } else {
+            tcam_error("VIDIOC_REQBUFS");
+        }
+    }
+
+
+
+    for (unsigned int i = 0; i < buffers.size(); ++i)
+    {
+        struct v4l2_buffer buf = {};
+
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_USERPTR;
+        buf.index = i;
+        buf.m.userptr = (unsigned long)buffers.at(i).buffer->get_data();
+        buf.length = buffers.at(i).buffer->get_buffer_size();
+
+        tcam_debug("Queueing buffer(%p) with length %zu", buffers.at(i).buffer->get_data(),buf.length);
+
+        if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
+        {
+            tcam_error("Unable to queue v4l2_buffer 'VIDIOC_QBUF' %s", strerror(errno));
+            return;
+        }
+        else
+        {
+            tcam_log(TCAM_LOG_DEBUG, "Successfully queued v4l2_buffer");
+            buffers.at(i).is_queued = true;
+        }
+    }
 }
 
 
@@ -1581,8 +1650,20 @@ tcam_image_size V4l2Device::get_sensor_size () const
 void V4l2Device::monitor_v4l2_device ()
 {
     auto udev = udev_new();
+    if (!udev)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev context");
+        return;
+    }
+
     /* Set up a monitor to monitor hidraw devices */
     auto mon = udev_monitor_new_from_netlink(udev, "udev");
+    if (!mon)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev monitor");
+        udev_unref(udev);
+        return;
+    }
     udev_monitor_filter_add_match_subsystem_devtype(mon, "video4linux", NULL);
     udev_monitor_enable_receiving(mon);
     /* Get the file descriptor (fd) for the monitor.
@@ -1600,15 +1681,17 @@ void V4l2Device::monitor_v4l2_device ()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
+        int select_fd = (udev_fd > udev_monitor_pipe[1] ? udev_fd : udev_monitor_pipe[1]);
         struct timeval tv;
         int ret;
 
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);
-        tv.tv_sec = 0;
+        FD_SET(udev_monitor_pipe[1], &fds);
+        tv.tv_sec = 1000000;
         tv.tv_usec = 0;
 
-        ret = select(udev_fd+1, &fds, NULL, NULL, &tv);
+        ret = select(select_fd, &fds, NULL, NULL, &tv);
 
         /* Check if our file descriptor has received data. */
         if (ret > 0 && FD_ISSET(udev_fd, &fds))
@@ -1641,6 +1724,10 @@ void V4l2Device::monitor_v4l2_device ()
                 tcam_log(TCAM_LOG_ERROR, "No Device from udev_monitor_receive_device. An error occured.");
             }
         }
-        usleep(250*1000);
     }
+
+    close(udev_monitor_pipe[1]);
+
+    udev_monitor_unref(mon);
+    udev_unref(udev);
 }

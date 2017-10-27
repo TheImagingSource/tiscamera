@@ -15,6 +15,7 @@
  */
 
 #include "logging.h"
+#include "version.h"
 
 #include <stdio.h>              /* printf, fopen */
 #include <stdarg.h>             /* va_args */
@@ -81,6 +82,19 @@ Logger::Logger ():
     if (log_def != nullptr)
     {
         level = string2loglevel(log_def);
+    }
+
+    if (level >= TCAM_LOG_DEBUG)
+    {
+        char b[1024];
+        sprintf(b,
+                "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s",
+                get_version(),
+                get_aravis_version());
+
+        auto tmp_level = level;
+        va_list args;
+        log("", TCAM_LOG_DEBUG, "Logger", __LINE__, b, args);
     }
 }
 

@@ -32,11 +32,11 @@ MemoryBuffer::MemoryBuffer (const struct tcam_image_buffer& buf, bool owns_memor
 MemoryBuffer::MemoryBuffer (const VideoFormat& format, bool owns_memory)
     : is_own_memory(owns_memory), buffer()
 {
-    buffer.length = format.get_required_buffer_size();
+    buffer.size = format.get_required_buffer_size();
     if (is_own_memory)
     {
         tcam_log(TCAM_LOG_INFO, "allocating data buffer");
-        buffer.pData = (unsigned char*)malloc(buffer.length );
+        buffer.pData = (unsigned char*)malloc(buffer.size);
     }
     else
     {
@@ -73,6 +73,18 @@ void MemoryBuffer::set_image_buffer (tcam_image_buffer buf)
 unsigned char* MemoryBuffer::get_data ()
 {
     return buffer.pData;
+}
+
+
+size_t MemoryBuffer::get_buffer_size () const
+{
+    return buffer.size;
+}
+
+
+size_t MemoryBuffer::get_image_size () const
+{
+    return buffer.length;
 }
 
 

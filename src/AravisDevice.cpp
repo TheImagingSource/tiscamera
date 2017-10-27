@@ -66,6 +66,7 @@ AravisDevice::AravisFormatHandler::AravisFormatHandler (AravisDevice* dev)
 
 std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const struct tcam_image_size& s, int pixelformat)
 {
+    std::vector<double> ret;
     auto dev = arv_camera_get_device(device->arv_camera);
 
 // TODO implement better way to check for availability
@@ -82,15 +83,39 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
     if (min == 0.0 && max == 0.0)
     {
+        // this means either the camera is broken or we have a FPS enum
+        // hope for the second and try it
+        guint n_fps_values = 0;
+        auto fps_values = arv_device_get_available_enumeration_feature_values(dev,
+                                                                              "FPS",
+                                                                              &n_fps_values);
+
+        if (n_fps_values == 0)
+        {
+            // alternative failed
+            // return empty vector and let format handle it
+            tcam_error("Unable to determine what framerate settings are used.");
+            return ret;
+        }
+
+        ret.reserve(n_fps_values);
+
+        for (unsigned int i = 0; i < n_fps_values; ++i)
+        {
+            auto val = fps_values + i;
+
+            ret.push_back((int)((10000000/(double) *val) * 100 + 0.5) / 100.0);
+        }
+
+
         // TestWidth, TestHeight do not exists.
         // return empty vector and let format handle it
-        return std::vector<double>();
+        return ret;
     }
-
 
     tcam_log(TCAM_LOG_DEBUG, "Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
 
-    std::vector<double> ret = create_steps_for_range(min, max);
+    ret = create_steps_for_range(min, max);
 
     return ret;
 }
@@ -110,9 +135,12 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     }
 
     arv_options.auto_socket_buffer = false;
-    arv_options.no_packet_resend = true;
+    arv_options.no_packet_resend = false;
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
+
+    guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera);
+    tcam_info("Automatically set packet size to %u bytes", packet_size);
 
     handler = std::make_shared<AravisPropertyHandler>(this);
     format_handler = std::make_shared<AravisFormatHandler>(this);
@@ -475,10 +503,18 @@ bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>
     this->buffers.clear();
 
     this->buffers.reserve(b.size());
+    int payload = arv_camera_get_payload(this->arv_camera);
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        buffer_info info = {b.at(i), false};
+        ArvBuffer* ab = arv_buffer_new_full(payload,
+                                            b.at(i)->get_data(),
+                                            b.at(i).get(),
+                                            nullptr);
+        buffer_info info = {};
+        info.buffer = b.at(i);
+        info.arv_buffer = ab;
+        info.is_queued = false;
         this->buffers.push_back(info);
     }
     return true;
@@ -490,6 +526,21 @@ bool AravisDevice::release_buffers ()
     buffers.clear();
 
     return true;
+}
+
+
+void AravisDevice::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+{
+
+    for (auto& b : buffers)
+    {
+        if (b.buffer == buffer)
+        {
+            //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
+            arv_stream_push_buffer(this->stream, b.arv_buffer);
+            b.is_queued = true;
+        }
+    }
 }
 
 
@@ -520,7 +571,6 @@ bool AravisDevice::start_stream ()
         // TODO errno
         return false;
     }
-    int payload = arv_camera_get_payload(this->arv_camera);
 
     if (ARV_IS_GV_STREAM (this->stream))
     {
@@ -537,6 +587,12 @@ bool AravisDevice::start_stream ()
                           "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER,
                           NULL);
         }
+        else
+        {
+            g_object_set (this->stream,
+                          "packet-resend", ARV_GV_STREAM_PACKET_RESEND_ALWAYS,
+                          NULL);
+        }
         g_object_set (this->stream,
                       "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
@@ -545,7 +601,7 @@ bool AravisDevice::start_stream ()
 
     for (int i = 0; i < buffers.size(); ++i)
     {
-        arv_stream_push_buffer(this->stream, arv_buffer_new(payload, buffers.at(i).buffer->get_data()));
+        arv_stream_push_buffer(this->stream, buffers.at(i).arv_buffer);
     }
 
     arv_stream_set_emit_signals (this->stream, TRUE);
@@ -603,74 +659,40 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
     {
         ArvBufferStatus status = arv_buffer_get_status(buffer);
 
-        //ArvBufferStatus status = buffer->;
-
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            struct tcam_image_buffer desc = {};
             tcam_log(TCAM_LOG_INFO, "Received new buffer.");
-
-            desc.format = self->active_video_format.get_struct();
-
-            size_t size = 0;
-            desc.pData = ( unsigned char* ) arv_buffer_get_data ( buffer, &size );
-            desc.length = size;
-            desc.pitch = desc.format.width * img::get_bits_per_pixel(desc.format.fourcc) / 8;
-
 
             self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
             self->statistics.frame_count++;
 
-            desc.statistics = self->statistics;
+            // only way to retrieve actual image size
+            size_t image_size = 0;
+            arv_buffer_get_data(buffer, &image_size);
 
-            if (desc.pData == NULL)
+            for (auto& b : self->buffers)
             {
-                tcam_log(TCAM_LOG_ERROR, "Received data pointer is NULL.");
-            }
+                const void* arv_user_data = arv_buffer_get_user_data(buffer);
+                if (b.buffer.get() != arv_user_data)
+                {
+                    continue;
+                }
 
-            std::shared_ptr<MemoryBuffer> p = std::make_shared<MemoryBuffer>(desc);
-
-            // self->buffers.at(self->current_buffer).buffer->set_image_buffer(desc);
-            //tcam_log(TCAM_LOG_DEBUG, "Pushing new image buffer to sink.");
-
-            // TODO check for image locking
-
-            // this can happen when the gstreamer pipeline is abruptly killed.
-            // we want to exit gracefully and not cause a segfault
-            if (self->buffers.empty())
-            {
-                arv_stream_push_buffer(self->stream, buffer);
-                return;
-            }
-
-            self->buffers.at(self->current_buffer).is_queued = false;
-
-            // self->external_sink->push_image(self->buffers.at(self->current_buffer).buffer);
-
-            if (auto ptr = self->external_sink.lock())
-            {
-                ptr->push_image(p);
-            }
-            else
-            {
-                tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
-                arv_stream_push_buffer(self->stream, buffer);
-                return;
-            }
-
-            // // keep buffer unqueued until user allows requeueing
-            // while (buffers.at(buf.index)->is_locked())
-            // {
-            //     usleep(500);
-            // }
-
-            if (self->current_buffer < self->buffers.size() -1)
-            {
-                self->current_buffer++;
-            }
-            else
-            {
-                self->current_buffer = 0;
+                b.buffer->set_statistics(self->statistics);
+                if (auto ptr = self->external_sink.lock())
+                {
+                    b.is_queued = false;
+                    auto desc = b.buffer->getImageBuffer();
+                    desc.length = image_size;
+                    b.buffer->set_image_buffer(desc);
+                    ptr->push_image(b.buffer);
+                }
+                else
+                {
+                    tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
+                    arv_stream_push_buffer(self->stream, buffer);
+                    return;
+                }
             }
         }
         else
@@ -726,9 +748,8 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
                 }
             }
             tcam_log(TCAM_LOG_WARNING, msg.c_str());
+            arv_stream_push_buffer(self->stream, buffer);
         }
-        //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
-        arv_stream_push_buffer(self->stream, buffer);
     }
     else
     {

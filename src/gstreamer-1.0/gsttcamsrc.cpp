@@ -654,7 +654,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
     GstCaps* caps = convert_videoformatsdescription_to_caps(format);
 
-
     if (gst_caps_get_size(caps) == 0)
     {
         GST_ERROR("Device did not provide ANY valid caps. Refusing playback.");
@@ -706,7 +705,12 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
             /* get intersection */
             GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
 
-            if (gst_caps_is_any(ipcaps) || strcmp(gst_caps_to_string(ipcaps), "ANY") == 0)
+            /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
+            gchar *capsstr = gst_caps_to_string(ipcaps);
+            bool is_any_caps = strcmp(capsstr, "ANY") == 0;
+            g_free (capsstr);
+
+            if (gst_caps_is_any(ipcaps) || is_any_caps)
             {
                 continue;
             }
@@ -1009,8 +1013,8 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->last_timestamp = 0;
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
-
     self->device->sink->registerCallback(gst_tcam_src_callback, self);
+    self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->dev->start_stream(self->device->sink);
 
@@ -1041,6 +1045,12 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     if (self->device != NULL)
     {
         delete self->device;
+    }
+
+    if (self->all_caps != nullptr)
+    {
+        gst_caps_unref(self->all_caps);
+        self->all_caps = nullptr;
     }
 
     std::vector<tcam::DeviceInfo> infos = tcam::get_device_list();
@@ -1140,7 +1150,6 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
     self->cv.notify_all();
 
     self->device->dev->stop_stream();
-    self->device->sink = nullptr;
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
     GST_DEBUG_OBJECT (self, "Stopped acquisition");
 
@@ -1236,6 +1245,23 @@ static void gst_tcam_src_get_times (GstBaseSrc* basesrc,
 }
 
 
+void* destroyer;
+
+static void buffer_destroy_callback (gpointer data)
+{
+    GstTcamSrc* self = GST_TCAM_SRC(destroyer);
+    tcam_image_buffer* tmp_ptr = (tcam_image_buffer*) data;
+    for (auto& b : self->device->sink->get_buffer_collection())
+    {
+        if (b->get_data() == tmp_ptr->pData)
+        {
+            self->device->sink->requeue_buffer(b);
+            break;
+        }
+    }
+}
+
+
 static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
                                           GstBuffer** buffer)
 {
@@ -1244,6 +1270,7 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
     GstTcamSrc* self = GST_TCAM_SRC (push_src);
 
     std::unique_lock<std::mutex> lck(self->mtx);
+    destroyer = self;
 
 wait_again:
     // wait until new buffer arrives or stop waiting when wee have to shut down
@@ -1265,9 +1292,10 @@ wait_again:
         return GST_FLOW_ERROR;
     }
 
-    if (self->ptr->pData == NULL || self->ptr->length == 0)
+    if (self->ptr->pData == NULL)// || self->ptr->length == 0)
     {
         GST_DEBUG_OBJECT (self, "Received buffer is invalid. Returning to waiting position.");
+        buffer_destroy_callback((gpointer)self->ptr);
         goto wait_again;
     }
 
@@ -1281,7 +1309,7 @@ wait_again:
     // }
 
     *buffer = gst_buffer_new_wrapped_full(0, self->ptr->pData, self->ptr->length,
-                                          0, self->ptr->length, NULL, NULL);
+                                          0, self->ptr->size, self->ptr, buffer_destroy_callback);
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
     /*
@@ -1368,6 +1396,8 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->all_caps = NULL;
     self->fixed_caps = NULL;
     self->is_running = FALSE;
+
+    GST_INFO("Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
 
 

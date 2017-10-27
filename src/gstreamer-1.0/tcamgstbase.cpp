@@ -343,6 +343,7 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
         }
 
         gst_object_unref(debayer);
+        gst_caps_unref(intersect);
     }
     else
     {
