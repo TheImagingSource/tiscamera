@@ -147,8 +147,12 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
+    if (pipe(udev_monitor_pipe) != 0)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to create udev monitor pipe");
+        throw std::runtime_error("Failed opening device.");
+    }
     udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
-    udev_monitor.detach();
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
@@ -173,6 +177,9 @@ V4l2Device::~V4l2Device ()
 
     this->stop_all = true;
     this->abort_all = true;
+    // signal the udev monitor to exit it's poll/select
+    write(udev_monitor_pipe[0], "q", 1);
+    close(udev_monitor_pipe[0]);
 
     this->cv.notify_all();
 
@@ -370,7 +377,7 @@ bool V4l2Device::set_framerate (double framerate)
     }
 
     // TODO what about range framerates?
-    struct v4l2_streamparm parm;
+    struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
@@ -1386,24 +1393,30 @@ bool V4l2Device::get_frame ()
     // buf.bytesused
     /* The number of bytes occupied by the data in the buffer. It depends on the negotiated data format and may change with each buffer for compressed variable size data like JPEG images. Drivers must set this field when type refers to a capture stream, applications when it refers to an output stream. If the application sets this to 0 for an output stream, then bytesused will be set to the size of the buffer (see the length field of this struct) by the driver. For multiplanar formats this field is ignored and the planes pointer is used instead.
      */
-    // if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
-    // {
-    //     tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
-    //              buf.bytesused, this->active_video_format.get_required_buffer_size());
-    //     requeue_buffer(buffers.at(buf.index).buffer);
-    //     // if (!requeue_mmap_buffer())
-    //     // {
-    //     //     return false;
-    //     // }
-    //     return true;
-    // }
 
+    if (active_video_format.get_fourcc() != FOURCC_MJPG)
+    {
+        if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
+        {
+            tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
+                     buf.bytesused, this->active_video_format.get_required_buffer_size());
+            requeue_buffer(buffers.at(buf.index).buffer);
+            // if (!requeue_mmap_buffer())
+            // {
+            //     return false;
+            // }
+            return true;
+        }
+    }
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
     statistics.capture_time_ns = ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
     buffers.at(buf.index).buffer->set_statistics(statistics);
 
+    auto desc = buffers.at(buf.index).buffer->getImageBuffer();
+    desc.length =  buf.bytesused;
+    buffers.at(buf.index).buffer->set_image_buffer(desc);
 
     tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
 
@@ -1623,8 +1636,20 @@ tcam_image_size V4l2Device::get_sensor_size () const
 void V4l2Device::monitor_v4l2_device ()
 {
     auto udev = udev_new();
+    if (!udev)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev context");
+        return;
+    }
+
     /* Set up a monitor to monitor hidraw devices */
     auto mon = udev_monitor_new_from_netlink(udev, "udev");
+    if (!mon)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Failed to create udev monitor");
+        udev_unref(udev);
+        return;
+    }
     udev_monitor_filter_add_match_subsystem_devtype(mon, "video4linux", NULL);
     udev_monitor_enable_receiving(mon);
     /* Get the file descriptor (fd) for the monitor.
@@ -1642,15 +1667,17 @@ void V4l2Device::monitor_v4l2_device ()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
+        int select_fd = (udev_fd > udev_monitor_pipe[1] ? udev_fd : udev_monitor_pipe[1]);
         struct timeval tv;
         int ret;
 
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);
-        tv.tv_sec = 0;
+        FD_SET(udev_monitor_pipe[1], &fds);
+        tv.tv_sec = 1000000;
         tv.tv_usec = 0;
 
-        ret = select(udev_fd+1, &fds, NULL, NULL, &tv);
+        ret = select(select_fd, &fds, NULL, NULL, &tv);
 
         /* Check if our file descriptor has received data. */
         if (ret > 0 && FD_ISSET(udev_fd, &fds))
@@ -1683,6 +1710,10 @@ void V4l2Device::monitor_v4l2_device ()
                 tcam_log(TCAM_LOG_ERROR, "No Device from udev_monitor_receive_device. An error occured.");
             }
         }
-        usleep(250*1000);
     }
+
+    close(udev_monitor_pipe[1]);
+
+    udev_monitor_unref(mon);
+    udev_unref(udev);
 }

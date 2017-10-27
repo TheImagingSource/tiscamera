@@ -158,6 +158,7 @@ private:
     bool abort_all;
 
     std::thread udev_monitor;
+    int udev_monitor_pipe[2];
 
     void notification_loop ();
 

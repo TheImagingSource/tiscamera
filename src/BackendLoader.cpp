@@ -39,7 +39,16 @@ tcam::BackendLoader::BackendLoader ()
 
 tcam::BackendLoader::~BackendLoader ()
 {
-    unload_backends();
+    // Do not actually unload the backends for now.
+    // If the application does not stop the video stream and/or unrefs all stream objects when it terminates,
+    // a backend may still have some threads running when reaching this point.
+    // Unloading the backend now would then result in a segmentation fault.
+    // Since the unloader only gets called when the application terminates, not unloading the backends should not impose a resource leak.
+    //
+    // TODO: Add a mechanism for reference counting for device backends such that the unloader could at least throw an exception if a
+    //       backend is still referenced at this point.
+
+    // unload_backends();
 }
 
 
