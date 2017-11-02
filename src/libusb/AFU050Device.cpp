@@ -153,6 +153,9 @@ tcam::AFU050Device::~AFU050Device ()
 {
     stop_stream();
 
+    libusb_release_interface(device_handle, 1);
+    libusb_release_interface(device_handle, 0);
+
     libusb_close(device_handle);
 }
 
@@ -638,7 +641,7 @@ void AFU050Device::add_int (const TCAM_PROPERTY_ID id, const VC_UNIT unit, const
         return;
     }
 
-    tcam_error("adding int %d %d %d", id, unit, prop);
+    tcam_debug("adding int %d %d %d", id, unit, prop);
 
     struct tcam_device_property p = tcam::create_empty_property(id);
     p.value.i.value = get_int_value(unit, prop, GET_CUR);

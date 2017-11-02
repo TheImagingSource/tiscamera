@@ -24,6 +24,7 @@
 #include <libusb-1.0/libusb.h>
 
 #include "UsbSession.h"
+#include "LibusbDevice.h"
 
 #include "DeviceInfo.h"
 
@@ -46,6 +47,7 @@ public:
     UsbHandler (const UsbHandler& _handler) = delete;
     UsbHandler& operator=(const UsbHandler&) = delete;
 
+    std::unique_ptr<LibusbDevice> open_device_ (const std::string& serial);
 
     struct libusb_device_handle* open_device (const std::string& serial);
 
