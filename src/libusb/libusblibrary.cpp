@@ -18,9 +18,10 @@
 // #include "v4l2library.h"
 
 #include "AFU050Device.h"
+#include "AFU420Device.h"
 #include "UsbHandler.h"
 #include "libusb_utils.h"
-
+#include "logging.h"
 
 #include <cstring>
 
@@ -28,7 +29,19 @@ VISIBILITY_INTERNAL
 
 DeviceInterface* open_device (const struct tcam_device_info* device)
 {
-    return new AFU050Device(DeviceInfo(*device), UsbHandler::get_instance().get_session());
+    if (strcmp(device->additional_identifier, "804") == 0)
+    {
+        return new AFU420Device(DeviceInfo(*device), UsbHandler::get_instance().get_session());
+    }
+    else if (strcmp(device->additional_identifier, "8209") == 0)
+    {
+        return new AFU050Device(DeviceInfo(*device), UsbHandler::get_instance().get_session());
+    }
+    else
+    {
+        tcam_error("Unable to identify requested LibUsb Backend %x", device->additional_identifier);
+        return nullptr;
+    }
 }
 
 

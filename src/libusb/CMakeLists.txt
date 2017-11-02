@@ -1,6 +1,9 @@
 
 set(lib_libusb
   AFU050Device.cpp
+  AFU420Device.cpp
+  AFU420DeviceProperties.cpp
+  AFU420PropertyHandler.cpp
   libusb_utils.cpp
   UsbSession.cpp
   UsbHandler.cpp
