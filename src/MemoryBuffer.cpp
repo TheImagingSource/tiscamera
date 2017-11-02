@@ -102,6 +102,28 @@ bool MemoryBuffer::set_statistics (const struct tcam_stream_statistics& stats)
 }
 
 
+bool MemoryBuffer::set_data (const unsigned char* data, size_t size, unsigned int offset)
+{
+    if (size + offset > buffer.size)
+    {
+        return false;
+    }
+
+    memcpy(buffer.pData + offset, data, size);
+
+    if (offset == 0)
+    {
+        buffer.length = size;
+    }
+    else
+    {
+        buffer.length = buffer.length + size;
+    }
+
+    return true;
+}
+
+
 bool MemoryBuffer::lock ()
 {
     buffer.lock_count++;

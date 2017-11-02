@@ -64,6 +64,8 @@ public:
 
     bool set_statistics (const struct tcam_stream_statistics&);
 
+    bool set_data (const unsigned char* data, size_t size, unsigned int offset = 0);
+
     bool lock ();
 
     bool unlock ();
