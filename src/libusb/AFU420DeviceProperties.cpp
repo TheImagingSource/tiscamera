@@ -86,11 +86,16 @@ bool AFU420Device::create_gain ()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_GAIN);
 
-    prop.value.i.min = 64; //
-    prop.value.i.max = 520; // 30 seconds
+    prop.value.i.min = 64;
+    prop.value.i.max = 520;
     prop.value.i.step = 1;
 
     auto value = get_gain();
+
+    if (value == 0)
+    {
+        value = 292;
+    }
 
     prop.value.i.value = value;
     prop.value.i.default_value = value;
