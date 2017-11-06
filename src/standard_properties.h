@@ -665,21 +665,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
         .group = { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL },
     },
-    // {
-    //     TCAM_PROPERTY_,
-    //     .name = "",
-    //     .type_to_use = TCAM_PROPERTY_TYPE,
-    // },
-
-    // {
-    //     .name = "Strobe Polarity",
-    //     .type_to_use = ,
-    // },
-    // {
-    //     .name = "Strobe Operation",
-    //     .type_to_use = ,
-    // },
-
+    {
+        TCAM_PROPERTY_SHUTTER,
+        .name = "Shutter",
+        .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_SHUTTER },
+    },
 };
 
 
