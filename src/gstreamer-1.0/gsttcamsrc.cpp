@@ -1087,6 +1087,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
             self->device = new struct device_state;
             self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
             self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
+            self->device_serial = infos[i].get_serial();
             break;
         }
     }

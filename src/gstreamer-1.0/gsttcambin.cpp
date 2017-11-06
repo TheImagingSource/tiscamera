@@ -916,7 +916,12 @@ static void gst_tcambin_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            g_value_set_string(value, self->device_serial);
+            if (self->src)
+            {
+                g_object_get_property(G_OBJECT(self->src), "serial", value);
+            } else {
+                g_value_set_string(value, self->device_serial);
+            }
             break;
         }
         case PROP_CAPS:
