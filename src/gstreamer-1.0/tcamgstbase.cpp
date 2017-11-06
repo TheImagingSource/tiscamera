@@ -308,7 +308,6 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
                           const GstCaps* wanted_caps,
                           bool& requires_conversion)
 {
-    GstCaps* ret = nullptr;
     requires_conversion = false;
 
     if (!GST_IS_CAPS(available_caps))
@@ -322,35 +321,33 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
         wanted_caps = gst_caps_copy(available_caps);
     }
 
-    GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
+    GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
 
-    if (gst_caps_is_empty(intersect))
+    if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+        && gst_element_factory_can_sink_any_caps(debayer, available_caps))
     {
-        GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
+        requires_conversion = true;
+        // wanted_caps can be fixed, etc.
+        // thus change name to be compatible to bayer2rgb sink pad
+        // and create a correct intersection
+        GstCaps* temp = gst_caps_copy(wanted_caps);
+        gst_caps_change_name(temp, "video/x-bayer");
 
-        if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
-            && gst_element_factory_can_sink_any_caps(debayer, available_caps))
-        {
-            requires_conversion = true;
-            // wanted_caps can be fixed, etc.
-            // thus change name to be compatible to bayer2rgb sink pad
-            // and create a correct intersection
-            GstCaps* temp = gst_caps_copy(wanted_caps);
-            gst_caps_change_name(temp, "video/x-bayer");
-
-            ret = gst_caps_intersect(available_caps, temp);
-            gst_caps_unref(temp);
-        }
-
+        GstCaps* ret = gst_caps_intersect(available_caps, temp);
+        gst_caps_unref(temp);
         gst_object_unref(debayer);
-        gst_caps_unref(intersect);
+        return ret;
     }
-    else
+    gst_object_unref(debayer);
+
+    GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
+    if (!gst_caps_is_empty(intersect))
     {
         return intersect;
     }
+    gst_caps_unref(intersect);
 
-    return ret;
+    return nullptr;
 }
 
 
