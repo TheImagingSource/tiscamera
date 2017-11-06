@@ -73,6 +73,18 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         {
             return device->set_focus(new_property.get_struct().value.i.value);
         }
+        case TCAM_PROPERTY_GAIN_RED:
+        {
+            return device->set_color_gain_factor(color_gain::ColorGainRed, new_property.get_struct().value.d.value);
+        }
+        case TCAM_PROPERTY_GAIN_GREEN:
+        {
+            return device->set_color_gain_factor(color_gain::ColorGainGreen1, new_property.get_struct().value.d.value);
+        }
+        case TCAM_PROPERTY_GAIN_BLUE:
+        {
+            return device->set_color_gain_factor(color_gain::ColorGainBlue, new_property.get_struct().value.d.value);
+        }
     }
 
 

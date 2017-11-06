@@ -38,40 +38,26 @@ using namespace tcam;
 
 
 
-tcam::AFU420Device::AFU420Device (const DeviceInfo& info,
-                                  std::shared_ptr<UsbSession> s)
-    :session(s), is_stream_on(false), stop_all(false)
+tcam::AFU420Device::AFU420Device (const DeviceInfo& info)
+    :usb_device_(nullptr), is_stream_on(false), stop_all(false)
 {
     device = info;
 
 
-    device_handle = UsbHandler::get_instance().open_device(info.get_serial());
+    usb_device_ = UsbHandler::get_instance().open_device_(info.get_serial());
 
-    if (!device_handle)
+    if (usb_device_ == nullptr)
     {
         tcam_log(TCAM_LOG_ERROR, "Failed to open device.");
     }
 
-    // int ret = libusb_get_configuration(device_handle, &end_point);
-
-    // if (ret != 0)
-    // {
-    //     tcam_warning("Could not retrieve configuration.");
-    // }
-
-
-    int ret = libusb_claim_interface(device_handle, 0);
-    if (ret < 0)
+    if (!usb_device_->open_interface(0))
     {
-        tcam_error("Failed to open camera interface - %d (%d). \n"
-                   "Please check device permissions!", 0, ret);
-        //libusb_close(device_handle);
+        tcam_error("Failed to open camera interface - %d. \n"
+                   "Please check device permissions!", 0);
     }
 
-    if (libusb_clear_halt(device_handle, USB_EP_BULK_VIDEO) != 0)
-    {
-        tcam_error("Could not halt endpoint");
-    }
+    usb_device_->halt_endpoint(USB_EP_BULK_VIDEO);
 
     read_firmware_version();
 
@@ -81,9 +67,8 @@ tcam::AFU420Device::AFU420Device (const DeviceInfo& info,
     create_formats();
 
     query_active_format();
-
-    //set_exposure(500000);
 }
+
 
 tcam::AFU420Device::~AFU420Device ()
 {
@@ -93,11 +78,8 @@ tcam::AFU420Device::~AFU420Device ()
     {
         work_thread.join();
     }
-
-    libusb_release_interface(device_handle, 0);
-
-    libusb_close(device_handle);
 }
+
 
 void print_resolution_conf (AFU420Device::sResolutionConf conf)
 {
@@ -669,6 +651,106 @@ void AFU420Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
+void AFU420Device::push_buffer ()
+{
+    if (current_buffer_ == nullptr)
+    {
+        return;
+    }
+
+    if (usbbulk_image_size_ - current_buffer_->get_image_size() != 0)
+    {
+        tcam_warning("Image buffer does not contain enough data. Dropping frame...");
+
+        statistics.frames_dropped++;
+        requeue_buffer(current_buffer_);
+        current_buffer_ = nullptr;
+        offset_ = 0;
+        return;
+    }
+
+    if (auto ptr = listener.lock())
+    {
+        tcam_debug("Transferred data %d - buf size %d expected size %d ", offset_,
+                   current_buffer_->get_image_size(),
+                   active_video_format.get_required_buffer_size());
+        statistics.frame_count++;
+        current_buffer_->set_statistics(statistics);
+        ptr->push_image(current_buffer_);
+        current_buffer_ = nullptr;
+        transfered_size_ = 0;
+        offset_ = 0;
+    }
+    else
+    {
+        tcam_error("ImageSink expired. Unable to deliver images.");
+    }
+}
+
+
+static uint16_t bytes_to_uint16( byte lo, byte hi )
+{
+    return uint16_t( lo ) | (uint16_t( hi ) << 8);
+}
+
+
+struct AFU420Device::header_res AFU420Device::check_and_eat_img_header (unsigned char* data, size_t data_size)
+{
+    struct header_res res = {};
+    res.frame_id = -1;
+    res.buffer = data;
+    res.size = data_size;
+    int actual_header_size = get_packet_header_size();
+
+    if (data_size < actual_header_size)
+    {
+        return res;
+    }
+
+    auto get_hdr_field_at = [bpp = get_stream_bitdepth(), data]( int offset )
+        {
+            return data[offset * bpp / 8];
+        };
+
+    if (image_bit_depth_ == 12)
+    {
+        byte hdr_12bit[4] = { 0x0a, 0xaa, 0x55, 0x00 };
+        int d = memcmp(data, hdr_12bit, 4);
+        if (d != 0)
+        {
+            return res;
+        }
+    }
+    else // this should work for 8 and 10 bit
+    {
+        byte hdr_8bit[4] = { 0x0a, 0xaa, 0x00, 0xa5 };
+        int d = memcmp(data, hdr_8bit, 4);
+        if (d != 0)
+        {
+            return res;
+        }
+    }
+
+    int uWidth = bytes_to_uint16( get_hdr_field_at( 0x4E ), get_hdr_field_at( 0x4C ) );   // note that we skip 0x4D
+    int uHeight = bytes_to_uint16( get_hdr_field_at( 0x5E ), get_hdr_field_at( 0x5C ) );
+
+    auto dim = get_stream_dim();
+    if (uWidth != dim.width || uHeight != dim.height)
+    {
+        tcam_error("Dimensions do not fit.");
+        return res;
+    }
+    res.frame_id = get_hdr_field_at( 0x10 );
+
+    res.buffer = data + actual_header_size;
+    res.size = data_size - actual_header_size;
+
+    //int hdr_mode_on = get_hdr_field_at( uWidth + 0x26 );
+
+    return res;
+}
+
+
 void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
 {
     static int num_packets;
@@ -687,90 +769,66 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             }
         };
 
-    if (current_buffer_ == nullptr)
-    {
-        current_buffer_ = get_next_buffer();
-        current_buffer_->clear();
-        transfered_size_ = 0;
-
-        if (current_buffer_ == nullptr)
-        {
-            tcam_error("Can not get buffer to fill image data. Aborting libusb callback.");
-            submit_transfer(xfr);
-            return;
-        }
-    }
-
 
 	if (xfr->status != LIBUSB_TRANSFER_COMPLETED)
     {
 		tcam_error("transfer status %d\n", xfr->status);
-		//libusb_free_transfer(xfr);
-		// exit(3);
+        submit_transfer(xfr);
         return;
 	}
 
-    num_packets++;
-    // if (xfr->actual_length != 15360)
-    // {
-    //     tcam_error("Only received %d bytes in packet %d", xfr->actual_length, num_packets);
-    //     submit_transfer(xfr);
-    //     return;
-    // }
+    auto header = check_and_eat_img_header(xfr->buffer, xfr->length);
 
-    std::lock_guard<std::mutex> guard(control_transfer_mtx_);
+    bool is_header = header.frame_id >= 0;
+    bool is_trailer = (!is_header) && header.size < usbbulk_chunk_size_;
 
-    unsigned int copy_size = 0;
-    if (transfered_size_ + xfr->actual_length > current_buffer_->get_buffer_size())
+    if (is_header)
     {
-        copy_size = current_buffer_->get_buffer_size() - transfered_size_;
-    }
-    else
-    {
-        copy_size = xfr->actual_length ;
-    }
+        push_buffer();
 
-    current_buffer_->set_data(libusb_control_transfer_get_data(xfr), copy_size, transfered_size_);
-
-	transfered_size_ += xfr->actual_length;
-	num_xfer++;
-
-    auto buffer_complete = [&] ()
+        if (current_buffer_ == nullptr)
         {
-            if (current_buffer_->get_image_size() >= active_video_format.get_required_buffer_size())
+            current_buffer_ = get_next_buffer();
+
+            if (current_buffer_ == nullptr)
             {
-                return true;
+                tcam_error("No buffer to work with. Dropping image");
+                statistics.frames_dropped++;
+                submit_transfer(xfr);
+                return;
             }
-            //tcam_error("%d /// %d", current_buffer_->get_image_size(), active_video_format.get_required_buffer_size());
-            return false;
-        };
 
-    if (buffer_complete())
-    {
-        //auto buffer = get_next_buffer();
-
-        if (auto ptr = listener.lock())
-        {
-            tcam_debug("Transferred data %d - buf size %d expected size %d ", transfered_size_,
-                       current_buffer_->get_image_size(),
-                       active_video_format.get_required_buffer_size());
-            // tcam_debug("pushing buffer to sink");
-            statistics.frame_count++;
-            current_buffer_->set_statistics(statistics);
-            ptr->push_image(current_buffer_);
-
-            // std::ofstream myFile ("/home/edt/test.raw", std::ios::out | std::ios::binary);
-            // myFile.write((char*)current_buffer_->get_data(), current_buffer_->get_image_size());
-
-            // exit(1);
-            current_buffer_ = nullptr;
+            current_buffer_->clear();
             transfered_size_ = 0;
-            num_packets = 0;
+            offset_ = 0;
         }
-        else
+    }
+
+    if (current_buffer_ == nullptr)
+    {
+        tcam_error("Can not get buffer to fill image data. Aborting libusb callback.");
+        no_buffer_counter++;
+        if (no_buffer_counter >= no_buffer_counter_max)
         {
-            tcam_error("ImageSink expired. Unable to deliver images.");
+            // TODO error handling
         }
+        submit_transfer(xfr);
+        return;
+    }
+    no_buffer_counter = 0;
+
+    int bytes_available = usbbulk_image_size_ - offset_;
+
+    int bytes_to_copy = std::min(bytes_available, int(header.size));
+
+    current_buffer_->set_data(header.buffer, bytes_to_copy, offset_);
+
+    offset_ += bytes_to_copy;
+
+    bool is_complete_image = offset_ >= usbbulk_image_size_;
+    if (is_complete_image || is_trailer)
+    {
+        push_buffer();
     }
 
     submit_transfer(xfr);
@@ -822,22 +880,41 @@ bool tcam::AFU420Device::start_stream ()
     int num_iso_packets = 16;
 
     static const int num_transfers = 40;
+    int chunk_size = 0;
+
+    if (usb_device_->is_superspeed())
+    {
+        chunk_size = usb_device_->get_max_packet_size(USB_EP_BULK_VIDEO) * USB3_STACKUP_SIZE;
+    }
+    else
+    {
+        chunk_size = 15 * 1024 * USB2_STACKUP_SIZE;
+    }
 
     transfer_items.clear();
     transfer_items.reserve(num_transfers);
+
+    tcam_error("max packet size of endpoint: %zu", usb_device_->get_max_packet_size(USB_EP_BULK_VIDEO));
+
+    size_t buffer_size =  chunk_size;
+
+    usbbulk_chunk_size_ = chunk_size;
+
+    usbbulk_image_size_ = active_video_format.get_required_buffer_size();
 
     for (int i = 0; i < num_transfers; ++i)
     {
         transfer_items.push_back({});
         transfer_items.at(i).transfer = libusb_alloc_transfer(0);
+        transfer_items.at(i).buffer.reserve(buffer_size);
 
         struct libusb_transfer* xfr = (libusb_transfer*)transfer_items.at(i).transfer;
 
         libusb_fill_bulk_transfer(xfr,
-                                  device_handle,
+                                  usb_device_->get_handle(),
                                   LIBUSB_ENDPOINT_IN | USB_EP_BULK_VIDEO,
-                                  (uint8_t*)&transfer_items.at(i).buffer,
-                                  sizeof(transfer_items.at(i).buffer),
+                                  (uint8_t*)transfer_items.at(i).buffer.data(),
+                                  transfer_items.at(i).buffer.capacity(),
                                   AFU420Device::libusb_bulk_callback,
                                   this,
                                   0);
@@ -871,13 +948,6 @@ bool tcam::AFU420Device::stop_stream ()
     stop_all = true;
     is_stream_on = false;
 
-    // unsigned char val = 0;
-    // int ret = control_write(BASIC_PC_TO_USB_STOP_STREAM,0);
-    // if (ret < 0)
-    // {
-    //     tcam_error("ggggggggggggggggggggggggggggggggggggggg%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%g");
-    // }
-
     for (auto& item : transfer_items)
     {
         libusb_cancel_transfer((libusb_transfer*)item.transfer);
@@ -887,10 +957,7 @@ bool tcam::AFU420Device::stop_stream ()
     if (work_thread.joinable())
         work_thread.join();
 
-    if (libusb_clear_halt(device_handle, USB_EP_BULK_VIDEO) != 0)
-    {
-        tcam_error("Could not halt stream");
-    }
+    usb_device_->halt_endpoint(USB_EP_BULK_VIDEO);
     release_buffers();
 
     return true;
@@ -905,7 +972,8 @@ void tcam::AFU420Device::stream ()
     tv.tv_usec = 200;
     while (!stop_all)
     {
-        int ret = libusb_handle_events_timeout_completed(session->get_session(), &tv, NULL);
+        int ret = libusb_handle_events_timeout_completed(UsbHandler::get_instance().get_session()->get_session(),
+                                                         &tv, NULL);
         if (ret < 0)
         {
             tcam_error("LIBUSB TIMEOUT!!!");
@@ -926,8 +994,6 @@ int AFU420Device::set_resolution_config (sResolutionConf conf, resolution_config
 	uint32_t exp_max = 0, exp_min = 0;
 	control_read( exp_min, BASIC_USB_TO_PC_MIN_EXP, test_mode, 0 );
 	control_read( exp_max, BASIC_USB_TO_PC_MAX_EXP, test_mode, 0 );
-    //print_resolution_conf(conf);
-    //tcam_debug("exp min: %d exp max: %d", exp_min, exp_max);
 
     return hr;
 }
@@ -946,16 +1012,16 @@ int AFU420Device::setup_bit_depth (int bpp)
     {
         tcam_error("Failed to set a bit depth. This is most likely a too old firmware. %d %s", hr, libusb_strerror((libusb_error)hr));
 
-        uint32_t b = 0;
-        int r = control_read(b, BASIC_USB_TO_PC_GET_BIT_DEPTH, 1 );
-        if (r < 0)
-        {
-            tcam_error("Unable to read bit depth %d", r);
-        }
-        else
-        {
-            tcam_info("Current bit depth is %u", b);
-        }
+        // uint32_t b = 0;
+        // int r = control_read(b, BASIC_USB_TO_PC_GET_BIT_DEPTH, 1 );
+        // if (r < 0)
+        // {
+        //     tcam_error("Unable to read bit depth %d", r);
+        // }
+        // else
+        // {
+        //     tcam_info("Current bit depth is %u", b);
+        // }
 
         return hr;
     }
@@ -971,7 +1037,6 @@ int AFU420Device::get_fps_max (double& max,
                                tcam_image_size binning,
                                int src_bpp)
 {
-    //tcam_info("in get_fps_max");
     int hr = setup_bit_depth(src_bpp);
     if (hr < 0)
     {
@@ -999,8 +1064,6 @@ int AFU420Device::get_fps_max (double& max,
     uint16_t ushMaxFPS = 0;
 
     hr = control_read(ushMaxFPS, BASIC_USB_TO_PC_MAX_FPS, conf_test_mode, 0);
-
-    //tcam_debug("get_max_fps returned %d", ushMaxFPS);
 
     if (hr < 0)
     {
@@ -1085,70 +1148,14 @@ int AFU420Device::get_frame_rate_range (uint32_t strm_fmt_id,
 }
 
 
-bool AFU420Device::property_write (property_description desc)
-{
-    // if (desc.property == nullptr)
-    // {
-    //     return false;
-    // }
-
-    // int ret = control_write(desc.prop_out, desc.index, desc.value,
-    //                         (uint32_t) desc.property->get_struct().value.i.value);
-
-    // if (ret < 0)
-    // {
-    //     tcam_error("Unable to write property '%s'. LibUsb returned %d",
-    //                desc.property->get_name().c_str(), ret);
-    //     return false;
-    // }
-
-    // return true;
-    return false;
-}
-
-
-uint32_t AFU420Device::property_read (property_description desc)
-{
-
-    uint32_t value = 0;
-
-    // int ret = control_read(value, desc.prop_out);
-
-    // if (ret < 0)
-    // {
-    //     //tcam_error("Unable to read property '%s'. LibUsb returned %d",
-    //     //         desc.property->get_name().c_str(), ret);
-
-    //     tcam_error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    // }
-    // else
-    // {
-    //     tcam_debug("read '%s' value: %u", value);
-    // }
-
-    return value;
-}
-
-
 int AFU420Device::control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex)
 {
-//    tcam_debug("control_write ucRequest %d, ushValue %d, ushIndex %d", ucRequest, ushValue, ushIndex);
-    // std::vector<unsigned char> d;
-    // d.reserve(sizeof(ushValue));
-    // memcpy(d.data(), &ushValue, sizeof(ushValue));
-
-    // return control_write(ucRequest, 0, ushIndex, d);
-
-    unsigned int timeout = 500;
-    int rval = libusb_control_transfer(device_handle,
-                                       LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                       (uint8_t)ucRequest,
-                                       ushValue,
-                                       ushIndex,
-                                       0, 0,
-                                       timeout);
-    return rval;
-
+    uint8_t data = 0;
+    return usb_device_->control_transfer(HOST_TO_DEVICE,
+                                         (uint8_t)ucRequest,
+                                         ushValue,
+                                         ushIndex,
+                                         data, 0);
 }
 
 
@@ -1157,25 +1164,11 @@ int AFU420Device::control_write (unsigned char ucRequest,
                                  uint16_t ushIndex,
                                  uint8_t data)
 {
-    // std::vector<unsigned char> d;
-    // d.reserve(sizeof(data));
-    // memcpy(d.data(), &data, sizeof(data));
-
-    // return control_write(ucRequest, ushValue, ushIndex, d);
-
-//    tcam_debug("control_write ucRequest %x, ushValue %d, ushIndex %d data %d", ucRequest, ushValue, ushIndex, data);
-
-    unsigned int timeout = 700;
-
-   int rval = libusb_control_transfer(device_handle,
-                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                      (uint8_t)ucRequest,
-                                      ushValue,
-                                      ushIndex,
-
-                                      (unsigned char*)&data, sizeof(data),
-                                      timeout);
-    return rval;
+    return usb_device_->control_transfer(HOST_TO_DEVICE,
+                                         (uint8_t)ucRequest,
+                                         ushValue,
+                                         ushIndex,
+                                         data);
 }
 
 
@@ -1184,20 +1177,11 @@ int AFU420Device::control_write (unsigned char ucRequest,
                                  uint16_t ushIndex,
                                  uint16_t data)
 {
-
-    //tcam_debug("control_write ucRequest %x, ushValue %d, ushIndex %d data %d", ucRequest, ushValue, ushIndex, data);
-
-    unsigned int timeout = 700;
-
-   int rval = libusb_control_transfer(device_handle,
-                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                      (uint8_t)ucRequest,
-                                      ushValue,
-                                      ushIndex,
-
-                                      (unsigned char*)&data, sizeof(data),
-                                      timeout);
-    return rval;
+    return usb_device_->control_transfer(HOST_TO_DEVICE,
+                                         (uint8_t)ucRequest,
+                                         ushValue,
+                                         ushIndex,
+                                         data);
 }
 
 
@@ -1206,41 +1190,31 @@ int AFU420Device::control_write (unsigned char ucRequest,
                                  uint16_t ushIndex,
                                  uint32_t data)
 {
-    // std::vector<unsigned char> d;
-    // d.reserve(sizeof(data));
-    // memcpy(d.data(), &data, sizeof(data));
 
-    // return control_write(ucRequest, ushValue, ushIndex, d);
-
-    // ushValue = 1;
-    // ushIndex = 1;
-
-    //tcam_debug("control_write ucRequest %x, ushValue %d, ushIndex %d data %d", ucRequest, ushValue, ushIndex, data);
-
-    unsigned int timeout = 500;
-
-   int rval = libusb_control_transfer(device_handle,
-                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                      (uint8_t)ucRequest,
-                                      ushValue,
-                                      ushIndex,
-
-                                      (unsigned char*)&data, sizeof(data),
-                                      timeout);
-    return rval;
+    return usb_device_->control_transfer(HOST_TO_DEVICE,
+                                         (uint8_t)ucRequest,
+                                         ushValue,
+                                         ushIndex,
+                                         data);
 }
 
 
 int AFU420Device::control_write (unsigned char ucRequest,
                                  uint16_t ushValue,
                                  uint16_t ushIndex,
-                                 std::vector<unsigned char> data)
+                                 std::vector<unsigned char>& data)
 {
+    // return usb_device_->control_transfer(HOST_TO_DEVICE,
+    //                                      (uint8_t)ucRequest,
+    //                                      ushValue,
+    //                                      ushIndex,
+    //                                      (unsigned char*)data.data(), data.size());
 
+    tcam_debug("hhhhhhhhhhhh");
     //tcam_debug("control_write ucRequest %x, ushValue %d, ushIndex %d datasize %d", ucRequest, ushValue, ushIndex, sizeof(data));
 
     unsigned int timeout = 500;
-    int rval = libusb_control_transfer(device_handle,
+    int rval = libusb_control_transfer(usb_device_->get_handle(),
                                        LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
                                        (uint8_t)ucRequest,
                                        ushValue,
@@ -1254,19 +1228,25 @@ int AFU420Device::control_write (unsigned char ucRequest,
 template<class T>
 int AFU420Device::read_reg (T& value, unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex)
 {
+
     unsigned int timeout = 500;
-
-    //tcam_debug("read_reg: %x %d %d", ucRequest, ushValue, ushIndex);
-
-
-    int rval = libusb_control_transfer(device_handle,
-                                       DEVICE_TO_HOST,
+    int rval = libusb_control_transfer(usb_device_->get_handle(),
+                                       LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
                                        (uint8_t)ucRequest,
-                                       ushIndex,
                                        ushValue,
-                                       (unsigned char*)&value, sizeof(value),
+                                       ushIndex,
+                                       (unsigned char*)&value, sizeof(T),
                                        timeout);
     return rval;
+
+
+    tcam_error("asdasdadsasdasdasdasdadsasd");
+    return usb_device_->control_transfer(LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                         (uint8_t)ucRequest,
+                                         ushValue,
+                                         ushIndex,
+                                         value);
+
 }
 
 
@@ -1312,7 +1292,7 @@ int AFU420Device::control_read (std::vector<uint8_t>& value, unsigned char ucReq
 
     //tcam_debug("transfer_read: %x %d %d", ucRequest, ushValue, ushIndex);
 
-    int rval = libusb_control_transfer(device_handle,
+    int rval = libusb_control_transfer(usb_device_->get_handle(),
                                        LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
                                        (uint8_t)ucRequest,
                                        ushIndex,

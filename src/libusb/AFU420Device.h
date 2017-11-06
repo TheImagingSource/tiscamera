@@ -22,6 +22,7 @@
 #include "VideoFormatDescription.h"
 #include "FormatHandlerInterface.h"
 #include "UsbSession.h"
+#include "LibusbDevice.h"
 //#include "afu420_definitions.h"
 
 #include "ep_defines_r42.h"
@@ -33,6 +34,8 @@
 #include <thread>
 #include <mutex>              // std::mutex, std::unique_lock
 #include <condition_variable> // std::condition_variable
+#include <atomic>
+
 
 VISIBILITY_INTERNAL
 
@@ -82,8 +85,10 @@ class AFU420Device : public DeviceInterface
 
 public:
 
-    explicit AFU420Device (const DeviceInfo&,
-                           std::shared_ptr<UsbSession> session);
+//    explicit AFU420Device (const DeviceInfo&,
+    //                         std::shared_ptr<UsbSession> session);
+    explicit AFU420Device (const DeviceInfo&);
+    //std::unique_ptr<LibusbDevice> usb_dev);
 
     AFU420Device () = delete;
 
@@ -198,9 +203,7 @@ private:
         set
     };
 
-
-    std::shared_ptr<UsbSession> session;
-    struct libusb_device_handle* device_handle;
+    std::unique_ptr<LibusbDevice> usb_device_;
 
     static constexpr tcam_image_size max_sensor_dim_ = { 7716, 5360 };
     static constexpr tcam_image_size min_sensor_dim_ = { 264, 256 };
@@ -290,18 +293,28 @@ private:
 
     std::shared_ptr<tcam::MemoryBuffer> get_next_buffer ();
 
-    volatile bool is_stream_on;
+    volatile std::atomic_bool is_stream_on;
     struct tcam_stream_statistics statistics;
 
     size_t transfered_size_;
     unsigned int offset_;
     std::shared_ptr<MemoryBuffer> current_buffer_;
-    int num_xfer;
 
     std::weak_ptr<SinkInterface> listener;
 
     static void LIBUSB_CALL libusb_bulk_callback (struct libusb_transfer* trans);
     void transfer_callback (struct libusb_transfer* transfer);
+
+    void push_buffer ();
+
+    struct header_res
+    {
+        int frame_id;
+        unsigned char* buffer;
+        size_t size;
+    };
+
+    struct header_res check_and_eat_img_header (unsigned char* data, size_t data_size);
 
     void stream ();
 
@@ -337,7 +350,7 @@ private:
     struct bulk_transfer_item
     {
         //uint8_t buffer[512];
-        uint8_t buffer[1024*15];
+        std::vector<uint8_t> buffer;
         //uint8_t buffer[2048];
         void* transfer;
 
@@ -352,6 +365,16 @@ private:
 
     std::vector<bulk_transfer_item> transfer_items;
 
+
+    int no_buffer_counter = 0;
+    static constexpr int no_buffer_counter_max = 10;
+    unsigned int usbbulk_chunk_size_ = 0;
+    unsigned int usbbulk_image_size_ = 0;
+    static constexpr int actual_image_prefix_size_ = 4;
+
+    int get_packet_header_size () const { (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
+
+
     struct frame_rate_cache_item {
         uint32_t        strm_fmt_id;
         int             scaling_factor_id;
@@ -364,6 +387,10 @@ private:
     std::vector<frame_rate_cache_item>  frame_rate_cache_;
     int                     image_bit_depth_ = 8;
 
+    int get_stream_bitdepth() const {return image_bit_depth_;};
+
+    tcam_image_size get_stream_dim() {return active_video_format.get_size();};
+
     std::mutex control_transfer_mtx_;
 
 
@@ -371,30 +398,41 @@ private:
     bool create_gain ();
     bool create_focus ();
 
+    bool create_shutter ();
+    bool create_color_gain ();
+    bool create_strobe ();
+
     int64_t get_exposure ();
     bool set_exposure(int64_t exposure_in_us);
     int64_t get_gain ();
     bool set_gain (int64_t gain);
     int64_t get_focus ();
     bool set_focus (int64_t focus);
+    bool get_shutter ();
+    bool set_shutter (bool open);
 
-    bool property_write (property_description);
-    uint32_t property_read (property_description);
+    bool get_color_gain_factor (color_gain eColor, double& dValue);
+    bool set_color_gain_factor (color_gain eColor, double dValue);
 
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint16_t data);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint32_t data);
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, std::vector<unsigned char> data);
+    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, std::vector<unsigned char>& data);
 
     template<class T>
     int read_reg (T& value, unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex);
 
-    int control_read (uint8_t& value, unsigned char ucRequest, uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint16_t& value, unsigned char ucRequest, uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint32_t& value, unsigned char ucRequest, uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint64_t& value, unsigned char ucRequest, uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (std::vector<uint8_t>& value, unsigned char ucRequest, uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read (uint8_t& value, unsigned char ucRequest,
+                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read (uint16_t& value, unsigned char ucRequest,
+                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read (uint32_t& value, unsigned char ucRequest,
+                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read (uint64_t& value, unsigned char ucRequest,
+                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read (std::vector<uint8_t>& value, unsigned char ucRequest,
+                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
 };
 
 } /* namespace tcam */

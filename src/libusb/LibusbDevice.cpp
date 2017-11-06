@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 The Imaging Source Europe GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "LibusbDevice.h"
 #include "UsbHandler.h"
@@ -23,9 +38,10 @@ tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s,
 tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s, libusb_device* dev)
     :session_(s), device_(dev)
 {
-    if (dev)
+    if (device_)
     {
-        int ret = libusb_open(dev, &device_handle_);
+        libusb_ref_device(device_);
+        int ret = libusb_open(device_, &device_handle_);
 
         if (ret < 0)
         {
@@ -105,4 +121,61 @@ bool tcam::LibusbDevice::close_interface (int interface)
     }
 
     return true;
+}
+
+
+bool tcam::LibusbDevice::is_superspeed ()
+{
+    if (!device_)
+    {
+        return false;
+    }
+
+    if (libusb_get_device_speed(device_) == LIBUSB_SPEED_SUPER)
+    {
+        return true;
+    }
+    return false;
+}
+
+
+int tcam::LibusbDevice::get_max_packet_size (int endpoint)
+{
+    if (!device_)
+    {
+        return -1;
+    }
+
+    return libusb_get_max_packet_size(device_, endpoint);
+}
+
+
+int tcam::LibusbDevice::internal_control_transfer (uint8_t RequestType,
+                                                   uint8_t Request,
+                                                   uint16_t Value,
+                                                   uint16_t Index,
+                                                   unsigned char* data,
+                                                   unsigned int size,
+                                                   unsigned int timeout)
+{
+    // tcam_debug("sending request(0x%x 0x%x 0x%x 0x%x) '%s' size %zu",
+    //            RequestType, Request, Index, Value,
+    //            data, size);
+
+    return libusb_control_transfer(device_handle_,
+                                   RequestType,
+                                   Request,
+                                   Value,
+                                   Index,
+                                   (unsigned char*)&data, size,
+                                   timeout);
+}
+
+
+void tcam::LibusbDevice::halt_endpoint (int endpoint)
+{
+    if (libusb_clear_halt(device_handle_, endpoint) != 0)
+    {
+        tcam_error("Could not halt endpoint");
+    }
 }

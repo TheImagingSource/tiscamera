@@ -47,9 +47,10 @@ UsbHandler::~UsbHandler()
 
 std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& serial)
 {
-    struct libusb_device_handle* ret = nullptr;
+    std::unique_ptr<LibusbDevice> ret = nullptr;
 
     libusb_device** devs;
+    libusb_device_handle* dev;
 
     int cnt = libusb_get_device_list(this->session->get_session(), &devs);
 
@@ -74,7 +75,7 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& seria
         if (desc.idProduct != 0x8209 && desc.idProduct != 0x0804)
             continue;
 
-        r = libusb_open(devs[i], &ret);
+        r = libusb_open(devs[i], &dev);
 
         if (r < 0)
         {
@@ -84,25 +85,22 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& seria
 
         char tmp_str[sizeof(tcam_device_info::serial_number)];
 
-        libusb_get_string_descriptor_ascii(ret, desc.iSerialNumber,
+        libusb_get_string_descriptor_ascii(dev, desc.iSerialNumber,
                                            (unsigned char*)tmp_str,
                                            sizeof(tcam_device_info::serial_number));
         if (serial.compare(tmp_str) == 0)
         {
-            //     tcam_info("Max packet size for endpoint 0: %d", libusb_get_max_packet_size(devs[i], 0));
-            libusb_close(ret);
-            return std::unique_ptr<LibusbDevice>(new LibusbDevice(session, devs[i]));
+            libusb_close(dev);
+            ret = std::unique_ptr<LibusbDevice>(new LibusbDevice(session, devs[i]));
             break;
         }
 
-        libusb_close(ret);
-
+        libusb_close(dev);
     }
 
     libusb_free_device_list(devs, 1);
 
-
-    return nullptr;;
+    return ret;
 }
 
 
@@ -204,7 +202,7 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
             //     cout<<"Descriptor Type: "<<(int)epdesc->bDescriptorType<<endl;
             //     cout<<"EP Address: "<<(int)epdesc->bEndpointAddress<<endl;
             // }
-            printdev(devs[i]);
+            //printdev(devs[i]);
             break;
         }
 
