@@ -1146,8 +1146,6 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 
     self->is_running = FALSE;
 
-    std::unique_lock<std::mutex> lck(self->mtx);
-
     self->cv.notify_all();
 
     self->device->dev->stop_stream();
@@ -1274,7 +1272,7 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
     destroyer = self;
 
 wait_again:
-    // wait until new buffer arrives or stop waiting when wee have to shut down
+    // wait until new buffer arrives or stop waiting when we have to shut down
     while ((self->new_buffer == false) && (self->is_running == true))
     {
         self->cv.wait_for(lck, std::chrono::milliseconds(1));
