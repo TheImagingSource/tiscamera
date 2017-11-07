@@ -56,7 +56,7 @@ class TisCameraWindow(Gtk.ApplicationWindow):
         if serial:
             src.set_property("serial", serial)
 
-        bus = src.get_bus()
+        bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect("message::eos", self.on_eos)
 
@@ -207,6 +207,7 @@ class Application(Gtk.Application):
                 self.windows[serial].present()
             else:
                 window = TisCameraWindow(serial, application=self)
+                window.set_size_request(800, 600)
                 window.present()
                 self.windows[serial] = window
                 self.add_window(window)
@@ -220,6 +221,7 @@ class Application(Gtk.Application):
     def do_activate(self):
         if not self.windows:
             window = TisCameraWindow(None)
+            window.set_size_request(800, 600)
             self.windows[window.get_serial()] = window
             window.present()
             self.add_window(window)
