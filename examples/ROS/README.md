@@ -1,7 +1,7 @@
 # ROS Camera Interface
-The TIS Ros Camera interface is a simple interface between the TIS GStreamer 
-modules and the ROS gscam plugin. It consists of two Python 3 scripts. 
-`tis_rossarter.py` is the main program, `TIS.py` wraps the GStreamer sources, 
+The TIS Ros Camera interface is a simple interface between the TIS GStreamer
+modules and the ROS gscam plugin. It consists of two Python 3 scripts.
+`tis_rossarter` is the main program, `tiscamera.py` wraps the GStreamer sources,
 camera property handling and rosrun calls.
 
 ## ROS Installation
@@ -10,7 +10,7 @@ for info.
 
 `sudo apt-get install ros-kinetic-gscam`
 
-Since ROS gscam is based on GStreamer 0.10, the GStreamer Base Plugins have to 
+Since ROS gscam is based on GStreamer 0.10, the GStreamer Base Plugins have to
 be installed:
 
 `sudo apt-get install libgstreamer-plugins-base0.10-dev`
@@ -20,7 +20,7 @@ under https://github.com/TheImagingSource/tiscamera.
 
 ## Configure your camera
 
-Open `tis_rosstarter.py` with a text editor. In the following line, select the 
+Open `tis_rosstarter` with a text editor. In the following line, select the
 camera, video format and frame rate:
 
 ```python
@@ -37,17 +37,16 @@ The values for the parameters can be determined with the tcam-ctrl program.
 
 The roscore is already running. Now the camera communitcation is started with
 
-`python3 tis_rosstarter.py`
+`./tis_rosstarter`
 
 The `rqt_image_view` program can be used to check the live video.
 
-`tis_rosstarter.py` is stopped by hitting the enter key.
+`tis_rosstarter` is stopped by hitting the enter key.
 
-In the `tis_rosstarter.py` source code all camera properties can be set. Sample
+In the `tis_rosstarter` source code all camera properties can be set. Sample
 code is already included. For example the line executes the Autofocus One Push,
 provided that the camera supports this feature:
 
 ```python
 Tis.PushProperty("Focus Auto")
 ```
-
