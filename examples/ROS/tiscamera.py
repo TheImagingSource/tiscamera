@@ -1,7 +1,7 @@
 import os
 import subprocess
-import gi
 from collections import namedtuple
+import gi
 
 gi.require_version("Gst", "1.0")
 gi.require_version("Tcam", "0.1")
@@ -11,10 +11,13 @@ from gi.repository import Tcam, Gst, GLib, GObject
 DeviceInfo = namedtuple("DeviceInfo", "status name identifier connection_type")
 CameraProperty = namedtuple("CameraProperty", "status value min max default step type flags category group")
 
+# Disable pylint false positives
+# pylint:disable=E0712
 
-class TIS:
+
+class Camera:
     """"""
-    def __init__(self,serial, width, height, framerate, color, liveview):
+    def __init__(self, serial, width, height, framerate, color, liveview):
         """ Constructor.
         Creates the sink pipeline and the source pipeline.
 
@@ -33,14 +36,14 @@ class TIS:
         self.newsample = False
         self.pid = -1
 
-        self.RemoveTmpFile()
+        self.__remove_tmp_file()
 
-        format = "BGRx"
+        pixelformat = "BGRx"
         if not color:
-            format = "GRAY8"
+            pixelformat = "GRAY8"
 
         if liveview:
-            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (serial, format, width, height, framerate,)
+            p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (serial, pixelformat, width, height, framerate,)
             p += ' ! tee name=t'
             p += ' t. ! queue ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem'  % (width, height, framerate,)
             p += ' t. ! queue ! videoconvert ! ximagesink'
@@ -54,11 +57,12 @@ class TIS:
         try:
             self.pipeline = Gst.parse_launch(p)
         except GLib.Error as error:
-            print("Error creating pipeline: {0}".format(err))
-            raise
+            raise RuntimeError("Error creating pipeline: {0}".format(error))
+
 
         self.pipeline.set_state(Gst.State.READY)
-        self.pipeline.get_state(4000000000)
+        if self.pipeline.get_state(10 * Gst.SECOND)[0] != Gst.StateChangeReturn.SUCCESS:
+            raise RuntimeError("Failed to start video stream.")
         # Query a pointer to our source, so we can set properties.
         self.source = self.pipeline.get_by_name("source")
 
@@ -67,20 +71,20 @@ class TIS:
         gscam += ',bpp=24,depth=24,blue_mask=16711680, green_mask=65280, red_mask=255 ! ffmpegcolorspace'
         os.environ["GSCAM_CONFIG"] = gscam
 
-    def Start_pipeline(self):
+    def start_pipeline(self):
         """ Starts the camera sink pipeline and the rosrun process
 
         :return:
         """
         try:
             self.pipeline.set_state(Gst.State.PLAYING)
-            self.pid = subprocess.Popen( ["rosrun", "gscam", "gscam"])
+            self.pid = subprocess.Popen(["rosrun", "gscam", "gscam"])
 
         except GLib.Error as error:
             print("Error starting pipeline: {0}".format(error))
             raise
 
-    def Stop_pipeline(self):
+    def stop_pipeline(self):
         """ Stops the camera pipeline. Should also kill the rosrun process, but is not implemented
 
         :return:
@@ -89,54 +93,52 @@ class TIS:
         self.pipeline.set_state(Gst.State.READY)
         self.pipeline.set_state(Gst.State.NULL)
 
-    def List_Properties(self):
+    def list_properties(self):
         """ Helper function. List available properties
 
         :return:
         """
         for name in self.source.get_tcam_property_names():
-            print( name )
+            print(name)
 
-    def Get_Property(self, PropertyName):
-        """ Return the value of the passed property. Use List_Properties for querying names of available properties.
+    def get_property(self, property_name):
+        """ Return the value of the passed property.
 
-        :param PropertyName: Name of the property, e.g. Gain, Exposure, Gain Auto.
+        Use list_properties for querying names of available properties.
+
+        :param property_name: Name of the property, e.g. Gain, Exposure, Gain Auto.
         :return: Current value of the property.
         """
         try:
-
-            return CameraProperty(*self.source.get_tcam_property(PropertyName))
+            return CameraProperty(*self.source.get_tcam_property(property_name))
         except GLib.Error as error:
-            print("Error get Property {0}: {1}",PropertyName, format(error))
-            raise
+            raise RuntimeError("Error get Property {0}: {1}", property_name, format(error))
 
-    def Set_Property(self, PropertyName, value):
-        """ Set a property. Use List_Properties for querying names of available properties.
+    def set_property(self, property_name, value):
+        """ Set a property. Use list_properties for querying names of available properties.
 
-        :param PropertyName: Name of the property, e.g. Gain, Exposure, Gain Auto.
+        :param property_name: Name of the property, e.g. Gain, Exposure, Gain Auto.
         :param value: Value to be set.
         :return:
         """
         try:
-            self.source.set_tcam_property(PropertyName,GObject.Value(type(value), value))
+            self.source.set_tcam_property(property_name, GObject.Value(type(value), value))
         except GLib.Error as error:
-            print("Error set Property {0}: {1}",PropertyName, format(error))
-            raise
+            raise RuntimeError("Error set Property {0}: {1}", property_name, format(error))
 
-    def Push_Property(self, PropertyName):
+    def push_property(self, property_name):
         """ Simplify push properties, like Auto Focus one push
 
-        :param PropertyName: Name of the property to be pushed
+        :param property_name: Name of the property to be pushed
         :return:
         """
         try:
-            self.source.set_tcam_property(PropertyName, GObject.Value(bool, True))
+            self.source.set_tcam_property(property_name, GObject.Value(bool, True))
 
         except GLib.Error as error:
-            print("Error set Property {0}: {1}", PropertyName, format(error))
-            raise
+            raise RuntimeError("Error set Property {0}: {1}", property_name, format(error))
 
-    def RemoveTmpFile(self):
+    def __remove_tmp_file(self):
         """ Delete the memory file used by the pipelines to share memory
 
         :return:
@@ -145,4 +147,3 @@ class TIS:
             os.remove('/tmp/ros_mem')
         except OSError:
             pass
-
