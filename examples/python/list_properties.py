@@ -74,7 +74,7 @@ def select_camera(source):
         if 0 <= selection < len(device_list):
             legal_input = True
         else:
-            print("Please select a legal device.")
+            print("Please select a device.")
 
     return device_list[selection]
 
