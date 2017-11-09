@@ -1275,7 +1275,7 @@ wait_again:
     // wait until new buffer arrives or stop waiting when we have to shut down
     while ((self->new_buffer == false) && (self->is_running == true))
     {
-        self->cv.wait_for(lck, std::chrono::milliseconds(1));
+        self->cv.wait(lck);
     }
 
     if (self->is_running != TRUE)
