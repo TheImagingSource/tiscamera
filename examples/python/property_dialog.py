@@ -20,17 +20,14 @@ import math
 
 import gi
 
-# the two lines import the tcam introspection
 gi.require_version("Tcam", "0.1")
 from gi.repository import Tcam
 
 gi.require_version("Gst", "1.0")
 gi.require_version("Gtk", "3.0")
-
 from gi.repository import Gtk, Gst, Gio, GObject, GLib
 
 from collections import namedtuple
-
 
 from live_video import TisCameraWindow
 
@@ -46,17 +43,22 @@ class PropertyBox(Gtk.Box):
 
 
 class BooleanProperty(PropertyBox):
+    """Base class for a bool type property. Uses a Gtk.Switch to control the value."""
     __gsignals__ = {"changed": (GObject.SIGNAL_RUN_FIRST, None, (str, bool))}
     def __init__(self, szgroup, name, ppty):
         super().__init__(szgroup, name)
         button = Gtk.Switch()
-        self.add(button)
+        self.pack_start(button, False, False, 10)
         button.set_active(ppty.value)
         button.connect("notify::active",
                        lambda switch, x, self: self.emit("changed", name, switch.get_active()), self)
 
 
 class ScaleProperty(PropertyBox):
+    """Base class for a scale control. valuetype could be "float" or "int".
+    The control will use a logarithmic scale if the range of possible values
+    would exceed 5000.
+    """
     ABSVAL_SLIDER_TICKS = 100
     def __init__(self, szgroup, name, ppty, valuetype):
         super().__init__(szgroup, name)
@@ -68,15 +70,23 @@ class ScaleProperty(PropertyBox):
             else:
                 minval = 0
             logrange = math.log(ppty.max) - minval
-            val = self.ABSVAL_SLIDER_TICKS / logrange * (math.log(ppty.value) - minval)
+            if ppty.value > 0:
+                logval = math.log(ppty.value)
+            else:
+                logval = 0
+            val = self.ABSVAL_SLIDER_TICKS / logrange * (logval - minval)
             scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, self.ABSVAL_SLIDER_TICKS, 1)
             scale.set_value(val)
-            scale.add_mark(val, Gtk.PositionType.TOP, None)
+            # Add a mark for the default value
+            if ppty.default > 0:
+                default = self.ABSVAL_SLIDER_TICKS / logrange * (math.log(ppty.default) - minval)
+                scale.add_mark(default, Gtk.PositionType.TOP, None)
             scale.connect("value-changed", self.on_logarithmic_value_changed, name, ppty, valuetype)
         else:
             step = ppty.step or 1.0
             scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, ppty.min, ppty.max, step)
             scale.set_value(ppty.value)
+            # Add a mark for the default value
             scale.add_mark(ppty.default, Gtk.PositionType.TOP, None)
             scale.connect("value-changed", lambda scale: self.emit("changed", name, valuetype(scale.get_value())))
         self.pack_start(scale, True, True, 0)
@@ -110,8 +120,10 @@ class DoubleProperty(ScaleProperty):
 
 
 class EnumProperty(PropertyBox):
+    """Base class for enum type properties."""
     __gsignals__ = {"changed": (GObject.SIGNAL_RUN_FIRST, None, (str, str))}
     def __init__(self, szgroup, name, ppty, value_list):
+        super().__init__(szgroup, name)
         combo_box = Gtk.ComboBoxText()
         for value in value_list:
             combo_box.append_text(value)
@@ -122,6 +134,7 @@ class EnumProperty(PropertyBox):
         self.add(combo_box)
 
 class ButtonProperty(Gtk.Button):
+    """Base class for button type properties."""
     __gsignals__ = {"changed": (GObject.SIGNAL_RUN_FIRST, None, (str, bool))}
     def __init__(self, szgroup, name):
         super().__init__(name)
@@ -132,9 +145,18 @@ class PropertyDialog(Gtk.Window):
     def __init__(self, src):
         super().__init__()
         self.src = src
+        devinfo = src.get_device_info(src.get_property("serial"))
+        self.set_title("%s (%s) - Properties" % (devinfo[1], src.get_property("serial")))
         self.add(self.create_controls())
+        self.connect("delete-event", self.on_destroy)
+
+    def on_destroy(self, *x):
+        self.hide()
+        return True
 
     def create_controls(self):
+        """Create a Gtk.Notebook containing the property categories as pages
+        and the properties as controls on each page."""
         names = self.src.get_tcam_property_names()
         group = Gtk.SizeGroup()
         group.set_mode(Gtk.SizeGroupMode.HORIZONTAL)
@@ -180,6 +202,7 @@ class PropertyDialog(Gtk.Window):
 
 
 class PropertyCameraWindow(TisCameraWindow):
+    """Main application window. Extends the live_video example window with a button to open a property dialog."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         button = Gtk.Button.new_with_mnemonic("_Properties")
