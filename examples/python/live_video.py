@@ -56,6 +56,8 @@ class TisCameraWindow(Gtk.ApplicationWindow):
         if serial:
             src.set_property("serial", serial)
 
+        src.set_state(Gst.State.READY)
+
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect("message::eos", self.on_eos)
