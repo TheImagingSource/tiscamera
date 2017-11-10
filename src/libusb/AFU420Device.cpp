@@ -514,10 +514,39 @@ bool tcam::AFU420Device::get_property (Property& p)
 }
 
 
-AFU420Device::sResolutionConf AFU420Device::videoformat_to_resolution_conf (const VideoFormat& format)
-//, const Property& binning)
+AFU420Device::sResolutionConf AFU420Device::videoformat_to_resolution_conf (const VideoFormat& format,
+                                                                            const std::shared_ptr<Property> binning_hor,
+                                                                            const std::shared_ptr<Property> binning_ver,
+                                                                            const std::shared_ptr<Property> offset_hor,
+                                                                            const std::shared_ptr<Property> offset_ver)
 {
-    auto conf = CreateResolutionConf({0, 0}, format.get_size(), {0, 0});
+
+
+    tcam_image_size offset = {0, 0};
+
+    if (offset_hor)
+    {
+        offset.width = offset_hor->get_struct().value.i.value;
+    }
+
+    if (offset_ver)
+    {
+        offset.height = offset_ver->get_struct().value.i.value;
+    }
+
+    tcam_image_size binning = {0, 0};
+
+    if (binning_hor)
+    {
+        binning.width = binning_hor->get_struct().value.i.value;
+    }
+
+    if (binning_ver)
+    {
+        binning.height = binning_ver->get_struct().value.i.value;
+    }
+
+    auto conf = CreateResolutionConf(offset, format.get_size(), binning);
 
     return conf;
 }
@@ -549,7 +578,27 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
         tcam_debug("Set bit depth. %d", ret);
     }
 
-    auto conf = videoformat_to_resolution_conf(format);
+    auto find_property = [this]( TCAM_PROPERTY_ID id)
+    {
+        for (auto& p : this->property_handler->properties)
+        {
+            if (p.property->get_ID() == id)
+            {
+                return p.property;
+            }
+        }
+        // TODO rework
+        //return nullptr;
+    };
+
+    auto binning_hor = find_property(TCAM_PROPERTY_BINNING_HORIZONTAL);
+    auto binning_ver = find_property(TCAM_PROPERTY_BINNING_VERTICAL);
+    auto offset_x = find_property(TCAM_PROPERTY_OFFSET_Y);
+    auto offset_y = find_property(TCAM_PROPERTY_OFFSET_X);
+
+    auto conf = videoformat_to_resolution_conf(format,
+                                               binning_hor, binning_ver,
+                                               offset_x, offset_y);
 
     ret = set_resolution_config(conf, resolution_config_mode::set);
 
