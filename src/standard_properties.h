@@ -671,6 +671,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_SHUTTER },
     },
+    {
+        TCAM_PROPERTY_HDR,
+        .name = "HDR",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_HDR },
+    },
 };
 
 
