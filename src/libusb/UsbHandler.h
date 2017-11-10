@@ -20,6 +20,8 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
+#include <atomic>
 
 #include <libusb-1.0/libusb.h>
 
@@ -57,12 +59,19 @@ public:
 
     /// @name open_camera
     /// @param serial - string containing the serial number of the camera that shall be opened
-    /// @return shared pointer to the opened usb camera; Reutrns nullptr on failure
+    /// @return shared pointer to the opened usb camera; Returns nullptr on failure
     // std::shared_ptr<UsbCamera> open_camera (std::string serial);
 
     std::shared_ptr<UsbSession> get_session ();
 
+    /**
+     * event related stuff
+     * used for async bulk transactions
+     */
+    std::atomic_bool run_event_thread;
+    std::thread event_thread;
 
+    void handle_events ();
 
 }; /* class UsbHandler */
 

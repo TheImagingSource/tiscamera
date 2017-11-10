@@ -37,12 +37,20 @@ UsbHandler& UsbHandler::get_instance ()
 
 
 UsbHandler::UsbHandler ():
-    session(new UsbSession())
-{}
+    session(new UsbSession()), run_event_thread(true)
+{
+    event_thread = std::thread(&UsbHandler::handle_events, this);
+}
 
 
 UsbHandler::~UsbHandler()
-{}
+{
+    run_event_thread = false;
+    if (event_thread.joinable())
+    {
+        event_thread.join();
+    }
+}
 
 
 std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& serial)
@@ -279,6 +287,19 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
 std::shared_ptr<UsbSession> UsbHandler::get_session ()
 {
     return this->session;
+}
+
+
+void UsbHandler::handle_events ()
+{
+    struct timeval tv = {};
+    tv.tv_usec = 200;
+    while (run_event_thread)
+    {
+        libusb_handle_events_timeout_completed(this->session->get_session(),
+                                               &tv,
+                                               nullptr);
+    }
 }
 
 }; /* namespace tis */

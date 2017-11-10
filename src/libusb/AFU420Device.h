@@ -85,10 +85,7 @@ class AFU420Device : public DeviceInterface
 
 public:
 
-//    explicit AFU420Device (const DeviceInfo&,
-    //                         std::shared_ptr<UsbSession> session);
     explicit AFU420Device (const DeviceInfo&);
-    //std::unique_ptr<LibusbDevice> usb_dev);
 
     AFU420Device () = delete;
 
@@ -247,10 +244,8 @@ private:
 
     std::shared_ptr<AFU420FormatHandler> format_handler;
 
-    unsigned char lost_countdown;
     bool stop_all;
     bool device_is_lost;
-    bool abort_all;
 
     std::thread udev_monitor;
 
@@ -275,7 +270,9 @@ private:
 
     void notification_loop ();
 
-    void lost_device ();
+    std::atomic_int lost_countdown;
+
+    //void lost_device ();
 
     void determine_active_video_format ();
 
@@ -319,8 +316,6 @@ private:
     };
 
     struct header_res check_and_eat_img_header (unsigned char* data, size_t data_size);
-
-    void stream ();
 
     bool get_frame ();
 
@@ -376,7 +371,7 @@ private:
     unsigned int usbbulk_image_size_ = 0;
     static constexpr int actual_image_prefix_size_ = 4;
 
-    int get_packet_header_size () const { (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
+    int get_packet_header_size () const { return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
 
 
     struct frame_rate_cache_item {
@@ -397,14 +392,21 @@ private:
 
     std::mutex control_transfer_mtx_;
 
+    bool has_optics_;
+    void check_for_optics ();
+    bool has_optics () {return has_optics_;}
+    bool has_ois_unit () {return has_optics_;};
 
     bool create_exposure ();
     bool create_gain ();
     bool create_focus ();
-
+    bool create_hdr ();
     bool create_shutter ();
     bool create_color_gain ();
     bool create_strobe ();
+
+    bool create_offsets ();
+    bool create_binning ();
 
     int64_t get_exposure ();
     bool set_exposure(int64_t exposure_in_us);
@@ -415,8 +417,11 @@ private:
     bool get_shutter ();
     bool set_shutter (bool open);
 
+    int64_t get_hdr ();
+    bool set_hdr (int64_t);
+
     bool get_color_gain_factor (color_gain eColor, double& dValue);
-    bool set_color_gain_factor (color_gain eColor, double dValue);
+    bool set_color_gain_factor (color_gain eColor, int dValue);
 
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);

@@ -17,6 +17,7 @@
 #include "AFU420Device.h"
 
 #include "logging.h"
+#include "PropertyGeneration.h" // handle_auto_center
 
 #include <algorithm>
 
@@ -75,15 +76,41 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         }
         case TCAM_PROPERTY_GAIN_RED:
         {
-            return device->set_color_gain_factor(color_gain::ColorGainRed, new_property.get_struct().value.d.value);
+            return device->set_color_gain_factor(color_gain::ColorGainRed, new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_GAIN_GREEN:
         {
-            return device->set_color_gain_factor(color_gain::ColorGainGreen1, new_property.get_struct().value.d.value);
+            device->set_color_gain_factor(color_gain::ColorGainGreen1, new_property.get_struct().value.i.value);
+            return device->set_color_gain_factor(color_gain::ColorGainGreen2, new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_GAIN_BLUE:
         {
-            return device->set_color_gain_factor(color_gain::ColorGainBlue, new_property.get_struct().value.d.value);
+            return device->set_color_gain_factor(color_gain::ColorGainBlue, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_OFFSET_AUTO:
+        {
+            auto props = device->getProperties();
+            return tcam::handle_auto_center(new_property, props, {}, device->active_video_format.get_size());
+        }
+        case TCAM_PROPERTY_OFFSET_X:
+        {
+            return true;
+        }
+        case TCAM_PROPERTY_OFFSET_Y:
+        {
+            return true;
+        }
+        case TCAM_PROPERTY_BINNING_HORIZONTAL:
+        {
+            break;
+        }
+        case TCAM_PROPERTY_BINNING_VERTICAL:
+        {
+            break;
+        }
+        default:
+        {
+            break;
         }
     }
 

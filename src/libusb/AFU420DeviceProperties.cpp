@@ -19,6 +19,8 @@
 #include "standard_properties.h"
 #include "logging.h"
 
+#include "utils.h"
+
 #include <cmath>
 
 using namespace tcam;
@@ -107,19 +109,60 @@ bool AFU420Device::create_shutter ()
 }
 
 
+bool AFU420Device::create_hdr ()
+{
+    auto prop = create_empty_property(TCAM_PROPERTY_HDR);
+    // hdr sets the exposure divider for the dark lines in the hdr image.
+    // e.g. a factor of 1 disables hdr
+    // a factor of 16 means that the dark lines use a exposure value of exposure / 16
+    prop.value.i.min = 1;
+    prop.value.i.max = 16;
+    prop.value.i.step = 1;
+    prop.value.i.value = 1;
+    prop.value.i.default_value = 1;
+
+    auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
+
+    property_handler->properties.push_back({property});
+
+    return true;
+}
+
+
+double color_gain_to_camera (double value)
+{
+    return map_value_ranges(0, 255, 0, (4.0 - (1.0 / 256.0)), value);
+}
+
+
+int camera_to_color_gain (double value)
+{
+    return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
+}
+
+
 bool AFU420Device::create_color_gain ()
 {
+    /*
+      gain works in a weird way.
+      the values lie between 0 and (4.0 - (1.0 / 256.0))
+
+      we map this to the more traditional 0 - 255
+
+      this allows direct adjustments from the tcamwhitebalance gst module
+     */
+
     auto prop = create_empty_property(TCAM_PROPERTY_GAIN_RED);
-    prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
-    prop.value.d.min = 0.0;
-    prop.value.d.max = 4.0 - (1.0 / 256.0);
-    prop.value.d.step = 0.1;
+
+    prop.value.i.min = 0;
+    prop.value.i.max = 255;
+    prop.value.i.step = 1;
 
     double value = 0;
     bool ret = get_color_gain_factor(color_gain::ColorGainRed, value);
 
-    prop.value.d.value = value;
-    prop.value.d.default_value = value;
+    prop.value.i.value = camera_to_color_gain(value);
+    prop.value.i.default_value = 64;
 
     auto property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
@@ -127,16 +170,16 @@ bool AFU420Device::create_color_gain ()
 
     /// gain green
     prop = create_empty_property(TCAM_PROPERTY_GAIN_GREEN);
-    prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
-    prop.value.d.min = 0.0;
-    prop.value.d.max = 4.0 - (1.0 / 256.0);
-    prop.value.d.step = 0.1;
+
+    prop.value.i.min = 0;
+    prop.value.i.max = 255;
+    prop.value.i.step = 1;
 
     value = 0;
     ret = get_color_gain_factor(color_gain::ColorGainGreen1, value);
 
-    prop.value.d.value = value;
-    prop.value.d.default_value = value;
+    prop.value.i.value = camera_to_color_gain(value);
+    prop.value.i.default_value = 64;
 
     property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
@@ -145,16 +188,16 @@ bool AFU420Device::create_color_gain ()
 
     /// gain blue
     prop = create_empty_property(TCAM_PROPERTY_GAIN_BLUE);
-    prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
-    prop.value.d.min = 0.0;
-    prop.value.d.max = 4.0 - (1.0 / 256.0);
-    prop.value.d.step = 0.1;
+
+    prop.value.i.min = 0;
+    prop.value.i.max = 255;
+    prop.value.i.step = 1;
 
     value = 0;
     ret = get_color_gain_factor(color_gain::ColorGainBlue, value);
 
-    prop.value.d.value = value;
-    prop.value.d.default_value = value;
+    prop.value.i.value = camera_to_color_gain(value);
+    prop.value.i.default_value = 64;
 
     property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
@@ -168,21 +211,100 @@ bool AFU420Device::create_strobe ()
 {}
 
 
+bool AFU420Device::create_offsets ()
+{
+    auto prop = create_empty_property(TCAM_PROPERTY_OFFSET_X);
+
+    prop.value.i.min = 0;
+    prop.value.i.max = m_uPixelMaxX - m_uPixelMinX;
+    prop.value.i.step = 12;
+
+    auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
+
+    property_handler->properties.push_back({property});
+
+
+
+
+
+    prop = create_empty_property(TCAM_PROPERTY_OFFSET_Y);
+
+    prop.value.i.min = 0;
+    prop.value.i.max = m_uPixelMaxY - m_uPixelMinY;
+    prop.value.i.step = 4;
+
+    property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
+
+    property_handler->properties.push_back({property});
+
+
+
+
+    prop = create_empty_property(TCAM_PROPERTY_OFFSET_AUTO);
+
+    prop.value.b.value = false;
+    prop.value.b.default_value = false;
+
+    auto property_auto = std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
+
+    property_handler->properties.push_back({property_auto});
+}
+
+
+bool AFU420Device::create_binning ()
+{
+    auto ptr = create_binning_property(TCAM_PROPERTY_BINNING_HORIZONTAL,
+                                       property_handler, 1, 8, 1, 1);
+
+    if (ptr == nullptr)
+    {
+        tcam_error("Could not create binning property. Continuing without.");
+    }
+    else
+    {
+        property_handler->properties.push_back({ptr});
+    }
+
+    ptr = create_binning_property(TCAM_PROPERTY_BINNING_VERTICAL,
+                                  property_handler, 1, 8, 1, 1);
+
+    if (ptr == nullptr)
+    {
+        tcam_error("Could not create binning property. Continuing without.");
+    }
+    else
+    {
+        property_handler->properties.push_back({ptr});
+    }
+
+    return true;
+}
+
+
 void AFU420Device::create_properties ()
 {
     create_exposure();
     create_gain();
-    create_focus();
 
-    create_shutter();
-    // hdr_factor
+    create_hdr();
+
     // roi x
     // roi y
 
     // OIS_mode
+
+    if (has_ois_unit())
+    {
+        create_focus();
+        create_shutter();
+
+
+    }
+
     create_color_gain();
     // strobe
-    // binning
+    create_binning();
+    create_offsets();
     // offset x
     // offset y
 }
@@ -392,6 +514,42 @@ bool AFU420Device::get_shutter ()
 }
 
 
+int64_t AFU420Device::get_hdr ()
+{
+    uint16_t value = 0;
+
+    int ret = control_read(value, BASIC_USB_TO_PC_HDR);
+
+    if (ret < 0)
+    {
+        tcam_error("Could not read hdr. Libusb returned %d", ret);
+    }
+
+    return value;
+}
+
+
+bool AFU420Device::set_hdr (int64_t hdr)
+{
+    if (hdr == 1)
+    {
+        hdr = 0;
+    }
+
+    uint16_t exposure_ratio = uint16_t(hdr);
+    uint16_t on_off = hdr <= 1 ? 0 : 1;
+
+    int ret = control_write(BASIC_PC_TO_USB_HDR, on_off, exposure_ratio);
+
+    if (ret < 0)
+    {
+        tcam_error("Could not write hdr value. Libusb returned %d", ret);
+        return false;
+    }
+    return true;
+}
+
+
 bool AFU420Device::get_color_gain_factor (color_gain eColor, double& dValue)
 {
     unsigned short ushColor = 0;
@@ -423,10 +581,13 @@ bool AFU420Device::get_color_gain_factor (color_gain eColor, double& dValue)
 }
 
 
-bool AFU420Device::set_color_gain_factor (color_gain eColor, double dValue)
+bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
 {
+    double dValue = color_gain_to_camera(value);
+
     if (!((dValue >= 0.0) && (dValue <= (4.0 - (1.0 / 256.0)))))
     {
+        tcam_error("color gain is out of bounds %f", dValue);
         return false;
     }
 
