@@ -1107,7 +1107,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
     {
         self->exposure_max = self->default_exposure_values.max;
     }
-    GST_INFO("Exposure boundaries are %f %f", self->exposure.min, self->exposure_max);
+    GST_INFO("Exposure boundaries are %f %d", self->exposure.min, self->exposure_max);
 
     GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
 }
