@@ -24,7 +24,7 @@ Open `tis_rosstarter` with a text editor. In the following line, select the
 camera, video format and frame rate:
 
 ```python
-Tis = TIS.TIS("17719924",1920, 1080, 30, True, False)
+cam = tiscamera.Camera("17719924", 1920, 1080, 30, True, False)
 ```
 The first parameter is the serial number of the camera. The next two are the
 width and height of the video format, followed by the frame rate.

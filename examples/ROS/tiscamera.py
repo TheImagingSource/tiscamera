@@ -49,7 +49,7 @@ class Camera:
             p += ' t. ! queue ! videoconvert ! ximagesink'
         else:
             p = 'tcambin serial="%s" name=source ! video/x-raw,format=%s,width=%d,height=%d,framerate=%d/1' % (
-            serial, format, width, height, framerate,)
+            serial, pixelformat, width, height, framerate,)
             p += ' ! videoconvert ! video/x-raw,format=RGB ,width=%d,height=%d,framerate=%d/1! shmsink socket-path=/tmp/ros_mem'  % (width, height, framerate,)
 
         print(p)
@@ -92,6 +92,7 @@ class Camera:
         self.pipeline.set_state(Gst.State.PAUSED)
         self.pipeline.set_state(Gst.State.READY)
         self.pipeline.set_state(Gst.State.NULL)
+        self.pid.kill()
 
     def list_properties(self):
         """ Helper function. List available properties
@@ -122,7 +123,7 @@ class Camera:
         :return:
         """
         try:
-            self.source.set_tcam_property(property_name, GObject.Value(type(value), value))
+            self.source.set_tcam_property(property_name, value)
         except GLib.Error as error:
             raise RuntimeError("Error set Property {0}: {1}", property_name, format(error))
 
@@ -133,7 +134,7 @@ class Camera:
         :return:
         """
         try:
-            self.source.set_tcam_property(property_name, GObject.Value(bool, True))
+            self.source.set_tcam_property(property_name, True)
 
         except GLib.Error as error:
             raise RuntimeError("Error set Property {0}: {1}", property_name, format(error))

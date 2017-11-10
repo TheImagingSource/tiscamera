@@ -8,7 +8,7 @@
 
 import tiscamera
 
-# Open the camera. Parameters are serial number, width, height, frame rate, Color and liveview.
+# Open the camera. Parameters are serial number, width, height, frame rate, color and liveview.
 cam = tiscamera.Camera("17719924", 1920, 1080, 30, True, False)
 
 # Start the live stream from the camera and also "rosrun"
