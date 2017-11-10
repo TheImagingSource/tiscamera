@@ -178,6 +178,21 @@ std::shared_ptr<Property> create_binning_property (TCAM_PROPERTY_ID id,
                                                    std::shared_ptr<PropertyImpl> handler,
                                                    int min, int max,
                                                    int value, int default_value);
+
+/**
+ * @brief map value from the input range to value in the output range
+ * @param input_start - smallest value input can have
+ * @param input_end - largest value input can have
+ * @param output_start - smallest value output can have
+ * @param output_end - largest value output can have
+ * @param value - value that shall be mapped
+ *
+ * @return value in output range
+ */
+double map_value_ranges (double input_start, double input_end,
+                         double output_start, double output_end,
+                         double value);
+
 } /* namespace tcam */
 
 VISIBILITY_POP

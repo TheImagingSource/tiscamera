@@ -402,3 +402,11 @@ std::shared_ptr<Property> tcam::create_binning_property (TCAM_PROPERTY_ID id,
 
     return std::make_shared<PropertyEnumeration>(handler, prop, map, Property::ENUM);
 }
+
+
+double tcam::map_value_ranges (double input_start, double input_end,
+                               double output_start, double output_end,
+                               double value)
+{
+    return (value - input_start) * (output_end - output_start) / (input_end - input_start) - output_start;
+}
