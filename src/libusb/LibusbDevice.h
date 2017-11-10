@@ -23,6 +23,7 @@
 #include "UsbSession.h"
 
 #include "logging.h"
+#include "base_types.h"
 
 namespace tcam
 {
@@ -120,6 +121,12 @@ public:
 
     void halt_endpoint (int endpoint);
 
+    /**
+     * will return nullptr for device info.
+     * it is implied that the user knows which device is handled
+     */
+    bool register_device_lost_callback (tcam_device_lost_callback callback, void* user_data);
+
 private:
 
     std::shared_ptr<tcam::UsbSession> session_;
@@ -135,6 +142,18 @@ private:
                                    unsigned char* data,
                                    unsigned int size,
                                    unsigned int timeout);
+
+
+
+    struct callback_container
+    {
+        tcam_device_lost_callback callback;
+        void* user_data;
+    };
+
+    std::vector<callback_container> lost_callbacks;
+
+    void notify_device_lost ();
 
 }; // class LibusbDevice
 

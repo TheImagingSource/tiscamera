@@ -179,3 +179,25 @@ void tcam::LibusbDevice::halt_endpoint (int endpoint)
         tcam_error("Could not halt endpoint");
     }
 }
+
+
+bool tcam::LibusbDevice::register_device_lost_callback (tcam_device_lost_callback callback,
+                                                        void* user_data)
+{
+    struct callback_container cc = {callback, user_data};
+
+    lost_callbacks.push_back(cc);
+
+    return true;
+}
+
+
+void tcam::LibusbDevice::notify_device_lost ()
+{
+    // auto dev = device.get_info();
+
+    for (const auto& cc : lost_callbacks)
+    {
+        cc.callback(nullptr, cc.user_data);
+    }
+}
