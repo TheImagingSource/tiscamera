@@ -21,6 +21,8 @@
 
 
 import sys
+
+from list_devices import select_camera
 import gi
 
 gi.require_version("Tcam", "0.1")
@@ -28,43 +30,78 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Tcam, Gst
 
+def list_formats(source):
+    """Returns a list of all video formats supported by a video source."""
 
-def print_help():
-    print("Print available gstreamer caps for device.")
-    print("Usage:\n\tformat_list [<serial>]")
-    print("Help options:\n\t-h, --help\t\tPrint this text.")
-    print("\n\n")
-
-
-def list_formats(serial):
-    source = Gst.ElementFactory.make("tcamsrc")
-
-    if serial:
-        source.set_property("serial", serial)
-
-    # ensure that the real caps are available
-    source.set_state(Gst.State.PAUSED)
+    # source needs to be at least in READY state to be able to read formats
+    old_state = source.get_state(10 * Gst.SECOND)
+    if old_state.state == Gst.State.NULL:
+        source.set_state(Gst.State.READY)
 
     caps = source.pads[0].query_caps()
 
-    # the string to_string delivers contains caps structures that are separated
-    # through a semicolon(;). We split the string to make the caps more readable.
-    for s in caps.to_string().split(";"):
-        print(s)
+    ret = []
+    for fmt in caps:
+        ret.append(fmt)
 
     # cleanup
-    # state NULL will close any internal device handles should they exist
-    source.set_state(Gst.State.NULL)
+    source.set_state(old_state.state)
 
+    return ret
+
+def get_frame_rate_list(fmt):
+    """Get the list of supported frame rates for a video format.
+    This function works arround an issue with older versions of GI that does not
+    support the GstValueList type"""
+    try:
+        rates = fmt.get_value("framerate")
+    except TypeError:
+        import re
+        # Workaround for missing GstValueList support in GI
+        substr = fmt.to_string()[fmt.to_string().find("framerate="):]
+        # try for frame rate lists
+        _unused_field, values, _unsued_remain = re.split("{|}", substr, maxsplit=3)
+        rates = [x.strip() for x in values.split(",")]
+    return rates
+
+
+def select_format(source):
+    """Helper function that prompts the user to select a video format.
+
+    Returns: Gst.Structure of format
+    """
+    print("Available formats:")
+    i = 0
+    formats = list_formats(source)
+    for fmt in formats:
+        try:
+            print("%d: %s (%dx%d)" %
+                  (i + 1,
+                   fmt.get_value("format"), fmt.get_value("width"), fmt.get_value("height")))
+            i += 1
+        except TypeError:
+            # format may contain ANY caps which do not have format/width/height
+            pass
+    selection = int(input("Select format: "))
+    fmt = formats[selection-1]
+
+    print("Available frame rates:")
+    frame_rates = get_frame_rate_list(fmt)
+    for i in range(len(frame_rates)):
+        print("%d : %s" % (i+1, frame_rates[i]))
+    selection = int(input("Select frame rate: "))
+    rate = frame_rates[selection-1]
+
+    fmt.set_value("framerate", rate)
+    # fmt is a Gst.Structure but Caps can only be generated from a string,
+    # so a to_string conversion is needed
+    return fmt
 
 if __name__ == "__main__":
     Gst.init(sys.argv)  # init gstreamer
-    serial_ = None
+    source = Gst.ElementFactory.make("tcamsrc")
+    serial = select_camera(source)
+    source.set_property("serial", serial)
 
-    if len(sys.argv) > 1:
-        if "-h" in sys.argv[1] or "--help" in sys.argv[1]:
-            print_help()
-            sys.exit(0)
-        serial_ = sys.argv[1]
-
-    list_formats(serial_)
+    fmt = select_format(source)
+    print("Selected format: ", fmt)
