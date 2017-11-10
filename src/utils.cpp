@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <limits>
 #include <cmath>
+#include <cstring>
 #include <signal.h> // kill
 
 #define IOCTL_RETRY 4
@@ -349,4 +350,55 @@ unsigned int tcam::get_pid_from_lockfile (const std::string filename)
 bool tcam::is_process_running (unsigned int pid)
 {
     return 0 == kill(pid, 0);
+}
+
+
+std::map<std::string, int> create_binning_entry_map (int min, int max)
+{
+    std::map<std::string, int> map;
+
+    for (int i = min; i <= max; i += i)
+    {
+        map.emplace(std::to_string(i), i);
+    }
+
+    return map;
+}
+
+
+std::shared_ptr<Property> tcam::create_binning_property (TCAM_PROPERTY_ID id,
+                                                         std::shared_ptr<PropertyImpl> handler,
+                                                         int min, int max,
+                                                         int value, int default_value)
+{
+
+    if (id != TCAM_PROPERTY_BINNING_HORIZONTAL
+        && id != TCAM_PROPERTY_BINNING_VERTICAL
+        && id != TCAM_PROPERTY_BINNING)
+    {
+        return nullptr;
+    }
+
+    tcam_device_property prop = {};
+    prop.id = id;
+    if (id == TCAM_PROPERTY_BINNING)
+    {
+        strncpy(prop.name, "Binning", sizeof(prop.name));
+    }
+    else if (id == TCAM_PROPERTY_BINNING_HORIZONTAL)
+    {
+        strncpy(prop.name, "Binning Horizontal", sizeof(prop.name));
+    }
+    else if (id == TCAM_PROPERTY_BINNING_VERTICAL)
+    {
+        strncpy(prop.name, "Binning Vertical", sizeof(prop.name));
+    }
+    prop.type = TCAM_PROPERTY_TYPE_ENUMERATION;
+
+    prop.value.i.value = value;
+    prop.value.i.default_value = default_value;
+
+    auto map = create_binning_entry_map(min, max);
+
+    return std::make_shared<PropertyEnumeration>(handler, prop, map, Property::ENUM);
 }

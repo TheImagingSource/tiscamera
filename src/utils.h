@@ -166,6 +166,18 @@ unsigned int get_pid_from_lockfile (const std::string filename);
 bool is_process_running (unsigned int pid);
 
 
+/**
+ * @para id - must be TCAM_PROPERTY_BINNING_HORIZONTAL, TCAM_PROPERTY_BINNING_VERTICAL
+ *            or TCAM_PROPERTY_BINNING
+ * @param handler - PropertyImpl the property shall use, can be nullptr
+ *
+ * @return shared_ptr<Property> containing a PropertyEnumeration that contains
+ *         binning values that double in step size e.g. 1, 2, 4, 8, 16
+ */
+std::shared_ptr<Property> create_binning_property (TCAM_PROPERTY_ID id,
+                                                   std::shared_ptr<PropertyImpl> handler,
+                                                   int min, int max,
+                                                   int value, int default_value);
 } /* namespace tcam */
 
 VISIBILITY_POP
