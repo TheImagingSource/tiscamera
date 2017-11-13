@@ -422,6 +422,9 @@ private:
 
     bool get_color_gain_factor (color_gain eColor, double& dValue);
     bool set_color_gain_factor (color_gain eColor, int dValue);
+    int read_strobe (strobe_data& strobe);
+    int64_t get_strobe (strobe_parameter param);
+    bool set_strobe (strobe_parameter param, int64_t);
 
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);

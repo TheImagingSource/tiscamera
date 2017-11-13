@@ -108,6 +108,34 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         {
             break;
         }
+        case TCAM_PROPERTY_STROBE_ENABLE:
+        {
+            break;
+        }
+        case TCAM_PROPERTY_STROBE_DELAY:
+        {
+            return device->set_strobe(strobe_parameter::first_strobe_delay, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_STROBE_DELAY_SECOND:
+        {
+            return device->set_strobe(strobe_parameter::second_strobe_delay, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_STROBE_DURATION:
+        {
+            return device->set_strobe(strobe_parameter::first_strobe_duration, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_STROBE_DURATION_SECOND:
+        {
+            return device->set_strobe(strobe_parameter::second_strobe_duration, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_STROBE_POLARITY:
+        {
+            return device->set_strobe(strobe_parameter::polarity, new_property.get_struct().value.b.value ? 1 : 0);
+        }
+        case TCAM_PROPERTY_STROBE_MODE:
+        {
+            return device->set_strobe(strobe_parameter::mode, new_property.get_struct().value.i.value);
+        }
         default:
         {
             break;

@@ -208,7 +208,71 @@ bool AFU420Device::create_color_gain ()
 
 
 bool AFU420Device::create_strobe ()
-{}
+{
+    auto prop = create_empty_property(TCAM_PROPERTY_STROBE_ENABLE);
+
+    prop.value.b.value = false;
+    prop.value.b.default_value = false;
+
+    property_handler->properties.push_back({std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN)});
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_DELAY);
+    prop.value.i.min = 0;
+    prop.value.i.max = 1700000;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_strobe(strobe_parameter::first_strobe_delay);
+    prop.value.i.default_value = prop.value.i.value;
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_DURATION);
+    prop.value.i.min = 10;
+    prop.value.i.max = 682000;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_strobe(strobe_parameter::first_strobe_duration);
+    prop.value.i.default_value = prop.value.i.value;
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_DELAY_SECOND);
+    prop.value.i.min = 0;
+    prop.value.i.max = 1700000;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_strobe(strobe_parameter::second_strobe_delay);
+    prop.value.i.default_value = prop.value.i.value;
+
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_DURATION_SECOND);
+    prop.value.i.min = 10;
+    prop.value.i.max = 682000;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_strobe(strobe_parameter::second_strobe_duration);
+    prop.value.i.default_value = prop.value.i.value;
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_POLARITY);
+    prop.value.b.value = false;
+    prop.value.b.default_value = false;
+    property_handler->properties.push_back({std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN)});
+
+    prop = create_empty_property(TCAM_PROPERTY_STROBE_MODE);
+    prop.value.i.min = 1;
+    prop.value.i.max = 2;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_strobe(strobe_parameter::mode);
+    prop.value.i.default_value = 1;
+
+    std::map<std::string, int> mode_map;
+    mode_map.emplace("Single Strobe", 1);
+    mode_map.emplace("Double Strobe", 2);
+
+    property_handler->properties.push_back({std::make_shared<PropertyEnumeration>(property_handler, prop, mode_map, Property::ENUM)});
+
+    return true;
+}
 
 
 bool AFU420Device::create_offsets ()
@@ -305,8 +369,6 @@ void AFU420Device::create_properties ()
     // strobe
     create_binning();
     create_offsets();
-    // offset x
-    // offset y
 }
 
 
@@ -358,6 +420,39 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
             get_color_gain_factor(color_gain::ColorGainBlue, value);
             desc.property->set_value(value);
             return true;
+        }
+        case TCAM_PROPERTY_STROBE_ENABLE:
+        {
+            break;
+        }
+        case TCAM_PROPERTY_STROBE_DELAY:
+        {
+            uint32_t value = get_strobe(strobe_parameter::first_strobe_delay);
+            desc.property->set_value((int64_t)value);
+        }
+        case TCAM_PROPERTY_STROBE_DELAY_SECOND:
+        {
+            uint32_t value = get_strobe(strobe_parameter::second_strobe_delay);
+            desc.property->set_value((int64_t)value);
+        }
+        case TCAM_PROPERTY_STROBE_DURATION:
+        {
+            uint32_t value = get_strobe(strobe_parameter::first_strobe_duration);
+            desc.property->set_value((int64_t)value);
+        }
+        case TCAM_PROPERTY_STROBE_DURATION_SECOND:
+        {
+            uint32_t value = get_strobe(strobe_parameter::second_strobe_duration);
+            desc.property->set_value((int64_t)value);
+        }
+        case TCAM_PROPERTY_STROBE_POLARITY:
+        {
+            uint32_t value = get_strobe(strobe_parameter::polarity);
+            desc.property->set_value((int64_t)value);
+        }
+        case TCAM_PROPERTY_STROBE_MODE:
+        {
+            uint32_t value = get_strobe(strobe_parameter::mode);
         }
 
     }
@@ -618,4 +713,76 @@ bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
     }
 
 	return true;
+}
+
+
+int AFU420Device::read_strobe (strobe_data& strobe)
+{
+    int ret = usb_device_->control_transfer(DEVICE_TO_HOST,
+                                            BASIC_PC_TO_USB_FLASH_STROBE, 0, 5,
+                                            (unsigned char*) &strobe,sizeof(strobe));
+
+    if (ret < 0)
+    {
+        tcam_error("Could not read strobe. Libusb returned %d", ret);
+    }
+    return ret;
+}
+
+
+int64_t AFU420Device::get_strobe (strobe_parameter param)
+{
+    uint32_t value;
+    int ret = 0;
+	if (param == strobe_parameter::polarity)
+    {
+		ret = control_read(value, BASIC_PC_TO_USB_FLASH_STROBE, 0, 5);
+	}
+
+	strobe_data tmp = {};
+	ret = read_strobe(tmp);
+	if (ret < 0)
+    {
+        return -1;
+	}
+
+    switch (param)
+    {
+        case strobe_parameter::mode:                    value = tmp.mode; break;
+        case strobe_parameter::first_strobe_delay:      value = tmp.delay_control; break;
+        case strobe_parameter::first_strobe_duration:   value = tmp.width_high_ctrl; break;
+        case strobe_parameter::second_strobe_delay:     value = tmp.width_low_ctrl; break;
+        case strobe_parameter::second_strobe_duration:  value = tmp.width2_high_ctrl; break;
+        default: return -1;
+    };
+    return value;
+}
+
+
+bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
+{
+    uint16_t value = strobe;
+    int ret = 0;
+    if (param == strobe_parameter::mode)
+    {
+        int ret = usb_device_->control_transfer(HOST_TO_DEVICE,
+                                                BASIC_PC_TO_USB_FLASH_STROBE,
+                                                value, 0,
+                                                value);
+    }
+    else
+    {
+        int ret = usb_device_->control_transfer(HOST_TO_DEVICE,
+                                                BASIC_PC_TO_USB_FLASH_STROBE,
+                                                0, (uint16_t)param,
+                                                value);
+    }
+
+    if (ret < 0)
+    {
+        tcam_error("Could not write strobe. Libusb returned %d", ret);
+        return false;
+    }
+
+    return true;
 }
