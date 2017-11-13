@@ -30,6 +30,8 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Tcam, Gst
 
+import common
+
 def list_formats(source):
     """Returns a list of all video formats supported by a video source."""
 
@@ -40,9 +42,8 @@ def list_formats(source):
 
     caps = source.pads[0].query_caps()
 
-    ret = []
-    for fmt in caps:
-        ret.append(fmt)
+    # create a list of all structures contained in the caps
+    ret = [caps.get_structure(i) for i in range(caps.get_size())]
 
     # cleanup
     source.set_state(old_state.state)
@@ -92,7 +93,13 @@ def select_format(source):
     selection = int(input("Select frame rate: "))
     rate = frame_rates[selection-1]
 
-    fmt.set_value("framerate", rate)
+    # work around older GI implementations that lack proper Gst.Fraction/Gst.ValueList support
+    if type(rate) == Gst.Fraction:
+        fmt.set_value("framerate", rate)
+    else:
+        numerator, denominator = rate.split("/")
+        fmt.set_value("framerate", Gst.Fraction(int(numerator), int(denominator)))
+
     # fmt is a Gst.Structure but Caps can only be generated from a string,
     # so a to_string conversion is needed
     return fmt

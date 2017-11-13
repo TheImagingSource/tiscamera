@@ -32,6 +32,7 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Tcam, Gst
 
+import common
 
 def print_help():
     print("Print properties for device.")

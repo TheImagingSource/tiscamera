@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 # Copyright 2017 The Imaging Source Europe GmbH
 #
@@ -111,7 +111,7 @@ def main():
         fmt.set_value("format", "BGRx")
     # Use a capsfilter to determine the video format of the camera source
     capsfilter = Gst.ElementFactory.make("capsfilter")
-    capsfilter.set_property("caps", Gst.Caps(fmt.to_string()))
+    capsfilter.set_property("caps", Gst.Caps.from_string(fmt.to_string()))
     # Add a small queue. Everything behind this queue will run in a separate
     # thread.
     queue = Gst.ElementFactory.make("queue")
@@ -124,7 +124,7 @@ def main():
     # Add an appsink. This element will receive the converted video buffers and
     # pass them to opencv
     output = Gst.ElementFactory.make("appsink")
-    output.set_property("caps", Gst.Caps(TARGET_FORMAT))
+    output.set_property("caps", Gst.Caps.from_string(TARGET_FORMAT))
     output.set_property("emit-signals", True)
     pipeline = Gst.Pipeline.new()
 
@@ -149,7 +149,7 @@ def main():
     # pipeline which we could use to display the opencv buffers.
     display_pipeline = Gst.parse_launch("appsrc name=src ! videoconvert ! ximagesink")
     display_input = display_pipeline.get_by_name("src")
-    display_input.set_property("caps", Gst.Caps(TARGET_FORMAT))
+    display_input.set_property("caps", Gst.Caps.from_string(TARGET_FORMAT))
     output.connect("new-sample", callback, display_input)
     display_pipeline.set_state(Gst.State.PLAYING)
 
