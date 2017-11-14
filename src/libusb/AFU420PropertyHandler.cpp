@@ -17,6 +17,7 @@
 #include "AFU420Device.h"
 
 #include "logging.h"
+#include "utils.h"
 #include "PropertyGeneration.h" // handle_auto_center
 
 #include <algorithm>
@@ -94,19 +95,23 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         }
         case TCAM_PROPERTY_OFFSET_X:
         {
+            device->active_resolution_conf_.x_addr_start = new_property.get_struct().value.i.value;
             return true;
         }
         case TCAM_PROPERTY_OFFSET_Y:
         {
+            device->active_resolution_conf_.y_addr_start = new_property.get_struct().value.i.value;
             return true;
         }
         case TCAM_PROPERTY_BINNING_HORIZONTAL:
         {
-            break;
+            device->active_resolution_conf_.hor_binning = new_property.get_struct().value.i.value;
+            return true;
         }
         case TCAM_PROPERTY_BINNING_VERTICAL:
         {
-            break;
+            device->active_resolution_conf_.ver_binning = new_property.get_struct().value.i.value;
+            return true;
         }
         case TCAM_PROPERTY_STROBE_ENABLE:
         {
@@ -135,6 +140,24 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         case TCAM_PROPERTY_STROBE_MODE:
         {
             return device->set_strobe(strobe_parameter::mode, new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_OIS_MODE:
+        {
+            return device->set_ois_mode(new_property.get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_OIS_POS_X:
+        {
+            auto props = device->getProperties();
+            auto y_pos = find_property(props, TCAM_PROPERTY_OIS_POS_X);
+            return device->set_ois_pos(new_property.get_struct().value.i.value,
+                                       y_pos->get_struct().value.i.value);
+        }
+        case TCAM_PROPERTY_OIS_POS_Y:
+        {
+            auto props = device->getProperties();
+            auto y_pos = find_property(props, TCAM_PROPERTY_OIS_POS_X);
+            return device->set_ois_pos(y_pos->get_struct().value.i.value,
+                                       new_property.get_struct().value.i.value);
         }
         default:
         {

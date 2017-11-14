@@ -67,6 +67,8 @@ tcam::AFU420Device::AFU420Device (const DeviceInfo& info)
     property_handler = std::make_shared<AFU420PropertyHandler>(this);
 
     // set_hdr(16);
+    set_ois_pos(0, 0);
+    set_ois_mode(6);
 
     create_properties();
     create_formats();
@@ -158,6 +160,8 @@ void AFU420Device::query_active_format ()
 
     format.width = conf.x_output_size;
     format.height = conf.y_output_size;
+
+    active_resolution_conf_ = conf;
 
     active_video_format = VideoFormat(format);
 
@@ -273,6 +277,12 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
                                                                          const tcam_image_size stream_dim,
                                                                          tcam_image_size binning)
 {
+
+    tcam_debug("Creating resolutionconf with input:\nstart: %dx%d\nstream_dim %dx%d\nbinning %d%d",
+               start.width, start.height,
+               stream_dim.width, stream_dim.height,
+               binning.width, binning.height);
+
     sResolutionConf res_conf = {};
 
     // change possible binning.v == 1 to = 0, because the firmware likes it
@@ -321,7 +331,7 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
     // check if the ROI is inside the visible area
     if( (roi_start.width > (m_uPixelMaxX - m_uPixelMinX)) || (roi_start.height > (m_uPixelMaxY - m_uPixelMinY)) )
     {
-        tcam_error("Invalid roi start.");
+        tcam_error("Invalid roi start. %dx%d", roi_start.width, roi_start.height);
         return res_conf;
     }
 
@@ -1029,6 +1039,12 @@ bool tcam::AFU420Device::stop_stream ()
 
 int AFU420Device::set_resolution_config (sResolutionConf conf, resolution_config_mode mode)
 {
+    tcam_info("Setting resolution conf:\n\tbinning %dx%d\n\toffset %dx%d\n\tres: %dx%d",
+              conf.hor_binning, conf.ver_binning,
+              conf.x_addr_start, conf.y_addr_start,
+              conf.x_output_size, conf.y_output_size);
+
+
     auto serialized_conf = serialize_resolution_config(conf);
 
     uint16_t test_mode = mode == resolution_config_mode::test ? 1 : 0;

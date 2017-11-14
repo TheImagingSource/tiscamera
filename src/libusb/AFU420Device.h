@@ -210,6 +210,8 @@ private:
     static constexpr int    m_uPixelMinX = 0x100;
     static constexpr int    m_uPixelMinY = 0x98;
 
+    struct sResolutionConf active_resolution_conf_;
+
     struct stream_fmt_data
     {
         int         id;
@@ -315,7 +317,8 @@ private:
         size_t size;
     };
 
-    struct header_res check_and_eat_img_header (unsigned char* data, size_t data_size);
+    struct header_res check_and_eat_img_header (unsigned char* data,
+                                                size_t data_size);
 
     bool get_frame ();
 
@@ -338,9 +341,16 @@ private:
     int setup_bit_depth (int bpp);
 
 
-    int get_fps_max (double& max, tcam_image_size pos, tcam_image_size dim, tcam_image_size binning, int src_bpp);
+    int get_fps_max (double& max,
+                     tcam_image_size pos,
+                     tcam_image_size dim,
+                     tcam_image_size binning,
+                     int src_bpp);
 
-    int get_frame_rate_range (uint32_t strm_fmt_id, int scaling_factor_id, tcam_image_size dim, double& min_fps, double& max_fps);
+    int get_frame_rate_range (uint32_t strm_fmt_id,
+                              int scaling_factor_id,
+                              tcam_image_size dim,
+                              double& min_fps, double& max_fps);
 
     void query_active_format ();
 
@@ -407,6 +417,7 @@ private:
 
     bool create_offsets ();
     bool create_binning ();
+    bool create_ois ();
 
     int64_t get_exposure ();
     bool set_exposure(int64_t exposure_in_us);
@@ -425,6 +436,14 @@ private:
     int read_strobe (strobe_data& strobe);
     int64_t get_strobe (strobe_parameter param);
     bool set_strobe (strobe_parameter param, int64_t);
+
+    int64_t get_ois_mode ();
+    bool set_ois_mode (int64_t mode);
+
+    bool get_ois_pos (int64_t& x_pos,
+                      int64_t& y_pos);
+    bool set_ois_pos (const int64_t& x_pos,
+                      const int64_t& y_pos);
 
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);

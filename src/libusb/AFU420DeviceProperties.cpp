@@ -280,7 +280,7 @@ bool AFU420Device::create_offsets ()
     auto prop = create_empty_property(TCAM_PROPERTY_OFFSET_X);
 
     prop.value.i.min = 0;
-    prop.value.i.max = m_uPixelMaxX - m_uPixelMinX;
+    prop.value.i.max = 7463; //m_uPixelMaxX - m_uPixelMinX;
     prop.value.i.step = 12;
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
@@ -294,7 +294,7 @@ bool AFU420Device::create_offsets ()
     prop = create_empty_property(TCAM_PROPERTY_OFFSET_Y);
 
     prop.value.i.min = 0;
-    prop.value.i.max = m_uPixelMaxY - m_uPixelMinY;
+    prop.value.i.max = 5115; //m_uPixelMaxY - m_uPixelMinY;
     prop.value.i.step = 4;
 
     property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
@@ -345,28 +345,69 @@ bool AFU420Device::create_binning ()
 }
 
 
+bool AFU420Device::create_ois ()
+{
+    tcam_device_property prop = create_empty_property(TCAM_PROPERTY_OIS_MODE);
+
+    prop.value.i.min = 1;
+    prop.value.i.max = 6;
+    prop.value.i.step = 1;
+    prop.value.i.value = get_ois_mode();
+    prop.value.i.default_value = 6;
+
+    std::map<std::string, int> map;
+    map.emplace("OFF", 6);
+    map.emplace("ON with still mode without pan-tilt", 1);
+    map.emplace("ON with movie mode without pan-tilt", 2);
+    map.emplace("ON with movie mode with pan-tilt", 3);
+    map.emplace("ON with center cervo", 4);
+    map.emplace("ON Circle Mode", 5);
+
+    auto ois_mode = std::make_shared<PropertyEnumeration>(property_handler, prop, map, Property::ENUM);
+
+    property_handler->properties.push_back({ois_mode});
+
+    int64_t x_pos, y_pos;
+    get_ois_pos(x_pos, y_pos);
+
+    prop = create_empty_property(TCAM_PROPERTY_OIS_POS_X);
+    prop.value.i.min = -90;
+    prop.value.i.max = 90;
+    prop.value.i.step = 1;
+    prop.value.i.value = x_pos;
+    prop.value.i.default_value = 0;
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    prop = create_empty_property(TCAM_PROPERTY_OIS_POS_Y);
+    prop.value.i.min = -90;
+    prop.value.i.max = 90;
+    prop.value.i.step = 1;
+    prop.value.i.value = y_pos;
+    prop.value.i.default_value = 0;
+    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+
+
+    return true;
+}
+
+
 void AFU420Device::create_properties ()
 {
     create_exposure();
     create_gain();
-
     create_hdr();
-
-    // roi x
-    // roi y
-
-    // OIS_mode
 
     if (has_ois_unit())
     {
         create_focus();
         create_shutter();
 
-
+        create_ois();
     }
 
     create_color_gain();
-    // strobe
+    create_strobe();
     create_binning();
     create_offsets();
 }
@@ -421,6 +462,17 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
             desc.property->set_value(value);
             return true;
         }
+        case TCAM_PROPERTY_BINNING_HORIZONTAL:
+        {
+            desc.property->set_value((int64_t)active_resolution_conf_.x_addr_start);
+            tcam_error("!!!!!");
+            return true;
+        }
+        case TCAM_PROPERTY_BINNING_VERTICAL:
+        {
+            desc.property->set_value((int64_t)active_resolution_conf_.y_addr_start);
+            return true;
+        }
         case TCAM_PROPERTY_STROBE_ENABLE:
         {
             break;
@@ -429,32 +481,62 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         {
             uint32_t value = get_strobe(strobe_parameter::first_strobe_delay);
             desc.property->set_value((int64_t)value);
+            return true;
         }
         case TCAM_PROPERTY_STROBE_DELAY_SECOND:
         {
             uint32_t value = get_strobe(strobe_parameter::second_strobe_delay);
             desc.property->set_value((int64_t)value);
+            return true;
         }
         case TCAM_PROPERTY_STROBE_DURATION:
         {
             uint32_t value = get_strobe(strobe_parameter::first_strobe_duration);
             desc.property->set_value((int64_t)value);
+            return true;
         }
         case TCAM_PROPERTY_STROBE_DURATION_SECOND:
         {
             uint32_t value = get_strobe(strobe_parameter::second_strobe_duration);
             desc.property->set_value((int64_t)value);
+            return true;
         }
         case TCAM_PROPERTY_STROBE_POLARITY:
         {
             uint32_t value = get_strobe(strobe_parameter::polarity);
             desc.property->set_value((int64_t)value);
+            return true;
         }
         case TCAM_PROPERTY_STROBE_MODE:
         {
             uint32_t value = get_strobe(strobe_parameter::mode);
+            // TODO
+            return true;
         }
-
+        case TCAM_PROPERTY_OIS_MODE:
+        {
+            desc.property->set_value((int64_t)get_ois_mode());
+            return true;
+        }
+        case TCAM_PROPERTY_OIS_POS_X:
+        {
+            int64_t x_pos, y_pos;
+            get_ois_pos(x_pos, y_pos);
+            desc.property->set_value(x_pos);
+            return true;
+        }
+        case TCAM_PROPERTY_OIS_POS_Y:
+        {
+            int64_t x_pos, y_pos;
+            get_ois_pos(x_pos, y_pos);
+            desc.property->set_value(y_pos);
+            return true;
+        }
+        default:
+        {
+            tcam_warning("Property does not belong to this device");
+            break;
+        }
     }
 
     return false;
@@ -492,7 +574,7 @@ bool AFU420Device::set_exposure (int64_t exposure)
     }
     else
     {
-        tcam_debug("Gain returned value: %u", value);
+        //tcam_debug("Exposure returned value: %u", value);
     }
     return true;
 }
@@ -529,7 +611,7 @@ bool AFU420Device::set_gain (int64_t gain)
     }
     else
     {
-        tcam_debug("Gain value: %u written", value);
+        //tcam_debug("Gain value: %u written", value);
     }
     return true;
 }
@@ -781,6 +863,55 @@ bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
     if (ret < 0)
     {
         tcam_error("Could not write strobe. Libusb returned %d", ret);
+        return false;
+    }
+
+    return true;
+}
+
+
+int64_t AFU420Device::get_ois_mode ()
+{
+    uint16_t mode = 0;
+
+    int ret = control_read(mode, ADVANCED_PC_TO_USB_OIS_MODE);
+
+    if (ret < 0)
+    {
+        tcam_error("Could not read ois mode. Libusb returned %d", ret);
+        return ret;
+    }
+    return mode;
+}
+
+
+bool AFU420Device::set_ois_mode (int64_t mode)
+{
+    int ret = control_write(ADVANCED_PC_TO_USB_OIS_MODE, (uint16_t)mode);
+
+    if (ret < 0)
+    {
+        tcam_error("Could not write ois mode. Libusb returned %d", ret);
+
+        return false;
+    }
+    return true;
+}
+
+
+bool AFU420Device::get_ois_pos (int64_t& x_pos, int64_t& y_pos)
+{
+    return false;
+}
+
+
+bool AFU420Device::set_ois_pos (const int64_t& x_pos, const int64_t& y_pos)
+{
+    int ret = control_write(ADVANCED_PC_TO_USB_OIS_POS, (uint16_t)x_pos, (uint16_t)y_pos);
+
+    if (ret < 0)
+    {
+        tcam_error("Could not write OIS position. Libusb returned %d", ret);
         return false;
     }
 
