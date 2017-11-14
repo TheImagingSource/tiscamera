@@ -695,6 +695,24 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_HDR },
     },
+    {
+        TCAM_PROPERTY_OIS_MODE,
+        .name = "OIS Mode",
+        .type_to_use = TCAM_PROPERTY_TYPE_ENUMERATION,
+        .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_OIS_MODE },
+    },
+    {
+        TCAM_PROPERTY_OIS_POS_X,
+        .name = "OIS Item Position X",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_OIS_MODE },
+    },
+    {
+        TCAM_PROPERTY_OIS_MODE,
+        .name = "OIS Item Position Y",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_OIS_MODE },
+    },
 };
 
 
