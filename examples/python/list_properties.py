@@ -32,51 +32,13 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Tcam, Gst
 
+import common
 
 def print_help():
     print("Print properties for device.")
     print("Usage:\n\trigger-images [<serial>]")
     print("Help options:\n\t-h, --help\t\tPrint this text.")
     print("\n\n")
-
-
-def select_camera(source):
-    """
-    Prompt user to select a camera.
-    Return the serial of the selected camera.
-    Return None on error/abort
-    """
-
-    # retrieve all available serial numbers
-    serials = source.get_device_serials()
-
-    # create a list to have an easy index <-> serial association
-    device_list = []
-    # we add None to have a default value for the case 'serial not defined'
-    # this also pushes our first serial index to 1.
-    device_list.append(None)
-
-    print("Available devices:")
-    index = 1
-    print("0 - Use default device")
-
-    for s in serials:
-
-        device_list.append(s)
-        print("{} - {}".format(index, s))
-        index = index + 1
-
-    # get input from user and only stop asking when
-    # input is legal
-    legal_input = False
-    while not legal_input:
-        selection = int(input("Please select a device: "))
-        if 0 <= selection < len(device_list):
-            legal_input = True
-        else:
-            print("Please select a legal device.")
-
-    return device_list[selection]
 
 
 def main():

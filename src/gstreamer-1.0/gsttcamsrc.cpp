@@ -1087,6 +1087,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
             self->device = new struct device_state;
             self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
             self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
+            self->device_serial = infos[i].get_serial();
             break;
         }
     }
@@ -1144,8 +1145,6 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
     GstTcamSrc* self = GST_TCAM_SRC(src);
 
     self->is_running = FALSE;
-
-    std::unique_lock<std::mutex> lck(self->mtx);
 
     self->cv.notify_all();
 
@@ -1273,10 +1272,10 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
     destroyer = self;
 
 wait_again:
-    // wait until new buffer arrives or stop waiting when wee have to shut down
+    // wait until new buffer arrives or stop waiting when we have to shut down
     while ((self->new_buffer == false) && (self->is_running == true))
     {
-        self->cv.wait_for(lck, std::chrono::milliseconds(1));
+        self->cv.wait(lck);
     }
 
     if (self->is_running != TRUE)

@@ -20,27 +20,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <gst/gst.h>
+#include <gst/video/video.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <tcamprop.h>
 
 GMainLoop *mainloop = NULL;
 
-
-void print_help ()
-{
-    printf("Show how to use appsink to receive images in an appliaction.\n"
-           "Usage:\n\appsink [<serial>]\n"
-           "Help options:\n\t-h, --help\t\tPrint this text.\n"
-           "\n\n");
-}
-
-
+/**
+ * This callback reads chars from stdin and terminates the mainloop when it receives a 'q'
+ */
 static gboolean
 stdin_callback (GIOChannel * io, GIOCondition condition, gpointer data)
 {
-    gchar in;
-
     GError *error = NULL;
+    gchar in;
 
     if (g_io_channel_read_chars (io, &in, 1, NULL, &error) ==  G_IO_STATUS_NORMAL)
     {
@@ -66,65 +60,75 @@ GstFlowReturn callback (GstElement* sink, void* user_data)
 
     if (sample)
     {
-        /* if you want to have information about the format the image has
-           you can look at the caps */
-        /* GstCaps* caps gst_sample_get_caps(sample) */
         static guint framecount = 0;
+        int pixel_data = -1;
 
         framecount++;
 
         GstBuffer* buffer = gst_sample_get_buffer(sample);
-        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
-        g_print("Captured frame %d, Timestamp=%" GST_TIME_FORMAT "            \r",
-                framecount,
-                GST_TIME_ARGS(timestamp));
         GstMapInfo info; // contains the actual image
         if (gst_buffer_map(buffer, &info, GST_MAP_READ))
         {
+            GstVideoInfo *video_info = gst_video_info_new();
+            if (!gst_video_info_from_caps (video_info, gst_sample_get_caps(sample)))
+            {
+                // Could not parse video info (should not happen)
+                g_warning("Failed to parse video info");
+                return GST_FLOW_ERROR;
+            }
+
+            /* Get a pointer to the image data */
             unsigned char* data = info.data;
 
-            /* do things here */
+            /* Get the pixel value of the center pixel */
+            int stride = video_info->finfo->bits / 8;
+            pixel_data = info.data[video_info->width/2*stride + video_info->width * video_info->height/2 * stride];
 
             gst_buffer_unmap(buffer, &info);
         }
+        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
+        g_print("Captured frame %d, Pixel Value=%03d Timestamp=%" GST_TIME_FORMAT "            \r",
+                framecount, pixel_data,
+                GST_TIME_ARGS(timestamp));
+
+
         // delete our reference so that gstreamer can handle the sample
         gst_sample_unref (sample);
     }
     return GST_FLOW_OK;
 }
 
+static gchar **_args = NULL;
+
+static GOptionEntry option_entries[] =
+{
+    {G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &_args, "Serial Number", "SERIAL-NUMBER"},
+    NULL
+};
 
 int main (int argc, char *argv[])
 {
+    GError *error = NULL;
+    GOptionContext *context;
 
-    gst_init(&argc, &argv); // init gstreamer
+    GOptionGroup *gst_options = gst_init_get_option_group(); // init gstreamer
+
+    context = g_option_context_new("- tiscamera image buffer example");
+    g_option_context_add_main_entries (context, option_entries, NULL);
+    g_option_context_add_group (context, gst_options);
+    if (!g_option_context_parse (context, &argc, &argv, &error))
+    {
+        g_print ("Failed parsing options: %s\n", error->message);
+        exit(1);
+    }
 
     mainloop = g_main_loop_new(NULL, FALSE);
 
-    char* serial = NULL; // the serial number of the camera we want to use
-
-    if (argc > 1)
-    {
-        if (strcmp("-h", argv[1]) == 0 || strcmp("--help", argv[1]) == 0)
-        {
-            print_help();
-            return 0;
-        }
-        else
-        {
-            serial = argv[1];
-        }
-    }
-
     GstElement* source = gst_element_factory_make("tcambin", "source");
 
-    if (serial != NULL)
+    if (_args != NULL)
     {
-        GValue val = {};
-        g_value_init(&val, G_TYPE_STRING);
-        g_value_set_static_string(&val, serial);
-
-        g_object_set_property(G_OBJECT(source), "serial", &val);
+        g_object_set(G_OBJECT(source), "serial", _args[0]);
     }
 
     // Get the caps from the source and use the first one in the list
@@ -149,7 +153,7 @@ int main (int argc, char *argv[])
                         NULL);
     g_print("Using video format '%s' for appsink.\n", gst_caps_to_string(formatcaps));
 
-    gst_element_set_state(source, GST_STATE_NULL);
+    //gst_element_set_state(source, GST_STATE_NULL);
 
     GstElement* pipeline = gst_pipeline_new("pipeline");
     GstElement* capsfilter = gst_element_factory_make("capsfilter", "caps");
@@ -178,8 +182,8 @@ int main (int argc, char *argv[])
     io_watch_id = g_io_add_watch (io, G_IO_IN, stdin_callback, NULL);
     g_io_channel_unref (io);
 
-    printf("Press 'q' then 'enter' to stop the stream.\n");
-    g_main_loop_run(mainloop);    
+    g_print("Press 'q' then 'enter' to stop the stream.\n");
+    g_main_loop_run(mainloop);
 
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);
