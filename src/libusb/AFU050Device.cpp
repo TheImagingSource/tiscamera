@@ -568,7 +568,7 @@ bool AFU050Device::set_control (int unit,
                                 int len,
                                 unsigned char* value)
 {
-    int ret = libusb_control_transfer(device_handle,
+    int ret = libusb_control_transfer(usb_device_->get_handle(),
                                       LIBUSB_ENDPOINT_OUT |
                                       LIBUSB_REQUEST_TYPE_CLASS |
                                       LIBUSB_RECIPIENT_DEVICE,
@@ -587,7 +587,7 @@ bool AFU050Device::get_control (int unit,
                                 unsigned char* value,
                                 enum CONTROL_CMD cmd)
 {
-    int ret = libusb_control_transfer(device_handle,
+    int ret = libusb_control_transfer(usb_device_->get_handle(),
                                       LIBUSB_ENDPOINT_IN |
                                       LIBUSB_REQUEST_TYPE_CLASS |
                                       LIBUSB_RECIPIENT_DEVICE,
