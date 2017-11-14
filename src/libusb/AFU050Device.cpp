@@ -33,28 +33,23 @@
 using namespace tcam;
 
 
-
-tcam::AFU050Device::AFU050Device (const DeviceInfo& info,
-                                  std::shared_ptr<UsbSession> s)
-    :session(s)
+tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
 {
     device = info;
 
-    device_handle = UsbHandler::get_instance().open_device(info.get_serial());
+    usb_device_ = UsbHandler::get_instance().open_device_(info.get_serial());
 
-    if (!device_handle)
+    if (!usb_device_->open_interface(0))
     {
-        tcam_log(TCAM_LOG_ERROR, "Failed to open device.");
+        tcam_error("Failed to open camera interface - %d. \n"
+                   "Please check device permissions!", 0);
     }
 
-    if ((libusb_claim_interface(device_handle, 0) < 0)
-        || (libusb_claim_interface(device_handle, 1) < 0))
+    if (!usb_device_->open_interface(1))
     {
-        tcam_error("Failed to open camera. "
-                   "Please check device permissions!");
-        libusb_close(device_handle);
+        tcam_error("Failed to open camera interface - %d. \n"
+                   "Please check device permissions!", 1);
     }
-
     property_handler = std::make_shared<AFU050PropertyHandler>(this);
 
     create_properties();
@@ -64,11 +59,6 @@ tcam::AFU050Device::AFU050Device (const DeviceInfo& info,
 tcam::AFU050Device::~AFU050Device ()
 {
     stop_stream();
-
-    libusb_release_interface(device_handle, 1);
-    libusb_release_interface(device_handle, 0);
-
-    libusb_close(device_handle);
 }
 
 
@@ -122,20 +112,6 @@ void AFU050Device::create_formats ()
 
 void AFU050Device::create_properties ()
 {
-
-    // x exposure
-    // x auto-exposure
-    // x gain
-    // x auto-gain
-    // x auto-focus
-    // x wb_r
-    // x wb_g
-    // x wb_b
-    // x wb_auto
-    // focus_zone_x
-    // focus_zone_y
-
-
     add_int(TCAM_PROPERTY_EXPOSURE, VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
     add_bool(TCAM_PROPERTY_EXPOSURE_AUTO, VC_UNIT_EXTENSION_UNIT, XU_AUTO_EXPOSURE);
 
@@ -326,6 +302,12 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
         tcam_error("libusb transfer returned with: %d", transfer->status);
     }
 
+    if (!is_stream_on)
+    {
+        libusb_free_transfer(transfer);
+        return;
+    }
+
     int processed = 0;
 
     unsigned char* ptr = transfer->buffer;
@@ -398,6 +380,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
                 auto b = buffer->getImageBuffer();
                 memcpy(b.pData, jpegbuf, jpegsize);
                 b.length = jpegsize;
+                b.size = jpegsize;
                 statistics.frame_count++;
                 buffer->set_statistics(statistics);
                 buffer->set_image_buffer(b);
@@ -481,7 +464,6 @@ bool tcam::AFU050Device::start_stream ()
     current_buffer = 0;
     stop_all = false;
     is_stream_on = true;
-    work_thread = std::thread(&AFU050Device::stream, this);
     jpegbuf = nullptr;
     jpegsize = 0;
     jpegptr = 0;
@@ -493,7 +475,7 @@ bool tcam::AFU050Device::start_stream ()
 
         struct libusb_transfer* transfer_in = libusb_alloc_transfer(0);
         libusb_fill_bulk_transfer( transfer_in,
-                                   device_handle,
+                                   usb_device_->get_handle(),
                                    USB_ENDPOINT_IN,
                                    buf,
                                    LEN_IN_BUFFER,
@@ -521,28 +503,11 @@ bool tcam::AFU050Device::stop_stream ()
     stop_all = true;
     is_stream_on = false;
 
-    sleep(1);
-    if (work_thread.joinable())
-        work_thread.join();
+    //sleep(1);
+    // if (work_thread.joinable())
+    //     work_thread.join();
 
     release_buffers();
-}
-
-
-void tcam::AFU050Device::stream ()
-{
-    struct timeval tv;
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    while (!stop_all)
-    {
-        int ret = libusb_handle_events_timeout_completed(session->get_session(), &tv, NULL);
-        if (ret < 0)
-        {
-            tcam_error("LIBUSB TIMEOUT!!!");
-            break;
-        }
-    }
 }
 
 
@@ -655,7 +620,7 @@ int AFU050Device::set_video_format (uint8_t format_index,
     buf[6] = (frame_interval >> 16) & 0xff;
     buf[7] = (frame_interval >> 24) & 0xff;
 
-    ret = libusb_control_transfer(device_handle,
+    ret = libusb_control_transfer(usb_device_->get_handle(),
                                   LIBUSB_ENDPOINT_OUT |
                                   LIBUSB_REQUEST_TYPE_CLASS |
                                   LIBUSB_RECIPIENT_INTERFACE,
@@ -693,7 +658,7 @@ bool AFU050Device::set_bool_value (enum VC_UNIT unit, unsigned char property, bo
                            4,
                            (unsigned char*)&val);
     if (!ret)
-        tcam_log(TCAM_LOG_ERROR, "get_control returned with: %d", ret);
+        tcam_log(TCAM_LOG_ERROR, "set_control returned with: %d", ret);
     return ret;
 }
 
@@ -719,6 +684,6 @@ bool AFU050Device::set_int_value (enum VC_UNIT unit, unsigned char property, int
                            4,
                            (unsigned char*)&value);
     if (!ret)
-        tcam_log(TCAM_LOG_ERROR, "get_control returned with: %d", ret);
+        tcam_log(TCAM_LOG_ERROR, "set_control returned with: %d", ret);
     return ret;
 }

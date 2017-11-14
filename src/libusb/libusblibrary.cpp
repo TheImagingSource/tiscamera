@@ -35,7 +35,7 @@ DeviceInterface* open_device (const struct tcam_device_info* device)
     }
     else if (strcmp(device->additional_identifier, "8209") == 0)
     {
-        return new AFU050Device(DeviceInfo(*device), UsbHandler::get_instance().get_session());
+        return new AFU050Device(DeviceInfo(*device));
     }
     else
     {

@@ -21,7 +21,7 @@
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "FormatHandlerInterface.h"
-#include "UsbSession.h"
+#include "LibusbDevice.h"
 #include "afu050_definitions.h"
 
 #include <libusb-1.0/libusb.h>
@@ -86,8 +86,7 @@ class AFU050Device : public DeviceInterface
 
 public:
 
-    explicit AFU050Device (const DeviceInfo&,
-                           std::shared_ptr<UsbSession> session);
+    explicit AFU050Device (const DeviceInfo&);
 
     AFU050Device () = delete;
 
@@ -127,8 +126,7 @@ public:
 
 private:
 
-    std::shared_ptr<UsbSession> session;
-    struct libusb_device_handle* device_handle;
+    std::unique_ptr<LibusbDevice> usb_device_;
 
     static const int UVC_SET_CUR = 0x1;
     static const int UVC_GET_CUR = 0x81;
