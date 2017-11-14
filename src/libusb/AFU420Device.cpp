@@ -38,7 +38,7 @@ using namespace tcam;
 
 
 tcam::AFU420Device::AFU420Device (const DeviceInfo& info)
-    :usb_device_(nullptr), lost_countdown(20),is_stream_on(false), stop_all(false)
+    :usb_device_(nullptr), lost_countdown(20), is_stream_on(false), stop_all(false)
 {
     device = info;
 
@@ -851,6 +851,12 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         }
 		tcam_error("transfer status %d\n", xfr->status);
         submit_transfer(xfr);
+
+        if (lost_countdown == 0)
+        {
+            notify_device_lost();
+        }
+
         lost_countdown--;
         return;
 	}
