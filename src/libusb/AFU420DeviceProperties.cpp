@@ -403,7 +403,7 @@ void AFU420Device::create_properties ()
         create_focus();
         create_shutter();
 
-        create_ois();
+        //create_ois();
     }
 
     create_color_gain();
