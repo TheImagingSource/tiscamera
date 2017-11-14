@@ -1,6 +1,7 @@
 
 set(lib_libusb
   AFU050Device.cpp
+  AFU050PropertyHandler.cpp
   AFU420Device.cpp
   AFU420DeviceProperties.cpp
   AFU420PropertyHandler.cpp
