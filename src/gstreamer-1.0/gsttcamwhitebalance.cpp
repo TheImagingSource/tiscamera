@@ -797,7 +797,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
         GST_ERROR("Unable to retrieve gain red property");
     }
 
-    if (p->set_value((int64_t)self->res.color.rgb.R))
+    if (!p->set_value((int64_t)self->res.color.rgb.R))
     {
         return FALSE;
     }
@@ -809,7 +809,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
         GST_ERROR("Unable to retrieve gain green property");
     }
 
-    if (p->set_value((int64_t)self->res.color.rgb.G))
+    if (!p->set_value((int64_t)self->res.color.rgb.G))
     {
         return FALSE;
     }
@@ -821,7 +821,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
         GST_ERROR("Unable to retrieve gain blue property");
     }
 
-    if (p->set_value((int64_t)self->res.color.rgb.B))
+    if (!p->set_value((int64_t)self->res.color.rgb.B))
     {
         return FALSE;
     }
