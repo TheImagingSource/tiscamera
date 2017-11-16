@@ -497,8 +497,12 @@ static void focus_run_tcam (GstTcamAutoFocus* self)
 {
     if (self->camera_src == NULL)
     {
-        GST_ERROR("Source empty! Aborting.");
-        return;
+        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+        if (self->camera_src == NULL)
+        {
+            GST_ERROR("Source empty! Aborting.");
+            return;
+        }
     }
 
     if (autofocus_is_running(self->focus))
@@ -634,6 +638,7 @@ static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
 static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
 {
     self->focus = autofocus_create();
+    self->focus_active = FALSE;
     self->cur_focus = 0;
     self->roi_left = 0;
     self->roi_left = 0;
@@ -658,7 +663,12 @@ void gst_tcamautofocus_set_property (GObject* object,
             self->focus_active = g_value_get_boolean (value);
             if (self->focus_active == TRUE)
             {
+                GST_INFO("focus_active is now TRUE");
                 focus_run(self);
+            }
+            else
+            {
+                GST_INFO("focus_active is now TRUE");
             }
             break;
         case PROP_LEFT:
