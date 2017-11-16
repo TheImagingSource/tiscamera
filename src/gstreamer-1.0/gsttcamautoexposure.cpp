@@ -43,6 +43,10 @@ static const gdouble K_SMALL    = 1e-9;
 
 /* prototypes */
 
+static void set_exposure (GstTcamautoexposure* self, gdouble exposure);
+
+static void set_gain (GstTcamautoexposure* self, gdouble gain);
+
 static void gst_tcamautoexposure_set_property (GObject* object,
                                                guint property_id,
                                                const GValue* value,
@@ -66,7 +70,9 @@ enum
     PROP_AUTO_GAIN,
     PROP_CAMERA,
     PROP_BRIGHTNESS_REFERENCE,
+    PROP_EXPOSURE_MIN,
     PROP_EXPOSURE_MAX,
+    PROP_GAIN_MIN,
     PROP_GAIN_MAX,
     PROP_ROI_LEFT,
     PROP_ROI_TOP,
@@ -161,9 +167,17 @@ static const char* tcamautoexposure_property_id_to_string (guint id)
         {
             return "Brightness Reference";
         }
+        case PROP_EXPOSURE_MIN:
+        {
+            return "Exposure Min";
+        }
         case PROP_EXPOSURE_MAX:
         {
             return "Exposure Max";
+        }
+        case PROP_GAIN_MIN:
+        {
+            return "Gain Min";
         }
         case PROP_GAIN_MAX:
         {
@@ -208,9 +222,17 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
     {
         return PROP_BRIGHTNESS_REFERENCE;
     }
+    else if (g_strcmp0(str, "Exposure Min") == 0)
+    {
+        return PROP_EXPOSURE_MIN;
+    }
     else if (g_strcmp0(str, "Exposure Max") == 0)
     {
         return PROP_EXPOSURE_MAX;
+    }
+    else if (g_strcmp0(str, "Gain Min") == 0)
+    {
+        return PROP_GAIN_MIN;
     }
     else if (g_strcmp0(str, "Gain Max") == 0)
     {
@@ -248,7 +270,11 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
     names = g_slist_append(names,
         g_strdup(tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)));
     names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)));
+    names = g_slist_append(names,
         g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
+    names = g_slist_append(names,
+        g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
     names = g_slist_append(names,
         g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
     names = g_slist_append(names,
@@ -283,9 +309,17 @@ static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gcha
     {
         return strdup("integer");
     }
-    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)) == 0)
     {
         return strdup("integer");
+    }
+   else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)) == 0)
+    {
+        return strdup("double");
     }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
@@ -477,6 +511,55 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)) == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->exposure_min);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, self->exposure.min);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, self->exposure.max);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, self->exposure.min);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "Exposure");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "Exposure");
+        }
+        return TRUE;
+    }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
     {
         if (value)
@@ -526,7 +609,56 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         return TRUE;
     }
-    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)) == 0)
+    {
+        if (value)
+        {
+            g_value_init(value, G_TYPE_DOUBLE);
+            g_value_set_double(value, self->gain_min);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_DOUBLE);
+            g_value_set_double(min, self->gain.min);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_DOUBLE);
+            g_value_set_double(max, self->gain.max);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_DOUBLE);
+            g_value_set_double(def, self->gain.min);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_DOUBLE);
+            g_value_set_double(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "Exposure");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "Gain");
+        }
+
+        return TRUE;
+    }    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
         if (value)
         {
@@ -869,12 +1001,26 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
+                                     PROP_EXPOSURE_MIN,
+                                     g_param_spec_int ("exposure-min",
+                                                       "Exposure Maximum",
+                                                       "Maximum value exposure can take",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
                                      g_param_spec_int ("exposure-max",
                                                        "Exposure Maximum",
                                                        "Maximum value exposure can take",
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_GAIN_MAX,
+                                     g_param_spec_double ("gain-min",
+                                                          "Gain Maximum",
+                                                          "Maximum value gain can take",
+                                                          0.0, G_MAXDOUBLE, 0.0,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
                                      g_param_spec_double ("gain-max",
@@ -935,7 +1081,9 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
     self->gain_is_double = FALSE;
+    self->exposure_min = 0;
     self->exposure_max = 0;
+    self->gain_min = 0.0;
     self->gain_max = 0.0;
     self->frame_counter = 0;
     self->camera_src = NULL;
@@ -959,16 +1107,68 @@ void gst_tcamautoexposure_set_property (GObject* object,
         case PROP_CAMERA:
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
+        case PROP_EXPOSURE_MIN:
+
+            if (g_value_get_int(value) >= tcamautoexposure->exposure_max)
+            {
+                GST_ERROR("New user value for exposure min is greater or equal to exposure max. Ignoring request.");
+                break;
+            }
+
+            tcamautoexposure->exposure_min = g_value_get_int(value);
+
+            if (tcamautoexposure->exposure.value < tcamautoexposure->exposure_min)
+            {
+                tcamautoexposure->exposure.value = tcamautoexposure->exposure_min;
+                set_exposure(tcamautoexposure, tcamautoexposure->exposure.value);
+            }
+
+            if (tcamautoexposure->exposure_min == 0)
+            {
+                tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
+            }
+            break;
         case PROP_EXPOSURE_MAX:
+            if (g_value_get_int(value) <= tcamautoexposure->exposure_min)
+            {
+                GST_ERROR("New user value for exposure max is smaller or equal to exposure min. Ignoring request.");
+                break;
+            }
+
             tcamautoexposure->exposure_max = g_value_get_int(value);
             if (tcamautoexposure->exposure_max == 0.0)
             {
                 tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
             }
             break;
-        case PROP_GAIN_MAX:
-            GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
+        case PROP_GAIN_MIN:
+            GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
+            if (g_value_get_double(value) >= tcamautoexposure->gain_max)
+            {
+                GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
+                break;
+            }
+            tcamautoexposure->gain_min = g_value_get_double(value);
 
+
+            if (tcamautoexposure->gain.value < tcamautoexposure->gain_min)
+            {
+                tcamautoexposure->gain.value = tcamautoexposure->gain_min;
+                set_gain(tcamautoexposure, tcamautoexposure->gain.value);
+            }
+
+            if (tcamautoexposure->gain_min == 0.0)
+            {
+                tcamautoexposure->gain = tcamautoexposure->default_gain_values;
+            }
+            break;
+       case PROP_GAIN_MAX:
+            GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
+            if (g_value_get_double(value) <= tcamautoexposure->gain_min)
+            {
+                GST_ERROR("New user value for gain min is smaller or equal to gain min. Ignoring request.");
+                break;
+            }
             tcamautoexposure->gain_max = g_value_get_double(value);
             if (tcamautoexposure->gain_max == 0.0)
             {
@@ -1014,8 +1214,14 @@ void gst_tcamautoexposure_get_property (GObject* object,
         case PROP_CAMERA:
             g_value_set_object (value, tcamautoexposure->camera_src);
             break;
+        case PROP_EXPOSURE_MIN:
+            g_value_set_int(value, tcamautoexposure->exposure_min);
+            break;
         case PROP_EXPOSURE_MAX:
             g_value_set_int(value, tcamautoexposure->exposure_max);
+            break;
+        case PROP_GAIN_MIN:
+            g_value_set_double(value, tcamautoexposure->gain_min);
             break;
         case PROP_GAIN_MAX:
             g_value_set_double(value, tcamautoexposure->gain_max);
@@ -1068,6 +1274,12 @@ static void init_camera_resources (GstTcamautoexposure* self)
     {
         p = prop->get_struct();
         self->exposure.min = p.value.i.min;
+
+        if (self->exposure_min != 0)
+        {
+            self->exposure_min = self->exposure.min;
+        }
+
         // do not set exposure.max
         // we default to 0
         // if 0 -> use max setting according to framerate
@@ -1101,6 +1313,11 @@ static void init_camera_resources (GstTcamautoexposure* self)
             self->gain.value = p.value.d.value;
         }
         self->gain_max = self->gain.max;
+
+        if (self->gain_min != 0)
+        {
+            self->gain_min = self->gain.min;
+        }
     }
 
     if (self->exposure_max == 0)
@@ -1174,7 +1391,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
             g_ref = self->gain.value + K_GAIN_SLOW * diff;
         }
 
-        gdouble new_gain = fmax(fmin(g_ref, self->gain_max), self->gain.min);
+        gdouble new_gain = fmax(fmin(g_ref, self->gain_max), self->gain_min);
         double percentage_new = (new_gain / self->gain_max * 100) - (self->gain.value / self->gain_max * 100);
 
         if (fabs(self->gain.value - new_gain) > K_SMALL)
@@ -1220,7 +1437,7 @@ static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
     if (self->auto_exposure)
     {
         const double e_ref = self->exposure.value * pow(2, diff);
-        const double new_exposure = fmax(fmin(e_ref, self->exposure_max), self->exposure.min);
+        const double new_exposure = fmax(fmin(e_ref, self->exposure_max), self->exposure_min);
 
         if (fabs(self->exposure.value - new_exposure) > K_SMALL)
         {
@@ -1419,7 +1636,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     else
     {
         /* Try swapping gain for exposure */
-        if (self->gain.value > self->gain.min && self->exposure.value < self->exposure_max)
+        if (self->gain.value > self->gain_min && self->exposure.value < self->exposure_max)
         {
             GST_DEBUG("reducing gain");
             modify_exposure(self, -modify_gain(self, -K_ADJUST));
