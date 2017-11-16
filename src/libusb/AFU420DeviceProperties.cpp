@@ -407,7 +407,7 @@ void AFU420Device::create_properties ()
     }
 
     create_color_gain();
-    create_strobe();
+    //create_strobe();
     create_binning();
     create_offsets();
 }
