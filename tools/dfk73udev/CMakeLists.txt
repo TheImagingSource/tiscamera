@@ -1,5 +1,6 @@
 
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/src/v4l2")
 
 
 set(cflags "-fPIC -w -Wall -Wextra -pedantic -Wundef -Wshadow")

@@ -88,117 +88,12 @@ set( srcs
 )
 
 if (BUILD_V4L2)
-
-  set(lib_v4l2
-    V4l2Device.cpp
-    v4l2_utils.cpp
-    v4l2library.cpp
-    devicelibrary.h)
-
-  find_package(UDev REQUIRED QUIET)
-  include_directories(${UDEV_INCLUDE_DIR})
-  add_definitions(-DHAVE_UDEV)
-
-  find_package(libusb-1.0 REQUIRED QUIET)
-  include_directories(${LIBUSB_1_INCLUDE_DIRS})
-
-  add_definitions(-DHAVE_USB)
-
-  add_library(tcam-v4l2 SHARED ${lib_v4l2} $<TARGET_OBJECTS:tcam-base>)
-  TARGET_LINK_LIBRARIES(tcam-v4l2 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
-
-  set_property(TARGET tcam-v4l2 PROPERTY VERSION ${TCAM_VERSION})
-  set_property(TARGET tcam-v4l2 PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
-
-  install(TARGETS tcam-v4l2
-    LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
-    COMPONENT tcam-v4l2)
-
-  # dfk73 special case
-
-  add_library(tcam-dfk73 SHARED dfk73.c)
-  target_link_libraries(tcam-v4l2 tcam-dfk73)
-  target_link_libraries(tcam-dfk73 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
-
-  set_property(TARGET tcam-dfk73 PROPERTY VERSION ${TCAM_VERSION})
-  set_property(TARGET tcam-dfk73 PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
-
-  install(TARGETS tcam-dfk73
-    LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}"
-    COMPONENT tcam-libdfk73)
-
+  add_subdirectory(v4l2)
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
-
-  set(lib_aravis
-    AravisDevice.cpp
-    aravis_utils.cpp
-    aravislibrary.cpp
-    devicelibrary.h)
-
-  add_definitions(-DHAVE_ARAVIS)
-
-  find_package(GObject REQUIRED QUIET) # dependency
-  find_package(GLIB2 REQUIRED QUIET)   # dependency
-  find_package(GIO REQUIRED QUIET)   # dependency
-
-  if (TCAM_INTERNAL_ARAVIS)
-
-    include_directories("${GIO_INCLUDE_DIR}")
-    include_directories("${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
-    include_directories("${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
-
-  else (TCAM_INTERNAL_ARAVIS)
-
-    find_package(Aravis REQUIRED QUIET)
-    include_directories(${aravis_INCLUDE_DIR})
-
-  endif(TCAM_INTERNAL_ARAVIS)
-
-  include_directories(${GOBJECT_INCLUDE_DIR})
-  include_directories(${GLIB2_INCLUDE_DIR})
-
-
-  include_directories("${CMAKE_SOURCE_DIR}/tools/gige-daemon")
-
   add_subdirectory(tcam-network)
-
-  add_library(tcam-aravis SHARED ${lib_aravis} $<TARGET_OBJECTS:tcam-base>)
-
-  TARGET_LINK_LIBRARIES(tcam-aravis ${GOBJECT_LIBRARIES})
-  TARGET_LINK_LIBRARIES(tcam-aravis ${GLIB2_LIBRARIES})
-
-  if (TCAM_INTERNAL_ARAVIS)
-    add_dependencies(tcam-aravis aravis)
-    set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
-    #add_dependencies(tcam_aravis aravis)
-    find_package(LibXml2 REQUIRED QUIET)
-    find_package(PCAP REQUIRED QUIET)
-
-    target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
-    target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
-
-    target_link_libraries(tcam-aravis "${LIBXML2_LIBRARIES}")
-    target_link_libraries(tcam-aravis "${ARAVIS_LIB}")
-
-  else (TCAM_INTERNAL_ARAVIS)
-
-    target_link_libraries(tcam-aravis ${aravis_LIBRARIES})
-
-  endif (TCAM_INTERNAL_ARAVIS)
-
-
-  set_property(TARGET tcam-aravis PROPERTY VERSION ${TCAM_VERSION})
-  set_property(TARGET tcam-aravis PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
-
-  install(TARGETS tcam-aravis
-    LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}"
-    COMPONENT tcam-aravis)
-
+  add_subdirectory(aravis)
 endif (BUILD_ARAVIS)
 
 if (BUILD_LIBUSB)
