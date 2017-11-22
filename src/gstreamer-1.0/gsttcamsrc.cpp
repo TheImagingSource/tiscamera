@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <queue>
 #include <algorithm>
 
 
@@ -42,6 +43,7 @@ struct device_state
     std::shared_ptr<tcam::ImageSink> sink;
     std::shared_ptr<tcam::MemoryBuffer> ptr;
     std::map<unsigned char*, std::shared_ptr<tcam::MemoryBuffer>> buffer;
+    std::queue<std::shared_ptr<tcam::MemoryBuffer>> queue;
 };
 
 
@@ -1282,11 +1284,13 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
 
     auto ptr = buffer->get_data();
 
-    assert(self->device->ptr == NULL);
+    // assert(self->device->ptr == NULL);
     self->device->buffer.emplace(ptr, buffer);
-    self->device->ptr = buffer;
+    self->device->queue.push(buffer);
+    // self->device->ptr = buffer;
     self->new_buffer = TRUE;
 
+    lck.unlock();
     self->cv.notify_all();
 }
 
@@ -1302,7 +1306,7 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
 
 wait_again:
     // wait until new buffer arrives or stop waiting when we have to shut down
-    while ((self->new_buffer == false) && (self->is_running == true))
+    while ((self->new_buffer == false) && (self->is_running == true) && self->device->queue.empty())
     {
         self->cv.wait(lck);
     }
@@ -1314,7 +1318,16 @@ wait_again:
 
     self->new_buffer = false;
 
-    auto ptr = self->device->ptr;
+    if (self->device->queue.empty())
+    {
+        GST_ERROR("Buffer queue is empty. Returning to waiting position");
+
+        goto wait_again;
+    }
+
+    GST_DEBUG("%d queue size", self->device->queue.size());
+
+    std::shared_ptr<tcam::MemoryBuffer> ptr = self->device->queue.front();
     ptr->set_user_data(self);
 
     // if (ptr == NULL)
@@ -1348,6 +1361,7 @@ wait_again:
                                           0, ptr->get_buffer_size(), trans, buffer_destroy_callback);
 
     self->device->ptr = NULL;
+    self->device->queue.pop(); // remove buffer from queue
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
     /*
