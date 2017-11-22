@@ -84,6 +84,15 @@ VideoFormat ImageSink::getVideoFormat () const
 }
 
 
+bool ImageSink::registerCallback (shared_callback sc, void* ud)
+{
+    this->sh_callback = sc;
+    this->user_data = ud;
+
+    return true;
+}
+
+
 bool ImageSink::registerCallback (sink_callback sc, void* ud)
 {
     this->callback = sc;
@@ -105,6 +114,10 @@ bool ImageSink::registerCallback (c_callback cc, void* ud)
 void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
 {
     last_image_buffer = buffer->getImageBuffer();
+    if (sh_callback)
+    {
+        this->sh_callback(buffer, user_data);
+    }
     if (callback != nullptr)
     {
         this->callback(&*buffer, user_data);

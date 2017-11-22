@@ -29,6 +29,7 @@
  * Main header
  */
 
+typedef void (*shared_callback)(std::shared_ptr<tcam::MemoryBuffer>, void*);
 typedef void (*sink_callback)(tcam::MemoryBuffer*, void*);
 typedef void (*c_callback)(const struct tcam_image_buffer*, void*);
 
@@ -48,6 +49,7 @@ public:
 
     VideoFormat getVideoFormat () const;
 
+    bool registerCallback (shared_callback, void*);
     bool registerCallback (sink_callback, void*);
     bool registerCallback (c_callback, void*);
 
@@ -78,6 +80,7 @@ private:
     TCAM_PIPELINE_STATUS status;
     VideoFormat format;
 
+    shared_callback sh_callback;
     sink_callback callback;
     c_callback c_back;
     void* user_data;
