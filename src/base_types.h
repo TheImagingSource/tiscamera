@@ -160,6 +160,8 @@ struct tcam_image_buffer
     struct tcam_stream_statistics statistics;
 
     uint32_t lock_count;
+
+    void* user_data;
 };
 
 
