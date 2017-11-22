@@ -74,6 +74,10 @@ public:
 
     bool is_complete () const;
 
+    void set_user_data (void* data);
+
+    void* get_user_data ();
+
     /**
      * @brief Fills MemoryBuffer with 0
      */

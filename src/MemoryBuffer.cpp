@@ -157,6 +157,19 @@ bool MemoryBuffer::is_complete () const
 }
 
 
+
+void MemoryBuffer::set_user_data (void* data)
+{
+    buffer.user_data = data;
+}
+
+
+void* MemoryBuffer::get_user_data ()
+{
+    return buffer.user_data;
+}
+
+
 void MemoryBuffer::clear ()
 {
     memset(buffer.pData, 0, buffer.length);
