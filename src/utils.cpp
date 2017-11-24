@@ -27,9 +27,6 @@
 #include <cstring>
 #include <signal.h> // kill
 
-#define IOCTL_RETRY 4
-
-
 using namespace tcam;
 
 std::string tcam::propertyType2String (TCAM_PROPERTY_TYPE type)
@@ -73,6 +70,8 @@ std::vector<std::string> tcam::split_string (const std::string& to_split, const 
 
 int tcam::tcam_xioctl (int fd, int request, void *arg)
 {
+    constexpr int IOCTL_RETRY = 4;
+
     int ret = 0;
     int tries= IOCTL_RETRY;
     do
