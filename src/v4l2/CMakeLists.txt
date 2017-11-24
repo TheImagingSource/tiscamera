@@ -1,6 +1,7 @@
 
 set(lib_v4l2
   V4l2Device.cpp
+  V4L2PropertyHandler.cpp
   v4l2_utils.cpp
   v4l2library.cpp)
 
