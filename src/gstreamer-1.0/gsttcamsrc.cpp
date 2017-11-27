@@ -609,6 +609,9 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                     case TCAM_DEVICE_TYPE_ARAVIS:
                         *connection_type = g_strdup ("aravis");
                         break;
+                    case TCAM_DEVICE_TYPE_LIBUSB:
+                        *connection_type = g_strdup("libusb");
+                        break;
                     default:
                         *connection_type = g_strdup ("unknown");
                         break;
