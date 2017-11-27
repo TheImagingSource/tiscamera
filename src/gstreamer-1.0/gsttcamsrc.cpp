@@ -41,7 +41,6 @@ struct device_state
 {
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
-    std::shared_ptr<tcam::MemoryBuffer> ptr;
     std::map<unsigned char*, std::shared_ptr<tcam::MemoryBuffer>> buffer;
     std::queue<std::shared_ptr<tcam::MemoryBuffer>> queue;
 };
@@ -1090,7 +1089,6 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
                 self->device = new struct device_state;
                 self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
                 self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
-                self->device->ptr = nullptr;
                 break;
             }
         }
@@ -1287,7 +1285,6 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
     // assert(self->device->ptr == NULL);
     self->device->buffer.emplace(ptr, buffer);
     self->device->queue.push(buffer);
-    // self->device->ptr = buffer;
     self->new_buffer = TRUE;
 
     lck.unlock();
@@ -1330,20 +1327,6 @@ wait_again:
     std::shared_ptr<tcam::MemoryBuffer> ptr = self->device->queue.front();
     ptr->set_user_data(self);
 
-    // if (ptr == NULL)
-    // {
-    //     GST_ERROR("No valid buffer. Aborting");
-
-    //     return GST_FLOW_ERROR;
-    // }
-
-    if (ptr->get_data() == NULL || ptr->get_image_size() == 0)
-    {
-        GST_DEBUG_OBJECT (self, "Received buffer is invalid. Returning to waiting position.");
-        buffer_destroy_callback((gpointer)self->device->ptr->get_data());
-        goto wait_again;
-    }
-
     /* TODO: check why aravis throws an incomplete buffer error
        but the received images are still valid */
     // if (!tcam::is_image_buffer_complete(self->ptr))
@@ -1360,7 +1343,6 @@ wait_again:
     *buffer = gst_buffer_new_wrapped_full(0, ptr->get_data(), ptr->get_image_size(),
                                           0, ptr->get_buffer_size(), trans, buffer_destroy_callback);
 
-    self->device->ptr = NULL;
     self->device->queue.pop(); // remove buffer from queue
 
     // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
