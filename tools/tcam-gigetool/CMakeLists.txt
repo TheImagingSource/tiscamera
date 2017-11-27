@@ -25,9 +25,12 @@ install(TARGETS tcam_gigewrapper
   DESTINATION lib
   COMPONENT tcam-gigetool)
 
-find_program(PYTHON "python")
+find_package(PythonInterp REQUIRED)
 
-if (PYTHON)
+if (PYTHONINTERP_FOUND)
+
+  set(GIGE_TOOLS_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/tcamgigetool")
+
     set(SETUP_PY_IN   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
     set(SETUP_PY      "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
     set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py.in")
@@ -39,12 +42,13 @@ if (PYTHON)
     configure_file(${VERSION_PY_IN} ${VERSION_PY})
 
     add_custom_command(OUTPUT ${OUTPUT}
-                       COMMAND ${PYTHON} ${SETUP_PY} build
+                       COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY} build
                        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
                        DEPENDS ${DEPS})
 
     add_custom_target(target ALL DEPENDS ${OUTPUT})
 
-    # install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)"
-            # COMPONENT tcam-gigetool)
-endif()
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/"
+    DESTINATION ${GIGE_TOOLS_PY_INSTALL})
+
+endif(PYTHONINTERP_FOUND)
