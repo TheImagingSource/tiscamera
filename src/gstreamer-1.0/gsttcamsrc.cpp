@@ -37,11 +37,17 @@ GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
 
+struct destroy_transfer
+{
+    GstTcamSrc* self;
+    std::shared_ptr<tcam::MemoryBuffer> ptr;
+};
+
+
 struct device_state
 {
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
-    std::map<unsigned char*, std::shared_ptr<tcam::MemoryBuffer>> buffer;
     std::queue<std::shared_ptr<tcam::MemoryBuffer>> queue;
 };
 
@@ -912,17 +918,6 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
                                       void* data);
 
 
-static void gst_tcam_src_callback (const struct tcam_image_buffer* buffer,
-                                   void* data)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(data);
-
-    self->new_buffer = TRUE;
-
-    self->cv.notify_all();
-}
-
-
 static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
                                        GstCaps* caps)
 {
@@ -1028,8 +1023,6 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->dev->start_stream(self->device->sink);
-
-    self->device->buffer.clear();
 
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
@@ -1263,17 +1256,15 @@ static void buffer_destroy_callback (gpointer data)
     GstTcamSrc* self = trans->self;
     std::unique_lock<std::mutex> lck(self->mtx);
 
-    auto ptr = self->device->buffer[(unsigned char*)trans->data_ptr];
-
-    if (ptr == nullptr)
+    if (trans->ptr == nullptr)
     {
         GST_ERROR("Memory does not seem to exist.");
         return;
     }
 
-    self->device->sink->requeue_buffer(self->device->buffer[(unsigned char*)trans->data_ptr]);
+    self->device->sink->requeue_buffer(trans->ptr);
 
-    free(data);
+    delete data;
 }
 
 
@@ -1285,10 +1276,7 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
 
     auto ptr = buffer->get_data();
 
-    // assert(self->device->ptr == NULL);
-    self->device->buffer.emplace(ptr, buffer);
     self->device->queue.push(buffer);
-    self->new_buffer = TRUE;
 
     lck.unlock();
     self->cv.notify_all();
@@ -1306,7 +1294,7 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
 
 wait_again:
     // wait until new buffer arrives or stop waiting when we have to shut down
-    while ((self->new_buffer == false) && (self->is_running == true) && self->device->queue.empty())
+    while (self->is_running && self->device->queue.empty())
     {
         self->cv.wait(lck);
     }
@@ -1315,8 +1303,6 @@ wait_again:
     {
         return GST_FLOW_EOS;
     }
-
-    self->new_buffer = false;
 
     if (self->device->queue.empty())
     {
@@ -1339,9 +1325,9 @@ wait_again:
     //     goto wait_again;
     // }
 
-    destroy_transfer* trans = (destroy_transfer*)malloc(sizeof(struct destroy_transfer));
+    destroy_transfer* trans = new(destroy_transfer);
     trans->self = self;
-    trans->data_ptr = ptr->get_data();
+    trans->ptr = ptr;
 
     *buffer = gst_buffer_new_wrapped_full(0, ptr->get_data(), ptr->get_image_size(),
                                           0, ptr->get_buffer_size(), trans, buffer_destroy_callback);

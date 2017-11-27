@@ -46,12 +46,6 @@ typedef struct _GstTcamSrcClass GstTcamSrcClass;
 
 struct device_state;
 
-struct destroy_transfer
-{
-    GstTcamSrc* self;
-    unsigned char* data_ptr;
-};
-
 struct _GstTcamSrc
 {
     GstPushSrc element;
@@ -62,7 +56,6 @@ struct _GstTcamSrc
 
     int n_buffers;
 
-    gboolean new_buffer;
     gboolean is_running;
     int payload;
 
