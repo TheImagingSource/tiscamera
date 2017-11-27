@@ -259,11 +259,7 @@ private:
     static std::vector<uint8_t> serialize_resolution_config (const struct AFU420Device::sResolutionConf& cfg);
     static AFU420Device::sResolutionConf deserialize_resolution_config (std::vector<uint8_t> serialized_data) noexcept( true );
 
-    sResolutionConf videoformat_to_resolution_conf (const VideoFormat& format,
-                                                    const std::shared_ptr<Property> binning_hor,
-                                                    const std::shared_ptr<Property> binning_ver,
-                                                    const std::shared_ptr<Property> offset_hor,
-                                                    const std::shared_ptr<Property> offset_ver);
+    sResolutionConf videoformat_to_resolution_conf (const VideoFormat& format);
 
     void read_firmware_version ();
 
