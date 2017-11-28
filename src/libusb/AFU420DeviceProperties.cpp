@@ -465,7 +465,6 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         case TCAM_PROPERTY_BINNING_HORIZONTAL:
         {
             desc.property->set_value((int64_t)active_resolution_conf_.x_addr_start);
-            tcam_error("!!!!!");
             return true;
         }
         case TCAM_PROPERTY_BINNING_VERTICAL:
@@ -510,7 +509,7 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         case TCAM_PROPERTY_STROBE_MODE:
         {
             uint32_t value = get_strobe(strobe_parameter::mode);
-            // TODO
+            desc.property->set_value((int64_t)value);
             return true;
         }
         case TCAM_PROPERTY_OIS_MODE:

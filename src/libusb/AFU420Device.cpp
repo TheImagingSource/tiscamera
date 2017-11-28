@@ -545,8 +545,6 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
                     return p.property;
                 }
             }
-            // TODO rework
-            //return nullptr;
         };
 
     auto binning_hor = find_property(TCAM_PROPERTY_BINNING_HORIZONTAL);
@@ -613,10 +611,6 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
 
     tcam_info("Attempting to set format to: '%s'", format.to_string().c_str());
 
-    // TODO check if format is valid
-
-    // TODO binning
-
     int ret = setup_bit_depth(img::get_bits_per_pixel(format.get_fourcc()));
 
     if (ret < 0)
@@ -638,8 +632,6 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
         tcam_error("Could not set bit depth. Aborting.");
         return false;
     }
-
-    // TODO set binning mode
 
     if (!set_framerate(format.get_framerate()))
     {
@@ -904,7 +896,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         no_buffer_counter++;
         if (no_buffer_counter >= no_buffer_counter_max)
         {
-            // TODO error handling
+            notify_device_lost();
         }
         usleep(200);
         submit_transfer(xfr);
@@ -962,17 +954,12 @@ void LIBUSB_CALL tcam::AFU420Device::libusb_bulk_callback (struct libusb_transfe
 
 bool tcam::AFU420Device::start_stream ()
 {
-    // TODO test trigger mode
-
     const int USB2_STACKUP_SIZE = 512;
     const int USB3_STACKUP_SIZE = 32;
 
 
     // reset statistics
     statistics = {};
-
-    // TODO get packet num from interface
-    int num_iso_packets = 16;
 
     static const int num_transfers = 40;
     int chunk_size = 0;
