@@ -77,8 +77,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "%s has unknown node type '%s'", feature, node_type);
-        // TODO ERROR
+        tcam_error("%s has unknown node type '%s'", feature, node_type);
     }
 
     auto prop_id = find_mapping(feature);
@@ -91,9 +90,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
-        tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. %s", feature);
+        tcam_warning("Unable to find std property. Passing raw property identifier through. %s", feature);
         // pass through and do not associate with anything existing
-        // TODO LOG
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(prop.name, feature, sizeof(prop.name));
         prop.type = value_type_to_ctrl_type(type);
@@ -136,9 +134,6 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                     {
                         // tcam_log(TCAM_LOG_DEBUG, "    Adding enum entry: '%s' %s", arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data));
 
-
-                        // TODO should enums be stored in separate vector
-                        // var.emplace(remove_prefix(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), "_"), var.size());
                         var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
                     }
                 }
@@ -322,7 +317,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         prop.value.i.min = 0;
         prop.value.i.step = 1;
 
-        // // TODO: default value
+        // TODO: default value
 
         return std::make_shared<PropertyBoolean>(impl, prop, type);
 

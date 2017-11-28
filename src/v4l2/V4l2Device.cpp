@@ -170,7 +170,6 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     // use greyscale for camera interaction
     if (emulate_bayer)
     {
-        // TODO: correctly handle bit deptht
         emulated_fourcc = fourcc;
         fourcc = FOURCC_Y800;
     }
@@ -291,7 +290,6 @@ bool V4l2Device::set_framerate (double framerate)
         return false;
     }
 
-    // TODO what about range framerates?
     struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -386,7 +384,8 @@ bool V4l2Device::set_framerate (double framerate)
 
 double V4l2Device::get_framerate ()
 {
-    // TODO what about range framerates?
+    // what about range framerates?
+    // - ranges are not supported by uvc
     struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -633,7 +632,6 @@ void V4l2Device::index_formats ()
     {
         struct tcam_video_format_description desc = {};
 
-        // TODO: Assure format descriptions are always consistent
         struct v4l2_fmtdesc new_desc = {};
         emulate_bayer = checkForBayer(fmtdesc, new_desc);
 
@@ -744,7 +742,6 @@ void V4l2Device::determine_active_video_format ()
         return;
     }
 
-    // TODO what about range framerates?
     struct v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1173,7 +1170,6 @@ void V4l2Device::stream ()
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
 
-            // TODO: should timeout be configurable?
             /* Timeout. */
             struct timeval tv;
             tv.tv_sec = 2;
@@ -1468,8 +1464,7 @@ void V4l2Device::init_mmap_buffers ()
         buffer.pitch = active_video_format.get_pitch_size();
         if (buffer.pData == MAP_FAILED)
         {
-            tcam_log(TCAM_LOG_ERROR, "MMAP failed for buffer %d. Aborting. %s", n_buffers, strerror(errno));
-            // TODO: errno
+            tcam_error("MMAP failed for buffer %d. Aborting. %s", n_buffers, strerror(errno));
             return;
         }
 
@@ -1507,8 +1502,6 @@ void V4l2Device::free_mmap_buffers ()
         if (-1 == munmap(buffers.at(i).buffer->getImageBuffer().pData,
                          buffers.at(i).buffer->getImageBuffer().length))
         {
-            // TODO: error
-
             return;
         }
         else

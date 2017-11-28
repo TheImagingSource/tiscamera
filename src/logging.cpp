@@ -89,7 +89,6 @@ Logger::Logger ():
     static const char* env_name = TCAM_LOG_ENV_NAME;
 
     load_default_settings();
-    // TODO: make environment variable name configurable
     char* log_def = getenv(env_name);
     if (log_def != nullptr)
     {

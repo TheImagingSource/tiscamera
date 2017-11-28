@@ -460,13 +460,6 @@ void AravisDevice::determine_active_video_format ()
     this->active_video_format.set_framerate(arv_camera_get_frame_rate(this->arv_camera));
     active_video_format.set_fourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera)));
 
-    int dx = 0;
-    int dy = 0;
-
-    arv_camera_get_binning(this->arv_camera, &dx, &dy);
-
-    // TODO binning
-
     int x1, x2, y1, y2;
     arv_camera_get_region(this->arv_camera, &x1, &y1, &x2, &y2);
 
@@ -568,7 +561,6 @@ bool AravisDevice::start_stream ()
     if (this->stream == nullptr)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to create ArvStream.");
-        // TODO errno
         return false;
     }
 
@@ -1081,7 +1073,6 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             std::vector<struct framerate_mapping> res_vec;
             res_vec.push_back(rf);
-// TODO
 
             tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
 
@@ -1091,9 +1082,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "NO PixelFormat Node");
-
-        // TODO
+        tcam_error("NO PixelFormat Node");
     }
 
 }
