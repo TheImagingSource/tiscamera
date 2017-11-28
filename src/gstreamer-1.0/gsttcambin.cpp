@@ -882,12 +882,12 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 self->src_caps = nullptr;
             }
 
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
             break;
         }
         case GST_STATE_CHANGE_READY_TO_NULL:
         {
             gst_tcambin_clear_source(self);
+            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
             break;
         }
         default:
