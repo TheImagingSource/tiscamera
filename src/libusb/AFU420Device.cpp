@@ -459,9 +459,6 @@ DeviceInfo tcam::AFU420Device::get_device_description () const
 
 void AFU420Device::create_formats ()
 {
-    tcam_image_size max_sensor_dim_by12 = { 5424, 5360 };
-    tcam_image_size step = { 12, 4 };
-
     std::vector<stream_fmt_data> fmt_list{
         stream_fmt_data{0, 8, FOURCC_GBRG8, FOURCC_RGB32, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0},
         stream_fmt_data{1, 8, FOURCC_GBRG8, FOURCC_Y800, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0},
@@ -562,8 +559,18 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
 
     if (offset_auto->get_struct().value.b.value)
     {
-        // TODO BY12
-        auto max = max_sensor_dim_;
+        tcam_image_size max = {};
+
+        int bpp = img::get_bits_per_pixel(format.get_fourcc());
+        if (bpp == 8)
+        {
+            max = max_sensor_dim_;
+        }
+        else
+        {
+            max = max_sensor_dim_by12;
+        }
+
         offset = calculate_auto_center(max ,format.get_size());
     }
     else

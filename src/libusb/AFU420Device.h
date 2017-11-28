@@ -205,6 +205,9 @@ private:
     static constexpr tcam_image_size max_sensor_dim_ = { 7716, 5360 };
     static constexpr tcam_image_size min_sensor_dim_ = { 264, 256 };
 
+    tcam_image_size max_sensor_dim_by12 = { 5424, 5360 };
+    tcam_image_size step = { 12, 4 };
+
     static constexpr int    m_uPixelMaxX = 7728 - 12 + 3;			// max horizontal: 7728;	-12: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
     static constexpr int    m_uPixelMaxY = 5368 - 4 + 3;			// max vertival: 5368;		 -4: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
     static constexpr int    m_uPixelMinX = 0x100;
