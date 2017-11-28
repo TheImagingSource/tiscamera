@@ -347,7 +347,7 @@ bool Property::set_property (const Property& p)
 }
 
 
-bool Property::set_value (const int64_t& value)
+bool Property::set_value (const int64_t& value, bool notify)
 {
     if (impl.expired())
     {
@@ -360,7 +360,10 @@ bool Property::set_value (const int64_t& value)
     if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
     {
         prop.value.i.value = value;
-        notify_impl();
+        if (notify)
+        {
+            notify_impl();
+        }
         return true;
     }
 
@@ -368,7 +371,7 @@ bool Property::set_value (const int64_t& value)
 }
 
 
-bool Property::set_value (const double& value)
+bool Property::set_value (const double& value, bool notify)
 {
     if (impl.expired())
     {
@@ -381,7 +384,10 @@ bool Property::set_value (const double& value)
     if (get_type() == TCAM_PROPERTY_TYPE_DOUBLE && !is_read_only())
     {
         prop.value.d.value = value;
-        notify_impl();
+        if (notify)
+        {
+            notify_impl();
+        }
         return true;
     }
 
@@ -389,7 +395,7 @@ bool Property::set_value (const double& value)
 }
 
 
-bool Property::set_value (const bool& value)
+bool Property::set_value (const bool& value, bool notify)
 {
     if (impl.expired())
     {
@@ -398,7 +404,10 @@ bool Property::set_value (const bool& value)
     if (get_type() == TCAM_PROPERTY_TYPE_BOOLEAN && !is_read_only())
     {
         prop.value.b.value = value;
-        notify_impl();
+        if (notify)
+        {
+            notify_impl();
+        }
         return true;
     }
 
@@ -406,7 +415,7 @@ bool Property::set_value (const bool& value)
 }
 
 
-bool Property::set_value (const std::string& value)
+bool Property::set_value (const std::string& value, bool notify)
 {
     if (impl.expired())
     {
@@ -415,7 +424,10 @@ bool Property::set_value (const std::string& value)
     if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
     {
         strcpy(prop.value.s.value, value.c_str());
-        notify_impl();
+        if (notify)
+        {
+            notify_impl();
+        }
         return true;
     }
 
@@ -426,7 +438,10 @@ bool Property::set_value (const std::string& value)
             if (value.compare(s.first) == 0)
             {
                 prop.value.i.value = s.second;
-                notify_impl();
+                if (notify)
+                {
+                    notify_impl();
+                }
                 return true;
             }
         }

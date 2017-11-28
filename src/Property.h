@@ -116,10 +116,10 @@ public:
 
     bool set_value (const struct tcam_device_property&);
 
-    bool set_value (const int64_t& value);
-    bool set_value (const double& value);
-    bool set_value (const bool& value);
-    bool set_value (const std::string& value);
+    bool set_value (const int64_t& value, bool notify_impl = true);
+    bool set_value (const double& value, bool notify_impl = true);
+    bool set_value (const bool& value, bool notify_impl = true);
+    bool set_value (const std::string& value, bool notify_impl = true);
     bool set_value ();
 
     bool set_flags (); // ??????
