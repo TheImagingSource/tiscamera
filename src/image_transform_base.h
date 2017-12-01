@@ -32,9 +32,13 @@ inline int get_bits_per_pixel (uint32_t fcc)
 {
     switch (fcc)
     {
+        case FOURCC_RGB8:       return 8;
+
         case FOURCC_RGB24:      return 24;
         case FOURCC_BGR24:      return 24;
         case FOURCC_RGB32:      return 32;
+        // case FOURCC_RGB48:      return 48;
+        case FOURCC_RGB64:      return 64;
         case FOURCC_YUY2:       return 16;
         case FOURCC_UYVY:       return 16;
         case FOURCC_YUYV:       return 16;
@@ -46,6 +50,21 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_RGGB8:      return 8;
         case FOURCC_GRBG8:      return 8;
 
+        case FOURCC_BGGR10:     return 10;
+        case FOURCC_GBRG10:     return 10;
+        case FOURCC_RGGB10:     return 10;
+        case FOURCC_GRBG10:     return 10;
+
+        case FOURCC_BGGR12:     return 12;
+        case FOURCC_GBRG12:     return 12;
+        case FOURCC_RGGB12:     return 12;
+        case FOURCC_GRBG12:     return 12;
+
+        case FOURCC_BGGR16:     return 16;
+        case FOURCC_GBRG16:     return 16;
+        case FOURCC_GRBG16:     return 16;
+        case FOURCC_RGGB16:     return 16;
+
         case FOURCC_YGB0:       return 16;
         case FOURCC_YGB1:       return 16;
         case FOURCC_Y16:        return 16;
@@ -53,17 +72,9 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_I420:       return 12;
         case FOURCC_YUV8PLANAR: return 24;
 
-        case FOURCC_BGGR16:     return 16;
-        case FOURCC_GBRG16:     return 16;
-        case FOURCC_GRBG16:     return 16;
-        case FOURCC_RGGB16:     return 16;
         case FOURCC_Y411:
         case FOURCC_IYU1:       return 14;      // beware
         case FOURCC_IYU2:       return 24;
-
-        //case FOURCC_RGB48:          return 48;
-        case FOURCC_RGB8:           return 8;
-        case FOURCC_RGB64:          return 64;
 
         case FOURCC_YUV16PLANAR:    return 48;
         case FOURCC_YUVFLOATPLANAR: return 96;
