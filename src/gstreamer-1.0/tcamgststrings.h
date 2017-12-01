@@ -91,6 +91,182 @@ static TcamGstMapping tcam_gst_caps_info[] =
 		"video/x-raw-bayer, format=(string)bggr, bpp=(int)8, depth=(int)8",
 		"video/x-raw-bayer"
 	},
+
+    {
+        FOURCC_GBRG10,
+		"video/x-bayer, format=(string)gbrg10",
+		"video/x-bayer",	"gbrg10",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR10,
+		"video/x-bayer, format=(string)bggr10",
+		"video/x-bayer",	"bggr10",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG10,
+		"video/x-bayer, format=(string)grbg10",
+		"video/x-bayer",	"grbg10",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB10,
+		"video/x-bayer, format=(string)rggb10",
+		"video/x-bayer",	"rggb10",
+        "",
+        ""
+    },
+
+    {
+        FOURCC_GBRG12,
+		"video/x-bayer, format=(string)gbrg12",
+		"video/x-bayer",	"gbrg12",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR12,
+		"video/x-bayer, format=(string)bggr12",
+		"video/x-bayer",	"bggr12",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG12,
+		"video/x-bayer, format=(string)grbg12",
+		"video/x-bayer",	"grbg12",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB12,
+		"video/x-bayer, format=(string)rggb12",
+		"video/x-bayer",	"rggb12",
+        "",
+        ""
+    },
+
+
+    {
+        FOURCC_GBRG12_PACKED,
+		"video/x-bayer, format=(string)gbrg12p",
+		"video/x-bayer",	"gbrg12p",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR12_PACKED,
+		"video/x-bayer, format=(string)bggr12p",
+		"video/x-bayer",	"bggr12p",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG12_PACKED,
+		"video/x-bayer, format=(string)grbg12p",
+		"video/x-bayer",	"grbg12p",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB12_PACKED,
+		"video/x-bayer, format=(string)rggb12p",
+		"video/x-bayer",	"rggb12p",
+        "",
+        ""
+    },
+
+    {
+        FOURCC_GBRG12_SPACKED,
+		"video/x-bayer, format=(string)gbrg12sp",
+		"video/x-bayer",	"gbrg12sp",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR12_SPACKED,
+		"video/x-bayer, format=(string)bggr12sp",
+		"video/x-bayer",	"bggr12sp",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG12_SPACKED,
+		"video/x-bayer, format=(string)grbg12sp",
+		"video/x-bayer",	"grbg12sp",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB12_SPACKED,
+		"video/x-bayer, format=(string)rggb12sp",
+		"video/x-bayer",	"rggb12sp",
+        "",
+        ""
+    },
+
+    {
+        FOURCC_GBRG12_MIPI_PACKED,
+		"video/x-bayer, format=(string)gbrg12m",
+		"video/x-bayer",	"gbrg12m",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR12_MIPI_PACKED,
+		"video/x-bayer, format=(string)bggr12m",
+		"video/x-bayer",	"bggr12m",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG12_MIPI_PACKED,
+		"video/x-bayer, format=(string)grbg12m",
+		"video/x-bayer",	"grbg12m",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB12_MIPI_PACKED,
+		"video/x-bayer, format=(string)rggb12m",
+		"video/x-bayer",	"rggb12m",
+        "",
+        ""
+    },
+
+    {
+        FOURCC_GBRG16,
+		"video/x-bayer, format=(string)gbrg16",
+		"video/x-bayer",	"gbrg16",
+        "",
+        ""
+    },
+    {
+        FOURCC_BGGR16,
+		"video/x-bayer, format=(string)bggr16",
+		"video/x-bayer",	"bggr16",
+        "",
+        ""
+    },
+    {
+        FOURCC_GRBG16,
+		"video/x-bayer, format=(string)grbg16",
+		"video/x-bayer",	"grbg16",
+        "",
+        ""
+    },
+    {
+        FOURCC_RGGB16,
+		"video/x-bayer, format=(string)rggb16",
+		"video/x-bayer",	"rggb16",
+        "",
+        ""
+    },
+
     {
         FOURCC_YUYV,
         "video/x-raw, format=(string)YUY2",
