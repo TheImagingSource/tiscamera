@@ -18,6 +18,7 @@
 #define TCAM_GST_STRINGS_H
 
 #include <stdint.h>
+#include <cstring>
 #include "base_types.h"
 
 typedef struct
