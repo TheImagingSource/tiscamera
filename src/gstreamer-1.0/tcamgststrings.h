@@ -26,8 +26,6 @@ typedef struct
     const char* gst_1_0_caps_string;
     const char* gst_1_0_name;
     const char* gst_format;
-    const char* gst_0_10_caps_string;
-    const char* gst_0_10_name;
 } TcamGstMapping;
 
 static TcamGstMapping tcam_gst_caps_info[] =
@@ -37,117 +35,85 @@ static TcamGstMapping tcam_gst_caps_info[] =
 		"video/x-raw, format=(string)RGB",
 		"video/x-raw",
         "RGB",
-		"video/x-raw-rgb, bpp=(int)32, depth=(int)8",
-		"video/x-raw-rgb"
 	},
 	{
 		FOURCC_BGR24,
 		"video/x-raw, format=(string)BGR",
 		"video/x-raw",
         "BGR",
-		"video/x-raw-bgr, bpp=(int)24, depth=(int)8",
-		"video/x-raw-bgr"
 	},
 	{
 		FOURCC_Y800,
 		"video/x-raw, format=(string)GRAY8",
 		"video/x-raw",
         "GRAY8",
-		"video/x-raw-gray, bpp=(int)8, depth=(int)8",
-		"video/x-raw-gray"
 	},
 	{
         FOURCC_Y16,
         "video/x-raw, format=(string)GRAY16_LE",
 		"video/x-raw", 	"GRAY16_LE",
-		"video/x-raw-gray, bpp=(int)16, depth=(int)10",
-		"video/x-raw-gray"
 	},
 	{
 		FOURCC_GRBG8,
 		"video/x-bayer, format=(string)grbg",
 		"video/x-bayer",	"grbg",
-		"video/x-raw-bayer, format=(string)grbg, bpp=(int)8, depth=(int)8",
-		"video/x-raw-bayer"
 	},
 	{
 		FOURCC_RGGB8,
 		"video/x-bayer, format=(string)rggb",
 		"video/x-bayer",	"rggb",
-		"video/x-raw-bayer, format=(string)rggb, bpp=(int)8, depth=(int)8",
-		"video/x-raw-bayer"
 	},
 	{
 		FOURCC_GBRG8,
 		"video/x-bayer, format=(string)gbrg",
 		"video/x-bayer",	"gbrg",
-		"video/x-raw-bayer, format=(string)gbrg, bpp=(int)8, depth=(int)8",
-		"video/x-raw-bayer"
 	},
 	{
 		FOURCC_BGGR8,
 		"video/x-bayer, format=(string)bggr",
 		"video/x-bayer",	"bggr",
-		"video/x-raw-bayer, format=(string)bggr, bpp=(int)8, depth=(int)8",
-		"video/x-raw-bayer"
 	},
 
     {
         FOURCC_GBRG10,
 		"video/x-bayer, format=(string)gbrg10",
 		"video/x-bayer",	"gbrg10",
-        "",
-        ""
     },
     {
         FOURCC_BGGR10,
 		"video/x-bayer, format=(string)bggr10",
 		"video/x-bayer",	"bggr10",
-        "",
-        ""
     },
     {
         FOURCC_GRBG10,
 		"video/x-bayer, format=(string)grbg10",
 		"video/x-bayer",	"grbg10",
-        "",
-        ""
     },
     {
         FOURCC_RGGB10,
 		"video/x-bayer, format=(string)rggb10",
 		"video/x-bayer",	"rggb10",
-        "",
-        ""
     },
 
     {
         FOURCC_GBRG12,
 		"video/x-bayer, format=(string)gbrg12",
 		"video/x-bayer",	"gbrg12",
-        "",
-        ""
     },
     {
         FOURCC_BGGR12,
 		"video/x-bayer, format=(string)bggr12",
 		"video/x-bayer",	"bggr12",
-        "",
-        ""
     },
     {
         FOURCC_GRBG12,
 		"video/x-bayer, format=(string)grbg12",
 		"video/x-bayer",	"grbg12",
-        "",
-        ""
     },
     {
         FOURCC_RGGB12,
 		"video/x-bayer, format=(string)rggb12",
 		"video/x-bayer",	"rggb12",
-        "",
-        ""
     },
 
 
@@ -155,131 +121,95 @@ static TcamGstMapping tcam_gst_caps_info[] =
         FOURCC_GBRG12_PACKED,
 		"video/x-bayer, format=(string)gbrg12p",
 		"video/x-bayer",	"gbrg12p",
-        "",
-        ""
     },
     {
         FOURCC_BGGR12_PACKED,
 		"video/x-bayer, format=(string)bggr12p",
 		"video/x-bayer",	"bggr12p",
-        "",
-        ""
     },
     {
         FOURCC_GRBG12_PACKED,
 		"video/x-bayer, format=(string)grbg12p",
 		"video/x-bayer",	"grbg12p",
-        "",
-        ""
     },
     {
         FOURCC_RGGB12_PACKED,
 		"video/x-bayer, format=(string)rggb12p",
 		"video/x-bayer",	"rggb12p",
-        "",
-        ""
     },
 
     {
         FOURCC_GBRG12_SPACKED,
 		"video/x-bayer, format=(string)gbrg12sp",
 		"video/x-bayer",	"gbrg12sp",
-        "",
-        ""
     },
     {
         FOURCC_BGGR12_SPACKED,
 		"video/x-bayer, format=(string)bggr12sp",
 		"video/x-bayer",	"bggr12sp",
-        "",
-        ""
     },
     {
         FOURCC_GRBG12_SPACKED,
 		"video/x-bayer, format=(string)grbg12sp",
 		"video/x-bayer",	"grbg12sp",
-        "",
-        ""
     },
     {
         FOURCC_RGGB12_SPACKED,
 		"video/x-bayer, format=(string)rggb12sp",
 		"video/x-bayer",	"rggb12sp",
-        "",
-        ""
     },
 
     {
         FOURCC_GBRG12_MIPI_PACKED,
 		"video/x-bayer, format=(string)gbrg12m",
 		"video/x-bayer",	"gbrg12m",
-        "",
-        ""
     },
     {
         FOURCC_BGGR12_MIPI_PACKED,
 		"video/x-bayer, format=(string)bggr12m",
 		"video/x-bayer",	"bggr12m",
-        "",
-        ""
     },
     {
         FOURCC_GRBG12_MIPI_PACKED,
 		"video/x-bayer, format=(string)grbg12m",
 		"video/x-bayer",	"grbg12m",
-        "",
-        ""
     },
     {
         FOURCC_RGGB12_MIPI_PACKED,
 		"video/x-bayer, format=(string)rggb12m",
 		"video/x-bayer",	"rggb12m",
-        "",
-        ""
     },
 
     {
         FOURCC_GBRG16,
 		"video/x-bayer, format=(string)gbrg16",
 		"video/x-bayer",	"gbrg16",
-        "",
-        ""
     },
     {
         FOURCC_BGGR16,
 		"video/x-bayer, format=(string)bggr16",
 		"video/x-bayer",	"bggr16",
-        "",
-        ""
     },
     {
         FOURCC_GRBG16,
 		"video/x-bayer, format=(string)grbg16",
 		"video/x-bayer",	"grbg16",
-        "",
-        ""
     },
     {
         FOURCC_RGGB16,
 		"video/x-bayer, format=(string)rggb16",
 		"video/x-bayer",	"rggb16",
-        "",
-        ""
     },
 
     {
         FOURCC_YUYV,
         "video/x-raw, format=(string)YUY2",
         "video/x-raw", "YUY2",
-        "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
-		"video/x-raw-yuv"
     },
     {
         FOURCC_YUY2,
         "video/x-raw, format=(string)YUY2",
         "video/x-raw", "YUY2",
-        "video/x-raw-yuv, format=(string)yuy2, bpp=(int)8, depth=(int)8",
-		"video/x-raw-yuv"
     },
     {
         FOURCC_UYVY,
@@ -290,20 +220,16 @@ static TcamGstMapping tcam_gst_caps_info[] =
         FOURCC_Y422,
         "video/x-raw, format=(string)Y422",
         "video/x-raw", "Y422",
-        "",
-		""
     },
     {
         FOURCC_Y411,
         "video/x-raw, format=(string)IYU1",
         "video/x-raw", "IYU1",
-        "", ""
     },
     {
         FOURCC_MJPG,
         "image/jpeg",
         "image/jpeg", "",
-        "", ""
     },
 };
 
@@ -311,36 +237,6 @@ static TcamGstMapping tcam_gst_caps_info[] =
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
-
-const char* tcam_fourcc_to_gst_0_10_caps_string (uint32_t fourcc)
-{
-	unsigned int i;
-	for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
-	{
-		if (fourcc == tcam_gst_caps_info[i].fourcc)
-		{
-			return tcam_gst_caps_info[i].gst_0_10_caps_string;
-		}
-	}
-	return NULL;
-}
-
-
-uint32_t tcam_fourcc_from_gst_0_10_caps_string (const char* name, const char* format)
-{
-
-	unsigned int i;
-
-	for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
-	{
-		if (strcmp(name, tcam_gst_caps_info[i].gst_0_10_name) == 0)
-		{
-			if (strcmp(format, tcam_gst_caps_info[i].gst_format) == 0)
-				return tcam_gst_caps_info[i].fourcc;
-		}
-	}
-	return 0;
-}
 
 const char* tcam_fourcc_to_gst_1_0_caps_string (uint32_t fourcc)
 {
