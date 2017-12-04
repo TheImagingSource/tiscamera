@@ -16,7 +16,7 @@
 
 #include "tcamgstbase.h"
 #include "base_types.h"
-
+#include "logging.h"
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 #include <algorithm> //std::find
@@ -304,11 +304,15 @@ GstCaps* get_caps_from_element (const char* elementname, const char* padname)
 }
 
 
-GstCaps* find_input_caps (const GstCaps* available_caps,
-                          const GstCaps* wanted_caps,
-                          bool& requires_conversion)
+// TODO: bayer and videoconvert should consider eachother
+// TODO: include jpegdec so that video/x-raw,format=BGRx is always possible as output
+GstCaps* find_input_caps (GstCaps* available_caps,
+                          GstCaps* wanted_caps,
+                          bool& requires_bayer,
+                          bool& requires_vidoeconvert)
 {
-    requires_conversion = false;
+    requires_bayer = false;
+    requires_vidoeconvert = false;
 
     if (!GST_IS_CAPS(available_caps))
     {
@@ -326,7 +330,7 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
     if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
         && gst_element_factory_can_sink_any_caps(debayer, available_caps))
     {
-        requires_conversion = true;
+        requires_bayer = true;
         // wanted_caps can be fixed, etc.
         // thus change name to be compatible to bayer2rgb sink pad
         // and create a correct intersection
@@ -339,6 +343,25 @@ GstCaps* find_input_caps (const GstCaps* available_caps,
         return ret;
     }
     gst_object_unref(debayer);
+
+    GstElementFactory* convert = gst_element_factory_find("videoconvert");
+    if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
+        && gst_element_factory_can_sink_any_caps(convert, available_caps))
+    {
+        requires_vidoeconvert = true;
+        // wanted_caps can be fixed, etc.
+        // thus change name to be compatible to bayer2rgb sink pad
+        // and create a correct intersection
+        GstCaps* temp = gst_caps_copy(available_caps);
+        //gst_caps_change_name(temp, "video/x-bayer");
+
+        GstCaps* ret = gst_caps_intersect(available_caps, temp);
+        gst_caps_unref(temp);
+        gst_object_unref(convert);
+        return ret;
+    }
+    gst_object_unref(convert);
+
 
     GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
     if (!gst_caps_is_empty(intersect))

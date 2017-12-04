@@ -396,7 +396,7 @@ enum
 {
     PROP_0,
     PROP_SERIAL,
-    PROP_CAPS,
+    PROP_DEVICE_CAPS
 };
 
 static GstStaticCaps raw_caps = GST_STATIC_CAPS("ANY");
@@ -666,6 +666,20 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
+    if (self->needs_videoconvert)
+    {
+        // this is needed to allow for conversions such as
+        // GRAY8 to BGRx that can exist when device-caps are set
+        if (!create_and_add_element(&self->debayer,
+                                    "videoconvert", "tcambin-convert",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
+        {
+            return FALSE;
+        }
+    }
+
+
     GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
     self->target_pad = gst_element_get_static_pad(previous_element, "src");
     GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
@@ -841,9 +855,29 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             {
                 gst_caps_unref(self->src_caps);
             }
-            self->src_caps = find_input_caps(src_caps, self->target_caps, self->needs_debayer);
+
+            if (self->user_caps)
+            {
+                if (gst_caps_is_subset(self->user_caps, src_caps) == FALSE)
+                {
+                    GST_ERROR("The user defined device caps are not supported by the device. User caps are: %s", gst_caps_to_string(self->user_caps));
+                    return GST_STATE_CHANGE_FAILURE;
+                }
+                GST_INFO("Using user defined caps for tcamsrc. User caps are: %s", gst_caps_to_string(self->user_caps));
+                self->src_caps = find_input_caps(self->user_caps, self->target_caps,
+                                                 self->needs_debayer, self->needs_videoconvert);
+            }
+            else
+            {
+                self->src_caps = find_input_caps(src_caps, self->target_caps,
+                                                 self->needs_debayer, self->needs_videoconvert);
+            }
 
             gst_caps_unref(src_caps);
+
+            GstCaps* by16_caps = gst_caps_from_string("video/x-bayer,format={bggr16, rggb16, gbrg16, brbg16}");
+            self->src_caps = gst_caps_subtract(self->src_caps, by16_caps);
+            gst_caps_unref(by16_caps);
 
             if (!self->src_caps)
             {
@@ -924,9 +958,9 @@ static void gst_tcambin_get_property (GObject* object,
             }
             break;
         }
-        case PROP_CAPS:
+        case PROP_DEVICE_CAPS:
         {
-            gst_value_set_caps(value, self->user_caps);
+            g_value_set_string(value, gst_caps_to_string(self->user_caps));
             break;
         }
         default:
@@ -958,9 +992,9 @@ static void gst_tcambin_set_property (GObject* object,
 
             break;
         }
-        case PROP_CAPS:
+        case PROP_DEVICE_CAPS:
         {
-            self->user_caps = gst_caps_copy(gst_value_get_caps(value));
+            self->user_caps = gst_caps_from_string(g_value_get_string(value));
             break;
         }
         default:
@@ -1031,16 +1065,18 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                     g_param_spec_string("serial",
                                                         "Camera serial",
                                                         "Serial of the camera that shall be used",
-                                                        NULL,
+                                                        "",
                                                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-    // not yet used
-    // g_object_class_install_property(object_class,
-    //                                 PROP_CAPS,
-    //                                 g_param_spec_boxed("filter-caps",
-    //                                                    "Filter caps",
-    //                                                    "Filter src caps",
-    //                                                    GST_TYPE_CAPS,
-    //                                                    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+
+    g_object_class_install_property(object_class,
+                                    PROP_DEVICE_CAPS,
+                                    g_param_spec_string("device-caps",
+                                                        "Device Caps",
+                                                        "GstCaps the tcamsrc shall use",
+                                                        "",
+                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
 
     gst_element_class_add_pad_template (element_class,
                                         gst_static_pad_template_get (&src_template));

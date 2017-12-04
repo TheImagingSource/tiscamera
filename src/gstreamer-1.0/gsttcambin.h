@@ -66,6 +66,7 @@ struct _GstTcamBin
 
     GstCaps* src_caps = nullptr;
     bool needs_debayer;
+    bool needs_videoconvert;
 };
 
 

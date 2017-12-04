@@ -84,9 +84,10 @@ GstCaps* get_caps_from_element (const char* elementname, const char* padname);
  *
  * @return possible caps for the source
  */
-GstCaps* find_input_caps (const GstCaps* available_caps,
-                          const GstCaps* wanted_caps,
-                          bool& requires_conversion);
+GstCaps* find_input_caps (GstCaps* available_caps,
+                          GstCaps* wanted_caps,
+                          bool& requires_bayer,
+                          bool& requires_vidoeconvert);
 
 
 bool fill_structure_fixed_resolution (GstStructure* structure,
