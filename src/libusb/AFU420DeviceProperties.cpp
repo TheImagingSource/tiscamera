@@ -30,9 +30,9 @@ bool AFU420Device::create_exposure ()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_EXPOSURE);
 
-    prop.value.i.min = 10; //
-    prop.value.i.max = 300000; // 30 seconds
-    prop.value.i.step = 1;
+    prop.value.i.min = 100; //
+    prop.value.i.max = 30000000; // 30 seconds
+    prop.value.i.step = 100;
 
     auto value = get_exposure();
 
