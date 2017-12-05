@@ -18,7 +18,6 @@
 
 #include "logging.h"
 #include "utils.h"
-#include "serialization.h"
 
 #include "CaptureDeviceImpl.h"
 
@@ -39,18 +38,6 @@ CaptureDevice::CaptureDevice (const DeviceInfo& info)
 
 CaptureDevice::~CaptureDevice ()
 {}
-
-
-bool CaptureDevice::load_configuration (const std::string& filename)
-{
-    return impl->load_configuration(filename);
-}
-
-
-bool CaptureDevice::save_configuration (const std::string& filename)
-{
-    return impl->save_configuration(filename);
-}
 
 
 bool CaptureDevice::is_device_open () const

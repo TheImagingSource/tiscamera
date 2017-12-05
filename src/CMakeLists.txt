@@ -84,7 +84,6 @@ set( srcs
   CaptureDeviceImpl.cpp
   PipelineManager.cpp
   ImageSource.cpp
-  serialization.cpp
   PropertyHandler.cpp
   public_utils.cpp
 )

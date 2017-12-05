@@ -30,7 +30,6 @@
 #include "DeviceInfo.h"
 #include "DeviceIndex.h"
 #include "ImageSink.h"
-#include "serialization.h"
 #include "public_utils.h"
 
 /** @} */

@@ -53,21 +53,6 @@ public:
 
     ~CaptureDevice ();
 
-    /**
-     * @brief Load xml configuration and apply it to device
-     * @param filename - string containing the filename of the xml description
-     * @return true on success; on error Error will be set
-     */
-    bool load_configuration (const std::string& filename);
-
-
-    /**
-     * @brief Store current device configuration in xml
-     * @param filename - string containing the filename under which the xml shall be saved
-     * @return true on success; on error Error will be set
-     */
-    bool save_configuration (const std::string& filename);
-
     // device related:
 
     /**

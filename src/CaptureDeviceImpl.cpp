@@ -18,7 +18,6 @@
 
 #include "logging.h"
 #include "utils.h"
-#include "serialization.h"
 
 #include <exception>
 
@@ -51,36 +50,6 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
 CaptureDeviceImpl::~CaptureDeviceImpl ()
 {
     close_device();
-}
-
-
-bool CaptureDeviceImpl::load_configuration (const std::string& filename)
-{
-    if (!is_device_open())
-    {
-        return false;
-    }
-
-    auto vec = property_handler->get_properties();
-
-    return load_xml_description(filename,
-                                open_device_info,
-                                active_format,
-                                vec);
-}
-
-
-bool CaptureDeviceImpl::save_configuration (const std::string& filename)
-{
-    if (!is_device_open())
-    {
-        return false;
-    }
-
-    return save_xml_description(filename,
-                                open_device_info,
-                                device->get_active_video_format(),
-                                property_handler->get_properties());
 }
 
 
