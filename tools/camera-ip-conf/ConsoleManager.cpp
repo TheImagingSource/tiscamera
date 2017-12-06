@@ -544,7 +544,8 @@ void upgradeFirmware (const std::vector<std::string>& args)
 
 
     std::cout << std::endl;
-    if (camera->uploadFirmware(cF, overrideModelName, func))
+    int ret = camera->uploadFirmware(cF, overrideModelName, func);
+    if (ret >= 0)
     {
         std::cout << "\n\nSuccessfully uploaded firmware. \
 Please reconnect your camera to assure full functionality.\n";
