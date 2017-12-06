@@ -1,9 +1,0 @@
-
-* daemonclass
-
-** does the port have to be closed
-
-* semaphores
-
-** do they have to be explicitly destroyed?
-** do they have to reside in the shared memory
