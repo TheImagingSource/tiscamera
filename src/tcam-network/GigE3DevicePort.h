@@ -20,6 +20,7 @@
 
 #include "FirmwareUpgrade.h"
 
+#include <pugixml.hpp>
 #include <string>
 #include <vector>
 
@@ -39,7 +40,7 @@ public:
 
 public:
     virtual Status Configure (const std::string& name,
-                              const TiXmlElement& portConfigElem) = 0;
+                              const pugi::xml_node& portConfigElem) = 0;
 
     // Check whether all the items are consistent with the requirements of this device port
     virtual Status CheckItems (const std::vector<UploadItem>& items) = 0;

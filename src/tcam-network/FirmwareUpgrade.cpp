@@ -23,7 +23,7 @@
 #include <regex.h>
 
 #include <zip.h>
-#include <tinyxml.h>
+#include <pugixml.hpp>
 
 #include "FirmwareUpgrade.h"
 #include "GigE3Update.h"
@@ -224,29 +224,37 @@ Status findFirmwareInPackage (const std::string& fileName, const std::string& mo
     }
     xmlData.push_back( 0 );
 
-    TiXmlDocument xdoc;
-    xdoc.Parse( (char*)&xmlData[0] );
-    if( xdoc.Error() )
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_buffer(&xmlData[0], xmlData.size());
+
+    if (!result)
     {
         return Status::InvalidFile;
     }
 
-    TiXmlHandle xhandle( &xdoc );
-    auto fwnode = xhandle.FirstChild( "firmwares" ).FirstChild( "firmware" ).ToElement();
+    auto fwnode = doc.child("firmwares").child("firmware");
 
-    for( ; fwnode; fwnode = fwnode->NextSiblingElement() )
+    for ( ; fwnode; fwnode = fwnode.next_sibling())
     {
-        auto nameAttr = fwnode->Attribute( "name" );
-        if( nameAttr == modelName )
+        auto nameAttr = fwnode.attribute("name").as_string();
+        if (nameAttr == modelName)
         {
-            const char* fwFileAttr = fwnode->Attribute( "firmwarefile" );
-            const char* fpgaConfigurationAttr = fwnode->Attribute( "fpgafile" );
-            int res = fwnode->QueryIntAttribute( "requiredfpga", (int*)&requiredFPGAVersion );
+            auto fwFileAttr = fwnode.attribute("firmwarefile").as_string();
+            auto fpgaConfigurationAttr = fwnode.attribute("fpgafile").as_string();
+            requiredFPGAVersion = fwnode.attribute("requiredfpga").as_int();
 
-            if (fwFileAttr == 0) return Status::InvalidFile;
-            if (fpgaConfigurationAttr == 0) return Status::InvalidFile;
-            if (res != TIXML_SUCCESS) return Status::InvalidFile;
-
+            if (fwFileAttr == 0)
+            {
+                return Status::InvalidFile;
+            }
+            if (fpgaConfigurationAttr == 0)
+            {
+                return Status::InvalidFile;
+            }
+            if (requiredFPGAVersion >= 0)
+            {
+                return Status::InvalidFile;
+            }
             firmwareName = fwFileAttr;
             FPGAConfigurationName = fpgaConfigurationAttr;
 

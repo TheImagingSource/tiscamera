@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-find_package(TinyXML REQUIRED)
-include_directories(${TinyXML_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/dependencies/PugiXml/)
 
 find_package(LibZip REQUIRED)
 include_directories(${LIBZIP_INCLUDE_DIR})
@@ -32,13 +31,14 @@ set(NETWORK_SOURCES
   GigE3Update.cpp
   FirmwarePackage.cpp
   MachXO2.cpp
-  JedecFile.cpp)
+  JedecFile.cpp
+  ${CMAKE_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp
+  )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 add_library(tcam-network SHARED ${NETWORK_SOURCES})
 
-target_link_libraries(tcam-network ${TinyXML_LIBRARIES})
 target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 
 set_property(TARGET tcam-network PROPERTY VERSION ${TCAM_VERSION})

@@ -21,6 +21,8 @@
 
 #include "FirmwareUpgrade.h"
 
+#include <pugixml.hpp>
+
 #include <memory>
 #include <vector>
 #include <map>
@@ -57,11 +59,11 @@ private:
     std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> file_data_cache_;
 
 private:
-    Status ReadPackageInfo (const TiXmlDocument& doc);
-    Status ReadDevicePorts (const TiXmlDocument& doc);
-    Status ReadDeviceTypes (const TiXmlDocument& doc);
-    Status ReadUploadGroup (const TiXmlElement& uploadGroupElem, UploadGroup& group);
-    Status ReadUploadItem (const TiXmlElement& uploadItemElem, UploadItem& item);
+    Status ReadPackageInfo (const pugi::xml_document& doc);
+    Status ReadDevicePorts (const pugi::xml_document& doc);
+    Status ReadDeviceTypes (const pugi::xml_document& doc);
+    Status ReadUploadGroup (const pugi::xml_node& uploadGroupElem, UploadGroup& group);
+    Status ReadUploadItem (const pugi::xml_node& uploadItemElem, UploadItem& item);
 
     std::shared_ptr<IDevicePort> CreateDevicePort (const std::string& portType);
 

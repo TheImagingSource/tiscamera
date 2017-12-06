@@ -41,7 +41,7 @@ public:
     virtual std::string name () override { return name_; }
 
     virtual Status Configure (const std::string& name,
-                              const TiXmlElement& portConfigElem) override;
+                              const pugi::xml_node& portConfigElem) override;
     virtual Status CheckItems (const std::vector<UploadItem>& items) override;
     virtual Status UploadItems (IFirmwareWriter& dev,
                                 const std::vector<UploadItem>& items,

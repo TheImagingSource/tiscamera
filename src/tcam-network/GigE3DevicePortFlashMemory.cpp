@@ -24,11 +24,11 @@
 using namespace FirmwareUpdate;
 
 
-bool parseAttribute (const TiXmlElement& elem,
+bool parseAttribute (const pugi::xml_node& elem,
                      const char* attributeName,
                      uint32_t& val)
 {
-    auto attrText = elem.Attribute (attributeName);
+    auto attrText = elem.attribute(attributeName).as_string();
     if (!attrText)
     {
         return false;
@@ -48,7 +48,7 @@ bool parseAttribute (const TiXmlElement& elem,
 
 
 FirmwareUpdate::Status GigE3::DevicePortFlashMemory::Configure (const std::string& name,
-                                                                const TiXmlElement& portConfigElem)
+                                                                const pugi::xml_node& portConfigElem)
 {
     if (!parseAttribute(portConfigElem, "EraseAddress", eraseAddress_)) return Status::InvalidFile;
     if (!parseAttribute(portConfigElem, "UnlockCode", unlockCode_)) return Status::InvalidFile;

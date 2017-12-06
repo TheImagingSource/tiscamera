@@ -26,7 +26,7 @@
 using namespace FirmwareUpdate;
 
 FirmwareUpdate::Status GigE3::DevicePortMachXO2::Configure (const std::string& name,
-                                                            const TiXmlElement& portConfigElem)
+                                                            const pugi::xml_node& portConfigElem)
 {
     name_ = name;
 

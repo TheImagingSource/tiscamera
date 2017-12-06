@@ -23,7 +23,7 @@
 
 #include "FirmwarePackage.h"
 
-#include <tinyxml.h>
+#include <pugixml.hpp>
 
 #include <memory>
 
@@ -34,21 +34,18 @@ std::vector<std::string> GigE3::Package::FindModelNames (const std::string& pack
 {
     std::vector<std::string> result;
 
-    auto xmlManifestData = FirmwarePackage::extractTextFile(packageFileName, "Manifest.xml");
+    pugi::xml_document doc;
+    auto load_res = doc.load_string(FirmwarePackage::extractTextFile(packageFileName, "manifest.xml").c_str());
 
-    TiXmlDocument xdoc;
-    xdoc.Parse(xmlManifestData.c_str());
-    if (xdoc.Error())
+    if (load_res != pugi::status_ok)
     {
         return result;
     }
 
-    TiXmlHandle docHandle(const_cast<TiXmlDocument*>(&xdoc));
-
-    auto deviceTypeElement = docHandle.FirstChild("FirmwarePackage").FirstChild("DeviceTypes").FirstChild("DeviceType").ToElement();
-    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement->NextSiblingElement("DeviceType"))
+    auto deviceTypeElement = doc.child("FirmwarePackage").child("DeviceTypes").child("DeviceType");
+    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
     {
-        auto modelName = deviceTypeElement->Attribute("Name");
+        auto modelName = deviceTypeElement.attribute("Name").as_string();
         if (modelName)
         {
             result.push_back(modelName);
@@ -86,29 +83,28 @@ FirmwareUpdate::Status GigE3::Package::Load (const std::string& packageFileName)
 {
     packageFileName_ = packageFileName;
 
-    auto xmlManifestData = FirmwarePackage::extractTextFile(packageFileName_, "manifest.xml");
+    pugi::xml_document doc;
+    auto manifest = FirmwarePackage::extractTextFile(packageFileName, "manifest.xml");
+    auto load_res = doc.load_string(manifest.c_str());
 
-    TiXmlDocument xdoc;
-    xdoc.Parse(xmlManifestData.c_str());
-
-    if (xdoc.Error())
+    if (load_res.status != pugi::status_ok)
     {
         return Status::InvalidFile;
     }
 
-    auto status = ReadPackageInfo(xdoc);
+    auto status = ReadPackageInfo(doc);
 
     if (failed(status))
     {
         return status;
     }
-    status = ReadDevicePorts(xdoc);
+    status = ReadDevicePorts(doc);
 
     if (failed(status))
     {
         return status;
     }
-    status = ReadDeviceTypes(xdoc);
+    status = ReadDeviceTypes(doc);
 
     if (failed(status))
     {
@@ -118,16 +114,19 @@ FirmwareUpdate::Status GigE3::Package::Load (const std::string& packageFileName)
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadPackageInfo (const TiXmlDocument& doc)
+FirmwareUpdate::Status GigE3::Package::ReadPackageInfo (const pugi::xml_document& doc)
 {
-    if (!doc.RootElement()->Attribute("FirmwareVersion", &firmwareVersion_))
+    auto root = doc.child("FirmwarePackage");
+
+    firmwareVersion_ = root.attribute("FirmwareVersion").as_int();
+
+    if (firmwareVersion_ <= 0)
     {
         return Status::InvalidFile;
     }
-    if (!doc.RootElement()->Attribute("ManifestVersion", &manifestVersion_))
-    {
-        return Status::InvalidFile;
-    }
+
+    manifestVersion_ = root.attribute("ManifestVersion").as_int();
+
     // Don't know how to handle manifest > 1
     if (manifestVersion_ > 1)
     {
@@ -137,18 +136,16 @@ FirmwareUpdate::Status GigE3::Package::ReadPackageInfo (const TiXmlDocument& doc
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const TiXmlDocument& doc)
+FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const pugi::xml_document& doc)
 {
     ports_.clear();
 
-    TiXmlHandle docHandle(const_cast<TiXmlDocument*>(&doc));
-
-    auto portElement = docHandle.FirstChild("FirmwarePackage").FirstChild("DevicePorts").FirstChild("DevicePort").ToElement();
-    for ( ; portElement; portElement = portElement->NextSiblingElement("DevicePort"))
+    auto portElement = doc.child("FirmwarePackage").child("DevicePorts").child("DevicePort");
+    for ( ; portElement; portElement = portElement.next_sibling("DevicePort"))
     {
-        auto portName = portElement->Attribute("Name");
-        auto portType = portElement->Attribute("Type");
-        auto portConfigElem = portElement->FirstChildElement("PortConfiguration");
+        auto portName = portElement.attribute("Name").as_string();
+        auto portType = portElement.attribute("Type").as_string();
+        auto portConfigElem = portElement.child("PortConfiguration");
 
         if (!portName || !portType || !portConfigElem)
         {
@@ -159,40 +156,38 @@ FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const TiXmlDocument& doc
         {
             return Status::InvalidFile;
         }
-        auto status = port->Configure( portName, *portConfigElem );
+        auto status = port->Configure(portName, portConfigElem);
         if (failed(status))
         {
             return status;
         }
-        ports_.push_back( std::move(port) );
+        ports_.push_back(std::move(port));
     }
 
     return Status::Success;
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes (const TiXmlDocument& doc)
+FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes (const pugi::xml_document& doc)
 {
     device_types_.clear();
 
-    TiXmlHandle docHandle( const_cast<TiXmlDocument*>( &doc ) );
-
-    auto deviceTypeElement = docHandle.FirstChild("FirmwarePackage").FirstChild("DeviceTypes").FirstChild("DeviceType").ToElement();
-    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement->NextSiblingElement("DeviceType"))
+    auto deviceTypeElement = doc.child("FirmwarePackage").child("DeviceTypes").child("DeviceType");
+    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
     {
-        auto modelName = deviceTypeElement->Attribute("Name");
+        auto modelName = deviceTypeElement.attribute("Name").as_string();
         if (!modelName)
         {
             return Status::InvalidFile;
         }
         std::vector<UploadGroup> groups;
 
-        auto* uploadGroupElem = deviceTypeElement->FirstChildElement("UploadGroup");
-        for ( ; uploadGroupElem; uploadGroupElem = uploadGroupElem->NextSiblingElement("UploadGroup"))
+        auto uploadGroupElem = deviceTypeElement.child("UploadGroup");
+        for ( ; uploadGroupElem; uploadGroupElem = uploadGroupElem.next_sibling("UploadGroup"))
         {
             UploadGroup group;
 
-            auto status = ReadUploadGroup( *uploadGroupElem, group );
+            auto status = ReadUploadGroup(uploadGroupElem, group);
             if (failed(status))
             {
                 return status;
@@ -222,9 +217,9 @@ static bool parseHexOrDecimal (const char* text, uint32_t& val)
 }
 
 
-static bool parseAttribute (const TiXmlElement& elem, const char* attributeName, uint32_t& val)
+static bool parseAttribute (const pugi::xml_node& elem, const char* attributeName, uint32_t& val)
 {
-    auto attrText = elem.Attribute(attributeName);
+    auto attrText = elem.attribute(attributeName).as_string();
     if (!attrText)
     {
         return false;
@@ -233,11 +228,11 @@ static bool parseAttribute (const TiXmlElement& elem, const char* attributeName,
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const TiXmlElement& uploadGroupElem,
+FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const pugi::xml_node& uploadGroupElem,
                                                         UploadGroup& group)
 {
-    auto groupName = uploadGroupElem.Attribute("Name");
-    auto destinationName = uploadGroupElem.Attribute("Destination");
+    auto groupName = uploadGroupElem.attribute("Name").as_string();
+    auto destinationName = uploadGroupElem.attribute("Destination").as_string();
     if (!groupName || !destinationName)
     {
         return Status::InvalidFile;
@@ -258,12 +253,12 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const TiXmlElement& uplo
     group.DestionationPort = port;
     group.Name = groupName;
 
-    auto* uploadItemElem = uploadGroupElem.FirstChildElement("Upload");
-    for ( ; uploadItemElem != nullptr; uploadItemElem = uploadItemElem->NextSiblingElement("Upload"))
+    auto uploadItemElem = uploadGroupElem.child("Upload");
+    for ( ; uploadItemElem != nullptr; uploadItemElem = uploadItemElem.next_sibling("Upload"))
     {
         UploadItem item;
 
-        auto status = ReadUploadItem(*uploadItemElem, item);
+        auto status = ReadUploadItem(uploadItemElem, item);
         if (failed( status))
         {
             return status;
@@ -280,42 +275,42 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const TiXmlElement& uplo
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const TiXmlElement& uploadItemElem,
+FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& uploadItemElem,
                                                        UploadItem& item)
 {
-    for (auto* attr = uploadItemElem.FirstAttribute(); attr; attr = attr->Next())
+    for (auto attr : uploadItemElem.attributes())
     {
-        if (attr->Name() == std::string("File"))
+        if (attr.name() == std::string("File"))
         {
             if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
-            item.Data = ExtractFile( attr->Value() );
+            item.Data = ExtractFile(attr.value());
             if (item.Data->empty())
             {
                 int a = 0;
             }
         }
-        else if (attr->Name() == std::string("String"))
+        else if (attr.name() == std::string("String"))
         {
             if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
-            auto str = attr->ValueStr();
+            auto str = std::string(attr.value());
             item.Data = std::make_shared<std::vector<uint8_t>>();
             item.Data->resize(str.length());
             memcpy(item.Data->data(), str.data(), str.length());
         }
-        else if (attr->Name() == std::string("U32"))
+        else if (attr.name() == std::string("U32"))
         {
             if (item.Data != nullptr)
             {
                 return Status::InvalidFile; // No two "data" elements allowed
             }
             uint32_t data = 0;
-            if (!parseHexOrDecimal(attr->Value(), data))
+            if (!parseHexOrDecimal(attr.value(), data))
             {
                 return Status::InvalidFile;
             }
@@ -326,11 +321,11 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const TiXmlElement& uploa
         else
         {
             uint32_t val = 0;
-            if (!parseHexOrDecimal(attr->Value(), val))
+            if (!parseHexOrDecimal(attr.value(), val))
             {
                 return Status::InvalidFile;
             }
-            item.Params[attr->Name()] = val;
+            item.Params[attr.name()] = val;
         }
     }
 
