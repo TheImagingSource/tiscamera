@@ -17,6 +17,7 @@
 # include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
 include_directories("..")
+include_directories("${CMAKE_SOURCE_DIR}/dependencies/PugiXml")
 
 set(files
   Archive.cpp
@@ -53,6 +54,7 @@ set(files
   lib/7z/BraIA64.c
   lib/7z/Lzma2Dec.c
   lib/7z/Ppmd7Dec.c
+  "${CMAKE_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp"
   )
 
 add_library(33update OBJECT ${files})

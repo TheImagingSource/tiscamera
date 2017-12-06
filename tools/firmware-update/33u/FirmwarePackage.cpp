@@ -20,7 +20,7 @@
 #include "ReportProgress.h"
 
 #include "Archive.h"
-#include "lib/PugiXml/pugixml.hpp"
+#include "pugixml.hpp"
 
 #include <stdexcept>
 #include <cctype>

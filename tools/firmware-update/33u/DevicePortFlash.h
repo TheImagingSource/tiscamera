@@ -18,7 +18,7 @@
 
 #include "IDevicePort.h"
 
-#include "lib/PugiXml/pugixml.hpp"
+#include "pugixml.hpp"
 
 #include <string>
 
