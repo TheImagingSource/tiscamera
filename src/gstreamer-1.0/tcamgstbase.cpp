@@ -83,6 +83,11 @@ std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
 
 bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
 {
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
     auto correct_format = [] (const char* str)
     {
         const static std::vector<std::string> formats = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
@@ -226,6 +231,11 @@ GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw)
 
 bool gst_caps_are_bayer_only (const GstCaps* caps)
 {
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(caps, i);
@@ -322,6 +332,11 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
 bool contains_bayer (const GstCaps* caps)
 {
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
     {
         if (strcmp("video/x-bayer", gst_structure_get_name(gst_caps_get_structure(caps, i))) == 0)
