@@ -773,6 +773,10 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
             gst_structure_fixate_field_nearest_int (outs, "width", width);
         }
         self->image_width = width;
+        if (self->roi_width == 0)
+        {
+            self->roi_width = width;
+        }
     }
 
     if (gst_structure_get_int (ins, "height", &height))
@@ -782,6 +786,10 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
             gst_structure_fixate_field_nearest_int (outs, "height", height);
         }
         self->image_height = height;
+        if (self->roi_height == 0)
+        {
+            self->roi_height = height;
+        }
     }
 
     if (gst_structure_get_field_type (ins, "format") == G_TYPE_STRING)
