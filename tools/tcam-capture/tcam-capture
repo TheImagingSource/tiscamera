@@ -239,6 +239,8 @@ class TCamCapture(QMainWindow):
             self.removeDockWidget(self.props)
             self.props = None
             self.set_device_menus_enabled(False)
+            self.view.setParent(None)
+            self.setCentralWidget(None)
             self.view = None
             log.info("Closed device")
 
