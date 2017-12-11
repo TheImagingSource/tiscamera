@@ -178,8 +178,6 @@ class TCamCapture(QMainWindow):
         """"""
         self.open_menu.clear()
 
-        # ensure our devices are always listed in the same order
-        device_list.sort(key=lambda x: x.serial)
         index = 1
         for d in device_list:
             action_string = "{model:<17} - {contype:<7} - {serial}\t&{ind}".format(model=d.model,
@@ -227,6 +225,8 @@ class TCamCapture(QMainWindow):
         """"""
         if self.view is not None:
             self.view.play(video_format)
+            self.view.adjustSize()  # ensure widget always has max size
+            self.view.repaint()
 
     def stop(self):
         """Stops the video stream"""

@@ -80,6 +80,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         super(TcamScreen, self).__init__(parent)
         self.setMouseTracking(True)
         self.mutex = QMutex()
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                           QtWidgets.QSizePolicy.Expanding)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setFrameStyle(0)
         self.scene = QGraphicsScene(self)
@@ -107,7 +109,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
 
     def send_mouse_pixel(self):
 
-        self.new_pixel_under_mouse.emit(self.pix.mouse_over, self.pix.get_mouse_color())
+        self.new_pixel_under_mouse.emit(self.pix.mouse_over,
+                                        self.pix.get_mouse_color())
 
     def mouseMoveEvent(self, event):
         mouse_position = event.pos()
@@ -172,6 +175,7 @@ class TcamView(QWidget):
         self.is_fullscreen = False
 
         self.layout.addWidget(self.container)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.setLayout(self.layout)
         self.serial = serial
         self.data = TcamCaptureData()
@@ -180,17 +184,7 @@ class TcamView(QWidget):
         self.mouse_is_pressed = False
         self.current_width = 0
         self.current_height = 0
-
-        self.format_list = ["YUV2", "YUY2", "BGR", "BGRx", "GRAY16_LE", "GRAY8"]
-
-        self.format_dict = {
-            "GRAY8": QtGui.QImage.Format_Indexed8,
-            "Y16": QtGui.QImage.Format_Mono,
-            "BGRx": QtGui.QImage.Format_ARGB32,
-            "BGR": QtGui.QImage.Format_RGB888
-            # "YUY2": QtGui.QImage.Format_
-        }
-
+        self.device_lost_callbacks = []
         self.format_menu = None
 
     def new_pixel_under_mouse_slot(self, active: bool, color: QtGui.QColor):
@@ -241,12 +235,13 @@ class TcamView(QWidget):
 
         if self.pipeline.get_state(1000000).state == Gst.State.PLAYING:
             log.debug("Setting pipeline to READY")
-            self.pipeline.set_state(Gst.State.READY)
-
+            self.pipeline.set_state(Gst.State.NULL)
         if video_format is not None:
-            log.debug("Setting format to {}".format(video_format))
-            caps = self.pipeline.get_by_name("caps")
-            caps.set_property("caps", Gst.Caps.from_string(video_format))
+            log.info("Setting format to {}".format(video_format))
+            caps = self.pipeline.get_by_name("bin")
+            caps.set_property("device-caps",
+                              Gst.Caps.from_string(video_format))
+        log.info("Setting state PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
 
     def new_buffer(self, appsink):
@@ -261,22 +256,19 @@ class TcamView(QWidget):
             if self.current_height == 0:
                 self.current_height = struc.get_value("height")
 
-            buffer_format = struc.get_value("format")
+            # buffer_format = struc.get_value("format")
 
-            if buffer_format in self.format_dict:
-                self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
-                                                                  struc.get_value("width"),
-                                                                  struc.get_value("height"),
-                                                                  self.format_dict[buffer_format]))
-                if self.fullscreen_container is not None:
-                    self.fullscreen_container.new_pixmap.emit(self.image)
-                else:
-                    self.container.new_pixmap.emit(self.image)
+            self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
+                                                              struc.get_value("width"),
+                                                              struc.get_value("height"),
+                                                              QtGui.QImage.Format_ARGB32))
+            if self.fullscreen_container is not None:
+                self.fullscreen_container.new_pixmap.emit(self.image)
             else:
-                log.error("Format {} is not supported. Unable to display.".format(buffer_format))
+                self.container.new_pixmap.emit(self.image)
 
         finally:
-             b.unmap(buffer_map)
+            b.unmap(buffer_map)
 
         return Gst.FlowReturn.OK
 
@@ -289,7 +281,7 @@ class TcamView(QWidget):
         # since the remaining buffers can not be displayed because our main thread
         # is currently in set_state
         pipeline_str = ("tcambin serial={serial} name=bin "
-                        "! capsfilter name=caps "
+                        "! video/x-raw,format=BGRx "
                         "! tee name=tee tee. "
                         "! queue "
                         "! videoconvert "
@@ -323,7 +315,7 @@ class TcamView(QWidget):
         log.info("Setting state to NULL")
 
         self.pipeline.set_state(Gst.State.NULL)
-        log.info("is NULL")
+        log.info("Set State to NULL")
 
     def on_error(self, bus, msg):
         err, dbg = msg.parse_error()
@@ -388,19 +380,31 @@ class TcamView(QWidget):
         for j in range(formats.get_size()):
             fmt = formats.get_structure(j)
             try:
-                format_string = fmt.get_value("format")
-                if format_string == "{ RGBx, xRGB, BGRx, xBGR, RGBA, ARGB, BGRA, ABGR }":
-                    format_string = "BGRx"
-                elif (format_string is None or
-                      format_string == "None" or
-                      "bayer" in fmt.get_name()):
+                # log.info("=== {}".format(fmt.to_string()))
+                format_name = fmt.get_name()
+
+                if "ANY" in format_name:
                     continue
+
+                format_string = fmt.get_value("format")
+                # ignore additional formats that are generated by the bin
+                # we only want the src formats
+
+                # TODO: This will loose GRAY16 formats in lists like { GRAY8, GRAY16_LE, BGRx }
+                if ("BGRx" in format_string and "GRAY" not in format_string):
+                    format_string = "GRAY8"
+                elif ("BGRx" in format_string):
+                    continue
+                elif (format_string is None or
+                      format_string == "None"):
+                    continue
+
+                width = fmt.get_value("width")
+                height = fmt.get_value("height")
 
                 if format_string not in format_dict:
                     format_dict[format_string] = QMenu(format_string, self)
 
-                width = fmt.get_value("width")
-                height = fmt.get_value("height")
                 f_str = "{} - {}x{}".format(format_string,
                                             width,
                                             height)
@@ -408,10 +412,17 @@ class TcamView(QWidget):
                     continue
                 if "range" in format_string:
                     continue
-                f_menu = format_dict[format_string].addMenu("{}x{}".format(width, height))
+
+                res_menu_string = "{}x{}".format(width, height)
+
+                # do not allow entries like [96,2592]x[2,1944]
+                if "]x[" in res_menu_string:
+                    continue
+
+                f_menu = format_dict[format_string].addMenu(res_menu_string)
 
             except TypeError as e:
-                log.warning("Could not interpret structure. Omitting.")
+                log.warning("Could not interpret structure. Omitting. {}".format(fmt.to_string()))
                 continue
 
             rates = get_framerates(fmt)
@@ -423,10 +434,12 @@ class TcamView(QWidget):
                 rate = str(rate)
                 action = QAction(rate, self)
                 action.setToolTip("Set format to '{}'".format(f_str + "@" + rate))
-                f = "video/x-raw,format={},width={},height={},framerate={}".format(format_string,
-                                                                                   width,
-                                                                                   height,
-                                                                                   rate)
+                f = "{},format={},width={},height={},framerate={}".format(format_name,
+                                                                          format_string,
+                                                                          width,
+                                                                          height,
+                                                                          rate)
+                # log.debug("Adding '{}'".format(f))
                 action.triggered.connect(functools.partial(self.play, f))
                 f_menu.addAction(action)
 
@@ -435,11 +448,8 @@ class TcamView(QWidget):
         # for key, value in format_dict.items():
         #     self.format_menu.addMenu(value)
 
-        for f in self.format_list:
-            try:
-                self.format_menu.addMenu(format_dict[f])
-            except:
-                continue
+        for key, value in format_dict.items():
+            self.format_menu.addMenu(value)
 
     def get_format_menu(self, parent=None):
         """Returns a QMenu which endpoints are connected
