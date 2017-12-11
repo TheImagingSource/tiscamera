@@ -70,19 +70,21 @@ class TcamDeviceIndex(QObject):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.create_device_list)
         self.timer.start(self.sleep_period_seconds * 1000)
+        self.tcam = Gst.ElementFactory.make("tcamsrc")
 
     def create_device_list(self):
 
-        tcam = Gst.ElementFactory.make("tcamsrc")
-        serials = tcam.get_device_serials()
+        log.info("Updating device list")
+        serials = self.tcam.get_device_serials()
         device_list = []
 
         for s in serials:
-            (status, name, ident, connection_type) = tcam.get_device_info(s)
+            (status, name, ident, connection_type) = self.tcam.get_device_info(s)
             d = TcamDevice(connection_type, s, name)
             device_list.append(d)
 
         # self.device_list will be None on first run
-        if self.device_list is None or sorted(self.device_list) != sorted(device_list):
-            self.update_device_list.emit(device_list)
-            self.device_list = device_list
+        if device_list is not None:  # or
+            if (self.device_list is None or sorted(self.device_list) != sorted(device_list)):
+                self.update_device_list.emit(device_list)
+                self.device_list = device_list
