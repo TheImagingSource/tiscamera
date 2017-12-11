@@ -44,9 +44,6 @@ add_subdirectory(algorithms)
 # can do this:
 # add_defintions($ENV{CFLAGS})
 
-find_package(TinyXML REQUIRED QUIET)
-include_directories(${TinyXML_INCLUDE_DIR})
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(cflags "-fpic -w -Wall -Wextra -pedantic -Wundef -Wshadow")
