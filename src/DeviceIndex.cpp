@@ -32,7 +32,7 @@ using namespace tcam;
 
 DeviceIndex::DeviceIndex ()
     : continue_thread(false),
-      wait_period(30),
+      wait_period(2),
       have_list(false),
       device_list(std::vector<DeviceInfo>()),
       callbacks(std::vector<callback_data>())
