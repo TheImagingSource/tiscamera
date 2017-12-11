@@ -205,6 +205,7 @@ class TCamCapture(QMainWindow):
         self.close()
         self.serial = serial
         self.view = TcamView(self.serial, self)
+        self.view.register_device_lost(self.lost_device)
         self.view.create_pipeline()
         self.view.image_saved.connect(self.saved_image)
         self.view.new_pixel_under_mouse.connect(self.new_pixel_under_mouse)
@@ -257,6 +258,16 @@ class TCamCapture(QMainWindow):
         self.data.work_thread.quit()
         self.data.work_thread.wait()
         print("Have a nice day.")
+
+    def lost_device(self):
+        """Callback for device lost"""
+        log.error("Lost device. Stopping...")
+        self.close()
+        error_dialog = QtWidgets.QMessageBox(self)
+        error_dialog.setIcon(QtWidgets.QMessageBox.Critical)
+        error_dialog.setWindowTitle("Device lost")
+        error_dialog.setText("Device has been lost. Please reconnect or re-open it.")
+        error_dialog.exec_()
 
 
 if __name__ == '__main__':

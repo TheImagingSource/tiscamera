@@ -308,6 +308,7 @@ class TcamView(QWidget):
         self.bus.add_signal_watch()
         self.bus.enable_sync_message_emission()
         self.bus.connect('message::state-changed', self.on_state_changed)
+        self.bus.connect('message::error', self.on_error)
 
         self.data.tcam = self.pipeline.get_by_name("bin")
 
@@ -323,6 +324,20 @@ class TcamView(QWidget):
 
         self.pipeline.set_state(Gst.State.NULL)
         log.info("is NULL")
+
+    def on_error(self, bus, msg):
+        err, dbg = msg.parse_error()
+
+        if msg.src.get_name() == "tcambin-source":
+            if err.message == "Device lost":
+                log.error("Received device lost message")
+                self.fire_device_lost()
+            else:
+                log.error("Error from source: {}".format(err.message))
+        else:
+            log.error("ERROR:", msg.src.get_name(), ":", err.message)
+            if dbg:
+                log.debug("Debug info:", dbg)
 
     # this function is called when the pipeline changes states.
     # we use it to keep track of the current state
@@ -436,3 +451,10 @@ class TcamView(QWidget):
             else:
                 self.create_format_menu(parent)
         return self.format_menu
+
+    def register_device_lost(self, callback):
+        self.device_lost_callbacks.append(callback)
+
+    def fire_device_lost(self):
+        for cb in self.device_lost_callbacks:
+            cb()
