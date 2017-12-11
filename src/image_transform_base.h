@@ -60,6 +60,21 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_RGGB12:     return 12;
         case FOURCC_GRBG12:     return 12;
 
+        case FOURCC_BGGR12_PACKED:     return 12;
+        case FOURCC_GBRG12_PACKED:     return 12;
+        case FOURCC_RGGB12_PACKED:     return 12;
+        case FOURCC_GRBG12_PACKED:     return 12;
+
+        case FOURCC_BGGR12_SPACKED:    return 12;
+        case FOURCC_GBRG12_SPACKED:    return 12;
+        case FOURCC_RGGB12_SPACKED:    return 12;
+        case FOURCC_GRBG12_SPACKED:    return 12;
+
+        case FOURCC_BGGR12_MIPI_PACKED:return 12;
+        case FOURCC_GBRG12_MIPI_PACKED:return 12;
+        case FOURCC_RGGB12_MIPI_PACKED:return 12;
+        case FOURCC_GRBG12_MIPI_PACKED:return 12;
+
         case FOURCC_BGGR16:     return 16;
         case FOURCC_GBRG16:     return 16;
         case FOURCC_GRBG16:     return 16;
