@@ -1274,7 +1274,7 @@ void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
     auto cp = desc.prop->get_struct();
 
     save_value_of_control(&ctrl, &cp, desc.conversion_factor);
-    tcam_log(TCAM_LOG_DEBUG, "Updated property %s to %d", desc.prop->get_name().c_str(), cp.value.i.value);
+    tcam_trace("Updated property %s to %d", desc.prop->get_name().c_str(), cp.value.i.value);
 
     desc.prop->set_struct(cp);
 }
