@@ -141,6 +141,12 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
 
+            if (!current_value)
+            {
+                tcam_error("The current value of %s is NULL. Ignoring", prop.name);
+                return nullptr;
+            }
+
             prop.value.i.value = var.at(current_value);
             prop.value.i.default_value = prop.value.i.value;
 
