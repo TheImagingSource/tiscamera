@@ -51,7 +51,10 @@ class TCamCapture(QMainWindow):
         super().__init__()
         app.aboutToQuit.connect(self.quit)
         self.app = app
-        logging.basicConfig(level=logging.DEBUG)
+
+        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%d-%m-%Y:%H:%M:%S',
+                            level=logging.CRITICAL)
         self.settings = Settings()
         self.settings.load()
 
