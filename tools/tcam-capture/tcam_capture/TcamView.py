@@ -437,11 +437,11 @@ class TcamView(QWidget):
                 rate = str(rate)
                 action = QAction(rate, self)
                 action.setToolTip("Set format to '{}'".format(f_str + "@" + rate))
-                if format_string == "image/jpeg";
-                f = "{},,width={},height={},framerate={}".format(format_name,
-                                                                 width,
-                                                                 height,
-                                                                 rate)
+                if format_string == "image/jpeg":
+                    f = "{},,width={},height={},framerate={}".format(format_name,
+                                                                     width,
+                                                                     height,
+                                                                     rate)
                 else:
                     f = "{},format={},width={},height={},framerate={}".format(format_name,
                                                                               format_string,
