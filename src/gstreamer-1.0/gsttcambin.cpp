@@ -865,12 +865,14 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             if (self->user_caps)
             {
-                if (gst_caps_is_subset(self->user_caps, src_caps) == FALSE)
+                GstCaps* tmp = gst_caps_intersect(self->user_caps, src_caps);
+                if (tmp == nullptr)
                 {
                     GST_ERROR("The user defined device caps are not supported by the device. User caps are: %s", gst_caps_to_string(self->user_caps));
                     return GST_STATE_CHANGE_FAILURE;
                 }
                 GST_INFO("Using user defined caps for tcamsrc. User caps are: %s", gst_caps_to_string(self->user_caps));
+                gst_caps_unref(tmp);
                 self->src_caps = find_input_caps(self->user_caps, self->target_caps,
                                                  self->needs_debayer, self->needs_videoconvert);
             }
