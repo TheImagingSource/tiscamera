@@ -74,7 +74,6 @@ class TcamDeviceIndex(QObject):
 
     def create_device_list(self):
 
-        log.info("Updating device list")
         serials = self.tcam.get_device_serials()
         device_list = []
 

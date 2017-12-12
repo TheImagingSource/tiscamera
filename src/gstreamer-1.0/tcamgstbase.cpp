@@ -17,7 +17,7 @@
 #include "tcamgstbase.h"
 #include "base_types.h"
 #include "logging.h"
-
+#include "public_utils.h"
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 #include <algorithm> //std::find
@@ -161,6 +161,63 @@ bool tcam_gst_is_fourcc_bayer (const unsigned int fourcc)
 }
 
 
+bool tcam_gst_is_bayer8_string (const char* format_string)
+{
+    if (format_string == nullptr)
+    {
+        return false;
+    }
+
+    if (strcmp(format_string, "gbrg")  == 0
+        || strcmp(format_string, "grbg")  == 0
+        || strcmp(format_string, "rggb")  == 0
+        || strcmp(format_string, "bggr")  == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool tcam_gst_is_bayer12_string (const char* format_string)
+{
+    if (format_string == nullptr)
+    {
+        return false;
+    }
+
+    if (strncmp(format_string, "gbrg12", strlen("gbrg12"))  == 0
+        || strncmp(format_string, "grbg12", strlen("grbg12"))  == 0
+        || strncmp(format_string, "rggb12", strlen("rggb12"))  == 0
+        || strncmp(format_string, "bggr12", strlen("bggr12"))  == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool tcam_gst_is_bayer16_string (const char* format_string)
+{
+    if (format_string == nullptr)
+    {
+        return false;
+    }
+
+    if (strcmp(format_string, "gbrg16")  == 0
+        || strcmp(format_string, "grbg16")  == 0
+        || strcmp(format_string, "rggb16")  == 0
+        || strcmp(format_string, "bggr16")  == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc)
 {
     if (fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'x')
@@ -258,6 +315,13 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     for (int i = 0; i < gst_caps_get_size(incoming); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(incoming, i);
+
+        const char* format = gst_structure_get_string(struc, "format");
+
+        if (tcam_gst_is_bayer16_string(format) || tcam_gst_is_bayer12_string(format))
+        {
+            continue;
+        }
 
         int width = -1;
         int height = -1;
