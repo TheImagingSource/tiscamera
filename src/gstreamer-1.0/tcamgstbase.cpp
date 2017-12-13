@@ -90,6 +90,11 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
 
     auto correct_format = [] (const char* str)
     {
+        if (str == nullptr)
+        {
+            return false;
+        }
+
         const static std::vector<std::string> formats = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
 
         if (std::find(formats.begin(), formats.end(), str) == formats.end())
