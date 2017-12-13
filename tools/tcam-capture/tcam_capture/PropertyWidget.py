@@ -54,9 +54,9 @@ class PropertyWidget(QWidget):
     def setup_ui(self):
         self.layout = QHBoxLayout()
 
-        if self.prop.name != self.prop.group:
-            self.spacer = QSpacerItem(30, 10)
-            self.layout.addItem(self.spacer)
+        # if self.prop.name != self.prop.group:
+        #     self.spacer = QSpacerItem(30, 10)
+        #     self.layout.addItem(self.spacer)
 
         self.setLayout(self.layout)
         if self.prop.valuetype != "boolean":
