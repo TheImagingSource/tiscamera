@@ -264,7 +264,6 @@ class TCamCapture(QMainWindow):
 
         self.data.work_thread.quit()
         self.data.work_thread.wait()
-        print("Have a nice day.")
 
     def lost_device(self):
         """Callback for device lost"""
