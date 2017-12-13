@@ -134,6 +134,7 @@ class TCamCapture(QMainWindow):
         close.triggered.connect(self.close)
         self.menuBar().addAction(close)
         self.format_menu = None
+        self.format_menu_action = None
         self.save_image = QAction("Save Image", self)
         self.save_image.triggered.connect(self.save_image_action)
         # self.menuBar().addAction(self.save_image)
@@ -214,7 +215,7 @@ class TCamCapture(QMainWindow):
                                 QtWidgets.QSizePolicy.Expanding)
         self.setCentralWidget(self.view)
         self.format_menu = self.view.get_format_menu(self)
-        self.menuBar().addMenu(self.format_menu)
+        self.format_menu_action = self.menuBar().addMenu(self.format_menu)
         self.data.tcam = self.view.get_tcam()
         self.view.pause()
         self.props = QDockWidget("Properties", self)
@@ -246,6 +247,9 @@ class TCamCapture(QMainWindow):
             self.view.setParent(None)
             self.setCentralWidget(None)
             self.view = None
+
+            self.menuBar().removeAction(self.format_menu_action)
+            self.format_menu = None
             log.info("Closed device")
 
     def set_device_menus_enabled(self, enabled):
