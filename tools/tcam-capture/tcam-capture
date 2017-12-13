@@ -117,10 +117,10 @@ class TCamCapture(QMainWindow):
         self.statusBar().addPermanentWidget(self.pixel_label)
         self.file_menu = self.menuBar().addMenu("File")
 
-        preferences_action = QAction('&Preferences', self)
-        preferences_action.triggered.connect(self.open_preferences)
-        self.open_options.connect(self.open_preferences)
-        self.file_menu.addAction(preferences_action)
+        # preferences_action = QAction('&Preferences', self)
+        # preferences_action.triggered.connect(self.open_preferences)
+        # self.open_options.connect(self.open_preferences)
+        # self.file_menu.addAction(preferences_action)
 
         exit_action = QAction('&Exit', self)
         exit_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Q))
