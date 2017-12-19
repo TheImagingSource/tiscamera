@@ -1524,7 +1524,7 @@ bool V4l2Device::get_frame ()
     desc.length =  buf.bytesused;
     buffers.at(buf.index).buffer->set_image_buffer(desc);
 
-    tcam_log(TCAM_LOG_DEBUG, "pushing new buffer");
+    tcam_trace("pushing new buffer");
 
     if (auto ptr = listener.lock())
     {

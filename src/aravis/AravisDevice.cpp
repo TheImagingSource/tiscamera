@@ -113,7 +113,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
         return ret;
     }
 
-    tcam_log(TCAM_LOG_DEBUG, "Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
+    tcam_trace("Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
 
     ret = create_steps_for_range(min, max);
 
@@ -653,7 +653,7 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            tcam_log(TCAM_LOG_INFO, "Received new buffer.");
+            tcam_trace("Received new buffer.");
 
             self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
             self->statistics.frame_count++;

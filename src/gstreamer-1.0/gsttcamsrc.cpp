@@ -1314,8 +1314,6 @@ wait_again:
         goto wait_again;
     }
 
-    GST_DEBUG("%d queue size", self->device->queue.size());
-
     std::shared_ptr<tcam::MemoryBuffer> ptr = self->device->queue.front();
     ptr->set_user_data(self);
 
@@ -1356,7 +1354,7 @@ wait_again:
         self->last_timestamp = timestamp_ns;
     }
     */
-    GST_DEBUG_OBJECT (self, "Pushing buffer...");
+    GST_LOG("Pushing buffer...");
 
     if (self->n_buffers != 0)
     {
