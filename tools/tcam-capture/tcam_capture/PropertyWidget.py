@@ -59,9 +59,9 @@ class PropertyWidget(QWidget):
         #     self.layout.addItem(self.spacer)
 
         self.setLayout(self.layout)
-        if self.prop.valuetype != "boolean":
-            self.name_label = QtWidgets.QLabel(self.prop.name)
-            self.layout.addWidget(self.name_label)
+        # if self.prop.valuetype != "boolean":
+        self.name_label = QtWidgets.QLabel(self.prop.name)
+        self.layout.addWidget(self.name_label)
         if self.prop.valuetype == "integer":
             self.value_label = QtWidgets.QLabel(str(self.prop.value))
             self.layout.addWidget(self.value_label)
@@ -86,7 +86,7 @@ class PropertyWidget(QWidget):
             self.checkbox.clicked.connect(self.set_property)
             self.layout.addWidget(self.checkbox)
         elif self.prop.valuetype == "boolean":
-            self.toggle = QPushButton(self.prop.name)
+            self.toggle = QCheckBox(self)  # QPushButton(self.prop.name)
             self.toggle.setCheckable(True)
             if self.prop.value:
                 self.toggle.toggle()

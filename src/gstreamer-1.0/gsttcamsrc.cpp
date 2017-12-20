@@ -1330,8 +1330,8 @@ wait_again:
     trans->self = self;
     trans->ptr = ptr;
 
-    *buffer = gst_buffer_new_wrapped_full(0, ptr->get_data(), ptr->get_image_size(),
-                                          0, ptr->get_buffer_size(), trans, buffer_destroy_callback);
+    *buffer = gst_buffer_new_wrapped_full(0, ptr->get_data(), ptr->get_buffer_size(),
+                                          0, ptr->get_image_size(), trans, buffer_destroy_callback);
 
     self->device->queue.pop(); // remove buffer from queue
 
