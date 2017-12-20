@@ -537,7 +537,7 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         }
         default:
         {
-            tcam_warning("Property does not belong to this device");
+            tcam_warning("Property %s does not belong to this device", desc.property->get_name().c_str());
             break;
         }
     }
