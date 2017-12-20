@@ -52,24 +52,6 @@ tcam::BackendLoader::~BackendLoader ()
 }
 
 
-template<class T>
-std::function<T> load(void* handle, std::string const& functionName)
-{
-    dlerror();
-    void* const result = dlsym(handle, functionName.c_str());
-    if (!result)
-    {
-        char* const error = dlerror();
-        if (error)
-        {
-            throw std::logic_error("can't find symbol named \"" + functionName + "\": " + error);
-        }
-    }
-
-    return reinterpret_cast<T*>(result);
-}
-
-
 void tcam::BackendLoader::load_backends ()
 {
 
@@ -87,17 +69,16 @@ void tcam::BackendLoader::load_backends ()
         {
             continue;
         }
-        void* handle = dlopen(b.name.c_str(), RTLD_LAZY);
 
-        if (handle == nullptr)
+        b.handle = LibraryHandle::open(b.name);
+
+        if (b.handle == nullptr)
         {
             tcam_log(TCAM_LOG_INFO, "Could not load backend %s", b.name.c_str());
-            tcam_log(TCAM_LOG_INFO, "    Reason: %s", dlerror());
             continue;
         }
-        b.handle = handle;
 
-        auto i = load<struct libinfo_v1*()>(b.handle, "get_library_functions_v1");
+        auto i = b.handle->load<struct libinfo_v1*()>("get_library_functions_v1");
 
         auto info = (i)();
 
@@ -123,7 +104,6 @@ void tcam::BackendLoader::unload_backends ()
     {
         if (b.handle != nullptr)
         {
-            dlclose(b.handle);
             b.handle = nullptr;
             b.open_device = nullptr;
             b.get_device_list = nullptr;

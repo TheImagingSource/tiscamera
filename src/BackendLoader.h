@@ -27,6 +27,8 @@
 
 #include "DeviceInterface.h"
 
+#include "LibraryHandle.h"
+
 VISIBILITY_INTERNAL
 
 namespace tcam
@@ -45,7 +47,7 @@ private:
     {
         enum TCAM_DEVICE_TYPE type;
         std::string name;
-        void* handle;
+        std::shared_ptr<LibraryHandle> handle;
 
         // std::function<std::vector<DeviceInfo>()> get_device_list;
         // std::function<std::shared_ptr<DeviceInterface>(const DeviceInfo&)> open_device;
