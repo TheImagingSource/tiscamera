@@ -535,6 +535,22 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
             desc.property->set_value(y_pos);
             return true;
         }
+        case TCAM_PROPERTY_OFFSET_X:
+        {
+            desc.property->set_value((int64_t)active_resolution_conf_.x_addr_start);
+            return true;
+        }
+        case TCAM_PROPERTY_OFFSET_Y:
+        {
+            desc.property->set_value((int64_t)active_resolution_conf_.y_addr_start);
+            return true;
+        }
+        case TCAM_PROPERTY_OFFSET_AUTO:
+        {
+            // simulated property. do nothing property already has the current value
+
+            return true;
+        }
         default:
         {
             tcam_warning("Property %s does not belong to this device", desc.property->get_name().c_str());
