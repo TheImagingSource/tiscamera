@@ -108,6 +108,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.mouse_position_x = -1
         self.mouse_position_y = -1
 
+        self.zoom_factor = 1.0
+
     def on_new_pixmap(self, pixmap):
         self.pix.setPixmap(pixmap)
         self.send_mouse_pixel()
@@ -140,6 +142,15 @@ class TcamScreen(QtWidgets.QGraphicsView):
             zoomFactor = zoomInFactor
         else:
             zoomFactor = zoomOutFactor
+
+        # restrict zooming out
+        if self.zoom_factor * zoomFactor <= 0.64:
+            return
+
+        self.zoom_factor *= zoomFactor
+
+        # we scale the view itself to get infinite zoom
+        # so that we can inspect a single pixel
         self.scale(zoomFactor, zoomFactor)
 
         # Get the new position
