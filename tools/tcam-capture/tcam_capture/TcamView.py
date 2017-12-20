@@ -438,6 +438,8 @@ class TcamView(QWidget):
                 continue
             if type(rates) is Gst.FractionRange:
                 continue
+            if type(rates) is Gst.Fraction:
+                continue
             for rate in rates:
                 rate = str(rate)
                 action = QAction(rate, self)
