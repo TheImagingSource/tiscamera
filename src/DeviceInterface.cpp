@@ -32,10 +32,14 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& de
     {
         return BackendLoader::getInstance().open_device(device);
     }
+    catch (const std::runtime_error& err)
+    {
+        tcam_error("Encountered Error while creating device interface. %s", err.what());
+        return nullptr;
+    }
     catch (...)
     {
-        tcam_log(TCAM_LOG_ERROR, "Encountered Error while creating device interface.");
-        return nullptr;
+        tcam_error("Caught unhandled exception while opening device.");
     }
     return nullptr;
 }
