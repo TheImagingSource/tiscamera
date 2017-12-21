@@ -202,16 +202,16 @@ private:
 
     std::unique_ptr<LibusbDevice> usb_device_;
 
-    static constexpr tcam_image_size max_sensor_dim_ = { 7716, 5360 };
-    static constexpr tcam_image_size min_sensor_dim_ = { 264, 256 };
+    const tcam_image_size max_sensor_dim_ = { 7716, 5360 };
+    const tcam_image_size min_sensor_dim_ = { 264, 256 };
 
     tcam_image_size max_sensor_dim_by12 = { 5424, 5360 };
     tcam_image_size step = { 12, 4 };
 
-    static constexpr int    m_uPixelMaxX = 7728 - 12 + 3;			// max horizontal: 7728;	-12: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
-    static constexpr int    m_uPixelMaxY = 5368 - 4 + 3;			// max vertival: 5368;		 -4: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
-    static constexpr int    m_uPixelMinX = 0x100;
-    static constexpr int    m_uPixelMinY = 0x98;
+    static const int    m_uPixelMaxX = 7728 - 12 + 3;			// max horizontal: 7728;	-12: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
+    static const int    m_uPixelMaxY = 5368 - 4 + 3;			// max vertival: 5368;		 -4: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
+    static const int    m_uPixelMinX = 0x100;
+    static const int    m_uPixelMinY = 0x98;
 
     struct sResolutionConf active_resolution_conf_;
 
@@ -375,10 +375,10 @@ private:
 
 
     int no_buffer_counter = 0;
-    static constexpr int no_buffer_counter_max = 10;
+    static const int no_buffer_counter_max = 10;
     unsigned int usbbulk_chunk_size_ = 0;
     unsigned int usbbulk_image_size_ = 0;
-    static constexpr int actual_image_prefix_size_ = 4;
+    static const int actual_image_prefix_size_ = 4;
 
     int get_packet_header_size () const { return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
 
