@@ -793,7 +793,7 @@ void V4l2Device::sort_properties ()
         return;
     }
 
-    TCAM_PROPERTY_ID id;
+    int id;
     auto search_func = [&id] (const property_description& desc)
         {
             if (desc.id == id)
@@ -825,6 +825,68 @@ void V4l2Device::sort_properties ()
                 p = property_handler->properties.erase(p);
             }
             p++;
+        }
+    }
+
+    // find properties that may exist multiple times
+    // due to different interfaces
+    std::vector<property_description> exp_desc;
+    std::vector<property_description> trigger_desc;
+
+    for (auto& prop_desc : property_handler->properties)
+    {
+        if (prop_desc.prop->get_ID() == TCAM_PROPERTY_EXPOSURE_AUTO)
+        {
+            exp_desc.push_back(prop_desc);
+        }
+        else if (prop_desc.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
+        {
+            trigger_desc.push_back(prop_desc);
+        }
+    }
+
+    if (exp_desc.size() > 1)
+    {
+        tcam_info("Detected multiple exposure interfaces. Simplifying");
+        // prefer exposure-auto over auto-shutter
+        for (auto& p : exp_desc)
+        {
+            // if (p.id == 0x009a0901) // exposure-auto
+            if (p.id == 0x0199e202) // auto-shutter
+            {
+                continue;
+            }
+
+            property_handler->special_properties.push_back(p);
+
+            id = p.id;
+            auto iter = std::find_if(property_handler->properties.begin(),
+                                     property_handler->properties.end(),
+                                     search_func);
+            property_handler->properties.erase(iter);
+        }
+    }
+
+    // ensure only one trigger
+    // prefer the one without the uvc extensions
+
+    if (trigger_desc.size() > 1)
+    {
+        tcam_info("Detected multiple trigger interfaces. Simplifying");
+        for (auto& p : trigger_desc)
+        {
+            if (p.id == V4L2_CID_PRIVACY) // prefer 'privacy'
+            {
+                continue;
+            }
+
+            property_handler->special_properties.push_back(p);
+
+            id = p.id;
+            auto iter = std::find_if(property_handler->properties.begin(),
+                                     property_handler->properties.end(),
+                                     search_func);
+            property_handler->properties.erase(iter);
         }
     }
 }
