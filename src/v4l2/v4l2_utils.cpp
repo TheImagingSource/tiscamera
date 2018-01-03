@@ -116,6 +116,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             break;
         }
         case V4L2_CTRL_TYPE_INTEGER_MENU:
+        case V4L2_CTRL_TYPE_MENU:
         {
             type = Property::ENUM;
             break;
