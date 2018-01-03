@@ -43,7 +43,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_EXPOSURE_AUTO,
-        .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS, 0x009a0901, 0x0199e202},
+        .v4l2_id = { V4L2_CID_AUTO_EXPOSURE_BIAS,
+                     0x009a0901, // exposure-auto
+                     0x0199e202 // auto-shutter
+        },
     },
     {
         .id = TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
