@@ -287,7 +287,7 @@ bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_pr
         }
     }
 
-    std::cout << "No property with name ' " << name <<"'"<< std::endl;
+    std::cout << "No property with name '" << name <<"'"<< std::endl;
 
     return false;
 }
