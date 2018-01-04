@@ -154,7 +154,7 @@ uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint3
         tcam_log(TCAM_LOG_ERROR, "Unknown fourcc %d", fourcc);
     }
 
-    uint64_t size = width * height * (img::get_bits_per_pixel(fourcc) / 8);
+    uint64_t size = width * height * ((double)img::get_bits_per_pixel(fourcc) / 8);
 
     return size;
 }
