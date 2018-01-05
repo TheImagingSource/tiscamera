@@ -71,8 +71,10 @@ sudo apt-get install gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-plugins-base
 
 ### aravis installation
 
-We ship an aravis git submodule. A systemwide installation can be done but does not affect tiscamera.
+We support GigE cameras through an aravis git submodule. A systemwide installation can be done but does not affect tiscamera.
 If you want to build against an external aravis version set TCAM\_INTERNAL\_ARAVIS=OFF
+
+If you only use USB cameras you can build without aravis.
 
 ### Building tiscamera
 
