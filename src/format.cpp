@@ -32,6 +32,7 @@ fourcc_names fourcc_name_array [] =
 {
     {FOURCC_RGB8, "RGB8"},
     {FOURCC_RGB24, "RGB24"},
+    {FOURCC_BGR24, "BGR24"},
     {FOURCC_RGB32, "RGB32"},
     {FOURCC_RGB64, "RGB64"},
 
