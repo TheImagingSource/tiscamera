@@ -63,6 +63,14 @@ namespace firmware_update
 				{
 					result.emplace( port_name, std::make_shared<DevicPortFlash>( port_name, port_config.node() ) );
 				}
+                else if (port_type == "EEPROM")
+                {
+                    result.emplace(port_name, nullptr);
+                }
+                else if (port_type == "I2CMachXO3")
+                {
+                    result.emplace(port_name, nullptr);
+                }
 				else
 				{
 					throw std::runtime_error( "Unexpected port_type" );
