@@ -146,10 +146,10 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoad
     {
         return ret;
     }
-    tcam_log(TCAM_LOG_DEBUG, "retrieving list for %s", b.name.c_str());
+    tcam_trace("retrieving list for %s", b.name.c_str());
     size_t t = b.get_device_list_size();
 
-    tcam_log(TCAM_LOG_DEBUG, "Amount of devices: %d", t);
+    tcam_trace("Amount of devices: %d", t);
 
     struct tcam_device_info temp[t];
 

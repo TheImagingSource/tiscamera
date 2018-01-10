@@ -144,7 +144,7 @@ void DeviceIndex::update_device_list ()
     if (!dev_list.empty())
         tmp_dev_list.insert(tmp_dev_list.end(), dev_list.begin(), dev_list.end());
 
-    tcam_log(TCAM_LOG_DEBUG, "Number of found devices: %d", dev_list.size());
+    tcam_trace("Number of found devices: %d", dev_list.size());
 
     // check for lost devices
     for (const auto& d : device_list)
