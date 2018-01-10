@@ -31,6 +31,9 @@ namespace tcam
 
 uint32_t convert_v4l2_flags (uint32_t v4l2_flags);
 
+
+TCAM_PROPERTY_ID find_v4l2_mapping (int v4l2_id);
+
 /**
  * @brief Create Property and return shared_ptr to base class
  *

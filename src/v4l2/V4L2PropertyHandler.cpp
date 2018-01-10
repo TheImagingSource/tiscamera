@@ -53,6 +53,20 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
 
     if (desc == properties.end())
     {
+        desc = std::find_if(special_properties.begin(), special_properties.end(), f);
+
+        if (desc != special_properties.end())
+        {
+            desc->prop->set_struct(new_property.get_struct());
+
+            if (device->changeV4L2Control(*desc))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
         tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
         return false;
     }
@@ -71,6 +85,35 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
         {
             tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.get_name().c_str());
             return false;
+        }
+    }
+    else if (desc->mapped)
+    {
+        for (auto& m : mappings)
+        {
+            auto p = m.std_prop.lock();
+            if (p == desc->prop)
+            {
+                if (p->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
+                {
+                    auto value = new_property.get_struct().value.b.value;
+                    p->set_value(value, false);
+                    auto internal_p = m.internal_prop.lock();
+
+                    internal_p->set_value(m.bool_map.at(value));
+                }
+                else
+                {
+                    tcam_error("mapping type not implemented");
+                }
+                break;
+            }
+        }
+        desc->prop->set_struct(new_property.get_struct());
+
+        if (device->changeV4L2Control(*desc))
+        {
+            return true;
         }
     }
     else

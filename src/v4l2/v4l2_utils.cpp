@@ -69,7 +69,7 @@ uint32_t tcam::convert_v4l2_flags (uint32_t v4l2_flags)
 }
 
 
-static TCAM_PROPERTY_ID find_mapping (int v4l2_id)
+TCAM_PROPERTY_ID tcam::find_v4l2_mapping (int v4l2_id)
 {
     auto f = [v4l2_id] (int p)
         {
@@ -133,7 +133,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         }
     }
 
-    auto prop_id = find_mapping (ctrl->id);
+    auto prop_id = find_v4l2_mapping (ctrl->id);
 
     auto ctrl_m = get_control_reference(prop_id);
 

@@ -40,6 +40,7 @@ class V4l2Device : public DeviceInterface
     {
         int id; // v4l2 identification
         double conversion_factor;
+        bool mapped;
         std::shared_ptr<Property> prop;
     };
     static const int EMULATED_PROPERTY = -1;
@@ -63,6 +64,15 @@ class V4l2Device : public DeviceInterface
 
         std::vector<property_description> properties;
         std::vector<property_description> special_properties;
+
+        struct mapping
+        {
+            std::weak_ptr<Property> std_prop;
+            std::weak_ptr<Property> internal_prop;
+            std::map<bool, std::string> bool_map;
+        };
+
+        std::vector<mapping> mappings;
 
         V4l2Device* device;
     };
@@ -184,6 +194,10 @@ private:
     void create_conversion_factors ();
 
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
+    void create_special_property (int fd,
+                                  struct v4l2_queryctrl* queryctrl,
+                                  struct v4l2_ext_control* ctrl,
+                                  std::shared_ptr<PropertyImpl> impl);
 
     int index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
 

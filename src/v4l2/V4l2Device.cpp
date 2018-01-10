@@ -20,6 +20,7 @@
 #include "utils.h"
 #include "v4l2_utils.h"
 #include "PropertyGeneration.h"
+#include "standard_properties.h"
 #include <errno.h>
 #include "v4l2_uvc_identifier.h"
 #include "dfk73.h"
@@ -779,7 +780,7 @@ void V4l2Device::create_emulated_properties ()
 
     for (auto& p : tmp_props)
     {
-        property_description pd = { EMULATED_PROPERTY, 0, p};
+        property_description pd = { EMULATED_PROPERTY, 0, false, p};
         tcam_log(TCAM_LOG_DEBUG, "Adding '%s' to property list", p->get_name().c_str());
         property_handler->properties.push_back(pd);
     }
@@ -990,6 +991,125 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 }
 
 
+
+// TODO: replace with a more general purpose solution
+void V4l2Device::create_special_property (int fd,
+                                          struct v4l2_queryctrl* queryctrl,
+                                          struct v4l2_ext_control* ctrl,
+                                          std::shared_ptr<PropertyImpl> impl
+    )
+{
+
+    if (ctrl->id == 0x009a0901) // exposure auto map
+    {
+        auto prop_id = find_v4l2_mapping(ctrl->id);
+        auto ctrl_m = get_control_reference(prop_id);
+        uint32_t flags = convert_v4l2_flags(queryctrl->flags);
+
+        TCAM_PROPERTY_TYPE type_to_use;
+        tcam_device_property cp = {};
+
+
+        //create internal property
+        // cp.name can be empty as it is internal
+        cp.id = generate_unique_property_id();
+        cp.type = TCAM_PROPERTY_TYPE_ENUMERATION;
+        cp.value.i.min = queryctrl->minimum;
+        cp.value.i.max = queryctrl->maximum;
+        cp.value.i.step = 0;
+        cp.value.i.default_value = queryctrl->default_value;
+        cp.value.i.value = ctrl->value;
+        cp.flags = flags;
+
+        struct v4l2_querymenu qmenu = {};
+
+        qmenu.id = queryctrl->id;
+
+        std::map<std::string, int> m;
+
+        for (int i = 0; i <= queryctrl->maximum; i++)
+        {
+            qmenu.index = i;
+            if (tcam_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
+                continue;
+
+            std::string map_string((char*) qmenu.name);
+            m.emplace(map_string, i);
+        }
+
+        auto internal_prop = std::make_shared<Property>(PropertyEnumeration(impl, cp, m, Property::ENUM));
+        //handler->special_properties.push_back
+
+        property_handler->special_properties.push_back({(int)ctrl->id, 0.0, false, internal_prop});
+
+        int active_value = cp.value.i.value;
+        int default_value = cp.value.i.default_value;
+        cp = {};
+
+        /*
+          1 => manual mode
+          3 => aperture priority mode
+          default is 3
+
+          external bool is:
+          true => 3
+          false => 1
+
+        */
+        std::map<bool, std::string> mapping;
+        mapping.emplace(true, "Aperture Priority Mode");
+        mapping.emplace(false, "Manual Mode");
+
+        type_to_use = ctrl_m.type_to_use;
+        cp = create_empty_property(ctrl_m.id);
+
+        // create external property
+        if (default_value == 1)
+        {
+            cp.value.b.default_value = false;
+        }
+        else if (default_value == 3)
+        {
+            cp.value.b.default_value = true;
+        }
+        else
+        {
+            tcam_log(TCAM_LOG_ERROR,
+                     "Boolean '%s' has impossible default value: %d Setting to false",
+                     cp.name,
+                     queryctrl->default_value);
+            cp.value.b.default_value = false;
+        }
+
+        if (active_value == 1)
+        {
+            cp.value.b.value = false;
+        }
+        else if (active_value == 3)
+        {
+            cp.value.b.value = true;
+        }
+        else
+        {
+            tcam_log(TCAM_LOG_ERROR,
+                     "Boolean '%s' has impossible value: %d Setting to false",
+                     cp.name,
+                     ctrl->value);
+            cp.value.b.value = false;
+        }
+        cp.flags = flags;
+
+        auto external_prop = std::make_shared<Property>(PropertyBoolean(impl, cp, Property::BOOLEAN));
+
+        property_handler->properties.push_back({(int)ctrl->id, 0.0, true, external_prop});
+
+        property_handler->mappings.push_back({external_prop, internal_prop, mapping});
+
+    }
+
+}
+
+
 int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl)
 {
 
@@ -1046,12 +1166,25 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
         ext_ctrl.value = ctrl.value;
     }
 
-    auto p = create_property(fd, qctrl, &ext_ctrl, property_handler);
+    std::shared_ptr<Property> p;
 
-    if (p == nullptr)
+    std::vector<int> special_properties = { 0x009a0901 /* exposure auto */ };
+
+    if (std::find(special_properties.begin(),
+                  special_properties.end(), ext_ctrl.id) != special_properties.end())
     {
-        tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", qctrl->name);
-        return -1;
+        create_special_property(fd, qctrl, &ext_ctrl, impl);
+        return 0;
+    }
+    else
+    {
+        p = create_property(fd, qctrl, &ext_ctrl, property_handler);
+
+        if (p == nullptr)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", qctrl->name);
+            return -1;
+        }
     }
 
     struct property_description desc;
