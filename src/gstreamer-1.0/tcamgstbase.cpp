@@ -243,7 +243,9 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc)
 
 bool tcam_gst_fixate_caps (GstCaps* caps)
 {
-    if (caps == nullptr || gst_caps_is_empty(caps))
+    if (caps == nullptr
+        || gst_caps_is_empty(caps)
+        || gst_caps_is_any(caps))
     {
         return FALSE;
     }
