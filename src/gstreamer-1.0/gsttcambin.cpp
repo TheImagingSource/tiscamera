@@ -589,8 +589,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     if (!gst_caps_is_fixed(self->src_caps))
     {
+        self->src_caps = gst_caps_intersect(self->src_caps, self->target_caps);
         self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
-        GST_INFO("Caps were not fixed. Reduced to: %", GST_PTR_FORMAT, self->src_caps);
+        GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
     }
 
     g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
