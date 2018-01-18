@@ -16,6 +16,7 @@
 
 #include "tcamgstbase.h"
 #include "base_types.h"
+#include "logging.h"
 
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
@@ -52,6 +53,34 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
 }
 
 
+std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
+{
+    std::vector<std::string> ret;
+    if (!GST_VALUE_HOLDS_LIST(gst_list))
+    {
+        tcam_error("Given GValue is not a list.");
+        return ret;
+    }
+
+    for (unsigned int x = 0; x < gst_value_list_get_size(gst_list); ++x)
+    {
+        const GValue* val = gst_value_list_get_value(gst_list, x);
+
+        if (G_VALUE_TYPE(val) == G_TYPE_STRING)
+        {
+
+            ret.push_back(g_value_get_string(val));
+        }
+        else
+        {
+            tcam_error("NOT IMPLEMENTED. TYPE CAN NOT BE INTERPRETED");
+        }
+    }
+
+    ret;
+}
+
+
 bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
 {
     auto correct_format = [] (const char* str)
@@ -73,9 +102,28 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
         {
             if (gst_structure_has_field(struc, "format"))
             {
-                if (!correct_format(gst_structure_get_string(struc, "format")))
+                if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
                 {
-                    return false;
+                    if (!correct_format(gst_structure_get_string(struc, "format")))
+                    {
+                        return false;
+                    }
+                }
+                else if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
+                {
+                    auto vec = gst_list_to_vector(gst_structure_get_value(struc, "format"));
+
+                    for (const auto& fmt : vec)
+                    {
+                        if (!correct_format(fmt.c_str()))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    tcam_error("Cannot handle format type in GstStructure.");
                 }
             }
             else
