@@ -40,7 +40,28 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* src_caps);
 bool tcam_gst_is_fourcc_bayer (const unsigned int fourcc);
 
 
+bool tcam_gst_is_bayer8_string (const char* fourcc);
+
+
+bool tcam_gst_is_bayer12_string (const char* format_string);
+
+
+bool tcam_gst_is_bayer12_packed_string (const char* format_string);
+
+
+bool tcam_gst_is_bayer16_string (const char* format_string);
+
+
 bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc);
+
+
+bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps);
+
+
+bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps);
+
+
+bool tcam_gst_contains_bayer_16_bit (const GstCaps* caps);
 
 
 bool tcam_gst_fixate_caps (GstCaps* caps);
@@ -87,7 +108,12 @@ GstCaps* get_caps_from_element (const char* elementname, const char* padname);
 GstCaps* find_input_caps (GstCaps* available_caps,
                           GstCaps* wanted_caps,
                           bool& requires_bayer,
-                          bool& requires_vidoeconvert);
+                          bool& requires_vidoeconvert,
+                          bool& requires_jpegconvert,
+                          bool& requires_dutils,
+                          bool& requires_biteater,
+                          bool use_dutils
+);
 
 
 bool fill_structure_fixed_resolution (GstStructure* structure,

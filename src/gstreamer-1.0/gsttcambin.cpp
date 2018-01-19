@@ -115,6 +115,16 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
         return ret;
     }
 
+    if (self->dutils != NULL)
+    {
+        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->dutils), name);
+
+        if (ret != nullptr)
+        {
+            return ret;
+        }
+    }
+
     if (self->whitebalance != NULL)
     {
         ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->whitebalance), name);
@@ -179,6 +189,16 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
     for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
     {
         ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
+    }
+
+    if (self->dutils != nullptr)
+    {
+        GSList* dutils_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->dutils));
+
+        for (unsigned int i = 0; i < g_slist_length(dutils_prop_names); i++)
+        {
+            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(dutils_prop_names, i)->data));
+        }
     }
 
     if (self->whitebalance != nullptr)
@@ -246,6 +266,20 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
         return TRUE;
     }
 
+    if (self->dutils != nullptr)
+    {
+        if (tcam_prop_get_tcam_property(TCAM_PROP(self->dutils),
+                                        name, value,
+                                        min, max,
+                                        def, step,
+                                        type,
+                                        flags,
+                                        category, group))
+        {
+            return TRUE;
+        }
+    }
+
     if (self->whitebalance != nullptr)
     {
         if (tcam_prop_get_tcam_property(TCAM_PROP(self->whitebalance),
@@ -308,8 +342,23 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
     {
         gst_tcambin_create_source(GST_TCAMBIN(self));
     }
-    return tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
+    auto l = tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
 
+    if (l != nullptr)
+    {
+        return l;
+    }
+
+    if (GST_TCAMBIN(self)->dutils != nullptr)
+    {
+        l = tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->dutils), name);
+
+        if (l != nullptr)
+        {
+            return l;
+        }
+    }
+    return nullptr;
 }
 
 static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
@@ -327,6 +376,14 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
     if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
     {
         return TRUE;
+    }
+
+    if (self->dutils != nullptr)
+    {
+        if (tcam_prop_set_tcam_property(TCAM_PROP(self->dutils), name, value))
+        {
+            return TRUE;
+        }
     }
 
     if (self->whitebalance != nullptr)
@@ -396,7 +453,8 @@ enum
 {
     PROP_0,
     PROP_SERIAL,
-    PROP_DEVICE_CAPS
+    PROP_DEVICE_CAPS,
+    PROP_USE_DUTILS
 };
 
 static GstStaticCaps raw_caps = GST_STATIC_CAPS("ANY");
@@ -504,6 +562,15 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
         gst_element_unlink_pads(self->src, "src", self->pipeline_caps, "sink");
         gst_bin_remove(GST_BIN(self), self->pipeline_caps);
         self->pipeline_caps = nullptr;
+    }
+
+    if (self->dutils)
+    {
+        remove_element(self->dutils);
+    }
+    if (self->biteater)
+    {
+        remove_element(self->dutils);
     }
     if (self->exposure)
     {
@@ -614,6 +681,28 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     GstElement* previous_element = self->pipeline_caps;
 
+    if (self->has_dutils && self->needs_dutils)
+    {
+        if (!create_and_add_element(&self->dutils,
+                                    "tcamdutils", "tcambin-dutils",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
+        {
+            return FALSE;
+        }
+        else if (self->needs_biteater)
+        {
+            if (!create_and_add_element(&self->biteater,
+                                        "tcambiteater", "tcambin-biteater",
+                                        &previous_element,
+                                        GST_BIN(self), pipeline_description))
+            {
+                return FALSE;
+            }
+        }
+        goto finished_element_creation;
+    }
+
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
 
@@ -673,12 +762,12 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
-    if (self->needs_videoconvert)
+    if (self->needs_jpegdec)
     {
         // this is needed to allow for conversions such as
         // GRAY8 to BGRx that can exist when device-caps are set
-        if (!create_and_add_element(&self->debayer,
-                                    "videoconvert", "tcambin-convert",
+        if (!create_and_add_element(&self->jpegdec,
+                                    "jpegdec", "tcambin-jpegdec",
                                     &previous_element,
                                     GST_BIN(self), pipeline_description))
         {
@@ -686,6 +775,20 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
+finished_element_creation:
+
+    if (self->needs_videoconvert)
+    {
+        // this is needed to allow for conversions such as
+        // GRAY8 to BGRx that can exist when device-caps are set
+        if (!create_and_add_element(&self->convert,
+                                    "videoconvert", "tcambin-convert",
+                                    &previous_element,
+                                    GST_BIN(self), pipeline_description))
+        {
+            return FALSE;
+        }
+    }
 
     GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
     self->target_pad = gst_element_get_static_pad(previous_element, "src");
@@ -724,16 +827,19 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     // if camera is mono,jpeg,yuv => pass through and be done
     // if camera has bayer => add video/x-raw,format{EVERYTHING} with the correct settings
 
+    GstCaps* to_remove = gst_caps_new_empty();
+
     if (camera_has_bayer(self))
     {
-        for (int i = 0; i < gst_caps_get_size(incoming); ++i)
+        for (int i = 0; i < gst_caps_get_size(all_caps); ++i)
         {
-            GstStructure* struc = gst_caps_get_structure(incoming, i);
+            GstStructure* struc = gst_caps_get_structure(all_caps, i);
 
             if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
             {
                 const char *string = gst_structure_get_string (struc, "format");
-                if (tcam_gst_is_fourcc_bayer(GST_STR_FOURCC(string)))
+
+                if (tcam_gst_is_bayer8_string(string))
                 {
                     const GValue* width = gst_structure_get_value(struc, "width");
                     const GValue* height = gst_structure_get_value(struc, "height");
@@ -758,12 +864,23 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                     gst_caps_unref(tmp);
                 }
+                else if (!self->has_dutils &&
+                          (tcam_gst_is_bayer12_string(string)
+                           || tcam_gst_is_bayer12_packed_string(string)
+                           || tcam_gst_is_bayer16_string(string)))
+                {
+                    gst_caps_append_structure(to_remove, gst_structure_copy(struc));
+                }
+
             }
         }
     }
 
     gst_caps_unref(incoming);
 
+    all_caps = gst_caps_subtract(all_caps, to_remove);
+
+    gst_caps_unref(to_remove);
     return all_caps;
 }
 
@@ -874,27 +991,34 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 GST_INFO("Using user defined caps for tcamsrc. User caps are: %s", gst_caps_to_string(self->user_caps));
                 gst_caps_unref(tmp);
                 self->src_caps = find_input_caps(self->user_caps, self->target_caps,
-                                                 self->needs_debayer, self->needs_videoconvert);
+                                                 self->needs_debayer,
+                                                 self->needs_videoconvert,
+                                                 self->needs_jpegdec,
+                                                 self->needs_dutils,
+                                                 self->needs_biteater,
+                                                 self->use_dutils);
             }
             else
             {
                 self->src_caps = find_input_caps(src_caps, self->target_caps,
-                                                 self->needs_debayer, self->needs_videoconvert);
+                                                 self->needs_debayer,
+                                                 self->needs_videoconvert,
+                                                 self->needs_jpegdec,
+                                                 self->needs_dutils,
+                                                 self->needs_biteater,
+                                                 self->use_dutils);
             }
 
             gst_caps_unref(src_caps);
 
-            GstCaps* by16_caps = gst_caps_from_string("video/x-bayer,format={bggr16, rggb16, gbrg16, brbg16}");
-            self->src_caps = gst_caps_subtract(self->src_caps, by16_caps);
-            gst_caps_unref(by16_caps);
-
             if (!self->src_caps)
             {
-                GST_ERROR("Unable to work with given caps: %" GST_PTR_FORMAT, self->target_caps);
+                GST_ERROR("Unable to work with given caps: %s",
+                          gst_caps_to_string(self->target_caps));
                 return GST_STATE_CHANGE_FAILURE;
             }
 
-            if (! gst_tcambin_create_elements(self))
+            if (!gst_tcambin_create_elements(self))
             {
                 GST_ERROR("Error while creating elements");
             }
@@ -972,6 +1096,11 @@ static void gst_tcambin_get_property (GObject* object,
             g_value_set_string(value, gst_caps_to_string(self->user_caps));
             break;
         }
+        case PROP_USE_DUTILS:
+        {
+            g_value_set_boolean(value, self->use_dutils);
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1006,6 +1135,11 @@ static void gst_tcambin_set_property (GObject* object,
             self->user_caps = gst_caps_from_string(g_value_get_string(value));
             break;
         }
+        case PROP_USE_DUTILS:
+        {
+            self->use_dutils = g_value_get_boolean(value);
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -1027,6 +1161,21 @@ static void gst_tcambin_src_reset (GstTcamBin* self)
 static void gst_tcambin_init (GstTcamBin* self)
 {
     GST_DEBUG("init");
+
+    self->use_dutils = TRUE;
+    self->needs_biteater = TRUE;
+
+    auto factory = gst_element_factory_find("tcamdutils");
+
+    if (factory != nullptr)
+    {
+        self->has_dutils = TRUE;
+        gst_object_unref(factory);
+    }
+    else
+    {
+        self->has_dutils = FALSE;
+    }
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
@@ -1085,6 +1234,13 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                                         "GstCaps the tcamsrc shall use",
                                                         "",
                                                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+   g_object_class_install_property(object_class,
+                                    PROP_USE_DUTILS,
+                                    g_param_spec_boolean("use-dutils",
+                                                        "Allow usage of dutils element",
+                                                        "",
+                                                        TRUE, G_PARAM_READWRITE));
 
 
     gst_element_class_add_pad_template (element_class,
