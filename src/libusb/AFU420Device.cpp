@@ -888,6 +888,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             current_buffer_->clear();
             transfered_size_ = 0;
             offset_ = 0;
+            have_header = false;
         }
         have_header = true;
     }
@@ -900,6 +901,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             submit_transfer(xfr);
             return;
         }
+
         tcam_error("Can not get buffer to fill with image data. Aborting libusb callback.");
         no_buffer_counter++;
         if (no_buffer_counter >= no_buffer_counter_max)
@@ -925,6 +927,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
     if (is_complete_image || is_trailer)
     {
         push_buffer();
+        have_header = false;
     }
     lost_countdown = 20;
     submit_transfer(xfr);
@@ -1019,6 +1022,7 @@ bool tcam::AFU420Device::start_stream ()
         return false;
     }
 
+    have_header = false;
     is_stream_on = true;
     stop_all = false;
 
