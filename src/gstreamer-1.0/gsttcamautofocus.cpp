@@ -60,9 +60,6 @@ static void gst_tcamautofocus_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans,
                                                      GstBuffer* buf);
-static GstCaps* gst_tcamautofocus_transform_caps (GstBaseTransform* trans,
-                                                  GstPadDirection direction,
-                                                  GstCaps* caps);
 
 static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
                                            GstPadDirection direction,
@@ -727,23 +724,6 @@ void gst_tcamautofocus_finalize (GObject* object)
 
     autofocus_destroy(self->focus);
     G_OBJECT_CLASS (gst_tcamautofocus_parent_class)->finalize (object);
-}
-
-
-static GstCaps* gst_tcamautofocus_transform_caps (GstBaseTransform* trans,
-                                                  GstPadDirection direction,
-                                                  GstCaps* caps)
-{
-    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(trans);
-    GstCaps *outcaps = gst_caps_copy (caps);
-
-    if (self->camera_src != NULL)
-    {
-        return outcaps;
-    }
-    /* if camera_src is not set we assume that the first default camera src found shall be used */
-
-    return outcaps;
 }
 
 

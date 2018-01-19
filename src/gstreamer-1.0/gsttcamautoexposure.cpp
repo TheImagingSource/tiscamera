@@ -94,9 +94,6 @@ static void gst_tcamautoexposure_get_property (GObject* object,
 static void gst_tcamautoexposure_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
-static GstCaps* gst_tcamautoexposure_transform_caps (GstBaseTransform* trans,
-                                                     GstPadDirection direction,
-                                                     GstCaps* caps);
 
 static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
                                               GstPadDirection direction,
@@ -983,8 +980,6 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
-    // base_transform_class->transform_caps = gst_tcamautoexposure_transform_caps;
-    //base_transform_class->fixate_caps = gst_tcamautoexposure_fixate_caps;
 
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
