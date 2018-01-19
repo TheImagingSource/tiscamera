@@ -129,18 +129,35 @@ void Logger::log (const char* module,
         return;
     }
 
-    char msg[1024];
-    char buffer [2056];
+    // local copy of va_list
+    // required because vsnprintf calls va_arg()
+    // thus making reusage in the 2. vsnprintf call impossible
+    va_list tmp_args;
+    va_copy(tmp_args, args);
 
-    /* fill user defined message */
-    vsprintf(msg, message, args);
+    size_t size = vsnprintf(NULL, 0, message, tmp_args);
+    char msg[size];
 
+    vsnprintf(msg, size, message, args);
     // use clock_t and not time_t
     // we want the time the program uses based on the
     // cpu and not on a human readable clock.
     clock_t t;
     t = clock();
+
+    size_t buffer_size = snprintf(nullptr,
+                                  0,
+                                 "%-10ld <%s> %s:%d: %s\n",
+                                 /* ctime(&timer), */
+                                 t,
+                                 loglevel2string(level),
+                                 function,
+                                 line,
+                                 msg);
+
     /* write complete message */
+    char buffer[buffer_size];
+
     sprintf(buffer,
             "%-10ld <%s> %s:%d: %s\n",
             /* ctime(&timer), */
@@ -153,14 +170,20 @@ void Logger::log (const char* module,
     switch (target)
     {
         case STDIO:
+        {
             log_to_stdout(buffer);
             break;
+        }
         case LOGFILE:
+        {
             log_to_file(buffer);
             break;
+        }
         case USER_DEFINED:
+        {
             //logger.callback(level, file, line, message, args);
             break;
+        }
         default:
             break;
     }
