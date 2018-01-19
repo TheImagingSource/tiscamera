@@ -100,7 +100,6 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);
 
-
 #ifdef __cplusplus
 }
 #endif

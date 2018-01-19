@@ -7,10 +7,13 @@ set(srcs
   image_sampling.c
   bayer.c
   whitebalance.cpp
-  parallel.cpp
-  work_pool.cpp)
+  biteater.cpp
+  work_pool.cpp
+  parallel.cpp)
 
 # set(PUBLIC_HEADER tcam.h tcam_c.h)
+# TODO: tcam-base shuld link library
+
 add_library(tcam-algorithms SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
 
 set_property(TARGET tcam-algorithms PROPERTY VERSION ${TCAM_VERSION})

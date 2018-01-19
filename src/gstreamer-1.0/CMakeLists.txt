@@ -18,6 +18,7 @@ set(PLUGINS
   gsttcamwhitebalance
   gsttcamautoexposure
   gsttcamautofocus
+  gsttcambiteater
   gsttcambin
   )
 
@@ -33,6 +34,7 @@ include_directories(${GSTREAMER_VIDEO_INCLUDE_DIRS})
 include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/algorithms/)
 include_directories(${CMAKE_SOURCE_DIR}/src/gobject)
 
 set(cflags " -w -Wall -Wextra -pedantic -Wundef -Wshadow")
@@ -61,6 +63,7 @@ add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp)
 
 add_library(gsttcamautofocus SHARED gsttcamautofocus.cpp)
 
+add_library(gsttcambiteater SHARED gsttcambiteater.cpp)
 
 add_library(gsttcambin SHARED gsttcambin.cpp)
 

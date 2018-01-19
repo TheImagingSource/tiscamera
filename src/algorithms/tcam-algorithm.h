@@ -23,5 +23,6 @@
 #include "image_sampling.h"
 #include "bayer.h"
 #include "whitebalance.h"
+#include "biteater.h"
 
 #endif /* TCAM_ALGORITHM_H */
