@@ -563,7 +563,7 @@ static gboolean create_and_add_element (GstElement** element,
                                         std::string& pipeline_description)
 {
     *element = gst_element_factory_make(factory_name, element_name);
-    if (element)
+    if (*element)
     {
         GST_DEBUG("Adding %s(%p) to pipeline", factory_name, *element);
         gst_bin_add(bin, *element);
