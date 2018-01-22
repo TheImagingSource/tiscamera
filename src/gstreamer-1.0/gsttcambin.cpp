@@ -478,42 +478,6 @@ static void gst_tcambin_clear_kid (GstTcamBin* src)
 }
 
 
-static gboolean camera_has_bayer (GstTcamBin* self)
-{
-    GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-    gboolean ret = FALSE;
-
-    for (unsigned int i = 0; i < gst_caps_get_size(src_caps); i++)
-    {
-        GstCaps* ipcaps = gst_caps_copy_nth(src_caps, i);
-
-        GstStructure* structure = gst_caps_get_structure(ipcaps, 0);
-
-        unsigned int fourcc = 0;
-        const char* string = gst_structure_get_string(structure, "format");
-
-        if (string == nullptr)
-        {
-            gst_caps_unref(ipcaps);
-            continue;
-        }
-
-        fourcc = GST_STR_FOURCC(string);
-
-        gst_caps_unref(ipcaps);
-
-        if (tcam_gst_is_fourcc_bayer(fourcc))
-        {
-            ret = TRUE;
-            break;
-        }
-    }
-
-    gst_caps_unref(src_caps);
-
-    return ret;
-}
-
 static gboolean gst_tcambin_create_source (GstTcamBin* self)
 {
     gst_tcambin_clear_source(self);
@@ -829,50 +793,49 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
     GstCaps* to_remove = gst_caps_new_empty();
 
-    if (camera_has_bayer(self))
+    for (int i = 0; i < gst_caps_get_size(all_caps); ++i)
     {
-        for (int i = 0; i < gst_caps_get_size(all_caps); ++i)
+        GstStructure* struc = gst_caps_get_structure(all_caps, i);
+
+        if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
         {
-            GstStructure* struc = gst_caps_get_structure(all_caps, i);
+            const char *string = gst_structure_get_string (struc, "format");
 
-            if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
+            if (tcam_gst_is_bayer8_string(string))
             {
-                const char *string = gst_structure_get_string (struc, "format");
+                const GValue* width = gst_structure_get_value(struc, "width");
+                const GValue* height = gst_structure_get_value(struc, "height");
+                const GValue* framerate = gst_structure_get_value(struc, "framerate");
 
-                if (tcam_gst_is_bayer8_string(string))
-                {
-                    const GValue* width = gst_structure_get_value(struc, "width");
-                    const GValue* height = gst_structure_get_value(struc, "height");
-                    const GValue* framerate = gst_structure_get_value(struc, "framerate");
+                GstStructure* s = gst_structure_new("video/x-raw", NULL);
 
-                    GstStructure* s = gst_structure_new("video/x-raw", NULL);
+                GValue format = {};
 
-                    GValue format = {};
+                std::string tmp_format_string;
+                GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
 
-                    std::string tmp_format_string;
-                    GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
+                GstStructure* struc = gst_caps_get_structure(tmp, 0);
 
-                    GstStructure* struc = gst_caps_get_structure(tmp, 0);
+                gst_structure_set_value(s, "format", gst_structure_get_value(struc, "format"));
 
-                    gst_structure_set_value(s, "format", gst_structure_get_value(struc, "format"));
+                gst_structure_set_value(s, "width", width);
+                gst_structure_set_value(s, "height", height);
+                gst_structure_set_value(s, "framerate", framerate );
 
-                    gst_structure_set_value(s, "width", width);
-                    gst_structure_set_value(s, "height", height);
-                    gst_structure_set_value(s, "framerate", framerate );
+                gst_caps_append_structure(all_caps, s);
 
-                    gst_caps_append_structure(all_caps, s);
-
-                    gst_caps_unref(tmp);
-                }
-                else if (!self->has_dutils &&
-                          (tcam_gst_is_bayer12_string(string)
-                           || tcam_gst_is_bayer12_packed_string(string)
-                           || tcam_gst_is_bayer16_string(string)))
-                {
-                    gst_caps_append_structure(to_remove, gst_structure_copy(struc));
-                }
-
+                gst_caps_unref(tmp);
             }
+            else if (!self->has_dutils &&
+                     (tcam_gst_is_bayer12_string(string)
+                      || tcam_gst_is_bayer12_packed_string(string)
+                      || tcam_gst_is_bayer16_string(string)))
+            {
+                GST_ERROR("HIT");
+                gst_caps_append_structure(to_remove, gst_structure_copy(struc));
+            }
+
+
         }
     }
 
