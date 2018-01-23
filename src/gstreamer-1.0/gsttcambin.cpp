@@ -764,7 +764,7 @@ finished_element_creation:
         self->target_caps = gst_caps_copy(self->src_caps);
     }
 
-    GST_INFO("Working with exit caps: %" GST_PTR_FORMAT, self->target_caps);
+    GST_INFO("Working with exit caps: %s", gst_caps_to_string(self->target_caps));
     self->elements_created = TRUE;
 
     return TRUE;
