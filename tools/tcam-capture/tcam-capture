@@ -68,7 +68,7 @@ class TCamCapture(QMainWindow):
         self.indexer.moveToThread(self.data.work_thread)
 
         self.data.work_thread.start()
-
+        self.device_list = None  # needed for setting window title later on
         self.setWindowTitle("TCam Capture")
 
         self.setup_ui()
@@ -181,13 +181,19 @@ class TCamCapture(QMainWindow):
     def update_device_list(self, device_list):
         """"""
         self.open_menu.clear()
-
+        self.device_list = device_list
         index = 1
         for d in device_list:
-            action_string = "{model:<17} - {contype:<7} - {serial}\t&{ind}".format(model=d.model,
-                                                                                   contype=d.device_type,
-                                                                                   serial=d.serial,
-                                                                                   ind=str(index))
+            if d.serial == self.serial:
+                active_check = "✔"
+            else:
+                active_check = " "
+
+            action_string = "{active} {model:<18} - {contype:<7} - {serial}\t&{ind}".format(active=active_check,
+                                                                                            model=d.model,
+                                                                                            contype=d.device_type,
+                                                                                            serial=d.serial,
+                                                                                            ind=str(index))
             device_action = QAction(action_string, self)
             device_action.setStatusTip("Open this device.")
             device_action.triggered.connect(functools.partial(self.open_device,
@@ -206,6 +212,14 @@ class TCamCapture(QMainWindow):
         """Open device and starts video stream"""
         self.close()
         self.serial = serial
+
+        for dev in self.device_list:
+            if dev.serial == serial:
+                self.setWindowTitle("TCam Capture - {}({})".format(dev.model, serial))
+                # update device menu so that mark on opened camera is drawn
+                self.update_device_list(self.device_list)
+                break
+
         self.view = TcamView(self.serial, self)
         self.view.register_device_lost(self.lost_device)
         self.view.create_pipeline()
@@ -247,9 +261,14 @@ class TCamCapture(QMainWindow):
             self.view.setParent(None)
             self.setCentralWidget(None)
             self.view = None
+            self.serial = None
+            # update menu to remove mark on open camera
+            self.update_device_list(self.device_list)
 
             self.menuBar().removeAction(self.format_menu_action)
             self.format_menu = None
+            self.setWindowTitle("TCam Capture")
+
             log.info("Closed device")
 
     def set_device_menus_enabled(self, enabled):
