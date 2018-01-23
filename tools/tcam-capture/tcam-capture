@@ -69,6 +69,7 @@ class TCamCapture(QMainWindow):
 
         self.data.work_thread.start()
         self.device_list = None  # needed for setting window title later on
+        self.props = None  # property dialog widget
         self.setWindowTitle("TCam Capture")
 
         self.setup_ui()
@@ -138,6 +139,12 @@ class TCamCapture(QMainWindow):
         self.save_image = QAction("Save Image", self)
         self.save_image.triggered.connect(self.save_image_action)
         # self.menuBar().addAction(self.save_image)
+
+        self.props_action = QAction("", self)
+        self.props_action.setText("Properties")
+        self.props_action.setVisible(False)
+        self.props_action.triggered.connect(self.toggle_properties_dialog)
+        self.menuBar().addAction(self.props_action)
 
         self.recording_action = QAction("", self)
         self.recording_action.setIconText("Start recording")
@@ -237,6 +244,8 @@ class TCamCapture(QMainWindow):
         self.props.setFloating(False)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.props)
         self.set_device_menus_enabled(True)
+        self.props_action.setVisible(True)
+
         self.play()
 
     def play(self, video_format=None):
@@ -267,9 +276,20 @@ class TCamCapture(QMainWindow):
 
             self.menuBar().removeAction(self.format_menu_action)
             self.format_menu = None
+            self.props_action.setVisible(False)
+
             self.setWindowTitle("TCam Capture")
 
             log.info("Closed device")
+
+    def toggle_properties_dialog(self):
+
+        if self.props:
+            if self.props_action.isEnabled():
+                if self.props.isVisible():
+                    self.props.setVisible(False)
+                else:
+                    self.props.setVisible(True)
 
     def set_device_menus_enabled(self, enabled):
         self.save_image.setEnabled(enabled)
