@@ -862,12 +862,14 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                 }
                 gst_object_unref(biteater);
             }
+            gst_object_unref(dutils);
         }
-        gst_object_unref(dutils);
     }
 
     GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
 
+    if (debayer)
+    {
     if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
         && gst_element_factory_can_sink_any_caps(debayer, available_caps))
     {
@@ -883,10 +885,14 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         gst_object_unref(debayer);
         return ret;
     }
+    }
     gst_object_unref(debayer);
 
     GstElementFactory* convert = gst_element_factory_find("videoconvert");
-    if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
+
+    if (convert)
+    {
+        if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
         && gst_element_factory_can_sink_any_caps(convert, available_caps))
     {
         requires_vidoeconvert = true;
@@ -911,33 +917,36 @@ GstCaps* find_input_caps (GstCaps* available_caps,
     }
     gst_object_unref(convert);
 
-
+}
 
     GstElementFactory* jpegdec = gst_element_factory_find("jpegdec");
 
-    if (gst_element_factory_can_src_any_caps(jpegdec, wanted_caps)
-        && gst_element_factory_can_sink_any_caps(jpegdec, available_caps))
+    if (jpegdec)
     {
-        requires_jpegdec = true;
-
-        // wanted_caps can be fixed, etc.
-        // thus change name to be compatible to jpegdec sink pad
-        // and create a correct intersection
-        GstCaps* temp = gst_caps_copy(wanted_caps);
-        gst_caps_change_name(temp, "image/jpeg");
-
-        for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
+        if (gst_element_factory_can_src_any_caps(jpegdec, wanted_caps)
+            && gst_element_factory_can_sink_any_caps(jpegdec, available_caps))
         {
-            gst_structure_remove_field(gst_caps_get_structure(temp, i), "format");
+            requires_jpegdec = true;
+
+            // wanted_caps can be fixed, etc.
+            // thus change name to be compatible to jpegdec sink pad
+            // and create a correct intersection
+            GstCaps* temp = gst_caps_copy(wanted_caps);
+            gst_caps_change_name(temp, "image/jpeg");
+
+            for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
+            {
+                gst_structure_remove_field(gst_caps_get_structure(temp, i), "format");
+            }
+
+            GstCaps* ret = gst_caps_intersect(available_caps, temp);
+            gst_caps_unref(temp);
+            gst_object_unref(jpegdec);
+            return ret;
         }
 
-        GstCaps* ret = gst_caps_intersect(available_caps, temp);
-        gst_caps_unref(temp);
         gst_object_unref(jpegdec);
-        return ret;
     }
-    gst_object_unref(jpegdec);
-
     intersect = gst_caps_intersect(available_caps, wanted_caps);
     if (!gst_caps_is_empty(intersect))
     {
