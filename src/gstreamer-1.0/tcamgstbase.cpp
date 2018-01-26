@@ -454,7 +454,7 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
 {
     std::vector<uint32_t> ret;
 
-    if (gst_caps_is_any(caps), gst_caps_is_empty(caps))
+    if (!caps ||gst_caps_is_empty(caps) || gst_caps_is_any(caps))
     {
         return ret;
     }
