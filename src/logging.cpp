@@ -135,7 +135,7 @@ void Logger::log (const char* module,
     va_list tmp_args;
     va_copy(tmp_args, args);
 
-    size_t size = vsnprintf(NULL, 0, message, tmp_args);
+    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
     char msg[size];
 
     vsnprintf(msg, size, message, args);
