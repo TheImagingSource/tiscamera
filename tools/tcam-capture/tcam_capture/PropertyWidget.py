@@ -16,8 +16,8 @@
 from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
                              QCheckBox, QComboBox, QWidget,
                              QSpinBox, QDoubleSpinBox)
-from PyQt5.QtCore import Qt, pyqtSignal
-from . import TcamSignal, TcamCaptureData
+from PyQt5.QtCore import Qt
+from . import TcamCaptureData
 import logging
 
 log = logging.getLogger(__name__)

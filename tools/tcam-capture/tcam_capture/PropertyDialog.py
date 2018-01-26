@@ -13,15 +13,11 @@
 # limitations under the License.
 
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
-from tcam_capture.TcamSignal import TcamSignals
-from tcam_capture.TcamCaptureData import TcamCaptureData
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QApplication, QWidget, QMainWindow,
-                             QHBoxLayout, QVBoxLayout, QTabWidget,
-                             QCheckBox, QPushButton, QSlider, QComboBox,
-                             QDockWidget, QAction, QMenu)
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget,
+                             QFormLayout, QPushButton)
 
-from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
+from PyQt5.QtCore import QObject
 
 import logging
 
@@ -39,17 +35,19 @@ class PropertyTree(QWidget):
         self.prop_dict = {}
 
     def setup_ui(self):
-        self.layout = QVBoxLayout()
+        self.layout = QFormLayout()
+        self.layout.setSpacing(0)
+        self.layout.setVerticalSpacing(0)
         self.setLayout(self.layout)
 
     def finish_setup(self):
         # insert spacer only after all other elements have been added
-        self.layout.insertStretch(-1, 1)
+        # self.layout.insertStretch(-1, 1)
+        pass
 
     def add_property(self, prop: Prop):
-        wid = PropertyWidget(self.data, prop)
-        self.layout.addWidget(wid)
-        self.prop_dict[prop.name] = wid
+        self.prop_dict[prop.name] = PropertyWidget(self.data, prop)
+        self.layout.addRow(prop.name, self.prop_dict[prop.name])
         self.property_number = self.property_number + 1
 
     def set_property(self, name, value):
@@ -62,9 +60,8 @@ class PropertyTree(QWidget):
         try:
             self.prop_dict[prop.name].update(prop)
         except KeyError as e:
-            self.prop_dict[prop.name] = PropertyWidget(self.data, prop)
-            self.layout.addWidget(self.prop_dict[prop.name])
-            self.property_number = self.property_number + 1
+            self.add_property(prop)
+
 
 
 class PropertyWorker(QObject):
@@ -123,6 +120,7 @@ class PropertyDialog(QWidget):
 
     def __init__(self, data, parent=None):
         super(PropertyDialog, self).__init__(parent)
+        self.setWindowTitle("Tcam-Capture Device Properties")
         self.data = data
         self.work_thread = QtCore.QThread()
 
@@ -138,7 +136,10 @@ class PropertyDialog(QWidget):
 
         self.tabs = QTabWidget()
 
-        self.layout = QHBoxLayout()
+        self.tabs.setTabPosition(QTabWidget.West)
+        self.reset_button = QPushButton("Reset")
+        self.reset_button.clicked.connect(self.reset)
+        self.layout = QVBoxLayout()
         self.layout.addWidget(self.tabs)
 
         self.tab_dict = {
