@@ -15,6 +15,7 @@
 
 
 add_subdirectory(tcam-ctrl)
+add_subdirectory(tcam-capture)
 
 if (BUILD_V4L2)
   add_subdirectory(firmware-update)
