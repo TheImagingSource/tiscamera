@@ -62,6 +62,9 @@ class PropertyTree(QWidget):
         except KeyError as e:
             self.add_property(prop)
 
+    def reset(self):
+        for key, item in self.prop_dict.items():
+            item.reset()
 
 
 class PropertyWorker(QObject):
@@ -141,6 +144,7 @@ class PropertyDialog(QWidget):
         self.reset_button.clicked.connect(self.reset)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.tabs)
+        self.layout.addWidget(self.reset_button)
 
         self.tab_dict = {
             "Exposure": PropertyTree(self.data, self),
@@ -193,3 +197,7 @@ class PropertyDialog(QWidget):
                                      self.tab_dict,
                                      None)  # parent of movable objects must not exists
         self.worker.moveToThread(self.work_thread)
+
+    def reset(self):
+        for key, t in self.tab_dict.items():
+            t.reset()

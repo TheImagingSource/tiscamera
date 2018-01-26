@@ -176,3 +176,24 @@ class PropertyWidget(QWidget):
             self.combo.blockSignals(True)
             self.combo.setCurrentText(prop.value)
             self.combo.blockSignals(False)
+
+    def reset(self):
+        if self.prop.valuetype == "integer":
+            self.update_box_value(self.value_box, self.prop.defval)
+            self.sld.setValue(self.prop.defval)
+
+        elif self.prop.valuetype == "double":
+            self.update_box_value(self.value_box, self.prop.defval)
+            self.sld.setValue(self.prop.defval * 1000)
+
+        elif self.prop.valuetype == "button":
+            pass
+
+        elif self.prop.valuetype == "boolean":
+            if self.prop.defval and not self.toggle.isChecked():
+                self.toggle.toggle()
+
+        elif self.prop.valuetype == "string":
+            pass
+        elif self.prop.valuetype == "enum":
+            self.combo.setCurrentText(self.prop.defval)
