@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyQt5 import QtWidgets
+
 from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
-                             QCheckBox, QComboBox, QWidget, QSpacerItem)
+                             QCheckBox, QComboBox, QWidget,
+                             QSpinBox, QDoubleSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal
 from . import TcamSignal, TcamCaptureData
 import logging
@@ -54,39 +55,43 @@ class PropertyWidget(QWidget):
     def setup_ui(self):
         self.layout = QHBoxLayout()
 
-        # if self.prop.name != self.prop.group:
-        #     self.spacer = QSpacerItem(30, 10)
-        #     self.layout.addItem(self.spacer)
-
         self.setLayout(self.layout)
-        # if self.prop.valuetype != "boolean":
-        self.name_label = QtWidgets.QLabel(self.prop.name)
-        self.layout.addWidget(self.name_label)
         if self.prop.valuetype == "integer":
-            self.value_label = QtWidgets.QLabel(str(self.prop.value))
-            self.layout.addWidget(self.value_label)
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             self.sld.setRange(self.prop.minval, self.prop.maxval)
             self.sld.setValue(self.prop.value)
-            self.sld.setGeometry(30, 40, 100, 30)
             self.sld.valueChanged[int].connect(self.set_property)
             self.layout.addWidget(self.sld)
+
+            self.value_box = QSpinBox(self)
+            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            self.value_box.setSingleStep(self.prop.step)
+            self.value_box.setValue(self.prop.value)
+            self.value_box.valueChanged[int].connect(self.set_property_box)
+            self.layout.addWidget(self.value_box)
+
         elif self.prop.valuetype == "double":
-            self.value_label = QtWidgets.QLabel(str(self.prop.value))
-            self.layout.addWidget(self.value_label)
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             self.sld.setRange(self.prop.minval * 1000, self.prop.maxval * 1000)
             self.sld.valueChanged[int].connect(self.set_property)
             self.sld.setGeometry(30, 40, 100, 30)
             self.layout.addWidget(self.sld)
+
+            self.value_box = QDoubleSpinBox(self)
+            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            self.value_box.setSingleStep(self.prop.step)
+            self.value_box.setValue(self.prop.value)
+            self.value_box.valueChanged[float].connect(self.set_property_box)
+            self.layout.addWidget(self.value_box)
+
         elif self.prop.valuetype == "button":
             self.checkbox = QPushButton(self)
             self.checkbox.clicked.connect(self.set_property)
             self.layout.addWidget(self.checkbox)
         elif self.prop.valuetype == "boolean":
-            self.toggle = QCheckBox(self)  # QPushButton(self.prop.name)
+            self.toggle = QCheckBox(self)
             self.toggle.setCheckable(True)
             if self.prop.value:
                 self.toggle.toggle()
@@ -111,9 +116,11 @@ class PropertyWidget(QWidget):
 
     def set_property(self, value):
         if self.prop.valuetype == "integer":
-            self.value_label.setText(str(value))
+            self.update_box_value(self.value_box, value)
+
         if self.prop.valuetype == "double":
-            self.value_label.setText(str(value / 1000))
+            self.update_box_value(self.value_box, value / 1000)
+
             self.signals.change_property.emit(self.tcam, self.prop.name,
                                               float(value) / 1000, self.prop.valuetype)
             return
@@ -121,19 +128,38 @@ class PropertyWidget(QWidget):
         self.signals.change_property.emit(self.tcam, self.prop.name,
                                           value, self.prop.valuetype)
 
+    def set_property_box(self, value):
+        if self.prop.valuetype == "integer":
+            self.update_slider_value(self.sld, value)
+
+        if self.prop.valuetype == "double":
+            self.update_slider_value(self.sld, value * 1000)
+
+            self.signals.change_property.emit(self.tcam, self.prop.name,
+                                              float(value), self.prop.valuetype)
+            return
+
+        self.signals.change_property.emit(self.tcam, self.prop.name,
+                                          value, self.prop.valuetype)
+
+    def update_box_value(self, box, value):
+        box.blockSignals(True)
+        box.setValue(value)
+        box.blockSignals(False)
+
+    def update_slider_value(self, slider, value):
+        slider.blockSignals(True)
+        slider.setValue(value)
+        slider.blockSignals(False)
+
     def update(self, prop: Prop):
         self.prop = prop
         if self.prop.valuetype == "integer":
-            self.value_label.setText(str(self.prop.value))
-            self.sld.blockSignals(True)
-            self.sld.setValue(self.prop.value)
-            self.sld.blockSignals(False)
+            self.update_slider_value(self.sld, self.prop.value)
+            self.update_box_value(self.value_box, self.prop.value)
         elif self.prop.valuetype == "double":
-            self.sld.blockSignals(True)
-            self.value_label.setText("{:.3f}".format(self.prop.value))
-            self.sld.setValue((self.prop.value * 1000))
-            self.sld.blockSignals(False)
-
+            self.update_slider_value(self.sld, self.prop.value * 1000)
+            self.update_box_value(self.value_box, self.prop.value)
         elif self.prop.valuetype == "button":
             pass
 
