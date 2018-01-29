@@ -45,6 +45,11 @@ std::string Camera::Impl::nios_firmware_version () const
     return gencp_.read_string( device_interface::MemoryMap::CAMERA_INFO + 0x60, 0x20 );
 }
 
+int Camera::Impl::firmware_version () const
+{
+    return device_->read_vendor_request<int>( 1, 0, 0 );
+}
+
 Camera::Camera (std::shared_ptr<driver_interface::IUsbDevice> dev)
     : impl_ { std::unique_ptr<Impl>( new Impl(dev) ) }
 	{}

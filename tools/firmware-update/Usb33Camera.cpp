@@ -67,7 +67,7 @@ int Usb33Camera::get_firmware_version ()
 
 std::string Usb33Camera::get_firmware_version_string ()
 {
-    return cam.nios_firmware_version();
+    return std::to_string( cam.firmware_version() );
 }
 
 

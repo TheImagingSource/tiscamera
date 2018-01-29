@@ -40,6 +40,7 @@ namespace lib33u
 			std::string model_description () const;
 			std::string fpga_version () const;
 			std::string nios_firmware_version () const;
+			int firmware_version () const;
 		};
 
 		std::unique_ptr<Impl> impl_;
@@ -67,6 +68,10 @@ namespace lib33u
 		std::string nios_firmware_version () const
 		{
 			return impl_->nios_firmware_version();
+		}
+		int firmware_version () const
+		{
+			return impl_->firmware_version();			
 		}
 
 	public:
