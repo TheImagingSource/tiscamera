@@ -16,18 +16,28 @@
 
 #pragma once
 
-#include <cstdint>
+#include "IDevicePort.h"
+
+#include "pugixml.hpp"
+
+#include <string>
 
 namespace lib33u
 {
-namespace device_interface
+namespace firmware_update
 {
-	namespace VendorCommands
+	class DevicePortI2CMachXO3 : public IDevicePort
 	{
-		const uint8_t GENCP = 0x30;
-		const uint8_t GENCP_MAX_WRITE = 0x22;
-		const uint8_t GENCP_MAX_READ = 0x23;
-		const uint8_t I2C = 0x18;
+	public:
+		DevicePortI2CMachXO3( const std::string& name, const pugi::xml_node& port_config );
+
+	public:
+		virtual std::string name() override;
+		virtual void upload( Camera& dev, const std::vector<UploadItem>& items, util::progress::IReportProgress& progress ) override;
+
+	private:
+		std::string name_;
 	};
-}
-}
+
+} /* namespace device_interface */
+} /* namespace lib33u */

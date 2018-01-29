@@ -16,6 +16,7 @@
 
 #include "Camera.h"
 #include "MemoryMap.h"
+#include "VendorCommands.h"
 
 namespace lib33u
 {
@@ -23,6 +24,7 @@ Camera::Impl::Impl (std::shared_ptr<driver_interface::IUsbDevice> dev)
     : device_ { dev }
     , gencp_ { dev }
     , flash_ { gencp_ }
+    , eeprom_ { gencp_ }
 	{}
 
 uint16_t Camera::Impl::product_id () const
@@ -48,6 +50,22 @@ std::string Camera::Impl::nios_firmware_version () const
 int Camera::Impl::firmware_version () const
 {
     return device_->read_vendor_request<int>( 1, 0, 0 );
+}
+
+void Camera::Impl::i2c_write( uint8_t dev, const std::vector<uint8_t>& data, bool combine_with_read )
+{
+    uint16_t flag = combine_with_read ? 1 : 0;
+
+    device_->write_vendor_request( device_interface::VendorCommands::I2C, dev, flag, data.data(), data.size() );
+}
+std::vector<uint8_t> Camera::Impl::i2c_read( uint8_t dev, size_t request_length, bool combine_with_read )
+{
+    uint16_t flag = combine_with_read ? 1 : 0;
+
+    std::vector<uint8_t> result( request_length );
+    device_->read_vendor_request( device_interface::VendorCommands::I2C, dev, flag, result.data(), result.size() );
+
+    return result;
 }
 
 Camera::Camera (std::shared_ptr<driver_interface::IUsbDevice> dev)

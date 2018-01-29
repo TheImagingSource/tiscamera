@@ -24,9 +24,12 @@ set(files
   Camera.cpp
   Crc32.cpp
   DevicePortFlash.cpp
+  DevicePortEEPROM.cpp
+  DevicePortI2CMachXO3.cpp
   Firmware.cpp
   FirmwarePackage.cpp
   Flash.cpp
+  EEPROM.cpp
   ForwardProgress.cpp
   GenCPCommand.cpp
   GenCPCommand.h
@@ -34,8 +37,9 @@ set(files
   LibUsbShowDevice.cpp
   LibUsbShowEnumerator.cpp
   ReportProgress.cpp
-  Flash.cpp
   GenCPFacade.cpp
+  MachXO3.cpp
+  JedecFile.cpp
   lib/7z/7zAlloc.c
   lib/7z/7zCrc.c
   lib/7z/7zFile.c

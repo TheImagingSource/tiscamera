@@ -93,7 +93,7 @@ void ShowDevice::read_vendor_request (uint8_t req,
 void ShowDevice::write_vendor_request (uint8_t req,
                                        uint16_t value,
                                        uint16_t index,
-                                       uint8_t* data,
+                                       const uint8_t* data,
                                        uint16_t length)
 {
      int ret = libusb_control_transfer(this->dev_handle,

@@ -16,18 +16,31 @@
 
 #pragma once
 
-#include <cstdint>
+#include "GenCPFacade.h"
+#include "IReportProgress.h"
 
 namespace lib33u
 {
 namespace device_interface
 {
-	namespace VendorCommands
+	class EEPROM
 	{
-		const uint8_t GENCP = 0x30;
-		const uint8_t GENCP_MAX_WRITE = 0x22;
-		const uint8_t GENCP_MAX_READ = 0x23;
-		const uint8_t I2C = 0x18;
+		GenCPFacade& gencp_;
+
+	public:
+		EEPROM( GenCPFacade& gencp )
+			: gencp_ (gencp)
+		{
+		}		
+
+	private:
+		void unlock();
+		void lock();
+		uint32_t block_crc32( uint32_t address, uint32_t length ) const;
+		void block_write( uint32_t address, const uint8_t* data, uint16_t length );
+
+	public:
+		void write_verify( uint32_t address, const uint8_t* data, uint32_t length, util::progress::IReportProgress& progress );
 	};
-}
-}
+} /* namespace device_interface */
+} /* namespace lib33u */

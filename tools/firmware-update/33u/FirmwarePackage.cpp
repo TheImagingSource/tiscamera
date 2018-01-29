@@ -17,6 +17,8 @@
 #include "FirmwarePackage.h"
 #include "IDevicePort.h"
 #include "DevicePortFlash.h"
+#include "DevicePortEEPROM.h"
+#include "DevicePortI2CMachXO3.h"
 #include "ReportProgress.h"
 
 #include "Archive.h"
@@ -65,11 +67,11 @@ namespace firmware_update
 				}
                 else if (port_type == "EEPROM")
                 {
-                    result.emplace(port_name, nullptr);
+                    result.emplace(port_name, std::make_shared<DevicePortEEPROM>( port_name, port_config.node() ) );
                 }
                 else if (port_type == "I2CMachXO3")
                 {
-                    result.emplace(port_name, nullptr);
+                    result.emplace(port_name, std::make_shared<DevicePortI2CMachXO3>( port_name, port_config.node() ) );
                 }
 				else
 				{

@@ -19,6 +19,7 @@
 #include "IUsbDevice.h"
 #include "GenCPFacade.h"
 #include "Flash.h"
+#include "EEPROM.h"
 
 #include <memory>
 #include <string>
@@ -33,6 +34,7 @@ namespace lib33u
 			std::shared_ptr<driver_interface::IUsbDevice>	device_;
 			device_interface::GenCPFacade					gencp_;
 			device_interface::Flash							flash_;
+			device_interface::EEPROM						eeprom_;
 
 			Impl (std::shared_ptr<driver_interface::IUsbDevice> dev);
 
@@ -41,6 +43,9 @@ namespace lib33u
 			std::string fpga_version () const;
 			std::string nios_firmware_version () const;
 			int firmware_version () const;
+
+			void i2c_write( uint8_t dev, const std::vector<uint8_t>& data, bool combine_with_read );
+			std::vector<uint8_t> i2c_read( uint8_t dev, size_t request_length, bool combine_with_read );
 		};
 
 		std::unique_ptr<Impl> impl_;
@@ -82,6 +87,20 @@ namespace lib33u
 		device_interface::GenCPFacade& gencp () const
 		{
 			return impl_->gencp_;
+		}
+		device_interface::EEPROM& eeprom () const
+		{
+			return impl_->eeprom_;			
+		}
+
+	public:
+		void i2c_write( uint8_t dev, const std::vector<uint8_t>& data, bool combine_with_read )
+		{
+			impl_->i2c_write( dev, data, combine_with_read );
+		}		
+		std::vector<uint8_t> i2c_read( uint8_t dev, size_t request_length, bool combine_with_read )
+		{
+			return impl_->i2c_read( dev, request_length, combine_with_read );
 		}
 	};
 }
