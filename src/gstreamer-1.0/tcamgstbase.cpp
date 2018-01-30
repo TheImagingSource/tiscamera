@@ -995,7 +995,7 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
 }
 
 
-GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatDescription> descriptions)
+GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoFormatDescription>& descriptions)
 {
     GstCaps* caps = gst_caps_new_empty();
 
@@ -1011,7 +1011,8 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
 
         if (caps_string == nullptr)
         {
-            tcam_warning("Format has empty caps string. Ignoring %s", tcam::fourcc_to_description(desc.get_fourcc()));
+            tcam_warning("Format has empty caps string. Ignoring %s",
+                         tcam::fourcc_to_description(desc.get_fourcc()));
             continue;
         }
 
@@ -1029,8 +1030,9 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
             int max_height = r.max_size.height;
 
             if (r.type == TCAM_RESOLUTION_TYPE_RANGE)
-            {              // std::vector<double> framerates = format[i].get_frame_rates(res[j]);
-                std::vector<struct tcam_image_size> framesizes = tcam::get_standard_resolutions(r.min_size, r.max_size);
+            {
+                std::vector<struct tcam_image_size> framesizes = tcam::get_standard_resolutions(r.min_size,
+                                                                                                r.max_size);
                 framesizes.insert(framesizes.begin(), r.min_size);
                 framesizes.push_back(r.max_size);
                 for (const auto& reso : framesizes)
@@ -1045,7 +1047,7 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
                         continue;
                     }
 
-                    GValue fps_list = {0};
+                    GValue fps_list = G_VALUE_INIT;
                     g_value_init(&fps_list, GST_TYPE_LIST);
 
                     for (const auto& f : framerates)
@@ -1061,7 +1063,7 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
                             continue;
                         }
 
-                        GValue fraction = {0};
+                        GValue fraction = G_VALUE_INIT;
                         g_value_init(&fraction, GST_TYPE_FRACTION);
                         gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
                         gst_value_list_append_value(&fps_list, &fraction);
@@ -1119,7 +1121,8 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
                 gst_structure_set_value(structure, "width", &w);
                 gst_structure_set_value(structure,"height", &h);
                 gst_structure_set_value(structure,"framerate", &f);
-                gst_caps_append_structure(caps, structure);}
+                gst_caps_append_structure(caps, structure);
+            }
             else
             {
                 GstStructure* structure = gst_structure_from_string (caps_string, NULL);
@@ -1132,6 +1135,31 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
     }
 
     return caps;
+}
+
+
+bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFormatDescription>& descriptions,
+                                                 std::string& str)
+{
+    GstCaps* caps = convert_videoformatsdescription_to_caps(descriptions);
+
+    if (caps == nullptr || gst_caps_is_empty(caps))
+    {
+        return false;
+    }
+
+    const char* tmp = gst_caps_to_string(caps);
+
+    if (tmp == nullptr)
+    {
+        gst_caps_unref(caps);
+        return false;
+    }
+
+    str = tmp;
+    gst_caps_unref(caps);
+
+    return true;
 }
 
 

@@ -17,9 +17,11 @@
 #include "formats.h"
 
 #include "tcamgststrings.h"
-
+#include "tcamgstbase.h" // videoformatsdescription_to_gst_caps_string
+#include <gst/gst.h> // gst_init
 #include <iostream>
 #include <iomanip>
+#include <regex>
 
 
 void list_formats (const std::vector<VideoFormatDescription>& available_formats)
@@ -56,72 +58,21 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 
 void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& available_formats)
 {
-    std::cout << "Available gstreamer-1.0 caps:" << std::endl;
-    for (const auto& f : available_formats)
+    // dummy init because gstreamer
+    // is to stupid to not crash without it
+    gst_init(NULL, 0);
+    std::string str;
+
+    if (videoformatsdescription_to_gst_caps_string(available_formats, str))
     {
-        const char* tmp = tcam_fourcc_to_gst_1_0_caps_string(f.get_fourcc());
-
-        if (tmp == nullptr)
-        {
-            continue;
-        }
-
-        std::string format = tmp;
-
-        for (const auto& res : f.get_resolutions())
-        {
-            if (res.type == TCAM_RESOLUTION_TYPE_FIXED)
-            {
-                std::string fps_string = ", fps={";
-                auto rates = f.get_framerates(res.min_size);
-                for (unsigned int i = 0; i < rates.size(); ++i)
-                {
-                    fps_string += std::to_string(rates.at(i));
-
-                    if (i < rates.size()-1)
-                    {
-                        fps_string += ", ";
-                    }
-                }
-
-                fps_string += "}";
-
-                std::string output = format
-                    + ", width=" + std::to_string(res.min_size.width)
-                    + ", height=" + std::to_string(res.min_size.height)
-                    + fps_string;
-
-                std::cout << output << std::endl;
-            }
-            else
-            {
-                auto resolutions = tcam::get_standard_resolutions(res.min_size, res.max_size);
-
-                for (const auto& r: resolutions)
-                {
-                    std::string fps_string = ", fps={";
-                    auto rates = f.get_framerates(r);
-                    for (unsigned int i = 0; i < rates.size(); ++i)
-                    {
-                        fps_string += std::to_string(rates.at(i));
-
-                        if (i < rates.size()-1)
-                        {
-                            fps_string += ", ";
-                        }
-                    }
-                    fps_string += "}";
-
-                    std::string output = format
-                        + ", width=" + std::to_string(r.width)
-                        + ", height=" + std::to_string(r.height)
-                        + fps_string;
-
-                    std::cout << output << std::endl;
-                }
-
-            }
-        }
+        // use a regex to insert line breaks for increased readability
+        std::regex e ("; ");
+        std::cout << "Available gstreamer-1.0 caps:" << std::endl;
+        std::cout << std::regex_replace(str, e, ";\n") << std::endl;
+    }
+    else
+    {
+        std::cerr << "Unable to display caps. Conversion failed." << std::endl;
     }
 }
 

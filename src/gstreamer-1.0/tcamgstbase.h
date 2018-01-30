@@ -107,9 +107,9 @@ GstCaps* get_caps_from_element (const char* elementname, const char* padname);
 /**
  * @param available_caps - caps the source offers
  * @param wanted_caps - caps the sink wants, if null available_caps will be returned
- * @param requires_bayer - will be set to true when the bayer2rgb element is required
- * @param requires_vidoeconvert - will be set to true when the videoconvert element is required
- * @param requires_jpegconvert - will be set to true when the jpegdec element is required
+ * @param requires_bayer(out) - will be set to true when the bayer2rgb element is required
+ * @param requires_vidoeconvert(out) - will be set to true when the videoconvert element is required
+ * @param requires_jpegconvert(out) - will be set to true when the jpegdec element is required
  * @param requires_biteater(out) - will be set to true when the biteater element is required
  * @param use_dutils(in) - false when dutils shall be ignored
  *
@@ -131,7 +131,16 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
                                       const tcam_resolution_description& res);
 
 
-GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatDescription> descriptions);
+GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoFormatDescription>& descriptions);
+
+
+/**
+ * @param desc - vector of VideoFormatDescriptions that shall be converted
+ * @param str(out) - string containing the converted caps
+ * @return true if desc could be converted
+ */
+bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFormatDescription>& descriptions,
+                                                 std::string& str);
 
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);
