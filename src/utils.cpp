@@ -266,6 +266,22 @@ bool tcam::are_equal (const tcam_image_size& s1,
 }
 
 
+bool tcam::in_range (const tcam_image_size& minimum,
+                     const tcam_image_size& maximum,
+                     const tcam_image_size& value)
+{
+    if (minimum.width > value.width || maximum.width < value.width)
+    {
+        return false;
+    }
+    if (minimum.height > value.height || maximum.height < value.height)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 bool tcam::are_equal (const struct tcam_resolution_description& res1,
                       const struct tcam_resolution_description& res2)
 {
@@ -297,7 +313,7 @@ bool tcam::are_equal (const struct tcam_video_format_description& fmt1,
 }
 
 
-bool tcam::is_smaller(const tcam_image_size &s1, const tcam_image_size &s2)
+bool tcam::is_smaller (const tcam_image_size &s1, const tcam_image_size &s2)
 {
     if (s1.height <= s2.height && s1.width <= s2.width)
     {

@@ -144,6 +144,9 @@ bool compare_double (double val1, double val2);
 bool are_equal (const tcam_image_size& s1,
                 const tcam_image_size& s2);
 
+bool in_range (const tcam_image_size& minimum,
+               const tcam_image_size& maximum,
+               const tcam_image_size& value);
 
 bool are_equal (const struct tcam_resolution_description& res1,
                 const struct tcam_resolution_description& res2);
