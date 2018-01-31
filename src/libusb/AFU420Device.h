@@ -301,6 +301,7 @@ private:
     size_t transfered_size_;
     unsigned int offset_;
     std::shared_ptr<MemoryBuffer> current_buffer_;
+    bool have_header;
 
     std::weak_ptr<SinkInterface> listener;
 
@@ -375,7 +376,7 @@ private:
 
 
     int no_buffer_counter = 0;
-    static const int no_buffer_counter_max = 10;
+    static const int no_buffer_counter_max = 100;
     unsigned int usbbulk_chunk_size_ = 0;
     unsigned int usbbulk_image_size_ = 0;
     static const int actual_image_prefix_size_ = 4;

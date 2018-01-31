@@ -881,6 +881,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
                 tcam_error("No buffer to work with. Dropping image");
                 statistics.frames_dropped++;
                 submit_transfer(xfr);
+                have_header = false;
                 return;
             }
 
@@ -888,10 +889,17 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             transfered_size_ = 0;
             offset_ = 0;
         }
+        have_header = true;
     }
 
     if (current_buffer_ == nullptr)
     {
+        if (!have_header)
+        {
+            // lost_image; wait until next one begins
+            submit_transfer(xfr);
+            return;
+        }
         tcam_error("Can not get buffer to fill with image data. Aborting libusb callback.");
         no_buffer_counter++;
         if (no_buffer_counter >= no_buffer_counter_max)
@@ -902,6 +910,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         submit_transfer(xfr);
         return;
     }
+
     no_buffer_counter = 0;
 
     int bytes_available = usbbulk_image_size_ - offset_;
@@ -977,8 +986,9 @@ bool tcam::AFU420Device::start_stream ()
     transfer_items.reserve(num_transfers);
 
     tcam_error("max packet size of endpoint: %zu", usb_device_->get_max_packet_size(USB_EP_BULK_VIDEO));
-
-    size_t buffer_size =  chunk_size;
+    tcam_error("chunk size %zu", chunk_size);
+    //size_t buffer_size =  chunk_size;
+    size_t buffer_size =  1024*1024;
 
     usbbulk_chunk_size_ = chunk_size;
 
