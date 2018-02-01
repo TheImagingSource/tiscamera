@@ -970,7 +970,7 @@ bool tcam::AFU420Device::start_stream ()
     // reset statistics
     statistics = {};
 
-    static const int num_transfers = 40;
+    static const int num_transfers = 12;
     int chunk_size = 0;
 
     if (usb_device_->is_superspeed())
