@@ -278,10 +278,10 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
                                                                          tcam_image_size binning)
 {
 
-    tcam_debug("Creating resolutionconf with input:\nstart: %dx%d\nstream_dim %dx%d\nbinning %d%d",
-               start.width, start.height,
-               stream_dim.width, stream_dim.height,
-               binning.width, binning.height);
+    // tcam_debug("Creating resolutionconf with input:\nstart: %dx%d\nstream_dim %dx%d\nbinning %d%d",
+    //            start.width, start.height,
+    //            stream_dim.width, stream_dim.height,
+    //            binning.width, binning.height);
 
     sResolutionConf res_conf = {};
 
@@ -851,7 +851,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             tcam_debug("transfer is cancelled");
             return;
         }
-		tcam_error("transfer status %d\n", xfr->status);
+		tcam_error("transfer status %d", xfr->status);
         submit_transfer(xfr);
 
         if (lost_countdown == 0)
@@ -985,9 +985,6 @@ bool tcam::AFU420Device::start_stream ()
     transfer_items.clear();
     transfer_items.reserve(num_transfers);
 
-    tcam_error("max packet size of endpoint: %zu", usb_device_->get_max_packet_size(USB_EP_BULK_VIDEO));
-    tcam_error("chunk size %zu", chunk_size);
-    //size_t buffer_size =  chunk_size;
     size_t buffer_size =  1024*1024;
 
     usbbulk_chunk_size_ = chunk_size;
@@ -1052,10 +1049,10 @@ bool tcam::AFU420Device::stop_stream ()
 
 int AFU420Device::set_resolution_config (sResolutionConf conf, resolution_config_mode mode)
 {
-    tcam_info("Setting resolution conf:\n\tbinning %dx%d\n\toffset %dx%d\n\tres: %dx%d",
-              conf.hor_binning, conf.ver_binning,
-              conf.x_addr_start, conf.y_addr_start,
-              conf.x_output_size, conf.y_output_size);
+    // tcam_info("Setting resolution conf:\n\tbinning %dx%d\n\toffset %dx%d\n\tres: %dx%d",
+    //           conf.hor_binning, conf.ver_binning,
+    //           conf.x_addr_start, conf.y_addr_start,
+    //           conf.x_output_size, conf.y_output_size);
 
 
     auto serialized_conf = serialize_resolution_config(conf);
