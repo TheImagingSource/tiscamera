@@ -99,7 +99,7 @@ bool Usb33Camera::upload_firmware (const std::string& firmware_package,
         lib33u::firmware_update::DeviceTypeDesc type_desc;
         for (auto& t : types)
         {
-            if (t.description.compare(firmware))
+            if (t.description == firmware)
             {
                 type_desc = t;
                 break;
