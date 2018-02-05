@@ -1423,6 +1423,11 @@ void V4l2Device::stream ()
                 continue;
             }
 
+            if (!is_stream_on)
+            {
+                break;
+            }
+
             bool ret_value = get_frame();
             if (ret_value)
             {
