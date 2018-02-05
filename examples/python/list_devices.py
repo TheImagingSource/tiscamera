@@ -20,7 +20,7 @@
 
 import sys
 import gi
-
+# gi don't get Tcam
 gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
 
