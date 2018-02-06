@@ -419,34 +419,6 @@ bool gst_caps_are_bayer_only (const GstCaps* caps)
 }
 
 
-std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
-{
-    std::vector<std::string> ret;
-    if (!GST_VALUE_HOLDS_LIST(gst_list))
-    {
-        tcam_error("Given GValue is not a list.");
-        return ret;
-    }
-
-    for (unsigned int x = 0; x < gst_value_list_get_size(gst_list); ++x)
-    {
-        const GValue* val = gst_value_list_get_value(gst_list, x);
-
-        if (G_VALUE_TYPE(val) == G_TYPE_STRING)
-        {
-
-            ret.push_back(g_value_get_string(val));
-        }
-        else
-        {
-            tcam_error("NOT IMPLEMENTED. TYPE CAN NOT BE INTERPRETED");
-        }
-    }
-
-    ret;
-}
-
-
 /**
  * Helper function to get a list of all available fourccs in caps
  */
