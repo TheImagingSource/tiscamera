@@ -34,7 +34,10 @@ bool AFU420Device::create_exposure ()
     prop.value.i.max = 30000000; // 30 seconds
     prop.value.i.step = 100;
 
-    auto value = get_exposure();
+    //auto value = get_exposure();
+
+    int value = 100;
+    set_exposure(value);
 
     prop.value.i.value = value;
     prop.value.i.default_value = value;
@@ -60,6 +63,7 @@ bool AFU420Device::create_gain ()
     if (value == 0)
     {
         value = 292;
+        set_gain(292);
     }
 
     prop.value.i.value = value;
