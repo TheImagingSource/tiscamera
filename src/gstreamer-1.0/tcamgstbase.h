@@ -97,6 +97,10 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
 
 GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatDescription> descriptions);
 
+
+bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);
+
+
 #ifdef __cplusplus
 }
 #endif

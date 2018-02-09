@@ -22,5 +22,6 @@
 #include "AutoFocus.h"
 #include "image_sampling.h"
 #include "bayer.h"
+#include "whitebalance.h"
 
 #endif /* TCAM_ALGORITHM_H */

@@ -596,3 +596,30 @@ GstCaps* convert_videoformatsdescription_to_caps (std::vector<tcam::VideoFormatD
 
     return caps;
 }
+
+
+bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format)
+{
+    if (!caps || !gst_caps_is_fixed(caps) || !format)
+    {
+        return false;
+    }
+
+    *format = {};
+
+    GstStructure* struc = gst_caps_get_structure(caps, 0);
+
+    format->fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
+                                                          gst_structure_get_string(struc, "format"));
+
+    gst_structure_get_int(struc, "width", &format->width);
+    gst_structure_get_int(struc, "height", &format->height);
+
+    int num;
+    int den;
+    gst_structure_get_fraction(struc, "framerate", &num, &den);
+
+    format->framerate = den / num;
+
+    return true;
+}

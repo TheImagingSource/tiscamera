@@ -93,6 +93,10 @@ struct device_resources
     gdouble framerate;
 
     struct device_color color;
+
+    struct tcam_image_buffer buffer;
+
+    struct tcam::algorithms::whitebalance::wb_settings settings;
 };
 
 struct _GstTcamWhitebalance {

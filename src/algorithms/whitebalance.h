@@ -19,6 +19,20 @@
 
 #include "bayer.h"
 
+#include "parallel.h"
+#include <memory>
+
+using namespace tcam::algorithms;
+
+namespace tcam
+{
+
+namespace algorithms
+{
+
+namespace whitebalance
+{
+
 
 struct wb_settings
 {
@@ -27,13 +41,30 @@ struct wb_settings
     rgb_tripel rgb;
     rgb_tripel user_values;
     tBY8Pattern  pattern;
-    unsigned int width;
-    unsigned int height;
-    unsigned char* data;
+
+    std::shared_ptr<parallel::parallel_state> para;
 };
 
 
-void whitebalance_buffer (struct wb_settings* settings);
+struct para_wb_callback : parallel::func_caller
+{
+    wb_settings* settings;
 
+    void call (const tcam_image_buffer& src,
+               const tcam_image_buffer& dst);
+
+};
+
+// void get_sampling_points (struct wb_settings* settings,
+//                           struct tcam_image_buffer& buffer,
+//                           auto_sample_points* points);
+
+void whitebalance_buffer (struct wb_settings* settings, tcam_image_buffer& buffer);
+
+} // namespace algorithms
+
+} // namespace algorithms
+
+} // namespace tcam
 
 #endif /* WHITEBALANCE_H */

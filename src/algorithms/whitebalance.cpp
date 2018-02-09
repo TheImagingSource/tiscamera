@@ -60,12 +60,14 @@ typedef struct auto_sample_points
 
 
 /* retrieve sampling points for image analysis */
-static void get_sampling_points (struct wb_settings* settings, auto_sample_points* points)
+void get_sampling_points (struct tcam::algorithms::whitebalance::wb_settings* settings,
+                          struct tcam_image_buffer& buffer,
+                          auto_sample_points* points)
 {
-    unsigned int* data = (unsigned int*)settings->data;
+    unsigned int* data = (unsigned int*)buffer.pData;
 
-    unsigned int width = settings->width;
-    unsigned int height = settings->height;
+    unsigned int width = buffer.format.width;
+    unsigned int height = buffer.format.height;
 
     static const unsigned int bypp = 1;
 
@@ -167,7 +169,9 @@ bool is_near_gray (uint r, uint g, uint b)
 }
 
 
-rgb_tripel simulate_whitebalance (const auto_sample_points* data, const rgb_tripel* wb, bool enable_near_gray)
+rgb_tripel simulate_whitebalance (const auto_sample_points* data,
+                                  const rgb_tripel* wb,
+                                  bool enable_near_gray)
 {
     rgb_tripel result = { 0, 0, 0 };
     rgb_tripel result_near_gray = { 0, 0, 0 };
@@ -412,12 +416,14 @@ static void wb_line_c (byte* dest_line,
 }
 
 
-static void	wb_image_c (struct wb_settings* settings)
+void tcam::algorithms::whitebalance::para_wb_callback::call (const tcam_image_buffer& image_in,
+                                                             const tcam_image_buffer& /* image_out */)
 {
-    unsigned int* data = (unsigned int*)settings->data;
 
-    unsigned int dim_x = settings->width;
-    unsigned int dim_y = settings->height;
+    unsigned int* data = (unsigned int*)image_in.pData;
+
+    unsigned int dim_x = image_in.format.width;
+    unsigned int dim_y = image_in.format.height;
 
     unsigned int pitch = 8 * dim_x / 8;
 
@@ -448,17 +454,53 @@ static void	wb_image_c (struct wb_settings* settings)
 }
 
 
-void apply_wb_by8_c (struct wb_settings* settings)
+static void	wb_image_c (struct tcam::algorithms::whitebalance::wb_settings* settings,
+                        struct tcam_image_buffer& buffer)
 {
-    wb_image_c(settings);
+    /* unsigned char*           pData;    /\**< pointer to actual image buffer *\/ */
+    /* unsigned int             length;   /\**< size of image in bytes *\/ */
+    /* unsigned int             size;     /\**< size of image buffer in bytes *\/ */
+    /* struct tcam_video_format format;   /\**< tcam_video_format the image buffer has *\/ */
+    /* unsigned int             pitch;    /\**< length of single image line in bytes *\/ */
+    /* struct tcam_stream_statistics statistics; */
+
+    tcam::algorithms::whitebalance::para_wb_callback cb;
+
+    cb.settings = settings;
+
+    //tcam_image_buffer image = {};
+
+    //image.pData = settings->data;
+    //image.
+
+
+    settings->para->queue_and_wait(&cb, buffer, buffer, 0);
+
+
 }
 
 
-void whitebalance_buffer (struct wb_settings* settings)
+void apply_wb_by8_c (struct tcam::algorithms::whitebalance::wb_settings* settings,
+                     struct tcam_image_buffer& buffer)
+{
+    wb_image_c(settings, buffer);
+}
+
+
+
+
+
+void tcam::algorithms::whitebalance::whitebalance_buffer (struct wb_settings* settings,
+                                                          struct tcam_image_buffer& buffer)
 {
     if (settings == NULL)
     {
         return;
+    }
+
+    if (settings->para == nullptr)
+    {
+        settings->para = std::make_shared<parallel::parallel_state>();
     }
 
     rgb_tripel rgb = settings->rgb;
@@ -466,13 +508,13 @@ void whitebalance_buffer (struct wb_settings* settings)
     /* we prefer to set our own values */
     if (settings->auto_whitebalance == false)
     {
-        rgb = settings->user_values;
+        settings->rgb = settings->user_values;
     }
     else /* update the permanent values to represent the current adjustments */
     {
         auto_sample_points points = {};
 
-        get_sampling_points (settings, &points);
+        get_sampling_points (settings, buffer, &points);
 
         unsigned int resulting_brightness = 0;
         auto_whitebalance(&points, &rgb, &resulting_brightness);
@@ -480,5 +522,5 @@ void whitebalance_buffer (struct wb_settings* settings)
         settings->rgb = rgb;
     }
 
-    apply_wb_by8_c(settings);
+    apply_wb_by8_c(settings, buffer);
 }

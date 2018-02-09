@@ -831,8 +831,7 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
     /* return device_set_rgb(&self->res); */
 }
 
-
-static guint clip (guint x, guint max)
+static uint clip (uint x, uint max)
 {
     if ( x > max )
         return max;
@@ -840,21 +839,22 @@ static guint clip (guint x, guint max)
 }
 
 
-guint calc_brightness_from_clr_avg (guint r, guint g, guint b)
+
+uint calc_brightness_from_clr_avg (uint r, uint g, uint b)
 {
     return (r * r_factor + g * g_factor + b * b_factor) >> 8;
 }
 
 
-gboolean is_near_gray (guint r, guint g, guint b)
+bool is_near_gray (uint r, uint g, uint b)
 {
-    guint brightness = calc_brightness_from_clr_avg( r, g, b );
-    if ( brightness < NEARGRAY_MIN_BRIGHTNESS ) return FALSE;
-    if ( brightness > NEARGRAY_MAX_BRIGHTNESS ) return FALSE;
+    uint brightness = calc_brightness_from_clr_avg( r, g, b );
+    if ( brightness < NEARGRAY_MIN_BRIGHTNESS ) return false;
+    if ( brightness > NEARGRAY_MAX_BRIGHTNESS ) return false;
 
-    guint deltaR = abs( (gint)r - (gint)brightness );
-    guint deltaG = abs( (gint)g - (gint)brightness );
-    guint deltaB = abs( (gint)b - (gint)brightness );
+    uint deltaR = abs( (int)r - (int)brightness );
+    uint deltaG = abs( (int)g - (int)brightness );
+    uint deltaB = abs( (int)b - (int)brightness );
 
     float devR = deltaR / (float)brightness;
     float devG = deltaG / (float)brightness;
@@ -866,77 +866,7 @@ gboolean is_near_gray (guint r, guint g, guint b)
 }
 
 
-rgb_tripel simulate_whitebalance (const auto_sample_points* data,
-                                  const rgb_tripel* wb,
-                                  gboolean enable_near_gray)
-{
-    rgb_tripel result = { 0, 0, 0 };
-    rgb_tripel result_near_gray = { 0, 0, 0 };
-    unsigned int count_near_gray = 0;
-
-    guint i;
-    for (i = 0; i < data->cnt; ++i)
-    {
-        unsigned int r = clip( data->samples[i].r * wb->R / WB_IDENTITY, WB_MAX );
-        unsigned int g = clip( data->samples[i].g * wb->G / WB_IDENTITY, WB_MAX );
-        unsigned int b = clip( data->samples[i].b * wb->B / WB_IDENTITY, WB_MAX );
-
-        result.R += r;
-        result.G += g;
-        result.B += b;
-
-        if ( is_near_gray( r, g, b ) )
-        {
-            result_near_gray.R += r;
-            result_near_gray.G += g;
-            result_near_gray.B += b;
-            count_near_gray += 1;
-        }
-    }
-
-    float near_gray_amount = count_near_gray / (float)data->cnt;
-
-    if ((near_gray_amount < NEARGRAY_REQUIRED_AMOUNT) || !enable_near_gray)
-    {
-        result.R /= data->cnt;
-        result.G /= data->cnt;
-        result.B /= data->cnt;
-        return result;
-    }
-    else
-    {
-        result_near_gray.R /= count_near_gray;
-        result_near_gray.G /= count_near_gray;
-        result_near_gray.B /= count_near_gray;
-        return result_near_gray;
-    }
-}
-
-
-static rgb_tripel average_color_cam (const auto_sample_points* data)
-{
-    rgb_tripel result = { 0, 0, 0 };
-
-	guint i;
-    for (i = 0; i < data->cnt; ++i)
-    {
-        unsigned int r =  data->samples[i].r ;
-        unsigned int g = data->samples[i].g ;
-        unsigned int b = data->samples[i].b ;
-
-        result.R += r;
-        result.G += g;
-        result.B += b;
-    }
-
-	result.R /= data->cnt;
-	result.G /= data->cnt;
-	result.B /= data->cnt;
-	return result;
-}
-
-
-gboolean wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
+bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 {
     unsigned int avg = ((clr->R + clr->G + clr->B) / 3);
     int dr = (int)avg - clr->R;
@@ -949,7 +879,7 @@ gboolean wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
         wb->G = clip( wb->G, WB_MAX );
         wb->B = clip( wb->B, WB_MAX );
 
-        return TRUE;
+        return true;
     }
 
     if ((clr->R > avg) && (wb->R > WB_IDENTITY))
@@ -989,11 +919,58 @@ gboolean wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
         wb->B -= 1;
     }
 
-    return FALSE;
+    return false;
 }
 
 
-gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guint* resulting_brightness)
+rgb_tripel simulate_whitebalance (const auto_sample_points* data,
+                                  const rgb_tripel* wb,
+                                  bool enable_near_gray)
+{
+    rgb_tripel result = { 0, 0, 0 };
+    rgb_tripel result_near_gray = { 0, 0, 0 };
+    unsigned int count_near_gray = 0;
+
+    uint i;
+    for (i = 0; i < data->cnt; ++i)
+    {
+        unsigned int r = clip( data->samples[i].r * wb->R / WB_IDENTITY, WB_MAX );
+        unsigned int g = clip( data->samples[i].g * wb->G / WB_IDENTITY, WB_MAX );
+        unsigned int b = clip( data->samples[i].b * wb->B / WB_IDENTITY, WB_MAX );
+
+        result.R += r;
+        result.G += g;
+        result.B += b;
+
+        if ( is_near_gray( r, g, b ) )
+        {
+            result_near_gray.R += r;
+            result_near_gray.G += g;
+            result_near_gray.B += b;
+            count_near_gray += 1;
+        }
+    }
+
+    float near_gray_amount = count_near_gray / (float)data->cnt;
+
+    if ((near_gray_amount < NEARGRAY_REQUIRED_AMOUNT) || !enable_near_gray)
+    {
+        result.R /= data->cnt;
+        result.G /= data->cnt;
+        result.B /= data->cnt;
+        return result;
+    }
+    else
+    {
+        result_near_gray.R /= count_near_gray;
+        result_near_gray.G /= count_near_gray;
+        result_near_gray.B /= count_near_gray;
+        return result_near_gray;
+    }
+}
+
+
+bool auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, uint* resulting_brightness)
 {
     rgb_tripel old_wb = *wb;
     if (wb->R < WB_IDENTITY)
@@ -1003,7 +980,7 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
     if (wb->B < WB_IDENTITY)
         wb->B = WB_IDENTITY;
     if (old_wb.R != wb->R || old_wb.G != wb->G || old_wb.B != wb->B)
-        return FALSE;
+        return false;
 
     while ((wb->R > WB_IDENTITY) && (wb->G > WB_IDENTITY) && (wb->B > WB_IDENTITY))
     {
@@ -1015,149 +992,23 @@ gboolean auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, guin
     unsigned int steps = 0;
     while (steps++ < MAX_STEPS)
     {
-        rgb_tripel tmp = simulate_whitebalance( data, wb, TRUE );
+        rgb_tripel tmp = simulate_whitebalance(data, wb, true);
 
         // Simulate white balance once more, this time always on the whole image
-        rgb_tripel tmp2 = simulate_whitebalance(data, wb, FALSE);
-        *resulting_brightness = calc_brightness_from_clr_avg(tmp2.R, tmp2.G, tmp2.B);
+        rgb_tripel tmp2 = simulate_whitebalance(data, wb, false);
+        *resulting_brightness = calc_brightness_from_clr_avg( tmp2.R, tmp2.G, tmp2.B );
 
         if (wb_auto_step(&tmp, wb))
         {
-            return TRUE;
+            return true;
         }
     }
     wb->R = clip( wb->R, WB_MAX );
     wb->G = clip( wb->G, WB_MAX );
     wb->B = clip( wb->B, WB_MAX );
 
-    return FALSE;
+    return false;
 }
-
-
-gboolean auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb )
-{
-    rgb_tripel old_wb = *wb;
-
-    if (wb->R < WB_IDENTITY)
-        wb->R = WB_IDENTITY;
-    if (wb->G < WB_IDENTITY)
-        wb->G = WB_IDENTITY;
-    if (wb->B < WB_IDENTITY)
-        wb->B = WB_IDENTITY;
-    if (old_wb.R != wb->R || old_wb.G != wb->G || old_wb.B != wb->B)
-        return FALSE;
-
-    while ((wb->R > WB_IDENTITY) && (wb->G > WB_IDENTITY) && (wb->B > WB_IDENTITY))
-    {
-        wb->R -= 1;
-        wb->G -= 1;
-        wb->B -= 1;
-    }
-
-    rgb_tripel averageColor = average_color_cam( data);
-    if (wb_auto_step(&averageColor, wb))
-    {
-        return TRUE;
-    }
-
-    wb->R = clip( wb->R, WB_MAX );
-    wb->G = clip( wb->G, WB_MAX );
-    wb->B = clip( wb->B, WB_MAX );
-
-    GST_INFO("Calculated white balance R:%d G:%d B:%d", wb->R, wb->G, wb->B);
-
-    return FALSE;
-}
-
-
-byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern pattern)
-{
-    unsigned int val = pixel;
-    switch (pattern)
-    {
-        case BG:
-            val = (val * wb_b) / 64;
-            break;
-        case GB:
-            val = (val * wb_g) / 64;
-            break;
-        case GR:
-            val = (val * wb_g) / 64;
-            break;
-        case RG:
-            val = (val * wb_r) / 64;
-            break;
-    };
-    return ( val > 0xFF ? 0xFF : (byte)(val));
-}
-
-
-static void wb_line_c (byte* dest_line,
-                       byte* src_line,
-                       unsigned int dim_x,
-                       byte wb_r, byte wb_g, byte wb_b,
-                       tBY8Pattern pattern)
-{
-    const tBY8Pattern even_pattern = pattern;
-    const tBY8Pattern odd_pattern = next_pixel(pattern);
-    guint x;
-    for (x = 0; x < dim_x; x += 2)
-    {
-        unsigned int v0 = wb_pixel_c( src_line[x], wb_r, wb_g, wb_b,even_pattern );
-        unsigned int v1 = wb_pixel_c( src_line[x+1], wb_r, wb_g, wb_b, odd_pattern );
-        *((guint16*)(dest_line + x)) = (guint16)(v1 << 8 | v0);
-    }
-
-    if (x == (dim_x - 1))
-    {
-        dest_line[x] = wb_pixel_c( src_line[x], wb_r, wb_g, wb_b, even_pattern );
-    }
-}
-
-
-static void	wb_image_c (GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte wb_g, byte wb_b)
-{
-    GstMapInfo info;
-    gst_buffer_make_writable(buf);
-
-    gst_buffer_map(buf, &info, GST_MAP_WRITE);
-
-    guint* data = (guint*)info.data;
-
-    unsigned int dim_x = self->image_size.width;
-    unsigned int dim_y = self->image_size.height;
-
-    guint pitch = 8 * dim_x / 8;
-
-    tBY8Pattern odd = next_line(self->pattern);
-
-    guint y;
-    for (y = 0 ; y < (dim_y - 1); y += 2)
-    {
-        byte* line0 = (byte*)data + y * pitch;
-        byte* line1 = (byte*)data + (y + 1) * pitch;
-
-        wb_line_c(line0, line0, dim_x, wb_r, wb_g, wb_b, self->pattern);
-        wb_line_c(line1, line1, dim_x, wb_r, wb_g, wb_b, odd);
-    }
-
-    if (y == (dim_y - 1))
-    {
-        byte* line = (byte*)data + y * pitch;
-        wb_line_c(line, line, dim_x, wb_r, wb_g, wb_b, self->pattern);
-    }
-
-    gst_buffer_unmap(buf, &info);
-}
-
-
-void apply_wb_by8_c ( GstTcamWhitebalance* self, GstBuffer* buf, byte wb_r, byte wb_g, byte wb_b)
-{
-    GST_DEBUG("Applying white balance with values: R:%d G:%d B:%d", wb_r, wb_g, wb_b);
-
-    wb_image_c( self, buf, wb_r, wb_g, wb_b);
-}
-
 
 static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 {
@@ -1169,9 +1020,13 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
         rgb.R = self->red;
         rgb.G = self->green;
         rgb.B = self->blue;
+
+        self->res.settings.user_values = rgb;
+        self->res.settings.auto_whitebalance = false;
     }
     else /* update the permanent values to represent the current adjustments */
     {
+        self->res.settings.auto_whitebalance = true;
         auto_sample_points points = {};
 
         GstMapInfo info;
@@ -1200,7 +1055,13 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
     }
     else
     {
-        apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+        //apply_wb_by8_c(self, buf, rgb.R, rgb.G, rgb.B);
+
+        self->res.settings.rgb = self->rgb;
+
+        tcam::algorithms::whitebalance::whitebalance_buffer(&self->res.settings, self->res.buffer);
+
+        self->rgb = self->res.settings.rgb;
     }
 }
 
@@ -1363,6 +1224,8 @@ static gboolean extract_resolution (GstTcamWhitebalance* self)
 
     self->res = find_source(GST_ELEMENT(self));
 
+    gst_caps_to_tcam_video_format(caps , &self->res.buffer.format);
+
     return TRUE;
 }
 
@@ -1416,6 +1279,12 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
         GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
         return GST_FLOW_OK;
     }
+
+    self->res.buffer.pData = (unsigned char*)data;
+    self->res.buffer.length = length;
+
+    self->res.settings.whitebalance_is_active = self->auto_wb;
+    self->res.settings.pattern = self->pattern;
 
     whitebalance_buffer(self, buf);
 
