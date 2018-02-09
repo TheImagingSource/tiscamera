@@ -39,8 +39,6 @@ DeviceIndex::DeviceIndex ()
 {
     continue_thread = true;
     work_thread = std::thread (&DeviceIndex::run, this);
-
-    work_thread.detach();
 }
 
 
