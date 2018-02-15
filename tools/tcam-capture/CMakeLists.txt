@@ -17,7 +17,7 @@ find_package(PythonInterp REQUIRED)
 if (PYTHONINTERP_FOUND)
   set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/tcamgigetool")
 
-  install(FILES tcam-capture
+  install(PROGRAMS tcam-capture
     DESTINATION bin
     COMPONENT tcam-capture)
 
