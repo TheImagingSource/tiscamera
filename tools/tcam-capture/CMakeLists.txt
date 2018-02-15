@@ -23,6 +23,8 @@ if (PYTHONINTERP_FOUND)
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture"
     DESTINATION "${TCAM_CAPTURE_PY_INSTALL}"
-    COMPONENT tcam-capture)
+    COMPONENT tcam-capture
+    PATTERN "__pycache__" EXCLUDE
+)
 
 endif (PYTHONINTERP_FOUND)
