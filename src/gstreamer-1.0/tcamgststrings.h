@@ -259,6 +259,32 @@ const char* tcam_fourcc_to_gst_1_0_caps_string (uint32_t fourcc)
 }
 
 
+const char* tcam_fourcc_to_gst_1_0_caps_name (uint32_t fourcc)
+{
+    for (unsigned int i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+    {
+        if (fourcc == tcam_gst_caps_info[i].fourcc)
+        {
+            return tcam_gst_caps_info[i].gst_1_0_name;
+        }
+    }
+    return NULL;
+}
+
+
+const char* tcam_fourcc_to_gst_1_0_caps_format (uint32_t fourcc)
+{
+    for (unsigned int i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
+    {
+        if (fourcc == tcam_gst_caps_info[i].fourcc)
+        {
+            return tcam_gst_caps_info[i].gst_format;
+        }
+    }
+    return NULL;
+}
+
+
 uint32_t tcam_fourcc_from_gst_1_0_caps_string (const char* name, const char* format)
 {
 
