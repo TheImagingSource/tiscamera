@@ -22,6 +22,9 @@
 #include <string.h> // strcmp
 #include <algorithm> //std::find
 
+#include "tcamgststrings.h"
+
+
 GstElement* tcam_gst_find_camera_src (GstElement* element)
 {
 

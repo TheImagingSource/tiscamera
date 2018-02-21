@@ -18,6 +18,7 @@
 #include <gst/video/video.h>
 
 #include "tcamgstbase.h"
+#include "tcamgststrings.h"
 
 enum
 {

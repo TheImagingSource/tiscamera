@@ -17,6 +17,7 @@
 #include "gsttcamsrc.h"
 
 #include "tcamgstbase.h"
+#include "tcamgststrings.h"
 
 #include "tcamprop.h"
 #include "tcam.h"

@@ -20,7 +20,6 @@
 #include <stdint.h>
 
 #include "tcam.h"
-#include "tcamgststrings.h"
 
 #include <gst/gst.h>
 
