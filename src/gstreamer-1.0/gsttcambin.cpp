@@ -831,7 +831,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
                       || tcam_gst_is_bayer12_packed_string(string)
                       || tcam_gst_is_bayer16_string(string)))
             {
-                GST_ERROR("HIT");
                 gst_caps_append_structure(to_remove, gst_structure_copy(struc));
             }
 
@@ -841,7 +840,11 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
     gst_caps_unref(incoming);
 
-    all_caps = gst_caps_subtract(all_caps, to_remove);
+    // TODO: find alternative
+    // caps_substract implicitly calls gst_caps_simplify
+    // this causes 'weird' caps like video/x-raw,format=rggb,width={2448, 2048},height=2048
+    // these are hard to parse and should be avoided.
+    // all_caps = gst_caps_subtract(all_caps, to_remove);
 
     gst_caps_unref(to_remove);
     return all_caps;
