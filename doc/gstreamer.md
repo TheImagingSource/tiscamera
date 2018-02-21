@@ -23,13 +23,27 @@ Color correction for bayer images.
 
 Allows for cameras with focus elements to automatically adjust focus.
 
+#### tcamdutils
+
+Closed source optional transformation and interpretation filter.
+Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
+Implements features like HDR.
+Optimized for x64 plattforms.
+
+#### tcambiteater
+
+Converts BGRx 64-bit to BGRx 32-Bit. Only required when using tcamdutils.
+
 #### tcambin
 
-Wrapper around all the previous elements, allowing for an easy all in one handling.
+Wrapper around all the previous elements, allowing for an easy all-in-one handling.
+The tcambin will prefer bayer 8-bit over bayer 12/16-bit. Currently tcamdutils are required
+for a correct conversion of these formats. Since tcamdutils are an optional module it existence
+can not be expected. To ensure identical whether or not tcamdutils are installed bayer 8-bit will be preferred unless the user explicitly specifies bayer 12/16-bit for the source through the property 'device-caps'.
 
 ## Useful modules
 
-#### clockovlerlay
+#### clockoverlay
 
 Allows overlays of timestamps or duration's.
 
@@ -56,6 +70,9 @@ For further info please consult the
 
 Change the framerate by duplicating or dropping frames.
 
+#### videoscale
+
+
 
 ## Debugging
 
@@ -65,6 +82,6 @@ For further info please consult the
 ## Environment
 
 To add additional directories to the gstreamer search path you need to set
-GST_PLUGIN_SYSTEM_PATH_1_0.
+GST_PLUGIN_PATH_1_0.
 
-    export GST_PLUGIN_SYSTEM_PATH_1_0="/home/user/tiscamera/build/src/gstreamer-1.0/:${GST_PLUGIN_SYSTEM_PATH_1_0}"
+    export GST_PLUGIN_PATH_1_0="/home/user/tiscamera/build/src/gstreamer-1.0/:${GST_PLUGIN_SYSTEM_PATH_1_0}"
