@@ -845,21 +845,21 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
     if (debayer)
     {
-    if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
-        && gst_element_factory_can_sink_any_caps(debayer, available_caps))
-    {
-        requires_bayer = true;
-        // wanted_caps can be fixed, etc.
-        // thus change name to be compatible to bayer2rgb sink pad
-        // and create a correct intersection
-        GstCaps* temp = gst_caps_copy(wanted_caps);
-        gst_caps_change_name(temp, "video/x-bayer");
+        if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+            && gst_element_factory_can_sink_any_caps(debayer, available_caps))
+        {
+            requires_bayer = true;
+            // wanted_caps can be fixed, etc.
+            // thus change name to be compatible to bayer2rgb sink pad
+            // and create a correct intersection
+            GstCaps* temp = gst_caps_copy(wanted_caps);
+            gst_caps_change_name(temp, "video/x-bayer");
 
-        GstCaps* ret = gst_caps_intersect(available_caps, temp);
-        gst_caps_unref(temp);
-        gst_object_unref(debayer);
-        return ret;
-    }
+            GstCaps* ret = gst_caps_intersect(available_caps, temp);
+            gst_caps_unref(temp);
+            gst_object_unref(debayer);
+            return ret;
+        }
     }
     gst_object_unref(debayer);
 
@@ -868,31 +868,31 @@ GstCaps* find_input_caps (GstCaps* available_caps,
     if (convert)
     {
         if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
-        && gst_element_factory_can_sink_any_caps(convert, available_caps))
-    {
-        requires_vidoeconvert = true;
-        // wanted_caps can be fixed, etc.
-
-        GstCaps* in = get_caps_from_element("videoconvert", "sink");
-
-        // this removes things like jpeg
-        GstCaps* ret = gst_caps_intersect(available_caps, in);
-
-        GstCaps* temp = gst_caps_copy(wanted_caps);
-        for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
+            && gst_element_factory_can_sink_any_caps(convert, available_caps))
         {
-            gst_structure_remove_field(gst_caps_get_structure(temp, i), "format");
+            requires_vidoeconvert = true;
+            // wanted_caps can be fixed, etc.
+
+            GstCaps* in = get_caps_from_element("videoconvert", "sink");
+
+            // this removes things like jpeg
+            GstCaps* ret = gst_caps_intersect(available_caps, in);
+
+            GstCaps* temp = gst_caps_copy(wanted_caps);
+            for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
+            {
+                gst_structure_remove_field(gst_caps_get_structure(temp, i), "format");
+            }
+
+            GstCaps* ret2 = gst_caps_intersect(ret, temp);
+            gst_caps_unref(in);
+            gst_caps_unref(ret);
+            gst_object_unref(convert);
+            return ret2;
         }
-
-        GstCaps* ret2 = gst_caps_intersect(ret, temp);
-        gst_caps_unref(in);
-        gst_caps_unref(ret);
         gst_object_unref(convert);
-        return ret2;
-    }
-    gst_object_unref(convert);
 
-}
+    }
 
     GstElementFactory* jpegdec = gst_element_factory_find("jpegdec");
 
