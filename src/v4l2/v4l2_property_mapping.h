@@ -312,7 +312,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         .id = TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
-        .v4l2_id = { 0x199e228 },
+        .v4l2_id = { 0x199e253 },
     },
 
 
