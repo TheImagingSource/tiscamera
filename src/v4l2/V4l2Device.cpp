@@ -516,17 +516,22 @@ bool V4l2Device::start_stream ()
 
 bool V4l2Device::stop_stream ()
 {
-    is_stream_on = false;
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    int ret = 0;
 
-    int ret = tcam_xioctl(fd, VIDIOC_STREAMOFF, &type);
+    if (is_stream_on)
+    {
+        ret = tcam_xioctl(fd, VIDIOC_STREAMOFF, &type);
+    }
 
     if (ret < 0)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMOFF %d", errno);
         return false;
     }
+
+    is_stream_on = false;
 
     if (work_thread.joinable())
     {
