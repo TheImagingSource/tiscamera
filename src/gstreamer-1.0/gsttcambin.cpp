@@ -991,6 +991,24 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             set_target_pad(self, self->target_pad);
 
+            /*
+             * We send this message as a means of always notifying
+             * applications of the output caps we use.
+             * This is done for the case where no output caps are given
+             * and the bin selected the caps that shall go out.
+             * With this message applications have a way of displaying
+             * the selected caps, no matter what.
+             */
+
+            const gchar* caps_info_string = g_strdup_printf("Working with src caps: %s",
+                                                            gst_caps_to_string(self->src_caps));
+
+            GstMessage* msg = gst_message_new_info(GST_OBJECT(element),
+                                                   nullptr,
+                                                   caps_info_string);
+            g_free(caps_info_string);
+            gst_element_post_message(element, msg);
+
             break;
         }
     }
