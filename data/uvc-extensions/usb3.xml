@@ -230,7 +230,7 @@
     </constant>
     <constant type="integer">
       <id>V4L2_AUTO_ROI_PRESET</id>
-      <value>0x0199e2510</value>
+      <value>0x0199e258</value>
     </constant>
     <constant type="integer">
       <id>V4L2_AUTO_ROI_LEFT</id>
