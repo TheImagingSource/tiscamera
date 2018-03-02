@@ -15,7 +15,7 @@
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget,
-                             QFormLayout, QPushButton)
+                             QFormLayout, QPushButton, QScrollArea)
 
 from PyQt5.QtCore import QObject
 
@@ -187,7 +187,10 @@ class PropertyDialog(QWidget):
         for t in tab_list:
             tab = self.tab_dict[t]
             if tab.get_property_count() > 0:
-                self.tabs.addTab(tab, t)
+                # wrap in scrollarea to ensure accessability
+                area = QScrollArea()
+                area.setWidget(tab)
+                self.tabs.addTab(area, t)
                 tab.finish_setup()
             else:
                 tab.setVisible(False)
