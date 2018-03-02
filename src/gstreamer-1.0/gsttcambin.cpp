@@ -534,7 +534,7 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     }
     if (self->biteater)
     {
-        remove_element(self->dutils);
+        remove_element(self->biteater);
     }
     if (self->exposure)
     {
