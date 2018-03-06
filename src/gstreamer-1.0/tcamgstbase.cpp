@@ -617,7 +617,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
-        GST_ERROR("Cannot fixate largest caps. Returning NULL");
+        tcam_error("Cannot fixate largest caps. Returning NULL");
         return nullptr;
     }
 
@@ -752,6 +752,89 @@ GstCaps* get_caps_from_element (const char* elementname, const char* padname)
 }
 
 
+std::vector<std::string> index_caps_formats (GstCaps* caps)
+{
+    std::vector<std::string> ret;
+
+    for (int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
+        {
+            auto vec = gst_list_to_vector(gst_structure_get_value(struc, "format"));
+
+            for (const auto& v : vec)
+            {
+                std::string str = gst_structure_get_name(struc);
+                str += ",format=";
+                str += v;
+                ret.push_back(str);
+            }
+        }
+        else if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
+        {
+            std::string str = gst_structure_get_name(struc);
+            str += ",format=";
+            str += gst_structure_get_string(struc, "format");
+            ret.push_back(str);
+        }
+    }
+
+    std::sort(ret.begin(), ret.end());
+    ret.erase(std::unique(ret.begin(), ret.end()));
+
+    return std::move(ret);
+}
+
+
+/**
+ * @param formats - GstCaps from which the format and name shall be used
+ * @param rest - GstCaps from which the rest i.e. width,height,framerate, shall be used, is_fixed has to be true
+ * @return GstCaps containing merged caps, user takes ownership
+ */
+GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
+{
+    if (!gst_caps_is_fixed(rest))
+    {
+        return nullptr;
+    }
+
+    auto st = gst_caps_get_structure(rest, 0);
+    auto width = gst_structure_get_value(st, "width");
+    auto height = gst_structure_get_value(st, "height");
+    auto framerate = gst_structure_get_value(st, "framerate");
+
+    auto caps_formats =  index_caps_formats(formats);
+
+    GstCaps* ret = gst_caps_new_empty();
+
+    for (const auto& fmt : caps_formats)
+    {
+        GstCaps* tmp = gst_caps_from_string(fmt.c_str());
+
+        if (width)
+        {
+            gst_caps_set_value(tmp, "width", width);
+        }
+        if (height)
+        {
+            gst_caps_set_value(tmp, "height", height);
+        }
+        if (framerate)
+        {
+            gst_caps_set_value(tmp, "framerate", framerate);
+        }
+        tcam_error("%s", gst_caps_to_string(tmp));
+
+        gst_caps_append(ret, tmp);
+    }
+
+    return ret;
+}
+
+
+
 /**
  * This function works as follows (please edit when changin)
  * Check if input directly supports wanted caps
@@ -831,8 +914,28 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                 }
                 else // dutils only
                 {
-                    GstCaps* ret = gst_caps_copy(available_caps);
                     gst_object_unref(biteater);
+                    GstCaps* ret;
+                    if (!gst_caps_is_fixed(available_caps))
+                    {
+                        GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
+
+                        ret = gst_caps_intersect(available_caps, possible_matches);
+                        gst_caps_unref(possible_matches);
+                    }
+                    else
+                    {
+                        ret = available_caps;
+                    }
+                    requires_vidoeconvert = true;
+
+                    if (!ret)
+                    {
+                        // TODO not compatible
+                        tcam_error("No intersecting caps between dutils and src");
+                        return nullptr;
+                    }
+
                     return ret;
                 }
                 gst_object_unref(biteater);
