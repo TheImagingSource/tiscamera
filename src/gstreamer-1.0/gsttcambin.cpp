@@ -552,6 +552,10 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     {
         remove_element(self->focus);
     }
+    if (self->convert)
+    {
+        remove_element(self->convert);
+    }
 }
 
 
