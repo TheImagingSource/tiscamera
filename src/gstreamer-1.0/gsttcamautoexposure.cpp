@@ -57,6 +57,10 @@ static void gst_tcamautoexposure_get_property (GObject* object,
                                                GParamSpec* pspec);
 static void gst_tcamautoexposure_finalize (GObject* object);
 
+
+static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
+                                                               GstStateChange trans);
+
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
                                                         GstBuffer* buf);
 
@@ -980,6 +984,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
+    ((GstElementClass*) klass)->change_state = gst_tcamautoexposure_change_state;
 
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
@@ -1350,6 +1355,69 @@ static void init_camera_resources (GstTcamautoexposure* self)
 }
 
 
+
+static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
+                                                               GstStateChange trans)
+{
+    GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
+
+    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(element);
+
+    switch(trans)
+    {
+        case GST_STATE_CHANGE_NULL_TO_READY:
+        {
+            break;
+        }
+        case GST_STATE_CHANGE_READY_TO_PAUSED:
+        {
+
+            if (self->camera_src == NULL)
+            {
+                self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+                if (self->camera_src == nullptr)
+                {
+                    return GST_STATE_CHANGE_FAILURE;
+                }
+                else
+                {
+                    init_camera_resources(self);
+                }
+            }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    ret = GST_ELEMENT_CLASS(element)->change_state(element, trans);
+    if (ret == GST_STATE_CHANGE_FAILURE)
+    {
+        return ret;
+    }
+
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_PAUSED_TO_READY:
+        {
+            break;
+        }
+        case GST_STATE_CHANGE_READY_TO_NULL:
+        {
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    return ret;
+}
+
+
 static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 {
     if (!G_IS_OBJECT(self->camera_src))
@@ -1603,7 +1671,7 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
     }
 
     if (self->image_region.x0 >= (self->image_size.width -
-				  self->image_region.x1))
+                                  self->image_region.x1))
     {
         self->image_region.x0 = self->image_size.width -
 	   ( self->image_region.x1);
