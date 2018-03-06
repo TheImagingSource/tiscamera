@@ -14,6 +14,7 @@
 
 import re
 import functools
+from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
@@ -113,6 +114,9 @@ class TcamScreen(QtWidgets.QGraphicsView):
     def on_new_pixmap(self, pixmap):
         self.pix.setPixmap(pixmap)
         self.send_mouse_pixel()
+        # don't call repaint here
+        # it causes problems once the screen goes blank due to screensavers, etc
+        # self.repaint()
 
     def send_mouse_pixel(self):
 
@@ -181,6 +185,7 @@ class TcamView(QWidget):
 
     image_saved = pyqtSignal(str)
     new_pixel_under_mouse = pyqtSignal(bool, QtGui.QColor)
+    format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
 
     def __init__(self, serial, parent=None):
         super(TcamView, self).__init__(parent)
@@ -202,6 +207,15 @@ class TcamView(QWidget):
         self.current_height = 0
         self.device_lost_callbacks = []
         self.format_menu = None
+        self.caps_desc = None
+        self.video_format = None
+        self.retry_countdown = 5
+
+    def get_caps_desc(self):
+        if not self.caps_desc:
+            caps = self.get_tcam().get_static_pad("src").query_caps()
+            self.caps_desc = CapsDesc(caps)
+        return self.caps_desc
 
     def new_pixel_under_mouse_slot(self, active: bool, color: QtGui.QColor):
         self.new_pixel_under_mouse.emit(active, color)
@@ -252,6 +266,7 @@ class TcamView(QWidget):
         if self.pipeline.get_state(1000000).state == Gst.State.PLAYING:
             log.debug("Setting pipeline to READY")
             self.pipeline.set_state(Gst.State.NULL)
+        self.video_format = video_format
         if video_format is not None:
             log.info("Setting format to {}".format(video_format))
             caps = self.pipeline.get_by_name("bin")
@@ -271,8 +286,6 @@ class TcamView(QWidget):
                 self.current_width = struc.get_value("width")
             if self.current_height == 0:
                 self.current_height = struc.get_value("height")
-
-            # buffer_format = struc.get_value("format")
 
             self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
                                                               struc.get_value("width"),
@@ -317,6 +330,7 @@ class TcamView(QWidget):
         self.bus.enable_sync_message_emission()
         self.bus.connect('message::state-changed', self.on_state_changed)
         self.bus.connect('message::error', self.on_error)
+        self.bus.connect('message::info', self.on_info)
 
         self.data.tcam = self.pipeline.get_by_name("bin")
 
@@ -325,13 +339,50 @@ class TcamView(QWidget):
 
     def pause(self):
         log.info("Setting state to PAUSED")
-        self.pipeline.set_state(Gst.State.PAUSED)
+        if self.pipeline:
+            self.pipeline.set_state(Gst.State.PAUSED)
+        else:
+            log.error("Pipeline object does not exist.")
 
     def stop(self):
         log.info("Setting state to NULL")
 
         self.pipeline.set_state(Gst.State.NULL)
         log.info("Set State to NULL")
+
+    def on_info(self, bus, msg):
+        info, dbg = msg.parse_info()
+
+        log.error(dbg)
+
+        if msg.src.get_name() == "bin":
+
+            if dbg.startswith("Working with src caps:"):
+                log.info("{}".format(dbg.split(": ")[1]))
+                self.fire_format_selected(dbg.split(": ")[1])
+            else:
+                log.error("Info from bin: {}".format(dbg))
+        else:
+            log.error("ERROR:", msg.src.get_name())  # , ":", info.message)
+            if dbg:
+                log.debug("Debug info:", dbg)
+
+    def fire_format_selected(self, caps: str):
+
+        c = Gst.Caps.from_string(caps)
+
+        structure = c.get_structure(0)
+
+        if structure.get_name() == "image/jpeg":
+            fmt = "jpeg"
+        else:
+            fmt = structure.get_value("format")
+
+        resolution = "{}x{}".format(structure.get_value("width"),
+                                    structure.get_value("height"))
+
+        fps = structure.get_value("framerate")
+        self.format_selected.emit(fmt, resolution, str(fps))
 
     def on_error(self, bus, msg):
         err, dbg = msg.parse_error()
@@ -342,6 +393,17 @@ class TcamView(QWidget):
                 self.fire_device_lost()
             else:
                 log.error("Error from source: {}".format(err.message))
+
+                self.retry_countdown -= 1
+
+                if self.retry_countdown == 0:
+                    log.error("Repeatedly retried to start stream. No Success. Giving up.")
+                    return
+
+                log.info("Trying restart of stream")
+                self.stop()
+                self.play(self.video_format)
+
         else:
             log.error("ERROR:", msg.src.get_name(), ":", err.message)
             if dbg:
