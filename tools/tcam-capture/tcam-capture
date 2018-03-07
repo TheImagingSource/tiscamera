@@ -51,8 +51,8 @@ class TcamComboBox(QComboBox):
     """
     def __init__(self, parent=None, default: str = None):
         super(TcamComboBox, self).__init__(parent)
-        self.default_entry: str = default
-        self.default_present: bool = True
+        self.default_entry = default
+        self.default_present = True
 
     def reset(self):
 
