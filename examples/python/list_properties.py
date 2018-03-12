@@ -32,6 +32,7 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Tcam, Gst
 
+from list_devices import select_camera
 import common
 
 def print_help():
