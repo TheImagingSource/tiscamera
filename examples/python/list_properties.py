@@ -80,10 +80,11 @@ def main():
             continue
 
         if value_type == "integer" or value_type == "double":
-            print("{}(integer) value: {} default: {} min: {} max: {} grouping: {} - {}".format(name,
-                                                                                               value, default_value,
-                                                                                               min_value, max_value,
-                                                                                               category, group))
+            print("{}({}) value: {} default: {} min: {} max: {} grouping: {} - {}".format(name,
+                                                                            value_type,
+                                                                            value, default_value,
+                                                                            min_value, max_value,
+                                                                            category, group))
         elif value_type == "string":
             print("{}(string) value: {} default: {} grouping: {} - {}".format(name, value, default_value, category, group))
         elif value_type == "button":
