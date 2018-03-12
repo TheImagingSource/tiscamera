@@ -55,8 +55,6 @@ struct _GstTcamBin
     GstElement* convert;
     GstElement* out_caps = nullptr;
 
-    GstElement* kid;
-
     char* device_serial;
 
     GstCaps* target_caps = nullptr;

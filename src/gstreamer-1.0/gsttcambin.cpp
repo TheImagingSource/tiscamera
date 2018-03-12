@@ -465,19 +465,6 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
                                                                    GST_STATIC_CAPS_ANY);
 
 
-static void gst_tcambin_clear_kid (GstTcamBin* src)
-{
-    if (src->kid)
-    {
-        gst_element_set_state (src->kid, GST_STATE_NULL);
-        gst_bin_remove (GST_BIN (src), src->kid);
-        src->kid = NULL;
-        /* Don't loose SOURCE flag */
-        GST_OBJECT_FLAG_SET (src, GST_ELEMENT_FLAG_SOURCE);
-    }
-}
-
-
 static gboolean gst_tcambin_create_source (GstTcamBin* self)
 {
     gst_tcambin_clear_source(self);
