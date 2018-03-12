@@ -75,7 +75,8 @@ def select_camera(source):
     for s in serials:
 
         device_list.append(s)
-        print("{} - {}".format(index, s))
+        info = source.get_device_info(s)
+        print("{} - {} - {}".format(index, s, info[1]))
         index = index + 1
 
     # get input from user and only stop asking when
