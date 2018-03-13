@@ -1015,10 +1015,10 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                        0, G_MAXINT, 0,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
-                                     PROP_GAIN_MAX,
+                                     PROP_GAIN_MIN,
                                      g_param_spec_double ("gain-min",
-                                                          "Gain Maximum",
-                                                          "Maximum value gain can take",
+                                                          "Gain Minimum",
+                                                          "Minimum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
