@@ -95,6 +95,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.new_pixmap.connect(self.on_new_pixmap)
         self.pix = ViewItem()
         self.scene.addItem(self.pix)
+        self.scene.setSceneRect(self.pix.boundingRect())
 
         self.factor = 1.0
         self.pix_width = 0
@@ -170,6 +171,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.scene_position_x = delta.x()
         self.scene_position_y = delta.y()
         self.translate(delta.x(), delta.y())
+
+        self.scene.setSceneRect(self.pix.boundingRect())
 
     def set_scale_position(self, scale_factor, x, y):
         self.scale(scale_factor, scale_factor)
