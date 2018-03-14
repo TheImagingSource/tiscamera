@@ -387,12 +387,13 @@ class TCamCapture(QMainWindow):
         self.close()
         self.serial = serial
 
-        for dev in self.device_list:
-            if dev.serial == serial:
-                self.setWindowTitle("TCam Capture - {}({})".format(dev.model, serial))
-                # update device menu so that mark on opened camera is drawn
-                self.update_device_list(self.device_list)
-                break
+        if self.device_list:
+            for dev in self.device_list:
+                if dev.serial == serial:
+                    self.setWindowTitle("TCam Capture - {}({})".format(dev.model, serial))
+                    # update device menu so that mark on opened camera is drawn
+                    self.update_device_list(self.device_list)
+                    break
 
         self.view = TcamView(self.serial, self)
         self.view.register_device_lost(self.lost_device)
