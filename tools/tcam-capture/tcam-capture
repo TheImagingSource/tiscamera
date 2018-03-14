@@ -151,6 +151,9 @@ class TCamCapture(QMainWindow):
     def setup_ui(self):
 
         self.pixel_label = QLabel("", self)
+        self.pixel_label.setFixedWidth(100)
+        self.pixel_coords_label = QLabel("", self)
+        self.statusBar().addPermanentWidget(self.pixel_coords_label)
         self.statusBar().addPermanentWidget(self.pixel_label)
         # self.file_menu = self.menuBar().addMenu("File")
 
@@ -302,11 +305,17 @@ class TCamCapture(QMainWindow):
             log.error("fps list is empty! fmt: '{}' resolution: '{}'".format(fmt,
                                                                              resolution))
 
-    def new_pixel_under_mouse(self, active: bool, color: QtGui.QColor):
+    def new_pixel_under_mouse(self, active: bool,
+                              mouse_x: int, mouse_y: int,
+                              color: QtGui.QColor):
         """Slot for TcamView.new_pixel_under_mouse"""
         if active:
-            self.pixel_label.setText(color.name())
+            self.pixel_coords_label.setText("X:{: <4} Y:{: <4}".format(mouse_x,
+                                                                       mouse_y))
+            self.pixel_label.setText("{}".format(color.name()))
+
         else:
+            self.pixel_coords_label.setText("")
             self.pixel_label.setText("")
 
     def on_format_selected(self, entry: str):

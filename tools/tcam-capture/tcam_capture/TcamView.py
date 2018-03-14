@@ -79,7 +79,7 @@ class ViewItem(QtWidgets.QGraphicsPixmapItem):
 class TcamScreen(QtWidgets.QGraphicsView):
 
     new_pixmap = pyqtSignal(QtGui.QPixmap)
-    new_pixel_under_mouse = pyqtSignal(bool, QtGui.QColor)
+    new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
     destroy_widget = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -119,12 +119,17 @@ class TcamScreen(QtWidgets.QGraphicsView):
         # self.repaint()
 
     def send_mouse_pixel(self):
-
+        # mouse positions start at 0
+        # we want the lower right corner to have the correct coordinates
+        # e.g. an 1920x1080 image should have the coordinates
+        # 1920x1080 for the last pixel
         self.new_pixel_under_mouse.emit(self.pix.mouse_over,
+                                        self.mouse_position_x + 1,
+                                        self.mouse_position_y + 1,
                                         self.pix.get_mouse_color())
 
     def mouseMoveEvent(self, event):
-        mouse_position = event.pos()
+        mouse_position = self.mapToScene(event.pos())
         self.mouse_position_x = mouse_position.x()
         self.mouse_position_y = mouse_position.y()
         super().mouseMoveEvent(event)
@@ -184,7 +189,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
 class TcamView(QWidget):
 
     image_saved = pyqtSignal(str)
-    new_pixel_under_mouse = pyqtSignal(bool, QtGui.QColor)
+    new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
     format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
 
     def __init__(self, serial, parent=None):
@@ -217,8 +222,10 @@ class TcamView(QWidget):
             self.caps_desc = CapsDesc(caps)
         return self.caps_desc
 
-    def new_pixel_under_mouse_slot(self, active: bool, color: QtGui.QColor):
-        self.new_pixel_under_mouse.emit(active, color)
+    def new_pixel_under_mouse_slot(self, active: bool,
+                                   mouse_x: int, mouse_y: int,
+                                   color: QtGui.QColor):
+        self.new_pixel_under_mouse.emit(active, mouse_x, mouse_y, color)
 
     def eventFilter(self, obj, event):
         """"""
