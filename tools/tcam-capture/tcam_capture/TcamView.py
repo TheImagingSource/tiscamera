@@ -67,8 +67,8 @@ class ViewItem(QtWidgets.QGraphicsPixmapItem):
         if self.mouse_over:
             if(self.mouse_position_x <= self.pixmap().width() and
                self.mouse_position_y <= self.pixmap().height()):
-                return self.pixmap().toImage().pixelColor(self.mouse_position_x,
-                                                          self.mouse_position_y)
+                return QtGui.QColor(self.pixmap().toImage().pixel(self.mouse_position_x,
+                                                                  self.mouse_position_y))
             else:
                 self.mouse_position_x = -1
                 self.mouse_position_y = -1
