@@ -259,9 +259,14 @@ class TCamCapture(QMainWindow):
         self.device_list = device_list
 
         self.device_combo.clear()
+
+        if not device_list:
+            return
+
         self.device_combo.addItem("")
 
         active_entry = None
+
         for d in device_list:
 
             action_string = "{model:<18} - {contype:<7} - {serial}".format(model=d.model,
