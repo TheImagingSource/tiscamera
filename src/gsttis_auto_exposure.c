@@ -278,11 +278,11 @@ void gst_tis_auto_exposure_set_property (GObject* object,
 	{
 	    gdouble val = g_value_get_double (value);
 	    if (val < tis_auto_exposure->default_exposure_values.min)
-		tis_auto_exposure->exposure.min = tis_auto_exposure->default_exposure_values.min;
+		    tis_auto_exposure->exposure.min = tis_auto_exposure->default_exposure_values.min;
 	    else if (val < tis_auto_exposure->exposure.max)
-		tis_auto_exposure->exposure.min = tis_auto_exposure->exposure.max;
+		    tis_auto_exposure->exposure.min = tis_auto_exposure->exposure.max;
 	    else
-		tis_auto_exposure->exposure.min = val;
+		    tis_auto_exposure->exposure.min = val;
 	    break;
 	}
         case PROP_EXPOSURE_MAX:
@@ -741,7 +741,7 @@ static gdouble calc_exposure (GstTis_Auto_Exposure* self, guint dist, gdouble ex
     /* If we do not want a significant change (on the sensor-scale), don't change anything */
     /* This should avoid pumping caused by an abrupt brightness change caused by a small value change */
     if ( abs(exposure - self->exposure.value) < (granularity / 2) )
-        return self->exposure.value;
+        return CLIP( self->exposure.value, self->exposure.min, self->exposure.max );
 
     return CLIP( exposure, self->exposure.min, self->exposure.max );
 }
@@ -875,6 +875,12 @@ static void correct_brightness (GstTis_Auto_Exposure* self, GstBuffer* buf)
     }
     /* assure we have the current values */
     retrieve_current_values (self);
+    // Check if we need to reduce gain
+    if (self->gain.max < self->gain.value)
+    {
+        set_gain(self, self->gain.max);
+        return;
+    }
 
     /* get distance from optimum */
     guint dist = calc_dist(self->brightness_reference, brightness);
