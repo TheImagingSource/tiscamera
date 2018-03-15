@@ -15,8 +15,8 @@
 # limitations under the License.
 
 import sys
-import functools
-# from argparse import ArgParse
+import signal
+import argparse
 import tcam_capture
 from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
 from tcam_capture.TcamSignal import TcamSignals
@@ -76,14 +76,11 @@ class TCamCapture(QMainWindow):
 
     open_options = pyqtSignal()
 
-    def __init__(self, app):
+    def __init__(self, app, serial=None, caps_str=None):
         super().__init__()
         app.aboutToQuit.connect(self.quit)
         self.app = app
 
-        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                            datefmt='%d-%m-%Y:%H:%M:%S',
-                            level=logging.CRITICAL)
         self.settings = Settings()
         self.settings.load()
 
@@ -105,7 +102,7 @@ class TCamCapture(QMainWindow):
 
         self.setup_ui()
 
-        self.serial = None
+        self.serial = serial
         self.caps_desc = None
         self.caps_fmt = None
         self.caps_resolution = None
@@ -114,6 +111,9 @@ class TCamCapture(QMainWindow):
         self.pipeline = None
         self.props = None
         self.show()
+
+        if self.serial:
+            self.open_device(self.serial, caps_str)
 
     def __del__(self):
         self.data.work_thread.quit()
@@ -387,7 +387,7 @@ class TCamCapture(QMainWindow):
 
         self.fps_combo.setCurrentText(fps)
 
-    def open_device(self, serial: str):
+    def open_device(self, serial: str, caps_str: str=None):
         """Open device and starts video stream"""
         self.close()
         self.serial = serial
@@ -402,7 +402,7 @@ class TCamCapture(QMainWindow):
 
         self.view = TcamView(self.serial, self)
         self.view.register_device_lost(self.lost_device)
-        self.view.create_pipeline()
+        self.view.create_pipeline(caps_str)
         self.view.image_saved.connect(self.saved_image)
         self.view.new_pixel_under_mouse.connect(self.new_pixel_under_mouse)
         self.view.format_selected.connect(self.format_selected_callback)
@@ -410,8 +410,6 @@ class TCamCapture(QMainWindow):
                                 QtWidgets.QSizePolicy.Expanding)
         self.setCentralWidget(self.view)
         self.caps_desc = self.view.get_caps_desc()
-        # self.format_menu = self.view.get_format_menu(self)
-        # self.format_menu_action = self.menuBar().addMenu(self.format_menu)
         self.data.tcam = self.view.get_tcam()
         self.view.pause()
 
@@ -422,7 +420,7 @@ class TCamCapture(QMainWindow):
         self.set_device_menus_enabled(True)
         self.props_action.setVisible(True)
 
-        self.play()
+        self.play(caps_str)
 
     def play(self, video_format=None):
         """"""
@@ -490,10 +488,56 @@ class TCamCapture(QMainWindow):
         error_dialog.exec_()
 
 
+def init():
+    """
+    This function performs additional setup steps that should happen
+    independently of the actual application.
+    argparse likes to exit the application when -h is appended
+    This will cause error, should QApplication already be running
+    """
+
+    parser = argparse.ArgumentParser(description='The Imaging Source Live Stream Application.')
+    parser.add_argument("--serial", help="Open device with serial immediately",
+                        action="store", dest="serial", default=None)
+    parser.add_argument("--format", help="Open device with this gstreamer format",
+                        action="store", dest="caps_str", default=None)
+    parser.add_argument("--verbose", "-v", action="count",
+                        dest="verbose_count", default=0)
+    # these are here to make argparse shut up about unknown arguments
+    # we want this application to allow gstreamer logging
+    parser.add_argument("--gst-debug", help=argparse.SUPPRESS)
+    parser.add_argument("--gst-debug-level", help=argparse.SUPPRESS)
+    parser.add_argument("--gst-debug-no-color", help=argparse.SUPPRESS)
+
+    arguments = parser.parse_args()
+
+    # set default logging level to WARN. each new -v increases the log level
+    level = max(3 - arguments.verbose_count, 0) * 10
+
+    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%d-%m-%Y:%H:%M:%S',
+                        level=level)
+    Gst.init(sys.argv)
+    return arguments.serial, arguments.caps_str
+
+
 if __name__ == '__main__':
 
-    Gst.init(sys.argv)
+    # initializing the application has the following priority of setting:
+    #
+    # commandline arguments overwrite
+    # cache values, which overwrite
+    # default values
+
+    serial, caps_str = init()
+
+    # keep the default signal handling
+    # should the application hang itself, due to gstreamer "hick-ups"
+    # we still have the possibility to kill it with ctrl-c
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     app = QApplication(sys.argv)
-    tcam_capture = TCamCapture(app)
+    # TODO: Missing serial verification
+    tcam_capture = TCamCapture(app, serial, caps_str)
 
     sys.exit(app.exec_())
