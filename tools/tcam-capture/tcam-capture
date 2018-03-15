@@ -468,6 +468,7 @@ class TCamCapture(QMainWindow):
 
     def quit(self):
         log.info("Shutting down...")
+        self.hide()
         self.close()
 
         self.data.work_thread.quit()
