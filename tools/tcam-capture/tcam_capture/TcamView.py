@@ -270,10 +270,12 @@ class TcamView(QWidget):
         self.videosaver.stop_recording_video()
 
     def play(self, video_format=None):
+
         if self.pipeline is None:
             self.create_pipeline()
 
-        if self.pipeline.get_state(1000000).state == Gst.State.PLAYING:
+        state = self.pipeline.get_state(1000000).state
+        if state == Gst.State.PLAYING or state == Gst.State.PAUSED:
             log.debug("Setting pipeline to READY")
             self.pipeline.set_state(Gst.State.NULL)
         self.video_format = video_format
