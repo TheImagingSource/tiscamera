@@ -1277,11 +1277,6 @@ static void init_camera_resources (GstTcamautoexposure* self)
         p = prop->get_struct();
         self->exposure.min = p.value.i.min;
 
-        if (self->exposure_min != 0)
-        {
-            self->exposure_min = self->exposure.min;
-        }
-
         // do not set exposure.max
         // we default to 0
         // if 0 -> use max setting according to framerate
@@ -1422,12 +1417,18 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
                     setter = self->gain.value - percentage;
                 }
             }
+
+            setter = fmax(fmin(g_ref, self->gain_max), self->gain_min);
+            new_gain = setter;
             set_gain(self, setter);
         }
-        GST_DEBUG("NEW GAIN: g_ref %f - new_gain %f / K_GAIN %f = %f",
-                  g_ref, new_gain, K_GAIN, (g_ref - new_gain) / K_GAIN);
 
-        return (g_ref - new_gain) / K_GAIN;
+        double new_diff = (double)(g_ref - new_gain) / K_GAIN;
+
+        GST_DEBUG("NEW GAIN: g_ref %f - new_gain %f / K_GAIN %f = %f",
+                  g_ref, new_gain, K_GAIN, new_diff);
+
+        return new_diff;
     }
     else
     {
@@ -1446,10 +1447,11 @@ static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
     if (self->auto_exposure)
     {
         const double e_ref = self->exposure.value * pow(2, diff);
-        const double new_exposure = fmax(fmin(e_ref, self->exposure_max), self->exposure_min);
+        double new_exposure = fmax(fmin(e_ref, self->exposure_max), self->exposure_min);
 
         if (fabs(self->exposure.value - new_exposure) > K_SMALL)
         {
+            new_exposure = fmax(fmin(new_exposure, self->exposure_max), self->exposure_min);
             set_exposure(self, new_exposure);
         }
         GST_DEBUG("Returning (e_ref - new_exposure = diff) %f - %f = %f",
