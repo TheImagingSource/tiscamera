@@ -1386,7 +1386,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
 
         gdouble g_ref;
 
-        if (diff <= 40.0)
+        if (fabs(diff) >= 0.10)
         {
             g_ref = self->gain.value + K_GAIN_FAST * diff;
         }
