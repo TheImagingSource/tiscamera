@@ -1001,31 +1001,32 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            TRUE,
                                                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
-                                     PROP_EXPOSURE_MIN,
-                                     g_param_spec_int ("exposure-min",
-                                                       "Exposure Maximum",
-                                                       "Maximum value exposure can take",
-                                                       0, G_MAXINT, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-    g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
                                      g_param_spec_int ("exposure-max",
                                                        "Exposure Maximum",
                                                        "Maximum value exposure can take",
-                                                       0, G_MAXINT, 0,
+                                                       0, G_MAXINT, G_MAXINT,
                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
-                                     PROP_GAIN_MIN,
-                                     g_param_spec_double ("gain-min",
-                                                          "Gain Minimum",
-                                                          "Minimum value gain can take",
-                                                          0.0, G_MAXDOUBLE, 0.0,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                     PROP_EXPOSURE_MIN,
+                                     g_param_spec_int ("exposure-min",
+                                                       "Exposure Minimum",
+                                                       "Minimum value exposure can take",
+                                                       0, G_MAXINT, 0,
+                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
                                      g_param_spec_double ("gain-max",
                                                           "Gain Maximum",
                                                           "Maximum value gain can take",
+                                                          0.0, G_MAXDOUBLE, G_MAXDOUBLE,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+    g_object_class_install_property (gobject_class,
+                                     PROP_GAIN_MIN,
+                                     g_param_spec_double ("gain-min",
+                                                          "Gain Minimum",
+                                                          "Minimum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
     g_object_class_install_property (gobject_class,
@@ -1129,6 +1130,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             }
             break;
         case PROP_EXPOSURE_MAX:
+
             if (g_value_get_int(value) <= tcamautoexposure->exposure_min)
             {
                 GST_ERROR("New user value for exposure max is smaller or equal to exposure min. Ignoring request.");
