@@ -1336,6 +1336,12 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
 static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 {
+    if (!G_IS_OBJECT(self->camera_src))
+    {
+        GST_WARNING("Have no camera source to set exposure.");
+        return;
+    }
+
     GST_INFO("Setting exposure to %f", exposure);
 
     tcam::CaptureDevice* dev;
@@ -1347,6 +1353,12 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
 
 static void set_gain (GstTcamautoexposure* self, gdouble gain)
 {
+    if (!G_IS_OBJECT(self->camera_src))
+    {
+        GST_WARNING("Have no camera source to set gain.");
+        return;
+    }
+
     GST_INFO("Setting gain to %f", gain);
 
     tcam::CaptureDevice* dev;
