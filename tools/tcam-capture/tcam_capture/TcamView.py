@@ -283,7 +283,7 @@ class TcamView(QWidget):
             log.info("Setting format to {}".format(video_format))
             caps = self.pipeline.get_by_name("bin")
             caps.set_property("device-caps",
-                              Gst.Caps.from_string(video_format))
+                              video_format)
         log.info("Setting state PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
 
