@@ -397,7 +397,18 @@ class TcamView(QWidget):
         resolution = "{}x{}".format(structure.get_value("width"),
                                     structure.get_value("height"))
 
-        fps = structure.get_value("framerate")
+        # compatability problems
+        # Older python bindings do not know the type Gst.Fraction.
+        # Thus we have to work around this problem...
+        results = re.search("framerate=\(fraction\)\d+/\d+", caps)
+
+        if results:
+            fps = results.group()
+            fps = fps.replace("framerate=(fraction)", "")
+        else:
+            fps = None
+            log.error("Unable to determine framerate settings. This will affect usability.")
+
         self.format_selected.emit(fmt, resolution, str(fps))
 
     def on_error(self, bus, msg):
