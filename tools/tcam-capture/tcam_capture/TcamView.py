@@ -277,7 +277,7 @@ class TcamView(QWidget):
         state = self.pipeline.get_state(1000000).state
         if state == Gst.State.PLAYING or state == Gst.State.PAUSED:
             log.debug("Setting pipeline to READY")
-            self.pipeline.set_state(Gst.State.NULL)
+            self.pipeline.set_state(Gst.State.READY)
         self.video_format = video_format
         if video_format is not None:
             log.info("Setting format to {}".format(video_format))
