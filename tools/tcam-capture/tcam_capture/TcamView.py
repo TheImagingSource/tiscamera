@@ -77,9 +77,15 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.mouse_position_y = -1
 
         self.zoom_factor = 1.0
+        self.first_image = True
 
     def on_new_pixmap(self, pixmap):
         self.pix.setPixmap(pixmap)
+
+        if self.first_image:
+            self.scene.setSceneRect(self.pix.boundingRect())
+            self.first_image = False
+
         self.send_mouse_pixel()
         # don't call repaint here
         # it causes problems once the screen goes blank due to screensavers, etc
@@ -268,6 +274,7 @@ class TcamView(QWidget):
                               video_format)
         log.info("Setting state PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
+        self.container.first_image = True
 
     def new_buffer(self, appsink):
         """
