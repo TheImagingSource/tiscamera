@@ -72,8 +72,8 @@ class ViewItem(QtWidgets.QGraphicsPixmapItem):
             else:
                 self.mouse_position_x = -1
                 self.mouse_position_y = -1
-        else:
-            return QtGui.QColor(0, 0, 0)
+
+        return QtGui.QColor(0, 0, 0)
 
 
 class TcamScreen(QtWidgets.QGraphicsView):
