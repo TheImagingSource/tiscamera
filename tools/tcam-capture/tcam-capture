@@ -507,7 +507,8 @@ def init():
     # we want this application to allow gstreamer logging
     parser.add_argument("--gst-debug", help=argparse.SUPPRESS)
     parser.add_argument("--gst-debug-level", help=argparse.SUPPRESS)
-    parser.add_argument("--gst-debug-no-color", help=argparse.SUPPRESS)
+    parser.add_argument("--gst-debug-no-color", help=argparse.SUPPRESS,
+                        action="store_true")  # required since no-color is a simple flag
 
     arguments = parser.parse_args()
 
