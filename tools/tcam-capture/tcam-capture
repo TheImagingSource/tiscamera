@@ -72,6 +72,22 @@ class TcamComboBox(QComboBox):
             return False
 
 
+class FmtSelection:
+    """
+    Helper class to keep track of different format selections
+    """
+    def __init__(self):
+        self.fmt = None
+        self.resolution = None
+        self.fps = None
+
+    def __eq__(self, other):
+
+        return (self.fmt == other.fmt
+                and self.resolution == other.resolution
+                and self.fps == other.fps)
+
+
 class TCamCapture(QMainWindow):
 
     open_options = pyqtSignal()
@@ -104,9 +120,8 @@ class TCamCapture(QMainWindow):
 
         self.serial = serial
         self.caps_desc = None
-        self.caps_fmt = None
-        self.caps_resolution = None
-        self.caps_fps = None
+        self.selected_format = FmtSelection()
+        self.active_format = FmtSelection()
 
         self.pipeline = None
         self.props = None
@@ -300,7 +315,7 @@ class TCamCapture(QMainWindow):
     def populate_fps_box(self, fmt: str, resolution: str):
 
         self.fps_combo.reset()
-        self.caps_resolution = resolution
+        self.selected_format.resolution = resolution
 
         fps_list = self.caps_desc.get_fps_list(fmt, resolution)
 
@@ -326,7 +341,7 @@ class TCamCapture(QMainWindow):
     def on_format_selected(self, entry: str):
         """callback for self.format_combo"""
         log.info("on_format_selected")
-        self.caps_fmt = entry
+        self.selected_format.fmt = entry
         self.populate_resolution_box(entry)
 
     def on_resolution_selected(self, entry: str):
@@ -337,8 +352,8 @@ class TCamCapture(QMainWindow):
             return
 
         self.resolution_combo.remove_default()
-        self.caps_resolution = entry
-        self.populate_fps_box(self.caps_fmt, self.caps_resolution)
+        self.selected_format.resolution = entry
+        self.populate_fps_box(self.selected_format.fmt, entry)
 
     def on_fps_selected(self, entry: str):
         """callback for self.fps_combo"""
@@ -346,12 +361,17 @@ class TCamCapture(QMainWindow):
 
         if self.fps_combo.is_default(entry):
             return
+        self.selected_format.fps = entry
+
+        if self.active_format == self.selected_format:
+            # no needs to restart the stream,
+            # since we already stream the correct format
+            return
 
         self.fps_combo.remove_default()
-        self.caps_fps = entry
-        caps_str = self.caps_desc.generate_caps_string(self.caps_fmt,
-                                                       self.caps_resolution,
-                                                       self.caps_fps)
+        caps_str = self.caps_desc.generate_caps_string(self.selected_format.fmt,
+                                                       self.selected_format.resolution,
+                                                       self.selected_format.fps)
 
         log.info("User selected '{}'".format(caps_str))
 
@@ -371,9 +391,13 @@ class TCamCapture(QMainWindow):
         SLOT for TcamView::format_selected
         Used for setting GUI elements to correctly display caps information
         """
-        self.caps_fmt = fmt
-        self.caps_resolution = resolution
-        self.caps_fps = fps
+        self.selected_format.fmt = fmt
+        self.selected_format.resolution = resolution
+        self.selected_format.fps = fps
+
+        self.active_format.fmt = fmt
+        self.active_format.resolution = resolution
+        self.active_format.fps = fps
 
         log.info("'{}' - '{}' - '{}'".format(fmt, resolution, fps))
         self.populate_fmt_box()
