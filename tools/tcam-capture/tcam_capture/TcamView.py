@@ -15,6 +15,7 @@
 import re
 import functools
 from tcam_capture.CapsDesc import CapsDesc
+from tcam_capture.ViewItem import ViewItem
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
@@ -39,44 +40,6 @@ gi.require_version("GstVideo", "1.0")
 from gi.repository import Tcam, Gst, GLib, GstVideo
 
 log = logging.getLogger(__name__)
-
-
-class ViewItem(QtWidgets.QGraphicsPixmapItem):
-    """Derived class enables mouse tracking for color under mouse retrieval"""
-    def __init__(self, parent=None):
-        super(ViewItem, self).__init__(parent)
-        self.setAcceptHoverEvents(True)
-        self.mouse_over = False  # flag if mouse is over our widget
-        self.mouse_position_x = -1
-        self.mouse_position_y = -1
-
-    def hoverEnterEvent(self, event):
-        self.mouse_over = True
-
-    def hoverLeaveEvent(self, event):
-        self.mouse_over = False
-
-    def hoverMoveEvent(self, event):
-        mouse_position = event.pos()
-
-        self.mouse_position_x = mouse_position.x()
-        self.mouse_position_y = mouse_position.y()
-        super().hoverMoveEvent(event)
-
-    def get_resolution(self):
-        return self.pixmap().size()
-
-    def get_mouse_color(self):
-        if self.mouse_over:
-            if(self.mouse_position_x <= self.pixmap().width() and
-               self.mouse_position_y <= self.pixmap().height()):
-                return QtGui.QColor(self.pixmap().toImage().pixel(self.mouse_position_x,
-                                                                  self.mouse_position_y))
-            else:
-                self.mouse_position_x = -1
-                self.mouse_position_y = -1
-
-        return QtGui.QColor(0, 0, 0)
 
 
 class TcamScreen(QtWidgets.QGraphicsView):
