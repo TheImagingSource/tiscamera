@@ -63,6 +63,9 @@ class ViewItem(QtWidgets.QGraphicsPixmapItem):
         self.mouse_position_y = mouse_position.y()
         super().hoverMoveEvent(event)
 
+    def get_resolution(self):
+        return self.pixmap().size()
+
     def get_mouse_color(self):
         if self.mouse_over:
             if(self.mouse_position_x <= self.pixmap().width() and
