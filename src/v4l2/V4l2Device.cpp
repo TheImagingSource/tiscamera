@@ -165,6 +165,17 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     // return false;
     // }
 
+    // dequeue all buffers
+    struct v4l2_requestbuffers req = {};
+
+    req.count  = 0; // free all buffers
+    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_USERPTR;
+
+    if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req))
+    {
+        tcam_error("Error while calling VIDIOC_REQBUFS to empty buffer queue. %s", strerror(errno));
+    }
 
     uint32_t fourcc  = new_format.get_fourcc();
 
