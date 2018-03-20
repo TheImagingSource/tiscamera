@@ -13,21 +13,19 @@
 # limitations under the License.
 
 import re
-import functools
+
 from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.ViewItem import ViewItem
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
-from tcam_capture.PropertyWidget import PropertyWidget, Prop
-from tcam_capture.TcamSignal import TcamSignals
 from tcam_capture.TcamCaptureData import TcamCaptureData
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWidgets import (QApplication, QWidget, QDialog,
+from PyQt5.QtWidgets import (QWidget, QDialog,
                              QHBoxLayout, QVBoxLayout,
-                             QAction, QMenu, QGraphicsView,
-                             QGraphicsItem, QGraphicsScene, QGraphicsPixmapItem)
+                             QGraphicsView,
+                             QGraphicsItem, QGraphicsScene)
 
-from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent, QMutex
+from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent, QSizeF
 
 import logging
 
@@ -51,7 +49,6 @@ class TcamScreen(QtWidgets.QGraphicsView):
     def __init__(self, parent=None):
         super(TcamScreen, self).__init__(parent)
         self.setMouseTracking(True)
-        self.mutex = QMutex()
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                            QtWidgets.QSizePolicy.Expanding)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
@@ -67,7 +64,6 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.pix_width = 0
         self.pix_height = 0
 
-        self.orig_parent = None
         self.is_fullscreen = False
         self.scale_factor = 1.0
         self.scene_position_x = None
