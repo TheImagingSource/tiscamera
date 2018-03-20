@@ -101,6 +101,22 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.mouse_position_y = mouse_position.y()
         super().mouseMoveEvent(event)
 
+    def is_scene_larger_than_image(self):
+        """
+        checks if the entire ViewItem is visible in the scene
+        """
+        port_rect = self.viewport().rect()
+        scene_rect = self.mapToScene(port_rect).boundingRect()
+        item_rect = self.pix.mapRectFromScene(scene_rect)
+
+        isec = item_rect.intersected(self.pix.boundingRect())
+
+        res = self.pix.get_resolution()
+        if (isec.size().width() >= QSizeF(res).width()
+                and isec.size().height() >= QSizeF(res).height()):
+            return True
+        return False
+
     def wheelEvent(self, event):
         # Zoom Factor
         zoomInFactor = 1.25
@@ -119,8 +135,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         else:
             zoomFactor = zoomOutFactor
 
-        # restrict zooming out
-        if self.zoom_factor * zoomFactor <= 0.64:
+        if (self.is_scene_larger_than_image()
+                and zoomFactor < 1.0):
             return
 
         self.zoom_factor *= zoomFactor
