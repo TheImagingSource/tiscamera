@@ -984,7 +984,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
-    ((GstElementClass*) klass)->change_state = gst_tcamautoexposure_change_state;
+    //((GstElementClass*) klass)->change_state = gst_tcamautoexposure_change_state;
 
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
