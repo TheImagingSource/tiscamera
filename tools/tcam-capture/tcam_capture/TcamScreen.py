@@ -47,10 +47,17 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.zoom_factor = 1.0
         self.first_image = True
 
+    def reset_zoom(self):
+
+        self.zoom_factor = 1.0
+        # this resets the view internal transformation matrix
+        self.setTransform(QtGui.QTransform())
+
     def on_new_pixmap(self, pixmap):
         self.pix.setPixmap(pixmap)
 
         if self.first_image:
+            self.reset_zoom()
             self.scene.setSceneRect(self.pix.boundingRect())
             self.first_image = False
 
