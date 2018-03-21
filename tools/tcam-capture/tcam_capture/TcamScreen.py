@@ -39,14 +39,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.scene.addItem(self.pix)
         self.scene.setSceneRect(self.pix.boundingRect())
 
-        self.factor = 1.0
-        self.pix_width = 0
-        self.pix_height = 0
-
         self.is_fullscreen = False
-        self.scale_factor = 1.0
-        self.scene_position_x = None
-        self.scene_position_y = None
 
         self.mouse_position_x = -1
         self.mouse_position_y = -1
@@ -131,8 +124,6 @@ class TcamScreen(QtWidgets.QGraphicsView):
 
         # Move scene to old position
         delta = newPos - oldPos
-        self.scene_position_x = delta.x()
-        self.scene_position_y = delta.y()
         self.translate(delta.x(), delta.y())
 
         self.scene.setSceneRect(self.pix.boundingRect())
