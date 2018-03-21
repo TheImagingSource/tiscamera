@@ -280,9 +280,9 @@ class TcamView(QWidget):
                 self.play(self.video_format)
 
         else:
-            log.error("ERROR:", msg.src.get_name(), ":", err.message)
+            log.error("ERROR: {} : {}".format(msg.src.get_name(), err.message))
             if dbg:
-                log.debug("Debug info:", dbg)
+                log.debug("Debug info: {}".format(dbg))
 
     def on_state_changed(self, bus, msg):
         """
