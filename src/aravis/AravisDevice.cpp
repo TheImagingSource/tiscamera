@@ -412,24 +412,22 @@ void AravisDevice::update_property (struct property_mapping& mapping)
 
 bool AravisDevice::set_video_format (const VideoFormat& new_format)
 {
-    // bool valid = false;
-    // for (const auto& v : available_videoformats)
-    // {
-    // if (v.isValidVideoFormat( _format))
-    // {
-    // valid = true;
-    // break;
-    // }
-    // }
-
-    // if (valid == false)
-    // {
-    // return false;
-    // }
-
     tcam_log(TCAM_LOG_DEBUG, "Setting format to '%s'", new_format.to_string().c_str());
 
+
+    // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
+    // // set them again after changing the framerate to ensure consistent behaviour
+    const char* trig_selector = arv_device_get_string_feature_value(arv_camera_get_device(arv_camera),
+                                                                    "TriggerSelector");
+    const char* trig_mode = arv_device_get_string_feature_value(arv_camera_get_device(arv_camera),
+                                                                "TriggerMode");
+
     arv_camera_set_frame_rate (this->arv_camera, new_format.get_framerate());
+
+    arv_device_set_string_feature_value(arv_camera_get_device(arv_camera),
+                                        "TriggerSelector", trig_selector);
+    arv_device_set_string_feature_value(arv_camera_get_device(arv_camera),
+                                        "TriggerMode", trig_mode);
 
     arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.get_fourcc()));
 
