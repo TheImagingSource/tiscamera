@@ -332,6 +332,9 @@ enum TCAM_PROPERTY_FLAGS
                                                 cause the device to carry out a given action
                                                 (e. g. motor control) but no meaningful
                                                 value can be returned. */
+    TCAM_PROPERTY_FLAG_IS_LOGARITHMIC = 0x0040, /**< This control should be displayed using a
+                                                   logarithmic scale as most actions will take
+                                                   place in a small range of the overall range. */
 };
 
 /** @} */
