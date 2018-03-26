@@ -262,6 +262,9 @@ struct tcam_property_group
                                                       if property_group and tcam_device_property.id
                                                       are identical the property should be considered
                                                       the group master */
+    unsigned int                property_order;    /**< order number of the property
+                                                      the lower to number the higher up it should
+                                                      be displayed in an dialog */
 };
 
 
