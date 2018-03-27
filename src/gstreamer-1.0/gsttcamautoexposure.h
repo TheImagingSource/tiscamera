@@ -42,7 +42,7 @@ typedef struct
     gdouble min;
     gdouble max;
     gdouble value;
-
+    gdouble step;
 } Gain;
 
 typedef struct

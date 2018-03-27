@@ -1302,12 +1302,14 @@ static void init_camera_resources (GstTcamautoexposure* self)
             self->gain.min = p.value.i.min;
             self->gain.max = p.value.i.max;
             self->gain.value = p.value.i.value;
+            self->gain.step = p.value.i.step;
         }
         else
         {
             self->gain.min = p.value.d.min;
             self->gain.max = p.value.d.max;
             self->gain.value = p.value.d.value;
+            self->gain.step = p.value.d.step;
         }
         if (self->gain_max == 0)
         {
@@ -1420,6 +1422,11 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
             GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
             if (fabs(percentage_new) > percentage)
             {
+                if (fabs(percentage) < self->gain.step)
+                {
+                    percentage = self->gain.step;
+                    GST_DEBUG("Changed percentage to %f", percentage);
+                }
                 if (percentage_new > 0.0)
                 {
                     setter = self->gain.value + percentage;
