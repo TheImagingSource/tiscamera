@@ -1311,21 +1311,27 @@ static void init_camera_resources (GstTcamautoexposure* self)
             self->gain.value = p.value.d.value;
             self->gain.step = p.value.d.step;
         }
-        if (self->gain_max == 0)
+        if (self->gain_max == 0
+            || self->gain_max == G_MAXDOUBLE
+            || self->gain_max > self->gain.max)
         {
             self->gain_max = self->gain.max;
         }
-        if (self->gain_min == 0)
+        if (self->gain_min == 0
+            || self->gain_min < self->gain.min)
         {
             self->gain_min = self->gain.min;
         }
     }
 
-    if (self->exposure_min == 0)
+    if (self->exposure_min == 0
+        || self->exposure_min < self->default_exposure_values.min)
     {
         self->exposure_min = self->default_exposure_values.min;
     }
-    if (self->exposure_max == 0)
+    if (self->exposure_max == 0
+        || self->exposure_max == G_MAXINT
+        || self->exposure_max > self->default_exposure_values.max)
     {
         self->exposure_max = self->default_exposure_values.max;
     }
