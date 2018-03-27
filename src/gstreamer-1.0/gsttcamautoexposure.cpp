@@ -1400,7 +1400,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
 
         gdouble g_ref;
 
-        if (fabs(diff) >= 0.10)
+        if (fabs(diff) >= 0.02)
         {
             g_ref = self->gain.value + K_GAIN_FAST * diff;
         }
@@ -1435,6 +1435,12 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
                 {
                     setter = self->gain.value - percentage;
                 }
+            }
+            else
+            {
+                GST_INFO("%f not big enough for change. minimum required is : %f",
+                         percentage_new,
+                         percentage);
             }
 
             setter = fmax(fmin(g_ref, self->gain_max), self->gain_min);
