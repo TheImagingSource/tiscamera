@@ -100,7 +100,7 @@ bool AFU420Device::create_focus ()
 
 bool AFU420Device::create_shutter ()
 {
-    auto prop = create_empty_property(TCAM_PROPERTY_FOCUS);
+    auto prop = create_empty_property(TCAM_PROPERTY_SHUTTER);
 
     prop.value.b.value = false;
     prop.value.b.default_value = false;
