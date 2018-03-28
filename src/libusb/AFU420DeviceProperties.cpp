@@ -423,8 +423,8 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
     {
         case TCAM_PROPERTY_EXPOSURE:
         {
-            auto value = get_exposure();
-            desc.property->set_value(value);
+            //auto value = get_exposure();
+            //desc.property->set_value(value);
             return true;
         }
         case TCAM_PROPERTY_GAIN:
@@ -560,13 +560,13 @@ int64_t AFU420Device::get_exposure ()
     {
         tcam_debug("exposure returned value: %u", value);
     }
-    return value / 1000;
+    return value;
 }
 
 
 bool AFU420Device::set_exposure (int64_t exposure)
 {
-    uint16_t value = exposure * 1000;
+    uint16_t value = exposure;
 
     int ret = control_write(BASIC_PC_TO_USB_EXPOSURE, value);
 
