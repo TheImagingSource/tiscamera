@@ -1178,6 +1178,13 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
             tcamautoexposure->gain_max = g_value_get_double(value);
+
+            if (tcamautoexposure->gain.value > tcamautoexposure->gain_max)
+            {
+                tcamautoexposure->gain.value = tcamautoexposure->gain_max;
+                set_gain(tcamautoexposure, tcamautoexposure->gain.value);
+            }
+
             if (tcamautoexposure->gain_max == 0.0)
             {
                 tcamautoexposure->gain = tcamautoexposure->default_gain_values;
