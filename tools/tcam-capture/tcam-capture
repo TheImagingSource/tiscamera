@@ -97,19 +97,17 @@ class TCamCapture(QMainWindow):
         app.aboutToQuit.connect(self.quit)
         self.app = app
 
+        self.serial = serial
+        self.caps_desc = None
+        self.selected_format = FmtSelection()
+        self.active_format = FmtSelection()
+
         self.settings = Settings()
         self.settings.load()
 
         self.data = TcamCaptureData()
         self.data.signals = TcamSignals()
 
-        self.data.work_thread = QtCore.QThread()
-
-        self.indexer = TcamDeviceIndex()
-        self.indexer.update_device_list.connect(self.update_device_list)
-        self.indexer.moveToThread(self.data.work_thread)
-
-        self.data.work_thread.start()
         self.device_list = None  # needed for setting window title later on
         self.props = None  # property dialog widget
         self.setWindowTitle("TCam Capture")
@@ -117,11 +115,14 @@ class TCamCapture(QMainWindow):
         self.setMinimumSize(640, 480)
 
         self.setup_ui()
+        self.indexer = TcamDeviceIndex()
+        self.indexer.update_device_list.connect(self.update_device_list)
 
-        self.serial = serial
-        self.caps_desc = None
-        self.selected_format = FmtSelection()
-        self.active_format = FmtSelection()
+        self.indexer.create_device_list()  # call manually once to speed up first listing
+        self.data.work_thread = QtCore.QThread()
+
+        self.indexer.moveToThread(self.data.work_thread)
+        self.data.work_thread.start()
 
         self.pipeline = None
         self.props = None
