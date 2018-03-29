@@ -1137,6 +1137,12 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
+            if (tcamautoexposure->exposure.value > tcamautoexposure->exposure_max)
+            {
+                tcamautoexposure->exposure.value = tcamautoexposure->exposure_max;
+                set_exposure(tcamautoexposure, tcamautoexposure->exposure.value);
+            }
+
             tcamautoexposure->exposure_max = g_value_get_int(value);
             if (tcamautoexposure->exposure_max == 0.0)
             {
