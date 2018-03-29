@@ -1110,7 +1110,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_EXPOSURE_MIN:
 
-            if (g_value_get_int(value) >= tcamautoexposure->exposure_max)
+            if (g_value_get_int(value) > tcamautoexposure->exposure_max)
             {
                 GST_ERROR("New user value for exposure min is greater or equal to exposure max. Ignoring request.");
                 break;
@@ -1131,7 +1131,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_EXPOSURE_MAX:
 
-            if (g_value_get_int(value) <= tcamautoexposure->exposure_min)
+            if (g_value_get_int(value) < tcamautoexposure->exposure_min)
             {
                 GST_ERROR("New user value for exposure max is smaller or equal to exposure min. Ignoring request.");
                 break;
@@ -1151,7 +1151,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_GAIN_MIN:
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
-            if (g_value_get_double(value) >= tcamautoexposure->gain_max)
+            if (g_value_get_double(value) > tcamautoexposure->gain_max)
             {
                 GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
@@ -1172,7 +1172,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
        case PROP_GAIN_MAX:
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
-            if (g_value_get_double(value) <= tcamautoexposure->gain_min)
+            if (g_value_get_double(value) < tcamautoexposure->gain_min)
             {
                 GST_ERROR("New user value for gain min is smaller or equal to gain min. Ignoring request.");
                 break;
