@@ -39,9 +39,9 @@ std::string tcam::propertyType2String (TCAM_PROPERTY_TYPE type)
         case TCAM_PROPERTY_TYPE_STRING: return "string";
         case TCAM_PROPERTY_TYPE_ENUMERATION: return "enum";
         case TCAM_PROPERTY_TYPE_BUTTON: return "button";
-        case TCAM_PROPERTY_TYPE_UNKNOWN:
+        case TCAM_PROPERTY_TYPE_UNKNOWN: return "unknown";
         default:
-            return "";
+            return "<UNKNOWN ENUM ENTRY>";
     }
 }
 
