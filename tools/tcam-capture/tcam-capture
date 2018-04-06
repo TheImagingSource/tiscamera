@@ -132,7 +132,8 @@ class TCamCapture(QMainWindow):
             self.open_device(self.serial, caps_str)
 
     def __del__(self):
-        self.data.work_thread.quit()
+        if self.data.work_thread:
+            self.data.work_thread.quit()
 
     def toggle_fullscreen(self):
 
