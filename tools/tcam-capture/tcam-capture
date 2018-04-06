@@ -162,7 +162,7 @@ class TCamCapture(QMainWindow):
     def saved_image(self, image_path: str):
         """Slot for saving an image """
 
-        self.statusBar().showMessage("Saved image {}".format(image_path), 10)
+        self.statusBar().showMessage("Saved image {}".format(image_path), 2000)
 
     def setup_ui(self):
 
