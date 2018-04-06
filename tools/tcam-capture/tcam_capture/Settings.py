@@ -14,6 +14,9 @@
 
 from configparser import ConfigParser
 import os
+import logging
+
+log = logging.getLogger(__file__)
 
 
 class Settings(object):
@@ -22,17 +25,31 @@ class Settings(object):
 
         self.gc = "General"  # general category name used in config file
 
-        self.set_defaults()
+        self._set_defaults()
 
-    def set_defaults(self):
-        self.settings_directory = "/home/edt/.config/"
-        self.settings_file_name = "/tcam_capture.ini"
+    def _set_defaults(self):
+        """
+        Set all settings to their default values
+        """
+        self.settings_directory = "~/.config/"
+        self.settings_file_name = "./tcam-capture.conf"
         self.save_location = "/tmp"
         self.image_type = "png"
         self.video_type = "mpeg2"
+        self.show_device_dialog_on_startup = True
+        self.reopen_device_on_startup = True
+        self.set_properties_on_reopen = True
+        self.logfile_location = None
 
-    def get_settings_file(self):
-        return self.settings_directory + self.settings_file_name
+    def reset(self):
+        """Set properties to their default values"""
+        self._set_defaults()
+
+    def get_settings_file(self,
+                          directory: str=os.getenv("XDG_CONFIG_DIR",
+                                                   os.path.expanduser("~/.config")),
+                          filename: str="tcam-capture.conf"):
+        return os.path.join(directory, filename)
 
     def get_save_location(self):
         return self.save_location
@@ -61,20 +78,43 @@ class Settings(object):
 
         gen = config[self.gc]
 
-        self.save_location = gen.get("SaveLocation", self.save_location)
-        self.image_type = gen.get("ImageType", self.image_type)
-        self.video_type = gen.get("VideoType", self.video_type)
+        self.save_location = gen.get("save_location", self.save_location)
+        self.image_type = gen.get("image_type", self.image_type)
+        self.video_type = gen.get("video_type", self.video_type)
+        self.show_device_dialog_on_startup = gen.getboolean("show_device_dialog_on_startup",
+                                                            self.show_device_dialog_on_startup)
+        self.reopen_device_on_startup = gen.getboolean("reopen_device_on_startup",
+                                                       self.reopen_device_on_startup)
+        self.set_properties_on_reopen = gen.getboolean("set_properties_on_reopen",
+                                                       self.set_properties_on_reopen)
+        self.logfile_location = gen.get("log_file_location",
+                                        self.logfile_location)
         return True
 
     def save(self):
-        config = ConfigParser()
+        config = ConfigParser(allow_no_value=True)
         config.add_section(self.gc)
-        config[self.gc]["SaveLocation"] = self.save_location
-        config[self.gc]["ImageType"] = self.image_type
-        config[self.gc]["VideoType"] = self.video_type
+
+        config.set(self.gc, "# Location where images and videos shall be saved")
+        config[self.gc]["save_location"] = self.save_location
+
+        config.set(self.gc, "# file type used for saving images")
+        config[self.gc]["image_type"] = self.image_type
+        config.set(self.gc, "# file type used for saving videos")
+        config[self.gc]["video_type"] = self.video_type
+
+        config.set(self.gc, "# display dialog. ignored when reopen_device_on_startup is True")
+        config[self.gc]["show_device_dialog_on_startup"] = str(self.show_device_dialog_on_startup)
+        config.set(self.gc, "# Automatically open the last used device with its last known settings")
+        config[self.gc]["reopen_device_on_startup"] = str(self.reopen_device_on_startup)
+        config.set(self.gc, "# set device properties to their last known values")
+        config[self.gc]["set_properties_on_reopen"] = str(self.set_properties_on_reopen)
+        config.set(self.gc, "# folder to which log files should be written")
+        config[self.gc]["log_file_location"] = str(self.logfile_location)
 
         if not os.path.exists(self.settings_directory):
             os.makedirs(self.settings_directory)
 
         with open(self.get_settings_file(), 'w') as configfile:
             config.write(configfile)
+            log.info("Saved config file '{}'".format(self.get_settings_file()))
