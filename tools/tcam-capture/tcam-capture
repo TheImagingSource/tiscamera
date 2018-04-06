@@ -186,7 +186,9 @@ class TCamCapture(QMainWindow):
         self.pixel_coords_label = QLabel("", self)
         self.statusBar().addPermanentWidget(self.pixel_coords_label)
         self.statusBar().addPermanentWidget(self.pixel_label)
-        # self.file_menu = self.menuBar().addMenu("File")
+
+        self.current_fps_label = QLabel("", self)
+        self.statusBar().addPermanentWidget(self.current_fps_label)
 
         self.toolbar = self.addToolBar("default")
         self.toolbar.setMovable(False)
@@ -457,6 +459,7 @@ class TCamCapture(QMainWindow):
         self.view.create_pipeline(caps_str)
         self.view.image_saved.connect(self.saved_image)
         self.view.new_pixel_under_mouse.connect(self.new_pixel_under_mouse)
+        self.view.current_fps.connect(self.current_fps)
         self.view.format_selected.connect(self.format_selected_callback)
         self.view.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                 QtWidgets.QSizePolicy.Expanding)
@@ -474,6 +477,9 @@ class TCamCapture(QMainWindow):
         self.cache.last_serial = self.serial
         self.cache.last_format = caps_str
         self.play(caps_str)
+
+    def current_fps(self, fps: float):
+        self.current_fps_label.setText("FPS: {0:.2f}".format(fps))
 
     def play(self, video_format=None):
         """"""

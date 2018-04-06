@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import re
-
+import time
 from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.TcamScreen import TcamScreen
 from tcam_capture.ImageSaver import ImageSaver
@@ -40,6 +40,7 @@ class TcamView(QWidget):
 
     image_saved = pyqtSignal(str)
     new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
+    current_fps = pyqtSignal(float)
     format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
 
     def __init__(self, serial, parent=None):
@@ -65,6 +66,9 @@ class TcamView(QWidget):
         self.caps_desc = None
         self.video_format = None
         self.retry_countdown = 5
+        self.actual_fps = 0.0
+        self.framecounter = 0
+        self.start_time = 0
 
     def get_caps_desc(self):
         if not self.caps_desc:
@@ -133,7 +137,26 @@ class TcamView(QWidget):
                               video_format)
         log.info("Setting state PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
+        self.start_time = 0
+        self.framecounter = 0
         self.container.first_image = True
+
+    def fps_tick(self):
+        """
+        Recalculate the current fps and emit current_fps signal
+        """
+        self.framecounter += 1
+        if self.start_time == 0:
+            self.start_time = time.time()
+        else:
+            diff = int(time.time() - self.start_time)
+            if diff == 0:
+                return
+            self.actual_fps = self.framecounter / diff
+            log.info("{} = {} / {}".format(self.actual_fps,
+                                           self.framecounter,
+                                           diff))
+            self.current_fps.emit(self.actual_fps)
 
     def new_buffer(self, appsink):
         """
@@ -150,6 +173,8 @@ class TcamView(QWidget):
                 self.current_width = struc.get_value("width")
             if self.current_height == 0:
                 self.current_height = struc.get_value("height")
+
+            self.fps_tick()
 
             self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
                                                               struc.get_value("width"),
@@ -207,10 +232,12 @@ class TcamView(QWidget):
             self.pipeline.set_state(Gst.State.PAUSED)
         else:
             log.error("Pipeline object does not exist.")
+        self.start_time = 0
+        self.framecounter = 0
 
     def stop(self):
         log.info("Setting state to NULL")
-
+        self.start_time = 0
         self.pipeline.set_state(Gst.State.NULL)
         log.info("Set State to NULL")
 
