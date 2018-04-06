@@ -153,9 +153,6 @@ class TcamView(QWidget):
             if diff == 0:
                 return
             self.actual_fps = self.framecounter / diff
-            log.info("{} = {} / {}".format(self.actual_fps,
-                                           self.framecounter,
-                                           diff))
             self.current_fps.emit(self.actual_fps)
 
     def new_buffer(self, appsink):
