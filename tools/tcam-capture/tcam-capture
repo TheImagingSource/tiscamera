@@ -25,6 +25,7 @@ from tcam_capture.PropertyDialog import PropertyDialog
 from tcam_capture.TcamView import TcamView, TcamScreen
 from tcam_capture.OptionsDialog import OptionsDialog
 from tcam_capture.Settings import Settings
+from tcam_capture.Cache import Cache
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
                              QDockWidget, QAction, QStyle, QPushButton, QComboBox)
@@ -105,6 +106,9 @@ class TCamCapture(QMainWindow):
         self.settings = Settings()
         self.settings.load()
 
+        self.cache = Cache()
+        self.cache.load()
+
         self.data = TcamCaptureData()
         self.data.signals = TcamSignals()
 
@@ -127,6 +131,16 @@ class TCamCapture(QMainWindow):
         self.pipeline = None
         self.props = None
         self.show()
+
+        if (self.settings.reopen_device_on_startup
+                and self.cache.last_serial):
+            dev_list = self.indexer.device_list
+            serial = self.cache.last_serial
+            # check if device exists
+            if any(x.serial == serial for x in dev_list):
+                self.serial = serial
+                if self.cache.last_format:
+                    caps_str = self.cache.last_format
 
         if self.serial:
             self.open_device(self.serial, caps_str)
@@ -457,12 +471,14 @@ class TCamCapture(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.props)
         self.set_device_menus_enabled(True)
         self.props_action.setVisible(True)
-
+        self.cache.last_serial = self.serial
+        self.cache.last_format = caps_str
         self.play(caps_str)
 
     def play(self, video_format=None):
         """"""
         if self.view is not None:
+            self.cache.last_format = video_format
             self.view.play(video_format)
             # self.view.repaint()
 
@@ -486,7 +502,8 @@ class TCamCapture(QMainWindow):
             self.update_device_list(self.device_list)
 
             self.props_action.setVisible(False)
-
+            self.cache.last_format = None
+            self.cache.last_serial = None
             self.setWindowTitle("TCam Capture")
 
             log.info("Closed device")
@@ -509,6 +526,7 @@ class TCamCapture(QMainWindow):
 
     def quit(self):
         log.info("Shutting down...")
+        self.cache.save()
         self.hide()
         self.close()
 
