@@ -112,7 +112,7 @@ class TCamCapture(QMainWindow):
         self.props = None  # property dialog widget
         self.setWindowTitle("TCam Capture")
 
-        self.setMinimumSize(640, 480)
+        self.setMinimumSize(960, 720)
 
         self.setup_ui()
         self.indexer = TcamDeviceIndex()
