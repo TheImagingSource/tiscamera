@@ -259,14 +259,12 @@ class TCamCapture(QMainWindow):
         self.view = None
 
     def open_preferences(self):
-        (result, location,
-         image, video) = OptionsDialog.get_options(self.settings)
+        result = OptionsDialog.get_options(self.settings)
 
         if result:
-            self.settings.set_location(location)
-            self.settings.set_image_type(image)
-            self.settings.set_video_type(video)
-            self.settings.save()
+            log.info("Saving settings")
+        else:
+            log.info("Settings not saved")
 
     def save_image_action(self):
         """"""

@@ -14,73 +14,107 @@
 
 from . import Encoder
 from . import Settings
+
+import logging
+
 # from PyQt5.QtGui import Q
 from PyQt5.QtWidgets import (QDialog, QGridLayout, QVBoxLayout,
                              QLabel, QLineEdit, QComboBox,
                              QDialogButtonBox, QFileDialog,
-                             QPushButton, QHBoxLayout)
+                             QPushButton, QHBoxLayout, QCheckBox,
+                             QFormLayout)
 from PyQt5.QtCore import Qt
+
+log = logging.getLogger(__file__)
 
 
 class OptionsDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, setting: Settings, parent=None):
         super(OptionsDialog, self).__init__(parent)
 
         encoder_dict = Encoder.get_encoder_dict()
+        self.settings = setting
 
         self.setWindowTitle("Tcam-Capture Options")
         self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
 
-        location_layout = QHBoxLayout()
+        self.form_layout = QFormLayout()
+        self.form_layout.setSpacing(20)
+        self.form_layout.setVerticalSpacing(20)
+        self.layout.addItem(self.form_layout)
+
+        self.location_layout = QHBoxLayout()
         self.location_label = QLabel("Where to save images/videos:", self)
         self.location_edit = QLineEdit(self)
         self.location_dialog_button = QPushButton("...", self)
         self.location_dialog_button.clicked.connect(self.open_file_dialog)
-        location_layout.addWidget(self.location_label)
-        location_layout.addWidget(self.location_edit)
-        location_layout.addWidget(self.location_dialog_button)
+        self.location_layout.addWidget(self.location_edit)
+        self.location_layout.addWidget(self.location_dialog_button)
 
-        self.layout.addItem(location_layout)
+        # maintain descriptions as own labels
+        # pyqt seems to loose the descriptions somewhere
+        # when simple strings are used or the qlabel do ot have self as owner
+        self.form_layout.addRow(self.location_label,
+                                self.location_layout)
 
-        image_layout = QHBoxLayout()
-        self.image_type_label = QLabel("Save images as:", self)
         self.image_type_combobox = QComboBox(self)
         for key, value in encoder_dict.items():
             if value.encoder_type == Encoder.EncoderType.image:
                 self.image_type_combobox.addItem(key)
+        self.image_type_label = QLabel("Save images as:", self)
+        self.form_layout.addRow(self.image_type_label,
+                                self.image_type_combobox)
 
-        image_layout.addWidget(self.image_type_label)
-        image_layout.addWidget(self.image_type_combobox)
-
-        self.layout.addItem(image_layout)
-
-        video_layout = QHBoxLayout()
-        self.video_type_label = QLabel("Save videos as:", self)
         self.video_type_combobox = QComboBox(self)
         for key, value in encoder_dict.items():
             if value.encoder_type == Encoder.EncoderType.video:
                 self.video_type_combobox.addItem(key)
 
-        video_layout.addWidget(self.video_type_label)
-        video_layout.addWidget(self.video_type_combobox)
+        self.video_type_label = QLabel("Save videos as:", self)
+        self.form_layout.addRow(self.video_type_label,
+                                self.video_type_combobox)
 
-        self.layout.addItem(video_layout)
+        self.device_dialog_checkbox = QCheckBox(self)
+        self.device_dialog_label = QLabel("Open device dialog on start:", self)
+        self.form_layout.addRow(self.device_dialog_label,
+                                self.device_dialog_checkbox)
+
+        self.reopen_device_checkbox = QCheckBox(self)
+        self.reopen_device_label = QLabel("Reopen device on start(ignores device dialog):", self)
+        self.form_layout.addRow(self.reopen_device_label,
+                                self.reopen_device_checkbox)
+
+        self.set_device_properties_checkbox = QCheckBox(self)
+        self.set_device_properties_label = QLabel("Set properties to cached values when known device is opened:", self)
+        self.form_layout.addRow(self.set_device_properties_label,
+                                self.set_device_properties_checkbox)
 
         # OK and Cancel buttons
         self.buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            QDialogButtonBox.Reset | QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
             Qt.Horizontal, self)
         self.layout.addWidget(self.buttons)
 
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
-
-        self.setLayout(self.layout)
+        self.buttons.clicked.connect(self.clicked)
 
     def set_settings(self, settings: Settings):
         self.location_edit.setText(settings.get_save_location())
         self.image_type_combobox.setCurrentText(settings.get_image_type())
         self.video_type_combobox.setCurrentText(settings.get_video_type())
+        self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
+        self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
+        self.set_device_properties_checkbox.setChecked(settings.set_properties_on_reopen)
+
+    def save_settings(self):
+        self.settings.save_location = self.location_edit.text()
+        self.settings.image_type = self.image_type_combobox.currentText()
+        self.settings.video_type = self.video_type_combobox.currentText()
+        self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
+        self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
+        self.settings.set_properties_on_reopen = self.set_device_properties_checkbox.isChecked()
 
     def open_file_dialog(self):
         fdia = QFileDialog()
@@ -98,16 +132,27 @@ class OptionsDialog(QDialog):
     def get_video_format(self):
         return self.video_type_combobox.currentText()
 
+    def clicked(self, button):
+
+        if self.buttons.buttonRole(button) == QDialogButtonBox.ResetRole:
+            self.reset()
+
+    def reset(self):
+        """"""
+        log.info("reset called")
+        self.settings.reset()
+        self.set_settings(self.settings)
+
     @staticmethod
-    def get_options(settings=None, parent=None):
-        dialog = OptionsDialog(parent)
+    def get_options(settings, parent=None):
+        dialog = OptionsDialog(settings, parent)
 
         if settings is not None:
             dialog.set_settings(settings)
         result = dialog.exec_()
 
-        location = dialog.get_location()
-        image = dialog.get_image_format()
-        video = dialog.get_video_format()
+        if result == QDialog.Accepted:
+            dialog.save_settings()
+            settings.save()
 
-        return (result == QDialog.Accepted, location, image, video)
+        return result == QDialog.Accepted
