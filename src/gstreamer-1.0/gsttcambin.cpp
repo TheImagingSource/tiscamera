@@ -500,6 +500,11 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     auto remove_element = [=] (GstElement* element)
         {
+            if (!GST_IS_ELEMENT(element))
+            {
+                return;
+            }
+
             gst_element_set_state(element, GST_STATE_NULL);
             gst_bin_remove(GST_BIN(self), element);
             // not needed bin_remove automatically does that
@@ -538,6 +543,10 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     if (self->focus)
     {
         remove_element(self->focus);
+    }
+    if (self->jpegdec)
+    {
+        remove_element(self->jpegdec);
     }
     if (self->convert)
     {
@@ -1151,6 +1160,18 @@ static void gst_tcambin_init (GstTcamBin* self)
     {
         self->has_dutils = FALSE;
     }
+
+    self->src = nullptr;
+    self->pipeline_caps = nullptr;
+    self->dutils = nullptr;
+    self->biteater = nullptr;
+    self->exposure = nullptr;
+    self->whitebalance = nullptr;
+    self->debayer = nullptr;
+    self->focus = nullptr;
+    self->jpegdec = nullptr;
+    self->convert = nullptr;
+    self->out_caps = nullptr;
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
