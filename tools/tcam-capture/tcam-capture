@@ -359,21 +359,26 @@ class TCamCapture(QMainWindow):
         """callback for self.format_combo"""
         log.info("on_format_selected")
 
-        if self.active_format.fmt == entry:
+        if (self.active_format.fmt == entry
+                and self.selected_format.fmt == entry):
             # no needs to reset other menus,
             # since we already have the correct format
             return
 
         self.selected_format.fmt = entry
+        self.selected_format.resolution = None
+        self.selected_format.fps = None
         self.populate_resolution_box(entry)
 
     def on_resolution_selected(self, entry: str):
         """callback for self.resolution_combo"""
         log.info("on_resolution_selected")
 
-        if self.active_format.resolution == entry:
+        if (self.active_format.resolution == entry
+                and self.selected_format.resolution == entry):
             # no needs to reset the menu,
             # since we already have the correct resolution
+            log.debug("Active format resolution is already selected")
             return
 
         if self.resolution_combo.is_default(entry):
