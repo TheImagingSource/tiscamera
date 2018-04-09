@@ -739,8 +739,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
     }
 
-finished_element_creation:
-
     if (self->needs_videoconvert)
     {
         // this is needed to allow for conversions such as
@@ -753,6 +751,8 @@ finished_element_creation:
             return FALSE;
         }
     }
+
+finished_element_creation:
 
     GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
     self->target_pad = gst_element_get_static_pad(previous_element, "src");
