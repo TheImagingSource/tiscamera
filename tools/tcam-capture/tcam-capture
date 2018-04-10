@@ -534,10 +534,11 @@ class TCamCapture(QMainWindow):
 
     def set_device_menus_enabled(self, enabled):
         # self.save_image.setEnabled(enabled)
-        # if self.format_menu is not None:
-        #     self.format_menu.setEnabled(enabled)
+        self.format_combo.setEnabled(enabled)
+        self.resolution_combo.setEnabled(enabled)
+        self.fps_combo.setEnabled(enabled)
+
         # self.recording_action.setEnabled(enabled)
-        pass
 
     def quit(self):
         log.info("Shutting down...")
