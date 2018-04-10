@@ -498,18 +498,18 @@ static void gst_tcambin_clear_source (GstTcamBin* self)
 static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
 
-    auto remove_element = [=] (GstElement* element)
+    auto remove_element = [=] (GstElement** element)
         {
-            if (!GST_IS_ELEMENT(element))
+            if (!GST_IS_ELEMENT(*element))
             {
                 return;
             }
 
-            gst_element_set_state(element, GST_STATE_NULL);
-            gst_bin_remove(GST_BIN(self), element);
+            gst_element_set_state(*element, GST_STATE_NULL);
+            gst_bin_remove(GST_BIN(self), *element);
             // not needed bin_remove automatically does that
             // gst_object_unref(element);
-            element = nullptr;
+            *element = nullptr;
         };
 
     if (self->pipeline_caps)
@@ -522,35 +522,35 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     if (self->dutils)
     {
-        remove_element(self->dutils);
+        remove_element(&self->dutils);
     }
     if (self->biteater)
     {
-        remove_element(self->biteater);
+        remove_element(&self->biteater);
     }
     if (self->exposure)
     {
-        remove_element(self->exposure);
+        remove_element(&self->exposure);
     }
     if (self->whitebalance)
     {
-        remove_element(self->whitebalance);
+        remove_element(&self->whitebalance);
     }
     if (self->debayer)
     {
-        remove_element(self->debayer);
+        remove_element(&self->debayer);
     }
     if (self->focus)
     {
-        remove_element(self->focus);
+        remove_element(&self->focus);
     }
     if (self->jpegdec)
     {
-        remove_element(self->jpegdec);
+        remove_element(&self->jpegdec);
     }
     if (self->convert)
     {
-        remove_element(self->convert);
+        remove_element(&self->convert);
     }
 }
 
