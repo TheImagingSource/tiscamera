@@ -19,6 +19,7 @@ import signal
 import argparse
 import tcam_capture
 from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
+from tcam_capture.DeviceDialog import DeviceDialog
 from tcam_capture.TcamSignal import TcamSignals
 from tcam_capture.TcamCaptureData import TcamCaptureData
 from tcam_capture.PropertyDialog import PropertyDialog
@@ -141,6 +142,11 @@ class TCamCapture(QMainWindow):
                 self.serial = serial
                 if self.cache.last_format:
                     caps_str = self.cache.last_format
+
+        if not self.serial and self.settings.show_device_dialog_on_startup:
+            res, device = DeviceDialog.get_device(self.indexer)
+            if res and device:
+                self.serial = device.serial
 
         if self.serial:
             self.open_device(self.serial, caps_str)
