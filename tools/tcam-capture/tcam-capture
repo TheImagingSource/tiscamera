@@ -23,16 +23,16 @@ from tcam_capture.DeviceDialog import DeviceDialog
 from tcam_capture.TcamSignal import TcamSignals
 from tcam_capture.TcamCaptureData import TcamCaptureData
 from tcam_capture.PropertyDialog import PropertyDialog
-from tcam_capture.TcamView import TcamView, TcamScreen
+from tcam_capture.TcamView import TcamView
 from tcam_capture.OptionsDialog import OptionsDialog
 from tcam_capture.Settings import Settings
 from tcam_capture.Cache import Cache
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
-                             QDockWidget, QAction, QStyle, QPushButton, QComboBox)
+                             QDockWidget, QAction, QComboBox)
 
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QObject
-from PyQt5.QtGui import QIcon, QKeySequence
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
 
 import gi
 
