@@ -17,6 +17,9 @@ find_package(PythonInterp 3 REQUIRED)
 if (PYTHONINTERP_FOUND)
   set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}/dist-packages/")
 
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py" @ONLY)
+
   install(PROGRAMS tcam-capture
     DESTINATION bin
     COMPONENT tcam-capture)
@@ -25,6 +28,21 @@ if (PYTHONINTERP_FOUND)
     DESTINATION "${TCAM_CAPTURE_PY_INSTALL}"
     COMPONENT tcam-capture
     PATTERN "__pycache__" EXCLUDE
-)
+    PATTERN "image_dir*" EXCLUDE)
+
+
+  # this additional step is done to differentiate between a local execution
+  # and an installed execution of tcam-capture
+  # an installed one should search for globally available images
+  # e.g. /usr/share/tiscamera/images
+  # whereas a local one should prefer <tiscamera>/data/images
+  set(TCAM_IMAGE_DIR "${TCAM_INSTALL_IMAGE_DIR}")
+
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py" @ONLY)
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py"
+    DESTINATION "${TCAM_CAPTURE_PY_INSTALL}"
+    COMPONENT tcam-capture)
 
 endif (PYTHONINTERP_FOUND)

@@ -83,6 +83,8 @@ qrc_*.cpp
 .ropeproject
 __pycache__
 
+image_dir.py
+
 # Misc
 
 *.kdev4
