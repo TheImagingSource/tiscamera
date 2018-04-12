@@ -335,6 +335,8 @@ enum TCAM_PROPERTY_FLAGS
     TCAM_PROPERTY_FLAG_IS_LOGARITHMIC = 0x0040, /**< This control should be displayed using a
                                                    logarithmic scale as most actions will take
                                                    place in a small range of the overall range. */
+    TCAM_PROPERTY_FLAG_REQUIRES_RESTART = 0x0080, /**< This control requires a restart of the stream
+                                                     to be applied. */
 };
 
 /** @} */
