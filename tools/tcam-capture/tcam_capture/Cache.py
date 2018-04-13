@@ -32,13 +32,27 @@ class Cache():
         self.cache_file = None
         self.gc = "General"
 
+    def reset(self):
+        """Delete cache contents"""
+        folder = self.get_default_cache_directory()
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+            except Exception as e:
+                log.error(e)
+
     def get_cache_file(self,
-                       directory: str=os.getenv("XDG_CACHE_DIR",
-                                                os.path.expanduser("~/.cache")),
+                       directory: str=None,
                        filename: str="tcam-capture.cache"):
         """
 
         """
+
+        if directory is None:
+            directory = self.get_default_cache_directory()
 
         return os.path.join(directory, filename)
 
@@ -65,8 +79,13 @@ class Cache():
         if self.last_format:
             config[self.gc]["last_format"] = self.last_format
 
-        # if not os.path.exists(self.settings_directory):
-        #     os.makedirs(self.settings_directory)
+        os.makedirs(os.path.dirname(self.get_cache_file()), exist_ok=True)
 
         with open(self.get_cache_file(), 'w') as configfile:
             config.write(configfile)
+
+    @staticmethod
+    def get_default_cache_directory():
+        return os.path.join(os.getenv("XDG_CACHE_DIR",
+                                      os.path.expanduser("~/.cache")),
+                            "tcam-capture")

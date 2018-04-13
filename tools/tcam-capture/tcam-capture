@@ -559,13 +559,29 @@ class TCamCapture(QMainWindow):
         error_dialog.setText("Device has been lost. Please reconnect or re-open it.")
         error_dialog.exec_()
 
+def reset_settings():
+    """
+    Reset the settings file to its default settings.
+    """
+    settings = Settings()
+    settings.reset()
+    settings.save()
+
+
+def clear_cache():
+    """
+    Remove all cache files
+    """
+    cache = Cache()
+    cache.reset()
+
 
 def init():
     """
     This function performs additional setup steps that should happen
     independently of the actual application.
     argparse likes to exit the application when -h is appended
-    This will cause error, should QApplication already be running
+    This will cause exceptions, should QApplication already be running
     """
 
     parser = argparse.ArgumentParser(description='The Imaging Source Live Stream Application.')
@@ -573,8 +589,10 @@ def init():
                         action="store", dest="serial", default=None)
     parser.add_argument("--format", help="Open device with this gstreamer format",
                         action="store", dest="caps_str", default=None)
-    parser.add_argument("--verbose", "-v", action="count",
-                        dest="verbose_count", default=0)
+    parser.add_argument("--verbose", "-v", help="Increase logging level",
+                        action="count", dest="verbose_count", default=0)
+    parser.add_argument("--reset", help="Reset application settings and clear cache",
+                        action="store_true")
     # these are here to make argparse shut up about unknown arguments
     # we want this application to allow gstreamer logging
     parser.add_argument("--gst-debug", help=argparse.SUPPRESS)
@@ -583,6 +601,10 @@ def init():
                         action="store_true")  # required since no-color is a simple flag
 
     arguments = parser.parse_args()
+
+    if arguments.reset:
+        reset_settings()
+        clear_cache()
 
     # set default logging level to WARN. each new -v increases the log level
     level = max(3 - arguments.verbose_count, 0) * 10
@@ -610,7 +632,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     app = QApplication(sys.argv)
-    # TODO: Missing serial verification
     tcam_capture = TCamCapture(app, serial, caps_str)
 
     sys.exit(app.exec_())
