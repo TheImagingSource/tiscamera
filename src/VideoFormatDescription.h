@@ -97,6 +97,8 @@ public:
                                      unsigned int height,
                                      double framerate) const;
 
+    bool is_valid_video_format (const VideoFormat&) const;
+
 private:
 
     tcam_video_format_description format;

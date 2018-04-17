@@ -179,3 +179,52 @@ VideoFormat VideoFormatDescription::create_video_format (unsigned int width,
 
     return VideoFormat(f);
 }
+
+
+bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
+{
+
+    if (fmt.get_fourcc() != format.fourcc) {
+        return false;
+    }
+
+    // skipping currently not used
+    // binning currently not used
+
+    auto size = fmt.get_size();
+
+    auto is_valid_resolution = [&size](const tcam_resolution_description &res)
+        {
+            if (res.type == TCAM_RESOLUTION_TYPE_FIXED)
+            {
+                return are_equal(res.min_size, size);
+            }
+            else // TCAM_RESOLUTION_TYPE_RANGE
+            {
+                return in_range(res.min_size, res.max_size, size);
+            }
+        };
+
+    auto resolutions = get_resolutions();
+
+    for (const auto& res : resolutions)
+    {
+        if (is_valid_resolution(res))
+        {
+            auto fps = get_framerates(size);
+
+            auto iter = std::find_if(fps.begin(), fps.end(), [=](double val)
+                                     {
+                                         return compare_double(fmt.get_framerate(), val);
+                                     });
+
+            if (iter == fps.end())
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
