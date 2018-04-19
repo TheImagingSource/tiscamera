@@ -55,10 +55,10 @@ struct device_state
 
 static GSList* gst_tcam_src_get_property_names(TcamProp* self);
 
-static gchar *gst_tcam_src_get_property_type (TcamProp* self, gchar* name);
+static gchar* gst_tcam_src_get_property_type (TcamProp* self, const gchar* name);
 
 static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
-                                                gchar* name,
+                                                const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
                                                 GValue* max,
@@ -73,7 +73,7 @@ static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
                                               const char* menu_name);
 
 static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
-                                                gchar* name,
+                                                const gchar* name,
                                                 const GValue* value);
 
 static GSList* gst_tcam_src_get_device_serials (TcamProp* self);
@@ -105,7 +105,7 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_PUSH_SRC,
 
 
 static gboolean get_property_by_name (GstTcamSrc* self,
-                                      gchar* name,
+                                      const gchar* name,
                                       struct tcam_device_property* prop)
 {
 
@@ -154,7 +154,8 @@ struct property_type_map
  *
  * Returns: (transfer full): A string describing the property type
  */
-static gchar* gst_tcam_src_get_property_type (TcamProp* iface, gchar* name)
+static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
+                                              const gchar* name)
 {
     gchar* ret = NULL;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
@@ -249,7 +250,7 @@ static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 
 
 static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
-                                                gchar* name,
+                                                const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
                                                 GValue* max,
@@ -488,7 +489,7 @@ static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
 
 
 static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
-                                                gchar* name,
+                                                const gchar* name,
                                                 const GValue* value)
 {
     gboolean ret = TRUE;

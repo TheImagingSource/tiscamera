@@ -42,22 +42,23 @@ static void gst_tcambin_clear_source (GstTcamBin* self);
 
 static GSList* gst_tcam_bin_get_property_names (TcamProp* self);
 
-static const gchar *gst_tcam_bin_get_property_type (TcamProp* self, gchar* name);
+static gchar* gst_tcam_bin_get_property_type (TcamProp* self,
+                                              const gchar* name);
 
-static gboolean gst_tcam_bin_get_tcam_property (TcamProp* self,
-                                                gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group);
+static gboolean gst_tcam_bin_get_tcam_property(TcamProp* self,
+                                               const gchar* name,
+                                               GValue* value,
+                                               GValue* min,
+                                               GValue* max,
+                                               GValue* def,
+                                               GValue* step,
+                                               GValue* type,
+                                               GValue* flags,
+                                               GValue* category,
+                                               GValue* group);
 
 static gboolean gst_tcam_bin_set_tcam_property (TcamProp* self,
-                                                gchar* name,
+                                                const gchar* name,
                                                 const GValue* value);
 
 static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
@@ -97,9 +98,10 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
  *
  * Returns: (transfer full): A string describing the property type
  */
-static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name)
+static gchar* gst_tcam_bin_get_property_type(TcamProp* iface,
+                                             const gchar* name)
 {
-    const gchar* ret = NULL;
+    gchar* ret = NULL;
 
 
     GstTcamBin* self = GST_TCAMBIN (iface);
@@ -108,7 +110,7 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
     {
         gst_tcambin_create_source(GST_TCAMBIN(self));
     }
-    ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name);
+    ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name));
 
     if (ret != nullptr)
     {
@@ -117,7 +119,7 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
 
     if (self->dutils != NULL)
     {
-        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->dutils), name);
+        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->dutils), name));
 
         if (ret != nullptr)
         {
@@ -127,7 +129,7 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
 
     if (self->whitebalance != NULL)
     {
-        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->whitebalance), name);
+        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->whitebalance), name));
 
         if (ret != nullptr)
         {
@@ -137,7 +139,7 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
 
     if (self->exposure != NULL)
     {
-        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->exposure), name);
+        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->exposure), name));
 
         if (ret != nullptr)
         {
@@ -147,7 +149,7 @@ static const gchar* gst_tcam_bin_get_property_type (TcamProp* iface, gchar* name
 
     if (self->focus != NULL)
     {
-        ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->focus), name);
+        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->focus), name));
 
         if (ret != nullptr)
         {
@@ -236,7 +238,7 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
 
 
 static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
-                                                gchar* name,
+                                                const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
                                                 GValue* max,
@@ -250,7 +252,6 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
     GstTcamBin* self = GST_TCAMBIN(iface);
 
     if (self->src == nullptr)
-
     {
         gst_tcambin_create_source(self);
     }
@@ -362,7 +363,7 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
 }
 
 static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
-                                                gchar* name,
+                                                const gchar* name,
                                                 const GValue* value)
 {
     gboolean ret = FALSE;
