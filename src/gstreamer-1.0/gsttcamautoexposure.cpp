@@ -106,10 +106,11 @@ static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
 
 static GSList* gst_tcamautoexposure_get_property_names(TcamProp* self);
 
-static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name);
+static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self,
+                                                      const gchar* name);
 
 static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* self,
-                                                        gchar* name,
+                                                        const gchar* name,
                                                         GValue* value,
                                                         GValue* min,
                                                         GValue* max,
@@ -121,7 +122,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* self,
                                                         GValue* group);
 
 static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
-                                                        gchar* name,
+                                                        const gchar* name,
                                                         const GValue* value);
 
 static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self,
@@ -291,7 +292,8 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 }
 
 
-static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gchar* name)
+static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self,
+                                                      const gchar* name)
 {
     if (name == nullptr)
     {
@@ -314,7 +316,7 @@ static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gcha
     {
         return strdup("integer");
     }
-   else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)) == 0)
     {
         return strdup("integer");
     }
@@ -347,7 +349,7 @@ static const gchar* gst_tcamautoexposure_get_property_type (TcamProp* self, gcha
 
 
 static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
-                                                        gchar* name,
+                                                        const gchar* name,
                                                         GValue* value,
                                                         GValue* min,
                                                         GValue* max,
@@ -360,7 +362,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
 {
     if (name == nullptr)
     {
-        return 0;
+        return FALSE;
     }
 
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(prop);
@@ -911,7 +913,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
 
 
 static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
-                                                        gchar* name,
+                                                        const gchar* name,
                                                         const GValue* value)
 {
     guint id = tcamautoexposure_string_to_property_id(name);
