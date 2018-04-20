@@ -109,6 +109,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = { 0x0199e234 },
     },
     {
+        .id = TCAM_PROPERTY_TRIGGER_OPERATION,
+        .v4l2_id = { 0x0199e235 },
+    },
+    {
         .id = TCAM_PROPERTY_TRIGGER_EXPOSURE_MODE,
         .v4l2_id = { 0x0199e236 },
     },
