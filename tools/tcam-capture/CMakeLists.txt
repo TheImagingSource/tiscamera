@@ -31,6 +31,13 @@ if (PYTHONINTERP_FOUND)
     PATTERN "image_dir*" EXCLUDE)
 
 
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam-capture.desktop.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop" @ONLY)
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop"
+    DESTINATION "${TCAM_INSTALL_DESKTOP_FILES}"
+    COMPONENT tcam-capture)
+
   # this additional step is done to differentiate between a local execution
   # and an installed execution of tcam-capture
   # an installed one should search for globally available images

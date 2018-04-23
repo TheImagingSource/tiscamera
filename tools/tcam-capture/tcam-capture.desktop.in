@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Tcam-Capture
+Comment=The Imaging Source Live Stream Viewer
+Exec=@TCAM_INSTALL_BIN@/tcam-capture
+Icon=@TCAM_INSTALL_IMAGE_DIR@/logo.jpg
+Terminal=false
