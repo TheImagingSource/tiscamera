@@ -37,3 +37,10 @@ class ImageProvider():
             return QIcon(fullpath)
         else:
             return QIcon.fromTheme('camera-photo')
+
+    def get_tcam_logo(self):
+        fullpath = os.path.join(self.path, "logo.jpg")
+        if os.path.isfile(fullpath):
+            return QIcon(fullpath)
+        else:
+            return QIcon.fromTheme('camera-photo')

@@ -25,6 +25,7 @@ from tcam_capture.TcamCaptureData import TcamCaptureData
 from tcam_capture.PropertyDialog import PropertyDialog
 from tcam_capture.TcamView import TcamView
 from tcam_capture.OptionsDialog import OptionsDialog
+from .ImageProvider import ImageProvider
 from tcam_capture.Settings import Settings
 from tcam_capture.Cache import Cache
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -116,6 +117,8 @@ class TCamCapture(QMainWindow):
         self.device_list = None  # needed for setting window title later on
         self.props = None  # property dialog widget
         self.setWindowTitle("TCam Capture")
+        image_provider = ImageProvider()
+        self.setWindowIcon(image_provider.get_tcam_logo())
 
         self.setMinimumSize(960, 720)
 
