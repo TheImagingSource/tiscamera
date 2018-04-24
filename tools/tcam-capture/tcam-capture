@@ -17,7 +17,14 @@
 import sys
 import signal
 import argparse
-import tcam_capture
+
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
+                             QDockWidget, QAction, QComboBox)
+
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
+
 from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
 from tcam_capture.DeviceDialog import DeviceDialog
 from tcam_capture.TcamSignal import TcamSignals
@@ -28,12 +35,6 @@ from tcam_capture.OptionsDialog import OptionsDialog
 from tcam_capture.ImageProvider import ImageProvider
 from tcam_capture.Settings import Settings
 from tcam_capture.Cache import Cache
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
-                             QDockWidget, QAction, QComboBox)
-
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon
 
 import gi
 
@@ -58,21 +59,28 @@ class TcamComboBox(QComboBox):
         self.default_present = True
 
     def reset(self):
-
+        """
+        Remove all entries and re-add the default one
+        """
         self.clear()
         self.addItem(self.default_entry)
         self.default_present = True
 
     def remove_default(self):
+        """
+        Remove the default entry from the combobox
+        """
         if self.default_present:
             self.removeItem(0)
             self.default_present = False
 
     def is_default(self, entry: str):
+        """
+        return true if given entry is equal to the default one
+        """
         if entry == self.default_entry:
             return True
-        else:
-            return False
+        return False
 
 
 class FmtSelection:
@@ -92,7 +100,9 @@ class FmtSelection:
 
 
 class TCamCapture(QMainWindow):
-
+    """
+    Main application window for tcam-capture
+    """
     open_options = pyqtSignal()
 
     def __init__(self, app, serial=None, caps_str=None):
@@ -116,13 +126,16 @@ class TCamCapture(QMainWindow):
 
         self.device_list = None  # needed for setting window title later on
         self.props = None  # property dialog widget
+        self.pipeline = None
+        self.view = None
+
         self.setWindowTitle("TCam Capture")
         image_provider = ImageProvider()
         self.setWindowIcon(image_provider.get_tcam_logo())
 
         self.setMinimumSize(960, 720)
 
-        self.setup_ui()
+        self.__setup_ui()
         self.indexer = TcamDeviceIndex()
         self.indexer.update_device_list.connect(self.update_device_list)
 
@@ -132,8 +145,6 @@ class TCamCapture(QMainWindow):
         self.indexer.moveToThread(self.data.work_thread)
         self.data.work_thread.start()
 
-        self.pipeline = None
-        self.props = None
         self.show()
 
         if (self.settings.reopen_device_on_startup
@@ -159,7 +170,9 @@ class TCamCapture(QMainWindow):
             self.data.work_thread.quit()
 
     def toggle_fullscreen(self):
-
+        """
+        Toggle fullscreen display of live stream
+        """
         if self.view is not None:
             self.view.toggle_fullscreen()
         else:
@@ -169,27 +182,39 @@ class TCamCapture(QMainWindow):
                 self.showFullScreen()
 
     def toggle_maximized(self):
+        """
+        toggle if window is maximized
+        """
         if self.isMaximized():
             self.showNormal()
         else:
             self.showMaximized()
 
     def keyPressEvent(self, event):
-        """Overwrite of QMainWindow::keyPressEvent"""
+        """
+        Overwrite of QMainWindow::keyPressEvent
+        """
         if event.key() == QtCore.Qt.Key_F11 or event.key() == QtCore.Qt.Key_F:
             log.info("Toggling fullscreen")
             self.toggle_fullscreen()
         elif event.key() == QtCore.Qt.Key_F10:
             log.info("Toggling maximize")
             self.toggle_maximized()
+        elif event.key() == QtCore.Qt.Key_P:
+            log.info("Got key event for saving image")
+            self.save_image_action()
 
     def saved_image(self, image_path: str):
-        """Slot for saving an image """
+        """
+        Slot for saving an image
+        """
 
         self.statusBar().showMessage("Saved image {}".format(image_path), 2000)
 
-    def setup_ui(self):
-
+    def __setup_ui(self):
+        """
+        General GUI setup code
+        """
         self.pixel_label = QLabel("", self)
         self.pixel_label.setFixedWidth(100)
         self.pixel_coords_label = QLabel("", self)
@@ -268,6 +293,9 @@ class TCamCapture(QMainWindow):
         self.view = None
 
     def open_preferences(self):
+        """
+        SLOT for open_preferences button
+        """
         result = OptionsDialog.get_options(self.settings)
 
         if result:
@@ -276,7 +304,10 @@ class TCamCapture(QMainWindow):
             log.info("Settings not saved")
 
     def save_image_action(self):
-        """"""
+        """
+        SLOT for save_image button
+        Signal TcamView to save an image.
+        """
         self.view.save_image(self.settings.get_image_type())
 
     def start_recording_video(self):
@@ -308,12 +339,12 @@ class TCamCapture(QMainWindow):
 
         active_entry = None
 
-        for d in device_list:
+        for dev in device_list:
 
-            action_string = "{model:<18} - {contype:<7} - {serial}".format(model=d.model,
-                                                                           contype=d.device_type,
-                                                                           serial=d.serial)
-            if d.serial == self.serial:
+            action_string = "{model:<18} - {contype:<7} - {serial}".format(model=dev.model,
+                                                                           contype=dev.device_type,
+                                                                           serial=dev.serial)
+            if dev.serial == self.serial:
                 active_entry = action_string
             self.device_combo.addItem(action_string)
 
@@ -321,7 +352,9 @@ class TCamCapture(QMainWindow):
             self.device_combo.setCurrentText(active_entry)
 
     def populate_fmt_box(self):
-
+        """
+        Fill format combobox with the correct values
+        """
         if not self.caps_desc:
             log.error("No caps description available")
             return
@@ -331,7 +364,9 @@ class TCamCapture(QMainWindow):
         self.format_combo.addItems(self.caps_desc.get_fmt_list())
 
     def populate_resolution_box(self, fmt: str):
-
+        """
+        Fill resolution combobox with the correct values
+        """
         self.resolution_combo.reset()
         self.fps_combo.reset()
         res_list = self.caps_desc.get_resolution_list(fmt)
@@ -339,7 +374,9 @@ class TCamCapture(QMainWindow):
         self.resolution_combo.addItems(res_list)
 
     def populate_fps_box(self, fmt: str, resolution: str):
-
+        """
+        Fill fps combobox with the correct values
+        """
         self.fps_combo.reset()
         self.selected_format.resolution = resolution
 
@@ -354,7 +391,9 @@ class TCamCapture(QMainWindow):
     def new_pixel_under_mouse(self, active: bool,
                               mouse_x: int, mouse_y: int,
                               color: QtGui.QColor):
-        """Slot for TcamView.new_pixel_under_mouse"""
+        """
+        Slot for TcamView.new_pixel_under_mouse
+        """
         if active:
             self.pixel_coords_label.setText("X:{: <4} Y:{: <4}".format(mouse_x,
                                                                        mouse_y))
@@ -365,9 +404,9 @@ class TCamCapture(QMainWindow):
             self.pixel_label.setText("")
 
     def on_format_selected(self, entry: str):
-        """callback for self.format_combo"""
-        log.info("on_format_selected")
-
+        """
+        callback for self.format_combo
+        """
         if (self.active_format.fmt == entry
                 and self.selected_format.fmt == entry):
             # no needs to reset other menus,
@@ -380,9 +419,9 @@ class TCamCapture(QMainWindow):
         self.populate_resolution_box(entry)
 
     def on_resolution_selected(self, entry: str):
-        """callback for self.resolution_combo"""
-        log.info("on_resolution_selected")
-
+        """
+        callback for self.resolution_combo
+        """
         if (self.active_format.resolution == entry
                 and self.selected_format.resolution == entry):
             # no needs to reset the menu,
@@ -491,22 +530,31 @@ class TCamCapture(QMainWindow):
         self.play(caps_str)
 
     def current_fps(self, fps: float):
+        """
+        SLOT for TcamView.current_fps signal
+        """
         self.current_fps_label.setText("FPS: {0:.2f}".format(fps))
 
     def play(self, video_format=None):
-        """"""
+        """
+        SLOT for activating a video stream
+        """
         if self.view is not None:
             self.cache.last_format = video_format
             self.view.play(video_format)
             # self.view.repaint()
 
     def stop(self):
-        """Stops the video stream"""
+        """
+        Stops the video stream
+        """
         if self.view is not None:
             self.view.stop()
 
     def close(self):
-        """Stops the video stream and closes the device"""
+        """
+        Stops the video stream and closes the device
+        """
         if self.view is not None:
             self.stop()
             self.removeDockWidget(self.props)
@@ -527,7 +575,9 @@ class TCamCapture(QMainWindow):
             log.info("Closed device")
 
     def toggle_properties_dialog(self):
-
+        """
+        SLOT for toggle_properties_dialog button
+        """
         if self.props:
             if self.props_action.isEnabled():
                 if self.props.isVisible():
@@ -536,6 +586,9 @@ class TCamCapture(QMainWindow):
                     self.props.setVisible(True)
 
     def set_device_menus_enabled(self, enabled):
+        """
+        Convenience function to enable/disable device related GUI elements
+        """
         # self.save_image.setEnabled(enabled)
         self.format_combo.setEnabled(enabled)
         self.resolution_combo.setEnabled(enabled)
@@ -544,6 +597,9 @@ class TCamCapture(QMainWindow):
         # self.recording_action.setEnabled(enabled)
 
     def quit(self):
+        """
+        Application shutdown function
+        """
         log.info("Shutting down...")
         self.cache.save()
         self.hide()
@@ -553,7 +609,9 @@ class TCamCapture(QMainWindow):
         self.data.work_thread.wait()
 
     def lost_device(self):
-        """Callback for device lost"""
+        """
+        Callback for device lost
+        """
         log.error("Lost device. Stopping...")
         self.close()
         error_dialog = QtWidgets.QMessageBox(self)
@@ -561,6 +619,7 @@ class TCamCapture(QMainWindow):
         error_dialog.setWindowTitle("Device lost")
         error_dialog.setText("Device has been lost. Please reconnect or re-open it.")
         error_dialog.exec_()
+
 
 def reset_settings():
     """
