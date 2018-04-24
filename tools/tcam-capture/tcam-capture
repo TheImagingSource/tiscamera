@@ -25,7 +25,7 @@ from tcam_capture.TcamCaptureData import TcamCaptureData
 from tcam_capture.PropertyDialog import PropertyDialog
 from tcam_capture.TcamView import TcamView
 from tcam_capture.OptionsDialog import OptionsDialog
-from .ImageProvider import ImageProvider
+from tcam_capture.ImageProvider import ImageProvider
 from tcam_capture.Settings import Settings
 from tcam_capture.Cache import Cache
 from PyQt5 import QtCore, QtWidgets, QtGui
