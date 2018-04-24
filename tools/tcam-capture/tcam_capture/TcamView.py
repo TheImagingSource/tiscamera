@@ -69,6 +69,10 @@ class TcamView(QWidget):
         self.actual_fps = 0.0
         self.framecounter = 0
         self.start_time = 0
+        # additional timer to update actual_fps
+        # when no images arrive
+        self.fps_timer = QtCore.QTimer()
+        self.fps_timer.timeout.connect(self.fps_tick)
 
     def get_caps_desc(self):
         if not self.caps_desc:
@@ -139,6 +143,7 @@ class TcamView(QWidget):
         self.pipeline.set_state(Gst.State.PLAYING)
         self.start_time = 0
         self.framecounter = 0
+        self.fps_timer.start(1000)  # 1 second
         self.container.first_image = True
 
     def fps_tick(self):
@@ -231,10 +236,13 @@ class TcamView(QWidget):
             log.error("Pipeline object does not exist.")
         self.start_time = 0
         self.framecounter = 0
+        self.fps_timer.stop()
 
     def stop(self):
         log.info("Setting state to NULL")
         self.start_time = 0
+        self.fps_timer.stop()
+
         self.pipeline.set_state(Gst.State.NULL)
         log.info("Set State to NULL")
 
