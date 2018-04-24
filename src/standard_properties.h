@@ -713,6 +713,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
         .group = { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_OIS_MODE },
     },
+    {
+        TCAM_PROPERTY_OVERRIDE_SCANNING_MODE,
+        .name = "Override Scanning Mode",
+        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
+        .group = { TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN, TCAM_PROPERTY_OVERRIDE_SCANNING_MODE},
+    },
 };
 
 
