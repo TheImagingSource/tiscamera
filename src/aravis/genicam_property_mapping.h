@@ -52,7 +52,7 @@ static std::vector<struct aravis_property> aravis_mappings =
         .genicam_name = {"ExposureAutoHighlighReduction"},
     },
     {
-        .id = TCAM_PROPERTY_AUTO_REFERENCE,
+        .id = TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
         .genicam_name = {"ExposureAutoReference"},
     },
     {
