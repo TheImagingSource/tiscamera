@@ -343,6 +343,30 @@ static std::vector<struct aravis_property> aravis_mappings =
         .id = TCAM_PROPERTY_IMX174_HARDWARE_WDR_ENABLE,
         .genicam_name = {"IMX174HardwareWDREnable"},
     },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL,
+        .genicam_name = {"AutoFunctionsROIEnable"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_LEFT,
+        .genicam_name = {"AutoFunctionsROILeft"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_HEIGHT,
+        .genicam_name = {"AutoFunctionsROIHeight"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_TOP,
+        .genicam_name = {"AutoFunctionsROITop"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_WIDTH,
+        .genicam_name = {"AutoFunctionsROIWidth"},
+    },
+    {
+        .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
+        .genicam_name = {"AutoFunctionsROIPreset"},
+    },
 };
 
 
