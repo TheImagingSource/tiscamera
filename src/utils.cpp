@@ -334,7 +334,7 @@ TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
 }
 
 
-unsigned int tcam::get_pid_from_lockfile (const std::string filename)
+unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
 {
     std::ifstream f(filename);
     unsigned int ret = 0;
