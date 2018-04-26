@@ -36,11 +36,11 @@ public:
     /// @return shared_ptr or nullptr
     /// Tries to open the specified library
     static std::shared_ptr<LibraryHandle> open (const std::string& name,
-                                                const std::string path = "");
+                                                const std::string& path = "");
 private:
 
     LibraryHandle (const std::string& name,
-                   const std::string path = "");
+                   const std::string& path = "");
 
     LibraryHandle (const LibraryHandle&) = delete;
 
@@ -73,7 +73,7 @@ public:
 private:
 
     static void* open_library (const std::string& name,
-                               const std::string path = "");
+                               const std::string& path = "");
 
     void* handle_;
 
