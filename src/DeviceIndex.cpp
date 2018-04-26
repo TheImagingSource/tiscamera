@@ -45,9 +45,18 @@ DeviceIndex::DeviceIndex ()
 DeviceIndex::~DeviceIndex ()
 {
     continue_thread = false;
-    if (work_thread.joinable())
+    wait_for_next_run.notify_all();
+
+    try
     {
-        work_thread.join();
+        if (work_thread.joinable())
+        {
+            work_thread.join();
+        }
+    }
+    catch (const std::system_error& err)
+    {
+        tcam_error("Unable to join thread. Exception: %s", err.what());
     }
 }
 
@@ -93,7 +102,7 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    auto it = std::begin(callbacks); //std::begin is a free function in C++11
+    auto it = std::begin(callbacks);
     for (auto& value : callbacks)
     {
         if (value.callback == callback && value.serial.compare(serial) == 0)
@@ -101,7 +110,7 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
             callbacks.erase(it);
             break;
         }
-        it++; //at the end OR make sure you do this in each iteration
+        it++;
     }
 }
 
@@ -180,7 +189,9 @@ void DeviceIndex::run ()
     while (continue_thread)
     {
         update_device_list();
-        std::this_thread::sleep_for(std::chrono::seconds(wait_period));
+
+        std::unique_lock<std::mutex> lock(mtx);
+        wait_for_next_run.wait_for(lock, std::chrono::seconds(wait_period));
     }
 }
 
@@ -231,16 +242,15 @@ bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 
 std::vector<DeviceInfo> DeviceIndex::get_device_list () const
 {
-    std::unique_lock<std::mutex> lock(mtx);
-
     // wait for work_thread to deliver first valid list
     // since get_aravis_device_list is a blocking function
     // our thread would retrieve an empty list without this wait loop
-    if (!have_list)
+    while (!have_list)
     {
+        std::unique_lock<std::mutex> lock(mtx);
         wait_for_list.wait_for(lock, std::chrono::seconds(wait_period));
     }
-
+    tcam_info("Got list");
     return device_list;
 }
 

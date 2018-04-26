@@ -95,6 +95,7 @@ private:
 
     bool have_list;
     mutable std::condition_variable wait_for_list;
+    mutable std::condition_variable wait_for_next_run;
 
     std::vector<DeviceInfo> device_list;
 
