@@ -17,7 +17,6 @@
 #include "general.h"
 #include "properties.h"
 #include "formats.h"
-#include "multimedia.h"
 
 #include <tcam.h>
 
@@ -226,15 +225,6 @@ int main (int argc, char *argv[])
         case SET_FORMAT:
         {
             set_active_format(dev, param);
-            break;
-        }
-        case SAVE_STREAM:
-        {
-            //save_stream(g, filename);
-        }
-        case SAVE_IMAGE:
-        {
-            //save_image(g, filename);
             break;
         }
         case SAVE_DEVICE_LIST:
