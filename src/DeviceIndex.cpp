@@ -250,7 +250,6 @@ std::vector<DeviceInfo> DeviceIndex::get_device_list () const
         std::unique_lock<std::mutex> lock(mtx);
         wait_for_list.wait_for(lock, std::chrono::seconds(wait_period));
     }
-    tcam_info("Got list");
     return device_list;
 }
 
