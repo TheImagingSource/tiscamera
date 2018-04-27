@@ -425,3 +425,17 @@ double tcam::map_value_ranges (double input_start, double input_end,
 {
     return (value - input_start) * (output_end - output_start) / (input_end - input_start) - output_start;
 }
+
+
+std::string tcam::get_environment_variable (const std::string& name,
+                                            const std::string& backup)
+{
+    char *value = getenv(name.c_str());
+
+    if (!value)
+    {
+        return backup;
+    }
+
+    return value;
+}

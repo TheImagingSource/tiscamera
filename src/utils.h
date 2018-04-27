@@ -196,6 +196,17 @@ double map_value_ranges (double input_start, double input_end,
                          double output_start, double output_end,
                          double value);
 
+
+/**
+ * @brief retrieve environment variable
+ * @param name - name of the variable that shall be retrieved
+ * @param backup - value that shall be returned when name is not set
+ *
+ * @return value of the environment variable or backup
+ */
+std::string get_environment_variable (const std::string& name,
+                                      const std::string& backup);
+
 } /* namespace tcam */
 
 VISIBILITY_POP

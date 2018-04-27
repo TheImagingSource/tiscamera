@@ -24,9 +24,9 @@ static work_pool::work_pool* g_default_pool = nullptr;
 static long g_pool_ref_count = 0;
 
 
-int tcam::algorithms::work_pool::get_logical_cpu_count ()
+unsigned int tcam::algorithms::work_pool::get_logical_cpu_count ()
 {
-    return (int) std::thread::hardware_concurrency();
+    return std::thread::hardware_concurrency();
 }
 
 
@@ -82,7 +82,7 @@ bool tcam::algorithms::work_pool::work_pool::start ()
 {
     ended_flag_ = false;
 
-    int num_worker_threads = get_logical_cpu_count() - 1;
+    unsigned int num_worker_threads = get_logical_cpu_count() - 1;
 
     thread_list_.reserve(num_worker_threads);
 

@@ -33,7 +33,7 @@ namespace algorithms
 namespace work_pool
 {
 
-int get_logical_cpu_count ();
+unsigned int get_logical_cpu_count ();
 
 struct work_context
 {
