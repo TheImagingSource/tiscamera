@@ -18,7 +18,7 @@
 #define TCAM_V4L2_UVC_IDENTIFIER_H
 
 #include "property_identifications.h"
-#include "compiler_defines.h"12
+#include "compiler_defines.h"
 
 VISIBILITY_INTERNAL
 
