@@ -63,18 +63,18 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 {
     device = device_desc;
 
+    if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
+    {
+        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'.", device.get_info().identifier);
+        throw std::runtime_error("Failed opening device.");
+    }
+
     if (pipe(udev_monitor_pipe) != 0)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to create udev monitor pipe");
         throw std::runtime_error("Failed opening device.");
     }
     udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
-
-    if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'.", device.get_info().identifier);
-        throw std::runtime_error("Failed opening device.");
-    }
 
     property_handler = std::make_shared<V4L2PropertyHandler>(this);
     format_handler = std::make_shared<V4L2FormatHandler>(this);
