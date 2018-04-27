@@ -36,6 +36,12 @@ DeviceInfo::DeviceInfo ()
 }
 
 
+DeviceInfo::DeviceInfo (const DeviceInfo& other)
+{
+    this->device = other.device;
+}
+
+
 DeviceInfo& DeviceInfo::operator= (const DeviceInfo& other)
 {
     this->device = other.device;

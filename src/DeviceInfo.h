@@ -47,6 +47,8 @@ public:
      */
     DeviceInfo ();
 
+    DeviceInfo (const DeviceInfo&);
+
     DeviceInfo& operator= (const DeviceInfo&);
 
     /**
