@@ -286,6 +286,7 @@ bool AFU420Device::create_offsets ()
     prop.value.i.min = 0;
     prop.value.i.max = 7463; //m_uPixelMaxX - m_uPixelMinX;
     prop.value.i.step = 12;
+    prop.flags = TCAM_PROPERTY_FLAG_REQUIRES_RESTART;
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
@@ -300,6 +301,7 @@ bool AFU420Device::create_offsets ()
     prop.value.i.min = 0;
     prop.value.i.max = 5115; //m_uPixelMaxY - m_uPixelMinY;
     prop.value.i.step = 4;
+    prop.flags = TCAM_PROPERTY_FLAG_REQUIRES_RESTART;
 
     property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
@@ -312,6 +314,7 @@ bool AFU420Device::create_offsets ()
 
     prop.value.b.value = false;
     prop.value.b.default_value = false;
+    prop.flags = TCAM_PROPERTY_FLAG_REQUIRES_RESTART;
 
     auto property_auto = std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
 
@@ -330,6 +333,7 @@ bool AFU420Device::create_binning ()
     }
     else
     {
+        ptr->set_flags(TCAM_PROPERTY_FLAG_REQUIRES_RESTART);
         property_handler->properties.push_back({ptr});
     }
 
@@ -342,6 +346,7 @@ bool AFU420Device::create_binning ()
     }
     else
     {
+        ptr->set_flags(TCAM_PROPERTY_FLAG_REQUIRES_RESTART);
         property_handler->properties.push_back({ptr});
     }
 
