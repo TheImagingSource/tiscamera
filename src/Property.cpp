@@ -131,6 +131,13 @@ uint32_t Property::get_flags () const
 }
 
 
+bool Property::set_flags (uint32_t new_flags)
+{
+    prop.flags = new_flags;
+    return true;
+}
+
+
 struct tcam_device_property Property::get_struct () const
 {
     return prop;

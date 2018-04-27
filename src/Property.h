@@ -122,7 +122,7 @@ public:
     bool set_value (const std::string& value, bool notify_impl = true);
     bool set_value ();
 
-    bool set_flags (); // ??????
+    bool set_flags (uint32_t new_flags);
 
 
 
