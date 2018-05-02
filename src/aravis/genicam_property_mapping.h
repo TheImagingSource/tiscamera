@@ -367,6 +367,10 @@ static std::vector<struct aravis_property> aravis_mappings =
         .id = TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
         .genicam_name = {"AutoFunctionsROIPreset"},
     },
+    {
+        .id = TCAM_PROPERTY_TRIGGER_BURST_COUNT,
+        .genicam_name = {"AcquisitionBurstFrameCount"}
+    },
 };
 
 
