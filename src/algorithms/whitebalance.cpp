@@ -23,7 +23,7 @@
 static const uint MAX_STEPS = 20;
 static uint WB_IDENTITY = 64;
 static uint WB_MAX = 255;
-static const uint BREAK_DIFF = 2;
+static const int BREAK_DIFF = 2;
 
 const uint NEARGRAY_MIN_BRIGHTNESS      = 10;
 const uint NEARGRAY_MAX_BRIGHTNESS      = 253;
