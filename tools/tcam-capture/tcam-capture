@@ -310,6 +310,17 @@ class TCamCapture(QMainWindow):
         else:
             log.info("Settings not saved")
 
+    def open_device_dialog(self):
+        """
+        SLOT for opening the device_dialog
+        """
+        res, device = DeviceDialog.get_device(self.indexer)
+        if res and device:
+            self.serial = device.serial
+            if self.serial:
+                caps_str = None
+                self.open_device(self.serial, caps_str)
+
     def save_image_action(self):
         """
         SLOT for save_image button
