@@ -55,7 +55,7 @@ class TcamView(QWidget):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.setLayout(self.layout)
         self.serial = serial
-        self.data = TcamCaptureData()
+        self.tcam = None
         self.pipeline = None
         self.image = None
         self.mouse_is_pressed = False
@@ -233,7 +233,7 @@ class TcamView(QWidget):
         self.bus.connect('message::error', self.on_error)
         self.bus.connect('message::info', self.on_info)
 
-        self.data.tcam = self.pipeline.get_by_name("bin")
+        self.tcam = self.pipeline.get_by_name("bin")
 
         self.pipeline.set_state(Gst.State.READY)
         log.debug("Created pipeline and set to READY")
@@ -350,7 +350,7 @@ class TcamView(QWidget):
             height = fmt.get_value("height")
 
     def get_tcam(self):
-        return self.data.tcam
+        return self.tcam
 
     def register_device_lost(self, callback):
         self.device_lost_callbacks.append(callback)
