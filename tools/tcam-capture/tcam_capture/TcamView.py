@@ -305,21 +305,24 @@ class TcamView(QWidget):
         err, dbg = msg.parse_error()
 
         if msg.src.get_name() == "tcambin-source":
-            if err.message == "Device lost":
-                log.error("Received device lost message")
-                self.fire_device_lost()
-            else:
-                log.error("Error from source: {}".format(err.message))
 
-                self.retry_countdown -= 1
+            if err:
 
-                if self.retry_countdown == 0:
-                    log.error("Repeatedly retried to start stream. No Success. Giving up.")
-                    return
+                if err.message == "Device lost":
+                    log.error("Received device lost message")
+                    self.fire_device_lost()
+                else:
+                    log.error("Error from source: {}".format(err.message))
 
-                log.info("Trying restart of stream")
-                self.stop()
-                self.play(self.video_format)
+                    self.retry_countdown -= 1
+
+                    if self.retry_countdown == 0:
+                        log.error("Repeatedly retried to start stream. No Success. Giving up.")
+                        return
+
+                    log.info("Trying restart of stream")
+                    self.stop()
+                    self.play(self.video_format)
 
         else:
             log.error("ERROR: {} : {}".format(msg.src.get_name(), err.message))
