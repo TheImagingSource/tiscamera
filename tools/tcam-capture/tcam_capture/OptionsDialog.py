@@ -29,12 +29,13 @@ log = logging.getLogger(__file__)
 
 
 class OptionsDialog(QDialog):
-    def __init__(self, setting: Settings, parent=None):
+    def __init__(self, setting: Settings, have_dutils, parent=None):
         super(OptionsDialog, self).__init__(parent)
 
         encoder_dict = Encoder.get_encoder_dict()
         self.settings = setting
 
+        self.enabled_dutils = have_dutils
         self.setWindowTitle("Tcam-Capture Options")
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
@@ -90,6 +91,17 @@ class OptionsDialog(QDialog):
         self.form_layout.addRow(self.set_device_properties_label,
                                 self.set_device_properties_checkbox)
 
+        self.use_dutils_checkbox = QCheckBox(self)
+        self.use_dutils_label = QLabel("Use tiscamera dutils, if present:", self)
+        self.form_layout.addRow(self.use_dutils_label,
+                                self.use_dutils_checkbox)
+
+        if not self.enabled_dutils:
+            self.use_dutils_label.setToolTip("Enabled when tiscamera-dutils are installed")
+            self.use_dutils_label.setEnabled(False)
+            self.use_dutils_checkbox.setToolTip("Enabled when tiscamera-dutils are installed")
+            self.use_dutils_checkbox.setEnabled(False)
+
         # OK and Cancel buttons
         self.buttons = QDialogButtonBox(
             QDialogButtonBox.Reset | QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
@@ -107,6 +119,7 @@ class OptionsDialog(QDialog):
         self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
         self.set_device_properties_checkbox.setChecked(settings.set_properties_on_reopen)
+        self.use_dutils_checkbox.setChecked(settings.use_dutils)
 
     def save_settings(self):
         self.settings.save_location = self.location_edit.text()
@@ -115,6 +128,7 @@ class OptionsDialog(QDialog):
         self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
         self.settings.set_properties_on_reopen = self.set_device_properties_checkbox.isChecked()
+        self.settings.use_dutils = self.use_dutils_checkbox.isChecked()
 
     def open_file_dialog(self):
         fdia = QFileDialog()

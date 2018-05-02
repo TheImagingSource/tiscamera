@@ -296,7 +296,8 @@ class TCamCapture(QMainWindow):
         """
         SLOT for open_preferences button
         """
-        result = OptionsDialog.get_options(self.settings)
+        result = OptionsDialog.get_options(self.settings,
+                                           TcamView.has_dutils())
 
         if result:
             log.info("Saving settings")

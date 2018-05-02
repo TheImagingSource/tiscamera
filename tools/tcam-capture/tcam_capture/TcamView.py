@@ -350,3 +350,15 @@ class TcamView(QWidget):
     def fire_device_lost(self):
         for cb in self.device_lost_callbacks:
             cb()
+
+    @staticmethod
+    def has_dutils():
+        """
+
+        """
+
+        factory = Gst.ElementFactory.find("tcamdutils")
+
+        if factory:
+            return True
+        return False

@@ -40,6 +40,7 @@ class Settings(object):
         self.reopen_device_on_startup = True
         self.set_properties_on_reopen = True
         self.logfile_location = None
+        self.use_dutils = True
 
     def reset(self):
         """Set properties to their default values"""
@@ -89,6 +90,8 @@ class Settings(object):
                                                        self.set_properties_on_reopen)
         self.logfile_location = gen.get("log_file_location",
                                         self.logfile_location)
+        self.use_dutils = gen.getboolean("use_dutils",
+                                         self.use_dutils)
         return True
 
     def save(self):
@@ -111,6 +114,8 @@ class Settings(object):
         config[self.gc]["set_properties_on_reopen"] = str(self.set_properties_on_reopen)
         config.set(self.gc, "# folder to which log files should be written")
         config[self.gc]["log_file_location"] = str(self.logfile_location)
+        config.set(self.gc, "# Use tiscamera-dutils, if present:")
+        config[self.gc]["use_dutils"] = str(self.use_dutils)
 
         if not os.path.exists(self.settings_directory):
             os.makedirs(self.settings_directory)
