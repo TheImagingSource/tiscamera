@@ -42,6 +42,7 @@ class TcamView(QWidget):
     new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
     current_fps = pyqtSignal(float)
     format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
+    first_image = pyqtSignal()
 
     def __init__(self, serial, parent=None):
         super(TcamView, self).__init__(parent)
@@ -184,6 +185,9 @@ class TcamView(QWidget):
                 self.current_height = struc.get_value("height")
 
             self.fps_tick()
+
+            if self.container.first_image:
+                self.first_image.emit()
 
             self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
                                                               struc.get_value("width"),
