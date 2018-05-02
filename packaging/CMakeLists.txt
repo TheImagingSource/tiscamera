@@ -55,6 +55,12 @@ else (BUILD_ARAVIS)
 
 endif (BUILD_ARAVIS)
 
+if (BUILD_TOOLS)
+
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "python3-pyqt5 (>= 5.7)")
+
+endif (BUILD_TOOLS)
+
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
