@@ -59,6 +59,7 @@ class TcamView(QWidget):
         self.pipeline = None
         self.image = None
         self.mouse_is_pressed = False
+        self.use_dutils = True
         self.current_width = 0
         self.current_height = 0
         self.device_lost_callbacks = []
@@ -200,7 +201,7 @@ class TcamView(QWidget):
         # changing the state from out main thread will cause a deadlock,
         # since the remaining buffers can not be displayed because our main thread
         # is currently in set_state
-        pipeline_str = ("tcambin serial={serial} name=bin "
+        pipeline_str = ("tcambin serial={serial} name=bin use-dutils={dutils} "
                         "! video/x-raw,format=BGRx "
                         "! tee name=tee tee. "
                         "! queue "
@@ -209,7 +210,8 @@ class TcamView(QWidget):
                         "! appsink name=sink emit-signals=true")
 
         self.pipeline = None
-        self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial))
+        self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
+                                                             dutils=self.use_dutils))
         self.imagesaver = ImageSaver(self.pipeline, self.serial)
         self.videosaver = VideoSaver(self.pipeline, self.serial)
 
