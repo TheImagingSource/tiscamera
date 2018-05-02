@@ -112,10 +112,16 @@ class TcamView(QWidget):
             self.fullscreen_container.destroy_widget.connect(self.toggle_fullscreen)
 
     def save_image(self, image_type: str):
-        self.imagesaver.save_image(image_type)
+        if not self.imagesaver.working:
+            self.imagesaver.save_image(image_type)
+        else:
+            log.info("Previous image still being saved.")
 
     def image_saved_callback(self, image_path: str):
         self.image_saved.emit(image_path)
+
+    def image_error_callback(self, error_msg: str):
+        pass
 
     def start_recording_video(self, video_type: str):
         """"""
@@ -213,6 +219,8 @@ class TcamView(QWidget):
         self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
                                                              dutils=self.use_dutils))
         self.imagesaver = ImageSaver(self.pipeline, self.serial)
+        self.imagesaver.saved.connect(self.image_saved_callback)
+        self.imagesaver.error.connect(self.image_error_callback)
         self.videosaver = VideoSaver(self.pipeline, self.serial)
 
         sink = self.pipeline.get_by_name("sink")

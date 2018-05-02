@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from PyQt5.QtCore import pyqtSignal, QObject
 from .Encoder import EncoderType, get_encoder_dict
 import os
 import logging
@@ -24,23 +25,33 @@ from gi.repository import Gst
 log = logging.getLogger(__name__)
 
 
-class ImageSaver(object):
+class ImageSaver(QObject):
     """
     Allows the saving of an image from a pipeline.
     Encoding is chosen by the user.
     Default location is /tmp
     """
+
+    saved = pyqtSignal(str)
+    error = pyqtSignal(str)
+
     def __init__(self, pipeline, serial):
+        super(ImageSaver, self).__init__(None)
         self.pipeline = pipeline
         self.serial = serial
         self.index = 0
         self.location = "/tmp/"
-
+        self.last_location = None
         self.encoder_dict = get_encoder_dict()
         self.selected_image_encoder = self.encoder_dict["png"]
         self.recording_type = EncoderType.unknown
+        self.srcpad = None
+        self.working = False
 
-    def set_image_encoder(self, enc_str: str):
+    def _set_image_encoder(self, enc_str: str):
+        """
+        Selects the image encoder for later usage
+        """
         if not any(enc_str == y.name for x, y in self.encoder_dict.items()):
             return False
 
@@ -50,31 +61,76 @@ class ImageSaver(object):
         self.selected_image_encoder = self.encoder_dict[enc_str]
         return True
 
-    def set_location(self, location):
-        if os.path.exists(location) and os.path.isdir(location):
-            self.location = location
-            return True
-        return False
-
     def _bus_call(self, gst_bus, message):
-        """"""
+        """
+        Callback from gstreamer that we can disconnect.
+        """
+        log.debug("got new message")
         t = message.type
         if (t == Gst.MessageType.ELEMENT):
             if (message.get_structure().has_name("GstMultiFileSink")):
                 self.index = self.index + 1
-                self._disconnect()
+                self.srcpad.add_probe(Gst.PadProbeType.IDLE,
+                                      self._idle_probe,
+                                      None)
+
+    def _idle_probe(self, pad, probe, user_data):
+        """
+        Gstreamer probe to disconnect the bin
+        """
+        tee = self.pipeline.get_by_name("tee")
+
+        if tee is None:
+            log.error("Could not find tee.")
+            return
+
+        if self.srcpad:
+            self.srcpad.unlink(self.ghost)
+            tee.release_request_pad(self.srcpad)
+
+        self.srcpad = None
+
+        if self.image_bin:
+            self.pipeline.remove(self.image_bin)
+
+            self.image_bin.set_state(Gst.State.NULL)
+
+        self.image_bin = None
+        self.image_queue = None
+        self.convert = None
+        self.encoder = None
+        self.filesink = None
+        # log.debug("calling play")
+        # self.pipeline.set_state(Gst.State.PLAYING)
+        # log.debug("Disconnected image saving bin")
+
+        bus = self.pipeline.get_bus()
+        bus.disconnect(self.watch_id)
+        self.working = False
+        self.saved.emit(self.last_location)
+
+        return Gst.PadProbeReturn.REMOVE
 
     def _create_encoder_element(self, enc_type: EncoderType):
-        log.debug("Using encoder: {}".format(self.selected_video_encoder.module))
+        """
+        Convenience method to create gstreamer encoder elements
+        """
+        log.debug("Using encoder: {}".format(self.selected_image_encoder.module))
         return Gst.ElementFactory.make(self.selected_image_encoder.module,
                                        "encoder")
 
-    def generate_location(self):
+    def _generate_location(self):
+        """
+        Generate the absolute path to which the image shall be saved
+        """
         return (self.location + "/"
-                + self.serial + "."
+                + self.serial + "-" + str(self.index) + "."
                 + self.selected_image_encoder.name)
 
-    def create_pipeline(self, enc_type: EncoderType):
+    def _create_pipeline(self, enc_type: EncoderType):
+        """
+        Create the bin internal pipeline
+        """
         self.image_bin = Gst.Bin.new()
 
         self.image_queue = Gst.ElementFactory.make("queue", "image_queue")
@@ -84,9 +140,9 @@ class ImageSaver(object):
         self.filesink.set_property("index", self.index)
         self.filesink.set_property("post-messages", True)
 
-        location = self.generate_location()
-        log.info("Saving to: {}".format(location))
-
+        location = self._generate_location()
+        log.info("Saving Image to: {}".format(location))
+        self.last_location = location
         self.filesink.set_property("location", location)
 
         self.image_bin.add(self.image_queue)
@@ -103,57 +159,49 @@ class ImageSaver(object):
         self.ghost = Gst.GhostPad.new("bin_sink", queue_pad)
         self.image_bin.add_pad(self.ghost)
 
-    def get_selected_image_encoder_type(self):
-        return self.selected_image_encoder.encoder_type
-
     def save_image(self, image_type: str):
-        if not self.set_image_encoder(image_type):
-            return False
+        """
 
-        self.create_pipeline(EncoderType.image)
+        """
+        if not self._set_image_encoder(image_type):
+            return False
+        self.working = True
+        self._create_pipeline(EncoderType.image)
         self.recording_type = EncoderType.image
         return self._connect()
 
     def _connect(self):
+        """
+        Connect bin to actual pipeline
+        """
         self.pipeline.set_state(Gst.State.PAUSED)
 
         tee = self.pipeline.get_by_name("tee")
         if tee is None:
             log.error("Could not find tee.")
             return False
-        srcpad = tee.get_request_pad("src_%u")
+        self.srcpad = tee.get_request_pad("src_%u")
+
+        if not self.srcpad:
+            log.error("Could not retrieve src pad to save image. Aborting.")
+            self.pipeline.set_state(Gst.State.PLAYING)
+
+            return
+
         self.pipeline.add(self.image_bin)
 
         try:
-            srcpad.link(self.ghost)
+            self.srcpad.link(self.ghost)
         except Gst.LinkError as e:
             log.error("Could not link image saving bin to pipeline")
             return
 
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
+        bus.enable_sync_message_emission()
+
         self.watch_id = bus.connect("message::element",
                                     self._bus_call)
         self.pipeline.set_state(Gst.State.PLAYING)
         log.debug("Attached image saving bin")
         return True
-
-    def _disconnect(self):
-
-        self.pipeline.set_state(Gst.State.PAUSED)
-
-        tee = self.pipeline.get_by_name("tee")
-
-        if tee is None:
-            log.error("Could not find tee.")
-            return
-
-        srcpad = tee.get_request_pad("src_%u")
-        self.pipeline.remove(self.image_bin)
-        srcpad.unlink(self.ghost)
-
-        bus = self.pipeline.get_bus()
-        # bus.remove_signal_watch()
-        bus.disconnect(self.watch_id)
-        self.pipeline.set_state(Gst.State.PLAYING)
-        log.debug("Disconnected image saving bin")
