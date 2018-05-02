@@ -312,7 +312,9 @@ class TCamCapture(QMainWindow):
         self.view.save_image(self.settings.get_image_type())
 
     def start_recording_video(self):
-        """"""
+        """
+        SLOT for triggering TcamView recording start
+        """
         self.view.start_recording_video(self.settings.get_video_type())
         self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaStop))
         self.recording_action.setText("Stop recording")
@@ -320,7 +322,9 @@ class TCamCapture(QMainWindow):
         self.recording_action.clicked.connect(self.stop_recording_video)
 
     def stop_recording_video(self):
-        """"""
+        """
+        SLOT for triggering TcamView recording stop
+        """
         self.view.stop_recording_video()
         self.recording_action.setText("Start recording")
         self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
@@ -328,7 +332,10 @@ class TCamCapture(QMainWindow):
         self.recording_action.triggered.connect(self.start_recording_video)
 
     def update_device_list(self, device_list):
-        """"""
+        """
+        SLOT for indexer.update_device_list
+        Refills the device combobox
+        """
         self.device_list = device_list
 
         self.device_combo.clear()
