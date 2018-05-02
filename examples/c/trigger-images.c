@@ -24,7 +24,7 @@
 void print_help ()
 {
     printf("Print available gstreamer caps for device.\n"
-           "Usage:\n\trigger-images [<serial>]\n"
+           "Usage:\n\\ttrigger-images [<serial>]\n"
            "Help options:\n\t-h, --help\t\tPrint this text.\n"
            "\n\n");
 }
