@@ -34,7 +34,7 @@ class OptionsDialog(QDialog):
 
         encoder_dict = Encoder.get_encoder_dict()
         self.settings = setting
-
+        self.enabled_video = False
         self.enabled_dutils = have_dutils
         self.setWindowTitle("Tcam-Capture Options")
         self.layout = QVBoxLayout(self)
@@ -66,15 +66,14 @@ class OptionsDialog(QDialog):
         self.image_type_label = QLabel("Save images as:", self)
         self.form_layout.addRow(self.image_type_label,
                                 self.image_type_combobox)
-
-        self.video_type_combobox = QComboBox(self)
-        for key, value in encoder_dict.items():
-            if value.encoder_type == Encoder.EncoderType.video:
-                self.video_type_combobox.addItem(key)
-
-        self.video_type_label = QLabel("Save videos as:", self)
-        self.form_layout.addRow(self.video_type_label,
-                                self.video_type_combobox)
+        if self.enabled_video:
+            self.video_type_combobox = QComboBox(self)
+            for key, value in encoder_dict.items():
+                if value.encoder_type == Encoder.EncoderType.video:
+                    self.video_type_combobox.addItem(key)
+            self.video_type_label = QLabel("Save videos as:", self)
+            self.form_layout.addRow(self.video_type_label,
+                                    self.video_type_combobox)
 
         self.device_dialog_checkbox = QCheckBox(self)
         self.device_dialog_label = QLabel("Open device dialog on start:", self)
@@ -115,7 +114,8 @@ class OptionsDialog(QDialog):
     def set_settings(self, settings: Settings):
         self.location_edit.setText(settings.get_save_location())
         self.image_type_combobox.setCurrentText(settings.get_image_type())
-        self.video_type_combobox.setCurrentText(settings.get_video_type())
+        if self.enabled_video:
+            self.video_type_combobox.setCurrentText(settings.get_video_type())
         self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
         self.set_device_properties_checkbox.setChecked(settings.set_properties_on_reopen)
@@ -124,7 +124,8 @@ class OptionsDialog(QDialog):
     def save_settings(self):
         self.settings.save_location = self.location_edit.text()
         self.settings.image_type = self.image_type_combobox.currentText()
-        self.settings.video_type = self.video_type_combobox.currentText()
+        if self.enabled_video:
+            self.settings.video_type = self.video_type_combobox.currentText()
         self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
         self.settings.set_properties_on_reopen = self.set_device_properties_checkbox.isChecked()
