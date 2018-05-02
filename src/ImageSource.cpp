@@ -145,7 +145,7 @@ bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool ImageSource::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers)
+bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<MemoryBuffer>>& new_buffers)
 {
     if (current_status == TCAM_PIPELINE_PLAYING)
     {

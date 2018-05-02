@@ -56,7 +56,7 @@ public:
 
     bool setSink (std::shared_ptr<SinkInterface>);
 
-    bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);
+    bool set_buffer_collection (const std::vector<std::shared_ptr<MemoryBuffer>>& new_buffers);
 
     std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
 
