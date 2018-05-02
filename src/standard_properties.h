@@ -89,12 +89,6 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
     },
     {
-        .id = TCAM_PROPERTY_AUTO_REFERENCE,
-        .name = "Exposure Auto Reference",
-        .type_to_use = TCAM_PROPERTY_TYPE_INTEGER,
-        .group = { TCAM_PROPERTY_CATEGORY_EXPOSURE, TCAM_PROPERTY_EXPOSURE },
-    },
-    {
         .id = TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
         .name = "Exposure Auto Upper Limit Auto",
         .type_to_use = TCAM_PROPERTY_TYPE_BOOLEAN,
