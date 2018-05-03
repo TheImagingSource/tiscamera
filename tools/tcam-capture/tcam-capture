@@ -125,7 +125,8 @@ class TCamCapture(QMainWindow):
         self.data.signals = TcamSignals()
 
         self.device_list = None  # needed for setting window title later on
-        self.props = None  # property dialog widget
+        self.props = None  # property dialog docker widget
+        self.props_widget = None  # property dialog widget
         self.pipeline = None
         self.view = None
 
@@ -544,8 +545,10 @@ class TCamCapture(QMainWindow):
         self.data.tcam = self.view.get_tcam()
         self.view.pause()
 
-        self.props = QDockWidget("Properties", self)
-        self.props.setWidget(PropertyDialog(self.data))
+        self.props = QDockWidget("Properties")
+        self.props_widget = PropertyDialog(self.data, self.props)
+        self.props.setWidget(self.props_widget)
+        self.props.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.props.setFloating(False)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.props)
         self.set_device_menus_enabled(True)
@@ -583,6 +586,9 @@ class TCamCapture(QMainWindow):
         if self.view is not None:
             self.stop()
             self.removeDockWidget(self.props)
+            self.props_widget.stop()
+            self.props_widget = None
+            self.props.setParent(None)
             self.props = None
             self.set_device_menus_enabled(False)
             self.view.setParent(None)

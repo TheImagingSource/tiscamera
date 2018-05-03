@@ -79,6 +79,11 @@ class PropertyWorker(QObject):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(self.sleep_period_seconds * 1000)
+        self.run = True
+
+    def stop(self):
+        self.run = False
+        self.timer.stop()
 
     def set_property(self, tcam, name, value, valuetype):
         if (valuetype == "integer" or
@@ -115,6 +120,9 @@ class PropertyWorker(QObject):
         return prop_list
 
     def update(self):
+        if not self.run:
+            self.timer.stop()
+            return
         for p in self.get_prop_list():
             self.category_dict[p.category].update(p)
 
@@ -131,7 +139,8 @@ class PropertyDialog(QWidget):
 
         self.work_thread.start()
 
-    def __del__(self):
+    def stop(self):
+        self.worker.stop()
         self.work_thread.quit()
         self.work_thread.wait()
 
