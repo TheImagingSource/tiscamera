@@ -21,6 +21,7 @@
 
 #include "tcamprop.h"
 #include "tcam.h"
+#include "logging.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -1048,6 +1049,40 @@ static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* in
 }
 
 
+void send_log_to_bus (void* user_data,
+                      enum TCAM_LOG_LEVEL level,
+                      const char* file,
+                      int line,
+                      const char* message,
+                      ...)
+{
+
+    if (level != TCAM_LOG_ERROR
+        && level != TCAM_LOG_WARNING)
+    {
+        return;
+    }
+
+    GstTcamSrc* self = GST_TCAM_SRC(user_data);
+
+    GstMessage* msg;
+
+    if (level == TCAM_LOG_ERROR)
+    {
+        msg = gst_message_new_error(GST_OBJECT(self), nullptr, message);
+        GST_ERROR("Backend reported error: %s:%d: %s", message);
+    }
+    else if (level == TCAM_LOG_WARNING)
+    {
+        msg = gst_message_new_warning(GST_OBJECT(self), nullptr, message);
+        GST_WARNING("Backend reported warning: %s:%d: %s", message);
+    }
+
+    gst_element_post_message(GST_ELEMENT(self), msg);
+
+}
+
+
 bool gst_tcam_src_init_camera (GstTcamSrc* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
@@ -1107,6 +1142,8 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         GST_ERROR("Unable to open device.");
         return false;
     }
+
+    Logger::getInstance().set_external_callback(send_log_to_bus, self);
 
     self->all_caps = gst_tcam_src_get_all_camera_caps(self);
 
