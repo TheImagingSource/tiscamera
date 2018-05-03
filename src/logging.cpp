@@ -172,6 +172,10 @@ void Logger::log (const char* module,
         case STDIO:
         {
             log_to_stdout(buffer);
+            if (callback)
+            {
+                callback(cb_user_data, level, function, line, message, args);
+            }
             break;
         }
         case LOGFILE:
@@ -237,9 +241,11 @@ std::string Logger::get_log_file () const
 }
 
 
-void Logger::set_external_callback (logging_callback c)
+void Logger::set_external_callback (logging_callback c,
+                                    void* user_data)
 {
     callback = c;
+    cb_user_data = user_data;
 }
 
 

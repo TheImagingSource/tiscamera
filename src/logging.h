@@ -51,7 +51,9 @@ enum TCAM_LOG_LEVEL
     TCAM_LOG_ERROR   = 5,
 };
 
-typedef void (*logging_callback) (enum TCAM_LOG_LEVEL, const char*, int, const char*, ...);
+typedef void (*logging_callback) (void* user_data,
+                                  enum TCAM_LOG_LEVEL,
+                                  const char*, int, const char*, ...);
 
 
 class Logger
@@ -77,7 +79,7 @@ public:
     void set_log_file (const std::string& filename);
     std::string get_log_file () const;
 
-    void set_external_callback (logging_callback);
+    void set_external_callback (logging_callback cb_function, void* user_data);
     void delete_external_callback ();
 
 private:
@@ -102,6 +104,7 @@ private:
     std::string log_file;
     TCAM_LOG_TARGET target;
     logging_callback callback;
+    void* cb_user_data;
     FILE* logfile;
 };
 
