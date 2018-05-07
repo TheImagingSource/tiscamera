@@ -429,7 +429,18 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
 {
     std::vector<uint32_t> ret;
 
-    if (!caps ||gst_caps_is_empty(caps) || gst_caps_is_any(caps))
+    /*
+    gst_caps_is_empty acts erratic, thus we work arround the issue with gst_caps_to_string:
+
+    --------
+    (gdb) print (char*)gst_caps_to_string (caps)
+    $4 = 0x555555a8f120 "EMPTY"
+    (gdb) print (int)gst_caps_is_empty (caps)
+    (process:5873): GStreamer-CRITICAL (recursed) **: gst_caps_is_empty: assertion 'GST_IS_CAPS (caps)' failed
+    --------
+
+    */
+    if (!caps || (!g_strcmp0(gst_caps_to_string(caps), "EMPTY")) || gst_caps_is_any(caps))
     {
         return ret;
     }
@@ -565,6 +576,11 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     std::vector<uint32_t> format_fourccs = index_format_fourccs(incoming);
 
     uint32_t preferred_fourcc = find_preferred_format(format_fourccs);
+
+    if(!g_strcmp0(gst_caps_to_string(incoming), "EMPTY"))
+    {
+        return nullptr;
+    }
 
     for (int i = 0; i < gst_caps_get_size(incoming); ++i)
     {
