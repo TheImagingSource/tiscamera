@@ -135,9 +135,7 @@ void CameraListHolder::run ()
 void CameraListHolder::stop ()
 {
     this->continue_loop = false;
-    mtx.lock();
     cv.notify_all();
-    mtx.unlock();
     shmctl(shmid, IPC_RMID, NULL);
     data = nullptr;
 
