@@ -30,7 +30,7 @@ libglib2.0-dev
 libgirepository1.0-dev
 libusb-1.0-0-dev
 libzip-dev
-python-setuptools
+python3-setuptools
 
 For aravis:
 
