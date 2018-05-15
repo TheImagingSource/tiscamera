@@ -20,9 +20,7 @@ cmake_minimum_required(VERSION 3.2)
 #Name your project here
 project(tcam)
 
-set(TCAM_VERSION_MAJOR 0)
-set(TCAM_VERSION_MINOR 9)
-set(TCAM_VERSION_PATCH 1)
+include(version.cmake)
 
 set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}" CACHE STRING "Version number")
 
