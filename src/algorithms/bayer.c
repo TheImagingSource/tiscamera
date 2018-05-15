@@ -38,7 +38,7 @@ tBY8Pattern next_line (tBY8Pattern pattern)
         case GB:    return RG;
         case GR:    return BG;
         case RG:    return GB;
-        case BG:
+        case BG:    return GR;
         default:    return BG;
     };
 }
