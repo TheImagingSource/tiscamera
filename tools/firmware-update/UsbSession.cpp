@@ -29,7 +29,7 @@ UsbSession::UsbSession ()
     {
         throw std::runtime_error("Unable to initialize libusb. Ret value: " + std::to_string(ret));
     }
-    libusb_set_debug(this->session, 3);
+    libusb_set_option(this->session, LIBUSB_OPTION_LOG_LEVEL, 3);
 }
 
 
