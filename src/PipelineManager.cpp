@@ -249,7 +249,10 @@ bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS status)
 {
     if (sink == nullptr)
     {
-        tcam_log(TCAM_LOG_WARNING, "Sink is not defined.");
+        if (status != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
+        {
+            tcam_warning("Sink is not defined.");
+        }
         return false;
     }
 
