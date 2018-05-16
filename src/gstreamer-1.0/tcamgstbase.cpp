@@ -1097,7 +1097,7 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
     {
         if (desc.get_fourcc() == 0)
         {
-            tcam_warning("Format has empty fourcc. Ignoring");
+            tcam_info("Format has empty fourcc. Ignoring");
             continue;
         }
 
@@ -1110,8 +1110,7 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
             continue;
         }
 
-
-        tcam_error("Found '%s' pixel format string", caps_string);
+        // tcam_error("Found '%s' pixel format string", caps_string);
 
         std::vector<struct tcam_resolution_description> res = desc.get_resolutions();
 

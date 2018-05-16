@@ -1070,12 +1070,12 @@ void send_log_to_bus (void* user_data,
     if (level == TCAM_LOG_ERROR)
     {
         msg = gst_message_new_error(GST_OBJECT(self), nullptr, message);
-        GST_ERROR("Backend reported error: %s:%d: %s", message);
+        GST_ERROR("Backend reported error: %s:%d: %s", file, line, message);
     }
     else if (level == TCAM_LOG_WARNING)
     {
         msg = gst_message_new_warning(GST_OBJECT(self), nullptr, message);
-        GST_WARNING("Backend reported warning: %s:%d: %s", message);
+        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, message);
     }
 
     gst_element_post_message(GST_ELEMENT(self), msg);

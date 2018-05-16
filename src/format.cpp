@@ -100,7 +100,7 @@ const char* tcam::fourcc2description (uint32_t fourcc)
         }
     }
 
-    tcam_log(TCAM_LOG_ERROR, "No string for fourcc 0x%x", fourcc);
+    tcam_info("No string for fourcc 0x%x", fourcc);
 
     return "";
 }
