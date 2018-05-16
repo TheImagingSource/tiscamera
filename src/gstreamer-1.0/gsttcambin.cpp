@@ -576,7 +576,6 @@ static gboolean create_and_add_element (GstElement** element,
     }
     else
     {
-        GST_ERROR("Could not create %s element. Aborting.", factory_name);
         return FALSE;
     }
     return TRUE;
@@ -639,6 +638,16 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     gst_element_link(self->src,
                      self->pipeline_caps);
 
+
+    auto send_missing_element_msg = [self] (const std::string& element_name)
+        {
+            std::string msg_string = "Could not create element '" + element_name + "'.";
+            GError* err = g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, msg_string.c_str());
+            GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
+            gst_element_post_message(GST_ELEMENT(self), msg);
+            g_error_free(err);
+        };
+
     std::string pipeline_description = "tcamsrc ! ";
     gchar *capsstr = gst_caps_to_string(self->src_caps);
     pipeline_description += capsstr;
@@ -653,6 +662,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                     &previous_element,
                                     GST_BIN(self), pipeline_description))
         {
+            send_missing_element_msg("tcamdutils");
             return FALSE;
         }
         else if (self->needs_biteater)
@@ -662,6 +672,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                         &previous_element,
                                         GST_BIN(self), pipeline_description))
             {
+                send_missing_element_msg("tcambiteater");
                 return FALSE;
             }
         }
@@ -681,6 +692,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                         &previous_element,
                                         GST_BIN(self), pipeline_description))
             {
+                send_missing_element_msg("tcamautoexposure");
                 return FALSE;
             }
         }
@@ -693,6 +705,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                         &previous_element,
                                         GST_BIN(self), pipeline_description))
             {
+                send_missing_element_msg("tcamautofocus");
                 return FALSE;
             }
         }
@@ -711,6 +724,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                         &previous_element,
                                         GST_BIN(self), pipeline_description))
             {
+                send_missing_element_msg("tcamwhitebalance");
                 return FALSE;
             }
         }
@@ -723,6 +737,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                     &previous_element,
                                     GST_BIN(self), pipeline_description))
         {
+            send_missing_element_msg("bayer2rgb");
             return FALSE;
         }
     }
@@ -736,6 +751,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                     &previous_element,
                                     GST_BIN(self), pipeline_description))
         {
+            send_missing_element_msg("jpegdec");
             return FALSE;
         }
     }
@@ -749,6 +765,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
                                     &previous_element,
                                     GST_BIN(self), pipeline_description))
         {
+            send_missing_element_msg("videoconvert");
             return FALSE;
         }
     }
