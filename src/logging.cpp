@@ -138,6 +138,8 @@ void Logger::log (const char* module,
     size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
     char msg[size];
 
+    va_end(tmp_args);
+
     vsnprintf(msg, size, message, args);
     // use clock_t and not time_t
     // we want the time the program uses based on the
