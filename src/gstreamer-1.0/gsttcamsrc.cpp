@@ -23,6 +23,7 @@
 #include "tcam.h"
 #include "logging.h"
 #include <unistd.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -1065,20 +1066,37 @@ void send_log_to_bus (void* user_data,
 
     GstTcamSrc* self = GST_TCAM_SRC(user_data);
 
+    va_list args;
+    va_start(args, message);
+    va_list tmp_args;
+    va_copy(tmp_args, args);
+
+    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
+    char m[size];
+
+    vsnprintf(m, size, message, args);
+
+    va_end(args);
+    va_end(tmp_args);
+
+    std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
+    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, msg_string.c_str());
+
     GstMessage* msg;
 
     if (level == TCAM_LOG_ERROR)
     {
-        msg = gst_message_new_error(GST_OBJECT(self), nullptr, message);
-        GST_ERROR("Backend reported error: %s:%d: %s", file, line, message);
+        msg = gst_message_new_error(GST_OBJECT(self), err, message);
+        GST_ERROR("Backend reported error: %s:%d: %s", file, line, m);
     }
     else if (level == TCAM_LOG_WARNING)
     {
-        msg = gst_message_new_warning(GST_OBJECT(self), nullptr, message);
-        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, message);
+        msg = gst_message_new_warning(GST_OBJECT(self), err, message);
+        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, m);
     }
 
     gst_element_post_message(GST_ELEMENT(self), msg);
+    g_error_free(err);
 
 }
 
