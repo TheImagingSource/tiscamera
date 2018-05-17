@@ -142,9 +142,9 @@ class CapsDesc:
                       format_string == "None"):
                     continue
 
-                if (format_name == "video/x-bayer"
-                        and format_string not in ("rggb", "bggr", "gbrg", "grbg")
-                        and not self.have_dutils):
+                if (format_name == "video/x-bayer" and
+                        format_string not in ("rggb", "bggr", "gbrg", "grbg") and not
+                        self.have_dutils):
                     continue
 
                 if format_string not in format_dict:
@@ -168,9 +168,9 @@ class CapsDesc:
                 continue
 
             rates = get_framerates(fmt)
-            if (rates is None
-                    or type(rates) is Gst.FractionRange
-                    or type(rates) is Gst.Fraction):
+            if (rates is None or
+                    type(rates) is Gst.FractionRange or
+                    type(rates) is Gst.Fraction):
                 log.error("Received framerates can not be interpreted. Skipping.")
                 continue
 

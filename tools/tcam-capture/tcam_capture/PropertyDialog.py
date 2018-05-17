@@ -87,8 +87,8 @@ class PropertyWorker(QObject):
 
     def set_property(self, tcam, name, value, valuetype):
         if (valuetype == "integer" or
-            valuetype == "double" or
-            valuetype == "boolean"):
+                valuetype == "double" or
+                valuetype == "boolean"):
             tcam.set_tcam_property(name, value)
         elif valuetype == "button":
             tcam.set_tcam_property(name, True)

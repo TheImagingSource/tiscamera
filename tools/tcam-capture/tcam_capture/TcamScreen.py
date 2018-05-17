@@ -93,8 +93,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         isec = item_rect.intersected(self.pix.boundingRect())
 
         res = self.pix.get_resolution()
-        if (isec.size().width() >= QSizeF(res).width()
-                and isec.size().height() >= QSizeF(res).height()):
+        if (isec.size().width() >= QSizeF(res).width() and
+                isec.size().height() >= QSizeF(res).height()):
             return True
         return False
 
@@ -116,8 +116,8 @@ class TcamScreen(QtWidgets.QGraphicsView):
         else:
             zoomFactor = zoomOutFactor
 
-        if (self.is_scene_larger_than_image()
-                and zoomFactor < 1.0):
+        if (self.is_scene_larger_than_image() and
+                zoomFactor < 1.0):
             return
 
         self.zoom_factor *= zoomFactor
@@ -141,9 +141,9 @@ class TcamScreen(QtWidgets.QGraphicsView):
 
     def keyPressEvent(self, event):
         if self.isFullScreen():
-            if (event.key() == Qt.Key_F11
-                    or event.key() == Qt.Key_Escape
-                    or event.key() == Qt.Key_F):
+            if (event.key() == Qt.Key_F11 or
+                    event.key() == Qt.Key_Escape or
+                    event.key() == Qt.Key_F):
                 self.destroy_widget.emit()
         else:
             # ignore event so that parent widgets can use it

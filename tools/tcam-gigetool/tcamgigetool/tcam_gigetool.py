@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 
+# Copyright 2017 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import time
 import sys
 import os
@@ -10,7 +24,7 @@ import struct
 import gettext
 try:
     import queue
-except:
+except ImportError:
     import Queue as queue
 
 import argparse
@@ -24,12 +38,14 @@ _ = gettext.gettext
 
 PROGNAME = os.path.basename(sys.argv[0])
 
+
 def handle_list(args):
     def trans_reachable(cam, x):
         if is_reachable(cam):
             return "Yes"
         else:
             return "No"
+
     def trans_flag(cam, x):
         if not is_reachable(cam):
             return "?"
@@ -37,8 +53,10 @@ def handle_list(args):
             return "On"
         else:
             return "Off"
+
     def trans_str(cam, x):
         return str(x)
+
     def trans_rstr(cam, x):
         if not is_reachable(cam):
             return "?"
@@ -90,7 +108,7 @@ def handle_list(args):
                 s += " "
             i += 1
         if twidth is None:
-            twidth = len(s)-1
+            twidth = len(s) - 1
         ifacedesc = " Interface: " + iface + " [%s]" % (get_ip_address(iface)) + " "
         print("")
         print(ifacedesc.center(twidth, "-"))
@@ -121,6 +139,7 @@ def handle_list(args):
                 print(s)
         print("")
 
+
 def handle_rescue(args):
     ctrl = CameraController()
     ctrl.discover()
@@ -132,6 +151,7 @@ def handle_rescue(args):
 
     return ctrl.rescue(identifier, ip, netmask, gateway)
 
+
 class FirmwareUploadCallback:
     def __init__(self):
         pass
@@ -139,6 +159,7 @@ class FirmwareUploadCallback:
     def func(self, msg, progress):
         msg = msg.decode("utf-8")
         sys.stdout.write("\r%s%% %s" % (str(progress).rjust(3), msg))
+
 
 def handle_upload(args):
     print("Preparing upload, please wait...")
@@ -159,7 +180,7 @@ def handle_upload(args):
     cam = ctrl.get_camera_details(identifier)
     if cam["is_busy"]:
         raise RuntimeError("Camera '%s' is already controlled by a different application" %
-                            (cam["serial_number"]))
+                           (cam["serial_number"]))
 
     _path = os.path.abspath(os.path.realpath(args["FILENAME"]))
     check_fwpath(_path)
@@ -167,7 +188,7 @@ def handle_upload(args):
     res = ctrl.upload_firmware(identifier, _path, fwupcb.func)
 
     if res != 0:
-        print ("Upload failed, result: %d" % (res,))
+        print("Upload failed, result: %d" % (res,))
 
 
 class BatchUploadThread(threading.Thread):
@@ -198,11 +219,13 @@ class BatchUploadThread(threading.Thread):
             self.workqueue.task_done()
         self.progress = None
 
+
 def _tobytes(value):
     if bytes == str:
         return bytes(value)
     else:
         return bytes(value, "utf-8")
+
 
 def get_camera(identifier, lst):
     ret = None
@@ -215,9 +238,11 @@ def get_camera(identifier, lst):
             ret = cam
     return ret
 
+
 def check_fwpath(_path):
     if not os.path.isfile(_path):
         raise IOError("Invalid file: '%s" % (_path))
+
 
 def is_reachable(cam):
     if 0:
@@ -227,11 +252,13 @@ def is_reachable(cam):
     else:
         return cam["is_reachable"]
 
+
 def address_in_network(iface_ip, net_ip, netmask):
-   ipaddr = struct.unpack('<L', socket.inet_aton(iface_ip))[0]
-   netaddr = struct.unpack('<L', socket.inet_aton(net_ip))[0]
-   netmask = struct.unpack('<L', socket.inet_aton(netmask))[0]
-   return ipaddr & netmask == netaddr & netmask
+    ipaddr = struct.unpack('<L', socket.inet_aton(iface_ip))[0]
+    netaddr = struct.unpack('<L', socket.inet_aton(net_ip))[0]
+    netmask = struct.unpack('<L', socket.inet_aton(netmask))[0]
+    return ipaddr & netmask == netaddr & netmask
+
 
 def get_ip_address(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -240,6 +267,7 @@ def get_ip_address(ifname):
         0x8915,  # SIOCGIFADDR
         struct.pack('256s', _tobytes(ifname[:15]))
     )[20:24])
+
 
 def get_netmask(ifname):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -258,6 +286,7 @@ def batchrescue(ctrl, cameras, baseip):
         gateway = "0.0.0.0"
         ctrl.rescue(cam["serial_number"], ip, netmask, gateway)
         ip_d += 1
+
 
 def handle_batchupload(args):
     iface = args["INTERFACE"]
@@ -287,22 +316,23 @@ def handle_batchupload(args):
     if args["baseaddress"]:
         baseip = args["baseaddress"]
         try:
-            a,b,c,d = [int(x) for x in baseip.split(".")]
+            a, b, c, d = [int(x) for x in baseip.split(".")]
         except ValueError:
             print("Invalid base ip address provided: %s" % (baseip))
             return
     else:
         baseip = get_ip_address(iface)
         try:
-            a,b,c,d = [int(x) for x in baseip.split(".")]
-        except:
+            a, b, c, d = [int(x) for x in baseip.split(".")]
+        except ValueError:
             print("Failed to get IP for interface '%s'" % (iface))
             return
         d = 10
 
     if not args["noconfigure"]:
-        print("Configuring cameras for address range: {0}.{1}.{2}.{3} .. {0}.{1}.{2}.{4}".format(a,b,c,d,d+len(cameras)-1))
-        batchrescue(ctrl, cameras, (a,b,c,d))
+        range_str = "{0}.{1}.{2}.{3} .. {0}.{1}.{2}.{4}".format(a, b, c, d, d + len(cameras) - 1)
+        print("Configuring cameras for address range: {}".format(range_str))
+        batchrescue(ctrl, cameras, (a, b, c, d))
         time.sleep(1)
 
         print("Rediscovering cameras")
@@ -314,7 +344,7 @@ def handle_batchupload(args):
             if cam["interface_name"] == iface:
                 if cam["is_busy"]:
                     raise RuntimeError("Camera '%s' is already controlled by a different application" %
-                                        (cam["serial_number"]))
+                                       (cam["serial_number"]))
                 cameras.append(cam)
 
     print("Starting Threads...")
@@ -332,7 +362,7 @@ def handle_batchupload(args):
     done = False
     while not done:
         time.sleep(0.5)
-        wc = threading.active_count() -1
+        wc = threading.active_count() - 1
         remain = workqueue.qsize()
         s = "Working:" + str(wc).ljust(3) + " Remaining:" + str(remain).ljust(3) + " "
         for t in threads:
@@ -373,13 +403,15 @@ def handle_batchupload(args):
             res = ctrl.upload_firmware(cam["serial_number"], _path, fwupcb.func)
 
             if res != 0:
-                print ("Upload failed, result: %d" % (res,))
+                print("Upload failed, result: %d" % (res,))
+
 
 def _parsebool(value):
     TRUES = ["true", "on", "1", "yes"]
     if value.lower() in TRUES:
         return 1
     return 0
+
 
 def handle_set(args):
     KEYS = ["ip", "netmask", "gateway", "name", "mode"]
@@ -394,7 +426,7 @@ def handle_set(args):
     res = None
 
     for key in KEYS:
-        if (not key in args) or (args[key] is None):
+        if (key not in args) or (args[key] is None):
             continue
         note = ""
         sys.stdout.write(key + ": ")
@@ -428,6 +460,7 @@ def handle_set(args):
         print("Nothing to set.")
     elif res != 0:
         print("Failed to set parameter '%s'" % (key))
+
 
 def handle_info(args):
     ctrl = CameraController()
@@ -469,6 +502,7 @@ class StoreNameValuePair(argparse.Action):
         n, v = values.split('=')
         setattr(namespace, n, v)
 
+
 def _add_common_argument(parser, a):
     if a == "i":
         parser.add_argument("IDENTIFIER",
@@ -478,6 +512,7 @@ def _add_common_argument(parser, a):
         parser.add_argument("-y", "--assume-yes",
                             type=bool,
                             help=_("assume 'yes' to all security questions"))
+
 
 def main():
     TCAM_GIGETOOL_VERSION_DESC = _("tcam-gigetool version:")

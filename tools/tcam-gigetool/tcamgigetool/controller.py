@@ -1,10 +1,26 @@
+# Copyright 2017 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 from ctypes import *
 
 MAX_CAMERAS = 64
 
+
 class CameraNotFoundError(Exception):
     pass
+
 
 class TcamCamera(Structure):
     _fields_ = [("model_name", c_char * 64),
@@ -23,16 +39,19 @@ class TcamCamera(Structure):
                 ("is_dhcp_enabled", c_int),
                 ("is_reachable", c_int),
                 ("is_busy", c_int)
-    ]
+                ]
+
 
 DISCOVER_CALLBACK_FUNC = CFUNCTYPE(None, TcamCamera)
 UPLOAD_CALLBACK_FUNC = CFUNCTYPE(None, c_char_p, c_int)
+
 
 def _tobytes(value):
     if bytes == str:
         return bytes(value)
     else:
         return bytes(value, "utf-8")
+
 
 class CameraController:
     def __init__(self):
@@ -42,7 +61,7 @@ class CameraController:
             _path = os.path.dirname(__file__)
             if not _path:
                 _path = "."
-            self.dll = cdll.LoadLibrary(os.path.join(_path,"libtcam_gigewrapper.so"))
+            self.dll = cdll.LoadLibrary(os.path.join(_path, "libtcam_gigewrapper.so"))
         self.dll.init()
         self.dll.set_persistent_parameter_s.argtypes = [c_char_p, c_char_p, c_char_p]
         self.dll.set_persistent_parameter_i.argtypes = [c_char_p, c_char_p, c_int]

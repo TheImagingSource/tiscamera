@@ -65,9 +65,9 @@ class VideoSaver(object):
         return element
 
     def generate_location(self):
-        return (self.location + "/"
-                + self.serial + "."
-                + self.selected_video_encoder.file_ending)
+        return (self.location + "/" +
+                self.serial + "." +
+                self.selected_video_encoder.file_ending)
 
     def create_pipeline(self, enc_type: EncoderType):
         self.image_bin = Gst.Bin.new()

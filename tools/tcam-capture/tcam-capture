@@ -94,9 +94,9 @@ class FmtSelection:
 
     def __eq__(self, other):
 
-        return (self.fmt == other.fmt
-                and self.resolution == other.resolution
-                and self.fps == other.fps)
+        return (self.fmt == other.fmt and
+                self.resolution == other.resolution and
+                self.fps == other.fps)
 
 
 class TCamCapture(QMainWindow):
@@ -148,8 +148,8 @@ class TCamCapture(QMainWindow):
 
         self.show()
 
-        if (self.settings.reopen_device_on_startup
-                and self.cache.last_serial):
+        if (self.settings.reopen_device_on_startup and
+                self.cache.last_serial):
             dev_list = self.indexer.device_list
             serial = self.cache.last_serial
             # check if device exists
@@ -433,8 +433,8 @@ class TCamCapture(QMainWindow):
         """
         callback for self.format_combo
         """
-        if (self.active_format.fmt == entry
-                and self.selected_format.fmt == entry):
+        if (self.active_format.fmt == entry and
+                self.selected_format.fmt == entry):
             # no needs to reset other menus,
             # since we already have the correct format
             return
@@ -448,8 +448,8 @@ class TCamCapture(QMainWindow):
         """
         callback for self.resolution_combo
         """
-        if (self.active_format.resolution == entry
-                and self.selected_format.resolution == entry):
+        if (self.active_format.resolution == entry and
+                self.selected_format.resolution == entry):
             # no needs to reset the menu,
             # since we already have the correct resolution
             log.debug("Active format resolution is already selected")

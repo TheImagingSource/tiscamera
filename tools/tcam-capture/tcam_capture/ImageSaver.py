@@ -123,9 +123,9 @@ class ImageSaver(QObject):
         """
         Generate the absolute path to which the image shall be saved
         """
-        return (self.location + "/"
-                + self.serial + "-" + str(self.index) + "."
-                + self.selected_image_encoder.name)
+        return (self.location + "/" +
+                self.serial + "-" + str(self.index) + "." +
+                self.selected_image_encoder.name)
 
     def _create_pipeline(self, enc_type: EncoderType):
         """

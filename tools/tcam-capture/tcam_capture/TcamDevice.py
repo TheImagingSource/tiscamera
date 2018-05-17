@@ -38,8 +38,8 @@ class TcamDevice(object):
 
     def __eq__(self, other):
         if (self.model == other.model and
-            self.device_type == other.device_type and
-            self.serial == other.serial):
+                self.device_type == other.device_type and
+                self.serial == other.serial):
             return True
         return False
 
@@ -48,10 +48,10 @@ class TcamDevice(object):
     def __lt__(self, other):
         return ("{}, {}, {}".format(self.serial,
                                     self.model,
-                                    self.device_type)
-                < "{}, {}, {}".format(other.serial,
-                                      other.model,
-                                      other.device_type))
+                                    self.device_type) <
+                "{}, {}, {}".format(other.serial,
+                                    other.model,
+                                    other.device_type))
 
 
 class TcamDeviceIndex(QObject):
