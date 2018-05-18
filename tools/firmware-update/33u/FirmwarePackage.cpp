@@ -22,7 +22,7 @@
 #include "ReportProgress.h"
 
 #include "Archive.h"
-#include "pugixml.hpp"
+#include "pugi.h"
 
 #include <stdexcept>
 #include <cctype>

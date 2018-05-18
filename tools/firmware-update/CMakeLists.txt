@@ -20,6 +20,6 @@ set(fwu-files
 
 include_directories("${CMAKE_SOURCE_DIR}/dependencies/PugiXml")
 
-add_executable(firmware-update ${fwu-files} $<TARGET_OBJECTS:33update>)
+add_executable(firmware-update ${fwu-files} $<TARGET_OBJECTS:33update> $<TARGET_OBJECTS:pugixml_obj>)
 
 target_link_libraries(firmware-update ${LIBUSB_1_LIBRARIES} ${LIBZIP_LIBRARY})

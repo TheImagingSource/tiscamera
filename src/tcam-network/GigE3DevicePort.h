@@ -20,7 +20,7 @@
 
 #include "FirmwareUpgrade.h"
 
-#include <pugixml.hpp>
+#include <pugi.h>
 #include <string>
 #include <vector>
 

@@ -23,7 +23,7 @@
 #include <regex.h>
 
 #include <zip.h>
-#include <pugixml.hpp>
+#include <pugi.h>
 
 #include "FirmwareUpgrade.h"
 #include "GigE3Update.h"

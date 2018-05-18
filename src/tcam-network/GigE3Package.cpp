@@ -23,7 +23,7 @@
 
 #include "FirmwarePackage.h"
 
-#include <pugixml.hpp>
+#include <pugi.h>
 
 #include <memory>
 

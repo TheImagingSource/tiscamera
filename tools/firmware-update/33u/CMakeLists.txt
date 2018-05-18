@@ -58,9 +58,11 @@ set(files
   lib/7z/BraIA64.c
   lib/7z/Lzma2Dec.c
   lib/7z/Ppmd7Dec.c
-  "${CMAKE_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp"
+  # "${CMAKE_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp"
   )
 
 add_library(33update OBJECT ${files})
+
+# target_link_libraries(33update ${pugixml_obj})
 
 # target_link_libraries(33updqate ${LIBUSB_1_LIBRARIES})

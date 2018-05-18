@@ -18,7 +18,7 @@
 
 #include "GigE3DevicePort.h"
 
-#include <pugixml.hpp>
+#include <pugi.h>
 
 namespace FirmwareUpdate
 {

@@ -32,12 +32,9 @@ set(NETWORK_SOURCES
   FirmwarePackage.cpp
   MachXO2.cpp
   JedecFile.cpp
-  ${CMAKE_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp
   )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-
-add_library(tcam-network SHARED ${NETWORK_SOURCES})
+add_library(tcam-network SHARED ${NETWORK_SOURCES} $<TARGET_OBJECTS:pugixml_obj>)
 
 target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 
