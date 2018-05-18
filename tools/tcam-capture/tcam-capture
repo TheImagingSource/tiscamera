@@ -20,7 +20,7 @@ import argparse
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
-                             QDockWidget, QAction, QComboBox)
+                             QDockWidget, QAction, QComboBox, QSizePolicy)
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon
