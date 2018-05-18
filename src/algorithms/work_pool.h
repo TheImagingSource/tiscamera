@@ -98,10 +98,10 @@ work_pool* acquire_default_work_pool ();
 
 void release_default_work_pool (work_pool* pool);
 
-}; // namespace work_pool
+} // namespace work_pool
 
-}; // namespace algorithms
+} // namespace algorithms
 
-}; // namespace tcam
+} // namespace tcam
 
 #endif /* TCAM_ALGORITHM_WORK_POOL_H */

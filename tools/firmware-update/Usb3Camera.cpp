@@ -417,4 +417,4 @@ bool Usb3Camera::upload_firmware (const std::string& firmware_package,
     return false;
 }
 
-}; /* namespace tis */
+} /* namespace tis */

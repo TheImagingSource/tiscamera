@@ -147,7 +147,8 @@ void tcam::algorithms::parallel::parallel_state::split_image_context::do_one ()
 {
     func->call(split_dst, split_src);
     shared_latch->count_down();
-};
+}
+
 
 void tcam::algorithms::parallel::parallel_state::construct_from_split_ (func_caller* func,
                                                                         tcam_image_buffer& dst,

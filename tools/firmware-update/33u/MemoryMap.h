@@ -26,6 +26,6 @@ namespace device_interface
 	{
 		const uint64_t CAMERA_INFO = 0x4C52544300000000;	// CTRL'0000'0000
 		const uint64_t CAMERA_FLASH = 0x4C525443EE000000;	// CTRL'EE00'0000
-	};
+	}
 }
 }

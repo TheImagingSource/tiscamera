@@ -279,7 +279,7 @@ static bool is_user_roi_valid ( const img_descriptor& image, const RECT& r )
     return true;
 }
 
-};
+}
 
 
 img::auto_focus::auto_focus ()

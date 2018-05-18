@@ -124,4 +124,4 @@ std::shared_ptr<UsbSession> UsbHandler::get_session ()
     return this->session;
 }
 
-}; /* namespace tis */
+} /* namespace tis */

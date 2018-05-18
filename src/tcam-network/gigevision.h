@@ -286,7 +286,8 @@ namespace Packet
 
     } ACK_READREG;
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
     typedef struct
     {
         ACK_HEADER  header;
@@ -295,7 +296,7 @@ namespace Packet
         uint32_t    data[0];
 
     } ACK_READMEM;
-
+#pragma GCC diagnostic pop
 
     typedef struct
     {

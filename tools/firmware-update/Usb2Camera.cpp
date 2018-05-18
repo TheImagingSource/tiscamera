@@ -50,7 +50,7 @@ Usb2Camera::~Usb2Camera ()
 
 int Usb2Camera::get_firmware_version ()
 {
-    int size = 1;
+    const int size = 1;
     int i = -1;
     unsigned char data[size];
 
@@ -680,4 +680,4 @@ int Usb2Camera::set_productid (unsigned short pid)
     return ret;
 }
 
-}; /* namespace tis */
+} /* namespace tis */

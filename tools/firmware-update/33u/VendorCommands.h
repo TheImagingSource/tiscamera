@@ -28,6 +28,6 @@ namespace device_interface
 		const uint8_t GENCP_MAX_WRITE = 0x22;
 		const uint8_t GENCP_MAX_READ = 0x23;
 		const uint8_t I2C = 0x18;
-	};
+	}
 }
 }
