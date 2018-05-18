@@ -19,7 +19,7 @@
 G_DEFINE_INTERFACE (TcamProp, tcam_prop, G_TYPE_OBJECT)
 
 
-static void tcam_prop_default_init (TcamPropInterface* klass)
+static void tcam_prop_default_init (__attribute__((unused))TcamPropInterface* klass)
 {
     /* GObjectClass *object_class = G_OBJECT_CLASS (klass); */
 
