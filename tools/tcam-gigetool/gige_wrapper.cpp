@@ -76,7 +76,7 @@ int get_camera_list(discover_callback_t callback, int get_persistent_values)
     discoverCameras(f);
     for (const auto& camera : cameras)
     {
-        struct tcam_camera tcam = {0};
+        struct tcam_camera tcam = {};
         copy_to_tcam(&tcam, camera, get_persistent_values);
         callback(tcam);
     }

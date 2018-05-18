@@ -32,15 +32,15 @@ void StdOutput::report_percentage (int pct)
 }
 
 
-void StdOutput::report_group (const std::string & msg)
+void StdOutput::report_group (const std::string& /* msg */)
 {}
 
 
-void StdOutput::report_step (const std::string & msg)
+void StdOutput::report_step (const std::string& /* msg */)
 {}
 
 
-void StdOutput::report_speed (float speed, const std::string & unit)
+void StdOutput::report_speed (float /* speed */, const std::string& /* unit */)
 {}
 
 
@@ -71,14 +71,14 @@ std::string Usb33Camera::get_firmware_version_string ()
 }
 
 
-int Usb33Camera::delete_firmware (std::function<void(int)> progress)
+int Usb33Camera::delete_firmware (std::function<void(int)> /* progress */)
 {
     return -1;
 }
 
 
-int Usb33Camera::download_firmware (std::vector<unsigned char>& firmware,
-                                    std::function<void(int)> progress)
+int Usb33Camera::download_firmware (std::vector<unsigned char>& /* firmware */,
+                                    std::function<void(int)> /* progress */)
 {
     return -1;
 }
@@ -134,42 +134,42 @@ int Usb33Camera::set_mode (UVC_COMPLIANCE /* mode */)
 }
 
 
-int Usb33Camera::write_eeprom (unsigned int addr,
-                               unsigned char* data,
-                               unsigned int size)
+int Usb33Camera::write_eeprom (unsigned int /* addr */,
+                               unsigned char* /* data */,
+                               unsigned int /* size */)
 {
     return -1;
 }
 
 
-int Usb33Camera::read_eeprom (unsigned int addr,
-                              unsigned char* data,
-                              unsigned int size)
+int Usb33Camera::read_eeprom (unsigned int /* addr */,
+                              unsigned char* /* data */,
+                              unsigned int /* size */)
 {
     return -1;
 }
 
 
-int Usb33Camera::erase_sector (unsigned int addr)
+int Usb33Camera::erase_sector (unsigned int /* addr */)
 {
     return -1;
 }
 
 
-int Usb33Camera::erase_eeprom (std::function<void(int)> progress)
+int Usb33Camera::erase_eeprom (std::function<void(int)> /* progress */)
 {
     return -1;
 }
 
 
-bool Usb33Camera::initialize_eeprom (std::vector<uint8_t>& firmware)
+bool Usb33Camera::initialize_eeprom (std::vector<uint8_t>& /* firmware */)
 {
     return false;
 }
 
 
-int Usb33Camera::upload_firmware_file (std::vector<uint8_t> firmware,
-                                       std::function<void(int)> progress)
+int Usb33Camera::upload_firmware_file (std::vector<uint8_t> /* firmware */,
+                                       std::function<void(int)> /* progress */)
 {
     return -1;
 }

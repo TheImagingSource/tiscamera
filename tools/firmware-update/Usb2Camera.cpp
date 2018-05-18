@@ -81,7 +81,7 @@ std::string Usb2Camera::get_firmware_version_string ()
 }
 
 
-int Usb2Camera::delete_firmware (std::function<void(int)> progress)
+int Usb2Camera::delete_firmware (std::function<void(int)> /* progress */)
 {
     return -1;
 }
@@ -121,7 +121,7 @@ int Usb2Camera::usbbuffer_to_string (unsigned char* usbbuffer,
 int Usb2Camera::string_to_usbbuffer (unsigned char* usbbuffer, int buffer_size, const char* string)
 {
     size_t length = strlen((char*) string );
-    unsigned int len = length * 2 + 4;
+    int len = length * 2 + 4;
 
     if ( buffer_size < len )
     {
@@ -350,7 +350,7 @@ bool Usb2Camera::patch_strings (const char* model,
 
 
 bool Usb2Camera::upload_firmware (const std::string& firmware_package,
-                                  const std::string& firmware,
+                                  const std::string& /* firmware */,
                                   std::function<void(int)> progress)
 {
     // This function loads a single firmware description

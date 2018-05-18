@@ -59,7 +59,7 @@ std::vector<device_info> UsbHandler::get_device_list ()
         if (desc.idVendor != 0x199e && desc.idVendor != 0xeb1a && desc.idVendor != 0x04b4)
             continue;
 
-        device_info d = { 0 };
+        device_info d = {};
         d.idVendor = desc.idVendor;
         d.idProduct = desc.idProduct;
 

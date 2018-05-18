@@ -55,7 +55,7 @@ work_pool::work_pool* work_pool::acquire_default_work_pool ()
 }
 
 
-void work_pool::release_default_work_pool (work_pool* pool)
+void work_pool::release_default_work_pool (work_pool* /* pool */)
 {
     std::lock_guard<std::mutex> lck(g_pool_lock);
 

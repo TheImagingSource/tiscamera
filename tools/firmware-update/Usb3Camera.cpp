@@ -167,7 +167,7 @@ unsigned int Usb3Camera::get_eeprom_size ()
     return 0;
 }
 
-int Usb3Camera::set_mode (UVC_COMPLIANCE mode)
+int Usb3Camera::set_mode (UVC_COMPLIANCE /* mode */)
 {
     return -1;
 }

@@ -345,21 +345,6 @@ void img::auto_focus::end ()
 }
 
 
-void debug_out ( char* format, ... )
-{
-#if 0 && _DEBUG
-    char buf[1024] = {};
-
-    va_list args;
-    va_start(args, format);
-    vsprintf_s( buf, format, args );
-    va_end(args);
-
-    ::OutputDebugStringA( buf );
-#endif
-}
-
-
 bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_val )
 {
     // if we can't get the lock, then just ignore this frame and retry next frame
@@ -505,8 +490,6 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
             data.prev_focus = data.focus_val;
             data.prev_sharpness = sq;
             new_focus_val = calc_next_focus();
-
-            // debug_out( "SWEEP SUCCESS: focus_val = %d, sharpness = %d => state = binary_search, new_focus_val = %d\n", data.focus_val, sq, new_focus_val );
 
             return true;
         }

@@ -238,12 +238,14 @@ void writeChanges (std::shared_ptr<Camera> camera,
     }
 }
 
+
 int isAccessible (const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
 
     return isAccessible(camera);
 }
+
 
 int isAccessible (std::shared_ptr<Camera> camera)
 {
@@ -559,41 +561,58 @@ Please reconnect your camera to assure full functionality.\n";
     std::cout << std::endl;
 }
 
-std::string string_format(const std::string &fmt, ...) {
-    int n, size=1;
+
+std::string string_format (const std::string& fmt, ...)
+{
+    int size = 1;
     std::string str;
     va_list ap;
 
-    while (1) {
+    while (1)
+    {
         str.resize(size);
         va_start(ap, fmt);
         int n = vsnprintf(&str[0], size, fmt.c_str(), ap);
         va_end(ap);
 
         if (n > -1 && n < size)
+        {
             return str;
+        }
         if (n > -1)
+        {
             size = n + 1;
+        }
         else
+        {
             size *= 2;
+        }
     }
 }
 
-std::string parseHexMac(std::string hexmac)
+
+std::string parseHexMac (const std::string& hexmac)
 {
     if (hexmac.length() != 13)
+    {
         return "";
+    }
 
     std::string mac = hexmac.substr(0,2);
     for (int i=2; i < 12; i+=2)
+    {
         mac += ":" + hexmac.substr(i,2);
+    }
     return mac;
 }
 
-std::string serialToMac(std::string serial)
+
+std::string serialToMac (const std::string& serial)
 {
     if(serial.length() != 8)
+    {
         return "";
+    }
     std::string tmp = serial.substr(2,2);
     tmp = tmp.substr(1,1) + tmp.substr(0,1);
     int macPart = std::stoi(serial.substr(4,4)) + (10000 * (std::stoi(tmp) - 9)) + (10000 * 30 * (std::stoi(serial.substr(0,2)) - 1));
@@ -601,6 +620,7 @@ std::string serialToMac(std::string serial)
     std::string macString = prefix + std::string(string_format("%06x", macPart));
     return parseHexMac(macString);
 }
+
 
 void rescue (std::vector<std::string> args)
 {

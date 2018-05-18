@@ -213,6 +213,8 @@ JedecFile JedecFile::Parse (const std::vector<uint8_t>& data)
             case RowType::USER_CODE:
                 userCode = ParseUserCode(RemoveTrailingStar(line.substr(1)));
                 break;
+            default:            // just deal with the rest
+                break;
         }
 
         if (state == RowType::COMMENT && string_contains(line, "DEVICE NAME:"))

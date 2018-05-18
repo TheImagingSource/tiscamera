@@ -269,18 +269,18 @@ static bool IsStatusFail (uint32_t status)
     return (status & (1 << 13)) != 0;
 }
 
-
+/*
 static bool IsStatusBusy (uint32_t status)
 {
     return (status & (1 << 12)) != 0;
 }
-
+*/
 
 int MachXO3Device::ReadStatus ()
 {
     uint32_t status = _itf.read<uint32_t>(Commands::READ_STATUS);
-    bool isBusy = IsStatusBusy(status);
-    bool isFail = IsStatusFail(status);
+    // bool isBusy = IsStatusBusy(status);
+    // bool isFail = IsStatusFail(status);
 
     return status;
 }

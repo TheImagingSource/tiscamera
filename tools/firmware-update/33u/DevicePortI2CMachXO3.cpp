@@ -67,7 +67,7 @@ namespace firmware_update
         I2C::I2CDevice i2c( 0x80, forwardI2CWrite(dev), forwardI2CRead(dev), 1024 );
 		MachXO3::MachXO3Device machXO3( i2c );
 
-		auto progress_func = [&progress]( const char* msg, int pct )
+		auto progress_func = [&progress]( const char* /* msg */, int pct )
 		{
 			progress.report_percentage( pct );
 		};
