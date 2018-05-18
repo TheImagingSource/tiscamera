@@ -72,8 +72,9 @@ option(BUILD_DOC      "Build documentation"                  OFF)
 set(TCAM_INTERNAL_ARAVIS ON CACHE STRING "Use internal aravis dependency instead of system libraries")
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pthread -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pthread -fPIC")
+
 
 if (BUILD_V4L2)
   add_definitions(-DHAVE_USB)
