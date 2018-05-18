@@ -1566,7 +1566,7 @@ static double modify_exposure (GstTcamautoexposure* self, gdouble diff)
         GST_DEBUG("Returning (e_ref - new_exposure = diff) %f - %f = %f",
                   e_ref, new_exposure, (e_ref - new_exposure));
 
-        return e_ref - new_exposure;
+        return e_ref / new_exposure - 1.0;
     }
     else
     {
