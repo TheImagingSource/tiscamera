@@ -16,23 +16,23 @@ if(GIO_INCLUDE_DIR AND GIO_LIBRARIES)
 endif(GIO_INCLUDE_DIR AND GIO_LIBRARIES)
 
 if (NOT WIN32)
-    include(UsePkgConfig)
-    pkgconfig(gio-2.0 _LibGIOIncDir _LibGIOLinkDir _LibGIOLinkFlags _LibGIOCflags)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(PKG_GIO REQUIRED QUIET gio-2.0)
 endif(NOT WIN32)
 
 if (NOT GIO_FIND_QUIETLY)
-MESSAGE(STATUS "gio include dir: ${_LibGIOIncDir}")
+  MESSAGE(STATUS "gio include dir: ${PKG_GIO_INCLUDEDIR}")
 endif (NOT GIO_FIND_QUIETLY)
 # first try without default paths to respect PKG_CONFIG_PATH
 
 find_path(GIO_MAIN_INCLUDE_DIR glib.h
         PATH_SUFFIXES glib-2.0
-        PATHS ${_LibGIOIncDir}
+        PATHS ${PKG_GIO_INCLUDEDIR}
         NO_DEFAULT_PATH)
 
 find_path(GIO_MAIN_INCLUDE_DIR glib.h
         PATH_SUFFIXES glib-2.0
-        PATHS ${_LibGIOIncDir} )
+        PATHS ${PKG_GIO_INCLUDEDIR} )
 
 if (NOT GIO_FIND_QUIETLY)
   MESSAGE(STATUS "found gio main include dir: ${GIO_MAIN_INCLUDE_DIR}")
@@ -41,24 +41,24 @@ endif (NOT GIO_FIND_QUIETLY)
 # search the glibconfig.h include dir under the same root where the library is found
 find_library(GIO_LIBRARIES
         NAMES gio-2.0
-        PATHS ${_LibGIOLinkDir}
+        PATHS ${PKG_GIO_INCLUDEDIR}
         NO_DEFAULT_PATH)
 
 find_library(GIO_LIBRARIES
         NAMES gio-2.0
-        PATHS ${_LibGIOLinkDir})
+        PATHS ${PKG_GIO_LIBDIR})
 
 
-get_filename_component(GIOLibDir "${GIO_LIBRARIES}" PATH)
+get_filename_component(GIOLibDir "${PKG_GIO_LIBRARIES}" PATH)
 
 find_path(GIO_INTERNAL_INCLUDE_DIR glibconfig.h
         PATH_SUFFIXES glib-2.0/include
-        PATHS ${_LibGIOIncDir} "${GIOLibDir}" ${CMAKE_SYSTEM_LIBRARY_PATH}
+        PATHS ${PKG_GIO_INCLUDEDIR} "${GIOLibDir}" ${CMAKE_SYSTEM_LIBRARY_PATH}
         NO_DEFAULT_PATH)
 
 find_path(GIO_INTERNAL_INCLUDE_DIR glibconfig.h
         PATH_SUFFIXES glib-2.0/include
-        PATHS ${_LibGIOIncDir} "${GIOLibDir}" ${CMAKE_SYSTEM_LIBRARY_PATH})
+        PATHS ${PKG_GIO_INCLUDEDIR} "${GIOLibDir}" ${CMAKE_SYSTEM_LIBRARY_PATH})
 
 set(GIO_INCLUDE_DIR "${GIO_MAIN_INCLUDE_DIR}")
 
@@ -69,6 +69,6 @@ if(GIO_INTERNAL_INCLUDE_DIR)
 endif(GIO_INTERNAL_INCLUDE_DIR)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GIO  DEFAULT_MSG  GIO_LIBRARIES GIO_MAIN_INCLUDE_DIR)
+find_package_handle_standard_args(GIO  DEFAULT_MSG  GIO_LIBRARIES GIO_MAIN_INCLUDE_DIR GIO_INCLUDE_DIR)
 
 mark_as_advanced(GIO_INCLUDE_DIR GIO_LIBRARIES)
