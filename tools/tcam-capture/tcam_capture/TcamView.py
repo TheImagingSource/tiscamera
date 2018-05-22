@@ -111,6 +111,12 @@ class TcamView(QWidget):
             self.fullscreen_container.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.fullscreen_container.installEventFilter(self.fullscreen_container)
             self.fullscreen_container.destroy_widget.connect(self.toggle_fullscreen)
+            # either show info that we are in trigger mode and still waiting for the first image
+            # or show that last image we had. This way we always have something to show to the user
+            if self.is_trigger_mode_on() and self.container.first_image:
+                self.fullscreen_container.wait_for_first_image()
+            else:
+                self.fullscreen_container.on_new_pixmap(self.container.pix.pixmap())
 
     def save_image(self, image_type: str):
         if not self.imagesaver.working:
@@ -153,6 +159,8 @@ class TcamView(QWidget):
         self.framecounter = 0
         self.fps_timer.start(1000)  # 1 second
         self.container.first_image = True
+        if self.is_trigger_mode_on():
+            self.container.wait_for_first_image()
 
     def fps_tick(self):
         """
@@ -365,6 +373,34 @@ class TcamView(QWidget):
     def fire_device_lost(self):
         for cb in self.device_lost_callbacks:
             cb()
+
+    def is_trigger_mode_on(self):
+        if not self.tcam:
+
+            return False
+
+        try:
+            (result, value,
+             minval, maxval,
+             defval, step,
+             valuetype,
+             flags,
+             category, group) = self.tcam.get_tcam_property("Trigger Mode")
+        except TypeError as e:
+            log.warning("get_tcam_property failed for '{}'".format("Trigger Mode"))
+            # log.("get_tcam_property failed for '{}'".format(name))
+            return False
+
+        if valuetype == "boolean":
+            if value:
+                return True
+            return False
+
+        elif valuetype == "enum":
+            if value == "On":
+                return True
+
+        return True
 
     @staticmethod
     def has_dutils():

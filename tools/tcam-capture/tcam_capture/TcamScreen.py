@@ -15,8 +15,10 @@
 from tcam_capture.ViewItem import ViewItem
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtWidgets import (QGraphicsView, QGraphicsScene)
+from PyQt5.QtWidgets import (QGraphicsView, QGraphicsScene,
+                             QGraphicsTextItem, QGraphicsPixmapItem)
 from PyQt5.QtCore import pyqtSignal, Qt, QSizeF
+from PyQt5.QtGui import QBrush, QColor, QPixmap
 
 
 class TcamScreen(QtWidgets.QGraphicsView):
@@ -34,12 +36,19 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.setFrameStyle(0)
         self.scene = QGraphicsScene(self)
         self.setScene(self.scene)
+
         self.new_pixmap.connect(self.on_new_pixmap)
         self.pix = ViewItem()
         self.scene.addItem(self.pix)
         self.scene.setSceneRect(self.pix.boundingRect())
 
         self.is_fullscreen = False
+
+        # Flag to differentiate between actual images
+        # and 'fake images' i.e. color background + text while
+        # waiting for first trigger image
+        self.display_real_image = True
+        self.text_item = None
 
         self.mouse_position_x = -1
         self.mouse_position_y = -1
@@ -56,6 +65,10 @@ class TcamScreen(QtWidgets.QGraphicsView):
     def on_new_pixmap(self, pixmap):
         self.pix.setPixmap(pixmap)
 
+        if not self.display_real_image:
+            self.scene.removeItem(self.text_item)
+            self.display_real_image = True
+
         if self.first_image:
             self.reset_zoom()
             self.scene.setSceneRect(self.pix.boundingRect())
@@ -65,6 +78,21 @@ class TcamScreen(QtWidgets.QGraphicsView):
         # don't call repaint here
         # it causes problems once the screen goes blank due to screensavers, etc
         # self.repaint()
+
+    def wait_for_first_image(self):
+
+        self.display_real_image = False
+
+        self.text_item = QGraphicsTextItem()
+        self.text_item.setDefaultTextColor(QColor("white"))
+
+        self.text_item.setPos(100, 70)
+        self.text_item.setPlainText("In Trigger Mode. Waiting for first image...")
+
+        bg = QPixmap(1280, 720)
+        bg.fill(QColor("grey"))
+        self.pix.setPixmap(bg)
+        self.scene.addItem(self.text_item)
 
     def send_mouse_pixel(self):
         # mouse positions start at 0
@@ -99,6 +127,9 @@ class TcamScreen(QtWidgets.QGraphicsView):
         return False
 
     def wheelEvent(self, event):
+
+        if not self.display_real_image:
+            return
         # Zoom Factor
         zoomInFactor = 1.25
         zoomOutFactor = 1 / zoomInFactor
