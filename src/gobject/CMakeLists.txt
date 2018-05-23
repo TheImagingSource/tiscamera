@@ -98,10 +98,10 @@ else()
   set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
 endif()
 
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir
   DESTINATION ${TCAM_INSTALL_GIR}
   COMPONENT tcam-introspection)
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.typelib
+install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib
   DESTINATION ${TCAM_INSTALL_TYPELIB}
   COMPONENT tcam-introspection)
 install(FILES tcamprop.h
