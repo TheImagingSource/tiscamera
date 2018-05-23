@@ -45,7 +45,7 @@ class CaptureDevice
 public:
 
     CaptureDevice ();
-    CaptureDevice (const DeviceInfo&);
+    explicit CaptureDevice (const DeviceInfo&);
 
     CaptureDevice (const CaptureDevice&) = delete;
 
