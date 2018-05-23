@@ -87,15 +87,15 @@ pkg_check_variable(gobject-introspection-1.0 girdir)
 pkg_check_variable(gobject-introspection-1.0 typelibdir)
 
 if (GOBJECT_INTROSPECTION_1.0_GIRDIR)
-  set(TCAM_INSTALL_GIR ${GOBJECT_INTROSPECTION_1.0_GIRDIR} CACHE STRING "gobject introspection installation path")
+  set(TCAM_INSTALL_GIR ${GOBJECT_INTROSPECTION_1.0_GIRDIR} CACHE PATH "gobject introspection installation path")
 else()
-  set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE STRING "gobject introspection installation path")
+  set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE PATH "gobject introspection installation path")
 endif()
 
 if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
-  set(TCAM_INSTALL_TYPELIB ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE STRING "gobject introspection typelib installation path")
+  set(TCAM_INSTALL_TYPELIB ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE PATH "gobject introspection typelib installation path")
 else()
-  set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE STRING "gobject introspection typelib installation path")
+  set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
 endif()
 
 install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-0.1.gir

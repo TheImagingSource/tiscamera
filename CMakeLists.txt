@@ -71,7 +71,7 @@ option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 option(BUILD_DOC      "Build documentation"                  OFF)
 
-set(TCAM_INTERNAL_ARAVIS ON CACHE STRING "Use internal aravis dependency instead of system libraries")
+set(TCAM_INTERNAL_ARAVIS ON CACHE BOOL "Use internal aravis dependency instead of system libraries")
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -pthread -fPIC")
