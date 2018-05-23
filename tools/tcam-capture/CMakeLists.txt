@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-find_package(PythonInterp 3 REQUIRED)
+find_package(PythonInterp 3 REQUIRED QUIET)
 
 if (PYTHONINTERP_FOUND)
+
+  find_package(PythonModule QUIET) # this quiet makes find_python_module be quiet
+  find_python_module(PyQt5 REQUIRED)
+
   set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}/dist-packages/")
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
