@@ -60,7 +60,9 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
-set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Common prefix for all installed files.")
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  SET(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
 option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
