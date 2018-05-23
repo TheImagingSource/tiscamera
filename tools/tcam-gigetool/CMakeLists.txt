@@ -34,22 +34,22 @@ if (PYTHONINTERP_FOUND)
 
   set(GIGE_TOOLS_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/tcamgigetool")
 
-    set(SETUP_PY_IN   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-    set(SETUP_PY      "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
-    set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py.in")
-    set(VERSION_PY    "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py")
-    set(DEPS          "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/tcam_gigetool.py")
-    set(OUTPUT        "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
+  set(SETUP_PY_IN   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+  set(SETUP_PY      "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+  set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py.in")
+  set(VERSION_PY    "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py")
+  set(DEPS          "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/tcam_gigetool.py")
+  set(OUTPUT        "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
 
-    configure_file(${SETUP_PY_IN} ${SETUP_PY})
-    configure_file(${VERSION_PY_IN} ${VERSION_PY})
+  configure_file(${SETUP_PY_IN} ${SETUP_PY})
+  configure_file(${VERSION_PY_IN} ${VERSION_PY})
 
-    add_custom_command(OUTPUT ${OUTPUT}
-                       COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY} build
-                       COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
-                       DEPENDS ${DEPS})
+  add_custom_command(OUTPUT ${OUTPUT}
+    COMMAND ${PYTHON_EXECUTABLE} ${SETUP_PY} build
+    COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
+    DEPENDS ${DEPS})
 
-    add_custom_target(target ALL DEPENDS ${OUTPUT})
+  add_custom_target(target ALL DEPENDS ${OUTPUT})
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/"
     DESTINATION ${GIGE_TOOLS_PY_INSTALL}
