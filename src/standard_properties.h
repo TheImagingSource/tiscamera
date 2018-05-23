@@ -48,7 +48,7 @@ struct control_reference
     tcam_property_group group;
 
     control_reference (TCAM_PROPERTY_ID id_,
-                       std::string name_,
+                       const std::string& name_,
                        enum TCAM_PROPERTY_TYPE type_to_use_,
                        tcam_property_group group_)
         : id(id_), name(name_), type_to_use(type_to_use_), group(group_)
