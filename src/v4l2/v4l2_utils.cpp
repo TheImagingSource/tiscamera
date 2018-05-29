@@ -302,6 +302,18 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
     struct udev_list_entry* devices = udev_enumerate_get_list_entry(enumerate);
     struct udev_list_entry* dev_list_entry;
 
+    auto device_is_known = [&device_list] (const DeviceInfo& info)
+        {
+            for (const auto& dev : device_list)
+            {
+                if (dev.get_serial() == info.get_serial())
+                {
+                    return true;
+                }
+            }
+            return false;
+        };
+
     udev_list_entry_foreach(dev_list_entry, devices)
     {
         const char* path;
@@ -367,7 +379,12 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
             {
                 memcpy(info.serial_number, "\0", sizeof(info.serial_number));
             }
-            device_list.push_back(DeviceInfo(info));
+
+            auto new_dev = DeviceInfo(info);
+            if (!device_is_known(new_dev))
+            {
+                device_list.push_back(new_dev);
+            }
         }
 
         udev_device_unref(dev);
