@@ -235,7 +235,7 @@ class TCamCapture(QMainWindow):
         exit_act.triggered.connect(self.app.quit)
         self.toolbar.addAction(exit_act)
 
-        preferences_action = QAction(QIcon.fromTheme("preferences-desktop-multimedia"),
+        preferences_action = QAction(QIcon.fromTheme("preferences-desktop"),
                                      "Preferences", self)
         preferences_action.setStatusTip("Open preferences dialog")
         preferences_action.triggered.connect(self.open_preferences)
