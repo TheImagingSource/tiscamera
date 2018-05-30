@@ -66,7 +66,7 @@ int SzCrcGenerateTableOnce()
 
 Archive::Data::Data( const std::string& fn )
 {
-    // static int x = SzCrcGenerateTableOnce();
+    SzCrcGenerateTableOnce();
 
     auto wres = InFile_Open( &archive_stream_.file, fn.c_str() );
     if( wres )
