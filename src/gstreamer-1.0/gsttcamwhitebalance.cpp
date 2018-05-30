@@ -408,7 +408,7 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_BOOLEAN);
-            g_value_set_boolean(value, self->auto_enabled);
+            g_value_set_boolean(value, self->auto_wb);
         }
         if (min)
         {
@@ -457,7 +457,7 @@ static gboolean gst_tcamwhitebalance_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_BOOLEAN);
-            g_value_set_boolean(value, self->auto_enabled);
+            g_value_set_boolean(value, self->force_hardware_wb);
         }
         if (min)
         {
