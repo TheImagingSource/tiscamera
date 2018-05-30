@@ -16,6 +16,8 @@
 # define external dependencies for linkage
 set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
 
+add_subdirectory(images)
+
 if (BUILD_ARAVIS)
 
   # leave as a reminder on how to handle aravis versions should a
