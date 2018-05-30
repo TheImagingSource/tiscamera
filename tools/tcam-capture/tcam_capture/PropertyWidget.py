@@ -147,6 +147,13 @@ class PropertyWidget(QWidget):
         box.setValue(value)
         box.blockSignals(False)
 
+    def update_box_range(self, box, minval, maxval):
+        """"""
+        box.blockSignals(True)
+        box.setRange(self.prop.minval,
+                     self.prop.maxval)
+        box.blockSignals(False)
+
     def update_slider_value(self, slider, value):
         slider.blockSignals(True)
         try:
@@ -156,14 +163,35 @@ class PropertyWidget(QWidget):
         finally:
             slider.blockSignals(False)
 
+    def update_slider_range(self, slider, minval, maxval):
+        """"""
+        self.sld.blockSignals(True)
+        self.sld.setRange(self.prop.minval,
+                          self.prop.maxval)
+        self.sld.blockSignals(False)
+
     def update(self, prop: Prop):
         self.prop = prop
         if self.prop.valuetype == "integer":
             self.update_slider_value(self.sld, self.prop.value)
+
+            self.update_slider_range(self.sld,
+                                     self.prop.minval,
+                                     self.prop.maxval)
+            self.update_box_range(self.value_box,
+                                  self.prop.minval,
+                                  self.prop.maxval)
             self.update_box_value(self.value_box, self.prop.value)
         elif self.prop.valuetype == "double":
+            self.update_slider_range(self.sld,
+                                     self.prop.minval * 1000,
+                                     self.prop.maxval * 1000)
             self.update_slider_value(self.sld, self.prop.value * 1000)
+            self.update_box_range(self.value_box,
+                                  self.prop.minval,
+                                  self.prop.maxval)
             self.update_box_value(self.value_box, self.prop.value)
+
         elif self.prop.valuetype == "button":
             pass
 
