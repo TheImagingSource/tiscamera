@@ -149,8 +149,12 @@ class PropertyWidget(QWidget):
 
     def update_slider_value(self, slider, value):
         slider.blockSignals(True)
-        slider.setValue(value)
-        slider.blockSignals(False)
+        try:
+            slider.setValue(value)
+        except OverflowError:
+            log.error("A slider had a value outside of the integer range. That should no happen.")
+        finally:
+            slider.blockSignals(False)
 
     def update(self, prop: Prop):
         self.prop = prop
