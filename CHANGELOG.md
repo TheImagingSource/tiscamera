@@ -57,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Segfault when DeviceIndex::get_device_list was called and gige-daemon was not running
 - gsttcamautoexposure now correctly handles gain/exposure ranges
 - gsttcamwhitebalance now correctly handles bggr
+- gsttcamwhitebalance tcam_prop interface now returns the correct values for
+  whitebalance-auto and camera-whitebalance
 - gsttcamautofocus ROI now behaves correctly
 - gsttcamautofocus "Auto Focus One Push" has to be triggered only once to
   actually do something
