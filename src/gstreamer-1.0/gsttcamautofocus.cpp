@@ -658,6 +658,7 @@ void gst_tcamautofocus_set_property (GObject* object,
     switch (property_id)
     {
         case PROP_AUTO:
+        {
             self->focus_active = g_value_get_boolean (value);
             if (self->focus_active == TRUE)
             {
@@ -669,21 +670,60 @@ void gst_tcamautofocus_set_property (GObject* object,
                 GST_INFO("focus_active is now TRUE");
             }
             break;
+        }
         case PROP_LEFT:
+        {
             self->roi_left = g_value_get_int(value);
+
+            if (self->roi_width > (self->image_width - self->roi_top))
+            {
+                GST_INFO("Requested ROI position does not allow the current ROI size. Reducing ROI width.");
+                self->roi_width = (self->image_width - self->roi_top);
+            }
+
             break;
+        }
         case PROP_TOP:
+        {
             self->roi_top = g_value_get_int(value);
+
+            if (self->roi_height > (self->image_height - self->roi_top))
+            {
+                GST_INFO("Requested ROI position does not allow the current ROI size. Reducing ROI height.");
+                self->roi_height = (self->image_height - self->roi_top);
+            }
+
             break;
+        }
         case PROP_WIDTH:
+        {
             self->roi_width = g_value_get_int(value);
+
+            if (self->roi_width > (self->image_width - self->roi_top))
+            {
+                GST_INFO("Requested width was larger than resolution and focus region allow. Setting possible maximum.");
+                self->roi_width = (self->image_width - self->roi_top);
+            }
+
             break;
+        }
         case PROP_HEIGHT:
+        {
             self->roi_height = g_value_get_int(value);
+
+            if (self->roi_height > (self->image_height - self->roi_top))
+            {
+                GST_INFO("Requested height was larger than resolution and focus region allow. Setting possible maximum.");
+                self->roi_height = (self->image_height - self->roi_top);
+            }
+
             break;
+        }
         default:
+        {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
+        }
     }
 }
 
@@ -882,6 +922,16 @@ gboolean find_image_values (GstTcamAutoFocus* self)
 
     g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_width), FALSE);
     g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_height), FALSE);
+
+    if (self->roi_width == 0)
+    {
+        self->roi_width = self->image_width;
+    }
+
+    if (self->roi_height == 0)
+    {
+        self->roi_height = self->image_height;
+    }
 
     gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
 
