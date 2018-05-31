@@ -583,7 +583,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_int(def, 0);
+            g_value_set_int(def, self->default_exposure_values.max);
         }
         if (step)
         {
@@ -681,7 +681,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_DOUBLE);
-            g_value_set_double(def, 0);
+            g_value_set_double(def, self->gain.max);
         }
         if (step)
         {
@@ -780,7 +780,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_int(def, 0);
+            g_value_set_int(def, self->image_size.width);
         }
         if (step)
         {
@@ -878,7 +878,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_int(def, 0);
+            g_value_set_int(def, self->image_size.height);
         }
         if (step)
         {
@@ -1128,7 +1128,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
 
             if (tcamautoexposure->exposure_min == 0)
             {
-                tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
+                tcamautoexposure->exposure_min = tcamautoexposure->default_exposure_values.min;
             }
             break;
         case PROP_EXPOSURE_MAX:
@@ -1148,7 +1148,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->exposure_max = g_value_get_int(value);
             if (tcamautoexposure->exposure_max == 0.0)
             {
-                tcamautoexposure->exposure = tcamautoexposure->default_exposure_values;
+                tcamautoexposure->exposure_max = tcamautoexposure->default_exposure_values.max;
             }
             break;
         case PROP_GAIN_MIN:
@@ -1158,8 +1158,15 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
             }
-            tcamautoexposure->gain_min = g_value_get_double(value);
 
+            if (g_value_get_double(value) > tcamautoexposure->default_gain_values.min)
+            {
+                GST_WARNING("New user value for gain min is greater than device gain min.");
+                tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
+                break;
+            }
+
+            tcamautoexposure->gain_min = g_value_get_double(value);
 
             if (tcamautoexposure->gain.value < tcamautoexposure->gain_min)
             {
@@ -1169,16 +1176,24 @@ void gst_tcamautoexposure_set_property (GObject* object,
 
             if (tcamautoexposure->gain_min == 0.0)
             {
-                tcamautoexposure->gain = tcamautoexposure->default_gain_values;
+                tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
             }
             break;
        case PROP_GAIN_MAX:
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
             if (g_value_get_double(value) < tcamautoexposure->gain_min)
             {
-                GST_ERROR("New user value for gain min is smaller or equal to gain min. Ignoring request.");
+                GST_ERROR("New user value for gain max is smaller or equal to gain min. Ignoring request.");
                 break;
             }
+
+            if (g_value_get_double(value) > tcamautoexposure->gain.max)
+            {
+                GST_WARNING("New user value for gain max is bigger that device gain max. Ignoring request.");
+                tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
+                break;
+            }
+
             tcamautoexposure->gain_max = g_value_get_double(value);
 
             if (tcamautoexposure->gain.value > tcamautoexposure->gain_max)
@@ -1189,7 +1204,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
 
             if (tcamautoexposure->gain_max == 0.0)
             {
-                tcamautoexposure->gain = tcamautoexposure->default_gain_values;
+                tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
             }
             break;
         case PROP_BRIGHTNESS_REFERENCE:
@@ -1654,36 +1669,67 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
+    region reg = {};
+
+    // x1 == width
     if (self->image_region.x1 == 0)
     {
-        self->image_region.x1 = self->image_size.width;
+        reg.x1 = self->image_size.width;
+
     }
     else if (self->image_region.x1 < SAMPLING_MIN_WIDTH)
     {
-        self->image_region.x1 = SAMPLING_MIN_WIDTH;
+        reg.x1 = SAMPLING_MIN_WIDTH;
+        // update user variable
+        self->image_region.x1 = reg.x1;
+    }
+    else if (self->image_region.x1 > (self->image_size.width - self->image_region.x0))
+    {
+        reg.x1 = (self->image_size.width - self->image_region.x0);
+        self->image_region.x1 = reg.x1;
+    }
+    else
+    {
+        reg.x1 = self->image_region.x1;
     }
 
+    // y1 == height
     if (self->image_region.y1 == 0)
     {
-        self->image_region.y1 = self->image_size.height;
+        reg.y1 = self->image_size.height;
     }
     else if (self->image_region.y1 < SAMPLING_MIN_HEIGHT)
     {
-        self->image_region.y1 = SAMPLING_MIN_HEIGHT;
+        reg.y1 = SAMPLING_MIN_HEIGHT;
+        // update user variable
+        self->image_region.y1 = reg.y1;
+    }
+    else if (self->image_region.y1 > (self->image_size.height - self->image_region.y0))
+    {
+        reg.y1 = (self->image_size.height - self->image_region.y0);
+        self->image_region.y1 = reg.y1;
+    }
+    else
+    {
+        reg.y1 = self->image_region.y1;
     }
 
-    if (self->image_region.x0 >= (self->image_size.width -
-                                  self->image_region.x1))
+    if (self->image_region.x0 == 0)
     {
-        self->image_region.x0 = self->image_size.width -
-	   ( self->image_region.x1);
+        reg.x0 = 0;
+    }
+    else
+    {
+        reg.x0 = self->image_region.x0;
     }
 
-    if (self->image_region.y0 >= (self->image_size.height -
-				  self->image_region.y1))
+    if (self->image_region.y0 == 0)
     {
-        self->image_region.y0 = self->image_size.height -
-	   ( self->image_region.y1);
+        reg.y0 = 0;
+    }
+    else
+    {
+        reg.y0 = self->image_region.y0;
     }
 
     const int bytes_per_pixel = 1;
@@ -1692,17 +1738,18 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     new_buf.rowstride = self->image_size.width * bytes_per_pixel;
 
-    new_buf.image = info.data + (self->image_region.x0 * bytes_per_pixel
-				 + self->image_region.y0 * new_buf.rowstride * bytes_per_pixel);
+    new_buf.image = info.data + (reg.x0 * bytes_per_pixel
+                                 + reg.y0 * new_buf.rowstride * bytes_per_pixel);
 
-    new_buf.width = self->image_region.x1;
-    new_buf.height = self->image_region.y1;
+    new_buf.width = reg.x1;
+    new_buf.height = reg.y1;
 
     new_buf.pattern = calculate_pattern_from_offset(self);
 
     GST_INFO("Region is from %d %d to %d %d",
-             self->image_region.x0, self->image_region.y0,
-             self->image_region.x0 + self->image_region.x1, self->image_region.y0 + self->image_region.y1);
+             reg.x0, reg.y0,
+             reg.x0 + reg.x1,
+             reg.y0 + reg.y1);
 
     gst_buffer_unmap(buf, &info);
 
@@ -1773,6 +1820,16 @@ gboolean find_image_values (GstTcamautoexposure* self)
 
     g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
     g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
+
+    if (self->image_region.x1 == 0)
+    {
+        self->image_region.x1 = self->image_size.width;
+    }
+
+    if (self->image_region.y1 == 0)
+    {
+        self->image_region.y1 = self->image_size.height;
+    }
 
     gst_structure_get_fraction(structure, "framerate",
                                &self->framerate_numerator, &self->framerate_denominator);
