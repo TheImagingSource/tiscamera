@@ -19,7 +19,7 @@ if (PYTHONINTERP_FOUND)
   find_package(PythonModule QUIET) # this quiet makes find_python_module be quiet
   find_python_module(PyQt5 REQUIRED)
 
-  set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}/dist-packages/")
+  set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/")
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py" @ONLY)
