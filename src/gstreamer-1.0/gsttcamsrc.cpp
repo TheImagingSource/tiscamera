@@ -1354,8 +1354,10 @@ static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
 
 wait_again:
     // wait until new buffer arrives or stop waiting when we have to shut down
-    self->cv.wait(lck);
-
+    while (self->is_running && self->device->queue.empty())
+    {
+        self->cv.wait(lck);
+    }
 
     if (self->is_running != TRUE)
     {
