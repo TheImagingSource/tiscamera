@@ -65,10 +65,6 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         .v4l2_id = {0x199e255},
     },
     {
-        .id = TCAM_PROPERTY_OVERRIDE_SCANNING_MODE,
-        .v4l2_id = { 0x199e257 },
-    },
-    {
         .id = TCAM_PROPERTY_GAIN,
         .v4l2_id = { V4L2_CID_GAIN },
     },

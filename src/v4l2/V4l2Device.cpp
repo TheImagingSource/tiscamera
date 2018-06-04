@@ -803,11 +803,6 @@ void V4l2Device::create_emulated_properties ()
 }
 
 
-/**
- * sort_properties moves properties that are present multiple times
- * to the special_properties vector so that only on property at a time will
- * be usable by the user
- */
 void V4l2Device::sort_properties ()
 {
     if (property_handler->properties.empty())
@@ -854,7 +849,6 @@ void V4l2Device::sort_properties ()
     // due to different interfaces
     std::vector<property_description> exp_desc;
     std::vector<property_description> trigger_desc;
-    bool have_override_scanning_mode = false;
 
     for (auto& prop_desc : property_handler->properties)
     {
@@ -866,20 +860,6 @@ void V4l2Device::sort_properties ()
         {
             trigger_desc.push_back(prop_desc);
         }
-        else if (prop_desc.prop->get_ID() == TCAM_PROPERTY_OVERRIDE_SCANNING_MODE)
-        {
-            have_override_scanning_mode = true;
-        }
-    }
-
-    if (have_override_scanning_mode)
-    {
-        id = 0x199e257;
-        auto iter = std::find_if(property_handler->properties.begin(),
-                                 property_handler->properties.end(),
-                                 search_func);
-        property_handler->special_properties.push_back(*iter);
-        property_handler->properties.erase(iter);
     }
 
     if (exp_desc.size() > 1)
