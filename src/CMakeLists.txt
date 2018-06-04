@@ -68,7 +68,7 @@ set(base
   VideoFormat.cpp
   VideoFormatDescription.cpp
   ImageSink.cpp
-  LibraryHandle.cpp)
+  )
 
 add_library(tcam-base OBJECT ${base})
 
@@ -76,6 +76,7 @@ target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 
 set( srcs
   BackendLoader.cpp
+  LibraryHandle.cpp
   DeviceIndex.cpp
   DeviceInterface.cpp
   CaptureDevice.cpp
