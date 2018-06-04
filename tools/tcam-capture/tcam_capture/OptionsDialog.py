@@ -85,10 +85,11 @@ class OptionsDialog(QDialog):
         self.form_layout.addRow(self.reopen_device_label,
                                 self.reopen_device_checkbox)
 
-        self.set_device_properties_checkbox = QCheckBox(self)
-        self.set_device_properties_label = QLabel("Set properties to cached values when known device is opened:", self)
-        self.form_layout.addRow(self.set_device_properties_label,
-                                self.set_device_properties_checkbox)
+
+        # self.set_device_properties_checkbox = QCheckBox(self)
+        # set_device_properties_label = QLabel("Set properties to cached values when known device is opened:", self)
+        # self.form_layout.addRow(set_device_properties_label,
+        #                         self.set_device_properties_checkbox)
 
         self.use_dutils_checkbox = QCheckBox(self)
         self.use_dutils_label = QLabel("Use tiscamera dutils, if present:", self)
@@ -118,7 +119,7 @@ class OptionsDialog(QDialog):
             self.video_type_combobox.setCurrentText(settings.get_video_type())
         self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
-        self.set_device_properties_checkbox.setChecked(settings.set_properties_on_reopen)
+        # self.set_device_properties_checkbox.setChecked(settings.set_properties_on_reopen)
         self.use_dutils_checkbox.setChecked(settings.use_dutils)
 
     def save_settings(self):
@@ -128,7 +129,7 @@ class OptionsDialog(QDialog):
             self.settings.video_type = self.video_type_combobox.currentText()
         self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
-        self.settings.set_properties_on_reopen = self.set_device_properties_checkbox.isChecked()
+        # self.settings.set_properties_on_reopen = self.set_device_properties_checkbox.isChecked()
         self.settings.use_dutils = self.use_dutils_checkbox.isChecked()
 
     def open_file_dialog(self):
