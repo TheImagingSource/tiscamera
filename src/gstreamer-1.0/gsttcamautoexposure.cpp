@@ -1187,7 +1187,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
-            if (g_value_get_double(value) > tcamautoexposure->gain.max)
+            if (tcamautoexposure->gain.max && (g_value_get_double(value) > tcamautoexposure->gain.max))
             {
                 GST_WARNING("New user value for gain max is bigger that device gain max. Ignoring request.");
                 tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
@@ -1537,6 +1537,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
                 GST_INFO("%f not big enough for change. minimum required is : %f",
                          percentage_new,
                          percentage);
+                return 0;
             }
 
             setter = fmax(fmin(g_ref, self->gain_max), self->gain_min);
