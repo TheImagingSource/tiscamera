@@ -1109,6 +1109,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_CAMERA:
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
+            init_camera_resources(self);
             break;
         case PROP_EXPOSURE_MIN:
 
