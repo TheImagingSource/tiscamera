@@ -57,7 +57,7 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_TOOLS)
 
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "python3-pyqt5 (>= 5.7)")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "python3-pyqt5 (>= 5.5)")
 
 endif (BUILD_TOOLS)
 
