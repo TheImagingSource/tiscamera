@@ -198,6 +198,7 @@ class PropertyDialog(QWidget):
             if tab.get_property_count() > 0:
                 # wrap in scrollarea to ensure accessability
                 area = QScrollArea()
+                area.setWidgetResizable(True)
                 area.setWidget(tab)
                 self.tabs.addTab(area, t)
                 tab.finish_setup()
