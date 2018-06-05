@@ -1153,13 +1153,13 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_GAIN_MIN:
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
-            if (g_value_get_double(value) > tcamautoexposure->gain_max)
+            if (tcamautoexposure->gain_max && (g_value_get_double(value) > tcamautoexposure->gain_max))
             {
                 GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
             }
 
-            if (g_value_get_double(value) > tcamautoexposure->default_gain_values.min)
+            if (tcamautoexposure->default_gain_values.min && (g_value_get_double(value) > tcamautoexposure->default_gain_values.min))
             {
                 GST_WARNING("New user value for gain min is greater than device gain min.");
                 tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
