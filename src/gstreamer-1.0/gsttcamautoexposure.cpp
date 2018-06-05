@@ -1508,6 +1508,11 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
             g_ref = self->gain.value + K_GAIN_SLOW * diff;
         }
 
+        if (g_ref < 0)
+        {
+            g_ref = 0;
+        }
+
         gdouble new_gain = fmax(fmin(g_ref, self->gain_max), self->gain_min);
         double percentage_new = (new_gain / self->gain_max * 100) - (self->gain.value / self->gain_max * 100);
 
