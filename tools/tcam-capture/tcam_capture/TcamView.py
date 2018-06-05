@@ -222,7 +222,7 @@ class TcamView(QWidget):
         pipeline_str = ("tcambin serial={serial} name=bin use-dutils={dutils} "
                         "! video/x-raw,format=BGRx "
                         "! tee name=tee tee. "
-                        "! queue "
+                        "! queue max-size-buffers=2 leaky=downstream "
                         "! videoconvert "
                         "! video/x-raw,format=BGRx "
                         "! appsink name=sink emit-signals=true")
