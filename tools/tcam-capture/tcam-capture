@@ -278,9 +278,10 @@ class TCamCapture(QMainWindow):
 
         # self.format_menu = None
         # self.format_menu_action = None
-        # self.save_image = QAction("Save Image", self)
-        # self.save_image.triggered.connect(self.save_image_action)
-        # self.toolbar.addAction(self.save_image)
+
+        self.save_image = QAction("Save Image", self)
+        self.save_image.triggered.connect(self.save_image_action)
+        self.toolbar.addAction(self.save_image)
 
         self.props_action = QAction("", self)
         self.props_action.setText("Properties")
