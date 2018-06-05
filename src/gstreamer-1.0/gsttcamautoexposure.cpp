@@ -1804,7 +1804,7 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     else
     {
         /* Try swapping gain for exposure */
-        if (self->gain.value > self->gain_min && self->exposure.value < self->exposure_max)
+        if (self->gain.value > (self->gain_min > 0 ? self->gain_min : 1.0) && self->exposure.value < self->exposure_max)
         {
             GST_DEBUG("reducing gain");
             modify_exposure(self, -modify_gain(self, -K_ADJUST));
