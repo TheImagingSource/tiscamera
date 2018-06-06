@@ -59,13 +59,19 @@ class PropertyWidget(QWidget):
         if self.prop.valuetype == "integer":
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
-            self.sld.setRange(self.prop.minval, self.prop.maxval)
+            try:
+                self.sld.setRange(self.prop.minval, self.prop.maxval)
+            except OverflowError:
+                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.sld.setValue(self.prop.value)
             self.sld.valueChanged[int].connect(self.set_property)
             self.layout.addWidget(self.sld)
 
             self.value_box = QSpinBox(self)
-            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            try:
+                self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            except OverflowError:
+                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.value_box.setSingleStep(self.prop.step)
             self.value_box.setValue(self.prop.value)
             self.value_box.valueChanged[int].connect(self.set_property_box)
@@ -74,13 +80,19 @@ class PropertyWidget(QWidget):
         elif self.prop.valuetype == "double":
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
-            self.sld.setRange(self.prop.minval * 1000, self.prop.maxval * 1000)
+            try:
+                self.sld.setRange(self.prop.minval * 1000, self.prop.maxval * 1000)
+            except OverflowError:
+                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.sld.valueChanged[int].connect(self.set_property)
             self.sld.setGeometry(30, 40, 100, 30)
             self.layout.addWidget(self.sld)
 
             self.value_box = QDoubleSpinBox(self)
-            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            try:
+                self.value_box.setRange(self.prop.minval, self.prop.maxval)
+            except OverflowError:
+                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.value_box.setSingleStep(self.prop.step)
             self.value_box.setValue(self.prop.value)
             self.value_box.valueChanged[float].connect(self.set_property_box)
