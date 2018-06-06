@@ -66,6 +66,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.pix.setPixmap(pixmap)
 
         if not self.display_real_image:
+            self.text_item.hide()
             self.scene.removeItem(self.text_item)
             self.display_real_image = True
 
@@ -81,6 +82,10 @@ class TcamScreen(QtWidgets.QGraphicsView):
 
     def wait_for_first_image(self):
 
+        if not self.display_real_image:
+            return
+
+        self.reset_zoom()
         self.display_real_image = False
 
         self.text_item = QGraphicsTextItem()
