@@ -1324,7 +1324,7 @@ static void buffer_destroy_callback (gpointer data)
 
     self->device->sink->requeue_buffer(trans->ptr);
 
-    delete data;
+    delete trans;
 }
 
 
