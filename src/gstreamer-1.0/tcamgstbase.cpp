@@ -534,11 +534,11 @@ uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         }
         else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
-            map[6] == fourcc;
+            map[6] = fourcc;
         }
         else if (tcam_gst_is_bayer16_fourcc(fourcc))
         {
-            map[7] == fourcc;
+            map[7] = fourcc;
         }
         else
         {
