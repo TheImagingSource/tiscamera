@@ -80,7 +80,7 @@ std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
         }
     }
 
-    ret;
+    return ret;
 }
 
 
