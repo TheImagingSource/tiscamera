@@ -61,11 +61,12 @@ static void gst_tcamautofocus_finalize (GObject* object);
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans,
                                                      GstBuffer* buf);
 
+#if 0
 static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
                                            GstPadDirection direction,
                                            GstCaps* caps,
                                            GstCaps* othercaps);
-
+#endif
 
 
 /* tcamprop interface*/
@@ -168,7 +169,7 @@ static guint tcamautofocus_string_to_property_id (const char* name)
 }
 
 
-static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
+static GSList* gst_tcamautofocus_get_property_names (TcamProp* self __attribute__((unused)))
 {
     GSList* names = nullptr;
 
@@ -187,7 +188,7 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self)
 }
 
 
-static gchar* gst_tcamautofocus_get_property_type (TcamProp* self, const gchar* name)
+static gchar* gst_tcamautofocus_get_property_type (TcamProp* self __attribute__((unused)), const gchar* name)
 {
     if (g_strcmp0(name, tcamautofocus_property_id_to_string(PROP_AUTO)) == 0)
     {
@@ -455,24 +456,24 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
 }
 
 
-static GSList* gst_tcamautofocus_get_tcam_menu_entries (TcamProp* self,
-                                                        const gchar* name)
+static GSList* gst_tcamautofocus_get_tcam_menu_entries (TcamProp* self __attribute__((unused)),
+                                                        const gchar* name __attribute__((unused)))
 {
     return nullptr;
 }
 
 
-static GSList* gst_tcamautofocus_get_device_serials (TcamProp* self)
+static GSList* gst_tcamautofocus_get_device_serials (TcamProp* self __attribute__((unused)))
 {
     return FALSE;
 }
 
 
-static gboolean gst_tcamautofocus_get_device_info (TcamProp* self,
-                                                   const char* serial,
-                                                   char** name,
-                                                   char** identifier,
-                                                   char** connection_type)
+static gboolean gst_tcamautofocus_get_device_info (TcamProp* self __attribute__((unused)),
+                                                   const char* serial __attribute__((unused)),
+                                                   char** name __attribute__((unused)),
+                                                   char** identifier __attribute__((unused)),
+                                                   char** connection_type __attribute__((unused)))
 {
     return FALSE;
 }
@@ -767,9 +768,9 @@ void gst_tcamautofocus_finalize (GObject* object)
     G_OBJECT_CLASS (gst_tcamautofocus_parent_class)->finalize (object);
 }
 
-
+#if 0
 static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
-                                           GstPadDirection direction,
+                                           GstPadDirection direction __attribute__((unused)),
                                            GstCaps* incoming,
                                            GstCaps* outgoing)
 {
@@ -844,7 +845,7 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 
     }
 }
-
+#endif
 
 static int clip (int min, int value, int max)
 {
@@ -866,7 +867,6 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     tcam::CaptureDevice* dev;
     g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
 
-    gint64 min = 0;
     gint64 max = 0;
 
     tcam::Property* focus_prop = dev->get_property(TCAM_PROPERTY_FOCUS);
