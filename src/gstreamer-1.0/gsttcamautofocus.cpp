@@ -595,35 +595,35 @@ static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
                                                          "Activate auto focus run",
                                                          "Automatically adjust camera focus",
                                                          FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_LEFT,
                                     g_param_spec_int("left",
                                                      "Left border of the focus region",
                                                      "Coordinate for focus region.",
                                                      0, G_MAXINT, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_TOP,
                                     g_param_spec_int("top",
                                                      "Top border of the focus region",
                                                      "Coordinate for focus region.",
                                                      0, G_MAXINT, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_WIDTH,
                                     g_param_spec_int("width",
                                                      "Width of focus region",
                                                      "Width of the focus region beginning at 'left'",
                                                      0, G_MAXINT, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_HEIGHT,
                                     g_param_spec_int("height",
                                                      "Height of focus region",
                                                      "Height of the focus region beginning at 'top'.",
                                                      0, G_MAXINT, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
 
     GST_DEBUG_CATEGORY_INIT (gst_tcamautofocus_debug_category,
