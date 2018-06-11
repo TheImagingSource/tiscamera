@@ -1026,6 +1026,11 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             break;
         }
+        default:
+        {
+            GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
+            break;
+        }
     }
 
     ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
