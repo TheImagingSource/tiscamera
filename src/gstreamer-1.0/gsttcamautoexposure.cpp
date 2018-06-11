@@ -1282,7 +1282,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    struct tcam_device_property p = {0};
+    struct tcam_device_property p = {};
 
     tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
@@ -1305,7 +1305,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
     }
 
-    p = {0};
+    p = {};
     prop = dev->get_property(TCAM_PROPERTY_GAIN);
 
     if (prop == nullptr)
