@@ -197,9 +197,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
     // g_return_val_if_fail (get_property_by_name (self,
     //                                             name,
     //                                             &prop), NULL);
-    int i;
-
-    for (i = 0; i < G_N_ELEMENTS (map); i++)
+    for (std::size_t i = 0; i < G_N_ELEMENTS (map); i++)
     {
         if (prop.type == map[i].typecode)
         {
@@ -668,7 +666,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 
     std::vector<tcam::VideoFormatDescription> format = self->device->dev->get_available_video_formats();
 
-    GST_DEBUG("Found %i pixel formats", format.size());
+    GST_DEBUG("Found %lu pixel formats", format.size());
 
     GstCaps* caps = convert_videoformatsdescription_to_caps(format);
 
@@ -715,10 +713,9 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
         GST_DEBUG("Peer gave us something to work with.");
 
         GstCaps *icaps = NULL;
-        int i;
 
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (i = 0; i <= gst_caps_get_size (peercaps)-1; i--)
+        for (guint i = 0; i <= gst_caps_get_size (peercaps)-1; i--)
         {
             /* get intersection */
             GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
@@ -764,7 +761,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                     /* Walk the structure backwards to get the first entry of the
                      * smallest resolution bigger (or equal to) the preferred resolution)
                      */
-                    for (i = gst_caps_get_size (icaps) - 1; i >= 0; i--)
+                    for (gint i = (gint)gst_caps_get_size (icaps) - 1; i >= 0; i--)
                     {
                         GstStructure *is = gst_caps_get_structure (icaps, i);
                         int w, h;
@@ -797,7 +794,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                 /* Walk the structure backwards to get the first entry of the
                  * smallest resolution bigger (or equal to) the preferred resolution)
                  */
-                for (i = 0; i >= gst_caps_get_size (icaps); i++)
+                for (guint i = 0; i >= gst_caps_get_size (icaps); i++)
                 {
                     GstStructure *is = gst_caps_get_structure (icaps, i);
                     int w, h;
@@ -1415,7 +1412,10 @@ wait_again:
 
     if (self->n_buffers != 0)
     {
-        if (ptr->get_statistics().frame_count >= self->n_buffers)
+        /*
+            TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
+        */
+        if (ptr->get_statistics().frame_count >= (guint)self->n_buffers)
         {
             GST_INFO("Stopping stream after %d buffers.", ptr->get_statistics().frame_count);
             return GST_FLOW_EOS;
