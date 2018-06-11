@@ -71,15 +71,6 @@ static void gst_tcamwhitebalance_get_property (GObject* object,
 static void gst_tcamwhitebalance_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
-static GstCaps* gst_tcamwhitebalance_transform_caps (GstBaseTransform* trans,
-                                                     GstPadDirection direction,
-                                                     GstCaps* caps);
-
-static void gst_tcamwhitebalance_fixate_caps (GstBaseTransform* base,
-                                              GstPadDirection direction,
-                                              GstCaps* caps,
-                                              GstCaps* othercaps);
-
 static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self);
 
 static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self,
@@ -186,7 +177,7 @@ static guint tcamwhitebalance_string_to_property_id (const char* name)
 
 
 
-static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self)
+static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self __attribute__((unused)))
 {
     GSList* names = nullptr;
 
@@ -207,7 +198,7 @@ static GSList* gst_tcamwhitebalance_get_property_names (TcamProp* self)
 }
 
 
-static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self,
+static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self __attribute__((unused)),
                                                       const gchar* name)
 {
     if (strcmp(name, "whitebalance-red") == 0)
@@ -574,24 +565,24 @@ static gboolean gst_tcamwhitebalance_set_tcam_property (TcamProp* self,
 }
 
 
-static GSList* gst_tcamwhitebalance_get_tcam_menu_entries (TcamProp* self,
-                                                           const gchar* name)
+static GSList* gst_tcamwhitebalance_get_tcam_menu_entries (TcamProp* self __attribute__((unused)),
+                                                           const gchar* name __attribute__((unused)))
 {
     return nullptr;
 }
 
 
-static GSList* gst_tcamwhitebalance_get_device_serials (TcamProp* self)
+static GSList* gst_tcamwhitebalance_get_device_serials (TcamProp* self __attribute__((unused)))
 {
     return nullptr;
 }
 
 
-static gboolean gst_tcamwhitebalance_get_device_info (TcamProp* self,
-                                                      const char* serial,
-                                                      char** name,
-                                                      char** identifier,
-                                                      char** connection_type)
+static gboolean gst_tcamwhitebalance_get_device_info (TcamProp* self __attribute__((unused)),
+                                                      const char* serial __attribute__((unused)),
+                                                      char** name __attribute__((unused)),
+                                                      char** identifier __attribute__((unused)),
+                                                      char** connection_type __attribute__((unused)))
 {
     return FALSE;
 }
