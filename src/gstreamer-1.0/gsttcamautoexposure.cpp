@@ -1744,8 +1744,11 @@ gboolean find_image_values (GstTcamautoexposure* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_size.width), FALSE);
-    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_size.height), FALSE);
+    gint tmp_w, tmp_h;
+    g_return_val_if_fail (gst_structure_get_int (structure, "width", &tmp_w), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "height", &tmp_h), FALSE);
+    self->image_size.width  = tmp_w < 0 ? 0 : tmp_w;
+    self->image_size.height = tmp_h < 0 ? 0 : tmp_h;
 
     if (self->image_region.x1 == 0)
     {
