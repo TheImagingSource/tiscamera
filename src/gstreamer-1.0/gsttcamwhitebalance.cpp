@@ -127,7 +127,7 @@ static void gst_tcamwhitebalance_prop_init (TcamPropInterface* iface)
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamWhitebalance, gst_tcamwhitebalance, GST_TYPE_BASE_TRANSFORM,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcamwhitebalance_prop_init));
+                                                gst_tcamwhitebalance_prop_init))
 
 
 static const char* tcamwhitebalance_property_id_to_string (guint id)

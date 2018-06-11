@@ -103,7 +103,7 @@ static void gst_tcam_src_prop_init (TcamPropInterface* iface)
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_PUSH_SRC,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_src_prop_init));
+                                                gst_tcam_src_prop_init))
 
 
 static gboolean get_property_by_name (GstTcamSrc* self,

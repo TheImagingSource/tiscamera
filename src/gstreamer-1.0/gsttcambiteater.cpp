@@ -31,7 +31,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambiteater_debug_category);
 
 
 #define gst_tcambiteater_parent_class parent_class
-G_DEFINE_TYPE(GstTcamBitEater, gst_tcambiteater, GST_TYPE_BASE_TRANSFORM);
+G_DEFINE_TYPE(GstTcamBitEater, gst_tcambiteater, GST_TYPE_BASE_TRANSFORM)
 
 
 static void gst_tcambiteater_set_property (GObject* object,

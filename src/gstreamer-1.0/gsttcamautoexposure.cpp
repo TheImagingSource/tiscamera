@@ -150,7 +150,7 @@ static void gst_tcamautoexposure_prop_init (TcamPropInterface* iface)
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamautoexposure, gst_tcamautoexposure, GST_TYPE_BASE_TRANSFORM,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcamautoexposure_prop_init));
+                                                gst_tcamautoexposure_prop_init))
 
 
 static const char* tcamautoexposure_property_id_to_string (guint id)

@@ -86,7 +86,7 @@ static void gst_tcam_bin_prop_init (TcamPropInterface* iface)
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_bin_prop_init));
+                                                gst_tcam_bin_prop_init))
 
 
 /**

@@ -118,7 +118,7 @@ static void gst_tcamautofocus_prop_init (TcamPropInterface* iface)
 G_DEFINE_TYPE_WITH_CODE (GstTcamAutoFocus,
                          gst_tcamautofocus,
                          GST_TYPE_BASE_TRANSFORM,
-                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcamautofocus_prop_init));
+                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcamautofocus_prop_init))
 
 
 static const char* tcamautofocus_property_id_to_string (guint id)
