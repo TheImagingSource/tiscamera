@@ -27,6 +27,12 @@
 #include <string>
 #include <cstring>
 
+//
+// Do not error on format warnings. They should happen only in debug statements anyway
+//
+#pragma GCC diagnostic warning "-Wformat"
+
+
 #define gst_tcambin_parent_class parent_class
 
 GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
