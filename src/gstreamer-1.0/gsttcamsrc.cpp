@@ -492,7 +492,6 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 const GValue* value)
 {
-    gboolean ret = TRUE;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
 
     tcam::Property* property = self->device->dev->get_property_by_name(name);
@@ -558,7 +557,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
+static GSList* gst_tcam_src_get_device_serials (TcamProp* self __attribute__((__unused__)))
 {
     std::vector<tcam::DeviceInfo> devices = tcam::get_device_list();
     GSList* ret = NULL;
@@ -574,7 +573,7 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 }
 
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+static gboolean gst_tcam_src_get_device_info (TcamProp* self __attribute__((__unused__)),
                                               const char* serial,
                                               char** name,
                                               char** identifier,
@@ -693,8 +692,6 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
     GstCaps *peercaps = NULL;
     gboolean result = FALSE;
 
-    GstTcamSrc* self = GST_TCAM_SRC(basesrc);
-
     /* first see what is possible on our source pad */
     thiscaps = gst_pad_query_caps (GST_BASE_SRC_PAD (basesrc), NULL);
     GST_DEBUG_OBJECT (basesrc, "caps of src: %" GST_PTR_FORMAT, thiscaps);
@@ -786,7 +783,6 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
             {
                 // ensure that there is no range but a high resolution with adequate framerate
 
-                GstStructure *s = gst_caps_get_structure (peercaps, 0);
                 int best = 0;
                 int twidth, theight;
                 int width = G_MAXINT, height = G_MAXINT;
@@ -798,7 +794,6 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                 {
                     GstStructure *is = gst_caps_get_structure (icaps, i);
                     int w, h;
-                    int max_width;
 
                     if (gst_structure_get_int (is, "width", &w)
                         && gst_structure_get_int (is, "height", &h))
@@ -889,7 +884,7 @@ no_nego_needed:
 
 
 static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
-                                       GstCaps* filter)
+                                       GstCaps* filter __attribute__((unused)))
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
     GstCaps* caps;
@@ -1035,7 +1030,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 }
 
 
-static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* info, void* user_data)
+static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* info __attribute__((unused)), void* user_data)
 {
     GstTcamSrc* self = (GstTcamSrc*) user_data;
 
@@ -1331,8 +1326,6 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
     GstTcamSrc* self = GST_TCAM_SRC(data);
     std::unique_lock<std::mutex> lck(self->mtx);
 
-    auto ptr = buffer->get_data();
-
     self->device->queue.push(buffer);
 
     lck.unlock();
@@ -1343,8 +1336,6 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer
 static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
                                           GstBuffer** buffer)
 {
-    guint64 timestamp_ns = 0;
-
     GstTcamSrc* self = GST_TCAM_SRC (push_src);
 
     std::unique_lock<std::mutex> lck(self->mtx);
