@@ -120,7 +120,7 @@ namespace device_interface
 		{
 			gencp_.write_u32( MEM_ADDRESS_ERASE, address );
 		}
-		catch( std::exception )
+		catch( std::exception const &e)
 		{
 			// If this exception occurs, we might have run into a timeout because of a slow flash chip
 			// Since we cannot fix the firmware for this (this is a firmware upgrade in progress),

@@ -350,7 +350,7 @@ void setCamera (const std::vector<std::string>& args)
         {
             writeChanges(camera, ip, subnet, gateway);
         }
-        catch (std::runtime_error run)
+        catch (std::runtime_error const &run)
         {
             throw run;
         }
