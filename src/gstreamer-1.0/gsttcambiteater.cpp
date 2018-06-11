@@ -122,9 +122,9 @@ static void gst_tcambiteater_init (GstTcamBitEater* self)
 
 
 /* No properties are implemented, so only a warning is produced */
-static void gst_tcambiteater_set_property (GObject* object,
+static void gst_tcambiteater_set_property (GObject* object __attribute__((unused)),
                                            guint prop_id,
-                                           const GValue* value,
+                                           const GValue* value __attribute__((unused)),
                                            GParamSpec* pspec)
 {
     switch (prop_id)
@@ -136,9 +136,9 @@ static void gst_tcambiteater_set_property (GObject* object,
 }
 
 
-static void gst_tcambiteater_get_property (GObject* object,
+static void gst_tcambiteater_get_property (GObject* object __attribute__((unused)),
                                            guint prop_id,
-                                           GValue* value,
+                                           GValue* value __attribute__((unused)),
                                            GParamSpec* pspec)
 {
 
@@ -172,8 +172,9 @@ static gboolean gst_tcambiteater_set_caps (GstBaseTransform* base,
 }
 
 
-static void gst_tcambiteater_reset (GstTcamBitEater* self)
-{}
+static void gst_tcambiteater_reset (GstTcamBitEater* self __attribute__((unused)))
+{
+}
 
 
 static void gst_tcambiteater_finalize (GObject* object)
@@ -182,7 +183,7 @@ static void gst_tcambiteater_finalize (GObject* object)
 }
 
 
-static GstCaps* gst_tcambiteater_transform_caps (GstBaseTransform* base,
+static GstCaps* gst_tcambiteater_transform_caps (GstBaseTransform* base __attribute__((unused)),
                                                  GstPadDirection direction,
                                                  GstCaps* caps,
                                                  GstCaps* filter)
@@ -234,8 +235,6 @@ static gboolean gst_tcambiteater_get_unit_size (GstBaseTransform* base,
     if (gst_structure_get_int(structure, "width", &width) &&
         gst_structure_get_int(structure, "height", &height))
     {
-        const char* name = gst_structure_get_name(structure);
-
         auto type = gst_structure_get_field_type(structure, "format");
         const char* format = nullptr;
 
