@@ -180,7 +180,7 @@ inline int get_bits_per_pixel (uint32_t fcc)
 
 		unsigned int	bytes_per_line;     // this is the stride to get from one line to the next, this may be > then dim_x * get_bits_per_pixel( type )
 
-		unsigned int	buffer_length;      // this is the length of the buffer to be allocated for the full image
+		std::size_t	    buffer_length;      // this is the length of the buffer to be allocated for the full image
 	};
 
 	struct img_descriptor
@@ -193,7 +193,7 @@ inline int get_bits_per_pixel (uint32_t fcc)
                                 // for planar formats this contains the count of bytes to get from one line in one plane to the next line in the same
                                 // note that this can be negative
 
-        unsigned int	data_length;    // the actual data length valid in this buffer. this is in most cases calc_img_size( type, dim_x, dim_y ), but may be smaller for e.g. compressed formats
+        std::size_t	    data_length;    // the actual data length valid in this buffer. this is in most cases calc_img_size( type, dim_x, dim_y ), but may be smaller for e.g. compressed formats
 
         byte*			pData;  // this is the pointer of the 'first' byte of the image. this can be the first byte of the last line if pitch is negative
 	};

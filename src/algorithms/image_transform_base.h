@@ -18,6 +18,7 @@
 #define IMAGE_TRANSFORM_BASE_H_INC_
 
 #include <stdint.h>
+#include <cstddef>
 
 #pragma once
 
@@ -108,7 +109,7 @@ typedef struct
 typedef struct
 {
     byte*           pData;
-    unsigned int    length;
+    std::size_t     length;
 
     uint32_t        type;   // this must be at least 32 bit wide
 
