@@ -191,7 +191,7 @@ static GstCaps* gst_tcambiteater_transform_caps (GstBaseTransform* base __attrib
     GstCaps* res_caps = gst_caps_copy(caps);
     size_t caps_size = gst_caps_get_size(res_caps);
 
-    for (int i = 0; i < caps_size; i++)
+    for (guint i = 0; i < caps_size; i++)
     {
         GstStructure* structure = gst_caps_get_structure (res_caps, i);
         if (direction == GST_PAD_SINK)
