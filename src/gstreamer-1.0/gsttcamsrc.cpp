@@ -985,24 +985,24 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     caps_string = tcam_fourcc_to_gst_1_0_caps_string(fourcc);
     if (caps_string != NULL)
     {
-        GstStructure *structure;
-        GstCaps *caps;
+        GstStructure *tmp_struct;
+        GstCaps *tmp_caps;
 
-        caps = gst_caps_new_empty ();
-        structure = gst_structure_from_string (caps_string, NULL);
-        gst_structure_set (structure,
+        tmp_caps = gst_caps_new_empty ();
+        tmp_struct = gst_structure_from_string (caps_string, NULL);
+        gst_structure_set (tmp_struct,
                            "width", G_TYPE_INT, width,
                            "height", G_TYPE_INT, height,
                            NULL);
 
         if (frame_rate != NULL)
         {
-            gst_structure_set_value (structure, "framerate", frame_rate);
+            gst_structure_set_value (tmp_struct, "framerate", frame_rate);
         }
 
-        gst_caps_append_structure (caps, structure);
+        gst_caps_append_structure (tmp_caps, tmp_struct);
 
-        self->fixed_caps = caps;
+        self->fixed_caps = tmp_caps;
     }
     else
     {
