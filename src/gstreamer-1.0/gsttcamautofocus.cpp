@@ -918,8 +918,11 @@ gboolean find_image_values (GstTcamAutoFocus* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    g_return_val_if_fail (gst_structure_get_int (structure, "width", &self->image_width), FALSE);
-    g_return_val_if_fail (gst_structure_get_int (structure, "height", &self->image_height), FALSE);
+    gint tmp_w, tmp_h;
+    g_return_val_if_fail (gst_structure_get_int (structure, "width", &tmp_w), FALSE);
+    g_return_val_if_fail (gst_structure_get_int (structure, "height", &tmp_h), FALSE);
+    self->image_width = tmp_w < 0 ? 0 : tmp_w;
+    self->image_height = tmp_h < 0 ? 0 : tmp_h;
 
     if (self->roi_width == 0)
     {
@@ -931,7 +934,10 @@ gboolean find_image_values (GstTcamAutoFocus* self)
         self->roi_height = self->image_height;
     }
 
-    gst_structure_get_fraction(structure, "framerate", &self->framerate_numerator, &self->framerate_denominator);
+    gint tmp_n, tmp_d;
+    gst_structure_get_fraction(structure, "framerate", &tmp_n, &tmp_d);
+    self->framerate_numerator = tmp_n < 0 ? 0 : tmp_n;
+    self->framerate_denominator = tmp_d < 0 ? 0 : tmp_d;
 
     return TRUE;
 }
