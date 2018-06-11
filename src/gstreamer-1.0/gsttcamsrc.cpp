@@ -1064,7 +1064,7 @@ void send_log_to_bus (void* user_data,
     va_copy(tmp_args, args);
 
     size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
-    char m[size];
+    char *m = new char[size];
 
     vsnprintf(m, size, message, args);
 
@@ -1089,7 +1089,7 @@ void send_log_to_bus (void* user_data,
 
     gst_element_post_message(GST_ELEMENT(self), msg);
     g_error_free(err);
-
+    delete[] m;
 }
 
 
