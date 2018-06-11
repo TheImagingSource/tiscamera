@@ -457,8 +457,6 @@ enum
     PROP_USE_DUTILS
 };
 
-static GstStaticCaps raw_caps = GST_STATIC_CAPS("ANY");
-
 static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
                                                                    GST_PAD_SRC,
                                                                    GST_PAD_ALWAYS,
@@ -865,7 +863,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 }
 
 
-void set_target_pad(GstTcamBin* self, GstPad* pad)
+void set_target_pad(GstTcamBin* self, GstPad* pad __attribute__((unused)))
 {
 
     gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
@@ -1070,11 +1068,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 }
 
 
-static void gst_tcambin_dispose (GObject* object)
-{
-}
-
-
 static void gst_tcambin_get_property (GObject* object,
                                       guint prop_id,
                                       GValue* value,
@@ -1148,12 +1141,6 @@ static void gst_tcambin_set_property (GObject* object,
             break;
         }
     }
-}
-
-
-static void gst_tcambin_src_reset (GstTcamBin* self)
-{
-    GST_DEBUG("reset");
 }
 
 
