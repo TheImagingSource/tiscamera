@@ -445,7 +445,7 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
         return ret;
     }
 
-    for (int i = 0; i < gst_caps_get_size(caps); ++i)
+    for (guint i = 0; i < gst_caps_get_size(caps); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(caps, i);
         std::string format_string;
@@ -582,7 +582,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         return nullptr;
     }
 
-    for (int i = 0; i < gst_caps_get_size(incoming); ++i)
+    for (guint i = 0; i < gst_caps_get_size(incoming); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(incoming, i);
 
@@ -772,7 +772,7 @@ std::vector<std::string> index_caps_formats (GstCaps* caps)
 {
     std::vector<std::string> ret;
 
-    for (int i = 0; i < gst_caps_get_size(caps); ++i)
+    for (guint i = 0; i < gst_caps_get_size(caps); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(caps, i);
 
@@ -1270,8 +1270,11 @@ bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* for
     format->fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
                                                           gst_structure_get_string(struc, "format"));
 
-    gst_structure_get_int(struc, "width", &format->width);
-    gst_structure_get_int(struc, "height", &format->height);
+    gint tmp_w, tmp_h;
+    gst_structure_get_int(struc, "width", &tmp_w);
+    gst_structure_get_int(struc, "height", &tmp_h);
+    format->width = tmp_w < 0 ? 0 : tmp_w;
+    format->height = tmp_h < 0 ? 0 : tmp_h;
 
     int num;
     int den;
