@@ -37,7 +37,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/algorithms/)
 include_directories(${CMAKE_SOURCE_DIR}/src/gobject)
 
-set(cflags " -w -Wall -Wextra -pedantic -Wundef -Wshadow")
+set(cflags " -Wall -Wextra -pedantic -Wundef -Wshadow")
 set(lflags "-fPIC -Wl,--gc-sections -ffunction-sections -fdata-sections")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ${lflags} -fpermissive")
