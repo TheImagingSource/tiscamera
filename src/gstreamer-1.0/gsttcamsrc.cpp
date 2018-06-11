@@ -1375,7 +1375,7 @@ wait_again:
     trans->self = self;
     trans->ptr = ptr;
 
-    *buffer = gst_buffer_new_wrapped_full(0, ptr->get_data(), ptr->get_buffer_size(),
+    *buffer = gst_buffer_new_wrapped_full(static_cast<GstMemoryFlags>(0), ptr->get_data(), ptr->get_buffer_size(),
                                           0, ptr->get_image_size(), trans, buffer_destroy_callback);
 
     self->device->queue.pop(); // remove buffer from queue
@@ -1635,14 +1635,14 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                               "Camera serial",
                               "Serial of the camera",
                               NULL,
-                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+                              static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
          PROP_DEVICE,
          g_param_spec_pointer ("camera",
                                "Camera Object",
                                "Camera instance to retrieve additional information",
-                               G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+                               static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
          PROP_NUM_BUFFERS,
@@ -1650,7 +1650,7 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                            "Number of Buffers",
                            "Number of buffers to send before ending pipeline",
                            0, G_MAXINT, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
-                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
          PROP_DO_TIMESTAMP,
@@ -1658,7 +1658,7 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                "Do timestamp",
                                "Apply current stream time to buffers",
                                true,
-                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT));
+                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
     GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
     gst_element_class_set_details_simple (element_class,
