@@ -985,28 +985,28 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            "Auto Exposure",
                                                            "Automatically adjust exposure",
                                                            TRUE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_GAIN,
                                      g_param_spec_boolean ("auto-gain",
                                                            "Auto Gain",
                                                            "Automatically adjust gain",
                                                            TRUE,
-                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
                                      g_param_spec_int ("exposure-max",
                                                        "Exposure Maximum",
                                                        "Maximum value exposure can take",
                                                        0, G_MAXINT, G_MAXINT,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                       static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MIN,
                                      g_param_spec_int ("exposure-min",
                                                        "Exposure Minimum",
                                                        "Minimum value exposure can take",
                                                        0, G_MAXINT, 0,
-                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                       static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MAX,
@@ -1014,28 +1014,28 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                           "Gain Maximum",
                                                           "Maximum value gain can take",
                                                           0.0, G_MAXDOUBLE, G_MAXDOUBLE,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
                                      PROP_GAIN_MIN,
                                      g_param_spec_double ("gain-min",
                                                           "Gain Minimum",
                                                           "Minimum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
                                      PROP_BRIGHTNESS_REFERENCE,
                                      g_param_spec_int("brightness-reference",
                                                       "Brightness Reference",
                                                       "Ideal average brightness of buffer",
                                                       0, 255, 128,
-                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                      static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_LEFT,
                                     g_param_spec_int("left",
                                                       "Left boundary of ROI",
                                                       "Left boundary of the region of interest",
                                                       0, G_MAXINT, 0,
-                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+                                                      static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_TOP,
@@ -1043,7 +1043,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                       "Top boundary of ROI",
                                                       "Top boundary of the region of interest",
                                                       0, G_MAXINT, 0,
-                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+                                                      static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_WIDTH,
@@ -1051,7 +1051,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                       "Width of ROI starting at 'left'",
                                                       "Width of the region of interest",
                                                       0, G_MAXINT, 0,
-                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+                                                      static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
     g_object_class_install_property(gobject_class,
                                     PROP_ROI_HEIGHT,
@@ -1059,7 +1059,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                       "Lower, right boundary starting at 'top'",
                                                       "Height of the region of interest",
                                                       0, G_MAXINT, 0,
-                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT)) ;
+                                                      static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 
     g_object_class_install_property (gobject_class,
                                      PROP_CAMERA,
@@ -1067,7 +1067,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                           "camera gst element",
                                                           "Gstreamer element that shall be manipulated",
                                                           GST_TYPE_ELEMENT,
-                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 }
 
 static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
