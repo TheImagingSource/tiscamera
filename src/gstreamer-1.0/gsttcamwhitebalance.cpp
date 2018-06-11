@@ -679,7 +679,7 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass* klass)
 
 static void init_wb_values (GstTcamWhitebalance* self)
 {
-    self->rgb = (rgb_tripel){WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
+    self->rgb = {WB_IDENTITY, WB_IDENTITY, WB_IDENTITY};
     self->red = WB_IDENTITY;
     self->green = WB_IDENTITY;
     self->blue = WB_IDENTITY;
