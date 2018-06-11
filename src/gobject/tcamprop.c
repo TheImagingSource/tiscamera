@@ -69,7 +69,7 @@ GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
 const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name)
 {
     TcamPropInterface* iface;
-    gchar* ret;
+    gchar* ret = NULL;
 
     g_return_val_if_fail (self != NULL, NULL);
     g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
@@ -182,7 +182,7 @@ gboolean tcam_prop_set_tcam_property (TcamProp* self,
                                       const GValue* value)
 {
     TcamPropInterface *iface;
-    gboolean ret;
+    gboolean ret = FALSE;
 
     g_return_val_if_fail (self != NULL, FALSE);
     g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
