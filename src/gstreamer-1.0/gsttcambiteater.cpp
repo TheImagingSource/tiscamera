@@ -20,6 +20,13 @@
 #include "tcamgstbase.h"
 #include "tcamgststrings.h"
 
+
+//
+// Do not error on format warnings. They should happen only in debug statements anyway
+//
+#pragma GCC diagnostic warning "-Wformat"
+
+
 enum
 {
     PROP_0,
