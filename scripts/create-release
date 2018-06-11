@@ -148,6 +148,27 @@ class Version():
         self.patch = patch
         self.rest = rest
 
+    def __lt__(self, other):
+        """
+        Comparison operator
+        Returns True when self is smaller than other
+        """
+        try:
+            if self.major < other.major:
+                return True
+            if self.minor < other.minor and self.major == other.major:
+                return True
+            if (self.patch < other.patch and
+                    self.minor == other.minor and
+                    self.major == other.major):
+                return True
+
+            # TODO: how to handle self.rest
+        except AttributeError:
+            return NotImplementedError
+
+        return False
+
     def __repr__(self):
         return self.__as_string(self.major, self.minor, self.patch, self.rest)
 
@@ -189,7 +210,7 @@ class Version():
         elif rel_type == ReleaseType.PATCH:
             patch += 1
         else:
-            print("WHAT")
+            print("Custom release appendices are currently not implemented.")
 
         return Version(major,
                        minor,
@@ -248,7 +269,25 @@ class Release():
 
     def find_last_tag(self):
 
-        self.last_tag = "v-tiscamera-0.9.1"
+        tags = self.repo.tags
+
+        for tag in tags:
+            print(tag)
+
+            if "v-tiscamera-" in str(tag):
+                n = re.findall('\d+', str(tag))
+
+                if len(n) != 3:
+                    print("Could not interpret tag '{}'. The version numbers do not seem to be in major.minor.patch format.".format(tag))
+                    continue
+
+                vers = Version(int(n[0]), int(n[1]), int(n[2]), "")
+
+                if not self.last_version or vers > self.last_version:
+                    self.last_tag = str(tag)
+                    self.last_version = vers
+
+                # TODO extract rest string
 
         if not self.last_tag:
             print("ERROR! Unable to determine last tag")
@@ -258,9 +297,9 @@ class Release():
 
         """
 
-        self.last_version = "0.9.2"
-
-        return Version.from_string(self.last_version)
+        if self.last_version is str:
+            return Version.from_string(self.last_version)
+        return self.last_version
 
     def create_future_tag(self):
         """
@@ -295,10 +334,11 @@ class Release():
         # This regex matches for an Unreleased section and tries
         # to determine if non whitespace text exists between that header
         # and the one of the previous release
-        regex_str = "## \[Unreleased\].*\S.*## \[{}".format(self.last_version)
+        regex_str = r"## \[Unreleased\].*\S.*## \[{}".format(self.last_version)
         res = None
         with open(filename, 'r') as myfile:
-            res = re.findall(regex_str, myfile.read, re.multiline)
+            print(re.__file__)
+            res = re.findall(regex_str, myfile.read(), re.MULTILINE)
 
         if len(res) == 1:
             return True
@@ -442,7 +482,8 @@ class Release():
         """
 
         changelog_str = "## [Unreleased]"
-        changelog_repl = "## [Unreleased]\n\n## [{}] - {}".format(self.future_version, date.today())
+        changelog_repl = "## [Unreleased]\n\n## [{}] - {}".format(self.future_version,
+                                                                  date.today())
 
         if self.dry_run:
             print("Changing in CHANGELOG.md:")
@@ -455,7 +496,11 @@ class Release():
                     changelog_repl)
 
         version_str = "set\(TCAM_VERSION_MAJOR \d+\)\s*set\(TCAM_VERSION_MINOR \d+\)\s*set\(TCAM_VERSION_PATCH \d+\)"
-        version_repl = "set(TCAM_VERSION_MAJOR 99)\nset(TCAM_VERSION_MINOR 99)\nset(TCAM_VERSION_PATCH 99)"
+        version_repl = ("set(TCAM_VERSION_MAJOR {})\n"
+                        "set(TCAM_VERSION_MINOR {})\n"
+                        "set(TCAM_VERSION_PATCH {})").format(self.future_version.major,
+                                                             self.future_version.minor,
+                                                             self.future_version.patch)
 
         if self.dry_run:
             print("Changing in version.cmake:")
