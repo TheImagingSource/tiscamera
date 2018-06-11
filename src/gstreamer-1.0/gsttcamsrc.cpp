@@ -34,6 +34,12 @@
 #include <algorithm>
 
 
+//
+// Do not error on format warnings. They should happen only in debug statements anyway
+//
+#pragma GCC diagnostic warning "-Wformat"
+
+
 #define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10
 
 GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
