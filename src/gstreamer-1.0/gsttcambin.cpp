@@ -829,9 +829,8 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
                 std::string tmp_format_string;
                 GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
 
-                GstStructure* struc = gst_caps_get_structure(tmp, 0);
-
-                gst_structure_set_value(s, "format", gst_structure_get_value(struc, "format"));
+                GstStructure* tmp_struc = gst_caps_get_structure(tmp, 0);
+                gst_structure_set_value(s, "format", gst_structure_get_value(tmp_struc, "format"));
 
                 gst_structure_set_value(s, "width", width);
                 gst_structure_set_value(s, "height", height);
