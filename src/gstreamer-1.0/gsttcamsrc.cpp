@@ -1519,8 +1519,6 @@ static void gst_tcam_src_set_property (GObject* object,
                 }
                 else
                 {
-                    const char* tmp = g_value_get_string(value);
-
                     self->device_serial = g_value_get_string(value);
                 }
 
