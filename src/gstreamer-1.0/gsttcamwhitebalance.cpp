@@ -638,42 +638,42 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass* klass)
                                                      "Red",
                                                      "Value for red",
                                                      0, 255, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_GAIN_GREEN,
                                     g_param_spec_int("green",
                                                      "Green",
                                                      "Value for red",
                                                      0, 255, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_GAIN_BLUE,
                                     g_param_spec_int("blue",
                                                      "Blue",
                                                      "Value for blue",
                                                      0, 255, 0,
-                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                     static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_AUTO_ENABLED,
                                     g_param_spec_boolean("auto",
                                                          "Auto Value Adjustment",
                                                          "Automatically adjust white balance values",
                                                          TRUE,
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_CAMERA_WB,
                                     g_param_spec_boolean("camera-whitebalance",
                                                          "Device whitebalance settings",
                                                          "Adjust whitebalance values in the camera",
                                                          FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(gobject_class,
                                     PROP_WHITEBALANCE_ENABLED,
                                     g_param_spec_boolean("module-enabled",
                                                          "Enable/Disable White Balance Module",
                                                          "Disable entire module",
                                                          TRUE,
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
 }
 
 
