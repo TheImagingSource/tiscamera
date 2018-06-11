@@ -138,6 +138,9 @@ void tcam_logging (const char* module,
 /*
   Convience wrapper macro
 */
+
+#pragma GCC system_header
+
 #define tcam_log(level, message, ...) (tcam_logging(level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
 
 #define tcam__log(module, level, message, ...) (tcam_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
