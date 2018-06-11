@@ -366,7 +366,6 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 const GValue* value)
 {
-    gboolean ret = FALSE;
     GstTcamBin* self = GST_TCAMBIN(iface);
 
     if (GST_TCAMBIN(self)->src == nullptr)
@@ -827,8 +826,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                 GstStructure* s = gst_structure_new("video/x-raw", NULL);
 
-                GValue format = {};
-
                 std::string tmp_format_string;
                 GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
 
@@ -1071,7 +1068,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
 static void gst_tcambin_dispose (GObject* object)
 {
-    GstTcamBin* self = GST_TCAMBIN(object);
 }
 
 
@@ -1154,9 +1150,6 @@ static void gst_tcambin_set_property (GObject* object,
 static void gst_tcambin_src_reset (GstTcamBin* self)
 {
     GST_DEBUG("reset");
-    GstPad* targetpad;
-
-    GstTcamBin* src = self;
 }
 
 
