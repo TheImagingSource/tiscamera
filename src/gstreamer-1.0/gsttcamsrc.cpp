@@ -784,7 +784,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                 // ensure that there is no range but a high resolution with adequate framerate
 
                 int best = 0;
-                int twidth, theight;
+                int twidth = 0, theight = 0;
                 int width = G_MAXINT, height = G_MAXINT;
 
                 /* Walk the structure backwards to get the first entry of the
