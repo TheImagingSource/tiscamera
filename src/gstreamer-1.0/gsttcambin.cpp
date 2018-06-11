@@ -810,7 +810,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
     GstCaps* to_remove = gst_caps_new_empty();
 
-    for (int i = 0; i < gst_caps_get_size(all_caps); ++i)
+    for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(all_caps, i);
 
