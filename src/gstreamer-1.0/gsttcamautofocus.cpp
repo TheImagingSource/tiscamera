@@ -879,9 +879,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
 
     GstMapInfo info = {};
-    gst_buffer_make_writable(buf);
-
-    gst_buffer_map(buf, &info, GST_MAP_WRITE);
+    gst_buffer_map(buf, &info, GST_MAP_READ);
 
     img_descriptor img =
         {
