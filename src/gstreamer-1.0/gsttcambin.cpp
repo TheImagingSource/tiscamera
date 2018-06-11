@@ -1012,7 +1012,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
              * the selected caps, no matter what.
              */
 
-            const gchar* caps_info_string = g_strdup_printf("Working with src caps: %s",
+            gchar* caps_info_string = g_strdup_printf("Working with src caps: %s",
                                                             gst_caps_to_string(self->src_caps));
 
             GstMessage* msg = gst_message_new_info(GST_OBJECT(element),
