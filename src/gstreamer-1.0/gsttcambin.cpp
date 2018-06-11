@@ -1222,7 +1222,7 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                                         "Camera serial",
                                                         "Serial of the camera that shall be used",
                                                         "",
-                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+                                                        static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
 
     g_object_class_install_property(object_class,
@@ -1231,14 +1231,15 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                                         "Device Caps",
                                                         "GstCaps the tcamsrc shall use",
                                                         "",
-                                                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+                                                        static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
    g_object_class_install_property(object_class,
                                     PROP_USE_DUTILS,
                                     g_param_spec_boolean("use-dutils",
                                                         "Allow usage of dutils element",
                                                         "",
-                                                        TRUE, G_PARAM_READWRITE));
+                                                        TRUE,
+                                                        static_cast<GParamFlags>(G_PARAM_READWRITE)));
 
 
     gst_element_class_add_pad_template (element_class,
