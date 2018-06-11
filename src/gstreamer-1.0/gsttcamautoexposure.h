@@ -68,8 +68,6 @@ typedef unsigned char byte;
 static const guint dist_mid = 100;
 static const gdouble steps_to_double_brightness = 30.0;
 
-static const char* CAMERASRC_TCAM = "GstTcam";
-
 
 typedef struct GstTcamautoexposure
 {

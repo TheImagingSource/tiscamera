@@ -58,9 +58,6 @@ static void gst_tcamautoexposure_get_property (GObject* object,
 static void gst_tcamautoexposure_finalize (GObject* object);
 
 
-static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
-                                                               GstStateChange trans);
-
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
                                                         GstBuffer* buf);
 
@@ -98,11 +95,6 @@ static void gst_tcamautoexposure_get_property (GObject* object,
 static void gst_tcamautoexposure_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
-
-static void gst_tcamautoexposure_fixate_caps (GstBaseTransform* base,
-                                              GstPadDirection direction,
-                                              GstCaps* caps,
-                                              GstCaps* othercaps);
 
 static GSList* gst_tcamautoexposure_get_property_names(TcamProp* self);
 
@@ -261,7 +253,7 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
 
 
 
-static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
+static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self __attribute__((unused)))
 {
     GSList* names = nullptr;
 
@@ -292,7 +284,7 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 }
 
 
-static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self,
+static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self __attribute__((unused)),
                                                       const gchar* name)
 {
     if (name == nullptr)
@@ -925,24 +917,24 @@ static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
     return TRUE;
 }
 
-static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self,
-                                                           const gchar* name)
+static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self __attribute__((unused)),
+                                                           const gchar* name __attribute__((unused)))
 {
     return nullptr;
 }
 
 
-static GSList* gst_tcamautoexposure_get_device_serials (TcamProp* self)
+static GSList* gst_tcamautoexposure_get_device_serials (TcamProp* self __attribute__((unused)))
 {
     return nullptr;
 }
 
 
-static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self,
-                                                      const char* serial,
-                                                      char** name,
-                                                      char** identifier,
-                                                      char** connection_type)
+static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self __attribute__((unused)),
+                                                      const char* serial __attribute__((unused)),
+                                                      char** name __attribute__((unused)),
+                                                      char** identifier __attribute__((unused)),
+                                                      char** connection_type __attribute__((unused)))
 {
     return FALSE;
 }
@@ -986,7 +978,6 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
-    //((GstElementClass*) klass)->change_state = gst_tcamautoexposure_change_state;
 
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
@@ -1287,9 +1278,6 @@ void gst_tcamautoexposure_finalize (GObject* object)
 
 static void init_camera_resources (GstTcamautoexposure* self)
 {
-    /* retrieve the element name e.g. GstAravis or GstV4l2Src*/
-    const char* element_name = g_type_name(gst_element_factory_get_element_type (gst_element_get_factory(self->camera_src)));
-
     tcam::CaptureDevice* dev = NULL;
 
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
@@ -1369,66 +1357,6 @@ static void init_camera_resources (GstTcamautoexposure* self)
     GST_INFO("Exposure boundaries are %f %d", self->exposure.min, self->exposure_max);
 
     GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
-}
-
-
-
-static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
-                                                               GstStateChange trans)
-{
-    GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
-
-    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(element);
-
-    switch(trans)
-    {
-        case GST_STATE_CHANGE_NULL_TO_READY:
-        {
-            break;
-        }
-        case GST_STATE_CHANGE_READY_TO_PAUSED:
-        {
-
-            if (self->camera_src == NULL)
-            {
-                self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
-                if (self->camera_src == nullptr)
-                {
-                    return GST_STATE_CHANGE_FAILURE;
-                }
-            }
-            init_camera_resources(self);
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    ret = GST_ELEMENT_CLASS(element)->change_state(element, trans);
-    if (ret == GST_STATE_CHANGE_FAILURE)
-    {
-        return ret;
-    }
-
-    switch (trans)
-    {
-        case GST_STATE_CHANGE_PAUSED_TO_READY:
-        {
-            break;
-        }
-        case GST_STATE_CHANGE_READY_TO_NULL:
-        {
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-
-    return ret;
 }
 
 
