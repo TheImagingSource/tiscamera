@@ -648,7 +648,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     int den;
     gst_structure_get_fraction(s, "framerate", &num, &den);
 
-    GValue vh = {};
+    GValue vh = G_VALUE_INIT;
 
     g_value_init(&vh, G_TYPE_INT);
     g_value_set_int(&vh, h);
@@ -1060,7 +1060,7 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
     std::vector<double> framerates = format.get_frame_rates(res);
     int framerate_count = framerates.size();
 
-    GValue fps_list = {0};
+    GValue fps_list = G_VALUE_INIT;
     g_value_init(&fps_list, GST_TYPE_LIST);
 
     for (int f = 0; f < framerate_count; f++)
@@ -1071,7 +1071,7 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
                                     &frame_rate_numerator,
                                     &frame_rate_denominator);
 
-        GValue fraction = {0};
+        GValue fraction = G_VALUE_INIT;
         g_value_init(&fraction, GST_TYPE_FRACTION);
         gst_value_set_fraction(&fraction, frame_rate_numerator, frame_rate_denominator);
         gst_value_list_append_value(&fps_list, &fraction);
@@ -1177,11 +1177,11 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
                 // finally also add the range to allow unusual settings like 1920x96@90fps
                 GstStructure* structure = gst_structure_from_string (caps_string, NULL);
 
-                GValue w = {};
+                GValue w = G_VALUE_INIT;
                 g_value_init(&w, GST_TYPE_INT_RANGE);
                 gst_value_set_int_range(&w, min_width, max_width);
 
-                GValue h = {};
+                GValue h = G_VALUE_INIT;
                 g_value_init(&h, GST_TYPE_INT_RANGE);
                 gst_value_set_int_range(&h, min_height, max_height);
 
@@ -1204,7 +1204,7 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
                                             &fps_max_num,
                                             &fps_max_den);
 
-                GValue f = {};
+                GValue f = G_VALUE_INIT;
                 g_value_init(&f, GST_TYPE_FRACTION_RANGE);
 
                 gst_value_set_fraction_range_full(&f,
