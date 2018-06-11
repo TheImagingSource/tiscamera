@@ -503,8 +503,6 @@ uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
     // since our key are associated in the way we prefer
     std::map<int, uint32_t> map;
 
-    uint32_t best_result = 0;
-
     for (const auto& fourcc : vec)
     {
         if (tcam_gst_is_fourcc_bayer(fourcc))
