@@ -56,17 +56,18 @@ private:
 
     std::vector<std::string> interface_list;
 
-    bool continue_loop;
+    bool continue_loop = true;
     std::thread work_thread;
     std::mutex mtx;
     std::mutex real_mutex;
     std::condition_variable cv;
 
     // memory sharing keys
-    int shmid;
+    int shmid = 0;
     key_t shmkey;
-    void* data;
 
     key_t semaphore_key;
-    int semaphore_id;
+    int semaphore_id = 0;
+
+    tcam::semaphore     semaphore_id;
 };

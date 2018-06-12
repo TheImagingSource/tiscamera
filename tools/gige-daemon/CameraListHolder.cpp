@@ -38,7 +38,7 @@ using namespace tis;
 
 
 CameraListHolder::CameraListHolder ()
-    : continue_loop(true), data(nullptr)
+    : continue_loop(true)
 {
     // to understand shared memory use this guide:
     // http://beej.us/guide/bgipc/output/html/multipage/shm.html
@@ -56,7 +56,7 @@ CameraListHolder::CameraListHolder ()
     }
 
     semaphore_key = ftok("/tmp/tcam-gige-semaphore", 'S');
-    semaphore_id = tcam::semaphore_create(semaphore_key);
+    semaphore_id = tcam::semaphore::create(semaphore_key);
 
     work_thread = std::thread(&CameraListHolder::index_loop, this);
 }
@@ -88,26 +88,23 @@ CameraListHolder& CameraListHolder::get_instance ()
 }
 
 
-std::vector<DeviceInfo> CameraListHolder::get_camera_list () const
+std::vector<DeviceInfo> CameraListHolder::get_camera_list ()
 {
-    tcam::semaphore_lock(semaphore_id);
+    std::lock_guard<semaphore> lck( semaphore_id );
+
     struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
-        tcam::semaphore_unlock(semaphore_id);
-
         return std::vector<DeviceInfo>();
     }
 
-    std::vector<DeviceInfo> ret(d->device_count);
+    std::vector<DeviceInfo> ret;
 
     for (unsigned int i = 0; i < d->device_count; ++i)
     {
         ret.push_back(DeviceInfo(d->devices[i]));
     }
-
-    tcam::semaphore_unlock(semaphore_id);
 
     return ret;
 }
@@ -128,7 +125,6 @@ void CameraListHolder::set_interface_list (std::vector<std::string> interfaces)
 
 void CameraListHolder::run ()
 {
-    data = shmat(shmid, nullptr, 0);
 }
 
 
@@ -137,7 +133,6 @@ void CameraListHolder::stop ()
     this->continue_loop = false;
     cv.notify_all();
     shmctl(shmid, IPC_RMID, NULL);
-    data = nullptr;
 
     if (this->work_thread.joinable())
     {
@@ -155,7 +150,7 @@ void CameraListHolder::index_loop ()
 }
 
 
-camera_list getCameraList (std::vector<std::string> interfaces)
+static camera_list getCameraList (std::vector<std::string> interfaces)
 {
     camera_list cameras;
     std::mutex cam_lock;
@@ -177,8 +172,8 @@ camera_list getCameraList (std::vector<std::string> interfaces)
     return cameras;
 }
 
-
-std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string> interfaces)
+namespace {
+static std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string> interfaces)
 {
     // out of the tcam-network lib
     auto l = getCameraList(interfaces);
@@ -205,7 +200,7 @@ std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::stri
 
     return ret;
 }
-
+}
 
 void CameraListHolder::loop_function ()
 {
@@ -226,7 +221,7 @@ void CameraListHolder::loop_function ()
         return;
     }
 
-    tcam::semaphore_lock(semaphore_id);
+    std::lock_guard<semaphore> lck2( semaphore_id );
 
     struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, 0);
 
@@ -244,8 +239,6 @@ void CameraListHolder::loop_function ()
     shmctl(shmid, IPC_STAT, &ds);
     shmctl(shmid, IPC_SET, &ds);
 
-    // release dataptr
+    // release data ptr
     shmdt(tmp_ptr);
-
-    tcam::semaphore_unlock(semaphore_id);
 }
