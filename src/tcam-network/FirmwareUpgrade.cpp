@@ -148,7 +148,7 @@ std::vector<byte> extractFileFromPackage (const std::string& packageFileName, co
     zip_stat(z, fileName.c_str(), 0, &st);
 
     //Alloc memory for its uncompressed contents
-    char contents [st.size];
+    char *contents = new char[st.size];
 
     //Read the compressed file
     zip_file *f = zip_fopen(z, fileName.c_str(), 0);
@@ -159,6 +159,8 @@ std::vector<byte> extractFileFromPackage (const std::string& packageFileName, co
 
     //And close the archive
     zip_close(z);
+
+    delete [] contents;
 
     return result;
 }
