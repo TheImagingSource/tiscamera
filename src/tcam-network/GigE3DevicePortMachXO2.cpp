@@ -198,9 +198,9 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems (IFirmwareWriter& d
         auto jedec = MachXO2::JedecFile::Parse(*item.Data);
 
         I2C::I2CDevice i2c(0x80, forwardI2CWrite(dev), forwardI2CRead(dev), queryMaxI2cReadLength(dev));
-        MachXO2::MachXO2Device dev(i2c);
+        MachXO2::MachXO2Device mxo2_dev(i2c);
 
-        if (dev.UpdateConfiguration(jedec, forwardAdvancedProgress(progressFunc)))
+        if (mxo2_dev.UpdateConfiguration(jedec, forwardAdvancedProgress(progressFunc)))
         {
             // UpdateConfiguration returns false if no upgrade was necessary
             return Status::Success;
