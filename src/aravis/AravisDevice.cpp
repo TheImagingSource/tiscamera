@@ -123,8 +123,8 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     : handler(nullptr),
-      current_buffer(0),
-      stream(NULL)
+      stream(NULL),
+      current_buffer(0)
 {
     device = device_desc;
     this->arv_camera = arv_camera_new (this->device.get_info().identifier);
@@ -201,7 +201,7 @@ bool AravisDevice::set_property (const Property& p)
         return false;
     }
 
-    auto device = arv_camera_get_device(arv_camera);
+    auto _device = arv_camera_get_device(arv_camera);
 
     Property::VALUE_TYPE value_type = pm->prop->get_value_type();
 
@@ -216,7 +216,7 @@ bool AravisDevice::set_property (const Property& p)
                      pm->arv_ident.c_str(),
                      ((PropertyInteger&) p).get_value());
             // PropertyInteger&
-            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
+            arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value());
             pm->prop->set_struct(p.get_struct());
             break;
         }
@@ -224,7 +224,7 @@ bool AravisDevice::set_property (const Property& p)
         {
             tcam_log(TCAM_LOG_DEBUG,
                      "Swissknife");
-            arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
+            arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value());
             break;
         }
         case Property::FLOAT:
@@ -243,7 +243,7 @@ bool AravisDevice::set_property (const Property& p)
             tcam_log(TCAM_LOG_DEBUG,
                      "Sending property change for (float) %s %f",
                      p.get_name().c_str(), d);
-            arv_device_set_float_feature_value(device, pm->arv_ident.c_str(),
+            arv_device_set_float_feature_value(_device, pm->arv_ident.c_str(),
                                                d);
             pm->prop->set_struct(p.get_struct());
 
@@ -253,16 +253,16 @@ bool AravisDevice::set_property (const Property& p)
         case Property::COMMAND:
         {
             //arv_device_
-            arv_device_execute_command(device, pm->arv_ident.c_str());
+            arv_device_execute_command(_device, pm->arv_ident.c_str());
             break;
         }
         case Property::BOOLEAN:
         {
             tcam_log(TCAM_LOG_DEBUG, "Bool %s", pm->arv_ident.c_str());
             if (((PropertyBoolean&) p).get_value())
-                arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
+                arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 1);
             else
-                arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
+                arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 0);
 
             pm->prop->set_struct(p.get_struct());
             break;
@@ -274,9 +274,9 @@ bool AravisDevice::set_property (const Property& p)
             if (p.get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
             {
                 if (((PropertyBoolean&) p).get_value())
-                    arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 1);
+                    arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 1);
                 else
-                    arv_device_set_integer_feature_value(device, pm->arv_ident.c_str(), 0);
+                    arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 0);
 
                 pm->prop->set_struct(p.get_struct());
                 break;
@@ -284,7 +284,7 @@ bool AravisDevice::set_property (const Property& p)
             else if (p.get_type() == TCAM_PROPERTY_TYPE_INTEGER)
             {
                 guint value_count = 0;
-                gint64* values = arv_device_get_available_enumeration_feature_values(device,
+                gint64* values = arv_device_get_available_enumeration_feature_values(_device,
                                                                                      pm->arv_ident.c_str(),
                                                                                      &value_count);
 
@@ -294,7 +294,7 @@ bool AravisDevice::set_property (const Property& p)
                 {
                     if (p_val == values[i])
                     {
-                        arv_device_set_integer_feature_value(device,
+                        arv_device_set_integer_feature_value(_device,
                                                              pm->arv_ident.c_str(),
                                                              p_val);
                         break;
@@ -307,7 +307,7 @@ bool AravisDevice::set_property (const Property& p)
                 std::string val = ((PropertyEnumeration&) p).get_value();
 
                 tcam_log(TCAM_LOG_DEBUG, "Setting '%s' to '%s'", pm->arv_ident.c_str(), val.c_str());
-                arv_device_set_string_feature_value(device, pm->arv_ident.c_str(), val.c_str());
+                arv_device_set_string_feature_value(_device, pm->arv_ident.c_str(), val.c_str());
                 break;
             }
 
@@ -334,7 +334,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
 {
     auto& p = mapping.prop;
 
-    auto device = arv_camera_get_device(arv_camera);
+    auto _device = arv_camera_get_device(arv_camera);
 
     switch (p->get_value_type())
     {
@@ -342,7 +342,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
         {
             // bool b = arv_device_get_boolean_feature_value(device,
             //                                               mapping.arv_ident.c_str());
-            int b = arv_device_get_integer_feature_value(device,
+            int b = arv_device_get_integer_feature_value(_device,
                                                          mapping.arv_ident.c_str());
             if (b < 0 || b > 1)
             {
@@ -358,14 +358,14 @@ void AravisDevice::update_property (struct property_mapping& mapping)
         case Property::VALUE_TYPE::STRING:
         case Property::VALUE_TYPE::ENUM:
         {
-            p->set_value(arv_device_get_string_feature_value(device,
+            p->set_value(arv_device_get_string_feature_value(_device,
                                                              mapping.arv_ident.c_str()));
             break;
         }
         case Property::VALUE_TYPE::INTSWISSKNIFE:
         case Property::VALUE_TYPE::INTEGER:
         {
-            int i = arv_device_get_integer_feature_value(device,
+            int i = arv_device_get_integer_feature_value(_device,
                                                          mapping.arv_ident.c_str());
             auto struc = p->get_struct();
 
@@ -378,7 +378,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
         {
             if (p->get_type() == TCAM_PROPERTY_TYPE_DOUBLE)
             {
-                double d = arv_device_get_float_feature_value(device,
+                double d = arv_device_get_float_feature_value(_device,
                                                               mapping.arv_ident.c_str());
                 auto struc = p->get_struct();
 
@@ -389,7 +389,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
             else
             {
 
-                double d = arv_device_get_float_feature_value(device,
+                double d = arv_device_get_float_feature_value(_device,
                                                               mapping.arv_ident.c_str());
                 auto struc = p->get_struct();
 
