@@ -108,9 +108,9 @@ VideoFormat ImageSource::getVideoFormat () const
 }
 
 
-void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSource::push_image (std::shared_ptr<MemoryBuffer> _buffer)
 {
-    auto stats = buffer->get_statistics();
+    auto stats = _buffer->get_statistics();
     auto end = std::chrono::steady_clock::now();
     auto elapsed = end - stream_start;
 
@@ -118,11 +118,11 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
     {
         stats.framerate = (double)stats.frame_count / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
     }
-    buffer->set_statistics(stats);
+    _buffer->set_statistics(stats);
 
     if (auto ptr = pipeline.lock())
     {
-        ptr->push_image(buffer);
+        ptr->push_image(_buffer);
     }
     else
     {
@@ -131,9 +131,9 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-void ImageSource::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSource::requeue_buffer (std::shared_ptr<MemoryBuffer> _buffer)
 {
-    device->requeue_buffer(buffer);
+    device->requeue_buffer(_buffer);
 }
 
 
