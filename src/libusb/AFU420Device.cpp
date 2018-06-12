@@ -319,11 +319,6 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
     }
 
     tcam_image_size roi_start = transform_roi_start( start, res_on_sensor_dim );
-    if( roi_start.width < 0 || roi_start.height < 0 )
-    {
-        tcam_error("Invalid roi start.");
-        return res_conf;
-    }
 
     int bin_horz = binning.width;
     int bin_vert = binning.height;
