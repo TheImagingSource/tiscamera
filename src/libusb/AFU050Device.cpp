@@ -203,7 +203,9 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
 
 
 bool tcam::AFU050Device::validate_video_format (const VideoFormat&) const
-{}
+{
+    return false;
+}
 
 
 VideoFormat tcam::AFU050Device::get_active_video_format () const
@@ -234,6 +236,7 @@ double tcam::AFU050Device::get_framerate ()
 bool tcam::AFU050Device::set_sink (std::shared_ptr<SinkInterface> s)
 {
     listener = s;
+    return true;
 }
 
 
@@ -275,6 +278,7 @@ void tcam::AFU050Device::init_buffers ()
 bool tcam::AFU050Device::release_buffers ()
 {
     buffers.clear();
+    return true;
 }
 
 
@@ -508,6 +512,7 @@ bool tcam::AFU050Device::stop_stream ()
     //     work_thread.join();
 
     release_buffers();
+    return true;
 }
 
 
@@ -560,6 +565,7 @@ bool AFU050Device::update_property (property_description& desc)
     {
         return false;
     }
+    return true;
 }
 
 
@@ -577,7 +583,7 @@ bool AFU050Device::set_control (int unit,
                                       unit << 8,
                                       value, len, 10000 );
 
-    return (ret == len ? 0 : -1);
+    return (ret == len ? true : false);
 }
 
 
