@@ -72,7 +72,7 @@ public:
                                          Index,
                                          (unsigned char*)&data, size,
                                          timeout);
-    };
+    }
 
     int control_transfer (uint8_t RequestType,
                           uint8_t Request,

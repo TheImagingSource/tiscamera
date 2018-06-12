@@ -221,7 +221,7 @@ std::vector<VideoFormatDescription> tcam::AFU050Device::get_available_video_form
 }
 
 
-bool tcam::AFU050Device::set_framerate (double framerate)
+bool tcam::AFU050Device::set_framerate (double framerate __attribute__((unused)))
 {
     return false;
 }
