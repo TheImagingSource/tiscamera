@@ -185,8 +185,8 @@ void Property::get_struct_value (struct tcam_device_property& p)
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_STRING:
-	    std::strncpy( p.value.s.value, prop.value.s.value, sizeof(prop.value.s.value));
-	    std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(prop.value.s.default_value));
+	    std::strncpy( p.value.s.value, prop.value.s.value, sizeof(p.value.s.value));
+	    std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(p.value.s.default_value));
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             p.value.i.value = prop.value.i.value;
 	    p.value.i.min = prop.value.i.min;
@@ -470,14 +470,14 @@ bool Property::set_value ()
 }
 
 
-bool Property::set_property_from_struct (const tcam_device_property& prop)
+bool Property::set_property_from_struct (const tcam_device_property& _prop)
 {
 
     if (impl.expired())
     {
         return false;
     }
-    set_struct_value(prop);
+    set_struct_value(_prop);
     notify_impl();
 
     return true;
@@ -485,21 +485,21 @@ bool Property::set_property_from_struct (const tcam_device_property& prop)
 
 }
 
-bool Property::get_property_from_struct (tcam_device_property& prop)
+bool Property::get_property_from_struct (tcam_device_property& _prop)
 {
 
     if (impl.expired())
     {
         return false;
     }
-    get_struct_value(prop);
+    get_struct_value(_prop);
 
     return true;
 }
 
 bool Property::get_property (Property& p)
 {
-    p.set_struct(this->prop);
+    p.set_struct(prop);
     return true;
 }
 
