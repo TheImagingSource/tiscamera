@@ -208,7 +208,7 @@ static bool parseHexOrDecimal (const char* text, uint32_t& val)
     {
         return true;
     }
-    if (sscanf(text, "%d", &val))
+    if (sscanf(text, "%u", &val))
     {
         return true;
     }
@@ -289,7 +289,6 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& upl
             item.Data = ExtractFile(attr.value());
             if (item.Data->empty())
             {
-                int a = 0;
             }
         }
         else if (attr.name() == std::string("String"))
