@@ -47,7 +47,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
     const char* feature = arv_gc_feature_node_get_name ((ArvGcFeatureNode*) node);
 
-    Property::VALUE_TYPE type;
+    Property::VALUE_TYPE type = Property::INTEGER;
 
     const char* node_type = arv_dom_node_get_node_name (ARV_DOM_NODE (node));
 
@@ -78,6 +78,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     else
     {
         tcam_error("%s has unknown node type '%s'", feature, node_type);
+        return nullptr;
     }
 
     auto prop_id = find_mapping(feature);
@@ -365,7 +366,7 @@ struct aravis_fourcc
 };
 
 
-static const std::vector<aravis_fourcc> arv_fourcc_conversion_table =
+static const aravis_fourcc arv_fourcc_conversion_table[] =
 {
     { FOURCC_Y800, ARV_PIXEL_FORMAT_MONO_8 },
     { 0, ARV_PIXEL_FORMAT_MONO_8_SIGNED },
@@ -417,7 +418,7 @@ static const std::vector<aravis_fourcc> arv_fourcc_conversion_table =
 
 uint32_t tcam::aravis2fourcc (uint32_t aravis)
 {
-    for (const auto& e : arv_fourcc_conversion_table)
+    for (auto&& e : arv_fourcc_conversion_table)
     {
         if (e.aravis == aravis)
         {
@@ -445,79 +446,36 @@ uint32_t tcam::fourcc2aravis (uint32_t fourcc)
 static const std::string gige_daemon_lock_file = "/var/lock/gige-daemon.lock";
 
 
-unsigned int tcam::get_gige_device_count ()
-{
-    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
-
-    if (!is_running)
-    {
-        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
-        return get_aravis_device_count();
-    }
-
-    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
-    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
-    int sem_id = semaphore_create(sem_key);
-
-    int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 );
-    if (shmid < 0)
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
-        return get_aravis_device_count();
-    }
-
-    semaphore_lock(sem_id);
-
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
-
-    if (d == nullptr)
-    {
-        shmdt(d);
-        semaphore_unlock(sem_id);
-        tcam_log(TCAM_LOG_WARNING, "shmat return nullptr. Returning device count: 0");
-        return 0;
-    }
-
-    unsigned int ret = d->device_count;
-
-    shmdt(d);
-    semaphore_unlock(sem_id);
-
-    return ret;
-}
-
-
 std::vector<DeviceInfo> tcam::get_gige_device_list ()
 {
-    bool is_running = is_process_running(get_pid_from_lockfile(gige_daemon_lock_file));
+    bool is_running = is_process_running( get_pid_from_lockfile( gige_daemon_lock_file ) );
 
     if (!is_running)
     {
-        tcam_log(TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods");
+        tcam_log( TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods" );
         return get_aravis_device_list();
     }
 
-    key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
-    key_t sem_key = ftok("/tmp/tcam-gige-semaphore", 'S');
-    int sem_id = semaphore_create(sem_key);
+    key_t shmkey = ftok( "/tmp/tcam-gige-camera-list", 'G' );
+    key_t sem_key = ftok( "/tmp/tcam-gige-semaphore", 'S' );
 
-    int shmid = shmget(shmkey, sizeof(struct tcam_gige_device_list), 0644 );
+    int shmid = shmget( shmkey, sizeof( struct tcam_gige_device_list ), 0644 );
     if (shmid < 0)
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
-        auto vec =  get_aravis_device_list();
+        auto vec = get_aravis_device_list();
         tcam_log(TCAM_LOG_ERROR, "Aravis gave us %d", vec.size());
         return vec;
     }
 
-    semaphore_lock(sem_id);
+    semaphore sem_id = semaphore::create( sem_key );
+    std::lock_guard<semaphore> lck( sem_id );
 
     struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
         shmdt(d);
-        semaphore_unlock(sem_id);
         return std::vector<DeviceInfo>();
     }
 
@@ -530,13 +488,16 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
         ret.push_back(DeviceInfo(d->devices[i]));
     }
 
-    shmdt(d);
-
-    semaphore_unlock(sem_id);
+    shmdt( d );
 
     return ret;
 }
 
+
+unsigned int tcam::get_gige_device_count ()
+{
+    return get_gige_device_list().size();
+}
 
 unsigned int tcam::get_aravis_device_count ()
 {
@@ -561,13 +522,13 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
 
     for (unsigned int i = 0; i < number_devices; ++i)
     {
-        tcam_device_info info = {};
+        tcam_device_info info = { TCAM_DEVICE_TYPE_ARAVIS,
+                                  "", "", "", ""};
         std::string name = arv_get_device_id(i);
         memcpy(info.identifier, name.c_str(), name.size());
 
         ArvCamera* cam = arv_camera_new(name.c_str());
 
-        info.type = TCAM_DEVICE_TYPE_ARAVIS;
         const char* n =  arv_camera_get_model_name(cam);
 
         if (n != NULL)
