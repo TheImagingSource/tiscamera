@@ -178,7 +178,7 @@ void Property::set_struct_value (const struct tcam_device_property& p)
         default:
             break;
     }
-};
+}
 
 void Property::get_struct_value (struct tcam_device_property& p)
 {
@@ -219,7 +219,7 @@ void Property::get_struct_value (struct tcam_device_property& p)
         default:
             break;
     }
-};
+}
 
 
 Property::VALUE_TYPE Property::get_value_type () const
