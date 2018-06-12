@@ -776,7 +776,8 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header (unsigned
         return res;
     }
 
-    auto get_hdr_field_at = [bpp = get_stream_bitdepth(), data]( int offset )
+    const int bpp = get_stream_bitdepth();
+    auto get_hdr_field_at = [bpp, data]( int offset )
         {
             return data[offset * bpp / 8];
         };
