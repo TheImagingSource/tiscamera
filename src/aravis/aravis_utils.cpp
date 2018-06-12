@@ -468,7 +468,7 @@ unsigned int tcam::get_gige_device_count ()
 
     semaphore_lock(sem_id);
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
@@ -512,7 +512,7 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
 
     semaphore_lock(sem_id);
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
