@@ -103,7 +103,6 @@ Logger::Logger ():
                 get_version(),
                 get_aravis_version());
 
-        auto tmp_level = level;
         va_list args;
         log("", TCAM_LOG_DEBUG, "Logger", __LINE__, b, args);
     }
@@ -117,7 +116,7 @@ void Logger::load_default_settings ()
 }
 
 
-void Logger::log (const char* module,
+void Logger::log (const char* module __attribute__((unused)),
                   enum TCAM_LOG_LEVEL _level,
                   const char* function,
                   int line,
@@ -205,7 +204,7 @@ void Logger::log_to_stdout (const char* message)
 }
 
 
-void Logger::log_to_file (const char* message)
+void Logger::log_to_file (const char* message __attribute__((unused)))
 {}
 
 
