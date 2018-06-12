@@ -166,9 +166,9 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
     // AFU050_FMT_1280X960 = 3
     // }afu050_video_format_t;
 
-    auto get_format_index = [] (const VideoFormat& format)
+    auto get_format_index = [] (const VideoFormat& _format)
         {
-            auto s = format.get_struct();
+            auto s = _format.get_struct();
             if (s.width == 2592 && s.height == 1944 && s.framerate == 15.0)
             {
                 return 1;
