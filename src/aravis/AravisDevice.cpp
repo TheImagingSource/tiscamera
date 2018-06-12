@@ -277,7 +277,6 @@ bool AravisDevice::set_property (const Property& p)
                     arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 0);
 
                 pm->prop->set_struct(p.get_struct());
-                break;
             }
             else if (p.get_type() == TCAM_PROPERTY_TYPE_INTEGER)
             {
@@ -298,7 +297,6 @@ bool AravisDevice::set_property (const Property& p)
                         break;
                     }
                 }
-                break;
             }
             else if (p.get_type()== TCAM_PROPERTY_TYPE_ENUMERATION)
             {
@@ -306,10 +304,9 @@ bool AravisDevice::set_property (const Property& p)
 
                 tcam_log(TCAM_LOG_DEBUG, "Setting '%s' to '%s'", pm->arv_ident.c_str(), val.c_str());
                 arv_device_set_string_feature_value(_device, pm->arv_ident.c_str(), val.c_str());
-                break;
             }
 
-            //break;
+            break;
         }
         case Property::UNDEFINED:
         default:
