@@ -26,7 +26,7 @@
 using namespace FirmwareUpdate;
 
 FirmwareUpdate::Status GigE3::DevicePortMachXO2::Configure (const std::string& name,
-                                                            const pugi::xml_node& portConfigElem)
+                                                            const pugi::xml_node& portConfigElem __attribute__((unused)))
 {
     name_ = name;
 
@@ -56,12 +56,6 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems (const std::vector<U
 
 namespace
 {
-
-std::function<void(int)> forwardSimpleProgress (std::function<void(int, const std::string&)> progressFunc)
-{
-    return [=](int progress) { progressFunc(progress, std::string()); };
-}
-
 
 std::function<void(const char*, int)> forwardAdvancedProgress(std::function<void(int,
                                                                                  const std::string& )> progressFunc)
