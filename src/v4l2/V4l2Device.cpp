@@ -992,7 +992,8 @@ void V4l2Device::create_conversion_factors ()
 
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
-    struct v4l2_queryctrl qctrl = { V4L2_CTRL_FLAG_NEXT_CTRL };
+    struct v4l2_queryctrl qctrl = {};
+    qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
     while (tcam_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
     {
