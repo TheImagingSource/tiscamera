@@ -38,24 +38,27 @@ namespace
         zip_stat(z, fileName.c_str(), 0, &st);
 
         //Alloc memory for its uncompressed contents
-        char contents [st.size];
+        char *contents = new char[st.size];
 
         //Read the compressed file
         zip_file *f = zip_fopen(z, fileName.c_str(), 0);
         if (f == nullptr)
         {
+            delete [] contents;
             return;
         }
-        int ret = zip_fread(f, contents, st.size);
+        zip_uint64_t ret = zip_fread(f, contents, st.size);
 
         if (ret != st.size)
         {
+            delete [] contents;
             return;
         }
 
         dest.assign(contents, contents + st.size);
 
         zip_close(z);
+        delete [] contents;
 	}
 }
 
