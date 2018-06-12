@@ -596,16 +596,16 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
 
     unsigned short id = generateRequestID();
 
-    Packet::CMD_READMEM packet = Packet::CMD_READMEM();
+    Packet::CMD_READMEM _packet = Packet::CMD_READMEM();
 
-    packet.header.magic = 0x42;
-    packet.header.flag = Flags::NEEDACK;
-    packet.header.command = htons(Commands::READMEM_CMD);
-    packet.header.length = htons(sizeof(Packet::CMD_READMEM) - sizeof(Packet::COMMAND_HEADER));
-    packet.header.req_id = ntohs(id);
+    _packet.header.magic = 0x42;
+    _packet.header.flag = Flags::NEEDACK;
+    _packet.header.command = htons(Commands::READMEM_CMD);
+    _packet.header.length = htons(sizeof(Packet::CMD_READMEM) - sizeof(Packet::COMMAND_HEADER));
+    _packet.header.req_id = ntohs(id);
 
-    packet.count = htons(size);
-    packet.address = htonl(address);
+    _packet.count = htons(size);
+    _packet.address = htonl(address);
 
     auto callback_function = [&data, &id, &size, &response] (void* msg) -> int
     {
@@ -630,7 +630,7 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
         int retries = tis::PACKET_RETRY_COUNT;
         while (retries && (response == Status::TIMEOUT))
         {
-            socket->sendAndReceive(getCurrentIP(), &packet, sizeof(packet), callback_function);
+            socket->sendAndReceive(getCurrentIP(), &_packet, sizeof(_packet), callback_function);
             retries--;
         }
     }
@@ -656,16 +656,16 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     size_t real_size = sizeof(Packet::CMD_WRITEMEM) + (size - sizeof(uint32_t));
 
     std::vector<uint8_t> packet_ (real_size);
-    auto packet = (Packet::CMD_WRITEMEM*)packet_.data();
+    auto _packet = (Packet::CMD_WRITEMEM*)packet_.data();
 
-    packet->header.magic = 0x42;
-    packet->header.flag = Flags::NEEDACK;
-    packet->header.command = htons(Commands::WRITEMEM_CMD);
-    packet->header.length = htons(size + sizeof(uint32_t));
-    packet->header.req_id = htons(id);
+    _packet->header.magic = 0x42;
+    _packet->header.flag = Flags::NEEDACK;
+    _packet->header.command = htons(Commands::WRITEMEM_CMD);
+    _packet->header.length = htons(size + sizeof(uint32_t));
+    _packet->header.req_id = htons(id);
 
-    memcpy(&packet->data, data, size);
-    packet->address = htonl(address);
+    memcpy(&_packet->data, data, size);
+    _packet->address = htonl(address);
 
     auto callback_function = [id, &response] (void* msg) -> int
     {
@@ -685,7 +685,7 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
         int retries = tis::PACKET_RETRY_COUNT;
         while (retries && (response == Status::TIMEOUT))
         {
-            socket->sendAndReceive(getCurrentIP(), packet, real_size, callback_function);
+            socket->sendAndReceive(getCurrentIP(), _packet, real_size, callback_function);
             retries--;
         }
     }
@@ -703,24 +703,24 @@ void Camera::sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32
     unsigned short id = generateRequestID();
     auto s = getSocket();
 
-    Packet::CMD_FORCEIP packet;
+    Packet::CMD_FORCEIP _packet;
 
-    packet.header.magic = 0x42;
-    packet.header.flag = Flags::NEEDACK;
-    packet.header.command = htons(Commands::FORCEIP_CMD);
-    packet.header.length = htons(sizeof(Packet::CMD_FORCEIP) - sizeof(Packet::COMMAND_HEADER));
-    packet.header.req_id = id;
+    _packet.header.magic = 0x42;
+    _packet.header.flag = Flags::NEEDACK;
+    _packet.header.command = htons(Commands::FORCEIP_CMD);
+    _packet.header.length = htons(sizeof(Packet::CMD_FORCEIP) - sizeof(Packet::COMMAND_HEADER));
+    _packet.header.req_id = id;
 
-    packet.DeviceMACHigh = this->packet.DeviceMACHigh;
-    packet.DeviceMACLow = this->packet.DeviceMACLow;
+    _packet.DeviceMACHigh = this->packet.DeviceMACHigh;
+    _packet.DeviceMACLow = this->packet.DeviceMACLow;
 
-    packet.StaticIP = ip;
-    packet.StaticSubnetMask = subnet;
-    packet.StaticGateway = gateway;
+    _packet.StaticIP = ip;
+    _packet.StaticSubnetMask = subnet;
+    _packet.StaticGateway = gateway;
 
     try
     {
-        s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
+        s->sendAndReceive("255.255.255.255", &_packet, sizeof(_packet), NULL, true);
     }
     catch (SocketSendToException& e)
     {
