@@ -231,7 +231,7 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
 }
 
 
-bool V4l2Device::validate_video_format (const VideoFormat& format) const
+bool V4l2Device::validate_video_format (const VideoFormat& format __attribute__((unused))) const
 {
     return false;
 }
@@ -1024,7 +1024,6 @@ void V4l2Device::create_special_property (int fd,
         auto ctrl_m = get_control_reference(prop_id);
         uint32_t flags = convert_v4l2_flags(queryctrl->flags);
 
-        TCAM_PROPERTY_TYPE type_to_use;
         tcam_device_property cp = {};
 
 
@@ -1078,7 +1077,6 @@ void V4l2Device::create_special_property (int fd,
         mapping.emplace(true, "Aperture Priority Mode");
         mapping.emplace(false, "Manual Mode");
 
-        type_to_use = ctrl_m.type_to_use;
         cp = create_empty_property(ctrl_m.id);
 
         // create external property
