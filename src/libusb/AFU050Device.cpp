@@ -389,10 +389,8 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
                 statistics.frame_count++;
                 buffer->set_statistics(statistics);
                 buffer->set_image_buffer(b);
-                buffer->lock();
 
                 jpegptr = 0;
-                jpegbuf = 0;
                 jpegsize = 0;
 
                 if (auto sink_ptr = listener.lock())
@@ -404,6 +402,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
                     tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
                 }
                 free(jpegbuf);
+                jpegbuf = 0;
             }
         }
         else
