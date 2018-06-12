@@ -38,7 +38,7 @@ bool parseAttribute (const pugi::xml_node& elem,
     {
         return true;
     }
-    if (sscanf(attrText, "%d", &val))
+    if (sscanf(attrText, "%u", &val))
     {
         return true;
     }
