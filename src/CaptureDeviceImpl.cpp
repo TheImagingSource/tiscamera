@@ -35,10 +35,10 @@ CaptureDeviceImpl::CaptureDeviceImpl ()
 {}
 
 
-CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& device)
+CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
     : pipeline(nullptr), property_handler(nullptr), device(nullptr)
 {
-    if (!open_device(device))
+    if (!open_device(_device))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to open device");
         bad_device bd;
