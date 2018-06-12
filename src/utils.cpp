@@ -68,7 +68,7 @@ std::vector<std::string> tcam::split_string (const std::string& to_split, const 
 }
 
 
-int tcam::tcam_xioctl (int fd, int request, void *arg)
+int tcam::tcam_xioctl (int fd, unsigned int request, void *arg)
 {
     constexpr int IOCTL_RETRY = 4;
 

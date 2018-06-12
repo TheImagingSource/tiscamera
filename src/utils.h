@@ -73,7 +73,7 @@ inline unsigned int unset_bit (unsigned int value, unsigned int bitindex)
 }
 
 
-int tcam_xioctl (int fd, int request, void* arg);
+int tcam_xioctl (int fd, unsigned int request, void* arg);
 
 unsigned int tcam_get_required_buffer_size (const struct tcam_video_format* format);
 
