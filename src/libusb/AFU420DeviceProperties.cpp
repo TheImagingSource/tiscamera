@@ -319,6 +319,8 @@ bool AFU420Device::create_offsets ()
     auto property_auto = std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
 
     property_handler->properties.push_back({property_auto});
+
+    return true;
 }
 
 
