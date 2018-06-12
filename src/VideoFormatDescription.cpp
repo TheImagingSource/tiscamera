@@ -193,23 +193,23 @@ bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
 
     auto size = fmt.get_size();
 
-    auto is_valid_resolution = [&size](const tcam_resolution_description &res)
+    auto is_valid_resolution = [&size](const tcam_resolution_description &_res)
         {
-            if (res.type == TCAM_RESOLUTION_TYPE_FIXED)
+            if (_res.type == TCAM_RESOLUTION_TYPE_FIXED)
             {
-                return are_equal(res.min_size, size);
+                return are_equal(_res.min_size, size);
             }
             else // TCAM_RESOLUTION_TYPE_RANGE
             {
-                return in_range(res.min_size, res.max_size, size);
+                return in_range(_res.min_size, _res.max_size, size);
             }
         };
 
     auto resolutions = get_resolutions();
 
-    for (const auto& res : resolutions)
+    for (const auto& _res : resolutions)
     {
-        if (is_valid_resolution(res))
+        if (is_valid_resolution(_res))
         {
             auto fps = get_framerates(size);
 
