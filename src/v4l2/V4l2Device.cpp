@@ -287,9 +287,9 @@ bool V4l2Device::set_framerate (double framerate)
 
     framerate = *iter_low;
 
-    auto f =[&framerate] (const framerate_conv& f)
+    auto f =[&framerate] (const framerate_conv& _f)
         {
-            return compare_double(framerate, f.fps);
+            return compare_double(framerate, _f.fps);
         };
 
     auto fps = std::find_if(framerate_conversions.begin(),
@@ -1011,7 +1011,7 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 
 
 // TODO: replace with a more general purpose solution
-void V4l2Device::create_special_property (int fd,
+void V4l2Device::create_special_property (int _fd,
                                           struct v4l2_queryctrl* queryctrl,
                                           struct v4l2_ext_control* ctrl,
                                           std::shared_ptr<PropertyImpl> impl
@@ -1047,7 +1047,7 @@ void V4l2Device::create_special_property (int fd,
         for (int i = 0; i <= queryctrl->maximum; i++)
         {
             qmenu.index = i;
-            if (tcam_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
+            if (tcam_xioctl(_fd, VIDIOC_QUERYMENU, &qmenu))
                 continue;
 
             std::string map_string((char*) qmenu.name);
