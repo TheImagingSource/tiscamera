@@ -136,7 +136,7 @@ void Logger::log (const char* module,
     va_copy(tmp_args, args);
 
     size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
-    char msg[size];
+    char *msg = new char[size];
 
     va_end(tmp_args);
 
@@ -158,7 +158,7 @@ void Logger::log (const char* module,
                                  msg);
 
     /* write complete message */
-    char buffer[buffer_size];
+    char *buffer = new char[buffer_size];
 
     sprintf(buffer,
             "%-10ld <%s> %s:%d: %s\n",
@@ -193,6 +193,8 @@ void Logger::log (const char* module,
         default:
             break;
     }
+    delete [] buffer;
+    delete [] msg;
 }
 
 
