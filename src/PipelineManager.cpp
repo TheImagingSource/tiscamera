@@ -227,7 +227,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 }
 
 
-bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS status)
+bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS _status)
 {
     if (source == nullptr)
     {
@@ -235,7 +235,7 @@ bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS status)
         return false;
     }
 
-    if (!source->set_status(status))
+    if (!source->set_status(_status))
     {
         tcam_log(TCAM_LOG_ERROR, "Source did not accept status change");
         return false;
@@ -245,18 +245,18 @@ bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS status)
 }
 
 
-bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS status)
+bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS _status)
 {
     if (sink == nullptr)
     {
-        if (status != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
+        if (_status != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
         {
             tcam_warning("Sink is not defined.");
         }
         return false;
     }
 
-    if (!sink->set_status(status))
+    if (!sink->set_status(_status))
     {
         tcam_log(TCAM_LOG_ERROR, "Sink spewed error");
         return false;
