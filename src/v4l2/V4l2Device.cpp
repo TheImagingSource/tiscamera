@@ -41,7 +41,8 @@ V4l2Device::V4L2FormatHandler::V4L2FormatHandler (V4l2Device* dev)
 {}
 
 
-std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s, int pixelformat)
+std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s __attribute__((unused)),
+                                                                  int pixelformat __attribute__((unused)))
 {
     std::vector<double> ret;
 
@@ -53,13 +54,14 @@ static const unsigned char lost_countdown_default = 5;
 
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
-    : emulate_bayer(false), emulated_fourcc(0),
+    : emulate_bayer(false),
+      emulated_fourcc(0),
       property_handler(nullptr),
-      is_stream_on(false),
       lost_countdown(lost_countdown_default),
       stop_all(false),
+      device_is_lost(false),
       abort_all(false),
-      device_is_lost(false)
+      is_stream_on(false)
 {
     device = device_desc;
 
