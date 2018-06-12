@@ -205,8 +205,6 @@ bool AravisDevice::set_property (const Property& p)
 
     Property::VALUE_TYPE value_type = pm->prop->get_value_type();
 
-    TCAM_PROPERTY_TYPE type = pm->prop->get_type();
-
     switch (value_type)
     {
         case Property::INTEGER:
@@ -630,7 +628,7 @@ bool AravisDevice::stop_stream ()
 }
 
 
-void AravisDevice::callback (ArvStream* stream, void* user_data)
+void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* user_data)
 {
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
@@ -763,14 +761,11 @@ void AravisDevice::callback (ArvStream* stream, void* user_data)
 }
 
 
-void AravisDevice::device_lost (ArvGvDevice* device, void* user_data)
+void AravisDevice::device_lost (ArvGvDevice* device __attribute__((unused)), void* user_data)
 {
     AravisDevice* self = (AravisDevice*)user_data;
 
-    struct tcam_device_info info = self->device.get_info();
-
     self->notify_device_lost();
-
 }
 
 
