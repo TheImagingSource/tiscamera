@@ -27,9 +27,9 @@ using namespace tcam;
 
 
 PropertyString::PropertyString (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& prop,
+                                const tcam_device_property& _prop,
                                 VALUE_TYPE t)
-    : Property(prop, t)
+    : Property(_prop, t)
 {
     impl = prop_impl;
 }
@@ -74,10 +74,10 @@ std::string PropertyString::get_value () const
 
 
 PropertyEnumeration::PropertyEnumeration (std::shared_ptr<PropertyImpl> prop_impl,
-                                          const tcam_device_property& prop,
+                                          const tcam_device_property& _prop,
                                           const std::map<std::string, int>& values,
                                           VALUE_TYPE t)
-    : Property(prop, values, t)
+    : Property(_prop, values, t)
 {
     impl = prop_impl;
 }
@@ -159,9 +159,9 @@ std::map<std::string, int> PropertyEnumeration::get_mapping () const
 
 
 PropertyBoolean::PropertyBoolean (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& prop,
+                                const tcam_device_property& _prop,
                                 VALUE_TYPE t)
-    : Property(prop, t)
+    : Property(_prop, t)
 {
     impl = prop_impl;
 }
@@ -202,9 +202,9 @@ bool PropertyBoolean::get_value () const
 
 
 PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> prop_impl,
-                                  const tcam_device_property& prop,
+                                  const tcam_device_property& _prop,
                                   VALUE_TYPE t)
-    : Property (prop, t)
+    : Property (_prop, t)
 {
     impl = prop_impl;
 }
@@ -273,9 +273,9 @@ bool PropertyInteger::set_value (int64_t new_value)
 
 
 PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& prop,
+                                const tcam_device_property& _prop,
                                 VALUE_TYPE t)
-    : Property(prop, t)
+    : Property(_prop, t)
 {
     impl = prop_impl;
 }
@@ -341,9 +341,9 @@ bool PropertyDouble::set_value (double new_value)
 
 
 PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& prop,
+                                const tcam_device_property& _prop,
                                 VALUE_TYPE t)
-    : Property(prop, t)
+    : Property(_prop, t)
 {
     impl = prop_impl;
 }
