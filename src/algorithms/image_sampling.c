@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <string.h> // for memset
 
 #include "image_sampling.h"
 
@@ -170,7 +171,8 @@ static unsigned int clip( unsigned int x )
 
 unsigned int image_brightness_bayer (image_buffer* buf)
 {
-    auto_sample_points points = {0};
+    auto_sample_points points;
+    memset(&points, 0, sizeof(points));
 
     get_sampling_points_from_buffer(buf, &points);
 
