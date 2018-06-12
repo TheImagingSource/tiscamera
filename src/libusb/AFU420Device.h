@@ -381,7 +381,7 @@ private:
     unsigned int usbbulk_image_size_ = 0;
     static const int actual_image_prefix_size_ = 4;
 
-    int get_packet_header_size () const { return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
+    size_t get_packet_header_size () const { return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
 
 
     struct frame_rate_cache_item {

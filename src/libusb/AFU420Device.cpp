@@ -769,7 +769,7 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header (unsigned
     res.frame_id = -1;
     res.buffer = data;
     res.size = data_size;
-    int actual_header_size = get_packet_header_size();
+    size_t actual_header_size = get_packet_header_size();
 
     if (data_size < actual_header_size)
     {
@@ -800,10 +800,10 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header (unsigned
         }
     }
 
-    int uWidth = bytes_to_uint16( get_hdr_field_at( 0x4E ), get_hdr_field_at( 0x4C ) );   // note that we skip 0x4D
-    int uHeight = bytes_to_uint16( get_hdr_field_at( 0x5E ), get_hdr_field_at( 0x5C ) );
+    uint32_t uWidth = bytes_to_uint16( get_hdr_field_at( 0x4E ), get_hdr_field_at( 0x4C ) );   // note that we skip 0x4D
+    uint32_t uHeight = bytes_to_uint16( get_hdr_field_at( 0x5E ), get_hdr_field_at( 0x5C ) );
 
-    auto dim = get_stream_dim();
+    tcam_image_size dim = get_stream_dim();
     if (uWidth != dim.width || uHeight != dim.height)
     {
         tcam_error("Dimensions do not fit.");
@@ -1177,7 +1177,7 @@ int AFU420Device::get_frame_rate_range (uint32_t strm_fmt_id,
     // auto func = [this, src_bpp = f->src_bpp, scaling_factor_id, dim, &min_fps, &max_fps]()
         // {                       //
 
-            int binning = scaling_factor_id;
+            uint32_t binning = scaling_factor_id;
             if (binning <= 1)
             {
                 binning = 0;
