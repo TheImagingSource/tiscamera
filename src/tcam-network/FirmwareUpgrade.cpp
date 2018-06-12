@@ -241,7 +241,7 @@ Status findFirmwareInPackage (const std::string& fileName, const std::string& mo
         {
             auto fwFileAttr = fwnode.attribute("firmwarefile").as_string();
             auto fpgaConfigurationAttr = fwnode.attribute("fpgafile").as_string();
-            requiredFPGAVersion = fwnode.attribute("requiredfpga").as_int();
+            int requiredFPGAVersionAttr = fwnode.attribute("requiredfpga").as_int(-1);
 
             if (fwFileAttr == 0)
             {
@@ -251,10 +251,11 @@ Status findFirmwareInPackage (const std::string& fileName, const std::string& mo
             {
                 return Status::InvalidFile;
             }
-            if (requiredFPGAVersion >= 0)
+            if (requiredFPGAVersionAttr < 0)
             {
                 return Status::InvalidFile;
             }
+            requiredFPGAVersion = requiredFPGAVersionAttr;
             firmwareName = fwFileAttr;
             FPGAConfigurationName = fpgaConfigurationAttr;
 
