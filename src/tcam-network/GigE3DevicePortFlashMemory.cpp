@@ -106,7 +106,7 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::UploadItems (IFirmwareWrite
 
     for (auto&& erq : eraseRequests)
     {
-        bool ret = dev.write(eraseAddress_, erq);
+        dev.write(eraseAddress_, erq);
 
         eraseProgress.NextItem();
     }
