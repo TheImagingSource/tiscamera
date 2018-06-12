@@ -1263,6 +1263,7 @@ bool save_value_of_control (const v4l2_control* ctrl,
             {
                 cp->value.i.value *= conversion_factor;
             }
+            return true;
         }
         default:
         {
