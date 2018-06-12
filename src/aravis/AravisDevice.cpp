@@ -584,7 +584,7 @@ bool AravisDevice::start_stream ()
                       NULL);
     }
 
-    for (int i = 0; i < buffers.size(); ++i)
+    for (std::size_t i = 0; i < buffers.size(); ++i)
     {
         arv_stream_push_buffer(this->stream, buffers.at(i).arv_buffer);
     }
