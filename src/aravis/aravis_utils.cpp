@@ -164,7 +164,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         }
         else if (type_to_use == TCAM_PROPERTY_TYPE_BOOLEAN)
         {
-            prop.type == TCAM_PROPERTY_TYPE_BOOLEAN;
+            prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
 
             const GSList* children;
             const GSList* iter;
