@@ -531,7 +531,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
 {
 
 
-    auto find_property = [this]( TCAM_PROPERTY_ID id)
+    auto find_property = [this]( TCAM_PROPERTY_ID id) -> std::shared_ptr<tcam::Property>
         {
             for (auto& p : this->property_handler->properties)
             {
@@ -540,6 +540,8 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
                     return p.property;
                 }
             }
+            tcam_error("Invalid property");
+            return nullptr;
         };
 
     auto binning_hor = find_property(TCAM_PROPERTY_BINNING_HORIZONTAL);
