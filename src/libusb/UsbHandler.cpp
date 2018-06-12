@@ -302,4 +302,4 @@ void UsbHandler::handle_events ()
     }
 }
 
-}; /* namespace tis */
+} /* namespace tis */
