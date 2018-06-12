@@ -681,6 +681,7 @@ double tcam::AFU420Device::get_framerate ()
 bool tcam::AFU420Device::set_sink (std::shared_ptr<SinkInterface> s)
 {
     listener = s;
+    return true;
 }
 
 
@@ -701,6 +702,7 @@ bool tcam::AFU420Device::initialize_buffers (std::vector<std::shared_ptr<MemoryB
 bool tcam::AFU420Device::release_buffers ()
 {
     buffers.clear();
+    return true;
 }
 
 
