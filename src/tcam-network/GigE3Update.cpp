@@ -52,7 +52,7 @@ Status initiateColdReboot (IFirmwareWriter& dev)
 Status GigE3::upgradeFirmware (IFirmwareWriter& dev,
                                const std::string& fileName,
                                const std::string& modelName,
-                               const std::string& originalModelName,
+                               const std::string& originalModelName __attribute__((unused)),
                                tReportProgressFunc progressFunc)
 {
     Package package;

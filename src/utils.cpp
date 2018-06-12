@@ -320,7 +320,7 @@ bool tcam::is_smaller (const tcam_image_size &s1, const tcam_image_size &s2)
         return true;
     }
     return false;
-};
+}
 
 
 TCAM_PROPERTY_ID tcam::generate_unique_property_id ()

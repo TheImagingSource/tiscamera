@@ -273,8 +273,8 @@ static bool IsStatusBusy (uint32_t status)
 int MachXO2Device::ReadStatus ()
 {
     uint32_t status = _itf.read<uint32_t>(Commands::READ_STATUS);
-    bool isBusy = IsStatusBusy(status);
-    bool isFail = IsStatusFail(status);
+    // bool isBusy = IsStatusBusy(status);
+    // bool isFail = IsStatusFail(status);
 
     return status;
 }
