@@ -178,8 +178,6 @@ private:
 
     std::vector<buffer_info> buffers;
 
-    std::shared_ptr<tcam::MemoryBuffer> get_next_buffer ();
-
     bool is_stream_on;
     struct tcam_stream_statistics statistics;
 

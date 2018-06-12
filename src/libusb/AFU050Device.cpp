@@ -423,30 +423,6 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
     }
 }
 
-
-std::shared_ptr<tcam::MemoryBuffer> tcam::AFU050Device::get_next_buffer ()
-{
-    if (buffers.empty())
-    {
-        tcam_error("No buffers to work with.");
-        return nullptr;
-    }
-
-    for (auto& b : buffers)
-    {
-        if (!b.is_queued)
-        {
-            tcam_error("returning buffer");
-            b.is_queued = true;
-            return b.buffer;
-        }
-    }
-
-    tcam_error("No free buffers available! %d", buffers.size());
-    return nullptr;
-}
-
-
 void LIBUSB_CALL tcam::AFU050Device::libusb_bulk_callback (struct libusb_transfer* trans)
 {
     AFU050Device* self = reinterpret_cast<AFU050Device*>(trans->user_data);
