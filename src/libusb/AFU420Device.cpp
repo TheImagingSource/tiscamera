@@ -472,7 +472,7 @@ void AFU420Device::create_formats ()
         memcpy(desc.description, fourcc2description(desc.fourcc), sizeof(desc.description));
 
         std::vector<struct framerate_mapping> rf;
-        auto add_res = [&rf] (stream_fmt_data& fmt, tcam_image_size& size)
+        auto add_res = [&rf] (stream_fmt_data& _fmt, tcam_image_size& size)
             {
                 struct tcam_resolution_description res = {};
                 res.type = TCAM_RESOLUTION_TYPE_FIXED;
@@ -481,7 +481,7 @@ void AFU420Device::create_formats ()
                 res.max_size.width = size.width;
                 res.max_size.height = size.height;
 
-                std::vector<double> f = create_steps_for_range(fmt.fps_min, fmt.fps_max);
+                std::vector<double> f = create_steps_for_range(_fmt.fps_min, _fmt.fps_max);
 
                 framerate_mapping r = { res, f };
                 rf.push_back(r);
@@ -830,9 +830,9 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         return;
     }
 
-    auto submit_transfer = [](struct libusb_transfer* xfr)
+    auto submit_transfer = [](struct libusb_transfer* _xfr)
         {
-            if (libusb_submit_transfer(xfr) < 0)
+            if (libusb_submit_transfer(_xfr) < 0)
             {
                 tcam_error("error re-submitting URB\n");
             }
