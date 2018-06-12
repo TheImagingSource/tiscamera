@@ -163,7 +163,7 @@ bool AFU420Device::create_color_gain ()
     prop.value.i.step = 1;
 
     double value = 0;
-    bool ret = get_color_gain_factor(color_gain::ColorGainRed, value);
+    get_color_gain_factor(color_gain::ColorGainRed, value);
 
     prop.value.i.value = camera_to_color_gain(value);
     prop.value.i.default_value = 64;
@@ -180,7 +180,7 @@ bool AFU420Device::create_color_gain ()
     prop.value.i.step = 1;
 
     value = 0;
-    ret = get_color_gain_factor(color_gain::ColorGainGreen1, value);
+    get_color_gain_factor(color_gain::ColorGainGreen1, value);
 
     prop.value.i.value = camera_to_color_gain(value);
     prop.value.i.default_value = 64;
@@ -198,7 +198,7 @@ bool AFU420Device::create_color_gain ()
     prop.value.i.step = 1;
 
     value = 0;
-    ret = get_color_gain_factor(color_gain::ColorGainBlue, value);
+    get_color_gain_factor(color_gain::ColorGainBlue, value);
 
     prop.value.i.value = camera_to_color_gain(value);
     prop.value.i.default_value = 64;
@@ -871,14 +871,14 @@ bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
     int ret = 0;
     if (param == strobe_parameter::mode)
     {
-        int ret = usb_device_->control_transfer(HOST_TO_DEVICE,
+        ret = usb_device_->control_transfer(HOST_TO_DEVICE,
                                                 BASIC_PC_TO_USB_FLASH_STROBE,
                                                 value, 0,
                                                 value);
     }
     else
     {
-        int ret = usb_device_->control_transfer(HOST_TO_DEVICE,
+        ret = usb_device_->control_transfer(HOST_TO_DEVICE,
                                                 BASIC_PC_TO_USB_FLASH_STROBE,
                                                 0, (uint16_t)param,
                                                 value);
@@ -923,7 +923,7 @@ bool AFU420Device::set_ois_mode (int64_t mode)
 }
 
 
-bool AFU420Device::get_ois_pos (int64_t& x_pos, int64_t& y_pos)
+bool AFU420Device::get_ois_pos (int64_t& x_pos __attribute__((unused)), int64_t& y_pos __attribute__((unused)))
 {
     return false;
 }
