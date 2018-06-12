@@ -96,6 +96,7 @@ image_dir.py
 build/
 .vscode/
 nbproject
+.vs/
 
 # kdevelop
 
