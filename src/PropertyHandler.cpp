@@ -175,16 +175,6 @@ bool PropertyHandler::get_property (Property& p)
     return false;
 }
 
-
-static bool is_wanted_property (const std::string& prop_name,  const std::shared_ptr<Property>& p)
-{
-    if (prop_name.compare(p->get_name()) == 0)
-        return true;
-    return false;
-}
-
-
-
 PropertyHandler::property_mapping PropertyHandler::find_mapping_external (TCAM_PROPERTY_ID id)
 {
     for (auto& m : properties)
