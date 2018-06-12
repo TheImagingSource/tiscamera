@@ -264,10 +264,10 @@ static bool IsStatusFail (uint32_t status)
 }
 
 
-static bool IsStatusBusy (uint32_t status)
-{
-    return (status & (1 << 12)) != 0;
-}
+// static bool IsStatusBusy (uint32_t status)
+// {
+//     return (status & (1 << 12)) != 0;
+// }
 
 
 int MachXO2Device::ReadStatus ()
