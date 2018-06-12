@@ -38,7 +38,7 @@ using namespace tcam;
 
 
 tcam::AFU420Device::AFU420Device (const DeviceInfo& info)
-    :usb_device_(nullptr), lost_countdown(20), is_stream_on(false), stop_all(false)
+    :usb_device_(nullptr), stop_all(false), lost_countdown(20), is_stream_on(false)
 {
     device = info;
 
