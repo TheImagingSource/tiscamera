@@ -151,15 +151,16 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoad
 
     tcam_trace("Amount of devices: %d", t);
 
-    struct tcam_device_info temp[t];
+    struct tcam_device_info *temp = new struct tcam_device_info[t];
 
-    auto copied_elements = b.get_device_list(temp, t);
+    size_t copied_elements = b.get_device_list(temp, t);
     ret.reserve(copied_elements);
-
-    for (const auto& info : temp)
+    for (size_t i = 0; i < copied_elements; i++)
     {
-        ret.push_back(DeviceInfo(info));
+        ret.push_back(DeviceInfo(temp[i]));
     }
+
+    delete [] temp;
 
     return ret;
 }
