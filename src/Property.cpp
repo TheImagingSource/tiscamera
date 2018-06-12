@@ -158,6 +158,7 @@ void Property::set_struct_value (const struct tcam_device_property& p)
     {
         case TCAM_PROPERTY_TYPE_STRING:
             std::strncpy(prop.value.s.value, p.value.s.value, sizeof(prop.value.s.value));
+            break;
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             prop.value.i.value = p.value.i.value;
             // BUG string representation is not copied
@@ -185,8 +186,9 @@ void Property::get_struct_value (struct tcam_device_property& p)
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_STRING:
-	    std::strncpy( p.value.s.value, prop.value.s.value, sizeof(p.value.s.value));
-	    std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(p.value.s.default_value));
+            std::strncpy( p.value.s.value, prop.value.s.value, sizeof(p.value.s.value));
+            std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(p.value.s.default_value));
+            break;
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             p.value.i.value = prop.value.i.value;
 	    p.value.i.min = prop.value.i.min;
