@@ -85,6 +85,57 @@ inline void semaphore_unlock(int sem_set_id)
     semop(sem_set_id, &sem_op, 1);
 }
 
+class semaphore
+{
+public:
+    semaphore() = default;
+
+    semaphore( const semaphore& ) = delete;
+    semaphore& operator=( const semaphore& ) = delete;
+
+    semaphore( semaphore&& op2 ) noexcept
+    {
+        sem_id_ = op2.sem_id_;
+        op2.sem_id_ = 0;
+    }
+    semaphore&  operator=( semaphore&& op2 ) noexcept
+    {
+        destroy();
+        std::swap( sem_id_, op2.sem_id_ );
+        return *this;
+    }
+    ~semaphore()
+    {
+        if( sem_id_ ) {
+            semaphore_destroy( sem_id_ );
+        }
+    }
+
+    void    lock() noexcept  { semaphore_lock( sem_id_ ); }
+    void    unlock() noexcept { semaphore_unlock( sem_id_ ); }
+
+    static semaphore   create( const key_t key )
+    {
+        auto id = semaphore_create( key );
+        if( id == -1 ) {
+            // do something
+        }
+        return semaphore( id );
+    }
+private:
+    explicit semaphore( int id ) noexcept : sem_id_( id )        {}
+
+    void    destroy() noexcept
+    {
+        if( sem_id_ ) {
+            semaphore_destroy( sem_id_ );
+        }
+        sem_id_ = 0;
+    }
+
+    int sem_id_ = 0;
+};
+
 } /* namespace tcam */
 
 #endif /* TCAM_SEMAPHORES_H */
