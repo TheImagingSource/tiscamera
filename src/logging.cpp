@@ -118,13 +118,13 @@ void Logger::load_default_settings ()
 
 
 void Logger::log (const char* module,
-                  enum TCAM_LOG_LEVEL level,
+                  enum TCAM_LOG_LEVEL _level,
                   const char* function,
                   int line,
                   const char* message,
                   va_list args)
 {
-    if (level < this->level)
+    if (_level < level)
     {
         return;
     }
@@ -152,7 +152,7 @@ void Logger::log (const char* module,
                                  "%-10ld <%s> %s:%d: %s\n",
                                  /* ctime(&timer), */
                                  t,
-                                 loglevel2string(level),
+                                 loglevel2string(_level),
                                  function,
                                  line,
                                  msg);
@@ -164,7 +164,7 @@ void Logger::log (const char* module,
             "%-10ld <%s> %s:%d: %s\n",
             /* ctime(&timer), */
             t,
-            loglevel2string(level),
+            loglevel2string(_level),
             function,
             line,
             msg);
@@ -176,7 +176,7 @@ void Logger::log (const char* module,
             log_to_stdout(buffer);
             if (callback)
             {
-                callback(cb_user_data, level, function, line, message, args);
+                callback(cb_user_data, _level, function, line, message, args);
             }
             break;
         }
@@ -187,7 +187,7 @@ void Logger::log (const char* module,
         }
         case USER_DEFINED:
         {
-            //logger.callback(level, file, line, message, args);
+            //logger.callback(_level, file, line, message, args);
             break;
         }
         default:
