@@ -38,7 +38,7 @@ DeviceIndex::DeviceIndex ()
       callbacks(std::vector<callback_data>())
 {
     continue_thread = true;
-    work_thread = std::thread (&DeviceIndex::run, this);
+    work_thread = std::thread (&DeviceIndex::update_device_list_thread, this);
 }
 
 
@@ -115,7 +115,7 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
 }
 
 
-void DeviceIndex::sort_device_list ()
+void DeviceIndex::sort_device_list (std::vector<DeviceInfo>& lst)
 {
     /*
       Sorting of devices shall create the following order:
@@ -138,74 +138,82 @@ void DeviceIndex::sort_device_list ()
             return true;
         };
 
-    std::sort(device_list.begin(), device_list.end(), compareDeviceInfo);
+    std::sort(lst.begin(), lst.end(), compareDeviceInfo);
 }
 
 
-void DeviceIndex::update_device_list ()
+std::vector<DeviceInfo> DeviceIndex::fetch_device_list_backend () const
 {
-    std::vector<DeviceInfo> tmp_dev_list = std::vector<DeviceInfo>();
-    tmp_dev_list.reserve(10);
+    auto tmp_dev_list = BackendLoader::getInstance().get_device_list_all_backends();
 
-    auto dev_list = BackendLoader::getInstance().get_device_list_all_backends();
-    if (!dev_list.empty())
-        tmp_dev_list.insert(tmp_dev_list.end(), dev_list.begin(), dev_list.end());
+    sort_device_list(tmp_dev_list);
+    return tmp_dev_list;
+}
 
-    tcam_trace("Number of found devices: %d", dev_list.size());
 
-    // check for lost devices
-    for (const auto& d : device_list)
+void DeviceIndex::update_device_list_thread ()
+{
+    auto first_list = fetch_device_list_backend();
+
+    std::unique_lock<std::mutex> lock( mtx );
+    device_list = first_list;
+    have_list = true;
+    wait_for_list.notify_all();
+
+    while (continue_thread)
     {
-        auto f = [&d] (const DeviceInfo& info)
+        wait_for_next_run.wait_for(lock, std::chrono::seconds(wait_period));
+        if (!continue_thread)
+        {
+            break;
+        }
+
+        lock.unlock();
+
+        auto tmp_dev_list = fetch_device_list_backend();
+
+        lock.lock();
+
+        std::vector<DeviceInfo> lost_list;
+
+        for (const auto& d : device_list)
+        {
+            auto f = [&d](const DeviceInfo& info)
             {
                 if (d.get_serial().compare(info.get_serial()) == 0)
+                {
                     return true;
+                }
                 return false;
             };
 
-        auto found = std::find_if(tmp_dev_list.begin(), tmp_dev_list.end(), f);
+            auto found = std::find_if(tmp_dev_list.begin(), tmp_dev_list.end(), f);
 
-        if (found == tmp_dev_list.end())
-        {
-            tcam_log(TCAM_LOG_INFO, "Lost device %s - %s. Contacting callbacks", d.get_name().c_str(), d.get_serial().c_str());
-            fire_device_lost(d);
+            if (found == tmp_dev_list.end())
+            {
+                tcam_log(TCAM_LOG_INFO, "Lost device %s - %s. Contacting callbacks", d.get_name().c_str(), d.get_serial().c_str());
+                lost_list.push_back(d);
+            }
         }
-    }
-    std::lock_guard<std::mutex> lock(mtx);
 
-    device_list.clear();
+        device_list = std::move(tmp_dev_list);
 
-    device_list.insert(device_list.end(), tmp_dev_list.begin(), tmp_dev_list.end());
+        auto cbs = callbacks;
 
-    sort_device_list();
+        lock.unlock();
 
-    have_list = true;
-    wait_for_list.notify_all();
-}
-
-
-void DeviceIndex::run ()
-{
-    while (continue_thread)
-    {
-        update_device_list();
-
-        std::unique_lock<std::mutex> lock(mtx);
-        wait_for_next_run.wait_for(lock, std::chrono::seconds(wait_period));
-    }
-}
-
-
-void DeviceIndex::fire_device_lost (const DeviceInfo& d)
-{
-    std::lock_guard<std::mutex> lock(mtx);
-
-    for (auto& c : callbacks)
-    {
-        if (c.serial.empty() || c.serial.compare(d.get_serial()) == 0)
+        for (auto&& d : lost_list)
         {
-            c.callback(d, c.data);
+            for (auto& c : cbs)
+            {
+                if (c.serial.empty() || c.serial.compare( d.get_serial() ) == 0)
+                {
+                    c.callback(d, c.data);
+                }
+            }
         }
+
+        lock.lock();
     }
 }
 
@@ -245,9 +253,10 @@ std::vector<DeviceInfo> DeviceIndex::get_device_list () const
     // wait for work_thread to deliver first valid list
     // since get_aravis_device_list is a blocking function
     // our thread would retrieve an empty list without this wait loop
+
+    std::unique_lock<std::mutex> lock(mtx);
     while (!have_list)
     {
-        std::unique_lock<std::mutex> lock(mtx);
         wait_for_list.wait_for(lock, std::chrono::seconds(wait_period));
     }
     return device_list;

@@ -100,8 +100,6 @@ public:
                     return nullptr;
                 }
 
-                static auto prop_desc = create_empty_property(id);
-
                 return (TProperty*) p;
 
             }

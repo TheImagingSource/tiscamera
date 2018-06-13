@@ -108,14 +108,11 @@ private:
 
     std::vector<callback_data> callbacks;
 
-    void sort_device_list ();
+    static void sort_device_list( std::vector<DeviceInfo>& );
 
-    void update_device_list ();
-
-    void run ();
-
-    void fire_device_lost (const DeviceInfo& d);
-
+    void update_device_list_thread ();
+    
+    std::vector<DeviceInfo> fetch_device_list_backend() const;
 };
 
 

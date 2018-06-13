@@ -42,8 +42,7 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
     if (!open_device(_device))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to open device");
-        bad_device bd;
-        throw bd;
+        throw bad_device();
     }
     const auto serial = open_device_info.get_serial();
     tcam::DeviceIndex::get_instance().register_device_lost(deviceindex_lost_cb,
