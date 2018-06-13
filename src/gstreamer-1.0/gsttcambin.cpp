@@ -1203,7 +1203,6 @@ static void gst_tcambin_dispose (GstTcamBin* self)
     if (self->pad)
     {
         gst_element_remove_pad(GST_ELEMENT(self), self->pad);
-        gst_object_unref(self->pad);
     }
 
     G_OBJECT_CLASS(parent_class)->dispose((GObject*) self);
