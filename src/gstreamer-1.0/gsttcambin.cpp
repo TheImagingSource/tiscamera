@@ -1031,7 +1031,9 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
         }
         default:
         {
+#if GST_VERSION_MINOR >= 14
             GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
+#endif
             break;
         }
     }
