@@ -1078,7 +1078,7 @@ void send_log_to_bus (void* user_data,
     va_end(tmp_args);
 
     std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
-    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, msg_string.c_str());
+    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, "%s", msg_string.c_str());
 
     GstMessage* msg;
 

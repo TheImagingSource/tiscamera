@@ -569,7 +569,7 @@ static gboolean create_and_add_element (GstElement** element,
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
     {
-        GST_DEBUG("Adding %s(%p) to pipeline", factory_name, *element);
+        GST_DEBUG("Adding %s(%p) to pipeline", factory_name, (void*)*element);
         gst_bin_add(bin, *element);
         pipeline_description += " ! ";
         pipeline_description += factory_name;
