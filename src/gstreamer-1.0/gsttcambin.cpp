@@ -828,12 +828,12 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
                 const GValue* height = gst_structure_get_value(struc, "height");
                 const GValue* framerate = gst_structure_get_value(struc, "framerate");
 
-                GstStructure* s = gst_structure_new("video/x-raw", NULL);
+                GstStructure* s = gst_structure_new_empty("video/x-raw");
 
                 std::string tmp_format_string;
                 GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
 
-                GstStructure* tmp_struc = gst_caps_get_structure(tmp, 0);
+                GstStructure* tmp_struc = gst_structure_copy(gst_caps_get_structure(tmp, 0));
                 gst_structure_set_value(s, "format", gst_structure_get_value(tmp_struc, "format"));
 
                 gst_structure_set_value(s, "width", width);
