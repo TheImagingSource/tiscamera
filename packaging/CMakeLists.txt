@@ -27,7 +27,7 @@ set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "uvcdynctrl")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "gstreamer1.0-tools, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, gstreamer1.0-tools, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad")
 set(CPACK_SET_DESTDIR "on")
 
 # set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
@@ -58,7 +58,7 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_TOOLS)
 
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "python3-pyqt5 (>= 5.5)")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python3-pyqt5 (>= 5.5)")
 
 endif (BUILD_TOOLS)
 
