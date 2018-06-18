@@ -291,12 +291,12 @@ class TCamCapture(QMainWindow):
         self.props_action.triggered.connect(self.toggle_properties_dialog)
         self.toolbar.addAction(self.props_action)
 
-        # self.recording_action = QAction("", self)
-        # self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaRecord))
-        # self.recording_action.setIconText("Start recording")
-        # self.recording_action.setText("Start recording")
-        # self.recording_action.triggered.connect(self.start_recording_video)
-        # self.toolbar.addAction(self.recording_action)
+        self.recording_action = QAction("", self)
+        self.recording_action.setIcon(QIcon.fromTheme("media-record"))
+        self.recording_action.setIconText("Start recording")
+        self.recording_action.setText("Start recording")
+        self.recording_action.triggered.connect(self.start_recording_video)
+        self.toolbar.addAction(self.recording_action)
 
         self.set_device_menus_enabled(False)
 
@@ -339,10 +339,11 @@ class TCamCapture(QMainWindow):
         SLOT for triggering TcamView recording start
         """
         self.view.start_recording_video(self.settings.get_video_type())
-        self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaStop))
+        self.recording_action.setIcon(QIcon.fromTheme("media-playback-stop"))
         self.recording_action.setText("Stop recording")
+        self.recording_action.triggered.disconnect(self.start_recording_video)
         self.recording_action.triggered.connect(self.stop_recording_video)
-        self.recording_action.clicked.connect(self.stop_recording_video)
+        # self.recording_action.clicked.connect(self.stop_recording_video)
 
     def stop_recording_video(self):
         """
@@ -350,9 +351,10 @@ class TCamCapture(QMainWindow):
         """
         self.view.stop_recording_video()
         self.recording_action.setText("Start recording")
-        self.recording_action.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-        self.recording_action.clicked.connect(self.start_recording_video)
+        self.recording_action.setIcon(QIcon.fromTheme("media-record"))
+        # self.recording_action.clicked.connect(self.start_recording_video)
         self.recording_action.triggered.connect(self.start_recording_video)
+        self.recording_action.triggered.disconnect(self.stop_recording_video)
 
     def update_device_list(self, device_list):
         """
