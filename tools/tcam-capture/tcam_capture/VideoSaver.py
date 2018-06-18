@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from .Encoder import EncoderType, get_encoder_dict
+from .Encoder import MediaType, get_encoder_dict
 
 import os
 import gi
@@ -42,7 +42,7 @@ class VideoSaver(object):
 
     def set_video_encoder(self, enc_str: str):
 
-        if self.encoder_dict[enc_str].encoder_type is not EncoderType.video:
+        if self.encoder_dict[enc_str].encoder_type is not MediaType.video:
             return False
 
         self.selected_video_encoder = self.encoder_dict[enc_str]
@@ -54,7 +54,7 @@ class VideoSaver(object):
             return True
         return False
 
-    def _create_encoder_element(self, enc_type: EncoderType):
+    def _create_encoder_element(self, enc_type: MediaType):
         log.debug("Using encoder: {}".format(self.selected_video_encoder.module))
         element = Gst.ElementFactory.make(self.selected_video_encoder.module,
                                           "encoder")
@@ -69,7 +69,7 @@ class VideoSaver(object):
                 self.serial + "." +
                 self.selected_video_encoder.file_ending)
 
-    def create_pipeline(self, enc_type: EncoderType):
+    def create_pipeline(self, enc_type: MediaType):
         self.image_bin = Gst.Bin.new()
 
         bin_name = "VideoSaveBin"
@@ -112,7 +112,7 @@ class VideoSaver(object):
         if not self.set_video_encoder(video_type):
             log.error("Unable to set video encoder")
             return False
-        self.create_pipeline(EncoderType.video)
+        self.create_pipeline(MediaType.video)
         if self._connect():
             self.running = True
             return True

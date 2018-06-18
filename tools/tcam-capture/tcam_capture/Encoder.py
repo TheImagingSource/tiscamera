@@ -22,7 +22,7 @@ from gi.repository import Gst
 
 
 @unique
-class EncoderType(Enum):
+class MediaType(Enum):
     unknown = 0
     image = 1
     video = 2
@@ -30,7 +30,11 @@ class EncoderType(Enum):
 
 class Encoder(object):
 
-    def __init__(self, name, module, encoder_type: EncoderType, ending: str):
+    def __init__(self,
+                 name, module,
+                 encoder_type: MediaType,
+                 ending: str):
+
         self.name = name
         self.module = module
         self.encoder_type = encoder_type
@@ -38,18 +42,24 @@ class Encoder(object):
 
 
 def get_encoder_dict():
+    """
+    Returns a dictionary containing all supported media/encoder types
+    """
     encoder_dict = {}
     if Gst.ElementFactory.find("pngenc") is not None:
-        encoder_dict["png"] = Encoder("png", "pngenc", EncoderType.image, "png")
+        encoder_dict["png"] = Encoder("png", "pngenc", MediaType.image, "png")
     if Gst.ElementFactory.find("jpegenc") is not None:
-        encoder_dict["jpeg"] = Encoder("jpeg", "jpegenc", EncoderType.image, "jpeg")
+        encoder_dict["jpeg"] = Encoder("jpeg", "jpegenc", MediaType.image, "jpeg")
     if Gst.ElementFactory.find("pnmenc") is not None:
-        encoder_dict["pnm"] = Encoder("pnm", "pnmenc", EncoderType.image, "pnm")
+        encoder_dict["pnm"] = Encoder("pnm", "pnmenc", MediaType.image, "pnm")
+    if Gst.ElementFactory.find("avenc_tiff") is not None:
+        encoder_dict["tiff"] = Encoder("tiff", "avenc_tiff", MediaType.image, "tiff")
     if Gst.ElementFactory.find("x264enc") is not None:
-        encoder_dict["h264"] = Encoder("h264", "x264enc", EncoderType.video, "mp4")
+        encoder_dict["h264"] = Encoder("h264", "x264enc ! mp4mux ",
+                                       MediaType.video, "mp4")
     if Gst.ElementFactory.find("mpegtsmux") is not None:
-        encoder_dict["mpeg2"] = Encoder("mpeg", "mpegtsmux", EncoderType.video, "mpeg")
+        encoder_dict["mpeg2"] = Encoder("mpeg", "mpegtsmux", MediaType.video, "mpeg")
     if Gst.ElementFactory.find("avimux") is not None:
-        encoder_dict["avi"] = Encoder("avi", "avimux", EncoderType.video, "avi")
+        encoder_dict["avi"] = Encoder("avi", "avimux", MediaType.video, "avi")
 
     return encoder_dict

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from PyQt5.QtCore import pyqtSignal, QObject
-from .Encoder import EncoderType, get_encoder_dict
+from .Encoder import MediaType, get_encoder_dict
 import os
 import logging
 import gi
@@ -44,7 +44,7 @@ class ImageSaver(QObject):
         self.last_location = None
         self.encoder_dict = get_encoder_dict()
         self.selected_image_encoder = self.encoder_dict["png"]
-        self.recording_type = EncoderType.unknown
+        self.recording_type = MediaType.unknown
         self.srcpad = None
         self.working = False
 
@@ -55,7 +55,7 @@ class ImageSaver(QObject):
         if not any(enc_str == y.name for x, y in self.encoder_dict.items()):
             return False
 
-        if self.encoder_dict[enc_str].encoder_type is not EncoderType.image:
+        if self.encoder_dict[enc_str].encoder_type is not MediaType.image:
             return False
 
         self.selected_image_encoder = self.encoder_dict[enc_str]
@@ -111,7 +111,7 @@ class ImageSaver(QObject):
 
         return Gst.PadProbeReturn.REMOVE
 
-    def _create_encoder_element(self, enc_type: EncoderType):
+    def _create_encoder_element(self, enc_type: MediaType):
         """
         Convenience method to create gstreamer encoder elements
         """
@@ -127,7 +127,7 @@ class ImageSaver(QObject):
                 self.serial + "-" + str(self.index) + "." +
                 self.selected_image_encoder.name)
 
-    def _create_pipeline(self, enc_type: EncoderType):
+    def _create_pipeline(self, enc_type: MediaType):
         """
         Create the bin internal pipeline
         """
@@ -166,8 +166,8 @@ class ImageSaver(QObject):
         if not self._set_image_encoder(image_type):
             return False
         self.working = True
-        self._create_pipeline(EncoderType.image)
-        self.recording_type = EncoderType.image
+        self._create_pipeline(MediaType.image)
+        self.recording_type = MediaType.image
         return self._connect()
 
     def _connect(self):
