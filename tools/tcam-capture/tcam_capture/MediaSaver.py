@@ -47,7 +47,7 @@ class MediaSaver(QObject):
         self.location = "/tmp/"
         self.media_type = media_type
         self.encoder_dict = get_encoder_dict()
-        self.video_encoder = self.encoder_dict["mpeg2"]
+        self.video_encoder = self.encoder_dict["avi"]
         self.image_encoder = self.encoder_dict["png"]
         self.caps = caps
         self.accept_buffer = False
