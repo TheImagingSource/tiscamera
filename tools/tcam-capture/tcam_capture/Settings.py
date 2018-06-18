@@ -19,12 +19,25 @@ import logging
 log = logging.getLogger(__file__)
 
 
+class FileNameSettings():
+
+    def __init__(self):
+
+        self.include_timestamp = True
+        self.include_serial = True
+        self.include_counter = True
+        self.overwrite_files = False
+        self.counter_size = 5
+        self.include_format = True
+        self.user_prefix = ""
+
+
 class Settings(object):
 
     def __init__(self):
 
-        self.gc = "General"  # general category name used in config file
-
+        self.section_general = "General"  # general category name used in config file
+        self.section_image_name = "Image Naming"
         self._set_defaults()
 
     def _set_defaults(self):
@@ -41,6 +54,8 @@ class Settings(object):
         self.set_properties_on_reopen = True
         self.logfile_location = None
         self.use_dutils = True
+
+        self.image_name = FileNameSettings()
 
     def reset(self):
         """Set properties to their default values"""
@@ -76,8 +91,9 @@ class Settings(object):
             return False
         config = ConfigParser()
         config.read(self.get_settings_file())
+        sg = self.section_general
 
-        gen = config[self.gc]
+        gen = config[sg]
 
         self.save_location = gen.get("save_location", self.save_location)
         self.image_type = gen.get("image_type", self.image_type)
@@ -92,30 +108,68 @@ class Settings(object):
                                         self.logfile_location)
         self.use_dutils = gen.getboolean("use_dutils",
                                          self.use_dutils)
+
+        if config.has_section(self.section_image_name):
+
+            img = config[self.section_image_name]
+            self.image_name.counter_size = img.getint("counter_size",
+                                                      self.image_name.counter_size)
+            self.image_name.include_counter = img.getboolean("counter",
+                                                             self.image_name.include_counter)
+            self.image_name.overwrite_files = img.getboolean("overwrite_files",
+                                                             self.image_name.overwrite_files)
+            self.image_name.include_serial = img.getboolean("serial",
+                                                            self.image_name.include_serial)
+            self.image_name.include_format = img.getboolean("format",
+                                                            self.image_name.include_format)
+            self.image_name.include_timestamp = img.getboolean("timestamp",
+                                                               self.image_name.include_timestamp)
+            self.image_name.user_prefix = img.get("user-prefix",
+                                                  self.image_name.user_prefix)
         return True
 
     def save(self):
+
+        sg = self.section_general
+
         config = ConfigParser(allow_no_value=True)
-        config.add_section(self.gc)
+        config.add_section(sg)
 
-        config.set(self.gc, "# Location where images and videos shall be saved")
-        config[self.gc]["save_location"] = self.save_location
+        config.set(sg, "# Location where images and videos shall be saved")
+        config[sg]["save_location"] = self.save_location
 
-        config.set(self.gc, "# file type used for saving images")
-        config[self.gc]["image_type"] = self.image_type
-        config.set(self.gc, "# file type used for saving videos")
-        config[self.gc]["video_type"] = self.video_type
+        config.set(sg, "# file type used for saving images")
+        config[sg]["image_type"] = self.image_type
+        config.set(sg, "# file type used for saving videos")
+        config[sg]["video_type"] = self.video_type
 
-        config.set(self.gc, "# display dialog. ignored when reopen_device_on_startup is True")
-        config[self.gc]["show_device_dialog_on_startup"] = str(self.show_device_dialog_on_startup)
-        config.set(self.gc, "# Automatically open the last used device with its last known settings")
-        config[self.gc]["reopen_device_on_startup"] = str(self.reopen_device_on_startup)
-        config.set(self.gc, "# set device properties to their last known values")
-        config[self.gc]["set_properties_on_reopen"] = str(self.set_properties_on_reopen)
-        config.set(self.gc, "# folder to which log files should be written")
-        config[self.gc]["log_file_location"] = str(self.logfile_location)
-        config.set(self.gc, "# Use tiscamera-dutils, if present:")
-        config[self.gc]["use_dutils"] = str(self.use_dutils)
+        config.set(sg, "# display dialog. ignored when reopen_device_on_startup is True")
+        config[sg]["show_device_dialog_on_startup"] = str(self.show_device_dialog_on_startup)
+        config.set(sg, "# Automatically open the last used device with its last known settings")
+        config[sg]["reopen_device_on_startup"] = str(self.reopen_device_on_startup)
+        config.set(sg, "# set device properties to their last known values")
+        config[sg]["set_properties_on_reopen"] = str(self.set_properties_on_reopen)
+        config.set(sg, "# folder to which log files should be written")
+        config[sg]["log_file_location"] = str(self.logfile_location)
+        config.set(sg, "# Use tiscamera-dutils, if present:")
+        config[sg]["use_dutils"] = str(self.use_dutils)
+
+        img = self.section_image_name
+        config.add_section(img)
+        config.set(img, "# user defined prefix")
+        config[img]["user-prefix"] = str(self.image_name.user_prefix)
+        config.set(img, "# include serial in filename")
+        config[img]["serial"] = str(self.image_name.include_serial)
+        config.set(img, "# include current format in filename")
+        config[img]["format"] = str(self.image_name.include_format)
+        config.set(img, "# include current ISO timestamp in filename ")
+        config[img]["timestamp"] = str(self.image_name.include_timestamp)
+        config.set(img, "# include a counter in filename")
+        config[img]["counter"] = str(self.image_name.include_counter)
+        config.set(img, "# minimum size of the counter (padding)")
+        config[img]["counter_size"] = str(self.image_name.counter_size)
+        config.set(img, "# overwrite files or try to always use unique names")
+        config[img]["overwrite_files"] = str(self.image_name.overwrite_files)
 
         if not os.path.exists(self.settings_directory):
             os.makedirs(self.settings_directory)
