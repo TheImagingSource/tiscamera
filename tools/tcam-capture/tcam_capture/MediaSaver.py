@@ -203,9 +203,10 @@ class MediaSaver(QObject):
         """
         if self.working:
             return
+        self.video_encoder = get_encoder_dict()[encoder]
         if self.media_type != MediaType.video:
+            log.error("Requested encoder is not intended for videos. Aborting.")
             return
-
         self._create_pipeline()
 
         self.pipeline.set_state(Gst.State.PLAYING)

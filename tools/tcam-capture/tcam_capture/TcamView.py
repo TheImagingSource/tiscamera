@@ -19,6 +19,7 @@ from tcam_capture.TcamScreen import TcamScreen
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
 from tcam_capture.MediaSaver import MediaSaver
+from tcam_capture.Settings import Settings
 from tcam_capture.Encoder import MediaType, get_encoder_dict
 from tcam_capture.TcamCaptureData import TcamCaptureData
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -41,6 +42,7 @@ log = logging.getLogger(__name__)
 class TcamView(QWidget):
 
     image_saved = pyqtSignal(str)
+    video_saved = pyqtSignal(str)
     new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
     current_fps = pyqtSignal(float)
     format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
@@ -72,6 +74,7 @@ class TcamView(QWidget):
         self.actual_fps = 0.0
         self.framecounter = 0
         self.start_time = 0
+        self.settings = None
         # additional timer to update actual_fps
         # when no images arrive
         self.fps_timer = QtCore.QTimer()
@@ -102,6 +105,9 @@ class TcamView(QWidget):
                 return True
 
         return QObject.eventFilter(self, obj, event)
+
+    def set_settings(self, new_settings: Settings):
+        self.settings = new_settings
 
     def toggle_fullscreen(self):
         if self.is_fullscreen:

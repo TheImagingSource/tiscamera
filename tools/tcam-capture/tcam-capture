@@ -314,6 +314,8 @@ class TCamCapture(QMainWindow):
         else:
             log.info("Settings not saved")
 
+        if self.view:
+            self.view.set_settings(self.settings)
     def open_device_dialog(self):
         """
         SLOT for opening the device_dialog
@@ -535,6 +537,7 @@ class TCamCapture(QMainWindow):
                     break
 
         self.view = TcamView(self.serial, self)
+        self.view.set_settings(self.settings)
         self.view.register_device_lost(self.lost_device)
         self.view.create_pipeline(caps_str)
         self.view.image_saved.connect(self.saved_image)
