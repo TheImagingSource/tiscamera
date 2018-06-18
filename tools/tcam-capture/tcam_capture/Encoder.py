@@ -57,8 +57,8 @@ def get_encoder_dict():
     if Gst.ElementFactory.find("x264enc") is not None:
         encoder_dict["h264"] = Encoder("h264", "x264enc ! mp4mux ",
                                        MediaType.video, "mp4")
-    if Gst.ElementFactory.find("mpegtsmux") is not None:
-        encoder_dict["mpeg2"] = Encoder("mpeg", "mpegtsmux", MediaType.video, "mpeg")
+    # if Gst.ElementFactory.find("mpegtsmux") is not None:
+    #     encoder_dict["mpeg2"] = Encoder("mpeg", "mpegtsmux", MediaType.video, "mpeg")
     if Gst.ElementFactory.find("avimux") is not None:
         encoder_dict["avi"] = Encoder("avi", "avimux", MediaType.video, "avi")
 

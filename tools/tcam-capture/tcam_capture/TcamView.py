@@ -18,6 +18,8 @@ from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.TcamScreen import TcamScreen
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
+from tcam_capture.MediaSaver import MediaSaver
+from tcam_capture.Encoder import MediaType, get_encoder_dict
 from tcam_capture.TcamCaptureData import TcamCaptureData
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout)
@@ -64,7 +66,6 @@ class TcamView(QWidget):
         self.current_width = 0
         self.current_height = 0
         self.device_lost_callbacks = []
-        self.format_menu = None
         self.caps_desc = None
         self.video_format = None
         self.retry_countdown = 5
@@ -75,6 +76,12 @@ class TcamView(QWidget):
         # when no images arrive
         self.fps_timer = QtCore.QTimer()
         self.fps_timer.timeout.connect(self.fps_tick)
+
+        self.file_pattern = ""
+        self.file_location = "/tmp"
+        self.caps = None
+        self.videosaver = None
+        self.imagesaver = None
 
     def get_caps_desc(self):
         if not self.caps_desc:
@@ -119,26 +126,53 @@ class TcamView(QWidget):
                 self.fullscreen_container.on_new_pixmap(self.container.pix.pixmap())
 
     def save_image(self, image_type: str):
-        if not self.imagesaver.working:
-            self.imagesaver.save_image(image_type)
-        else:
-            log.info("Previous image still being saved.")
+
+        if not self.imagesaver:
+            self.imagesaver = MediaSaver(self.serial, self.caps, MediaType.image)
+            self.imagesaver.saved.connect(self.image_saved_callback)
+            self.imagesaver.error.connect(self.image_error_callback)
+        self.imagesaver.save_image(get_encoder_dict()[image_type])
 
     def image_saved_callback(self, image_path: str):
+        """
+        SLOT for imagesaver callback for successfull saving
+        """
         self.image_saved.emit(image_path)
 
     def image_error_callback(self, error_msg: str):
         pass
 
+    def video_saved_callback(self, video_path: str):
+        """
+        SLOT for videosaver callback for successfull saving
+        """
+        self.video_saved.emit(video_path)
+
     def start_recording_video(self, video_type: str):
-        """"""
+        """
+
+        """
+        if self.videosaver:
+            log.error("A video recording is already ongoing.")
+            return
+        self.videosaver = MediaSaver(self.serial, self.caps, MediaType.video)
+        self.videosaver.set_encoder(video_type)
+        self.videosaver.location = self.file_location
+        self.videosaver.saved.connect(self.video_saved_callback)
         self.videosaver.start_recording_video(video_type)
 
     def stop_recording_video(self):
-        """"""
-        self.videosaver.stop_recording_video()
+        """
+
+        """
+        if self.videosaver:
+            self.videosaver.stop_recording_video()
+            self.videosaver = None
 
     def play(self, video_format=None):
+
+        if self.videosaver:
+            self.stop_recording_video()
 
         if self.pipeline is None:
             self.create_pipeline()
@@ -183,6 +217,7 @@ class TcamView(QWidget):
         """
         buf = self.pipeline.get_by_name("sink").emit("pull-sample")
         caps = buf.get_caps()
+        self.caps = caps
         struc = caps.get_structure(0)
         b = buf.get_buffer()
         try:
@@ -205,6 +240,10 @@ class TcamView(QWidget):
                 self.fullscreen_container.new_pixmap.emit(self.image)
             else:
                 self.container.new_pixmap.emit(self.image)
+            if self.videosaver and self.videosaver.accept_buffer:
+                self.videosaver.feed_image(b)
+            if self.imagesaver and self.imagesaver.accept_buffer:
+                self.imagesaver.feed_image(b)
 
         finally:
             b.unmap(buffer_map)
@@ -230,10 +269,6 @@ class TcamView(QWidget):
         self.pipeline = None
         self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
                                                              dutils=self.use_dutils))
-        self.imagesaver = ImageSaver(self.pipeline, self.serial)
-        self.imagesaver.saved.connect(self.image_saved_callback)
-        self.imagesaver.error.connect(self.image_error_callback)
-        self.videosaver = VideoSaver(self.pipeline, self.serial)
 
         sink = self.pipeline.get_by_name("sink")
         sink.connect("new-sample", self.new_buffer)
@@ -261,6 +296,9 @@ class TcamView(QWidget):
         self.fps_timer.stop()
 
     def stop(self):
+        """
+        Stop playback
+        """
         log.info("Setting state to NULL")
         self.start_time = 0
         self.fps_timer.stop()
@@ -269,6 +307,9 @@ class TcamView(QWidget):
         log.info("Set State to NULL")
 
     def on_info(self, bus, msg):
+        """
+        Callback for gst bus info messages
+        """
         info, dbg = msg.parse_info()
 
         log.info(dbg)
@@ -286,7 +327,10 @@ class TcamView(QWidget):
                 log.debug("Debug info:", dbg)
 
     def fire_format_selected(self, caps: str):
-
+        """
+        Emit SIGNAL that the pipeline has selected
+        src caps and inform listeners what the caps are
+        """
         c = Gst.Caps.from_string(caps)
 
         structure = c.get_structure(0)
@@ -314,6 +358,10 @@ class TcamView(QWidget):
         self.format_selected.emit(fmt, resolution, str(fps))
 
     def on_error(self, bus, msg):
+        """
+        Callback for gst bus messages
+        Receives errors and chooses appropriate actions
+        """
         err, dbg = msg.parse_error()
 
         if msg.src.get_name() == "tcambin-source":
@@ -371,6 +419,9 @@ class TcamView(QWidget):
         self.device_lost_callbacks.append(callback)
 
     def fire_device_lost(self):
+        """
+        Notify all callback that our device is gone
+        """
         for cb in self.device_lost_callbacks:
             cb()
 
@@ -405,7 +456,7 @@ class TcamView(QWidget):
     @staticmethod
     def has_dutils():
         """
-
+        Check to see if the gstreamer module gsttcamdutils is available.
         """
 
         factory = Gst.ElementFactory.find("tcamdutils")
