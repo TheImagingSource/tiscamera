@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import glob
+from tcam_capture.Settings import FileNameSettings
 import datetime
 import re
 import os
@@ -22,139 +22,104 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Gst
 
-
 import logging
 
 log = logging.getLogger(__name__)
 
 
-class FileNamePattern(object):
-    """"""
-
-    def __init__(self,
-                 name: str, pattern: str, help_text: str, sample: str):
-        self.name = name
-        self.pattern = pattern
-        self.help_text = help_text
-        self.sample = sample
-
-
 class FileNameGenerator(object):
     """"""
 
-    def __init__(self):
+    def __init__(self,
+                 serial: str,
+                 settings: FileNameSettings,
+                 caps: Gst.Caps=None):
 
-        # self.pattern_default = "{serial}-{format}-%Y%m%dT%H%M%S-{counter:5}.{suffix}"
-        self.pattern_default = "{serial}-{format}-{counter:5}.{suffix}"
-        self.pattern = self.pattern_default
+        self.serial = serial
+        self.settings = settings
+        self.location = "/tmp/"
+        self.file_suffix = "unknown"
 
-        self.fields = {}
-        self.fields["serial"] = FileNamePattern("serial",
-                                                "{serial}",
-                                                "serial number of the device that is used.",
-                                                "00001234")
+        self.caps_str = FileNameGenerator.caps_to_fmt_string(caps)
 
-        self.fields["suffix"] = FileNamePattern("suffix",
-                                                "{suffix}",
-                                                "Automatically determine the file format and set the file type accordingly.",
-                                                "mkv")
-
-        self.fields["format"] = FileNamePattern("format",
-                                                "{format}",
-                                                "Simple format description of what the device currently sends.",
-                                                "jpeg_1920x1080_60_1")
-
-        self.fields["counter"] = FileNamePattern("counter",
-                                                 "{counter(\:\d+)?}",
-                                                 "Simple counter that is increased with every image taken. Can be padded by appending :<int>",
-                                                 "00001")
-
-    def get_pattern_list(self):
-        pass
-
-    def _replace(self, text, rep_dict):
+    def set_settings(self, settings: FileNameSettings):
         """"""
+        log.info("Received updated settings")
+        self.settings = settings
 
-        # use these three lines to do the replacement
-        rep_dict = dict((re.escape(k), v) for k, v in rep_dict.items())
-        pattern = re.compile("|".join(rep_dict.keys()))
-        text = pattern.sub(lambda m: rep_dict[re.escape(m.group(0))], text)
+    def set_serial(self, serial: str):
+        """"""
+        self.serial = serial
 
-        def replace_counter(match):
-            if match.group() == "{counter}":
-                return rep_dict["{counter}"]
+    def set_caps(self, caps: Gst.Caps):
+        self.caps_str = FileNameGenerator.caps_to_fmt_string(caps)
+
+    def _create_file_name_str(self,
+                              fallthrough: str="mediafile",
+                              create_searchpattern: bool=False):
+
+        filename = ""
+
+        if self.settings.user_prefix != "":
+            filename += self.settings.user_prefix
+
+        if self.settings.include_serial:
+            if filename != "":
+                filename += "-"
+            filename += self.serial
+
+        if self.settings.include_format:
+            if filename != "":
+                filename += "-"
+            filename += self.caps_str
+
+        if self.settings.include_timestamp:
+            if filename != "":
+                filename += "-"
+            filename += datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        if self.settings.include_counter:
+            if filename != "":
+                filename += "-"
+
+            if not create_searchpattern:
+                # actual fillout
+                next_index = FileNameGenerator.get_next_index(self.location,
+                                                              self._create_file_name_str(fallthrough, True),
+                                                              self.settings.counter_size)
+
+                filename += '{message:0>{fill}}'.format(message=next_index,
+                                                        fill=self.settings.counter_size)
+
             else:
-                padding = re.search("\d+", match.group())
-                return "%{}d".format(padding.group())
-                return "{counter:0{width}d}".format(width=padding.group(),
-                                                    counter=1)
+                # use regex pattern to find preexisting files
+                filename += "[0-9]{{{}}}"
 
-        # deal with counter separately as its padding makes simple replacement impossible
-        # text = re.sub(r'{counter(\:\d+)?}', replace_counter, text)
-        text = re.sub(r'{counter(\:\d+)?}', "%05d", text)
+        if filename == "":
+            filename = fallthrough
 
-        text = datetime.datetime.strftime(datetime.datetime.now(), text)
-        log.info("returning {}".format(text))
-        return text
+        filename += "."
+        filename += self.file_suffix
 
-    def set_pattern(self, pattern: str = None):
+        log.debug("Returning filename {}".format(filename))
+
+        return filename
+
+    def create_file_name(self, fallthrough: str="mediafile"):
         """
-        Sets the useed pattern to the specified string
-        Should the given pattern be None, the pattern will be reset
-        by calling reset_pattern
+
         """
-        return
-        if pattern:
-            self.pattern = pattern
-        else:
-            self.reset_pattern()
 
-    def reset_pattern(self):
-        """Resets pattern to the default value"""
-        self.pattern = self.pattern_default
+        fs = self.location + "/" + self._create_file_name_str(fallthrough)
 
-    def _create_replacement_dict(self,
-                                 serial: str=None,
-                                 fmt: str=None,
-                                 counter: str="",
-                                 file_suffix: str=None):
-        rep_dict = {}
-        rep_dict["{format}"] = fmt
-        rep_dict["{suffix}"] = file_suffix
-        rep_dict["{counter}"] = counter
-        rep_dict["{serial}"] = serial
-
-        return rep_dict
-
-    def preview(self, pattern: str):
-        """
-        Return a preview of how a filename with
-        the specified pattern would look like
-        """
-        #  TODO replace stuff with things from filenamepatterns
-        rep_dict = self._create_replacement_dict("00001234",
-                                                 "jpeg_1920x1080_60_1",
-                                                 "1",
-                                                 "pnm")
-        return self._replace(pattern, rep_dict)
-
-    def create_file_name(self,
-                         serial: str=None,
-                         fmt: str=None,
-                         counter: str=None,
-                         file_suffix: str=None):
-
-        rep_dict = self._create_replacement_dict(serial,
-                                                 fmt,
-                                                 "%05d",
-                                                 file_suffix)
-
-        return self._replace(self.pattern, rep_dict)
+        return fs
 
     @staticmethod
     def caps_to_fmt_string(caps: Gst.Caps):
-        """"""
-        if not caps.is_fixed():
+        """
+        Convert Gst.Caps to a string that is useable in file names.
+        """
+
+        if not caps or not caps.is_fixed():
             return ""
 
         fmt = caps.get_structure(0)
@@ -165,7 +130,6 @@ class FileNameGenerator(object):
         fps_str = re.search("\d{1,2}/\d", fmt.to_string())
 
         fps_str = fps_str.group(0)
-        # fmt.to_string()[fmt.to_string().find("framerate=(fraction)"):]
 
         return "{}_{}x{}_{}_{}".format(str(frmt),
                                        str(width),
@@ -180,7 +144,7 @@ class FileNameGenerator(object):
         """"""
 
         # python str.format uses {} to escape {}
-        search_str = "19510261-[0-9]{{{}}}.jpeg".format(index_width)
+        search_str = filepattern.format(index_width)
 
         matches = [f for f in os.listdir(directory) if re.search(search_str, f)]
 
@@ -204,7 +168,9 @@ class FileNameGenerator(object):
         # e.g. index_width=5 what if 99999 exists and (maybe) 100000 or larger
 
         if (10 * index_width - 1) in numbers:
-            ret = FileNameGenerator.get_next_index(index_width + 1)
+            ret = FileNameGenerator.get_next_index(directory,
+                                                   filepattern,
+                                                   index_width + 1)
 
             if ret != 0:
                 return ret

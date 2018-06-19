@@ -18,6 +18,7 @@ from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.TcamScreen import TcamScreen
 from tcam_capture.ImageSaver import ImageSaver
 from tcam_capture.VideoSaver import VideoSaver
+from tcam_capture.FileNameGenerator import FileNameGenerator
 from tcam_capture.MediaSaver import MediaSaver
 from tcam_capture.Settings import Settings
 from tcam_capture.Encoder import MediaType, get_encoder_dict
@@ -75,6 +76,9 @@ class TcamView(QWidget):
         self.framecounter = 0
         self.start_time = 0
         self.settings = None
+        self.video_fng = None
+        self.image_fng = None
+
         # additional timer to update actual_fps
         # when no images arrive
         self.fps_timer = QtCore.QTimer()
@@ -107,7 +111,25 @@ class TcamView(QWidget):
         return QObject.eventFilter(self, obj, event)
 
     def set_settings(self, new_settings: Settings):
+        """
+        Update settings of all subclasses
+        """
         self.settings = new_settings
+        if not self.video_fng:
+            self.video_fng = FileNameGenerator(self.serial,
+                                               self.settings.video_name)
+        else:
+            self.video_fng.set_settings(self.settings.video_name)
+        self.video_fng.location = self.settings.save_location
+        self.video_fng.file_suffix = get_encoder_dict()[self.settings.video_type].file_ending
+
+        if not self.image_fng:
+            self.image_fng = FileNameGenerator(self.serial,
+                                               self.settings.image_name)
+        else:
+            self.image_fng.set_settings(self.settings.image_name)
+        self.image_fng.location = self.settings.save_location
+        self.image_fng.file_suffix = get_encoder_dict()[self.settings.image_type].file_ending
 
     def toggle_fullscreen(self):
         if self.is_fullscreen:
@@ -137,6 +159,11 @@ class TcamView(QWidget):
             self.imagesaver = MediaSaver(self.serial, self.caps, MediaType.image)
             self.imagesaver.saved.connect(self.image_saved_callback)
             self.imagesaver.error.connect(self.image_error_callback)
+        self.image_fng.set_settings(self.settings.image_name)
+
+        fn = self.image_fng.create_file_name("image")
+
+        self.imagesaver.current_filename = fn
         self.imagesaver.save_image(get_encoder_dict()[image_type])
 
     def image_saved_callback(self, image_path: str):
@@ -164,6 +191,8 @@ class TcamView(QWidget):
         self.videosaver = MediaSaver(self.serial, self.caps, MediaType.video)
         self.videosaver.set_encoder(video_type)
         self.videosaver.location = self.file_location
+
+        self.videosaver.current_filename = self.video_fng.create_file_name()
         self.videosaver.saved.connect(self.video_saved_callback)
         self.videosaver.start_recording_video(video_type)
 
@@ -340,6 +369,9 @@ class TcamView(QWidget):
         c = Gst.Caps.from_string(caps)
 
         structure = c.get_structure(0)
+
+        self.image_fng.set_caps(c)
+        self.video_fng.set_caps(c)
 
         if structure.get_name() == "image/jpeg":
             fmt = "jpeg"

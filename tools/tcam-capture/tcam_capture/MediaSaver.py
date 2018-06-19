@@ -14,7 +14,6 @@
 
 
 from .Encoder import MediaType, get_encoder_dict, Encoder
-from .FileNameGenerator import FileNameGenerator
 
 from PyQt5.QtCore import pyqtSignal, QObject
 import os
@@ -51,7 +50,8 @@ class MediaSaver(QObject):
         self.image_encoder = self.encoder_dict["png"]
         self.caps = caps
         self.accept_buffer = False
-        self.fng = FileNameGenerator()
+
+        self.current_filename = ""
         self.working = False
         self.queue_counter = 0
         self.src_name = ""
@@ -100,16 +100,7 @@ class MediaSaver(QObject):
 
 
         """
-
-        fmt = FileNameGenerator.caps_to_fmt_string(self.caps)
-        self.fng._create_replacement_dict(self.serial,
-                                          fmt,
-                                          self.index,
-                                          self._select_encoder().file_ending)
-
-        return (self.location + "/" + self.serial + "-%d." + self._select_encoder().file_ending)
-        # return (self.location + "/" +
-        #         self.fng.create_file_name(self.serial, fmt, counter=self.index, file_suffix=self._select_encoder().file_ending))
+        return self.location + "/" + "mediafile." + self._select_encoder().file_ending
 
     def _select_encoder(self):
         """"""
@@ -130,7 +121,11 @@ class MediaSaver(QObject):
         """
         Create a GstPipeline that contains our encoding, etc
         """
-        location = self._generate_location()
+        if self.current_filename == "":
+            location = self._generate_location()
+        else:
+            location = self.current_filename
+
         encoder = self._select_encoder()
         sink_str = self._select_sink()
 
@@ -165,22 +160,25 @@ class MediaSaver(QObject):
         # log.info("Received msg from {}".format(message.src.get_name()))
         if message.src.get_name() == self.sink_name:
 
-            log.info("{}".format(message.get_structure().to_string()))
-            log.info("{}".format(message.get_structure().get_string("filename")))
+            # log.info("{}".format(message.get_structure().to_string()))
+            # log.info("{}".format(message.get_structure().get_string("filename")))
             self.saved.emit(message.get_structure().get_string("filename"))
+            self.current_filename = ""
 
         if t == Gst.MessageType.EOS:
-            log.info("Received EOS from {}".format(message.src.get_name()))
+            # log.info("Received EOS from {}".format(message.src.get_name()))
 
             if (message.src.get_name() == self.sink_name and
                     self.media_type == MediaType.video):
-                self.saved.emit("")
-                log.info("sink sent EOS {}".format(message.get_structure().to_string()))
+                self.saved.emit(self.current_filename)
+                # log.info("sink sent EOS {}".format(message.get_structure().to_string()))
+                self.current_filename = ""
 
             self.pipeline.set_state(Gst.State.NULL)
             self.src = None
             self.pipeline = None
             self.working = False
+            self.saved.emit(self.current_filename)
 
     def feed_image(self, gstbuffer: Gst.Buffer):
         """
@@ -251,6 +249,9 @@ class MediaSaver(QObject):
             bus = self.pipeline.get_bus()
             bus.add_signal_watch()
             bus.connect("message", self._bus_call)
+
+        sink = self.pipeline.get_by_name(self.sink_name)
+        sink.set_property("location", self.current_filename)
 
         self.working = True
         self.accept_buffer = True
