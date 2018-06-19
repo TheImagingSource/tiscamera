@@ -38,6 +38,7 @@ class Settings(object):
 
         self.section_general = "General"  # general category name used in config file
         self.section_image_name = "Image Naming"
+        self.section_video_name = "Video Naming"
         self._set_defaults()
 
     def _set_defaults(self):
@@ -56,6 +57,7 @@ class Settings(object):
         self.use_dutils = True
 
         self.image_name = FileNameSettings()
+        self.video_name = FileNameSettings()
 
     def reset(self):
         """Set properties to their default values"""
@@ -126,6 +128,24 @@ class Settings(object):
                                                                self.image_name.include_timestamp)
             self.image_name.user_prefix = img.get("user-prefix",
                                                   self.image_name.user_prefix)
+
+        if config.has_section(self.section_video_name):
+
+            img = config[self.section_video_name]
+            self.video_name.counter_size = img.getint("counter_size",
+                                                      self.video_name.counter_size)
+            self.video_name.include_counter = img.getboolean("counter",
+                                                             self.video_name.include_counter)
+            self.video_name.overwrite_files = img.getboolean("overwrite_files",
+                                                             self.video_name.overwrite_files)
+            self.video_name.include_serial = img.getboolean("serial",
+                                                            self.video_name.include_serial)
+            self.video_name.include_format = img.getboolean("format",
+                                                            self.video_name.include_format)
+            self.video_name.include_timestamp = img.getboolean("timestamp",
+                                                               self.video_name.include_timestamp)
+            self.video_name.user_prefix = img.get("user-prefix",
+                                                  self.video_name.user_prefix)
         return True
 
     def save(self):
@@ -170,6 +190,23 @@ class Settings(object):
         config[img]["counter_size"] = str(self.image_name.counter_size)
         config.set(img, "# overwrite files or try to always use unique names")
         config[img]["overwrite_files"] = str(self.image_name.overwrite_files)
+
+        vid = self.section_video_name
+        config.add_section(vid)
+        config.set(vid, "# user defined prefix")
+        config[vid]["user-prefix"] = str(self.video_name.user_prefix)
+        config.set(vid, "# include serial in filename")
+        config[vid]["serial"] = str(self.video_name.include_serial)
+        config.set(vid, "# include current format in filename")
+        config[vid]["format"] = str(self.video_name.include_format)
+        config.set(vid, "# include current ISO timestamp in filename ")
+        config[vid]["timestamp"] = str(self.video_name.include_timestamp)
+        config.set(vid, "# include a counter in filename")
+        config[vid]["counter"] = str(self.video_name.include_counter)
+        config.set(vid, "# minimum size of the counter (padding)")
+        config[vid]["counter_size"] = str(self.video_name.counter_size)
+        config.set(vid, "# overwrite files or try to always use unique names")
+        config[vid]["overwrite_files"] = str(self.video_name.overwrite_files)
 
         if not os.path.exists(self.settings_directory):
             os.makedirs(self.settings_directory)
