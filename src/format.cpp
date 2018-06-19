@@ -24,11 +24,11 @@
 struct fourcc_names
 {
     uint32_t fourcc;
-    char name[24];
+    const char* name;
 };
 
 
-fourcc_names fourcc_name_array [] =
+static const fourcc_names fourcc_name_array [] =
 {
     {FOURCC_RGB8, "RGB8"},
     {FOURCC_RGB24, "RGB24"},
@@ -121,7 +121,7 @@ uint32_t tcam::description2fourcc (const char* description)
 
 std::string tcam::fourcc2string (uint32_t fourcc)
 {
-
+    // #TODO this is wrong on ARM !!
 
     union _bla
     {
@@ -146,13 +146,7 @@ uint32_t tcam::string2fourcc (const std::string& s)
         return 0;
     }
 
-    uint32_t fourcc = 0;
-
-    char c[4];
-
-    strncpy(c, s.c_str(), 4);
-
-    fourcc = mmioFOURCC(c[0],c[1],c[2],c[3]);
+    uint32_t fourcc = mmioFOURCC(s[0],s[1],s[2],s[3]);
 
     return fourcc;
 }
