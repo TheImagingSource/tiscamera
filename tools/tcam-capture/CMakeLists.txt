@@ -51,7 +51,7 @@ if (PYTHONINTERP_FOUND)
   # an installed one should search for globally available images
   # e.g. /usr/share/tiscamera/images
   # whereas a local one should prefer <tiscamera>/data/images
-  set(TCAM_IMAGE_DIR "${TCAM_INSTALL_IMAGE_DIR}")
+  set(TCAM_IMAGE_DIR "${TCAM_INSTALL_IMAGE_DIR}/images")
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
     "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py" @ONLY)
