@@ -135,11 +135,13 @@ class OptionsDialog(QDialog):
             for key, value in encoder_dict.items():
                 if value.encoder_type == Encoder.MediaType.video:
                     self.video_type_combobox.addItem(key)
+            self.video_type_combobox.currentIndexChanged['QString'].connect(self.video_name_suffix_changed)
+
             video_type_label = QLabel("Save videos as:", self)
             form_layout.addRow(video_type_label,
                                self.video_type_combobox)
 
-        image_name_groupbox = QGroupBox("Image Name")
+        image_name_groupbox = QGroupBox("Image File Names")
         groupbox_layout = QFormLayout()
         image_name_groupbox.setLayout(groupbox_layout)
 
@@ -182,7 +184,7 @@ class OptionsDialog(QDialog):
         groupbox_layout.addRow(self.image_name_counter_box_description,
                                self.image_name_counter_box)
 
-        self.image_name_counter.toggled.connect(self.toggle_counter_box_availability)
+        self.image_name_counter.toggled.connect(self.toggle_image_counter_box_availability)
         self.image_name_counter.toggled.connect(self.image_name_properties_toggled)
 
         self.image_name_timestamp = QCheckBox(self)
@@ -192,6 +194,61 @@ class OptionsDialog(QDialog):
                                self.image_name_timestamp)
 
         layout.addWidget(image_name_groupbox)
+
+        video_groupbox = QGroupBox("Video File Names")
+
+        video_layout = QFormLayout()
+        video_groupbox.setLayout(video_layout)
+
+        self.video_name_preview = QLabel("<USER-PREFIX>-<SERIAL>-<FORMAT>-<TIMESTAMP>-<COUNTER>.png")
+        self.video_name_preview_description = QLabel("Videos will be named like:")
+        video_layout.addRow(self.video_name_preview_description,
+                            self.video_name_preview)
+
+        self.video_name_prefix = QLineEdit()
+        self.video_name_prefix.textChanged.connect(self.video_name_prefix_changed)
+        self.video_name_prefix.setMaxLength(100)
+
+        self.video_name_prefix_description = QLabel("User Prefix:", self)
+        video_layout.addRow(self.video_name_prefix_description,
+                            self.video_name_prefix)
+
+        self.video_name_serial = QCheckBox(self)
+        self.video_name_serial.toggled.connect(self.video_name_properties_toggled)
+        self.video_name_serial_description = QLabel("Include Serial:")
+        video_layout.addRow(self.video_name_serial_description,
+                            self.video_name_serial)
+
+        self.video_name_format = QCheckBox(self)
+        self.video_name_format.toggled.connect(self.video_name_properties_toggled)
+
+        self.video_name_format_description = QLabel("Include Format:")
+        video_layout.addRow(self.video_name_format_description,
+                            self.video_name_format)
+
+        self.video_name_counter = QCheckBox(self)
+        self.video_name_counter.toggled.connect(self.video_name_properties_toggled)
+        self.video_name_counter_description = QLabel("Include Counter:")
+        video_layout.addRow(self.video_name_counter_description,
+                            self.video_name_counter)
+
+        self.video_name_counter_box = QSpinBox(self)
+        self.video_name_counter_box.setRange(1, 10)
+        self.video_name_counter_box.valueChanged.connect(self.video_name_counter_changed)
+        self.video_name_counter_box_description = QLabel("Counter Size:")
+        video_layout.addRow(self.video_name_counter_box_description,
+                            self.video_name_counter_box)
+
+        self.video_name_counter.toggled.connect(self.toggle_video_counter_box_availability)
+        self.video_name_counter.toggled.connect(self.video_name_properties_toggled)
+
+        self.video_name_timestamp = QCheckBox(self)
+        self.video_name_timestamp.toggled.connect(self.video_name_properties_toggled)
+        self.video_name_timestamp_description = QLabel("Include Timestamp:")
+        video_layout.addRow(self.video_name_timestamp_description,
+                            self.video_name_timestamp)
+
+        layout.addWidget(video_groupbox)
 
         self.saving_widget.setLayout(layout)
 
@@ -260,12 +317,88 @@ class OptionsDialog(QDialog):
 
         self.image_name_preview.setText(preview_string)
 
-    def toggle_counter_box_availability(self):
+
+    def video_name_prefix_changed(self, name: str):
+        """"""
+
+        self.settings.video_name.user_prefix = self.video_name_prefix.text()
+        self.update_video_name_preview()
+
+    def video_name_suffix_changed(self, suffix: str):
+        """"""
+
+        self.update_video_name_preview()
+
+    def video_name_counter_changed(self, name: str):
+        """"""
+        self.settings.video_name.counter_size = self.video_name_counter_box.value()
+        self.update_video_name_preview()
+
+    def video_name_properties_toggled(self):
+        """"""
+
+        self.settings.video_name.include_timestamp = self.video_name_timestamp.isChecked()
+        self.settings.video_name.include_counter = self.video_name_counter.isChecked()
+        self.settings.video_name.include_format = self.video_name_format.isChecked()
+        self.settings.video_name.include_serial = self.video_name_serial.isChecked()
+
+        self.update_video_name_preview()
+
+    def update_video_name_preview(self):
+
+        preview_string = ""
+
+        if self.settings.video_name.user_prefix != "":
+
+            # This is a convenience change to the displayed string.
+            # We only display an amount of max_prefix_length
+            # chars to save screen space
+            max_prefix_length = 15
+            prefix = (self.settings.video_name.user_prefix[:max_prefix_length] + '..') if len(self.settings.video_name.user_prefix) > max_prefix_length else self.settings.video_name.user_prefix
+
+            preview_string += prefix
+
+        if self.settings.video_name.include_serial:
+            if preview_string != "":
+                preview_string += "-"
+            preview_string += "00001234"
+
+        if self.settings.video_name.include_format:
+            if preview_string != "":
+                preview_string += "-"
+            preview_string += "gbrg_1920x1080_15_1"
+
+        if self.settings.video_name.include_timestamp:
+            if preview_string != "":
+                preview_string += "-"
+            preview_string += "19701230T125503"
+
+        if self.settings.video_name.include_counter:
+            if preview_string != "":
+                preview_string += "-"
+            preview_string += '{message:0>{fill}}'.format(message=1,
+                                                          fill=self.settings.video_name.counter_size)
+
+        if preview_string == "":
+            preview_string = "video"
+
+        preview_string += "." + self.video_type_combobox.currentText()
+
+        self.video_name_preview.setText(preview_string)
+
+    def toggle_image_counter_box_availability(self):
         """"""
         if self.image_name_counter.isChecked():
             self.image_name_counter_box.setEnabled(True)
         else:
             self.image_name_counter_box.setEnabled(False)
+
+    def toggle_video_counter_box_availability(self):
+        """"""
+        if self.video_name_counter.isChecked():
+            self.video_name_counter_box.setEnabled(True)
+        else:
+            self.video_name_counter_box.setEnabled(False)
 
     def set_settings(self, settings: Settings):
         self.location_edit.setText(settings.get_save_location())
@@ -288,7 +421,7 @@ class OptionsDialog(QDialog):
         self.image_name_counter_box.blockSignals(True)
         self.image_name_counter_box.setValue(settings.image_name.counter_size)
         self.image_name_counter_box.blockSignals(False)
-        self.toggle_counter_box_availability()
+        self.toggle_image_counter_box_availability()
 
         if settings.image_name.include_format:
             self.image_name_format.blockSignals(True)
@@ -303,6 +436,34 @@ class OptionsDialog(QDialog):
         self.image_name_prefix.blockSignals(False)
 
         self.update_image_name_preview()
+
+        if settings.video_name.include_timestamp:
+            self.video_name_timestamp.blockSignals(True)
+            self.video_name_timestamp.toggle()
+            self.video_name_timestamp.blockSignals(False)
+        if settings.video_name.include_counter:
+            self.video_name_counter.blockSignals(True)
+            self.video_name_counter.toggle()
+            self.video_name_counter.blockSignals(False)
+
+        self.video_name_counter_box.blockSignals(True)
+        self.video_name_counter_box.setValue(settings.video_name.counter_size)
+        self.video_name_counter_box.blockSignals(False)
+        self.toggle_video_counter_box_availability()
+
+        if settings.video_name.include_format:
+            self.video_name_format.blockSignals(True)
+            self.video_name_format.toggle()
+            self.video_name_format.blockSignals(False)
+        if settings.video_name.include_serial:
+            self.video_name_serial.blockSignals(True)
+            self.video_name_serial.toggle()
+            self.video_name_serial.blockSignals(False)
+        self.video_name_prefix.blockSignals(True)
+        self.video_name_prefix.setText(settings.video_name.user_prefix)
+        self.video_name_prefix.blockSignals(False)
+
+        self.update_video_name_preview()
 
     def save_settings(self):
         self.settings.save_location = self.location_edit.text()
@@ -321,6 +482,15 @@ class OptionsDialog(QDialog):
         self.settings.image_name.include_format = self.image_name_format.isChecked()
         self.settings.image_name.include_serial = self.image_name_serial.isChecked()
         self.settings.image_name.user_prefix = self.image_name_prefix.text()
+
+        self.settings.video_name.include_timestamp = self.video_name_timestamp.isChecked()
+        self.settings.video_name.include_counter = self.video_name_counter.isChecked()
+        if self.video_name_counter.isChecked():
+            self.settings.video_name.counter_size = self.video_name_counter_box.value()
+
+        self.settings.video_name.include_format = self.video_name_format.isChecked()
+        self.settings.video_name.include_serial = self.video_name_serial.isChecked()
+        self.settings.video_name.user_prefix = self.video_name_prefix.text()
 
     def open_file_dialog(self):
         fdia = QFileDialog()
