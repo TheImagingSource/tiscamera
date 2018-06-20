@@ -1,23 +1,20 @@
+# Tools {#ToolsSection}
 
-# Tools
+This section deals with all tools that are
+either part of tiscamera or are indirectly used.
 
-### camera-ip-conf
+\subpage tcam-capture - GUI application for camera interaction
 
-Configure your GigE camera IP setting.
+\subpage tcam-ctrl - Commandline tool for camera IO
 
-### tcam-ctrl
+\subpage camera-ip-conf - Commandline tool for GigE camera IP configuration
 
-Tcam-ctrl allows you to
+\subpage tcam-gigetool
 
-- list cameras
-- list formats a camera will give you
-- list properties the camera has
-- set formats
-- set properties
+\subpage firmware-update - Commandline tool for USB firmware updates.
 
-### gige-daemon
+\subpage gige-daemon - Daemon for GigE camera indexing
 
-The gige-daemon maintains a list of all available GigE devices.
+### Third-Party Tools
 
-To retrieve a list of available devices call `gige-daemon list`
-To get more infos call `gige-daemon list-long`
+\subpage uvcdynctrl - Tool for automatic uvc extension application for USB cameras.

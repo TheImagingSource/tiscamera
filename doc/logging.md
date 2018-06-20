@@ -1,5 +1,4 @@
-
-# Logging
+# Logging {#logging}
 
 There are two separate logging functionalities you have to be aware of:
 The project internal functionality and the gstreamer owned functionality.

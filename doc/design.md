@@ -18,6 +18,9 @@ The API a backend has to implement is defined in the file 'devicelibrary.h'.
 The interaction between camera object and backend is done through the abstract
 DeviceInterface class.
 
+Each backend has to be known to the BackendLoader that keeps LibraryHandles and uses them
+for periodic device indexing
+
 ## Algorithms
 
 Our algorithms can be found in a separate library. This library can be used

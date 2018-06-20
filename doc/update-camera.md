@@ -21,13 +21,13 @@ This will list all supported cameras.
 
 Now get information about your camera by executing
 
-    sudo tcam-ctrl -id <SERIAL>
+    sudo tcam-ctrl -id SERIAL
 
 The serial is printed on your camera and can also be retrieved by the --list command.
 
 The command to upgrade your camera is
 
-    sudo tcam-ctrl -ud <SERIAL> -f <FILEPATH>
+    sudo tcam-ctrl -ud SERIAL -f FILEPATH
 
 For usb2 cameras you can find all firmware files in <tiscamera>/data/firmware/usb2.
 For usb3 camera firmware files, please contact our support.

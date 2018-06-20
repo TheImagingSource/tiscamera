@@ -1,5 +1,5 @@
 
-# Checking out tiscamera with gstreamer-0.10
+# Legacy Releases
 
 To checkout our previous release follow these steps:
 
@@ -7,12 +7,9 @@ To checkout our previous release follow these steps:
 
     cd tiscamera
 
-    git checkout
+    git checkout v-tiscamera-RELEASE
 
+After this you can follow the build and install instructions in the README.
 You now have the legacy release.
 
-To get the old wiki follow these steps:
-
-    git clone https://github.com/TheImagingSource/tiscamera.wiki.git
-
-    cd tiscamera.wiki
+All files required are included in the repository.

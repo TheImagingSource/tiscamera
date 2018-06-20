@@ -1,6 +1,4 @@
-
-# Gstreamer
-@addtogroup gstreamer
+# Gstreamer {#gstreamer}
 
 Gstreamer is a general purpose multimedia framework. It is the recommended way
 to interact with your device.
@@ -76,8 +74,7 @@ Change the framerate by duplicating or dropping frames.
 
 ## Debugging
 
-For further info please consult the
-[gstreamer documentation](https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gstreamer/html/gst-running.html).
+For further info, see [logging](@ref logging).
 
 ## Environment
 
