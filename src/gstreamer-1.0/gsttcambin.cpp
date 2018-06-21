@@ -519,7 +519,10 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     if (self->pipeline_caps)
     {
         gst_element_set_state(self->pipeline_caps, GST_STATE_NULL);
-        gst_element_unlink_pads(self->src, "src", self->pipeline_caps, "sink");
+        if (self->src)
+        {
+            gst_element_unlink_pads(self->src, "src", self->pipeline_caps, "sink");
+        }
         gst_bin_remove(GST_BIN(self), self->pipeline_caps);
         self->pipeline_caps = nullptr;
     }
