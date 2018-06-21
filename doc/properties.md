@@ -1,3 +1,0 @@
-# Properties {#properties}
-
-\subpage flags

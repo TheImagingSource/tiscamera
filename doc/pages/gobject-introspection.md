@@ -1,5 +1,5 @@
-# GObject Introspection - TcamProp
-@addtogroup gobject-introspection
+# GObject Introspection - TcamProp {#tcamprop}
+
 To allow camera interaction from many different environments we offer a gobject
 introspection interface. This interface, that can be accessed through our
 gstreamer modules, allows full control of all device properties.

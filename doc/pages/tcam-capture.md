@@ -2,7 +2,7 @@
 
 tcam-capture is the general purpose image retrieval application of The Imaging Source under Linux.
 
-![Running tcam-capture](tcam-capture-running.png)
+![](tcam-capture-running.png)
 
 ## Optional Arguments
 
@@ -23,6 +23,10 @@ Currently supported are
 
 For more information concerning gstreamer debugging go here: [logging](@ref logging)
 
+\snippet c/list-devices.c list-devices
+
+\snippet python/list_devices.py list-devices
+
 ## Options
 
 tcam-capture offers several options to change its behavior.
@@ -31,7 +35,7 @@ This is `~/.config/tcam-capture.conf`, unless changed.
 
 ### Image/Video
 
-![image/video options](tcam-capture-options-saving.png)
+![](tcam-capture-options-saving.png)
 
 #### Save Location
 
@@ -43,9 +47,11 @@ Folder in which images/videos shall be saved.
 
 Image encoding that shall be used when saving images.
 
+_Default_: png
+
 #### Video Type
 
-Default: avi
+_Default_: avi
 
 Video encoding that shall be used when saving videos.
 
@@ -53,66 +59,67 @@ Video encoding that shall be used when saving videos.
 
 The available options are identical for images and videos.
 
-- __User Prefix__ - Random string defined by the user that is prepended to the
+-  __User Prefix__ - Random string defined by the user that is prepended to the
   file name. The maximum length is 100 characters
 
-  Default: Empty
+  _Default_: Empty
+  
 - __Include Serial__ - Adds the serial number of the used device to the filename
 
-  Default: True
+  _Default_: True
 
 - __Include Format__ - Include a simple format description.
   This description contains all information you configured your device with.
   The string will have the format: format\_widthxheight\_framerate-numerator\_framerate-denominator
   To ensure the file can be saved characters like '/' are replaced with underscores.
 
-  Default: True
+  _Default_: True
 
 - __Include Counter__ - Include a unique counter in the filename. If the
   application is restarted the counter will pickup where it left, assuming all
   other parts of the name remain identical.
 
-  Default: True
+  _Default_: True
 
 - __Counter Size__ - Size of the padding the counter shall have
 
-  _Maximum_: 10
+  _Maximum_: 10<br>
   _Default_: 5
 
 - __Include Timestamp__ - Include a timestamp with your local time in the
   filename. The timestamp will be in ISO format i.e. YYYYmmddTHHMMSS.
-  Please be aware that, should both timestamp and counter be active your counter
+  Please be aware that should both timestamp and counter be active your counter
   will be reset once the timestamp changes.
 
-  Default: True
+  _Default_: True
 
 
 ### General
 
-![general options](tcam-capture-options-general.png)
+![](tcam-capture-options-general.png)
 
 
 #### Show Device Dialog On Startup
 
-Default: True
-
 Whether or not to show the device selection dialog on startup.
 Will be ignored when a device shall be reopened.
 
-#### Reopen Device On Startup
+_Default_: True
 
-Default: True
+#### Reopen Device On Startup
 
 When a device was open during the last application shutdown, tcam-capture will
 automatically try to reopen the device. If the device does not exist it will
 fall back to its default behavior.
 
-#### Use Dutils
+_Default_: True
 
-Default: True
+#### Use Dutils
 
 A toggle to disable the usage of tiscamera-dutils.
 The package tiscamera-dutils will have to be installed for this to be enabled.
+
+_Default_: True
 
 ## Caching
 

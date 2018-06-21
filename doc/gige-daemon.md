@@ -1,1 +1,0 @@
-# gige-daemon {#gige-daemon}

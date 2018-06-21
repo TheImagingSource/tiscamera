@@ -49,27 +49,33 @@ if (BUILD_USER_DOC)
   set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-User.cmake)
   set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-  set(doc_dir ${CMAKE_CURRENT_SOURCE_DIR})
+  set(doc_dir "${CMAKE_CURRENT_SOURCE_DIR}/pages")
 
   # this needs to be a single string
   # cmake adds ';' between values otherwise
   # thus making it impossible for doxygen to parse the list
   set(doc_file_list
     "${doc_dir}/welcome.md \
+    ${doc_dir}/building.md \
     ${doc_dir}/installation.md \
     ${doc_dir}/versioning-and-releases.md \
     ${doc_dir}/gstreamer.md \
     ${doc_dir}/logging.md \
     ${doc_dir}/flags.md \
+    ${doc_dir}/gobject-introspection.md \
     ${doc_dir}/properties.md \
     ${doc_dir}/tools.md \
     ${doc_dir}/tcam-capture.md \
     ${doc_dir}/tcam-ctrl.md \
+    ${doc_dir}/trigger.md \
+    ${doc_dir}/examples.md \
     ${doc_dir}/tcam-gigetool.md \
     ${doc_dir}/camera-ip-conf.md \
     ${doc_dir}/firmware-update.md \
     ${doc_dir}/gige-daemon.md \
     ${doc_dir}/uvcdynctrl.md \
+    ${doc_dir}/udev-rules.md \
+    ${doc_dir}/licensing.md \
     ${doc_dir}/further-reading.md"
     )
 
