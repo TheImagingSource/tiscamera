@@ -953,11 +953,11 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                     self->target_caps = gst_pad_query_caps (sinkpad, NULL);
                 }
                 gst_object_unref(par);
-                GST_INFO("caps of sink: %" GST_PTR_FORMAT, self->target_caps);
+                GST_INFO("caps of sink: %" GST_PTR_FORMAT, static_cast<void*>(self->target_caps));
             }
 
             GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-            GST_INFO("caps of src: %" GST_PTR_FORMAT, src_caps);
+            GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps));
 
             if (self->src_caps != nullptr)
             {
