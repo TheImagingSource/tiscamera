@@ -700,7 +700,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
 
     /* first see what is possible on our source pad */
     thiscaps = gst_pad_query_caps (GST_BASE_SRC_PAD (basesrc), NULL);
-    GST_DEBUG_OBJECT (basesrc, "caps of src: %" GST_PTR_FORMAT, thiscaps);
+    GST_DEBUG_OBJECT (basesrc, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(thiscaps));
 
     // nothing or anything is allowed, we're done
     if (gst_caps_is_empty(thiscaps)|| gst_caps_is_any (thiscaps))
@@ -733,7 +733,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
                 continue;
             }
 
-            GST_DEBUG_OBJECT (basesrc, "peer: %" GST_PTR_FORMAT, ipcaps);
+            GST_DEBUG_OBJECT (basesrc, "peer: %" GST_PTR_FORMAT, static_cast<void*>(ipcaps));
 
             icaps = gst_caps_intersect_full(thiscaps, ipcaps, GST_CAPS_INTERSECT_FIRST);
             gst_caps_unref (ipcaps);
@@ -744,7 +744,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
             gst_caps_unref (icaps);
             icaps = NULL;
         }
-        GST_DEBUG_OBJECT (basesrc, "intersect: %" GST_PTR_FORMAT, icaps);
+        GST_DEBUG_OBJECT (basesrc, "intersect: %" GST_PTR_FORMAT, static_cast<void*>(icaps));
 
         if (icaps)
         {
@@ -859,7 +859,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
         if (!gst_caps_is_empty (caps))
         {
             caps = gst_tcam_src_fixate_caps (basesrc, caps);
-            GST_DEBUG_OBJECT (basesrc, "fixated to: %" GST_PTR_FORMAT, caps);
+            GST_DEBUG_OBJECT (basesrc, "fixated to: %" GST_PTR_FORMAT, static_cast<void*>(caps));
 
             if (gst_caps_is_any (caps))
             {
@@ -935,7 +935,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     const char* caps_string;
     const char* format_string;
 
-    GST_INFO("Requested caps = %" GST_PTR_FORMAT, caps);
+    GST_INFO("Requested caps = %" GST_PTR_FORMAT, static_cast<void*>(caps));
 
     self->device->dev->stop_stream();
     self->device->sink = nullptr;
@@ -1414,7 +1414,7 @@ wait_again:
         */
         if (ptr->get_statistics().frame_count >= (guint)self->n_buffers)
         {
-            GST_INFO("Stopping stream after %d buffers.", ptr->get_statistics().frame_count);
+            GST_INFO("Stopping stream after %lu buffers.", ptr->get_statistics().frame_count);
             return GST_FLOW_EOS;
         }
     }

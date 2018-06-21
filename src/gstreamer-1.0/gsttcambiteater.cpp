@@ -225,7 +225,7 @@ static GstCaps* gst_tcambiteater_transform_caps (GstBaseTransform* base __attrib
         gst_caps_unref(tmp_caps);
     }
     GST_DEBUG("transformed %" GST_PTR_FORMAT " into %"
-              GST_PTR_FORMAT, caps, res_caps);
+              GST_PTR_FORMAT, static_cast<void*>(caps), static_cast<void*>(res_caps));
     return res_caps;
 }
 
