@@ -19,7 +19,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
 
 
-set(cflags "-fPIC -w -Wall -Wextra -pedantic -Wundef -Wshadow")
+set(cflags "-fPIC -Wall -Wextra -pedantic -Wundef -Wshadow")
 set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -l pthread")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ")
