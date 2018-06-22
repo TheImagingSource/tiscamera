@@ -70,7 +70,7 @@ CameraListHolder::~CameraListHolder ()
         work_thread.join();
     }
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
     d->device_count = 0;
     memset(d->devices, 0, sizeof(struct tcam_gige_device_list) * TCAM_DEVICE_LIST_MAX);
     shmdt(d);
@@ -91,7 +91,7 @@ CameraListHolder& CameraListHolder::get_instance ()
 std::vector<DeviceInfo> CameraListHolder::get_camera_list () const
 {
     tcam::semaphore_lock(semaphore_id);
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
@@ -228,7 +228,7 @@ void CameraListHolder::loop_function ()
 
     tcam::semaphore_lock(semaphore_id);
 
-    struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, 0);
 
     tmp_ptr->device_count = aravis_list.size();
 

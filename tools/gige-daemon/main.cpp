@@ -57,7 +57,7 @@ std::vector<struct tcam_device_info> get_camera_list ()
 
     tcam::semaphore_lock(sem_id);
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, NULL);
+    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     if (d == nullptr)
     {
@@ -145,7 +145,7 @@ void signal_handler (int sig)
 
 int main (int argc, char *argv[])
 {
-    for (unsigned int i = 1; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
         if (strcmp("list", argv[i]) == 0)
         {
@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
         {
             bool daemonize = true;
 
-            for (unsigned int j = 1; j < argc; ++j)
+            for (int j = 1; j < argc; ++j)
             {
                 if (strcmp("--no-fork", argv[j]) == 0)
                 {
@@ -185,7 +185,7 @@ int main (int argc, char *argv[])
             }
 
             std::vector<std::string> interfaces;
-            for (unsigned int x = (i + 1); x < argc; ++x)
+            for (int x = (i + 1); x < argc; ++x)
             {
                 if (strcmp("--no-fork", argv[x]) == 0)
                 {
