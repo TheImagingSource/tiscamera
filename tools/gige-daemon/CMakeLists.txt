@@ -18,16 +18,11 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
 
-
-set(cflags "-fPIC -Wall -Wextra -pedantic -Wundef -Wshadow")
-set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -l pthread")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cflags} ")
-
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
 
 TARGET_LINK_LIBRARIES(gige-daemon tcam)
 TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
+TARGET_LINK_LIBRARIES(gige-daemon "dl")
 
 install(TARGETS gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}
