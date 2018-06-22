@@ -10,6 +10,7 @@
 #include <csignal>
 
 #include <iostream>
+#include <vector>
 #include <cstdlib>
 
 
@@ -121,13 +122,13 @@ std::string LockFile::get_file_content () const
     std::size_t size = pbuf->pubseekoff (0,ifs.end,ifs.in);
     pbuf->pubseekpos (0, ifs.in);
 
-    // allocate memory to contain file data
-    char buffer[size];
+    std::vector<char> buffer;
+    buffer.reserve(size);
 
     // get file data
-    pbuf->sgetn (buffer, size);
+    pbuf->sgetn (buffer.data(), size);
 
-    std::string content = buffer;
+    std::string content = buffer.data();
 
     return content;
 }
