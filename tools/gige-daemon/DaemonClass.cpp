@@ -14,7 +14,7 @@
 
 
 LockFile::LockFile (const std::string filename)
-    : lockfile_name(filename), lock_file(nullptr), file_handle(-1)
+    : lockfile_name_(filename), lock_file_(nullptr), file_handle_(-1)
 {}
 
 
@@ -27,7 +27,7 @@ LockFile::~LockFile ()
 bool LockFile::file_exists () const
 {
     struct stat buffer;
-    return (stat (lockfile_name.c_str(), &buffer) == 0);
+    return (stat (lockfile_name_.c_str(), &buffer) == 0);
 }
 
 
@@ -54,14 +54,14 @@ bool LockFile::create_lock_file ()
         return false;
     }
 
-    file_handle = open(lockfile_name.c_str(), O_RDWR|O_CREAT, 0644);
+    file_handle_ = open(lockfile_name_.c_str(), O_RDWR|O_CREAT, 0644);
 
     // TODO
-    if (file_handle < 0)
+    if (file_handle_ < 0)
     {
         exit(1); /* can not open */
     }
-    if (lockf(file_handle, F_TLOCK, 0) < 0)
+    if (lockf(file_handle_, F_TLOCK, 0) < 0)
     {
         exit(0); /* can not lock */
     }
@@ -69,7 +69,7 @@ bool LockFile::create_lock_file ()
 
     char str[10];
     sprintf(str,"%d\n",getpid());
-    write(file_handle, str, strlen(str)); /* record pid to lockfile */
+    write(file_handle_, str, strlen(str)); /* record pid to lockfile */
 
     return true;
 }
@@ -77,27 +77,27 @@ bool LockFile::create_lock_file ()
 
 void LockFile::destroy_lock_file ()
 {
-    lockf(file_handle, F_ULOCK, 0);
+    lockf(file_handle_, F_ULOCK, 0);
 
-    close(file_handle);
-    file_handle = -1;
+    close(file_handle_);
+    file_handle_ = -1;
     // lock_file->close();
     // lock_file = nullptr;
 
-    remove(lockfile_name.c_str());
+    remove(lockfile_name_.c_str());
 }
 
 
 
 std::string LockFile::get_file_name () const
 {
-    return lockfile_name;
+    return lockfile_name_;
 }
 
 
 bool LockFile::is_locked () const
 {
-    if (file_handle != -1)
+    if (file_handle_ != -1)
     {
         return true;
     }
@@ -113,7 +113,7 @@ std::string LockFile::get_file_content () const
     }
 
     std::ifstream ifs;
-    ifs.open(lockfile_name);
+    ifs.open(lockfile_name_);
 
     std::filebuf* pbuf = ifs.rdbuf();
 
@@ -125,7 +125,7 @@ std::string LockFile::get_file_content () const
     char buffer[size];
 
     // get file data
-    pbuf->sgetn (buffer,size);
+    pbuf->sgetn (buffer, size);
 
     std::string content = buffer;
 
@@ -135,25 +135,25 @@ std::string LockFile::get_file_content () const
 
 DaemonClass::DaemonClass (const std::string lock_file,
                           bool open_ports)
-    : lock_file(LockFile(lock_file)), is_port_open(false)
+    : lock_file_(LockFile(lock_file)), is_port_open_(false)
 {
     if (open_ports)
     {
         open_port();
-        is_port_open = true;
+        is_port_open_ = true;
     }
 }
 
 
 DaemonClass::~DaemonClass ()
 {
-    if (lock_file.is_locked())
+    if (lock_file_.is_locked())
     {
-        lock_file.unlock();
+        lock_file_.unlock();
     }
 
     close_port();
-    is_port_open = false;
+    is_port_open_ = false;
 }
 
 
@@ -169,7 +169,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
     // }
 
     // another daemon is already running
-    if (lock_file.file_exists())
+    if (lock_file_.file_exists())
     {
         return -2;
     }
@@ -219,7 +219,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
     chdir("/"); /* change to dir that always exists */
 
     // make this the only running instance
-    if (!lock_file.lock())
+    if (!lock_file_.lock())
     {
         return -4;
     }
@@ -239,7 +239,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
 
 bool DaemonClass::stop_daemon ()
 {
-    lock_file.unlock();
+    return lock_file_.unlock();
 }
 
 
@@ -274,9 +274,9 @@ bool DaemonClass::is_daemonized ()
 
 int DaemonClass::get_daemon_pid ()
 {
-    if (lock_file.file_exists())
+    if (lock_file_.file_exists())
     {
-        std::string content = lock_file.get_file_content();
+        std::string content = lock_file_.get_file_content();
 
         return std::stoi(content);
     }
@@ -288,22 +288,22 @@ int DaemonClass::get_daemon_pid ()
 void DaemonClass::open_port ()
 {
 
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
-    memset(&serv_addr, '0', sizeof(serv_addr));
-    memset(sendBuff, '0', sizeof(sendBuff));
+    listenfd_ = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr_, '0', sizeof(serv_addr_));
+    memset(sendBuff_, '0', sizeof(sendBuff_));
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(5000);
+    serv_addr_.sin_family = AF_INET;
+    serv_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr_.sin_port = htons(5000);
 
 
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
-    memset(&serv_addr, '0', sizeof(serv_addr));
-    memset(sendBuff, '0', sizeof(sendBuff));
+    listenfd_ = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr_, '0', sizeof(serv_addr_));
+    memset(sendBuff_, '0', sizeof(sendBuff_));
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(5000);
+    serv_addr_.sin_family = AF_INET;
+    serv_addr_.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr_.sin_port = htons(5000);
 
 }
 

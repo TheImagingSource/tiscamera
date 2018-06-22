@@ -41,9 +41,9 @@ public:
 
 private:
 
-    std::string lockfile_name;
-    std::filebuf* lock_file;
-    int file_handle;
+    std::string lockfile_name_;
+    std::filebuf* lock_file_;
+    int file_handle_;
 
     bool create_lock_file ();
 
@@ -95,14 +95,15 @@ private:
 
     void close_port ();
 
-    LockFile lock_file;
+    LockFile lock_file_;
 
     // socket related member
-    bool is_port_open;
+    bool is_port_open_;
 
-    int listenfd = 0, connfd = 0;
-    struct sockaddr_in serv_addr;
+    int listenfd_ = 0;
+    int connfd_ = 0;
+    struct sockaddr_in serv_addr_;
 
-    char sendBuff[1025];
-    time_t ticks;
+    char sendBuff_[1025];
+    time_t ticks_;
 };
