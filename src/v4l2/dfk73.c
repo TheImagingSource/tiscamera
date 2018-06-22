@@ -95,12 +95,8 @@ static struct dfk73_devinfo* dfk73_open (struct libusb_device* udev)
 {
     struct dfk73_devinfo* devinfo = NULL;
     libusb_device_handle* dev;
-    char driver_name[64];
     int driver_detached = 0;
     int itf = 0;
-    int r;
-
-    driver_name[0] = 0;
 
     if (libusb_open(udev, &dev) < 0)
     {
@@ -116,7 +112,7 @@ static struct dfk73_devinfo* dfk73_open (struct libusb_device* udev)
             /* fprintf(stderr, "Unable to claim interface %d, detaching
              * uvcvideo\n", */
             /* itf); */
-            r = libusb_detach_kernel_driver( dev, itf);
+             libusb_detach_kernel_driver( dev, itf);
             if (libusb_claim_interface (dev, itf) < 0)
             {
                 libusb_close(dev);
@@ -139,14 +135,13 @@ static struct dfk73_devinfo* dfk73_open (struct libusb_device* udev)
 static void dfk73_close (struct dfk73_devinfo* devinfo)
 {
     int itf = 0;
-    int r;
 
     if (devinfo->driver_detached)
     {
-        r = libusb_release_interface(devinfo->dev, itf);
+        libusb_release_interface(devinfo->dev, itf);
         for(itf = 0; itf < 1; itf++)
         {
-            r = libusb_attach_kernel_driver (devinfo->dev, itf);
+            libusb_attach_kernel_driver (devinfo->dev, itf);
         }
     }
     free(devinfo);
