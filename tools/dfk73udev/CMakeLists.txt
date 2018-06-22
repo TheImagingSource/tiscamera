@@ -3,7 +3,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 include_directories("${PROJECT_SOURCE_DIR}/src/v4l2")
 
 
-set(cflags "-fPIC -w -Wall -Wextra -pedantic -Wundef -Wshadow")
+set(cflags "-fPIC -Wall -Wextra -pedantic -Wundef -Wshadow")
 set(lflags "-Wl,--gc-sections -ffunction-sections -fdata-sections -l -pthread -lrt")
 
 
