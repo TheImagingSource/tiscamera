@@ -866,7 +866,9 @@ bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
     int dg = (int)avg - clr->G;
     int db = (int)avg - clr->B;
 
-    if (abs(dr) < BREAK_DIFF && abs(dg) < BREAK_DIFF && abs(db) < BREAK_DIFF)
+    if ((unsigned int)abs(dr) < BREAK_DIFF
+        && (unsigned int)abs(dg) < BREAK_DIFF
+        && (unsigned int)abs(db) < BREAK_DIFF)
     {
         wb->R = clip( wb->R, WB_MAX );
         wb->G = clip( wb->G, WB_MAX );
