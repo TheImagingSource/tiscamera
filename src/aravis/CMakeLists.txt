@@ -15,8 +15,8 @@ find_package(GIO REQUIRED QUIET)   # dependency
 if (TCAM_INTERNAL_ARAVIS)
 
   include_directories("${GIO_INCLUDE_DIR}")
-  include_directories("${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
-  include_directories("${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+  include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
+  include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 
 else (TCAM_INTERNAL_ARAVIS)
 
