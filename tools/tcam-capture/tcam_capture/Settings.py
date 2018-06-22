@@ -49,7 +49,7 @@ class Settings(object):
         self.settings_file_name = "./tcam-capture.conf"
         self.save_location = "/tmp"
         self.image_type = "png"
-        self.video_type = "mpeg2"
+        self.video_type = "avi"
         self.show_device_dialog_on_startup = True
         self.reopen_device_on_startup = True
         self.set_properties_on_reopen = True
