@@ -134,7 +134,7 @@ void Logger::log (const char* module __attribute__((unused)),
     va_list tmp_args;
     va_copy(tmp_args, args);
 
-    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
+    size_t size = vsnprintf(NULL, 0, message, tmp_args) + 1;
     char *msg = new char[size];
 
     va_end(tmp_args);
@@ -148,13 +148,13 @@ void Logger::log (const char* module __attribute__((unused)),
 
     size_t buffer_size = snprintf(nullptr,
                                   0,
-                                 "%-10ld <%s> %s:%d: %s\n",
-                                 /* ctime(&timer), */
-                                 t,
-                                 loglevel2string(_level),
-                                 function,
-                                 line,
-                                 msg);
+                                  "%-10ld <%s> %s:%d: %s\n",
+                                  /* ctime(&timer), */
+                                  t,
+                                  loglevel2string(_level),
+                                  function,
+                                  line,
+                                  msg) + 1;
 
     /* write complete message */
     char *buffer = new char[buffer_size];
