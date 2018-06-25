@@ -55,11 +55,11 @@ if (TCAM_INTERNAL_ARAVIS)
   find_package(LibXml2 REQUIRED QUIET)
   find_package(PCAP REQUIRED QUIET)
 
-  target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
-  target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
+  target_link_libraries(tcam-aravis "${ARAVIS_LIB}")
 
   target_link_libraries(tcam-aravis "${LIBXML2_LIBRARIES}")
-  target_link_libraries(tcam-aravis "${ARAVIS_LIB}")
+  target_link_libraries(tcam-aravis "${GIO_LIBRARIES}")
+  target_link_libraries(tcam-aravis "${PCAP_LIBRARIES}")
 
 else (TCAM_INTERNAL_ARAVIS)
 
