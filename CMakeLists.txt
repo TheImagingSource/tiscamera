@@ -106,9 +106,7 @@ if (BUILD_TOOLS)
   add_subdirectory(tools)
 endif (BUILD_TOOLS)
 
-if (BUILD_DOC)
-  add_subdirectory(doc)
-endif (BUILD_DOC)
+add_subdirectory(doc)
 
 # uninstall target
 configure_file(
