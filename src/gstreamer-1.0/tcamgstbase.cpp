@@ -1019,7 +1019,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             && gst_element_factory_can_sink_any_caps(jpegdec, available_caps))
         {
             requires_jpegdec = true;
-
+            requires_vidoeconvert = true;
             // wanted_caps can be fixed, etc.
             // thus change name to be compatible to jpegdec sink pad
             // and create a correct intersection
