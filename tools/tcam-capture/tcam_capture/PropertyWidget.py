@@ -61,9 +61,10 @@ class PropertyWidget(QWidget):
             self.sld.setFocusPolicy(Qt.NoFocus)
             try:
                 self.sld.setRange(self.prop.minval, self.prop.maxval)
+                self.sld.setValue(self.prop.value)
             except OverflowError:
                 log.error("Property {} reported a range that could not be handled".format(self.prop.name))
-            self.sld.setValue(self.prop.value)
+            self.sld.setSingleStep(self.prop.step)
             self.sld.valueChanged[int].connect(self.set_property)
             self.layout.addWidget(self.sld)
 
@@ -81,9 +82,11 @@ class PropertyWidget(QWidget):
             self.sld = QSlider(Qt.Horizontal, self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             try:
-                self.sld.setRange(self.prop.minval * 1000, self.prop.maxval * 1000)
+                self.sld.setRange(self.prop.minval, self.prop.maxval)
+                self.sld.setValue(self.prop.value)
             except OverflowError:
                 log.error("Property {} reported a range that could not be handled".format(self.prop.name))
+            self.sld.setSingleStep(self.prop.step * 1000)
             self.sld.valueChanged[int].connect(self.set_property)
             self.sld.setGeometry(30, 40, 100, 30)
             self.layout.addWidget(self.sld)
@@ -131,10 +134,10 @@ class PropertyWidget(QWidget):
             self.update_box_value(self.value_box, value)
 
         if self.prop.valuetype == "double":
-            self.update_box_value(self.value_box, value / 1000)
+            self.update_box_value(self.value_box, value)
 
             self.signals.change_property.emit(self.tcam, self.prop.name,
-                                              float(value) / 1000, self.prop.valuetype)
+                                              float(value), self.prop.valuetype)
             return
 
         self.signals.change_property.emit(self.tcam, self.prop.name,
@@ -145,7 +148,7 @@ class PropertyWidget(QWidget):
             self.update_slider_value(self.sld, value)
 
         if self.prop.valuetype == "double":
-            self.update_slider_value(self.sld, value * 1000)
+            self.update_slider_value(self.sld, value)
 
             self.signals.change_property.emit(self.tcam, self.prop.name,
                                               float(value), self.prop.valuetype)
@@ -196,9 +199,9 @@ class PropertyWidget(QWidget):
             self.update_box_value(self.value_box, self.prop.value)
         elif self.prop.valuetype == "double":
             self.update_slider_range(self.sld,
-                                     self.prop.minval * 1000,
-                                     self.prop.maxval * 1000)
-            self.update_slider_value(self.sld, self.prop.value * 1000)
+                                     self.prop.minval,
+                                     self.prop.maxval)
+            self.update_slider_value(self.sld, self.prop.value)
             self.update_box_range(self.value_box,
                                   self.prop.minval,
                                   self.prop.maxval)
