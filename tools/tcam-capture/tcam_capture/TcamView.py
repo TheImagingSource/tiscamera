@@ -16,8 +16,6 @@ import re
 import time
 from tcam_capture.CapsDesc import CapsDesc
 from tcam_capture.TcamScreen import TcamScreen
-from tcam_capture.ImageSaver import ImageSaver
-from tcam_capture.VideoSaver import VideoSaver
 from tcam_capture.FileNameGenerator import FileNameGenerator
 from tcam_capture.MediaSaver import MediaSaver
 from tcam_capture.Settings import Settings
