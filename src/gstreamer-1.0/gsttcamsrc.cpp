@@ -1172,7 +1172,11 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
     GST_INFO("Closing device");
     if (self->device != NULL)
     {
-        self->device->dev->stop_stream();
+        std::lock_guard<std::mutex> lck(self->mtx);
+        if (self->device->dev)
+        {
+            self->device->dev->stop_stream();
+        }
         self->device->dev = nullptr;
         self->device->sink = nullptr;
         delete self->device;
@@ -1212,7 +1216,12 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 
     self->cv.notify_all();
 
+    // no lock_guard since new_eos will call change_state which will call stop
+    // in that case we _may_ still hold the lock, which is unwanted.
+    std::unique_lock<std::mutex> lck(self->mtx);
     self->device->dev->stop_stream();
+    lck.unlock();
+
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
     GST_DEBUG("Stopped acquisition");
 
