@@ -135,7 +135,6 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     }
 
     arv_options.auto_socket_buffer = false;
-    arv_options.no_packet_resend = false;
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
@@ -566,18 +565,7 @@ bool AravisDevice::start_stream ()
                           "socket-buffer-size", 0,
                           NULL);
         }
-        if (this->arv_options.no_packet_resend)
-        {
-            g_object_set (this->stream,
-                          "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER,
-                          NULL);
-        }
-        else
-        {
-            g_object_set (this->stream,
-                          "packet-resend", ARV_GV_STREAM_PACKET_RESEND_ALWAYS,
-                          NULL);
-        }
+
         g_object_set (this->stream,
                       "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,

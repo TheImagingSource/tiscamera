@@ -129,7 +129,6 @@ private:
     struct aravis_options
     {
         bool auto_socket_buffer;
-        bool no_packet_resend;
         unsigned int packet_timeout;
         unsigned int frame_retention;
     };
