@@ -208,8 +208,8 @@ class Settings(object):
         config.set(vid, "# overwrite files or try to always use unique names")
         config[vid]["overwrite_files"] = str(self.video_name.overwrite_files)
 
-        if not os.path.exists(self.settings_directory):
-            os.makedirs(self.settings_directory)
+        if not os.path.exists(os.path.expanduser(self.settings_directory)):
+            os.makedirs(os.path.expanduser(self.settings_directory))
 
         with open(self.get_settings_file(), 'w') as configfile:
             config.write(configfile)
