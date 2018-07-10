@@ -48,7 +48,7 @@ tcam_image_buffer tcam::algorithms::parallel::split_image_buffer (const tcam_ima
 
 
 unsigned int tcam::algorithms::parallel::calc_split_height (unsigned int image_height,
-                                                            int suggested_split_count)
+                                                            int& suggested_split_count)
 {
     if (suggested_split_count <= 1)
     {

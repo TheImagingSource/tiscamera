@@ -48,7 +48,7 @@ tcam_image_buffer split_image_buffer (const tcam_image_buffer& img_to_split,
  * @param suggested_split_count
  */
 unsigned int calc_split_height (unsigned int image_height,
-                                int suggested_split_count);
+                                int& suggested_split_count);
 
 static const int max_work_item_count = 32;
 
