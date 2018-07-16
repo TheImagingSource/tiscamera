@@ -30,7 +30,7 @@
 //
 // Do not error on format warnings. They should happen only in debug statements anyway
 //
-#pragma GCC diagnostic warning "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat"
 
 
 #define gst_tcambin_parent_class parent_class

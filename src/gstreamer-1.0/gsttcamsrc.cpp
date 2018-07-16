@@ -37,7 +37,7 @@
 //
 // Do not error on format warnings. They should happen only in debug statements anyway
 //
-#pragma GCC diagnostic warning "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat"
 
 
 #define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10

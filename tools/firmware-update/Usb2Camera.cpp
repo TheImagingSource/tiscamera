@@ -50,7 +50,7 @@ Usb2Camera::~Usb2Camera ()
 
 int Usb2Camera::get_firmware_version ()
 {
-    const int size = 1;
+    const int size = 2;
     int i = -1;
     unsigned char data[size];
 
@@ -69,7 +69,7 @@ int Usb2Camera::get_firmware_version ()
     }
     else
     {
-        i = data[0];
+        i = (data[1] << 8) + data[0];
     }
     return i;
 }
