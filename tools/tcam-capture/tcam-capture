@@ -127,7 +127,6 @@ class TCamCapture(QMainWindow):
         self.device_list = None  # needed for setting window title later on
         self.props = None  # property dialog docker widget
         self.props_widget = None  # property dialog widget
-        self.pipeline = None
         self.view = None
 
         self.setWindowTitle("TCam Capture")
@@ -155,7 +154,8 @@ class TCamCapture(QMainWindow):
             # check if device exists
             if any(x.serial == serial for x in dev_list):
                 self.serial = serial
-                if self.cache.last_format:
+
+                if not caps_str and self.cache.last_format:
                     caps_str = self.cache.last_format
 
         if not self.serial and self.settings.show_device_dialog_on_startup:

@@ -210,17 +210,21 @@ class TcamView(QWidget):
         if self.pipeline is None:
             self.create_pipeline()
 
-        state = self.pipeline.get_state(1000000).state
-        if state == Gst.State.PLAYING or state == Gst.State.PAUSED:
-            log.debug("Setting pipeline to READY")
-            self.pipeline.set_state(Gst.State.READY)
-        self.video_format = video_format
-        if video_format is not None:
+        self.pipeline.set_state(Gst.State.READY)
+
+        caps_desc = self.get_caps_desc()
+        if caps_desc.contains(video_format):
+            self.video_format = video_format
+        else:
+            log.error("Given format caps could not be found in caps descriptions. {}".format(video_format))
+            log.error("Falling back to default behavior.")
+
+        if self.video_format is not None:
             log.info("Setting format to {}".format(video_format))
             caps = self.pipeline.get_by_name("bin")
             caps.set_property("device-caps",
                               video_format)
-        log.info("Setting state PLAYING")
+
         self.pipeline.set_state(Gst.State.PLAYING)
         self.start_time = 0
         self.framecounter = 0
