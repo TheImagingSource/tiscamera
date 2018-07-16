@@ -63,10 +63,18 @@ class Settings(object):
         """Set properties to their default values"""
         self._set_defaults()
 
+    def get_settings_folder(self):
+        """
+        """
+        return os.getenv("XDG_CONFIG_DIR",
+                         os.path.expanduser(self.settings_directory))
+
     def get_settings_file(self,
-                          directory: str=os.getenv("XDG_CONFIG_DIR",
-                                                   os.path.expanduser("~/.config")),
+                          directory: str="",
                           filename: str="tcam-capture.conf"):
+        if not directory:
+            directory = self.get_settings_folder()
+
         return os.path.join(directory, filename)
 
     def get_save_location(self):
@@ -208,8 +216,8 @@ class Settings(object):
         config.set(vid, "# overwrite files or try to always use unique names")
         config[vid]["overwrite_files"] = str(self.video_name.overwrite_files)
 
-        if not os.path.exists(os.path.expanduser(self.settings_directory)):
-            os.makedirs(os.path.expanduser(self.settings_directory))
+        if not os.path.exists(self.get_settings_folder()):
+            os.makedirs(self.get_settings_folder())
 
         with open(self.get_settings_file(), 'w') as configfile:
             config.write(configfile)
