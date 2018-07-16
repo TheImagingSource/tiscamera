@@ -32,7 +32,7 @@
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautofocus_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautofocus_debug_category
 
-
+static const int REGION_MIN_SIZE = 128;
 
 enum
 {
@@ -293,7 +293,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, self->image_width);
+            g_value_set_int(max, self->image_width - REGION_MIN_SIZE);
         }
         if (def)
         {
@@ -332,7 +332,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, self->image_height);
+            g_value_set_int(max, self->image_height - REGION_MIN_SIZE);
         }
         if (def)
         {
@@ -366,7 +366,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, REGION_MIN_SIZE);
         }
         if (max)
         {
@@ -376,7 +376,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_int(def, 0);
+            g_value_set_int(def, self->image_width);
         }
         if (step)
         {
@@ -405,7 +405,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (min)
         {
             g_value_init(min, G_TYPE_INT);
-            g_value_set_int(min, 0);
+            g_value_set_int(min, REGION_MIN_SIZE);
         }
         if (max)
         {
@@ -415,7 +415,7 @@ static gboolean gst_tcamautofocus_get_tcam_property (TcamProp* prop,
         if (def)
         {
             g_value_init(def, G_TYPE_INT);
-            g_value_set_int(def, 0);
+            g_value_set_int(def, self->image_height);
         }
         if (step)
         {
@@ -676,10 +676,10 @@ void gst_tcamautofocus_set_property (GObject* object,
         {
             self->roi_left = g_value_get_int(value);
 
-            if (self->roi_width > (self->image_width - self->roi_top))
+            if (self->roi_width > (self->image_width - self->roi_left))
             {
                 GST_INFO("Requested ROI position does not allow the current ROI size. Reducing ROI width.");
-                self->roi_width = (self->image_width - self->roi_top);
+                self->roi_width = (self->image_width - self->roi_left);
             }
 
             break;
@@ -700,10 +700,10 @@ void gst_tcamautofocus_set_property (GObject* object,
         {
             self->roi_width = g_value_get_int(value);
 
-            if (self->roi_width > (self->image_width - self->roi_top))
+            if (self->roi_width > (self->image_width - self->roi_left))
             {
                 GST_INFO("Requested width was larger than resolution and focus region allow. Setting possible maximum.");
-                self->roi_width = (self->image_width - self->roi_top);
+                self->roi_width = (self->image_width - self->roi_left);
             }
 
             break;
