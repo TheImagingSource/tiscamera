@@ -212,12 +212,13 @@ class TcamView(QWidget):
 
         self.pipeline.set_state(Gst.State.READY)
 
-        caps_desc = self.get_caps_desc()
-        if caps_desc.contains(video_format):
-            self.video_format = video_format
-        else:
-            log.error("Given format caps could not be found in caps descriptions. {}".format(video_format))
-            log.error("Falling back to default behavior.")
+        if video_format:
+            caps_desc = self.get_caps_desc()
+            if caps_desc.contains(video_format):
+                self.video_format = video_format
+            else:
+                log.error("Given format caps could not be found in caps descriptions. {}".format(video_format))
+                log.error("Falling back to default behavior.")
 
         if self.video_format is not None:
             log.info("Setting format to {}".format(video_format))
