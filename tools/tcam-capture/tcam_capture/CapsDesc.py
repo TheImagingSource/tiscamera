@@ -210,3 +210,20 @@ class CapsDesc:
             if entry.get_name() == fmt:
                 return entry.generate_caps_string(resolution, fps)
         return None
+
+    def contains(self, caps_str: str):
+        """
+        Convert the given caps string to Gst.Caps and
+        look if this collection contains them.
+        Returns True is caps_str is in collection
+        """
+        if not caps_str:
+            return False
+        intersect = self.caps.intersect(Gst.Caps.from_string(caps_str))
+
+        if not intersect:
+            return False
+        if intersect.is_empty():
+            return False
+
+        return True
