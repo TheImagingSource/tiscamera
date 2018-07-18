@@ -1302,7 +1302,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         self->exposure.max = p.value.i.max;
         self->exposure.value = p.value.i.value;
 
-        self->default_exposure_values.max = 1000000 / (self->framerate_numerator / self->framerate_denominator);
+        self->default_exposure_values.max = 1000000 / double(self->framerate_numerator / self->framerate_denominator);
     }
 
     p = {};
