@@ -1465,7 +1465,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
                 GST_INFO("%f not big enough for change. minimum required is : %f",
                          percentage_new,
                          percentage);
-                return 0;
+                return diff;
             }
 
             setter = fmax(fmin(g_ref, self->gain_max), self->gain_min);
