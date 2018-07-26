@@ -1444,7 +1444,7 @@ static gdouble modify_gain (GstTcamautoexposure* self, gdouble diff)
             double percentage = self->gain_max / 100;
             double setter = new_gain;
             GST_DEBUG("Comparing percentage_new %f > percentage %f", percentage_new, percentage);
-            if (fabs(percentage_new) > percentage)
+            if (fabs(percentage_new) > 0.5)
             {
                 if (fabs(percentage) < self->gain.step)
                 {
