@@ -28,12 +28,28 @@ import sys
 import argparse
 from enum import Enum
 from git import Repo
-from subprocess import call
+from subprocess import call, run
+import subprocess
 import re
 from datetime import date
 
 
-def replace(filename, pattern, replace):
+def string_replace(filename, old_string, new_string):
+    # Safely read the input filename using 'with'
+    with open(filename) as f:
+        s = f.read()
+        if old_string not in s:
+            print("\\\"{old_string}\\\" not found in {filename}.".format(**locals()))
+            return
+
+    # Safely write the changed content, if found in the file
+    with open(filename, 'w') as f:
+        print("Changing \"{old_string}\" to \"{new_string}\" in {filename}".format(**locals()))
+        s = s.replace(old_string, new_string)
+        f.write(s)
+
+
+def regex_replace(filename, pattern, replace):
     """
     "filename" relative file path to file that shall be worked with
     "pattern" regex string that shall be replaced
@@ -257,7 +273,7 @@ class Release():
         self.future_version = None
         self.last_tag = None
         self.last_version = None
-        self.dry_run = True
+        self.dry_run = dry_run
         self.assume_yes = assume_yes
         self.force = force
         self.repo = Repo(".")
@@ -268,17 +284,20 @@ class Release():
             self.create_future_tag()
 
     def find_last_tag(self):
+        """
+        Find the last release tag
+        """
 
         tags = self.repo.tags
 
         for tag in tags:
-            print(tag)
+            # print(tag)
 
             if "v-tiscamera-" in str(tag):
                 n = re.findall('\d+', str(tag))
 
                 if len(n) != 3:
-                    print("Could not interpret tag '{}'. The version numbers do not seem to be in major.minor.patch format.".format(tag))
+                    # print("Could not interpret tag '{}'. The version numbers do not seem to be in major.minor.patch format.".format(tag))
                     continue
 
                 vers = Version(int(n[0]), int(n[1]), int(n[2]), "")
@@ -294,7 +313,7 @@ class Release():
 
     def create_future_version(self):
         """
-
+        Bump the version and create a new version object
         """
 
         if self.last_version is str:
@@ -337,8 +356,7 @@ class Release():
         regex_str = r"## \[Unreleased\].*\S.*## \[{}".format(self.last_version)
         res = None
         with open(filename, 'r') as myfile:
-            print(re.__file__)
-            res = re.findall(regex_str, myfile.read(), re.MULTILINE)
+            res = re.findall(regex_str, myfile.read(), re.MULTILINE | re.DOTALL)
 
         if len(res) == 1:
             return True
@@ -391,7 +409,7 @@ class Release():
             taken_str = "[ ]"
             if taken:
                 taken_str = "[X]"
-            print("-{} {}".format(taken_str, step_desc))
+                print("-{} {}".format(taken_str, step_desc))
             return taken
 
         requirements_good = True
@@ -408,13 +426,16 @@ class Release():
         Final overview over what happened and
         what the maintainer should do next
         """
-        print("")
-        print("")
-        print("")
-        print("Your next steps probably include:")
-        print("")
-        print("\tgit push origin {}".format(self.future_tag))
-        print("")
+
+        print("Created commit for version bump")
+        print("Created tag for version bump release")
+
+        if not self.dry_run:
+            print("")
+            print("Your next steps probably include:")
+            print("")
+            print("\tgit push origin {}".format(self.future_tag))
+            print("")
 
     def commit_changes(self, commit_message: str=None):
         """
@@ -428,14 +449,23 @@ class Release():
             return False
 
         def stage_files():
-            # stage
-            # if not self.dry_run:
+            """
+            Stage files that shall be commited
+            """
             index.add(["CHANGELOG.md"])
             index.add(["version.cmake"])
 
         def unstage_files():
-            index.remove(["CHANGELOG.md"])
-            index.remove(["version.cmake"])
+            """
+            Undo changes that should be commited.
+            Used for dry-runs
+            """
+
+            index.reset(["CHANGELOG.md"], force=True)
+            index.reset(["version.cmake"], force=True)
+
+            index.checkout(["CHANGELOG.md"], force=True)
+            index.checkout(["version.cmake"], force=True)
 
         stage_files()
 
@@ -445,13 +475,15 @@ class Release():
         # diff staged files through external means
         # gitpython cannot do that for some reason
 
-        call(["git", "diff", "--cached"])
+        cmd = ["git", "diff", "--cached"]
+
+        subprocess.run(cmd, stderr=sys.stderr, stdout=sys.stdout)
 
         print("")
         if not query_yes_no("Are you ok with this?"):
             print("")
             print("Changes were not accepted. Aborting release. Changes remain staged.")
-            unstage_files()
+            # unstage_files()
             return False
 
         # commit
@@ -474,7 +506,7 @@ class Release():
         print("Creating tag: '{}' ...".format(tag), end='')
         if not self.dry_run:
             self.repo.create_tag(self.future_tag)
-        print("Done")
+            print("Done")
 
     def update_files(self):
         """
@@ -487,13 +519,13 @@ class Release():
 
         if self.dry_run:
             print("Changing in CHANGELOG.md:")
-            print("\t" + changelog_str)
+            print("\n" + changelog_str)
             print("to:")
-            print("\t" + changelog_repl)
+            print("\n" + changelog_repl)
         else:
-            replace("CHANGELOG.md",
-                    changelog_str,
-                    changelog_repl)
+            string_replace("CHANGELOG.md",
+                           changelog_str,
+                           changelog_repl)
 
         version_str = "set\(TCAM_VERSION_MAJOR \d+\)\s*set\(TCAM_VERSION_MINOR \d+\)\s*set\(TCAM_VERSION_PATCH \d+\)"
         version_repl = ("set(TCAM_VERSION_MAJOR {})\n"
@@ -503,17 +535,18 @@ class Release():
                                                              self.future_version.patch)
 
         if self.dry_run:
-            print("Changing in version.cmake:")
+            print("\nChanging version.cmake")
+            print("\n")
         else:
-            replace("version.cmake",
-                    version_str,
-                    version_repl)
+            regex_replace("version.cmake",
+                          version_str,
+                          version_repl)
 
     def execute_release(self):
         """"""
         self.update_files()
-        self.commit_changes()
-        self.create_tag(self.future_tag)
+        if self.commit_changes():
+            self.create_tag(self.future_tag)
 
     def run(self):
 
@@ -550,7 +583,7 @@ class Release():
 
 def main():
 
-    parser = argparse.ArgumentParser("Release Helper")
+    parser = argparse.ArgumentParser(description="Helps create a release by checking prerequisites and performing steps like version number bumps or git tags.")
     parser.add_argument("--major", help="Create a major release",
                         action="store_true")
     parser.add_argument("--feature", help="Create a feature release",
