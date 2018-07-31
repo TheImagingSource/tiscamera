@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtWidgets import (QAction, QMenu, QGraphicsView,
-                             QGraphicsItem, QGraphicsScene, QGraphicsPixmapItem)
+from PyQt5.QtWidgets import (QGraphicsPixmapItem)
 
-from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent, QSizeF
+from PyQt5.QtGui import QColor
 
 
-class ViewItem(QtWidgets.QGraphicsPixmapItem):
-    """Derived class enables mouse tracking for color under mouse retrieval"""
+class ViewItem(QGraphicsPixmapItem):
+    """
+    Derived class enables mouse tracking for color under mouse retrieval
+    """
+
     def __init__(self, parent=None):
         super(ViewItem, self).__init__(parent)
         self.setAcceptHoverEvents(True)
@@ -48,10 +49,10 @@ class ViewItem(QtWidgets.QGraphicsPixmapItem):
         if self.mouse_over:
             if(self.mouse_position_x <= self.pixmap().width() and
                self.mouse_position_y <= self.pixmap().height()):
-                return QtGui.QColor(self.pixmap().toImage().pixel(self.mouse_position_x,
-                                                                  self.mouse_position_y))
+                return QColor(self.pixmap().toImage().pixel(self.mouse_position_x,
+                                                            self.mouse_position_y))
             else:
                 self.mouse_position_x = -1
                 self.mouse_position_y = -1
 
-        return QtGui.QColor(0, 0, 0)
+        return QColor(0, 0, 0)
