@@ -591,27 +591,33 @@ class TCamCapture(QMainWindow):
         """
         Stops the video stream and closes the device
         """
-        if self.view is not None:
-            self.stop()
-            self.removeDockWidget(self.props)
-            self.props_widget.stop()
-            self.props_widget = None
+        self.props_action.setVisible(False)
+        self.cache.last_format = None
+        self.cache.last_serial = None
+        self.setWindowTitle("TCam Capture")
+        self.pixel_coords_label.setText("")
+        self.pixel_label.setText("")
+        self.current_fps_label.setText("")
+
+        if self.props:
             self.props.setParent(None)
             self.props = None
-            self.set_device_menus_enabled(False)
+            self.removeDockWidget(self.props)
+
+        self.set_device_menus_enabled(False)
+        self.setCentralWidget(None)
+        self.serial = None
+
+        if self.props_widget:
+            self.props_widget.stop()
+            self.props_widget = None
+
+        if self.view is not None:
+            self.stop()
             self.view.setParent(None)
-            self.setCentralWidget(None)
             self.view = None
-            self.serial = None
             # update menu to remove mark on open camera
             self.update_device_list(self.device_list)
-
-            self.props_action.setVisible(False)
-            self.cache.last_format = None
-            self.cache.last_serial = None
-            self.setWindowTitle("TCam Capture")
-
-            log.info("Closed device")
 
     def toggle_properties_dialog(self):
         """
@@ -652,12 +658,15 @@ class TCamCapture(QMainWindow):
         Callback for device lost
         """
         log.error("Lost device. Stopping...")
-        self.close()
+
         error_dialog = QtWidgets.QMessageBox(self)
         error_dialog.setIcon(QtWidgets.QMessageBox.Critical)
         error_dialog.setWindowTitle("Device lost")
         error_dialog.setText("Device has been lost. Please reconnect or re-open it.")
-        error_dialog.exec_()
+
+        error_dialog.show()
+
+        self.close()
 
 
 def reset_settings():
