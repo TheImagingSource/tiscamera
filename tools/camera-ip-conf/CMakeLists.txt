@@ -24,7 +24,3 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_D
 install(TARGETS camera-ip-conf
   DESTINATION bin
   COMPONENT tcam-camera-ip-conf)
-
-if (BUILD_GUI)
-  add_subdirectory(gui)
-endif (BUILD_GUI)
