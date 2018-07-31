@@ -321,7 +321,6 @@ class TcamView(QWidget):
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
         self.bus.enable_sync_message_emission()
-        self.bus.connect('message::state-changed', self.on_state_changed)
         self.bus.connect('message::error', self.on_error)
         self.bus.connect('message::info', self.on_info)
 
@@ -436,29 +435,6 @@ class TcamView(QWidget):
             log.error("ERROR: {} : {}".format(msg.src.get_name(), err.message))
             if dbg:
                 log.debug("Debug info: {}".format(dbg))
-
-    def on_state_changed(self, bus, msg):
-        """
-        this function is called when the pipeline changes states.
-        we use it to keep track of the current state
-        """
-        old, new, pending = msg.parse_state_changed()
-        if not msg.src == self.pipeline.get_by_name("bin"):
-            # not from the playbin, ignore
-            return
-        self.state = new
-
-        if new == Gst.State.PLAYING:
-            sink = self.pipeline.get_by_name("bin")
-            pad = sink.get_static_pad("src")
-            caps = pad.query_caps()
-            fmt = caps.get_structure(0)
-            if fmt is None:
-                log.error("Unable to determine format.")
-                return
-
-            width = fmt.get_value("width")
-            height = fmt.get_value("height")
 
     def get_tcam(self):
         return self.tcam
