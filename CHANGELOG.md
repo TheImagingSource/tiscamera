@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- tcam-capture now has a --fullscreen flag to make it start in fullscreen mode
+- tcam-capture now has a ROI display and selection capabilities
+- tcam-capture now has configurable global keybindings allowing for
+  fullscreen, image saving, triggering and opening the device dialog
+
+### Changed
+
+- lost-device event has triggered more aggressively
+
+### Removed
+
+- unused camera-ip-conf gui
+
 ## [0.10.0] - 2018-07-31
 
 ### Added
