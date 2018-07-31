@@ -142,6 +142,10 @@ class PropertyDialog(QWidget):
     def stop(self):
         self.worker.stop()
         self.work_thread.quit()
+        if not self.work_thread.wait(5000):  # wait 5 seconds
+            log.error("Property Update Thread did not stop in time")
+            self.work_thread.terminate()
+
         self.work_thread.wait()
 
     def setup_ui(self):
