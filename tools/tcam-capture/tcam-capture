@@ -340,14 +340,6 @@ class TCamCapture(QMainWindow):
         self.toolbar.addWidget(self.fps_label)
         self.toolbar.addWidget(self.fps_combo)
 
-        # preferences_action = QAction('&Preferences', self)
-        # preferences_action.triggered.connect(self.open_preferences)
-        # self.open_options.connect(self.open_preferences)
-        # self.file_menu.addAction(preferences_action)
-
-        # self.format_menu = None
-        # self.format_menu_action = None
-
         self.save_image = QAction("Save Image", self)
         self.save_image.setIcon(QIcon.fromTheme("insert-image"))
 
@@ -620,6 +612,8 @@ class TCamCapture(QMainWindow):
         self.view = TcamView(self.serial, self)
         self.view.set_settings(self.settings)
         self.view.register_device_lost(self.lost_device)
+        # create preemptive pipline to make tcambin available
+        # needed for properties
         self.view.create_pipeline(caps_str)
         self.view.image_saved.connect(self.saved_image)
         self.view.new_pixel_under_mouse.connect(self.new_pixel_under_mouse)
@@ -641,7 +635,6 @@ class TCamCapture(QMainWindow):
         self.set_device_menus_enabled(True)
         self.props_action.setVisible(True)
         self.cache.last_serial = self.serial
-        self.cache.last_format = caps_str
         self.play(caps_str)
 
     def current_fps(self, fps: float):
@@ -657,7 +650,6 @@ class TCamCapture(QMainWindow):
         if self.view is not None:
             self.cache.last_format = video_format
             self.view.play(video_format)
-            # self.view.repaint()
 
     def stop(self):
         """
