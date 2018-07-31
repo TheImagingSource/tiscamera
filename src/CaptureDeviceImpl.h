@@ -142,6 +142,15 @@ public:
 
 private:
 
+    static void deviceindex_lost_cb (const DeviceInfo&, void* user_data);
+
+    struct device_lost_cb_data
+    {
+        tcam_device_lost_callback callback;
+        void* user_data;
+    };
+
+    std::vector<device_lost_cb_data> device_lost_callback_data_;
     // both need to be shared_ptr and not unique_ptr
     // the property handler is used for callbacks of properties
     // the pipeline is used for callbacks of ImageSource instances

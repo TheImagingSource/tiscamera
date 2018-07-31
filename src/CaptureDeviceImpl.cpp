@@ -15,6 +15,7 @@
  */
 
 #include "CaptureDeviceImpl.h"
+#include "DeviceIndex.h"
 
 #include "logging.h"
 #include "utils.h"
@@ -44,6 +45,10 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
         bad_device bd;
         throw bd;
     }
+    const auto serial = open_device_info.get_serial();
+    tcam::DeviceIndex::get_instance().register_device_lost(deviceindex_lost_cb,
+                                                           this,
+                                                           serial);
 }
 
 
@@ -109,7 +114,29 @@ bool CaptureDeviceImpl::register_device_lost_callback (tcam_device_lost_callback
     {
         return false;
     }
+
+    struct device_lost_cb_data data;
+    data.callback = callback;
+    data.user_data = user_data;
+
+    device_lost_callback_data_.push_back(data);
+
     return device->register_device_lost_callback(callback, user_data);
+}
+
+
+void CaptureDeviceImpl::deviceindex_lost_cb (const DeviceInfo& info, void* user_data)
+{
+    auto self = (CaptureDeviceImpl*) user_data;
+
+    const auto i = info.get_info();
+
+    tcam_info("Received lost from index");
+
+    for (const auto& data : self->device_lost_callback_data_)
+    {
+        (*data.callback)(&i, data.user_data);
+    }
 }
 
 
