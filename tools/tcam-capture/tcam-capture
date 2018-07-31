@@ -170,6 +170,14 @@ class TCamCapture(QMainWindow):
         if self.data.work_thread:
             self.data.work_thread.quit()
 
+    def get_focus(self):
+        """
+        Give the mainwindow the focus
+        """
+
+        self.activateWindow()
+        self.setFocus()
+
     def toggle_fullscreen(self):
         """
         Toggle fullscreen display of live stream
@@ -365,6 +373,9 @@ class TCamCapture(QMainWindow):
 
         if self.view:
             self.view.set_settings(self.settings)
+
+        self.get_focus()
+
     def open_device_dialog(self):
         """
         SLOT for opening the device_dialog
@@ -499,6 +510,7 @@ class TCamCapture(QMainWindow):
         self.selected_format.resolution = None
         self.selected_format.fps = None
         self.populate_resolution_box(entry)
+        self.get_focus()
 
     def on_resolution_selected(self, entry: str):
         """
