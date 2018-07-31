@@ -627,7 +627,7 @@ class TCamCapture(QMainWindow):
         self.view.pause()
 
         self.props = QDockWidget("Properties")
-        self.props_widget = PropertyDialog(self.data, self.props)
+        self.props_widget = PropertyDialog(self.data, self.view, self.props)
         self.props.setWidget(self.props_widget)
         self.props.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.props.setFloating(False)

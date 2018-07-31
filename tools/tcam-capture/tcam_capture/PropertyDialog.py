@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
+from tcam_capture.ROICollection import ROICollection, ROIGroup
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget,
                              QFormLayout, QPushButton, QScrollArea)
@@ -25,7 +26,8 @@ log = logging.getLogger(__name__)
 
 
 class PropertyTree(QWidget):
-
+    """
+    """
     def __init__(self, data, parent=None):
         super(PropertyTree, self).__init__(parent)
         self.tcam = data.tcam
@@ -33,21 +35,43 @@ class PropertyTree(QWidget):
         self.setup_ui()
         self.property_number = 0
         self.prop_dict = {}
+        self.roi_groups = ROIGroup.get_all_groups()
+        self.roi_widget = None  # currently only one roi per category is expected
 
     def setup_ui(self):
-        self.layout = QFormLayout()
-        self.layout.setSpacing(0)
-        self.layout.setVerticalSpacing(0)
+        self.formlayout = QFormLayout()
+        self.formlayout.setSpacing(0)
+        self.formlayout.setVerticalSpacing(0)
+
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.formlayout)
         self.setLayout(self.layout)
 
     def finish_setup(self):
         # insert spacer only after all other elements have been added
         # self.layout.insertStretch(-1, 1)
-        pass
+
+        for group in self.roi_groups:
+            if group.is_complete():
+                self.roi_widget = ROICollection(group)
+                self.layout.addWidget(self.roi_widget)
+                break
+        self.setLayout(self.layout)
+
+    def __add_to_roi_group_maybe(self, prop: PropertyWidget):
+        """
+        Return True on successfull addage to group
+        """
+        for group in self.roi_groups:
+            if group.add_member_maybe(prop):
+                return True
+        return False
 
     def add_property(self, prop: Prop):
         self.prop_dict[prop.name] = PropertyWidget(self.data, prop)
-        self.layout.addRow(prop.name, self.prop_dict[prop.name])
+        if not self.__add_to_roi_group_maybe(self.prop_dict[prop.name]):
+            self.formlayout.addRow(prop.name, self.prop_dict[prop.name])
+
         self.property_number = self.property_number + 1
 
     def set_property(self, name, value):
@@ -129,10 +153,11 @@ class PropertyWorker(QObject):
 
 class PropertyDialog(QWidget):
 
-    def __init__(self, data, parent=None):
+    def __init__(self, data, display_area, parent=None):
         super(PropertyDialog, self).__init__(parent)
         self.setWindowTitle("Tcam-Capture Device Properties")
         self.data = data
+        self.display_area = display_area
         self.work_thread = QtCore.QThread()
 
         self.setup_ui()
@@ -204,8 +229,10 @@ class PropertyDialog(QWidget):
                 area = QScrollArea()
                 area.setWidgetResizable(True)
                 area.setWidget(tab)
-                self.tabs.addTab(area, t)
                 tab.finish_setup()
+                if tab.roi_widget:
+                    tab.roi_widget.display_area = self.display_area
+                self.tabs.addTab(area, t)
             else:
                 tab.setVisible(False)
 

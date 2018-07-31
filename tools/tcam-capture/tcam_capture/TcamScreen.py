@@ -16,9 +16,14 @@ from tcam_capture.ViewItem import ViewItem
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import (QGraphicsView, QGraphicsScene,
-                             QGraphicsTextItem, QGraphicsPixmapItem)
-from PyQt5.QtCore import pyqtSignal, Qt, QSizeF
-from PyQt5.QtGui import QBrush, QColor, QPixmap
+                             QGraphicsTextItem,
+                             QRubberBand, QApplication)
+from PyQt5.QtCore import pyqtSignal, Qt, QSizeF, QSize, QRect, QPoint
+from PyQt5.QtGui import QColor, QPixmap
+
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class TcamScreen(QtWidgets.QGraphicsView):
@@ -60,6 +65,15 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.zoom_factor = 1.0
         self.first_image = True
         self.image_counter = 0
+
+        self.capture_roi = False
+        self.roi_obj = None
+        self.roi_origin = None
+        self.roi_widgets = []
+
+        self.selection_area = None
+        self.capture_widget = None
+        self.origin = None
 
     def fit_view(self):
         """
@@ -142,7 +156,53 @@ class TcamScreen(QtWidgets.QGraphicsView):
         mouse_position = self.mapToScene(event.pos())
         self.mouse_position_x = mouse_position.x()
         self.mouse_position_y = mouse_position.y()
+
+        if self.selection_area:
+
+            # adjust rect since we want to pull in all directions
+            # origin can well be bottom left, thus recalc
+            def calc_selection_rect():
+
+                x = min(self.origin.x(), event.pos().x())
+                y = min(self.origin.y(), event.pos().y())
+                x2 = max(self.origin.x(), event.pos().x())
+                y2 = max(self.origin.y(), event.pos().y())
+
+                return QPoint(x, y), QPoint(x2, y2)
+
+            p1, p2 = calc_selection_rect()
+            self.selection_area.setGeometry(QRect(p1, p2))
+
         super().mouseMoveEvent(event)
+
+    def mousePressEvent(self, event):
+        """"""
+
+        if self.capture_widget:
+
+            self.selection_area = QRubberBand(QRubberBand.Rectangle, self)
+            self.selection_area.setGeometry(QRect(event.pos(), QSize()))
+            self.origin = event.pos()
+            self.selection_area.show()
+
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+
+        if self.capture_widget:
+            selectionBBox = self.selection_area.rect()
+            rect = QRect(self.selection_area.pos(), selectionBBox.size())
+            selectionBBox = self.mapToScene(rect).boundingRect().toRect()
+            self.capture_widget.emit(selectionBBox)
+
+            self.selection_area.hide()
+            self.selection_area = None
+            QApplication.restoreOverrideCursor()
+
+        self.capture_widget = None
+        self.selection_area = None
+
+        super().mouseReleaseEvent(event)
 
     def is_scene_larger_than_image(self):
         """
@@ -210,6 +270,56 @@ class TcamScreen(QtWidgets.QGraphicsView):
                     event.key() == Qt.Key_Escape or
                     event.key() == Qt.Key_F):
                 self.destroy_widget.emit()
+        elif self.capture_widget and event.key() == Qt.Key_Escape:
+            self.abort_roi_capture()
         else:
-            # ignore event so that parent widgets can use it
+            # Ignore event so that parent widgets can use it.
+            # This is only called when we are not fullscreen.
+            # Fullscreen causes us to have no parents.
             event.ignore()
+
+    def start_roi_capture(self, finished_signal):
+        """
+        Capture a region of interest
+        """
+
+        self.capture_widget = finished_signal
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+
+    def abort_roi_capture(self):
+        """
+        Abort the capture of a regoin of interest
+        """
+        self.capture_widget = None
+        self.origin = None
+
+        if self.selection_area:
+            self.selection_area.hide()
+            self.selection_area = None
+
+        QApplication.restoreOverrideCursor()
+
+    def add_roi(self, roi_widget):
+        """
+        Add roi_widget to the QGraphicsScene for display
+        """
+        if not roi_widget:
+            return
+
+        self.roi_widgets.append(roi_widget)
+        self.scene.addItem(roi_widget)
+        roi_widget.show()
+
+    def remove_roi(self, roi_widget):
+        """
+        Remove given roi widget from the scene
+        """
+        if not roi_widget:
+            return
+
+        roi_widget.hide()
+        try:
+            self.roi_widgets.remove(roi_widget)
+        except ValueError as e:
+            # This means the widget is not in the list
+            pass

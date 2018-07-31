@@ -16,7 +16,7 @@
 from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
                              QCheckBox, QComboBox, QWidget,
                              QSpinBox, QDoubleSpinBox)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from . import TcamCaptureData
 import logging
 
@@ -40,9 +40,14 @@ class Prop(object):
 
 
 class PropertyWidget(QWidget):
+
+    value_changed = pyqtSignal(object)
+
     """display widget for tcam property"""
-    def __init__(self, data: TcamCaptureData, prop: Prop):
+    def __init__(self, data: TcamCaptureData, prop: Prop,
+                 app_property: bool=False):
         super().__init__()
+        self.app_property = app_property
         self.tcam = data.tcam
         self.signals = data.signals
         self.prop = prop
@@ -128,8 +133,10 @@ class PropertyWidget(QWidget):
         log.debug("button clicked")
         self.signals.change_property.emit(self.tcam, self.prop.name,
                                           self.toggle.isChecked(), self.prop.valuetype)
+        self.value_changed.emit(self)
 
-    def set_property(self, value):
+    def set_property(self, value, emit_value_changed=True):
+        self.prop.value = value
         if self.prop.valuetype == "integer":
             self.update_box_value(self.value_box, value)
 
@@ -142,6 +149,8 @@ class PropertyWidget(QWidget):
 
         self.signals.change_property.emit(self.tcam, self.prop.name,
                                           value, self.prop.valuetype)
+        if emit_value_changed:
+            self.value_changed.emit(self)
 
     def set_property_box(self, value):
         if self.prop.valuetype == "integer":
@@ -156,6 +165,7 @@ class PropertyWidget(QWidget):
 
         self.signals.change_property.emit(self.tcam, self.prop.name,
                                           value, self.prop.valuetype)
+        self.value_changed.emit(self)
 
     def update_box_value(self, box, value):
         box.blockSignals(True)
@@ -186,6 +196,12 @@ class PropertyWidget(QWidget):
         self.sld.blockSignals(False)
 
     def update(self, prop: Prop):
+
+        emit_value_changed = False
+
+        if self.prop.value != prop.value:
+            emit_value_changed = True
+
         self.prop = prop
         if self.prop.valuetype == "integer":
             self.update_slider_value(self.sld, self.prop.value)
@@ -224,6 +240,9 @@ class PropertyWidget(QWidget):
             self.combo.setCurrentText(prop.value)
             self.combo.blockSignals(False)
 
+        if emit_value_changed:
+            self.value_changed.emit(self)
+
     def reset(self):
         if self.prop.valuetype == "integer":
             self.update_box_value(self.value_box, self.prop.defval)
@@ -244,3 +263,4 @@ class PropertyWidget(QWidget):
             pass
         elif self.prop.valuetype == "enum":
             self.combo.setCurrentText(self.prop.defval)
+        self.value_changed.emit(self)

@@ -496,6 +496,25 @@ class TcamView(QWidget):
         if self.is_trigger_mode_on():
             self.tcam.set_tcam_property("Software Trigger", True)
 
+    def start_roi_capture(self, finished_signal):
+        """
+        Start capturing a ROI and emit finished_signal once the capture is finished
+        """
+        self.container.start_roi_capture(finished_signal)
+
+    def add_roi(self, roi_widget):
+        """
+        Add the given roi_widget for permanent display.
+        Call remove_roi to undo.
+        """
+        self.container.add_roi(roi_widget)
+
+    def remove_roi(self, roi_widget):
+        """
+        Remove roi_widget from display
+        """
+        self.container.remove_roi(roi_widget)
+
     @staticmethod
     def has_dutils():
         """
