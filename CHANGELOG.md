@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   actually do something
 - tcam-ctrl set now handles all property cases
 - Logger instance now works across library boundaries
-
+- removed compile flag that hid warnings, warnings have been fixed
 
 ### Removed
 
