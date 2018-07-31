@@ -26,6 +26,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
     new_pixmap = pyqtSignal(QtGui.QPixmap)
     new_pixel_under_mouse = pyqtSignal(bool, int, int, QtGui.QColor)
     destroy_widget = pyqtSignal()
+    fit_in_view = pyqtSignal()
 
     def __init__(self, parent=None):
         super(TcamScreen, self).__init__(parent)
@@ -38,6 +39,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.setScene(self.scene)
 
         self.new_pixmap.connect(self.on_new_pixmap)
+        self.fit_in_view.connect(self.fit_view)
         self.pix = ViewItem()
         self.scene.addItem(self.pix)
         self.scene.setSceneRect(self.pix.boundingRect())
@@ -50,11 +52,24 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.display_real_image = True
         self.text_item = None
 
+        self.fit_in_view_called = False
+
         self.mouse_position_x = -1
         self.mouse_position_y = -1
 
         self.zoom_factor = 1.0
         self.first_image = True
+        self.image_counter = 0
+
+    def fit_view(self):
+        """
+
+        """
+
+        self.reset_zoom()
+        self.scene.setSceneRect(self.pix.boundingRect())
+        self.scene.update()
+        self.fitInView(self.scene.sceneRect(), Qt.KeepAspectRatio)
 
     def reset_zoom(self):
 
@@ -63,6 +78,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.setTransform(QtGui.QTransform())
 
     def on_new_pixmap(self, pixmap):
+        self.image_counter += 1
         self.pix.setPixmap(pixmap)
 
         if not self.display_real_image:
@@ -70,10 +86,22 @@ class TcamScreen(QtWidgets.QGraphicsView):
             self.scene.removeItem(self.text_item)
             self.display_real_image = True
 
-        if self.first_image:
-            self.reset_zoom()
+        if self.image_counter == 1:
+            self.resize(self.size())
             self.scene.setSceneRect(self.pix.boundingRect())
+            self.update()
+
+            self.reset_zoom()
             self.first_image = False
+
+        # wait for the second image
+        # resizeEvents, etc appear before the scene has adjusted
+        # to the actual image size. By waiting for the 2. image
+        # we circumvent this by having the first image making all
+        # adjustments for us. The only scenario where this will
+        # cause problems is triggering.
+        if self.is_fullscreen and self.image_counter == 2:
+            self.fit_view()
 
         self.send_mouse_pixel()
         # don't call repaint here
@@ -97,6 +125,7 @@ class TcamScreen(QtWidgets.QGraphicsView):
         bg = QPixmap(1280, 720)
         bg.fill(QColor("grey"))
         self.pix.setPixmap(bg)
+        self.image_counter += 1
         self.scene.addItem(self.text_item)
 
     def send_mouse_pixel(self):

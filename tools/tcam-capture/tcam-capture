@@ -105,7 +105,7 @@ class TCamCapture(QMainWindow):
     """
     open_options = pyqtSignal()
 
-    def __init__(self, app, serial=None, caps_str=None):
+    def __init__(self, app, serial=None, caps_str=None, fullscreen=False):
         super().__init__()
         app.aboutToQuit.connect(self.quit)
         self.app = app
@@ -166,6 +166,11 @@ class TCamCapture(QMainWindow):
         if self.serial:
             self.open_device(self.serial, caps_str)
 
+        if self.view and fullscreen:
+            self.view.toggle_fullscreen()
+            self.view.fit_view()
+        self.get_focus()
+
     def __del__(self):
         if self.data.work_thread:
             self.data.work_thread.quit()
@@ -177,6 +182,13 @@ class TCamCapture(QMainWindow):
 
         self.activateWindow()
         self.setFocus()
+
+    def fit_to_window(self):
+        """
+        Resize stream display to fit the available display area
+        """
+        if self.view:
+            self.view.fit_view()
 
     def toggle_fullscreen(self):
         """
@@ -341,6 +353,12 @@ class TCamCapture(QMainWindow):
 
         self.save_image.triggered.connect(self.save_image_action)
         self.toolbar.addAction(self.save_image)
+
+        self.fit_to_win = QAction("Fit To Window", self)
+        self.fit_to_win.setIcon(QIcon.fromTheme("zoom-fit-best"))
+
+        self.fit_to_win.triggered.connect(self.fit_to_window)
+        self.toolbar.addAction(self.fit_to_win)
 
         self.props_action = QAction("", self)
         self.props_action.setText("Properties")
@@ -764,6 +782,8 @@ def init():
                         action="count", dest="verbose_count", default=0)
     parser.add_argument("--reset", help="Reset application settings and clear cache",
                         action="store_true")
+    parser.add_argument("--fullscreen", help="Start to application with a fullscreen display",
+                        action="store_true")
     # these are here to make argparse shut up about unknown arguments
     # we want this application to allow gstreamer logging
     parser.add_argument("--gst-debug", help=argparse.SUPPRESS)
@@ -784,7 +804,7 @@ def init():
                         datefmt='%d-%m-%Y:%H:%M:%S',
                         level=level)
     Gst.init(sys.argv)
-    return arguments.serial, arguments.caps_str
+    return arguments.serial, arguments.caps_str, arguments.fullscreen
 
 
 if __name__ == '__main__':
@@ -795,7 +815,7 @@ if __name__ == '__main__':
     # cache values, which overwrite
     # default values
 
-    serial, caps_str = init()
+    serial, caps_str, fullscreen = init()
 
     # keep the default signal handling
     # should the application hang itself, due to gstreamer "hick-ups"
@@ -803,6 +823,6 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     app = QApplication(sys.argv)
-    tcam_capture = TCamCapture(app, serial, caps_str)
+    tcam_capture = TCamCapture(app, serial, caps_str, fullscreen)
 
     sys.exit(app.exec_())

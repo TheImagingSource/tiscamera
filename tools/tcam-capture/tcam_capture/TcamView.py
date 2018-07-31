@@ -141,13 +141,18 @@ class TcamView(QWidget):
             self.is_fullscreen = False
             self.showNormal()
             self.fullscreen_container.hide()
-            self.fullscreen_container.deleteLater()
+            # self.fullscreen_container.deleteLater()
             self.fullscreen_container = None
         else:
             self.is_fullscreen = True
             self.fullscreen_container = TcamScreen()
+            self.fullscreen_container.is_fullscreen = True
+
+            self.fullscreen_container.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.fullscreen_container.showFullScreen()
             self.fullscreen_container.show()
+            self.container.first_image = True
+
             self.fullscreen_container.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.fullscreen_container.installEventFilter(self.fullscreen_container)
             self.fullscreen_container.destroy_widget.connect(self.toggle_fullscreen)
@@ -157,6 +162,12 @@ class TcamView(QWidget):
                 self.fullscreen_container.wait_for_first_image()
             else:
                 self.fullscreen_container.on_new_pixmap(self.container.pix.pixmap())
+
+    def fit_view(self):
+        if self.is_fullscreen:
+            self.fullscreen_container.fit_in_view.emit()
+        else:
+            self.container.fit_in_view.emit()
 
     def save_image(self, image_type: str):
 
@@ -282,7 +293,8 @@ class TcamView(QWidget):
                                                               struc.get_value("height"),
                                                               QtGui.QImage.Format_ARGB32))
             if self.fullscreen_container is not None:
-                self.fullscreen_container.new_pixmap.emit(self.image)
+                if self.fullscreen_container.isFullScreen():
+                    self.fullscreen_container.new_pixmap.emit(self.image)
             else:
                 self.container.new_pixmap.emit(self.image)
             if self.videosaver and self.videosaver.accept_buffer:
