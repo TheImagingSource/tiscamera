@@ -15,6 +15,7 @@
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
 from tcam_capture.ROIGroup import ROIGroup
 from tcam_capture.ROIRectItem import ROIRectItem
+from tcam_capture.ResizeableRectItem import ResizeableRectItem, ResizeableRectItemSettings
 
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout,
                              QGroupBox, QHBoxLayout, QFormLayout,
