@@ -69,7 +69,7 @@ class TcamView(QWidget):
         self.device_lost_callbacks = []
         self.caps_desc = None
         self.video_format = None
-        self.retry_countdown = 5
+        self.retry_countdown = 0
         self.actual_fps = 0.0
         self.framecounter = 0
         self.start_time = 0
@@ -417,7 +417,7 @@ class TcamView(QWidget):
 
                     self.retry_countdown -= 1
 
-                    if self.retry_countdown == 0:
+                    if self.retry_countdown <= 0:
                         log.error("Repeatedly retried to start stream. No Success. Giving up.")
                         return
 
