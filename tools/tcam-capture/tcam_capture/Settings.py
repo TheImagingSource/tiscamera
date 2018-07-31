@@ -31,6 +31,21 @@ class FileNameSettings():
         self.include_format = True
         self.user_prefix = ""
 
+    def __repr__(self):
+        return ("user_prefix={};include_timestamp={};"
+                "include_serial={};"
+                "include_counter={};"
+                "overwrite_files={};"
+                "counter_size={}"
+                "include_format={};").format(self.user_prefix,
+                                             self.include_timestamp,
+                                             self.include_serial,
+                                             self.include_counter,
+                                             self.overwrite_files,
+                                             self.counter_size,
+                                             self.include_format
+                                 )
+
 
 class Settings(object):
 
