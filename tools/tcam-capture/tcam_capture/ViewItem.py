@@ -31,9 +31,11 @@ class ViewItem(QGraphicsPixmapItem):
 
     def hoverEnterEvent(self, event):
         self.mouse_over = True
+        super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         self.mouse_over = False
+        super().hoverLeaveEvent(event)
 
     def hoverMoveEvent(self, event):
         mouse_position = event.pos()
