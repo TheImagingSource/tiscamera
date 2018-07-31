@@ -39,6 +39,7 @@ tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
 
     usb_device_ = UsbHandler::get_instance().open_device_(info.get_serial());
 
+    // LibusbDevice tracks open interfaces and closes them automatically
     if (!usb_device_->open_interface(0))
     {
         tcam_error("Failed to open camera interface - %d. \n"
