@@ -89,8 +89,15 @@ class TcamView(QWidget):
         self.imagesaver = None
 
     def get_caps_desc(self):
+        """
+        Returns a CapsDesc describing the caps of the currently opened device
+        Returns None if device is not opened
+        """
         if not self.caps_desc:
-            caps = self.get_tcam().get_static_pad("src").query_caps()
+            tcam = self.get_tcam()
+            if not tcam:
+                return None
+            caps = tcam.get_static_pad("src").query_caps()
             self.caps_desc = CapsDesc(caps)
         return self.caps_desc
 
