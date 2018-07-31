@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
                              QDockWidget, QAction, QComboBox, QSizePolicy)
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 
 from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
 from tcam_capture.DeviceDialog import DeviceDialog
@@ -195,15 +195,64 @@ class TCamCapture(QMainWindow):
         """
         Overwrite of QMainWindow::keyPressEvent
         """
-        if event.key() == QtCore.Qt.Key_F11 or event.key() == QtCore.Qt.Key_F:
+
+        value = event.key()
+
+        bad_values = [QtCore.Qt.Key_Alt,
+                      QtCore.Qt.Key_Control,
+                      QtCore.Qt.Key_Shift,
+                      QtCore.Qt.Key_Meta,
+                      QtCore.Qt.Key_AltGr]
+
+        if value in bad_values:
+            return
+
+        if event.modifiers() & QtCore.Qt.AltModifier:
+            value += QtCore.Qt.ALT
+        if event.modifiers() & QtCore.Qt.ControlModifier:
+            value += QtCore.Qt.CTRL
+        if event.modifiers() & QtCore.Qt.MetaModifier:
+            value += QtCore.Qt.META
+        if event.modifiers() & QtCore.Qt.ShiftModifier:
+            value += QtCore.Qt.SHIFT
+
+        log.info("Keypress {}".format(QKeySequence(value).toString(QKeySequence.NativeText)))
+
+        event_sequence = QKeySequence(value)
+
+        # handle special keys that should not be changeable
+        if event.key() == QtCore.Qt.Key_F11:
             log.info("Toggling fullscreen")
             self.toggle_fullscreen()
+            return
         elif event.key() == QtCore.Qt.Key_F10:
             log.info("Toggling maximize")
             self.toggle_maximized()
-        elif event.key() == QtCore.Qt.Key_P:
-            log.info("Got key event for saving image")
+            return
+        # handle user defined keybindings
+        self.handle_keysequence(event_sequence)
+
+    def handle_keysequence(self, keys: QKeySequence):
+
+        if keys.toString() == self.settings.keybinding_fullscreen:
+            self.toggle_fullscreen()
+            return
+        elif keys.toString() == self.settings.keybinding_open_dialog:
+            self.open_device_dialog()
+            return
+        elif keys.toString() == self.settings.keybinding_save_image:
             self.save_image_action()
+            return
+        elif keys.toString() == self.settings.keybinding_trigger_image:
+            self.trigger_image()
+            return
+        # log.debug("No action mapped to '{}'".format(keys.toString()))
+        # log.debug("{}".format(self.settings.keybinding_trigger_image))
+
+    def trigger_image(self):
+
+        if self.view:
+            self.view.trigger_image()
 
     def saved_image(self, image_path: str):
         """
