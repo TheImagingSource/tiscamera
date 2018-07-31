@@ -501,6 +501,13 @@ class TcamView(QWidget):
 
         return True
 
+    def trigger_image(self):
+        """
+        Checks if trigger mode is active and try to trigger an image
+        """
+        if self.is_trigger_mode_on():
+            self.tcam.set_tcam_property("Software Trigger", True)
+
     @staticmethod
     def has_dutils():
         """
