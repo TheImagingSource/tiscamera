@@ -409,6 +409,9 @@ class OptionsDialog(QDialog):
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
         self.use_dutils_checkbox.setChecked(settings.use_dutils)
 
+        #
+        # image saving
+        #
         if settings.image_name.include_timestamp:
             self.image_name_timestamp.blockSignals(True)
             self.image_name_timestamp.toggle()
@@ -437,6 +440,9 @@ class OptionsDialog(QDialog):
 
         self.update_image_name_preview()
 
+        #
+        # video saving
+        #
         if settings.video_name.include_timestamp:
             self.video_name_timestamp.blockSignals(True)
             self.video_name_timestamp.toggle()
@@ -474,6 +480,9 @@ class OptionsDialog(QDialog):
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
         self.settings.use_dutils = self.use_dutils_checkbox.isChecked()
 
+        #
+        # image saving
+        #
         self.settings.image_name.include_timestamp = self.image_name_timestamp.isChecked()
         self.settings.image_name.include_counter = self.image_name_counter.isChecked()
         if self.image_name_counter.isChecked():
@@ -483,6 +492,9 @@ class OptionsDialog(QDialog):
         self.settings.image_name.include_serial = self.image_name_serial.isChecked()
         self.settings.image_name.user_prefix = self.image_name_prefix.text()
 
+        #
+        # video saving
+        #
         self.settings.video_name.include_timestamp = self.video_name_timestamp.isChecked()
         self.settings.video_name.include_counter = self.video_name_counter.isChecked()
         if self.video_name_counter.isChecked():
