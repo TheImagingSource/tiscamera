@@ -37,6 +37,7 @@ class Settings(object):
     def __init__(self):
 
         self.section_general = "General"  # general category name used in config file
+        self.section_keys = "Keybindings"
         self.section_image_name = "Image Naming"
         self.section_video_name = "Video Naming"
         self._set_defaults()
@@ -55,6 +56,11 @@ class Settings(object):
         self.set_properties_on_reopen = True
         self.logfile_location = None
         self.use_dutils = True
+
+        self.keybinding_fullscreen = "f"
+        self.keybinding_save_image = "s"
+        self.keybinding_trigger_image = "space"
+        self.keybinding_open_dialog = "Ctrl+O"
 
         self.image_name = FileNameSettings()
         self.video_name = FileNameSettings()
@@ -119,6 +125,18 @@ class Settings(object):
         self.use_dutils = gen.getboolean("use_dutils",
                                          self.use_dutils)
 
+        if config.has_section(self.section_keys):
+            keys = config[self.section_keys]
+
+            self.keybinding_fullscreen = keys.get("fullscreen",
+                                                  self.keybinding_fullscreen)
+            self.keybinding_save_image = keys.get("save_image",
+                                                  self.keybinding_save_image)
+            self.keybinding_trigger_image = keys.get("trigger_image",
+                                                     self.keybinding_trigger_image)
+            self.keybinding_open_dialog = keys.get("open_device_dialog",
+                                                   self.keybinding_open_dialog)
+
         if config.has_section(self.section_image_name):
 
             img = config[self.section_image_name]
@@ -181,6 +199,17 @@ class Settings(object):
         config[sg]["log_file_location"] = str(self.logfile_location)
         config.set(sg, "# Use tiscamera-dutils, if present:")
         config[sg]["use_dutils"] = str(self.use_dutils)
+
+        keys = self.section_keys
+        config.add_section(keys)
+        config.set(keys, "# Toggle fullscreen display of the stream")
+        config[keys]["fullscreen"] = self.keybinding_fullscreen
+        config.set(keys, "# Save an image")
+        config[keys]["save_image"] = self.keybinding_save_image
+        config.set(keys, "# Trigger an image")
+        config[keys]["trigger_image"] = self.keybinding_trigger_image
+        config.set(keys, "# Open the device dialog to select a device")
+        config[keys]["open_device_dialog"] = self.keybinding_open_dialog
 
         img = self.section_image_name
         config.add_section(img)

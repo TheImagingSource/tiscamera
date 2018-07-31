@@ -22,8 +22,9 @@ from PyQt5.QtWidgets import (QDialog, QVBoxLayout,
                              QDialogButtonBox, QFileDialog,
                              QPushButton, QHBoxLayout, QCheckBox,
                              QFormLayout, QTabWidget, QWidget,
-                             QGroupBox, QSpinBox)
+                             QGroupBox, QSpinBox, QKeySequenceEdit)
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QKeySequence
 
 log = logging.getLogger(__file__)
 
@@ -51,6 +52,9 @@ class OptionsDialog(QDialog):
         self._setup_general_ui()
         self.tabs.addTab(self.general_widget, "General")
 
+        if self.enabled_keybindings:
+            self._setup_keybindings_ui()
+            self.tabs.addTab(self.keybindings_widget, "Keybindings")
         self._setup_saving_ui()
         self.tabs.addTab(self.saving_widget, "Image/Video")
 
@@ -400,6 +404,34 @@ class OptionsDialog(QDialog):
         else:
             self.video_name_counter_box.setEnabled(False)
 
+    def _setup_keybindings_ui(self):
+        """
+        Create everything related to the keybindings tab
+        """
+
+        layout = QFormLayout()
+        self.keybinding_fullscreen_label = QLabel("Toggle Fullscreen:")
+        self.keybinding_fullscreen = QKeySequenceEdit()
+        layout.addRow(self.keybinding_fullscreen_label,
+                      self.keybinding_fullscreen)
+
+        self.keybinding_save_image_label = QLabel("Save image:")
+        self.keybinding_save_image = QKeySequenceEdit(QKeySequence(self.settings.keybinding_save_image))
+        layout.addRow(self.keybinding_save_image_label,
+                      self.keybinding_save_image)
+
+        self.keybinding_trigger_image_label = QLabel("Trigger images via softwaretrigger:")
+        self.keybinding_trigger_image = QKeySequenceEdit(QKeySequence(self.settings.keybinding_trigger_image))
+        layout.addRow(self.keybinding_trigger_image_label,
+                      self.keybinding_trigger_image)
+
+        self.keybinding_open_dialog_label = QLabel("Open device dialog:")
+        self.keybinding_open_dialog = QKeySequenceEdit(QKeySequence(self.settings.keybinding_open_dialog))
+        layout.addRow(self.keybinding_open_dialog_label,
+                      self.keybinding_open_dialog)
+
+        self.keybindings_widget.setLayout(layout)
+
     def set_settings(self, settings: Settings):
         self.location_edit.setText(settings.get_save_location())
         self.image_type_combobox.setCurrentText(settings.get_image_type())
@@ -408,6 +440,15 @@ class OptionsDialog(QDialog):
         self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
         self.use_dutils_checkbox.setChecked(settings.use_dutils)
+
+        #
+        # keybindings
+        #
+        if self.enabled_keybindings:
+            self.keybinding_fullscreen.setKeySequence(QKeySequence(self.settings.keybinding_fullscreen))
+            self.keybinding_save_image.setKeySequence(QKeySequence(self.settings.keybinding_save_image))
+            self.keybinding_trigger_image.setKeySequence(QKeySequence(self.settings.keybinding_trigger_image))
+            self.keybinding_open_dialog.setKeySequence(QKeySequence(self.settings.keybinding_open_dialog))
 
         #
         # image saving
@@ -479,6 +520,15 @@ class OptionsDialog(QDialog):
         self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
         self.settings.use_dutils = self.use_dutils_checkbox.isChecked()
+
+        #
+        # keybindings
+        #
+        if self.enabled_keybindings:
+            self.settings.keybinding_fullscreen = self.keybinding_fullscreen.keySequence().toString()
+            self.settings.keybinding_save_image = self.keybinding_save_image.keySequence().toString()
+            self.settings.keybinding_trigger_image = self.keybinding_trigger_image.keySequence().toString()
+            self.settings.keybinding_open_dialog = self.keybinding_open_dialog.keySequence().toString()
 
         #
         # image saving
