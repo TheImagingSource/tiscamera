@@ -474,6 +474,10 @@ class TCamCapture(QMainWindow):
         self.fps_combo.reset()
         res_list = self.caps_desc.get_resolution_list(fmt)
 
+        if not res_list:
+            log.error("Could not retrieve resolutions for format. Resolution box will be empty.")
+            return
+
         self.resolution_combo.addItems(res_list)
 
     def populate_fps_box(self, fmt: str, resolution: str):
