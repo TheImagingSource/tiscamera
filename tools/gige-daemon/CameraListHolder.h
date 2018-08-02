@@ -22,6 +22,7 @@
 #include <condition_variable>
 
 #include "tcam.h"
+#include "tcam-semaphores.h"
 
 using namespace tcam;
 
@@ -33,7 +34,7 @@ public:
 
     static CameraListHolder& get_instance ();
 
-    std::vector<DeviceInfo> get_camera_list () const;
+    std::vector<DeviceInfo> get_camera_list ();
 
     std::vector<std::string> get_interface_list () const;
 
@@ -67,7 +68,6 @@ private:
     key_t shmkey;
 
     key_t semaphore_key;
-    int semaphore_id = 0;
 
     tcam::semaphore     semaphore_id;
 };
