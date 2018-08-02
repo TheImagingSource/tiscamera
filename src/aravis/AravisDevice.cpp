@@ -1036,7 +1036,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             rf.resolution.max_size = max;
             rf.resolution.min_size = min;
 
-            if (are_equal(min, max))
+            if (min == max)
             {
                 rf.resolution.type = TCAM_RESOLUTION_TYPE_FIXED;
             }

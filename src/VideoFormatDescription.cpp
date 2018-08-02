@@ -68,7 +68,7 @@ bool VideoFormatDescription::operator!= (const VideoFormatDescription& other) co
 
 bool VideoFormatDescription::operator== (const struct tcam_video_format_description& other) const
 {
-    if (are_equal(format, other))
+    if (format == other)
     {
         return true;
     }
@@ -94,13 +94,13 @@ uint32_t VideoFormatDescription::get_fourcc () const
 }
 
 
-uint32_t VideoFormatDescription::get_binning() const
+uint32_t VideoFormatDescription::get_binning () const
 {
     return format.binning;
 }
 
 
-uint32_t VideoFormatDescription::get_skipping ()const
+uint32_t VideoFormatDescription::get_skipping () const
 {
     return format.skipping;
 }
@@ -124,7 +124,7 @@ std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resoluti
 
     for (const auto& m : res)
     {
-        if (are_equal(m.resolution, desc))
+        if (m.resolution == desc)
         {
             return m.framerates;
         }
@@ -145,14 +145,14 @@ std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_siz
     {
         if (r.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
         {
-            if (are_equal(s, r.resolution.min_size))
+            if (s == r.resolution.min_size)
             {
                 return r.framerates;
             }
         }
         else
         {
-            if (is_smaller(r.resolution.min_size, s) && is_smaller(s, r.resolution.max_size))
+            if ((r.resolution.min_size < s) && (s < r.resolution.max_size))
             {
                 return r.framerates;
             }
@@ -197,7 +197,7 @@ bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
         {
             if (_res.type == TCAM_RESOLUTION_TYPE_FIXED)
             {
-                return are_equal(_res.min_size, size);
+                return _res.min_size == size;
             }
             else // TCAM_RESOLUTION_TYPE_RANGE
             {

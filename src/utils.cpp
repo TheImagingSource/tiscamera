@@ -254,18 +254,6 @@ bool tcam::compare_double (double val1, double val2)
 }
 
 
-bool tcam::are_equal (const tcam_image_size& s1,
-                      const tcam_image_size& s2)
-{
-    if (s1.height == s2.height
-        && s1.width == s2.width)
-    {
-        return true;
-    }
-    return false;
-}
-
-
 bool tcam::in_range (const tcam_image_size& minimum,
                      const tcam_image_size& maximum,
                      const tcam_image_size& value)
@@ -279,47 +267,6 @@ bool tcam::in_range (const tcam_image_size& minimum,
         return false;
     }
     return true;
-}
-
-
-bool tcam::are_equal (const struct tcam_resolution_description& res1,
-                      const struct tcam_resolution_description& res2)
-{
-    if (res1.type == res2.type
-        && res1.framerate_count == res2.framerate_count
-        && are_equal(res1.max_size, res2.max_size)
-        && are_equal(res1.min_size,res2.min_size))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-bool tcam::are_equal (const struct tcam_video_format_description& fmt1,
-                      const struct tcam_video_format_description& fmt2)
-{
-    if (fmt1.fourcc == fmt2.fourcc
-        && fmt1.binning == fmt2.binning
-        && fmt1.skipping == fmt2.skipping
-        && fmt1.resolution_count == fmt2.resolution_count
-        && strcmp(fmt1.description, fmt2.description) == 0)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-bool tcam::is_smaller (const tcam_image_size &s1, const tcam_image_size &s2)
-{
-    if (s1.height <= s2.height && s1.width <= s2.width)
-    {
-        return true;
-    }
-    return false;
 }
 
 

@@ -147,7 +147,7 @@ std::vector<struct tcam_image_size> tcam::get_standard_resolutions (const struct
 
     for (const auto& r : resolutions)
     {
-        if (is_smaller(min, r) && is_smaller(r, max))
+        if ((min < r) && (r < max))
         {
             ret.push_back(r);
         }

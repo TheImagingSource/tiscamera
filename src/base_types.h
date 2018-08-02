@@ -82,6 +82,25 @@ struct tcam_image_size
 {
     uint32_t width;
     uint32_t height;
+
+    bool operator< (const struct tcam_image_size& other) const
+    {
+        if (height <= other.height && width <= other.width)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool operator== (const struct tcam_image_size& other) const
+    {
+        if (s1.height == s2.height
+            && s1.width == s2.width)
+        {
+            return true;
+        }
+        return false;
+    }
 };
 
 
@@ -101,6 +120,19 @@ struct tcam_resolution_description
     struct tcam_image_size max_size;         /**< biggest available resolution */
 
     uint32_t framerate_count;                /**< number of framerates this resolution supports */
+
+    bool operator== (const struct tcam_resolution_description& other) const
+    {
+        if (type == other.type
+            && framerate_count == other.framerate_count
+            && res1.max_size == other.max_size
+            && res1.min_size == other.min_size)
+        {
+            return true;
+        }
+
+        return false;
+    }
 };
 
 
@@ -116,6 +148,20 @@ struct tcam_video_format_description
     uint32_t skipping;
 
     uint32_t resolution_count;               /**< number of resolutions this format supports */
+
+    bool operator== (const struct tcam_video_format_description& other) const
+    {
+        if (fourcc == other.fourcc
+            && binning == other.binning
+            && skipping == other.skipping
+            && resolution_count == other.resolution_count
+            && strcmp(description, other.description) == 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
 };
 
 
