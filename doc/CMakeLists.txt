@@ -90,4 +90,11 @@ if (BUILD_USER_DOC)
 
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
 
+  # This adds the doxygen output directories to the 'make clean' command
+  set_property(DIRECTORY APPEND PROPERTY
+    ADDITIONAL_MAKE_CLEAN_FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/latex"
+    "${CMAKE_CURRENT_BINARY_DIR}/html"
+    "${CMAKE_CURRENT_BINARY_DIR}/man")
+
 endif (BUILD_USER_DOC)
