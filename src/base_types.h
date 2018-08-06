@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
+#include <cstring>
 #include "property_identifications.h"
 #include "image_fourcc.h"
 
@@ -94,8 +94,8 @@ struct tcam_image_size
 
     bool operator== (const struct tcam_image_size& other) const
     {
-        if (s1.height == s2.height
-            && s1.width == s2.width)
+        if (height == other.height
+            && width == other.width)
         {
             return true;
         }
@@ -125,8 +125,8 @@ struct tcam_resolution_description
     {
         if (type == other.type
             && framerate_count == other.framerate_count
-            && res1.max_size == other.max_size
-            && res1.min_size == other.min_size)
+            && max_size == other.max_size
+            && min_size == other.min_size)
         {
             return true;
         }
