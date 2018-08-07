@@ -84,6 +84,7 @@ class ROICollection(QWidget):
         self.visibility_checkbox.toggled.connect(self.__checkbox_cb)
         first_line.addWidget(self.visibility_checkbox)
         self.select_button = QPushButton("+", self)
+        self.select_button.setToolTip("Select ROI with the mouse")
         self.select_button.clicked.connect(self.activate_selection)
         first_line.addWidget(self.select_button)
 
