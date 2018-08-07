@@ -2,4 +2,4 @@
 
 triggertriggertriggertriggertriggertrigger
 
-\snippet python/list_devices.py list-devices
+\snippet python/trigger-images trigger

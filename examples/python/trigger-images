@@ -111,6 +111,8 @@ def main():
     source.link(convert)
     convert.link(output)
 
+    #! [trigger]
+
     pipeline.set_state(Gst.State.PLAYING)
 
     # stream for 2 seconds before switching to trigger mode
@@ -140,6 +142,8 @@ def main():
 
     # this stops the pipeline and frees all resources
     pipeline.set_state(Gst.State.NULL)
+
+    #! [trigger]
 
 if __name__ == "__main__":
     main()

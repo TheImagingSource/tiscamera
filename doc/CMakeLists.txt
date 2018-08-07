@@ -17,36 +17,13 @@
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
-
-if(BUILD_DOCUMENTATION)
-  if(NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen is needed to build the documentation.")
-  endif()
-
-  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake)
-  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-  configure_file(${doxyfile_in} ${doxyfile} @ONLY)
-
-  # ALL allows us to build the documentation with the project
-  add_custom_target(doc ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating API documentation with Doxygen"
-    VERBATIM)
-
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
-endif()
-
+set(doxygen_files "")
+set(doxyfile_layout "")
 
 if (BUILD_USER_DOC)
 
-  if(NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen is needed to build the documentation.")
-  endif()
-
   set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-User.cmake)
+  set(doxyfile_layout ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-layout-user.xml)
   set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
   set(doc_dir "${CMAKE_CURRENT_SOURCE_DIR}/pages")
@@ -59,6 +36,7 @@ if (BUILD_USER_DOC)
     ${doc_dir}/building.md \
     ${doc_dir}/installation.md \
     ${doc_dir}/versioning-and-releases.md \
+    ${doc_dir}/documentation.md \
     ${doc_dir}/gstreamer.md \
     ${doc_dir}/logging.md \
     ${doc_dir}/flags.md \
@@ -76,13 +54,54 @@ if (BUILD_USER_DOC)
     ${doc_dir}/uvcdynctrl.md \
     ${doc_dir}/udev-rules.md \
     ${doc_dir}/licensing.md \
-    ${doc_dir}/further-reading.md"
+    ${doc_dir}/further-reading.md \
+    ${doc_dir}/contact.md \
+    "
     )
+
+  set(doxygen_files "${doxygen_files} ${doc_file_list}")
+
+  set(BUILD_DOC TRUE)
+
+endif (BUILD_USER_DOC)
+
+
+if(BUILD_DOCUMENTATION)
+
+  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake)
+  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+  set(doxygen_files "${doxygen_files} \
+${CMAKE_SOURCE_DIR}/src/ \
+${CMAKE_SOURCE_DIR}/tools/ \
+")
+
+  set(BUILD_DOC TRUE)
+
+endif(BUILD_DOCUMENTATION)
+
+
+if ((BUILD_USER_DOC) AND (BUILD_DOCUMENTATION))
+
+  set(doxyfile_layout ${CMAKE_CURRENT_SOURCE_DIR}/DoxygenLayout.xml)
+
+  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-ALL.cmake)
+  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+endif ((BUILD_USER_DOC) AND (BUILD_DOCUMENTATION))
+
+
+
+if (BUILD_DOC)
+
+  if(NOT DOXYGEN_FOUND)
+    message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+  endif()
 
   configure_file(${doxyfile_in} ${doxyfile} @ONLY)
 
   # ALL allows us to build the documentation with the project
-  add_custom_target(user-doc ALL
+  add_custom_target(doc ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
     COMMENT "Generate User Documentation"
@@ -97,4 +116,4 @@ if (BUILD_USER_DOC)
     "${CMAKE_CURRENT_BINARY_DIR}/html"
     "${CMAKE_CURRENT_BINARY_DIR}/man")
 
-endif (BUILD_USER_DOC)
+endif (BUILD_DOC)

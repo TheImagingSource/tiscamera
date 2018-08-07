@@ -8,11 +8,12 @@ tcam-capture is the general purpose image retrieval application of The Imaging S
 
 tcam-capture has several optional arguments to change its behavior:
 
-    -h, --help         show this help message and exit
+    -h, --help         Show this help message and exit
     --serial SERIAL    Open device with serial immediately
     --format CAPS_STR  Open device with this gstreamer format
     --verbose, -v      Increase logging level
     --reset            Reset application settings and clear cache
+    --fullscreen       Start the application in fullscreen mode
 
 Additionally you can pass gstreamer arguments to retrieve debug information about the streams.
 Currently supported are
@@ -22,10 +23,6 @@ Currently supported are
     --gst-debug-no-color
 
 For more information concerning gstreamer debugging go here: [logging](@ref logging)
-
-\snippet c/list-devices.c list-devices
-
-\snippet python/list_devices.py list-devices
 
 ## Options
 

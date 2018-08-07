@@ -32,15 +32,15 @@ This requires that git is installed.
 
 - **-DBUILD_V4L2=<ON/OFF>**
 
-    Build tiscamera with suppoort for v4l2 devices.
+    Build tiscamera with support for v4l2 devices.
 
     _Default:_ ON
 
 - **-DBUILD_LIBUSB=<ON/OFF>**
 
-    Build tiscamera with suppoort for v4l2 devices.
+    Build tiscamera with support for usb devices that that have no native driver.
 
-    _Default:_ON
+    _Default:_ ON
 
 - **-DCMAKE_INSTALL_PREFIX**
 
