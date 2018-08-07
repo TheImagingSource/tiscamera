@@ -69,8 +69,8 @@ option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_V4L2     "Include support for USB cameras"      ON )
 option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
-option(BUILD_DOC      "Build documentation"                  OFF)
-option(BUILD_USER_DOC "Build user documentation." ON)
+option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
+option(BUILD_USER_DOC "Build user documentation."            OFF)
 
 
 set(TCAM_INTERNAL_ARAVIS ON CACHE BOOL "Use internal aravis dependency instead of system libraries")
@@ -106,7 +106,10 @@ if (BUILD_TOOLS)
   add_subdirectory(tools)
 endif (BUILD_TOOLS)
 
-add_subdirectory(doc)
+if ((BUILD_DOCUMENTATION) OR (BUILD_USER_DOC))
+  add_subdirectory(doc)
+endif ((BUILD_DOCUMENTATION) OR (BUILD_USER_DOC))
+
 
 # uninstall target
 configure_file(
