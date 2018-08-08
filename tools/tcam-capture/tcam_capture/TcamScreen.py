@@ -147,10 +147,13 @@ class TcamScreen(QtWidgets.QGraphicsView):
         # we want the lower right corner to have the correct coordinates
         # e.g. an 1920x1080 image should have the coordinates
         # 1920x1080 for the last pixel
-        self.new_pixel_under_mouse.emit(self.pix.mouse_over,
+
+        self.new_pixel_under_mouse.emit(self.pix.legal_coordinates(self.mouse_position_x,
+                                                                   self.mouse_position_y),
                                         self.mouse_position_x + 1,
                                         self.mouse_position_y + 1,
-                                        self.pix.get_mouse_color())
+                                        self.pix.get_color_at_position(self.mouse_position_x,
+                                                                       self.mouse_position_y))
 
     def mouseMoveEvent(self, event):
         mouse_position = self.mapToScene(event.pos())

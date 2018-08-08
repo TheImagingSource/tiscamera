@@ -24,37 +24,23 @@ class ViewItem(QGraphicsPixmapItem):
 
     def __init__(self, parent=None):
         super(ViewItem, self).__init__(parent)
-        self.setAcceptHoverEvents(True)
-        self.mouse_over = False  # flag if mouse is over our widget
-        self.mouse_position_x = -1
-        self.mouse_position_y = -1
-
-    def hoverEnterEvent(self, event):
-        self.mouse_over = True
-        super().hoverEnterEvent(event)
-
-    def hoverLeaveEvent(self, event):
-        self.mouse_over = False
-        super().hoverLeaveEvent(event)
-
-    def hoverMoveEvent(self, event):
-        mouse_position = event.pos()
-
-        self.mouse_position_x = mouse_position.x()
-        self.mouse_position_y = mouse_position.y()
-        super().hoverMoveEvent(event)
 
     def get_resolution(self):
         return self.pixmap().size()
 
-    def get_mouse_color(self):
-        if self.mouse_over:
-            if(self.mouse_position_x <= self.pixmap().width() and
-               self.mouse_position_y <= self.pixmap().height()):
-                return QColor(self.pixmap().toImage().pixel(self.mouse_position_x,
-                                                            self.mouse_position_y))
-            else:
-                self.mouse_position_x = -1
-                self.mouse_position_y = -1
+    def legal_coordinates(self, x_pos, y_pos):
+        if(0 <= x_pos <= self.pixmap().width() and
+           0 <= y_pos <= self.pixmap().height()):
+            return True
+        else:
+            return False
 
-        return QColor(0, 0, 0)
+    def get_color_at_position(self, x_pos, y_pos):
+        """
+        Coordinates must be in object coordinates
+        """
+        if self.legal_coordinates(x_pos, y_pos):
+            return QColor(self.pixmap().toImage().pixel(x_pos,
+                                                        y_pos))
+        else:
+            return QColor(0, 0, 0)
