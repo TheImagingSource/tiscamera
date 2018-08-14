@@ -191,9 +191,13 @@ class PropertyWidget(QWidget):
     def update_slider_range(self, slider, minval, maxval):
         """"""
         self.sld.blockSignals(True)
-        self.sld.setRange(self.prop.minval,
-                          self.prop.maxval)
-        self.sld.blockSignals(False)
+        try:
+            self.sld.setRange(self.prop.minval,
+                              self.prop.maxval)
+        except OverflowError:
+            log.error("A slider had a value outside of the integer range. That should no happen.")
+        finally:
+            self.sld.blockSignals(False)
 
     def update(self, prop: Prop):
 
