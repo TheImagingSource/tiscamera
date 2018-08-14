@@ -56,6 +56,7 @@ class PropertyTree(QWidget):
                 self.roi_widget = ROICollection(group)
                 self.layout.addWidget(self.roi_widget)
                 break
+        self.layout.addStretch()
         self.setLayout(self.layout)
 
     def __add_to_roi_group_maybe(self, prop: PropertyWidget):
