@@ -101,6 +101,11 @@ struct tcam_image_size
         }
         return false;
     }
+
+    bool operator!= (const struct tcam_image_size& other) const
+    {
+        return !operator==(other);
+    }
 };
 
 
