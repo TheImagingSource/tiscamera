@@ -442,6 +442,30 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO, 0 },
     },
     {
+        TCAM_PROPERTY_FOCUS_ROI_TOP,
+        "Focus ROI Top",
+        TCAM_PROPERTY_TYPE_INTEGER,
+        { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO, 0 },
+    },
+    {
+        TCAM_PROPERTY_FOCUS_ROI_LEFT,
+        "Focus ROI Left",
+        TCAM_PROPERTY_TYPE_INTEGER,
+        { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO, 0 },
+    },
+    {
+        TCAM_PROPERTY_FOCUS_ROI_WIDTH,
+        "Focus ROI Width",
+        TCAM_PROPERTY_TYPE_INTEGER,
+        { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO, 0 },
+    },
+    {
+        TCAM_PROPERTY_FOCUS_ROI_HEIGHT,
+        "Focus ROI Height",
+        TCAM_PROPERTY_TYPE_INTEGER,
+        { TCAM_PROPERTY_CATEGORY_LENS, TCAM_PROPERTY_FOCUS_AUTO, 0 },
+    },
+    {
         TCAM_PROPERTY_FOCUS_ONE_PUSH,
         "Focus One Push",
         TCAM_PROPERTY_TYPE_BUTTON,
