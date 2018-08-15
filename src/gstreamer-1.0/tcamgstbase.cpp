@@ -1124,8 +1124,19 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
             {
                 std::vector<struct tcam_image_size> framesizes = tcam::get_standard_resolutions(r.min_size,
                                                                                                 r.max_size);
-                framesizes.insert(framesizes.begin(), r.min_size);
-                framesizes.push_back(r.max_size);
+
+                // check if min/max are already in the vector.
+                // some devices return std resolutions as max
+                if (r.min_size != framesizes.front())
+                {
+                    framesizes.insert(framesizes.begin(), r.min_size);
+                }
+
+                if (r.max_size != framesizes.back())
+                {
+                    framesizes.push_back(r.max_size);
+                }
+
                 for (const auto& reso : framesizes)
                 {
                     GstStructure* structure = gst_structure_from_string (caps_string, NULL);
