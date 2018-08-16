@@ -31,6 +31,9 @@ if (BUILD_USER_DOC)
   # this needs to be a single string
   # cmake adds ';' between values otherwise
   # thus making it impossible for doxygen to parse the list
+  #
+  # The order of this list is also the order of the side pane in doxygen!
+  #
   set(doc_file_list
     "${doc_dir}/welcome.md \
     ${doc_dir}/building.md \
