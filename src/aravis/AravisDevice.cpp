@@ -549,7 +549,7 @@ bool AravisDevice::start_stream ()
     }
 
     // install callback to initialize the capture thread as real time
-    auto stream_cb = [] (void* user_data, ArvStreamCallbackType type, ArvBuffer* buffer)
+    auto stream_cb = [] (void* /*user_data*/, ArvStreamCallbackType type, ArvBuffer* /*buffer*/)
         {
             if (type == ARV_STREAM_CALLBACK_TYPE_INIT)
             {
