@@ -20,7 +20,7 @@
 #include "base_types.h"
 #include "Properties.h"
 #include "VideoFormatDescription.h"
-#include "MemoryBuffer.h"
+#include "ImageBuffer.h"
 
 #include <string>
 #include <vector>
@@ -56,9 +56,9 @@ public:
 
     virtual struct FilterDescription getDescription () const = 0;
 
-    virtual bool transform (MemoryBuffer& in, MemoryBuffer& out ) = 0;
+    virtual bool transform (ImageBuffer& in, ImageBuffer& out ) = 0;
 
-    virtual bool apply (std::shared_ptr<MemoryBuffer>) = 0;
+    virtual bool apply (std::shared_ptr<ImageBuffer>) = 0;
 
     virtual bool setStatus (TCAM_PIPELINE_STATUS) = 0;
 

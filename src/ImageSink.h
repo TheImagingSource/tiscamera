@@ -29,8 +29,8 @@
  * Main header
  */
 
-typedef void (*shared_callback)(std::shared_ptr<tcam::MemoryBuffer>, void*);
-typedef void (*sink_callback)(tcam::MemoryBuffer*, void*);
+typedef void (*shared_callback)(std::shared_ptr<tcam::ImageBuffer>, void*);
+typedef void (*sink_callback)(tcam::ImageBuffer*, void*);
 typedef void (*c_callback)(const struct tcam_image_buffer*, void*);
 
 namespace tcam
@@ -53,15 +53,15 @@ public:
     bool registerCallback (sink_callback, void*);
     bool registerCallback (c_callback, void*);
 
-    void push_image (std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>);
 
-    void requeue_buffer(std::shared_ptr<MemoryBuffer>);
+    void requeue_buffer(std::shared_ptr<ImageBuffer>);
 
     bool set_buffer_number (size_t);
 
-    bool set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers);
+    bool set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>> new_buffers);
 
-    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
 
     bool delete_buffer_collection ();
 
@@ -90,7 +90,7 @@ private:
     bool external_buffer;
 
     size_t buffer_number;
-    std::vector<std::shared_ptr<MemoryBuffer>> buffers;
+    std::vector<std::shared_ptr<ImageBuffer>> buffers;
 
 };
 

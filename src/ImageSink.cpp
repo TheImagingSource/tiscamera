@@ -111,7 +111,7 @@ bool ImageSink::registerCallback (c_callback cc, void* ud)
 }
 
 
-void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSink::push_image (std::shared_ptr<ImageBuffer> buffer)
 {
     last_image_buffer = buffer->getImageBuffer();
     if (sh_callback)
@@ -129,7 +129,7 @@ void ImageSink::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-void ImageSink::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void ImageSink::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 {
     if (auto ptr = source_.lock())
     {
@@ -160,7 +160,7 @@ bool ImageSink::set_buffer_number (size_t new_number)
 }
 
 
-bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>> new_buffers)
+bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>> new_buffers)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -175,7 +175,7 @@ bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<MemoryBuffer>
 }
 
 
-std::vector<std::shared_ptr<MemoryBuffer>> ImageSink::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection ()
 {
     if (buffers.empty())
     {
@@ -216,7 +216,7 @@ bool ImageSink::initialize_internal_buffer ()
 
     for (unsigned int i = 0; i < this->buffer_number; ++i)
     {
-        auto ptr = std::make_shared<MemoryBuffer>(format, true);
+        auto ptr = std::make_shared<ImageBuffer>(format, true);
         this->buffers.push_back(ptr);
     }
     return true;

@@ -50,15 +50,15 @@ public:
 
     VideoFormat getVideoFormat () const;
 
-    void push_image (std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>);
 
-    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>);
 
     bool setSink (std::shared_ptr<SinkInterface>);
 
-    bool set_buffer_collection (const std::vector<std::shared_ptr<MemoryBuffer>>& new_buffers);
+    bool set_buffer_collection (const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers);
 
-    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
 
 private:
 
@@ -68,7 +68,7 @@ private:
 
     std::chrono::time_point<std::chrono::steady_clock> stream_start;
 
-    std::vector<std::shared_ptr<MemoryBuffer>> buffer;
+    std::vector<std::shared_ptr<ImageBuffer>> buffer;
 
     std::weak_ptr<SinkInterface> pipeline;
 

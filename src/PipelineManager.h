@@ -84,11 +84,11 @@ public:
     std::shared_ptr<SinkInterface> getSink ();
 
     // @brief callback for ImageSource
-    void push_image (std::shared_ptr<MemoryBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>);
 
-    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>);
 
-    std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
 
 private:
 
@@ -121,7 +121,7 @@ private:
     /**
      * @brief Additional buffer used for internal image copies
      */
-    std::vector<std::shared_ptr<MemoryBuffer>> pipeline_buffer;
+    std::vector<std::shared_ptr<ImageBuffer>> pipeline_buffer;
     unsigned int current_ppl_buffer;
 
     void distributeProperties ();

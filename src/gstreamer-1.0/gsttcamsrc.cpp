@@ -49,7 +49,7 @@ GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 struct destroy_transfer
 {
     GstTcamSrc* self;
-    std::shared_ptr<tcam::MemoryBuffer> ptr;
+    std::shared_ptr<tcam::ImageBuffer> ptr;
 };
 
 
@@ -57,7 +57,7 @@ struct device_state
 {
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
-    std::queue<std::shared_ptr<tcam::MemoryBuffer>> queue;
+    std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
 };
 
 
@@ -916,7 +916,7 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
 }
 
 
-static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer,
+static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
                                       void* data);
 
 
@@ -1335,7 +1335,7 @@ static void buffer_destroy_callback (gpointer data)
 }
 
 
-static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::MemoryBuffer> buffer,
+static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
                                       void* data)
 {
     GstTcamSrc* self = GST_TCAM_SRC(data);
@@ -1374,7 +1374,7 @@ wait_again:
         goto wait_again;
     }
 
-    std::shared_ptr<tcam::MemoryBuffer> ptr = self->device->queue.front();
+    std::shared_ptr<tcam::ImageBuffer> ptr = self->device->queue.front();
     ptr->set_user_data(self);
 
     /* TODO: check why aravis throws an incomplete buffer error

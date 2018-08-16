@@ -482,7 +482,7 @@ bool AravisDevice::set_sink (std::shared_ptr<SinkInterface> s)
 }
 
 
-bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> b)
+bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> b)
 {
 
     this->buffers.clear();
@@ -514,7 +514,7 @@ bool AravisDevice::release_buffers ()
 }
 
 
-void AravisDevice::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void AravisDevice::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 {
 
     for (auto& b : buffers)

@@ -53,7 +53,7 @@ set(base
   logging.cpp
   DeviceInfo.cpp
   image_transform_base.h
-  MemoryBuffer.cpp
+  ImageBuffer.cpp
   Properties.cpp
   Property.cpp
   PropertyGeneration.cpp

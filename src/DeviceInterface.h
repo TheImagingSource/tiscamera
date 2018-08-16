@@ -24,7 +24,7 @@
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 
-#include "MemoryBuffer.h"
+#include "ImageBuffer.h"
 #include "SinkInterface.h"
 
 #include <vector>
@@ -85,14 +85,14 @@ public:
     /**
      * @return true on successfull allocation/registration; else false
      */
-    virtual bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>) = 0;
+    virtual bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>) = 0;
 
     /**
      * @brief Delete all internal references to used memorybuffers
      */
     virtual bool release_buffers () = 0;
 
-    virtual void requeue_buffer (std::shared_ptr<MemoryBuffer>) = 0;
+    virtual void requeue_buffer (std::shared_ptr<ImageBuffer>) = 0;
 
     /**
      * Start image retrieval and wait for new images

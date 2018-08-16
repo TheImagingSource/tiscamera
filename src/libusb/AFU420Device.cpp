@@ -687,7 +687,7 @@ bool tcam::AFU420Device::set_sink (std::shared_ptr<SinkInterface> s)
 }
 
 
-bool tcam::AFU420Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> buffs)
+bool tcam::AFU420Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
     tcam_log(TCAM_LOG_INFO, "Received %d buffer from external allocator.", buffs.size());
 
@@ -708,7 +708,7 @@ bool tcam::AFU420Device::release_buffers ()
 }
 
 
-void AFU420Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void AFU420Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 {
     for (auto& b : buffers)
     {
@@ -934,7 +934,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
 }
 
 
-std::shared_ptr<tcam::MemoryBuffer> tcam::AFU420Device::get_next_buffer ()
+std::shared_ptr<tcam::ImageBuffer> tcam::AFU420Device::get_next_buffer ()
 {
     if (buffers.empty())
     {

@@ -26,7 +26,7 @@
 #include "base_types.h"
 #include "CaptureDevice.h"
 #include "Properties.h"
-#include "MemoryBuffer.h"
+#include "ImageBuffer.h"
 #include "DeviceInfo.h"
 #include "DeviceIndex.h"
 #include "ImageSink.h"

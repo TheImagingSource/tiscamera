@@ -241,7 +241,7 @@ bool tcam::AFU050Device::set_sink (std::shared_ptr<SinkInterface> s)
 }
 
 
-bool tcam::AFU050Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> buffs)
+bool tcam::AFU050Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
     tcam_log(TCAM_LOG_INFO, "Received %d buffer from external allocator.", buffs.size());
 
@@ -271,7 +271,7 @@ void tcam::AFU050Device::init_buffers ()
         b.pData = (unsigned char*)malloc(JPEGBUF_SIZE);
         b.size = JPEGBUF_SIZE;
 
-        buffers.push_back({std::make_shared<MemoryBuffer>(b, true), false});
+        buffers.push_back({std::make_shared<ImageBuffer>(b, true), false});
     }
 }
 
@@ -283,7 +283,7 @@ bool tcam::AFU050Device::release_buffers ()
 }
 
 
-void tcam::AFU050Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buf)
+void tcam::AFU050Device::requeue_buffer (std::shared_ptr<ImageBuffer> buf)
 {
     for (auto& b : buffers)
     {
@@ -317,7 +317,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
 
     unsigned char* ptr = transfer->buffer;
 
-    std::shared_ptr<tcam::MemoryBuffer> buffer = nullptr;
+    std::shared_ptr<tcam::ImageBuffer> buffer = nullptr;
     buffer = buffers.at(current_buffer).buffer;
 
     while (processed < transfer->actual_length)

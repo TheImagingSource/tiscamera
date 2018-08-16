@@ -17,7 +17,7 @@
 #ifndef TCAM_SINKINTERFACE_H
 #define TCAM_SINKINTERFACE_H
 
-#include "MemoryBuffer.h"
+#include "ImageBuffer.h"
 
 #include "VideoFormat.h"
 
@@ -41,11 +41,11 @@ public:
 
     virtual VideoFormat getVideoFormat () const = 0;
 
-    virtual void push_image (std::shared_ptr<MemoryBuffer>) = 0;
+    virtual void push_image (std::shared_ptr<ImageBuffer>) = 0;
 
-    virtual void requeue_buffer (std::shared_ptr<MemoryBuffer>) = 0;
+    virtual void requeue_buffer (std::shared_ptr<ImageBuffer>) = 0;
 
-    virtual std::vector<std::shared_ptr<MemoryBuffer>> get_buffer_collection () = 0;
+    virtual std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () = 0;
 
     virtual void set_source (std::weak_ptr<SinkInterface>) {};
 

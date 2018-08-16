@@ -433,7 +433,7 @@ bool V4l2Device::set_sink (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>> b)
+bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> b)
 {
     if (is_stream_on)
     {
@@ -469,7 +469,7 @@ bool V4l2Device::release_buffers ()
 }
 
 
-void V4l2Device::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void V4l2Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 {
     for (unsigned int i = 0; i < buffers.size(); ++i)
     {

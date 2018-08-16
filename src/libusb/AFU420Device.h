@@ -115,11 +115,11 @@ public:
 
     bool set_sink (std::shared_ptr<SinkInterface>);
 
-    bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
+    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>);
 
     bool release_buffers ();
 
-    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>);
 
     bool start_stream ();
 
@@ -287,20 +287,20 @@ private:
 
     struct buffer_info
     {
-        std::shared_ptr<MemoryBuffer> buffer;
+        std::shared_ptr<ImageBuffer> buffer;
         bool is_queued;
     };
 
     std::vector<buffer_info> buffers;
 
-    std::shared_ptr<tcam::MemoryBuffer> get_next_buffer ();
+    std::shared_ptr<tcam::ImageBuffer> get_next_buffer ();
 
     volatile std::atomic_bool is_stream_on;
     struct tcam_stream_statistics statistics;
 
     size_t transfered_size_;
     unsigned int offset_;
-    std::shared_ptr<MemoryBuffer> current_buffer_;
+    std::shared_ptr<ImageBuffer> current_buffer_;
     bool have_header;
 
     std::weak_ptr<SinkInterface> listener;

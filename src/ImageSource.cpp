@@ -108,7 +108,7 @@ VideoFormat ImageSource::getVideoFormat () const
 }
 
 
-void ImageSource::push_image (std::shared_ptr<MemoryBuffer> _buffer)
+void ImageSource::push_image (std::shared_ptr<ImageBuffer> _buffer)
 {
     auto stats = _buffer->get_statistics();
     auto end = std::chrono::steady_clock::now();
@@ -131,7 +131,7 @@ void ImageSource::push_image (std::shared_ptr<MemoryBuffer> _buffer)
 }
 
 
-void ImageSource::requeue_buffer (std::shared_ptr<MemoryBuffer> _buffer)
+void ImageSource::requeue_buffer (std::shared_ptr<ImageBuffer> _buffer)
 {
     device->requeue_buffer(_buffer);
 }
@@ -145,7 +145,7 @@ bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<MemoryBuffer>>& new_buffers)
+bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers)
 {
     if (current_status == TCAM_PIPELINE_PLAYING)
     {
@@ -157,7 +157,7 @@ bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<Memor
     return true;
 }
 
-std::vector<std::shared_ptr<MemoryBuffer>> ImageSource::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> ImageSource::get_buffer_collection ()
 {
     return this->buffer;
 }

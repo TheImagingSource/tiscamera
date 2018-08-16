@@ -89,10 +89,10 @@ public:
 
     bool set_sink (std::shared_ptr<SinkInterface>);
 
-    bool initialize_buffers (std::vector<std::shared_ptr<MemoryBuffer>>);
+    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>);
     bool release_buffers ();
 
-    void requeue_buffer (std::shared_ptr<MemoryBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>);
 
     bool start_stream ();
 
@@ -117,7 +117,7 @@ private:
 
     struct buffer_info
     {
-        std::shared_ptr<MemoryBuffer> buffer;
+        std::shared_ptr<ImageBuffer> buffer;
         ArvBuffer* arv_buffer;
         bool is_queued;
     };

@@ -456,7 +456,7 @@ bool PipelineManager::allocate_conversion_buffer ()
         b.format.height = output_format.get_size().height;
         b.format.framerate = output_format.get_framerate();
 
-        this->pipeline_buffer.push_back(std::make_shared<MemoryBuffer>(b));
+        this->pipeline_buffer.push_back(std::make_shared<ImageBuffer>(b));
     }
 
     current_ppl_buffer = 0;
@@ -569,7 +569,7 @@ bool PipelineManager::stop_playing ()
 }
 
 
-void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
+void PipelineManager::push_image (std::shared_ptr<ImageBuffer> buffer)
 {
     if (status == TCAM_PIPELINE_STOPPED)
     {
@@ -612,7 +612,7 @@ void PipelineManager::push_image (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-void PipelineManager::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
+void PipelineManager::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 {
     if (source)
     {
@@ -621,7 +621,7 @@ void PipelineManager::requeue_buffer (std::shared_ptr<MemoryBuffer> buffer)
 }
 
 
-std::vector<std::shared_ptr<MemoryBuffer>> PipelineManager::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> PipelineManager::get_buffer_collection ()
 {
-    return std::vector<std::shared_ptr<MemoryBuffer>>();
+    return std::vector<std::shared_ptr<ImageBuffer>>();
 }
