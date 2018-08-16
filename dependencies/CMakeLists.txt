@@ -19,11 +19,15 @@ include(ExternalProject)
 if (BUILD_ARAVIS)
   if (TCAM_INTERNAL_ARAVIS)
 
-    if( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/aravis/.git" )
-      message( FATAL_ERROR "The git submodules are not available. Please run:
-    git submodule update --init --recursive"
-        )
-    endif()
+    ExternalProject_Add(aravis
+      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
+      GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
+      GIT_TAG ARAVIS_0_5_13
+      CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-hartbeat
+      BUILD_COMMAND make -j4 CFLAGS=-fPIC
+      INSTALL_COMMAND ""        # Do not install we are statically linking
+      UPDATE_COMMAND ""         # Do not rebuild when calling make
+      )
 
     #
     # Get the latest abbreviated commit hash of the working branch
@@ -37,12 +41,7 @@ if (BUILD_ARAVIS)
     set(ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH_INTERNAL}" PARENT_SCOPE)
     set(ARAVIS_VERSION "0.6" PARENT_SCOPE)
 
-    ExternalProject_Add(aravis
-      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
-      CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-hartbeat
-      BUILD_COMMAND make -j4 CFLAGS=-fPIC
-      INSTALL_COMMAND ""
-      ALWAYS 1)
+
 
   else (TCAM_INTERNAL_ARAVIS)
 
