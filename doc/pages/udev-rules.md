@@ -1,4 +1,6 @@
-# Udev Rules {#udev-rules}
+# Udev and UVC extensions {#udev-rules}
+
+## Udev
 
 udev (userspace /dev) is a device manager for the Linux kernel.
 It can be used to add actions to the attachment/removal of certain devices.
@@ -12,7 +14,15 @@ The following devices require our udev rules:
 - DFK AFU420
 - All USB-2.0 with a 21, 31 or 41 in the name
 
+The default installation path is: _/etc/udev/rules.d_
+
 ## UVC Extension Units
 
-uvc extension units are also applied through udev rules. 
+UVC extension units are also applied through udev rules.  
 These rules are provided by uvcdynctrl and not by tiscamera.
+
+The extension units are xml files that describe how certain device interactions
+should be mapped to UVC and v4l2 properties.  
+Most USB cameras require these units for full functionality.
+
+The default installation path is: _/usr/share/uvcdynctrl/data/199e_
