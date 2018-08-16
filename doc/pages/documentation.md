@@ -17,7 +17,7 @@ This document describes the internal structure of the documentation and how to e
 
 To add a page the following steps have to be taken:
 1. Create a page.md file in tiscamera/doc/pages or a subfolder thereof.
-2. Give the file a header with a unique id e.g. `# New page {#new-page}`  
+2. Give the file a header with a unique id e.g. ` # New page {#&zwj;new_page} `
    The id new-page will be used by doxygen to reference this page
 3. Add the page to the variable 'doc_file_list' in tiscamera/doc/CMakeLists.txt  
    Do not forget the linebreak '\\' as the variable must be a single string.  
