@@ -1,0 +1,48 @@
+# tcam-ctrl completion                             -*- shell-script -*-
+
+_tcam-ctrl () {
+
+    local cur prev words cword
+    _init_completion || return
+
+    local COMMANDS=(
+        "help"
+        "list"
+        "caps"
+        "formats"
+        "properties"
+        "-p"
+        "-l"
+        "-c"
+        "-s"
+        "-h"
+        "--help"
+        "--version"
+    )
+
+    local command i
+    for (( i=0; i < ${#words[@]}-1; i++ )); do
+        if [[ ${COMMANDS[@]} =~ ${words[i]} ]]; then
+            command=${words[i]}
+            break
+        fi
+    done
+
+
+    if [[ -n $command ]]; then
+        case $command in
+            list|properties|formats|caps|-c)
+                COMPREPLY=( $( compgen -W "$( tcam-ctrl -l | awk -print 'NF>1{print $4}' )" -- "$cur" ) )
+                return 0
+            ;;
+        esac
+    fi
+
+    # no command yet, show what commands we have
+    if [ "$command" = "" ]; then
+        COMPREPLY=( $( compgen -W '${COMMANDS[@]}' -- "$cur" ) )
+    fi
+
+    return 0
+} &&
+complete -F _tcam-ctrl tcam-ctrl

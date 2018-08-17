@@ -18,6 +18,10 @@ set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
 
 add_subdirectory(images)
 
+if (BUILD_TOOLS)
+  add_subdirectory(bash-completion)
+endif (BUILD_TOOLS)
+
 if (BUILD_ARAVIS)
 
   # leave as a reminder on how to handle aravis versions should a
