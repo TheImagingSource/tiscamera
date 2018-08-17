@@ -893,12 +893,12 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         wanted_caps = gst_caps_copy(available_caps);
     }
 
-    GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
-    if (!gst_caps_is_empty(intersect))
-    {
-        return intersect;
-    }
-    gst_caps_unref(intersect);
+    // GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
+    // if (!gst_caps_is_empty(intersect))
+    // {
+    //     return intersect;
+    // }
+    // gst_caps_unref(intersect);
 
     if (use_dutils)
     {
@@ -932,12 +932,20 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                     GstCaps* ret;
                     if (!gst_caps_is_fixed(available_caps))
                     {
-                        GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
+                        if (!gst_caps_is_empty(wanted_caps) &&
+                            g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") == 0)
+                        {
+                            GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
 
-                        ret = gst_caps_intersect(available_caps, possible_matches);
-                        gst_caps_unref(possible_matches);
+                            ret = gst_caps_intersect(available_caps, possible_matches);
+                            gst_caps_unref(possible_matches);
+                        }
+                        else
+                        {
+                            ret = tcam_gst_find_largest_caps(available_caps);
+                        }
                     }
-                    else
+                    else // is fixed
                     {
                         ret = available_caps;
                     }
@@ -1039,7 +1047,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
         gst_object_unref(jpegdec);
     }
-    intersect = gst_caps_intersect(available_caps, wanted_caps);
+    GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
     if (!gst_caps_is_empty(intersect))
     {
         return intersect;
