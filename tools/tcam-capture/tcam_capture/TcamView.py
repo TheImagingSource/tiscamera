@@ -360,7 +360,6 @@ class TcamView(QWidget):
         self.fps_timer.stop()
 
         self.pipeline.set_state(Gst.State.NULL)
-        log.info("Set State to NULL")
 
     def on_info(self, bus, msg):
         """
@@ -378,7 +377,7 @@ class TcamView(QWidget):
             else:
                 log.error("Info from bin: {}".format(dbg))
         else:
-            log.error("ERROR:", msg.src.get_name())  # , ":", info.message)
+            log.error("ERROR:", msg.src.get_name())
             if dbg:
                 log.debug("Debug info:", dbg)
 
@@ -475,7 +474,6 @@ class TcamView(QWidget):
              category, group) = self.tcam.get_tcam_property("Trigger Mode")
         except TypeError as e:
             log.warning("get_tcam_property failed for '{}'".format("Trigger Mode"))
-            # log.("get_tcam_property failed for '{}'".format(name))
             return False
 
         if valuetype == "boolean":
