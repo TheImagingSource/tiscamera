@@ -10,13 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - tcam-capture now has a --fullscreen flag to make it start in fullscreen mode
+- tcam-capture now has a fit-to-view button to resize the display
 - tcam-capture now has a ROI display and selection capabilities
 - tcam-capture now has configurable global keybindings allowing for
   fullscreen, image saving, triggering and opening the device dialog
+- Generation of user documentation. Enabled with -DBUILD_USER_DOC=ON
+- bash auto completion for tcam-ctrl
+- bash auto completion for tcam-capture
+- bash auto completion for gige-daemon
 
 ### Changed
 
-- lost-device event has triggered more aggressively
+- lost-device event will be triggered more aggressively
+- The aravis backend will now always attempt to use a realtime thread
+- tcamsrc sometimes generated double resolution entries for ranges.
+- The internal aravis is built with fast-heartbeat=ON
+- The caps output of 'tcam-ctrl -c' does not contain type descriptions.
+  This means the descriptions can now be copy pasted for gst-launch
 
 ### Removed
 
