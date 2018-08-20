@@ -14,8 +14,8 @@ When an element property is also available through the property interface its na
 
 Source elements that retrieves images from you device.
 
-__serial__ - Serial number of the device you want to use  
- __num-buffers__ - Only send the specified number of images.
+- __serial__ - Serial number of the device you want to use
+- __num-buffers__ - Only send the specified number of images.
                   With 'num-buffers=200' tcamsrc will automatically send an EOS and stop the device after 200 buffers have been sent to the pipeline.
 
 ### tcamautoexposure
@@ -159,7 +159,7 @@ Converts BGRx 64-bit to BGRx 32-Bit. Only required when using tcamdutils.
 Wrapper around all the previous elements, allowing for an easy all-in-one handling.
 The tcambin will prefer bayer 8-bit over bayer 12/16-bit. Currently tcamdutils are required
 for a correct conversion of these formats. Since tcamdutils are an optional module its existence
-can not be expected. To ensure identical behavior whether or not tcamdutils are installed, bayer 8-bit will be preferred unless the user explicitly specifies bayer 12/16-bit for the source through the property 'device-caps'.
+can not be expected. To ensure identical behavior whether or not tcamdutils are installed, bayer 8-bit will be preferred unless the user explicitly specifies bayer 12/16-bit for the source through the property 'device-caps'. The selected caps for the internal tcamscr will be propagated as a gstbus message with the prefix "Working with src caps: ".
 
 - __serial__ - Serial number of the device you want to use
 
@@ -194,6 +194,7 @@ For further info please consult the
 
 #### valve
 
+Let image buffer and bus messages pass only while the valve is open
 
 #### videorate
 
@@ -202,6 +203,11 @@ Change the framerate by duplicating or dropping frames.
 #### videoscale
 
 Change the resolution of your image stream by scaling up or down.
+
+#### appsink
+
+Receive image buffer in you application and use them directly.
+For examples how this may work, look at our examples folder.
 
 ## Debugging
 

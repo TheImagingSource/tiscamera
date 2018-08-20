@@ -32,3 +32,14 @@ sudo systemctl enable gige-daemon.service    # start on every boot
 sudo systemctl start gige-daemon.service     # start the actual daemon
 sudo systemctl status gige-daemon.service    # check if statemd say everything is ok
 ```
+
+## Restricting to certain interfaces
+
+Per default the gige-daemon will address all available interfaces.  
+If you want to restrict the daemon to a certain interface initialize the process with the names of the interfaces that shall be queried.
+
+```
+sudo gige-daemon start eth2 eth1 # eth0 would not be queried
+```
+
+This change has to be manually done in the systemd config, should you wish to start the process through systemd.

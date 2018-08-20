@@ -35,4 +35,4 @@ http://www.theimagingsource.com/en_US/company/contact/
 
 Firmware for our USB-2.0 cameras can be found in our Linux repository in data/firmware.
 
-If you are unsure on how to proceed, please contact our support.
+If you are unsure on how to proceed, [please contact our support](@ref contact).

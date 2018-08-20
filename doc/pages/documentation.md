@@ -24,6 +24,8 @@ To add a page the following steps have to be taken:
    Please be aware that the order in which the files are read in the CMakeLists.txt is important.
 4. Recompile the project to generate a documentation with your new page.
 
+Images that are only used in the documentation should be stored in doc/images
+
 ## Snippets
 
 To add code snippets to the documentation you can use the following command:
