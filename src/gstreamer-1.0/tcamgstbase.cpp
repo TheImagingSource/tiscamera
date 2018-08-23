@@ -24,6 +24,8 @@
 
 #include "tcamgststrings.h"
 
+#include "public_utils.h"
+
 
 GstElement* tcam_gst_find_camera_src (GstElement* element)
 {
@@ -450,6 +452,7 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
         GstStructure* struc = gst_caps_get_structure(caps, i);
         std::string format_string;
         std::vector<std::string> vec;
+
         if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
         {
             vec = gst_list_to_vector(gst_structure_get_value(struc, "format"));
@@ -459,14 +462,32 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
             vec.push_back(gst_structure_get_string(struc, "format"));
         }
 
-        for (const auto& fmt : vec)
-        {
-            uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
-                                                                   fmt.c_str());
-            if (fourcc != 0)
+        // code in helper func is needed weither vec is empty or not
+        // prevents code duplication
+        auto helper_func = [&ret] (const char* name, const char* fmt)
             {
-                ret.push_back(fourcc);
+                uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(name,
+                                                                       fmt);
+                if (fourcc != 0)
+                {
+                    ret.push_back(fourcc);
+                }
+            };
+
+        const char* name = gst_structure_get_name(struc);
+
+        if (!vec.empty())
+        {
+            for (const auto& fmt : vec)
+            {
+                helper_func(name, fmt.c_str());
             }
+        }
+        else
+        {
+            // this will be the case for things like image/jpeg
+            // such caps will have no format field and thus vec.empty() ==
+            helper_func(name, "");
         }
     }
 
