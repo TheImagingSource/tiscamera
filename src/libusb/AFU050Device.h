@@ -153,7 +153,7 @@ private:
 
     unsigned char lost_countdown;
     bool stop_all;
-    bool device_is_lost;
+    bool device_is_lost = false;
     bool abort_all;
 
     std::thread udev_monitor;

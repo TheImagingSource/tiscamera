@@ -63,6 +63,21 @@ tcam::AFU050Device::~AFU050Device ()
 }
 
 
+void tcam::AFU050Device::lost_device ()
+{
+    device_is_lost = true;
+
+    if (device_is_lost)
+    {
+        return;
+    }
+
+    stop_stream();
+
+    notify_device_lost();
+}
+
+
 DeviceInfo tcam::AFU050Device::get_device_description () const
 {
     return device;
@@ -304,6 +319,12 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
             tcam_debug("FREE");
             libusb_free_transfer(transfer);
         }
+        else if (transfer->status == LIBUSB_TRANSFER_NO_DEVICE)
+        {
+            lost_device();
+            libusb_free_transfer(transfer);
+            return;
+        }
         tcam_error("libusb transfer returned with: %d", transfer->status);
     }
 
@@ -414,7 +435,11 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
     if (is_stream_on)
     {
          //submit the next transfer
-        libusb_submit_transfer(transfer);
+        int ret = libusb_submit_transfer(transfer);
+        if (ret == LIBUSB_ERROR_NO_DEVICE)
+        {
+            lost_device();
+        }
     }
     else
     {
@@ -467,6 +492,11 @@ bool tcam::AFU050Device::start_stream ()
         int ret = libusb_submit_transfer(transfer_in);
         if (ret < 0)
         {
+            if (ret == LIBUSB_ERROR_NO_DEVICE)
+            {
+                lost_device();
+            }
+
             tcam_debug("ret < 0");
             break;
         }
@@ -559,6 +589,11 @@ bool AFU050Device::set_control (int unit,
                                       unit << 8,
                                       value, len, 10000 );
 
+    if (ret == LIBUSB_ERROR_NO_DEVICE)
+    {
+        lost_device();
+    }
+
     return (ret == len ? true : false);
 }
 
@@ -577,6 +612,11 @@ bool AFU050Device::get_control (int unit,
                                       ctrl << 8,
                                       unit << 8,
                                       value, len, 10000);
+
+    if (ret == LIBUSB_ERROR_NO_DEVICE)
+    {
+        lost_device();
+    }
 
     if (len == ret)
     {
@@ -611,6 +651,11 @@ int AFU050Device::set_video_format (uint8_t format_index,
                                   1,
                                   buf, sizeof(buf), 10000);
 // frame_interval = buf[4] | ((uint32_t)buf[5]<<8) | ((uint32_t)buf[6]<<16) | ((uint32_t)buf[7]<<24);
+
+    if (ret == LIBUSB_ERROR_NO_DEVICE)
+    {
+        lost_device();
+    }
 
     tcam_log(TCAM_LOG_DEBUG, "set_video_format transfer ended with %d", ret);
 
