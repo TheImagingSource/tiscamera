@@ -4,10 +4,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/uvcvideo.h>
 #include <linux/videodev2.h>
-#include <stropts.h>
 
 #include <libusb-1.0/libusb.h>
 
