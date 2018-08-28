@@ -27,3 +27,5 @@ When dealing with bash auto completion you may encounter situations in which the
 Be aware that characters like '=' tend to break to completion scripts. To circumvent this you will have to wrap the concerning string in quotation marks '"'.
 
     tcam-capture --serial 00001234 --format "video/x-bayer,format=gbrg,width=1280,height=720,framerate=30/1"
+
+If you are using zsh you are able to use these completion modules by initializing bashcompinit in you zshrc.
