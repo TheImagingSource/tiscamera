@@ -49,6 +49,10 @@ public:
 
     virtual void set_source (std::weak_ptr<SinkInterface>) {};
 
+    virtual void drop_incomplete_frames (bool drop_them) = 0;
+
+    virtual bool should_incomplete_frames_be_dropped () const = 0;
+
 };
 
 } /* namespace tcam */

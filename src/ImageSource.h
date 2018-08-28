@@ -60,6 +60,9 @@ public:
 
     std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
 
+    void drop_incomplete_frames (bool drop_them) override;
+    bool should_incomplete_frames_be_dropped () const override;
+
 private:
 
     TCAM_PIPELINE_STATUS current_status;
@@ -71,6 +74,8 @@ private:
     std::vector<std::shared_ptr<ImageBuffer>> buffer;
 
     std::weak_ptr<SinkInterface> pipeline;
+
+    bool drop_frames_ = true;
 
 };
 

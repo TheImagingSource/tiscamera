@@ -161,3 +161,15 @@ std::vector<std::shared_ptr<ImageBuffer>> ImageSource::get_buffer_collection ()
 {
     return this->buffer;
 }
+
+
+void ImageSource::drop_incomplete_frames (bool drop_them)
+{
+    drop_frames_ = drop_them;
+}
+
+
+bool ImageSource::should_incomplete_frames_be_dropped () const
+{
+    return drop_frames_;
+}

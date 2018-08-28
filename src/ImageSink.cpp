@@ -221,3 +221,30 @@ bool ImageSink::initialize_internal_buffer ()
     }
     return true;
 }
+
+
+void ImageSink::drop_incomplete_frames (bool drop_them)
+{
+    if (auto source = source_.lock())
+    {
+        source->drop_incomplete_frames(drop_them);
+    }
+    else
+    {
+        tcam_info("Unable to get source object to tell it if imcomplete frames should be locked");
+    }
+}
+
+
+bool ImageSink::should_incomplete_frames_be_dropped () const
+{
+    if (auto source = source_.lock())
+    {
+        return source->should_incomplete_frames_be_dropped();
+    }
+    else
+    {
+        tcam_error("Unable to get source object to query if imcomplete frames should be locked");
+        return true;
+    }
+}

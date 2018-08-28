@@ -646,6 +646,7 @@ enum
     PROP_DEVICE,
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
+    PROP_DROP_INCOMPLETE_FRAMES,
 };
 
 
@@ -1025,6 +1026,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->dev->start_stream(self->device->sink);
+    self->device->sink->drop_incomplete_frames(self->drop_incomplete_frames);
 
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
@@ -1471,7 +1473,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     self->n_buffers = 0;
     self->payload = 0;
-
+    self->drop_incomplete_frames = TRUE;
     // explicitly init c++ objects
     // older compiler (e.g. gcc-4.8) can cause segfaults
     // when not explicitly initialized
@@ -1563,6 +1565,15 @@ static void gst_tcam_src_set_property (GObject* object,
                                           g_value_get_boolean(value));
             break;
         }
+        case PROP_DROP_INCOMPLETE_FRAMES:
+        {
+            self->drop_incomplete_frames = g_value_get_boolean(value);
+            if (self->device && self->device->sink)
+            {
+                self->device->sink->drop_incomplete_frames(self->drop_incomplete_frames);
+            }
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1607,6 +1618,11 @@ static void gst_tcam_src_get_property (GObject* object,
         {
             g_value_set_boolean (value,
                                  gst_base_src_get_do_timestamp(GST_BASE_SRC(object)));
+            break;
+        }
+        case PROP_DROP_INCOMPLETE_FRAMES:
+        {
+            g_value_set_boolean(value, self->drop_incomplete_frames);
             break;
         }
         default:
@@ -1670,6 +1686,14 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
          g_param_spec_boolean ("do-timestamp",
                                "Do timestamp",
                                "Apply current stream time to buffers",
+                               true,
+                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
+    g_object_class_install_property
+        (gobject_class,
+         PROP_DROP_INCOMPLETE_FRAMES,
+         g_param_spec_boolean ("drop-incomplete-buffer",
+                               "Drop incomplete buffers",
+                               "Drop buffer that are incomplete.",
                                true,
                                static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
     GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");

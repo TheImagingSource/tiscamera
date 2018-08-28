@@ -57,6 +57,7 @@ struct _GstTcamSrc
     int n_buffers;
 
     gboolean is_running;
+    gboolean drop_incomplete_frames;
     int payload;
 
     int buffer_timeout_us;

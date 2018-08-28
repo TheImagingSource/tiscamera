@@ -702,6 +702,41 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
                 case ARV_BUFFER_STATUS_MISSING_PACKETS:
                 {
                     msg = "Stream has missing packets";
+
+                    if (auto ptr = self->external_sink.lock())
+                    {
+
+                        if (ptr->should_incomplete_frames_be_dropped())
+                        {
+                            break;
+                        }
+                        tcam_warning("Image has missing packets. Sending incomplete buffer as requested.");
+                        self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
+                        self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
+                        self->statistics.frame_count++;
+
+                        // only way to retrieve actual image size
+                        size_t image_size = 0;
+                        arv_buffer_get_data(buffer, &image_size);
+
+                        for (auto& b : self->buffers)
+                        {
+                            const void* arv_user_data = arv_buffer_get_user_data(buffer);
+                            if (b.buffer.get() != arv_user_data)
+                            {
+                                continue;
+                            }
+
+                            b.buffer->set_statistics(self->statistics);
+                            b.is_queued = false;
+                            auto desc = b.buffer->getImageBuffer();
+                            desc.length = image_size;
+                            b.buffer->set_image_buffer(desc);
+                            ptr->push_image(b.buffer);
+
+                        }
+                    }
+
                     break;
                 }
                 case ARV_BUFFER_STATUS_WRONG_PACKET_ID:

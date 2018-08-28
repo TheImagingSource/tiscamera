@@ -599,3 +599,24 @@ std::vector<std::shared_ptr<ImageBuffer>> PipelineManager::get_buffer_collection
 {
     return std::vector<std::shared_ptr<ImageBuffer>>();
 }
+
+
+void PipelineManager::drop_incomplete_frames (bool drop_them)
+{
+    if (source)
+    {
+        source->drop_incomplete_frames(drop_them);
+    }
+}
+
+
+bool PipelineManager::should_incomplete_frames_be_dropped () const
+{
+    if (source)
+    {
+        return source->should_incomplete_frames_be_dropped();
+    }
+
+    tcam_error("No shource to ask if incomplete frames should be dropped.");
+    return true;
+}

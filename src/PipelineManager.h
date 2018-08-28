@@ -90,6 +90,10 @@ public:
 
     std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
 
+    void drop_incomplete_frames (bool drop_them) override;
+
+    bool should_incomplete_frames_be_dropped () const override;
+
 private:
 
     VideoFormat output_format;
