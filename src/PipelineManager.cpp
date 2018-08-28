@@ -439,32 +439,6 @@ bool PipelineManager::add_interpretation_filter ()
 }
 
 
-bool PipelineManager::allocate_conversion_buffer ()
-{
-    pipeline_buffer.clear();
-
-    for (int i = 0; i < 5; ++i)
-    {
-        tcam_image_buffer b = {};
-        b.pitch = output_format.get_size().width * img::get_bits_per_pixel(output_format.get_fourcc()) / 8;
-        b.length = b.pitch * output_format.get_size().height;
-
-        b.pData = (unsigned char*)malloc(b.length);
-
-        b.format.fourcc = output_format.get_fourcc();
-        b.format.width = output_format.get_size().width;
-        b.format.height = output_format.get_size().height;
-        b.format.framerate = output_format.get_framerate();
-
-        this->pipeline_buffer.push_back(std::make_shared<ImageBuffer>(b));
-    }
-
-    current_ppl_buffer = 0;
-
-    return true;
-}
-
-
 bool PipelineManager::create_pipeline ()
 {
     if (source.get() == nullptr || sink.get() == nullptr)

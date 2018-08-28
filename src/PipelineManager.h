@@ -140,8 +140,6 @@ private:
 
     bool add_interpretation_filter ();
 
-    bool allocate_conversion_buffer ();
-
     bool create_pipeline ();
 
     bool start_playing ();
