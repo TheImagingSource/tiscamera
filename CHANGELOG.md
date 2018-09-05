@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bash auto completion for tcam-ctrl
 - bash auto completion for tcam-capture
 - bash auto completion for gige-daemon
+- AFU050 will have much quicker device lost notification
+- tcamsrc now adds a GstMeta object to each buffer to transport additional information
+- Add property drop-incomplete-buffer to tcamsrc
 
 ### Changed
 
@@ -31,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - unused camera-ip-conf gui
+
+### Fixed
+
+- The gige-daemon showed connection problems to clients on some systems due to permissions.
+- compilation error due to missing header on some systems due to POSIX compatability issues.
 
 ## [0.10.0] - 2018-07-31
 
