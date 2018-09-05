@@ -19,6 +19,8 @@
 #include "tcamgstbase.h"
 #include "tcamgststrings.h"
 
+#include "gstmetatcamstatistics.h"
+
 #include "tcamprop.h"
 #include "tcam.h"
 #include "logging.h"
@@ -1350,6 +1352,27 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
 }
 
 
+void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
+                                  GstStructure* struc)
+{
+
+    if (!statistics || !struc)
+    {
+        return;
+    }
+
+    gst_structure_set(struc,
+                      "frame_count", G_TYPE_UINT64, statistics->frame_count,
+                      "frames_dropped", G_TYPE_UINT64, statistics->frames_dropped,
+                      "capture_time_ns", G_TYPE_UINT64, statistics->capture_time_ns,
+                      "camera_time_ns", G_TYPE_UINT64, statistics->camera_time_ns,
+                      "framerate", G_TYPE_DOUBLE, statistics->framerate,
+                      "is_damaged", G_TYPE_BOOLEAN, statistics->is_damaged,
+                      nullptr);
+
+}
+
+
 static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
                                           GstBuffer** buffer)
 {
@@ -1397,26 +1420,24 @@ wait_again:
 
     self->device->queue.pop(); // remove buffer from queue
 
-    // GST_DEBUG("Framerate according to source: %f", self->ptr->statistics.framerate);
-    /*
-    if (gst_base_src_get_do_timestamp(GST_BASE_SRC(push_src)))
+    // add meta statistics data to buffer
     {
-        timestamp_ns = self->ptr->statistics.capture_time_ns;
-        GST_DEBUG("Timestamp(ns): %ld", timestamp_ns);
-        if (self->timestamp_offset == 0)
+
+        auto stat = ptr->get_statistics();
+
+        GstStructure* struc = gst_structure_new_empty("TcamStatistics");
+        statistics_to_gst_structure(&stat, struc);
+
+        auto meta = gst_buffer_add_tcam_statistics_meta(*buffer, struc);
+
+        if (!meta)
         {
-            self->timestamp_offset = timestamp_ns;
-            self->last_timestamp = timestamp_ns;
+            GST_WARNING("Unable to add meta !!!!");
         }
 
-        GST_BUFFER_DURATION(*buffer) = timestamp_ns - self->last_timestamp;
-        GST_BUFFER_PTS(*buffer) = timestamp_ns - self->timestamp_offset;
-        // GST_DEBUG("duration %ld", timestamp_ns - self->last_timestamp);
-        // GST_DEBUG("pts %ld", timestamp_ns - self->last_timestamp);
-        self->last_timestamp = timestamp_ns;
-    }
-    */
-    GST_LOG("Pushing buffer...");
+    } // end meta data
+
+    // GST_DEBUG("Pushing buffer...");
 
     if (self->n_buffers != 0)
     {
