@@ -17,6 +17,24 @@ Source elements that retrieves images from you device.
 - __serial__ - Serial number of the device you want to use
 - __num-buffers__ - Only send the specified number of images.
                   With 'num-buffers=200' tcamsrc will automatically send an EOS and stop the device after 200 buffers have been sent to the pipeline.
+- __drop-incomplete-buffer__ - When incomplete buffers should be delivered this has to be set to `false`.
+
+##### MetaData
+
+Each image buffer the tcamsrc send has associated meta data that contains multiple information concerning the buffer.
+
+The meta object contains a GstStructure which contains all information. This is to ensure extensibility without interfering with user applications.
+
+The following fields are available:
+
+fieldname | type | description
+----|---|----
+frame_count | uint64 | number of frames delivered. Starts at 0 with every stream start.
+frames_dropped | uint64 | number of frames dropped by backend
+capture_time_ns | uint64 | Timestamp in Nanoseconds when the backend received the image
+camera_time_ns | uint64 | Timestamp when the device itself captured the image. Only useful for GigE.
+framerate | double | framerate the backend has.
+is_damaged | bool | Flag noting if the buffer is damaged in any way. Only useful when drop-incomplete-buffer=false.
 
 ### tcamautoexposure
 
