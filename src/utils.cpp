@@ -311,7 +311,21 @@ unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
 
 bool tcam::is_process_running (unsigned int pid)
 {
-    return 0 == kill(pid, 0);
+    int ret = kill(pid, 0);
+
+    bool is_running = false;
+    if (ret < 0)
+    {
+        if (errno == EPERM)
+        {
+            is_running = true;
+        }
+    }
+    else
+    {
+        is_running = true;
+    }
+    return is_running;
 }
 
 
