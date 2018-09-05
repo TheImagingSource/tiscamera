@@ -104,7 +104,7 @@
     </constant>
     <constant type="integer">
       <id>V4L2_CID_GLOBAL_RESET_SHUTTER</id>
-      <value>0x00980930</value>
+      <value>0x0199e92a</value>
     </constant>
 
   </constants>
