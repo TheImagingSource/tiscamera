@@ -72,6 +72,8 @@ bool LockFile::create_lock_file ()
     sprintf(str,"%d\n",getpid());
     write(file_handle_, str, strlen(str)); /* record pid to lockfile */
 
+    // do not close file handle. this is to ensure exclusive write access
+
     return true;
 }
 
@@ -215,7 +217,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
 
     i = open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standart I/O */
 
-    umask(027); /* set newly created file permissions */
+    umask(022); /* set newly created file permissions */
 
     chdir("/"); /* change to dir that always exists */
 
