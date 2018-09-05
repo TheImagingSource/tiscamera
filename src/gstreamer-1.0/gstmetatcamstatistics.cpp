@@ -37,7 +37,8 @@ static gboolean tcam_statistics_meta_init (GstMeta* meta,
 {
     TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
 
-    tcam->structure = gst_structure_new_empty("TcamStatistics");
+    tcam->structure = nullptr;
+        //gst_structure_new_empty("TcamStatistics");
 
     return TRUE;
 }
@@ -67,7 +68,8 @@ static void tcam_statistics_meta_free (GstMeta* meta, GstBuffer* /* buffer */)
 {
     TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
 
-    gst_object_unref(tcam->structure);
+    gst_structure_free(tcam->structure);
+    tcam->structure = nullptr;
 }
 
 
