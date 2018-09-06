@@ -120,6 +120,8 @@ class TcamView(QWidget):
         Update settings of all subclasses
         """
         self.settings = new_settings
+
+        self.use_dutils = self.settings.use_dutils
         if not self.video_fng:
             self.video_fng = FileNameGenerator(self.serial,
                                                self.settings.video_name)
