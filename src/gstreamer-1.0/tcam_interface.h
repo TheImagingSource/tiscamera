@@ -76,11 +76,14 @@ gboolean tcam_interface_get_tcam_property (TcamProp* prop,
                                            GValue* group)
 {
     auto props = *(tcam_interface_properties.get());
-    for (const auto& pr : props)
+
+    for (auto& pr : props)
     {
-        auto p = pr.get_struct();
-        if (strcmp(p.name, name) == 0)
+        if (strcmp(pr.get_name().c_str(), name) == 0)
         {
+            pr.update();
+            auto p = pr.get_struct();
+
             // tcam_log(TCAM_LOG_ERROR, "bla %s", name);
 
             if (flags)
