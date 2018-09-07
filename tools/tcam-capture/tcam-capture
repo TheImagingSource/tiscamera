@@ -147,7 +147,8 @@ class TCamCapture(QMainWindow):
 
         self.show()
 
-        if (self.settings.reopen_device_on_startup and
+        if (not self.serial and
+                self.settings.reopen_device_on_startup and
                 self.cache.last_serial):
             dev_list = self.indexer.device_list
             serial = self.cache.last_serial
