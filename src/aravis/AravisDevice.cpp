@@ -739,7 +739,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
                         }
                     }
 
-                    break;
+                    goto no_back_push;
                 }
                 case ARV_BUFFER_STATUS_WRONG_PACKET_ID:
                 {
@@ -772,8 +772,9 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
                     break;
                 }
             }
-            tcam_log(TCAM_LOG_WARNING, msg.c_str());
             arv_stream_push_buffer(self->stream, buffer);
+        no_back_push:
+            tcam_log(TCAM_LOG_WARNING, msg.c_str());
         }
     }
     else
