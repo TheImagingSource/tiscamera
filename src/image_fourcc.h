@@ -97,7 +97,7 @@
 #define FOURCC_GRBG12		    mmioFOURCC('B', 'A', '1', '2') /* 12  GRGR.. BGBG.. */
 #define FOURCC_RGGB12		    mmioFOURCC('R', 'G', '1', '2') /* 12  RGRG.. GBGB.. */
 
-#define FOURCC_GRBG12_SPACKED   mmioFOURCC('G', 'R', 'C', 'p') /* 12  u8, [pix0_lo][pix0_hi | pix1_hi][pix1_lo] */
+#define FOURCC_GRBG12_SPACKED   mmioFOURCC('G', 'R', 'C', 'p') /* 12  u8, [pix0_lo][pix0_hi | pix1_lo][pix1_hi] */
 #define FOURCC_RGGB12_SPACKED   mmioFOURCC('R', 'G', 'C', 'p') /* 12   */
 #define FOURCC_GBRG12_SPACKED   mmioFOURCC('G', 'B', 'C', 'p') /* 12   */
 #define FOURCC_BGGR12_SPACKED   mmioFOURCC('B', 'G', 'C', 'p') /* 12   */
