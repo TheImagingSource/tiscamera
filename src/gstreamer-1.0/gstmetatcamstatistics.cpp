@@ -58,7 +58,12 @@ static gboolean tcam_statistics_meta_transform (GstBuffer* trans_buffer,
                                                                                TCAM_STATISTICS_META_INFO,
                                                                                nullptr);
 
-    tcam->structure = gst_structure_copy(trans_tcam->structure);
+    if (!trans_tcam)
+    {
+        return FALSE;
+    }
+
+    trans_tcam->structure = gst_structure_copy(tcam->structure);
 
     return TRUE;
 }
@@ -68,8 +73,12 @@ static void tcam_statistics_meta_free (GstMeta* meta, GstBuffer* /* buffer */)
 {
     TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
 
-    gst_structure_free(tcam->structure);
-    tcam->structure = nullptr;
+    if (tcam->structure)
+    {
+        gst_structure_free(tcam->structure);
+
+        tcam->structure = nullptr;
+    }
 }
 
 
