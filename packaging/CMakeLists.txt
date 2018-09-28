@@ -24,19 +24,38 @@ set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
 set(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
 set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
+set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS ON)
 
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "uvcdynctrl")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, gstreamer1.0-tools, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad")
+# this causes problems and makes it impossible to create packages
+# without actually installing the files.
+# Due to this problem we have to manually track dependencies.
+# set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+# string describing all dependencies
+# should respect oldest ubuntu LTS
+set(debian_dependencies
+  "uvcdynctrl, \
+   gstreamer1.0-tools, \
+   gstreamer1.0-plugins-good, \
+   gstreamer1.0-plugins-bad,\
+   gstreamer1.0-x, \
+   gstreamer1.0-plugins-base, \
+   gstreamer1.0-plugins-ugly, \
+   libxml2, \
+   libpcap0.8, \
+   libaudit1, \
+   libnotify4, \
+   python3-gi, \
+")
+
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "${debian_dependencies}")
+
 set(CPACK_SET_DESTDIR "on")
 
 # set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 set(CPACK_GENERATOR "DEB")
 
-set(CPACK_PACKAGE_DESCRIPTION "The Imaging Source Linux Software Collection")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Collection of tools and libraries used for camera interaction")
-set(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
-set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
 set(CPACK_PACKAGE_VERSION_MAJOR "${TCAM_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${TCAM_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${TCAM_VERSION_PATCH}")
