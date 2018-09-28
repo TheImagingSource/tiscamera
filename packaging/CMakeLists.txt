@@ -89,6 +89,19 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINAR
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
 
+
+# The package name is created according to the following rules:
+#
+# If is is an official release on the master branch:
+#     tiscamera_MAJ.MIN.PAT_arch.deb
+#
+# If it is a preview release:
+#     tiscamera_MAJ.MIN.PAT.COMMIT_COUNT~branch_COMMIT_HASH_arch.deb
+#
+# If a git tag is present it will replace branch and commit hash
+#     tiscamera_MAJ.MIN.PAT.COMMIT_COUNT_tag_arch.deb
+
+
 set(CPACK_PACKAGE_NAME "tiscamera")
 
 string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
@@ -100,17 +113,39 @@ if(DPKG_PROGRAM)
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
+  # Get commit tag
+  execute_process(
+    COMMAND git describe --exact-match HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_TAG
+    ERROR_VARIABLE GIT_TAG_ERROR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-  if (GIT_COMMIT_HASH)
+  if (GIT_TAG)
     set(CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+      "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${GIT_TAG}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
   else ()
-    set(CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
-  endif(GIT_COMMIT_HASH)
+
+    if (GIT_COMMIT_HASH)
+
+      set(CPACK_PACKAGE_FILE_NAME
+        "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+    else () # this will be the case when users download the github zip and compile on deb systems
+
+      set(CPACK_PACKAGE_FILE_NAME
+        "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+    endif(GIT_COMMIT_HASH)
+  endif(GIT_TAG)
+
 else(DPKG_PROGRAM)
+
   set(CPACK_PACKAGE_FILE_NAME
     "${CPACK_PACKAGE_NAME_LOWERCASE}_${TCAM_VERSION}_${CMAKE_SYSTEM_NAME}")
+
 endif(DPKG_PROGRAM)
 
 
