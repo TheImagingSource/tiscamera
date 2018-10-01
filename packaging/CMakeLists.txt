@@ -35,17 +35,17 @@ set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS ON)
 # should respect oldest ubuntu LTS
 set(debian_dependencies
   "uvcdynctrl, \
-   gstreamer1.0-tools, \
-   gstreamer1.0-plugins-good, \
-   gstreamer1.0-plugins-bad,\
-   gstreamer1.0-x, \
-   gstreamer1.0-plugins-base, \
-   gstreamer1.0-plugins-ugly, \
-   libxml2, \
-   libpcap0.8, \
-   libaudit1, \
-   libnotify4, \
-   python3-gi, \
+gstreamer1.0-tools, \
+gstreamer1.0-plugins-good, \
+gstreamer1.0-plugins-bad,\
+gstreamer1.0-x, \
+gstreamer1.0-plugins-base, \
+gstreamer1.0-plugins-ugly, \
+libxml2, \
+libpcap0.8, \
+libaudit1, \
+libnotify4, \
+python3-gi, \
 ")
 
 
@@ -77,7 +77,8 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_TOOLS)
 
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python3-pyqt5 (>= 5.5)")
+  # no comma separating CPACK_DEBIAN_PACKAGE_DEPENDS and others as the previous list should end with one
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS} python3-pyqt5 (>= 5.5)")
 
 endif (BUILD_TOOLS)
 
