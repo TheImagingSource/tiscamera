@@ -193,6 +193,8 @@ private:
 
     void create_conversion_factors ();
 
+    bool extension_unit_is_loaded ();
+
     void index_all_controls (std::shared_ptr<PropertyImpl> impl);
     void create_special_property (int fd,
                                   struct v4l2_queryctrl* queryctrl,

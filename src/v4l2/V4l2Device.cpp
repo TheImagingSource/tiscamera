@@ -990,8 +990,44 @@ void V4l2Device::create_conversion_factors ()
 }
 
 
+bool V4l2Device::extension_unit_is_loaded ()
+{
+    struct v4l2_queryctrl qctrl = {};
+    qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
+
+    while (tcam_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
+    {
+        if (((qctrl.id >> 12) ^ 0x199e) == 0)
+        {
+            return true;
+        }
+        qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
+    }
+    return false;
+}
+
+
 void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 {
+    bool extension_unit_exists = false;
+    // test for loaded extension unit.
+    for (unsigned int i = 0; i < 3; ++i)
+    {
+        if (extension_unit_is_loaded())
+        {
+            extension_unit_exists = true;
+            break;
+        }
+        else
+        {
+            usleep(500);
+        }
+    }
+    if (!extension_unit_exists)
+    {
+        tcam_warning("The property extension unit does not exist. Not all properties will be accessible.");
+    }
+
     struct v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
