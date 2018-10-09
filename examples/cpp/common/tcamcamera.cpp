@@ -517,6 +517,14 @@ TcamCamera::get_property(std::string name)
 std::vector<std::shared_ptr<Property>>
 TcamCamera::get_camera_property_list()
 {
+    GstState old_state;
+    gst_element_get_state(tcambin_, &old_state, nullptr, 5 * GST_SECOND);
+    if (old_state == GST_STATE_NULL)
+    {
+        // ensure we have a capture pipeline
+        gst_element_set_state(tcambin_, GST_STATE_PAUSED);
+        gst_element_get_state(tcambin_, nullptr, nullptr, 5 * GST_SECOND);
+    }
     GSList *names = tcam_prop_get_tcam_property_names(TCAM_PROP(tcambin_));
     std::vector<std::shared_ptr<Property>> pptylist;
 
@@ -529,6 +537,8 @@ TcamCamera::get_camera_property_list()
         }
         catch(...)  {}
     }
+
+    gst_element_set_state(tcambin_, old_state);
 
     return pptylist;
 }
