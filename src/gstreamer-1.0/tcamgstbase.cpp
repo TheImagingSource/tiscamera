@@ -968,7 +968,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                     }
                     else // is fixed
                     {
-                        ret = available_caps;
+                        ret = gst_caps_copy(available_caps);
                     }
                     requires_vidoeconvert = true;
 
