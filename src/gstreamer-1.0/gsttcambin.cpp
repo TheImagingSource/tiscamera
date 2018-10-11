@@ -504,6 +504,9 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     auto remove_element = [=] (GstElement** element)
         {
+            if (!element)
+                return;
+
             if (!GST_IS_ELEMENT(*element))
             {
                 return;
@@ -527,37 +530,21 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
         self->pipeline_caps = nullptr;
     }
 
-    if (self->dutils)
+
+    GstElement **elements[] = {
+        &self->dutils,
+        &self->biteater,
+        &self->exposure,
+        &self->whitebalance,
+        &self->debayer,
+        &self->focus,
+        &self->jpegdec,
+        &self->convert
+    };
+    std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
+    for(GstElement ** element: elemv)
     {
-        remove_element(&self->dutils);
-    }
-    if (self->biteater)
-    {
-        remove_element(&self->biteater);
-    }
-    if (self->exposure)
-    {
-        remove_element(&self->exposure);
-    }
-    if (self->whitebalance)
-    {
-        remove_element(&self->whitebalance);
-    }
-    if (self->debayer)
-    {
-        remove_element(&self->debayer);
-    }
-    if (self->focus)
-    {
-        remove_element(&self->focus);
-    }
-    if (self->jpegdec)
-    {
-        remove_element(&self->jpegdec);
-    }
-    if (self->convert)
-    {
-        remove_element(&self->convert);
+        remove_element(element);
     }
 }
 
