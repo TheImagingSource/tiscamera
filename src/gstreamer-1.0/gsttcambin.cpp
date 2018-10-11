@@ -469,6 +469,22 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
                                                                    GST_STATIC_CAPS_ANY);
 
 
+static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBin *self)
+{
+    GstElement **elements[] = {
+        &self->dutils,
+        &self->biteater,
+        &self->exposure,
+        &self->whitebalance,
+        &self->debayer,
+        &self->focus,
+        &self->jpegdec,
+        &self->convert
+    };
+    std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
+    return elemv;
+}
+
 static gboolean gst_tcambin_create_source (GstTcamBin* self)
 {
     gst_tcambin_clear_source(self);
@@ -504,7 +520,7 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     auto remove_element = [=] (GstElement** element)
         {
-            if (!element)
+            if (!*element)
                 return;
 
             if (!GST_IS_ELEMENT(*element))
@@ -530,18 +546,8 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
         self->pipeline_caps = nullptr;
     }
 
+    auto elemv = gst_tcambin_get_internal_element_refs(self);
 
-    GstElement **elements[] = {
-        &self->dutils,
-        &self->biteater,
-        &self->exposure,
-        &self->whitebalance,
-        &self->debayer,
-        &self->focus,
-        &self->jpegdec,
-        &self->convert
-    };
-    std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
     for(GstElement ** element: elemv)
     {
         remove_element(element);
