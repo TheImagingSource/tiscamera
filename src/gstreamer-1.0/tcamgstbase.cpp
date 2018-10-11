@@ -687,6 +687,23 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     return largest_caps;
 }
 
+bool contains_jpeg (const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        if (strcmp("image/jpeg", gst_structure_get_name(gst_caps_get_structure(caps, i))) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 bool contains_bayer (const GstCaps* caps)
 {

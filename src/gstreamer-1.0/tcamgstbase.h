@@ -95,6 +95,9 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming);
 
 bool contains_bayer (const GstCaps* caps);
 
+bool contains_jpeg (const GstCaps* caps);
+
+
 /**
  * @param elementname - name of the GstElement that shall be queried
  * @param padname - name of the static pad that shall be queried

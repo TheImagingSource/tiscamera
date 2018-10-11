@@ -40,6 +40,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 
 
 static gboolean gst_tcambin_create_source (GstTcamBin* self);
+static gboolean gst_tcambin_create_elements (GstTcamBin* self);
 static void gst_tcambin_clear_source (GstTcamBin* self);
 
 //
@@ -114,7 +115,7 @@ static gchar* gst_tcam_bin_get_property_type(TcamProp* iface,
 
     if (GST_TCAMBIN(self)->src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
     ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name));
 
@@ -182,7 +183,7 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
 
     if (GST_TCAMBIN(self)->src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
 
     GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
@@ -259,7 +260,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
 
     if (self->src == nullptr)
     {
-        gst_tcambin_create_source(self);
+        gst_tcambin_create_elements(self);
     }
 
     if (tcam_prop_get_tcam_property(TCAM_PROP(self->src),
@@ -347,7 +348,7 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
 {
     if (GST_TCAMBIN(self)->src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
     auto l = tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
 
@@ -376,7 +377,7 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
 
     if (GST_TCAMBIN(self)->src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
 
     if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
@@ -420,31 +421,43 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_bin_get_device_serials (TcamProp* self)
+static GSList* gst_tcam_bin_get_device_serials (TcamProp* self __attribute((__unused__)))
 {
-    if (GST_TCAMBIN(self)->src == nullptr)
+    GstElement *src = gst_element_factory_make("tcamsrc", nullptr);
+    if (src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        g_critical("Failed to create a tcamsrc");
+        return nullptr;
     }
-    return tcam_prop_get_device_serials(TCAM_PROP(GST_TCAMBIN(self)->src));
+
+    GSList *serials = tcam_prop_get_device_serials(TCAM_PROP(src));
+
+    gst_object_unref(src);
+
+    return serials;
 }
 
 
-static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
+static gboolean gst_tcam_bin_get_device_info (TcamProp* self __attribute((__unused__)),
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type)
 {
-    if (GST_TCAMBIN(self)->src == nullptr)
+    GstElement *src = gst_element_factory_make("tcamsrc", nullptr);
+    if (src == nullptr)
     {
-        gst_tcambin_create_source(GST_TCAMBIN(self));
+        g_critical("Failed to create a tcamsrc");
+        return false;
     }
-        return tcam_prop_get_device_info(TCAM_PROP(GST_TCAMBIN(self)->src),
-                                         serial,
-                                         name,
-                                         identifier,
-                                         connection_type);
+    gboolean ret = tcam_prop_get_device_info(TCAM_PROP(src),
+                                        serial,
+                                        name,
+                                        identifier,
+                                        connection_type);
+    g_object_unref(src);
+
+    return ret;
 }
 
 
@@ -558,23 +571,17 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 static gboolean create_and_add_element (GstElement** element,
                                         const char* factory_name,
                                         const char* element_name,
-                                        GstElement** previous_element,
-                                        GstBin* bin,
-                                        std::string& pipeline_description)
+                                        GstBin* bin)
 {
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
     {
         GST_DEBUG("Adding %s(%p) to pipeline", factory_name, (void*)*element);
         gst_bin_add(bin, *element);
-        pipeline_description += " ! ";
-        pipeline_description += factory_name;
-
-        gst_element_link(*previous_element, *element);
-        *previous_element = *element;
     }
     else
     {
+        g_critical("Failed to create element '%s", factory_name);
         return FALSE;
     }
     return TRUE;
@@ -597,12 +604,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         gst_tcambin_create_source(self);
     }
 
-    if (self->target_caps == NULL)
-    {
-        GST_ERROR("Unknown target caps. Aborting.");
-        return FALSE;
-    }
-
     self->pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
 
     if (self->pipeline_caps == nullptr)
@@ -611,19 +612,19 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         return FALSE;
     }
 
-    if (self->src_caps == nullptr)
-    {
-        GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
-        return FALSE;
-    }
+    // if (self->src_caps == nullptr)
+    // {
+    //     GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
+    //     return FALSE;
+    // }
 
-    if (!gst_caps_is_fixed(self->src_caps))
-    {
-        self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
-        GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
-    }
+    // if (!gst_caps_is_fixed(self->src_caps))
+    // {
+    //     self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
+    //     GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
+    // }
 
-    g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
+    // g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
 
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
 
@@ -645,14 +646,11 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     pipeline_description += capsstr;
     g_free (capsstr);
 
-    GstElement* previous_element = self->pipeline_caps;
-
     if (self->has_dutils && self->needs_dutils)
     {
         if (!create_and_add_element(&self->dutils,
                                     "tcamdutils", "tcambin-dutils",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
+                                    GST_BIN(self)))
         {
             send_missing_element_msg("tcamdutils");
             return FALSE;
@@ -661,120 +659,101 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         {
             if (!create_and_add_element(&self->biteater,
                                         "tcambiteater", "tcambin-biteater",
-                                        &previous_element,
-                                        GST_BIN(self), pipeline_description))
+                                        GST_BIN(self)))
             {
                 send_missing_element_msg("tcambiteater");
                 return FALSE;
             }
         }
-        goto finished_element_creation;
-    }
+    } else {
+        GstPad *srcpad = gst_element_get_static_pad(self->src, "src");
+        GstCaps *srccaps = gst_pad_query_caps(srcpad, NULL);
 
-    // the following elements only support mono or bayer
-    // security check to prevent faulty pipelines
-
-    if (gst_caps_are_bayer_only(self->src_caps)
-        || tcam_gst_raw_only_has_mono(self->src_caps))
-    {
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
+        if (contains_bayer(srccaps)
+            || tcam_gst_raw_only_has_mono(srccaps))
         {
-            if (!create_and_add_element(&self->exposure,
-                                        "tcamautoexposure", "tcambin-exposure",
-                                        &previous_element,
-                                        GST_BIN(self), pipeline_description))
+            if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
             {
-                send_missing_element_msg("tcamautoexposure");
+                if (!create_and_add_element(&self->exposure,
+                                            "tcamautoexposure", "tcambin-exposure",
+                                            GST_BIN(self)))
+                {
+                    send_missing_element_msg("tcamautoexposure");
+                    return FALSE;
+                }
+            }
+
+            if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
+                && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+            {
+                if (!create_and_add_element(&self->focus,
+                                            "tcamautofocus", "tcambin-focus",
+                                            GST_BIN(self)))
+                {
+                    send_missing_element_msg("tcamautofocus");
+                    return FALSE;
+                }
+            }
+        }
+
+        // always add whitebalance when using bayer
+        // we want it when debayering
+        // users may still want it when asking for bayer
+        if (contains_bayer(srccaps))
+        {
+            // use this to see if the device already has the feature
+            if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
+            {
+                if (!create_and_add_element(&self->whitebalance,
+                                            "tcamwhitebalance", "tcambin-whitebalance",
+                                            GST_BIN(self)))
+                {
+                    send_missing_element_msg("tcamwhitebalance");
+                    return FALSE;
+                }
+            }
+            if (!create_and_add_element(&self->debayer,
+                                        "bayer2rgb", "tcambin-debayer",
+                                        GST_BIN(self)))
+            {
+                send_missing_element_msg("bayer2rgb");
                 return FALSE;
             }
         }
 
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+        if (contains_jpeg(srccaps))
         {
-            if (!create_and_add_element(&self->focus,
-                                        "tcamautofocus", "tcambin-focus",
-                                        &previous_element,
-                                        GST_BIN(self), pipeline_description))
+            if (!create_and_add_element(&self->jpegdec,
+                                        "jpegdec", "tcambin-jpegdec",
+                                        GST_BIN(self)))
             {
-                send_missing_element_msg("tcamautofocus");
+                send_missing_element_msg("jpegdec");
                 return FALSE;
             }
         }
-    }
 
-    // always add whitebalance when using bayer
-    // we want it when debayering
-    // users may still want it when asking for bayer
-    if (contains_bayer(self->src_caps))
-    {
-        // use this to see if the device already has the feature
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
-        {
-            if (!create_and_add_element(&self->whitebalance,
-                                        "tcamwhitebalance", "tcambin-whitebalance",
-                                        &previous_element,
-                                        GST_BIN(self), pipeline_description))
-            {
-                send_missing_element_msg("tcamwhitebalance");
-                return FALSE;
-            }
-        }
-    }
-
-    if (self->needs_debayer)
-    {
-        if (!create_and_add_element(&self->debayer,
-                                    "bayer2rgb", "tcambin-debayer",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
-        {
-            send_missing_element_msg("bayer2rgb");
-            return FALSE;
-        }
-    }
-
-    if (self->needs_jpegdec)
-    {
-        // this is needed to allow for conversions such as
-        // GRAY8 to BGRx that can exist when device-caps are set
-        if (!create_and_add_element(&self->jpegdec,
-                                    "jpegdec", "tcambin-jpegdec",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
-        {
-            send_missing_element_msg("jpegdec");
-            return FALSE;
-        }
-    }
-
-    if (self->needs_videoconvert)
-    {
         // this is needed to allow for conversions such as
         // GRAY8 to BGRx that can exist when device-caps are set
         if (!create_and_add_element(&self->convert,
                                     "videoconvert", "tcambin-convert",
-                                    &previous_element,
-                                    GST_BIN(self), pipeline_description))
+                                    GST_BIN(self)))
         {
             send_missing_element_msg("videoconvert");
             return FALSE;
         }
     }
 
-finished_element_creation:
+    // GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
+    // self->target_pad = gst_element_get_static_pad(previous_element, "src");
+    // GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
 
-    GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
-    self->target_pad = gst_element_get_static_pad(previous_element, "src");
-    GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
+    // if (gst_caps_is_any(self->target_caps) || gst_caps_is_empty(self->target_caps))
+    // {
+    //     gst_caps_unref(self->target_caps);
+    //     self->target_caps = gst_caps_copy(self->src_caps);
+    // }
 
-    if (gst_caps_is_any(self->target_caps) || gst_caps_is_empty(self->target_caps))
-    {
-        gst_caps_unref(self->target_caps);
-        self->target_caps = gst_caps_copy(self->src_caps);
-    }
-
-    GST_INFO("Working with exit caps: %s", gst_caps_to_string(self->target_caps));
+    // GST_INFO("Working with exit caps: %s", gst_caps_to_string(self->target_caps));
     self->elements_created = TRUE;
 
     return TRUE;
@@ -896,8 +875,10 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
 
             if (self->src == nullptr)
             {
-                gst_tcambin_create_source(self);
-                g_object_set(self->src, "serial", self->device_serial, NULL);
+                if (!gst_tcambin_create_elements(self))
+                {
+                    GST_ERROR("Error while creating elements");
+                }
             }
 
             gst_element_set_state(self->src, GST_STATE_READY);
@@ -989,11 +970,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 GST_ERROR("Unable to work with given caps: %s",
                           gst_caps_to_string(self->target_caps));
                 return GST_STATE_CHANGE_FAILURE;
-            }
-
-            if (!gst_tcambin_create_elements(self))
-            {
-                GST_ERROR("Error while creating elements");
             }
 
             set_target_pad(self, self->target_pad);
@@ -1114,12 +1090,12 @@ static void gst_tcambin_set_property (GObject* object,
         case PROP_SERIAL:
         {
             self->device_serial = g_strdup(g_value_get_string(value));
-            if (self->src != nullptr)
+            if (self->src == nullptr)
             {
-                GST_INFO("Setting source serial to %s", self->device_serial);
-                g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
+                gst_tcambin_create_elements(self);
             }
-
+            GST_INFO("Setting source serial to %s", self->device_serial);
+            g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
             break;
         }
         case PROP_DEVICE_CAPS:
