@@ -94,6 +94,23 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
                                                 gst_tcambin_prop_init))
 
 
+static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBin *self)
+{
+    GstElement **elements[] = {
+        &self->dutils,
+        &self->biteater,
+        &self->exposure,
+        &self->whitebalance,
+        &self->debayer,
+        &self->focus,
+        &self->jpegdec,
+        &self->convert
+    };
+    std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
+    return elemv;
+}
+
+
 /**
  * gst_tcam_get_property_type:
  * @self: a #GstTcamBin
@@ -104,10 +121,9 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
  * Returns: (transfer full): A string describing the property type
  */
 static gchar* gst_tcambin_get_property_type(TcamProp* iface,
-                                             const gchar* name)
+                                            const gchar* name)
 {
     gchar* ret = NULL;
-
 
     GstTcamBin* self = GST_TCAMBIN (iface);
 
@@ -115,52 +131,24 @@ static gchar* gst_tcambin_get_property_type(TcamProp* iface,
     {
         gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
-    ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), name));
 
-    if (ret != nullptr)
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
     {
-        return ret;
-    }
-
-    if (self->dutils != NULL)
-    {
-        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->dutils), name));
-
-        if (ret != nullptr)
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        if(TCAM_IS_PROP(element))
         {
-            return ret;
+            ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(element), name));
+            if (ret != nullptr)
+                break;
         }
+        g_value_unset(&item);
     }
 
-    if (self->whitebalance != NULL)
-    {
-        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->whitebalance), name));
-
-        if (ret != nullptr)
-        {
-            return ret;
-        }
-    }
-
-    if (self->exposure != NULL)
-    {
-        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->exposure), name));
-
-        if (ret != nullptr)
-        {
-            return ret;
-        }
-    }
-
-    if (self->focus != NULL)
-    {
-        ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(self->focus), name));
-
-        if (ret != nullptr)
-        {
-            return ret;
-        }
-    }
+    gst_iterator_free(it);
 
     return ret;
 }
@@ -184,75 +172,38 @@ static GSList* gst_tcambin_get_property_names (TcamProp* iface)
         gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
 
-    GSList* src_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->src));
-
-    // special case
-    // when our src return no properties we have an invalid device and abort everything
-    if (src_prop_names == nullptr)
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
     {
-        return nullptr;
-    }
-
-    for (unsigned int i = 0; i < g_slist_length(src_prop_names); i++)
-    {
-        ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(src_prop_names, i)->data));
-    }
-
-    if (self->dutils != nullptr)
-    {
-        GSList* dutils_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->dutils));
-
-        for (unsigned int i = 0; i < g_slist_length(dutils_prop_names); i++)
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        if(TCAM_IS_PROP(element))
         {
-            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(dutils_prop_names, i)->data));
+            GSList* prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(element));
+            ret = g_slist_concat(ret, prop_names);
         }
+        g_value_unset(&item);
     }
 
-    if (self->whitebalance != nullptr)
-    {
-        GSList* wb_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->whitebalance));
-
-        for (unsigned int i = 0; i < g_slist_length(wb_prop_names); i++)
-        {
-            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(wb_prop_names, i)->data));
-        }
-    }
-
-    if (self->exposure != nullptr)
-    {
-        GSList* exp_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->exposure));
-
-        for (unsigned int i = 0; i < g_slist_length(exp_prop_names); i++)
-        {
-            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(exp_prop_names, i)->data));
-        }
-    }
-
-    if (self->focus != nullptr)
-    {
-        GSList* focus_prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->focus));
-
-        for (unsigned int i = 0; i < g_slist_length(focus_prop_names); i++)
-        {
-            ret = g_slist_append(ret, g_strdup((char*)g_slist_nth(focus_prop_names, i)->data));
-        }
-    }
+    gst_iterator_free(it);
 
     return ret;
 }
 
 
 static gboolean gst_tcambin_get_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group)
+                                               const gchar* name,
+                                               GValue* value,
+                                               GValue* min,
+                                               GValue* max,
+                                               GValue* def,
+                                               GValue* step,
+                                               GValue* type,
+                                               GValue* flags,
+                                               GValue* category,
+                                               GValue* group)
 {
     GstTcamBin* self = GST_TCAMBIN(iface);
 
@@ -261,79 +212,79 @@ static gboolean gst_tcambin_get_tcam_property (TcamProp* iface,
         gst_tcambin_create_elements(self);
     }
 
-    if (tcam_prop_get_tcam_property(TCAM_PROP(self->src),
-                                    name, value,
-                                    min, max,
-                                    def, step,
-                                    type,
-                                    flags,
-                                    category, group))
-    {
-        return TRUE;
-    }
+    gboolean ret = false;
 
-    if (self->dutils != nullptr)
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
     {
-        if (tcam_prop_get_tcam_property(TCAM_PROP(self->dutils),
-                                        name, value,
-                                        min, max,
-                                        def, step,
-                                        type,
-                                        flags,
-                                        category, group))
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        if(TCAM_IS_PROP(element))
         {
-            return TRUE;
+            if (tcam_prop_get_tcam_property(TCAM_PROP(element),
+                                            name, value,
+                                            min, max,
+                                            def, step,
+                                            type,
+                                            flags,
+                                            category, group))
+            {
+                ret = true;
+                break;
+            }
         }
+        g_value_unset(&item);
     }
 
-    if (self->whitebalance != nullptr)
+    gst_iterator_free(it);
+
+    return ret;
+}
+
+
+static gboolean gst_tcambin_set_tcam_property (TcamProp* iface,
+                                                const gchar* name,
+                                                const GValue* value)
+{
+    GstTcamBin* self = GST_TCAMBIN(iface);
+
+    if (self->src == nullptr)
     {
-        if (tcam_prop_get_tcam_property(TCAM_PROP(self->whitebalance),
-                                        name, value,
-                                        min, max,
-                                        def, step,
-                                        type,
-                                        flags,
-                                        category, group))
-        {
-            return TRUE;
-        }
+        gst_tcambin_create_elements(self);
     }
 
-    if (self->exposure != nullptr)
+    gboolean ret = false;
+
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
     {
-        if (tcam_prop_get_tcam_property(TCAM_PROP(self->exposure),
-                                        name, value,
-                                        min, max,
-                                        def, step,
-                                        type,
-                                        flags,
-                                        category, group))
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        if(TCAM_IS_PROP(element))
         {
-            return TRUE;
+            if (tcam_prop_set_tcam_property(TCAM_PROP(element),
+                                            name, value))
+            {
+                ret = true;
+                break;
+            }
         }
+        g_value_unset(&item);
     }
 
-    if (self->focus != nullptr)
-    {
-        if (tcam_prop_get_tcam_property(TCAM_PROP(self->focus),
-                                        name, value,
-                                        min, max,
-                                        def, step,
-                                        type,
-                                        flags,
-                                        category, group))
-        {
-            return TRUE;
-        }
-    }
+    gst_iterator_free(it);
 
-    return FALSE;
+    return ret;
+
 }
 
 
 /**
- * gst_tcambin_get_tcam_manu_entries:
+ * gst_tcambin_get_tcam_menu_entries:
  * @self: a #GstTcamBin
  * @name: a #char*
  *
@@ -348,74 +299,28 @@ static GSList* gst_tcambin_get_tcam_menu_entries (TcamProp* self,
     {
         gst_tcambin_create_elements(GST_TCAMBIN(self));
     }
-    auto l = tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->src), name);
 
-    if (l != nullptr)
+    GSList * ret;
+
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
     {
-        return l;
-    }
-
-    if (GST_TCAMBIN(self)->dutils != nullptr)
-    {
-        l = tcam_prop_get_tcam_menu_entries(TCAM_PROP(GST_TCAMBIN(self)->dutils), name);
-
-        if (l != nullptr)
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        if(TCAM_IS_PROP(element))
         {
-            return l;
+            ret = tcam_prop_get_tcam_menu_entries(TCAM_PROP(element), name);
+            if (ret)
+                break;
         }
-    }
-    return nullptr;
-}
-
-static gboolean gst_tcambin_set_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                const GValue* value)
-{
-    GstTcamBin* self = GST_TCAMBIN(iface);
-
-    if (GST_TCAMBIN(self)->src == nullptr)
-    {
-        gst_tcambin_create_elements(GST_TCAMBIN(self));
+        g_value_unset(&item);
     }
 
-    if (tcam_prop_set_tcam_property(TCAM_PROP(self->src), name, value))
-    {
-        return TRUE;
-    }
+    gst_iterator_free(it);
 
-    if (self->dutils != nullptr)
-    {
-        if (tcam_prop_set_tcam_property(TCAM_PROP(self->dutils), name, value))
-        {
-            return TRUE;
-        }
-    }
-
-    if (self->whitebalance != nullptr)
-    {
-        if (tcam_prop_set_tcam_property(TCAM_PROP(self->whitebalance), name, value))
-        {
-            return TRUE;
-        }
-    }
-
-    if (self->exposure != nullptr)
-    {
-        if (tcam_prop_set_tcam_property(TCAM_PROP(self->exposure), name, value))
-        {
-            return TRUE;
-        }
-    }
-
-    if (self->focus != nullptr)
-    {
-        if (tcam_prop_set_tcam_property(TCAM_PROP(self->focus), name, value))
-        {
-            return TRUE;
-        }
-    }
-
-    return FALSE;
+    return ret;
 }
 
 
@@ -479,22 +384,6 @@ static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
                                                                    GST_PAD_ALWAYS,
                                                                    GST_STATIC_CAPS_ANY);
 
-
-static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBin *self)
-{
-    GstElement **elements[] = {
-        &self->dutils,
-        &self->biteater,
-        &self->exposure,
-        &self->whitebalance,
-        &self->debayer,
-        &self->focus,
-        &self->jpegdec,
-        &self->convert
-    };
-    std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
-    return elemv;
-}
 
 static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
@@ -694,15 +583,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             }
         }
 
-        // this is needed to allow for conversions such as
-        // GRAY8 to BGRx that can exist when device-caps are set
-        if (!create_and_add_element(&self->convert,
-                                    "videoconvert", "tcambin-convert",
-                                    GST_BIN(self)))
-        {
-            send_missing_element_msg("videoconvert");
-            return FALSE;
-        }
         gst_caps_unref(srccaps);
         gst_object_unref(srcpad);
     }
@@ -742,6 +622,8 @@ static void gst_tcambin_unlink_all(GstTcamBin *self)
         gst_object_unref(srcpad);
         g_value_unset(&item);
     }
+
+    gst_iterator_free(it);
 }
 
 /*
