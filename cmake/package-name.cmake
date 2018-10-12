@@ -53,9 +53,15 @@ function (create_package_name return_value name version)
         git_commit_count(GIT_COMMIT_COUNT)
         git_branch(GIT_BRANCH)
 
-        set(${return_value}
-          "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}"
-          PARENT_SCOPE)
+        if ("${GIT_BRANCH}" STREQUAL "master")
+          set(${return_value}
+            "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" PARENT_SCOPE)
+        else ()
+          set(${return_value}
+            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}"
+            PARENT_SCOPE)
+
+        endif ("${GIT_BRANCH}" STREQUAL "master")
 
       else () # this will be the case when users download the github zip and compile on deb systems
 
