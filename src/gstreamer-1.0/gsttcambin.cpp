@@ -39,9 +39,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 #define GST_CAT_DEFAULT gst_tcambin_debug
 
 
-static gboolean gst_tcambin_create_source (GstTcamBin* self);
 static gboolean gst_tcambin_create_elements (GstTcamBin* self);
-static void gst_tcambin_clear_source (GstTcamBin* self);
 
 //
 // introspection interface
@@ -498,36 +496,6 @@ static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBi
     return elemv;
 }
 
-static gboolean gst_tcambin_create_source (GstTcamBin* self)
-{
-    gst_tcambin_clear_source(self);
-
-    GST_DEBUG("Creating source...");
-
-    self->src = gst_element_factory_make("tcamsrc", "tcambin-source");
-    gst_bin_add(GST_BIN(self), self->src);
-
-    if (self->device_serial != nullptr)
-    {
-        GST_INFO("Setting source serial to %s", self->device_serial);
-        g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
-    }
-
-    return TRUE;
-}
-
-
-static void gst_tcambin_clear_source (GstTcamBin* self)
-{
-    if (self->src)
-    {
-        gst_element_set_state(self->src, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->src);
-        self->src = nullptr;
-    }
-}
-
-
 static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
 
@@ -590,6 +558,15 @@ static gboolean create_and_add_element (GstElement** element,
 
 static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 {
+    auto send_missing_element_msg = [self] (const std::string& element_name)
+        {
+            std::string msg_string = "Could not create element '" + element_name + "'.";
+            GError* err = g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, msg_string.c_str());
+            GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
+            gst_element_post_message(GST_ELEMENT(self), msg);
+            g_error_free(err);
+        };
+
 
     if (self->elements_created)
     {
@@ -601,7 +578,13 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     if (self->src == nullptr)
     {
-        gst_tcambin_create_source(self);
+        if (!create_and_add_element(&self->src,
+                                    "tcamsrc", "tcambin-source",
+                                    GST_BIN(self)))
+        {
+            send_missing_element_msg("tcamsrc");
+            return FALSE;
+        }
     }
 
     self->pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
@@ -628,25 +611,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
 
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
 
-    gst_element_link(self->src,
-                     self->pipeline_caps);
-
-
-    auto send_missing_element_msg = [self] (const std::string& element_name)
-        {
-            std::string msg_string = "Could not create element '" + element_name + "'.";
-            GError* err = g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, msg_string.c_str());
-            GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
-            gst_element_post_message(GST_ELEMENT(self), msg);
-            g_error_free(err);
-        };
-
-    std::string pipeline_description = "tcamsrc ! ";
-    gchar *capsstr = gst_caps_to_string(self->src_caps);
-    pipeline_description += capsstr;
-    g_free (capsstr);
-
-    if (self->has_dutils && self->needs_dutils)
+    if (self->has_dutils && self->use_dutils)
     {
         if (!create_and_add_element(&self->dutils,
                                     "tcamdutils", "tcambin-dutils",
@@ -655,15 +620,12 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             send_missing_element_msg("tcamdutils");
             return FALSE;
         }
-        else if (self->needs_biteater)
+        if (!create_and_add_element(&self->biteater,
+                                    "tcambiteater", "tcambin-biteater",
+                                    GST_BIN(self)))
         {
-            if (!create_and_add_element(&self->biteater,
-                                        "tcambiteater", "tcambin-biteater",
-                                        GST_BIN(self)))
-            {
-                send_missing_element_msg("tcambiteater");
-                return FALSE;
-            }
+            send_missing_element_msg("tcambiteater");
+            return FALSE;
         }
     } else {
         GstPad *srcpad = gst_element_get_static_pad(self->src, "src");
@@ -741,6 +703,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             send_missing_element_msg("videoconvert");
             return FALSE;
         }
+        gst_caps_unref(srccaps);
+        gst_object_unref(srcpad);
     }
 
     // GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
@@ -757,6 +721,180 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     self->elements_created = TRUE;
 
     return TRUE;
+}
+
+static void gst_tcambin_unlink_all(GstTcamBin *self)
+{
+    GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
+    GValue item = G_VALUE_INIT;
+    for (GstIteratorResult res = gst_iterator_next(it, &item);
+         res == GST_ITERATOR_OK;
+         res = gst_iterator_next(it, &item))
+    {
+        GstElement *element = GST_ELEMENT(g_value_get_object(&item));
+        GstPad *srcpad = gst_element_get_static_pad(element, "src");
+        if (gst_pad_is_linked(srcpad))
+        {
+            GstPad *sinkpad = gst_pad_get_peer(srcpad);
+            gst_pad_unlink(srcpad, sinkpad);
+            gst_object_unref(sinkpad);
+        }
+        gst_object_unref(srcpad);
+        g_value_unset(&item);
+    }
+}
+
+/*
+    Link our elements.
+
+    Szenarios:
+
+    1.) With DUTILS:
+      - target caps and dutils intersect:
+        - link tcamsrc -> dutils
+        - link dutils to ghost pad -> DONE
+
+      - target caps and biteater intersect:
+        - link tcamsrc -> dutils -> biteater
+        - link biteater to ghost pad -> DONE
+
+      - target could not be linked, FAIL
+
+    2.) Without DUTILS:
+      - target caps is GRAY8 or bayer?
+        - link tcamsrc -> tcamautoexposure -> tcamautofocus  IF elements are present
+
+      - target caps is bayer?
+        - link tcamwhitebalance  IF element is present
+
+      - target caps and tcamsrc caps intersect?
+        - link last element to ghost pad -> DONE
+
+      - target caps and bayer2rgb intersect?
+        - srccaps and bayer2rgb intersect?
+          - link tcamsrc -> tcamautoexposure -> tcamwhitebalance -> tcamautofocus  IF elements are present
+          - link last element -> bayer2rgb
+          - link bayer2rgb to ghost pad -> DONE
+
+      - target caps could not be linked, FAIL
+*/
+static gboolean gst_tcambin_link_elements(GstTcamBin *self)
+{
+    if (!self->elements_created)
+    {
+        g_critical("Trying to link but elements are not created");
+        return false;
+    }
+
+    gst_tcambin_unlink_all(self);
+
+    GstCaps *filter_caps = gst_caps_new_any();
+    GstCaps *target_caps = gst_pad_peer_query_caps(self->pad, filter_caps);
+    gst_caps_unref(filter_caps);
+
+    if (target_caps == nullptr)
+    {
+        g_critical("target caps are empty");
+        return false;
+    }
+
+    GST_DEBUG("Linking elements with caps: %" GST_PTR_FORMAT, target_caps);
+    gboolean is_linked = false;
+
+    if(self->dutils)
+    {
+        GstCaps *dutils_caps = get_caps_from_element(self->dutils, "src");
+        if(gst_caps_can_intersect(target_caps, dutils_caps))
+        {
+            g_return_val_if_fail(gst_element_link(self->src, self->dutils), false);
+            GstPad *pad = gst_element_get_static_pad(self->dutils, "src");
+            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
+            gst_object_unref(pad);
+
+            is_linked = true;
+        } else {
+            GstCaps *biteater_caps = get_caps_from_element(self->biteater, "src");
+            if (gst_caps_can_intersect(target_caps, biteater_caps))
+            {
+                g_return_val_if_fail(gst_element_link(self->src, self->dutils), false);
+                g_return_val_if_fail(gst_element_link(self->dutils, self->biteater), false);
+                GstPad *pad = gst_element_get_static_pad(self->biteater, "src");
+                gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
+                gst_object_unref(pad);
+
+                is_linked = true;
+            }
+            gst_caps_unref(biteater_caps);
+        }
+        gst_caps_unref(dutils_caps);
+    } else {
+        GstElement *prev = self->src;
+        if (tcam_gst_can_intersect_simple(target_caps, "video/x-bayer") ||
+            tcam_gst_can_intersect_simple(target_caps, "video/x-raw,format=GRAY8"))
+        {
+            if (self->exposure)
+            {
+                g_return_val_if_fail(gst_element_link(prev, self->exposure), false);
+                prev = self->exposure;
+            }
+            if (self->focus)
+            {
+                g_return_val_if_fail(gst_element_link(prev, self->focus), false);
+                prev = self->focus;
+            }
+        }
+        if (tcam_gst_can_intersect_simple(target_caps, "video/x-bayer"))
+        {
+            if (self->whitebalance)
+            {
+                g_return_val_if_fail(gst_element_link(prev, self->whitebalance), false);
+                prev = self->whitebalance;
+            }
+        }
+        GstCaps *srccaps = get_caps_from_element(self->src, "src");
+        if (gst_caps_can_intersect(target_caps, srccaps))
+        {
+            GstPad *pad = gst_element_get_static_pad(prev, "src");
+            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
+            gst_object_unref(pad);
+
+            is_linked = true;
+        } else {
+            if (self->debayer)
+            {
+                prev = self->src;
+                GstCaps *bayercaps = get_caps_from_element(self->debayer, "src");
+                if (gst_caps_can_intersect(target_caps, bayercaps))
+                {
+                    if (gst_caps_can_intersect(srccaps, bayercaps))
+                    {
+                        if (self->exposure)
+                        {
+                            g_return_val_if_fail(gst_element_link(prev, self->exposure), false);
+                            prev = self->exposure;
+                        }
+                        if (self->whitebalance)
+                        {
+                            g_return_val_if_fail(gst_element_link(prev, self->whitebalance), false);
+                            prev = self->whitebalance;
+                        }
+                        if (self->focus)
+                        {
+                            g_return_val_if_fail(gst_element_link(prev, self->focus), false);
+                            prev = self->focus;
+                        }
+                        g_return_val_if_fail(gst_element_link(prev, self->debayer), false);
+                        GstPad *pad = gst_element_get_static_pad(self->debayer, "src");
+                        gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
+                        gst_object_unref(pad);
+
+                        is_linked = true;
+                    }
+                }
+            }
+        }
+    }
+    return is_linked;
 }
 
 
@@ -799,7 +937,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
                 GstStructure* s = gst_structure_new_empty("video/x-raw");
 
                 std::string tmp_format_string;
-                GstCaps* tmp = get_caps_from_element("bayer2rgb", "src");
+                GstCaps* tmp = get_caps_from_element_name("bayer2rgb", "src");
 
                 GstStructure* tmp_struc = gst_structure_copy(gst_caps_get_structure(tmp, 0));
                 gst_structure_set_value(s, "format", gst_structure_get_value(tmp_struc, "format"));
@@ -812,7 +950,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                 gst_caps_unref(tmp);
             }
-            else if (!self->has_dutils &&
+            else if (!self->dutils &&
                      (tcam_gst_is_bayer12_string(string)
                       || tcam_gst_is_bayer12_packed_string(string)
                       || tcam_gst_is_bayer16_string(string)))
@@ -871,9 +1009,13 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
+            // From the docs:
+            // state change from NULL to READY.
+            // The element must check if the resources it needs are available. Device sinks and -sources typically try to probe the device to constrain their caps.
+            // The element opens the device (in case feature need to be probed).
             GST_INFO("NULL_TO_READY");
 
-            if (self->src == nullptr)
+            if (!self->elements_created)
             {
                 if (!gst_tcambin_create_elements(self))
                 {
@@ -881,117 +1023,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                 }
             }
 
-            gst_element_set_state(self->src, GST_STATE_READY);
-
-            if (self->out_caps)
-                g_object_unref(self->out_caps);
-            self->out_caps = gst_element_factory_make("capsfilter", "tcambin-out_caps");
-
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), gst_element_get_static_pad(self->out_caps, "src"));
-            GstCaps* all_caps = generate_all_caps(self);
-            g_object_set(self->out_caps, "caps", all_caps, NULL);
-            gst_caps_unref(all_caps);
-            break;
-        }
-        case GST_STATE_CHANGE_READY_TO_PAUSED:
-        {
-            GST_INFO("READY_TO_PAUSED");
-
-            GstPad* sinkpad = gst_pad_get_peer(self->pad);
-
-            if (sinkpad == nullptr)
-            {
-                self->target_caps = gst_caps_new_empty();
-            }
-            else
-            {
-                GstElement* par = gst_pad_get_parent_element(sinkpad);
-
-                if (strcmp(g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(par))),
-                           "GstCapsFilter") == 0)
-                {
-                    if (self->target_caps)
-                    {
-                        gst_caps_unref(self->target_caps);
-                        self->target_caps = nullptr;
-                    }
-
-                    g_object_get(par, "caps", &self->target_caps, NULL);
-                }
-                else
-                {
-                    self->target_caps = gst_pad_query_caps (sinkpad, NULL);
-                }
-                gst_object_unref(par);
-                GST_INFO("caps of sink: %" GST_PTR_FORMAT, static_cast<void*>(self->target_caps));
-            }
-
-            GstCaps* src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-            GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps));
-
-            if (self->src_caps != nullptr)
-            {
-                gst_caps_unref(self->src_caps);
-            }
-
-            if (self->user_caps)
-            {
-                GstCaps* tmp = gst_caps_intersect(self->user_caps, src_caps);
-                if (tmp == nullptr)
-                {
-                    GST_ERROR("The user defined device caps are not supported by the device. User caps are: %s", gst_caps_to_string(self->user_caps));
-                    return GST_STATE_CHANGE_FAILURE;
-                }
-                GST_INFO("Using user defined caps for tcamsrc. User caps are: %s", gst_caps_to_string(self->user_caps));
-                gst_caps_unref(tmp);
-                self->src_caps = find_input_caps(self->user_caps, self->target_caps,
-                                                 self->needs_debayer,
-                                                 self->needs_videoconvert,
-                                                 self->needs_jpegdec,
-                                                 self->needs_dutils,
-                                                 self->needs_biteater,
-                                                 self->use_dutils);
-            }
-            else
-            {
-                self->src_caps = find_input_caps(src_caps, self->target_caps,
-                                                 self->needs_debayer,
-                                                 self->needs_videoconvert,
-                                                 self->needs_jpegdec,
-                                                 self->needs_dutils,
-                                                 self->needs_biteater,
-                                                 self->use_dutils);
-            }
-
-            gst_caps_unref(src_caps);
-
-            if (!self->src_caps)
-            {
-                GST_ERROR("Unable to work with given caps: %s",
-                          gst_caps_to_string(self->target_caps));
-                return GST_STATE_CHANGE_FAILURE;
-            }
-
-            set_target_pad(self, self->target_pad);
-
-            /*
-             * We send this message as a means of always notifying
-             * applications of the output caps we use.
-             * This is done for the case where no output caps are given
-             * and the bin selected the caps that shall go out.
-             * With this message applications have a way of displaying
-             * the selected caps, no matter what.
-             */
-
-            gchar* caps_info_string = g_strdup_printf("Working with src caps: %s",
-                                                            gst_caps_to_string(self->src_caps));
-
-            GstMessage* msg = gst_message_new_info(GST_OBJECT(element),
-                                                   nullptr,
-                                                   caps_info_string);
-            g_free(caps_info_string);
-            gst_element_post_message(element, msg);
-
+            gst_tcambin_link_elements(self);
             break;
         }
         default:
@@ -1007,34 +1039,6 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
     if (ret == GST_STATE_CHANGE_FAILURE)
     {
         return ret;
-    }
-
-    switch(trans)
-    {
-        case GST_STATE_CHANGE_PAUSED_TO_READY:
-        {
-            self->elements_created = FALSE;
-            self->target_set = FALSE;
-            self->needs_debayer = false;
-
-            if (self->src_caps)
-            {
-                gst_caps_unref(self->src_caps);
-                self->src_caps = nullptr;
-            }
-
-            break;
-        }
-        case GST_STATE_CHANGE_READY_TO_NULL:
-        {
-            gst_tcambin_clear_source(self);
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
-            break;
-        }
-        default:
-        {
-            break;
-        }
     }
 
     return ret;
@@ -1165,7 +1169,6 @@ static void gst_tcambin_dispose (GstTcamBin* self)
 {
     GST_DEBUG("dispose");
 
-    gst_tcambin_clear_source(self);
     gst_tcambin_clear_elements(self);
     if (self->pad)
     {
