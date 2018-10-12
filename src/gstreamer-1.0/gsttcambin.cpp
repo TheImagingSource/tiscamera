@@ -45,12 +45,12 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self);
 // introspection interface
 //
 
-static GSList* gst_tcam_bin_get_property_names (TcamProp* self);
+static GSList* gst_tcambin_get_property_names (TcamProp* self);
 
-static gchar* gst_tcam_bin_get_property_type (TcamProp* self,
+static gchar* gst_tcambin_get_property_type (TcamProp* self,
                                               const gchar* name);
 
-static gboolean gst_tcam_bin_get_tcam_property(TcamProp* self,
+static gboolean gst_tcambin_get_tcam_property(TcamProp* self,
                                                const gchar* name,
                                                GValue* value,
                                                GValue* min,
@@ -62,36 +62,36 @@ static gboolean gst_tcam_bin_get_tcam_property(TcamProp* self,
                                                GValue* category,
                                                GValue* group);
 
-static gboolean gst_tcam_bin_set_tcam_property (TcamProp* self,
+static gboolean gst_tcambin_set_tcam_property (TcamProp* self,
                                                 const gchar* name,
                                                 const GValue* value);
 
-static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
+static GSList* gst_tcambin_get_tcam_menu_entries (TcamProp* self,
                                                    const gchar* name);
 
-static GSList* gst_tcam_bin_get_device_serials (TcamProp* self);
+static GSList* gst_tcambin_get_device_serials (TcamProp* self);
 
-static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
+static gboolean gst_tcambin_get_device_info (TcamProp* self,
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type);
 
-static void gst_tcam_bin_prop_init (TcamPropInterface* iface)
+static void gst_tcambin_prop_init (TcamPropInterface* iface)
 {
-    iface->get_property_names = gst_tcam_bin_get_property_names;
-    iface->get_property_type = gst_tcam_bin_get_property_type;
-    iface->get_property = gst_tcam_bin_get_tcam_property;
-    iface->get_menu_entries = gst_tcam_bin_get_tcam_menu_entries;
-    iface->set_property = gst_tcam_bin_set_tcam_property;
-    iface->get_device_serials = gst_tcam_bin_get_device_serials;
-    iface->get_device_info = gst_tcam_bin_get_device_info;
+    iface->get_property_names = gst_tcambin_get_property_names;
+    iface->get_property_type = gst_tcambin_get_property_type;
+    iface->get_property = gst_tcambin_get_tcam_property;
+    iface->get_menu_entries = gst_tcambin_get_tcam_menu_entries;
+    iface->set_property = gst_tcambin_set_tcam_property;
+    iface->get_device_serials = gst_tcambin_get_device_serials;
+    iface->get_device_info = gst_tcambin_get_device_info;
 }
 
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_bin_prop_init))
+                                                gst_tcambin_prop_init))
 
 
 /**
@@ -103,7 +103,7 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
  *
  * Returns: (transfer full): A string describing the property type
  */
-static gchar* gst_tcam_bin_get_property_type(TcamProp* iface,
+static gchar* gst_tcambin_get_property_type(TcamProp* iface,
                                              const gchar* name)
 {
     gchar* ret = NULL;
@@ -167,14 +167,14 @@ static gchar* gst_tcam_bin_get_property_type(TcamProp* iface,
 
 
 /**
- * gst_tcam_bin_get_property_names:
+ * gst_tcambin_get_property_names:
  * @self: a #GstTcamBin
  *
  * Return a list of property names
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
+static GSList* gst_tcambin_get_property_names (TcamProp* iface)
 {
     GSList* ret = NULL;
     GstTcamBin* self = GST_TCAMBIN(iface);
@@ -242,7 +242,7 @@ static GSList* gst_tcam_bin_get_property_names (TcamProp* iface)
 }
 
 
-static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
+static gboolean gst_tcambin_get_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
@@ -333,7 +333,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
 
 
 /**
- * gst_tcam_bin_get_tcam_manu_entries:
+ * gst_tcambin_get_tcam_manu_entries:
  * @self: a #GstTcamBin
  * @name: a #char*
  *
@@ -341,7 +341,7 @@ static gboolean gst_tcam_bin_get_tcam_property (TcamProp* iface,
  *
  * Returns: (element-type utf8) (transfer full): a #GSList
  */
-static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
+static GSList* gst_tcambin_get_tcam_menu_entries (TcamProp* self,
                                                    const gchar* name)
 {
     if (GST_TCAMBIN(self)->src == nullptr)
@@ -367,7 +367,7 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
     return nullptr;
 }
 
-static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
+static gboolean gst_tcambin_set_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 const GValue* value)
 {
@@ -419,7 +419,7 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_bin_get_device_serials (TcamProp* self __attribute((__unused__)))
+static GSList* gst_tcambin_get_device_serials (TcamProp* self __attribute((__unused__)))
 {
     GstElement *src = gst_element_factory_make("tcamsrc", nullptr);
     if (src == nullptr)
@@ -436,7 +436,7 @@ static GSList* gst_tcam_bin_get_device_serials (TcamProp* self __attribute((__un
 }
 
 
-static gboolean gst_tcam_bin_get_device_info (TcamProp* self __attribute((__unused__)),
+static gboolean gst_tcambin_get_device_info (TcamProp* self __attribute((__unused__)),
                                               const char* serial,
                                               char** name,
                                               char** identifier,
