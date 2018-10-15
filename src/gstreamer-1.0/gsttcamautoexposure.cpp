@@ -966,7 +966,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                         gst_static_pad_template_get(&gst_tcamautoexposure_sink_template));
 
     gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
-                                          "The Imaging Source Brightness Balance Element",
+                                          "The Imaging Source Auto Exposure Element",
                                           "Generic",
                                           "Adjusts the image brightness by setting camera properties.",
                                           "The Imaging Source Europe GmbH <support@theimagingsource.com>");
