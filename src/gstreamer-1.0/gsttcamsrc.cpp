@@ -684,9 +684,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
     }
 
-    GstStructure* structure = gst_structure_from_string ("ANY", NULL);
-    gst_caps_append_structure (caps, structure);
-
     GST_INFO("Device provides the following caps: %s", gst_caps_to_string(caps));
 
     return caps;
