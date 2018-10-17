@@ -18,7 +18,6 @@
 
 #include "GigE3Progress.h"
 
-#include <tinyxml.h>
 #include <cstdio> // sscanf
 
 using namespace FirmwareUpdate;
