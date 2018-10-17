@@ -33,23 +33,16 @@ set(CPACK_PACKAGE_CHECKSUM "SHA512")
 # Due to this problem we have to manually track dependencies.
 # set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-# string describing all dependencies
-# should respect oldest ubuntu LTS
-set(debian_dependencies
-  "uvcdynctrl, \
-gstreamer1.0-tools, \
-gstreamer1.0-plugins-good, \
-gstreamer1.0-plugins-bad,\
-gstreamer1.0-x, \
-gstreamer1.0-plugins-base, \
-gstreamer1.0-plugins-ugly, \
-libxml2, \
-libpcap0.8, \
-libaudit1, \
-libnotify4, \
-python3-gi, \
-")
+# load dependency list from central point
+file(STRINGS "${CMAKE_SOURCE_DIR}/dependencies-debian-runtime.txt" debian_dep)
 
+foreach(Line ${debian_dep})
+  # Ignore comments and append the rest to a single line.
+  if(NOT "${Line}" MATCHES "^#.*$")
+    string(REPLACE "\n" "" Line "${Line}")
+    set(debian_dependencies "${debian_dependencies}${Line}")
+  endif()
+endforeach()
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "${debian_dependencies}")
 
