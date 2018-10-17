@@ -107,7 +107,8 @@ static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBi
         &self->focus,
         &self->jpegdec,
         &self->convert,
-        &self->out_caps
+        &self->out_caps,
+        &self->pipeline_caps
     };
     std::vector<GstElement**> elemv(elements, elements + sizeof(elements)/sizeof(elements[0]));
     return elemv;
@@ -676,6 +677,13 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
         return false;
     }
 
+    if (!gst_element_link(self->src, self->pipeline_caps))
+    {
+        g_critical("Failed to link source to internal caps!");
+        gst_caps_unref(target_caps);
+        return false;
+    }
+
     GST_DEBUG("Linking elements with caps: %" GST_PTR_FORMAT, target_caps);
     if (gst_caps_is_any(target_caps))
     {
@@ -689,7 +697,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
         GstCaps *dutils_caps = get_caps_from_element(self->dutils, "src");
         if(gst_caps_can_intersect(target_caps, dutils_caps))
         {
-            g_return_val_if_fail(gst_element_link(self->src, self->dutils), false);
+            g_return_val_if_fail(gst_element_link(self->pipeline_caps, self->dutils), false);
             GstPad *pad = gst_element_get_static_pad(self->dutils, "src");
             gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
             gst_object_unref(pad);
@@ -699,7 +707,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
             GstCaps *biteater_caps = get_caps_from_element(self->biteater, "src");
             if (gst_caps_can_intersect(target_caps, biteater_caps))
             {
-                g_return_val_if_fail(gst_element_link(self->src, self->dutils), false);
+                g_return_val_if_fail(gst_element_link(self->pipeline_caps, self->dutils), false);
                 g_return_val_if_fail(gst_element_link(self->dutils, self->biteater), false);
                 GstPad *pad = gst_element_get_static_pad(self->biteater, "src");
                 gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
@@ -711,7 +719,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
         }
         gst_caps_unref(dutils_caps);
     } else {
-        GstElement *prev = self->src;
+        GstElement *prev = self->pipeline_caps;
         if (tcam_gst_can_intersect_simple(target_caps, "video/x-bayer") ||
             tcam_gst_can_intersect_simple(target_caps, "video/x-raw,format=GRAY8"))
         {
@@ -734,7 +742,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
                 prev = self->whitebalance;
             }
         }
-        GstCaps *srccaps = get_caps_from_element(self->src, "src");
+        GstCaps *srccaps = get_caps_from_element(self->pipeline_caps, "src");
         GST_DEBUG("Linking with source caps: %" GST_PTR_FORMAT, srccaps);
         if (gst_caps_can_intersect(target_caps, srccaps))
         {
@@ -744,7 +752,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
         } else {
             if (self->debayer)
             {
-                prev = self->src;
+                prev = self->pipeline_caps;
                 GstCaps *bayercaps = get_caps_from_element(self->debayer, "src");
                 if (gst_caps_can_intersect(target_caps, bayercaps))
                 {

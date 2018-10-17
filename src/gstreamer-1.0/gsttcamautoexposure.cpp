@@ -27,6 +27,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <gst/gst.h>
+#include <gst/video/video.h>
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautoexposure.h"
 
@@ -60,6 +61,8 @@ static void gst_tcamautoexposure_finalize (GObject* object);
 
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
                                                         GstBuffer* buf);
+static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
+                                               GstCaps * incaps, GstCaps * outcaps);
 
 static void init_camera_resources (GstTcamautoexposure* self);
 
@@ -940,17 +943,11 @@ static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self __attribute
 }
 /* pad templates */
 
-static GstStaticPadTemplate gst_tcamautoexposure_sink_template =
-    GST_STATIC_PAD_TEMPLATE ("sink",
-                             GST_PAD_SINK,
-                             GST_PAD_ALWAYS,
-                             GST_STATIC_CAPS ("ANY"));
-
-static GstStaticPadTemplate gst_tcamautoexposure_src_template =
-    GST_STATIC_PAD_TEMPLATE ("src",
-                             GST_PAD_SRC,
-                             GST_PAD_ALWAYS,
-                             GST_STATIC_CAPS ("ANY"));
+#define VIDEO_CAPS \
+    GST_VIDEO_CAPS_MAKE("{GRAY8}") ";" \
+        "video/x-bayer,format={rggb,bggr,gbrg,grbg}," \
+        "width=" GST_VIDEO_SIZE_RANGE ",height=" GST_VIDEO_SIZE_RANGE \
+        ",framerate=" GST_VIDEO_FPS_RANGE
 
 
 /* class initialization */
@@ -961,9 +958,11 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     GstBaseTransformClass* base_transform_class = GST_BASE_TRANSFORM_CLASS (klass);
 
     gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-                                        gst_static_pad_template_get(&gst_tcamautoexposure_src_template));
+        gst_pad_template_new ("src", GST_PAD_SRC, GST_PAD_ALWAYS,
+            gst_caps_from_string (VIDEO_CAPS)));
     gst_element_class_add_pad_template (GST_ELEMENT_CLASS(klass),
-                                        gst_static_pad_template_get(&gst_tcamautoexposure_sink_template));
+        gst_pad_template_new ("sink", GST_PAD_SINK, GST_PAD_ALWAYS,
+            gst_caps_from_string (VIDEO_CAPS)));
 
     gst_element_class_set_details_simple (GST_ELEMENT_CLASS(klass),
                                           "The Imaging Source Auto Exposure Element",
@@ -978,6 +977,7 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
+    base_transform_class->set_caps = GST_DEBUG_FUNCPTR (gst_tcamautoexposure_set_caps);
 
     g_object_class_install_property (gobject_class,
                                      PROP_AUTO_EXPOSURE,
@@ -1835,6 +1835,41 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
     self->frame_counter++;
 
     return GST_FLOW_OK;
+}
+
+
+static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
+    GstCaps * incaps, GstCaps * outcaps)
+{
+    GstTcamautoexposure *self = GST_TCAMAUTOEXPOSURE(trans);
+    GstStructure * structure = nullptr;
+
+    GST_DEBUG ("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT, incaps,
+                outcaps);
+    structure = gst_caps_get_structure (incaps, 0);
+
+    if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
+    {
+        const char *format;
+        format = gst_structure_get_string (structure, "format");
+        self->color_format = BAYER;
+        if (g_str_equal (format, "bggr")) {
+            self->pattern = BG;
+        } else if (g_str_equal (format, "gbrg")) {
+            self->pattern = GB;
+        } else if (g_str_equal (format, "grbg")) {
+            self->pattern = GR;
+        } else if (g_str_equal (format, "rggb")) {
+            self->pattern = RG;
+        } else {
+            g_critical("Format '%s' not handled by this element", format);
+            g_return_val_if_reached(false);
+        }
+    } else {
+        self->pattern = UNDEFINED_PATTERN;
+        self->color_format = GRAY;
+    }
+    return true;
 }
 
 
