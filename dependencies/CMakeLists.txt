@@ -19,6 +19,9 @@ include(ExternalProject)
 if (BUILD_ARAVIS)
   if (TCAM_INTERNAL_ARAVIS)
 
+    # check for intltool
+    find_package (Intl REQUIRED QUIET)
+
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
