@@ -571,6 +571,9 @@ class TCamCapture(QMainWindow):
         """callback for self.device_combo"""
         if entry == "":
             self.close()
+            self.cache.last_serial = None
+            self.cache.last_format = None
+            self.cache.save()
             return
 
         serial = entry.split(" - ")[2]
@@ -640,6 +643,7 @@ class TCamCapture(QMainWindow):
         self.set_device_menus_enabled(True)
         self.props_action.setVisible(True)
         self.cache.last_serial = self.serial
+        self.cache.save()
         self.play(caps_str)
 
     def current_fps(self, fps: float):
