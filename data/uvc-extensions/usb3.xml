@@ -297,6 +297,16 @@
       <value>0x0199e257</value>
     </constant>
 
+    <constant type="integer">
+      <id>V4L2_GAIN_AUTO_LOWER_LIMIT</id>
+      <value>0x0199e258</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_GAIN_AUTO_UPPER_LIMIT</id>
+      <value>0x0199e259</value>
+    </constant>
+
+
     <!-- register values -->
 
     <!-- BM8, bit 0 = ENABLE -->
@@ -481,6 +491,15 @@
     <constant type="integer">
       <id>XU_EXPOSURE_AUTO_UPPER_LIMIT_US</id>
       <value>0x3D</value>
+    </constant>
+
+    <constant type="integer">
+      <id>XU_GAIN_AUTO_LOWER_LIMIT</id>
+      <value>0x3F</value>
+    </constant>
+    <constant type="integer">
+      <id>XU_GAIN_AUTO_UPPER_LIMIT</id>
+      <value>0x40</value>
     </constant>
 
     <constant type="integer">
@@ -1018,6 +1037,32 @@
             <request>GET_RES</request>
           </requests>
         </control>
+
+        <control id="gain_auto_lower_limit">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_GAIN_AUTO_LOWER_LIMIT</selector>
+          <index>62</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+        <control id="gain_auto_upper_limit">
+          <entity>UVC_GUID_TISEUVC_XU</entity>
+          <selector>XU_GAIN_AUTO_UPPER_LIMIT</selector>
+          <index>63</index>
+          <size>4</size>
+          <requests>
+            <request>SET_CUR</request>
+            <request>GET_CUR</request>
+            <request>GET_DEF</request>
+            <request>GET_RES</request>
+          </requests>
+        </control>
+
         <control id="flip_horizontal">
           <entity>UVC_GUID_TISEUVC_XU</entity>
           <selector>XU_FLIP_H</selector>
@@ -2115,6 +2160,34 @@
         <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
       </v4l2>
     </mapping>
+
+    <mapping>
+      <name>Gain Auto Lower Limit</name>
+      <uvc>
+        <control_ref idref="gain_auto_lower_limit"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_GAIN_AUTO_LOWER_LIMIT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Gain Auto Upper Limit</name>
+      <uvc>
+        <control_ref idref="gain_auto_upper_limit"/>
+        <size>32</size>
+        <offset>0</offset>
+        <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
+      </uvc>
+      <v4l2>
+        <id>V4L2_GAIN_AUTO_UPPER_LIMIT</id>
+        <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
+      </v4l2>
+    </mapping>
+
     <mapping>
       <name>Override Scanning Mode</name>
       <uvc>
