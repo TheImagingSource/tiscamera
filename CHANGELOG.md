@@ -21,15 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AFU050 will have much quicker device lost notification
 - tcamsrc now adds a GstMeta object to each buffer to transport additional information
 - Add property drop-incomplete-buffer to tcamsrc
+- TCAM_GIGE_PACKET_SIZE environment variable
 
 ### Changed
 
 - lost-device event will be triggered more aggressively
 - The aravis backend will now always attempt to use a realtime thread
-- tcamsrc sometimes generated double resolution entries for ranges.
 - The internal aravis is built with fast-heartbeat=ON
 - The caps output of 'tcam-ctrl -c' does not contain type descriptions.
   This means the descriptions can now be copy pasted for gst-launch
+- internal aravis version to 0.6.0
 
 ### Removed
 
@@ -39,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The gige-daemon showed connection problems to clients on some systems due to permissions.
 - compilation error due to missing header on some systems due to POSIX compatability issues.
+- tcamsrc sometimes generated double resolution entries for ranges.
+- tcam-capture --serial was not respected
 
 ## [0.10.0] - 2018-07-31
 
