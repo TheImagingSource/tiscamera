@@ -29,6 +29,8 @@
 namespace tcam
 {
 
+/// @class ImageBuffer
+/// @brief Transport class for memory, format and statistics representing an actual image
 class ImageBuffer
 {
 
@@ -56,7 +58,14 @@ public:
      */
     unsigned char* get_data ();
 
+    /// @name get_buffer_size
+    /// @brief Get the size of the internal memory
+    /// @return size_t - size of the internal memory
     size_t get_buffer_size () const;
+
+    /// @name get_image_size
+    /// @brief Get size of the image in bytes
+    /// @return size of the image in bytes
     size_t get_image_size () const;
 
 
@@ -64,6 +73,12 @@ public:
 
     bool set_statistics (const struct tcam_stream_statistics&);
 
+    /// @name set_data
+    /// @brief write data to the internal buffer
+    /// @param data - pointer to the data that shall be written
+    /// @param size - number of bytes that shall be read from data
+    /// @param offset - number of bytes at the beginning of the internal buffer that shall be ignored before writing. Default: 0
+    /// @return true when data could be written
     bool set_data (const unsigned char* data, size_t size, unsigned int offset = 0);
 
     bool lock ();
@@ -78,9 +93,7 @@ public:
 
     void* get_user_data ();
 
-    /**
-     * @brief Fills MemoryBuffer with 0
-     */
+    /// @brief Fills MemoryBuffer with 0
     void clear ();
 
 private:
