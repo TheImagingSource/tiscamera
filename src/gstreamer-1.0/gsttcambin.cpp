@@ -40,6 +40,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 
 
 static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *serial);
+static gboolean gst_tcambin_link_elements(GstTcamBin *self);
 static GstCaps* generate_all_caps (GstTcamBin* self);
 
 //
@@ -490,20 +491,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
         return FALSE;
     }
 
-    // if (self->src_caps == nullptr)
-    // {
-    //     GST_ERROR("Could not find valid caps. Aborting pipeline creation.");
-    //     return FALSE;
-    // }
-
-    // if (!gst_caps_is_fixed(self->src_caps))
-    // {
-    //     self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
-    //     GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
-    // }
-
-    // g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
-
     gst_bin_add(GST_BIN(self), self->pipeline_caps);
 
     if (self->has_dutils && self->use_dutils)
@@ -599,28 +586,16 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
     gst_caps_unref(caps);
     gst_bin_add(GST_BIN(self), self->out_caps);
 
-    GstPad *pad = gst_element_get_static_pad(self->out_caps, "src");
-    gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
-    gst_object_unref(pad);
-
-    // GST_INFO("Using %s as exit element for internal pipeline", gst_element_get_name(previous_element));
-    // self->target_pad = gst_element_get_static_pad(previous_element, "src");
-    // GST_INFO("Internal pipeline: %s", pipeline_description.c_str());
-
-    // if (gst_caps_is_any(self->target_caps) || gst_caps_is_empty(self->target_caps))
-    // {
-    //     gst_caps_unref(self->target_caps);
-    //     self->target_caps = gst_caps_copy(self->src_caps);
-    // }
-
-    // GST_INFO("Working with exit caps: %s", gst_caps_to_string(self->target_caps));
     self->elements_created = TRUE;
 
+    // Initial link
+    gst_tcambin_link_elements(self);
     return TRUE;
 }
 
 static void gst_tcambin_unlink_all(GstTcamBin *self)
 {
+    GST_DEBUG("unlink");
     GstIterator *it = gst_bin_iterate_elements(GST_BIN(self));
     GValue item = G_VALUE_INIT;
     for (GstIteratorResult res = gst_iterator_next(it, &item);
@@ -686,10 +661,15 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
 
     gst_tcambin_unlink_all(self);
 
+    GstPad *pad = gst_element_get_static_pad(self->out_caps, "src");
+    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad))
+    {
+        g_critical("Failed to sed pad target");
+    }
+
     GstCaps *filter_caps = gst_caps_new_any();
     GstCaps *target_caps = gst_pad_peer_query_caps(self->pad, filter_caps);
     gst_caps_unref(filter_caps);
-
     if (target_caps == nullptr)
     {
         g_critical("target caps are empty");
@@ -697,6 +677,11 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
     }
 
     GST_DEBUG("Linking elements with caps: %" GST_PTR_FORMAT, target_caps);
+    if (gst_caps_is_any(target_caps))
+    {
+        gst_caps_unref(target_caps);
+        return true;
+    }
     gboolean is_linked = false;
 
     if(self->dutils)
@@ -753,9 +738,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
         GST_DEBUG("Linking with source caps: %" GST_PTR_FORMAT, srccaps);
         if (gst_caps_can_intersect(target_caps, srccaps))
         {
-            GstPad *pad = gst_element_get_static_pad(prev, "src");
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
-            gst_object_unref(pad);
+            g_return_val_if_fail(gst_element_link(prev, self->out_caps), false);
 
             is_linked = true;
         } else {
@@ -784,9 +767,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
                             prev = self->focus;
                         }
                         g_return_val_if_fail(gst_element_link(prev, self->debayer), false);
-                        GstPad *pad = gst_element_get_static_pad(self->debayer, "src");
-                        gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), pad);
-                        gst_object_unref(pad);
+                        g_return_val_if_fail(gst_element_link(self->debayer, self->out_caps), false);
 
                         is_linked = true;
                     }
@@ -796,6 +777,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
             }
         }
     }
+    gst_object_unref(pad);
     return is_linked;
 }
 
@@ -861,8 +843,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
             {
                 gst_caps_append_structure(to_remove, gst_structure_copy(struc));
             }
-
-
         }
     }
 
@@ -877,30 +857,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     gst_caps_unref(to_remove);
     return all_caps;
 }
-
-
-void set_target_pad(GstTcamBin* self, GstPad* pad __attribute__((unused)))
-{
-
-    gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
-
-    if (self->target_set == FALSE)
-    {
-        if (self->target_pad == nullptr)
-        {
-            GST_ERROR("target_pad not defined");
-        }
-        else
-        {
-            if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad))
-            {
-                GST_ERROR("Could not set target for ghostpad.");
-            }
-        }
-        self->target_set = TRUE;
-    }
-}
-
 
 static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                                                       GstStateChange trans)
@@ -919,6 +875,7 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
             // The element opens the device (in case feature need to be probed).
             GST_INFO("NULL_TO_READY");
 
+            // The pad does not get a CAPS event in null state so we need to link here for the case the element is already connected
             gst_tcambin_link_elements(self);
             break;
         }
@@ -952,7 +909,9 @@ static void gst_tcambin_get_property (GObject* object,
         case PROP_SERIAL:
         {
             if (!self->elements_created)
+            {
                 gst_tcambin_create_elements(self, nullptr);
+            }
             g_object_get_property(G_OBJECT(self->src), "serial", value);
             break;
         }
@@ -1027,6 +986,7 @@ static GstPadProbeReturn gst_tcambin_pad_probe(GstPad *pad,
         GstCaps *caps;
         gst_event_parse_caps(event, &caps);
         GST_DEBUG("Got event caps %" GST_PTR_FORMAT, caps);
+        gst_tcambin_link_elements(self);
     }
     return GST_PAD_PROBE_OK;
 }
