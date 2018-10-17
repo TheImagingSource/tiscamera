@@ -388,6 +388,8 @@ byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern patter
         case RG:
             val = (val * wb_r) / 64;
             break;
+        default:
+            return 0;
     };
     return ( val > 0xFF ? 0xFF : (byte)(val));
 }
