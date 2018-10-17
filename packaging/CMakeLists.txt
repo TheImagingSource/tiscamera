@@ -26,6 +26,8 @@ set(CPACK_PACKAGE_VENDOR "The Imaging Source Europe GmbH")
 set(CPACK_PACKAGE_CONTACT "support@theimagingsource.com")
 set(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS ON)
 
+set(CPACK_PACKAGE_CHECKSUM "SHA512")
+
 # this causes problems and makes it impossible to create packages
 # without actually installing the files.
 # Due to this problem we have to manually track dependencies.
