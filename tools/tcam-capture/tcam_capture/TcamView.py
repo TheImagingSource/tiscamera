@@ -388,7 +388,16 @@ class TcamView(QWidget):
         Emit SIGNAL that the pipeline has selected
         src caps and inform listeners what the caps are
         """
+
+        if caps is None or caps == "NULL":
+            log.error("Bin returned faulty source caps. Not firiing format_selected")
+            return
+
         c = Gst.Caps.from_string(caps)
+
+        if c.is_empty():
+            log.error("Received empty caps. Aborting fire_format_selected")
+            return
 
         structure = c.get_structure(0)
 
