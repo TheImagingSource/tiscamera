@@ -1,0 +1,19 @@
+git (>= 1:2.7.4),
+g++ (>= 4:5.3.1),
+cmake (>= 3.2),
+pkg-config (>= 0.29.1),
+libudev-dev (>=229),
+libtinyxml-dev (>=2.6.2-3),
+libgstreamer1.0-dev (>=1.8.3-1),
+libgstreamer-plugins-base1.0-dev (>=1.8.3-1),
+libglib2.0-dev (>= 2.48.2),
+libgirepository1.0-dev (>= 1.46.0),
+libusb-1.0-0-dev (>= 2:1.0.20.1),
+libzip-dev (>= 1.0.1),
+python-setuptools (>= 20.7.0-1),
+python3-setuptools (>= 20.7.0-1)
+
+# aravis specific dependencies
+libxml2-dev (>= 2.9.3),
+autoconf (>= 2.69-9),
+intltool (>= 0.51.0),
