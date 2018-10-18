@@ -99,6 +99,7 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamBin, gst_tcambin, GST_TYPE_BIN,
 static std::vector<GstElement **>gst_tcambin_get_internal_element_refs(GstTcamBin *self)
 {
     GstElement **elements[] = {
+        &self->src,
         &self->dutils,
         &self->biteater,
         &self->exposure,
