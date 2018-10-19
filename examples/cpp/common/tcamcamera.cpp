@@ -7,9 +7,13 @@
 #include <string>
 #include <stdexcept>
 
+#include <fstream>
+
 #include <iostream>
 
 #include <assert.h>
+
+#include <yaml-cpp/yaml.h>
 
 using namespace gsttcam;
 
@@ -276,7 +280,8 @@ TcamCamera::TcamCamera(std::string serial = "")
 
 TcamCamera::~TcamCamera()
 {
-    g_print("pipeline refcount at cleanup: %d\n", GST_OBJECT_REFCOUNT_VALUE(pipeline_));
+    stop();
+    g_print("pipeline refcount at cleanup: %d bin: %d\n", GST_OBJECT_REFCOUNT_VALUE(pipeline_), GST_OBJECT_REFCOUNT_VALUE(tcambin_));
     gst_object_unref(pipeline_);
 }
 
@@ -294,10 +299,10 @@ TcamCamera::create_pipeline()
     g_object_set(capturesink_, "max-buffers", 4, "drop", true, nullptr);
     assert(pipeline_ && tee_ && capturecapsfilter_ && queue && capturesink_);
 
-
     gst_bin_add_many(GST_BIN(pipeline_),
                      tcambin_, capturecapsfilter_, tee_, queue, capturesink_, nullptr);
     assert(gst_element_link_many(tcambin_, capturecapsfilter_, tee_, queue, capturesink_, nullptr));
+
 }
 
 void
@@ -320,7 +325,7 @@ TcamCamera::initialize_format_list()
     gst_element_get_state(tcambin_, nullptr, nullptr, GST_CLOCK_TIME_NONE);
 
     std::vector<VideoFormatCaps> ret;
-
+    GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline_), GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
     GstPad *pad = gst_element_get_static_pad(tcambin_, "src");
     assert(pad);
     GstCaps *caps = gst_pad_query_caps(pad, nullptr);
@@ -563,7 +568,9 @@ TcamCamera::set_capture_format(std::string format, FrameSize size, FrameRate fra
                                         nullptr);
     assert(caps);
     if(format != "")
+    {
         gst_caps_set_simple(caps, "format", G_TYPE_STRING, format.c_str(), nullptr);
+    }
 
     g_object_set(G_OBJECT(capturecapsfilter_), "caps", caps, nullptr);
     gst_caps_unref(caps);
@@ -627,7 +634,14 @@ TcamCamera::enable_video_display(GstElement *displaysink)
     gst_bin_add(GST_BIN(pipeline_), displaybin_);
     gst_bin_add_many(GST_BIN(displaybin_), queue, convert, capsfilter, displaysink, nullptr);
     if (!gst_element_link_many(tee_, queue, convert, capsfilter, displaysink, nullptr))
+    {
+        GstCaps *caps;
+        GstPad *pad;
+        pad = gst_element_get_static_pad(tcambin_, "src");
+        caps = gst_pad_query_caps(pad, nullptr);
+        printf("%s\n", gst_caps_to_string(caps));
         throw std::runtime_error("Could not link elements");
+    }
 }
 
 void
@@ -642,4 +656,85 @@ TcamCamera::disable_video_display()
         gst_object_unref(displaybin_);
         displaybin_ = nullptr;
     }
+}
+
+bool
+TcamCamera::store_device_state(std::string filename)
+{
+    YAML::Node node;
+    for (auto ppty: get_camera_property_list())
+    {
+        if(ppty->type == "integer")
+        {
+            std::shared_ptr<IntegerProperty> ip = std::dynamic_pointer_cast<IntegerProperty>(ppty);
+            node[ppty->name] = ip->value;
+        } else if (ppty->type == "double")
+        {
+            std::shared_ptr<DoubleProperty> dp = std::dynamic_pointer_cast<DoubleProperty>(ppty);
+            node[ppty->name] = dp->value;
+        } else if (ppty->type == "string")
+        {
+            std::shared_ptr<StringProperty> sp = std::dynamic_pointer_cast<StringProperty>(ppty);
+            node[ppty->name] = sp->value;
+        } else if (ppty->type == "enum")
+        {
+            std::shared_ptr<EnumProperty> ep = std::dynamic_pointer_cast<EnumProperty>(ppty);
+            node[ppty->name] = ep->value;
+        } else if ((ppty->type == "boolean") || (ppty->type == "button"))
+        {
+            std::shared_ptr<BooleanProperty> bp = std::dynamic_pointer_cast<BooleanProperty>(ppty);
+            node[ppty->name] = bp->value;
+        }
+    }
+    std::ofstream fout(filename);
+    fout << node;
+    return true;
+}
+
+bool
+TcamCamera::restore_device_state(std::string filename)
+{
+    YAML::Node config = YAML::LoadFile(filename);
+    for (auto it = config.begin(); it != config.end(); ++it)
+    {
+        auto key = it->first.as<std::string>();
+        auto value = it->second;
+        auto ppty = get_property(key);
+        GValue gval = G_VALUE_INIT;
+        if ((ppty->type == "boolean") || (ppty->type == "button"))
+        {
+            std::shared_ptr<BooleanProperty> bp = std::dynamic_pointer_cast<BooleanProperty>(ppty);
+            g_value_init(&gval, G_TYPE_BOOLEAN);
+            g_value_set_boolean(&gval, value.as<bool>());
+            set_property(key, gval);
+        }
+    }
+
+    for (auto it = config.begin(); it != config.end(); ++it)
+    {
+        auto key = it->first.as<std::string>();
+        auto value = it->second;
+        auto ppty = get_property(key);
+        GValue gval = G_VALUE_INIT;
+        if(ppty->type == "integer")
+        {
+            std::shared_ptr<IntegerProperty> ip = std::dynamic_pointer_cast<IntegerProperty>(ppty);
+            g_value_init(&gval, G_TYPE_INT);
+            g_value_set_int(&gval, value.as<int>());
+            set_property(key, gval);
+        } else if (ppty->type == "double")
+        {
+            std::shared_ptr<DoubleProperty> dp = std::dynamic_pointer_cast<DoubleProperty>(ppty);
+            g_value_init(&gval, G_TYPE_DOUBLE);
+            g_value_set_double(&gval, value.as<double>());
+            set_property(key, gval);
+        } else if ((ppty->type == "string") || (ppty->type == "enum"))
+        {
+            std::shared_ptr<StringProperty> sp = std::dynamic_pointer_cast<StringProperty>(ppty);
+            g_value_init(&gval, G_TYPE_STRING);
+            g_value_set_string(&gval, value.as<std::string>().c_str());
+            set_property(key, gval);
+        }
+    }
+    return true;
 }

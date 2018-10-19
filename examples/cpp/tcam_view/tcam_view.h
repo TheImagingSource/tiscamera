@@ -14,11 +14,14 @@ public:
     Gtk::ApplicationWindow *get_window();
 
 private:
+    bool on_exit(const GdkEventAny* event);
     void update_device_combo();
     void on_device_changed();
     void update_formats();
     void update_frame_rates();
     void on_frame_rate_changed();
+    void on_save_device_state();
+    void on_restore_device_state();
 
     TcamCamera* cam_ = nullptr;
 

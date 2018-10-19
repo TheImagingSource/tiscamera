@@ -14,11 +14,14 @@
 
 find_package(PkgConfig REQUIRED)
 
-add_library(tcamgstcamera tcamcamera.cpp)
+add_library(tcamgstcamera tcamcamera.cpp tcamserializer.cpp)
+
+set_property(TARGET tcamgstcamera PROPERTY POSITION_INDEPENDENT_CODE on)
 
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
+pkg_check_modules(YAML REQUIRED yaml-cpp)
 include_directories(${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(tcamgstcamera ${GSTREAMER_LIBRARIES})
+target_link_libraries(tcamgstcamera ${GSTREAMER_LIBRARIES} ${YAML_LIBRARIES})
 pkg_check_modules(TCAM REQUIRED tcam)
 include_directories(${TCAM_INCLUDE_DIRS})
 target_link_libraries(tcamgstcamera ${TCAM_LIBRARIES})

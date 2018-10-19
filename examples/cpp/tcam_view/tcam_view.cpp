@@ -20,6 +20,16 @@ TcamView::TcamView()
     builder_->get_widget("FramerateCombo", framerate_combo);
     framerate_combo->pack_start(framerate_columns_.col_description_);
 
+    Gtk::Button *save_device_state_button = nullptr;
+    builder_->get_widget("SaveDeviceStateButton", save_device_state_button);
+    save_device_state_button->signal_clicked().connect(sigc::mem_fun(*this,
+                                                        &TcamView::on_save_device_state));
+
+    Gtk::Button *restore_device_state_button = nullptr;
+    builder_->get_widget("RestoreDeviceStateButton", restore_device_state_button);
+    restore_device_state_button->signal_clicked().connect(sigc::mem_fun(*this,
+                                                        &TcamView::on_restore_device_state));
+
     Gtk::Paned *paned = nullptr;
     builder_->get_widget("Paned", paned);
     paned->set_position(300);
@@ -27,6 +37,21 @@ TcamView::TcamView()
     update_device_combo();
     window->set_default_size(800, 600);
     window->show_all();
+
+    window->signal_delete_event().connect(sigc::mem_fun(*this,
+                                                        &TcamView::on_exit));
+}
+
+
+bool
+TcamView::on_exit(const GdkEventAny* event)
+{
+    if (cam_)
+    {
+        cam_->stop();
+    }
+
+    return false;
 }
 
 void
@@ -186,6 +211,51 @@ TcamView::on_frame_rate_changed()
     property_box_->populate_tabs(*cam_);
     ebox->add(*property_box_);
     ebox->show_all();
+}
+
+void
+TcamView::on_save_device_state()
+{
+    if (cam_ == nullptr)
+        return;
+    auto dlg = Gtk::FileChooserDialog("Please choose a filename for saving the camera parameters",
+                                      Gtk::FILE_CHOOSER_ACTION_SAVE);
+    dlg.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+    dlg.add_button("Select", Gtk::RESPONSE_OK);
+    dlg.present();
+    int response = dlg.run();
+    if (response == Gtk::RESPONSE_OK)
+    {
+        auto filename = dlg.get_filename();
+        cam_->store_device_state(filename);
+    }
+}
+
+void
+TcamView::on_restore_device_state()
+{
+    if (cam_ == nullptr)
+        return;
+    auto dlg = Gtk::FileChooserDialog("Please choose a file to load the camera parameters from");
+    dlg.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+    dlg.add_button("Select", Gtk::RESPONSE_OK);
+    dlg.present();
+    int response = dlg.run();
+    if (response == Gtk::RESPONSE_OK)
+    {
+        auto filename = dlg.get_filename();
+        cam_->restore_device_state(filename);
+    }
+
+    // Re-create property controls to reflect new state
+    Gtk::EventBox *ebox = nullptr;
+    builder_->get_widget("PropertyBox", ebox);
+    property_box_ = nullptr;
+    property_box_ = std::unique_ptr<PropertyBox>(new PropertyBox());
+    property_box_->populate_tabs(*cam_);
+    ebox->add(*property_box_);
+    ebox->show_all();
+
 }
 
 Gtk::ApplicationWindow*
