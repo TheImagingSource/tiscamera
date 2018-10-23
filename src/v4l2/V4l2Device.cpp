@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <unistd.h>
 #include <fcntl.h>              /* O_RDWR O_NONBLOCK */
-#include <sys/mman.h>           /* mmap PROT_READ*/
 #include <linux/videodev2.h>
 #include <cstring>              /* memcpy*/
 #include <libudev.h>
@@ -461,8 +460,6 @@ bool V4l2Device::release_buffers ()
     {
         return false;
     }
-
-    free_mmap_buffers();
 
     buffers.clear();
     return true;
@@ -1512,32 +1509,6 @@ void V4l2Device::stream ()
 }
 
 
-bool V4l2Device::requeue_mmap_buffer ()
-{
-    for (unsigned int i = 0; i < buffers.size(); ++i)
-    {
-        if (!buffers[i].buffer->is_locked() && !buffers[i].is_queued)
-        {
-            struct v4l2_buffer buf = {};
-
-            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            buf.memory = V4L2_MEMORY_MMAP;
-
-            buf.index = i;
-
-            // requeue buffer
-            int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
-            if (ret == -1)
-            {
-                return false;
-            }
-            buffers[i].is_queued = true;
-        }
-    }
-    return true;
-}
-
-
 bool V4l2Device::get_frame ()
 {
     struct v4l2_buffer buf = {};
@@ -1573,10 +1544,6 @@ bool V4l2Device::get_frame ()
             tcam_log(TCAM_LOG_ERROR, "Buffer has wrong size. Got: %d Expected: %d Dropping...",
                      buf.bytesused, this->active_video_format.get_required_buffer_size());
             requeue_buffer(buffers.at(buf.index).buffer);
-            // if (!requeue_mmap_buffer())
-            // {
-            //     return false;
-            // }
             return true;
         }
     }
@@ -1649,138 +1616,6 @@ void V4l2Device::init_userptr_buffers ()
             buffers.at(i).is_queued = true;
         }
     }
-}
-
-
-void V4l2Device::init_mmap_buffers ()
-{
-    if (buffers.empty())
-    {
-        tcam_log(TCAM_LOG_ERROR, "Number of used buffers has to be >= 2");
-        return;
-    }
-    else
-    {
-        tcam_log(TCAM_LOG_ERROR, "Mmaping %d buffers", buffers.size());
-    }
-
-    struct v4l2_requestbuffers req = {};
-
-    req.count = buffers.size();
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    req.memory = V4L2_MEMORY_MMAP;
-
-    if (tcam_xioctl(fd, VIDIOC_REQBUFS, &req) == -1)
-    {
-        return;
-    }
-
-    if (req.count < 2)
-    {
-        tcam_log(TCAM_LOG_ERROR, "Insufficient memory for memory mapping");
-        return;
-    }
-
-    for (unsigned int n_buffers = 0; n_buffers < req.count; ++n_buffers)
-    {
-        struct v4l2_buffer buf = {};
-
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = n_buffers;
-
-        if (tcam_xioctl(fd, VIDIOC_QUERYBUF, &buf) == -1)
-        {
-            return;
-        }
-
-        struct tcam_image_buffer buffer = {};
-
-        // buffer.length = active_video_format.get_required_buffer_size();
-        buffer.length = buf.length;
-        buffer.pData =
-            /* use pre-allocated memory */
-            (unsigned char*) mmap( NULL,
-                                   buffer.length,
-                                   PROT_READ | PROT_WRITE, /* required */
-                                   MAP_SHARED, /* recommended */
-                                   fd,
-                                   buf.m.offset);
-
-        buffer.format = active_video_format.get_struct();
-
-        if (buffer.format.fourcc == mmioFOURCC('G', 'R', 'E', 'Y'))
-        {
-            buffer.format.fourcc = FOURCC_Y800;
-        }
-
-        if (emulate_bayer)
-        {
-            if (emulated_fourcc != 0)
-            {
-                buffer.format.fourcc = emulated_fourcc;
-            }
-        }
-
-        buffer.pitch = active_video_format.get_pitch_size();
-        if (buffer.pData == MAP_FAILED)
-        {
-            tcam_error("MMAP failed for buffer %d. Aborting. %s", n_buffers, strerror(errno));
-            return;
-        }
-
-        tcam_log(TCAM_LOG_DEBUG, "mmap pointer %p %p", buffer.pData,
-                 buffers.at(n_buffers).buffer->get_data());
-
-        buffers.at(n_buffers).buffer->set_image_buffer(buffer);
-        buffers.at(n_buffers).is_queued = true;
-    }
-
-}
-
-
-static bool reqbufs_mmap (int fd, v4l2_requestbuffers &reqbuf, uint32_t buftype, int count)
-{
-	memset(&reqbuf, 0, sizeof (reqbuf));
-	reqbuf.type = buftype;
-	reqbuf.memory = V4L2_MEMORY_MMAP;
-	reqbuf.count = count;
-
-	return tcam_xioctl(fd, VIDIOC_REQBUFS, &reqbuf) >= 0;
-}
-
-
-void V4l2Device::free_mmap_buffers ()
-{
-    if (buffers.empty())
-        return;
-
-
-    unsigned int i;
-
-    for (i = 0; i < buffers.size(); ++i)
-    {
-        if (-1 == munmap(buffers.at(i).buffer->getImageBuffer().pData,
-                         buffers.at(i).buffer->getImageBuffer().length))
-        {
-            return;
-        }
-        else
-        {
-            // auto buf = buffers.at(i).buffer->getImageBuffer();
-
-            // buf.pData = nullptr;
-            // buf.length = 0;
-
-            // buffers.at(i).buffer->set_image_buffer(buf);
-        }
-    }
-
-	uint32_t buftype = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	v4l2_requestbuffers reqbufs;
-
-    reqbufs_mmap(fd, reqbufs, buftype, 1);  // videobuf workaround
-    reqbufs_mmap(fd, reqbufs, buftype, 0);
 }
 
 
