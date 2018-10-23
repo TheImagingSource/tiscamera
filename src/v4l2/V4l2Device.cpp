@@ -1843,7 +1843,7 @@ void V4l2Device::monitor_v4l2_device ()
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);
         FD_SET(udev_monitor_pipe[1], &fds);
-        tv.tv_sec = 1000000;
+        tv.tv_sec = 1;
         tv.tv_usec = 0;
 
         ret = select(select_fd, &fds, NULL, NULL, &tv);
