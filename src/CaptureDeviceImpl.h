@@ -22,6 +22,7 @@
 #include "Properties.h"
 #include "PipelineManager.h"
 #include "PropertyHandler.h"
+#include "DeviceIndex.h"
 
 #include <string>
 #include <vector>
@@ -161,6 +162,8 @@ private:
     VideoFormat active_format;
 
     std::shared_ptr<DeviceInterface> device;
+
+    tcam::DeviceIndex index_;
 
 }; /* class CaptureDeviceImpl */
 

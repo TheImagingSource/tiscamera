@@ -20,6 +20,7 @@
 #include "utils.h"
 
 #include "CaptureDeviceImpl.h"
+#include "DeviceIndex.h"
 
 using namespace tcam;
 
@@ -207,7 +208,8 @@ bool CaptureDevice::stop_stream ()
 
 std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial)
 {
-    for (const auto& d : get_device_list())
+    DeviceIndex index;
+    for (const auto& d : index.get_device_list())
     {
         if (d.get_serial().compare(serial) == 0)
         {

@@ -32,12 +32,12 @@ struct bad_device : std::exception
 
 
 CaptureDeviceImpl::CaptureDeviceImpl ()
-    : pipeline(nullptr), property_handler(nullptr), device(nullptr)
+    : pipeline(nullptr), property_handler(nullptr), device(nullptr), index_()
 {}
 
 
 CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
-    : pipeline(nullptr), property_handler(nullptr), device(nullptr)
+    : pipeline(nullptr), property_handler(nullptr), device(nullptr), index_()
 {
     if (!open_device(_device))
     {
@@ -45,9 +45,9 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
         throw bad_device();
     }
     const auto serial = open_device_info.get_serial();
-    tcam::DeviceIndex::get_instance().register_device_lost(deviceindex_lost_cb,
-                                                           this,
-                                                           serial);
+    index_.register_device_lost(deviceindex_lost_cb,
+                                this,
+                                serial);
 }
 
 

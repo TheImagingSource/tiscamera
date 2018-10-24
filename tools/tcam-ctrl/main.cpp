@@ -134,7 +134,8 @@ int main (int argc, char *argv[])
         }
         else if (arg == "-l" || arg == "--list")
         {
-            std::vector<DeviceInfo> device_list = get_device_list();
+            DeviceIndex index;
+            std::vector<DeviceInfo> device_list = index.get_device_list();
 
             print_capture_devices(device_list);
             return 0;

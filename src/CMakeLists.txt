@@ -71,6 +71,7 @@ set( srcs
   BackendLoader.cpp
   LibraryHandle.cpp
   DeviceIndex.cpp
+  Indexer.cpp
   DeviceInterface.cpp
   CaptureDevice.cpp
   CaptureDeviceImpl.cpp
