@@ -1549,7 +1549,7 @@ bool V4l2Device::get_frame ()
 
     if (ret == -1)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to dequeue buffer.");
+        tcam_trace("Unable to dequeue buffer.");
         return false;
     }
 
