@@ -27,6 +27,7 @@
 #include <thread>
 #include <mutex>              // std::mutex, std::unique_lock
 #include <condition_variable> // std::condition_variable
+#include <atomic>
 
 VISIBILITY_INTERNAL
 
@@ -163,9 +164,9 @@ private:
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
     unsigned char lost_countdown;
-    bool stop_all;
-    bool device_is_lost;
-    bool abort_all;
+    std::atomic<bool> stop_all;
+    std::atomic<bool> device_is_lost;
+    std::atomic<bool> abort_all;
 
     std::thread udev_monitor;
     int udev_monitor_pipe[2];

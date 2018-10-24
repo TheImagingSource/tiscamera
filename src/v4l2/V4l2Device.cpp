@@ -573,16 +573,16 @@ void V4l2Device::notification_loop ()
         std::unique_lock<std::mutex> lck(this->mtx);
         this->cv.wait(lck);
 
+        if (this->device_is_lost)
+        {
+            tcam_info("notifying callbacks about lost device");
+            this->lost_device();
+
+        }
+
         if (this->abort_all)
         {
             break;
-        }
-
-        if (this->device_is_lost)
-        {
-            tcam_log(TCAM_LOG_DEBUG, "notifying callbacks about lost device");
-            this->lost_device();
-
         }
     }
 }
@@ -1470,7 +1470,8 @@ void V4l2Device::stream ()
                 if (this->lost_countdown <= 0)
                 {
                     this->device_is_lost = true;
-                    tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
+                    this->is_stream_on = false;
+                    // tcam_error("Unable to retrieve buffer");
                     this->cv.notify_all();
                     break;
                 }
@@ -1494,8 +1495,9 @@ void V4l2Device::stream ()
                 if (this->lost_countdown <= 0)
                 {
                     this->device_is_lost = true;
+                    this->is_stream_on = false;
 
-                    tcam_log(TCAM_LOG_ERROR, "Unable to retrieve buffer");
+                    // tcam_error("Unable to retrieve buffer");
                     this->cv.notify_all();
                     break;
                 }
