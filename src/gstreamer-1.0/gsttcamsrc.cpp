@@ -565,9 +565,13 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self __attribute__((__unused__)))
+static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 {
-    std::vector<tcam::DeviceInfo> devices = tcam::get_device_list();
+
+    GstTcamSrc* s = GST_TCAM_SRC(self);
+
+    std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
+
     GSList* ret = NULL;
 
     for (const auto& d : devices)
@@ -581,13 +585,15 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* self __attribute__((__
 }
 
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self __attribute__((__unused__)),
+static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type)
 {
-    std::vector<tcam::DeviceInfo> devices = tcam::get_device_list();
+    GstTcamSrc* s = GST_TCAM_SRC(self);
+
+    std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
 
     int count = devices.size();
     gboolean ret = FALSE;
@@ -1118,7 +1124,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         self->all_caps = nullptr;
     }
 
-    std::vector<tcam::DeviceInfo> infos = tcam::get_device_list();
+    std::vector<tcam::DeviceInfo> infos = self->index_.get_device_list();
     int dev_count = infos.size();
 
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
@@ -1502,6 +1508,8 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     new (&self->mtx) std::mutex();
     new (&self->cv) std::condition_variable();
 
+    new(&self->index_) tcam::DeviceIndex();
+
     self->device = NULL;
     self->all_caps = NULL;
     self->fixed_caps = NULL;
@@ -1531,6 +1539,8 @@ static void gst_tcam_src_finalize (GObject* object)
     (&self->device_serial)->std::string::~string();
     (&self->mtx)->std::mutex::~mutex();
     (&self->cv)->std::condition_variable::~condition_variable();
+    (&self->index_)->DeviceIndex::~DeviceIndex();
+
 
     G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
 }

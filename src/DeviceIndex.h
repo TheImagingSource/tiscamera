@@ -23,7 +23,9 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <atomic>
 #include <condition_variable>
+#include <memory>
 
 /**
  * @addtogroup API
@@ -33,13 +35,27 @@
 namespace tcam
 {
 
+#ifndef dev_callback
+
 typedef void (*dev_callback) (const DeviceInfo&, void* user_data);
+
+#endif /* dev_callback */
+
+// forward declaration
+class Indexer;
 
 class DeviceIndex
 {
 
 public:
 
+
+    explicit DeviceIndex ();
+
+    ~DeviceIndex ();
+
+    DeviceIndex& operator=(DeviceIndex&) = default;
+    DeviceIndex(DeviceIndex&) = default;
 
     std::vector<DeviceInfo> get_device_list () const;
 
@@ -80,22 +96,11 @@ public:
      */
     bool fill_device_info (DeviceInfo&) const;
 
-    static DeviceIndex& get_instance ();
-
 private:
 
-    DeviceIndex ();
+    std::shared_ptr<Indexer> indexer_;
 
-    ~DeviceIndex ();
-
-    bool continue_thread;
     mutable std::mutex mtx;
-    unsigned int wait_period;
-    std::thread work_thread;
-
-    bool have_list;
-    mutable std::condition_variable wait_for_list;
-    mutable std::condition_variable wait_for_next_run;
 
     std::vector<DeviceInfo> device_list;
 
@@ -108,15 +113,7 @@ private:
 
     std::vector<callback_data> callbacks;
 
-    static void sort_device_list( std::vector<DeviceInfo>& );
-
-    void update_device_list_thread ();
-    
-    std::vector<DeviceInfo> fetch_device_list_backend() const;
 };
-
-
-std::vector<DeviceInfo> get_device_list ();
 
 } /* namespace tcam */
 

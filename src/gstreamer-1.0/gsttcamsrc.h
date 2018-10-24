@@ -25,6 +25,9 @@
 #include <mutex>
 #include <condition_variable>
 #include <string>
+#include "tcam.h"
+
+using namespace tcam;
 
 #ifdef __cplusplus
 extern "C"
@@ -72,6 +75,7 @@ struct _GstTcamSrc
 
     std::mutex mtx;
     std::condition_variable cv;
+    DeviceIndex index_;
 };
 
 
