@@ -265,6 +265,12 @@ std::shared_ptr<Property> tcam::create_property (int fd,
                 m.emplace(map_string, i);
             }
 
+            if (m.empty())
+            {
+                tcam_debug("Enum %s does not have any entries. Ignoring.", cp.name);
+                return nullptr;
+            }
+
             return std::make_shared<Property>(PropertyEnumeration(impl, cp, m, type));
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
