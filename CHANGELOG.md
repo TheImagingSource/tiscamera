@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcamsrc now adds a GstMeta object to each buffer to transport additional information
 - Add property drop-incomplete-buffer to tcamsrc
 - TCAM_GIGE_PACKET_SIZE environment variable
+- Add gain auto lower limit to usb3 uvc extension unit
+- Add gain auto upper limit to usb3 uvc extension unit
 
 ### Changed
 
