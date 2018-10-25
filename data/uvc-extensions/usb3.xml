@@ -299,11 +299,11 @@
 
     <constant type="integer">
       <id>V4L2_GAIN_AUTO_LOWER_LIMIT</id>
-      <value>0x0199e258</value>
+      <value>0x0199e259</value>
     </constant>
     <constant type="integer">
       <id>V4L2_GAIN_AUTO_UPPER_LIMIT</id>
-      <value>0x0199e259</value>
+      <value>0x0199e260</value>
     </constant>
 
 
