@@ -42,6 +42,7 @@ gstreamer1.0-x, \
 gstreamer1.0-plugins-base, \
 gstreamer1.0-plugins-ugly, \
 libxml2, \
+libzip4, \
 libpcap0.8, \
 libaudit1, \
 libnotify4, \
