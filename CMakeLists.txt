@@ -36,6 +36,17 @@ git_commit_count(GIT_COMMIT_COUNT)
 git_branch(GIT_BRANCH)
 git_commit_tag(GIT_TAG)
 
+set(default_build_type "Release")
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+    STRING "Choose the type of build." FORCE)
+
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
 
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
