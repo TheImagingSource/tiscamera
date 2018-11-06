@@ -11,6 +11,8 @@
 
 #include "DeviceInfo.h"
 
+#include "BackendLoader.h"
+
 #include "compiler_defines.h"
 
 // VISIBILITY_INTERNAL
@@ -82,6 +84,8 @@ private:
     };
 
     std::vector<callback_data> callbacks_;
+
+    std::shared_ptr<BackendLoader> backend_loader_;
 };
 
 

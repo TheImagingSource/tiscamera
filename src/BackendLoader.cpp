@@ -23,11 +23,22 @@
 #include "internal.h"
 #include "devicelibrary.h"
 
-tcam::BackendLoader& tcam::BackendLoader::getInstance ()
-{
-    static BackendLoader loader;
+std::weak_ptr<BackendLoader> BackendLoader::instance;
 
-    return loader;
+
+std::shared_ptr<BackendLoader> BackendLoader::get_instance ()
+{
+    auto inst = instance.lock();
+
+    if (!inst)
+    {
+        struct wrapper : BackendLoader {};
+
+        inst = std::make_shared<wrapper>();
+        instance = inst;
+    }
+
+    return inst;
 }
 
 
@@ -48,7 +59,7 @@ tcam::BackendLoader::~BackendLoader ()
     // TODO: Add a mechanism for reference counting for device backends such that the unloader could at least throw an exception if a
     //       backend is still referenced at this point.
 
-    // unload_backends();
+    unload_backends();
 }
 
 
@@ -134,7 +145,11 @@ std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::D
 
     auto dev = device.get_info();
 
-    return std::shared_ptr<DeviceInterface>(b.open_device(&dev));
+    auto ptr = std::shared_ptr<DeviceInterface>(b.open_device(&dev));
+
+    ptr->set_backend_loader(get_instance());
+
+    return ptr;
 }
 
 

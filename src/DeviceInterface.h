@@ -37,6 +37,9 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
+// forward declaration
+class BackendLoader;
+
 class DeviceInterface : public PropertyImpl
 {
 
@@ -116,9 +119,18 @@ public:
         return true;
     }
 
+    virtual void set_backend_loader (std::shared_ptr<BackendLoader> ptr)
+    {
+        backend_loader_ = ptr;
+    }
+
+
 protected:
 
     DeviceInfo device;
+
+    // reference to keep the backend open until all devices/indexer are closed
+    std::shared_ptr<BackendLoader> backend_loader_;
 
     struct callback_container
     {

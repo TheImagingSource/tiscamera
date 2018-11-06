@@ -30,7 +30,8 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& de
 
     try
     {
-        return BackendLoader::getInstance().open_device(device);
+        auto loader = BackendLoader::get_instance();
+        return loader->open_device(device);
     }
     catch (const std::runtime_error& err)
     {
