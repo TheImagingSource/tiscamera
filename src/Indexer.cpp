@@ -13,7 +13,8 @@ std::weak_ptr<Indexer> Indexer::indexer_ptr;
 Indexer::Indexer ()
     : continue_thread_(true),
       wait_period_(2),
-      have_list_(false)
+      have_list_(false),
+      backend_loader_(BackendLoader::get_instance())
 {
     work_thread_ = std::thread (&Indexer::update_device_list_thread, this);
 }
@@ -129,7 +130,7 @@ void Indexer::update_device_list_thread ()
 
 std::vector<DeviceInfo> Indexer::fetch_device_list_backend () const
 {
-    auto tmp_dev_list = BackendLoader::getInstance().get_device_list_all_backends();
+    auto tmp_dev_list = backend_loader_->get_device_list_all_backends();
 
     sort_device_list(tmp_dev_list);
     return tmp_dev_list;

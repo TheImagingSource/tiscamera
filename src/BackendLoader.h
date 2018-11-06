@@ -43,6 +43,8 @@ private:
 
     BackendLoader& operator= (const BackendLoader&) = delete;
 
+    static std::weak_ptr<BackendLoader> instance;
+
     struct backend
     {
         enum TCAM_DEVICE_TYPE type;
@@ -67,7 +69,7 @@ private:
 
 public:
 
-    static BackendLoader& getInstance ();
+    static std::shared_ptr<BackendLoader> get_instance ();
 
     std::shared_ptr<DeviceInterface> open_device (const DeviceInfo&);
 
