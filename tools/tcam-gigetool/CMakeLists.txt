@@ -58,4 +58,8 @@ if (PYTHONINTERP_FOUND)
     DESTINATION "${GIGE_TOOLS_PY_INSTALL}/tcamgigetool"
     PATTERN "*.in" EXCLUDE)
 
+  install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/tcam_gigetool.py"
+    DESTINATION "${TCAM_INSTALL_BIN}"
+    RENAME "tcam-gigetool")
+                # COMPONENT tcam-gigetool)
 endif(PYTHONINTERP_FOUND)
