@@ -150,6 +150,8 @@ bool CaptureDeviceImpl::close_device ()
 
     pipeline->destroyPipeline();
 
+    pipeline = nullptr;
+
     open_device_info = DeviceInfo ();
     device.reset();
     property_handler = nullptr;
