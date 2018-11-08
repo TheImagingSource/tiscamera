@@ -2137,6 +2137,50 @@ gboolean find_image_values (GstTcamautoexposure* self)
     gst_structure_get_fraction(structure, "framerate",
                                &self->framerate_numerator, &self->framerate_denominator);
 
+    if (strcmp(gst_structure_get_name(structure), "video/x-bayer") == 0)
+    {
+        self->color_format = BAYER;
+
+        guint fourcc;
+
+        if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
+        {
+            const char *string;
+            string = gst_structure_get_string (structure, "format");
+            fourcc = GST_STR_FOURCC (string);
+        }
+
+        if (fourcc == MAKE_FOURCC ('g','r','b','g'))
+        {
+            self->pattern = GR;
+        }
+        else if (fourcc == MAKE_FOURCC ('r', 'g', 'g', 'b'))
+        {
+            self->pattern = RG;
+        }
+        else if (fourcc == MAKE_FOURCC ('g', 'b', 'r', 'g'))
+        {
+            self->pattern = GB;
+        }
+        else if (fourcc == MAKE_FOURCC ('b', 'g', 'g', 'r'))
+        {
+            self->pattern = BG;
+        }
+        // else
+        // {
+        //     GST_ERROR("Unable to determine bayer pattern.");
+        //     return FALSE;
+        // }
+    }
+    else
+    {
+        self->color_format = GRAY;
+        // will not be used, but still explicitly define something
+        self->pattern = BG;
+    }
+
+
+
     return TRUE;
 }
 
