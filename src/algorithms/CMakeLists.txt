@@ -21,6 +21,8 @@ set(srcs
   image_sampling.c
   bayer.c
   whitebalance.cpp
+  auto_exposure.cpp
+  pid_controller.cpp
   biteater.cpp
   work_pool.cpp
   parallel.cpp)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Imaging Source Europe GmbH
+ * Copyright 2018 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,36 @@
  * limitations under the License.
  */
 
-#ifndef TCAM_ALGORITHM_H
-#define TCAM_ALGORITHM_H
+#pragma once
 
-#include "base_types.h"
 
-#include "AutoFocus.h"
-#include "image_sampling.h"
-#include "bayer.h"
-#include "whitebalance.h"
-#include "biteater.h"
-#include "auto_exposure.h"
+namespace algorithms
+{
 
-#endif /* TCAM_ALGORITHM_H */
+namespace detail
+{
+
+class pid_controller
+{
+private:
+    float	_P, _I, _D;
+    float	_e_sum_limit;
+
+    float	_e_sum;
+
+    float	_e_prev;
+    bool	_e_prev_valid;
+
+
+public:
+    pid_controller (float p, float i, float d, float e_sum_limit);
+
+    float step (float e, float fps);
+
+    void reset (void);
+
+}; /* class pid_controller */
+
+} /*namespace detail */
+
+} /* namespace algorithms */
