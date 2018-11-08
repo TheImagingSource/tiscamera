@@ -47,6 +47,8 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure);
 
 static void set_gain (GstTcamautoexposure* self, gdouble gain);
 
+static void set_iris (GstTcamautoexposure* self, int iris);
+
 static void gst_tcamautoexposure_set_property (GObject* object,
                                                guint property_id,
                                                const GValue* value,
@@ -69,12 +71,15 @@ enum
     PROP_0,
     PROP_AUTO_EXPOSURE,
     PROP_AUTO_GAIN,
+    PROP_AUTO_IRIS,
     PROP_CAMERA,
     PROP_BRIGHTNESS_REFERENCE,
     PROP_EXPOSURE_MIN,
     PROP_EXPOSURE_MAX,
     PROP_GAIN_MIN,
     PROP_GAIN_MAX,
+    PROP_IRIS_MIN,
+    PROP_IRIS_MAX,
     PROP_ROI_LEFT,
     PROP_ROI_TOP,
     PROP_ROI_WIDTH,
@@ -157,6 +162,10 @@ static const char* tcamautoexposure_property_id_to_string (guint id)
         {
             return "Gain Auto";
         }
+        case PROP_AUTO_IRIS:
+        {
+            return "Iris Auto";
+        }
         case PROP_BRIGHTNESS_REFERENCE:
         {
             return "Brightness Reference";
@@ -176,6 +185,14 @@ static const char* tcamautoexposure_property_id_to_string (guint id)
         case PROP_GAIN_MAX:
         {
             return "Gain Max";
+        }
+        case PROP_IRIS_MIN:
+        {
+            return "Iris Min";
+        }
+        case PROP_IRIS_MAX:
+        {
+            return "Iris Max";
         }
         case PROP_ROI_LEFT:
         {
@@ -212,6 +229,10 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
     {
         return PROP_AUTO_GAIN;
     }
+    else if (g_strcmp0(str, "Iris Auto") == 0)
+    {
+        return PROP_AUTO_IRIS;
+    }
     else if (g_strcmp0(str, "Brightness Reference") == 0)
     {
         return PROP_BRIGHTNESS_REFERENCE;
@@ -231,6 +252,14 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
     else if (g_strcmp0(str, "Gain Max") == 0)
     {
         return PROP_GAIN_MAX;
+    }
+    else if (g_strcmp0(str, "Iris Min") == 0)
+    {
+        return PROP_IRIS_MIN;
+    }
+    else if (g_strcmp0(str, "Iris Max") == 0)
+    {
+        return PROP_IRIS_MAX;
     }
     else if (g_strcmp0(str, "Exposure ROI Left") == 0)
     {
@@ -255,6 +284,8 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
 
 static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self __attribute__((unused)))
 {
+    GstTcamautoexposure* element = GST_TCAMAUTOEXPOSURE(self);
+
     GSList* names = nullptr;
 
     names = g_slist_append(names,
@@ -271,6 +302,15 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self __attribu
         g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
     names = g_slist_append(names,
         g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
+    if (element->has_iris)
+    {
+        names = g_slist_append(names,
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_IRIS)));
+        names = g_slist_append(names,
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MIN)));
+        names = g_slist_append(names,
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MAX)));
+    }
     names = g_slist_append(names,
         g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)));
     names = g_slist_append(names,
@@ -300,6 +340,10 @@ static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self __attribute
     {
         return strdup("boolean");
     }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_IRIS)) == 0)
+    {
+        return strdup("boolean");
+    }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)) == 0)
     {
         return strdup("integer");
@@ -319,6 +363,14 @@ static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self __attribute
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
         return strdup("double");
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_IRIS_MIN)) == 0)
+    {
+        return strdup("integer");
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_IRIS_MAX)) == 0)
+    {
+        return strdup("integer");
     }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)) == 0)
     {
@@ -454,6 +506,60 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         {
             g_value_init(group, G_TYPE_STRING);
             g_value_set_string(group, "Gain");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_IRIS)) == 0)
+    {
+        if (!self->has_iris)
+        {
+            return FALSE;
+        }
+
+        if (value)
+        {
+            g_value_init(value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(value, self->auto_iris);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_BOOLEAN);
+            g_value_set_boolean(min, FALSE);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_BOOLEAN);
+            g_value_set_boolean(max, TRUE);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_BOOLEAN);
+            g_value_set_boolean(def, TRUE);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type, gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "Lens");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "Iris");
         }
         return TRUE;
     }
@@ -653,7 +759,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
 
         return TRUE;
-    }    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)) == 0)
     {
         if (value)
         {
@@ -701,6 +808,114 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
             g_value_set_string(group, "Gain");
         }
 
+        return TRUE;
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_IRIS_MIN)) == 0)
+    {
+        if (!self->has_iris)
+        {
+            return FALSE;
+        }
+
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->iris_min);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, self->iris.min);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, self->iris.max);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, self->iris.min);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "Lens");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "Iris");
+        }
+        return TRUE;
+    }
+    else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_IRIS_MAX)) == 0)
+    {
+        if (!self->has_iris)
+        {
+            return FALSE;
+        }
+
+        if (value)
+        {
+            g_value_init(value, G_TYPE_INT);
+            g_value_set_int(value, self->iris_max);
+        }
+        if (min)
+        {
+            g_value_init(min, G_TYPE_INT);
+            g_value_set_int(min, self->iris.min);
+        }
+        if (max)
+        {
+            g_value_init(max, G_TYPE_INT);
+            g_value_set_int(max, self->iris.max);
+        }
+        if (def)
+        {
+            g_value_init(def, G_TYPE_INT);
+            g_value_set_int(def, self->iris.min);
+        }
+        if (step)
+        {
+            g_value_init(step, G_TYPE_INT);
+            g_value_set_int(step, 1);
+        }
+        if (flags)
+        {
+            g_value_init(flags, G_TYPE_INT);
+            g_value_set_int(flags, 0);
+        }
+        if (type)
+        {
+            g_value_init(type, G_TYPE_STRING);
+            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+        }
+        if (category)
+        {
+            g_value_init(category, G_TYPE_STRING);
+            g_value_set_string(category, "Lens");
+        }
+        if (group)
+        {
+            g_value_init(group, G_TYPE_STRING);
+            g_value_set_string(group, "Iris");
+        }
         return TRUE;
     }
     else if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)) == 0)
@@ -994,6 +1209,13 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                            TRUE,
                                                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
     g_object_class_install_property (gobject_class,
+                                     PROP_AUTO_GAIN,
+                                     g_param_spec_boolean ("auto-iris",
+                                                           "Auto Iris",
+                                                           "Automatically adjust the iris, if camera allows adjustments",
+                                                           TRUE,
+                                                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
+    g_object_class_install_property (gobject_class,
                                      PROP_EXPOSURE_MAX,
                                      g_param_spec_int ("exposure-max",
                                                        "Exposure Maximum",
@@ -1022,6 +1244,22 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
                                                           "Minimum value gain can take",
                                                           0.0, G_MAXDOUBLE, 0.0,
                                                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
+
+    g_object_class_install_property (gobject_class,
+                                     PROP_IRIS_MAX,
+                                     g_param_spec_int ("iris-max",
+                                                       "Iris Maximum",
+                                                       "Maximum value the iris can take",
+                                                       0, G_MAXINT, G_MAXINT,
+                                                       static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
+    g_object_class_install_property (gobject_class,
+                                     PROP_IRIS_MIN,
+                                     g_param_spec_int ("iris-min",
+                                                       "Iris Minimum",
+                                                       "Minimum value the iris can take",
+                                                       0, G_MAXINT, 0,
+                                                       static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT)));
+
     g_object_class_install_property (gobject_class,
                                      PROP_BRIGHTNESS_REFERENCE,
                                      g_param_spec_int("brightness-reference",
@@ -1074,12 +1312,14 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
 {
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
+    self->auto_iris = TRUE;
     self->gain_is_double = FALSE;
     self->exposure_min = 0;
     self->exposure_max = 0;
     self->gain_min = 0.0;
     self->gain_max = 0.0;
     self->frame_counter = 0;
+    self->has_iris = FALSE;
     self->camera_src = NULL;
 }
 
@@ -1097,6 +1337,9 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         case PROP_AUTO_GAIN:
             tcamautoexposure->auto_gain = g_value_get_boolean(value);
+            break;
+        case PROP_AUTO_IRIS:
+            tcamautoexposure->auto_iris = g_value_get_boolean(value);
             break;
         case PROP_CAMERA:
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
@@ -1198,6 +1441,49 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
             }
             break;
+        case PROP_IRIS_MIN:
+        {
+            if (g_value_get_int(value) > tcamautoexposure->iris_max)
+            {
+                GST_ERROR("New user value for iris min is greater or equal to iris max. Ignoring request.");
+                break;
+            }
+
+            tcamautoexposure->iris_min = g_value_get_int(value);
+
+            if (tcamautoexposure->iris.value < tcamautoexposure->iris_min)
+            {
+                tcamautoexposure->iris.value = tcamautoexposure->iris_min;
+                set_iris(tcamautoexposure, tcamautoexposure->iris.value);
+            }
+
+            if (tcamautoexposure->iris_min == 0)
+            {
+                tcamautoexposure->iris_min = tcamautoexposure->iris.min;
+            }
+            break;
+            }
+        case PROP_IRIS_MAX:
+        {
+            if (g_value_get_int(value) < tcamautoexposure->iris_min)
+            {
+                GST_ERROR("New user value for iris max is smaller or equal to iris min. Ignoring request.");
+                break;
+            }
+
+            if (tcamautoexposure->iris.value > tcamautoexposure->iris_max)
+            {
+                tcamautoexposure->iris.value = tcamautoexposure->iris_max;
+                set_iris(tcamautoexposure, tcamautoexposure->iris.value);
+            }
+
+            tcamautoexposure->iris_max = g_value_get_int(value);
+            if (tcamautoexposure->iris_max == 0.0)
+            {
+                tcamautoexposure->iris_max = tcamautoexposure->iris.max;
+            }
+            break;
+        }
         case PROP_BRIGHTNESS_REFERENCE:
             tcamautoexposure->brightness_reference = g_value_get_int(value);
             break;
@@ -1234,6 +1520,9 @@ void gst_tcamautoexposure_get_property (GObject* object,
         case PROP_AUTO_GAIN:
             g_value_set_boolean (value, tcamautoexposure->auto_gain);
             break;
+        case PROP_AUTO_IRIS:
+            g_value_set_boolean (value, tcamautoexposure->auto_iris);
+            break;
         case PROP_CAMERA:
             g_value_set_object (value, tcamautoexposure->camera_src);
             break;
@@ -1249,7 +1538,13 @@ void gst_tcamautoexposure_get_property (GObject* object,
         case PROP_GAIN_MAX:
             g_value_set_double(value, tcamautoexposure->gain_max);
             break;
-        case PROP_BRIGHTNESS_REFERENCE:
+        case PROP_IRIS_MIN:
+            g_value_set_int(value, tcamautoexposure->iris_min);
+            break;
+        case PROP_IRIS_MAX:
+            g_value_set_int(value, tcamautoexposure->iris_max);
+            break;
+         case PROP_BRIGHTNESS_REFERENCE:
             g_value_set_int(value, tcamautoexposure->brightness_reference);
             break;
         case PROP_ROI_LEFT:
@@ -1354,9 +1649,49 @@ static void init_camera_resources (GstTcamautoexposure* self)
         self->exposure_max = self->default_exposure_values.max;
     }
 
+    p = {};
+    prop = dev->get_property(TCAM_PROPERTY_IRIS);
+
+    if (prop == nullptr)
+    {
+        GST_INFO("Iris could not be found");
+    }
+    else
+    {
+        self->has_iris = true;
+        p = prop->get_struct();
+        //self->iris.min = p.value.i.min;
+        // most iris modules are the same
+        // with a range from 0 - 1023
+        // 100 is a good base number.
+        // GigE cameras offer IrisAutoMin that suggests what this should be
+        self->iris.min = 100;
+        self->iris.max = p.value.i.max;
+        self->iris.value = p.value.i.value;
+
+        if (self->iris_min == 0)
+        {
+            self->iris_min = self->iris.min;
+        }
+        if (self->iris_max == 0)
+        {
+            self->iris_max = self->iris.max;
+        }
+    }
+
     GST_INFO("Exposure boundaries are %f %d", self->exposure.min, self->exposure_max);
 
     GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
+
+    if (self->has_iris)
+    {
+        GST_INFO("Camera has an iris.");
+        GST_INFO("Iris boundaries are %d %d", self->iris.min, self->iris.max);
+    }
+    else
+    {
+        GST_INFO("Camera does not have an iris. Disabling functionality");
+    }
 }
 
 
@@ -1398,6 +1733,23 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     {
         dev->set_property(TCAM_PROPERTY_GAIN, gain);
     }
+}
+
+
+static void set_iris(GstTcamautoexposure* self, int iris)
+{
+    if (!G_IS_OBJECT(self->camera_src))
+    {
+        GST_WARNING("Have no camera source to set iris.");
+        return;
+    }
+
+    GST_INFO("Setting iris to %d", iris);
+
+    tcam::CaptureDevice* dev;
+    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+
+    dev->set_property(TCAM_PROPERTY_IRIS, (int64_t)iris);
 }
 
 
@@ -1568,6 +1920,21 @@ void retrieve_current_values (GstTcamautoexposure* self)
         }
     }
 
+    if (self->has_iris)
+    {
+        prop =  dev->get_property(TCAM_PROPERTY_IRIS);
+
+        if (prop == nullptr)
+        {
+            GST_ERROR("Tcam did not return iris");
+        }
+        else
+        {
+            p = prop->get_struct();
+            GST_DEBUG("Current iris is %ld", p.value.i.value);
+            self->iris.value = p.value.i.value;
+        }
+    }
 }
 
 

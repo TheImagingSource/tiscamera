@@ -53,6 +53,13 @@ typedef struct
 
 } Exposure;
 
+typedef struct
+{
+    gint min;
+    gint max;
+    gint value;
+    gint def;
+} Iris;
 
 typedef struct
 {
@@ -78,6 +85,7 @@ typedef struct GstTcamautoexposure
 
     gboolean auto_exposure;
     gboolean auto_gain;
+    gboolean auto_iris;
 
     gboolean gain_is_double;
     Gain gain;
@@ -88,6 +96,11 @@ typedef struct GstTcamautoexposure
     double gain_max;
     Exposure exposure;
     Exposure default_exposure_values;
+
+    int iris_min;
+    int iris_max;
+    Iris iris;
+    bool has_iris;
 
     guint brightness_reference;
 
