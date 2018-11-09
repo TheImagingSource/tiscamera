@@ -48,6 +48,10 @@ PI: Exposure Auto
  _Default_: True  
 PI: Gain Auto
 
+- __auto-iris__ - Bool stating if the iris value will be changed or not.  
+ _Default_: True  
+ PI: Iris Auto - __Iris Properties will only be available when the camera has an addressable iris.__
+
 - __brightness-reference__ - Image brightness that shall be considered ideal.   
 The auto algorithm will try to get within a certain range of this value and adjust exposure/gain to remain within the range. The range is +/- 5 of the brightness reference value.  
  _Default_ : 128  
@@ -75,6 +79,14 @@ If the user defined value is not a possible value it will be rejected.
 PI: Gain Auto Min
 
 - __gain-max__ - Maximum Gain Value the element is allowed to set.
+
+- __iris-min__ - Minimum iris value the element is allowed to set.  
+ _Default_: Minimum value of the camera. Some cameras suggest a minimum value for auto algorithms that is higher than the actual minimal value. This value will be used when available.  
+ PI: Iris Auto Min
+
+- __iris-max__ - Maximum iris value the element is to set.  
+ _Default_: Maximum of the camera.
+ PI: Iris Auto Max  
 
 The following properties are related to the region of interest.
 The region of interest is a section of the entire image that shall be used by the element for its
