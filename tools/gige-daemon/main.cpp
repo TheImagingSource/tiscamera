@@ -106,16 +106,14 @@ void print_camera_list_long ()
 
 void print_help (const char* prog_name)
 {
-    std::cout << sizeof(struct tcam_gige_device_list) << std::endl;
-
     std::cout << prog_name <<" - GigE Indexing daemon\n"
               << "\n"
               << "Usage:\n"
-              << "\t" << prog_name << " list      - list camera names\n"
-              << "\t" << prog_name << " list-long - list camera names, ip, mac\n"
-              << "\t" << prog_name << " start     - start daemon and fork\n"
-              << "\t\t" << " --no-fork            - run daemon without forking\n"
-              << "\t" << prog_name << " stop      - stop daemon\n"
+              << "\t" << prog_name << " list \t - list camera names\n"
+              << "\t" << prog_name << " list-long \t - list camera names, ip, mac\n"
+              << "\t" << prog_name << " start \t - start daemon and fork\n"
+              << "\t\t --no-fork \t - run daemon without forking\n"
+              << "\t" << prog_name << " stop \t - stop daemon\n"
               <<std::endl;
 }
 
