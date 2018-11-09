@@ -36,4 +36,4 @@ GigE cameras deliver an additional timestamp that describes the time when the ca
 This timestamp will always be in nanoseconds.
 
 The frame of reference is the boot time of the camera.  
-Restarting the stream will reset the camera capture time.
+Manually resetting the frame of reference is possible by calling the property 'TimestampReset'.
