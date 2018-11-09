@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-capture now has configurable global keybindings allowing for
   fullscreen, image saving, triggering and opening the device dialog
 - Generation of user documentation. Enabled with -DBUILD_USER_DOC=ON
+- Auto Iris functionality to gsttcamautoexposure element
 - bash auto completion for tcam-ctrl
 - bash auto completion for tcam-capture
 - bash auto completion for gige-daemon
@@ -33,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The caps output of 'tcam-ctrl -c' does not contain type descriptions.
   This means the descriptions can now be copy pasted for gst-launch
 - internal aravis version to 0.6.0
+- Switch to different auto-exposure algorithm
 
 ### Removed
 
@@ -44,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - compilation error due to missing header on some systems due to POSIX compatability issues.
 - tcamsrc sometimes generated double resolution entries for ranges.
 - tcam-capture --serial was not respected
+- Segmentation faults when program exits
 
 ## [0.10.0] - 2018-07-31
 
