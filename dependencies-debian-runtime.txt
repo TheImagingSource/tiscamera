@@ -1,6 +1,6 @@
 # general dependencies
 
-libgstreamer1.0-0 (>= 1.8.3-1),
+libgstreamer1.0-0 (>= 1.8.3),
 gstreamer1.0-tools (>= 1.8.0),
 gstreamer1.0-x (>= 1.8.3),
 gstreamer1.0-plugins-base (>= 1.8.0),
@@ -10,12 +10,12 @@ gstreamer1.0-plugins-ugly (>= 1.8.3),
 libxml2 (>= 2.9.3),
 libzip4 (>= 1.0.1),
 libglib2.0-0 (>= 2.48.2),
-libgirepository1.0-1 (>= 1.46.0),
+libgirepository-1.0-1 (>= 1.46.0),
 
 # usb specific dependencies
 uvcdynctrl (>= 0.2.4),
 libudev1 (>= 229),
-libusb-1.0 (>= 2:1.0.20.1),
+libusb-1.0-0 (>= 2:1.0.20),
 
 # aravis specific dependencies
 libxml2 (>= 2.9.3),
