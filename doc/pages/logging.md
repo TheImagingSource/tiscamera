@@ -10,13 +10,13 @@ Currently logging is only possible to the console.
 Output redirects to files and user specified callbacks are planned but not implemented.
 
 To enable logging set the environment variable TCAM_LOG.
-The following values are possible:
-OFF
-TRACE
-DEBUG
-INFO
-WARNING
-ERROR
+The following values are possible:  
+ OFF   - No logging  
+ TRACE - Give as much information as possible.  
+ DEBUG - Information that are potentially useful to understand/debug a problem.  
+ INFO - Information that may be useful to the user under certain circumstances. E.g. Disabling a software feature because the used camera already offers a similar feature.  
+ WARNING - Events that might cause problems that are noticeable to the user but do not affect the general streaming capabilities of the camera.   
+ ERROR - Events that may cause a stream end and other critical failures. The tcamsrc will see these as reasons the end streaming.  
 
 Per default all logging is set to OFF.
 To disable logging unset the environment variable or set it to OFF.
