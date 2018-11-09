@@ -64,6 +64,7 @@ bool LockFile::create_lock_file ()
     }
     if (lockf(file_handle_, F_TLOCK, 0) < 0)
     {
+        std::cerr << "Unable to lock PID file" << std::endl;
         exit(0); /* can not lock */
     }
     /* only first instance continues */
