@@ -1,7 +1,7 @@
 
 # Timestamps {#timestamps}
 
-This page describes the various timestamps that a GstBuffer you receive can be associated with.
+This page describes the various timestamps that a GstBuffer can be associated with.
 
 ## PTS
 
@@ -24,7 +24,7 @@ Please be aware that suspend/hibernate will cause the clock to not run.
 
 #### Aravis userspace library
 
-The Aravis backend delivers the system wall-clock time of then the first bytes of the image where received.  
+The Aravis backend delivers the system wall-clock time of when the first bytes of the image where received.  
 The point of reference if January 1, 1970 UTC.
 
 ## Camera Capture Time
