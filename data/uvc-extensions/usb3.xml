@@ -221,7 +221,7 @@
       <value>0x0199e239</value>
     </constant>
     <constant type="integer">
-      <id>V4L2_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+      <id>V4L2_TRIGGER_NOISE_SUPPRESSION_TIME_US</id>
       <value>0x0199e240</value>
     </constant>
     <constant type="integer">
@@ -527,7 +527,7 @@
       <value>0x46</value>
     </constant>
     <constant type="integer">
-      <id>XU_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+      <id>XU_TRIGGER_NOISE_SUPPRESSION_TIME_US</id>
       <value>0x47</value>
     </constant>
     <constant type="integer">
@@ -1172,9 +1172,9 @@
             <request>GET_RES</request>
           </requests>
         </control>
-        <control id="trigger_noise_supression_time_us">
+        <control id="trigger_noise_suppression_time_us">
           <entity>UVC_GUID_TISEUVC_XU</entity>
-          <selector>XU_TRIGGER_NOISE_SUPRRESSION_TIME_US</selector>
+          <selector>XU_TRIGGER_NOISE_SUPPRESSION_TIME_US</selector>
           <index>70</index>
           <size>4</size>
           <requests>
@@ -1937,15 +1937,15 @@
       </v4l2>
     </mapping>
     <mapping>
-      <name>Trigger Noise Supression Time</name>
+      <name>Trigger Noise Suppression Time</name>
       <uvc>
-        <control_ref idref="trigger_noise_supression_time_us"/>
+        <control_ref idref="trigger_noise_suppression_time_us"/>
         <size>32</size>
         <offset>0</offset>
         <uvc_type>UVC_CTRL_DATA_TYPE_UNSIGNED</uvc_type>
       </uvc>
       <v4l2>
-        <id>V4L2_TRIGGER_NOISE_SUPRRESSION_TIME_US</id>
+        <id>V4L2_TRIGGER_NOISE_SUPPRESSION_TIME_US</id>
         <v4l2_type>V4L2_CTRL_TYPE_INTEGER</v4l2_type>
       </v4l2>
     </mapping>
