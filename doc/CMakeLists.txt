@@ -58,6 +58,7 @@ if (BUILD_USER_DOC)
     ${doc_dir}/udev-rules.md \
     ${doc_dir}/optimizations.md \
     ${doc_dir}/timestamps.md \
+    ${doc_dir}/packaging.md \
     ${doc_dir}/licensing.md \
     ${doc_dir}/further-reading.md \
     ${doc_dir}/contact.md \
