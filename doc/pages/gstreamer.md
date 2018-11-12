@@ -36,6 +36,8 @@ camera_time_ns | uint64 | Timestamp when the device itself captured the image. O
 framerate | double | framerate the backend has.
 is_damaged | bool | Flag noting if the buffer is damaged in any way. Only useful when drop-incomplete-buffer=false.
 
+For timestamp point of reference values look [here](@ref timestamps)
+
 ### tcamautoexposure
 
 Automatically adjust exposure and gain to reach the wished image brightness.
