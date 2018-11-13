@@ -113,7 +113,7 @@ if (BUILD_DOC)
     COMMENT "Generate User Documentation"
     VERBATIM)
 
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION "${TCAM_INSTALL_DOCUMENTATION}")
 
   # This adds the doxygen output directories to the 'make clean' command
   set_property(DIRECTORY APPEND PROPERTY
