@@ -1,3 +1,0 @@
-[submodule "dependencies/aravis"]
-	path = dependencies/aravis
-	url = https://github.com/AravisProject/aravis.git
