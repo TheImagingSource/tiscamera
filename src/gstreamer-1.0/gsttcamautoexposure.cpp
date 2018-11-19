@@ -2049,7 +2049,7 @@ gboolean find_image_values (GstTcamautoexposure* self)
     {
         self->color_format = BAYER;
 
-        guint fourcc;
+        guint fourcc = 0;
 
         if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {
