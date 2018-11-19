@@ -344,6 +344,15 @@ void setCamera (const std::vector<std::string>& args)
         gateway = camera->getPersistentGateway();
     }
 
+    std::string err_reason;
+    if (!verifySettings(ip, subnet, gateway, err_reason))
+    {
+        std::cout << "Security checks failed. Changes were not written." << std::endl
+                  << err_reason << std::endl;
+        return;
+    }
+
+
     if (write_changes)
     {
         try
@@ -449,6 +458,14 @@ void forceIP (const std::vector<std::string>& args)
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specifiy a gateway address." << std::endl;
+        return;
+    }
+
+    std::string err_reason;
+    if (!verifySettings(ip, subnet, gateway, err_reason))
+    {
+        std::cout << "Security checks failed. Changes were not written." << std::endl
+                  << err_reason << std::endl;
         return;
     }
 
@@ -657,13 +674,22 @@ void rescue (std::vector<std::string> args)
         return;
     }
 
-
     std::string gateway = getArgumentValue (args,"gateway", "");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specify a gateway address." << std::endl;
         return;
     }
+
+    std::string err_reason;
+    if (!verifySettings(ip, subnet, gateway, err_reason))
+    {
+        std::cout << "Security checks failed. Changes were not written." << std::endl
+                  << err_reason << std::endl;
+        return;
+    }
+
+    return;
 
     try
     {

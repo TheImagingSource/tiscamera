@@ -23,6 +23,11 @@
 #include <functional>
 
 #include "gigevision.h"
+
+namespace tis {
+class NetworkInterface;
+}
+
 #include "utils.h"
 
 

@@ -16,6 +16,8 @@
 
 #include "utils.h"
 
+#include "CameraDiscovery.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <linux/if.h>
@@ -90,6 +92,80 @@ bool isValidIpAddress (const std::string& ipAddress)
     int result = inet_aton(ipAddress.c_str(), &(sa.sin_addr));
 
     return result != 0;
+}
+
+
+std::shared_ptr<NetworkInterface> findNetworkInterfaceForAddress (const std::string& ipAddress)
+{
+    uint32_t remote_addr = ip2int(ipAddress);
+
+    auto interfaces = detectNetworkInterfaces();
+
+    for (const auto& interface : interfaces)
+    {
+        auto mask = interface->getInterfaceNetmask();
+        auto addr = interface->getInterfaceIP();
+
+        if ((mask & remote_addr) == (mask & addr))
+        {
+            return interface;
+        }
+    }
+
+    return nullptr;
+}
+
+
+bool verifySettings (const std::string& ip,
+                     const std::string& subnet,
+                     const std::string& gateway __attribute__((unused)),
+                     std::string& reason_out)
+{
+    // security checks to ensure settings are valid
+    uint32_t ip_int = ip2int(ip);
+    uint32_t subnet_int = ip2int(subnet);
+
+
+    auto interface = findNetworkInterfaceForAddress(ip);
+
+    if (!interface)
+    {
+        reason_out = "No compatible interface for address.";
+        return false;
+    }
+
+    // Check whether the subnet mask matches the subnet mask of the adapter
+
+    auto mask = interface->getInterfaceNetmask();
+
+    // if (ntohl(mask) != ip2int(subnet))
+    if (mask != ip2int(subnet))
+    {
+        reason_out = "Netmasks do not align.";
+        return false;
+    }
+
+    // Check whether the subnet mask is formed like 111...000
+    if (__builtin_popcount(~ntohl(subnet_int) + 1) != 1)
+    {
+        return false;
+    }
+
+    // Check whether the IP address happens to be valid in the subnet.
+    // All-zero host addresses are not allowed
+    uint32_t host_part = ip_int & ~subnet_int;
+    if (host_part == 0)
+    {
+        return false;
+    }
+
+    // All-one host addresses (broadcast addresses) are not allowed
+    if (host_part == ~subnet_int)
+    {
+        reason_out = "Broadcast addresses are not allowed.";
+        return false;
+    }
+    return true;
 }
 
 

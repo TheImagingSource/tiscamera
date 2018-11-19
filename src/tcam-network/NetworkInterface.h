@@ -25,6 +25,8 @@
 namespace tis
 {
 
+class Socket;
+
 class NetworkInterface
 {
 private:

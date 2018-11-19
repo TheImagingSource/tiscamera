@@ -17,8 +17,11 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#include "NetworkInterface.h"
+
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <ifaddrs.h>
 #include <linux/if.h>
@@ -75,6 +78,21 @@ sockaddr_in fillAddr (const std::string &address, const unsigned short port);
 /// @param ipAddress - string containing IP that shall be checked
 /// @return true if valid IP
 bool isValidIpAddress (const std::string& ipAddress);
+
+/// @brief find interface that can be used to address the given remote ip address
+/// @param ipAddress - ip address for which the interface shall be found
+/// @return shared_ptr to the correct interface. nullptr if no such interface exists.
+std::shared_ptr<NetworkInterface> findNetworkInterfaceForAddress (const std::string& ipAddress);
+
+/// @param ip - string containing IP that shall be checked
+/// @param subnet - string containing subnet mask that shall be checked
+/// @param gateway - string containing gateway that shall be checked
+/// @param reason_out(out) - string containing the reason the settings were rejected. Untouched if true is returned
+/// @return true if IP address is considered legal
+bool verifySettings (const std::string& ip,
+                     const std::string& subnet,
+                     const std::string& gateway,
+                     std::string& reason_out);
 
 /// @name isValidIpMAC
 /// @param mac - string containing mac that shall be checked

@@ -26,6 +26,8 @@
 
 namespace tis
 {
+    class NetworkInterface;
+    class Socket;
     class Camera;
     typedef std::vector<std::shared_ptr<Camera>> camera_list;
 
