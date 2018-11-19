@@ -117,6 +117,8 @@ typedef struct GstTcamautoexposure
 
     gint frame_counter;
 
+    gboolean module_is_disabled;
+
 } GstTcamautoexposure;
 
 typedef struct GstTcamautoexposureClass

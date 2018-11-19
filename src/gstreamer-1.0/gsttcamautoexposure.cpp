@@ -1318,6 +1318,7 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->frame_counter = 0;
     self->has_iris = FALSE;
     self->camera_src = NULL;
+    self->module_is_disabled = FALSE;
 }
 
 void gst_tcamautoexposure_set_property (GObject* object,
@@ -1575,6 +1576,14 @@ static void init_camera_resources (GstTcamautoexposure* self)
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
     struct tcam_device_property p = {};
+
+    if (dev->get_property(TCAM_PROPERTY_GAIN_AUTO) != nullptr ||
+        dev->get_property(TCAM_PROPERTY_EXPOSURE_AUTO) != nullptr)
+    {
+        GST_INFO("Device has auto properties. Disabling module.");
+        self->module_is_disabled = TRUE;
+        return;
+    }
 
     tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
 
@@ -2100,6 +2109,11 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 {
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE (trans);
 
+    // module is disabled when device has any auto property
+    if (self->module_is_disabled)
+    {
+        return GST_FLOW_OK;
+    }
 
     if (self->image_size.width == 0 || self->image_size.height == 0)
     {
