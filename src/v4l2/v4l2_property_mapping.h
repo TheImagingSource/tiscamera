@@ -87,6 +87,14 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         { 0x0199e205 },
     },
     {
+        TCAM_PROPERTY_GAIN_AUTO_LOWER_LIMIT,
+        { 0x199e259 },
+    },
+    {
+        TCAM_PROPERTY_GAIN_AUTO_UPPER_LIMIT,
+        { 0x199e260 },
+    },
+    {
         TCAM_PROPERTY_TRIGGER_MODE,
         { V4L2_CID_PRIVACY, 0x0199e208, 0x980924},
     },
