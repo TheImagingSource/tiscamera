@@ -33,13 +33,10 @@
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautoexposure_debug_category
 
-/* Constants */
-static const gdouble K_CONTROL  = 0.5 / 255;
-static const gdouble K_DEADBAND = 5.0;
-static const gdouble K_GAIN     = 3.0;
-static const gdouble K_ADJUST   = 4;
-static const gdouble K_SMALL    = 1e-9;
-
+// The algorithm works with integers
+// floating point gain values will be multiplied
+// to allow handling of this
+static const gdouble GAIN_FLOAT_MULTIPLIER = 1000;
 
 /* prototypes */
 
@@ -1619,10 +1616,18 @@ static void init_camera_resources (GstTcamautoexposure* self)
         }
         else
         {
-            self->gain.min = p.value.d.min;
-            self->gain.max = p.value.d.max;
-            self->gain.value = p.value.d.value;
-            self->gain.step = p.value.d.step;
+            if (p.value.d.min == 0.0)
+            {
+                self->gain.min = GAIN_FLOAT_MULTIPLIER;
+            }
+            else
+            {
+                self->gain.min = p.value.d.min * GAIN_FLOAT_MULTIPLIER;
+            }
+            // self->gain.min = p.value.d.min * GAIN_FLOAT_MULTIPLIER;
+            self->gain.max = p.value.d.max * GAIN_FLOAT_MULTIPLIER;
+            self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
+            self->gain.step = p.value.d.step * GAIN_FLOAT_MULTIPLIER;
         }
         if (self->gain_max == 0
             || self->gain_max == G_MAXDOUBLE
@@ -1731,7 +1736,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     }
     else
     {
-        dev->set_property(TCAM_PROPERTY_GAIN, gain);
+        dev->set_property(TCAM_PROPERTY_GAIN, (float)gain / GAIN_FLOAT_MULTIPLIER);
     }
 }
 
@@ -1801,7 +1806,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
         else
         {
             GST_DEBUG("Current gain is %f", p.value.d.value);
-            self->gain.value = p.value.d.value;
+            self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
         }
     }
 
@@ -1819,6 +1824,10 @@ void retrieve_current_values (GstTcamautoexposure* self)
             GST_DEBUG("Current iris is %ld", p.value.i.value);
             self->iris.value = p.value.i.value;
         }
+    }
+    else
+    {
+        self->auto_iris = false;
     }
 }
 
@@ -1959,6 +1968,10 @@ static void new_exposure (GstTcamautoexposure* self, unsigned int brightness)
         iris.min = self->iris_min;
         iris.max = self->iris_max;
         iris.is_pwm_iris = false;
+    }
+    else
+    {
+        iris.do_auto = false;
     }
 
     auto res = algorithms::calc_auto_gain_exposure_iris(brightness,
