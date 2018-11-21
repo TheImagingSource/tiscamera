@@ -94,7 +94,7 @@ public:
     int step_size;
 
 	virtual std::string to_string() override;
-	virtual bool get( TcamCamera &cam, int &value ) override;
+	virtual bool get(TcamCamera &cam, int &value ) override;
 	virtual bool set(TcamCamera &cam, int value) override;
 };
 
@@ -169,6 +169,7 @@ class TcamCamera
 			gst_object_unref( pipeline_ );
 			pipeline_ = other.pipeline_;
 			other.pipeline_ = nullptr;
+            return *this;
 		}
 
 
@@ -221,6 +222,9 @@ class TcamCamera
         * Disconnect the video display sink element from the capture pipeline
         */
         void disable_video_display();
+
+        bool store_device_state(std::string filename);
+        bool restore_device_state(std::string filename);
 
     private:
         GstElement *pipeline_ = nullptr;

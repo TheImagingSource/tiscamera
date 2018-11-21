@@ -26,6 +26,7 @@ add_custom_command (
     )
 
 add_executable(tcam_view
+                tcam_app.cpp
                 tcam_view.cpp
                 property_box.cpp
                 logscale.cpp

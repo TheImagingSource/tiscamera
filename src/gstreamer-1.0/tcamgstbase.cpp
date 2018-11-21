@@ -687,6 +687,23 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     return largest_caps;
 }
 
+bool contains_jpeg (const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        if (strcmp("image/jpeg", gst_structure_get_name(gst_caps_get_structure(caps, i))) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 bool contains_bayer (const GstCaps* caps)
 {
@@ -704,6 +721,15 @@ bool contains_bayer (const GstCaps* caps)
     }
 
     return false;
+}
+
+bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring)
+{
+    GstCaps *tmpcaps = gst_caps_from_string(capsstring);
+    gboolean ret = gst_caps_can_intersect(caps, tmpcaps);
+    gst_caps_unref(tmpcaps);
+
+    return ret;
 }
 
 
@@ -769,7 +795,7 @@ GstCaps* get_caps_from_element (GstElement* element, const char* padname)
 }
 
 
-GstCaps* get_caps_from_element (const char* elementname, const char* padname)
+GstCaps* get_caps_from_element_name (const char* elementname, const char* padname)
 {
 
     GstElement* ele = gst_element_factory_make(elementname, "tmp-element");
@@ -1019,7 +1045,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             requires_vidoeconvert = true;
             // wanted_caps can be fixed, etc.
 
-            GstCaps* in = get_caps_from_element("videoconvert", "sink");
+            GstCaps* in = get_caps_from_element_name("videoconvert", "sink");
 
             // this removes things like jpeg
             GstCaps* ret = gst_caps_intersect(available_caps, in);

@@ -95,13 +95,19 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming);
 
 bool contains_bayer (const GstCaps* caps);
 
+bool contains_jpeg (const GstCaps* caps);
+
+
 /**
  * @param elementname - name of the GstElement that shall be queried
  * @param padname - name of the static pad that shall be queried
  * @return GstCaps from static pad with name padname, can return nullptr
  */
-GstCaps* get_caps_from_element (const char* elementname, const char* padname);
+GstCaps* get_caps_from_element_name (const char* elementname, const char* padname);
+GstCaps* get_caps_from_element (GstElement* element, const char* padname);
 
+
+bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring);
 
 /**
  * @param available_caps - caps the source offers

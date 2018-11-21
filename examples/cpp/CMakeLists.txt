@@ -13,7 +13,7 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.1)
-project(tcamgstcamera VERSION 0.0.1)
+project(tcamgstcamera VERSION 0.1.0)
 
 # set(CMAKE_AUTOMOC ON)
 # set(CMAKE_INCLUDE_CURRENT_DIR ON)

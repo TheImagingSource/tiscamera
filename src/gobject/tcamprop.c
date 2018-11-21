@@ -158,7 +158,7 @@ GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_property_names)
+    if (iface->get_menu_entries)
     {
 	    ret = iface->get_menu_entries (self, name);
     }

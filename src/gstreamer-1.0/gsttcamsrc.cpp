@@ -690,9 +690,6 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
     }
 
-    GstStructure* structure = gst_structure_from_string ("ANY", NULL);
-    gst_caps_append_structure (caps, structure);
-
     GST_INFO("Device provides the following caps: %s", gst_caps_to_string(caps));
 
     return caps;
@@ -1172,6 +1169,7 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     Logger::getInstance().set_external_callback(send_log_to_bus, self);
 
     self->all_caps = gst_tcam_src_get_all_camera_caps(self);
+    //gst_base_src_set_caps (GST_BASE_SRC(self), self->all_caps);
 
     return true;
 }

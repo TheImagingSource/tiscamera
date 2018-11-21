@@ -39,7 +39,9 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_EXPOSURE,
-        { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE, TCAM_V4L2_EXPOSURE_TIME_US },
+        { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE,
+        // TCAM_V4L2_EXPOSURE_TIME_US
+        },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO,

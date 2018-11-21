@@ -31,6 +31,7 @@ typedef enum
     GB,     /* GBRG */
     GR,     /* GRBG */
     RG,     /* RGGB */
+    UNDEFINED_PATTERN
 } tBY8Pattern;
 
 
