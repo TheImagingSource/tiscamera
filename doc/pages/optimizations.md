@@ -26,6 +26,8 @@ Edit `/etc/security/limits.conf` and add the following lines at the end of the f
 
 Whereas \<username\> should be replaced with the user under which the application will be run.
 
+A restart may be required to apply these changes.
+
 The hard limit is the absolut limit to which to soft limit can be set.  
 The soft limit is the highest priority a thread can be set to.  
 All capture threads operate with a priority of 10.
