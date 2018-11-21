@@ -28,7 +28,8 @@
 #include <cstring>
 
 //
-// Do not error on format warnings. They should happen only in debug statements anyway
+// Do not error on format warnings.
+// They should happen only in debug statements anyway
 //
 #pragma GCC diagnostic ignored "-Wformat"
 
@@ -39,7 +40,8 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 #define GST_CAT_DEFAULT gst_tcambin_debug
 
 
-static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *serial);
+static gboolean gst_tcambin_create_elements (GstTcamBin* self,
+                                             const gchar *serial);
 static gboolean gst_tcambin_link_elements(GstTcamBin *self);
 static GstCaps* generate_all_caps (GstTcamBin* self);
 
@@ -148,7 +150,9 @@ static gchar* gst_tcambin_get_property_type(TcamProp* iface,
         {
             ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(element), name));
             if (ret != nullptr)
+            {
                 break;
+            }
         }
         g_value_unset(&item);
     }
@@ -454,7 +458,8 @@ static gboolean create_and_add_element (GstElement** element,
 }
 
 
-static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *serial)
+static gboolean gst_tcambin_create_elements (GstTcamBin* self,
+                                             const gchar *serial)
 {
     auto send_missing_element_msg = [self] (const std::string& element_name)
         {
@@ -485,7 +490,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
         g_object_set(self->src, "serial", serial, nullptr);
     }
 
-    self->pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
+    self->pipeline_caps = gst_element_factory_make("capsfilter",
+                                                   "tcambin-src_caps");
 
     if (self->pipeline_caps == nullptr)
     {
@@ -521,7 +527,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
             if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
             {
                 if (!create_and_add_element(&self->exposure,
-                                            "tcamautoexposure", "tcambin-exposure",
+                                            "tcamautoexposure",
+                                            "tcambin-exposure",
                                             GST_BIN(self)))
                 {
                     send_missing_element_msg("tcamautoexposure");
@@ -533,7 +540,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
                 && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
             {
                 if (!create_and_add_element(&self->focus,
-                                            "tcamautofocus", "tcambin-focus",
+                                            "tcamautofocus",
+                                            "tcambin-focus",
                                             GST_BIN(self)))
                 {
                     send_missing_element_msg("tcamautofocus");
@@ -551,7 +559,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
             if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
             {
                 if (!create_and_add_element(&self->whitebalance,
-                                            "tcamwhitebalance", "tcambin-whitebalance",
+                                            "tcamwhitebalance",
+                                            "tcambin-whitebalance",
                                             GST_BIN(self)))
                 {
                     send_missing_element_msg("tcamwhitebalance");
@@ -559,7 +568,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
                 }
             }
             if (!create_and_add_element(&self->debayer,
-                                        "bayer2rgb", "tcambin-debayer",
+                                        "bayer2rgb",
+                                        "tcambin-debayer",
                                         GST_BIN(self)))
             {
                 send_missing_element_msg("bayer2rgb");
@@ -570,7 +580,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
         if (contains_jpeg(srccaps))
         {
             if (!create_and_add_element(&self->jpegdec,
-                                        "jpegdec", "tcambin-jpegdec",
+                                        "jpegdec",
+                                        "tcambin-jpegdec",
                                         GST_BIN(self)))
             {
                 send_missing_element_msg("jpegdec");
@@ -583,7 +594,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
     }
 
     GstCaps *caps = generate_all_caps(self);
-    self->out_caps = gst_element_factory_make("capsfilter", "tcambin-out_caps");
+    self->out_caps = gst_element_factory_make("capsfilter",
+                                              "tcambin-out_caps");
     g_object_set(self->out_caps, "caps", caps, NULL);
     gst_caps_unref(caps);
     gst_bin_add(GST_BIN(self), self->out_caps);
@@ -594,6 +606,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self, const gchar *seri
     gst_tcambin_link_elements(self);
     return TRUE;
 }
+
 
 static void gst_tcambin_unlink_all(GstTcamBin *self)
 {
@@ -619,10 +632,11 @@ static void gst_tcambin_unlink_all(GstTcamBin *self)
     gst_iterator_free(it);
 }
 
+
 /*
     Link our elements.
 
-    Szenarios:
+    Scenarios:
 
     1.) With DUTILS:
       - target caps and dutils intersect:
@@ -693,10 +707,10 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
     }
     gboolean is_linked = false;
 
-    if(self->dutils)
+    if (self->dutils)
     {
         GstCaps *dutils_caps = get_caps_from_element(self->dutils, "src");
-        if(gst_caps_can_intersect(target_caps, dutils_caps))
+        if (gst_caps_can_intersect(target_caps, dutils_caps))
         {
             g_return_val_if_fail(gst_element_link(self->pipeline_caps, self->dutils), false);
             GstPad *pad = gst_element_get_static_pad(self->dutils, "src");
@@ -704,7 +718,9 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
             gst_object_unref(pad);
 
             is_linked = true;
-        } else {
+        }
+        else
+        {
             GstCaps *biteater_caps = get_caps_from_element(self->biteater, "src");
             if (gst_caps_can_intersect(target_caps, biteater_caps))
             {
@@ -719,7 +735,9 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
             gst_caps_unref(biteater_caps);
         }
         gst_caps_unref(dutils_caps);
-    } else {
+    }
+    else
+    {
         GstElement *prev = self->pipeline_caps;
         if (tcam_gst_can_intersect_simple(target_caps, "video/x-bayer") ||
             tcam_gst_can_intersect_simple(target_caps, "video/x-raw,format=GRAY8"))
@@ -750,7 +768,9 @@ static gboolean gst_tcambin_link_elements(GstTcamBin *self)
             g_return_val_if_fail(gst_element_link(prev, self->out_caps), false);
 
             is_linked = true;
-        } else {
+        }
+        else
+        {
             if (self->debayer)
             {
                 prev = self->pipeline_caps;
@@ -867,6 +887,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     return all_caps;
 }
 
+
 static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
                                                       GstStateChange trans)
 {
@@ -880,11 +901,14 @@ static GstStateChangeReturn gst_tcambin_change_state (GstElement* element,
         {
             // From the docs:
             // state change from NULL to READY.
-            // The element must check if the resources it needs are available. Device sinks and -sources typically try to probe the device to constrain their caps.
+            // The element must check if the resources it needs are available.
+            // Device sinks and -sources typically try
+            // to probe the device to constrain their caps.
             // The element opens the device (in case feature need to be probed).
             GST_INFO("NULL_TO_READY");
 
-            // The pad does not get a CAPS event in null state so we need to link here for the case the element is already connected
+            // The pad does not get a CAPS event in null state so we need to
+            // link here for the case the element is already connected
             gst_tcambin_link_elements(self);
             break;
         }
@@ -986,7 +1010,8 @@ static void gst_tcambin_set_property (GObject* object,
 }
 
 static GstPadProbeReturn gst_tcambin_pad_probe(GstPad *pad,
-                                               GstPadProbeInfo *info, gpointer user_data)
+                                               GstPadProbeInfo *info,
+                                               gpointer user_data)
 {
     GstTcamBin* self = GST_TCAMBIN(user_data);
     GstEvent *event = GST_EVENT(info->data);
@@ -1035,7 +1060,11 @@ static void gst_tcambin_init (GstTcamBin* self)
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
 
-    gst_pad_add_probe(self->pad, GST_PAD_PROBE_TYPE_EVENT_BOTH, gst_tcambin_pad_probe, self, nullptr);
+    gst_pad_add_probe(self->pad,
+                      GST_PAD_PROBE_TYPE_EVENT_BOTH,
+                      gst_tcambin_pad_probe,
+                      self,
+                      nullptr);
 
     if (!gst_tcambin_create_elements(self, nullptr))
     {
