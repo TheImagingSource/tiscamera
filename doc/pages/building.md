@@ -42,6 +42,18 @@ This requires that git is installed.
 
     _Default:_ ON
 
+- **-DBUILD_USER_DOC=<ON/OFF>**
+
+    Build html user documentation.
+
+    _Default:_ OFF
+
+- **-DBUILD_DOCUMENTATION=<ON/OFF>**
+
+    Build html source code documentation.
+
+    _Default:_ OFF
+
 - **-DCMAKE_INSTALL_PREFIX**
 
     Installation target prefix
