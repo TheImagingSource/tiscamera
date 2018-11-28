@@ -64,6 +64,7 @@ struct _GstTcamBin
     GstCaps* user_caps;
 
     gboolean elements_created;
+    gboolean elements_linked;
     gboolean target_set;
 
     GstCaps* src_caps = nullptr;
