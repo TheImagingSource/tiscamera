@@ -907,7 +907,7 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
  * generally speaking prefer (for both input/output)
  *                           color over mono
  *                           RGBx over YUV
- *                           anythiung over jpeg
+ *                           anything over jpeg
  */
 
 
@@ -980,7 +980,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                     if (!gst_caps_is_fixed(available_caps))
                     {
                         if (!gst_caps_is_empty(wanted_caps) &&
-                            g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") == 0)
+                            g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0)
                         {
                             GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
 
