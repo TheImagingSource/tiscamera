@@ -40,3 +40,23 @@ install(TARGETS tcam-dfk73
   LIBRARY
   DESTINATION "${TCAM_INSTALL_LIB}"
   COMPONENT tcam-libdfk73)
+
+# uvc-extension library
+
+
+find_package(LibUuid REQUIRED QUIET)
+
+include_directories(${LIBUUID_INCLUDE_DIRS})
+
+include_directories("${CMAKE_SOURCE_DIR}/dependencies/json")
+
+add_library(tcam-uvc-extension-loader SHARED
+  uvc-extension-loader.cpp
+  $<TARGET_OBJECTS:tcam-base>) # required for tcam_xioctl
+
+target_link_libraries(tcam-uvc-extension-loader ${LIBUUID_LIBRARIES})
+
+install(TARGETS tcam-uvc-extension-loader
+  LIBRARY
+  DESTINATION "${TCAM_INSTALL_LIB}"
+  COMPONENT uvc-extension)
