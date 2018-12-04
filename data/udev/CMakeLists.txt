@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+configure_file(80-theimagingsource-cameras.rules.in 80-theimagingsource-cameras.rules @ONLY)
 
-set(RULE_FILES 80-theimagingsource-cameras.rules)
+set(RULE_FILES ${CMAKE_CURRENT_BINARY_DIR}/80-theimagingsource-cameras.rules)
 
 install(FILES ${RULE_FILES}
   DESTINATION ${TCAM_INSTALL_UDEV}

@@ -24,6 +24,18 @@ ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8209", GROUP="video", MODE="0660"
 # afu420
 ATTRS{idVendor}=="199e", ATTRS{idProduct}=="0804", GROUP="video", MODE="0660"
 
+
+# load uvc extensions for usb3 cameras
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
+               RUN+="@TCAM_INSTALL_BIN@/uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/uvc-extensions/usb3.json"
+
+# load uvc extensions for usb2 cameras
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
+               RUN+="@TCAM_INSTALL_BIN@/uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/uvc-extensions/usb2.json"
+
+
 # templates for those using non standard locations
 
 # load uvc extensions for usb2 cameras
@@ -34,4 +46,4 @@ ATTRS{idVendor}=="199e", ATTRS{idProduct}=="0804", GROUP="video", MODE="0660"
 # load uvc extensions for usb3 cameras
 # ACTION=="add", SUBSYSTEM=="video4linux", \
 #               ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
-#               RUN+="/usr/bin/uvcdynctrl --device=/dev/%k -i /path/to/tiscamera/uvc-extensions/usb3.xml"
+#               RUN+="/usr/bin/uvc-extension-loader --device=/dev/%k -f /path/to/tiscamera/uvc-extensions/usb3.json"
