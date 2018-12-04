@@ -1,0 +1,104 @@
+{
+    "guid": "95d63e92-f256-e111-83f7-37704824019b"
+    "mappings": [
+        {
+            "id": "0x199e920",
+		    "name": "ExtIO",
+		    "selector": "0x5",
+		    "uvc_type": "raw",
+		    "v4l2_type": "boolean",
+		    "size_bits": 8,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e921",
+		    "name": "GainR",
+		    "selector": "0x6",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 8,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e922",
+		    "name": "GainG",
+		    "selector": "0x7",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 8,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e923",
+		    "name": "GainB",
+		    "selector": "0x8",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 8,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e208",
+		    "name": "Trigger",
+		    "selector": "0x1",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e92a",
+		    "name": "Trigger Global Reset Shutter",
+		    "selector": "0x1",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 1
+        },
+        {
+            "id": "0x199e209",
+		    "name": "Software Trigger",
+		    "selector": "0xA",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "button",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e925",
+		    "name": "Binning",
+		    "selector": "0x4",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 8,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e929",
+		    "name": "Skipping",
+		    "selector": "0xB",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e927",
+		    "name": "X Offset",
+		    "selector": "0x2",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 16,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e928",
+		    "name": "Y Offset",
+		    "selector": "0x3",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "integer",
+		    "size_bits": 16,
+		    "offset_bits": 0
+        }
+    ]
+}

@@ -17,8 +17,7 @@
 # assure executable exists
 # find_executable(UVCDYNCTRL uvcdynctrl)
 
-set(EXTENSION_UNITS tisEUVC.xml usb3.xml)
+set(TCAM_EXTENSION_UNITS usb2.json usb3.json)
 
-install(FILES ${EXTENSION_UNITS}
-  DESTINATION ${TCAM_INSTALL_UVCDYNCTRL}
-  COMPONENT tcam-uvc-extension)
+install(FILES ${TCAM_EXTENSION_UNITS}
+  DESTINATION ${TCAM_INSTALL_UVC_EXTENSION})
