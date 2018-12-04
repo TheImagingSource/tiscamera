@@ -11,9 +11,11 @@ either part of tiscamera or are indirectly used.
 
 \subpage tcam-gigetool
 
-\subpage firmware-update - Commandline tool for USB firmware updates.
+\subpage firmware-update - Commandline tool for USB firmware updates
 
 \subpage gige-daemon - Daemon for GigE camera indexing
+
+\subpage tcam-uvc-extension-loader - Commandline tool for mapping uvc extension units
 
 ### Third-Party Tools
 
