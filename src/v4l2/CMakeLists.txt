@@ -50,13 +50,13 @@ include_directories(${LIBUUID_INCLUDE_DIRS})
 
 include_directories("${CMAKE_SOURCE_DIR}/dependencies/json")
 
-add_library(tcam-uvc-extension-loader SHARED
+add_library(tcam-uvc-extension SHARED
   uvc-extension-loader.cpp
   $<TARGET_OBJECTS:tcam-base>) # required for tcam_xioctl
 
-target_link_libraries(tcam-uvc-extension-loader ${LIBUUID_LIBRARIES})
+target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
 
-install(TARGETS tcam-uvc-extension-loader
+install(TARGETS tcam-uvc-extension
   LIBRARY
   DESTINATION "${TCAM_INSTALL_LIB}"
   COMPONENT uvc-extension)

@@ -19,7 +19,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src/v4l2")
 
 add_executable(tcam-uvc-extension-loader main.cpp)
 
-target_link_libraries(tcam-uvc-extension-loader tcam-uvc-extension-loader)
+target_link_libraries(tcam-uvc-extension-loader tcam-uvc-extension)
 
 install(TARGETS tcam-uvc-extension-loader
   DESTINATION "${TCAM_INSTALL_BIN}"
