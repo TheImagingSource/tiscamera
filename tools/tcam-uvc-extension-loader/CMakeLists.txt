@@ -1,5 +1,5 @@
 
-# Copyright 2014 The Imaging Source Europe GmbH
+# Copyright 2018 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,25 +14,13 @@
 # limitations under the License.
 
 
-add_subdirectory(tcam-ctrl)
-add_subdirectory(tcam-capture)
+include_directories("${CMAKE_SOURCE_DIR}/dependencies/CLI11")
+include_directories("${CMAKE_SOURCE_DIR}/src/v4l2")
 
-if (BUILD_V4L2)
+add_executable(tcam-uvc-extension-loader main.cpp)
 
-  add_subdirectory(firmware-update)
+target_link_libraries(tcam-uvc-extension-loader tcam-uvc-extension-loader)
 
-  add_subdirectory(dfk73udev)
-
-  add_subdirectory(tcam-uvc-extension-loader)
-
-endif (BUILD_V4L2)
-
-if (BUILD_ARAVIS)
-
-  add_subdirectory(camera-ip-conf)
-
-  add_subdirectory(gige-daemon)
-
-  add_subdirectory(tcam-gigetool)
-
-endif (BUILD_ARAVIS)
+install(TARGETS tcam-uvc-extension-loader
+  DESTINATION "${TCAM_INSTALL_BIN}"
+  COMPONENT uvc-extension)
