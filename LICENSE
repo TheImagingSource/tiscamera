@@ -202,4 +202,10 @@
    limitations under the License.
 
 
-This product bundles PugiXml 1.6, which is available under a "MIT" license.
+This product bundles the following libraries:
+
+PugiXml 1.6, which is available under a "MIT" license.
+The json library by Niels Lohmann, which is available under the "MIT" license.
+7z, which is published as public domain.
+aravis, which is available under the LGPLv2.
+CLI11 available under the 3-Clause BSD-License
