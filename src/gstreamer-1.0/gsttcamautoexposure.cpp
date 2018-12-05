@@ -1625,6 +1625,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         }
         else
         {
+            self->gain_is_double = TRUE;
             if (p.value.d.min == 0.0)
             {
                 self->gain.min = GAIN_FLOAT_MULTIPLIER;
