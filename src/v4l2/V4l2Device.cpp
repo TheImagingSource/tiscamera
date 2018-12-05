@@ -66,7 +66,9 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'.", device.get_info().identifier);
+        tcam_log(TCAM_LOG_ERROR, "Unable to open device \'%s\'. Reported error: %s(%d)",
+                 device.get_info().identifier, strerror(errno), errno);
+
         throw std::runtime_error("Failed opening device.");
     }
 
