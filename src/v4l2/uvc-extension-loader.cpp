@@ -203,16 +203,17 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
 
         map.data_type = parse_uvc_type(m.at("uvc_type").get<std::string>());
 
-        if (map.data_type == 0)
-        {
-            std::string msg = "data_type for '" + m.at("name").get<std::string>()
-                + "' does not make sense.";
-            cb(msg);
-            continue;
-        }
+        // 0 is UVC_CTRL_DATA_TYPE_RAW
+        // if (map.data_type == 0)
+        // {
+        //     std::string msg = "data_type for '" + m.at("name").get<std::string>()
+        //         + "' does not make sense.";
+        //     cb(msg);
+        //     continue;
+        // }
 
         map.v4l2_type = parse_v4l2_type(m.at("v4l2_type").get<std::string>());
-        if (map.data_type == 0)
+        if (map.v4l2_type == 0)
         {
             std::string msg = "v4l2_type for '" + m.at("name").get<std::string>()
                 + "' does not make sense.";
