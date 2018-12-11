@@ -391,6 +391,9 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
         g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
     }
 
+    self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+    GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
+
     return TRUE;
 }
 
