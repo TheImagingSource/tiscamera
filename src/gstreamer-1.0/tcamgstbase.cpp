@@ -865,7 +865,13 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
     auto height = gst_structure_get_value(st, "height");
     auto framerate = gst_structure_get_value(st, "framerate");
 
-    auto caps_formats =  index_caps_formats(formats);
+    auto caps_formats = index_caps_formats(formats);
+
+    if (caps_formats.empty())
+    {
+        tcam_error("Could not identify formats for caps creation");
+        return nullptr;
+    }
 
     GstCaps* ret = gst_caps_new_empty();
 
