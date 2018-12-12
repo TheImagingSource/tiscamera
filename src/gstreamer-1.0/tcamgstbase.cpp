@@ -29,31 +29,30 @@
 
 GstElement* tcam_gst_find_camera_src (GstElement* element)
 {
+    GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
 
-    GstElement* e = GST_ELEMENT( gst_object_get_parent(GST_OBJECT(element)));
+    GstPad* src_pad = gst_pad_get_peer(orig_pad);
+    g_object_unref(orig_pad);
 
-    GList* l = GST_BIN(e)->children;
-    GstElement* ret = nullptr;
-    while (1==1)
+    if (!src_pad)
     {
-        const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory((GstElement*)l->data)));
-
-        if (g_strcmp0(name, "GstTcamSrc") == 0)
-        {
-            ret = (GstElement*)l->data;
-            break;
-        }
-
-        if (g_list_next(l) == NULL)
-            break;
-
-        l = g_list_next(l);
+        // this means we have reached a dead end where no valid tcamsrc exists
+        return nullptr;
     }
 
-    if (ret == nullptr)
+    GstElement* el = gst_pad_get_parent_element(src_pad);
+
+    gst_object_unref(src_pad);
+    GstElement* ret;
+    const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
+    if (g_strcmp0(name, "GstTcamSrc") == 0)
     {
-        GST_ERROR("Camera source not set!");
+        return el;
     }
+    ret =  tcam_gst_find_camera_src(el);
+
+    gst_object_unref(el);
+
     return ret;
 }
 
