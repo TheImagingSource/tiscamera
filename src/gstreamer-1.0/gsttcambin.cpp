@@ -618,6 +618,10 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
         return FALSE;
     }
 
+// videoconvert can be needed by non-dutils and dutils pipelines
+// thus include it after the label
+finished_element_creation:
+
     // this is needed to allow for conversions such as
     // GRAY8 to BGRx that can exist when device-caps are set
     if (!create_and_add_element(&self->convert,
@@ -627,9 +631,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
         send_missing_element_msg("videoconvert");
         return FALSE;
     }
-
-
-finished_element_creation:
 
     self->elements_created = TRUE;
 
@@ -756,7 +757,7 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
                 send_linking_element_msg("tcambiteater");
                 return FALSE;
         }
-        goto finished_element_linking;
+        // goto finished_element_linking;
 
     }
 
