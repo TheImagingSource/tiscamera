@@ -4,21 +4,6 @@
 
 This tool allows you to update the firmware of your TIS USB camera.
 
-# Build
-
-You will need gcc >= 4.7 to successfully compile this tool.
-
-Simply call:
-
-make
-
-## Dependencies
-
-In order to build this tool you need:
-
-libusb-1.0  and its header files
-libzip      and its header files
-
 # Usage
 
 ### examples
@@ -40,14 +25,13 @@ Switching to uvc mode is only necessary for USB2 cameras.
 
 # Firmware Files
 
+# Usb2 
+
+Firmware file for usb-2.0 cameras are located in data/firmware/usb2
+
+# Usb3
+
 If you need firmware files for USB3 cameras,
 please send us a request.
 
 http://www.theimagingsource.com/en_US/company/contact/
-
-# Problems & Questions
-
-For both visit us at:
-
-https://github.com/TheImagingSource/tiscamera
-
