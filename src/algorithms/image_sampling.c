@@ -16,13 +16,12 @@
 
 #include <string.h> // for memset
 
+
 #include "image_sampling.h"
 
 /* retrieve sampling points for image analysis */
-void get_sampling_points (unsigned char* data, auto_sample_points* points, tBY8Pattern pattern, gst_tcam_image_size size)
+void get_sampling_points (unsigned char* data, auto_sample_points* points, tBY8Pattern pattern, int width, int height)
 {
-    unsigned int width = size.width;
-    unsigned int height = size.height;
 
     static const unsigned int bypp = 1;
 

@@ -105,7 +105,7 @@ struct _GstTcamWhitebalance {
     GstPad        *srcpad;
     GstPad        *sinkpad1;
 
-    gst_tcam_image_size image_size;
+    GstVideoInfo vinfo;
     gdouble        framerate;
     tBY8Pattern    pattern;
     guint expected_buffer_size;

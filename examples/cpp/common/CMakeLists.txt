@@ -14,7 +14,7 @@
 
 find_package(PkgConfig REQUIRED)
 
-add_library(tcamgstcamera tcamcamera.cpp tcamserializer.cpp)
+add_library(tcamgstcamera tcamcamera.cpp)
 
 set_property(TARGET tcamgstcamera PROPERTY POSITION_INDEPENDENT_CODE on)
 

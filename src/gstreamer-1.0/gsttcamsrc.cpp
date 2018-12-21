@@ -1347,6 +1347,8 @@ static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
                                       void* data)
 {
     GstTcamSrc* self = GST_TCAM_SRC(data);
+    GST_INFO("sh callback");
+
 
     if (!self->is_running)
     {

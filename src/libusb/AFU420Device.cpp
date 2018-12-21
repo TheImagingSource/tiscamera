@@ -747,6 +747,7 @@ void AFU420Device::push_buffer ()
         //           active_video_format.get_required_buffer_size());
         statistics.frame_count++;
         current_buffer_->set_statistics(statistics);
+        tcam_debug("push image");
         ptr->push_image(current_buffer_);
         current_buffer_ = nullptr;
         transfered_size_ = 0;
@@ -926,6 +927,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
     bool is_complete_image = offset_ >= usbbulk_image_size_;
     if (is_complete_image || is_trailer)
     {
+        tcam_debug("image complete");
         push_buffer();
         have_header = false;
     }

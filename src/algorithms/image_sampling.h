@@ -74,10 +74,7 @@ typedef struct
  * @param bayer pattern of image
  * @brief analyzes given buffer and fills sample points
 */
-void get_sampling_points (unsigned char* buf,
-                          auto_sample_points* points,
-                          tBY8Pattern pattern,
-                          gst_tcam_image_size size);
+void get_sampling_points (unsigned char* data, auto_sample_points* points, tBY8Pattern pattern, int width, int height);
 
 void get_sampling_points_from_buffer (image_buffer* buf,
                                       auto_sample_points* points);
