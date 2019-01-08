@@ -85,6 +85,7 @@ GstFlowReturn callback (GstElement* sink, void* user_data)
             pixel_data = info.data[video_info->width/2*stride + video_info->width * video_info->height/2 * stride];
 
             gst_buffer_unmap(buffer, &info);
+            gst_video_info_free(video_info);
         }
         GstClockTime timestamp = GST_BUFFER_PTS(buffer);
         g_print("Captured frame %d, Pixel Value=%03d Timestamp=%" GST_TIME_FORMAT "            \r",
