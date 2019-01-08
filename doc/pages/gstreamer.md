@@ -19,7 +19,7 @@ Source elements that retrieves images from you device.
                   With 'num-buffers=200' tcamsrc will automatically send an EOS and stop the device after 200 buffers have been sent to the pipeline.
 - __drop-incomplete-buffer__ - When incomplete buffers should be delivered this has to be set to `false`.
 
-##### MetaData
+#### MetaData
 
 Each image buffer the tcamsrc send has associated meta data that contains multiple information concerning the buffer.
 
@@ -37,6 +37,21 @@ framerate | double | framerate the backend has.
 is_damaged | bool | Flag noting if the buffer is damaged in any way. Only useful when drop-incomplete-buffer=false.
 
 For timestamp point of reference values look [here](@ref timestamps)
+
+#### Messages
+
+The tcamsrc element can send multiple possible messages to the GstBus.
+It is generally recommended to listen for error messages as these will be considered lethal to the video stream and cause a stream stop.
+
+##### Device lost
+
+An error message containing the string "Device lost" will always be sent when the device does not respond or is not reachable. 
+
+If you operate multiple devices in the same pipeline you can query the error details to retrieve
+the serial of the lost device.
+
+    GstStructure* struc = gst_message_parse_error_details(message);
+    const char* lost_serial = gst_structure_get_string(struc, "serial");
 
 ### tcamautoexposure
 
