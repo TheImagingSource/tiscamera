@@ -438,7 +438,10 @@ class TcamView(QWidget):
             if err:
 
                 if err.message == "Device lost":
-                    log.error("Received device lost message")
+                    details = msg.parse_error_details()
+                    if details:
+                        log.error("Received device lost message for {}".format(details.get_string("serial")))
+
                     self.fire_device_lost()
                 else:
                     log.error("Error from source: {}".format(err.message))
