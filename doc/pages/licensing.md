@@ -12,4 +12,6 @@ The following projects are included in this project:
 
 - The (json library)[https://github.com/nlohmann/json] by Niels Lohmann, which is available under the "MIT" license.
 
+- (Catch2)[https://github.com/catchorg/Catch2], which is published under the Boost Software License, Version 1.0
+
 - (CLI11)[https://github.com/CLIUtils/CLI11] under the 3-Clause BSD-License
