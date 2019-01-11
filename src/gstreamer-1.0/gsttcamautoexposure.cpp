@@ -2180,9 +2180,10 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(trans);
     GstStructure* structure = nullptr;
 
-    GST_DEBUG ("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT, incaps,
-                outcaps);
-    structure = gst_caps_get_structure (incaps, 0);
+    GST_DEBUG("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT,
+              (void*)incaps,
+              (void*)outcaps);
+    structure = gst_caps_get_structure(incaps, 0);
 
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {

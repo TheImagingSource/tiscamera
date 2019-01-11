@@ -1181,9 +1181,10 @@ static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform* trans,
     GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(trans);
     GstStructure* structure = nullptr;
 
-    GST_DEBUG ("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT, incaps,
-                outcaps);
-    structure = gst_caps_get_structure (incaps, 0);
+    GST_DEBUG("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT,
+              (void*)incaps,
+              (void*)outcaps);
+    structure = gst_caps_get_structure(incaps, 0);
 
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {
@@ -1275,7 +1276,8 @@ static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans,
 
     if (data == NULL || length != self->expected_buffer_size)
     {
-        GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...(%d <> %d) %p", length, self->expected_buffer_size, data);
+        GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...(%d <> %d) %p",
+                  length, self->expected_buffer_size, (void*)data);
         gst_buffer_unmap(buf, &info);
         return GST_FLOW_OK;
     }
