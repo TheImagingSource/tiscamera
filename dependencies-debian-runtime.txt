@@ -16,6 +16,7 @@ libgirepository-1.0-1 (>= 1.46.0),
 uvcdynctrl (>= 0.2.4),
 libudev1 (>= 229),
 libusb-1.0-0 (>= 2:1.0.20),
+libuuid1 (>= 2.27),
 
 # aravis specific dependencies
 libxml2 (>= 2.9.3),
