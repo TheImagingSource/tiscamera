@@ -45,18 +45,7 @@ private:
 
     static std::weak_ptr<BackendLoader> instance;
 
-    struct backend
-    {
-        enum TCAM_DEVICE_TYPE type;
-        std::string name;
-        std::shared_ptr<LibraryHandle> handle;
-
-        // std::function<std::vector<DeviceInfo>()> get_device_list;
-        // std::function<std::shared_ptr<DeviceInterface>(const DeviceInfo&)> open_device;
-        std::function<size_t(struct tcam_device_info*, size_t)> get_device_list;
-        std::function<size_t()> get_device_list_size;
-        std::function<tcam::DeviceInterface*(const struct tcam_device_info*)> open_device;
-    };
+    struct backend;
 
     std::vector<backend> backends;
 

@@ -11,7 +11,7 @@
 
 #include "DeviceInfo.h"
 
-#include "BackendLoader.h"
+//#include "BackendLoader.h"
 
 #include "compiler_defines.h"
 
@@ -26,6 +26,8 @@ typedef void (*dev_callback) (const DeviceInfo&, void* user_data);
 
 #endif /* dev_callback */
 
+//forward declaration
+class BackendLoader;
 
 class Indexer
 {
