@@ -1,17 +1,16 @@
 # Documentation {#documentation}
 
+This document describes the internal structure of the documentation and how to expand it.
+
 ## General
 
 The entire documentation is done with doxygen.
-Doxygen allows the generation of multiple kinds of documentation, while keeping external dependencies
-and being manageable for users.
+Doxygen allows the generation of multiple kinds of documentation, while keeping external dependencies minimal and manageable for users.
 
 The documentation consists out of two parts, the user documentation and the internal documentation.
 Both can be built independently or as a joint document.
 
-For the required configuration steps, please read [here](@ref building)
-
-This document describes the internal structure of the documentation and how to expand it.
+For the required configuration steps, please read [the build instructions](@ref building).
 
 ## Adding a page
 
