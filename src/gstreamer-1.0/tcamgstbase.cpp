@@ -911,6 +911,88 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
 }
 
 
+GstCaps* find_input_caps_dutils (GstCaps* available_caps,
+                                 GstCaps* wanted_caps,
+                                 bool& /*requires_bayer*/,
+                                 bool& requires_vidoeconvert,
+                                 bool& /*requires_jpegdec*/,
+                                 bool& requires_dutils,
+                                 bool& requires_biteater)
+{
+    requires_vidoeconvert = true;
+
+    GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
+
+    if (dutils)
+    {
+        // check if only dutils suffice
+        if (gst_element_factory_can_src_any_caps(dutils, wanted_caps)
+            && gst_element_factory_can_sink_any_caps(dutils, available_caps))
+        {
+            requires_dutils = true;
+            gst_object_unref(dutils);
+
+            GstElementFactory* biteater = gst_element_factory_find("tcambiteater");
+            // check if dutils + biteater suffice
+            if (!tcam_gst_contains_bayer_8_bit(available_caps)
+                && ((tcam_gst_contains_bayer_12_bit(available_caps)
+                     || tcam_gst_contains_bayer_16_bit(available_caps)))
+                && gst_element_factory_can_src_any_caps(biteater, wanted_caps))
+            {
+                requires_biteater = true;
+
+                gst_object_unref(biteater);
+
+                return available_caps;
+            }
+            else // dutils only
+            {
+                gst_object_unref(biteater);
+                GstCaps* ret;
+                if (!gst_caps_is_fixed(available_caps))
+                {
+                    if (!gst_caps_is_empty(wanted_caps) &&
+                        g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0)
+                    {
+                        GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
+
+                        if (!possible_matches || gst_caps_is_empty(possible_matches))
+                        {
+                            tcam_error("No possible matches for dutils.");
+                            return nullptr;
+                        }
+
+                        ret = gst_caps_intersect(available_caps, possible_matches);
+                        gst_caps_unref(possible_matches);
+                    }
+                    else
+                    {
+                        ret = tcam_gst_find_largest_caps(available_caps);
+                    }
+                }
+                else // is fixed
+                {
+                    ret = gst_caps_copy(available_caps);
+                }
+
+                if (!ret)
+                {
+                    // TODO not compatible
+                    tcam_error("No intersecting caps between dutils and src");
+                    return nullptr;
+                }
+
+                return ret;
+            }
+            gst_object_unref(biteater);
+        }
+        gst_object_unref(dutils);
+    }
+
+    tcam_error("Could not create dutils.");
+    return nullptr;
+}
+
 
 /**
  * This function works as follows (please edit when changin)
@@ -964,68 +1046,13 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
     if (use_dutils)
     {
-        GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
-
-        if (dutils)
-        {
-            // check if only dutils suffice
-            if (gst_element_factory_can_src_any_caps(dutils, wanted_caps)
-                && gst_element_factory_can_sink_any_caps(dutils, available_caps))
-            {
-                requires_dutils = true;
-                gst_object_unref(dutils);
-
-                GstElementFactory* biteater = gst_element_factory_find("tcambiteater");
-                // check if dutils + biteater suffice
-                if (!tcam_gst_contains_bayer_8_bit(available_caps)
-                    && ((tcam_gst_contains_bayer_12_bit(available_caps)
-                         || tcam_gst_contains_bayer_16_bit(available_caps)))
-                    && gst_element_factory_can_src_any_caps(biteater, wanted_caps))
-                {
-                    requires_biteater = true;
-
-                    gst_object_unref(biteater);
-
-                    return available_caps;
-                }
-                else // dutils only
-                {
-                    gst_object_unref(biteater);
-                    GstCaps* ret;
-                    if (!gst_caps_is_fixed(available_caps))
-                    {
-                        if (!gst_caps_is_empty(wanted_caps) &&
-                            g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0)
-                        {
-                            GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
-
-                            ret = gst_caps_intersect(available_caps, possible_matches);
-                            gst_caps_unref(possible_matches);
-                        }
-                        else
-                        {
-                            ret = tcam_gst_find_largest_caps(available_caps);
-                        }
-                    }
-                    else // is fixed
-                    {
-                        ret = gst_caps_copy(available_caps);
-                    }
-                    requires_vidoeconvert = true;
-
-                    if (!ret)
-                    {
-                        // TODO not compatible
-                        tcam_error("No intersecting caps between dutils and src");
-                        return nullptr;
-                    }
-
-                    return ret;
-                }
-                gst_object_unref(biteater);
-            }
-            gst_object_unref(dutils);
-        }
+        return find_input_caps_dutils(available_caps,
+                                      wanted_caps,
+                                      requires_bayer,
+                                      requires_vidoeconvert,
+                                      requires_jpegdec,
+                                      requires_dutils,
+                                      requires_biteater);
     }
 
     GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
