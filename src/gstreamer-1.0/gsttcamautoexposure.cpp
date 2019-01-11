@@ -2173,11 +2173,12 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 }
 
 
-static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
-    GstCaps * incaps, GstCaps * outcaps)
+static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
+                                               GstCaps* incaps,
+                                               GstCaps* outcaps)
 {
-    GstTcamautoexposure *self = GST_TCAMAUTOEXPOSURE(trans);
-    GstStructure * structure = nullptr;
+    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(trans);
+    GstStructure* structure = nullptr;
 
     GST_DEBUG ("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT, incaps,
                 outcaps);
@@ -2188,19 +2189,30 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
         const char *format;
         format = gst_structure_get_string (structure, "format");
         self->color_format = BAYER;
-        if (g_str_equal (format, "bggr")) {
+        if (g_str_equal (format, "bggr"))
+        {
             self->pattern = BG;
-        } else if (g_str_equal (format, "gbrg")) {
+        }
+        else if (g_str_equal (format, "gbrg"))
+        {
             self->pattern = GB;
-        } else if (g_str_equal (format, "grbg")) {
+        }
+        else if (g_str_equal (format, "grbg"))
+        {
             self->pattern = GR;
-        } else if (g_str_equal (format, "rggb")) {
+        }
+        else if (g_str_equal (format, "rggb"))
+        {
             self->pattern = RG;
-        } else {
+        }
+        else
+        {
             g_critical("Format '%s' not handled by this element", format);
             g_return_val_if_reached(false);
         }
-    } else {
+    }
+    else
+    {
         self->pattern = UNDEFINED_PATTERN;
         self->color_format = GRAY;
     }
@@ -2208,12 +2220,12 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
 }
 
 
-static gboolean plugin_init (GstPlugin * plugin)
+static gboolean plugin_init (GstPlugin* plugin)
 {
-    return gst_element_register (plugin,
-                                 "tcamautoexposure",
-                                 GST_RANK_NONE,
-                                 GST_TYPE_TCAMAUTOEXPOSURE);
+    return gst_element_register(plugin,
+                                "tcamautoexposure",
+                                GST_RANK_NONE,
+                                GST_TYPE_TCAMAUTOEXPOSURE);
 }
 
 #ifndef VERSION

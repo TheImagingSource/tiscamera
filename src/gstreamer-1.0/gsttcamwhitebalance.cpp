@@ -1173,11 +1173,13 @@ static struct device_resources find_source (GstElement* self)
     return res;
 }
 
-static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform * trans,
-    GstCaps * incaps, GstCaps * outcaps)
+
+static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform* trans,
+                                               GstCaps* incaps,
+                                               GstCaps* outcaps)
 {
-    GstTcamWhitebalance *self = GST_TCAMWHITEBALANCE(trans);
-    GstStructure * structure = nullptr;
+    GstTcamWhitebalance* self = GST_TCAMWHITEBALANCE(trans);
+    GstStructure* structure = nullptr;
 
     GST_DEBUG ("in caps %" GST_PTR_FORMAT " out caps %" GST_PTR_FORMAT, incaps,
                 outcaps);
@@ -1185,17 +1187,26 @@ static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform * trans,
 
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {
-        const char *format;
+        const char* format;
         format = gst_structure_get_string (structure, "format");
-        if (g_str_equal (format, "bggr")) {
+        if (g_str_equal(format, "bggr"))
+        {
             self->pattern = BG;
-        } else if (g_str_equal (format, "gbrg")) {
+        }
+        else if (g_str_equal(format, "gbrg"))
+        {
             self->pattern = GB;
-        } else if (g_str_equal (format, "grbg")) {
+        }
+        else if (g_str_equal(format, "grbg"))
+        {
             self->pattern = GR;
-        } else if (g_str_equal (format, "rggb")) {
+        }
+        else if (g_str_equal(format, "rggb"))
+        {
             self->pattern = RG;
-        } else {
+        }
+        else
+        {
             g_critical("Format '%s' not handled by this element", format);
             g_return_val_if_reached(false);
         }
