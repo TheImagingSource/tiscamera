@@ -587,9 +587,6 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
      * 2. find the largest resolution
      * 3. for the format with the largest resolution take the highest framerate
      */
-    int largest_index = -1;
-    int largest_width = -1;
-    int largest_height = -1;
 
     std::vector<uint32_t> format_fourccs = index_format_fourccs(incoming);
 
@@ -599,6 +596,10 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     {
         return nullptr;
     }
+
+    int largest_index = -1;
+    int largest_width = -1;
+    int largest_height = -1;
 
     for (guint i = 0; i < gst_caps_get_size(incoming); ++i)
     {
@@ -629,6 +630,10 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                 new_width = true;
             }
         }
+        else
+        {
+            tcam_warning("Field 'width' does not have the type 'int'");
+        }
 
         if (gst_structure_get_int(struc, "height", &height))
         {
@@ -637,6 +642,10 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                 largest_height = height;
                 new_height = true;
             }
+        }
+        else
+        {
+            tcam_warning("Field 'height' does not have the type 'int'");
         }
 
         if (new_width && new_height)
@@ -814,6 +823,8 @@ GstCaps* get_caps_from_element_name (const char* elementname, const char* padnam
 
 std::vector<std::string> index_caps_formats (GstCaps* caps)
 {
+    // todo missing jpeg
+
     std::vector<std::string> ret;
 
     for (guint i = 0; i < gst_caps_get_size(caps); ++i)
@@ -891,7 +902,7 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
         {
             gst_caps_set_value(tmp, "framerate", framerate);
         }
-        tcam_error("%s", gst_caps_to_string(tmp));
+        tcam_info("%s", gst_caps_to_string(tmp));
 
         gst_caps_append(ret, tmp);
     }
@@ -914,7 +925,6 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
  *                           RGBx over YUV
  *                           anything over jpeg
  */
-
 
 // TODO: bayer and videoconvert should consider eachother
 GstCaps* find_input_caps (GstCaps* available_caps,
