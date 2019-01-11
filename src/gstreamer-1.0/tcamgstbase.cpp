@@ -1084,6 +1084,15 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
             && gst_element_factory_can_sink_any_caps(convert, available_caps))
         {
+            // this intersection check is to ensure that we can't just pass
+            // the caps through and really need this additional element
+            GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
+            if (!gst_caps_is_empty(intersect))
+            {
+                return intersect;
+            }
+            gst_caps_unref(intersect);
+
             requires_vidoeconvert = true;
             // wanted_caps can be fixed, etc.
 
