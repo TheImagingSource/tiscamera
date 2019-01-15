@@ -715,27 +715,62 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_DOUBLE);
-            g_value_set_double(value, self->gain_min);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(value, self->gain_min / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(value, self->gain_min);
+            }
         }
         if (min)
         {
             g_value_init(min, G_TYPE_DOUBLE);
-            g_value_set_double(min, self->gain.min);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(min, self->gain.min / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(min, self->gain.min);
+            }
         }
         if (max)
         {
             g_value_init(max, G_TYPE_DOUBLE);
-            g_value_set_double(max, self->gain.max);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(max, self->gain.max / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(max, self->gain.max);
+            }
         }
         if (def)
         {
             g_value_init(def, G_TYPE_DOUBLE);
-            g_value_set_double(def, self->gain.min);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(def, self->gain.min / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(def, self->gain.min);
+            }
         }
         if (step)
         {
             g_value_init(step, G_TYPE_DOUBLE);
-            g_value_set_double(step, 1);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(step, 0.1);
+            }
+            else
+            {
+                g_value_set_double(step, 1);
+            }
         }
         if (flags)
         {
@@ -765,27 +800,62 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_DOUBLE);
-            g_value_set_double(value, self->gain_max);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(value, self->gain_max);
+            }
+            else
+            {
+                g_value_set_double(value, self->gain_max);
+            }
         }
         if (min)
         {
             g_value_init(min, G_TYPE_DOUBLE);
-            g_value_set_double(min, self->gain.min);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(min, self->gain.min / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(min, self->gain.min);
+            }
         }
         if (max)
         {
             g_value_init(max, G_TYPE_DOUBLE);
-            g_value_set_double(max, self->gain.max);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(max, self->gain.max / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(max, self->gain.max);
+            }
         }
         if (def)
         {
             g_value_init(def, G_TYPE_DOUBLE);
-            g_value_set_double(def, self->gain.max);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(def, self->gain.max / GAIN_FLOAT_MULTIPLIER);
+            }
+            else
+            {
+                g_value_set_double(def, self->gain.max);
+            }
         }
         if (step)
         {
             g_value_init(step, G_TYPE_DOUBLE);
-            g_value_set_double(step, 1);
+            if (self->gain_is_double)
+            {
+                g_value_set_double(step, 0.1);
+            }
+            else
+            {
+                g_value_set_double(step, 1);
+            }
         }
         if (flags)
         {
@@ -1312,9 +1382,9 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->auto_iris = TRUE;
     self->gain_is_double = FALSE;
     self->exposure_min = 0;
-    self->exposure_max = 0;
+    self->exposure_max = G_MAXINT;
     self->gain_min = 0.0;
-    self->gain_max = 0.0;
+    self->gain_max = G_MAXDOUBLE;
     self->frame_counter = 0;
     self->has_iris = FALSE;
     self->camera_src = NULL;
