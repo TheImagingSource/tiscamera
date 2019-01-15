@@ -65,6 +65,7 @@ option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
 option(BUILD_TOOLS    "Build additional utilities"           OFF)
 option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
 option(BUILD_USER_DOC "Build user documentation."            OFF)
+option(BUILD_TESTS    "Build tests."                         OFF)
 
 
 set(TCAM_INTERNAL_ARAVIS ON CACHE BOOL "Use internal aravis dependency instead of system libraries")
@@ -106,6 +107,12 @@ if ((BUILD_DOCUMENTATION) OR (BUILD_USER_DOC))
   add_subdirectory(doc)
 endif ((BUILD_DOCUMENTATION) OR (BUILD_USER_DOC))
 
+if (BUILD_TESTS)
+  enable_testing()
+
+  add_subdirectory(tests)
+endif (BUILD_TESTS)
+
 
 # uninstall target
 configure_file(
@@ -144,6 +151,7 @@ MESSAGE(STATUS "Support for LibUsb cameras:    " ${BUILD_LIBUSB})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "Build internal documentation   " ${BUILD_DOCUMENTATION})
 MESSAGE(STATUS "Build user documentation       " ${BUILD_USER_DOC})
+MESSAGE(STATUS "Build tests                    " ${BUILD_TESTS})
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
 MESSAGE(STATUS "Installing binaries to:        " ${TCAM_INSTALL_BIN})
