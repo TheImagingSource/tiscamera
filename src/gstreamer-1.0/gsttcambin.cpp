@@ -557,7 +557,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
 
-    if (gst_caps_are_bayer_only(self->src_caps)
+    //if (gst_caps_are_bayer_only(self->src_caps)
+    if (contains_bayer(self->src_caps)
         || tcam_gst_raw_only_has_mono(self->src_caps))
     {
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
@@ -671,8 +672,11 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
 
     if (!gst_caps_is_fixed(self->src_caps))
     {
+        std::string sc = gst_caps_to_string(self->src_caps);
         self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
-        GST_INFO("Caps were not fixed. Reduced to: %s", gst_caps_to_string(self->src_caps));
+        GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
+                 sc.c_str(),
+                 gst_caps_to_string(self->src_caps));
     }
     else
     {
@@ -1055,10 +1059,16 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                               gst_caps_to_string(self->user_caps));
                     return GST_STATE_CHANGE_FAILURE;
                 }
-                GST_INFO("Using user defined caps for tcamsrc. User caps are: %s",
-                         gst_caps_to_string(self->user_caps));
 
-                gst_caps_unref(tmp);
+                // Use the intersected caps instead of the user defined ones.
+                // This allows us to work with valid device caps even when
+                // the user defines caps like 'video/x-raw,format=BGR' because
+                // they want to define the device format but not the resolution etc.
+                GST_INFO("Using user defined caps for tcamsrc. User caps are: %s",
+                         gst_caps_to_string(tmp));
+                gst_caps_unref(self->user_caps);
+                self->user_caps = tmp;
+
                 self->src_caps = find_input_caps(self->user_caps, self->target_caps,
                                                  self->needs_debayer,
                                                  self->needs_videoconvert,
@@ -1080,7 +1090,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
 
             gst_caps_unref(src_caps);
 
-            if (!self->src_caps)
+            if (!self->src_caps || gst_caps_is_empty(self->src_caps))
             {
                 GST_ERROR("Unable to work with given caps: %s",
                           gst_caps_to_string(self->target_caps));
@@ -1090,6 +1100,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             if (!gst_tcambin_link_elements(self))
             {
                 GST_ERROR("Unable to link elements");
+                return GST_STATE_CHANGE_FAILURE;
             }
 
             set_target_pad(self, self->target_pad);
