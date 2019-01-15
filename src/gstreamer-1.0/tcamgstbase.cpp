@@ -852,9 +852,13 @@ std::vector<std::string> index_caps_formats (GstCaps* caps)
         }
     }
 
-    std::sort(ret.begin(), ret.end());
-    ret.erase(std::unique(ret.begin(), ret.end()));
+    // make all entries unique
+    if (ret.size() > 1)
+    {
+        std::sort(ret.begin(), ret.end());
 
+        ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
+    }
     return std::move(ret);
 }
 
