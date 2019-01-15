@@ -65,6 +65,8 @@ bool tcam_gst_contains_bayer_16_bit (const GstCaps* caps);
 
 bool tcam_gst_fixate_caps (GstCaps* caps);
 
+std::vector<std::string> index_caps_formats (GstCaps* caps);
+
 
 /**
  * Change the name of the given caps to name
