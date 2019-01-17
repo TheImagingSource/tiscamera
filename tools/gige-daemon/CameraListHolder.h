@@ -38,7 +38,7 @@ public:
 
     std::vector<std::string> get_interface_list () const;
 
-    void set_interface_list (std::vector<std::string>);
+    void set_interface_list (std::vector<std::string>&);
 
     void run ();
 

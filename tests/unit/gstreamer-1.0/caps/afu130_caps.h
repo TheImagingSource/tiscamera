@@ -4,7 +4,7 @@
 namespace caps
 {
 
-static const char* AFU130_CAPS = \
+static const char* AFU130_CAPS __attribute__((unused)) = \
     "video/x-raw,format=YUY2,width=4128,height=3096,framerate={1/1};"
     "video/x-raw,format=YUY2,width=3264,height=2448,framerate={1/1};"
     "video/x-raw,format=YUY2,width=2592,height=1944,framerate={1/1};"

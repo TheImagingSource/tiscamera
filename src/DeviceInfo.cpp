@@ -30,9 +30,9 @@ DeviceInfo::DeviceInfo ()
 {
     device.type = TCAM_DEVICE_TYPE_UNKNOWN;
 
-    memcpy(device.identifier, "\0", sizeof(device.identifier));
-    memcpy(device.name, "\0", sizeof(device.name));
-    memcpy(device.serial_number, "\0", sizeof(device.serial_number));
+    memset(device.identifier, 0, sizeof(device.identifier));
+    memset(device.name, 0, sizeof(device.name));
+    memset(device.serial_number, 0, sizeof(device.serial_number));
 }
 
 

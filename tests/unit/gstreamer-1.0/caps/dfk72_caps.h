@@ -3,7 +3,7 @@
 
 namespace caps
 {
-static const char* DFK72_CAPS = \
+static const char* DFK72_CAPS __attribute__((unused)) = \
     "video/x-raw,format=GRAY8,width=2592,height=1944,framerate={15/2,7/1,5/1,4/1};"
     "video/x-raw,format=GRAY8,width=1920,height=1080,framerate={15/1,10/1,15/2,5/1};"
     "video/x-raw,format=GRAY8,width=1456,height=1944,framerate={15/1,10/1,15/2,5/1};"

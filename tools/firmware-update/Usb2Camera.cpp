@@ -189,7 +189,7 @@ int Usb2Camera::download_firmware (std::vector<unsigned char>& firmware, std::fu
 
 int Usb2Camera::upload_firmware_file (unsigned char* data, unsigned int size, std::function<void(int)> progress)
 {
-    int ret;
+    int ret = -1;
 
     const int len = 32;
     unsigned char buffer[256] = { 0 };

@@ -115,7 +115,8 @@ std::vector<std::string> CameraListHolder::get_interface_list () const
     return interface_list;
 }
 
-void CameraListHolder::set_interface_list (std::vector<std::string> interfaces)
+
+void CameraListHolder::set_interface_list (std::vector<std::string>& interfaces)
 {
     // std::mutex cam_lock;
     std::lock_guard<std::mutex> mutex_lock(mtx);
@@ -150,7 +151,7 @@ void CameraListHolder::index_loop ()
 }
 
 
-static camera_list getCameraList (std::vector<std::string> interfaces)
+static camera_list getCameraList (std::vector<std::string>& interfaces)
 {
     camera_list cameras;
     std::mutex cam_lock;
@@ -172,8 +173,10 @@ static camera_list getCameraList (std::vector<std::string> interfaces)
     return cameras;
 }
 
-namespace {
-static std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string> interfaces)
+namespace
+{
+
+static std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string>& interfaces)
 {
     // out of the tcam-network lib
     auto l = getCameraList(interfaces);
@@ -188,12 +191,12 @@ static std::vector<struct tcam_device_info> get_gige_device_list (std::vector<st
 
         info.type = TCAM_DEVICE_TYPE_ARAVIS;
 
-        strncpy(info.serial_number, c->getSerialNumber().c_str(), sizeof(info.serial_number));
-        strncpy(info.name, c->getModelName().c_str(), sizeof(info.name));
+        strncpy(info.serial_number, c->getSerialNumber().c_str(), sizeof(info.serial_number) - 1);
+        strncpy(info.name, c->getModelName().c_str(), sizeof(info.name) - 1);
 
         std::string identifier = c->getVendorName() + "-" + c->getSerialNumber();
 
-        strncpy(info.identifier, identifier.c_str(), sizeof(info.identifier));
+        strncpy(info.identifier, identifier.c_str(), sizeof(info.identifier) - 1);
 
         ret.push_back(info);
     }

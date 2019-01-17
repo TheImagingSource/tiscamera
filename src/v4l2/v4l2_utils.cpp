@@ -367,18 +367,22 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
             if (udev_device_get_sysattr_value(parent_device, "idProduct") != NULL)
             {
-                strncpy(info.additional_identifier, udev_device_get_sysattr_value(parent_device, "idProduct"), sizeof(info.additional_identifier));
+                strncpy(info.additional_identifier,
+                        udev_device_get_sysattr_value(parent_device, "idProduct"),
+                        sizeof(info.additional_identifier) - 1);
             }
 
             if (udev_device_get_sysattr_value(parent_device, "product") != NULL)
             {
-                strncpy(info.name, udev_device_get_sysattr_value(parent_device, "product"), sizeof(info.name));
+                strncpy(info.name,
+                        udev_device_get_sysattr_value(parent_device, "product"),
+                        sizeof(info.name) - 1);
             }
             if (udev_device_get_sysattr_value(parent_device, "serial") != NULL)
             {
                 std::string tmp = udev_device_get_sysattr_value(parent_device, "serial");
                 tmp.erase(remove_if(tmp.begin(), tmp.end(), isspace), tmp.end());
-                strncpy(info.serial_number, tmp.c_str(), sizeof(info.serial_number));
+                strncpy(info.serial_number, tmp.c_str(), sizeof(info.serial_number) - 1);
             }
 
             auto new_dev = DeviceInfo(info);

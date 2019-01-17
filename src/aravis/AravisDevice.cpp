@@ -1093,7 +1093,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
                 continue;
             }
 
-            strncpy(desc.description, format_str[i], sizeof(desc.description));
+            strncpy(desc.description, format_str[i], sizeof(desc.description) - 1);
 
             desc.resolution_count = 1;
             framerate_mapping rf = {};

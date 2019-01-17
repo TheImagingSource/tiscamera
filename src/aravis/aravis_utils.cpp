@@ -533,7 +533,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
 
         if (n != NULL)
         {
-            strncpy(info.name, n, sizeof(info.name));
+            strncpy(info.name, n, sizeof(info.name) - 1);
         }
         else
         {

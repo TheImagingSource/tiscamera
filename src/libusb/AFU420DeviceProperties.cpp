@@ -378,7 +378,8 @@ bool AFU420Device::create_ois ()
 
     property_handler->properties.push_back({ois_mode});
 
-    int64_t x_pos, y_pos;
+    int64_t x_pos = 0;
+    int64_t y_pos = 0;
     get_ois_pos(x_pos, y_pos);
 
     prop = create_empty_property(TCAM_PROPERTY_OIS_POS_X);

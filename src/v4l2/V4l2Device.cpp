@@ -610,28 +610,28 @@ static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtde
     {
         // new_desc.pixelformat = FOURCC_GBRG8;
         new_desc.pixelformat = FOURCC_GRBG8;
-        memcpy(new_desc.description, "BayerGR8", sizeof(new_desc.description));
+        strncpy((char*)new_desc.description, "BayerGR8", sizeof(new_desc.description) - 1);
         return true;
     }
     else if (strcmp((const char*)fmtdesc.description, "42474752-0000-0010-8000-00aa003") == 0)
     {
         // new_desc.pixelformat = FOURCC_BGGR8;
         new_desc.pixelformat = FOURCC_RGGB8;
-        memcpy(new_desc.description, "BayerRG8", sizeof(new_desc.description));
+        strncpy((char*)new_desc.description, "BayerRG8", sizeof(new_desc.description) - 1);
         return true;
     }
     else if (strcmp((const char*)fmtdesc.description, "31384142-0000-0010-8000-00aa003") == 0)
     {
         // new_desc.pixelformat = FOURCC_RGGB8;
         new_desc.pixelformat = FOURCC_BGGR8;
-        memcpy(new_desc.description, "BayerBG8", sizeof(new_desc.description));
+        strncpy((char*)new_desc.description, "BayerBG8", sizeof(new_desc.description) - 1);
         return true;
     }
     else if (strcmp((const char*)fmtdesc.description, "47524247-0000-0010-8000-00aa003") == 0)
     {
         // new_desc.pixelformat = FOURCC_GRBG8;
         new_desc.pixelformat = FOURCC_GBRG8;
-        memcpy(new_desc.description, "BayerGB8", sizeof(new_desc.description));
+        strncpy((char*)new_desc.description, "BayerGB8", sizeof(new_desc.description) - 1);
         return true;
     }
 

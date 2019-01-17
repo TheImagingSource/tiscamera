@@ -824,7 +824,7 @@ inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
 
     tcam_device_property prop = {};
     prop.type = ref.type_to_use;
-    strncpy(prop.name, ref.name.c_str(), sizeof(prop.name));
+    strncpy(prop.name, ref.name.c_str(), sizeof(prop.name) - 1);
     prop.id = ref.id;
     prop.group = ref.group;
 
