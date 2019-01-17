@@ -29,13 +29,11 @@ TEST_CASE("tcam_gst_find_camera_src")
     GError* err = nullptr;
 
     const char* pipeline_str = "tcamsrc name=test-source1 "
-        "! tcamautoexposure "
         "! bayer2rgb "
         "! videoconvert name=test-conv1 "
         "! videomixer name=mix ! videoconvert ! fakesink "
         " tcamsrc name=test-source2 "
-        "! tcamautoexposure name=test-exposure2 "
-        "! bayer2rgb "
+        "! bayer2rgb name=test-b2r2 "
         "! videoconvert ! mix.";
 
     GstElement* pipeline = gst_parse_launch(pipeline_str, &err);
@@ -43,18 +41,18 @@ TEST_CASE("tcam_gst_find_camera_src")
     gst_element_set_state(pipeline, GST_STATE_READY);
 
     GstElement* conv1 = gst_bin_get_by_name(GST_BIN(pipeline), "test-conv1");
-    GstElement* exposure2 = gst_bin_get_by_name(GST_BIN(pipeline), "test-exposure2");
+    GstElement* bayer2rgb2 = gst_bin_get_by_name(GST_BIN(pipeline), "test-b2r2");
 
     GstElement* source1 = gst_bin_get_by_name(GST_BIN(pipeline), "test-source1");
     GstElement* source2 = gst_bin_get_by_name(GST_BIN(pipeline), "test-source2");
 
     REQUIRE(conv1 != nullptr);
-    REQUIRE(exposure2 != nullptr);
+    REQUIRE(bayer2rgb2 != nullptr);
     REQUIRE(source1 != nullptr);
     REQUIRE(source2 != nullptr);
 
     GstElement* res_source1 = tcam_gst_find_camera_src(conv1);
-    GstElement* res_source2 = tcam_gst_find_camera_src(exposure2);
+    GstElement* res_source2 = tcam_gst_find_camera_src(bayer2rgb2);
 
     REQUIRE(source1 == res_source1);
     REQUIRE(source2 == res_source2);
