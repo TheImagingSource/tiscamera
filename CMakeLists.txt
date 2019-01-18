@@ -125,6 +125,8 @@ add_custom_target(uninstall
 
 
 add_subdirectory(packaging)
+add_subdirectory(scripts)
+
 
 if (BUILD_GST_1_0)
 
