@@ -1102,7 +1102,10 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                 GST_ERROR("Unable to link elements");
                 return GST_STATE_CHANGE_FAILURE;
             }
-
+            if (self->pipeline_caps && self->src_caps)
+            {
+                g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
+            }
             set_target_pad(self, self->target_pad);
 
             /*
