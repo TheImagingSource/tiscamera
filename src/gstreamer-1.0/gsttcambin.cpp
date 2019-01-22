@@ -1281,6 +1281,7 @@ static void gst_tcambin_init (GstTcamBin* self)
     else
     {
         self->has_dutils = FALSE;
+        self->use_dutils = FALSE;
     }
 
     self->src = nullptr;
