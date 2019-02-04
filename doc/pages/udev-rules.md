@@ -19,10 +19,9 @@ The default installation path is: _/etc/udev/rules.d_
 ## UVC Extension Units
 
 UVC extension units are also applied through udev rules.  
-These rules are provided by uvcdynctrl and not by tiscamera.
 
-The extension units are xml files that describe how certain device interactions
+The extension units are json files that describe how certain device interactions
 should be mapped to UVC and v4l2 properties.  
 Most USB cameras require these units for full functionality.
 
-The default installation path is: _/usr/share/uvcdynctrl/data/199e_
+The default installation path is: _/usr/share/theimagingsource/tiscamera/uvc-extension__
