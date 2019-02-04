@@ -81,6 +81,7 @@ class PropertyWidget(QWidget):
             self.value_box.setSingleStep(self.prop.step)
             self.value_box.setValue(self.prop.value)
             self.value_box.valueChanged[int].connect(self.set_property_box)
+            self.value_box.setKeyboardTracking(False)
             self.layout.addWidget(self.value_box)
 
         elif self.prop.valuetype == "double":
@@ -104,6 +105,7 @@ class PropertyWidget(QWidget):
             self.value_box.setSingleStep(self.prop.step)
             self.value_box.setValue(self.prop.value)
             self.value_box.valueChanged[float].connect(self.set_property_box)
+            self.value_box.setKeyboardTracking(False)
             self.layout.addWidget(self.value_box)
 
         elif self.prop.valuetype == "button":
