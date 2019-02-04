@@ -56,6 +56,8 @@ if (BUILD_USER_DOC)
     ${doc_dir}/gige-daemon.md \
     ${doc_dir}/uvcdynctrl.md \
     ${doc_dir}/tcam-uvc-extension-loader.md \
+    ${doc_dir}/scripts.md \
+    ${doc_dir}/tests.md \
     ${doc_dir}/udev-rules.md \
     ${doc_dir}/optimizations.md \
     ${doc_dir}/timestamps.md \
