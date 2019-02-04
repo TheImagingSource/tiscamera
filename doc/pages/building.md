@@ -54,6 +54,12 @@ This requires that git is installed.
 
     _Default:_ OFF
 
+- **-DBUILD_TESTS=<ON/OFF>**
+
+    Build unit/integration tests.
+
+    _Default:_ OFF
+
 - **-DCMAKE_INSTALL_PREFIX**
 
     Installation target prefix
