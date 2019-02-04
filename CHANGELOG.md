@@ -24,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add property drop-incomplete-buffer to tcamsrc
 - TCAM_GIGE_PACKET_SIZE environment variable
 - Add gain auto lower limit to usb3 uvc extension unit
-- Add gain auto upper limit to usb3 uvc extension unit
 - Some basic unit/integration tests.
   Enabled with -DBUILD_TESTS=ON.
   Run with 'make test'.
@@ -41,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This means the descriptions can now be copy pasted for gst-launch
 - internal aravis version to 0.6.0
 - Switch to different auto-exposure algorithm
+- gstreamer elements that interact with tcamsrc elements now search upstream
 
 ### Removed
 
