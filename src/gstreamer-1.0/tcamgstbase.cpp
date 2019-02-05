@@ -1047,9 +1047,10 @@ GstCaps* find_input_caps (GstCaps* available_caps,
     //     return intersect;
     // }
     // gst_caps_unref(intersect);
-
-    if (use_dutils)
+    GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
+    if (use_dutils && dutils)
     {
+        gst_object_unref(dutils);
         return find_input_caps_dutils(available_caps,
                                       wanted_caps,
                                       requires_bayer,
