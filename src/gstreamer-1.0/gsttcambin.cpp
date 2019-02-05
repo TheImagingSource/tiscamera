@@ -1104,6 +1104,9 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             }
             if (self->pipeline_caps && self->src_caps)
             {
+
+                self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
+
                 g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
             }
             set_target_pad(self, self->target_pad);
