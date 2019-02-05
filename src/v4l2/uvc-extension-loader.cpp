@@ -73,6 +73,21 @@ __u8 string_to_u8 (const std::string& input)
     long n = strtol( input.c_str(), & p, 16 );
 
     // this means an error occured
+    if (n == LONG_MAX || n == LONG_MIN || n > UCHAR_MAX)
+    {
+        return 0;
+    }
+
+    return n;
+}
+
+
+__u32 string_to_u32 (const std::string& input)
+{
+    char* p;
+    long n = strtol( input.c_str(), & p, 16 );
+
+    // this means an error occured
     if (n == LONG_MAX || n == LONG_MIN)
     {
         return 0;
@@ -178,7 +193,7 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
 
         auto& map = desc.mapping;
 
-        map.id = string_to_u8(m.at("id").get<std::string>());
+        map.id = string_to_u32(m.at("id").get<std::string>());
 
         if (map.id == 0)
         {
