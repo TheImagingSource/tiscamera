@@ -28,12 +28,12 @@ ATTRS{idVendor}=="199e", ATTRS{idProduct}=="0804", GROUP="video", MODE="0660"
 # load uvc extensions for usb3 cameras
 ACTION=="add", SUBSYSTEM=="video4linux", \
                ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
-               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/uvc-extensions/usb3.json"
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb3.json"
 
 # load uvc extensions for usb2 cameras
 ACTION=="add", SUBSYSTEM=="video4linux", \
                ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
-               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/uvc-extensions/usb2.json"
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"
 
 
 # templates for those using non standard locations
