@@ -26,8 +26,25 @@
 #define CLIP(val,l,h) ( (val) < (l) ? (l) : (val) > (h) ? (h): (val) )
 #endif
 
+
 namespace img
 {
+
+
+
+// typedef struct
+// {
+//     byte*           pData;
+//     std::size_t     length;
+
+//     uint32_t        type;   // this must be at least 32 bit wide
+
+//     unsigned int    dim_x;  // pixels
+//     unsigned int    dim_y;  // lines
+//     unsigned int    pitch;  // in bytes
+// } img_descriptor;
+
+
 inline int get_bits_per_pixel (uint32_t fcc)
 {
     switch (fcc)

@@ -55,7 +55,7 @@ unsigned int sqrt_ (unsigned int n)
 }
 
 
-static unsigned int CalcRegionCenterDistance ( const img_descriptor& image, const RegionInfo& region )
+static unsigned int CalcRegionCenterDistance ( const img::img_descriptor& image, const RegionInfo& region )
 {
     int imageCenterX = image.dim_x / 2;
     int imageCenterY = image.dim_y / 2;
@@ -80,7 +80,7 @@ inline TDataType* get_ptr_at ( void* region_base, int x, int y, int stride )
 
 
 template<typename TChannelType>
-static unsigned int autofocus_get_contrast_ ( const img_descriptor& image, const RegionInfo& region )
+static unsigned int autofocus_get_contrast_ ( const img::img_descriptor& image, const RegionInfo& region )
 {
     const unsigned int LINE_COUNT = 7;
 
@@ -145,7 +145,7 @@ static unsigned int autofocus_get_contrast_ ( const img_descriptor& image, const
 }
 
 
-static unsigned int autofocus_get_contrast ( const img_descriptor& image, const RegionInfo& region )
+static unsigned int autofocus_get_contrast ( const img::img_descriptor& image, const RegionInfo& region )
 {
     if ( image.type == FOURCC_Y16 )
     {
@@ -158,7 +158,7 @@ static unsigned int autofocus_get_contrast ( const img_descriptor& image, const 
 }
 
 
-static void autofocus_get_all_regions_ ( const img_descriptor& image, RegionInfo* regions, unsigned int regionCount )
+static void autofocus_get_all_regions_ ( const img::img_descriptor& image, RegionInfo* regions, unsigned int regionCount )
 {
     unsigned int regions_x = image.dim_x / REGION_SIZE;
     unsigned int regions_y = image.dim_y / REGION_SIZE;
@@ -231,7 +231,7 @@ static unsigned int calc_needed_region_count ( unsigned int img_width, unsigned 
 }
 
 
-static void autofocus_find_region ( const img_descriptor& image, RegionInfo& region )
+static void autofocus_find_region ( const img::img_descriptor& image, RegionInfo& region )
 {
     unsigned int region_count = calc_needed_region_count( image.dim_x, image.dim_y, REGION_SIZE );
     RegionInfo* regions = new RegionInfo[region_count];
@@ -256,13 +256,13 @@ static void autofocus_find_region ( const img_descriptor& image, RegionInfo& reg
 }
 
 
-static unsigned int autofocus_get_sharpness ( const img_descriptor& image, const RegionInfo& region )
+static unsigned int autofocus_get_sharpness ( const img::img_descriptor& image, const RegionInfo& region )
 {
     return autofocus_get_contrast( image, region );
 }
 
 
-static bool is_user_roi_valid ( const img_descriptor& image, const RECT& r )
+static bool is_user_roi_valid ( const img::img_descriptor& image, const RECT& r )
 {
     if( (r.bottom - r.top) < 64 )
         return false;
@@ -410,8 +410,12 @@ bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, 
     }
     else
     {
-        if ( img.dim_x != init_width_ || img.dim_y != init_height_ || img.pitch != init_pitch_ || init_binning_ != (unsigned int)binning_value ||
-            init_offset_.x != offsets.x || init_offset_.y != offsets.y )
+        if ( img.dim_x != init_width_
+             || img.dim_y != init_height_
+             || img.pitch != init_pitch_
+             || init_binning_ != (unsigned int)binning_value
+             || init_offset_.x != offsets.x
+             || init_offset_.y != offsets.y )
         {
             // when any of the parameters change, we just quit this
             data.state = data_holder::ended;

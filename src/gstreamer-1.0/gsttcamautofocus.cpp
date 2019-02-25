@@ -881,14 +881,14 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     GstMapInfo info = {};
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
-    img_descriptor img =
+    img::img_descriptor img =
         {
-            info.data,
-            info.size,
-            FOURCC_GRBG, /* TODO: DYNAMICALLY FIND FORMAT */
+            FOURCC_GRBG8, /* TODO: DYNAMICALLY FIND FORMAT */
             self->image_width,
             self->image_height,
-            self->image_width
+            static_cast<int>(self->image_width),
+            info.size,
+            info.data
         };
 
     int new_focus_value;

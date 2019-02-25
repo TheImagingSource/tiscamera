@@ -51,7 +51,7 @@ void autofocus_run (AutoFocus* focus,
 
 
 bool autofocus_analyze_frame (AutoFocus* focus,
-                              img_descriptor img,
+                              img::img_descriptor img,
                               POINT offsets,
                               int binning_value,
                               int* new_focus_value)

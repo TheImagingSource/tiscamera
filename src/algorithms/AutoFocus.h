@@ -63,7 +63,7 @@ extern "C"
     /* @param new_focus_value - will be set to new focus value */
     /* @return true if new_focus_value has been set */
     bool autofocus_analyze_frame (AutoFocus* focus,
-                                  img_descriptor img,
+                                  img::img_descriptor img,
                                   POINT offsets,
                                   int binning_value,
                                   int* new_focus_value);
