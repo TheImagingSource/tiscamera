@@ -1404,3 +1404,27 @@ bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* for
 
     return true;
 }
+
+
+bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer,
+                                      tcam_image_buffer* image)
+{
+    if (!buffer || !image)
+    {
+        return false;
+    }
+
+    *image = {};
+
+    GstMapInfo info;
+
+    gst_buffer_map(buffer, &info, GST_MAP_READ);
+
+    image->pData = info.data;
+    image->length = info.size;
+    //gst_caps_to_tcam_video_format(info., image->format);
+
+    gst_buffer_unmap(buffer, &info);
+
+    return true;
+}

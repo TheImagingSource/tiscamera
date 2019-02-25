@@ -152,6 +152,8 @@ bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFo
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);
 
+bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer, tcam_image_buffer* image);
+
 #ifdef __cplusplus
 }
 #endif
