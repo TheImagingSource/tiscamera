@@ -289,37 +289,36 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self __attribu
     GSList* names = nullptr;
 
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
     if (element->has_iris)
     {
         names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_IRIS)));
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_IRIS)));
         names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MIN)));
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MIN)));
         names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MAX)));
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_IRIS_MAX)));
     }
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_LEFT)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_WIDTH)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_TOP)));
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_TOP)));
     names = g_slist_append(names,
-        g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT)));
-
+                           g_strdup(tcamautoexposure_property_id_to_string(PROP_ROI_HEIGHT)));
     return names;
 }
 
@@ -1401,19 +1400,27 @@ void gst_tcamautoexposure_set_property (GObject* object,
     switch (property_id)
     {
         case PROP_AUTO_EXPOSURE:
+        {
             tcamautoexposure->auto_exposure = g_value_get_boolean(value);
             break;
+        }
         case PROP_AUTO_GAIN:
+        {
             tcamautoexposure->auto_gain = g_value_get_boolean(value);
             break;
+        }
         case PROP_AUTO_IRIS:
+        {
             tcamautoexposure->auto_iris = g_value_get_boolean(value);
             break;
+        }
         case PROP_CAMERA:
+        {
             tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
             break;
+        }
         case PROP_EXPOSURE_MIN:
-
+        {
             if (g_value_get_int(value) > tcamautoexposure->exposure_max)
             {
                 GST_ERROR("New user value for exposure min is greater or equal to exposure max. Ignoring request.");
@@ -1433,8 +1440,9 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->exposure_min = tcamautoexposure->default_exposure_values.min;
             }
             break;
+        }
         case PROP_EXPOSURE_MAX:
-
+        {
             if (g_value_get_int(value) < tcamautoexposure->exposure_min)
             {
                 GST_ERROR("New user value for exposure max is smaller or equal to exposure min. Ignoring request.");
@@ -1453,7 +1461,9 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->exposure_max = tcamautoexposure->default_exposure_values.max;
             }
             break;
+        }
         case PROP_GAIN_MIN:
+        {
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
             if (tcamautoexposure->gain_max && (g_value_get_double(value) > tcamautoexposure->gain_max))
             {
@@ -1481,7 +1491,9 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
             }
             break;
-       case PROP_GAIN_MAX:
+        }
+        case PROP_GAIN_MAX:
+        {
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
             if (g_value_get_double(value) < tcamautoexposure->gain_min)
             {
@@ -1509,6 +1521,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
             }
             break;
+        }
         case PROP_IRIS_MIN:
         {
             if (g_value_get_int(value) > tcamautoexposure->iris_max)
@@ -1530,7 +1543,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 tcamautoexposure->iris_min = tcamautoexposure->iris.min;
             }
             break;
-            }
+        }
         case PROP_IRIS_MAX:
         {
             if (g_value_get_int(value) < tcamautoexposure->iris_min)
@@ -1553,8 +1566,10 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         }
         case PROP_BRIGHTNESS_REFERENCE:
+        {
             tcamautoexposure->brightness_reference = g_value_get_int(value);
             break;
+        }
         case PROP_ROI_LEFT:
             tcamautoexposure->image_region.x0 = g_value_get_int(value);
             break;
@@ -1568,8 +1583,10 @@ void gst_tcamautoexposure_set_property (GObject* object,
             tcamautoexposure->image_region.y1 = g_value_get_int(value);
             break;
         default:
+        {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
             break;
+        }
     }
 }
 
