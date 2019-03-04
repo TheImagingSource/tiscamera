@@ -51,7 +51,6 @@ endif()
 # assure config.h is found
 include_directories("${PROJECT_BINARY_DIR}")
 
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
