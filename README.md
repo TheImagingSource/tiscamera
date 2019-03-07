@@ -68,11 +68,13 @@ On a Debian / Ubuntu system, the following command line could be used to install
 
 ```
 # Build dependencies
-sudo apt-get install git g++ cmake pkg-config libudev-dev libudev1 libtinyxml-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libglib2.0-dev libgirepository1.0-dev libusb-1.0-0-dev libzip-dev uvcdynctrl python-setuptools libxml2-dev libpcap-dev libaudit-dev libnotify-dev autoconf intltool gtk-doc-tools python3-setuptools
+sudo ./scripts/install-dependencies.sh --compilation --runtime
 
 # Runtime dependencies
-sudo apt-get install gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly libxml2 libpcap0.8 libaudit1 libnotify4 python3-pyqt5 python3-gi
+sudo ./scripts/install-dependencies.sh --runtime
 ```
+
+If you want to see the dependencies open the file dependencies-debian-compilation.txt and dependencies-debian-runtime.txt
 
 ### aravis installation
 
