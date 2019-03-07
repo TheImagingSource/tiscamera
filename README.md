@@ -88,15 +88,15 @@ If you only use USB cameras you can build without aravis.
 The following commands will build and install our software with default settings. A brief reference of compile time options could be found at the end of this document.
 
 ```
-git clone --recursive https://github.com/TheImagingSource/tiscamera.git
+git clone https://github.com/TheImagingSource/tiscamera.git
 cd tiscamera
 mkdir build
 cd build
 
 # With ARAVIS:
-cmake -DBUILD_ARAVIS=ON -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+cmake -DBUILD_ARAVIS=ON -DBUILD_TOOLS=ON ..
 # Without ARAVIS
-cmake -DBUILD_ARAVIS=OFF -DBUILD_GST_1_0=ON -DBUILD_TOOLS=ON -DBUILD_V4L2=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+cmake -DBUILD_ARAVIS=OFF -DBUILD_TOOLS=ON ..
 
 make
 sudo make install
