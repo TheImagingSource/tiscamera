@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The internal aravis is built with fast-heartbeat=ON
 - The caps output of 'tcam-ctrl -c' does not contain type descriptions.
   This means the descriptions can now be copy pasted for gst-launch
-- internal aravis version to 0.6.0
+- internal aravis version to 0.6.1
 - Switch to different auto-exposure algorithm
 - gstreamer elements that interact with tcamsrc elements now search upstream
 
