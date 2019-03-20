@@ -5,41 +5,58 @@ programming languages and/or different applications. The same examples and file
 structure is used for all programming examples. Please note that not all
 examples exist for every language.
 
-Supported programming languages: C, C++, Python, LUA.
+Supported programming languages: C, Python.
 
 ## Programming Examples
 
-list_devices:
+00-list-devices
 
-    Shows how to get a list of all supported devices currently connected to
-    the computer.
+    Show what cameras there are and what you can use to identify them
 
-list_formats:
+01-list-properties
 
-    Prints out a list of all video formwats supported by a device.
+    Show the properties of a camera and their settings(range, current value, etc.)
 
-list_properties:
+02-set-property
 
-    Prompts for a video device and prints out a list of all supported
-    properties as well as their current values and other details.
+    Shows how to set a specific property
 
-live_video:
+03-live-stream
 
-    Shows a live video stream from the device using the GTK+3 libraries.
-    This example also shows how to save video images to a JPEG file.
+    Live image stream from the camera
 
-property_dialog:
+04-list-formats
 
-    Extends the live_video example with a property dialog.
+    List what formats the camera offers
 
-## Other Examples
+05-set-format
 
-ROS:
+    Set the camera to a specific format
 
-    This folder contains an interface to the Robot Operating System (ROS).
-    ROS is available for download on http://www.ros.org
+06-softwaretrigger
 
-## Licensing
+    Instead of a continuous image stream, trigger single images.
 
-All files are published under the Apache License 2.0.
+07-appsink
 
+    Receive images in an application instead of just showing them.
+
+08-appsink-live
+
+    Receive images in an application, process it and feed it into another pipeline.
+
+09-save-stream
+
+    Store a stream in a file.
+
+10-device-lost
+
+    Receive device-lost and other messages and react to them
+
+## Further Examples
+
+For extended examples look through the examples repository.
+
+https://github.com/TheImagingSource/Linux-tiscamera-Programming-Samples
+
+It contains examples on how to interact with OpenCV, ROS, GUI toolkits and much more.

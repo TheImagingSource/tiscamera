@@ -30,41 +30,15 @@ CFLAGS+=$(shell pkg-config tcam --cflags)
 
 .PHONY: all clean
 
+EXECS = 00-list-devices 01-list-properties 02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost
 
-all: save-video list-devices list-properties list-formats pipeline properties trigger-images appsink
 
-save-video: save-video.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
+all: $(EXECS)
 
-list-devices: list-devices.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
 
-list-properties: list-properties.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
-list-formats: list-formats.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
-pipeline: pipeline.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
-properties: properties.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
-trigger-images: trigger-images.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
-appsink: appsink.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) $^ -o $@ $(LIBS)
-
+$(EXECS): %: %.c
+	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) -o $@ $< $(LIBS)
 
 clean:
 	$(RM) *.o
-	$(RM) save-video
-	$(RM) list-devices
-	$(RM) list-properties
-	$(RM) list-formats
-	$(RM) pipeline
-	$(RM) properties
-	$(RM) trigger-images
-	$(RM) appsink
+	$(RM) $(EXECS)
