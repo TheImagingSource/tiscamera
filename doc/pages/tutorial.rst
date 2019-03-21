@@ -10,6 +10,23 @@ For a simpler version read the README.md in the project's root directory.
 Setup
 =====
 
+Cloning
+=======
+
+To retrieve the code clone it from github:
+
+.. code-block:: sh
+
+   git clone https://github.com/TheImagingSource/tiscamera.git
+
+For this ``git`` has to be installed.
+
+After this change into the tiscamera directory and create a build directory:
+
+.. code-block:: sh
+
+   mkdir build
+
 Dependencies
 ============
 
@@ -26,8 +43,9 @@ To install all dependencies execute the following command in the tiscamera direc
 Configuration
 =============
 
-The configuration of tiscamera is done with `cmake`.
+The configuration of tiscamera is done with ``cmake``.
 It allows the (de)activation of entire sections.
+To configure the project call `cmake` from the build directory.
 
 For an overview of available cmake options, see :any:`configuring`
 
@@ -112,8 +130,6 @@ For a quick listing of available devices execute the following in a terminal:
 .. code-block:: sh
 
    tcam-ctrl -l
-
-This will give list all available capture devices.
 
 The responsible functions are :c:func:`tcam_prop_get_device_serials`
 and :c:func:`tcam_prop_get_device_info`
