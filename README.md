@@ -136,6 +136,10 @@ sudo systemctl status gige-daemon.service    # check if statemd say everything i
 
   Build tiscamera with suppoort for v4l2 devices.
 
+- **-DBUILD_DOCUMENTATION=<ON/OFF>**
+
+  Build html user documentation.
+
 - **-DCMAKE_INSTALL_PREFIX**
 
   Installation target prefix (defaults to /usr/local)
