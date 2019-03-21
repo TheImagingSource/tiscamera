@@ -14,106 +14,42 @@
 # limitations under the License.
 
 
-# add a target to generate API documentation with Doxygen
-find_package(Doxygen)
+if (BUILD_DOCUMENTATION)
 
-set(doxygen_files "")
-set(doxyfile_layout "")
+  find_package(Sphinx REQUIRED)
 
-if (BUILD_USER_DOC)
-
-  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-User.cmake)
-  set(doxyfile_layout ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-layout-user.xml)
-  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-  set(doc_dir "${CMAKE_CURRENT_SOURCE_DIR}/pages")
-
-  # this needs to be a single string
-  # cmake adds ';' between values otherwise
-  # thus making it impossible for doxygen to parse the list
-  #
-  # The order of this list is also the order of the side pane in doxygen!
-  #
-  set(doc_file_list
-    "${doc_dir}/welcome.md \
-    ${doc_dir}/building.md \
-    ${doc_dir}/installation.md \
-    ${doc_dir}/versioning-and-releases.md \
-    ${doc_dir}/documentation.md \
-    ${doc_dir}/gstreamer.md \
-    ${doc_dir}/logging.md \
-    ${doc_dir}/flags.md \
-    ${doc_dir}/gobject-introspection.md \
-    ${doc_dir}/properties.md \
-    ${doc_dir}/tools.md \
-    ${doc_dir}/tcam-capture.md \
-    ${doc_dir}/tcam-ctrl.md \
-    ${doc_dir}/trigger.md \
-    ${doc_dir}/examples.md \
-    ${doc_dir}/tcam-gigetool.md \
-    ${doc_dir}/camera-ip-conf.md \
-    ${doc_dir}/firmware-update.md \
-    ${doc_dir}/gige-daemon.md \
-    ${doc_dir}/uvcdynctrl.md \
-    ${doc_dir}/tcam-uvc-extension-loader.md \
-    ${doc_dir}/scripts.md \
-    ${doc_dir}/tests.md \
-    ${doc_dir}/udev-rules.md \
-    ${doc_dir}/optimizations.md \
-    ${doc_dir}/timestamps.md \
-    ${doc_dir}/packaging.md \
-    ${doc_dir}/licensing.md \
-    ${doc_dir}/further-reading.md \
-    ${doc_dir}/contact.md \
-    "
-    )
-
-  set(doxygen_files "${doxygen_files} ${doc_file_list}")
-
-  set(BUILD_DOC TRUE)
-
-endif (BUILD_USER_DOC)
-
-
-if(BUILD_DOCUMENTATION)
-
-  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake)
-  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-  set(doxygen_files "${doxygen_files} \
-${CMAKE_SOURCE_DIR}/src/ \
-${CMAKE_SOURCE_DIR}/tools/ \
-")
-
-  set(BUILD_DOC TRUE)
-
-endif(BUILD_DOCUMENTATION)
-
-
-if ((BUILD_USER_DOC) AND (BUILD_DOCUMENTATION))
-
-  set(doxyfile_layout ${CMAKE_CURRENT_SOURCE_DIR}/DoxygenLayout.xml)
-
-  set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile-ALL.cmake)
-  set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-endif ((BUILD_USER_DOC) AND (BUILD_DOCUMENTATION))
-
-
-
-if (BUILD_DOC)
-
-  if(NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+  if(NOT DEFINED SPHINX_THEME)
+    set(SPHINX_THEME default)
   endif()
 
-  configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+  if(NOT DEFINED SPHINX_THEME_DIR)
+    set(SPHINX_THEME_DIR)
+  endif()
 
-  # ALL allows us to build the documentation with the project
+
+  # configured documentation tools and intermediate build results
+  set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
+
+  # Sphinx cache with pickled ReST documents
+  set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
+
+  # HTML output directory
+  set(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/html")
+
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
+    "${BINARY_BUILD_DIR}/conf.py"
+    @ONLY)
+
+
   add_custom_target(doc ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-    COMMENT "Generate User Documentation"
+    ${SPHINX_EXECUTABLE}
+    -q -b html
+    -c "${BINARY_BUILD_DIR}"
+    -d "${SPHINX_CACHE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/pages"
+    "${SPHINX_HTML_DIR}"
+    COMMENT "Generate HTML Documentation with Sphinx"
     VERBATIM)
 
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION "${TCAM_INSTALL_DOCUMENTATION}")
@@ -125,4 +61,4 @@ if (BUILD_DOC)
     "${CMAKE_CURRENT_BINARY_DIR}/html"
     "${CMAKE_CURRENT_BINARY_DIR}/man")
 
-endif (BUILD_DOC)
+endif (BUILD_DOCUMENTATION)

@@ -1,0 +1,364 @@
+
+########
+Tutorial
+########
+
+This page contains a extended tutorial on how to get started with The Imaging Source Cameras.
+For a simpler version read the README.md in the project's root directory.
+
+=====
+Setup
+=====
+
+Dependencies
+============
+
+The project requires multiple dependencies to compile.
+For a complete list of dependencies see :any:`dependencies`.
+
+To install all dependencies execute the following command in the tiscamera directory.
+
+.. code-block:: sh
+
+   ./scripts/install-dependencies.sh --runtime --compilation
+
+
+Configuration
+=============
+
+The configuration of tiscamera is done with `cmake`.
+It allows the (de)activation of entire sections.
+
+For an overview of available cmake options, see :any:`configuring`
+
+To interactively change options use the program ``cmake-gui``.
+Under debian/ubuntu it can be installed with ``sudo apt install cmake-qt-gui``
+
+
+Compilation
+===========
+
+.. code-block:: sh
+
+   make -j
+
+Installation
+============
+
+The default configuration of tiscamera will install into `/usr`.
+This means all libraries, etc. will be available to all users.
+
+..  are unable to install into the root directory or have special requirements
+
+DESTDIR
+-------
+   
+.. code-block:: sh
+                
+   DESTDIR=<install root> make install
+
+This command will install all tiscamera components into `<install root>`,
+effectively replacing the root directory with it.
+
+Running without installation
+----------------------------
+
+To integrate tiscamera into the system environment source the `env.sh` script located in the build directory.
+It will adjust environment variables, so that gstreamer elements, etc can be found.
+
+   
+===================
+Camera Interactions
+===================
+
+This sections describes how a program can interact with a camera.
+
+The API
+=======
+
+The tiscamer API consists out of two parts: the tiscamera gstreamer elements and a gobject interface.
+For a technical overview over the API, continue reading here: :any:`api`.
+
+To reference both APIs add the following lines:
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. code-block:: c
+                  
+         #include <gst/gst.h>
+         #include <tcamprop.h>
+                  
+   .. group-tab:: python
+
+      .. code-block:: python
+                  
+         import gi
+
+         gi.require_version("Tcam", "0.1")
+         gi.require_version("Gst", "1.0")
+
+         from gi.repository import Tcam, Gst
+                  
+Camera Discovery
+================
+
+Listing Available Cameras
+-------------------------
+
+For a quick listing of available devices execute the following in a terminal:
+
+.. code-block:: sh
+
+   tcam-ctrl -l
+
+This will give list all available capture devices.
+
+The responsible functions are :c:func:`tcam_prop_get_device_serials`
+and :c:func:`tcam_prop_get_device_info`
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/00-list-devices.c
+         :language: c
+         :lines: 28-62
+         :emphasize-lines: 7, 23-27
+         :linenos:
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/00-list-devices.py
+         :language: python
+         :lines: 33-
+         :linenos:
+
+This code can be found in the example `00-list-devices`.
+
+Opening And Closing A Camera
+----------------------------
+
+The recommended way of addressing a camera is by using it's serial number.
+
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/00-list-devices.c
+         :lines: 17-
+         :linenos:
+      
+                  
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/00-list-devices.py
+         :lines: 17-
+         :linenos:
+
+Streaming
+=========
+
+For image retrieval the gstreamer element :any:`tcamsrc` is used.
+
+Available Caps
+--------------
+
+For an overview over supported gstreamer caps type the following into a terminal:
+
+.. code-block:: sh
+
+   tcam-ctrl -c <SERIAL>
+
+The printed caps are gstreamer compatible and can be copy-pasted for configuration purposes.
+
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/04-list-formats.c
+         :language: c
+         :lines: 28-62
+         :emphasize-lines: 7, 23
+         :linenos:
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/04-list-formats.py
+         :language: python
+         :lines: 17-
+         :linenos:
+
+This code can be found in the example `03-list-formats`.
+
+            
+Setting Caps
+------------
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/05-set-format.c
+         :language: c
+         :lines: 17-
+         :linenos:
+                  
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/05-set-format.py
+         :language: python
+         :lines: 17-
+         :linenos:
+
+This code can be found in the example `04-set-format`.
+
+Showing a live image
+--------------------
+
+To display a live image a display sink is required.
+
+Depending on the used system some display sinks may work better than others.
+Generally the `ximagesink` is a good starting point.
+
+A simple pipeline would look like this:
+
+``tcambin ! videoconvert ! ximagesink``
+
+Working code can be found in the example `05-live-stream`.
+
+
+Receiving Images
+----------------
+
+The easiest approach is to use an appsink.
+The appsink element will call a function for each new image it receives.
+
+To enable image retrieval the following steps need to be taken.
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/07-appsink.c
+         :language: c
+         :lines: 107-114
+         :linenos:
+            
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/07-appsink.py
+         :language: python
+         :lines: 17-
+         :linenos:
+
+The image `sample` that is given to the function contains the image, video caps and other additional information that maybe required for image processing.
+
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/07-appsink.c
+         :language: c
+         :lines: 38-45, 49-52, 60-62, 70-72, 81-85
+         :linenos:
+                                                         
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/07-appsink.py
+         :language: python
+         :lines: 17-
+         :linenos:
+
+
+This code can be found in the example `07-appsink`.
+
+An additional example where the image is touched and then displayed can be found in `08-appsink-live`
+
+Properties
+==========
+
+The camera offers multiple properties to assist with image acquisition.
+Depending on the device at hand these range from softwaretrigger to
+exposure to complete auto adjustment algorithms.
+
+List Properties
+---------------
+
+The responsible function is `tcam_prop_get_tcam_property_names`.
+
+For an overview over available properties type the following into a terminal:
+
+.. code-block:: sh
+
+   tcam-ctrl -p <SERIAL>
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/01-list-properties.c
+         :language: c
+         :lines: 28-62
+         :emphasize-lines: 7, 23
+         :linenos:
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/01-list-properties.py
+         :language: python
+         :lines: 51, 52, 64
+         :linenos:
+
+This code can be found in the example `01-list-properties`.
+
+Get Property
+------------
+
+The responsible function is `tcam_prop_get_tcam_property`.
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/01-list-properties.c
+         :language: c
+         :lines: 45-78
+         :linenos:                                          
+                         
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/01-list-properties.py
+         :language: python
+         :lines: 64-76
+         :linenos:
+   
+   This code can be found in the example `01-list-properties`.
+   
+Set Property
+------------
+
+The responsible function is `tcam_prop_set_tcam_property`.
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/02-set-properties.c
+         :language: c
+         :lines: 34-50
+         :linenos:
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/02-set-properties.py
+         :language: python
+         :lines: 34-48
+         :linenos:
+
+This code can be found in the example `02-set-properties`.
+
