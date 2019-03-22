@@ -48,12 +48,8 @@ cmake options
      - Build tiscamera with support for usb devices that that have no native driver.
      - ON
 
-   * - -DBUILD_USER_DOC
-     - Build html user documentation.
-     - OFF
-
    * - -DBUILD_DOCUMENTATION
-     - Build html source code documentation.
+     - Build html documentation.
      - OFF
 
    * - -DBUILD_TESTS
