@@ -110,7 +110,6 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
     /* retrieve the appsink from the pipeline */
     GstElement* sink = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
 
@@ -119,6 +118,8 @@ int main (int argc, char *argv[])
 
     // tell appsink what function to call when it notifies us
     g_signal_connect(sink, "new-sample", G_CALLBACK(callback), NULL);
+
+    gst_object_unref(sink);
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 

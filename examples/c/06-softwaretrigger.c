@@ -97,6 +97,7 @@ int main (int argc, char *argv[])
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
+    gst_object_unref(source);
     /* the pipeline automatically handles all elements that have been added to it.
        thus they do not have to be cleaned up manually */
     gst_object_unref(pipeline);

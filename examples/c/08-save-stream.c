@@ -62,6 +62,7 @@ int main (int argc, char *argv[])
         g_value_set_static_string(&val, serial);
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
+        gst_object_unref(source);
     }
 
     const char* file_location = "/tmp/tiscamera-save-stream.avi";

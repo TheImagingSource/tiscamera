@@ -60,6 +60,7 @@ int main (int argc, char *argv[])
         }
     }
 
+    g_slist_free(serials);
     gst_object_unref(source);
 
     return 0;

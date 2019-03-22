@@ -111,6 +111,7 @@ int main (int argc, char *argv[])
         g_value_set_static_string(&val, serial);
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
+        gst_object_unref(source);
     }
 
     GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
@@ -129,6 +130,7 @@ int main (int argc, char *argv[])
     loop = g_main_loop_new (NULL, FALSE);
     g_main_loop_run (loop);
 
+    g_main_loop_unref(loop);
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
     return 0;

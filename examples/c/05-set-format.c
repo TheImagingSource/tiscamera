@@ -74,6 +74,7 @@ int main (int argc, char *argv[])
 
     g_object_set(G_OBJECT(capsfilter), "caps", caps, NULL);
     gst_object_unref(capsfilter);
+    gst_caps_unref(caps);
 
     /*
       to statically create caps you can reduce the whole procedure to
