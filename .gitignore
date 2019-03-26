@@ -1,16 +1,16 @@
 
 # examples
 
-*/c/list-devices
-*/c/list-formats
-*/c/list-properties
-*/c/pipeline
-*/c/properties
-*/c/pipeline
-*/c/properties
-*/c/trigger-images
-*/c/save-video
-*/c/appsink
+*/c/00-list-devices
+*/c/01-list-properties
+*/c/02-set-properties
+*/c/03-live-stream
+*/c/04-list-formats
+*/c/05-set-format
+*/c/06-softwaretrigger
+*/c/07-appsink
+*/c/08-save-stream
+*/c/09-device-lost
 
 # ### VCS ###
 
