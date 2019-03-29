@@ -85,6 +85,8 @@ way as gst-launch. Simply write a string description and let gstreamer handle th
    .. code-tab:: python
 
       pipeline = Gst.parse_launch("tcambin ! videoconvert ! ximagesink")
+
+.. _gstreamer_caps:
       
 ****
 Caps

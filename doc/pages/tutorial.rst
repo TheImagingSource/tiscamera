@@ -21,10 +21,11 @@ To retrieve the code clone it from github:
 
 For this ``git`` has to be installed.
 
-After this change into the tiscamera directory and create a build directory:
+Now change into the tiscamera directory and create a build directory:
 
 .. code-block:: sh
 
+   cd tiscamera
    mkdir build
 
 Dependencies
@@ -65,18 +66,6 @@ Installation
 
 The default configuration of tiscamera will install into `/usr`.
 This means all libraries, etc. will be available to all users.
-
-..  are unable to install into the root directory or have special requirements
-
-DESTDIR
--------
-   
-.. code-block:: sh
-                
-   DESTDIR=<install root> make install
-
-This command will install all tiscamera components into `<install root>`,
-effectively replacing the root directory with it.
 
 Running without installation
 ----------------------------
@@ -163,17 +152,19 @@ The recommended way of addressing a camera is by using it's serial number.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/00-list-devices.c
-         :lines: 17-
+      .. literalinclude:: ../../examples/c/02-set-properties.c
+         :language: c
+         :lines: 86-93, 127-130
          :linenos:
       
-                  
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/00-list-devices.py
-         :lines: 17-
+         :language: python
          :linenos:
 
+This code can be found in the example `02-set-properties`.
+            
 Streaming
 =========
 
@@ -197,18 +188,16 @@ The printed caps are gstreamer compatible and can be copy-pasted for configurati
 
       .. literalinclude:: ../../examples/c/04-list-formats.c
          :language: c
-         :lines: 28-62
-         :emphasize-lines: 7, 23
+         :lines: 33-35, 45-52
          :linenos:
 
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/04-list-formats.py
          :language: python
-         :lines: 17-
          :linenos:
 
-This code can be found in the example `03-list-formats`.
+This code can be found in the example `04-list-formats`.
 
             
 Setting Caps
@@ -220,17 +209,20 @@ Setting Caps
 
       .. literalinclude:: ../../examples/c/05-set-format.c
          :language: c
-         :lines: 17-
+         :lines: 32-36,55-69,76-79
          :linenos:
                   
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/05-set-format.py
          :language: python
-         :lines: 17-
          :linenos:
 
 This code can be found in the example `04-set-format`.
+
+As an alternative to creating the GstCaps manually you can also use ``gst_caps_from_string``.
+This function takes a format string description and converts it to a valid GstCaps instance.
+For more information, see :any:`the caps reference section.<gstreamer_caps>`.
 
 Showing a live image
 --------------------
@@ -261,7 +253,7 @@ To enable image retrieval the following steps need to be taken.
 
       .. literalinclude:: ../../examples/c/07-appsink.c
          :language: c
-         :lines: 107-114
+         :lines:  102-106, 114-123
          :linenos:
             
    .. group-tab:: python
@@ -280,14 +272,13 @@ The image `sample` that is given to the function contains the image, video caps 
 
       .. literalinclude:: ../../examples/c/07-appsink.c
          :language: c
-         :lines: 38-45, 49-52, 60-62, 70-72, 81-85
+         :lines: 32-45, 51, 90-95
          :linenos:
                                                          
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/07-appsink.py
          :language: python
-         :lines: 17-
          :linenos:
 
 
@@ -302,8 +293,8 @@ The camera offers multiple properties to assist with image acquisition.
 Depending on the device at hand these range from softwaretrigger to
 exposure to complete auto adjustment algorithms.
 
-List Properties
----------------
+Get/List Properties
+-------------------
 
 The responsible function is `tcam_prop_get_tcam_property_names`.
 
@@ -319,42 +310,18 @@ For an overview over available properties type the following into a terminal:
 
       .. literalinclude:: ../../examples/c/01-list-properties.c
          :language: c
-         :lines: 28-62
-         :emphasize-lines: 7, 23
+         :lines: 33-35, 45-78, 140-143
          :linenos:
 
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/01-list-properties.py
          :language: python
-         :lines: 51, 52, 64
          :linenos:
 
 This code can be found in the example `01-list-properties`.
 
-Get Property
-------------
-
-The responsible function is `tcam_prop_get_tcam_property`.
-
-.. tabs::
-
-   .. group-tab:: c
-
-      .. literalinclude:: ../../examples/c/01-list-properties.c
-         :language: c
-         :lines: 45-78
-         :linenos:                                          
-                         
-   .. group-tab:: python
-
-      .. literalinclude:: ../../examples/python/01-list-properties.py
-         :language: python
-         :lines: 64-76
-         :linenos:
-   
-   This code can be found in the example `01-list-properties`.
-   
+  
 Set Property
 ------------
 
@@ -366,7 +333,7 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 34-50
+         :lines: 86-91, 103-109
          :linenos:
 
    .. group-tab:: python

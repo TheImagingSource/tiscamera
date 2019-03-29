@@ -30,8 +30,9 @@ int main (int argc, char *argv[])
     char* serial = NULL; // set this if you do not want the first found device
 
     GError* err = NULL;
+    const char* pipeline_desc = "tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink";
 
-    GstElement* pipeline = gst_parse_launch("tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink", &err);
+    GstElement* pipeline = gst_parse_launch(pipeline_desc, &err);
 
     /* test for error */
     if (pipeline == NULL)

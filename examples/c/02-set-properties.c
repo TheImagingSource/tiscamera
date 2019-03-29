@@ -89,6 +89,8 @@ int main (int argc, char *argv[])
     /* in the READY state the camera will always be initialized */
     gst_element_set_state(source, GST_STATE_READY);
 
+    /* Device is now in a state for interactions */
+
     /*
       We print the properties for a before/after comparison,
      */
@@ -103,16 +105,19 @@ int main (int argc, char *argv[])
 
     g_value_set_boolean(&set_auto, FALSE);
 
-    tcam_prop_set_tcam_property(TCAM_PROP(source), "Exposure Auto", &set_auto);
+    tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                "Exposure Auto", &set_auto);
     /* reuse set_auto. Auto Exposure and Auto Gain have the same type */
-    tcam_prop_set_tcam_property(TCAM_PROP(source), "Gain Auto", &set_auto);
+    tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                "Gain Auto", &set_auto);
 
     GValue set_exposure = G_VALUE_INIT;
     g_value_init(&set_exposure, G_TYPE_INT);
 
     g_value_set_int(&set_exposure, 3000);
 
-    tcam_prop_set_tcam_property(TCAM_PROP(source), "Exposure", &set_exposure);
+    tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                "Exposure", &set_exposure);
 
     /*
       second print for the before/after comparison

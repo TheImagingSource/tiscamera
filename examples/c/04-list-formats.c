@@ -27,8 +27,8 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = "42610001";
-        // NULL; // set this if you do not want the first found device
+    // set this if you do not want the first found device
+    char* serial = NULL;
 
     /* create a tcambin to retrieve device information */
     GstElement* source = gst_element_factory_make("tcambin", "source");
@@ -42,8 +42,8 @@ int main (int argc, char *argv[])
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
 
-    /* Setting the state to ready ensures that all resources are initialized
-       and that we really get all format capabilities */
+    /* Setting the state to ready ensures that all resources
+       are initialized and that we really get all format capabilities */
     gst_element_set_state(source, GST_STATE_READY);
 
     GstPad* pad = gst_element_get_static_pad(source, "src");
@@ -87,7 +87,9 @@ int main (int argc, char *argv[])
         }
         else
         {
-            printf("format handling not implemented for unexpected type: %s\n", G_VALUE_TYPE_NAME(gst_structure_get_field_type(structure, "format")));
+            printf("format handling not implemented for unexpected type: %s\n",
+                   G_VALUE_TYPE_NAME(gst_structure_get_field_type(structure,
+                                                                  "format")));
             continue;
         }
 
@@ -95,8 +97,10 @@ int main (int argc, char *argv[])
 
         if (width_type == GST_TYPE_INT_RANGE)
         {
-            int width_min = gst_value_get_int_range_min(gst_structure_get_value(structure, "width"));
-            int width_max = gst_value_get_int_range_max(gst_structure_get_value(structure, "width"));
+            int width_min = gst_value_get_int_range_min(gst_structure_get_value(structure,
+                                                                                "width"));
+            int width_max = gst_value_get_int_range_max(gst_structure_get_value(structure,
+                                                                                "width"));
 
 
             printf("width: [%d-%d]", width_min, width_max);
@@ -121,8 +125,10 @@ int main (int argc, char *argv[])
 
         if (height_type == GST_TYPE_INT_RANGE)
         {
-            int height_min = gst_value_get_int_range_min(gst_structure_get_value(structure, "height"));
-            int height_max = gst_value_get_int_range_max(gst_structure_get_value(structure, "height"));
+            int height_min = gst_value_get_int_range_min(gst_structure_get_value(structure,
+                                                                                 "height"));
+            int height_max = gst_value_get_int_range_max(gst_structure_get_value(structure,
+                                                                                 "height"));
 
 
             printf("height: [%d-%d]", height_min, height_max);

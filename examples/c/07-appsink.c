@@ -43,6 +43,8 @@ GstFlowReturn callback (GstElement* sink, void* user_data)
 
     if (sample)
     {
+        // we have a valid sample
+        // do things with the image here
         static guint framecount = 0;
         int pixel_data = -1;
 
