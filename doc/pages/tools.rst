@@ -17,7 +17,6 @@ either part of tiscamera or are indirectly used.
    camera-ip-conf.rst
    firmware-update.rst
    gige-daemon.rst
-   uvcdynctrl.rst
    tcam-uvc-extension-loader.rst
 
 ### Third-Party Tools
