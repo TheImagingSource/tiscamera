@@ -16,9 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fullscreen, image saving, triggering and opening the device dialog
 - Generation of user documentation. Enabled with -DBUILD_USER_DOC=ON
 - Auto Iris functionality to gsttcamautoexposure element
-- bash auto completion for tcam-ctrl
-- bash auto completion for tcam-capture
-- bash auto completion for gige-daemon
 - AFU050 will have much quicker device lost notification
 - tcamsrc now adds a GstMeta object to each buffer to transport additional information
 - Add property drop-incomplete-buffer to tcamsrc
