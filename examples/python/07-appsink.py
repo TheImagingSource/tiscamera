@@ -47,7 +47,7 @@ def callback(appsink, user_data):
 
         caps = sample.get_caps()
 
-        gst_buffer = sample.get_buffer().copy()
+        gst_buffer = sample.get_buffer()
 
         try:
             (ret, buffer_map) = gst_buffer.map(Gst.MapFlags.READ)
@@ -91,15 +91,14 @@ def main():
     Gst.init(sys.argv)  # init gstreamer
     serial = None
 
-    pipeline = Gst.parse_launch("tcambin name=source ! videoconvert ! appsink name=sink")
+    pipeline = Gst.parse_launch("tcambin name=source"
+                                " ! videoconvert"
+                                " ! appsink name=sink")
 
     # test for error
     if not pipeline:
         print("Could not create pipeline.")
         sys.exit(1)
-
-    # we create a source element to retrieve a device list through it
-    source = Gst.ElementFactory.make("tcambin")
 
     # The user has not given a serial, so we prompt for one
     if serial is not None:

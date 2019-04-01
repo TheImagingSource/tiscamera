@@ -86,6 +86,17 @@ int main (int argc, char *argv[])
     /* create a tcambin to retrieve device information */
     GstElement* source = gst_element_factory_make("tcambin", "source");
 
+    const char* serial = NULL;
+
+    if (serial != NULL)
+    {
+        GValue val = {};
+        g_value_init(&val, G_TYPE_STRING);
+        g_value_set_static_string(&val, serial);
+
+        g_object_set_property(G_OBJECT(source), "serial", &val);
+    }
+
     /* in the READY state the camera will always be initialized */
     gst_element_set_state(source, GST_STATE_READY);
 
@@ -124,6 +135,7 @@ int main (int argc, char *argv[])
      */
     print_properties(source);
 
+    /* cleanup, reset state */
     gst_element_set_state(source, GST_STATE_NULL);
 
     gst_object_unref(source);

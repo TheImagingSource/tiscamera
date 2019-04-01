@@ -48,8 +48,10 @@ def main():
 
     caps = Gst.Caps.new_empty()
 
-    structure = Gst.Structure.from_string("video/x-raw")
-    structure.set("", )
+    structure = Gst.Structure.new_from_string("video/x-raw")
+    structure.set_value("width", 640)
+    structure.set_value("height", 480)
+    structure.set_value("framerate", Gst.Fraction(30, 1))
 
     caps.append_structure(structure)
 

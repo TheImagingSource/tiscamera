@@ -77,6 +77,9 @@ def main():
         # This is gstreamer set_property
         camera.set_property("serial", serial)
 
+    # in the READY state the camera will always be initialized
+    camera.set_state(Gst.State.READY)
+
     # Print properties for a before/after comparison
     print_properties()
 
@@ -88,6 +91,9 @@ def main():
     camera.set_tcam_property("Exposure", 3000)
 
     print_properties()
+
+    # cleanup, reset state
+    camera.set_state(Gst.State.NULL)
 
 
 if __name__ == "__main__":

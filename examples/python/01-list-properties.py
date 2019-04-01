@@ -27,60 +27,6 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Tcam, Gst
 
 
-def print_single_property(camera, name):
-    """
-    param: camera: TcamProp object that shall be used
-    param: name: string containing the name of the property
-
-    """
-
-    (ret, value,
-     min_value, max_value,
-     default_value, step_size,
-     value_type, flags,
-     category, group) = camera.get_tcam_property(name)
-
-    if not ret:
-        print("could not receive value {}".format(name))
-        return
-
-    if value_type == "integer" or value_type == "double":
-        print("{}({}) value: {} default: {} min: {} max: {} grouping: {} - {}".format(name,
-                                                                                      value_type,
-                                                                                      value, default_value,
-                                                                                      min_value, max_value,
-                                                                                      category, group))
-    elif value_type == "string":
-            print("{}(string) value: {} default: {} grouping: {} - {}".format(name,
-                                                                              value,
-                                                                              default_value,
-                                                                              category,
-                                                                              group))
-    elif value_type == "button":
-            print("{}(button) grouping is {} -  {}".format(name,
-                                                           category,
-                                                           group))
-    elif value_type == "boolean":
-            print("{}(boolean) value: {} default: {} grouping: {} - {}".format(name,
-                                                                               value,
-                                                                               default_value,
-                                                                               category,
-                                                                               group))
-    elif value_type == "enum":
-            enum_entries = camera.get_tcam_menu_entries(name)
-
-            print("{}(enum) value: {} default: {} grouping {} - {}".format(name,
-                                                                           value,
-                                                                           default_value,
-                                                                           category,
-                                                                           group))
-            print("Entries: ")
-            for entry in enum_entries:
-                print("\t {}".format(entry))
-    else:
-        print("This should not happen.")
-
-
 def main():
     Gst.init(sys.argv)  # init gstreamer
 
@@ -98,7 +44,52 @@ def main():
     property_names = camera.get_tcam_property_names()
 
     for name in property_names:
-        print_single_property(camera, name)
+
+        (ret, value,
+         min_value, max_value,
+         default_value, step_size,
+         value_type, flags,
+         category, group) = camera.get_tcam_property(name)
+
+        if not ret:
+            print("could not receive value {}".format(name))
+            continue
+
+        if value_type == "integer" or value_type == "double":
+            print("{}({}) value: {} default: {} min: {} max: {} grouping: {} - {}".format(name,
+                                                                                          value_type,
+                                                                                          value, default_value,
+                                                                                          min_value, max_value,
+                                                                                          category, group))
+        elif value_type == "string":
+            print("{}(string) value: {} default: {} grouping: {} - {}".format(name,
+                                                                              value,
+                                                                              default_value,
+                                                                              category,
+                                                                              group))
+        elif value_type == "button":
+            print("{}(button) grouping is {} -  {}".format(name,
+                                                           category,
+                                                           group))
+        elif value_type == "boolean":
+            print("{}(boolean) value: {} default: {} grouping: {} - {}".format(name,
+                                                                               value,
+                                                                               default_value,
+                                                                               category,
+                                                                               group))
+        elif value_type == "enum":
+            enum_entries = camera.get_tcam_menu_entries(name)
+
+                print("{}(enum) value: {} default: {} grouping {} - {}".format(name,
+                                                                               value,
+                                                                               default_value,
+                                                                               category,
+                                                                               group))
+                print("Entries: ")
+                for entry in enum_entries:
+                    print("\t {}".format(entry))
+        else:
+            print("This should not happen.")
 
 
 if __name__ == "__main__":

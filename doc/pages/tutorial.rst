@@ -132,13 +132,15 @@ and :c:func:`tcam_prop_get_device_info`
          :lines: 28-62
          :emphasize-lines: 7, 23-27
          :linenos:
+         :dedent: 4
 
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/00-list-devices.py
          :language: python
-         :lines: 33-
+         :lines: 34-57
          :linenos:
+         :dedent: 4
 
 This code can be found in the example `00-list-devices`.
 
@@ -154,15 +156,40 @@ The recommended way of addressing a camera is by using it's serial number.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 86-93, 127-130
+         :lines: 86-101
          :linenos:
-      
+         :dedent: 4
+  
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/00-list-devices.py
+      .. literalinclude:: ../../examples/python/02-set-properties.py
          :language: python
+         :lines: 71-81
          :linenos:
+         :dedent: 4
 
+To close a device it is sufficient to set the gstreamer state to NULL.
+All hardware resources will be freed.
+                  
+.. tabs::
+
+   .. group-tab:: c
+
+      .. literalinclude:: ../../examples/c/02-set-properties.c
+         :language: c
+         :lines: 138-141
+         :linenos:
+         :dedent: 4
+
+   .. group-tab:: python
+
+      .. literalinclude:: ../../examples/python/02-set-properties.py
+         :language: python
+         :lines: 95-96
+         :linenos:
+         :dedent: 4
+
+                  
 This code can be found in the example `02-set-properties`.
             
 Streaming
@@ -190,12 +217,15 @@ The printed caps are gstreamer compatible and can be copy-pasted for configurati
          :language: c
          :lines: 33-35, 45-52
          :linenos:
+         :dedent: 4
 
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/04-list-formats.py
          :language: python
+         :lines: 112, 124, 34
          :linenos:
+         :dedent: 4
 
 This code can be found in the example `04-list-formats`.
 
@@ -211,13 +241,16 @@ Setting Caps
          :language: c
          :lines: 32-36,55-69,76-79
          :linenos:
+         :dedent: 4
                   
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/05-set-format.py
          :language: python
+         :lines: 38-42, 49-64
          :linenos:
-
+         :dedent: 4
+                  
 This code can be found in the example `04-set-format`.
 
 As an alternative to creating the GstCaps manually you can also use ``gst_caps_from_string``.
@@ -238,6 +271,9 @@ A simple pipeline would look like this:
 
 Working code can be found in the example `05-live-stream`.
 
+An alternative for simple try and error setups is the usage of the program ``gst-launch-1.0``.
+It enables the creation of pipelines on the commandline, allowing for quick setups. 
+
 
 Receiving Images
 ----------------
@@ -255,14 +291,16 @@ To enable image retrieval the following steps need to be taken.
          :language: c
          :lines:  102-106, 114-123
          :linenos:
-            
+         :dedent: 4
+                  
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/07-appsink.py
          :language: python
-         :lines: 17-
-         :linenos:
-
+         :lines: 94-97, 108-116
+         :linenos: 
+         :dedent: 4
+                  
 The image `sample` that is given to the function contains the image, video caps and other additional information that maybe required for image processing.
 
 
@@ -274,17 +312,16 @@ The image `sample` that is given to the function contains the image, video caps 
          :language: c
          :lines: 32-45, 51, 90-95
          :linenos:
-                                                         
+                  
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/07-appsink.py
          :language: python
+         :lines: 37-51, 86
          :linenos:
-
 
 This code can be found in the example `07-appsink`.
 
-An additional example where the image is touched and then displayed can be found in `08-appsink-live`
 
 Properties
 ==========
@@ -312,13 +349,17 @@ For an overview over available properties type the following into a terminal:
          :language: c
          :lines: 33-35, 45-78, 140-143
          :linenos:
-
+         :dedent: 4
+                     
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/01-list-properties.py
          :language: python
+         :lines: 37-40, 44-56 
          :linenos:
+         :dedent: 4
 
+                  
 This code can be found in the example `01-list-properties`.
 
   
@@ -333,15 +374,17 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 86-91, 103-109
+         :lines: 86-88, 100-101, 114-132
          :linenos:
-
+         :dedent: 4
+                  
    .. group-tab:: python
 
       .. literalinclude:: ../../examples/python/02-set-properties.py
          :language: python
-         :lines: 34-48
+         :lines: 74-75, 80-82, 88-91
          :linenos:
-
+         :dedent: 4
+                  
 This code can be found in the example `02-set-properties`.
 
