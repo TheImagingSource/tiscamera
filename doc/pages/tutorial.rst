@@ -73,6 +73,14 @@ Running without installation
 To integrate tiscamera into the system environment source the `env.sh` script located in the build directory.
 It will adjust environment variables, so that gstreamer elements, etc can be found.
 
+Verifying the installation
+==========================
+
+To ensure that all libraries are correctly found execute one of the following commands after connecting the camera.
+
+``tcam-capture`` - The graphical example program that ships with tiscamera.
+
+``gst-launch-1.0 tcambin ! video/x-raw,format=BGRx ! videoconvert ! ximagesink`` - GStreamer commandline that works with every camera.
    
 ===================
 Camera Interactions
