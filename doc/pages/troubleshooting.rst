@@ -6,6 +6,12 @@ Troubleshooting
 General
 =======
 
+A good starting point is to enable logging.
+GStreamer logging and tiscamera logging will most likely be helpful.
+See :ref:`logging`.
+
+If in doubt, please :any:`contact our support<contact>`. We will gladly answer any questions and help with troubleshooting.
+
 ===
 USB
 ===
@@ -13,17 +19,23 @@ USB
 cstate handling
 ===============
 
+cstates are a method of CPU power saving. When dealing with realtime processes like video streaming
+aggressive power management can cause latency spikes.
+
 For a good overview/introduction read: https://access.redhat.com/articles/65410
 
-The problem boils down to: Setting kernel arguments in grub. This should be used to verify that the problem really has to do with cstates. To do this add
+The solution boils down to: Setting kernel arguments in grub.
+This should be used to verify that the problem really has to do with cstates.
+To do this add
 
 .. code-block:: text
                 
    processor.max_cstate=1 idle=poll
 
-to the kernel arguements.
+to the kernel arguments.
 
-To achieve the same during run time, let this program run. It has to be killed manually to re-enable cstates.
+To achieve the same during run time, let this program run. It has to be  manually stopped by pressing `Ctrl-C`.
+This will re-enable cstates.
 
 .. code-block:: c
 
