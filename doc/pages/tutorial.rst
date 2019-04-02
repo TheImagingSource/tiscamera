@@ -10,6 +10,12 @@ For a simpler version read the README.md in the project's root directory.
 Setup
 =====
 
+The first half of this tutorial describes the configuration and build process
+required to build tiscamera on a local PC.
+For stable releases a precompiled .deb-file is available, see :ref:`packaging`.
+
+At this moment only amd64 releases are available.
+
 Cloning
 =======
 

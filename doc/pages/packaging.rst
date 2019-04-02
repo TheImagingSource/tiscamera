@@ -10,6 +10,10 @@ distribution of the compiled binaries.
 
 Currently only the creation of Debian packages is supported.
 
+A release will be published at https://github.com/TheImagingSource/tiscamera/releases .
+
+At this moment only amd64 releases are available.
+
 Naming
 ======
 
