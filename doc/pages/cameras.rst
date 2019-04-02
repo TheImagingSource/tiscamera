@@ -2,11 +2,70 @@
 Cameras
 #######
 
+Compatibility
+-------------
+
+All `The Imaging Source` cameras can be addressed under Linux.
+Some legacy hardware is not supported by the tiscamera libraries.
+
+.. list-table:: compatability list
+   :header-rows: 1
+
+   * - Type
+     - Linux I/O
+     - tiscamera
+   * - Usb-2.0
+     - yes
+     - yes
+   * - Usb-3.0
+     - yes
+     - yes
+   * - GigE
+     - yes
+     - yes
+   * - Firewire
+     - yes
+     - no
+   * - Converter / Grabber
+     - yes
+     - no
+
+
 ===============
 Firmware-Update
 ===============
 
 For the event that a firmware update is required take the following steps:
+
+Prerequisites
+-------------
+
+The following tools are required for a firmware update:
+
+.. tabs::
+
+   .. group-tab:: Usb-2.0
+
+      ``firmware-update``
+
+      firmware-update is not part of a standard tiscamera installation.
+      To get the tool you have to manually compile the tiscamera repository.
+      firmware-update can then be found in the build directory under `tools/firmware-update/`.
+
+   .. group-tab:: Usb-3.X
+
+      ``firmware-update``
+
+      firmware-update is not part of a standard tiscamera installation.
+      To get the tool you have to manually compile the tiscamera repository.
+      firmware-update can then be found in the build directory under `tools/firmware-update/`.
+                  
+   .. group-tab:: GigE
+
+      ``camera-ip-conf``
+
+      camera-ip-conf is part of a standard tiscamera installation when aravis support is enabled.
+
 
 Identifying the camera
 ----------------------
