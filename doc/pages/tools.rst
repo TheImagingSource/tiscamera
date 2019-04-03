@@ -19,7 +19,3 @@ either part of tiscamera or are indirectly used.
    gige-daemon.rst
    tcam-uvc-extension-loader.rst
 
-### Third-Party Tools
-
-\subpage uvcdynctrl - Tool for automatic uvc extension application for USB cameras.
-

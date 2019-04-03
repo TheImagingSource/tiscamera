@@ -1,4 +1,4 @@
-.. _tcam-ctrl:
+.. _tcam_ctrl:
 
 #########
 tcam-ctrl

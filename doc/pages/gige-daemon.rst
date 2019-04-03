@@ -1,3 +1,5 @@
+.. _gige_daemon:
+
 ###########
 gige-daemon
 ###########

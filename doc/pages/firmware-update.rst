@@ -1,3 +1,5 @@
+.. _firmware_update:
+
 ###############
 firmware-update
 ###############

@@ -1,4 +1,4 @@
-.. _tcam-capture:
+.. _tcam_capture:
 
 ############
 tcam-capture

@@ -1,3 +1,5 @@
+.. _tcam_gigetool:
+
 #############
 tcam-gigetool
 #############

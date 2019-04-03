@@ -1,4 +1,6 @@
 
+.. _camera_ip_conf:
+
 ##############
 camera-ip-conf
 ##############

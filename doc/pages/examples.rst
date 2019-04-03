@@ -43,7 +43,8 @@ These examples exist in all available example languages.
    * - 09
      - device-lost
      - Receive device-lost and other messages and react to them
-       
+
+.. _examples_further:
 
 Further Examples
 ================

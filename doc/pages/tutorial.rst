@@ -406,3 +406,5 @@ Where To Go From Here
 =====================
 
 Take a look at our :any:`reference`, the :any:`GStreamer documentation<reading_gstreamer>` or :any:`ask us a question<contact>`.
+
+For extended examples that include OpenCV, ROS and GUI frameworks look at our :ref:`extended examples<examples_further>`.

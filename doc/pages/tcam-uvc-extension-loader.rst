@@ -1,3 +1,5 @@
+.. _tcam_uvc_extension_loader:
+
 #########################
 tcam-uvc-extension-loader
 #########################

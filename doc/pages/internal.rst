@@ -10,21 +10,20 @@ Folder Structure
 This is a simplified folder structure of the tiscamera project:
 
 
-|   tiscamera
+|   tiscamera 
 |   ├── cmake
 |   │   └── modules
 |   ├── data - static data that is neither compiled or generated
-|   │   ├── bash-completion
 |   │   ├── firmware
 |   │   │   └── usb2
-|   │   ├── images
-|   │   ├── systemd
-|   │   ├── udev
-|   │   └── uvc-extensions
+|   │   ├── images - logos, icons, camera images, etc.
+|   │   ├── systemd - systemd units
+|   │   ├── udev - udev rules for usb cameras, see :doc:`udev`
+|   │   └── uvc-extensions - description files for UVC extension units, see :doc:`uvc`
 |   ├── dependencies - third party software 
 |   │   ├── 7z
 |   │   ├── aravis
-|   │   ├── catch
+|   │   ├── catch - C++ test framework
 |   │   ├── CLI11
 |   │   ├── json
 |   │   └── PugiXml
@@ -36,39 +35,33 @@ This is a simplified folder structure of the tiscamera project:
 |   │   │   └── _templates
 |   ├── examples - code examples to help with understanding 
 |   │   ├── c
-|   │   ├── cpp
-|   │   ├── gstreamer-1.0
-|   │   ├── lua
-|   │   ├── python
-|   │   └── ROS
+|   │   └── python
 |   ├── packaging - resources for the creation of binary distributions
 |   │   └── deb
 |   ├── scripts - helper scripts, see :any:`scripts`
-|   ├── src
-|   │   ├── algorithms
+|   ├── src - general source directory
+|   │   ├── algorithms - autofocus, whitebalance, etc.
 |   │   ├── aravis - aravis backend
 |   │   ├── gobject - tcamprop property interface
 |   │   ├── gstreamer-1.0 - gstreamer modules
 |   │   ├── libusb - libusb-1.0 backend
 |   │   ├── tcam-network - network helper library
 |   │   └── v4l2 - v4l2 backend
-|   ├── tests - verification code
+|   ├── tests - verification code, see :doc:`tests`
 |   │   ├── integration
 |   │   │   └── start_stop
-|   │   ├── release
 |   │   └── unit
-|   │       ├── algorithms
 |   │       ├── gstreamer-1.0
 |   │       └── tcam-network
-|   └── tools
-|       ├── camera-ip-conf
+|   └── tools - directory for applications 
+|       ├── :ref:`camera-ip-conf<camera_ip_conf>`
 |       ├── dfk73udev
-|       ├── firmware-update
-|       ├── gige-daemon
-|       ├── tcam-capture
-|       ├── tcam-ctrl
-|       ├── tcam-gigetool
-|       └── tcam-uvc-extension-loader
+|       ├── :ref:`firmware-update<firmware_update>`
+|       ├── :ref:`gige-daemon<gige_daemon>`
+|       ├── :ref:`tcam-capture<tcam_capture>`
+|       ├── :ref:`tcam-ctrl<tcam_ctrl>`
+|       ├── :ref:`tcam-gigetool<tcam_gigetool>`
+|       └── :ref:`tcam-uvc-extension-loader<tcam_uvc_extension_loader>`
 
 Libraries
 =========
@@ -93,7 +86,9 @@ gobject-introspection library. Used by all gstreamer modules.
 libtcam-network
 ---------------
 
-Common network functionality. Used by :any:`gige-daemon`, :any:`camera-ip-conf`, :any:`tcam-gigetool`
+Common network functionality.
+Used by :ref:`gige-daemon<gige_daemon>`, :ref:`camera-ip-conf<camera_ip_conf>`,
+:ref:`tcam-gigetool<tcam_gigetool>`
 
 libtcam-uvc-extension
 ---------------------
@@ -114,3 +109,4 @@ libtcam-dfk73
 -------------
 
 Helper library for the correct initialization of DFK73 cameras.
+
