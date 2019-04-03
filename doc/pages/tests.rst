@@ -33,3 +33,142 @@ Integration tests are tests that verify the proper interaction of multiple eleme
 This e.g. includes the execution of complete gstreamer pipelines.
 
 They are not executed automatically.
+
+Manual Tests
+============
+
+The following tests are executed by a tester before publication of a new release.
+The tests are executed on the current reference system.
+
+For most tests the following configuration is assumed:
+``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=ON -DBUILD_LIBUSB=ON -DBUILD_TESTS=ON -DBUILD_DOCUMENTATION=ON -DBUILD_TOOLS=ON ..``
+
+- [ ] Building/Installation
+
+  - [ ] The README instructions are clear and correct.
+  - [ ] scripts/install-dependencies.sh installs all required dependencies for compilation/run time
+
+  - [ ] The following configurations have to run/compile without error:
+
+    - [ ] ``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=OFF -DBUILD_LIBUSB=OFF ..``
+    - [ ] ``cmake -DBUILD_ARAVIS=OFF -DBUILD_USB=OFF -DBUILD_LIBUSB=ON ..``
+    - [ ] ``cmake -DBUILD_ARAVIS=OFF -DBUILD_USB=ON -DBUILD_LIBUSB=OFF ..``
+    - [ ] ``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=ON -DBUILD_LIBUSB=ON ..``
+
+  - [ ] ``make tests`` executes without errors. Can be done after installation or with env.sh.
+  - [ ] ``make package`` creates a Debian package that is installable and executable.
+    See :ref:`package_testing`.
+
+  - [ ] Sourcing env.sh sets all paths correctly
+
+  - [ ] ``tcam-ctrl -l`` lists all devices.
+
+    - [ ] ``tcam-capture`` can be started and works as expected.
+    - [ ] ``camera-ip-conf -l`` works
+
+  - [ ] installation works
+
+    - [ ] ``sudo make install`` runs without warnings/error
+    - [ ] ``sudo systemctl start gige-daemon.service``
+
+- [ ] tcam-capture
+
+  - [ ] Starting with ``--fullscreen`` opens in fullscreen mode
+  - [ ] Starting with ``--serial`` opens the device with the given serial.
+  - [ ] Starting with ``--format <caps string>`` opens the last device with the described format.
+  - [ ] Pressing the fit-to-view button resizes the display area fit the current window size.
+  - [ ] ROI display
+
+    - [ ] ROIs can be adjusted via mouse
+    - [ ] ROIs can be moved via mouse
+
+  - [ ] hotkeys
+
+    - [ ] trigger button works
+      Active `trigger mode` and press the `trigger button` to receive a new image (default: spacebar).
+    - [ ] reopen the device dialog
+      Reopen the device dialog to select a new device (default: ctrl-o).
+    - [ ] Pressing F11 or f toggles fullscreen mode
+
+- [ ] evironment
+
+  - [ ] TCAM_LOG
+
+    - [ ] Setting TCAM_LOG=DEBUG enables debug output.
+    - [ ] Setting TCAM_LOG=OFF disables any output log.
+
+  - [ ] TCAM_GIGE_PACKET_SIZE works
+
+    - | [ ] ``export TCAM_GIGE_PACKET_SIZE=XXXX``
+      | use ``TCAM_LOG=DEBUG gst-launch-1.0 tcambin serial=<serial> ! videoconvert ! ximagesink``
+      | to verify the size.
+
+- [ ] GStreamer Elements
+
+  - [ ] tcamsrc
+
+    - [ ] tcamsrc property `drop-incomplete-frames=false` delivers incomplete frames.
+      Testable by changing the mtu.
+    - [ ] delivers correct GstMeta data
+
+  - [ ] tcamautoexposure
+
+    - [ ] auto exposure changes the exposure value
+
+    - [ ] increasing auto exposure min increases the lowest possible exposure value the algorithm chooses.
+      - [ ] auto exposure max is correctly limited by the used framerate.
+      - [ ] lowering auto exposure max causes adjustments by the algorithms when high exposure values are set.
+
+    - [ ] auto gain changes the gain value.
+
+      - [ ] increasing auto gain min increases the lowest possible gain value the algorithm chooses.
+      - [ ] lowering auto gain max causes adjustments by the algorithms when high gain values are set.
+
+    - [ ] auto iris changes the iris value
+
+      - [ ] iris is on maximum opening
+        when exposure/gain adjustments are sufficient
+      - [ ] iris closes when image becomes the bright
+        and exposure/gain are already at their minim values.
+
+- [ ] USB
+
+  - [ ] extension units are correctly loaded when
+
+    - [ ] usb 2
+    - [ ] usb 23
+    - [ ] usb 33/37
+
+  - [ ] UDEV
+
+    - [ ] extension units are correctly loaded when a camera is attached
+    - [ ] libusb cameras like the afu050 can be opened
+
+
+.. _package_testing:
+
+Package Testing
+---------------
+
+The following steps are to be taken to ensure proper package integrity.
+These steps shall be executed on a vanilla reference system.
+
+- [ ] ``sudo apt install tiscamera-*.deb`` installs the package without warnings etc.
+
+- [ ] The gige-daemon is running.
+
+  - [ ] The gige-daemon is running after a reboot.
+
+- [ ] ``tcam-ctrl -l`` lists all expected devices and has no waiting period.
+
+- [ ] ``tcam-ctrl -p <serial>`` lists all properties for a UVC camera (this verifies tcam-uvc-extension-loader).
+
+- [ ] ``gst-launch-1.0 tcambin ! videoconvert ! ximagesink`` opens the first device and displays an image.
+
+- [ ] ``tcam-capture`` correctly interacts with cameras
+
+  - [ ] camera images and `The Imaging Source` icon are correctly displayed.
+
+- [ ] The documenation can be opened and used. Default path: /usr/share/theimagingsource/tiscamera/documentation/index.html
+
+- [ ] ``sudo apt remove tiscamera`` removes the package without warnings, etc.
