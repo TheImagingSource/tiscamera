@@ -14,15 +14,34 @@ Commandline Arguments
 
 tcam-capture has several optional arguments to change its behavior:
 
--h, --help           Show this help message and exit
---serial SERIAL      Open device with serial immediately
---format CAPS_STR    Open device with this gstreamer format
---verbose, -v        Increase logging level
---reset              Reset application settings and clear cache
---fullscreen         Start the application in fullscreen mode
+.. option:: -h, --help
+
+   Show this help message and exit
+   
+.. option:: --serial SERIAL
+
+   Open device with serial immediately.
+
+.. option:: --format CAPS_STR
+
+   Open device with this gstreamer caps.
+
+.. option:: --verbose, -v
+
+   Increase logging level. Maximum is 5.
+
+.. option:: --reset
+
+   Reset application settings and clear cache.
+   This deletes all user settings.
+
+.. option:: --fullscreen
+
+   Start the application in fullscreen mode.
+
 
 Additionally  gstreamer arguments can be passe to retrieve debug information about the streams.
-Currently supported are
+Currently supported are the following gstreamer commandline arguments:
 
 .. code-block:: text
 
@@ -30,13 +49,14 @@ Currently supported are
     --gst-debug-level
     --gst-debug-no-color
 
-For more information concerning gstreamer debugging go here: :ref:`logging`
+For more information concerning gstreamer debugging/logging, see :ref:`logging`
 
-=======
-Options
-=======
+===========
+Preferences
+===========
 
 tcam-capture offers several options to change its behavior.
+To open the options dialog press the `Preferences` button in the toolbar.
 The configuration file can be found under `$XDG_CONFIG_DIR/tcam-capture.conf`.
 
 **Default** : `~/.config/tcam-capture.conf`
