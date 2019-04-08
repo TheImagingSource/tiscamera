@@ -19,6 +19,7 @@ libuuid1 (>= 2.27),
 
 # aravis specific dependencies
 libxml2 (>= 2.9.3),
+libpcap0.8 (>= 1.7.4-2),
 
 # tools specific dependencies
 python3-pyqt5 (>= 5.5.1),
