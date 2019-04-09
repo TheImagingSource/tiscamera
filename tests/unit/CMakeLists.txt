@@ -13,8 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(gstreamer-1.0)
-add_subdirectory(tcam-network)
+if (BUILD_GST_1_0)
+  add_subdirectory(gstreamer-1.0)
+endif (BUILD_GST_1_0)
+
+if (BUILD_ARAVIS)
+  add_subdirectory(tcam-network)
+endif (BUILD_ARAVIS)
+
+add_subdirectory(algorithms)
 
 include_directories("${CMAKE_SOURCE_DIR}/dependencies/catch")
 
