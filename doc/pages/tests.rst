@@ -55,7 +55,8 @@ For most tests the following configuration is assumed:
     - [ ] ``cmake -DBUILD_ARAVIS=OFF -DBUILD_USB=ON -DBUILD_LIBUSB=OFF ..``
     - [ ] ``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=ON -DBUILD_LIBUSB=ON ..``
 
-  - [ ] ``make tests`` executes without errors. Can be done after installation or with env.sh.
+  - [ ] ``make test`` executes without errors.
+    Requires installation or sourcing of env.sh.
   - [ ] ``make package`` creates a Debian package that is installable and executable.
     See :ref:`package_testing`.
 
