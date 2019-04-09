@@ -57,5 +57,5 @@ TEST_CASE("Verify IP settings are legal", "[verification]")
                                 err_reason) == false);
     REQUIRE(!err_reason.empty());
 
-    std::cout << err_reason << "\n";
+    // std::cout << err_reason << "\n";
 }
