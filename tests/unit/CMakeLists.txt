@@ -21,8 +21,6 @@ if (BUILD_ARAVIS)
   add_subdirectory(tcam-network)
 endif (BUILD_ARAVIS)
 
-add_subdirectory(algorithms)
-
 include_directories("${CMAKE_SOURCE_DIR}/dependencies/catch")
 
 
