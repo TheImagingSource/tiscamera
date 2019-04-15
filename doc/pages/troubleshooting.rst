@@ -218,7 +218,3 @@ Permanently adjusting the MTU
 
 This step depends on the setup of the computer in question.
    
-Check the MTU size of the network components
---------------------------------------------
-
-.. todo:: implement a trace command in camera-ip-conf with arv_camera_gv_auto_packet_size
