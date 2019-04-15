@@ -8,14 +8,6 @@ camera-ip-conf
 camera-ip-conf is a tool that allows the ip configuration of GigE network cameras.
 It offers the possibility to configure via cli or gui.
 
-Examples
---------
-
-To list all cameras:
-
-.. code-block:: sh
-
-   camera-ip-conf -l
 
 Cameras can be named using the following methods:
 
@@ -25,6 +17,88 @@ Cameras can be named using the following methods:
    -m  --mac    - The mac of the camera
    -n  --name   - The user defined name (assuming the name is not empty)
 
+
+Arguments
+---------
+
+.. program:: camera-ip-conf
+
+.. option:: -h, --help
+
+   Print a help message
+
+.. option:: -l, list
+
+   List available GigE cameras.
+
+.. option:: -i, info (-s SERIAL|-n NAME|-m MAC)
+
+   Print information about a certain camera.
+
+.. option:: set [ip=IP] [subnet=NETMASK] [gateway=GATEWAY] [dhcp={on,off}] [static={on,off}] [name=NAME] (-s SERIAL|-n NAME|-m MAC)
+
+   Configure one or more settings in the camera.
+            
+   .. program:: camera-ip-conf-set
+
+   .. option:: ip=IP
+
+      Option to set static IP settings IP.
+               
+   .. option:: subnet=NETMASK
+
+      Option to set static IP settings netmask.
+
+   .. option:: gateway=GATEWAY
+
+      Option to set static IP settings gateway.
+               
+   .. option:: dhcp={on,off}
+
+      Toggle for usage of dynamic IP address settings.
+               
+   .. option:: static={on,off}
+
+      Toggle for usage of static IP address settings.
+               
+   .. option:: name=NAME
+
+      The maximum length of this name is 15 characters.
+               
+.. option:: rescue [ip=IP] [subnet=NETMASK] [gateway=GATEWAY] (-s SERIAL|-m MAC)
+
+   Temporarily assign another address to a camera
+
+   .. program:: camera-ip-conf-rescue
+
+   .. option:: ip=IP
+
+      IP address that shall be temporarily assigned.
+
+   .. option:: subnet=NETMASK
+
+      Netmask address that shall be temporarily assigned.
+               
+   .. option:: gateway=GATEWAY
+
+      Gateway address that shall be temporarily assigned.
+
+.. option:: upload firmware=FILE -s SERIAL
+
+   Upload a firmware file to a camera. 
+            
+   .. option:: firmware=FILE
+
+      .fw or .fwpack file that shall be used.
+
+Examples
+--------
+
+To list all cameras:
+
+.. code-block:: sh
+
+   camera-ip-conf -l
 
 To get information about a single camera:
 
