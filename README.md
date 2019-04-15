@@ -154,6 +154,8 @@ After installation you could try one of our examples or directly start with a gs
 
 `gst-launch-1.0 tcambin ! videoconvert ! ximagesink`
 
+alternatively start tcam-capture
+
 ## Questions, etc.
 
 For questions simply open a ticket or write us a mail at support@theimagingsource.com.
