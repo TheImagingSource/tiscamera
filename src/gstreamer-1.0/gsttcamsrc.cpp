@@ -1047,7 +1047,10 @@ static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* in
 {
     GstTcamSrc* self = (GstTcamSrc*) user_data;
 
-    GST_ERROR("Received lost device notification. Stopping stream.");
+    GST_ELEMENT_ERROR(GST_ELEMENT(self),
+                      RESOURCE, NOT_FOUND,
+                      ("Device lost (%s)", self->device_serial.c_str()),
+                      (NULL));
 
 #if GST_VERSION_MAJOR >= 1 && GST_VERSION_MINOR >= 10
 
