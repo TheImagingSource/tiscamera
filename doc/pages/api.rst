@@ -9,4 +9,4 @@ API
 
    tcamprop.rst
    properties.rst
-   roi.rst
+

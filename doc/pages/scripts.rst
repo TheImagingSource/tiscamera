@@ -37,7 +37,7 @@ To source it call the following in the build directory
 
    . ./env.sh
 
-Now additional commands like :ref:`tcam-ctrl` or :ref:`tcam-capture` should be available.
+Now additional commands like :ref:`tcam_ctrl` or :ref:`tcam_capture` should be available.
 
 .. _create_release:
 
