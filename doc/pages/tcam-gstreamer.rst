@@ -78,10 +78,14 @@ Device lost
 
 An error message containing the string "Device lost" will always be sent when the device does not respond or is not reachable.
 
-To operate multiple devices in the same pipeline one can query the error details to retrieve
-the serial of the lost device.
+The received message will be in the format "Device lost (<SERIAL>)".
+For an example of message handling, see the example `09-device-lost`.
 
-For an example of message handling, see the example 09-device-lost
+.. note:: The following requires GStreamer >= 1.10
+
+To simplify error handling the tcamsrc sends an additional "Device lost" message
+with a GstStructure attached. This structure contains the string field "serial".
+This implies tiscamera was compiled with gstreamer >= 1.10.
 
 .. code-block:: c
 
@@ -90,7 +94,7 @@ For an example of message handling, see the example 09-device-lost
    const char* lost_serial = gst_structure_get_string(struc, "serial");
 
 tcamautoexposure
-================
+################
 
 Automatically adjust exposure and gain to reach the wished image brightness.
 
@@ -189,7 +193,7 @@ Per default the region equals the entire image unless the user defines these val
      - Height the ROI shall have.
        
 tcamwhitebalance
-================
+################
 
 Color correction for bayer images.
 
@@ -228,7 +232,7 @@ Color correction for bayer images.
 .. _tcamautofocus:
        
 tcamautofocus
-=============
+#############
 
 Allows for cameras with focus elements to automatically adjust focus.
 
@@ -272,20 +276,20 @@ Per default the region equals the entire image unless the user defines these val
 
 
 tcamdutils
-==========
+##########
 
 Closed source optional transformation and interpretation filter.
 Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
 Implements features like HDR.
-Optimized for x64 plattforms.
+Optimized for x64 platforms.
 
 tcambiteater
-============
+############
 
 Converts BGRx 64-bit to BGRx 32-Bit. Only required when using tcamdutils.
 
 tcambin
-=======
+#######
 
 Wrapper around all the previous elements, allowing for an easy all-in-one handling.
 The tcambin will prefer bayer 8-bit over bayer 12/16-bit. Currently tcamdutils are required
