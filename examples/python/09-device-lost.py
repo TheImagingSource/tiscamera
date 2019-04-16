@@ -19,6 +19,7 @@
 #
 
 import sys
+import re
 import gi
 
 gi.require_version("Tcam", "0.1")
@@ -49,13 +50,13 @@ def bus_callback(bus, message, user_data):
         # if (strcmp(source_name, "tcamsrc0") == 0)
         if message.src.get_name() == "tcambin-source":
 
-            if err.message == "Device lost":
-                details = message.parse_error_details()
-                if details:
-                    print("Device lost came from device with serial = {}".format(details.get_string("serial")))
+            if err.message.startswith("Device lost ("):
+
+                m = re.search('Device lost \((.*)\)', err.message)
+                print("Device lost came from device with serial = {}".format(m.group(1)))
 
                 # device lost handling should be initiated here
-                # this example simply stops plaback
+                # this example simply stops playback
                 loop.quit()
 
     elif mtype == Gst.MessageType.WARNING:

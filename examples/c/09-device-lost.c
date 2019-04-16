@@ -28,6 +28,17 @@
 gboolean stop_program = FALSE;
 static GMainLoop* loop;
 
+
+gboolean starts_with (const char* a, const char* b)
+{
+    if (strncmp(a, b, strlen(b)) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+
 static gboolean bus_callback (GstBus* bus,
                               GstMessage* message,
                               gpointer data)
@@ -43,8 +54,6 @@ static gboolean bus_callback (GstBus* bus,
 
             gst_message_parse_error (message, &err, &debug);
             g_print ("Error: %s \n", err->message);
-            g_error_free (err);
-            g_free (debug);
 
             const char* source_name = gst_object_get_name(message->src);
 
@@ -52,15 +61,16 @@ static gboolean bus_callback (GstBus* bus,
             // if (strcmp(source_name, "tcamsrc0") == 0)
             if (strcmp(source_name, "tcambin-source") == 0)
             {
-                /* device-lost specific handling */
-                const GstStructure* struc = NULL;
-                gst_message_parse_error_details(message, &struc);
-
-                const char* serial = gst_structure_get_string(struc, "serial");
-
-                printf("Device lost came from device with serial = %s\n", serial);
+                if (starts_with(err->message, "Device lost ("))
+                {
+                    char* s_str = strstr(err->message, "(");
+                    const char* serial = strtok(s_str, "()");
+                    printf("Device lost came from device with serial = %s\n", serial);
+                }
             }
 
+            g_error_free (err);
+            g_free (debug);
             // device lost handling should be initiated here
             // this example simply stops plaback
             g_main_loop_quit(loop);
