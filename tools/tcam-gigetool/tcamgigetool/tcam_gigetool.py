@@ -550,7 +550,7 @@ def main():
     _add_common_argument(subparser, "i")
     subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
     subparser = subparsers.add_parser("batchupload",
-                                      help=_("upload a firmeare file to all cameras connected to a network interface"))
+                                      help=_("upload a firmware file to all cameras connected to a network interface"))
     subparser.add_argument("INTERFACE", type=str, help=_("network interface to scan for cameras"))
     subparser.add_argument("FILENAME", type=str, help=_("filename of firmware file to upload"))
     subparser.add_argument("-n", "--noconfigure", action="store_true", dest="noconfigure",
