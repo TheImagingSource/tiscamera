@@ -26,6 +26,7 @@ TISCAMERA_DIR=
 
 # Distribution in use
 DISTRIBUTION="DEBIAN"
+ASSUME_YES=""
 
 # possible values currently are:
 # DEBIAN
@@ -80,12 +81,12 @@ read_file () {
 #
 
 install_dependencies_debian_compilation () {
-    sudo apt install $(read_file "$TISCAMERA_DIR/dependencies-debian-compilation.txt")
+    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies-debian-compilation.txt")
 }
 
 
 install_dependencies_debian_runtime () {
-    sudo apt install $(read_file "$TISCAMERA_DIR/dependencies-debian-runtime.txt")
+    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies-debian-runtime.txt")
 }
 
 
@@ -155,6 +156,9 @@ while [ "$1" != "" ]; do
             ;;
         --runtime)
             install_runtime=1
+            ;;
+        --yes)
+            ASSUME_YES="-y"
             ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
