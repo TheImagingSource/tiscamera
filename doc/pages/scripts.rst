@@ -13,6 +13,8 @@ based systems.
 It allows for the installation of compilation and/or runtime dependencies. These can be
 selected with --compilation and --runtime.
 
+Additionally the argument --yes can be given to suppress the confirmation prompt of apt-get.
+
 Since the usage of installed packages by other software can not be tracked an uninstall option is not available.
 
 To install all dependencies call
