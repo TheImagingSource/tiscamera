@@ -2064,6 +2064,7 @@ static void new_exposure (GstTcamautoexposure* self, unsigned int brightness)
         iris.do_auto = self->auto_iris;
         iris.min = self->iris_min;
         iris.max = self->iris_max;
+        iris.val = self->iris.value;
         iris.is_pwm_iris = false;
     }
     else
