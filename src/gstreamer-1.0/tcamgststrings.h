@@ -56,6 +56,18 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "GRAY8",
     },
     {
+        FOURCC_Y12_PACKED,
+        "video/x-raw, format=(string)GRAY12p",
+        "video/x-raw",
+        "GRAY12p"
+    },
+    {
+        FOURCC_Y12_SPACKED,
+        "video/x-raw, format=(string)GRAY12sp",
+        "video/x-raw",
+        "GRAY12sp"
+    },
+    {
         FOURCC_Y16,
         "video/x-raw, format=(string)GRAY16_LE",
         "video/x-raw", "GRAY16_LE",

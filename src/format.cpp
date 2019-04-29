@@ -38,7 +38,7 @@ static const fourcc_names fourcc_name_array [] =
 
     {FOURCC_YUY2, "YUY2"},
     {FOURCC_Y800, "Y800"},
-    {FOURCC_Y12P, "Y12 packed"},
+    // {FOURCC_Y12P, "Y12 packed"},
     {FOURCC_BY8,   "BY8"},
     {FOURCC_UYVY, "UYVY"},
     {FOURCC_YUYV, "YUYV"},
@@ -64,6 +64,10 @@ static const fourcc_names fourcc_name_array [] =
     {FOURCC_GBRG12, "GB12"},
     {FOURCC_GRBG12, "BA12"},
     {FOURCC_RGGB12, "RG12"},
+
+    {FOURCC_Y10_PACKED, "Y10 Packed"},
+    {FOURCC_Y12_PACKED, "Y12 Packed"},
+    {FOURCC_Y12_SPACKED, "Y12 Simple Packed"},
 
     {FOURCC_BGGR12_PACKED, "BG12 Packed"},
     {FOURCC_GBRG12_PACKED, "GB12 Packed"},
