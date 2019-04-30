@@ -64,20 +64,28 @@ class ROIRectItem(ResizeableRectItem):
         return QGraphicsRectItem.itemChange(self, change, value)
 
     def update_pos(self):
-        scene_rect = self.rect()
+
         # Given QRectF scene_rect that represents the rectangle I want drawn...
         self.prepareGeometryChange()
-        self.setPos(scene_rect.topLeft().toPoint())  # Set the item's "position" relative to the scene
+
+        self.setPos(self.position)  # Set the item's "position" relative to the scene
 
     def update_rect(self):
 
         self.prepareGeometryChange()
+
         # position has to be 0:0
         # we always draw from the origin of our containing rectangle
         # the actual position is always set in the qgraphicsscene
         self.setRect(0, 0,
                      int(self.size.width()),
                      int(self.size.height()))
+
+        self.update_pos()
+
+        # update should not be called with prepareGeometryChange
+        # object is already considered 'dirty' and will be redrawn
+        # self.update()
 
     def mousePressEvent(self, event):
         """"""

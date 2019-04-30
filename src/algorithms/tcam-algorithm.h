@@ -19,6 +19,7 @@
 
 #include "base_types.h"
 
+#include "roi.h"
 #include "AutoFocus.h"
 #include "image_sampling.h"
 #include "bayer.h"

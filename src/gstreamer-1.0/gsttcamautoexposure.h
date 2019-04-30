@@ -108,7 +108,11 @@ typedef struct GstTcamautoexposure
     tBY8Pattern pattern;
     format color_format;
 
+    tcam_video_format active_format;
+
     region image_region;
+
+    ROI* roi;
 
     gst_tcam_image_size image_size;
 

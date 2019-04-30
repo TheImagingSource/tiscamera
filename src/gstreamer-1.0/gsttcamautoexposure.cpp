@@ -31,6 +31,7 @@
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautoexposure.h"
 
+
 GST_DEBUG_CATEGORY_STATIC (gst_tcamautoexposure_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautoexposure_debug_category
 
@@ -277,12 +278,13 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
     {
         return PROP_ROI_HEIGHT;
     }
+
     return 0;
 }
 
 
 
-static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self __attribute__((unused)))
+static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 {
     GstTcamautoexposure* element = GST_TCAMAUTOEXPOSURE(self);
 
@@ -801,7 +803,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
             g_value_init(value, G_TYPE_DOUBLE);
             if (self->gain_is_double)
             {
-                g_value_set_double(value, self->gain_max);
+                g_value_set_double(value,
+                                   self->gain_max / GAIN_FLOAT_MULTIPLIER);
             }
             else
             {
@@ -813,7 +816,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
             g_value_init(min, G_TYPE_DOUBLE);
             if (self->gain_is_double)
             {
-                g_value_set_double(min, self->gain.min / GAIN_FLOAT_MULTIPLIER);
+                g_value_set_double(min,
+                                   self->gain.min / GAIN_FLOAT_MULTIPLIER);
             }
             else
             {
@@ -825,7 +829,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
             g_value_init(max, G_TYPE_DOUBLE);
             if (self->gain_is_double)
             {
-                g_value_set_double(max, self->gain.max / GAIN_FLOAT_MULTIPLIER);
+                g_value_set_double(max,
+                                   self->gain.max / GAIN_FLOAT_MULTIPLIER);
             }
             else
             {
@@ -837,7 +842,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
             g_value_init(def, G_TYPE_DOUBLE);
             if (self->gain_is_double)
             {
-                g_value_set_double(def, self->gain.max / GAIN_FLOAT_MULTIPLIER);
+                g_value_set_double(def,
+                                   self->gain.max / GAIN_FLOAT_MULTIPLIER);
             }
             else
             {
@@ -992,7 +998,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->image_region.x0);
+            g_value_set_int(value, roi_left(self->roi));
         }
         if (min)
         {
@@ -1041,7 +1047,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->image_region.x1);
+            g_value_set_int(value, roi_width(self->roi));
         }
         if (min)
         {
@@ -1071,7 +1077,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
-            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+            g_value_set_string(type,
+                               gst_tcamautoexposure_get_property_type(prop, name));
         }
         if (category)
         {
@@ -1090,7 +1097,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->image_region.y0);
+            g_value_set_int(value, roi_top(self->roi));
         }
         if (min)
         {
@@ -1100,7 +1107,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (max)
         {
             g_value_init(max, G_TYPE_INT);
-            g_value_set_int(max, self->image_size.height - (SAMPLING_MIN_HEIGHT + 1));
+            g_value_set_int(max,
+                            self->image_size.height - (SAMPLING_MIN_HEIGHT + 1));
         }
         if (def)
         {
@@ -1120,7 +1128,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
-            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+            g_value_set_string(type,
+                               gst_tcamautoexposure_get_property_type(prop, name));
         }
         if (category)
         {
@@ -1139,7 +1148,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (value)
         {
             g_value_init(value, G_TYPE_INT);
-            g_value_set_int(value, self->image_region.y1);
+            g_value_set_int(value, roi_height(self->roi));
         }
         if (min)
         {
@@ -1169,7 +1178,8 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         if (type)
         {
             g_value_init(type, G_TYPE_STRING);
-            g_value_set_string(type,gst_tcamautoexposure_get_property_type(prop, name));
+            g_value_set_string(type,
+                               gst_tcamautoexposure_get_property_type(prop, name));
         }
         if (category)
         {
@@ -1197,6 +1207,7 @@ static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
     {
         return FALSE;
     }
+
     gst_tcamautoexposure_set_property(G_OBJECT(self), id, value, NULL);
     return TRUE;
 }
@@ -1204,7 +1215,9 @@ static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
 static GSList* gst_tcamautoexposure_get_tcam_menu_entries (TcamProp* self __attribute__((unused)),
                                                            const gchar* name __attribute__((unused)))
 {
-    return nullptr;
+    GSList* ret = nullptr;
+
+    return ret;
 }
 
 
@@ -1388,6 +1401,14 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->has_iris = FALSE;
     self->camera_src = NULL;
     self->module_is_disabled = FALSE;
+
+    tcam_image_size s = {SAMPLING_MIN_WIDTH, SAMPLING_MIN_HEIGHT};
+
+    self->roi = create_roi(&s, &s);
+
+    // explicitly set properties
+    roi_set_preset(self->roi, ROI_PRESET_FULL_SENSOR);
+
 }
 
 void gst_tcamautoexposure_set_property (GObject* object,
@@ -1571,17 +1592,26 @@ void gst_tcamautoexposure_set_property (GObject* object,
             break;
         }
         case PROP_ROI_LEFT:
-            tcamautoexposure->image_region.x0 = g_value_get_int(value);
+        {
+            roi_set_left(tcamautoexposure->roi, g_value_get_int(value));
             break;
+        }
         case PROP_ROI_TOP:
-            tcamautoexposure->image_region.y0 = g_value_get_int(value);
+        {
+            roi_set_top(tcamautoexposure->roi, g_value_get_int(value));
             break;
+        }
         case PROP_ROI_WIDTH:
-            tcamautoexposure->image_region.x1 = g_value_get_int(value);
+        {
+            roi_set_width(tcamautoexposure->roi, g_value_get_int(value));
             break;
+        }
         case PROP_ROI_HEIGHT:
-            tcamautoexposure->image_region.y1 = g_value_get_int(value);
+        {
+            roi_set_height(tcamautoexposure->roi,
+                           g_value_get_int(value));
             break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -1633,16 +1663,16 @@ void gst_tcamautoexposure_get_property (GObject* object,
             g_value_set_int(value, tcamautoexposure->brightness_reference);
             break;
         case PROP_ROI_LEFT:
-            g_value_set_int(value, tcamautoexposure->image_region.x0);
+            g_value_set_int(value, roi_left(tcamautoexposure->roi));
             break;
         case PROP_ROI_TOP:
-            g_value_set_int(value, tcamautoexposure->image_region.y0);
+            g_value_set_int(value, roi_top(tcamautoexposure->roi));
             break;
         case PROP_ROI_WIDTH:
-            g_value_set_int(value, tcamautoexposure->image_region.x1);
+            g_value_set_int(value, roi_width(tcamautoexposure->roi));
             break;
         case PROP_ROI_HEIGHT:
-            g_value_set_int(value, tcamautoexposure->image_region.y1);
+            g_value_set_int(value, roi_height(tcamautoexposure->roi));
             break;
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1652,6 +1682,9 @@ void gst_tcamautoexposure_get_property (GObject* object,
 
 void gst_tcamautoexposure_finalize (GObject* object)
 {
+    auto self = GST_TCAMAUTOEXPOSURE(object);
+    destroy_roi(self->roi);
+
     G_OBJECT_CLASS (gst_tcamautoexposure_parent_class)->finalize (object);
 }
 
@@ -1805,7 +1838,7 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
         return;
     }
 
-    GST_INFO("Setting exposure to %f", exposure);
+    //GST_INFO("Setting exposure to %f", exposure);
 
     tcam::CaptureDevice* dev;
     g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
@@ -1834,11 +1867,13 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     else
     {
         dev->set_property(TCAM_PROPERTY_GAIN, (float)gain / GAIN_FLOAT_MULTIPLIER);
+        GST_INFO("Setting gain to %f", (float)gain /  GAIN_FLOAT_MULTIPLIER);
+
     }
 }
 
 
-static void set_iris(GstTcamautoexposure* self, int iris)
+static void set_iris (GstTcamautoexposure* self, int iris)
 {
     if (!G_IS_OBJECT(self->camera_src))
     {
@@ -1876,7 +1911,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
     else
     {
         p = prop->get_struct();
-        GST_DEBUG("Current exposure is %ld", p.value.i.value);
+        //GST_DEBUG("Current exposure is %ld", p.value.i.value);
         self->exposure.value = p.value.i.value;
     }
 
@@ -1918,7 +1953,7 @@ void retrieve_current_values (GstTcamautoexposure* self)
         else
         {
             p = prop->get_struct();
-            GST_DEBUG("Current iris is %ld", p.value.i.value);
+            //GST_DEBUG("Current iris is %ld", p.value.i.value);
             self->iris.value = p.value.i.value;
         }
     }
@@ -1947,93 +1982,52 @@ static tBY8Pattern calculate_pattern_from_offset (GstTcamautoexposure* self)
 }
 
 
+uint32_t get_pitch (unsigned int width, uint32_t fourcc)
+{
+    return width * (img::get_bits_per_pixel(fourcc) / 8);
+}
+
+
 static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer* buf)
 {
     GstMapInfo info;
 
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
-    region reg = {};
+    tcam_image_buffer image = {};
 
-    // x1 == width
-    if (self->image_region.x1 == 0)
-    {
-        reg.x1 = self->image_size.width;
 
-    }
-    else if (self->image_region.x1 < SAMPLING_MIN_WIDTH)
+    gst_buffer_to_tcam_image_buffer(buf, &image);
+    image.format = self->active_format;
+
+    tcam_image_buffer roi_buffer = {};
+
+    if (!roi_extract(self->roi, &image, &roi_buffer))
     {
-        reg.x1 = SAMPLING_MIN_WIDTH;
-        // update user variable
-        self->image_region.x1 = reg.x1;
-    }
-    else if (self->image_region.x1 > (self->image_size.width - self->image_region.x0))
-    {
-        reg.x1 = (self->image_size.width - self->image_region.x0);
-        self->image_region.x1 = reg.x1;
-    }
-    else
-    {
-        reg.x1 = self->image_region.x1;
+        GST_ERROR("Unable to extract ROI");
+        return {};
     }
 
-    // y1 == height
-    if (self->image_region.y1 == 0)
-    {
-        reg.y1 = self->image_size.height;
-    }
-    else if (self->image_region.y1 < SAMPLING_MIN_HEIGHT)
-    {
-        reg.y1 = SAMPLING_MIN_HEIGHT;
-        // update user variable
-        self->image_region.y1 = reg.y1;
-    }
-    else if (self->image_region.y1 > (self->image_size.height - self->image_region.y0))
-    {
-        reg.y1 = (self->image_size.height - self->image_region.y0);
-        self->image_region.y1 = reg.y1;
-    }
-    else
-    {
-        reg.y1 = self->image_region.y1;
-    }
 
-    if (self->image_region.x0 == 0)
-    {
-        reg.x0 = 0;
-    }
-    else
-    {
-        reg.x0 = self->image_region.x0;
-    }
+    roi_buffer.pitch = get_pitch(roi_buffer.format.width,
+                                 roi_buffer.format.fourcc);
 
-    if (self->image_region.y0 == 0)
-    {
-        reg.y0 = 0;
-    }
-    else
-    {
-        reg.y0 = self->image_region.y0;
-    }
 
-    const int bytes_per_pixel = 1;
+    image_buffer new_buf = {};
 
-    image_buffer new_buf;
-
-    new_buf.rowstride = self->image_size.width * bytes_per_pixel;
-
-    new_buf.image = info.data + (reg.x0 * bytes_per_pixel
-                                 + reg.y0 * new_buf.rowstride * bytes_per_pixel);
-
-    new_buf.width = reg.x1;
-    new_buf.height = reg.y1;
+    new_buf.image = roi_buffer.pData;
+    new_buf.width = roi_buffer.format.width;
+    new_buf.height = roi_buffer.format.height;
 
     new_buf.pattern = calculate_pattern_from_offset(self);
+    new_buf.rowstride = roi_buffer.pitch;
 
-    GST_INFO("Region is from %d %d to %d %d",
-             reg.x0, reg.y0,
-             reg.x0 + reg.x1,
-             reg.y0 + reg.y1);
+    // GST_INFO("Region is from %d %d to %d %d",
+    //          reg.x0, reg.y0,
+    //          reg.x0 + reg.x1,
+    //          reg.y0 + reg.y1);
+
+
 
     gst_buffer_unmap(buf, &info);
 
@@ -2110,10 +2104,18 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
         GST_DEBUG("Calculating brightness for gray");
         brightness = buffer_brightness_gray(&buffer);
     }
+
+    if (buffer.image)
+    {
+        free((void*)buffer.image);
+        buffer.image = nullptr;
+    }
+
     /* assure we have the current values */
     retrieve_current_values (self);
 
     new_exposure(self, brightness);
+
     return;
 }
 
@@ -2122,6 +2124,9 @@ gboolean find_image_values (GstTcamautoexposure* self)
 {
     GstPad* pad = GST_BASE_TRANSFORM_SINK_PAD(self);
     GstCaps* caps = gst_pad_get_current_caps(pad);
+
+    gst_caps_to_tcam_video_format(caps, &self->active_format);
+
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
     gint tmp_w, tmp_h;
@@ -2243,9 +2248,6 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
         guint* data = (guint*)info.data;
         guint length = info.size;
 
-        gst_buffer_unmap(buf, &info);
-
-
         if (data == NULL || length == 0)
         {
             GST_WARNING("Buffer is not valid! Ignoring buffer and trying to continue...");
@@ -2305,6 +2307,15 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
         self->pattern = UNDEFINED_PATTERN;
         self->color_format = GRAY;
     }
+
+    unsigned int width;
+    gst_structure_get_int(structure, "width", (int*)&width);
+
+    unsigned int height;
+    gst_structure_get_int(structure, "height", (int*)&height);
+
+    roi_set_image_size(self->roi, {width, height});
+
     return true;
 }
 

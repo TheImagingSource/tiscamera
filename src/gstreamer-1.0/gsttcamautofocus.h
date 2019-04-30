@@ -20,7 +20,6 @@
 #include <gst/base/gstbasetransform.h>
 #include "algorithms/tcam-algorithm.h"
 
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -65,6 +64,8 @@ typedef struct GstTcamAutoFocus
     guint cur_focus;
     guint roi_left;
     guint roi_top;
+
+    ROI* roi;
 
 } GstTcamAutoFocus;
 

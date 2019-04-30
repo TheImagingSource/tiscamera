@@ -253,7 +253,7 @@ inline int get_bits_per_pixel (uint32_t fcc)
         return make_img_type( fcc, width, height, pitch, calc_img_size_from_pitch( fcc, pitch, height ) );
     }
 
-    inline img_descriptor	to_img_desc( void* data, uint32_t fcc, unsigned width, unsigned height, int pitch, unsigned size )
+    inline img_descriptor	to_img_desc( void* data, uint32_t fcc, unsigned width, unsigned height, unsigned int pitch, unsigned size )
     {
         img_descriptor rval = {
             fcc,

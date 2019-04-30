@@ -16,6 +16,10 @@
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
 set(srcs
+  roi.cpp
+  roi_preset.cpp
+  roi_change_behavior.cpp
+  RegionOfInterest.cpp
   AutoFocus.cpp
   auto_focus.cpp
   image_sampling.c

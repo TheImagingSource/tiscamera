@@ -190,11 +190,12 @@ class ROICollection(QWidget):
 
             self.rubberband.position = self.group.get_position()
             if "Left" in prop.prop.name:
-                if int(self.rubberband.position.x()) == prop.prop.value:
-                    return
+
+                self.rubberband.position.x = prop.prop.value
+
             elif "Top" in prop.prop.name:
-                if int(self.rubberband.position.y()) == prop.prop.value:
-                    return
+
+                self.rubberband.position.y = prop.prop.value
 
             # log.info("scenePos{}".format(self.rubberband.scenePos()))
             # log.info("pos {}".format(self.group.get_position()))
@@ -204,13 +205,15 @@ class ROICollection(QWidget):
                 "Height" in prop.prop.name):
 
             if "Width" in prop.prop.name:
-                if int(self.rubberband.position.x()) == prop.prop.value:
+                if int(self.rubberband.size.width()) == prop.prop.value:
                     return
 
             if "Height" in prop.prop.name:
-                if int(self.rubberband.position.y()) == prop.prop.value:
+                if int(self.rubberband.size.height()) == prop.prop.value:
                     return
 
             self.rubberband.size = self.group.get_size()
             # log.info("size {}".format(self.group.get_size()))
             self.rubberband.update_rect()
+
+        self.display_area.update()
