@@ -132,7 +132,8 @@ class PropertyWorker(QObject):
                  defval, step,
                  valuetype,
                  flags,
-                 category, group) = self.tcam.get_tcam_property(name)
+                 category,
+                 group) = self.tcam.get_tcam_property(name)
             except TypeError as e:
                 # log.warning("get_tcam_property failed for '{}'".format(name))
                 # log.("get_tcam_property failed for '{}'".format(name))
@@ -206,6 +207,7 @@ class PropertyDialog(QWidget):
                  category, group) = self.data.tcam.get_tcam_property(name)
             except TypeError as e:
                 log.warning("get_tcam_property failed for '{}'".format(name))
+                log.warning(e)
                 continue
 
             prop = Prop(name, value, minval, maxval, defval, step, valuetype,
