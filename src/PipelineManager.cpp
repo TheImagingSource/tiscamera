@@ -217,7 +217,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
     for (const auto& v : available_input_formats)
     {
         tcam_log(TCAM_LOG_DEBUG,
-                "Found device fourcc '%s' - %d",
+                "Found device fourcc '%s' - %x",
                 fourcc2description(v.get_fourcc()),
                 v.get_fourcc());
 
