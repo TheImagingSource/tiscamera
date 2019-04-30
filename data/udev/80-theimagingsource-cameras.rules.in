@@ -11,19 +11,8 @@ ACTION=="add", SUBSYSTEM=="drivers", \
                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
                ATTR{new_id}="199e 8101"
 
-# afu050
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8201", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8202", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8203", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8204", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8205", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8206", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8207", GROUP="video", MODE="0660"
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8209", GROUP="video", MODE="0660"
-
-# afu420
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="0804", GROUP="video", MODE="0660"
-
+# give users permission to interact with cameras
+SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
 
 # load uvc extensions for usb3 cameras
 ACTION=="add", SUBSYSTEM=="video4linux", \
@@ -34,16 +23,3 @@ ACTION=="add", SUBSYSTEM=="video4linux", \
 ACTION=="add", SUBSYSTEM=="video4linux", \
                ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
                RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"
-
-
-# templates for those using non standard locations
-
-# load uvc extensions for usb2 cameras
-# ACTION=="add", SUBSYSTEM=="video4linux", \
-#               ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
-#               RUN+="/usr/bin/uvcdynctrl --device=/dev/%k -i /path/to/tiscamera/uvc-extensions/tisEUVC.xml"
-
-# load uvc extensions for usb3 cameras
-# ACTION=="add", SUBSYSTEM=="video4linux", \
-#               ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
-#               RUN+="/usr/bin/uvc-extension-loader --device=/dev/%k -f /path/to/tiscamera/uvc-extensions/usb3.json"
