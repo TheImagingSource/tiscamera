@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
     std::string serial;
     std::string param;
     std::string filename;
-    modes do_this;
+    modes do_this = PRINT_VERSION;
 
     for (int i = 1; i < argc; ++i)
     {
