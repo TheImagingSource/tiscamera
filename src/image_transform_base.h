@@ -211,13 +211,19 @@ inline int get_bits_per_pixel (uint32_t fcc)
 
 		unsigned int	dim_x;	// pixels
 		unsigned int	dim_y;	// lines
-		int	            pitch;	// in bytes, this is the count of bytes it takes from the start of one line to get to the next line
-                                // for planar formats this contains the count of bytes to get from one line in one plane to the next line in the same
+		unsigned int    pitch;	// in bytes,
+                                // this is the count of bytes it takes from the start
+                                // of one line to get to the next line
+                                // for planar formats this contains the count of bytes
+                                // to get from one line in one plane to the next line in the same
                                 // note that this can be negative
 
-        std::size_t	    data_length;    // the actual data length valid in this buffer. this is in most cases calc_img_size( type, dim_x, dim_y ), but may be smaller for e.g. compressed formats
+        std::size_t	    data_length;    // the actual data length valid in this buffer.
+                                        // this is in most cases calc_img_size( type, dim_x, dim_y ),
+                                        // but may be smaller for e.g. compressed formats
 
-        byte*			pData;  // this is the pointer of the 'first' byte of the image. this can be the first byte of the last line if pitch is negative
+        byte*			pData;  // this is the pointer of the 'first' byte of the image.
+                                // this can be the first byte of the last line if pitch is negative
 	};
 
 
