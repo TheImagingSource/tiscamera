@@ -97,7 +97,13 @@ V4l2Device::~V4l2Device ()
     this->stop_all = true;
     this->abort_all = true;
     // signal the udev monitor to exit it's poll/select
-    write(udev_monitor_pipe[0], "q", 1);
+    ssize_t write_ret = write(udev_monitor_pipe[0], "q", 1);
+
+    if (write_ret != 1)
+    {
+        tcam_error("Error closing udev monitoring pipe. write return '%zu'", write_ret);
+    }
+
     close(udev_monitor_pipe[0]);
 
     this->cv.notify_all();

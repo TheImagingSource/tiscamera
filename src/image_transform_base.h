@@ -231,9 +231,11 @@ inline int get_bits_per_pixel (uint32_t fcc)
 
     inline int      calc_plane_pitch( const img_descriptor& dsc )
     {
-        ASSERT( dsc.type == FOURCC_YUV16PLANAR || dsc.type == FOURCC_YUV8PLANAR || dsc.type == FOURCC_YUVFLOATPLANAR );
-        int pitch = dsc.pitch < 0 ? -dsc.pitch : dsc.pitch;
-        return (int)dsc.dim_y * pitch;
+        ASSERT( dsc.type == FOURCC_YUV16PLANAR
+                || dsc.type == FOURCC_YUV8PLANAR
+                || dsc.type == FOURCC_YUVFLOATPLANAR );
+        //int pitch = dsc.pitch < 0 ? -dsc.pitch : dsc.pitch;
+        return (int)dsc.dim_y * dsc.pitch;
     }
 
     inline img_type make_img_type( uint32_t fcc, unsigned width, unsigned height, unsigned bytes_per_line, unsigned size )

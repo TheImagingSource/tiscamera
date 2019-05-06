@@ -108,7 +108,8 @@ std::vector<unsigned char> loadFile (const std::string& fileName)
         contents.resize(fileLen);
 
         fseek(pF, 0, SEEK_SET);
-        fread(&contents[0], 1, fileLen, pF);
+        size_t read_ret __attribute__((unused));
+        read_ret = fread(&contents[0], 1, fileLen, pF);
         fclose(pF);
 
         while (contents.size() % 4)
