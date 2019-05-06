@@ -49,9 +49,9 @@ cmake options
      - ON
 
    * - -DBUILD_DOCUMENTATION
-     - Build html documentation.
+     - Build html documentation. This requires Sphinx Version >= 1.4
      - OFF
-
+       
    * - -DBUILD_TESTS
      - Build unit/integration tests.
      - OFF
