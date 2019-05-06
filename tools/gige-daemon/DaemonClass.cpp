@@ -71,7 +71,15 @@ bool LockFile::create_lock_file ()
 
     char str[10];
     sprintf(str,"%d\n",getpid());
-    write(file_handle_, str, strlen(str)); /* record pid to lockfile */
+    size_t write_ret = write(file_handle_, str, strlen(str)); /* record pid to lockfile */
+
+    if (write_ret != strlen(str))
+    {
+        std::cerr << "Error while writing lockfile. Wrote "
+                  << write_ret << " bytes, but expected "
+                  << strlen(str) << " bytes." << std::endl;
+        return false;
+    }
 
     // do not close file handle. this is to ensure exclusive write access
 
@@ -216,11 +224,20 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
         close(i); /* close all descriptors */
     }
 
-    i = open("/dev/null",O_RDWR); dup(i); dup(i); /* handle standart I/O */
+    i = open("/dev/null", O_RDWR);
+    // handle warnings for -Wunused_result
+    if (dup(i) != -1) {}
+    if (dup(i) != -1) {}
+
+    /* handle standart I/O */
 
     umask(022); /* set newly created file permissions */
 
-    chdir("/"); /* change to dir that always exists */
+    /* change to dir that always exists */
+    if (chdir("/") != 0)
+    {
+        std::cerr << "Unable to chdir to '/'." << std::endl;
+    }
 
     // make this the only running instance
     if (!lock_file_.lock())

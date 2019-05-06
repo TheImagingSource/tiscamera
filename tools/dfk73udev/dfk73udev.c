@@ -91,7 +91,10 @@ int main(int argc, char **argv)
    fstat(shmfd, &shms);
    if(shms.st_size == 0)
    {
-      ftruncate(shmfd, MAXBUS * MAXDEV);
+      if (ftruncate(shmfd, MAXBUS * MAXDEV) != 0)
+      {
+         fprintf(stderr, "Could not truncate shared memory\n");
+      }
       devmap = mmap(NULL, MAXBUS * MAXDEV, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
       memset(devmap, 0x0, MAXBUS * MAXDEV);
    } else {
