@@ -8,7 +8,7 @@ running without any problems, we recommend to not implement any of these steps.
 
 .. _real_time_threading:
 
-Real time threading
+Real Time Threading
 ===================
 
 Real time threads are threads the kernel gives a high priority to.

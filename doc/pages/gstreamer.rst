@@ -17,7 +17,7 @@ Note: This is merely a movie reference and is not reflective of the code quality
    * - Good
      - This package contains the GStreamer plugins from the "good" set: a collection of high-quality plugins under the LGPL license.
    * - Bad
-     - GStreamer "bad" plugins are a set of plug-ins not up-to-par compared to the rest. Their quality might closely approach "good"-quality plugins, but they lack something: a good code review, some documentation, a set of tests, a real-live maintainer, or actual wide use.
+     - GStreamer "bad" plugins are a collection of plugins not up-to-par compared to the rest. Their quality might closely approach "good"-quality plugins, but they lack something: a good code review, some documentation, a set of tests, a real-live maintainer, or actual wide use.
    * - Ugly
      - This package contains plugins from the "ugly" set: a collection of good-quality plugins that might pose distribution problems.
 
@@ -123,7 +123,7 @@ A list will be displayed in ``{}`` with each possible value:
 
 ``video/x-bayer,format=gbrg,width=640,height=480,framerate={6875/3136,3/1,4/1,5/1,6/1,7/1,8/1,9/1,10/1,11/1,12/1,13/1,14/1,15/1,16/1,17/1,18/1,19/1,20/1,30/1,40/1,50/1,60/1,70/1,80/1,90/1,100/1,150/1,200/1,250/1,61875/238}``
 
-Ranges can only be encountered when using GigE cameras.
+Ranges only need to be dealt with when using GigE cameras.
 
 Possible formats
 ----------------

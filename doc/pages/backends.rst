@@ -110,7 +110,7 @@ The source code for this backend can be found in *src/aravis/*
 For further reading, :any:`check out the documentation or mailing list<reading_aravis>`.
 
 USB3 Vision
-^^^^^^^^^
+^^^^^^^^^^^
 
 .. note::
 

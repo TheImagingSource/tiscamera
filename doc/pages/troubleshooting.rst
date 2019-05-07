@@ -16,7 +16,7 @@ If in doubt, please :any:`contact our support<contact>`. We will gladly answer a
 USB
 ===
 
-cstate handling
+Cstate Handling
 ===============
 
 cstates are a method of CPU power saving. When dealing with realtime processes like video streaming
@@ -83,7 +83,7 @@ This will re-enable cstates.
 GigE
 ====
 
-The camera is not found
+The Camera Is Not Found
 =======================
 
 One or more cameras are not delivering no/incomplete images
@@ -97,7 +97,7 @@ Assuming the computer is not simply having processing problems due to low perfor
 Verifying Gigabit Capabilities
 ------------------------------
 
-Identify the network interface
+Identify the Network Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Execute the following in the terminal
@@ -130,7 +130,7 @@ Sample ouput:
 Here the interface are named `enp31s0` and `enp37s0`.
 Interfaces may be named like `enp31s0` or `eth0`.
 
-Verify the speed of the network interface
+Verify the Speed of the Network Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: sh
@@ -148,7 +148,7 @@ If the output is `1000` the network interface has gigabit.
 Checking MTU Size Of The Network Interface
 ------------------------------------------
 
-Identifying the network interface
+Identifying the Network Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Execute the following in the terminal

@@ -54,7 +54,7 @@ Overview
    further-reading.rst
    contact.rst
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`

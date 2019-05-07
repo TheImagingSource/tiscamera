@@ -34,7 +34,8 @@ Please be aware that suspend/hibernate will stop the clock.
 Aravis Userspace Library
 ++++++++++++++++++++++++
 
-The Aravis backend uses the system wall-clock time of when the first bytes of the image were received.
+The Aravis backend provides a timestamp (WallClockTime).
+This timestamp starts when the first bytes of the image where are received.
 The point of reference is January 1, 1970 UTC.
 
 Camera Capture Time

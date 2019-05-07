@@ -3,8 +3,8 @@ Installation
 ############
 
 The installation of this project defaults to /usr.
-Despite this some parts of the project will install to different paths,
-as the search path for these tools requires special handling.
+Because the search path for these tools requires special handling,
+however, some parts of the project will install to paths other than /usr.
 These include:
 systemd - /
 udev -
@@ -24,7 +24,7 @@ in the pkgconfig gstreamer description.
 
 To manually add different folders to the search path, set the environment variable GST_PLUGIN_PATH_1_0
 
-Private libraries
+Private Libraries
 =================
 
 The tiscamera project includes multiple shared libraries that are not meant for general usage.

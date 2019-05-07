@@ -73,13 +73,13 @@ Installation
 The default configuration of tiscamera will install into `/usr`.
 This means all libraries, etc. will be available to all users.
 
-Running without installation
+Running without Installation
 ----------------------------
 
 To integrate tiscamera into the system environment, source the `env.sh` script located in the build directory.
 It will adjust environment variables so that GStreamer elements, etc can be found.
 
-Verifying the installation
+Verifying the Installation
 ==========================
 
 To ensure that all libraries are correctly found, execute one of the following commands after connecting the camera.
@@ -271,7 +271,7 @@ As an alternative to creating the GstCaps manually, you can also use ``gst_caps_
 This function takes a format string description and converts it to a valid GstCaps instance.
 For more information, see :any:`the caps reference section.<gstreamer_caps>`.
 
-Showing a live image
+Showing a Live Image
 --------------------
 
 In order to display a live image, a display sink is required.
