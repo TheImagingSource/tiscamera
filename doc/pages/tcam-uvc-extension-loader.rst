@@ -6,12 +6,12 @@ tcam-uvc-extension-loader
 
 The tcam-uvc-extension-loader is our internal replacement for uvcdynctrl.
 
-It's only purpose is to load UVC extension units for usb cameras.
+It's only purpose is to load UVC extension units for USB cameras.
 
 The description files for the extension units are written in json and are a
 direct representation of the underlying struct that is submitted to the kernel.
 
-For a description of the uvc driver mapping command, please refer to the `kernel
+For a description of the UVC driver mapping command, please refer to the `kernel
 documentation <https://www.kernel.org/doc/html/latest/media/v4l-drivers/uvcvideo.html#uvcioc-ctrl-map-map-a-uvc-control-to-a-v4l2-control>`_.
 
 Arguments
@@ -48,23 +48,23 @@ be loadable be tcam-uvc-extension-loader.
         # the list of mappings
         "mappings": [
             {
-                # string containing the u32 id number that v4l2
+                # string containing the u32 id number that V4L2
                 # will give when querying the device
                 "id": "0x199e9999",
                 # String containing the name. Maximum of 31 characters
                 "name", "My property",
-                # uvc control selector
+                # UVC control selector
                 "selector": "0xB1",
-                # type the uvc property has.
+                # type the UVC property has.
                 # possible values are: unsigned, signed, raw, enum, booean, bitmask
                 "uvc_type": "",
-                # type the v4l2 property has.
+                # type the V4L2 property has.
                 # possible values are: bitmask, boolean, button, integer, menu, string
                 v4l2_type: "",
-                # size of the uvc property in bit
+                # size of the UVC property in bit
                 size_bits: 8,
                 # size of the offset in bit.
-                # It is possible to map multiple v4l2 onto the same uvc property field.
+                # It is possible to map multiple V4L2 onto the same UVC property field.
                 # E.g. this offset allows access to single bit in a bitfield.
                 offset_bits 0,
 
@@ -73,7 +73,7 @@ be loadable be tcam-uvc-extension-loader.
                 # That shall be mapped
                 entries: [
                     {
-                        # integer value the v4l2 property shall set in uvc upon selection.
+                        # integer value the V4L2 property shall set in UVC upon selection.
                         value: 999,
                         # String for the entry. Maximum of 31 characters
                         "entry": "My Menu Entry"

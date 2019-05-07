@@ -1,13 +1,12 @@
 #########
-Gstreamer
+GStreamer
 #########
 
-Gstreamer is a general purpose multimedia framework. It is the recommended way
-to interact with The Imaging Source cameras.
+GStreamer is a general-purpose multimedia framework.
+GStreamer provides the best means of interacting with The Imaging Source cameras.
 
-GStreamer plugins fall into three categories, good, bad and ugly.
-Yes, this is a movie reference.
-No, it is not reflective of the code quality at hand.
+GStreamer plugins fall into three categories: good, bad and ugly.
+Note: This is merely a movie reference and is not reflective of the code quality itself.
 
 .. list-table:: plugin types
    :header-rows: 1
@@ -16,31 +15,31 @@ No, it is not reflective of the code quality at hand.
    * - Plug-in set name
      - Description
    * - Good
-     - This package contains the GStreamer plug-ins from the "good" set, a set of high quality plug-ins under the LGPL license.
+     - This package contains the GStreamer plugins from the "good" set: a collection of high-quality plugins under the LGPL license.
    * - Bad
-     - GStreamer Bad Plug-ins comprises a set of plug-ins not up-to-par compared to the rest. They might closely approach good-quality plug-ins, but they lack something: perhaps a good code review, some documentation, a set of tests, a real live maintainer, or some actual wide use.
+     - GStreamer "bad" plugins are a set of plug-ins not up-to-par compared to the rest. Their quality might closely approach "good"-quality plugins, but they lack something: a good code review, some documentation, a set of tests, a real-live maintainer, or actual wide use.
    * - Ugly
-     - This package contains plug-ins from the "ugly" set, a set of good-quality plug-ins that might pose distribution problems.
+     - This package contains plugins from the "ugly" set: a collection of good-quality plugins that might pose distribution problems.
 
-The advantage of using gstreamer lies in the pre-existing language bindings and the
-amount of plugins available.
-Through these users are offered a great amount of flexibility.
-With gstreamer it is easy to save a video to a file or to rescale it.
-Whereas without gstreamer a large amount of time and effort has to be invested in
+The advantage of using GStreamer lies in the pre-existing language bindings and the
+number of plugins available.
+These provide users a great amount of flexibility.
+With GStreamer, it is easy to save a video to a file or to rescale it.
+Whereas without GStreamer a large amount of time and effort has to be invested in
 video acquisition and processing now a simple pipeline suffices,
 thus freeing developer resources for more important tasks.
 
-For more information, please refer to :ref:`the gstreamer documentation<reading_gstreamer>`.
+For more information, please refer to :ref:`the GStreamer documentation<reading_gstreamer>`.
        
 All information concerning a plugin can be queried by executing 'gst-inspect-1.0 elementname'
 
-We offer the following gstreamer elements:
+We offer the following GStreamer elements:
 
 .. toctree::
       
    tcam-gstreamer.rst
 
-Additionaly the following elements might prove useful:
+The following elements might also prove useful:
    
 .. toctree::
    
@@ -50,14 +49,14 @@ Additionaly the following elements might prove useful:
 Introduction
 ************
 
-There are a few things that can make working with easier.
+There are a few things that can make working with GStreamer easier.
 The following is an incomplete list of these things.
 
 Initialization
 --------------
 
-Always pass the commandline arguments to gstreamer.
-This allows the usage of arguments like ``--gst-debug-level=5``, which ease debugging.
+Always pass command line arguments to GStreamer.
+This allows the use of arguments like ``--gst-debug-level=5`` which ease debugging.
 For an alternative, see :ref:`GStreamer Environment Variables <env_gstreamer>`.
 
 .. tabs::
@@ -74,7 +73,7 @@ Pipeline Creation
 -----------------
 
 Creating pipelines can be bothersome. A shortcut is to create the pipeline in the same
-way as gst-launch. Simply write a string description and let gstreamer handle the rest.
+way as gst-launch. Simply write a string description and let GStreamer handle the rest.
 
 .. tabs::
 
@@ -92,10 +91,11 @@ way as gst-launch. Simply write a string description and let gstreamer handle th
 Caps
 ****
 
-How to read caps
+How to Read Caps
 ----------------
 
-In general gstreamer capabilities have five fields that are used to describe the videoformat that is used.
+In general, GStreamer capabilities have five fields that
+are used to describe the video format.
 
 These are:
 
@@ -140,8 +140,8 @@ Together they describe a unique format.
 
     All bayer formats will have this name. The pixel order and compression are described in the format field.
 
-    Officially supported by gstreamer are ``bggr``, ``rggb``, ``grbg`` and ``gbrg`` uncompressed 8-bayer patterns.
-    10 to 16 bayer formats are only supported by The Imaging Source modules.
+    Officially supported by GStreamer are ``bggr``, ``rggb``, ``grbg`` and ``gbrg`` uncompressed 8 bit Bayer patterns.
+    10 to 16 bit Bayer formats are only supported by The Imaging Source modules.
 
 **image/jpeg**:
 

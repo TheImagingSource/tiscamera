@@ -23,7 +23,7 @@ TCAM_LOG
 TCAM_GIGE_PACKET_SIZE
 +++++++++++++++++++++
 
-`TCAM_GIGE_PACKET_SIZE` allows a manually overwrite of the largest allowed packet size for
+`TCAM_GIGE_PACKET_SIZE` allows a manual overwrite of the largest allowed packet size for
 GigE packages. This value is normally auto-negotiated and does not have to be set.
 The value is in bytes.
 
@@ -36,15 +36,15 @@ The value is in bytes.
 GStreamer
 =========
 
-Please refer to `the gstreamer documentation of environment variables <https://developer.gnome.org/gstreamer/stable/gst-running.html>`_ for a full overview.
+Please refer to `the GStreamer documentation of environment variables <https://developer.gnome.org/gstreamer/stable/gst-running.html>`_ for a full overview.
 
 
-The following variables are used to configure the gstreamer-1.0 behavior.
+The following variables are used to configure the GStreamer-1.0 behavior.
 
 GST_PLUGIN_PATH_1_0
 +++++++++++++++++++
 
-To add additional directories to the gstreamer search path set GST_PLUGIN_PATH_1_0.
+To add additional directories to the GStreamer search path, set GST_PLUGIN_PATH_1_0.
 
 .. code-block:: sh
    
@@ -66,14 +66,14 @@ GST_DEBUG
 GOBJECT
 +++++++
 
-To allow for a simpler debugging set the variable `G_DEBUG`. to one of the following values.
-For more information read the `GLib documentation <https://developer.gnome.org/glib/2.28/glib-running.html>`_.
+To allow for simpler debugging, set the variable `G_DEBUG`. to one of the following values.
+For more information, read the `GLib documentation <https://developer.gnome.org/glib/2.28/glib-running.html>`_.
 
 .. code-block:: sh
 
    export G_DEBUG=fatal-warnings
 
-To index additional directories set the environment variable `GI_TYPELIB_PATH`.
+To index additional directories, set the environment variable `GI_TYPELIB_PATH`.
 
 .. code-block:: sh
 

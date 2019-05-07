@@ -225,7 +225,7 @@ Color correction for bayer images.
        PI: Exposure Auto
    * - camera-whitebalance
      - bool
-     - Bool stating if the whitebalance values shall be applied via software or in the device. Currently only the 72 usb cameras support this.
+     - Bool stating if the whitebalance values shall be applied via software or in the device. Currently only the 72 USB cameras support this.
        Default: False
        PI: Camera Whitebalance
        

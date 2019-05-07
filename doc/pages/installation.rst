@@ -28,5 +28,5 @@ Private libraries
 =================
 
 The tiscamera project includes multiple shared libraries that are not meant for general usage.
-They will be installed into a subfolder named tcam-MAJOR_VERSION
+They will be installed into a subfolder named tcam-MAJOR_VERSION.
 These libs should not be linked as their API might change without notice.

@@ -114,7 +114,7 @@ The dependencies are also listed in `dependencies-debian-runtime.txt`
 Inofficial Dependencies
 =======================
 
-Scripts or tests that are not intended for day to day use
+Scripts or tests that are not intended for day-to-day use
 may have additional dependencies.
 
 

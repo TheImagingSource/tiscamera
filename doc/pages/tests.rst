@@ -141,9 +141,9 @@ For most tests the following configuration is assumed:
 
   - [ ] extension units are correctly loaded when
 
-    - [ ] usb 2
-    - [ ] usb 23
-    - [ ] usb 33/37
+    - [ ] USB 2
+    - [ ] USB 23
+    - [ ] USB 33/37
 
   - [ ] UDEV
 

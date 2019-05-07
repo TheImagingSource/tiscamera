@@ -4,7 +4,7 @@ Tutorial
 ########
 
 This page contains a extended tutorial on how to get started with The Imaging Source Cameras.
-For a simpler version read the README.md in the project's root directory.
+For a simpler version, read the README.md in the project's root directory.
 
 =====
 Setup
@@ -12,20 +12,20 @@ Setup
 
 The first half of this tutorial describes the configuration and build process
 required to build tiscamera on a local PC.
-For stable releases a precompiled .deb-file is available, see :ref:`packaging`.
+For stable releases, a precompiled .deb-file is available: see :ref:`packaging`.
 
-At this moment only amd64 releases are available.
+Currently only amd64 releases are available.
 
 Cloning
 =======
 
-To retrieve the code clone it from github:
+To retrieve the code, clone it from github:
 
 .. code-block:: sh
 
    git clone https://github.com/TheImagingSource/tiscamera.git
 
-For this ``git`` has to be installed.
+For this, ``git`` must be installed.
 
 Now change into the tiscamera directory and create a build directory:
 
@@ -38,9 +38,9 @@ Dependencies
 ============
 
 The project requires multiple dependencies to compile.
-For a complete list of dependencies see :any:`dependencies`.
+For a complete list of dependencies, see :any:`dependencies`.
 
-To install all dependencies execute the following command in the tiscamera directory.
+To install all dependencies, execute the following command in the tiscamera directory:
 
 .. code-block:: sh
 
@@ -50,14 +50,14 @@ To install all dependencies execute the following command in the tiscamera direc
 Configuration
 =============
 
-The configuration of tiscamera is done with ``cmake``.
-It allows the (de)activation of entire sections.
-To configure the project call `cmake` from the build directory.
+tiscamera is configured using ``cmake`` which
+allows the (de)activation of entire sections of code.
+To configure the project, call `cmake` from the build directory.
 
-For an overview of available cmake options, see :any:`configuring`
+For an overview of available cmake options, see :any:`configuring`.
 
-To interactively change options use the program ``cmake-gui``.
-Under debian/ubuntu it can be installed with ``sudo apt install cmake-qt-gui``
+To interactively change options, use the program ``cmake-gui``.
+Under Debian/Ubuntu, it can be installed with ``sudo apt install cmake-qt-gui``.
 
 
 Compilation
@@ -76,13 +76,13 @@ This means all libraries, etc. will be available to all users.
 Running without installation
 ----------------------------
 
-To integrate tiscamera into the system environment source the `env.sh` script located in the build directory.
-It will adjust environment variables, so that gstreamer elements, etc can be found.
+To integrate tiscamera into the system environment, source the `env.sh` script located in the build directory.
+It will adjust environment variables so that GStreamer elements, etc can be found.
 
 Verifying the installation
 ==========================
 
-To ensure that all libraries are correctly found execute one of the following commands after connecting the camera.
+To ensure that all libraries are correctly found, execute one of the following commands after connecting the camera.
 
 ``tcam-capture`` - The graphical example program that ships with tiscamera.
 
@@ -97,10 +97,10 @@ This sections describes how a program can interact with a camera.
 The API
 =======
 
-The tiscamer API consists out of two parts: the tiscamera gstreamer elements and a gobject interface.
-For a technical overview over the API, continue reading here: :any:`api`.
+The tiscamera API consists of two parts: the tiscamera GStreamer elements and a GObject Interface.
+For a technical overview of the API, continue reading here: :any:`api`.
 
-To reference both APIs add the following lines:
+To reference both APIs, add the following lines:
 
 .. tabs::
 
@@ -128,7 +128,7 @@ Camera Discovery
 Listing Available Cameras
 -------------------------
 
-For a quick listing of available devices execute the following in a terminal:
+For a quick listing of available devices, execute the following in a terminal:
 
 .. code-block:: sh
 
@@ -158,10 +158,10 @@ and :c:func:`tcam_prop_get_device_info`
 
 This code can be found in the example `00-list-devices`.
 
-Opening And Closing A Camera
+Opening and Closing a Camera
 ----------------------------
 
-The recommended way of addressing a camera is by using it's serial number.
+The recommended way of addressing a camera is by using its serial number.
 
 
 .. tabs::
@@ -182,8 +182,8 @@ The recommended way of addressing a camera is by using it's serial number.
          :linenos:
          :dedent: 4
 
-To close a device it is sufficient to set the gstreamer state to NULL.
-All hardware resources will be freed.
+To close a device, it is sufficient to set the GStreamer state to NULL
+which will free up all hardware resources.
                   
 .. tabs::
 
@@ -209,18 +209,18 @@ This code can be found in the example `02-set-properties`.
 Streaming
 =========
 
-For image retrieval the gstreamer element :any:`tcamsrc` is used.
+For image retrieval, use the GStreamer element :any:`tcamsrc`.
 
 Available Caps
 --------------
 
-For an overview over supported gstreamer caps type the following into a terminal:
+For an overview of supported GStreamer caps, type the following into a terminal:
 
 .. code-block:: sh
 
    tcam-ctrl -c <SERIAL>
 
-The printed caps are gstreamer compatible and can be copy-pasted for configuration purposes.
+The printed caps are GStreamer compatible and can be copy-pasted for configuration purposes.
 
 
 .. tabs::
@@ -267,17 +267,17 @@ Setting Caps
                   
 This code can be found in the example `04-set-format`.
 
-As an alternative to creating the GstCaps manually you can also use ``gst_caps_from_string``.
+As an alternative to creating the GstCaps manually, you can also use ``gst_caps_from_string``.
 This function takes a format string description and converts it to a valid GstCaps instance.
 For more information, see :any:`the caps reference section.<gstreamer_caps>`.
 
 Showing a live image
 --------------------
 
-To display a live image a display sink is required.
+In order to display a live image, a display sink is required.
 
-Depending on the used system some display sinks may work better than others.
-Generally the `ximagesink` is a good starting point.
+Depending on the system being used, some display sinks may work better than others.
+Generally, the `ximagesink` is a good starting point.
 
 A simple pipeline would look like this:
 
@@ -285,8 +285,8 @@ A simple pipeline would look like this:
 
 Working code can be found in the example `05-live-stream`.
 
-An alternative for simple try and error setups is the usage of the program ``gst-launch-1.0``.
-It enables the creation of pipelines on the commandline, allowing for quick setups. 
+An alternative to simple trial-and-error setups is the use of the program ``gst-launch-1.0``.
+This program enables the creation of pipelines on the command line, allowing for quick setups. 
 
 
 Receiving Images
@@ -295,7 +295,7 @@ Receiving Images
 The easiest approach is to use an appsink.
 The appsink element will call a function for each new image it receives.
 
-To enable image retrieval the following steps need to be taken.
+To enable image retrieval, the following steps need to be taken.
 
 .. tabs::
 
@@ -341,15 +341,15 @@ Properties
 ==========
 
 The camera offers multiple properties to assist with image acquisition.
-Depending on the device at hand these range from softwaretrigger to
-exposure to complete auto adjustment algorithms.
+Depending on the device at hand, these properties include functions
+such as software trigger, exposure, and complete auto adjustment algorithms.
 
 Get/List Properties
 -------------------
 
 The responsible function is `tcam_prop_get_tcam_property_names`.
 
-For an overview over available properties type the following into a terminal:
+For an overview of available properties, type the following into a terminal:
 
 .. code-block:: sh
 
@@ -402,9 +402,9 @@ The responsible function is `tcam_prop_set_tcam_property`.
                   
 This code can be found in the example `02-set-properties`.
 
-Where To Go From Here
+Where to Go from Here
 =====================
 
 Take a look at our :any:`reference`, the :any:`GStreamer documentation<reading_gstreamer>` or :any:`ask us a question<contact>`.
 
-For extended examples that include OpenCV, ROS and GUI frameworks look at our :ref:`extended examples<examples_further>`.
+For extended examples (including OpenCV, ROS and GUI frameworks), please have a look at our :ref:`extended examples<examples_further>`.

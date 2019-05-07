@@ -32,10 +32,10 @@ Some legacy hardware is not supported by the tiscamera libraries.
 
 
 ===============
-Firmware-Update
+Firmware Update
 ===============
 
-For the event that a firmware update is required take the following steps:
+In the event a firmware update is required, take the following steps:
 
 Prerequisites
 -------------
@@ -67,10 +67,10 @@ The following tools are required for a firmware update:
       camera-ip-conf is part of a standard tiscamera installation when aravis support is enabled.
 
 
-Identifying the camera
+Identifying the Camera
 ----------------------
 
-To identify the available devices execute the following command in a terminal.
+To identify the available devices, execute the following command in a terminal:
 
 .. tabs::
 
@@ -93,7 +93,7 @@ To identify the available devices execute the following command in a terminal.
          camera-ip-conf -l
 
 
-Locate the firmware
+Locate the Firmware
 -------------------
 
 .. tabs::
@@ -112,7 +112,7 @@ Locate the firmware
 
       Please :any:`contact the Imaging Source <contact>` to receive the necessary files.
 
-Writing the firmware
+Writing the Firmware
 --------------------
 
 .. tabs::

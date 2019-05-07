@@ -6,13 +6,13 @@ Configuration and Building
 Getting the code
 ================
 
-To get the code execute:
+To get the code, execute:
 
 ```
 git clone --recursive https://github.com/TheImagingSource/tiscamera.git
 ```
 
-This requires that git is installed.
+This requires that git be installed.
 
 .. _configuring:
 
@@ -41,11 +41,11 @@ cmake options
      - Build additional tools for camera interaction.
      - OFF
    * - -DBUILD_V4L2
-     - Build tiscamera with support for v4l2 devices.
+     - Build tiscamera with support for V4L2 devices.
      - ON
 
    * - -DBUILD_LIBUSB
-     - Build tiscamera with support for usb devices that that have no native driver.
+     - Build tiscamera with support for USB devices that that have no native driver.
      - ON
 
    * - -DBUILD_DOCUMENTATION
@@ -69,7 +69,7 @@ cmake options
 Installation Directories
 ========================
 
-This is a list of all installation directories that are used.
+This is a list of all installation directories used.
 All directories can be changed independently of each other when configuring the project with cmake.
 Paths may change when CMAKE_INSTALL_PREFIX is set.
 

@@ -8,7 +8,7 @@ To allow camera interaction from many different environments we offer a gobject
 introspection interface. This interface, that can be accessed through our
 gstreamer modules, allows full control of all device properties.
 
-Accessing the interface
+Accessing the Interface
 =======================
 
 To access the tcamprop interface two things are required:
@@ -32,7 +32,7 @@ advised. The tcambin will delete internal elements should the not be required
 for the current format. This typically happens when switching between bayer and
 other formats.
 
-Adding additional directories to the search path
+Adding Additional Directories to the Search Path
 ================================================
 
 To index additional directories set the environment variable `GI_TYPELIB_PATH`.

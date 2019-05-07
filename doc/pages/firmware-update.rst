@@ -40,7 +40,7 @@ Switch camera to UVC/proprietary mode:
    firmware-update -d <serialnumber> -m proprietary
 
 
-Switching to uvc mode is only necessary for USB2 cameras.
+Switching to UVC mode is only necessary for USB-2.0 cameras.
 
 Firmware Files
 ==============

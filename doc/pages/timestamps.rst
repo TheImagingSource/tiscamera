@@ -9,7 +9,7 @@ This page describes the various timestamps that a GstBuffer can be associated wi
 PTS
 ===
 
-The presentation timestamp is a gstreamer internal timestamp that references a gstclock which is associated with the start of a gstreamer stream. These timestamps are automatically created by gstreamer and describe the time the buffer was emitted by the tcamsrc.
+The presentation timestamp is a GStreamer internal timestamp and references a gstclock which is associated with the start of a GStreamer stream. These timestamps are automatically created by GStreamer and describe the time the buffer was emitted by the tcamsrc.
 
 Capture Time
 ============
@@ -25,17 +25,17 @@ This timestamp will always be in nanoseconds.
 This frame of reference will depend on the backend.
 When unsure about the used backend, call `tcam-ctrl -l` in a terminal and check the 'Type' column.
 
-V4L2 kernel driver
+V4L2 Kernel Driver
 ++++++++++++++++++
 
-The V4L2 backend will deliver a timestamp which's point of reference is the boot time.
-Please be aware that suspend/hibernate will cause the clock to not run.
+The V4L2 backend will deliver a timestamp whose point of reference is the boot time.
+Please be aware that suspend/hibernate will stop the clock.
 
-Aravis userspace library
+Aravis Userspace Library
 ++++++++++++++++++++++++
 
-The Aravis backend delivers the system wall-clock time of when the first bytes of the image where received.
-The point of reference if January 1, 1970 UTC.
+The Aravis backend uses the system wall-clock time of when the first bytes of the image were received.
+The point of reference is January 1, 1970 UTC.
 
 Camera Capture Time
 ===================

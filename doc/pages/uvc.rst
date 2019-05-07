@@ -4,14 +4,14 @@ UVC
 
 .. _uvc_extensions:
 
-===================
+===============
 Extension Units
-===================
+===============
 
 UVC extension units are applied through udev rules.
 
 The extension units are json files that describe how certain device interactions
-should be mapped to UVC and v4l2 properties.
+should be mapped to UVC and V4L2 properties.
 Most USB cameras require these units for full functionality.
 
 The default installation path is: /usr/share/theimagingsource/tiscamera/uvc-extension

@@ -7,21 +7,21 @@ This page describes the different backends that are used to interact with camera
 V4L2
 ####
 
-UVC compatible cameras can be addressed through the video4linux2(v4l2) kernel API.
+UVC compatible cameras can be addressed through the Video4Linux2(V4L2) kernel API.
 
-To know which device is associated with an /dev/videoX node read the contents of the
+To know which device is associated with an /dev/videoX node, read the contents of the
 directory `/dev/v4l/by-id/`. This directory contains softlinks containing the full
 camera name and serial pointing to the associated dev-node.
 
 The source code for this backend can be found in *src/v4l2/*
 
-For further reading, :any:`check out the documentation or mailiinglist<reading_v4l2>`.
+For further reading, :any:`check out the documentation or mailing list<reading_v4l2>`.
 
 v4l-utils
 ^^^^^^^^^^
 
-`v4l-utils` is a package that contains helper tools for v4l2 device interaction.
-These tools allow direct interaction with the v4l2 device.
+`v4l-utils` is a package that contains helper tools for V4L2 device interaction.
+These tools allow direct interaction with the V4L2 device.
 
 To check the available formats of a camera:
 
@@ -91,25 +91,25 @@ To list the currently available properties:
 The columns can be read as follows:
 
 1. name
-2. v4l2 id - unique identifier used for ioctl commands
-3. v4l2 property type
-4. description of the v4l2 property
+2. V4L2 id - unique identifier used for ioctl commands
+3. V4L2 property type
+4. description of the V4L2 property
 
-For menus the index - name association is listed beneath the menu property
+For menus, the index/name association is listed beneath the menu property.
     
 Aravis
 ######
 
-Aravis is a userspace library that allows interaction with GigE Vision devices.
+Aravis is a user space library which allows interaction with GigE Vision devices.
 
-Since aravis works in the userspace performance limitations may apply.
-To circumvent theses limitations read :ref:`real_time_threading`.
+Since Aravis works in the user space, performance limitations may apply.
+To circumvent theses limitations, read :ref:`real_time_threading`.
 
 The source code for this backend can be found in *src/aravis/*
 
-For further reading, :any:`check out the documentation or mailiinglist<reading_aravis>`.
+For further reading, :any:`check out the documentation or mailing list<reading_aravis>`.
 
-UsbVision
+USB3 Vision
 ^^^^^^^^^
 
 .. note::
@@ -118,16 +118,16 @@ UsbVision
 
 In some rare cases platforms do not offer a valid media stack,
 thus preventing the usage of USB cameras with a UVC backend.
-As a workaround aravis can be compiled with `--enable-usb`.
+As a workaround, Aravis can be compiled with `--enable-usb`.
 
-This enables aravis to iterate usb cameras through libusb.
-For a proper working ensure that the uvc driver is blacklisted.
+This enables Aravis to iterate USB cameras through libusb.
+To ensure functionality, make sure that the UVC driver is blacklisted.
 
-LibUSB
+libusb
 ######
 
-Cameras that are not UVC compatible and can thus not be addressed via v4l2 have an implementation via libusb-1.0.
+Cameras that are not UVC compatible and can thus not be addressed via V4L2 have an implementation via libusb-1.0.
 
 The source code for this backend can be found in *src/libusb/*
 
-For further reading, :any:`check out the documentation or mailiinglist<reading_libusb>`.
+For further reading, :any:`check out the documentation or mailing list<reading_libusb>`.
