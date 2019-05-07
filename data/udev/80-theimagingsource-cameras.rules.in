@@ -9,7 +9,7 @@ RUN+="/sbin/modprobe -b uvcvideo"
 # add the imaging source VID and PID to the list of devices supported by uvcvideo
 ACTION=="add", SUBSYSTEM=="drivers", \
                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
-               ATTR{new_id}="199e 8101"
+               RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/driver/uvcvideo'"
 
 # give users permission to interact with cameras
 SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
