@@ -178,7 +178,7 @@ bool RegionOfInterest::set_image_size (const tcam_image_size& image_size)
                            behavior_,
                            cache_))
     {
-        printf("calculate_new_roi failed!\n");
+        //printf("calculate_new_roi failed!\n");
 
         // TODO: reset roi
         /*
@@ -194,13 +194,11 @@ bool RegionOfInterest::set_image_size (const tcam_image_size& image_size)
 
     if (!roi_fits_image(image_size_, new_roi))
     {
-        printf("roi does not fit!\n");
+        //printf("roi does not fit!\n");
         return false;
     }
 
     roi_ = new_roi;
-
-    printf("NEW ROI %ux%u -> %ux%u\n", roi_.left, roi_.top, roi_.width, roi_.height);
 
     // not here
     // set_preset(ROI_PRESET_CUSTOM_RECTANGLE);
