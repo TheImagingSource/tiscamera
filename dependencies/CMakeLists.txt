@@ -25,7 +25,7 @@ if (BUILD_ARAVIS)
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG ARAVIS_0_6_0
+      GIT_TAG ARAVIS_0_6_2
       CONFIGURE_COMMAND CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-usb=no --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-hartbeat
       BUILD_COMMAND make -j4 CFLAGS=-fPIC
       INSTALL_COMMAND ""        # Do not install we are statically linking
