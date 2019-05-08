@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-capture now has a ROI display and selection capabilities
 - tcam-capture now has configurable global keybindings allowing for
   fullscreen, image saving, triggering and opening the device dialog
-- Generation of user documentation. Enabled with -DBUILD_USER_DOC=ON
+- Generation of user documentation. Enable with -DBUILD_DOCUMENATION=ON
 - Auto Iris functionality to gsttcamautoexposure element
 - AFU050 will have much quicker device lost notification
 - tcamsrc now adds a GstMeta object to each buffer to transport additional information
@@ -26,7 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Run with 'make test'.
 - tcam-uvc-extension-loader as a replacement for uvcdynctrl
 - libuuid dependency
-
+- 12-Mono Support for GigE devices
+- env.sh to add build directory to current environment
+- install-dependencies.sh to automatically install dependencies
 
 ### Changed
 
@@ -35,14 +37,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The internal aravis is built with fast-heartbeat=ON
 - The caps output of 'tcam-ctrl -c' does not contain type descriptions.
   This means the descriptions can now be copy pasted for gst-launch
-- internal aravis version to 0.6.1
+- internal aravis version to 0.6.2
 - Switch to different auto-exposure algorithm
 - gstreamer elements that interact with tcamsrc elements now search upstream
+- Udev rules
+  -- Changed discovery of legacy cameras
+  -- Changed TAGS/mod to be aravis USB3Vision compatible
+- TcamProp properties are now available when in GST_STATE_READY
+- aravis is now a cmake external project and not a git submodule
 
 ### Removed
 
 - unused camera-ip-conf gui
 - uvcdynctrl dependency
+- Most examples. Now only API examples exist.
+  Complex examples were move to https://github.com/TheImagingSource/Linux-tiscamera-Programming-Samples
 
 ### Fixed
 
@@ -51,6 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcamsrc sometimes generated double resolution entries for ranges.
 - tcam-capture --serial was not respected
 - Segmentation faults when program exits
+- tcam-gigetool installation problems
+- Faulty serial number identification for GigE cameras when the gige-daemon was not running
 
 ## [0.10.0] - 2018-07-31
 
