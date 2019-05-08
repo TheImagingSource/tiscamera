@@ -527,9 +527,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
         std::string name = arv_get_device_id(i);
         memcpy(info.identifier, name.c_str(), name.size());
 
-        ArvCamera* cam = arv_camera_new(name.c_str());
-
-        const char* n =  arv_camera_get_model_name(cam);
+        const char* n =  arv_get_device_model(i);
 
         if (n != NULL)
         {
@@ -539,16 +537,10 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
         {
             tcam_log(TCAM_LOG_WARNING, "Unable to determine model name.");
         }
-        size_t t = name.find("-");
 
-        if (t != std::string::npos)
-        {
-            strcpy(info.serial_number, name.substr((t+1)).c_str());
-        }
+        strcpy(info.serial_number, arv_get_device_serial_nbr(i));
 
         device_list.push_back(DeviceInfo(info));
-
-        g_object_unref(cam);
     }
 
     return device_list;
