@@ -6,7 +6,7 @@ tcam-uvc-extension-loader
 
 The tcam-uvc-extension-loader is our internal replacement for uvcdynctrl.
 
-It's only purpose is to load UVC extension units for USB cameras.
+Its only purpose is to load UVC extension units for USB cameras.
 
 The description files for the extension units are written in json and are a
 direct representation of the underlying struct that is submitted to the kernel.
@@ -28,7 +28,7 @@ tcam-uvc-extension-loader has the following arguments:
 Plug & Play
 ===========
 
-With a default installation `tcam-uvc-extension-loader` is automatically called when a
+With a default installation, `tcam-uvc-extension-loader` is automatically called when a
 compatible device is attached. This is done via :any:`UDev rules <udev>`.
     
 Extension Unit

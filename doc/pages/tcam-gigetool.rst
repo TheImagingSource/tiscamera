@@ -28,12 +28,12 @@ The following arguments may be required by a command:
    
    .. option:: --format
 
-      Format of the device specific information that will be printed.
+      Format of the device-specific information that will be printed.
       The field descriptors must be prepended with a '%'.
       
       Default is `%m%s%u%i`.
 
-      :m: Name of the camera model.
+      :m: Name of the camera model
       :s: Serial number of the camera
       :u: User defined name, may be empty
       :i: Current ip
@@ -52,7 +52,7 @@ The following arguments may be required by a command:
             
    Show details of a camera.
 
-   Possible identifier are the serial number of the camera or it's MAC address.
+   Possible identifier would be the camera's serial number or its MAC address.
    
 .. option:: set [--ip IP] [--netmask NETMASK] [--gateway GATEWAY] [--mode {dhcp,static,linklocal}] [--name NAME] IDENTIFIER
 
@@ -78,7 +78,7 @@ The following arguments may be required by a command:
       
    .. option:: --name NAME
 
-      Set a user defined name. This is restricted to 15 characters or less.
+      Set a user-defined name. This is restricted to 15 characters or less.
 
 
 .. option:: rescue --ip IP --netmask NETMASK --gateway GATEWAY IDENTIFIER

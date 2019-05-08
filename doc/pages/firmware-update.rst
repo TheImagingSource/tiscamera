@@ -6,7 +6,7 @@ firmware-update
 
 firmware-update is a commandline tool to update the firmware of The Imaging Source USB cameras.
 
-Due to the fact that this tool is rarely needed it is not installed alongside other tools.
+This tool is rarely needed and, therefore not installed alongside other tools.
 
 Examples
 ========

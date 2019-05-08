@@ -6,7 +6,7 @@ camera-ip-conf
 ##############
 
 camera-ip-conf is a tool that allows the ip configuration of GigE network cameras.
-It offers the possibility to configure via cli or gui.
+Use it to configure the camera through the command line.
 
 
 Cameras can be named using the following methods:
@@ -114,7 +114,7 @@ To set the name of a camera:
 
 This name is restricted to 15 characters.
 
-To delete the name simply set it to an empty name
+To delete the name, simply set it to an empty name:
 
 .. code-block:: sh
 
@@ -140,26 +140,26 @@ To upload a new firmware:
 
 .. warning::
    
-   **CAUTION: This can break the camera. Use at own risk!**
+   **CAUTION: Failures when upgrading the firmware can make the camera unusable. Use at your own risk!**
 
 
 Troubleshooting
 ===============
 
 - The camera is not detected.
-  If the camera is not detected, there are various possible reasons.
-
-  - Assure the camera responds as expected.
-    This can be done via wireshark. If an gvcp pong arrives, the
-    camera responds correctly.
-  - Turn of the firewall.
-    It could be filtered
-  - Turn of rp_filter
+  There might be several issues to consider:
+  
+  - Ensure the camera is responding as it should.
+    This can be done via wireshark. If a gvcp pong arrives, the
+    camera is responding correctly.
+  - Turn off the firewall.
+    The firewall might be blocking the packages.
+  - Turn off rp_filter.
     rp_filter is a kernel module that drops packets from addresses
     that are not within the address range of the configured network.
-    If the camera happens to use LLA or a static IP not within
-    the configured network. This may be the reason.
-    To temporarily turn off the rp_filter execute:
+    If the camera happens to use LLA (or a static IP not within
+    the configured network). This may be the reason.
+    To temporarily turn off the rp_filter, execute:
     
     .. code-block:: sh
 
@@ -167,16 +167,13 @@ Troubleshooting
 
     .. warning::
        **WARNING:** These actions may pose a security threat to the
-       computer. If there is a professional administrator at your
-       facility, please contact this person to assure the working
-       environment is not endangered by these actions.
-       We do not take responsibility for any damage to you, your
-       system or your environment caused by these actions.
-       Usage at own risk.
+       computer. Please contact the system administrator before executing these actions.
+       We take no responsibility for damage to persons, systems or environments.
+       Use at your own risk.
 
   - The camera is misconfigured.
     If the camera has a temporary IP configuration and is not
-    reachable a simple reconnecting of the camera should reset the
+    reachable, simply reconnecting the camera should reset the
     configuration.
 
     If the static ip is misconfigured and the camera has a address
@@ -187,6 +184,6 @@ Troubleshooting
 
        camera-ip-conf rescue ip=<IP> subnet=<SUBNET> gateway=<GATEWAY> mac=<MAC>
 
-  To get the mac address of the camera use tools like wireshark
+  To get the mac address of the camera, use tools like wireshark
   to listen to incoming traffic. The camera should still send
   pong packets as a response to the discovery pings.

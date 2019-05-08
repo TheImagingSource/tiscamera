@@ -7,7 +7,7 @@ gige-daemon
 The gige-daemon is a daemon that keeps track of available GigE devices.
 
 Searching the network for available devices takes time,
-thus it is preferable to have a local list available when a device shall be opened.
+making it preferable to have a local list available when a device is opened.
 
 Available options
 =================
@@ -44,11 +44,11 @@ The following commands may be relevant in this regard:
 Restricting to certain interfaces
 =================================
 
-Per default the gige-daemon will address all available interfaces.
-To restrict the daemon to a certain interface initialize the process with the names of the interfaces that shall be queried.
+Per default, the gige-daemon will address all available interfaces.
+To restrict the daemon to a certain interface, initialize the process with the names of the interfaces to be queried.
 
 .. code-block:: sh
 
    gige-daemon start eth1 eth2 # eth0 would not be queried
 
-This change has to be manually done in the systemd config.
+This change has to be performed manually in the systemd config.

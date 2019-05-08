@@ -8,16 +8,17 @@ Tiscamera has helper scripts that aim to help with deployment and installation.
 install-dependencies.sh
 =======================
 
-install-dependencies.sh is a shell scripts that allows the installation of dependencies on Debian
-based systems.
+install-dependencies.sh is a shell script that allows the installation
+of dependencies on Debian-based systems.
 It allows for the installation of compilation and/or runtime dependencies. These can be
-selected with --compilation and --runtime.
+selected with ``--compilation`` and ``--runtime``.
 
-Additionally the argument --yes can be given to suppress the confirmation prompt of apt-get.
+Additionally, the argument ``--yes`` can be given to suppress the confirmation prompt of ``apt-get``.
 
-Since the usage of installed packages by other software can not be tracked an uninstall option is not available.
+Since the usage of installed packages by other software can not be tracked,
+an uninstall option is not available.
 
-To install all dependencies call
+To install all dependencies, call
 
 .. code-block:: sh
 
@@ -27,13 +28,13 @@ To install all dependencies call
 env.sh
 ======
 
-env.sh is a bourne shell script that can be sourced to integrate the build directory
+env.sh is a Bourne shell script that can be sourced to integrate the build directory
 into the current environment.
 
 It will append directories to the PATH and library search path for the dynamic linker
-and gstreamer, thus enabling usage of tiscamera resources without installation.
+and GStreamer, thus enabling usage of tiscamera resources without installation.
 
-To source it call the following in the build directory
+To source it, call the following in the build directory
 
 .. code-block:: sh
 

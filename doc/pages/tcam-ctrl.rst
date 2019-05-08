@@ -31,18 +31,24 @@ Arguments
 .. option:: -p <SERIAL>
 
    Print available properties.
-   Requires the serial number of the camera that shall be queried.
+   *Requires the serial number of the camera to be queried.*
 
 .. option:: -f <SERIAL>
+
+   Print information about available video formats.
+   *Requires the serial number of the camera to be queried.*
+            
 .. option:: -c <SERIAL>
 
    Print GStreamer 1.0 caps the device offers.
-   Requires the serial number of the camera that shall be queried.
-   These caps are caps the device directly offers. Implicitly converted caps
-   that are additionally offered by the tcambin through
-   conversion are not included.
+   *Requires the serial number of the camera to be queried.*
+   
+   These caps are offered directly by the device.
+   Implicitly converted caps offered by the tcambin through conversion are not included.
 
 .. option:: --version
 
    Print version information about the used tiscamera and aravis versions.
+
+   Print information about the library versions of tiscamera and aravis.
 
