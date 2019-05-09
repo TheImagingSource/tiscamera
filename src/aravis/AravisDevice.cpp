@@ -571,6 +571,14 @@ bool AravisDevice::start_stream ()
                     {
                         tcam_warning("Unable to make aravis capture thread real time or high priority");
                     }
+                    else
+                    {
+                        tcam_warning("Aravis capture thread is running in high priority mode");
+                    }
+                }
+                else
+                {
+                    tcam_info("Aravis capture thread is running as a real time thread");
                 }
             }
         };
