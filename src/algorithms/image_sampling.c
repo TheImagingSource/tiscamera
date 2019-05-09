@@ -197,7 +197,7 @@ unsigned int image_brightness_bayer (image_buffer* buf)
 unsigned int buffer_brightness_gray (image_buffer* buf)
 {
     unsigned int brightness = 0;
-    unsigned char*data = (unsigned char*)buf->image;
+    unsigned char *data = (unsigned char*)buf->image;
 
     /* GstCaps *caps = GST_BUFFER_CAPS(buf); */
     /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
@@ -213,19 +213,22 @@ unsigned int buffer_brightness_gray (image_buffer* buf)
 
     // currently only 8bit formats are supported
     unsigned int byte_per_pixel = 1;
-    int pitch = width * byte_per_pixel;
+    int pitch = buf->rowstride;
     unsigned int cnt = 0;
     unsigned int y_accu = 0;
-    unsigned int sampling_line_step = width / (SAMPLING_LINES + 1);
+    unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
 
-    unsigned int y;
-    for (y = sampling_line_step; y < width; y += sampling_line_step )
+    for (unsigned int y = sampling_line_step;
+         y < (height - sampling_line_step);
+         y += sampling_line_step)
     {
-        unsigned int samplingColStep = ((height) / (SAMPLING_COLUMNS+1));
+        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
+
         byte* pLine = data + y * pitch;
 
-        unsigned int col;
-        for (col = samplingColStep; col < height; col += samplingColStep)
+        for (unsigned int col = samplingColStep;
+             col < (width - samplingColStep);
+             col += samplingColStep)
         {
             ++cnt;
             y_accu += pLine[col];
