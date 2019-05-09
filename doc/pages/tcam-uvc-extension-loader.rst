@@ -34,8 +34,8 @@ compatible device is attached. This is done via :any:`UDev rules <udev>`.
 Extension Unit
 ==============
 
-The following is a description of the json format that files must adhere to to
-be loadable be tcam-uvc-extension-loader.
+The following description is a generic example showing
+what a file that is loadable by this program must look like.
 
 .. code-block:: text
 
