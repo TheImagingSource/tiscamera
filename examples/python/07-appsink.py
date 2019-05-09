@@ -23,7 +23,6 @@
 import sys
 import gi
 import time
-import gst_hacks
 
 gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
