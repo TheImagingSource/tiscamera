@@ -54,7 +54,7 @@ Legacy Releases
 ===============
 
 
-To checkout our previous release follow these steps:
+To checkout our previous release, follow these steps:
 
 .. code-block:: sh
 
@@ -64,6 +64,6 @@ To checkout our previous release follow these steps:
 
    git checkout v-tiscamera-<RELEASE>
 
-After this simply follow the build and install instructions in the README.
+After this, simply follow the build and install instructions in the README.
 
 All files required are included in the repository.

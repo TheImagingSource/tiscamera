@@ -16,7 +16,7 @@ Most USB cameras require these units for full functionality.
 
 The default installation path is: /usr/share/theimagingsource/tiscamera/uvc-extension
 
-For more information on how the UVC extension units are loaded read :any:`tcam-uvc-extension-loader`.
+For more information on how the UVC extension units are loaded, read :any:`tcam-uvc-extension-loader`.
 
 ===========
 UVC Logging

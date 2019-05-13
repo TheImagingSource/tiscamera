@@ -19,14 +19,14 @@ USB
 Cstate Handling
 ===============
 
-cstates are a method of CPU power saving. When dealing with realtime processes like video streaming
+cstates are a method of CPU power saving. When dealing with real time processes like video streaming,
 aggressive power management can cause latency spikes.
 
 For a good overview/introduction read: https://access.redhat.com/articles/65410
 
-The solution boils down to: Setting kernel arguments in grub.
+The solution boils down to: Setting kernel arguments in GRUB.
 This should be used to verify that the problem really has to do with cstates.
-To do this add
+To do this, add
 
 .. code-block:: text
                 
@@ -86,13 +86,13 @@ GigE
 The Camera Is Not Found
 =======================
 
-One or more cameras are not delivering no/incomplete images
-===========================================================
+One or more cameras are delivering no/incomplete images
+=======================================================
 
-Assuming the computer is not simply having processing problems due to low performance two problems may be the cause.
+Assuming the computer is not simply having processing problems due to low performance two problems may be the cause:
 
-1. The network card in the computer or a switch between the computer and the camera is not gigabit capable.
-2. The packet size of the network card or a switch between the computer and the camera is to small.
+1. The network card in the computer, or a switch between the computer and the camera, is not gigabit capable.
+2. The packet size of the network card, or a switch between the computer and the camera, is too small.
 
 Verifying Gigabit Capabilities
 ------------------------------
@@ -127,8 +127,8 @@ Sample ouput:
        inet 169.254.100.1/16 brd 169.254.255.255 scope global enp37s0
           valid_lft forever preferred_lft forever
 
-Here the interface are named `enp31s0` and `enp37s0`.
-Interfaces may be named like `enp31s0` or `eth0`.
+Here the interfaces are named `enp31s0` and `enp37s0`.
+Interfaces may also have names like `enp31s0` or `eth0`.
 
 Verify the Speed of the Network Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -143,10 +143,10 @@ Sample output:
 
    1000
 
-If the output is `1000` the network interface has gigabit.
+If the output is `1000`, the network interface has gigabit.
 
-Checking MTU Size Of The Network Interface
-------------------------------------------
+Checking the Network Interface's MTU Size
+-----------------------------------------
 
 Identifying the Network Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -178,8 +178,8 @@ Sample ouput:
        inet 169.254.100.1/16 brd 169.254.255.255 scope global enp37s0
           valid_lft forever preferred_lft forever
 
-Here the interface are named `enp31s0` and `enp37s0`.
-Interfaces may be named like `enp31s0` or `eth0`.
+Here the interfaces are named `enp31s0` and `enp37s0`.
+Interfaces may also have names like `enp31s0` or `eth0`.
 
 .. _verify_mtu:
    
@@ -204,14 +204,14 @@ The default setting is typically at 1500.
 Temporarily adjusting the MTU
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   
 
-To temporarily adjust the MTU for a network interface execute the following in the terminal
+To temporarily adjust the MTU for a network interface, execute the following in the terminal:
 
 .. code-block:: sh
 
    sudo ip link set <INTERFACE_NAME> mtu 9000
 
 This will set the MTU to the recommended setting.
-To verify this execute the steps described under :any:`Verifying the MTU size <verify_mtu>`.
+To verify this, execute the steps described under :any:`Verifying the MTU size <verify_mtu>`.
 
 Permanently adjusting the MTU
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

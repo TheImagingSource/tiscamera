@@ -7,7 +7,7 @@ The following links can be helpful when dealing with tiscamera and the underlyin
 
 .. _reading_gstreamer:
 
-Gstreamer
+GStreamer
 =========
 
 Documentation: https://gstreamer.freedesktop.org/documentation/
@@ -34,7 +34,7 @@ Mailinglist: https://www.freelists.org/list/aravis
 
 .. _reading_libusb:
 
-LibUsb
+libusb
 ======
 
 Documentation: http://libusb.sourceforge.net/api-1.0/

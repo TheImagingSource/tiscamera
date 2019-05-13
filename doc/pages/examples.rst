@@ -15,41 +15,41 @@ These examples exist in all available example languages.
      - What it teaches
    * - 00
      - list-devices
-     - Show what cameras there are and how to identify them
+     - Shows what cameras there are and how to identify them
    * - 01
      - list-properties
-     - Show the properties of a camera and their settings(range, current value, etc.)
+     - Shows the properties of a camera and their settings (range, current value, etc.)
    * - 02
      - set-property
      - Shows how to set a specific property
    * - 03
      - live-stream
-     - Live image stream from the camera
+     - Delivers live-image stream from the camera
    * - 04
      - list-formats
-     - List what formats the camera offers
+     - Lists what formats the camera offers
    * - 05
      - set-format
-     - Set the camera to a specific format
+     - Sets the camera to a specific format
    * - 06
      - softwaretrigger
-     - Instead of a continuous image stream, trigger single images.
+     - Triggers single images - instead of a continuous image stream
    * - 07
      - appsink
-     - Receive images in an application instead of just showing them.
+     - Receives images in an application instead of just showing them.
    * - 08
      - save-stream
-     - Store a stream in a file.
+     - Stores a stream in a file.
    * - 09
      - device-lost
-     - Receive device-lost and other messages and react to them
+     - Receives device-lost and other messages and react to them
 
 .. _examples_further:
 
 Further Examples
 ================
 
-For extended examples look through the examples repository.
+For extended examples, look through the examples repository.
 
 https://github.com/TheImagingSource/Linux-tiscamera-Programming-Samples
 

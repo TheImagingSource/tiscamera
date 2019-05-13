@@ -15,12 +15,12 @@ Unit Tests
 
 .. note::
 
-   The gstreamer unit tests will require a camera for indexing.
+   The GStreamer unit tests will require a camera for indexing.
    It is also advised to have the gige-daemon running to speed up test runs.
 
 Unit tests are implemented with the help of the catch2 framework.
 
-To execute unit tests build the project and call `make test`.
+To execute unit tests, build the project and call `make test`.
 
 To retrieve verbose output without calling a single test executable, set the
 environment variable `CTEST_OUTPUT_ON_FAILURE=1`
@@ -35,15 +35,15 @@ Integration Tests
 =================
 
 Integration tests are tests that verify the proper interaction of multiple elements.
-This e.g. includes the execution of complete gstreamer pipelines.
+This would, for example, include the execution of complete GStreamer pipelines.
 
 They are not executed automatically.
 
 Release Tests
 =============
 
-Release Tests are tests that will be run to ensure no problems arise when deploying tiscamera.
-This e.g. includes the building of different tiscamera configurations.
+Release Tests are tests that are run to ensure no problems arise when deploying tiscamera.
+This includes the building of different tiscamera configurations.
 They are not executed automatically.
 
 Manual Tests
@@ -52,7 +52,7 @@ Manual Tests
 The following tests are executed by a tester before publication of a new release.
 The tests are executed on the current reference system.
 
-For most tests the following configuration is assumed:
+For most tests, the following configuration is assumed:
 ``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=ON -DBUILD_LIBUSB=ON -DBUILD_TESTS=ON -DBUILD_TOOLS=ON ..``
 
 - [ ] Building/Installation
@@ -157,7 +157,7 @@ Package Testing
 ---------------
 
 The following steps are to be taken to ensure proper package integrity.
-These steps shall be executed on a vanilla reference system.
+These steps should be executed on a vanilla reference system.
 
 - [ ] ``sudo apt install tiscamera-*.deb`` installs the package without warnings etc.
 
