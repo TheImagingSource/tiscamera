@@ -2250,9 +2250,11 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
 
         if (data == NULL || length == 0)
         {
+            gst_buffer_unmap(buf, &info);
             GST_WARNING("Buffer is not valid! Ignoring buffer and trying to continue...");
             return GST_FLOW_OK;
         }
+        gst_buffer_unmap(buf, &info);
 
         correct_brightness(self, buf);
         self->frame_counter = 0;
