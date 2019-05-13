@@ -937,6 +937,8 @@ void AravisDevice::iterate_genicam (const char* feature)
                                                              "IMX174WDRShutter2",
                                                              "ChunkIMX174FrameSet",
                                                              "ChunkIMX174FrameId",
+                                                             "SensorPixelHeight",
+                                                             "SensorPixelWidth",
         };
 
 
