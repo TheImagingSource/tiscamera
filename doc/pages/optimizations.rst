@@ -34,8 +34,8 @@ Where \<username\> should be replaced with the user under which the application 
 
 A restart may be required to apply these changes.
 
-The hard limit is the absolute limit to which the soft limit can be set.
-The soft limit is the highest priority a thread can be set to.
+The `hard limit` is the absolute limit to which the soft limit can be set.
+The `soft limit` is the highest priority a thread can be set to.
 All capture threads operate with a priority of 10.
 
 To change the soft limit at runtime enter:
