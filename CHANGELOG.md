@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2019-05-13
+
 ### Added
 
 - tcam-capture now has a --fullscreen flag to make it start in fullscreen mode
