@@ -139,7 +139,17 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.frame_retention = 200;
 
     std::string env_packet_size = tcam::get_environment_variable("TCAM_GIGE_PACKET_SIZE", "0");
-    int eps = std::stoi(env_packet_size);
+
+    int eps = 0;
+
+    try
+    {
+        eps = std::stoi(env_packet_size);
+    }
+    catch (...)
+    {
+        tcam_warning("Unable to interpret the value for TCAM_GIGE_PACKET_SIZE. Falling back to default values.");
+    }
 
     if (eps == 0)
     {
