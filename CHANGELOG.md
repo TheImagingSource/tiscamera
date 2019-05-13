@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 12-Mono Support for GigE devices
 - env.sh to add build directory to current environment
 - install-dependencies.sh to automatically install dependencies
+- Filter for genicam properties SensorPixelHeight and SensorPixelWidth
+- TAG+="uaccess", TAG+="udev-acl to USB device permissions
 
 ### Changed
 
@@ -45,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   -- Changed TAGS/mod to be aravis USB3Vision compatible
 - TcamProp properties are now available when in GST_STATE_READY
 - aravis is now a cmake external project and not a git submodule
+- USB device mode is now 0666
+- legacy usb cameras are registered differently. This should minimize problems with udev.
 
 ### Removed
 
