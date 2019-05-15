@@ -31,8 +31,8 @@ import argparse
 
 from operator import itemgetter
 
-from .version import TCAM_VERSION, TCAM_GIGETOOL_VERSION, TCAM_GIGETOOL_GIT_REVISION
-from .controller import CameraController, CameraNotFoundError
+from tcamgigetool.version import TCAM_VERSION, TCAM_GIGETOOL_VERSION, TCAM_GIGETOOL_GIT_REVISION
+from tcamgigetool.controller import CameraController, CameraNotFoundError
 
 _ = gettext.gettext
 
