@@ -346,6 +346,7 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
         /* skip this device if we can't get the usb parent */
         if (!parent_device)
         {
+            udev_device_unref(dev);
             continue;
         }
 
