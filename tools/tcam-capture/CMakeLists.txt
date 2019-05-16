@@ -19,11 +19,14 @@ if (PYTHONINTERP_FOUND)
   find_package(PythonModule QUIET) # this quiet makes find_python_module be quiet
   find_python_module(PyQt5 REQUIRED)
 
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print([x for x in site.getsitepackages() if x.startswith('${CMAKE_INSTALL_PREFIX}/lib')][0])"
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import site; sites=[x for x in site.getsitepackages() if x.startswith('${CMAKE_INSTALL_PREFIX}/lib')]; print(sites[0] if len(sites)>0 else '')"
     OUTPUT_VARIABLE TCAM_CAPTURE_PY_INSTALL)
-  string(REGEX REPLACE "\n$" "" TCAM_CAPTURE_PY_INSTALL "${TCAM_CAPTURE_PY_INSTALL}")
 
-  # set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/")
+  if (TCAM_CAPTURE_PY_INSTALL MATCHES "")
+    set(TCAM_CAPTURE_PY_INSTALL "${TCAM_INSTALL_LIB}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/")
+  else ()
+    string(REGEX REPLACE "\n$" "" TCAM_CAPTURE_PY_INSTALL "${TCAM_CAPTURE_PY_INSTALL}")
+  endif ()
 
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py" @ONLY)
