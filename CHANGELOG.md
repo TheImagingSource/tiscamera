@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Memory leak in the udev device iteration
+- Installation issues for tcam-gigetool with custom CMAKE_INSTALL_PREFIX
+- Installation issues for tcam-capture with custim CMAKE_INSTALL_PREFIX
+- Issues with UVC extension units for USB 23 and 33 cameras concerning 'Trigger Polarity'
+
 ## [0.11.0] - 2019-05-13
 
 ### Added
