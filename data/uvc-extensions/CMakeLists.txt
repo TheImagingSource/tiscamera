@@ -17,7 +17,7 @@
 # assure executable exists
 # find_executable(UVCDYNCTRL uvcdynctrl)
 
-set(TCAM_EXTENSION_UNITS usb2.json usb3.json)
+set(TCAM_EXTENSION_UNITS usb2.json usb23.json usb33.json)
 
 install(FILES ${TCAM_EXTENSION_UNITS}
   DESTINATION ${TCAM_INSTALL_UVC_EXTENSION})
