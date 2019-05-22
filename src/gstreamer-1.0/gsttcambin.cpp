@@ -526,8 +526,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
     auto send_missing_element_msg = [self] (const std::string& element_name)
         {
             std::string msg_string = "Could not create element '" + element_name + "'.";
-            GError* err = g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN,
-                                      "%s", msg_string.c_str());
+            GError* err = g_error_new_literal(GST_CORE_ERROR,
+                                              GST_CORE_ERROR_MISSING_PLUGIN,
+                                              msg_string.c_str());
             GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
             gst_element_post_message(GST_ELEMENT(self), msg);
             g_error_free(err);
