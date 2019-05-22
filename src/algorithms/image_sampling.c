@@ -211,8 +211,6 @@ unsigned int buffer_brightness_gray (image_buffer* buf)
     unsigned int width = buf->width;
     unsigned int height = buf->height;
 
-    // currently only 8bit formats are supported
-    unsigned int byte_per_pixel = 1;
     int pitch = buf->rowstride;
     unsigned int cnt = 0;
     unsigned int y_accu = 0;
