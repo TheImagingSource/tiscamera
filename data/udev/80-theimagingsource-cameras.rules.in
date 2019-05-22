@@ -14,12 +14,64 @@ ACTION=="add", SUBSYSTEM=="drivers", \
 # give users permission to interact with cameras
 SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
 
-# load uvc extensions for usb3 cameras
-ACTION=="add", SUBSYSTEM=="video4linux", \
-               ATTRS{idVendor}=="199e", ATTRS{speed}=="5000", \
-               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb3.json"
 
-# load uvc extensions for usb2 cameras
+
+#######
+# UVC Extension Units
+# When manually editing this file for uasge in you system replace the following strings
+# with the absolute paths of tcam-uvc-extension-loader and the location of the uvc extensions
+#
+# @TCAM_INSTALL_BIN@ - typically /usr/bin/
+# @TCAM_INSTALL_UVC_EXTENSION@ - typically /usr/share/theimagingsource/tiscamera/uvc-extension/
+#
+#######
+
+#
+# load uvc extensions for USB3 33 cameras
+# Product IDs 0x90xx, 0x94xx, 0x98xx = 33U, 37U, 38U
+#
 ACTION=="add", SUBSYSTEM=="video4linux", \
-               ATTRS{idVendor}=="199e", ATTRS{speed}=="480", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="90??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="94??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="98??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb33.json"
+
+
+#
+# load uvc extensions for USB3 23 cameras
+# Product IDs 0x84xx, 0x85xx, 0x86xx, 0x87xx = 23U, 24U, 27U, 23er AFU
+#
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="84??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="85??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="86??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="87??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
+
+
+#
+# load uvc extensions for USB2 cameras
+# Product IDs 0x82xx, 0x83xx = 22U, 72U
+#
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{speed}=="82??", \
+               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"
+
+ACTION=="add", SUBSYSTEM=="video4linux", \
+               ATTRS{idVendor}=="199e", ATTRS{speed}=="83??", \
                RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"

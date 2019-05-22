@@ -1,0 +1,703 @@
+{
+    "guid": "0aba49de-5c0b-49d5-8f71-0be40f94a67a",
+    "mappings": [
+        {
+            "id": "0x199e201",
+            "name": "Exposure Time (us)",
+            "selector": "0x1B",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e202",
+            "name": "Auto Shutter",
+            "selector": "0x01",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e203",
+            "name": "Auto Exposure Reference",
+            "selector": "0x04",
+            "uvc_type": "signed",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e204",
+            "name": "Gain (dB/100)",
+            "selector": "0x18",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e205",
+            "name": "Gain Auto",
+            "selector": "0x02",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e206",
+            "name": "White Balance One Push",
+            "selector": "0x03",
+            "uvc_type": "boolean",
+            "v4l2_type": "button",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e207",
+            "name": "White Balance Preset",
+            "selector": "0x25",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 16,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 1,
+                    "entry": "Hold (After Auto)"
+                },
+                {
+                    "value": 3,
+                    "entry": "Light Bulb"
+                },
+                {
+                    "value": 4,
+                    "entry": "Neutral Color Fluorescent Light"
+                },
+                {
+                    "value": 5,
+                    "entry": "Clear Sky"
+                },
+                {
+                    "value": 6,
+                    "entry": "Cloudy Sky"
+                },
+                {
+                    "value": 9,
+                    "entry": "Daylight Color Fluorescent"
+                },
+                {
+                    "value": 10,
+                    "entry": "LightBulb Color Fluorescent"
+                }
+            ]
+        },
+        {
+            "id": "0x199e208",
+            "name": "Trigger Mode",
+            "selector": "0x05",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e209",
+            "name": "Software Trigger",
+            "selector": "0x0f",
+            "uvc_type": "boolean",
+            "v4l2_type": "button",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e210",
+            "name": "Trigger Delay",
+            "selector": "0x1A",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+
+        {
+            "id": "0x199e261",
+            "name": "Trigger Global Reset Release",
+            "selector": "0x05",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 2
+        },
+        {
+            "id": "0x199e211",
+            "name": "Strobe Enable",
+            "selector": "0x06",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e212",
+            "name": "Strobe Polarity",
+            "selector": "0x06",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 1
+        },
+        {
+            "id": "0x199e213",
+            "name": "Strobe Exposure",
+            "selector": "0x06",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 1
+        },
+        {
+            "id": "0x199e214",
+            "name": "Strobe Duration",
+            "selector": "0x07",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e215",
+            "name": "Strobe Delay",
+            "selector": "0x07",
+            "uvc_type": "signed",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 16
+        },
+        {
+            "id": "0x199e216",
+            "name": "GPOUT",
+            "selector": "0x08",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e217",
+            "name": "GPIN",
+            "selector": "0x08",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 1
+        },
+        {
+            "id": "0x199e218",
+            "name": "ROI Offset X",
+            "selector": "0x15",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e219",
+            "name": "ROI Offset Y",
+            "selector": "0x16",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e220",
+            "name": "ROI Auto Center",
+            "selector": "0x17",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e221",
+            "name": "Auto Focus One Push",
+            "selector": "0x1C",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e222",
+            "name": "Auto Focus ROI Enable",
+            "selector": "0x29",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+
+        {
+            "id": "0x199e223",
+            "name": "Auto Focus ROI Left",
+            "selector": "0x2A",
+            "uvc_type": "signed",
+            "v4l2_type": "integer",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e224",
+            "name": "Auto Focus ROI Top",
+            "selector": "0x2B",
+            "uvc_type": "signed",
+            "v4l2_type": "integer",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e225",
+            "name": "ATR Enable",
+            "selector": "0x1F",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e226",
+            "name": "ATR Gain",
+            "selector": "0x20",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e227",
+            "name": "ATR Enable Wide D",
+            "selector": "0x21",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e228",
+            "name": "ATR Contrast",
+            "selector": "0x22",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e229",
+            "name": "ATR Contrast Auto",
+            "selector": "0x23",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e230",
+            "name": "ATR Chroma",
+            "selector": "0x24",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e231",
+            "name": "Image Stabilization",
+            "selector": "0x26",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e232",
+            "name": "Noise Reduction",
+            "selector": "0x27",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e233",
+            "name": "Face Detection",
+            "selector": "0x28",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e251",
+            "name": "Flip Horizontal",
+            "selector": "0x2E",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e252",
+            "name": "Flip Vertical",
+            "selector": "0x2F",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e253",
+            "name": "Highlight Reduction",
+            "selector": "0x3B",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e234",
+            "name": "Trigger Polarity",
+            "selector": "0x05",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 1
+        },
+        {
+            "id": "0x199e235",
+            "name": "Trigger Operation",
+            "selector": "0x42",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 8,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Default"
+                },
+                {
+                    "value": 1,
+                    "entry": "Global Reset Release"
+                }
+            ]
+        },
+        {
+            "id": "0x199e236",
+            "name": "Trigger Expposure Mode",
+            "selector": "0x43",
+            "uvc_type": "boolean",
+            "v4l2_type": "menu",
+            "size_bits": 1,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Frame Start"
+                },
+                {
+                    "value": 1,
+                    "entry": "Exposure Active"
+                }
+            ]
+        },
+        {
+            "id": "0x199e237",
+            "name": "Trigger Burst Count",
+            "selector": "0x44",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e238",
+            "name": "Trigger Debounce Time (us)",
+            "selector": "0x45",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e239",
+            "name": "Trigger Mask Time (us)",
+            "selector": "0x46",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e240",
+            "name": "Trigger Noise Suppression Time",
+            "selector": "0x47",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e241",
+            "name": "Auto Functions ROI Control",
+            "selector": "0x48",
+            "uvc_type": "unsigned",
+            "v4l2_type": "boolean",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e242",
+            "name": "Auto Functions ROI Left",
+            "selector": "0x49",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e243",
+            "name": "Auto Functions ROI Top",
+            "selector": "0x4A",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e244",
+            "name": "Auto Functions ROI Width",
+            "selector": "0x4B",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e245",
+            "name": "Auto Functions ROI Height",
+            "selector": "0x4C",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e246",
+            "name": "White Balance Mode",
+            "selector": "0x4D",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 1,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Gray World"
+                },
+                {
+                    "value": 1,
+                    "entry": "Temperature"
+                }
+            ]
+        },
+        {
+            "id": "0x199e247",
+            "name": "White Balance Auto Preset",
+            "selector": "0x4E",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 8,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Any"
+                },
+                {
+                    "value": 1,
+                    "entry": "Warm White"
+                },
+                {
+                    "value": 2,
+                    "entry": "Cool White"
+                },
+                {
+                    "value": 3,
+                    "entry": "Daylight"
+                },
+                {
+                    "value": 4,
+                    "entry": "Deep Shade"
+                }
+            ]
+        },
+        {
+            "id": "0x199e248",
+            "name": "White Balance Green Component",
+            "selector": "0x4F",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 8,
+            "offset_bits": 0
+        },
+
+        {
+            "id": "0x199e249",
+            "name": "White Balance Temp. Preset",
+            "selector": "0x50",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 16,
+            "offset_bits": 0,
+            "entries": [
+                {
+                    "value": 2500,
+                    "entry": "Sodium Vapor Lamp"
+                },
+                {
+                    "value": 2700,
+                    "entry": "Warm Light"
+                },
+                {
+                    "value": 3000,
+                    "entry": "Halogen Light"
+                },
+                {
+                    "value": 3500,
+                    "entry": "Neutral White"
+                },
+                {
+                    "value": 4000,
+                    "entry": "Cool White Fluorescent Light"
+                },
+                {
+                    "value": 5000,
+                    "entry": "Cool White/Daylight (CFL)"
+                },
+                {
+                    "value": 6000,
+                    "entry": "Daylight"
+                },
+                {
+                    "value": 7500,
+                    "entry": "Cool White LED"
+                },
+                {
+                    "value": 10000,
+                    "entry": "Blue Sky"
+                }
+            ]
+        },
+        {
+            "id": "0x199e250",
+            "name": "White Balance Temperature",
+            "selector": "0x50",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 16,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e254",
+            "name": "Exposure Auto Upper Limit Auto",
+            "selector": "0x3E",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e255",
+            "name": "Exposure Auto Lower Limit (us)",
+            "selector": "0x3C",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e256",
+            "name": "Exposure Auto Upper Limit (us)",
+            "selector": "0x3D",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e257",
+            "name": "Override Scanning Mode",
+            "selector": "0x3A",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e258",
+            "name": "Auto Functions ROI Preset",
+            "selector": "0x48",
+            "uvc_type": "unsigned",
+            "v4l2_type": "menu",
+            "size_bits": 8,
+            "offset_bits": 8,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Full Sensor"
+                },
+                {
+                    "value": 1,
+                    "entry": "Custom Rectangle"
+                },
+                {
+                    "value": 2,
+                    "entry": "Center 50%"
+                },
+                {
+                    "value": 3,
+                    "entry": "Center 25%"
+                },
+                {
+                    "value": 4,
+                    "entry": "Bottom Half"
+                },
+                {
+                    "value": 5,
+                    "entry": "Top Half"
+                }
+            ]
+        },
+        {
+            "id": "0x199e259",
+            "name": "Gain Auto Lower Limit",
+            "selector": "0x3F",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        },
+        {
+            "id": "0x199e260",
+            "name": "Gain Auto Upper Limit",
+            "selector": "0x40",
+            "uvc_type": "unsigned",
+            "v4l2_type": "integer",
+            "size_bits": 32,
+            "offset_bits": 0
+        }
+    ]
+}

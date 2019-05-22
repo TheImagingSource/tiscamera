@@ -122,16 +122,7 @@
 		    "offset_bits": 0
         },
         {
-            "id": "0x199e234",
-		    "name": "Trigger Polarity",
-		    "selector": "0x05",
-		    "uvc_type": "boolean",
-		    "v4l2_type": "boolean",
-		    "size_bits": 1,
-		    "offset_bits": 1
-        },
-        {
-            "id": "0x199e208",
+            "id": "0x199e261",
 		    "name": "Trigger Global Reset Release",
 		    "selector": "0x05",
 		    "uvc_type": "boolean",
