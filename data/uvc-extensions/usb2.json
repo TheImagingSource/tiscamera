@@ -99,6 +99,24 @@
 		    "v4l2_type": "integer",
 		    "size_bits": 16,
 		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e211",
+		    "name": "Strobe Enable",
+		    "selector": "0x16",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 0
+        },
+        {
+            "id": "0x199e212",
+		    "name": "Strobe Polarity",
+		    "selector": "0x16",
+		    "uvc_type": "boolean",
+		    "v4l2_type": "boolean",
+		    "size_bits": 1,
+		    "offset_bits": 1
         }
     ]
 }

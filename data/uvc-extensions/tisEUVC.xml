@@ -61,6 +61,10 @@
       <id>XU_SKIP</id>
       <value>0xb</value>
     </constant>
+    <constant type="integer">
+      <id>XU_STROBE</id>
+      <value>0x16</value>
+    </constant>
 
     <constant type="integer">
       <id>V4L2_CID_EUVC_EXT_IO</id>
@@ -105,6 +109,14 @@
     <constant type="integer">
       <id>V4L2_CID_GLOBAL_RESET_SHUTTER</id>
       <value>0x0199e92a</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_STROBE_ENABLE</id>
+      <value>0x0199e211</value>
+    </constant>
+    <constant type="integer">
+      <id>V4L2_STROBE_POLARITY</id>
+      <value>0x0199e212</value>
     </constant>
 
   </constants>
@@ -232,11 +244,50 @@
 	  <description>
 	  </description>
 	</control>
+    <control id="strobe">
+	  <entity>UVC_GUID_TISEUVC_XU</entity>
+	  <selector>XU_STROBE</selector>
+	  <index>1</index>
+	  <size>1</size>
+	  <requests>
+	    <request>SET_CUR</request>
+	    <request>GET_CUR</request>
+	  </requests>
+	  <description>
+	  </description>
+	</control>
+
       </controls>
     </device>
   </devices>
 
   <mappings>
+    <mapping>
+      <name>Strobe Enable</name>
+      <uvc>
+	    <control_ref idref="strobe"/>
+	    <size>1</size>
+	    <offset>0</offset>
+	    <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	    <id>V4L2_STROBE_ENABLE</id>
+	    <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
+    <mapping>
+      <name>Strobe Enable</name>
+      <uvc>
+	    <control_ref idref="strobe"/>
+	    <size>1</size>
+	    <offset>1</offset>
+	    <uvc_type>UVC_CTRL_DATA_TYPE_BOOLEAN</uvc_type>
+      </uvc>
+      <v4l2>
+	    <id>V4L2_STROBE_POLARITY</id>
+	    <v4l2_type>V4L2_CTRL_TYPE_BOOLEAN</v4l2_type>
+      </v4l2>
+    </mapping>
     <mapping>
       <name>ExtIO</name>
       <uvc>
