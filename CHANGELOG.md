@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Missing Strobe Enable and Strobe Polarity for USB-2.0 cameras
+
+### Fixed
+
+- Compiler warning
+
+
 ## [0.11.1] - 2019-05-22
 
 ### Fixed
