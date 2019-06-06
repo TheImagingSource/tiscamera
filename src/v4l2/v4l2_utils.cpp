@@ -142,7 +142,8 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
-        tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
+        // PATCH: This line segfaults as soon as log level reaches `TCAM_LOG=WARNING`.
+        // tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
