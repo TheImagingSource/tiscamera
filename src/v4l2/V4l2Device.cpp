@@ -97,14 +97,16 @@ V4l2Device::~V4l2Device ()
     this->stop_all = true;
     this->abort_all = true;
     // signal the udev monitor to exit it's poll/select
-    ssize_t write_ret = write(udev_monitor_pipe[0], "q", 1);
+    ssize_t write_ret = write(udev_monitor_pipe[1], "q", 1);
 
     if (write_ret != 1)
     {
-        tcam_error("Error closing udev monitoring pipe. write return '%zu'", write_ret);
+        tcam_error("Error closing udev monitoring pipe. write return '%zd' errno: %s",
+                   write_ret, strerror(errno));
     }
 
-    close(udev_monitor_pipe[0]);
+    // close write pipe fd
+    close(udev_monitor_pipe[1]);
 
     this->cv.notify_all();
 
@@ -1681,7 +1683,7 @@ void V4l2Device::monitor_v4l2_device ()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
-        int select_fd = (udev_fd > udev_monitor_pipe[1] ? udev_fd : udev_monitor_pipe[1]);
+        int select_fd = (udev_fd > udev_monitor_pipe[0] ? udev_fd : udev_monitor_pipe[0]);
         struct timeval tv;
         int ret;
 
@@ -1726,7 +1728,8 @@ void V4l2Device::monitor_v4l2_device ()
         }
     }
 
-    close(udev_monitor_pipe[1]);
+    /* close read pipe fd */
+    close(udev_monitor_pipe[0]);
 
     udev_monitor_unref(mon);
     udev_unref(udev);
