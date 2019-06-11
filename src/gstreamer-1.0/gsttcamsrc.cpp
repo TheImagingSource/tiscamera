@@ -1231,6 +1231,11 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 {
     GstTcamSrc* self = GST_TCAM_SRC(src);
 
+    if (!self->is_running)
+    {
+        return FALSE;
+    }
+
     self->is_running = FALSE;
 
     self->cv.notify_all();
