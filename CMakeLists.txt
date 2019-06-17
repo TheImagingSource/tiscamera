@@ -120,6 +120,10 @@ if (BUILD_TESTS)
 endif (BUILD_TESTS)
 
 
+install(DIRECTORY examples
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+
+
 # uninstall target
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
