@@ -88,7 +88,15 @@ set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "p
 set(TCAM_INSTALL_DOCUMENTATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/doc/tiscamera" CACHE PATH "documentation installation path" FORCE)
 set(TCAM_INSTALL_UVC_EXTENSION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/uvc-extension/" CACHE PATH "Folder for uvc extension descriptions" FORCE)
 set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACHE PATH "Folder for storing .desktop files")
-set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions" CACHE PATH "Installation folder for bash auto completion.")
+#set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions" CACHE PATH "Installation folder for bash auto completion.")
+
+
+find_package(PythonInterp 3 REQUIRED QUIET)
+
+
+execute_process ( COMMAND python3 -c "from distutils.sysconfig import get_python_lib; lb=get_python_lib(); print(lb.startswith('${CMAKE_INSTALL_PREFIX}') and lb or lb)" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
 
 add_subdirectory(dependencies)
 add_subdirectory(src)

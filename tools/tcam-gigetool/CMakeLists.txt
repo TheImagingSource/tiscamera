@@ -32,11 +32,6 @@ if (PYTHONINTERP_FOUND)
   find_package(PythonModule QUIET) # this quiet makes find_python_module be quiet
   find_python_module(setuptools REQUIRED)
 
-  execute_process ( COMMAND python3 -c "from distutils.sysconfig import get_python_lib; lb=get_python_lib(); print(lb.startswith('${CMAKE_INSTALL_PREFIX}') and lb or lb)" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-  # execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print([x for x in site.getsitepackages() if x.startswith('${CMAKE_INSTALL_PREFIX}/lib')][0])"
-  #   OUTPUT_VARIABLE GIGE_TOOLS_PY_INSTALL)
-  # string(REGEX REPLACE "\n$" "" GIGE_TOOLS_PY_INSTALL "${GIGE_TOOLS_PY_INSTALL}")    
-
   set(SETUP_PY_IN   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
   set(SETUP_PY      "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
   set(VERSION_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/version.py.in")
@@ -55,7 +50,7 @@ if (PYTHONINTERP_FOUND)
   add_custom_target(target ALL DEPENDS ${OUTPUT})
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/"
-    DESTINATION "${PYTHON_SITE_PACKAGES}/tcamgigetool"
+    DESTINATION "${TCAM_INSTALL_PYTHON3_MODULES}/tcamgigetool"
     PATTERN "*.in" EXCLUDE)
 
   install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/tcamgigetool/tcam_gigetool.py"
