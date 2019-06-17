@@ -85,7 +85,7 @@ set(TCAM_INSTALL_UDEV "/etc/udev/rules.d" CACHE PATH "udev rules installation pa
 set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE PATH "uvcdynctrl rules installation path")
 set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE PATH "systemd unit installation path" FORCE)
 set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "pkgconfig installation path" FORCE)
-set(TCAM_INSTALL_DOCUMENTATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/doc/tiscamera" CACHE PATH "documentation installation path" FORCE)
+set(TCAM_INSTALL_DOCUMENTATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/doc" CACHE PATH "documentation installation path" FORCE)
 set(TCAM_INSTALL_UVC_EXTENSION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/uvc-extension/" CACHE PATH "Folder for uvc extension descriptions" FORCE)
 set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACHE PATH "Folder for storing .desktop files")
 #set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions" CACHE PATH "Installation folder for bash auto completion.")

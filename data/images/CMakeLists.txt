@@ -15,7 +15,7 @@
 
 set(TCAM_IMAGE_DIR "${CMAKE_SOURCE_DIR}/data/images/" CACHE INTERNAL "project folder for images")
 
-set(TCAM_INSTALL_IMAGE_DIR "${CMAKE_INSTALL_PREFIX}/share/tiscamera/" CACHE PATH "install location for image files")
+set(TCAM_INSTALL_IMAGE_DIR "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/" CACHE PATH "install location for image files")
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   DESTINATION "${TCAM_INSTALL_IMAGE_DIR}"
