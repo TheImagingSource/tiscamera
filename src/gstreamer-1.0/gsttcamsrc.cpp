@@ -1467,7 +1467,7 @@ wait_again:
 
     // GST_DEBUG("Pushing buffer...");
 
-    if (self->n_buffers != 0)
+    if (self->n_buffers != -1)
     {
         /*
             TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
@@ -1520,7 +1520,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     gst_base_src_set_live (GST_BASE_SRC (self), TRUE);
     gst_base_src_set_format (GST_BASE_SRC (self), GST_FORMAT_TIME);
 
-    self->n_buffers = 0;
+    self->n_buffers = -1;
     self->payload = 0;
     self->drop_incomplete_frames = TRUE;
     // explicitly init c++ objects
@@ -1730,8 +1730,8 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
          PROP_NUM_BUFFERS,
          g_param_spec_int ("num-buffers",
                            "Number of Buffers",
-                           "Number of buffers to send before ending pipeline",
-                           0, G_MAXINT, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
+                           "Number of buffers to send before ending pipeline (-1 = unlimited)",
+                           -1, G_MAXINT, -1,
                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
