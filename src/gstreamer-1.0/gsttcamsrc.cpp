@@ -652,6 +652,7 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE,
+    PROP_CAM_BUFFERS,
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
     PROP_DROP_INCOMPLETE_FRAMES,
@@ -1027,6 +1028,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     self->last_timestamp = 0;
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
+    self->device->sink->set_buffer_number(self->imagesink_buffers);
     self->device->sink->registerCallback(gst_tcam_src_sh_callback, self);
     self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
@@ -1536,6 +1538,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->all_caps = NULL;
     self->fixed_caps = NULL;
     self->is_running = FALSE;
+    self->imagesink_buffers = 10;
 
     GST_INFO("Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
@@ -1607,6 +1610,20 @@ static void gst_tcam_src_set_property (GObject* object,
             }
             break;
         }
+        case PROP_CAM_BUFFERS:
+        {
+            GstState state;
+            // timeout 1 second
+            auto ret = gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000000);
+            if (ret != GST_STATE_CHANGE_SUCCESS && state != GST_STATE_NULL)
+            {
+                GST_WARNING("camera-buffers can only be set while in GST_STATE_NULL.");
+                break;
+            }
+
+            self->imagesink_buffers = g_value_get_int(value);
+            break;
+        }
         case PROP_NUM_BUFFERS:
         {
             self->n_buffers = g_value_get_int (value);
@@ -1660,6 +1677,11 @@ static void gst_tcam_src_get_property (GObject* object,
             {
                 g_value_set_pointer (value, nullptr);
             }
+            break;
+        }
+        case PROP_CAM_BUFFERS:
+        {
+            g_value_set_int(value, self->imagesink_buffers);
             break;
         }
         case PROP_NUM_BUFFERS:
@@ -1725,6 +1747,14 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                "Camera Object",
                                "Camera instance to retrieve additional information",
                                static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property
+        (gobject_class,
+         PROP_CAM_BUFFERS,
+         g_param_spec_int ("camera-buffers",
+                           "Number of Buffers",
+                           "Number of buffers to use for retrieving images",
+                           1, 256, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
+                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
          PROP_NUM_BUFFERS,

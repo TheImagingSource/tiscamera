@@ -22,6 +22,9 @@ Source elements that retrieves images from a device.
    * - serial
      - string
      - Serial number of the device that shall be used
+   * - camera-buffers
+     - int
+     - Number of internal buffers the backend can use.
    * - num-buffers
      - int
      - Only send the specified number of images.

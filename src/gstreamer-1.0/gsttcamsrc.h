@@ -58,6 +58,7 @@ struct _GstTcamSrc
     struct device_state* device;
 
     int n_buffers;
+    int imagesink_buffers;
 
     gboolean is_running;
     gboolean drop_incomplete_frames;
