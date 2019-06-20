@@ -51,7 +51,7 @@ if (PYTHONINTERP_FOUND)
     "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py" @ONLY)
 
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py"
-    DESTINATION "${TCAM_CAPTURE_PY_INSTALL}/tcam_capture"
+    DESTINATION "${TCAM_INSTALL_PYTHON3_MODULES}/tcam_capture"
     COMPONENT tcam-capture)
 
 endif (PYTHONINTERP_FOUND)
