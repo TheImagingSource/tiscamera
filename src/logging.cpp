@@ -146,6 +146,8 @@ void Logger::log (const char* module __attribute__((unused)),
     clock_t t;
     t = clock();
 
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+
     size_t buffer_size = snprintf(nullptr,
                                   0,
                                   "%-10ld <%s> %s:%d: %s\n",
@@ -155,6 +157,8 @@ void Logger::log (const char* module __attribute__((unused)),
                                   function,
                                   line,
                                   msg) + 1;
+
+#pragma GCC diagnostic pop
 
     /* write complete message */
     char *buffer = new char[buffer_size];
