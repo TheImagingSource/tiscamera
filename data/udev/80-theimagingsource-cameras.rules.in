@@ -69,9 +69,9 @@ ACTION=="add", SUBSYSTEM=="video4linux", \
 # Product IDs 0x82xx, 0x83xx = 22U, 72U
 #
 ACTION=="add", SUBSYSTEM=="video4linux", \
-               ATTRS{idVendor}=="199e", ATTRS{speed}=="82??", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="82??", \
                RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"
 
 ACTION=="add", SUBSYSTEM=="video4linux", \
-               ATTRS{idVendor}=="199e", ATTRS{speed}=="83??", \
+               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="83??", \
                RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb2.json"
