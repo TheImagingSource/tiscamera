@@ -73,7 +73,7 @@ def print_formats(source):
         except TypeError:
             import re
 
-            substr = fmt.to_string()[fmt.to_string().find("framerate="):]
+            substr = structure.to_string()[structure.to_string().find("framerate="):]
             # try for frame rate lists
             field, values, remain = re.split("{|}", substr, maxsplit=3)
             rates = [x.strip() for x in values.split(",")]
@@ -116,7 +116,6 @@ def main():
     # source = Gst.ElementFactory.make("tcambin")
 
     serial = None
-    serial = "42610001"
 
     if serial:
         source.set_property("serial", serial)
