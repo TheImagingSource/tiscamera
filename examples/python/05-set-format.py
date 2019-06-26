@@ -51,9 +51,21 @@ def main():
     structure = Gst.Structure.new_from_string("video/x-raw")
     structure.set_value("width", 640)
     structure.set_value("height", 480)
-    structure.set_value("framerate", Gst.Fraction(30, 1))
+
+    try:
+        fraction = Gst.Fraction(30, 1)
+        structure.set_value("framerate", fraction)
+    except TypeError:
+        struc_string = structure.to_string()
+
+        struc_string += ",framerate={}/{}".format(30, 1)
+        structure.free()
+        structure = structure.from_string(struc_string)
 
     caps.append_structure(structure)
+
+    structure.free()
+    # structure is not useable from here on
 
     capsfilter = pipeline.get_by_name("filter")
 
