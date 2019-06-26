@@ -185,7 +185,7 @@ def main():
     # source = Gst.ElementFactory.make("tcambin")
 
     serial = None
-    serial = "35510248"
+
     if serial:
         source.set_property("serial", serial)
 
