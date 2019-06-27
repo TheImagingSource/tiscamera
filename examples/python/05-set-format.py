@@ -60,7 +60,7 @@ def main():
 
         struc_string += ",framerate={}/{}".format(30, 1)
         structure.free()
-        structure = structure.from_string(struc_string)
+        structure, end = structure.from_string(struc_string)
 
     caps.append_structure(structure)
 
