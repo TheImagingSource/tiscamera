@@ -707,6 +707,15 @@
             "v4l2_type": "integer",
             "size_bits": 32,
             "offset_bits": 0
+        },
+        {
+            "id": "0x199e262",
+            "name": "IMX Low-Latency Mode",
+            "selector": "0x52",
+            "uvc_type": "boolean",
+            "v4l2_type": "boolean",
+            "size_bits": 1,
+            "offset_bits": 0
         }
     ]
 }
