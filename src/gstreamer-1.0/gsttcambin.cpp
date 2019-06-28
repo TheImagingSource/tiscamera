@@ -613,12 +613,15 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
         return FALSE;
     }
 
-    if (!create_and_add_element(&self->jpegdec,
-                                "jpegdec", "tcambin-jpegdec",
-                                GST_BIN(self)))
+    if (contains_jpeg(self->src_caps))
     {
-        send_missing_element_msg("jpegdec");
-        return FALSE;
+        if (!create_and_add_element(&self->jpegdec,
+                                    "jpegdec", "tcambin-jpegdec",
+                                    GST_BIN(self)))
+        {
+            send_missing_element_msg("jpegdec");
+            return FALSE;
+        }
     }
 
 // videoconvert can be needed by non-dutils and dutils pipelines
