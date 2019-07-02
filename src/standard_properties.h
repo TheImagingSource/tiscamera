@@ -783,6 +783,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_TYPE_BOOLEAN,
         { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE, 0 },
     },
+    {
+        TCAM_PROPERTY_TRIGGER_GLOBAL_RESET_RELEASE,
+        "Trigger Global Reset Release",
+        TCAM_PROPERTY_TYPE_BOOLEAN,
+        { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE, 0 },
+    },
 };
 
 

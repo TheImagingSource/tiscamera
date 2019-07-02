@@ -332,6 +332,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         TCAM_PROPERTY_IMX_LOW_LATENCY_MODE,
         { 0x199e262 },
     },
+    {
+        TCAM_PROPERTY_TRIGGER_GLOBAL_RESET_RELEASE,
+        { 0x199e261 },
+    },
 
 
 
