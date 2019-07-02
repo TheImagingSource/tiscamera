@@ -10,10 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Missing Strobe Enable and Strobe Polarity for USB-2.0 cameras
+- tcamsrc property 'camera-buffers'
+  Allows modification of the number of buffers the backend uses.
+- Missing IMX Low-Latency Mode for USB-3 33, 37, 38 cameras
+- Property mappings for
+  IMX Low-Latency Mode
+  Trigger Global Reset Release
+
+### Changed
+
+- Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
+- tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
 
 ### Fixed
 
 - Compiler warning
+- Loading of uvc extension units for USB-2.0 cameras
+- Installation path with tcam_capture module
+- Threading issues with GstBus messages
+- Multiple issues with python examples
 
 
 ## [0.11.1] - 2019-05-22
