@@ -1113,16 +1113,17 @@ void send_log_to_bus (void* user_data,
     std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
     GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, "%s", msg_string.c_str());
 
-    GstMessage* msg;
+    GstMessage* msg = nullptr;
+
 
     if (level == TCAM_LOG_ERROR)
     {
-        msg = gst_message_new_error(GST_OBJECT(self), err, message);
+        msg = gst_message_new_error(GST_OBJECT(self), err, m);
         GST_ERROR("Backend reported error: %s:%d: %s", file, line, m);
     }
     else if (level == TCAM_LOG_WARNING)
     {
-        msg = gst_message_new_warning(GST_OBJECT(self), err, message);
+        msg = gst_message_new_warning(GST_OBJECT(self), err, m);
         GST_WARNING("Backend reported warning: %s:%d: %s", file, line, m);
     }
 
