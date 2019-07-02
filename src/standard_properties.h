@@ -777,6 +777,12 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_TYPE_INTEGER,
         { TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN, TCAM_PROPERTY_OVERRIDE_SCANNING_MODE, 0 },
     },
+    {
+        TCAM_PROPERTY_IMX_LOW_LATENCY_MODE,
+        "IMX Low-Latency Mode",
+        TCAM_PROPERTY_TYPE_BOOLEAN,
+        { TCAM_PROPERTY_CATEGORY_SPECIAL, TCAM_PROPERTY_TRIGGER_MODE, 0 },
+    },
 };
 
 

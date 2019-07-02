@@ -328,6 +328,10 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
         TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
         { 0x199e253 },
     },
+    {
+        TCAM_PROPERTY_IMX_LOW_LATENCY_MODE,
+        { 0x199e262 },
+    },
 
 
 
