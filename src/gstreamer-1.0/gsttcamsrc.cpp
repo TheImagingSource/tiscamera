@@ -1082,20 +1082,19 @@ void send_log_to_bus (void* user_data,
         return;
     }
 
-    GstTcamSrc* self = GST_TCAM_SRC(user_data);
-
     /*
       This check is to prevent threading issues.
       When the application calls gst_set_state(GST_STATE_NULL)
       while the backend is still building up or busy
       we might end up in this callback while self is already cleaned up.
-     */
-    if (!GST_IS_OBJECT(self))
+    */
+    if (!GST_IS_OBJECT(user_data))
     {
         tcam_info("GstObject tcamsrc does not exist. Messages will not be sent to the GstBus.");
         return;
     }
 
+    GstTcamSrc* self = GST_TCAM_SRC(user_data);
 
     va_list args;
     va_start(args, message);
