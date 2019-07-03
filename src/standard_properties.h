@@ -565,13 +565,13 @@ static const std::vector<struct control_reference> ctrl_reference_table =
         TCAM_PROPERTY_REVERSE_X,
         "Reverse X",
         TCAM_PROPERTY_TYPE_BOOLEAN,
-        { TCAM_PROPERTY_CATEGORY_UNKNOWN, TCAM_PROPERTY_INVALID, 0 },
+        { TCAM_PROPERTY_CATEGORY_IMAGE, TCAM_PROPERTY_REVERSE_X, 0 },
     },
     {
         TCAM_PROPERTY_REVERSE_Y,
         "Reverse Y",
         TCAM_PROPERTY_TYPE_BOOLEAN,
-        { TCAM_PROPERTY_CATEGORY_UNKNOWN, TCAM_PROPERTY_INVALID, 0 },
+        { TCAM_PROPERTY_CATEGORY_IMAGE, TCAM_PROPERTY_REVERSE_Y, 0 },
     },
     {
         TCAM_PROPERTY_BLACKLEVEL,
