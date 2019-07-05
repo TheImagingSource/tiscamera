@@ -1150,6 +1150,8 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     std::vector<tcam::DeviceInfo> infos = self->index_.get_device_list();
     int dev_count = infos.size();
 
+    Logger::getInstance().set_external_callback(send_log_to_bus, self);
+
     GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
 
     if (!self->device_serial.empty())
@@ -1192,7 +1194,6 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         return false;
     }
 
-    Logger::getInstance().set_external_callback(send_log_to_bus, self);
 
     self->all_caps = gst_tcam_src_get_all_camera_caps(self);
     //gst_base_src_set_caps (GST_BASE_SRC(self), self->all_caps);
