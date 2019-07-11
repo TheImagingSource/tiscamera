@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
                              QCheckBox, QComboBox, QWidget,
                              QSpinBox, QDoubleSpinBox)
 from PyQt5.QtCore import Qt, pyqtSignal
-from . import TcamCaptureData
+from . import TcamCaptureData, TcamSlider
 import logging
 
 log = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class PropertyWidget(QWidget):
 
         self.setLayout(self.layout)
         if self.prop.valuetype == "integer":
-            self.sld = QSlider(Qt.Horizontal, self)
+            self.sld = TcamSlider.TcamSlider(self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             try:
                 self.sld.setRange(self.prop.minval, self.prop.maxval)
@@ -71,6 +71,7 @@ class PropertyWidget(QWidget):
                 log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.sld.setSingleStep(self.prop.step)
             self.sld.valueChanged[int].connect(self.set_property)
+            self.sld.doubleClicked.connect(self.reset)
             self.layout.addWidget(self.sld)
 
             self.value_box = QSpinBox(self)
@@ -85,7 +86,7 @@ class PropertyWidget(QWidget):
             self.layout.addWidget(self.value_box)
 
         elif self.prop.valuetype == "double":
-            self.sld = QSlider(Qt.Horizontal, self)
+            self.sld = TcamSlider.TcamSlider(self)
             self.sld.setFocusPolicy(Qt.NoFocus)
             try:
                 self.sld.setRange(self.prop.minval, self.prop.maxval)
@@ -94,6 +95,8 @@ class PropertyWidget(QWidget):
                 log.error("Property {} reported a range that could not be handled".format(self.prop.name))
             self.sld.setSingleStep(self.prop.step * 1000)
             self.sld.valueChanged[int].connect(self.set_property)
+            self.sld.doubleClicked.connect(self.reset)
+
             self.sld.setGeometry(30, 40, 100, 30)
             self.layout.addWidget(self.sld)
 
