@@ -324,7 +324,10 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         prop.value.i.min = 0;
         prop.value.i.step = 1;
 
-        // TODO: default value
+        prop.value.b.value = arv_device_get_boolean_feature_value(arv_camera_get_device(camera),
+                                                                  feature);
+
+        prop.value.b.default_value = prop.value.b.value;
 
         return std::make_shared<PropertyBoolean>(impl, prop, type);
 
