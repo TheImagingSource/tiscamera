@@ -81,7 +81,7 @@ def main():
     camera.set_state(Gst.State.READY)
 
     # Print properties for a before/after comparison
-    print_properties()
+    print_properties(camera)
 
     # Set properties
 
@@ -90,7 +90,7 @@ def main():
 
     camera.set_tcam_property("Exposure", 3000)
 
-    print_properties()
+    print_properties(camera)
 
     # cleanup, reset state
     camera.set_state(Gst.State.NULL)
