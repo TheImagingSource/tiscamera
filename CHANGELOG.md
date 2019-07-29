@@ -16,11 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Property mappings for
   IMX Low-Latency Mode
   Trigger Global Reset Release
+- tcam-capture: Double click on sliders resets to default values
+- tcam-capture: SpinBox buttons do not randomly stop accepting input
 
 ### Changed
 
 - Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
 - tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
+- "Override Scanning Mode" category is now "Partial Scan"
 
 ### Fixed
 
@@ -29,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installation path with tcam_capture module
 - Threading issues with GstBus messages
 - Multiple issues with python examples
+- Issues with GigE camera bool handling
 
 
 ## [0.11.1] - 2019-05-22
