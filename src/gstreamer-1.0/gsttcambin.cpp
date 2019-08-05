@@ -1157,6 +1157,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
         case GST_STATE_CHANGE_PAUSED_TO_READY:
         {
             self->target_set = FALSE;
+            self->elements_linked = FALSE;
 
             if (self->src_caps)
             {
@@ -1279,6 +1280,7 @@ static void gst_tcambin_init (GstTcamBin* self)
 
     self->use_dutils = TRUE;
     self->needs_biteater = TRUE;
+    self->elements_linked = FALSE;
 
     auto factory = gst_element_factory_find("tcamdutils");
 
