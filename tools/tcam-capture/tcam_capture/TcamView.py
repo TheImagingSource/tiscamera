@@ -230,6 +230,9 @@ class TcamView(QWidget):
         if self.pipeline is None:
             self.create_pipeline()
 
+        # Set to NULL to ensure that buffers,
+        # etc are destroyed.
+        self.pipeline.set_state(Gst.State.NULL)
         self.pipeline.set_state(Gst.State.READY)
 
         if video_format:
