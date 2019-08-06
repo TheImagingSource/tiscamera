@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
 - tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
 - "Override Scanning Mode" category is now "Partial Scan"
+- Moved properties ReverseX and ReverseY to category 'Image'
 
 ### Fixed
 
@@ -33,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Threading issues with GstBus messages
 - Multiple issues with python examples
 - Issues with GigE camera bool handling
+- Issues with python examples
+
+### Removed
+
+- unused header files
 
 
 ## [0.11.1] - 2019-05-22
