@@ -22,8 +22,8 @@ set(srcs
   RegionOfInterest.cpp
   AutoFocus.cpp
   auto_focus.cpp
-  image_sampling.c
-  bayer.c
+  image_sampling.cpp
+  bayer.cpp
   whitebalance.cpp
   auto_exposure.cpp
   pid_controller.cpp
