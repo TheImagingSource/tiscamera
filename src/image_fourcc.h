@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cstdint>
 // depends on uint32_t
 
 #ifndef mmioFOURCC
