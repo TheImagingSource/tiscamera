@@ -542,11 +542,11 @@ uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         {
             map[3] = fourcc;
         }
-        else if (fourcc == FOURCC_Y16)
+        else if (fourcc == FOURCC_Y800)
         {
             map[4] = fourcc;
         }
-        else if (fourcc == FOURCC_Y800)
+        else if (fourcc == FOURCC_Y16)
         {
             map[5] = fourcc;
         }
@@ -580,8 +580,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
      *       if bayer 8-bit does not exist order according to the following list:
      *       color formats like BGR
      *       formats like MJPEG
-     *       GRAY16
      *       GRAY8
+     *       GRAY16
      *       bayer12/16
      *
      * 2. find the largest resolution
