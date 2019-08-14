@@ -88,16 +88,9 @@ bool roi_extract (const ROI* roi,
                   const tcam_image_buffer* image,
                   tcam_image_buffer* roi_image);
 
-// bool roi_extract_view (const ROI* /*roi*/,
-//                        const tcam_image_buffer* /*image*/)
-// {
-//     return false;
-// }
-
-/**
- * end of RegionOfinterest wrapper
- */
-
+bool roi_extract_view (const ROI* roi,
+                       const tcam_image_buffer* image,
+                       tcam_image_buffer* roi_image);
 
 bool roi_fits_image (const tcam_image_size& size,
                      const roi_area& roi);

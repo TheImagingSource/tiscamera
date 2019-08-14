@@ -163,6 +163,10 @@ public:
     bool copy_roi (const tcam_image_buffer& image,
                    tcam_image_buffer& image_roi) const;
 
+
+    bool extract_roi_view (const tcam_image_buffer& image,
+                           tcam_image_buffer& image_roi) const;
+
 private:
 
     /**

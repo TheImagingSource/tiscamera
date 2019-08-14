@@ -168,6 +168,14 @@ bool roi_extract (const ROI* roi,
 }
 
 
+bool roi_extract_view (const ROI* roi,
+                       const tcam_image_buffer* image,
+                       tcam_image_buffer* roi_image)
+{
+    return reinterpret_cast<const RegionOfInterest*>(roi)->extract_roi_view(*image, *roi_image);
+}
+
+
 bool roi_fits_image (const tcam_image_size& size,
                      const roi_area& roi)
 {

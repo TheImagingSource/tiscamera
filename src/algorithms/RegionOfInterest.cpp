@@ -331,7 +331,7 @@ bool RegionOfInterest::copy_roi (const tcam_image_buffer& image,
 
 	byte* pIn = image.pData;
 
-    size_t size = roi_buffer_size();
+    size_t size = roi_buffer_size() * bpp / 8;
     byte* pOut = (byte*)malloc(size);
 
     pIn += startRow * bytesPerLineIn + roi_.left * bpp / 8;
@@ -358,6 +358,22 @@ bool RegionOfInterest::copy_roi (const tcam_image_buffer& image,
 
     image_roi.pitch = roi_.width * img::get_bits_per_pixel(image_roi.format.fourcc) / 8;
 
+    return true;
+}
+
+bool RegionOfInterest::extract_roi_view (const tcam_image_buffer& image,
+                                         tcam_image_buffer& image_roi) const
+{
+    size_t bpp = img::get_bits_per_pixel(image.format.fourcc);
+
+    image_roi.pData = image.pData + (roi_.top * image.format.width * bpp / 8
+                               + roi_.left * bpp / 8);
+
+    image_roi.pitch = roi_.width * bpp / 8;
+
+    image_roi.format = image.format;
+    image_roi.format.height = roi_.height;
+    image_roi.format.width = roi_.width;
     return true;
 }
 
