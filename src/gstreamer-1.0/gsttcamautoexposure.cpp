@@ -2008,8 +2008,6 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
         return {};
     }
 
-    roi_buffer.length = 1228800;
-
     // roi_buffer.pitch = get_pitch(roi_buffer.format.width,
     //                              roi_buffer.format.fourcc);
 
