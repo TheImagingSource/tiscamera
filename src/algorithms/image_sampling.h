@@ -64,9 +64,6 @@ typedef struct
 } image_buffer;
 
 
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
-
-
 /**
  * @name get_sampling_points
  * @param buf - image buffer that shall be analyzed
@@ -74,7 +71,9 @@ typedef struct
  * @param bayer pattern of image
  * @brief analyzes given buffer and fills sample points
 */
-void get_sampling_points (unsigned char* data, auto_sample_points* points, tBY8Pattern pattern, int width, int height);
+void get_sampling_points (unsigned char* data,
+                          auto_sample_points* points,
+                          tBY8Pattern pattern, int width, int height);
 
 void get_sampling_points_from_buffer (image_buffer* buf,
                                       auto_sample_points* points);
@@ -94,6 +93,8 @@ unsigned int image_brightness_bayer (image_buffer* buf);
  * @return
  */
 unsigned int buffer_brightness_gray (image_buffer* buf);
+
+unsigned int buffer_brightness_gray16 (image_buffer* buf);
 
 #ifdef __cplusplus
 }

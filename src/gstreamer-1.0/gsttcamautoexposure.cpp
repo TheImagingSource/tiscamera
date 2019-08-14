@@ -1238,7 +1238,7 @@ static gboolean gst_tcamautoexposure_get_device_info (TcamProp* self __attribute
 /* pad templates */
 
 #define VIDEO_CAPS \
-    GST_VIDEO_CAPS_MAKE("{GRAY8}") ";" \
+    GST_VIDEO_CAPS_MAKE("{GRAY8, GRAY16_LE}") ";" \
         "video/x-bayer,format={rggb,bggr,gbrg,grbg}," \
         "width=" GST_VIDEO_SIZE_RANGE ",height=" GST_VIDEO_SIZE_RANGE \
         ",framerate=" GST_VIDEO_FPS_RANGE
@@ -2002,15 +2002,16 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
 
     tcam_image_buffer roi_buffer = {};
 
-    if (!roi_extract(self->roi, &image, &roi_buffer))
+    if (!roi_extract_view(self->roi, &image, &roi_buffer))
     {
         GST_ERROR("Unable to extract ROI");
         return {};
     }
 
+    roi_buffer.length = 1228800;
 
-    roi_buffer.pitch = get_pitch(roi_buffer.format.width,
-                                 roi_buffer.format.fourcc);
+    // roi_buffer.pitch = get_pitch(roi_buffer.format.width,
+    //                              roi_buffer.format.fourcc);
 
 
     image_buffer new_buf = {};
@@ -2101,15 +2102,21 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
     }
     else
     {
-        GST_DEBUG("Calculating brightness for gray");
-        brightness = buffer_brightness_gray(&buffer);
+        if (self->bit_depth == 8)
+        {
+            GST_DEBUG("Calculating brightness for gray");
+            brightness = buffer_brightness_gray(&buffer);
+        }
+        else
+        {
+            // the algorithm is designed for 8-bit brightness
+            // we thus need to convert the 16-bit brightness
+            // back to something that makes sense
+            brightness = buffer_brightness_gray16(&buffer) / 256;
+        }
     }
 
-    if (buffer.image)
-    {
-        free((void*)buffer.image);
-        buffer.image = nullptr;
-    }
+    GST_INFO("Calculated brightness: %u", brightness);
 
     /* assure we have the current values */
     retrieve_current_values (self);
@@ -2277,6 +2284,8 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
               (void*)outcaps);
     structure = gst_caps_get_structure(incaps, 0);
 
+    self->bit_depth = 8;
+
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {
         const char *format;
@@ -2308,6 +2317,11 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
     {
         self->pattern = UNDEFINED_PATTERN;
         self->color_format = GRAY;
+
+        if (g_str_equal(gst_structure_get_string(structure, "format"), "GRAY16_LE"))
+        {
+            self->bit_depth = 16;
+        }
     }
 
     unsigned int width;

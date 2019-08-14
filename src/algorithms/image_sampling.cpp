@@ -19,8 +19,17 @@
 
 #include "image_sampling.h"
 
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
+#endif
+
+
 /* retrieve sampling points for image analysis */
-void get_sampling_points (unsigned char* data, auto_sample_points* points, tBY8Pattern pattern, int width, int height)
+void get_sampling_points (unsigned char* data,
+                          auto_sample_points* points,
+                          tBY8Pattern pattern,
+                          int width, int height)
 {
 
     static const unsigned int bypp = 1;
@@ -106,18 +115,20 @@ void get_sampling_points_from_buffer (image_buffer* buf,
     unsigned int cnt = 0;
     unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
 
-    unsigned int y;
-    for (y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
+    for (unsigned int y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
     {
         unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
 
         byte* pLine = (byte*)data + first_line_offset + y * bytes_per_line;
         byte* pNextLine = pLine + bytes_per_line;
 
-        unsigned int col;
-        for (col = samplingColStep; col < (width - samplingColStep); col += samplingColStep)
+        for (unsigned int col = samplingColStep;
+             col < (width - samplingColStep);
+             col += samplingColStep)
         {
-            unsigned int r = 0, g = 0, b = 0;
+            unsigned int r = 0;
+            unsigned int g = 0;
+            unsigned int b = 0;
             if ( y & 1 )
             {
                 if (col & 1)
@@ -161,7 +172,8 @@ void get_sampling_points_from_buffer (image_buffer* buf,
     points->cnt = cnt;
 }
 
-static unsigned int clip( unsigned int x )
+
+static unsigned int clip (unsigned int x)
 {
 	if( x > 255 ) return 255;
 	return x;
@@ -179,8 +191,7 @@ unsigned int image_brightness_bayer (image_buffer* buf)
     unsigned int g = 0;
     unsigned int b = 0;
 
-    unsigned int x;
-    for (x = 0; x < points.cnt; ++x)
+    for (unsigned int x = 0; x < points.cnt; ++x)
     {
         r += clip(points.samples[x].r);
         g += clip(points.samples[x].g);
@@ -193,6 +204,7 @@ unsigned int image_brightness_bayer (image_buffer* buf)
 
     return (r + g + b) / 3;
 }
+
 
 unsigned int buffer_brightness_gray (image_buffer* buf)
 {
@@ -238,4 +250,42 @@ unsigned int buffer_brightness_gray (image_buffer* buf)
         brightness = y_accu / cnt;
     }
     return brightness;
+}
+
+
+unsigned int buffer_brightness_gray16 (image_buffer* buf)
+{
+    unsigned int brightness = 0;
+    unsigned short *data = (unsigned short*)buf->image;
+
+    unsigned int width = buf->width;
+    unsigned int height = buf->height;
+
+    int pitch = buf->rowstride / 2;
+    unsigned int cnt = 0;
+    unsigned long y_accu = 0;
+    unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
+
+    for (unsigned int y = sampling_line_step;
+         y < (height - sampling_line_step);
+         y += sampling_line_step)
+    {
+        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
+
+        unsigned short* pLine = data + y * pitch;
+
+        for (unsigned int col = samplingColStep;
+             col < (width - samplingColStep);
+             col += samplingColStep)
+        {
+            ++cnt;
+            y_accu += pLine[col];
+        }
+    }
+
+    if (cnt)
+    {
+        brightness = y_accu / cnt;
+    }
+    return brightness ;
 }
