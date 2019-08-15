@@ -117,12 +117,30 @@ install_runtime_dependencies () {
 }
 
 
+update_package_cache_debian () {
+    sudo apt update
+}
+
+
+update_package_cache () {
+    case "$DISTRIBUTION" in
+        DEBIAN)
+            update_package_cache_debian
+            ;;
+        *)
+            printf "Distribution '%s' is not supported.\n" $DISTRIBUTION
+            exit 1
+    esac
+}
+
+
 usage () {
     printf "%s\n" "$0"
     printf "install dependencies for the tiscamera project\n"
     printf "options:\n"
     printf "\t--compilation \t Install compilation dependencies\n"
     printf "\t--runtime \t Install runtime dependencies\n"
+    printf "\t--no-update \t Do not update the package cache\n"
     printf "\t--help \t\t Print this message\n"
 }
 
@@ -132,6 +150,7 @@ usage () {
 
 install_compilation=0
 install_runtime=0
+update_cache=1
 
 if [ $# -eq 0 ]; then
     usage
@@ -160,6 +179,9 @@ while [ "$1" != "" ]; do
         --yes)
             ASSUME_YES="-y"
             ;;
+        --no-update)
+            update_cache=0
+            ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
             usage
@@ -174,6 +196,9 @@ if [ $install_compilation -eq 0 ] && [ $install_runtime -eq 0 ]; then
     exit 1
 fi
 
+if [ $update_cache -eq 1 ]; then
+    update_package_cache
+fi
 
 if [ $install_compilation -eq 1 ]; then
     install_compile_dependencies
