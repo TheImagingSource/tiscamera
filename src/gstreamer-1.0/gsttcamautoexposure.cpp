@@ -1399,6 +1399,8 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->gain_max = G_MAXDOUBLE;
     self->frame_counter = 0;
     self->has_iris = FALSE;
+    self->iris_min = 0;
+    self->iris_max = 0;
     self->camera_src = NULL;
     self->module_is_disabled = FALSE;
 
@@ -1808,7 +1810,9 @@ static void init_camera_resources (GstTcamautoexposure* self)
         {
             self->iris_min = self->iris.min;
         }
-        if (self->iris_max == 0)
+        if (self->iris_max == 0
+            || self->iris_max == G_MAXINT
+            || self->iris_max > self->iris.max)
         {
             self->iris_max = self->iris.max;
         }
