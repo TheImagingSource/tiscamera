@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Trigger Global Reset Release
 - tcam-capture: Double click on sliders resets to default values
 - tcam-capture: SpinBox buttons do not randomly stop accepting input
+- install-dependencies.sh updates the package cache before installation
+  To skip this step, use `--no-update`
+- tcamautoexposure support for GRAY16_LE
+- Installation of examples folder in $PREFIX/share/theimagingsource/tiscamera
+
 
 ### Changed
 
@@ -25,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
 - "Override Scanning Mode" category is now "Partial Scan"
 - Moved properties ReverseX and ReverseY to category 'Image'
+- GRAY8 is now preferred over GRAY16_LE in caps negotiation
+- tcamsrc num-buffers default is now -1. This is now identical to v4l2src.
 
 ### Fixed
 
@@ -35,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple issues with python examples
 - Issues with GigE camera bool handling
 - Issues with python examples
+- gsttcamautoexposure iris max is now handled correctly
 
 ### Removed
 
