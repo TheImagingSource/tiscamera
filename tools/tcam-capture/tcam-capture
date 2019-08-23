@@ -798,11 +798,17 @@ def init():
         reset_settings()
         clear_cache()
 
-    # set default logging level to WARN. each new -v increases the log level
-    level = max(3 - arguments.verbose_count, 0) * 10
+    if arguments.verbose_count == 0:
+        level = logging.ERROR
+    elif arguments.verbose_count == 1:
+        level = logging.WARNING
+    elif arguments.verbose_count == 2:
+        level = logging.INFO
+    else:
+        level = logging.DEBUG
 
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
-                        datefmt='%d-%m-%Y:%H:%M:%S',
+    logging.basicConfig(format='[%(asctime)s:%(msecs)3d] [%(levelname)8s] [%(filename)20s:%(lineno)3d] - %(message)s',
+                        datefmt='%Y-%m-%d:%H:%M:%S',
                         level=level)
     Gst.init(sys.argv)
     return arguments.serial, arguments.caps_str, arguments.fullscreen
