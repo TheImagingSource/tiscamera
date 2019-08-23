@@ -141,9 +141,11 @@ void tcam_logging (const char* module,
 
 #pragma GCC system_header
 
-#define tcam_log(level, message, ...) (tcam_logging(level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
+#define FILENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define tcam__log(module, level, message, ...) (tcam_logging(module, level, __FILE__ , __LINE__, message, ##__VA_ARGS__))
+#define tcam_log(level, message, ...) (tcam_logging(level, FILENAME , __LINE__, message, ##__VA_ARGS__))
+
+#define tcam__log(module, level, message, ...) (tcam_logging(module, level, FILENAME, __LINE__, message, ##__VA_ARGS__))
 
 #define tcam_error(message, ...) (tcam_log(TCAM_LOG_ERROR, message, ##__VA_ARGS__))
 #define tcam_warning(message, ...) (tcam_log(TCAM_LOG_WARNING, message, ##__VA_ARGS__))
