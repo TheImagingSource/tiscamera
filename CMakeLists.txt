@@ -61,7 +61,7 @@ option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
 option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
 option(BUILD_V4L2     "Include support for USB cameras"      ON )
 option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
-option(BUILD_TOOLS    "Build additional utilities"           OFF)
+option(BUILD_TOOLS    "Build additional utilities"           ON)
 option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
 option(BUILD_TESTS    "Build tests."                         OFF)
 
