@@ -23,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcamautoexposure support for GRAY16_LE
 - Installation of examples folder in $PREFIX/share/theimagingsource/tiscamera
 
-
 ### Changed
 
 - Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
@@ -32,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved properties ReverseX and ReverseY to category 'Image'
 - GRAY8 is now preferred over GRAY16_LE in caps negotiation
 - tcamsrc num-buffers default is now -1. This is now identical to v4l2src.
+- Log output now only contains the filename and not the absolute path.
+- tcam-capture: slider with a range larger than 5000 now have a logarithmic behavior
+- tcam-capture: Number Text Boxes do not update while user is editing
+- cmake option -DBUILD_TOOLS not defaults to ON
 
 ### Fixed
 
