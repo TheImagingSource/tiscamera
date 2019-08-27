@@ -119,11 +119,6 @@ class TcamDoubleSpinBox(QDoubleSpinBox):
         self.setLineEdit(self.line)
 
         super().editingFinished.connect(self.__release_block)
-        self.valueChanged[int].connect(self.__activate_block)
-
-    def __activate_block(self, i):
-        """"""
-        self.is_active = True
 
     def __activate_block_str(self, i):
         """"""
