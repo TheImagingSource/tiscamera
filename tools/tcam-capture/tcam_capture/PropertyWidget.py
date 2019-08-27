@@ -15,9 +15,10 @@
 
 from PyQt5.QtWidgets import (QHBoxLayout, QSlider, QPushButton,
                              QCheckBox, QComboBox, QWidget,
-                             QSpinBox, QDoubleSpinBox)
+                             QSpinBox, QDoubleSpinBox, QLabel)
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
-from . import TcamCaptureData, TcamSlider
+from . import TcamCaptureData, TcamSlider, TcamSpinBox
 import logging
 
 log = logging.getLogger(__name__)
@@ -51,11 +52,108 @@ class PropertyWidget(QWidget):
         self.tcam = data.tcam
         self.signals = data.signals
         self.prop = prop
+        self.is_log = False
         self.setup_ui()
 
     def __repr__(self):
         return repr((self.prop.name, self.prop.valuetype,
                      self.prop.category, self.prop.group))
+
+    def __setup_ui_boolean(self):
+        """
+        Helper function that contains all setup code for bool UIs
+        """
+        self.toggle = QCheckBox(self)
+        self.toggle.setCheckable(True)
+        if self.prop.value:
+            self.toggle.toggle()
+        self.toggle.toggled.connect(self.button_clicked)
+        self.layout.addWidget(self.toggle)
+
+    def __setup_ui_integer(self):
+        """
+
+        """
+
+        self.value_box = TcamSpinBox.TcamSpinBox(self)
+        try:
+            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+        except OverflowError:
+            log.error("Property {} reported a range "
+                      "that could not be handled".format(self.prop.name))
+
+        self.value_box.setSingleStep(self.prop.step)
+        self.value_box.blockSignals(True)
+        self.value_box.setValue(self.prop.value)
+        self.value_box.blockSignals(False)
+        self.value_box.valueChanged[int].connect(self.set_property_box)
+        self.value_box.setKeyboardTracking(False)
+
+        if self.is_log:
+            log.debug("Adding log slider for {}".format(self.prop.name))
+            self.sld = TcamSlider.TcamLogSlider(self)
+            self.sld.valueLogChanged.connect(self.set_property)
+        else:
+            self.sld = TcamSlider.TcamSlider(self)
+            self.sld.valueChanged[int].connect(self.set_property)
+
+        self.sld.setFocusPolicy(Qt.NoFocus)
+        try:
+            self.sld.setRange(self.prop.minval, self.prop.maxval)
+            self.sld.blockSignals(True)
+            self.sld.setValue(self.prop.value)
+            self.sld.blockSignals(False)
+
+        except OverflowError:
+            log.error("Property {} reported a range "
+                      "that could not be handled".format(self.prop.name))
+        self.sld.setSingleStep(self.prop.step)
+        self.sld.doubleClicked.connect(self.reset)
+
+        self.layout.addWidget(self.sld)
+        self.layout.addWidget(self.value_box)
+
+    def __setup_ui_double(self):
+        """
+        Helper function that contains all setup code for doube UIs
+        """
+        self.value_box = TcamSpinBox.TcamDoubleSpinBox(self)
+        try:
+            self.value_box.setRange(self.prop.minval, self.prop.maxval)
+        except OverflowError:
+            log.error("Property {} reported a range "
+                      "that could not be handled".format(self.prop.name))
+
+        self.value_box.setSingleStep(self.prop.step)
+        self.value_box.blockSignals(True)
+        self.value_box.setValue(self.prop.value)
+        self.value_box.blockSignals(False)
+        self.value_box.valueChanged[float].connect(self.set_property_box)
+        self.value_box.setKeyboardTracking(False)
+
+        if self.is_log:
+            self.sld = TcamSlider.TcamLogSlider(self)
+            self.sld.valueLogChanged.connect(self.set_property)
+        else:
+            self.sld = TcamSlider.TcamSlider(self)
+            self.sld.valueChanged[int].connect(self.set_property)
+
+        self.sld.setFocusPolicy(Qt.NoFocus)
+        try:
+            self.sld.setRange(self.prop.minval, self.prop.maxval)
+            self.sld.blockSignals(True)
+            self.sld.setValue(self.prop.value)
+            self.sld.blockSignals(False)
+
+        except OverflowError:
+            log.error("Property {} reported a range "
+                      "that could not be handled".format(self.prop.name))
+        self.sld.setSingleStep(self.prop.step)
+        self.sld.doubleClicked.connect(self.reset)
+
+        self.sld.setGeometry(30, 40, 100, 30)
+        self.layout.addWidget(self.sld)
+        self.layout.addWidget(self.value_box)
 
     def setup_ui(self):
         self.layout = QHBoxLayout()
@@ -76,97 +174,27 @@ class PropertyWidget(QWidget):
 
         self.setLayout(self.layout)
 
-        make_log = should_be_logarithmic(self.prop)
+        self.is_log = should_be_logarithmic(self.prop)
 
         if self.prop.valuetype == "integer":
 
-            self.value_box = QSpinBox(self)
-            try:
-                self.value_box.setRange(self.prop.minval, self.prop.maxval)
-            except OverflowError:
-                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
-
-            self.value_box.setSingleStep(self.prop.step)
-            self.value_box.blockSignals(True)
-            self.value_box.setValue(self.prop.value)
-            self.value_box.blockSignals(False)
-            self.value_box.valueChanged[int].connect(self.set_property_box)
-            self.value_box.setKeyboardTracking(False)
-
-            if make_log:
-                log.debug("Adding log slider for {}".format(self.prop.name))
-                self.sld = TcamSlider.TcamLogSlider(self)
-                self.sld.valueLogChanged.connect(self.set_property)
-            else:
-                self.sld = TcamSlider.TcamSlider(self)
-                self.sld.valueChanged[int].connect(self.set_property)
-
-            self.sld.setFocusPolicy(Qt.NoFocus)
-            try:
-                self.sld.setRange(self.prop.minval, self.prop.maxval)
-                self.sld.blockSignals(True)
-                self.sld.setValue(self.prop.value)
-                self.sld.blockSignals(False)
-
-            except OverflowError:
-                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
-            self.sld.setSingleStep(self.prop.step)
-            self.sld.doubleClicked.connect(self.reset)
-
-            self.layout.addWidget(self.sld)
-            self.layout.addWidget(self.value_box)
+            self.__setup_ui_integer()
 
         elif self.prop.valuetype == "double":
 
-            self.value_box = QDoubleSpinBox(self)
-            try:
-                self.value_box.setRange(self.prop.minval, self.prop.maxval)
-            except OverflowError:
-                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
-
-            self.value_box.setSingleStep(self.prop.step)
-            self.value_box.blockSignals(True)
-            self.value_box.setValue(self.prop.value)
-            self.value_box.blockSignals(False)
-            self.value_box.valueChanged[float].connect(self.set_property_box)
-            self.value_box.setKeyboardTracking(False)
-
-            if make_log:
-                self.sld = TcamSlider.TcamLogSlider(self)
-                self.sld.valueLogChanged.connect(self.set_property)
-            else:
-                self.sld = TcamSlider.TcamSlider(self)
-                self.sld.valueChanged[int].connect(self.set_property)
-
-            self.sld.setFocusPolicy(Qt.NoFocus)
-            try:
-                self.sld.setRange(self.prop.minval, self.prop.maxval)
-                self.sld.blockSignals(True)
-                self.sld.setValue(self.prop.value)
-                self.sld.blockSignals(False)
-
-            except OverflowError:
-                log.error("Property {} reported a range that could not be handled".format(self.prop.name))
-            self.sld.setSingleStep(self.prop.step)
-            self.sld.doubleClicked.connect(self.reset)
-
-            self.sld.setGeometry(30, 40, 100, 30)
-            self.layout.addWidget(self.sld)
-            self.layout.addWidget(self.value_box)
+            self.__setup_ui_double()
 
         elif self.prop.valuetype == "button":
             self.checkbox = QPushButton(self)
             self.checkbox.clicked.connect(self.set_property)
             self.layout.addWidget(self.checkbox)
+
         elif self.prop.valuetype == "boolean":
-            self.toggle = QCheckBox(self)
-            self.toggle.setCheckable(True)
-            if self.prop.value:
-                self.toggle.toggle()
-            self.toggle.toggled.connect(self.button_clicked)
-            self.layout.addWidget(self.toggle)
+            self.__setup_ui_boolean()
+
         elif self.prop.valuetype == "string":
             pass
+
         elif self.prop.valuetype == "enum":
             self.combo = QComboBox(self)
             entry_list = self.tcam.get_tcam_menu_entries(self.prop.name)
@@ -232,7 +260,8 @@ class PropertyWidget(QWidget):
         try:
             slider.setValue(value)
         except OverflowError:
-            log.error("A slider had a value outside of the integer range. That should no happen.")
+            log.error("The slider for '{}' had a value outside of the integer "
+                      "range. That should no happen.".format(self.prop.name))
         finally:
             slider.blockSignals(False)
 
@@ -243,7 +272,11 @@ class PropertyWidget(QWidget):
             self.sld.setRange(self.prop.minval,
                               self.prop.maxval)
         except OverflowError:
-            log.error("A slider had a value outside of the integer range. That should no happen.")
+            log.error("The slider for '{}' had a value outside of the integer "
+                      "range. That should no happen. "
+                      "Min: '{}' Max: {}".format(self.prop.name,
+                                                 self.prop.minval,
+                                                 self.prop.maxval))
         finally:
             self.sld.blockSignals(False)
 
@@ -256,6 +289,10 @@ class PropertyWidget(QWidget):
 
         self.prop = prop
         if self.prop.valuetype == "integer":
+            if type(self.value_box) is TcamSpinBox.TcamSpinBox:
+                if self.value_box.active():
+                    # box.setValue(value)
+                    return
             self.update_slider_value(self.sld, self.prop.value)
 
             self.update_slider_range(self.sld,
@@ -302,7 +339,7 @@ class PropertyWidget(QWidget):
 
         elif self.prop.valuetype == "double":
             self.update_box_value(self.value_box, self.prop.defval)
-            self.sld.setValue(self.prop.defval * 1000)
+            self.sld.setValue(self.prop.defval)
 
         elif self.prop.valuetype == "button":
             pass
