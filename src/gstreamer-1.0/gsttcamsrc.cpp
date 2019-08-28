@@ -1462,6 +1462,8 @@ wait_again:
     // add meta statistics data to buffer
     {
 
+        // uint64_t frame_count = (*buffer)->offset; // is not set yet
+        uint64_t frame_count = gst_pad_get_offset(gst_element_get_static_pad(GST_ELEMENT(self), "src"));
         auto stat = ptr->get_statistics();
 
         GstStructure* struc = gst_structure_new_empty("TcamStatistics");
@@ -1472,6 +1474,34 @@ wait_again:
         if (!meta)
         {
             GST_WARNING("Unable to add meta !!!!");
+        }
+        else
+        {
+            const char* damaged = nullptr;
+            if (stat.is_damaged)
+            {
+                damaged = "true";
+            }
+            else
+            {
+                damaged = "false";
+            }
+
+            GST_DEBUG("Added meta info: \n"
+                      "gst frame_count: %lu\n"
+                      "backend frame_count %u\n"
+                      "frames_dropped %u\n"
+                      "capture_time_ns:%lu\n"
+                      "camera_time_ns: %lu\n"
+                      "framerate: %f\n"
+                      "is_damaged: %s\n",
+                      frame_count,
+                      stat.frame_count,
+                      stat.frames_dropped,
+                      stat.capture_time_ns,
+                      stat.camera_time_ns,
+                      stat.framerate,
+                      damaged);
         }
 
     } // end meta data
