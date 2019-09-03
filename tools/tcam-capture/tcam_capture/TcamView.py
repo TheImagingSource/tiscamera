@@ -85,6 +85,7 @@ class TcamView(QWidget):
         self.file_pattern = ""
         self.file_location = "/tmp"
         self.caps = None
+        self.state = None
         self.videosaver = None
         self.imagesaver = None
 
@@ -222,6 +223,16 @@ class TcamView(QWidget):
             self.videosaver.stop_recording_video()
             self.videosaver = None
 
+    def get_gst_state(self, timeout=5):
+        """
+        Arguments:
+        timeout=5, optional
+        """
+
+        if not self.pipeline:
+            return None
+        return self.pipeline.get_state(timeout).state
+
     def play(self, video_format=None):
 
         if self.videosaver:
@@ -230,10 +241,12 @@ class TcamView(QWidget):
         if self.pipeline is None:
             self.create_pipeline()
 
-        # Set to NULL to ensure that buffers,
-        # etc are destroyed.
-        self.pipeline.set_state(Gst.State.NULL)
-        self.pipeline.set_state(Gst.State.READY)
+        if self.get_gst_state() == Gst.State.PLAYING:
+            log.debug("Setting state to NULL")
+            # Set to NULL to ensure that buffers,
+            # etc are destroyed.
+            self.pipeline.set_state(Gst.State.NULL)
+            self.pipeline.set_state(Gst.State.READY)
 
         if video_format:
             caps_desc = self.get_caps_desc()
@@ -249,6 +262,15 @@ class TcamView(QWidget):
             caps.set_property("device-caps",
                               video_format)
 
+        if self.state and self.settings.apply_property_cache:
+            log.info("Property state found.")
+            # log.debug("Setting state: ==>{}<==".format(self.state))
+            self.tcam.set_property("state", str(self.state))
+            self.state = None
+        else:
+            log.info("No property state found. Starting vanilla camera")
+
+        log.debug("Setting state to PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
         self.start_time = 0
         self.framecounter = 0
@@ -343,6 +365,8 @@ class TcamView(QWidget):
 
         self.tcam = self.pipeline.get_by_name("bin")
 
+        # This ready is required so that get_caps_desc
+        # works and does not return ANY
         self.pipeline.set_state(Gst.State.READY)
         log.debug("Created pipeline and set to READY")
 
@@ -529,6 +553,25 @@ class TcamView(QWidget):
         Remove roi_widget from display
         """
         self.container.remove_roi(roi_widget)
+
+    def get_state(self):
+        """
+        Retrieve a json description of the current property settings
+        Returns:
+        str or None
+        """
+        if not self.tcam:
+            return None
+
+        return self.tcam.get_property("state")
+
+    def load_state(self, state: str):
+        """
+        Arguments:
+        state:
+        str containing json descibing the property values
+        """
+        self.state = state
 
     @staticmethod
     def has_dutils():

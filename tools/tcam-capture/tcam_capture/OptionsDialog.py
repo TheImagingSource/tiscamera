@@ -93,6 +93,11 @@ class OptionsDialog(QDialog):
         layout.addRow(self.use_dutils_label,
                       self.use_dutils_checkbox)
 
+        self.apply_property_cache_checkbox = QCheckBox(self)
+        self.apply_property_cache_label = QLabel("Apply cached properties when opening a device", self)
+        layout.addRow(self.apply_property_cache_label,
+                      self.apply_property_cache_checkbox)
+
         if not self.enabled_dutils:
             self.use_dutils_label.setToolTip("Enabled when tiscamera-dutils are installed")
             self.use_dutils_label.setEnabled(False)
@@ -440,6 +445,7 @@ class OptionsDialog(QDialog):
         self.device_dialog_checkbox.setChecked(settings.show_device_dialog_on_startup)
         self.reopen_device_checkbox.setChecked(settings.reopen_device_on_startup)
         self.use_dutils_checkbox.setChecked(settings.use_dutils)
+        self.apply_property_cache_checkbox.setChecked(settings.apply_property_cache)
 
         #
         # keybindings
@@ -520,6 +526,7 @@ class OptionsDialog(QDialog):
         self.settings.show_device_dialog_on_startup = self.device_dialog_checkbox.isChecked()
         self.settings.reopen_device_on_startup = self.reopen_device_checkbox.isChecked()
         self.settings.use_dutils = self.use_dutils_checkbox.isChecked()
+        self.settings.apply_property_cache = self.apply_property_cache_checkbox.isChecked()
 
         #
         # keybindings

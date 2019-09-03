@@ -84,6 +84,40 @@ class Cache():
         with open(self.get_cache_file(), 'w') as configfile:
             config.write(configfile)
 
+    def save_device_state(self, device_state: str):
+        """"""
+        if not device_state:
+            log.warning("Device state is None. No cache written.")
+            return
+
+        filename = self.get_device_state_filename()
+
+        with open(filename, "w") as f:
+            log.debug("Writing property state to {}".format(filename))
+            f.write(device_state)
+
+    def load_device_state(self):
+        """
+        return: str containing the comlpete json description
+        """
+
+        filename = self.get_device_state_filename()
+        if os.path.isfile(filename):
+            with open(filename, "r") as f:
+
+                # f.write(device_cache)
+                cache = f.read()
+                return cache
+        return None
+
+    def get_device_state_filename(self):
+        """
+        Method returns the absolute filename for the device property cache
+        """
+
+        return os.path.join(self.get_default_cache_directory(),
+                            "properties-{}-state.json".format(self.last_serial))
+
     @staticmethod
     def get_default_cache_directory():
         return os.path.join(os.getenv("XDG_CACHE_DIR",

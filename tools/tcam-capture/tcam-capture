@@ -414,7 +414,6 @@ class TCamCapture(QMainWindow):
         self.recording_action.setText("Stop recording")
         self.recording_action.triggered.disconnect(self.start_recording_video)
         self.recording_action.triggered.connect(self.stop_recording_video)
-        # self.recording_action.clicked.connect(self.stop_recording_video)
 
     def stop_recording_video(self):
         """
@@ -634,6 +633,13 @@ class TCamCapture(QMainWindow):
         self.data.tcam = self.view.get_tcam()
         self.view.pause()
 
+        self.cache.last_serial = self.serial
+        self.cache.save()
+        state = self.cache.load_device_state()
+
+        if state:
+            self.view.load_state(state)
+
         self.props = QDockWidget("Properties")
         self.props_widget = PropertyDialog(self.data, self.view, self.props)
         self.props.setWidget(self.props_widget)
@@ -642,8 +648,7 @@ class TCamCapture(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.props)
         self.set_device_menus_enabled(True)
         self.props_action.setVisible(True)
-        self.cache.last_serial = self.serial
-        self.cache.save()
+
         self.play(caps_str)
 
     def current_fps(self, fps: float):
@@ -665,6 +670,10 @@ class TCamCapture(QMainWindow):
         Stops the video stream
         """
         if self.view is not None:
+            state = self.view.get_state()
+
+            self.cache.save_device_state(state)
+
             self.view.stop()
 
     def close(self):
@@ -672,8 +681,7 @@ class TCamCapture(QMainWindow):
         Stops the video stream and closes the device
         """
         self.props_action.setVisible(False)
-        self.cache.last_format = None
-        self.cache.last_serial = None
+
         self.setWindowTitle("TCam Capture")
         self.pixel_coords_label.setText("")
         self.pixel_label.setText("")
@@ -698,6 +706,9 @@ class TCamCapture(QMainWindow):
             self.view = None
             # update menu to remove mark on open camera
             self.update_device_list(self.device_list)
+
+        self.cache.last_format = None
+        self.cache.last_serial = None
 
     def toggle_properties_dialog(self):
         """

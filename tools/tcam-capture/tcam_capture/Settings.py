@@ -71,6 +71,7 @@ class Settings(object):
         self.set_properties_on_reopen = True
         self.logfile_location = None
         self.use_dutils = True
+        self.apply_property_cache = True
 
         self.keybinding_fullscreen = "f"
         self.keybinding_save_image = "s"
@@ -139,6 +140,8 @@ class Settings(object):
                                         self.logfile_location)
         self.use_dutils = gen.getboolean("use_dutils",
                                          self.use_dutils)
+        self.apply_property_cache = gen.getboolean("apply_property_cache",
+                                                   self.apply_property_cache)
 
         if config.has_section(self.section_keys):
             keys = config[self.section_keys]
@@ -214,6 +217,8 @@ class Settings(object):
         config[sg]["log_file_location"] = str(self.logfile_location)
         config.set(sg, "# Use tiscamera-dutils, if present:")
         config[sg]["use_dutils"] = str(self.use_dutils)
+        config.set(sg, "# Apply saved property values, if present:")
+        config[sg]["apply_property_cache"] = str(self.apply_property_cache)
 
         keys = self.section_keys
         config.add_section(keys)
