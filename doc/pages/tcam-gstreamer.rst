@@ -32,6 +32,9 @@ Source elements that retrieves images from a device.
    * - drop-incomplete-buffer
      - bool
      - When incomplete buffers should be delivered this has to be set to `false`.
+   * - property-state
+     - string
+     - JSON string describing the state of all device properties. See :any:`state`.
 
 MetaData
 --------
@@ -318,6 +321,9 @@ The offered caps are the sum of unfiltered camera caps and caps that will be ava
      - bool
      - Use the tcamdutils element, if present.
        Default: True
+   * - property-state
+     - string
+     - JSON string describing the state of all device properties. See :any:`state`.
        
 Internal pipelines will always be created when the element state is set to PAUSED.
 
