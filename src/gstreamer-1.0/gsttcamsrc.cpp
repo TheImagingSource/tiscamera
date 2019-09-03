@@ -23,6 +23,9 @@
 
 #include "tcamprop.h"
 #include "tcam.h"
+
+#include "tcamgstjson.h"
+
 #include "logging.h"
 #include <unistd.h>
 #include <stdarg.h>
@@ -620,6 +623,7 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                 *identifier = g_strndup (info.identifier,
                                          sizeof (info.identifier));
             }
+            // TODO: unify with deviceinfo::get_device_type_as_string
             if (connection_type)
             {
                 switch (info.type)
@@ -656,6 +660,7 @@ enum
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
     PROP_DROP_INCOMPLETE_FRAMES,
+    PROP_STATE,
 };
 
 
@@ -954,7 +959,8 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     frame_rate = gst_structure_get_value (structure, "framerate");
     format_string = gst_structure_get_string (structure, "format");
 
-    uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name (structure), format_string);
+    uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                                                           format_string);
 
     double framerate;
     if (frame_rate != nullptr)
@@ -1258,6 +1264,20 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
     lck.unlock();
 
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
+
+    GstBus* bus = gst_element_get_bus(GST_ELEMENT(src));
+    if (bus)
+    {
+        //  auto msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_EOS);
+
+        //gst_message_unref(msg);
+
+        // gst_bus_remove_signal_watch(bus);
+    }
+    else
+    {
+        GST_WARNING("NO BUS============================");
+    }
     GST_DEBUG("Stopped acquisition");
 
     return TRUE;
@@ -1463,7 +1483,8 @@ wait_again:
     {
 
         // uint64_t frame_count = (*buffer)->offset; // is not set yet
-        uint64_t frame_count = gst_pad_get_offset(gst_element_get_static_pad(GST_ELEMENT(self), "src"));
+        //uint64_t frame_count = gst_pad_get_offset(gst_element_get_static_pad(GST_ELEMENT(self), "src"));
+        uint64_t frame_count = self->element.parent.segment.position;
         auto stat = ptr->get_statistics();
 
         GstStructure* struc = gst_structure_new_empty("TcamStatistics");
@@ -1683,6 +1704,17 @@ static void gst_tcam_src_set_property (GObject* object,
             }
             break;
         }
+        case PROP_STATE:
+        {
+            bool state = load_device_settings(TCAM_PROP(self),
+                                              self->device_serial,
+                                              g_value_get_string(value));
+            if (!state)
+            {
+                GST_WARNING(". Device may be in an undefined state.");
+            }
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1737,6 +1769,20 @@ static void gst_tcam_src_get_property (GObject* object,
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
             g_value_set_boolean(value, self->drop_incomplete_frames);
+            break;
+        }
+        case PROP_STATE:
+        {
+            if (!self->device_serial.empty())
+            {
+                std::string bla = create_device_settings(self->device_serial,
+                                                         TCAM_PROP(self)).c_str();
+                g_value_set_string(value, bla.c_str());
+            }
+            else
+            {
+                g_value_set_string(value, "");
+            }
             break;
         }
         default:
@@ -1818,6 +1864,16 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                "Drop buffer that are incomplete.",
                                true,
                                static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
+
+
+    g_object_class_install_property(gobject_class,
+                                    PROP_STATE,
+                                    g_param_spec_string("state",
+                                                        "Property State",
+                                                        "Property values the internal elements shall use",
+                                                        "",
+                                                        static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
     GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
     gst_element_class_set_details_simple (element_class,

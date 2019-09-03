@@ -17,6 +17,7 @@ This section contains background information and technical documentation.
    backends.rst
    logging.rst
    environment.rst
+   state.rst
    timestamps.rst
    configuration.rst
    dependencies.rst

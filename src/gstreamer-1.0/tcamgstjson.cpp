@@ -1,0 +1,266 @@
+/*
+ * Copyright 2019 The Imaging Source Europe GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "tcamgstjson.h"
+
+#include <fstream>
+#include <iostream>
+
+#include <json.hpp>
+
+#include <logging.h>
+
+
+
+// for convenience
+using json = nlohmann::json;
+
+static const char* JSON_FILE_VERSION_CURRENT = "v0.1";
+
+
+bool tcam_property_to_json (TcamProp* prop,
+                            json& parent,
+                            const char* name)
+{
+    GValue value = G_VALUE_INIT;
+    GValue type = G_VALUE_INIT;
+
+    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(prop),
+                                               name,
+                                               &value,
+                                               nullptr,
+                                               nullptr,
+                                               nullptr,
+                                               nullptr,
+                                               &type,
+                                               nullptr,
+                                               nullptr,
+                                               nullptr);
+
+    if (!ret)
+    {
+        tcam_warning("Unable to read property '%s'", name);
+        return false;
+    }
+
+    try
+    {
+        switch(G_VALUE_TYPE(&value))
+        {
+            case G_TYPE_INT:
+            {
+                parent.push_back(json::object_t::value_type(name, g_value_get_int(&value)));
+                break;
+            }
+            case G_TYPE_DOUBLE:
+            {
+                parent.push_back(json::object_t::value_type(name, g_value_get_double(&value)));
+                break;
+            }
+            case G_TYPE_STRING:
+            {
+                parent.push_back(json::object_t::value_type(name, g_value_get_string(&value)));
+                break;
+            }
+            case G_TYPE_BOOLEAN:
+            {
+                parent.push_back(json::object_t::value_type(name, (bool)g_value_get_boolean(&value)));
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+    catch (const std::logic_error& err)
+    {
+        tcam_error(err.what());
+        return false;
+    }
+    return true;
+}
+
+
+
+
+std::string create_device_settings (const std::string& serial,
+                                    TcamProp* tcam)
+{
+    if (!tcam)
+    {
+        return "";
+    }
+
+    json j;
+    try
+    {
+        if (!serial.empty())
+        {
+            j["serial"] = serial;
+        }
+        j["version"] = JSON_FILE_VERSION_CURRENT;
+        j["properties"] = {};
+    }
+    catch (std::logic_error& err)
+    {
+        tcam_error(err.what());
+        return "";
+    }
+
+    GSList* names = tcam_prop_get_tcam_property_names(tcam);
+
+    for (unsigned int i = 0; i < g_slist_length(names); ++i)
+    {
+        const char* type = tcam_prop_get_tcam_property_type(tcam,
+                                                            (const char*)g_slist_nth_data(names, i));
+
+        if (g_strcmp0("button", type) == 0)
+        {
+            continue;
+        }
+
+        bool ret = tcam_property_to_json(tcam,
+                                         j["properties"],
+                                         (const char*)g_slist_nth_data(names, i));
+        if (!ret)
+        {
+            tcam_warning("Could not convert %s to json.", (const char*)g_slist_nth_data(names, i));
+        }
+
+    }
+    int indent = 4;
+    return j.dump(indent);
+}
+
+
+bool load_device_settings (TcamProp* tcam,
+                           const std::string& serial,
+                           const std::string& cache)
+{
+    if (!tcam)
+    {
+        return false;
+    }
+
+    tcam_info(cache.c_str());
+    json j;
+    try
+    {
+        j = json::parse(cache);
+    }
+    catch (json::parse_error& e)
+    {
+        tcam_error("Unable to parse property settings. JSON parser returned: %s", e.what());
+        return false;
+    }
+
+    std::string serial_str;
+    try
+    {
+        serial_str = j.at("serial");
+    }
+    catch (json::out_of_range& e)
+    {
+        tcam_debug("State string has no serial. Omitting check.");
+    }
+
+    std::string version;
+    try
+    {
+        version = j.at("version");
+    }
+    catch (json::out_of_range& e)
+    {
+        tcam_debug("State string has no version. Omitting check.");
+    }
+
+    tcam_error(version.c_str());
+
+    if (!serial_str.empty())
+    {
+        if (serial_str.compare(serial) != 0)
+        {
+            tcam_error("Serial mismatch. State string will not be evaluated.");
+            return false;
+        }
+    }
+
+    if (!version.empty())
+    {
+        if (version != JSON_FILE_VERSION_CURRENT)
+        {
+            tcam_error("Version mismatch for state file.");
+            return false;
+        }
+    }
+
+    /*
+      This check is to allow for simplified
+      versions that can be used with gst-launch
+      all meta data is omitted and the properties
+      name does not exist.
+      basically root == properties
+     */
+    json props;
+
+    if (j.find("properties") != j.end())
+    {
+        props = j["properties"];
+    }
+    else
+    {
+        props = j;
+    }
+
+
+    for (auto iter : props.items())
+    {
+        GValue value = G_VALUE_INIT;
+
+        if (iter.value().is_boolean())
+        {
+            g_value_init(&value, G_TYPE_BOOLEAN);
+            g_value_set_boolean(&value, iter.value());
+        }
+        else if (iter.value().is_number_float())
+        {
+            g_value_init(&value, G_TYPE_DOUBLE);
+            g_value_set_double(&value, iter.value());
+        }
+        else if (iter.value().is_number_integer())
+        {
+            g_value_init(&value, G_TYPE_INT);
+            g_value_set_int(&value, iter.value());
+        }
+        else
+        {
+            g_value_init(&value, G_TYPE_STRING);
+            g_value_set_string(&value, iter.value().get<std::string>().c_str());
+        }
+
+        gboolean ret = tcam_prop_set_tcam_property(tcam, iter.key().c_str(), &value);
+
+        if (!ret)
+        {
+            tcam_error("Setting '%s' to '%s' caused an error",
+                       iter.key().c_str(), iter.value().dump().c_str());
+        }
+
+    }
+
+    return true;
+}

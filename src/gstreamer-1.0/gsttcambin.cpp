@@ -19,6 +19,9 @@
 
 #include "tcamgstbase.h"
 #include "tcamprop.h"
+
+#include "tcamgstjson.h"
+
 #include <glib-object.h>
 
 #include <unistd.h>
@@ -367,7 +370,8 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE_CAPS,
-    PROP_USE_DUTILS
+    PROP_USE_DUTILS,
+    PROP_STATE
 };
 
 static GstStaticPadTemplate src_template = GST_STATIC_PAD_TEMPLATE("src",
@@ -1197,7 +1201,9 @@ static void gst_tcambin_get_property (GObject* object,
             if (self->src)
             {
                 g_object_get_property(G_OBJECT(self->src), "serial", value);
-            } else {
+            }
+            else
+            {
                 g_value_set_string(value, self->device_serial);
             }
             break;
@@ -1210,6 +1216,27 @@ static void gst_tcambin_get_property (GObject* object,
         case PROP_USE_DUTILS:
         {
             g_value_set_boolean(value, self->use_dutils);
+            break;
+        }
+        case PROP_STATE:
+        {
+            if (!self->elements_created)
+            {
+                gst_tcambin_create_elements(GST_TCAMBIN(self), nullptr);
+            }
+            std::string serial;
+
+            if (self->device_serial)
+            {
+                serial = self->device_serial;
+                std::string bla = create_device_settings(serial,
+                                                  TCAM_PROP(self)).c_str();
+                g_value_set_string(value, bla.c_str());
+            }
+            else
+            {
+                g_value_set_string(value, "");
+            }
             break;
         }
         default:
@@ -1262,6 +1289,17 @@ static void gst_tcambin_set_property (GObject* object,
             {
                 gst_tcambin_clear_elements(self);
                 gst_tcambin_create_elements(self);
+            }
+            break;
+        }
+        case PROP_STATE:
+        {
+            bool state = load_device_settings(TCAM_PROP(self),
+                                              self->device_serial,
+                                              g_value_get_string(value));
+            if (!state)
+            {
+                GST_WARNING("Device may be in an undefined state.");
             }
             break;
         }
@@ -1370,7 +1408,15 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                                         "Allow usage of dutils element",
                                                         "",
                                                         TRUE,
-                                                        static_cast<GParamFlags>(G_PARAM_READWRITE)));
+                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+   g_object_class_install_property(object_class,
+                                   PROP_STATE,
+                                   g_param_spec_string("state",
+                                                       "Property State",
+                                                       "Property values the internal elements shall use",
+                                                       "",
+                                                       static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
 
     gst_element_class_add_pad_template (element_class,
