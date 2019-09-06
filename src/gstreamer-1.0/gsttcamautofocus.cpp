@@ -821,13 +821,13 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     }
 
     img::img_descriptor i = img::to_img_desc(roi_buffer.pData,
-                                             image.format.fourcc,
+                                             roi_buffer.format.fourcc,
                                              roi_buffer.format.width,
                                              roi_buffer.format.height,
                                              roi_buffer.pitch,
                                              roi_buffer.size);
 
-    int new_focus_value;
+    int new_focus_value = prop.value.i.value;
     img::point p = {0, 0};
 
     // pixel dimensions
@@ -837,15 +837,18 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 
     if (self->init_focus)
     {
+        self->params = {};
         GST_DEBUG("Initializing auto focus paramater");
         self->params.is_run_cmd = true;
         self->params.is_end_cmd = false;
+
         self->params.run_cmd_params.roi = {0,0,0,0};
         self->params.run_cmd_params.focus_range_min = prop.value.i.min;
         self->params.run_cmd_params.focus_range_max = prop.value.i.max;
         self->params.run_cmd_params.auto_step_divisor = 4;
         self->params.run_cmd_params.focus_device_speed = 500;
-        self->params.run_cmd_params.suggest_sweep = true;
+        self->params.run_cmd_params.suggest_sweep = false;
+        self->params.run_cmd_params.focus_min_move_wait_in_ms = 500;
         self->init_focus = FALSE;
     }
     else
@@ -855,25 +858,24 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 
     self->params.device_focus_val = prop.value.i.value;
 
-    bool ret = autofocus_run(self->focus,
-                             std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(),
-                             i,
-                             self->params,
-                             p,
-                             pixel_dim,
-                             new_focus_value);
-
+    autofocus_run(self->focus,
+                  std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(),
+                  i,
+                  self->params,
+                  p,
+                  pixel_dim,
+                  new_focus_value);
 
     if (autofocus_is_running(self->focus))
     {
-        GST_INFO("Setting focus %d %d %d", new_focus_value, self->params.run_cmd_params.focus_range_min, self->params.run_cmd_params.focus_range_max);
+        GST_DEBUG("Setting focus to %d", new_focus_value);
 
         focus_prop->set_value((int64_t)new_focus_value);
         self->cur_focus = new_focus_value;
     }
     else
     {
-        GST_INFO("focus said no %d", new_focus_value);
+        GST_INFO("Auto Focus ended with focus value %d", new_focus_value);
         self->focus_active = FALSE;
         self->init_focus = TRUE;
     }
@@ -929,7 +931,6 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
 
     if (self->focus_active) // entered if set to true with gst-launch
     {
-        GST_INFO("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         find_image_values(self);
 
         transform_tcam (self, buf);

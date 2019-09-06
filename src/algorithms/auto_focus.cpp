@@ -408,9 +408,9 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
     }
     else
     {
-        if (img.dim_x != init_width_
-            || img.dim_y != init_height_
-            || img.pitch != init_pitch_
+        if (img.dim_x != (unsigned int)init_width_
+            || img.dim_y != (unsigned int)init_height_
+            || img.pitch != (unsigned int)init_pitch_
             || init_pixel_dim_.cx != pixel_dim.cx
             || init_pixel_dim_.cy != pixel_dim.cy
             || init_offset_.x != offsets.x
@@ -430,7 +430,7 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
 }
 
 
-#if 0
+#if 1
 #define debug_out( ... )
 #else
 
