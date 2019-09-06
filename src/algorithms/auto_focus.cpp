@@ -15,38 +15,44 @@
  */
 
 #include "auto_focus.h"
+#include "image_fourcc_func.h"
 
-#define max(a, b) (((a) > (b)) ? (a) : (b))
+#include <stdio.h>
 
-namespace {
+#include <algorithm>
+
+namespace
+{
+
+using std::max;
 
 const int REGION_SIZE = 128;
 const int SWEEP_SHARPNESS_THRESHOLD = 300;
 
-//struct RegionPos
-
 struct RegionInfo
 {
-    unsigned int x;
-    unsigned int y;
-    unsigned int width;
-    unsigned int height;
+    int x;
+    int y;
+    int width;
+    int height;
 
-    unsigned int sharpness;
-    unsigned int weighted_sharpness;
+    int sharpness;
+    int weighted_sharpness;
 };
 
 
-unsigned int abs_ (int value)
+int abs_ (int value)
 {
     int t = value >> 31;
     return t ^ (value + t);
 }
 
 
-unsigned int sqrt_ (unsigned int n)
+int sqrt_ (int n)
 {
-    unsigned int a = 0;
+    if (n < 0)
+        return 0;
+    int a = 0;
     while( n >= (2 * a) + 1 )
     {
         n -= (2 * a++) + 1;
@@ -55,88 +61,100 @@ unsigned int sqrt_ (unsigned int n)
 }
 
 
-static unsigned int CalcRegionCenterDistance ( const img::img_descriptor& image, const RegionInfo& region )
+static int CalcRegionCenterDistance (const img::img_descriptor& image, const RegionInfo& region)
 {
     int imageCenterX = image.dim_x / 2;
     int imageCenterY = image.dim_y / 2;
     int blockCenterX = region.x + region.width / 2;
     int blockCenterY = region.y + region.height / 2;
 
-    unsigned int dx = abs_(imageCenterX - blockCenterX);
-    unsigned int dy = abs_(imageCenterY - blockCenterY);
+    int dx = abs_(imageCenterX - blockCenterX);
+    int dy = abs_(imageCenterY - blockCenterY);
 
-    unsigned int ndx = (dx * 100) / image.dim_x;
-    unsigned int ndy = (dy * 100) / image.dim_y;
+    int ndx = (dx * 100) / image.dim_x;
+    int ndy = (dy * 100) / image.dim_y;
 
     return sqrt_(ndx * ndx + ndy * ndy);
 }
 
 
 template<class TDataType>
-inline TDataType* get_ptr_at ( void* region_base, int x, int y, int stride )
+inline TDataType* get_ptr_at (void* region_base, int x, int y, int stride)
 {
-    return ((TDataType*)(((unsigned char*)region_base) + y * stride)) + x;
+    return ((TDataType*)(((uint8_t*)region_base) + y * stride)) + x;
 }
 
 
 template<typename TChannelType>
-static unsigned int autofocus_get_contrast_ ( const img::img_descriptor& image, const RegionInfo& region )
+static int autofocus_get_contrast_ ( const img::img_descriptor& image, const RegionInfo& region)
 {
-    const unsigned int LINE_COUNT = 7;
+    const int LINE_COUNT = 7;
 
-    void* region_start = get_ptr_at<TChannelType>( image.pData, region.x, region.y, image.pitch );
-    unsigned int stride = image.pitch;
+    void* region_start = img::get_line_start<TChannelType>( image, region.y ) + region.x;
+    int stride = image.pitch;
 
-    unsigned int step_y = region.height / (LINE_COUNT + 1) + 1;
-    unsigned int step_x = region.width / (LINE_COUNT + 1) + 1;
+    int step_y = region.height / (LINE_COUNT + 1) + 1;
+    int step_x = region.width / (LINE_COUNT + 1) + 1;
 
-    unsigned int sharpness = 0;
-    for ( unsigned int y = step_y; (y+4) < region.height; y += step_y )
+    int sharpness = 0;
+    for (int y = step_y; (y+4) < region.height; y += step_y)
     {
-        unsigned int max_contrast = 0;
+        int max_contrast = 0;
 
-        for ( unsigned int x = 0; (x+16) < region.width; x += 4 )
+        for (int x = 0; (x+16) < region.width; x += 4)
         {
             int a = 0;
-            for ( unsigned int i = 0; i < 8; ++i )
-                for ( unsigned int j = 0; j < 4; ++j )
+            for (int i = 0; i < 8; ++i)
+            {
+                for (int j = 0; j < 4; ++j)
+                {
                     a += *get_ptr_at<TChannelType>( region_start, x + i, y + j, stride );
-
+                }
+            }
             a /= 16;
 
             int b = 0;
-            for ( unsigned int i = 8; i < 16; ++i )
-                for ( unsigned int j = 0; j< 4;++j )
+            for (int i = 8; i < 16; ++i)
+            {
+                for (int j = 0; j< 4;++j)
+                {
                     b += *get_ptr_at<TChannelType>( region_start, x + i, y + j, stride );
-
+                }
+            }
             b /= 16;
 
-            unsigned int contrast = abs_(a-b);
+            int contrast = abs_(a-b);
             max_contrast = max(contrast, max_contrast);
         }
         sharpness += max_contrast;
     }
-    for ( unsigned int x = step_x; (x+4) < region.width; x += step_x )
+    for (int x = step_x; (x+4) < region.width; x += step_x)
     {
-        unsigned int max_contrast = 0;
+        int max_contrast = 0;
 
-        for ( unsigned int y = 0; (y+16) < region.height; y += 4 )
+        for (int y = 0; (y+16) < region.height; y += 4)
         {
             int a = 0;
-            for ( unsigned int i = 0; i < 8; ++i )
-                for ( unsigned int j = 0; j< 4;++j )
+            for (int i = 0; i < 8; ++i)
+            {
+                for (int j = 0; j< 4;++j)
+                {
                     a += *get_ptr_at<TChannelType>( region_start, x + j, y + i, stride );
-
+                }
+            }
             a /= 16;
 
             int b = 0;
-            for ( unsigned int i = 8; i < 16; ++i )
-                for ( unsigned int j = 0; j< 4;++j )
+            for( int i = 8; i < 16; ++i )
+            {
+                for( int j = 0; j< 4;++j )
+                {
                     b += *get_ptr_at<TChannelType>( region_start, x + j, y + i, stride );
-
+                }
+            }
             b /= 16;
 
-            unsigned int contrast = abs_(a-b);
+            int contrast = abs_(a-b);
             max_contrast = max(contrast, max_contrast);
         }
         sharpness += max_contrast;
@@ -145,9 +163,9 @@ static unsigned int autofocus_get_contrast_ ( const img::img_descriptor& image, 
 }
 
 
-static unsigned int autofocus_get_contrast ( const img::img_descriptor& image, const RegionInfo& region )
+static int autofocus_get_contrast (const img::img_descriptor& image, const RegionInfo& region)
 {
-    if ( image.type == FOURCC_Y16 )
+    if( image.type == FOURCC_Y16 || img::is_by16_fcc( image.type ) )
     {
         return autofocus_get_contrast_<uint16_t>( image, region );
     }
@@ -158,22 +176,22 @@ static unsigned int autofocus_get_contrast ( const img::img_descriptor& image, c
 }
 
 
-static void autofocus_get_all_regions_ ( const img::img_descriptor& image, RegionInfo* regions, unsigned int regionCount )
+static void autofocus_get_all_regions_ (const img::img_descriptor& image, RegionInfo* regions, int regionCount)
 {
-    unsigned int regions_x = image.dim_x / REGION_SIZE;
-    unsigned int regions_y = image.dim_y / REGION_SIZE;
+    int regions_x = image.dim_x / REGION_SIZE;
+    int regions_y = image.dim_y / REGION_SIZE;
 
-    if ( regions_x * regions_y > regionCount )
+    if (regions_x * regions_y > regionCount)
     {
         return;
     }
 
-    unsigned int start_x = (image.dim_x - regions_x * REGION_SIZE) / 2;
-    unsigned int start_y = (image.dim_y - regions_y * REGION_SIZE) / 2;
+    int start_x = (image.dim_x - regions_x * REGION_SIZE) / 2;
+    int start_y = (image.dim_y - regions_y * REGION_SIZE) / 2;
 
-    for ( unsigned int y = 0; y < regions_y; ++y )
+    for (int y = 0; y < regions_y; ++y)
     {
-        for ( unsigned int x = 0; x < regions_x; ++x )
+        for (int x = 0; x < regions_x; ++x)
         {
             RegionInfo& r = regions[y*regions_x + x];
             r.x = start_x + x * REGION_SIZE;
@@ -186,23 +204,23 @@ static void autofocus_get_all_regions_ ( const img::img_descriptor& image, Regio
         }
     }
 
-    for ( unsigned int y = 0; y < regions_y; ++y )
+    for (int y = 0; y < regions_y; ++y)
     {
-        for ( unsigned int x = 0; x < regions_x; ++x )
+        for (int x = 0; x < regions_x; ++x)
         {
             RegionInfo& r = regions[y*regions_x + x];
 
             // Boost sharpness with surrounding sharpness values
-            unsigned int x0 = x > 0 ? x - 1 : x;
-            unsigned int x1 = x < (regions_x - 1) ? x + 1 : x;
-            unsigned int y0 = y > 0 ? y - 1 : y;
-            unsigned int y1 = y < (regions_y - 1) ? y + 1 : y;
+            int x0 = x > 0 ? x - 1 : x;
+            int x1 = x < (regions_x - 1) ? x + 1 : x;
+            int y0 = y > 0 ? y - 1 : y;
+            int y1 = y < (regions_y - 1) ? y + 1 : y;
 
-            unsigned int extra_sharpness = 0;
+            int extra_sharpness = 0;
 
-            for (unsigned int iy = y0; iy < y1; ++iy)
+            for (int iy = y0; iy < y1; ++iy)
             {
-                for (unsigned int ix = x0; ix < x1; ++ix)
+                for (int ix = x0; ix < x1; ++ix)
                 {
                     if (iy != 0 || ix != 0)
                     {
@@ -213,37 +231,38 @@ static void autofocus_get_all_regions_ ( const img::img_descriptor& image, Regio
             }
 
             // Apply elliptical quadratic weighting
-            unsigned int center_distance = CalcRegionCenterDistance( image, r );
+            int center_distance = CalcRegionCenterDistance( image, r );
 
-            unsigned int d = (center_distance + 60);
-            r.weighted_sharpness = (unsigned int)((r.sharpness + extra_sharpness) * 10000 / (d*d));
+            int d = (center_distance + 60);
+            r.weighted_sharpness = (int)((r.sharpness + extra_sharpness) * 10000 / (d*d));
         }
     }
 }
 
 
-static unsigned int calc_needed_region_count ( unsigned int img_width, unsigned int img_height, unsigned int region_size )
+static int	calc_needed_region_count (int img_width, int img_height, int region_size)
 {
-    unsigned int regions_x = img_width / region_size;
-    unsigned int regions_y = img_height / region_size;
+    int regions_x = img_width / region_size;
+    int regions_y = img_height / region_size;
 
     return regions_x * regions_y;
 }
 
 
-static void autofocus_find_region ( const img::img_descriptor& image, RegionInfo& region )
+static void	autofocus_find_region (const img::img_descriptor& image, RegionInfo& region)
 {
-    unsigned int region_count = calc_needed_region_count( image.dim_x, image.dim_y, REGION_SIZE );
+
+    int region_count = calc_needed_region_count( image.dim_x, image.dim_y, REGION_SIZE );
     RegionInfo* regions = new RegionInfo[region_count];
 
     autofocus_get_all_regions_( image, regions, region_count );
 
-    unsigned int best_idx = 0;
-    unsigned int best_weighted_sharpness = 0;
+    int best_idx = 0;
+    int best_weighted_sharpness = 0;
 
-    for ( unsigned int i = 0; i < region_count; ++i )
+    for (int i = 0; i < region_count; ++i)
     {
-        if ( regions[i].weighted_sharpness > best_weighted_sharpness )
+        if (regions[i].weighted_sharpness > best_weighted_sharpness)
         {
             best_idx = i;
             best_weighted_sharpness = regions[i].weighted_sharpness;
@@ -256,13 +275,13 @@ static void autofocus_find_region ( const img::img_descriptor& image, RegionInfo
 }
 
 
-static unsigned int autofocus_get_sharpness ( const img::img_descriptor& image, const RegionInfo& region )
+static int autofocus_get_sharpness (const img::img_descriptor& image, const RegionInfo& region)
 {
     return autofocus_get_contrast( image, region );
 }
 
 
-static bool is_user_roi_valid ( const img::img_descriptor& image, const RECT& r )
+static bool is_user_roi_valid (const img::img_descriptor& image, const img::rect& r)
 {
     if( (r.bottom - r.top) < 64 )
         return false;
@@ -282,32 +301,28 @@ static bool is_user_roi_valid ( const img::img_descriptor& image, const RECT& r 
 }
 
 
-img::auto_focus::auto_focus ()
-    : focus_applied_( 1 ), focus_min_( 0 ), focus_max_( 0 ),
-      max_time_to_wait_for_focus_change_( 1000 ), img_wait_cnt( 0 )//, min_time_to_wait_for_focus_change_( 1000 )
+auto_alg::auto_focus::auto_focus ()
+    : focus_min_( 0 ), focus_max_( 0 ),
+    max_time_to_wait_for_focus_change_( 1000 ), min_time_to_wait_for_focus_change_( 300 ), img_wait_cnt_( 0 )
 {
     data.state = data_holder::ended;
     data.focus_val = 0;
     data.stepCount = 0;
-    pthread_mutex_init(&this->param_mtx_, NULL);
 }
 
 
-bool img::auto_focus::is_running () const
+bool auto_alg::auto_focus::is_running () const
 {
     return data.state != data_holder::ended;
 }
 
 
-void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
-                            int speed, int auto_step_divisor, bool suggest_sweep )
+void auto_alg::auto_focus::run (int focus_val,
+                                int min, int max,
+                                const img::rect& roi,
+                                int speed, int auto_step_divisor,
+                                bool suggest_sweep)
 {
-    int ret = pthread_mutex_trylock(&param_mtx_);
-    if (ret != 0)
-    {
-        return;
-    }
-
     focus_min_ = min;
     focus_max_ = max;
     max_time_to_wait_for_focus_change_ = speed;
@@ -318,90 +333,162 @@ void img::auto_focus::run ( int focus_val, int min, int max, const RECT& roi,
     data.focus_val = focus_val;
 
     data.state = data_holder::init;
-    focus_applied_ = 1;
     data.stepCount = 0;
     user_roi_ = roi;
-
-    pthread_mutex_unlock(&param_mtx_);
 }
 
 
-void img::auto_focus::end ()
+void auto_alg::auto_focus::end ()
 {
-    int ret = pthread_mutex_trylock(&param_mtx_);
-    if (ret != 0)
-    {
-        return;
-    }
-
     data.state = data_holder::ended;
 
     user_roi_.left = 0;
     user_roi_.top = 0;
     user_roi_.bottom = 0;
     user_roi_.right = 0;
-    pthread_mutex_unlock(&param_mtx_);
-
 }
 
 
-bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_val )
+bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
+                                         const img::img_descriptor& img,
+                                         const auto_alg::auto_focus_params& state,
+                                         img::point offsets,
+                                         img::dim pixel_dim,
+                                         int& new_focus_val)
 {
-    // if we can't get the lock, then just ignore this frame and retry next frame
-    int ret = pthread_mutex_trylock(&param_mtx_);
-    if (ret != 0)
+    // these formats should work ...
+    if (img.type != FOURCC_Y800 &&
+        img.type != FOURCC_Y16 &&
+        img::is_by16_fcc( img.type ) &&
+        img::is_by8_fcc( img.type ) &&
+        img.type != FOURCC_RGB32 &&
+        img.type != FOURCC_RGB24)
     {
         return false;
     }
+
     // force this to prevent too small images
-    if ( img.dim_x < REGION_SIZE || img.dim_y < REGION_SIZE )
+    if (img.dim_x < REGION_SIZE || img.dim_y < REGION_SIZE)
     {
-        pthread_mutex_unlock(&param_mtx_);
-
         return false;
     }
 
-    if ( data.state == data_holder::ended )
+    if (state.is_end_cmd)
     {
-        pthread_mutex_unlock(&param_mtx_);
-
+        end();
         return false;
     }
 
     bool rval = false;
-    if ( data.state == data_holder::init )
+    if (state.is_run_cmd)
     {
+        run( state.device_focus_val, state.run_cmd_params.focus_range_min, state.run_cmd_params.focus_range_max, state.run_cmd_params.roi,
+             state.run_cmd_params.focus_device_speed, state.run_cmd_params.auto_step_divisor, state.run_cmd_params.suggest_sweep );
+
+        if (state.run_cmd_params.focus_min_move_wait_in_ms > 0)
+            min_time_to_wait_for_focus_change_ = state.run_cmd_params.focus_min_move_wait_in_ms;
+        else
+            min_time_to_wait_for_focus_change_ = 300;
+
         init_width_ = img.dim_x;
         init_height_ = img.dim_y;
         init_pitch_ = img.pitch;
-        init_binning_ = binning_value;
+        init_pixel_dim_ = pixel_dim;
         init_offset_ = offsets;
 
-        if ( user_roi_.bottom != 0 )
+        if (user_roi_.bottom != 0)
         {
-            user_roi_.top = (user_roi_.top - offsets.y) / binning_value;
-            user_roi_.left = (user_roi_.left - offsets.x) / binning_value;
-            user_roi_.bottom = (user_roi_.bottom - offsets.y) / binning_value;
-            user_roi_.right = (user_roi_.right - offsets.x) / binning_value;
+            user_roi_.top = (user_roi_.top - offsets.y) / pixel_dim.cy;
+            user_roi_.left = (user_roi_.left - offsets.x) / pixel_dim.cx;
+            user_roi_.bottom = (user_roi_.bottom - offsets.y) / pixel_dim.cy;
+            user_roi_.right = (user_roi_.right - offsets.x) / pixel_dim.cx;
         }
 
+        rval = analyze_frame( time_point, img, new_focus_val );
+    }
+    else
+    {
+        if (img.dim_x != init_width_
+            || img.dim_y != init_height_
+            || img.pitch != init_pitch_
+            || init_pixel_dim_.cx != pixel_dim.cx
+            || init_pixel_dim_.cy != pixel_dim.cy
+            || init_offset_.x != offsets.x
+            || init_offset_.y != offsets.y)
+        {
+            // when any of the parameters change, we just quit this
+            end();
+
+            return false;
+        }
+
+        update_focus( state.device_focus_val );
+
+        rval = analyze_frame( time_point, img, new_focus_val );
+    }
+    return rval;
+}
+
+
+#if 0
+#define debug_out( ... )
+#else
+
+#include <stdio.h>
+#include <stdarg.h>
+
+extern "C" {
+
+void
+OutputDebugStringA(
+    const char* lpOutputString
+    );
+}
+
+void	debug_out( char* format, ... )
+{
+    char buf[1024] = {};
+
+    va_list args;
+    va_start(args, format);
+    vsprintf( buf, format, args );
+    va_end(args);
+    printf(buf);
+
+    //::OutputDebugStringA( buf );
+}
+#endif
+
+
+bool auto_alg::auto_focus::analyze_frame (uint64_t now, const img::img_descriptor& img, int& new_focus_val)
+{
+    if (data.state == data_holder::ended)
+        return false;
+
+    bool rval = false;
+    if (data.state == data_holder::init)
+    {
         RegionInfo info;
         find_region( img, user_roi_, info );
         restart_roi( info );
 
-        if ( !sweep_suggested_ || (data.prev_sharpness > SWEEP_SHARPNESS_THRESHOLD) )
+        if (!sweep_suggested_ || (data.prev_sharpness > SWEEP_SHARPNESS_THRESHOLD))
         {
             data.state = data_holder::binary_search;
             data.sweep_step = 0;
+
+            debug_out( "INIT: focus = %d, sharpness = %d => state = binary_search\n", data.focus_val, data.prev_sharpness );
         }
         else
         {
             data.state = data_holder::sweep_1;
 
-            if ( (data.focus_val - data.left) > (data.right - data.focus_val) )
+            if ((data.focus_val - data.left) > (data.right - data.focus_val))
                 data.sweep_step = -(data.right - data.left) / 20;
             else
                 data.sweep_step = (data.right - data.left) / 20;
+
+            debug_out( "INIT: focus = %d, sharpness = %d => state = sweep_1, step = %d\n", data.focus_val, data.prev_sharpness, data.sweep_step );
         }
         data.prev_focus = data.focus_val;
 
@@ -410,56 +497,29 @@ bool img::auto_focus::analyze_frame ( const img_descriptor& img, POINT offsets, 
     }
     else
     {
-        if ( img.dim_x != init_width_
-             || img.dim_y != init_height_
-             || img.pitch != init_pitch_
-             || init_binning_ != (unsigned int)binning_value
-             || init_offset_.x != offsets.x
-             || init_offset_.y != offsets.y )
-        {
-            // when any of the parameters change, we just quit this
-            data.state = data_holder::ended;
-
-#if _DEBUG
-            char buf[100] = {};
-            sprintf_s( buf, __FUNCTION__ ", preconditions changed, just quit one-push-run\n" );
-            OutputDebugStringA( buf );
-#endif
-            pthread_mutex_unlock(&param_mtx_);
-
-            return false;
-        }
-        if ( !focus_applied_ )
-        {
-            pthread_mutex_unlock(&param_mtx_);
-
-            return false;
-        }
-        if ( check_wait_condition() )
+        if (check_wait_condition( now ))
         {
             rval = analyze_frame_( img, new_focus_val );
         }
     }
 
-    if ( rval )
+    if (rval)
     {
-        focus_applied_ = 0;
-        arm_focus_timer( abs_(data.prev_focus - new_focus_val) );
+        arm_focus_timer( now, abs_(data.prev_focus - new_focus_val) );
     }
-    pthread_mutex_unlock(&param_mtx_);
 
     return rval;
 }
 
 
-bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus_val )
+bool auto_alg::auto_focus::analyze_frame_ (const img::img_descriptor& img, int& new_focus_val)
 {
     data.stepCount += 1;
-    if ( (data.stepCount == 4 || data.stepCount == 8) )
+    if ((data.stepCount == 4 || data.stepCount == 8))
     {
-        RegionInfo newROI;
+        RegionInfo	newROI;
         find_region( img, user_roi_, newROI );
-        if ( data.x != newROI.x || data.y != newROI.y )
+        if (data.x != newROI.x || data.y != newROI.y)
         {
             restart_roi( newROI );
             new_focus_val = calc_next_focus();
@@ -468,7 +528,7 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
     }
 
     // In sweep mode, look for the region with the highest sharpness on every frame
-    if ( (data.state == data_holder::sweep_1) || (data.state == data_holder::sweep_2) )
+    if ((data.state == data_holder::sweep_1) || (data.state == data_holder::sweep_2))
     {
         RegionInfo newROI;
         find_region(img, user_roi_, newROI);
@@ -480,13 +540,13 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
 
     int sq = get_sharpness( img );
 
-    if ( (data.state == data_holder::sweep_1) || (data.state == data_holder::sweep_2) )
+    if ((data.state == data_holder::sweep_1) || (data.state == data_holder::sweep_2))
     {
-        if ( sq > SWEEP_SHARPNESS_THRESHOLD )
+        if (sq > SWEEP_SHARPNESS_THRESHOLD)
         {
             data.state = data_holder::binary_search;
 
-            if ( data.sweep_step > 0 )
+            if (data.sweep_step > 0)
                 data.left = data.focus_val - data.sweep_step;
             else
                 data.right = data.focus_val - data.sweep_step;
@@ -495,51 +555,61 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
             data.prev_sharpness = sq;
             new_focus_val = calc_next_focus();
 
+            debug_out( "SWEEP SUCCESS: focus_val = %d, sharpness = %d => state = binary_search, new_focus_val = %d\n", data.focus_val, sq, new_focus_val );
+
             return true;
         }
         else
         {
             new_focus_val = data.focus_val + data.sweep_step;
-            if ( new_focus_val < data.left ) new_focus_val = data.left;
-            if ( new_focus_val > data.right) new_focus_val = data.right;
+            if( new_focus_val < data.left ) new_focus_val = data.left;
+            if( new_focus_val > data.right) new_focus_val = data.right;
 
-            if ( ((data.sweep_step < 0) && (new_focus_val == data.left))
-                || ((data.sweep_step > 0) && (new_focus_val == data.right)) )
+            if (((data.sweep_step < 0) && (new_focus_val == data.left))
+                || ((data.sweep_step > 0) && (new_focus_val == data.right)))
             {
-                if ( data.state == data_holder::sweep_1 )
+                if (data.state == data_holder::sweep_1)
                 {
                     data.state = data_holder::sweep_2;
                     data.sweep_step = -data.sweep_step;
 
                     // Restart from where sweep_1 was started
                     new_focus_val = data.prev_focus;
+
+                    debug_out( "SWEEP REVERSE: focus_val = %d, sharpness = %d, sweep_step = %d => state = sweep_2, new_focus_val = %d\n", data.focus_val, sq, data.sweep_step, new_focus_val );
                 }
                 else
                 {
-                    data.state = data_holder::binary_search;
+                     data.state = data_holder::binary_search;
 
-                    data.prev_focus = data.focus_val;
-                    data.prev_sharpness = sq;
-                    new_focus_val = calc_next_focus();
+                     data.prev_focus = data.focus_val;
+                     data.prev_sharpness = sq;
+                     new_focus_val = calc_next_focus();
+
+                     debug_out( "SWEEP FAIL: focus_val = %d, sharpness = %d => state = binary_search, new_focus_val = %d\n", data.focus_val, sq, new_focus_val );
                 }
+            }
+            else
+            {
+                debug_out( "SWEEP STEP: focus_val = %d, sharpness = %d, sweep_step = %d => new_focus_val = %d\n", data.focus_val, sq, data.sweep_step, new_focus_val );
             }
 
             return true;
         }
     }
 
-    if ( data.state == data_holder::binary_search )
+    if (data.state == data_holder::binary_search)
     {
-        if ( sq < data.prev_sharpness )
+        if (sq < data.prev_sharpness)
         {
-            if ( data.focus_val < data.prev_focus )
+            if (data.focus_val < data.prev_focus)
                 data.left = data.focus_val;
             else
                 data.right = data.focus_val;
         }
         else // sq >= prev_sharpness
         {
-            if ( data.focus_val < data.prev_focus )
+            if (data.focus_val < data.prev_focus)
                 data.right = data.prev_focus;
             else
                 data.left = data.prev_focus;
@@ -548,9 +618,14 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
             data.prev_sharpness = sq;
         }
 
-        if ( (data.right - data.left) > 2 )
+        if ((data.right - data.left) > 2)
         {
             new_focus_val = calc_next_focus();
+
+            debug_out( "BINARY_SEARCH: cur_focus=%d, next_focus=%d, left=%d, right=%d, cur_sharpness=%d region = (%d, %d)\n",
+                data.focus_val, new_focus_val, data.left, data.right, sq,
+                data.x, data.y
+                );
 
             return true;
         }
@@ -560,11 +635,12 @@ bool img::auto_focus::analyze_frame_ ( const img_descriptor& img, int& new_focus
         }
     }
 
+
     return false;
 }
 
 
-unsigned int img::auto_focus::get_sharpness ( const img_descriptor& img )
+int auto_alg::auto_focus::get_sharpness (const img::img_descriptor& img)
 {
     RegionInfo info;
     info.x = data.x;
@@ -576,16 +652,16 @@ unsigned int img::auto_focus::get_sharpness ( const img_descriptor& img )
 }
 
 
-int img::auto_focus::calc_next_focus ()
+int auto_alg::auto_focus::calc_next_focus ()
 {
-    unsigned int dl = abs_(data.left - data.prev_focus);
-    unsigned int dr = abs_(data.right - data.prev_focus);
+    int dl = abs_(data.left - data.prev_focus);
+    int dr = abs_(data.right - data.prev_focus);
 
     int div = auto_step_divisor_;
-    unsigned int lstep = dl / div;
-    unsigned int rstep = dr / div;
-    if ( !lstep ) lstep = 1;
-    if ( !rstep ) rstep = 1;
+    int lstep = dl / div;
+    int rstep = dr / div;
+    if (!lstep) lstep = 1;
+    if (!rstep) rstep = 1;
 
     int new_focus = (dl > dr) ? (data.prev_focus - lstep) : (data.prev_focus + rstep);
 
@@ -593,7 +669,7 @@ int img::auto_focus::calc_next_focus ()
 }
 
 
-void img::auto_focus::restart_roi ( const RegionInfo& info )
+void auto_alg::auto_focus::restart_roi (const RegionInfo& info)
 {
     data.x = info.x;
     data.y = info.y;
@@ -607,62 +683,41 @@ void img::auto_focus::restart_roi ( const RegionInfo& info )
 }
 
 
-void img::auto_focus::update_focus ( int focus_val )
+void auto_alg::auto_focus::update_focus (int focus_val)
 {
-    int ret = pthread_mutex_trylock(&param_mtx_);
-
-    if (ret != 0)
-        return;
-
     data.focus_val = focus_val;
-    focus_applied_ = 1;
-
-    pthread_mutex_unlock(&param_mtx_);
 }
 
 
-bool img::auto_focus::check_wait_condition ()
+bool auto_alg::auto_focus::check_wait_condition (uint64_t now)
 {
-    if ( --img_wait_cnt < 0 )
+    if (--img_wait_cnt_ < 0)
     {
-        timespec time2;
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
-        if (time2.tv_sec > img_wait_endtime.tv_sec)
-        {
-            return true;
-        }
-
-        if (time2.tv_sec == img_wait_endtime.tv_sec)
-            if (time2.tv_nsec > img_wait_endtime.tv_nsec)
-            {
-                return true;
-            }
+        return now > img_wait_endtime_;
     }
     return false;
 }
 
 
-void img::auto_focus::arm_focus_timer ( int diff )
+void auto_alg::auto_focus::arm_focus_timer (uint64_t now, int diff)
 {
     int ms_to_use = 0;
-    if( diff > 0 )
+    if (diff > 0)
     {
         ms_to_use = (diff * max_time_to_wait_for_focus_change_) / (focus_max_ - focus_min_);
     }
     // we have to wait for at least n frames and at least for focus_min_move_speed_ milliseconds
-    if( ms_to_use < min_time_to_wait_for_focus_change_ )
+    if (ms_to_use < min_time_to_wait_for_focus_change_)
         ms_to_use = min_time_to_wait_for_focus_change_;
 
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &img_wait_endtime);
-    img_wait_endtime.tv_nsec = ms_to_use*1000*1000;
+    img_wait_endtime_ = now + ms_to_use * 1000;
 
-    img_wait_cnt = 3; // at least we have to wait 2 frames due to frame latency
+    img_wait_cnt_ = 3;	// at least we have to wait 2 frames due to frame latency
 }
 
-
-void img::auto_focus::find_region ( const img_descriptor& image, RECT roi, RegionInfo& region )
+void auto_alg::auto_focus::find_region (const img::img_descriptor& image, img::rect roi, RegionInfo& region)
 {
-    if ( is_user_roi_valid( image, roi ) )
+    if (is_user_roi_valid( image, roi ))
     {
         RegionInfo& tmp = region;
         tmp.width = roi.right - roi.left;
@@ -675,8 +730,9 @@ void img::auto_focus::find_region ( const img_descriptor& image, RECT roi, Regio
     }
     else
     {
-        RECT r = {};
-        user_roi_ = r;
+        user_roi_ = {};
         autofocus_find_region( image, region );
+
+        debug_out( "FIND REGION: x = %d, y = %d\n", region.x, region.y );
     }
 }

@@ -21,6 +21,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <chrono>
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include "gsttcamautofocus.h"
@@ -452,6 +453,7 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
 
     if (id == 0)
     {
+        GST_WARNING("Unknown id");
         return FALSE;
     }
 
@@ -498,82 +500,6 @@ static GstStaticPadTemplate gst_tcamautofocus_src_template =
                              GST_PAD_SRC,
                              GST_PAD_ALWAYS,
                              GST_STATIC_CAPS ("ANY"));
-
-
-static void focus_run_tcam (GstTcamAutoFocus* self)
-{
-    if (self->camera_src == NULL)
-    {
-        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
-        if (self->camera_src == NULL)
-        {
-            GST_ERROR("Source empty! Aborting.");
-            return;
-        }
-    }
-
-    if (autofocus_is_running(self->focus))
-    {
-        return;
-    }
-
-    tcam::CaptureDevice* dev = nullptr;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
-
-    if (dev == nullptr)
-    {
-        GST_ERROR("Unable to retrieve camera! Aborting.");
-        return;
-    }
-
-    RECT r = {0, 0, 0, 0};
-
-    /* user defined rectangle */
-    if (self->roi_width != 0 && self->roi_height != 0)
-    {
-        r.left = self->roi_left;
-        r.right = self->roi_left + self->roi_width;
-        r.top = self->roi_left;
-        r.bottom = self->roi_left + self->roi_height;
-    }
-
-    tcam::Property* p = dev->get_property(TCAM_PROPERTY_FOCUS);
-
-    if (p == nullptr)
-    {
-        GST_ERROR("Unable to retrieve focus property! Aborting.");
-        return;
-    }
-    struct tcam_device_property prop = p->get_struct();
-
-    self->cur_focus = prop.value.i.value;
-    int min = prop.value.i.min;
-    int max = prop.value.i.max;
-
-    /* magic number */
-    int focus_auto_step_divisor = 4;
-
-    GST_INFO("Callig autofocus_run with: Focus %d Min %d Max %d Divisor %d ",
-             self->cur_focus,
-             min,
-             max,
-             focus_auto_step_divisor);
-
-    autofocus_run(self->focus,
-                  self->cur_focus,
-                  min,
-                  max,
-                  r,
-                  500,
-                  focus_auto_step_divisor,
-                  false);
-}
-
-
-static void focus_run (GstTcamAutoFocus* self)
-{
-    focus_run_tcam(self);
-}
 
 
 static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
@@ -654,6 +580,7 @@ static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
     self->image_width = 0;
     self->image_height = 0;
     self->camera_src = NULL;
+    self->init_focus = TRUE;
     tcam_image_size min_size = {REGION_MIN_SIZE, REGION_MIN_SIZE};
 
     self->roi = create_roi(&min_size, &min_size);
@@ -675,7 +602,7 @@ void gst_tcamautofocus_set_property (GObject* object,
             if (self->focus_active == TRUE)
             {
                 GST_INFO("focus_active is now TRUE");
-                focus_run(self);
+                //focus_run(self);
             }
             else
             {
@@ -864,14 +791,6 @@ static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
 }
 #endif
 
-static int clip (int min, int value, int max)
-{
-    if (min > value)
-        return min;
-    if (max < value)
-        return max;
-    return value;
-}
 
 
 static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
@@ -884,16 +803,8 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     tcam::CaptureDevice* dev;
     g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
 
-    gint64 max = 0;
-
     tcam::Property* focus_prop = dev->get_property(TCAM_PROPERTY_FOCUS);
     struct tcam_device_property prop = focus_prop->get_struct();
-
-    int focus_auto_min = prop.value.i.min;
-    max = prop.value.i.max;
-
-    /* assure we use the current focus value */
-    autofocus_update_focus(self->focus, clip(focus_auto_min, self->cur_focus, max));
 
     GstMapInfo info = {};
     gst_buffer_map(buf, &info, GST_MAP_READ);
@@ -909,31 +820,62 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         return;
     }
 
-    img::img_descriptor img =
-        {
-            FOURCC_GRBG8, /* TODO: DYNAMICALLY FIND FORMAT */
-            roi_buffer.format.width,
-            roi_buffer.format.height,
-            roi_buffer.format.width,
-            roi_buffer.length,
-            roi_buffer.pData
-        };
+    img::img_descriptor i = img::to_img_desc(roi_buffer.pData,
+                                             image.format.fourcc,
+                                             roi_buffer.format.width,
+                                             roi_buffer.format.height,
+                                             roi_buffer.pitch,
+                                             roi_buffer.size);
 
     int new_focus_value;
-    POINT p = {0, 0};
+    img::point p = {0, 0};
 
-    bool ret = autofocus_analyze_frame(self->focus,
-                                       img,
-                                       p,
-                                       500,
-                                       &new_focus_value);
+    // pixel dimensions
+    // has to adjusted when binning etc is active
+    // TODO implement that
+    img::dim pixel_dim = {1, 1};
 
-    if (ret)
+    if (self->init_focus)
     {
-        GST_DEBUG("Setting focus %d", new_focus_value);
+        GST_DEBUG("Initializing auto focus paramater");
+        self->params.is_run_cmd = true;
+        self->params.is_end_cmd = false;
+        self->params.run_cmd_params.roi = {0,0,0,0};
+        self->params.run_cmd_params.focus_range_min = prop.value.i.min;
+        self->params.run_cmd_params.focus_range_max = prop.value.i.max;
+        self->params.run_cmd_params.auto_step_divisor = 4;
+        self->params.run_cmd_params.focus_device_speed = 500;
+        self->params.run_cmd_params.suggest_sweep = true;
+        self->init_focus = FALSE;
+    }
+    else
+    {
+        self->params.is_run_cmd = false;
+    }
+
+    self->params.device_focus_val = prop.value.i.value;
+
+    bool ret = autofocus_run(self->focus,
+                             std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(),
+                             i,
+                             self->params,
+                             p,
+                             pixel_dim,
+                             new_focus_value);
+
+
+    if (autofocus_is_running(self->focus))
+    {
+        GST_INFO("Setting focus %d %d %d", new_focus_value, self->params.run_cmd_params.focus_range_min, self->params.run_cmd_params.focus_range_max);
 
         focus_prop->set_value((int64_t)new_focus_value);
         self->cur_focus = new_focus_value;
+    }
+    else
+    {
+        GST_INFO("focus said no %d", new_focus_value);
+        self->focus_active = FALSE;
+        self->init_focus = TRUE;
     }
 
     gst_buffer_unmap(buf, &info);
@@ -973,31 +915,6 @@ gboolean find_image_values (GstTcamAutoFocus* self)
 }
 
 
-static GstFlowReturn gst_tcamautofocus_analyze_buffer (GstTcamAutoFocus* self, GstBuffer* buf)
-{
-    // validity checks
-    GstMapInfo info;
-
-    gst_buffer_map(buf, &info, GST_MAP_READ);
-
-    guint* data = (guint*)info.data;
-    guint length = info.size;
-
-    if (data == NULL || length == 0)
-    {
-        GST_ERROR("Buffer is not valid! Ignoring buffer and trying to continue...");
-        return GST_FLOW_OK;
-    }
-
-    GST_DEBUG("transform_tcam");
-    transform_tcam(self, buf);
-
-    gst_buffer_unmap(buf, &info);
-
-    return GST_FLOW_OK;
-}
-
-
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (trans);
@@ -1010,23 +927,13 @@ static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans, Gs
         }
     }
 
-    if (autofocus_is_running(self->focus))
+    if (self->focus_active) // entered if set to true with gst-launch
     {
-        if (self->camera_src == NULL)
-        {
-            self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
-        }
+        GST_INFO("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         find_image_values(self);
 
-        return gst_tcamautofocus_analyze_buffer(self, buf);
-    }
-    else if (self->focus_active) // entered if set to true with gst-launch
-    {
-        find_image_values(self);
-        self->focus_active = FALSE;
-        focus_run(self);
-
-        return gst_tcamautofocus_analyze_buffer(self, buf);
+        transform_tcam (self, buf);
+        return GST_FLOW_OK;
     }
 
     autofocus_end(self->focus);

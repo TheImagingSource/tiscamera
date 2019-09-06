@@ -296,6 +296,14 @@ inline int get_bits_per_pixel (uint32_t fcc)
         tmp.pitch = -dsc.pitch;
         return tmp;
     }
+
+
+template<class TOut>
+constexpr TOut* get_line_start( const img::img_descriptor& dsc, int y ) noexcept
+{
+    return reinterpret_cast<TOut*>(dsc.pData + y * dsc.pitch);
+}
+
 }
 
 #endif // TCAM_IMAGE_TRANSFORM_BASE_H

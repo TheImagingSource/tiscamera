@@ -21,61 +21,41 @@
 
 AutoFocus* autofocus_create (void)
 {
-    return reinterpret_cast<AutoFocus*>(new img::auto_focus());
+    return reinterpret_cast<AutoFocus*>(new auto_alg::auto_focus());
 }
 
 
 void autofocus_destroy (AutoFocus* focus)
 {
-    delete reinterpret_cast<img::auto_focus*>(focus);
+    delete reinterpret_cast<auto_alg::auto_focus*>(focus);
 }
 
 
-void autofocus_run (AutoFocus* focus,
-                    int focus_val,
-                    int min,
-                    int max,
-                    RECT roi,
-                    int speed,
-                    int auto_step_divisor,
-                    bool suggest_sweep)
+bool autofocus_run (AutoFocus* focus,
+                    uint64_t time_point,
+                    const img::img_descriptor &img,
+                    const auto_alg::auto_focus_params &state,
+                    img::point offsets,
+                    img::dim pixel_dim,
+                    int &new_focus_vale)
 {
-    reinterpret_cast<img::auto_focus*>(focus)->run(focus_val,
-                                                   min,
-                                                   max,
-                                                   roi,
-                                                   speed,
-                                                   auto_step_divisor,
-                                                   suggest_sweep);
-}
+    return reinterpret_cast<auto_alg::auto_focus*>(focus)->auto_alg_run(time_point,
+                                                                        img,
+                                                                        state,
+                                                                        offsets,
+                                                                        pixel_dim,
+                                                                        new_focus_vale);
 
-
-bool autofocus_analyze_frame (AutoFocus* focus,
-                              img::img_descriptor img,
-                              POINT offsets,
-                              int binning_value,
-                              int* new_focus_value)
-{
-    return reinterpret_cast<img::auto_focus*>(focus)->analyze_frame(img,
-                                                                    offsets,
-                                                                    binning_value,
-                                                                    *new_focus_value);
 }
 
 
 bool autofocus_is_running (AutoFocus* focus)
 {
-    return reinterpret_cast<img::auto_focus*>(focus)->is_running();
+    return reinterpret_cast<auto_alg::auto_focus*>(focus)->is_running();
 }
 
 
 void autofocus_end (AutoFocus* focus)
 {
-    reinterpret_cast<img::auto_focus*>(focus)->end();
-}
-
-
-void autofocus_update_focus (AutoFocus* focus, int new_focus_value)
-{
-    reinterpret_cast<img::auto_focus*>(focus)->update_focus(new_focus_value);
+    reinterpret_cast<auto_alg::auto_focus*>(focus)->reset();
 }

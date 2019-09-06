@@ -17,71 +17,78 @@
 #ifndef AUTO_FOCUS_H_INC_
 #define AUTO_FOCUS_H_INC_
 
+#pragma once
+
+// #include <dutils_img_pipe/auto_alg_params.h>
+
 #include "image_transform_base.h"
-#include <pthread.h>
-#include <ctime>
+#include "auto_alg_params.h"
 
-
-namespace {
+namespace
+{
 struct RegionInfo;
 }
 
-namespace img
+namespace auto_alg
 {
+
 class auto_focus
 {
 public:
-    auto_focus();
+    auto_focus ();
 
-    /*
-     * Beware that this function currently only works for bayer-8 images and RGB32
-     * @return true when a new focus value was evaluated and should be submitted to the focus control
-     * @param new_focus_vale When true was returned, this contains the new focus value to set
-     */
-    bool analyze_frame ( const img_descriptor& img, POINT offsets, int binning_value, int& new_focus_vale );
+    bool auto_alg_run (uint64_t time_point,
+                       const img::img_descriptor& img,
+                       const auto_alg::auto_focus_params& state,
+                       img::point offsets,
+                       img::dim pixel_dim,
+                       int& new_focus_vale);
 
-    void run ( int focus_val, int min, int max, const RECT& roi, int speed, int auto_step_divisor, bool suggest_sweep );
-    void end ();
     bool is_running () const;
 
-    /*
-     * This must be called each time when the focus value was changed for the device.
-     */
-    void update_focus ( int focus_val );
+    void reset () { end(); }
+
 private:
-    // this is the public interface mutex, and should never be taken by a function which is called by analyze_frame_
-    // only setup/analyze_frame/run/end/update_focus/set_user_roi may take this
-    // if any other function indirectly takes this lock, we run into an deadlock
-    pthread_mutex_t param_mtx_;
+    /*
+     * Beware that this function currently only works for bayer-8 images and RGB32
+     *	@return	true when a new focus value was evaluated and should be submitted to the focus control
+     *	@param new_focus_vale	When true was returned, this contains the new focus value to set
+     */
+    bool	analyze_frame (uint64_t now, const img::img_descriptor& img, int& new_focus_vale);
 
+    void	run (int focus_val,
+                 int min, int max,
+                 const img::rect& roi,
+                 int speed, int auto_step_divisor,
+                 bool suggest_sweep);
+    void	end ();
+    bool	analyze_frame_ (const img::img_descriptor& img, int& new_focus_vale);
 
-    bool analyze_frame_ ( const img_descriptor& img, int& new_focus_vale );
+    void	restart_roi (const RegionInfo& info);
+    void	find_region (const img::img_descriptor& image, img::rect roi, RegionInfo& region);
 
-    void set_focus ( int newval );
+    int		calc_next_focus ();
 
-    void restart_roi ( const RegionInfo& info );
-    void find_region ( const img_descriptor& image, RECT roi, RegionInfo& region );
+    int		get_sharpness (const img::img_descriptor& img);
 
-    int calc_next_focus ();
+    bool	check_wait_condition (uint64_t now);
+    void	arm_focus_timer (uint64_t now, int diff);
 
-    unsigned int get_sharpness ( const img_descriptor& img );
-
-    bool check_wait_condition ();
-    void arm_focus_timer ( int diff );
+    void	update_focus (int focus_val);
 
     struct data_holder
     {
-        unsigned int x, y, width, height;
+        int	x, y, width, height;
 
-        unsigned int stepCount;
-        int focus_val;
+        int	    stepCount;
+        int		focus_val;
 
-        int left, right;
+        int		left, right;
 
-        int prev_sharpness;
-        int prev_focus;
+        int		prev_sharpness;
+        int		prev_focus;
 
-        int sweep_step;
+        int		sweep_step;
 
         enum
         {
@@ -93,30 +100,28 @@ private:
         } state;
     } data;
 
-    RECT user_roi_;
+    img::rect			user_roi_;
 
-    unsigned int init_width_, init_height_, init_pitch_;
-    unsigned int init_binning_;
-    POINT init_offset_;
+    int	            init_width_, init_height_;
+    int             init_pitch_;
+    img::dim       init_pixel_dim_;
+    img::point		init_offset_;
 
-    volatile long focus_applied_;
-
-    int focus_min_;
-    int focus_max_;
+    int				focus_min_;
+    int				focus_max_;
     // time in ms for moving between min and max
-    int max_time_to_wait_for_focus_change_;
+    int				max_time_to_wait_for_focus_change_;
     // minimum speed for moving between any focus values
-    int min_time_to_wait_for_focus_change_;
+    int				min_time_to_wait_for_focus_change_;
 
-    int auto_step_divisor_;
+    int				auto_step_divisor_;
 
-    bool sweep_suggested_;
+    bool			sweep_suggested_;
 
-    struct timespec img_wait_endtime;
-    int img_wait_cnt;
+    uint64_t        img_wait_endtime_;  // in us
+    int				img_wait_cnt_;
+};
 
-}; // class auto_focus
-
-} // namespace img
+} /* namespace auto_alg */
 
 #endif // AUTO_FOCUS_H_INC_

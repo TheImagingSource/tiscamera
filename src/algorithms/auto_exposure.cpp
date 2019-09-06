@@ -132,10 +132,10 @@ static int calc_iris (int dist,
 
 algorithms::gain_exposure_iris_values
 algorithms::calc_auto_gain_exposure_iris (int brightness,
-                                        int reference_value,
-                                        const algorithms::property_cont_gain& gain_desc,
-                                        const algorithms::property_cont_exposure& exposure_desc,
-                                        const algorithms::property_cont& iris_desc)
+                                          int reference_value,
+                                          const algorithms::property_cont_gain& gain_desc,
+                                          const algorithms::property_cont_exposure& exposure_desc,
+                                          const algorithms::property_cont& iris_desc)
 {
     algorithms::gain_exposure_iris_values rval = {};
     if (exposure_desc.do_auto)

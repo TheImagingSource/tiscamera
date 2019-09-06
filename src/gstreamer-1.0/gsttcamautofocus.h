@@ -67,6 +67,8 @@ typedef struct GstTcamAutoFocus
 
     ROI* roi;
 
+    gboolean init_focus;
+    auto_alg::auto_focus_params params;
 } GstTcamAutoFocus;
 
 typedef struct GstTcamAutoFocusClass

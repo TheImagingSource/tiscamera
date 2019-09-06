@@ -19,8 +19,7 @@
 
 #include <stdbool.h>
 #include "image_transform_base.h"
-
-//#include "tcam_c.h"
+#include "auto_alg_params.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -37,36 +36,16 @@ extern "C"
     /* @brief Destroy AutoFocus instance */
     void autofocus_destroy (AutoFocus* focus);
 
-    /* @brief Define parameter for next auto focus run */
-    /* @param focus - AutoFocus instance to use */
-    /* @param focus_val - current focus value */
-    /* @param min - allowed minimum focus value */
-    /* @param max - allowed maximum focus value */
-    /* @param roi - region of interest that shall be focused instead of whole image */
-    /* @param speed - */
-    /* @param auto_step_divisor - */
-    /* @param suggest_sweep - */
-    void autofocus_run (AutoFocus* focus,
-                        int focus_val,
-                        int min,
-                        int max,
-                        RECT roi,
-                        int speed,
-                        int auto_step_divisor,
-                        bool suggest_sweep);
-
-    /* @name autofocus_analyze_frame */
-    /* @param focus - AutoFocus instance to use */
-    /* @param img - image description that shall be analyzed */
-    /* @param offsets */
-    /* @param binning_value */
-    /* @param new_focus_value - will be set to new focus value */
-    /* @return true if new_focus_value has been set */
-    bool autofocus_analyze_frame (AutoFocus* focus,
-                                  img::img_descriptor img,
-                                  POINT offsets,
-                                  int binning_value,
-                                  int* new_focus_value);
+    /* @param pixel_dim dimension of a single pixel
+                        usually 1x1, binning may change that
+     */
+    bool autofocus_run (AutoFocus* focus,
+                        uint64_t time_point,
+                        const img::img_descriptor &img,
+                        const auto_alg::auto_focus_params &state,
+                        img::point offsets,
+                        img::dim pixel_dim,
+                        int &new_focus_vale);
 
     /* @name autofocus_is_running */
     /* @param focus - AutoFocus that shall be checked */
@@ -76,10 +55,6 @@ extern "C"
     /* @name autofocus_end */
     /* @brief Force stop */
     void autofocus_end (AutoFocus* focus);
-
-    /* @name autofocus_update_focus */
-    /* @brief Tell te auto focus process the new focus value */
-    void autofocus_update_focus (AutoFocus* focus, int new_focus_value);
 
 #ifdef __cplusplus
 }
