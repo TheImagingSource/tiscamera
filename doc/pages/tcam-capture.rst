@@ -144,6 +144,12 @@ Use Dutils:
   The package tiscamera-dutils will have to be installed for this to be enabled.
   Default: True
 
+Apply cached properties:
+  When closing a device tcam-capture saves a snapshot of all properties and their current value.
+  These will be written into the device when it is opened the next time.
+  The files can be found in the tcam-capture cache directory.
+  When disabled the device will be opened 'as is' and tcam-capture will not touch any properties.
+  
 =======
 Caching
 =======
