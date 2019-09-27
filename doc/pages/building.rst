@@ -65,7 +65,30 @@ cmake options
        Set this to `Debug` to enable debug symbols.
      - Release
 
+   * - TCAM_INTERNAL_ARAVIS
+     - To reduce required steps for customers it was decided to ship an internal aravis version.
+       This version will be downloaded, compiled and statically linked during the build process (libtcam-aravis.so).
+       The current minimal version of aravis that is supported is '0.6'.
 
+       When switching to an external version the following steps are recommended:
+       
+       - deleting the existing build directory
+         CMake may retain build artifacts that may prevent a clean compilation.
+       - Configuration of header/library search paths.
+         Tiscamera tries to automatically determine these values through pkg-config.
+         To manually configure the aravis installation define the variables 'aravis_INCLUDE_DIR' and 'aravis_LIBRARIES'.
+         The only cmake file that uses aravis is 'src/aravis/CMakeLists.txt'
+         
+     - ON
+
+   * - TCAM_VERSION
+     - TCAM release version
+     - Current version string
+
+   * - TCAM_GI_API_VERSION
+     - Version the gobject introspection tiscamera has.
+     - 0.1 
+       
 Installation Directories
 ========================
 
