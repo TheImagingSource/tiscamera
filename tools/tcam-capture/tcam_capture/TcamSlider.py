@@ -44,7 +44,7 @@ def log_(value):
     Wrapper around math.log
     """
 
-    if value == 0:
+    if value <= 0:
         return 0
     else:
         return math.log(value)
