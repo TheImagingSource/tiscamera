@@ -21,7 +21,8 @@
 #include <stdarg.h>             /* va_args */
 #include <string.h>             /* memcpy */
 #include <time.h>               /* time_t */
-
+#include <vector>
+#include <chrono>
 
 static const char* loglevel2string (const enum TCAM_LOG_LEVEL level)
 {
@@ -140,19 +141,29 @@ void Logger::log (const char* module __attribute__((unused)),
     va_end(tmp_args);
 
     vsnprintf(msg, size, message, args);
-    // use clock_t and not time_t
-    // we want the time the program uses based on the
-    // cpu and not on a human readable clock.
-    clock_t t;
-    t = clock();
+
+    // get current time
+    auto now = std::chrono::system_clock::now();
+
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_c);
+
+    const size_t t_size = 80;
+    std::vector<char> t0(t_size);
+    std::vector<char> t(t_size);
+
+    strftime(t0.data(), t_size -1, "%Y.%m.%dT%H:%M:%S:%%03u", &now_tm);
+    snprintf(t.data(), t_size -1, t0.data(),  ms);
 
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 
     size_t buffer_size = snprintf(nullptr,
                                   0,
-                                  "%-10ld <%s> %s:%d: %s\n",
+                                  "%-30s <%s> %s:%d: %s\n",
                                   /* ctime(&timer), */
-                                  t,
+                                  t.data(),
                                   loglevel2string(_level),
                                   function,
                                   line,
@@ -164,9 +175,9 @@ void Logger::log (const char* module __attribute__((unused)),
     char *buffer = new char[buffer_size];
 
     sprintf(buffer,
-            "%-10ld <%s> %s:%d: %s\n",
+            "%-30s <%s> %s:%d: %s\n",
             /* ctime(&timer), */
-            t,
+            t.data(),
             loglevel2string(_level),
             function,
             line,
