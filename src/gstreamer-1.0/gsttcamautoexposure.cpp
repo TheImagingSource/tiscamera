@@ -1392,15 +1392,23 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
     self->auto_iris = TRUE;
-    self->gain_is_double = FALSE;
+
+    self->exposure = {};
     self->exposure_min = 0;
     self->exposure_max = G_MAXINT;
+
+    self->gain = {};
     self->gain_min = 0.0;
     self->gain_max = G_MAXDOUBLE;
+    self->gain_is_double = FALSE;
+
     self->frame_counter = 0;
+
     self->has_iris = FALSE;
+    self->iris = {};
     self->iris_min = 0;
-    self->iris_max = 0;
+    self->iris_max = G_MAXINT;
+
     self->camera_src = NULL;
     self->module_is_disabled = FALSE;
 
@@ -1488,16 +1496,16 @@ void gst_tcamautoexposure_set_property (GObject* object,
         case PROP_GAIN_MIN:
         {
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
-            if (tcamautoexposure->gain_max && (g_value_get_double(value) > tcamautoexposure->gain_max))
+            if (g_value_get_double(value) > tcamautoexposure->gain_max)
             {
                 GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
             }
 
-            if (tcamautoexposure->default_gain_values.min && (g_value_get_double(value) > tcamautoexposure->default_gain_values.min))
+            if (g_value_get_double(value) > tcamautoexposure->gain.min)
             {
                 GST_WARNING("New user value for gain min is greater than device gain min.");
-                tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
+                tcamautoexposure->gain_min = tcamautoexposure->gain.min;
                 break;
             }
 
@@ -1511,7 +1519,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
 
             if (tcamautoexposure->gain_min == 0.0)
             {
-                tcamautoexposure->gain_min = tcamautoexposure->default_gain_values.min;
+                tcamautoexposure->gain_min = tcamautoexposure->gain.min;
             }
             break;
         }
@@ -1524,7 +1532,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
-            if (tcamautoexposure->gain.max && (g_value_get_double(value) > tcamautoexposure->gain.max))
+            if ((g_value_get_double(value) > tcamautoexposure->gain.max))
             {
                 GST_WARNING("New user value for gain max is bigger that device gain max. Ignoring request.");
                 tcamautoexposure->gain_max = tcamautoexposure->default_gain_values.max;
@@ -1575,17 +1583,18 @@ void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
+            tcamautoexposure->iris_max = g_value_get_int(value);
+            if (tcamautoexposure->iris_max == 0.0 || tcamautoexposure->iris_max == G_MAXINT)
+            {
+                tcamautoexposure->iris_max = tcamautoexposure->iris.max;
+            }
+
             if (tcamautoexposure->iris.value > tcamautoexposure->iris_max)
             {
                 tcamautoexposure->iris.value = tcamautoexposure->iris_max;
                 set_iris(tcamautoexposure, tcamautoexposure->iris.value);
             }
 
-            tcamautoexposure->iris_max = g_value_get_int(value);
-            if (tcamautoexposure->iris_max == 0.0)
-            {
-                tcamautoexposure->iris_max = tcamautoexposure->iris.max;
-            }
             break;
         }
         case PROP_BRIGHTNESS_REFERENCE:
@@ -1942,7 +1951,8 @@ void retrieve_current_values (GstTcamautoexposure* self)
         else
         {
             GST_DEBUG("Current gain is %f", p.value.d.value);
-            self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
+            if (p.value.d.value != 0)
+                self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
         }
     }
 
@@ -2075,17 +2085,17 @@ static void new_exposure (GstTcamautoexposure* self, unsigned int brightness)
                                                         exposure,
                                                         iris);
 
-    if (self->auto_exposure)
+    if (self->auto_exposure && self->exposure.value != res.exposure)
     {
         set_exposure(self, res.exposure);
     }
 
-    if (self->auto_gain)
+    if (self->auto_gain && self->gain.value != res.gain)
     {
         set_gain(self, res.gain);
     }
 
-    if (self->auto_iris)
+    if (self->auto_iris && self->iris.value != res.iris)
     {
         set_iris(self, res.iris);
     }
