@@ -637,9 +637,11 @@ void gst_tcamautofocus_set_property (GObject* object,
         }
         case PROP_WIDTH:
         {
+            GST_INFO("New value for roi width: %d", g_value_get_int(value));
             self->roi_width = g_value_get_int(value);
 
-            if (self->roi_width > (self->image_width - self->roi_left))
+            if (self->image_width != 0 &&
+                self->roi_width > (self->image_width - self->roi_left))
             {
                 GST_INFO("Requested width was larger than resolution and focus region allow. Setting possible maximum.");
                 self->roi_width = (self->image_width - self->roi_left);
