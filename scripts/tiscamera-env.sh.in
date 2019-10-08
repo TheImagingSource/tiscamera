@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+
+# This script sets environment variables and aliases to
+# allow the usage of a custom tiscamera installation
+
+
+if [ -z "${PKG_CONFIG_PATH}" ]; then
+    export PKG_CONFIG_PATH="@TCAM_INSTALL_PKGCONFIG@:${PKG_CONFIG_PATH}"
+else
+    export PKG_CONFIG_PATH="@TCAM_INSTALL_PKGCONFIG@"
+fi
+
+if [ -z "${GST_PLUGIN_PATH_1_0}" ]; then
+    export GST_PLUGIN_PATH_1_0="@TCAM_INSTALL_GST_1_0@:${GST_PLUGIN_PATH_1_0}"
+else
+    export GST_PLUGIN_PATH_1_0="@TCAM_INSTALL_GST_1_0@"
+fi
+
+if [ -z "${LD_RUN_PATH}" ]; then
+    export LD_RUN_PATH="@TCAM_INSTALL_LIB@:${LD_LIBRARY_PATH}"
+else
+    export LD_RUN_PATH="@TCAM_INSTALL_LIB@"
+fi
+
+if [ -z "${GI_TYPELIB_PATH}" ]; then
+    export GI_TYPELIB_PATH="@TCAM_INSTALL_TYPELIB@:${GI_TYPELIB_PATH}"
+else
+    export GI_TYPELIB_PATH="@TCAM_INSTALL_TYPELIB@:"
+fi
+
+if [ -z "${LD_LIBRARY_PATH}" ]; then
+    export LD_LIBRARY_PATH="@TCAM_INSTALL_LIB@:@TCAM_INSTALL_LIB@/tcam-0:${LD_RUN_PATH}"
+else
+    export LD_LIBRARY_PATH="@TCAM_INSTALL_LIB@:@TCAM_INSTALL_LIB@/tcam-0"
+fi
+
+if [ -z "${LIBRARY_PATH}" ]; then
+    export LIBRARY_PATH="@TCAM_INSTALL_LIB@:@TCAM_INSTALL_LIB@/tcam-0:${LD_RUN_PATH}"
+else
+    export LIBRARY_PATH="@TCAM_INSTALL_LIB@:@TCAM_INSTALL_LIB@/tcam-0"
+fi
+
+if [ -z "${PYTHONPATH}" ]; then
+    export PYTHONPATH="@TCAM_INSTALL_PYTHON3_MODULES@:${PYTHONPATH}"
+else
+    export PYTHONPATH="@TCAM_INSTALL_PYTHON3_MODULES@"
+fi
+
+export PATH="@TCAM_INSTALL_BIN@:${PATH}"

@@ -42,6 +42,24 @@ To source it, call the following in the build directory
 
 Now additional commands like :ref:`tcam_ctrl` or :ref:`tcam_capture` should be available.
 
+================
+tiscamera-env.sh
+================
+
+tiscamera-env.sh is a Bourne shell script that can be sourced to integrate the installation directories
+of the installation into the current environment.
+
+It will append directories to the PATH and library search path for the dynamic linker
+and GStreamer, thus enabling usage of tiscamera resources without installation.
+
+To source it, call the following in the build directory
+
+.. code-block:: sh
+
+. ./tiscamera-env.sh
+
+The script is not installed. It can be found in the build directory under `./tiscamera-env.sh`
+
 .. _create_release:
 
 ==============
