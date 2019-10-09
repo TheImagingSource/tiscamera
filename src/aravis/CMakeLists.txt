@@ -67,6 +67,13 @@ else (TCAM_INTERNAL_ARAVIS)
 
 endif (TCAM_INTERNAL_ARAVIS)
 
+if (TCAM_ARAVIS_USB_VISION)
+
+  find_package(libusb-1.0 REQUIRED QUIET)
+  target_link_libraries(tcam-aravis "${LIBUSB_1_LIBRARIES}")
+
+endif (TCAM_ARAVIS_USB_VISION)
+
 
 set_property(TARGET tcam-aravis PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam-aravis PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})

@@ -83,6 +83,15 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
     if (min == 0.0 && max == 0.0)
     {
+        // this means TestPixelFormat, TestWidth, TestHeight are not available
+        // could be an UsbVision camera
+
+        min = arv_device_get_float_feature_value(dev, "MinFPS");
+        max = arv_device_get_float_feature_value(dev, "MaxFPS");
+    }
+
+    if (min == 0.0 && max == 0.0)
+    {
         // this means either the camera is broken or we have a FPS enum
         // hope for the second and try it
         guint n_fps_values = 0;
@@ -138,30 +147,10 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
-    std::string env_packet_size = tcam::get_environment_variable("TCAM_GIGE_PACKET_SIZE", "0");
-
-    int eps = 0;
-
-    try
+    if (device.get_name().find("U") == std::string::npos)
     {
-        eps = std::stoi(env_packet_size);
+        auto_set_packet_size();
     }
-    catch (...)
-    {
-        tcam_warning("Unable to interpret the value for TCAM_GIGE_PACKET_SIZE. Falling back to default values.");
-    }
-
-    if (eps == 0)
-    {
-        guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera);
-        tcam_info("Automatically set packet size to %u bytes", packet_size);
-    }
-    else
-    {
-        arv_camera_gv_set_packet_size(arv_camera, eps);
-        tcam_info("Set packet size accordning to environment to: %d", eps);
-    }
-
 
     handler = std::make_shared<AravisPropertyHandler>(this);
     format_handler = std::make_shared<AravisFormatHandler>(this);
@@ -655,6 +644,34 @@ bool AravisDevice::stop_stream ()
     }
 
     return true;
+}
+
+
+void AravisDevice::auto_set_packet_size ()
+{
+    std::string env_packet_size = tcam::get_environment_variable("TCAM_GIGE_PACKET_SIZE", "0");
+
+    int eps = 0;
+
+    try
+    {
+        eps = std::stoi(env_packet_size);
+    }
+    catch (...)
+    {
+        tcam_warning("Unable to interpret the value for TCAM_GIGE_PACKET_SIZE. Falling back to default values.");
+    }
+
+    if (eps == 0)
+    {
+        guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera);
+        tcam_info("Automatically set packet size to %u bytes", packet_size);
+    }
+    else
+    {
+        arv_camera_gv_set_packet_size(arv_camera, eps);
+        tcam_info("Set packet size accordning to environment to: %d", eps);
+    }
 }
 
 

@@ -100,6 +100,10 @@ public:
 
 private:
 
+    // helper function to set packet size
+    // depending on env and auto negotiation
+    void auto_set_packet_size ();
+
     static void callback(ArvStream* stream, void* user_data);
 
     static void device_lost (ArvGvDevice* device, void* user_data);
