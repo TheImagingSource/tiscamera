@@ -66,17 +66,19 @@ option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
 option(BUILD_TESTS    "Build tests."                         OFF)
 
 
-set(TCAM_INTERNAL_ARAVIS ON CACHE BOOL "Use internal aravis dependency instead of system libraries")
+option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
+option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
 
+# auto disable v4l2 when activating aravis Usb3Vision
+if (TCAM_ARAVIS_USB_VISION)
+
+  set(BUILD_ARAVIS ON)
+  set(BUILD_V4L2 OFF)
+
+endif (TCAM_ARAVIS_USB_VISION)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
-
-
-if (BUILD_V4L2)
-  add_definitions(-DHAVE_USB)
-  set(HAVE_USB 1)
-endif (BUILD_V4L2)
 
 set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
 set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
