@@ -453,7 +453,7 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
 
     if (id == 0)
     {
-        GST_WARNING("Unknown id");
+        // GST_WARNING("Unknown id for name '%s'", name);
         return FALSE;
     }
 
@@ -489,17 +489,21 @@ static gboolean gst_tcamautofocus_get_device_info (TcamProp* self __attribute__(
 }
 
 
+static const char* CAPS_STR = "video/x-raw,format={GRAY8,GRAY16_LE};"
+    "video/x-bayer,format={rggb,bggr,grbg,gbrg}";
+
+
 static GstStaticPadTemplate gst_tcamautofocus_sink_template =
-    GST_STATIC_PAD_TEMPLATE ("sink",
-                             GST_PAD_SINK,
-                             GST_PAD_ALWAYS,
-                             GST_STATIC_CAPS ("ANY"));
+    GST_STATIC_PAD_TEMPLATE("sink",
+                            GST_PAD_SINK,
+                            GST_PAD_ALWAYS,
+                            GST_STATIC_CAPS(CAPS_STR));
 
 static GstStaticPadTemplate gst_tcamautofocus_src_template =
-    GST_STATIC_PAD_TEMPLATE ("src",
-                             GST_PAD_SRC,
-                             GST_PAD_ALWAYS,
-                             GST_STATIC_CAPS ("ANY"));
+    GST_STATIC_PAD_TEMPLATE("src",
+                            GST_PAD_SRC,
+                            GST_PAD_ALWAYS,
+                            GST_STATIC_CAPS(CAPS_STR));
 
 
 static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
@@ -573,7 +577,7 @@ static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
     self->focus = autofocus_create();
     self->focus_active = FALSE;
     self->cur_focus = 0;
-    self->roi_left = 0;
+    self->roi_top = 0;
     self->roi_left = 0;
     self->roi_width = 0;
     self->roi_height = 0;
@@ -654,7 +658,8 @@ void gst_tcamautofocus_set_property (GObject* object,
         {
             self->roi_height = g_value_get_int(value);
 
-            if (self->roi_height > (self->image_height - self->roi_top))
+            if (self->image_height != 0 &&
+                self->roi_height > (self->image_height - self->roi_top))
             {
                 GST_INFO("Requested height was larger than resolution and focus region allow. Setting possible maximum.");
                 self->roi_height = (self->image_height - self->roi_top);
@@ -812,22 +817,18 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     gst_buffer_map(buf, &info, GST_MAP_READ);
 
     tcam_image_buffer image;
-    gst_buffer_to_tcam_image_buffer(buf, &image);
+    gst_buffer_to_tcam_image_buffer(buf, nullptr, &image);
 
-    tcam_image_buffer roi_buffer = {};
+    image.format = self->fmt;
+    image.pitch = calc_pitch(image.format.fourcc,
+                             image.format.width);
 
-    if (!roi_extract(self->roi, &image, &roi_buffer))
-    {
-        GST_ERROR("Unable to extract ROI");
-        return;
-    }
-
-    img::img_descriptor i = img::to_img_desc(roi_buffer.pData,
-                                             roi_buffer.format.fourcc,
-                                             roi_buffer.format.width,
-                                             roi_buffer.format.height,
-                                             roi_buffer.pitch,
-                                             roi_buffer.size);
+    img::img_descriptor i = img::to_img_desc(image.pData,
+                                             image.format.fourcc,
+                                             image.format.width,
+                                             image.format.height,
+                                             image.pitch,
+                                             image.length);
 
     int new_focus_value = prop.value.i.value;
     img::point p = {0, 0};
@@ -844,7 +845,13 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         self->params.is_run_cmd = true;
         self->params.is_end_cmd = false;
 
-        self->params.run_cmd_params.roi = {0,0,0,0};
+        self->params.run_cmd_params.roi = {
+            self->roi_top, // top
+            self->roi_left, // left
+            self->roi_left + self->roi_width, // right
+            self->roi_top + self->roi_height  // bottom
+        };
+
         self->params.run_cmd_params.focus_range_min = prop.value.i.min;
         self->params.run_cmd_params.focus_range_max = prop.value.i.max;
         self->params.run_cmd_params.auto_step_divisor = 4;
@@ -870,10 +877,13 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 
     if (autofocus_is_running(self->focus))
     {
-        GST_DEBUG("Setting focus to %d", new_focus_value);
+        if (self->cur_focus != new_focus_value)
+        {
+            GST_INFO("Setting focus to %d", new_focus_value);
 
-        focus_prop->set_value((int64_t)new_focus_value);
-        self->cur_focus = new_focus_value;
+            focus_prop->set_value((int64_t)new_focus_value);
+            self->cur_focus = new_focus_value;
+        }
     }
     else
     {
@@ -892,6 +902,8 @@ gboolean find_image_values (GstTcamAutoFocus* self)
     GstCaps* caps = gst_pad_get_current_caps(pad);
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
+    gst_caps_to_tcam_video_format(caps, &self->fmt);
+
     gint tmp_w, tmp_h;
     g_return_val_if_fail (gst_structure_get_int (structure, "width", &tmp_w), FALSE);
     g_return_val_if_fail (gst_structure_get_int (structure, "height", &tmp_h), FALSE);
@@ -908,7 +920,8 @@ gboolean find_image_values (GstTcamAutoFocus* self)
         self->roi_height = self->image_height;
     }
 
-    roi_set_image_size(self->roi, {self->image_width, self->image_height});
+    roi_set_image_size(self->roi, {(unsigned int)self->image_width,
+                                   (unsigned int)self->image_height});
 
     gint tmp_n, tmp_d;
     gst_structure_get_fraction(structure, "framerate", &tmp_n, &tmp_d);

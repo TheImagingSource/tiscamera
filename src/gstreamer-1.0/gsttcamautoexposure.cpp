@@ -2011,7 +2011,7 @@ static image_buffer retrieve_image_region (GstTcamautoexposure* self, GstBuffer*
     tcam_image_buffer image = {};
 
 
-    gst_buffer_to_tcam_image_buffer(buf, &image);
+    gst_buffer_to_tcam_image_buffer(buf, nullptr, &image);
     image.format = self->active_format;
 
     tcam_image_buffer roi_buffer = {};

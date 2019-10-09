@@ -47,11 +47,8 @@ typedef struct GstTcamAutoFocus
     GstPad *sinkpad;
     GstPad *srcpad;
 
-    unsigned int image_width;
-    unsigned int image_height;
-
-    unsigned int roi_width;
-    unsigned int roi_height;
+    gint image_width;
+    gint image_height;
 
     unsigned int framerate_numerator;
     unsigned int framerate_denominator;
@@ -61,11 +58,16 @@ typedef struct GstTcamAutoFocus
     GstElement* camera_src;
     AutoFocus* focus;
 
-    guint cur_focus;
-    guint roi_left;
-    guint roi_top;
+    gint cur_focus;
+
+    gint roi_left;
+    gint roi_top;
+    gint roi_width;
+    gint roi_height;
 
     ROI* roi;
+
+    tcam_video_format fmt;
 
     gboolean init_focus;
     auto_alg::auto_focus_params params;

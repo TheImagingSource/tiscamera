@@ -23,6 +23,7 @@
 #include <algorithm> //std::find
 
 #include "tcamgststrings.h"
+#include "image_transform_base.h"
 
 #include "public_utils.h"
 
@@ -1407,6 +1408,7 @@ bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* for
 
 
 bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer,
+                                      GstCaps* caps,
                                       tcam_image_buffer* image)
 {
     if (!buffer || !image)
@@ -1422,9 +1424,23 @@ bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer,
 
     image->pData = info.data;
     image->length = info.size;
-    //gst_caps_to_tcam_video_format(info., image->format);
+
+
+    if (caps)
+    {
+        gst_caps_to_tcam_video_format(caps, &image->format);
+        image->pitch = img::calc_minimum_pitch(image->format.fourcc,
+                                               image->format.width);
+    }
 
     gst_buffer_unmap(buffer, &info);
 
     return true;
+}
+
+
+int calc_pitch (int fourcc, int width)
+{
+    return img::calc_minimum_pitch(fourcc,
+                                   width);
 }

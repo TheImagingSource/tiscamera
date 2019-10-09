@@ -152,7 +152,10 @@ bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFo
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);
 
-bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer, tcam_image_buffer* image);
+bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer, GstCaps* caps, tcam_image_buffer* image);
+
+
+int calc_pitch (int fourcc, int width);
 
 #ifdef __cplusplus
 }
