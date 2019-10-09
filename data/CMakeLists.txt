@@ -44,9 +44,16 @@ if (BUILD_V4L2)
 
   add_subdirectory(uvc-extensions)
 
+endif (BUILD_V4L2)
+
+if (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+  # udev rules are needed for device permissions
+  # libusb and usb3vision require access to change the used driver
+
   add_subdirectory(udev)
 
-endif (BUILD_V4L2)
+endif (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
 
