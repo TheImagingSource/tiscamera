@@ -238,25 +238,6 @@
 		    "size_bits": 1,
 		    "offset_bits": 0
         },
-
-        {
-            "id": "0x199e223",
-		    "name": "Auto Focus ROI Left",
-		    "selector": "0x2A",
-		    "uvc_type": "signed",
-		    "v4l2_type": "integer",
-		    "size_bits": 8,
-		    "offset_bits": 0
-        },
-        {
-            "id": "0x199e224",
-		    "name": "Auto Focus ROI Top",
-		    "selector": "0x2B",
-		    "uvc_type": "signed",
-		    "v4l2_type": "integer",
-		    "size_bits": 1,
-		    "offset_bits": 0
-        },
         {
             "id": "0x199e225",
 		    "name": "ATR Enable",
