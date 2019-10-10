@@ -22,19 +22,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   To skip this step, use `--no-update`
 - tcamautoexposure support for GRAY16_LE
 - Installation of examples folder in $PREFIX/share/theimagingsource/tiscamera
+- Firmware v3024 for dmk/dfk 22uc03 auto focus cameras
+- tiscamera-env.sh script to source installed tiscamera instances
+- cmake option TCAM_ARAVIS_USB_VISION
+  Allows usage of USB3Vision via aravis. gige-daemon has to be disabled.
+  v4l2 will automatically disabled.
+- uvc extension unit for 37U cameras.
+- property state system
+  tcamsrc and tcambin have the property 'state' containing a JSON string describing
+  the current property/value list.
 
 ### Changed
 
 - Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
 - tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
 - "Override Scanning Mode" category is now "Partial Scan"
+- "Reverse X" and "Reverse Y" category is now "Image"
 - Moved properties ReverseX and ReverseY to category 'Image'
 - GRAY8 is now preferred over GRAY16_LE in caps negotiation
 - tcamsrc num-buffers default is now -1. This is now identical to v4l2src.
 - Log output now only contains the filename and not the absolute path.
+- logging timestamp is now YYYY-mm-ddTHH:MM:SS:MS
 - tcam-capture: slider with a range larger than 5000 now have a logarithmic behavior
 - tcam-capture: Number Text Boxes do not update while user is editing
-- cmake option -DBUILD_TOOLS not defaults to ON
+- cmake option -DBUILD_TOOLS now defaults to ON
+- udev rules now only contain extension loading when required by BUILD_USB.
 
 ### Fixed
 
@@ -46,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issues with GigE camera bool handling
 - Issues with python examples
 - gsttcamautoexposure iris max is now handled correctly
+- cmake install directories could not be set by user
+- tcam-capture issue with jumping ROI overlay
 
 ### Removed
 
