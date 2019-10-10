@@ -72,8 +72,8 @@ option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OF
 # auto disable v4l2 when activating aravis Usb3Vision
 if (TCAM_ARAVIS_USB_VISION)
 
-  set(BUILD_ARAVIS ON)
-  set(BUILD_V4L2 OFF)
+  set(BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
+  set(BUILD_V4L2 OFF CACHE BOOL "Include support for USB cameras" FORCE)
 
 endif (TCAM_ARAVIS_USB_VISION)
 
