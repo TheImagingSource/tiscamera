@@ -155,7 +155,7 @@
 		    "uvc_type": "boolean",
 		    "v4l2_type": "boolean",
 		    "size_bits": 1,
-		    "offset_bits": 1
+		    "offset_bits": 2
         },
         {
             "id": "0x199e214",
