@@ -23,6 +23,18 @@
 #include "internal.h"
 #include "devicelibrary.h"
 
+#ifdef HAVE_ARAVIS
+#include "aravis/aravis_api.h"
+#endif
+
+#ifdef HAVE_V4L2
+#include "v4l2/v4l2_api.h"
+#endif
+
+#ifdef HAVE_LIBUSB
+#include "libusb/libusb_api.h"
+#endif
+
 std::weak_ptr<BackendLoader> BackendLoader::instance;
 
 
@@ -83,59 +95,22 @@ void tcam::BackendLoader::load_backends ()
 
     backends =
         {
-            {TCAM_DEVICE_TYPE_V4L2,    "libtcam-v4l2.so",   nullptr, nullptr, nullptr, nullptr},
-            {TCAM_DEVICE_TYPE_ARAVIS,  "libtcam-aravis.so", nullptr, nullptr, nullptr, nullptr},
-            {TCAM_DEVICE_TYPE_LIBUSB,  "libtcam-libusb.so", nullptr, nullptr, nullptr, nullptr},
+            #ifdef HAVE_V4L2
+            {TCAM_DEVICE_TYPE_V4L2, "libtcam-v4l2.so",   nullptr, get_v4l2_device_list, get_v4l2_device_list_size, open_v4l2_device},
+            #endif
+            #ifdef HAVE_ARAVIS
+            {TCAM_DEVICE_TYPE_ARAVIS, "libtcam-aravis.so", nullptr, get_aravis_device_list, get_aravis_device_list_size, open_aravis_device},
+            #endif
+            #ifdef HAVE_LIBUSB
+            {TCAM_DEVICE_TYPE_LIBUSB, "libtcam-libusb.so", nullptr, get_libusb_device_list, get_libusb_device_list_size, open_libusb_device},
+            #endif
             {TCAM_DEVICE_TYPE_UNKNOWN, "none",              nullptr, nullptr, nullptr, nullptr}
         };
-
-    for (auto& b : backends)
-    {
-        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN)
-        {
-            continue;
-        }
-
-        b.handle = LibraryHandle::open(b.name);
-
-        if (b.handle == nullptr)
-        {
-            tcam_log(TCAM_LOG_INFO, "Could not load backend %s", b.name.c_str());
-            continue;
-        }
-
-        auto i = b.handle->load<struct libinfo_v1*()>("get_library_functions_v1");
-
-        auto info = (i)();
-
-
-        auto f = std::function<tcam::DeviceInterface*(const struct tcam_device_info*)>(info->open_device);
-        b.open_device = f;
-
-
-        auto fls = std::function<size_t()>(info->get_device_list_size);
-        b.get_device_list_size = fls;
-
-        auto fl = std::function<size_t(struct tcam_device_info*, size_t)>(info->get_device_list);
-        b.get_device_list = fl;
-
-        delete info;
-    }
 }
 
 
 void tcam::BackendLoader::unload_backends ()
-{
-    for (auto& b : backends)
-    {
-        if (b.handle != nullptr)
-        {
-            b.handle = nullptr;
-            b.open_device = nullptr;
-            b.get_device_list = nullptr;
-        }
-    }
-}
+{}
 
 
 std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device (const tcam::DeviceInfo& device)
@@ -172,7 +147,7 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoad
 {
     std::vector<DeviceInfo> ret;
 
-    if (b.handle == nullptr)
+    if (b.get_device_list_size == nullptr)
     {
         return ret;
     }
@@ -215,7 +190,7 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends ()
     std::vector<DeviceInfo> ret;
     for (auto& b : backends)
     {
-        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN || b.handle == nullptr)
+        if (b.type == TCAM_DEVICE_TYPE_UNKNOWN)
         {
             continue;
         }

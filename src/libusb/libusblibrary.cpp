@@ -15,13 +15,8 @@
  */
 
 #include "devicelibrary.h"
-// #include "v4l2library.h"
 
-#include "AFU050Device.h"
-#include "AFU420Device.h"
-#include "UsbHandler.h"
-#include "libusb_utils.h"
-#include "logging.h"
+#include "libusb_api.h"
 
 #include <cstring>
 
@@ -29,26 +24,13 @@ VISIBILITY_INTERNAL
 
 DeviceInterface* open_device (const struct tcam_device_info* device)
 {
-    if (strcmp(device->additional_identifier, "804") == 0)
-    {
-        return new AFU420Device(DeviceInfo(*device));
-    }
-    else if (strcmp(device->additional_identifier, "8209") == 0)
-    {
-        return new AFU050Device(DeviceInfo(*device));
-    }
-    else
-    {
-        tcam_error("Unable to identify requested LibUsb Backend %x", device->additional_identifier);
-        return nullptr;
-    }
+    return open_libusb_device(device);
 }
 
 
 size_t get_device_list_size ()
 {
-    auto vec = get_libusb_device_list();
-    return vec.size();
+    return get_libusb_device_list_size();
 }
 
 
@@ -57,21 +39,7 @@ size_t get_device_list_size ()
  */
 size_t get_device_list (struct tcam_device_info* array, size_t array_size)
 {
-    auto vec = get_libusb_device_list();
-
-    if (vec.size() > array_size)
-    {
-        return 0;
-    }
-
-    for (const auto v : vec)
-    {
-        auto i = v.get_info();
-        memcpy(array, &i, sizeof(struct tcam_device_info));
-        array++;
-    }
-
-    return vec.size();
+    return get_libusb_device_list(array, array_size);
 }
 
 VISIBILITY_POP

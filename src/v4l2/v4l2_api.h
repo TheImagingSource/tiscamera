@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 The Imaging Source Europe GmbH
+ * Copyright 2019 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,13 @@
 
 #include "devicelibrary.h"
 
-#include "aravis_api.h"
-
 #include <cstring>
 
-DeviceInterface* open_device (const struct tcam_device_info* device)
-{
-    return open_aravis_device(device);
-}
+DeviceInterface* open_v4l2_device (const struct tcam_device_info* device);
 
-
-size_t get_device_list_size ()
-{
-    return get_aravis_device_list_size()
-}
-
+size_t get_v4l2_device_list_size ();
 
 /**
  * @return number of copied device_infos
  */
-size_t get_device_list (struct tcam_device_info* array, size_t array_size)
-{
-    return get_aravis_device_list(array, array_size);
-}
-
-
-struct libinfo_v1* get_library_functions_v1 ()
-{
-    struct libinfo_v1* info = new libinfo_v1();
-
-    info->open_device = &open_device;
-    info->get_device_list_size = &get_device_list_size;
-    info->get_device_list = &get_device_list;
-
-    return info;
-}
+size_t get_v4l2_device_list (struct tcam_device_info* array, size_t array_size);

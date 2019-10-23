@@ -83,16 +83,89 @@ set( srcs
 
 if (BUILD_V4L2)
   add_subdirectory(v4l2)
+
+  set(srcs
+    ${srcs}
+    v4l2/V4l2Device.cpp
+    v4l2/V4L2PropertyHandler.cpp
+    v4l2/v4l2_utils.cpp
+    # v4l2/v4l2library.cpp
+    v4l2/v4l2_api.cpp)
+
+  find_package(UDev REQUIRED QUIET)
+  include_directories(${UDEV_INCLUDE_DIR})
+  add_definitions(-DHAVE_UDEV)
+  add_definitions(-DHAVE_V4L2)
+
+  find_package(libusb-1.0 REQUIRED QUIET)
+  include_directories(${LIBUSB_1_INCLUDE_DIRS})
+
+
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
   add_subdirectory(tcam-network)
-  add_subdirectory(aravis)
+  # add_subdirectory(aravis)
+
+  add_definitions(-DHAVE_ARAVIS)
+  set(srcs
+    ${srcs}
+    aravis/AravisDevice.cpp
+    aravis/aravis_utils.cpp
+    aravis/aravis_api.cpp
+)
+
+find_package(GObject REQUIRED QUIET) # dependency
+find_package(GLIB2   REQUIRED QUIET) # dependency
+find_package(GIO     REQUIRED QUIET) # dependency
+
+if (TCAM_INTERNAL_ARAVIS)
+
+
+  include_directories("${GIO_INCLUDE_DIR}")
+  include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
+  include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+
+else (TCAM_INTERNAL_ARAVIS)
+
+  find_package(Aravis REQUIRED QUIET)
+  include_directories(${aravis_INCLUDE_DIR})
+
+endif(TCAM_INTERNAL_ARAVIS)
+
+include_directories(${GOBJECT_INCLUDE_DIR})
+include_directories(${GLIB2_INCLUDE_DIR})
+include_directories("${CMAKE_SOURCE_DIR}/tools/gige-daemon")
+
+
+
+
 endif (BUILD_ARAVIS)
 
 if (BUILD_LIBUSB)
-  add_subdirectory(libusb)
+  # add_subdirectory(libusb)
+  set(srcs
+    ${srcs}
+    libusb/AFU050Device.cpp
+    libusb/AFU050PropertyHandler.cpp
+    libusb/AFU420Device.cpp
+    libusb/AFU420DeviceProperties.cpp
+    libusb/AFU420PropertyHandler.cpp
+    libusb/libusb_utils.cpp
+    libusb/UsbSession.cpp
+    libusb/UsbHandler.cpp
+    libusb/LibusbDevice.cpp
+    libusb/libusb_api.cpp
+    # libusb/libusblibrary.cpp
+    )
+
+  add_definitions(-DHAVE_LIBUSB)
+  find_package(libusb-1.0 REQUIRED QUIET)
+  include_directories(${LIBUSB_1_INCLUDE_DIRS})
+
 endif (BUILD_LIBUSB)
+
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/dependencies/")
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
@@ -105,8 +178,57 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
 TARGET_LINK_LIBRARIES(tcam dl)
 
-# install(FILES ${PUBLIC_HEADER}
-#   DESTINATION "${TCAM_INSTALL_INCLUDE}")
+
+
+
+
+
+
+
+if (BUILD_V4L2)
+
+    target_link_libraries(tcam ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
+    target_link_libraries(tcam tcam-dfk73)
+
+endif (BUILD_V4L2)
+
+
+if (BUILD_ARAVIS)
+
+  if (TCAM_INTERNAL_ARAVIS)
+    add_dependencies(tcam aravis)
+    set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
+
+    find_package(LibXml2 REQUIRED QUIET)
+    find_package(PCAP REQUIRED QUIET)
+
+    target_link_libraries(tcam "${ARAVIS_LIB}")
+
+    target_link_libraries(tcam "${LIBXML2_LIBRARIES}")
+    target_link_libraries(tcam "${GIO_LIBRARIES}")
+    target_link_libraries(tcam "${PCAP_LIBRARIES}")
+
+  else (TCAM_INTERNAL_ARAVIS)
+
+    target_link_libraries(tcam ${aravis_LIBRARIES})
+
+  endif (TCAM_INTERNAL_ARAVIS)
+
+  if (TCAM_ARAVIS_USB_VISION)
+
+    find_package(libusb-1.0 REQUIRED QUIET)
+    target_link_libraries(tcam "${LIBUSB_1_LIBRARIES}")
+
+  endif (TCAM_ARAVIS_USB_VISION)
+
+endif (BUILD_ARAVIS)
+
+
+if (BUILD_LIBUSB)
+
+  target_link_libraries(tcam ${LIBUSB_1_LIBRARIES})
+
+endif (BUILD_LIBUSB)
 
 install(TARGETS tcam
   LIBRARY

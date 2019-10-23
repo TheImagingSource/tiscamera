@@ -16,10 +16,7 @@
 
 #include "devicelibrary.h"
 // #include "v4l2library.h"
-
-#include "V4l2Device.h"
-#include "v4l2_utils.h"
-
+#include "v4l2_api.h"
 
 #include <cstring>
 
@@ -27,14 +24,13 @@ VISIBILITY_INTERNAL
 
 DeviceInterface* open_device (const struct tcam_device_info* device)
 {
-    return new V4l2Device(DeviceInfo(*device));
+    return open_v4l2_device(device);
 }
 
 
 size_t get_device_list_size ()
 {
-    auto vec = get_v4l2_device_list();
-    return vec.size();
+    return get_v4l2_device_list_size();
 }
 
 
@@ -43,21 +39,7 @@ size_t get_device_list_size ()
  */
 size_t get_device_list (struct tcam_device_info* array, size_t array_size)
 {
-    auto vec = get_v4l2_device_list();
-
-    if (vec.size() > array_size)
-    {
-        return 0;
-    }
-
-    for (const auto v : vec)
-    {
-        auto i = v.get_info();
-        memcpy(array, &i, sizeof(struct tcam_device_info));
-        array++;
-    }
-
-    return vec.size();
+    return get_v4l2_device_list(array, array_size);
 }
 
 VISIBILITY_POP
