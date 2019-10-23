@@ -206,22 +206,32 @@ bool CaptureDevice::stop_stream ()
 }
 
 
-std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial)
+std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial, TCAM_DEVICE_TYPE type)
 {
+    auto _open = [](const DeviceInfo& info) -> std::shared_ptr<CaptureDevice>
+              {
+                  try
+                  {
+                      return std::make_shared<CaptureDevice>(info);
+                  }
+                  catch (const std::exception& err)
+                  {
+                      tcam_error("Could not open CaptureDevice. Exception:\"%s\"", err.what());
+                      return nullptr;
+                  }
+              };
+
+
     DeviceIndex index;
     for (const auto& d : index.get_device_list())
     {
-        if (d.get_serial().compare(serial) == 0)
+
+
+        if ((d.get_serial().compare(serial) == 0 || serial.empty())
+            &&
+            (type == TCAM_DEVICE_TYPE_UNKNOWN || d.get_device_type() == type))
         {
-            try
-            {
-                return std::make_shared<CaptureDevice>(d);
-            }
-            catch (const std::exception& err)
-            {
-                tcam_log(TCAM_LOG_ERROR, "Could not open CaptureDevice. Exception:\"%s\"", err.what());
-                return nullptr;
-            }
+            return _open(d);
         }
     }
 

@@ -157,7 +157,7 @@ private:
 
 }; /* class CaptureDevice */
 
-std::shared_ptr<CaptureDevice> open_device (const std::string& serial);
+std::shared_ptr<CaptureDevice> open_device (const std::string& serial, TCAM_DEVICE_TYPE type=TCAM_DEVICE_TYPE_UNKNOWN);
 
 } /* namespace tcam */
 
