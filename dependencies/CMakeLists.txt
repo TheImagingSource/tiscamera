@@ -23,42 +23,45 @@ if (BUILD_ARAVIS)
     find_package (Intl REQUIRED QUIET)
 
     # meson confugration
-    # list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC meson ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=false -Dgst-plugin=false -Dusb=false -Dfast-heartbeat=true -Ddocumentation=false -Dintrospection=true -Ddefault_library=static)
+    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC meson ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=false -Dgst-plugin=false -Dusb=false -Dfast-heartbeat=true -Ddocumentation=false -Dintrospection=true -Ddefault_library=static )
 
     # autotools configuration
-    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-heartbeat --disable-dependency-tracking)
+    # list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-heartbeat --disable-dependency-tracking)
 
     if (TCAM_ARAVIS_USB_VISION)
 
-      # list(APPEND ARAVIS_CONFIG "-Denable-usb=true")
-      list(APPEND ARAVIS_CONFIG "--enable-usb=yes")
+      list(APPEND ARAVIS_CONFIG "-Dusb=true")
+      # list(APPEND ARAVIS_CONFIG "--enable-usb=yes")
 
     else (TCAM_ARAVIS_USB_VISION)
 
-      # list(APPEND ARAVIS_CONFIG "-Denable-usb=false")
-      list(APPEND ARAVIS_CONFIG "--enable-usb=no")
+      list(APPEND ARAVIS_CONFIG "-Dusb=false")
+      # list(APPEND ARAVIS_CONFIG "--enable-usb=no")
 
     endif (TCAM_ARAVIS_USB_VISION)
+
+    # old autotools externalproject
+    #
+    # ExternalProject_Add(aravis
+    #   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
+    #   GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
+    #   GIT_TAG ARAVIS_0_6_2
+    #   CONFIGURE_COMMAND ${ARAVIS_CONFIG}
+    #   BUILD_COMMAND make -j4 CFLAGS=-fPIC
+    #   INSTALL_COMMAND ""        # Do not install we are statically linking
+    #   UPDATE_COMMAND ""         # Do not rebuild when calling make
+    #   )
 
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG ARAVIS_0_6_2
+      GIT_TAG ARAVIS_0_7_2
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
-      BUILD_COMMAND make -j4 CFLAGS=-fPIC
+      BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
-      UPDATE_COMMAND ""         # Do not rebuild when calling make
+      # Do not rebuild when calling make
+      # meson --reconfigure ${CMAKE_CURRENT_BUILD_DIR}/aravis
       )
-
-    # ExternalProject_Add(aravis
-    #   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
-    #   GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-    #   GIT_TAG ARAVIS_0_6_3
-    #   CONFIGURE_COMMAND ${ARAVIS_CONFIG}
-    #   BUILD_COMMAND ninja
-    #   INSTALL_COMMAND ""        # Do not install we are statically linking
-    #   UPDATE_COMMAND ""         # Do not rebuild when calling make
-    #   )
 
     #
     # Get the latest abbreviated commit hash of the working branch

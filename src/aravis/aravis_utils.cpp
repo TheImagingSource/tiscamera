@@ -77,7 +77,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else
     {
-        tcam_error("%s has unknown node type '%s'", feature, node_type);
+        tcam_info("%s has unknown node type '%s'", feature, node_type);
         return nullptr;
     }
 
@@ -139,8 +139,10 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                     }
                 }
             }
-
-            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+            GError* err = nullptr;
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera),
+                                                                            feature,
+                                                                            &err);
 
             if (!current_value)
             {
@@ -170,6 +172,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             const GSList* children;
             const GSList* iter;
 
+            GError* err = nullptr;
+
             children = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION (node));
 
             std::map<std::string, int> var;
@@ -193,7 +197,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                 return std::make_shared<PropertyBoolean>(impl, prop, type);
             }
 
-            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature, &err);
 
             if (strcmp(current_value, "On") == 0)
             {
@@ -221,12 +225,14 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
     if (strcmp(node_type, "Integer") == 0)
     {
+        GError* err = nullptr;
+
         // IN/OUT types are identical
         if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
             //camera_property prop = {};
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
-            prop.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature, &err);
             prop.value.i.default_value = prop.value.i.value;
 
             prop.value.i.step = 1;
@@ -234,7 +240,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             arv_device_get_integer_feature_bounds(arv_camera_get_device(camera),
                                                   feature,
                                                   &prop.value.i.min,
-                                                  &prop.value.i.max);
+                                                  &prop.value.i.max,
+                                                  &err);
 
             return std::make_shared<PropertyInteger>(impl, prop, type);
 
@@ -243,14 +250,14 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         {
 
             prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
-            prop.value.d.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.d.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature, &err);
             prop.value.d.default_value = prop.value.i.value;
 
 
             prop.value.d.step = 1.0;
 
             int64_t min, max;
-            arv_device_get_integer_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+            arv_device_get_integer_feature_bounds(arv_camera_get_device(camera), feature, &min, &max, &err);
 
             prop.value.d.min = min;
             prop.value.d.max = max;
@@ -281,17 +288,19 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else if (strcmp(node_type, "Float") == 0)
     {
+        GError* err = nullptr;
+
         if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
-            prop.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature, &err);
             prop.value.i.default_value = prop.value.i.value;
 
 
             prop.value.i.step = 1;
 
             double min, max;
-            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max, &err);
 
             prop.value.i.min = min;
             prop.value.i.max = max;
@@ -303,9 +312,22 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             double min, max;
 
-            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
 
-            prop.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
+            if (g_strcmp0(feature, "DeviceTemperatureConverter") == 0)
+            {}
+            else
+            {
+                arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max, &err);
+            }
+
+            if (err)
+            {
+                tcam_error("!!!!!!!!!!!!!!!!!!!!1 %s", err->message);
+            }
+
+            err = nullptr;
+
+            prop.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature, &err);
             prop.value.d.min = min;
             prop.value.d.max = max;
             prop.value.d.default_value = prop.value.d.value;
@@ -316,6 +338,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else if (strcmp(node_type, "Boolean") == 0)
     {
+        GError* err = nullptr;
         // struct camera_property ctrl = {};
         prop.type = TCAM_PROPERTY_TYPE_BOOLEAN;
 
@@ -325,7 +348,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         prop.value.i.step = 1;
 
         prop.value.b.value = arv_device_get_boolean_feature_value(arv_camera_get_device(camera),
-                                                                  feature);
+                                                                  feature,
+                                                                  &err);
 
         prop.value.b.default_value = prop.value.b.value;
 
@@ -455,7 +479,7 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
 
     if (!is_running)
     {
-        tcam_log( TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods" );
+        // tcam_warning("Could not find gige-daemon. Using internal methods");
         return get_aravis_device_list();
     }
 
@@ -465,9 +489,16 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     int shmid = shmget( shmkey, sizeof( struct tcam_gige_device_list ), 0644 );
     if (shmid < 0)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
+        // tcam_info("Unable to connect to gige-daemon. Using internal methods");
         auto vec = get_aravis_device_list();
-        tcam_log(TCAM_LOG_ERROR, "Aravis gave us %d", vec.size());
+        if (!vec.empty())
+        {
+            // tcam_info("Aravis returned %d devices.", vec.size());
+        }
+        else
+        {
+            tcam_info("Aravis returned 0 devices.");
+        }
         return vec;
     }
 
@@ -520,6 +551,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
 
     if (number_devices == 0)
     {
+        tcam_info("aravis device list is empty");
         return device_list;
     }
 
