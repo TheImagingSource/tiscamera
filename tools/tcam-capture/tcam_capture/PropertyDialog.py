@@ -53,12 +53,12 @@ class PropertyTree(QWidget):
 
         for group in self.roi_groups:
             if group.is_complete():
-                log.info("{} is complete. adding group to global group".format(group.name))
+                # log.debug("{} is complete. adding group to global group".format(group.name))
                 self.roi_widget = ROICollection(group)
                 self.layout.addWidget(self.roi_widget)
                 break
             else:
-                log.info("{} is incomplete adding members to global group".format(group.name))
+                # log.debug("{} is incomplete adding members to global group".format(group.name))
                 for prop in group.properties:
                     self.prop_dict[prop.prop.name] = prop
                     self.formlayout.addRow(prop.prop.name, prop)

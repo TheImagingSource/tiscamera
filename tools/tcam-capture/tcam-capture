@@ -475,7 +475,8 @@ class TCamCapture(QMainWindow):
         res_list = self.caps_desc.get_resolution_list(fmt)
 
         if not res_list:
-            log.error("Could not retrieve resolutions for format. Resolution box will be empty.")
+            log.error("Could not retrieve resolutions for format '{}'. "
+                      "Resolution box will be empty.".format(fmt))
             return
 
         self.resolution_combo.addItems(res_list)
@@ -591,7 +592,7 @@ class TCamCapture(QMainWindow):
         self.active_format.resolution = resolution
         self.active_format.fps = fps
 
-        log.info("'{}' - '{}' - '{}'".format(fmt, resolution, fps))
+        log.info("Selected format consists out of: '{}' - '{}' - '{}'".format(fmt, resolution, fps))
         self.populate_fmt_box()
         self.format_combo.setCurrentText(fmt)
         self.populate_resolution_box(fmt)
