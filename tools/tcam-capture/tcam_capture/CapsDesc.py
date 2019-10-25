@@ -177,9 +177,15 @@ class CapsDesc:
 
             rates = get_framerates(fmt)
             if (rates is None or
-                    type(rates) is Gst.FractionRange or
                     type(rates) is Gst.Fraction):
                 log.error("Received framerates can not be interpreted. Skipping.")
+                log.debug("Format causing error is: '{}'. Rates is '{}'".format(fmt, type(rates)))
+                continue
+
+            # FractionRange is not an error but gets ignored
+            # as tcam-capture does not allow the selection of
+            # 'unusual' framerates
+            if type(rates) is Gst.FractionRange:
                 continue
 
             r = []
