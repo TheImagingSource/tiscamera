@@ -24,34 +24,13 @@
 #include <iomanip>
 #include <unistd.h>
 
+#include <CLI11/CLI11.hpp>
+
 using namespace tcam;
 
 
-void print_help (const std::string& prog_name)
-{
-    std::cout << "Commandline camera manipulation utility." << std::endl
-    << std::endl
-    << "Options:\n"
-    << "\t-l - list cameras\n"
-    << "\t-p - list properties\n"
-    << "\t-s - set property\n"
-    << "\t-f - list video formats\n"
-    << "\t-c - list gstreamer-1.0 caps\n"
-    << "\t--version - list used library versions\n"
-    << "\n"
-    << "Examples:\n"
-    << "\n"
-    << "Set video format:\n"
-    << "\t" << prog_name << " -f -s \"format=GRBG,width=1920,height=1080,framerate=15.0\" <SERIAL>\n"
-    << "\n"
-    << "Set property\n"
-    << "\t" << prog_name << " -p -s \"Auto Exposure=false\" <SERIAL>\n"
-    << "\n"
-    << std::endl;
-}
 
-
-void print_version ()
+void print_version (size_t /*t*/)
 {
     std::cout << "Versions: "<< std::endl
               << "\tTcam:\t" << get_version() << std::endl
@@ -78,108 +57,68 @@ void print_capture_devices (const std::vector<DeviceInfo>& devices)
 }
 
 
-enum modes
+void print_devices (size_t /*t*/)
 {
-    LIST_PROPERTIES = 0,
-    SET_PROPERTY,
-    LIST_FORMATS,
-    LIST_GST_1_0_FORMATS,
-    SET_FORMAT,
-    LIST_DEVICES,
-    SAVE_STREAM,
-    SAVE_IMAGE,
-    SAVE_DEVICE_LIST,
-    SAVE_DEVICE_SETTINGS,
-    LOAD_DEVICE_SETTINGS,
-    PRINT_VERSION,
-};
+    DeviceIndex index;
+    std::vector<DeviceInfo> device_list = index.get_device_list();
 
-enum INTERACTION
-{
-    GET = 0,
-    SET,
-};
+    print_capture_devices(device_list);
+}
+
 
 int main (int argc, char *argv[])
 {
 
-    std::string executable = extract_filename(argv[0]);
+    CLI::App app {"Commandline camera manipulation utility."};
 
-    if (argc == 1)
+    auto show_version = app.add_flag_function("--version", print_version, "list used library versions");
+    auto list_devices = app.add_flag_function("-l,--list", print_devices, "list capture devices");
+
+    std::string serial;
+
+    auto show_caps = app.add_option("-c,--caps", serial,
+                                    "list available gstreamer-1.0 caps");
+    auto show_formats = app.add_option("-f,--formats", serial,
+                                       "list available formats");
+    auto show_properties = app.add_option("-p,--properties", serial,
+                                          "list available device properties");
+
+    auto save_state = app.add_option("--save", serial,
+                                     "Print a JSON string containing all properties and their current values");
+    std::string state;
+    auto load_state = app.add_option("--load", serial,
+                                     "Read a JSON string containing properties and their values and set them in the device");
+
+    std::string device_type;
+    auto existing_device_types = tcam::get_device_type_list_strings();
+    std::set<std::string> s(existing_device_types.begin(),existing_device_types.end());
+
+    app.add_set("-t,--type", device_type, s,
+                "camera type", "unknown");
+
+    list_devices->excludes(show_caps);
+    list_devices->excludes(show_formats);
+    list_devices->excludes(show_properties);
+    show_properties->excludes(show_caps);
+    show_properties->excludes(show_formats);
+
+    // CLI11 uses "TEXT" as a filler for the option string arguments
+    // replace it with "SERIAL" to make the help text more intuitive.
+    app.get_formatter()->label("TEXT", "SERIAL");
+
+    app.allow_extras();
+
+    CLI11_PARSE(app, argc, argv);
+
+    if (*list_devices || *show_version)
     {
-        print_help(executable);
         return 0;
     }
 
-    INTERACTION way = GET;
-    std::string serial;
-    std::string param;
-    std::string filename;
-    modes do_this = PRINT_VERSION;
 
-    for (int i = 1; i < argc; ++i)
-    {
-        std::string arg = argv[i];
+    auto t = tcam::tcam_device_from_string(device_type);
 
-        if (arg == "-h" || arg == "--help")
-        {
-            print_help(executable);
-            return 0;
-        }
-        else if (arg == "--version")
-        {
-            print_version();
-
-            return 0;
-        }
-        else if (arg == "-l" || arg == "--list")
-        {
-            DeviceIndex index;
-            std::vector<DeviceInfo> device_list = index.get_device_list();
-
-            print_capture_devices(device_list);
-            return 0;
-        }
-        else if (arg == "-p" || arg == "--list-properties")
-        {
-            do_this = LIST_PROPERTIES;
-        }
-        else if (arg == "-s" || arg == "--set")
-        {
-            way = SET;
-            //do_this = SET_PROPERTY;
-            int tmp_i = i;
-            tmp_i++;
-            if (tmp_i >= argc)
-            {
-                std::cout << "--set requires additional arguments to work properly!" << std::endl;
-                return 1;
-            }
-            param = argv[tmp_i];
-            i++;
-
-        }
-        else if (arg == "-f" || arg == "--format")
-        {
-            do_this = LIST_FORMATS;
-        }
-        else if (arg == "-c" || arg == "--caps")
-        {
-            do_this = LIST_GST_1_0_FORMATS;
-        }
-        else
-        {
-            serial = arg;
-        }
-    }
-
-    if (serial.empty())
-    {
-        std::cout << "No serial given!" << std::endl;
-        return 1;
-    }
-
-    auto dev = open_device(serial);
+    auto dev = open_device(serial, t);
 
     if (!dev)
     {
@@ -187,55 +126,36 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    switch (do_this)
+    if (*show_caps)
     {
-        case LIST_PROPERTIES:
+        list_gstreamer_1_0_formats(dev->get_available_video_formats());
+    }
+    else if (*show_formats)
+    {
+        list_formats(dev->get_available_video_formats());
+    }
+    else if (*show_properties)
+    {
+        print_properties(dev->get_available_properties());
+    }
+    else if (*save_state)
+    {
+        print_state_json(dev);
+    }
+    else if (*load_state)
+    {
+        if (app.remaining_size() != 1)
         {
-            if (way == GET)
-            {
-                print_properties(dev->get_available_properties());
-            }
-            else
-            {
-                set_property(dev, param);
-            }
-            break;
+            std::cerr << "Too many arguments" << std::endl;
         }
-        case LIST_FORMATS:
-        {
-            if (way == GET)
-            {
-                list_formats(dev->get_available_video_formats());
-            }
-            else
-            {
-                set_active_format(dev, param);
-            }
-            break;
-        }
-        case LIST_GST_1_0_FORMATS:
-        {
-            list_gstreamer_1_0_formats(dev->get_available_video_formats());
-            break;
-        }
-        case SET_PROPERTY:
-        {
-            set_property(dev, param);
-            break;
-        }
-        case SET_FORMAT:
-        {
-            set_active_format(dev, param);
-            break;
-        }
-        case SAVE_DEVICE_LIST:
-        case SAVE_DEVICE_SETTINGS:
-        case LOAD_DEVICE_SETTINGS:
-        default:
-        {
-            std::cout << "Unknown command." << std::endl;
-            break;
-        }
+
+        std::vector<std::string> vec = app.remaining();
+
+        load_json_state(dev, vec.at(0));
+        // bool state = load_device_settings(TCAM_PROP(self),
+        //                                   self->device_serial,
+        //                                   g_value_get_string(value));
+
     }
 
     return 0;

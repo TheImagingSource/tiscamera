@@ -291,3 +291,16 @@ bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_pr
 
     return false;
 }
+
+
+
+void print_state_json (std::shared_ptr<CaptureDevice> dev)
+{
+    std::cout << create_json_state(dev) << std::endl;
+}
+
+
+void load_state_json_string (std::shared_ptr<CaptureDevice> dev, const std::string json_str)
+{
+    load_json_state(dev, json_str);
+}

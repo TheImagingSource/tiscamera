@@ -55,6 +55,8 @@ public:
               const std::map<std::string, int>&,
               VALUE_TYPE);
 
+    Property (const Property& other) = default;
+
     virtual ~Property ();
 
     virtual Property& operator= (const Property&);

@@ -61,6 +61,7 @@ set(base
   VideoFormat.cpp
   VideoFormatDescription.cpp
   ImageSink.cpp
+  json.cpp
   )
 
 add_library(tcam-base OBJECT ${base})

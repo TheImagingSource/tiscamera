@@ -13,7 +13,7 @@ Arguments
 
    Print available options.
 
-.. option:: -l
+.. option:: -l, --list
 
    Print available cameras.
 
@@ -28,19 +28,22 @@ Arguments
       DFK 39GX265-Z20   Aravis      12919949
       DFK AFU050-L34    LibUsb      04614259
 
-.. option:: -p <SERIAL>
+.. option:: -p, --properties <SERIAL>
 
    Print available properties.
+
    *Requires the serial number of the camera to be queried.*
 
-.. option:: -f <SERIAL>
+.. option:: -f, --format <SERIAL>
 
    Print information about available video formats.
+
    *Requires the serial number of the camera to be queried.*
             
-.. option:: -c <SERIAL>
+.. option:: -c, --caps <SERIAL>
 
    Print GStreamer 1.0 caps the device offers.
+
    *Requires the serial number of the camera to be queried.*
    
    These caps are offered directly by the device.
@@ -52,3 +55,25 @@ Arguments
 
    Print information about the library versions of tiscamera and aravis.
 
+.. option:: -t,--type {aravis,v4l2,libusb,unknown}
+
+   Device type that shall be used.
+   When a device offers multiple backends,
+   this flag allows the user to choose the appropriate backend.
+   Defaults to 'unknown', which causes the first device with matching serial to be choosen.
+
+.. option:: --state <SERIAL>
+
+   Prints a JSON description of the device properties and their values.
+
+   *Requires the serial number of the camera to be queried.*
+
+.. option:: --load <SERIAL> <JSON>
+
+   Load the JSON string and set the properties to the specified values.
+
+   See :any:`state` for a JSON description.
+
+   .. code-block:: sh
+
+      tcam-ctrl --load 01810255 '{"Exposure":9000,"Exposure Auto":false}'

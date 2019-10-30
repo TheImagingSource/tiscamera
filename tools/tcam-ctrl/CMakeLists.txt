@@ -26,6 +26,7 @@ include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 
 
+include_directories("${PROJECT_SOURCE_DIR}/dependencies")
 include_directories("${PROJECT_SOURCE_DIR}/src")
 include_directories("${PROJECT_SOURCE_DIR}/src/gstreamer-1.0")
 include_directories("${CMAKE_SOURCE_DIR}/src")

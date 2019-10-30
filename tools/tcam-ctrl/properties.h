@@ -40,4 +40,10 @@ void print_properties (const std::vector<Property*>& properties);
  */
 bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_prop);
 
+
+
+void print_state_json (std::shared_ptr<CaptureDevice> dev);
+
+void load_state_json_string (std::shared_ptr<CaptureDevice> dev, const std::string json_str);
+
 #endif /* CONTROLS_H */

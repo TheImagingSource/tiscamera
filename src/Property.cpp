@@ -291,36 +291,36 @@ bool Property::from_string (const std::string& s)
         {
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
+                bool val;
                 if (s.compare("true") == 0)
                 {
-                    prop.value.b.value = true;
+                    val = true;
                 }
                 else
                 {
-                    prop.value.b.value = false;
+                    val = false;
                 }
+
+                set_value(val);
+
                 break;
             }
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                prop.value.i.value = stoi(s);
+                set_value((int64_t)stoi(s));
 
                 break;
             }
             case TCAM_PROPERTY_TYPE_DOUBLE:
             {
-                prop.value.d.value = stod(s);
-                break;
-            }
-            case TCAM_PROPERTY_TYPE_STRING:
-            {
-                strncpy(prop.value.s.value, s.c_str(), sizeof(prop.value.s.value));
-                prop.value.s.value[sizeof(prop.value.s.value)-1] = '\0';
+                set_value(stod(s));
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
+            case TCAM_PROPERTY_TYPE_STRING:
             {
-
+                set_value(s)
+                break;
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
             case TCAM_PROPERTY_TYPE_UNKNOWN:
