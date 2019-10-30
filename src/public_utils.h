@@ -40,6 +40,19 @@ std::string property_id_to_string (TCAM_PROPERTY_ID);
 
 std::string property_type_to_string (TCAM_PROPERTY_TYPE);
 
+
+std::vector<TCAM_DEVICE_TYPE> get_device_type_list ();
+
+
+std::vector<std::string> get_device_type_list_strings ();
+
+
+std::string tcam_device_type_to_string (TCAM_DEVICE_TYPE type);
+
+
+TCAM_DEVICE_TYPE tcam_device_from_string (const std::string& str);
+
+
 uint64_t get_image_size (uint32_t fourcc,
                          unsigned int width,
                          unsigned int height);

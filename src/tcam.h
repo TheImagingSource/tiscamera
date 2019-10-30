@@ -31,6 +31,7 @@
 #include "DeviceIndex.h"
 #include "ImageSink.h"
 #include "public_utils.h"
+#include "json.h"
 
 /** @} */
 

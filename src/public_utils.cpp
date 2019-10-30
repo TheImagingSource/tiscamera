@@ -63,6 +63,56 @@ std::string tcam::property_type_to_string (TCAM_PROPERTY_TYPE type)
 }
 
 
+std::vector<TCAM_DEVICE_TYPE> tcam::get_device_type_list ()
+{
+    return {
+        TCAM_DEVICE_TYPE_UNKNOWN,
+        TCAM_DEVICE_TYPE_V4L2,
+        TCAM_DEVICE_TYPE_ARAVIS,
+        TCAM_DEVICE_TYPE_LIBUSB};
+}
+
+
+std::vector<std::string> tcam::get_device_type_list_strings ()
+{
+    auto vec = get_device_type_list();
+
+    std::vector<std::string> ret;
+
+    ret.reserve(vec.size());
+
+    for (const auto& v : vec)
+    {
+        ret.push_back(tcam_device_type_to_string(v));
+    }
+
+    return ret;
+}
+
+
+std::string tcam::tcam_device_type_to_string (TCAM_DEVICE_TYPE type)
+{
+    switch (type)
+    {
+        case TCAM_DEVICE_TYPE_V4L2: return "v4l2";
+        case TCAM_DEVICE_TYPE_ARAVIS: return "aravis";
+        case TCAM_DEVICE_TYPE_LIBUSB: return "libusb";
+        default: return "unknown";
+    }
+}
+
+
+TCAM_DEVICE_TYPE tcam::tcam_device_from_string (const std::string& str)
+{
+    if (str == "v4l2") return TCAM_DEVICE_TYPE_V4L2;
+    else if (str == "aravis") return TCAM_DEVICE_TYPE_ARAVIS;
+    else if (str == "libusb") return TCAM_DEVICE_TYPE_LIBUSB;
+
+
+    return TCAM_DEVICE_TYPE_UNKNOWN;
+}
+
+
 uint64_t tcam::get_image_size (uint32_t fourcc,
                                unsigned int width,
                                unsigned int height)
