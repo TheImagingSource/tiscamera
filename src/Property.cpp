@@ -319,7 +319,7 @@ bool Property::from_string (const std::string& s)
             case TCAM_PROPERTY_TYPE_ENUMERATION:
             case TCAM_PROPERTY_TYPE_STRING:
             {
-                set_value(s)
+                set_value(s);
                 break;
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
