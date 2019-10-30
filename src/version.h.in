@@ -19,8 +19,8 @@
 
 #define GIT_REVISION "${GIT_BRANCH}/${GIT_COMMIT_HASH} rev: ${GIT_COMMIT_COUNT}"
 #define TCAM_VERSION "${TCAM_VERSION}"
-#define ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH}"
-#define ARAVIS_VERSION "${ARAVIS_VERSION}"
+#define TCAM_ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH}"
+#define TCAM_ARAVIS_VERSION "${ARAVIS_VERSION}"
 
 inline const char* get_commit_id ()
 {
@@ -39,17 +39,17 @@ inline const char* get_version ()
 
 inline const char* get_aravis_commit_id ()
 {
-    return "${ARAVIS_GIT_COMMIT_HASH}";
+    return "${TCAM_ARAVIS_GIT_COMMIT_HASH}";
 }
 
 inline const char* get_aravis_version_number ()
 {
-    return "${ARAVIS_VERSION}";
+    return "${TCAM_ARAVIS_VERSION}";
 }
 
 inline const char* get_aravis_version ()
 {
-    return "${ARAVIS_VERSION}_version_${ARAVIS_GIT_COMMIT_HASH}";
+    return "${TCAM_ARAVIS_VERSION}_version_${TCAM_ARAVIS_GIT_COMMIT_HASH}";
 }
 
 #endif /* TCAM_VERSION_H */
