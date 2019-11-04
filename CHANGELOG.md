@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - property state system
   tcamsrc and tcambin have the property 'state' containing a JSON string describing
   the current property/value list.
+- type property for tcamsrc and tcambin
+  Allows the selection of the backend when multiple are available
+- `tcam-ctrl --load` to load property state string
+- `tcam-ctrl --save` to save property state string
 
 ### Changed
 
@@ -46,7 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-capture: slider with a range larger than 5000 now have a logarithmic behavior
 - tcam-capture: Number Text Boxes do not update while user is editing
 - cmake option -DBUILD_TOOLS now defaults to ON
-- udev rules now only contain extension loading when required by BUILD_USB.
+- udev rules now only contain extension loading when required by BUILD_V4L2.
+- tcam-ctrl argument handling has been reworked. This changes the help message.
+- udev rules file now only contains uvc extension loading when v4l2 is configured
 
 ### Fixed
 
@@ -60,10 +66,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - gsttcamautoexposure iris max is now handled correctly
 - cmake install directories could not be set by user
 - tcam-capture issue with jumping ROI overlay
+- 'Strobe Exposure' control in extension units for 33U and 37U
 
 ### Removed
 
 - unused header files
+- tcam-ctrl -s flag for setting formats.
+- tcam-ctrl -s flag for setting properties. Replaced with state system.
 
 
 ## [0.11.1] - 2019-05-22
