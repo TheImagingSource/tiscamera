@@ -435,7 +435,7 @@ roi_cache RegionOfInterest::fill_cache (const tcam_image_size& image,
     cache.width_cache  = (double)roi.width / image.width * 100;
     cache.height_cache = (double)roi.height / image.height * 100;
 
-    return std::move(cache);
+    return cache;
 }
 
 

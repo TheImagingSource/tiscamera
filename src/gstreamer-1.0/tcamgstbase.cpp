@@ -860,7 +860,7 @@ std::vector<std::string> index_caps_formats (GstCaps* caps)
 
         ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
     }
-    return std::move(ret);
+    return ret;
 }
 
 

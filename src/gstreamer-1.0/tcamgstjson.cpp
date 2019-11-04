@@ -21,14 +21,13 @@
 
 #include <json.hpp>
 
+#include "tcam.h"
 #include <logging.h>
 
 
 
 // for convenience
 using json = nlohmann::json;
-
-static const char* JSON_FILE_VERSION_CURRENT = "v0.1";
 
 
 bool tcam_property_to_json (TcamProp* prop,
@@ -112,7 +111,7 @@ std::string create_device_settings (const std::string& serial,
         {
             j["serial"] = serial;
         }
-        j["version"] = JSON_FILE_VERSION_CURRENT;
+        j["version"] = tcam::JSON_FILE_VERSION_CURRENT;
         j["properties"] = {};
     }
     catch (std::logic_error& err)
@@ -201,7 +200,7 @@ bool load_device_settings (TcamProp* tcam,
 
     if (!version.empty())
     {
-        if (version != JSON_FILE_VERSION_CURRENT)
+        if (version != tcam::JSON_FILE_VERSION_CURRENT)
         {
             tcam_error("Version mismatch for state file.");
             return false;
