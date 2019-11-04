@@ -14,6 +14,7 @@
 # limitations under the License.
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories(${PROJECT_BINARY_DIR})
 
 set(srcs
   roi.cpp

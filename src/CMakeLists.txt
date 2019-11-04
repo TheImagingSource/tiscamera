@@ -31,6 +31,12 @@ function(pkg_check_variable _pkg _name)
 endfunction()
 
 
+# If you really want to set additional options from outside CMakeLists.txt you
+# can do this:
+# add_defintions($ENV{CFLAGS})
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 add_subdirectory(gobject)
 
 
@@ -40,13 +46,6 @@ endif (BUILD_GST_1_0)
 
 add_subdirectory(algorithms)
 
-# If you really want to set additional options from outside CMakeLists.txt you
-# can do this:
-# add_defintions($ENV{CFLAGS})
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
 set(base
   format.cpp
@@ -180,10 +179,21 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 TARGET_LINK_LIBRARIES(tcam dl)
 
 
+set(TCAM_VERSION_HEADER ${PROJECT_BINARY_DIR}/version.h)
 
-
-
-
+add_custom_command(
+  TARGET tcam
+  PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -DVERSION_FILE_NAME=${TCAM_VERSION_HEADER}
+  -DARAVIS_VERSION="${ARAVIS_VERSION}"
+  -DARAVIS_GIT_COMMIT_HASH="${ARAVIS_GIT_COMMIT_HASH}"
+  -DTCAM_VERSION="${TCAM_VERSION}"
+  -DGIT_BRANCH="${GIT_BRANCH}"
+  -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
+  -DGIT_COMMIT_COUNT="${GIT_COMMIT_COUNT}"
+  -P "${CMAKE_SOURCE_DIR}/cmake/create_version_header.cmake"
+  COMMENT ""
+  )
 
 
 if (BUILD_V4L2)
