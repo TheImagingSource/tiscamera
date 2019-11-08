@@ -181,9 +181,8 @@ TARGET_LINK_LIBRARIES(tcam dl)
 
 set(TCAM_VERSION_HEADER ${PROJECT_BINARY_DIR}/version.h)
 
-add_custom_command(
-  TARGET tcam
-  PRE_BUILD
+add_custom_target(
+  version-header
   COMMAND ${CMAKE_COMMAND} -DVERSION_FILE_NAME=${TCAM_VERSION_HEADER}
   -DARAVIS_VERSION="${ARAVIS_VERSION}"
   -DARAVIS_GIT_COMMIT_HASH="${ARAVIS_GIT_COMMIT_HASH}"
@@ -193,8 +192,10 @@ add_custom_command(
   -DGIT_COMMIT_COUNT="${GIT_COMMIT_COUNT}"
   -P "${CMAKE_SOURCE_DIR}/cmake/create_version_header.cmake"
   COMMENT ""
+  OUTPUT ${TCAM_VERSION_HEADER}
   )
 
+add_dependencies(tcam-base   version-header)
 
 if (BUILD_V4L2)
 
