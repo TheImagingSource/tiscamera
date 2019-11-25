@@ -68,7 +68,7 @@ cmake options
    * - TCAM_INTERNAL_ARAVIS
      - To reduce required steps for customers it was decided to ship an internal aravis version.
        This version will be downloaded, compiled and statically linked during the build process (libtcam-aravis.so).
-       The current minimal version of aravis that is supported is '0.7'.
+       The current minimal version of aravis that is supported is '0.6'.
 
        When switching to an external version the following steps are recommended:
        
@@ -87,13 +87,7 @@ cmake options
 
    * - TCAM_GI_API_VERSION
      - Version the gobject introspection tiscamera has.
-     - 0.1
-
-   * - TCAM_ARAVIS_USB_VISION
-     - Enable aravis USB3Vision
-       This currently disables v4l2.
-       gige-daemon has to be disabled.
-     - OFF
+     - 0.1 
        
 Installation Directories
 ========================
