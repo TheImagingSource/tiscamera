@@ -47,24 +47,29 @@ static gboolean tcam_statistics_meta_init (GstMeta* meta,
 static gboolean tcam_statistics_meta_transform (GstBuffer* trans_buffer,
                                                 GstMeta* meta,
                                                 GstBuffer* /* buffer */,
-                                                GQuark /* type */,
+                                                GQuark type,
                                                 gpointer /* data */)
 {
+    g_return_val_if_fail(GST_IS_BUFFER(trans_buffer), FALSE);
+    // g_return_val_if_fail(statistics, nullptr);
+
     // we always copy
 
     TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
 
-    TcamStatisticsMeta* trans_tcam = (TcamStatisticsMeta*) gst_buffer_add_meta(trans_buffer,
-                                                                               TCAM_STATISTICS_META_INFO,
-                                                                               nullptr);
-
-    if (!trans_tcam)
+    if (GST_META_TRANSFORM_IS_COPY(type))
     {
-        return FALSE;
+        TcamStatisticsMeta* trans_tcam = (TcamStatisticsMeta*) gst_buffer_add_meta(trans_buffer,
+                                                                                   TCAM_STATISTICS_META_INFO,
+                                                                                   nullptr);
+
+        if (!trans_tcam)
+        {
+            return FALSE;
+        }
+
+        trans_tcam->structure = gst_structure_copy(tcam->structure);
     }
-
-    trans_tcam->structure = gst_structure_copy(tcam->structure);
-
     return TRUE;
 }
 
