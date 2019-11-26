@@ -43,7 +43,7 @@ if (BUILD_ARAVIS)
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG ARAVIS_0_6_2
+      GIT_TAG aravis-0-6
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
       BUILD_COMMAND make -j4 CFLAGS=-fPIC
       INSTALL_COMMAND ""        # Do not install we are statically linking
