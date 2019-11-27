@@ -250,6 +250,90 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "image/jpeg",
         "image/jpeg", "",
     },
+    {
+        FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0,
+        "video/x-bayer, format=(string)bggr_polarized_90_45_135_0",
+        "video/x-bayer", "bggr_polarized_90_45_135_0",
+    },
+    {
+        FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0,
+        "video/x-bayer, format=(string)bggr12p_polarized_90_45_135_0",
+        "video/x-bayer", "bggr12p_polarized_90_45_135_0",
+    },
+    {
+        FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0,
+        "video/x-bayer, format=(string)bggr16_polarized_90_45_135_0",
+        "video/x-bayer", "bggr16_polarized_90_45_135_0",
+    },
+    {
+        FOURCC_POLARIZATION_MONO8_90_45_135_0,
+        "video/x-raw, format=(string)GRAY8_polarized_90_45_135_0",
+        "video/x-raw", "GRAY8_polarized_90_45_135_0",
+    },
+    {
+        FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0,
+        "video/x-raw, format=(string)GRAY12p_polarized_90_45_135_0",
+        "video/x-raw", "GRAY12p_polarized_90_45_135_0",
+    },
+    {
+        FOURCC_POLARIZATION_MONO16_90_45_135_0,
+        "video/x-raw, format=(string)GRAY16_LE_polarized_90_45_135_0",
+        "video/x-raw", "GRAY16_LE_polarized_90_45_135_0",
+    },
+
+    // internal not meant for gst usage
+
+    // {
+    //     FOURCC_POLARIZATION_ADI_PLANAR_MONO8,
+    //     "",
+    //     "", ""
+    // },
+    // {
+    //     FOURCC_POLARIZATION_ADI_PLANAR_MONO16,
+    //     "",
+    //     "", ""
+    // },
+
+    {
+        FOURCC_POLARIZATION_ADI_MONO8,
+        "video/tis,format=(string)ADI_GRAY8",
+        "video/tis", "ADI_GRAY8"
+    },
+    {
+        FOURCC_POLARIZATION_ADI_MONO16,
+        "video/tis,format=(string)ADI_GRAY16_LE",
+        "video/tis", "ADI_GRAY16_LE"
+    },
+    {
+        FOURCC_POLARIZATION_ADI_RGB8,
+        "video/tis,format=(string)ADI_RGB8",
+        "video/tis", "ADI_RGB8"
+    },
+    {
+        FOURCC_POLARIZATION_ADI_RGB16,
+        "video/tis,format=(string)ADI_RGB16",
+        "video/tis", "ADI_RGB16"
+    },
+    {
+        FOURCC_POLARIZATION_PACKED8,
+        "video/x-raw,format=(string)polarized-GREY8p",
+        "video/x-raw", "polarized-GREY8p"
+    },
+    {
+        FOURCC_POLARIZATION_PACKED16,
+        "video/x-raw,format=(string)polarized-GREY16_LEp",
+        "video/x-raw", "polarized-GREY16_LEp"
+    },
+    {
+        FOURCC_POLARIZATION_PACKED8_BAYER_BG,
+        "video/x-bayer,format=(string)polarized-bggr8p",
+        "video/x-bayer", "polarized-bggr8p"
+    },
+    {
+        FOURCC_POLARIZATION_PACKED16_BAYER_BG,
+        "video/x-bayer,format=(string)polarized-bggr16p",
+        "video/x-bayer", "polarized-bggr16p"
+    },
 };
 
 #ifndef ARRAYSIZE

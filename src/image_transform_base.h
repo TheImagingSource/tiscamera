@@ -102,6 +102,26 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_GRBG16:     return 16;
         case FOURCC_RGGB16:     return 16;
 
+        case FOURCC_POLARIZATION_MONO8_90_45_135_0:         return 8;
+        case FOURCC_POLARIZATION_MONO12_90_45_135_0:        return 12;
+        case FOURCC_POLARIZATION_MONO16_90_45_135_0:        return 16;
+
+        case FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0:     return 8;
+        case FOURCC_POLARIZATION_BAYER_BG12_90_45_135_0:    return 12;
+        case FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0:    return 16;
+
+        case FOURCC_POLARIZATION_ADI_MONO8:                 return 32;
+        case FOURCC_POLARIZATION_ADI_MONO16:                return 64;
+        case FOURCC_POLARIZATION_ADI_PLANAR_MONO8:          return 32;
+        case FOURCC_POLARIZATION_ADI_PLANAR_MONO16:         return 64;
+        case FOURCC_POLARIZATION_ADI_RGB8:                  return 64;
+        case FOURCC_POLARIZATION_ADI_RGB16:                 return 128;
+
+        case FOURCC_POLARIZATION_PACKED8:            return 32;
+        case FOURCC_POLARIZATION_PACKED16:           return 64;
+        case FOURCC_POLARIZATION_PACKED8_BAYER_BG:   return 32;
+        case FOURCC_POLARIZATION_PACKED16_BAYER_BG:  return 64;
+
         case FOURCC_YGB0:       return 16;
         case FOURCC_YGB1:       return 16;
         case FOURCC_Y16:        return 16;

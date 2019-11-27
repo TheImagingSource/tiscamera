@@ -120,7 +120,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-
 #define FOURCC_Y10_PACKED                   mmioFOURCC('Y', '1', '0', 'p') /* 10  u8, 5 pix, 4 bytes */
 #define FOURCC_Y12_SPACKED                  mmioFOURCC('Y', '1', '2', 'p') /* 12  u8, [pix0_hi][pix0_lo | pix1_hi][pix1_lo] */
 #define FOURCC_Y12_PACKED                   mmioFOURCC('Y', '1', '2', 'P') /* 12  u8, [pix0_hi][pix0_lo | pix1_lo][pix1_hi] */
@@ -135,6 +134,42 @@
 
 
 #define FOURCC_Y800_NIBBLE_RLE_COMPRESSED       mmioFOURCC( 'C', 'Y', '6', '0' )
+
+
+// Image Polarization format
+
+// We format Polarizations formats via prefix 'PXYY', 'P' is prefix, X is the Filter polarization angle
+// YY is the bit depth, E.g. '80' for 8 bit, 'Cp' for 12 bit packed, 'CP' for 16 bit packed, and '16' bit packed
+// X stands for the filter polarization angles, e.g. 1 ^= line + 0 [P90][P45], line + 1 [P135][P0]
+
+#define FOURCC_POLARIZATION_MONO8_90_45_135_0           mmioFOURCC('P', '1', '8', '0')   // Polarization format 8-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_MONO16_90_45_135_0          mmioFOURCC('P', '1', '1', '6')   // Polarization format 16-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_MONO12_90_45_135_0          mmioFOURCC('P', '1', 'C', 'p')   // Polarization format 16-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0  mmioFOURCC('P', '1', 'C', 'p') // Polarization format 12-bit SPACKED, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0   mmioFOURCC('P', '1', 'C', 'P')   // Polarization format 12-bit PACKED, line + 0 [P90][P45], line + 1 [P135][P0]
+
+#define FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0             mmioFOURCC('P', '2', '8', '0')  // Polarization format 8-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_BAYER_BG12_90_45_135_0      mmioFOURCC('P', '2', 'C', 'p')   // Polarization format 16-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0            mmioFOURCC('P', '2', '1', '6')  // Polarization format 16-bit, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0    mmioFOURCC('P', '2', 'C', 'p') // Polarization format 12-bit SPACKED, line + 0 [P90][P45], line + 1 [P135][P0]
+#define FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0     mmioFOURCC('P', '2', 'C', 'P')   // Polarization format 12-bit PACKED, line + 0 [P90][P45], line + 1 [P135][P0]
+
+// internal ADI formats
+#define FOURCC_POLARIZATION_ADI_PLANAR_MONO8            mmioFOURCC('A', 'D', 'p', '1')  // Polarization ADI planar image, uint8_t planes [angleOfMaxPolarization, linearityOfPolarization, intensity, unused]
+#define FOURCC_POLARIZATION_ADI_PLANAR_MONO16           mmioFOURCC('A', 'D', 'p', '2')  // Polarization ADI planar image, uint16_t planes [angleOfMaxPolarization, linearityOfPolarization, intensity, unused]
+
+// output polarization formats
+#define FOURCC_POLARIZATION_ADI_MONO8                   mmioFOURCC('A', 'D', 'I', '1')  // Polarization result image, packed uint8_t  [angleOfMaxPolarization, linearityOfPolarization, intensity, unused]
+#define FOURCC_POLARIZATION_ADI_MONO16                  mmioFOURCC('A', 'D', 'I', '2')  // Polarization result image, packed uint16_t [angleOfMaxPolarization, linearityOfPolarization, intensity, unused]
+#define FOURCC_POLARIZATION_ADI_RGB8                    mmioFOURCC('A', 'D', 'C', '1')  // Polarization result image, packed uint8_t  [angleOfMaxPolarization, linearityOfPolarization, R0, G0, B0, R1, G1, B1, all 8 bit
+#define FOURCC_POLARIZATION_ADI_RGB16                   mmioFOURCC('A', 'D', 'C', '2')  // Polarization result image, packed uint16_t [angleOfMaxPolarization, linearityOfPolarization, R0, G0, B0, R1, G1, B1, all 8 bit
+
+
+#define FOURCC_POLARIZATION_PACKED8                     mmioFOURCC('P', 'P', 'M', '1')  // Polarization result image, packed uint8_t [0;45;90;135] degrees, pixel ^= 32 bit
+#define FOURCC_POLARIZATION_PACKED16                    mmioFOURCC('P', 'P', 'M', '2')  // Polarization result image, packed uint8_t [0;45;90;135] degrees, pixel ^= 32 bit
+#define FOURCC_POLARIZATION_PACKED8_BAYER_BG            mmioFOURCC('P', 'P', 'B', '1')  // Polarization result image, packed uint16_t [0;45;90;135] degrees, pixel ^= 64 bit
+#define FOURCC_POLARIZATION_PACKED16_BAYER_BG           mmioFOURCC('P', 'P', 'B', '2')  // Polarization result image, packed uint16_t [0;45;90;135] degrees, pixel ^= 64 bit
+
 
 
 #endif // TCAM_IMAGE_FOURCC_H

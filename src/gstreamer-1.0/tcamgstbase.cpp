@@ -352,6 +352,36 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc)
 }
 
 
+bool tcam_gst_is_polarized (const unsigned int fourcc)
+{
+    if (fourcc == FOURCC_POLARIZATION_MONO8_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_MONO16_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_MONO12_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_ADI_PLANAR_MONO8
+        || fourcc == FOURCC_POLARIZATION_ADI_PLANAR_MONO16
+        || fourcc == FOURCC_POLARIZATION_ADI_MONO8
+        || fourcc == FOURCC_POLARIZATION_ADI_MONO16
+        || fourcc == FOURCC_POLARIZATION_ADI_RGB8
+        || fourcc == FOURCC_POLARIZATION_ADI_RGB16
+        || fourcc == FOURCC_POLARIZATION_PACKED8
+        || fourcc == FOURCC_POLARIZATION_PACKED16
+        || fourcc == FOURCC_POLARIZATION_PACKED8_BAYER_BG
+        || fourcc == FOURCC_POLARIZATION_PACKED16_BAYER_BG
+        )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 bool tcam_gst_fixate_caps (GstCaps* caps)
 {
     if (caps == nullptr

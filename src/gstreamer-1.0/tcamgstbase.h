@@ -54,6 +54,9 @@ bool tcam_gst_is_bayer16_string (const char* format_string);
 bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc);
 
 
+bool tcam_gst_is_polarized (const unsigned int fourcc);
+
+
 bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps);
 
 
