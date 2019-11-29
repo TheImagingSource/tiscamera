@@ -21,6 +21,9 @@
 
 #include "tcam.h"
 
+#include <string>
+#include <vector>
+
 #include <gst/gst.h>
 
 #ifdef __cplusplus
@@ -29,6 +32,9 @@ extern "C"
 #endif
 
 GstElement* tcam_gst_find_camera_src (GstElement* element);
+
+
+std::vector<std::string> gst_list_to_vector (const GValue* gst_list);
 
 /*
   extracts video/x-raw from caps and checks if only mono is present
