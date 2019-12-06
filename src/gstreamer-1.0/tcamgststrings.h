@@ -261,6 +261,11 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-bayer", "bggr12p_polarized_90_45_135_0",
     },
     {
+        FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0,
+        "video/x-bayer, format=(string)bggr12sp_polarized_90_45_135_0",
+        "video/x-bayer", "bggr12sp_polarized_90_45_135_0",
+    },
+    {
         FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0,
         "video/x-bayer, format=(string)bggr16_polarized_90_45_135_0",
         "video/x-bayer", "bggr16_polarized_90_45_135_0",
