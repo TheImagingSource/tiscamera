@@ -226,7 +226,15 @@ bool load_device_settings (TcamProp* tcam,
     }
 
 
-    for (auto iter : props.items())
+    /*
+      the order is alphabetical i.e. not in the same order the input data is
+      since we use the string names for property identification
+      we use the reverse order to apply auto properties before properties
+      e.g. 'Exposure Auto' before 'Exposure'.
+      This allows the disabling of read-only flags for exposure
+      before setting the exposure value
+    */
+    for (auto iter = props.rbegin(); iter != props.rend(); iter++)
     {
         GValue value = G_VALUE_INIT;
 
