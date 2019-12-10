@@ -959,6 +959,54 @@ std::vector<std::string> index_caps_formats (GstCaps* caps)
 }
 
 
+std::vector<uint32_t> index_caps_fourcc (GstCaps* caps)
+{
+    // todo missing jpeg
+
+    std::vector<uint32_t> ret;
+
+    for (guint i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(caps, i);
+
+        if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
+        {
+            auto vec = gst_list_to_vector(gst_structure_get_value(struc, "format"));
+
+            for (const auto& v : vec)
+            {
+                auto fcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
+                                                                v.c_str());
+
+                if (fcc == 0)
+                    continue;
+
+                ret.push_back(fcc);
+            }
+        }
+        else if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
+        {
+            auto fcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
+                                                            gst_structure_get_string(struc, "format"));
+
+            if (fcc == 0)
+                continue;
+
+            ret.push_back(fcc);
+        }
+    }
+
+    // make all entries unique
+    if (ret.size() > 1)
+    {
+        std::sort(ret.begin(), ret.end());
+
+        ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
+    }
+    return ret;
+}
+
+
 /**
  * @param formats - GstCaps from which the format and name shall be used
  * @param rest - GstCaps from which the rest i.e. width,height,framerate, shall be used, is_fixed has to be true

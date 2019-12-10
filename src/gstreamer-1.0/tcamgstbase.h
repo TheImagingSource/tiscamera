@@ -76,6 +76,8 @@ bool tcam_gst_fixate_caps (GstCaps* caps);
 
 std::vector<std::string> index_caps_formats (GstCaps* caps);
 
+std::vector<uint32_t> index_caps_fourcc (GstCaps* caps);
+
 
 /**
  * Change the name of the given caps to name
