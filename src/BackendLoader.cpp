@@ -96,13 +96,13 @@ void tcam::BackendLoader::load_backends ()
     backends =
         {
             #ifdef HAVE_V4L2
-            {TCAM_DEVICE_TYPE_V4L2, "libtcam-v4l2.so",   nullptr, get_v4l2_device_list, get_v4l2_device_list_size, open_v4l2_device},
+            {TCAM_DEVICE_TYPE_V4L2, "v4l2 backend",   nullptr, get_v4l2_device_list, get_v4l2_device_list_size, open_v4l2_device},
             #endif
             #ifdef HAVE_ARAVIS
-            {TCAM_DEVICE_TYPE_ARAVIS, "libtcam-aravis.so", nullptr, get_aravis_device_list, get_aravis_device_list_size, open_aravis_device},
+            {TCAM_DEVICE_TYPE_ARAVIS, "aravis backend", nullptr, get_aravis_device_list, get_aravis_device_list_size, open_aravis_device},
             #endif
             #ifdef HAVE_LIBUSB
-            {TCAM_DEVICE_TYPE_LIBUSB, "libtcam-libusb.so", nullptr, get_libusb_device_list, get_libusb_device_list_size, open_libusb_device},
+            {TCAM_DEVICE_TYPE_LIBUSB, "libusb backend", nullptr, get_libusb_device_list, get_libusb_device_list_size, open_libusb_device},
             #endif
             {TCAM_DEVICE_TYPE_UNKNOWN, "none",              nullptr, nullptr, nullptr, nullptr}
         };
