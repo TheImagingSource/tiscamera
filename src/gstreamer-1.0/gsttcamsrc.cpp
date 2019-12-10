@@ -1257,6 +1257,11 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 
     self->cv.notify_all();
 
+    if (!self->device || !self->device->dev)
+    {
+        return FALSE;
+    }
+
     // no lock_guard since new_eos will call change_state which will call stop
     // in that case we _may_ still hold the lock, which is unwanted.
     std::unique_lock<std::mutex> lck(self->mtx);
