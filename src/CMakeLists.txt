@@ -173,41 +173,28 @@ set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
 set(PUBLIC_HEADER tcam.h)
 
 
-set(TCAM_VERSION_HEADER ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+set(TCAM_VERSION_FILE ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 
-# add_custom_target(
-#   version-header
-#   COMMAND ${CMAKE_COMMAND} -DVERSION_FILE_NAME=${TCAM_VERSION_HEADER}
-#   -DARAVIS_VERSION="${ARAVIS_VERSION}"
-#   -DARAVIS_GIT_COMMIT_HASH="${ARAVIS_GIT_COMMIT_HASH}"
-#   -DTCAM_VERSION="${TCAM_VERSION}"
-#   -DGIT_BRANCH="${GIT_BRANCH}"
-#   -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
-#   -DGIT_COMMIT_COUNT="${GIT_COMMIT_COUNT}"
-#   -P "${CMAKE_SOURCE_DIR}/cmake/create_version_header.cmake"
-#   COMMENT ""
-#   OUTPUT ${TCAM_VERSION_HEADER}
-#   )
 add_custom_command(
-  COMMAND ${CMAKE_COMMAND} -DVERSION_FILE_NAME=${TCAM_VERSION_HEADER}
+  COMMAND ${CMAKE_COMMAND} -DVERSION_FILE_NAME=${TCAM_VERSION_FILE}
   -DARAVIS_VERSION="${ARAVIS_VERSION}"
   -DARAVIS_GIT_COMMIT_HASH="${ARAVIS_GIT_COMMIT_HASH}"
   -DTCAM_VERSION="${TCAM_VERSION}"
   -DGIT_BRANCH="${GIT_BRANCH}"
   -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
   -DGIT_COMMIT_COUNT="${GIT_COMMIT_COUNT}"
-  -P "${CMAKE_SOURCE_DIR}/cmake/create_version_header.cmake"
+  -P "${CMAKE_SOURCE_DIR}/cmake/create_version_file.cmake"
   COMMENT ""
-  OUTPUT ${TCAM_VERSION_HEADER}
+  OUTPUT ${TCAM_VERSION_FILE}
   )
 
 
 add_custom_target(generate-version-file
-  DEPENDS ${TCAM_VERSION_HEADER})
+  DEPENDS ${TCAM_VERSION_FILE})
 
 
-add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base> ${TCAM_VERSION_HEADER})
-# add_dependencies(tcam-base version-header)
+add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base> ${TCAM_VERSION_FILE})
+
 add_dependencies(tcam-base generate-version-file)
 
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
