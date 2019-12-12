@@ -15,8 +15,8 @@
 
 string(TIMESTAMP _date "%Y.%m.%d %H:%M:%S")
 file(WRITE ${VERSION_FILE_NAME} "
-#ifndef TCAM_VERSION_H
-#define TCAM_VERSION_H
+
+#include \"version.h\"
 
 /* generated on ${_date} */
 
@@ -25,35 +25,34 @@ file(WRITE ${VERSION_FILE_NAME} "
 #define TCAM_ARAVIS_GIT_COMMIT_HASH \"${ARAVIS_GIT_COMMIT_HASH}\"
 #define TCAM_ARAVIS_VERSION \"${ARAVIS_VERSION}\"
 
-inline const char* get_commit_id ()
+const char* get_commit_id ()
 {
     return \"${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}\";
 }
 
-inline const char* get_version_number ()
+const char* get_version_number ()
 {
     return \"${TCAM_VERSION}\";
 }
 
-inline const char* get_version ()
+const char* get_version ()
 {
     return \"${TCAM_VERSION}_${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}\";
 }
 
-inline const char* get_aravis_commit_id ()
+const char* get_aravis_commit_id ()
 {
     return \"${ARAVIS_GIT_COMMIT_HASH}\";
 }
 
-inline const char* get_aravis_version_number ()
+const char* get_aravis_version_number ()
 {
     return \"${ARAVIS_VERSION}\";
 }
 
-inline const char* get_aravis_version ()
+const char* get_aravis_version ()
 {
     return \"${ARAVIS_VERSION}_version_${ARAVIS_GIT_COMMIT_HASH}\";
 }
 
-#endif /* TCAM_VERSION_H */
 ")
