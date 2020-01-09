@@ -42,18 +42,24 @@ enum class RowType
 
 
 template<typename TCharIterator>
-std::string getline (TCharIterator& begin, TCharIterator end, std::string delim)
+std::string getline (TCharIterator& begin, TCharIterator end)
 {
     std::string line;
 
-    for ( ; begin != end && !std::equal(delim.begin(), delim.end(), begin); ++begin)
+    // Apparently, jedec files can come with both \n or \r\n line endings
+
+    for ( ; (begin != end) && (*begin != '\r') && (*begin != '\n'); ++begin)
     {
         line += *begin;
     }
 
-    if (begin != end)
+    if( (begin != end) && (*begin == '\r') )
     {
-        begin += delim.length();
+        ++begin;
+    }
+    if( (begin != end) && (*begin == '\n') )
+    {
+        ++begin;
     }
 
     return line;
@@ -160,7 +166,7 @@ JedecFile JedecFile::Parse (const std::vector<uint8_t>& data)
     auto pos = data.begin();
     while (pos != data.end())
     {
-        auto line = getline(pos, data.end(), "\r\n");
+        auto line = getline(pos, data.end());
 
         if (state == RowType::FEATURE_ROW)
             state = RowType::FEATURE_BITS;
