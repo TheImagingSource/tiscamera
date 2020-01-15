@@ -140,15 +140,15 @@ class PropertyWidget(QWidget):
 
         self.sld.setFocusPolicy(Qt.NoFocus)
         try:
-            self.sld.setRange(self.prop.minval, self.prop.maxval)
+            self.sld.setRange(self.prop.minval * 100, self.prop.maxval * 100)
             self.sld.blockSignals(True)
-            self.sld.setValue(self.prop.value)
+            self.sld.setValue(self.prop.value * 100)
             self.sld.blockSignals(False)
 
         except OverflowError:
             log.error("Property {} reported a range "
                       "that could not be handled".format(self.prop.name))
-        self.sld.setSingleStep(self.prop.step)
+        self.sld.setSingleStep(self.prop.step * 100)
         self.sld.doubleClicked.connect(self.reset)
 
         self.sld.setGeometry(30, 40, 100, 30)
@@ -217,10 +217,10 @@ class PropertyWidget(QWidget):
             self.update_box_value(self.value_box, value)
 
         if self.prop.valuetype == "double":
-            self.update_box_value(self.value_box, value)
+            self.update_box_value(self.value_box, value / 100)
 
             self.signals.change_property.emit(self.tcam, self.prop.name,
-                                              float(value), self.prop.valuetype)
+                                              float(value / 100), self.prop.valuetype)
             return
 
         self.signals.change_property.emit(self.tcam, self.prop.name,
@@ -258,7 +258,11 @@ class PropertyWidget(QWidget):
     def update_slider_value(self, slider, value):
         slider.blockSignals(True)
         try:
-            slider.setValue(value)
+            if self.prop.valuetype == "double":
+                slider.setValue(value * 100)
+            else:
+                slider.setValue(value)
+
         except OverflowError:
             log.error("The slider for '{}' had a value outside of the integer "
                       "range. That should no happen.".format(self.prop.name))
@@ -269,8 +273,12 @@ class PropertyWidget(QWidget):
         """"""
         self.sld.blockSignals(True)
         try:
-            self.sld.setRange(self.prop.minval,
-                              self.prop.maxval)
+            if self.prop.valuetype == "double":
+                self.sld.setRange(self.prop.minval * 100,
+                                  self.prop.maxval * 100)
+            else:
+                self.sld.setRange(self.prop.minval,
+                                  self.prop.maxval)
         except OverflowError:
             log.error("The slider for '{}' had a value outside of the integer "
                       "range. That should no happen. "
