@@ -137,7 +137,7 @@ Writing the Firmware
       
       .. code-block:: sh
 
-         camera-ip-conf --serial <SERIAL> firmware=<path to firmware file>
+         camera-ip-conf upload --serial <SERIAL> firmware=<path to firmware file>
       
 
             
