@@ -99,6 +99,8 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
 
 
 static bool gst_tcam_src_init_camera (GstTcamSrc* self);
+static void gst_tcam_src_close_camera (GstTcamSrc* self);
+
 static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self);
 
 static void gst_tcam_src_prop_init (TcamPropInterface* iface)
@@ -1153,46 +1155,18 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         self->all_caps = nullptr;
     }
 
-    std::vector<tcam::DeviceInfo> infos = self->index_.get_device_list();
-    int dev_count = infos.size();
 
-    Logger::getInstance().set_external_callback(send_log_to_bus, self);
+    self->device = new struct device_state;
+    self->device->dev = tcam::open_device(self->device_serial, self->device_type);
 
-    GST_DEBUG_OBJECT (self, "Found %d devices.", dev_count);
-
-    if (!self->device_serial.empty())
+    if (!self->device->dev)
     {
-        GST_DEBUG_OBJECT (self, "Searching for device with serial %s.", self->device_serial.c_str());
+        GST_ERROR("Unable to open device. No stream possible.");
+        gst_tcam_src_close_camera(self);
+        return false;
     }
-    else
-    {
-        GST_DEBUG_OBJECT (self, "No serial given. Opening first available device.");
-    }
-
-    for (unsigned int i = 0; i < infos.size(); ++i)
-    {
-        if (!self->device_serial.empty())
-        {
-            GST_DEBUG("Comparing '%s' to '%s'", infos[i].get_serial().c_str(), self->device_serial.c_str());
-            if (strcmp(infos[i].get_serial().c_str(), self->device_serial.c_str()) == 0)
-            {
-                GST_DEBUG_OBJECT (self, "Found device.");
-
-                self->device = new struct device_state;
-                self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
-                self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
-                break;
-            }
-        }
-        else
-        {
-            self->device = new struct device_state;
-            self->device->dev = std::make_shared<tcam::CaptureDevice>(tcam::DeviceInfo(infos[i]));
-            self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
-            self->device_serial = infos[i].get_serial();
-            break;
-        }
-    }
+    self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
+    self->device_serial = self->device->dev->get_device().get_serial();
 
     if (self->device == NULL)
     {
@@ -1237,13 +1211,14 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
     {
         if (!gst_tcam_src_init_camera(self))
         {
-            gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
+            gst_base_src_start_complete(src, GST_FLOW_ERROR);
             return FALSE;
         }
     }
 
     self->timestamp_offset = 0;
     self->last_timestamp = 0;
+    gst_base_src_start_complete(src, GST_FLOW_OK);
 
     return TRUE;
 }
@@ -1662,8 +1637,10 @@ static void gst_tcam_src_set_property (GObject* object,
 
                 GST_INFO("Set camera name to %s", self->device_serial.c_str());
 
-                gst_tcam_src_close_camera(self);
-
+                if (self->device)
+                {
+                    gst_tcam_src_close_camera(self);
+                }
                 if (!self->device_serial.empty())
                 {
                     if (!gst_tcam_src_init_camera(self))
