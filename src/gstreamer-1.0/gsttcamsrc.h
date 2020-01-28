@@ -54,6 +54,7 @@ struct _GstTcamSrc
     GstPushSrc element;
 
     std::string device_serial;
+    TCAM_DEVICE_TYPE device_type;
 
     struct device_state* device;
 

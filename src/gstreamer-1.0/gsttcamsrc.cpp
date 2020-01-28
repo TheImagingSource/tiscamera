@@ -657,6 +657,7 @@ enum
 {
     PROP_0,
     PROP_SERIAL,
+    PROP_DEVICE_TYPE,
     PROP_DEVICE,
     PROP_CAM_BUFFERS,
     PROP_NUM_BUFFERS,
@@ -1589,6 +1590,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     new(&self->index_) tcam::DeviceIndex();
 
+    self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
     self->device = NULL;
     self->all_caps = NULL;
     self->fixed_caps = NULL;
@@ -1664,6 +1666,28 @@ static void gst_tcam_src_set_property (GObject* object,
                         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
                     }
                 }
+                else
+                {
+                    GST_DEBUG("Successfully opened device");
+                }
+            }
+            break;
+        }
+        case PROP_DEVICE_TYPE:
+        {
+            const char* type = g_value_get_string(value);
+
+            // this check is simply for messaging the user
+            // about invalid values
+            auto vec = tcam::get_device_type_list_strings();
+            if (std::find(vec.begin() , vec.end(), type) == vec.end())
+            {
+                GST_ERROR("Unknown device type '%s'", type);
+                self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+            }
+            else
+            {
+                self->device_type = tcam::tcam_device_from_string(type);
             }
             break;
         }
@@ -1747,6 +1771,12 @@ static void gst_tcam_src_get_property (GObject* object,
             }
             break;
         }
+        case PROP_DEVICE_TYPE:
+        {
+            g_value_set_string(value, tcam::tcam_device_type_to_string(self->device_type).c_str());
+
+            break;
+        }
         case PROP_CAM_BUFFERS:
         {
             g_value_set_int(value, self->imagesink_buffers);
@@ -1822,6 +1852,16 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                               "Serial of the camera",
                               NULL,
                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+   g_object_class_install_property
+        (gobject_class,
+         PROP_DEVICE_TYPE,
+         g_param_spec_string ("type",
+                              "Camera type",
+                              "type/backend of the camera",
+                              "auto",
+                              static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
     g_object_class_install_property
         (gobject_class,
          PROP_DEVICE,
