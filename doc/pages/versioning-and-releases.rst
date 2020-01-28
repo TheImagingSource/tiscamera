@@ -40,6 +40,18 @@ the scheme:
 
 v-tiscamera-MAJOR.MINOR.PATCH(~additional_info)
 
+Release Lifetime
+================
+
+Their dependencies are tailored to the current reference system.
+
+see: https://ubuntu.com/about/release-cycle
+
+Ubuntu 16.04 LTS will be supported until December 2019
+Ubuntu 18.04 LTS will be supported until December 2021
+Ubuntu 20.04 LTS will be supported until December 2023
+
+
 Pre-Release steps
 =================
 

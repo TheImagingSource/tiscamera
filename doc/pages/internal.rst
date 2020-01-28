@@ -72,11 +72,7 @@ libtcam
 -------
 
 The main library. Device indexing, property mappings, etc. is done here.
-
-libtcam-{aravis, v4l2, libusb}
-------------------------------
-
-These libraries represent the different backends. They are dynamically loaded by libtcam.
+The backends are also contained in this library.
 
 libtcamprop
 -----------
