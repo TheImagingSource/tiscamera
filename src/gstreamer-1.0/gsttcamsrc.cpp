@@ -1355,6 +1355,14 @@ static void gst_tcam_src_get_times (GstBaseSrc* basesrc,
 static void buffer_destroy_callback (gpointer data)
 {
     struct destroy_transfer* trans = (destroy_transfer*)data;
+
+    if (!GST_IS_TCAM_SRC(trans->self))
+    {
+        GST_ERROR("Received source is not valid.");
+        delete trans;
+        return;
+    }
+
     GstTcamSrc* self = trans->self;
     std::unique_lock<std::mutex> lck(self->mtx);
 
@@ -1364,7 +1372,14 @@ static void buffer_destroy_callback (gpointer data)
         return;
     }
 
-    self->device->sink->requeue_buffer(trans->ptr);
+    if (self->device)
+    {
+        self->device->sink->requeue_buffer(trans->ptr);
+    }
+    else
+    {
+        GST_ERROR("Unable to requeue buffer. Device is not open.");
+    }
 
     delete trans;
 }
