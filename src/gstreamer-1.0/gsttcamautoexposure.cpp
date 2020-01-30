@@ -1392,15 +1392,23 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->auto_exposure = TRUE;
     self->auto_gain = TRUE;
     self->auto_iris = TRUE;
+    self->gain_is_double = FALSE;
 
     self->exposure = {};
+    self->exposure.min = 0;
+    self->exposure.value = 0;
+    self->exposure.max = G_MAXINT;
+
     self->exposure_min = 0;
     self->exposure_max = G_MAXINT;
 
-    self->gain = {};
+    self->gain.min = 0;
+    self->gain.step = 0.1;
+    self->gain.value = 0.0;
+    self->gain.max = G_MAXDOUBLE;
+
     self->gain_min = 0.0;
     self->gain_max = G_MAXDOUBLE;
-    self->gain_is_double = FALSE;
 
     self->frame_counter = 0;
 
