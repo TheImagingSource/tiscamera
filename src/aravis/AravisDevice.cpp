@@ -604,6 +604,9 @@ bool AravisDevice::start_stream ()
                       "packet-timeout", (unsigned) this->arv_options.packet_timeout * 1000,
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
                       NULL);
+        g_object_set(this->stream,
+                     "packet-request-ratio", 1.0,
+                     NULL);
     }
 
     for (std::size_t i = 0; i < buffers.size(); ++i)
