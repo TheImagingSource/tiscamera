@@ -31,6 +31,18 @@ The value is in bytes.
 
    export TCAM_GIGE_PACKET_SIZE=9000
 
+TCAM_ARV_PACKET_REQUEST_RATIO
++++++++++++++++++++++++++++++
+
+`TCAM_ARV_PACKET_REQUEST_RATIO` allows setting the packet resend request limit
+as a percentage of frame packet number. See “packet-request-ratio” property of
+arvgvstream.
+The value has to be between 0.0 and 1.0.
+
+.. code-block:: sh
+
+   export TCAM_ARV_PACKET_REQUEST_RATIO=1.0
+
 .. _env_gstreamer:
  
 GStreamer

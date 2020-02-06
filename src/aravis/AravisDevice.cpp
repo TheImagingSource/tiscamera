@@ -150,6 +150,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     if (device.get_name().find("U") == std::string::npos)
     {
         auto_set_packet_size();
+        determine_packet_request_ratio();
     }
 
     handler = std::make_shared<AravisPropertyHandler>(this);
@@ -647,6 +648,33 @@ bool AravisDevice::stop_stream ()
     }
 
     return true;
+}
+
+
+void AravisDevice::determine_packet_request_ratio ()
+{
+    std::string arv_prr = tcam::get_environment_variable("TCAM_ARV_PACKET_REQUEST_RATIO", "0.1");
+
+    double eps = 0.0;
+    GError* err = nullptr;
+
+    try
+    {
+        eps = std::stof(arv_prr);
+    }
+    catch (...)
+    {
+        tcam_warning("Unable to interpret the value for TCAM_ARV_PACKET_REQUEST_RATIO. Falling back to default value.");
+    }
+
+    if (eps <= 0.0 || eps > 1.0)
+    {
+        this->arv_options.packet_request_ratio = 0.1;
+    }
+    else
+    {
+        this->arv_options.packet_request_ratio = eps;
+    }
 }
 
 

@@ -100,6 +100,10 @@ public:
 
 private:
 
+    // helper function to set
+    // aravis packet-request-ratio
+    void determine_packet_request_ratio ();
+
     // helper function to set packet size
     // depending on env and auto negotiation
     void auto_set_packet_size ();
@@ -135,6 +139,7 @@ private:
         bool auto_socket_buffer;
         unsigned int packet_timeout;
         unsigned int frame_retention;
+        double packet_request_ratio;
     };
 
     // these options are used to define aravis behaviour
