@@ -142,7 +142,7 @@ class PropertyWidget(QWidget):
         try:
             self.sld.setRange(self.prop.minval * 100, self.prop.maxval * 100)
             self.sld.blockSignals(True)
-            self.sld.setValue(self.prop.value * 100)
+            self.sld.setValue(int(self.prop.value * 100))
             self.sld.blockSignals(False)
 
         except OverflowError:
