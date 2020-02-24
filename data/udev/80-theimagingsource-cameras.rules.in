@@ -11,6 +11,12 @@ ACTION=="add", SUBSYSTEM=="drivers", \
                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
                RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/driver/uvcvideo'"
 
+# Second action with different sysfs path.
+# The API changed at one point so this path has been added.
+ACTION=="add", SUBSYSTEM=="drivers", \
+               ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
+               RUN+="/bin/sh -c 'echo 199e 8101 > /sys//bus/usb/drivers/uvcvideo/new_id'"
+
 # give users permission to interact with cameras
 SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
 
