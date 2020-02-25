@@ -30,25 +30,25 @@
 TEST_CASE("find_input_caps")
 {
 
-    bool has_dutils;
-    if (gst_element_factory_find("tcamdutils") != nullptr)
-    {
-        has_dutils = true;
-    }
-    else
-    {
-        WARN("No tcamdutils. Not all tests will be run");
-        has_dutils = false;
-    }
+    // bool has_dutils;
+    // if (gst_element_factory_find("tcamdutils") != nullptr)
+    // {
+    //     has_dutils = true;
+    // }
+    // else
+    // {
+    //     WARN("No tcamdutils. Not all tests will be run");
+    //     has_dutils = false;
+    // }
 
     for (unsigned int x = 0; x < fic_test_data.size(); x++)
     {
         auto &entry = fic_test_data.at(x);
 
-        if (entry.use_dutils && !has_dutils)
-        {
-            continue;
-        }
+        // if (entry.use_dutils && !has_dutils)
+        // {
+        //     continue;
+        // }
 
         SECTION(entry.name)
         {

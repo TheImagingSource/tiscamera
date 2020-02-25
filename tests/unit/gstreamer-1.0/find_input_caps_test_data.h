@@ -416,60 +416,6 @@ std::vector<fic_test_data_container> fic_test_data = {
         }
     },
 
-    {
-        "Dutils BGRx default",
-        // simplefied caps of AFU420
-
-        "video/x-bayer,format=gbrg,width=360,height=280,framerate={2/1,4057/10};"
-        "video/x-bayer,format=gbrg,width=1920,height=1200,framerate={2/1,10/1,60/1,100/1,2519/25};"
-        "video/x-bayer,format=gbrg,width=7680,height=4800,framerate={2/1, 3/1, 401/50 };"
-
-        "video/x-bayer,format=gbrg12m,width=360,height=280,framerate={2/1,10/1,250/1,13523/50};"
-        "video/x-bayer,format=gbrg12m,width=1920,height=1200,framerate={2/1,10/1,60/1,6717/100};"
-        "video/x-bayer,format=gbrg12m,width=3840,height=2160,framerate={2/1,10/1,15/1,20/1,2363/100};",
-        "video/x-raw,format=BGRx",
-        true,
-        {
-
-            "video/x-bayer,format=gbrg,width=360,height=280,framerate={2/1,4057/10};"
-            "video/x-bayer,format=gbrg,width=1920,height=1200,framerate={2/1,10/1,60/1,100/1,2519/25};"
-            "video/x-bayer,format=gbrg,width=7680,height=4800,framerate={2/1, 3/1, 401/50 };"
-
-            "video/x-bayer,format=gbrg12m,width=360,height=280,framerate={2/1,10/1,250/1,13523/50};"
-            "video/x-bayer,format=gbrg12m,width=1920,height=1200,framerate={2/1,10/1,60/1,6717/100};"
-            "video/x-bayer,format=gbrg12m,width=3840,height=2160,framerate={2/1,10/1,15/1,20/1,2363/100};",
-            false,
-            true,
-            false,
-            false,
-            true,
-        }
-    },
-
-    {
-        "Dutils Mono Caps BGRx conversion",
-
-        "video/x-raw,format=GRAY8,width=640,height=480,framerate={300/1,5000000/20833,120/1,60/1,30/1,15/1,5/1,1/1};"
-        "video/x-raw,format=GRAY8,width=1920,height=1080,framerate={90/1,120/1,60/1,30/1,15/1,5/1,1/1};"
-        "video/x-raw,format=GRAY8,width=2048,height=1536,framerate={60/1,30/1,15/1,5/1,1/1};"
-        "video/x-raw,format=GRAY16_LE,width=640,height=480,framerate={300/1,5000000/20833,120/1, "
-        "60/1,30/1,15/1,5/1,1/1 };"
-        "video/x-raw,format=GRAY16_LE,width=1920,height=1080,framerate={90/1,60/1,30/1,15/1,5/1,1/1};"
-        "video/x-raw,format=GRAY16_LE,width=2048,height=1536,framerate={50/1,30/1,15/1,5/1,1/1};"
-        "ANY",
-        "video/x-raw,format=BGRx,width=640,height=480,framerate=30/1",
-        true,
-        {
-            "video/x-raw,format=GRAY8,width=640,height=480,framerate=30/1;"
-            "video/x-raw,format=GRAY16_LE,width=640,height=480,framerate=30/1",
-            false,
-            true,
-            false,
-            false,
-            true,
-        }
-    },
-
     // {
     //     // afu130
     //     .name = "yuv dutils handling",
