@@ -11,6 +11,7 @@
 #include "dfk23ux236_caps.h"
 #include "dfk33ux290_caps.h"
 #include "dfk72_caps.h"
+#include "dfk22_caps.h"
 #include "dmk23gm021_caps.h"
 #include "dmk23uv024_caps.h"
 #include "dmk23gp031_caps.h"
