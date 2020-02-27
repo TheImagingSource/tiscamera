@@ -81,10 +81,10 @@ def main():
             enum_entries = camera.get_tcam_menu_entries(name)
 
             print("{}(enum) value: {} default: {} grouping {} - {}".format(name,
-                                                                               value,
-                                                                               default_value,
-                                                                               category,
-                                                                               group))
+                                                                           value,
+                                                                           default_value,
+                                                                           category,
+                                                                           group))
             print("Entries: ")
             for entry in enum_entries:
                 print("\t {}".format(entry))
