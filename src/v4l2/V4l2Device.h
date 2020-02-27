@@ -216,7 +216,7 @@ private:
 
     // streaming related
 
-    bool is_stream_on;
+    std::atomic<bool> is_stream_on;
     struct tcam_stream_statistics statistics;
     size_t current_buffer;
 
