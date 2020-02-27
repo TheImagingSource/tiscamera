@@ -25,6 +25,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <string>
+#include <atomic>
 #include "tcam.h"
 
 using namespace tcam;
@@ -61,7 +62,7 @@ struct _GstTcamSrc
     int n_buffers;
     int imagesink_buffers;
 
-    gboolean is_running;
+    std::atomic<bool> is_running;
     gboolean drop_incomplete_frames;
     int payload;
 
