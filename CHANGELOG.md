@@ -35,8 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Allows the selection of the backend when multiple are available
 - `tcam-ctrl --load` to load property state string
 - `tcam-ctrl --save` to save property state string
+- caps definitions for polarization cameras
+- TCAM_ARV_PACKET_REQUEST_RATIO environment variable
+- aravis version to HEAD of aravis-0.6 branch
 
 ### Changed
+
+- Reference system is now Ubuntu 18.04 LTS
 
 - Installation of static data is now unified under /usr/share/theimagingsource/tiscamera/
 - tcambin now only initializes jpegdec when tcamsrc offers image/jpeg
@@ -53,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - udev rules now only contain extension loading when required by BUILD_V4L2.
 - tcam-ctrl argument handling has been reworked. This changes the help message.
 - udev rules file now only contains uvc extension loading when v4l2 is configured
+- Line endings in 33U firmware files are handled differently
 
 ### Fixed
 
@@ -67,12 +73,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cmake install directories could not be set by user
 - tcam-capture issue with jumping ROI overlay
 - 'Strobe Exposure' control in extension units for 33U and 37U
+- gstmetatcamstatistics.h is installed into gstreamer-1.0 include directory
+- env.sh now respects existing environment variables
+- Segfault on buffer destruction on stream end in gsttcamsrc
+- Pipelines sometimes did not end when backend device could not be opened
+- Fix min/max ranges for tcamautoexposure properties with no device set
+- tcam-capture: Double slider behavior is now correct
+- thread lock up in the V4l2Device notification thread during destruction
+- Segfault in device lost callback in gsttcamsrc
 
 ### Removed
 
 - unused header files
 - tcam-ctrl -s flag for setting formats.
 - tcam-ctrl -s flag for setting properties. Replaced with state system.
+- unit tests for tiscamera-dutils. They are now part of the tiscamera-dutils repository
 
 
 ## [0.11.1] - 2019-05-22
