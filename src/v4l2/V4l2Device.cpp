@@ -109,7 +109,7 @@ V4l2Device::~V4l2Device ()
     // close write pipe fd
     close(udev_monitor_pipe[1]);
 
-    this->cv.notify_all();
+    this->notification_thread_cond_.notify_all();
 
     if (this->fd != -1)
     {
@@ -133,7 +133,10 @@ V4l2Device::~V4l2Device ()
         // we simply want to join all thread as
         // we already are destroying the device
         this->device_is_lost = false;
-        this->cv.notify_all();
+        {
+            std::lock_guard<std::mutex> lck( this->notification_thread_mutex_ );
+            this->notification_thread_cond_.notify_all();
+        }
 
         notification_thread.join();
     }
@@ -581,13 +584,16 @@ bool V4l2Device::stop_stream ()
 
 void V4l2Device::notification_loop ()
 {
-    auto reg_check = std::chrono::microseconds(2);
+    auto reg_check = std::chrono::seconds(2);
 
     while(this->is_stream_on)
     {
         {
-            std::unique_lock<std::mutex> lck(this->mtx);
-            this->cv.wait_for(lck, reg_check);
+            std::unique_lock<std::mutex> lck(this->notification_thread_mutex_);
+            if( !this->is_stream_on ) {
+                return;
+            }
+            this->notification_thread_cond_.wait_for( lck, reg_check );
         }
 
         if (this->device_is_lost)
@@ -1488,7 +1494,7 @@ void V4l2Device::stream ()
                     this->device_is_lost = true;
                     this->is_stream_on = false;
                     // tcam_error("Unable to retrieve buffer");
-                    this->cv.notify_all();
+                    this->notification_thread_cond_.notify_all();
                     break;
                 }
                 continue;
@@ -1514,7 +1520,7 @@ void V4l2Device::stream ()
                     this->is_stream_on = false;
 
                     // tcam_error("Unable to retrieve buffer");
-                    this->cv.notify_all();
+                    this->notification_thread_cond_.notify_all();
                     break;
                 }
             }

@@ -136,8 +136,8 @@ private:
 
     std::thread notification_thread;
 
-    std::condition_variable cv;
-    std::mutex mtx;
+    std::condition_variable notification_thread_cond_;
+    std::mutex notification_thread_mutex_;
 
     int fd;
 

@@ -97,6 +97,7 @@ build/
 .vscode/
 nbproject
 .vs/
+/out
 
 # kdevelop
 
