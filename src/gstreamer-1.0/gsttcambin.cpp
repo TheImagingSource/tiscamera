@@ -692,6 +692,29 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
         GST_INFO("Caps are fixed. Using caps for src: %s", gst_caps_to_string(self->src_caps));
     }
 
+    // explicitly destroy the pipeline caps
+    // when having a start/stop cycle that goes PLAYING-READY-PLAYING, etc
+    // the capsfilter sometimes refuses to correctly link again
+    // by simply destroying it and creating a new one we work around this issue
+
+    if (self->pipeline_caps)
+    {
+        gst_element_set_state(self->pipeline_caps, GST_STATE_NULL);
+        gst_bin_remove(GST_BIN(self), self->pipeline_caps);
+    }
+
+    self->pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
+
+    if (self->pipeline_caps == nullptr)
+    {
+        GST_ERROR("Could not create internal pipeline caps. Aborting");
+        return FALSE;
+    }
+
+    gst_bin_add(GST_BIN(self), self->pipeline_caps);
+
+    // back to normal linking
+
     g_object_set(self->pipeline_caps, "caps", self->src_caps, NULL);
 
     gboolean ret = gst_element_link(self->src,
