@@ -245,7 +245,10 @@ class TcamView(QWidget):
             log.debug("Setting state to NULL")
             # Set to NULL to ensure that buffers,
             # etc are destroyed.
-            self.pipeline.set_state(Gst.State.NULL)
+            # do this by calling stop
+            # so that additional steps like fps.stop()
+            # are taken
+            self.stop()
             self.pipeline.set_state(Gst.State.READY)
 
         if video_format:
