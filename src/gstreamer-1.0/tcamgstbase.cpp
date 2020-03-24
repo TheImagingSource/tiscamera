@@ -1100,18 +1100,34 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
                 if (!gst_caps_is_fixed(available_caps))
                 {
                     if (!gst_caps_is_empty(wanted_caps) &&
-                        g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0)
+                        (g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0))
                     {
-                        GstCaps* possible_matches = create_caps_for_formats(available_caps, wanted_caps);
 
-                        if (!possible_matches || gst_caps_is_empty(possible_matches))
+                        if (!gst_caps_is_fixed(wanted_caps))
                         {
-                            tcam_error("No possible matches for dutils.");
-                            return nullptr;
-                        }
+                            ret = gst_caps_intersect(available_caps, wanted_caps);
 
-                        ret = gst_caps_intersect(available_caps, possible_matches);
-                        gst_caps_unref(possible_matches);
+                            if (gst_caps_is_empty(ret))
+                            {
+                                gst_caps_unref(ret);
+                                return gst_caps_copy(available_caps);
+                            }
+
+                        }
+                        else
+                        {
+                            GstCaps* possible_matches = create_caps_for_formats(available_caps,
+                                                                                wanted_caps);
+
+                            if (!possible_matches || gst_caps_is_empty(possible_matches))
+                            {
+                                tcam_error("No possible matches for dutils.");
+                                return nullptr;
+                            }
+
+                            ret = gst_caps_intersect(available_caps, possible_matches);
+                            gst_caps_unref(possible_matches);
+                        }
                     }
                     else
                     {
@@ -1135,9 +1151,13 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
             gst_object_unref(biteater);
         }
         gst_object_unref(dutils);
-    }
 
-    tcam_error("Could not create dutils.");
+        tcam_error("Could not negotiate caps");
+    }
+    else
+    {
+        tcam_error("Could not create dutils.");
+    }
     return nullptr;
 }
 
