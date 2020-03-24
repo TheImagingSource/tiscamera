@@ -21,6 +21,7 @@ from tcam_capture.MediaSaver import MediaSaver
 from tcam_capture.Settings import Settings
 from tcam_capture.Encoder import MediaType, get_encoder_dict
 from tcam_capture.TcamCaptureData import TcamCaptureData
+from tcam_capture.FPSCounter import FPSCounter
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout)
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
@@ -70,9 +71,7 @@ class TcamView(QWidget):
         self.caps_desc = None
         self.video_format = None
         self.retry_countdown = 0
-        self.actual_fps = 0.0
-        self.framecounter = 0
-        self.start_time = 0
+
         self.settings = None
         self.video_fng = None
         self.image_fng = None
@@ -81,7 +80,7 @@ class TcamView(QWidget):
         # when no images arrive
         self.fps_timer = QtCore.QTimer()
         self.fps_timer.timeout.connect(self.fps_tick)
-
+        self.fps = None
         self.file_pattern = ""
         self.file_location = "/tmp"
         self.caps = None
@@ -275,9 +274,9 @@ class TcamView(QWidget):
 
         log.debug("Setting state to PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
-        self.start_time = 0
-        self.framecounter = 0
         self.fps_timer.start(1000)  # 1 second
+        self.fps = FPSCounter()
+        self.fps.start()
         self.container.first_image = True
         if self.is_trigger_mode_on():
             self.container.wait_for_first_image()
@@ -286,15 +285,7 @@ class TcamView(QWidget):
         """
         Recalculate the current fps and emit current_fps signal
         """
-        self.framecounter += 1
-        if self.start_time == 0:
-            self.start_time = time.time()
-        else:
-            diff = int(time.time() - self.start_time)
-            if diff == 0:
-                return
-            self.actual_fps = self.framecounter / diff
-            self.current_fps.emit(self.actual_fps)
+        self.current_fps.emit(self.fps.get_fps())
 
     def new_buffer(self, appsink):
         """
@@ -313,6 +304,7 @@ class TcamView(QWidget):
             if self.current_height == 0:
                 self.current_height = struc.get_value("height")
 
+            self.fps.tick()
             self.fps_tick()
 
             if self.container.first_image:
@@ -379,17 +371,19 @@ class TcamView(QWidget):
             self.pipeline.set_state(Gst.State.PAUSED)
         else:
             log.error("Pipeline object does not exist.")
-        self.start_time = 0
-        self.framecounter = 0
+
         self.fps_timer.stop()
+        if self.fps:
+            self.fps.stop()
 
     def stop(self):
         """
         Stop playback
         """
         log.info("Setting state to NULL")
-        self.start_time = 0
         self.fps_timer.stop()
+        if self.fps:
+            self.fps.stop()
 
         self.pipeline.set_state(Gst.State.NULL)
 
