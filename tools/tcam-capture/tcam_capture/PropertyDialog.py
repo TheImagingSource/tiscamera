@@ -18,7 +18,7 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget,
                              QFormLayout, QPushButton, QScrollArea)
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 
 import logging
 
@@ -28,6 +28,9 @@ log = logging.getLogger(__name__)
 class PropertyTree(QWidget):
     """
     """
+
+    request_visibility = pyqtSignal(str, bool)
+
     def __init__(self, data, parent=None):
         super(PropertyTree, self).__init__(parent)
         self.tcam = data.tcam
@@ -92,7 +95,11 @@ class PropertyTree(QWidget):
         try:
             self.prop_dict[prop.name].update(prop)
         except KeyError as e:
+            log.error(e)
             self.add_property(prop)
+
+            if not self.isVisible():
+                self.request_visibility.emit(prop.category, True)
 
     def reset(self):
         for key, item in self.prop_dict.items():
@@ -162,11 +169,16 @@ class PropertyWorker(QObject):
 
 class PropertyDialog(QWidget):
 
+    # allows the disabling/enabling of tabs
+    # after initial setup
+    toggle_tab_visibility = pyqtSignal(str, bool)
+
     def __init__(self, data, display_area, parent=None):
         super(PropertyDialog, self).__init__(parent)
         self.setWindowTitle("Tcam-Capture Device Properties")
         self.data = data
         self.display_area = display_area
+        self.visible_tabs = []
         self.work_thread = QtCore.QThread()
 
         self.setup_ui()
@@ -200,8 +212,14 @@ class PropertyDialog(QWidget):
             "Special": PropertyTree(self.data, self),
             "Partial Scan": PropertyTree(self.data, self),
             "Image": PropertyTree(self.data, self),
+            "WDR": PropertyTree(self.data, self),
             "Unknown": PropertyTree(self.data, self)
         }
+
+        for val in self.tab_dict.values():
+
+            val.request_visibility.connect(self.__toggle_tab)
+
         prop_names = self.data.tcam.get_tcam_property_names()
 
         for name in prop_names:
@@ -230,27 +248,77 @@ class PropertyDialog(QWidget):
         # the order of these entries is equivalent to the tab order
         # in the application
         tab_list = ["Exposure", "Image", "Color",
-                    "Lens", "Special", "Partial Scan", "Unknown"]
+                    "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
 
         for t in tab_list:
-            tab = self.tab_dict[t]
-            if tab.get_property_count() > 0:
-                # wrap in scrollarea to ensure accessability
-                area = QScrollArea()
-                area.setWidgetResizable(True)
-                area.setWidget(tab)
-                tab.finish_setup()
-                if tab.roi_widget:
-                    tab.roi_widget.display_area = self.display_area
-                self.tabs.addTab(area, t)
-            else:
-                tab.setVisible(False)
+            self.__add_tab(t)
 
         self.worker = PropertyWorker(self.data.tcam,
                                      self.data.signals,
                                      self.tab_dict,
                                      None)  # parent of movable objects must not exists
         self.worker.moveToThread(self.work_thread)
+
+    def __add_tab(self, name):
+        """
+        Add tab with name to PropertyDialog
+        """
+        try:
+            tab = self.tab_dict[name]
+
+            if tab.get_property_count() > 0:
+                tab.setVisible(True)
+            else:
+                log.debug("Tab {} has no properties".format(name))
+                tab.setVisible(False)
+                return
+
+            # wrap in scrollarea to ensure accessability
+            area = QScrollArea()
+            area.setWidgetResizable(True)
+            area.setWidget(tab)
+            tab.finish_setup()
+            if tab.roi_widget:
+                tab.roi_widget.display_area = self.display_area
+
+            # the order of these entries is equivalent to the tab order
+            # in the application
+            tab_list = ["Exposure", "Image", "Color",
+                        "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
+
+            # we want the tabs in a certain sequence
+            # since we do not know which of these
+            # already exist we have to manually count all
+            # visible tabs before us to get the correct index
+            our_index = tab_list.index(name)
+            pos = 0
+            for t in range(our_index):
+
+                if tab_list[t] in self.visible_tabs:
+                    pos += 1
+
+            log.debug(pos)
+            self.tabs.insertTab(pos, area, name)
+
+            area.setVisible(True)
+
+            log.info("Added tab {}".format(name))
+            log.debug("tab index count is {}".format(self.tabs.count()))
+            self.visible_tabs.append(name)
+
+        except KeyError as err:
+            log.error(err)
+
+    def __toggle_tab(self, tab_name: str, make_visible: str):
+        """
+        Slot for adding tab to PropertyDialog
+        """
+
+        try:
+            self.__add_tab(tab_name)
+
+        except TypeError as err:
+            log.error("Unable to find property tab. {}".format(err))
 
     def reset(self):
         for key, t in self.tab_dict.items():
