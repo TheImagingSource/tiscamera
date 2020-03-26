@@ -689,8 +689,6 @@ void rescue (std::vector<std::string> args)
         return;
     }
 
-    return;
-
     try
     {
         sendIpRecovery(mac, ip2int(ip), ip2int(subnet), ip2int(gateway));
