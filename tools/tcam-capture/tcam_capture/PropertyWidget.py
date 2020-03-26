@@ -343,11 +343,11 @@ class PropertyWidget(QWidget):
     def reset(self):
         if self.prop.valuetype == "integer":
             self.update_box_value(self.value_box, self.prop.defval)
-            self.sld.setValue(self.prop.defval)
+            self.update_slider_value(self.sld, self.prop.defval)
 
         elif self.prop.valuetype == "double":
             self.update_box_value(self.value_box, self.prop.defval)
-            self.sld.setValue(self.prop.defval)
+            self.update_slider_value(self.sld, self.prop.defval)
 
         elif self.prop.valuetype == "button":
             pass
@@ -361,3 +361,5 @@ class PropertyWidget(QWidget):
         elif self.prop.valuetype == "enum":
             self.combo.setCurrentText(self.prop.defval)
         self.value_changed.emit(self)
+        self.signals.change_property.emit(self.tcam, self.prop.name,
+                                          self.prop.defval, self.prop.valuetype)
