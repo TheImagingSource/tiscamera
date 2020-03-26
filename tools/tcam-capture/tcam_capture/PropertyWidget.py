@@ -140,15 +140,17 @@ class PropertyWidget(QWidget):
 
         self.sld.setFocusPolicy(Qt.NoFocus)
         try:
-            self.sld.setRange(self.prop.minval * 100, self.prop.maxval * 100)
+            self.sld.setRange(int(self.prop.minval * 100), int(self.prop.maxval * 100))
             self.sld.blockSignals(True)
             self.sld.setValue(int(self.prop.value * 100))
             self.sld.blockSignals(False)
 
         except OverflowError:
-            log.error("Property {} reported a range "
-                      "that could not be handled".format(self.prop.name))
-        self.sld.setSingleStep(self.prop.step * 100)
+            log.warning("Property {} reported a range "
+                        "that could not be handled min: {} max: {}".format(self.prop.name,
+                                                                           self.prop.minval,
+                                                                           self.prop.maxval))
+        self.sld.setSingleStep(int(self.prop.step * 100))
         self.sld.doubleClicked.connect(self.reset)
 
         self.sld.setGeometry(30, 40, 100, 30)
@@ -259,7 +261,7 @@ class PropertyWidget(QWidget):
         slider.blockSignals(True)
         try:
             if self.prop.valuetype == "double":
-                slider.setValue(value * 100)
+                slider.setValue(int(value * 100))
             else:
                 slider.setValue(value)
 
