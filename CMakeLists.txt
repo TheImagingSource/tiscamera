@@ -69,11 +69,9 @@ option(BUILD_TESTS    "Build tests."                         OFF)
 option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
 option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
 
-# auto disable v4l2 when activating aravis Usb3Vision
 if (TCAM_ARAVIS_USB_VISION)
-
+  # activate aravis since we need it for usb3vision
   set(BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
-  set(BUILD_V4L2 OFF CACHE BOOL "Include support for USB cameras" FORCE)
 
 endif (TCAM_ARAVIS_USB_VISION)
 
