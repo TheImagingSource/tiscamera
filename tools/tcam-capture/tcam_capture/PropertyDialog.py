@@ -94,8 +94,7 @@ class PropertyTree(QWidget):
     def update(self, prop):
         try:
             self.prop_dict[prop.name].update(prop)
-        except KeyError as e:
-            log.error(e)
+        except KeyError:
             self.add_property(prop)
 
             if not self.isVisible():
