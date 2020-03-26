@@ -25,6 +25,12 @@ include(CPackComponent)
 #
 # If a git tag is present it will replace branch and commit hash
 #     tiscamera_MAJ.MIN.PAT.COMMIT_COUNT_tag_arch.deb
+#
+# If the built version is NOT a Release build,
+# the build type will be additionally appended.
+# this will always be lower case
+#     tiscamera_MAJ.MIN.PAT_arch_buildtype.deb
+#
 
 function (create_package_name return_value name version)
 
@@ -38,10 +44,29 @@ function (create_package_name return_value name version)
 
     git_commit_tag(GIT_TAG)
 
+    set(build_type "")
+
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+      # empty since 'Release' is considered the default
+      set(build_type "")
+
+    else ()
+
+      # prepend a '_' this makes the rest of the name generation easier
+      # build_type will always be the last property in the string
+      # so no problems should be created by this
+      set(build_type "_${CMAKE_BUILD_TYPE}")
+
+    endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+    # we do not want '_Debug' as a string but '_debug'
+    string(TOLOWER "${build_type}" build_type)
+
     if (GIT_TAG)
 
       set(${return_value}
-        "${name}_${version}_${GIT_TAG}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}"
+        "${name}_${version}_${GIT_TAG}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}"
         PARENT_SCOPE)
 
     else ()
@@ -55,18 +80,18 @@ function (create_package_name return_value name version)
 
         if ("${GIT_BRANCH}" STREQUAL "master")
           set(${return_value}
-            "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" PARENT_SCOPE)
+            "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
         else ()
           set(${return_value}
-            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}"
+            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}"
             PARENT_SCOPE)
 
         endif ("${GIT_BRANCH}" STREQUAL "master")
 
-      else () # this will be the case when users download the github zip and compile on deb systems
+      else () # this will be the case when users download the github zip and compiles on deb systems
 
         set(${return_value}
-          "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" PARENT_SCOPE)
+          "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
 
       endif(GIT_COMMIT_HASH)
 
@@ -75,7 +100,7 @@ function (create_package_name return_value name version)
   else(DPKG_PROGRAM)
 
     set(${return_value}
-      "${name}_${version}_${CMAKE_SYSTEM_NAME}" PARENT_SCOPE)
+      "${name}_${version}_${CMAKE_SYSTEM_NAME}${build_type}" PARENT_SCOPE)
 
   endif(DPKG_PROGRAM)
 
