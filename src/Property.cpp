@@ -499,6 +499,21 @@ bool Property::get_property_from_struct (tcam_device_property& _prop)
     return true;
 }
 
+
+std::vector<std::string> Property::get_possible_values() const
+{
+    std::vector<std::string> ret;
+    ret.reserve(string_map.size())
+
+    for (const auto& e : string_map)
+    {
+        ret.push_back(e.first);
+    }
+
+    return ret;
+}
+
+
 bool Property::get_property (Property& p)
 {
     p.set_struct(prop);

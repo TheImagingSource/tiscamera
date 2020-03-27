@@ -150,6 +150,9 @@ public:
     bool get_property (Property&);
     bool get_property_from_struct (tcam_device_property&);
 
+    // only applicable to enums
+    std::vector<std::string> get_possible_values() const;
+
 protected:
 
     std::weak_ptr<PropertyImpl> impl;
