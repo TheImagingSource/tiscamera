@@ -76,6 +76,7 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries (TcamProp* self,
                                                    const gchar* name);
 
 static GSList* gst_tcam_bin_get_device_serials (TcamProp* self);
+static GSList* gst_tcam_bin_get_device_serials_backend (TcamProp* self);
 
 static gboolean gst_tcam_bin_get_device_info (TcamProp* self,
                                               const char* serial,
@@ -91,6 +92,7 @@ static void gst_tcam_bin_prop_init (TcamPropInterface* iface)
     iface->get_menu_entries = gst_tcam_bin_get_tcam_menu_entries;
     iface->set_property = gst_tcam_bin_set_tcam_property;
     iface->get_device_serials = gst_tcam_bin_get_device_serials;
+    iface->get_device_serials_backend = gst_tcam_bin_get_device_serials_backend;
     iface->get_device_info = gst_tcam_bin_get_device_info;
 }
 
@@ -335,6 +337,23 @@ static GSList* gst_tcam_bin_get_device_serials (TcamProp* self __attribute((__un
 }
 
 
+static GSList* gst_tcam_bin_get_device_serials_backend (TcamProp* self __attribute((__unused__)))
+{
+    GstElement* src = gst_element_factory_make("tcamsrc", nullptr);
+    if (src == nullptr)
+    {
+        g_critical("Failed to create a tcamsrc");
+        return nullptr;
+    }
+
+    GSList *serials = tcam_prop_get_device_serials_backend(TCAM_PROP(src));
+
+    gst_object_unref(src);
+
+    return serials;
+}
+
+
 static gboolean gst_tcam_bin_get_device_info (TcamProp* self __attribute((__unused__)),
                                               const char* serial,
                                               char** name,
@@ -369,6 +388,7 @@ enum
 {
     PROP_0,
     PROP_SERIAL,
+    PROP_DEVICE_TYPE,
     PROP_DEVICE_CAPS,
     PROP_USE_DUTILS,
     PROP_STATE
@@ -1231,6 +1251,19 @@ static void gst_tcambin_get_property (GObject* object,
             }
             break;
         }
+        case PROP_DEVICE_TYPE:
+        {
+
+            if (self->src)
+            {
+                g_object_get_property(G_OBJECT(self->src), "type", value);
+            }
+            else
+            {
+                g_value_set_string(value, self->device_type);
+            }
+            break;
+        }
         case PROP_DEVICE_CAPS:
         {
             g_value_set_string(value, gst_caps_to_string(self->user_caps));
@@ -1289,6 +1322,16 @@ static void gst_tcambin_set_property (GObject* object,
                 g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
             }
 
+            break;
+        }
+        case PROP_DEVICE_TYPE:
+        {
+            self->device_type = g_strdup(g_value_get_string(value));
+            if (self->src != nullptr)
+            {
+                GST_INFO("Setting source device type to %s", g_value_get_string(value));
+                g_object_set(G_OBJECT(self->src), "type", self->device_type, NULL);
+            }
             break;
         }
         case PROP_DEVICE_CAPS:
@@ -1415,6 +1458,16 @@ static void gst_tcambin_class_init (GstTcamBinClass* klass)
                                                         "Serial of the camera that shall be used",
                                                         "",
                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+
+    g_object_class_install_property
+        (object_class,
+         PROP_DEVICE_TYPE,
+         g_param_spec_string("type",
+                             "Camera type",
+                             "type/backend of the camera",
+                             "auto",
+                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
 
     g_object_class_install_property(object_class,

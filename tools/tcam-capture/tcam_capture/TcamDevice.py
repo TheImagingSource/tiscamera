@@ -74,12 +74,14 @@ class TcamDeviceIndex(QObject):
 
     def create_device_list(self):
 
-        serials = self.tcam.get_device_serials()
+        serials = self.tcam.get_device_serials_backend()
         device_list = []
 
         for s in serials:
-            (status, name, ident, connection_type) = self.tcam.get_device_info(s)
-            d = TcamDevice(connection_type, s, name)
+            serial, ty = s.split("-")
+
+            (status, name, ident, connection_type) = self.tcam.get_device_info(serial)
+            d = TcamDevice(ty, serial, name)
             device_list.append(d)
 
         # self.device_list will be None on first run

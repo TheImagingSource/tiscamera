@@ -48,7 +48,7 @@ class TcamView(QWidget):
     format_selected = pyqtSignal(str, str, str)  # format, widthxheight, framerate
     first_image = pyqtSignal()
 
-    def __init__(self, serial, parent=None):
+    def __init__(self, serial: str, dev_type: str, parent=None):
         super(TcamView, self).__init__(parent)
         self.layout = QHBoxLayout()
         self.container = TcamScreen(self)
@@ -60,6 +60,7 @@ class TcamView(QWidget):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.setLayout(self.layout)
         self.serial = serial
+        self.dev_type = dev_type
         self.tcam = None
         self.pipeline = None
         self.image = None
@@ -270,7 +271,7 @@ class TcamView(QWidget):
             self.tcam.set_property("state", str(self.state))
             self.state = None
         else:
-            log.info("No property state found. Starting vanilla camera")
+            log.info("No property state to be applied. Starting vanilla camera")
 
         log.debug("Setting state to PLAYING")
         self.pipeline.set_state(Gst.State.PLAYING)
@@ -330,6 +331,13 @@ class TcamView(QWidget):
         return Gst.FlowReturn.OK
 
     def create_pipeline(self, video_format=None):
+
+        # we cheat
+        # inject the type into the serial
+        # this ensures that no matter what we
+        # always have the correct backend
+        if self.dev_type:
+            self.serial = "{}-{}".format(self.serial, self.dev_type.lower())
 
         # the queue element before the sink is important.
         # it allows set_state to work as expected.

@@ -60,11 +60,13 @@ struct _TcamPropInterface
                               const gchar* name,
                               const GValue* value);
 	GSList* (*get_device_serials) (TcamProp* self);
+	GSList* (*get_device_serials_backend) (TcamProp* self);
 	gboolean (*get_device_info) (TcamProp* self,
                                  const char* serial,
                                  char** name,
                                  char** identifier,
                                  char** connection_type);
+
 };
 
 
@@ -94,6 +96,8 @@ gboolean tcam_prop_set_tcam_property (TcamProp* self,
                                       const GValue* value);
 
 GSList* tcam_prop_get_device_serials (TcamProp* self);
+
+GSList* tcam_prop_get_device_serials_backend (TcamProp* self);
 
 gboolean tcam_prop_get_device_info (TcamProp* self,
                                     const char* serial,

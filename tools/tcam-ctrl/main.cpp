@@ -115,6 +115,31 @@ int main (int argc, char *argv[])
         return 0;
     }
 
+    // additional check for serial format
+    // <serial>-<dev-type>
+    //
+    auto pos = serial.find("-");
+    std::string new_type;
+
+    if (pos != std::string::npos)
+    {
+        new_type = serial.substr(pos+1);
+        serial = serial.substr(0, pos);
+
+        if (device_type != "unknown" && !device_type.empty())
+        {
+            if (device_type != new_type)
+            {
+                std::cerr << "Given device types in serial and type missmatch. '"
+                          << device_type << "' - " << new_type << std::endl;
+                return 1;
+            }
+        }
+        else
+        {
+            device_type = new_type;
+        }
+    }
 
     auto t = tcam::tcam_device_from_string(device_type);
 

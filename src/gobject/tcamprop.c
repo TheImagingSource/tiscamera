@@ -228,6 +228,35 @@ GSList* tcam_prop_get_device_serials (TcamProp* self)
 
 
 /**
+ * tcam_prop_get_device_serials_backend:
+ * @self: a #TcamProp
+ *
+ * Retrieve a list of all connected device serial numbers
+ * Appended to the serial number is the backend,
+ * serparated by a hyphen "-".
+ *
+ * Returns: (element-type utf8) (transfer full): a #GSList
+ */
+GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
+{
+    TcamPropInterface* iface;
+    GSList* ret = NULL;
+
+    g_return_val_if_fail (self != NULL, NULL);
+    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+
+    iface = TCAM_PROP_GET_IFACE (self);
+
+    if (iface->get_device_serials_backend)
+    {
+        ret = iface->get_device_serials_backend (self);
+    }
+
+    return ret;
+}
+
+
+/**
  * tcam_prop_get_device_info:
  * @self: a #TcamProp
  * @serial: (in): serial number of camera to query

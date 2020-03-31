@@ -50,6 +50,45 @@
 GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
+// helper functions
+
+
+const char* type_to_str (TCAM_DEVICE_TYPE type)
+{
+    switch (type)
+    {
+        case TCAM_DEVICE_TYPE_V4L2:
+            return "v4l2";
+        case TCAM_DEVICE_TYPE_ARAVIS:
+            return "aravis";
+        case TCAM_DEVICE_TYPE_LIBUSB:
+            return "libusb";
+        default:
+            return "unknown";
+    }
+}
+
+
+TCAM_DEVICE_TYPE str_to_type (const std::string& str)
+{
+    if (str == "aravis")
+    {
+        return TCAM_DEVICE_TYPE_ARAVIS;
+    }
+    else if (str == "v4l2")
+    {
+        return TCAM_DEVICE_TYPE_V4L2;
+    }
+    else if (str == "libusb")
+    {
+        return TCAM_DEVICE_TYPE_LIBUSB;
+    }
+    else
+    {
+        return TCAM_DEVICE_TYPE_UNKNOWN;
+    }
+}
+
 
 struct destroy_transfer
 {
@@ -90,6 +129,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
                                                 const GValue* value);
 
 static GSList* gst_tcam_src_get_device_serials (TcamProp* self);
+static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self);
 
 static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                               const char* serial,
@@ -111,6 +151,7 @@ static void gst_tcam_src_prop_init (TcamPropInterface* iface)
     iface->get_menu_entries = gst_tcam_src_get_menu_entries;
     iface->set_property = gst_tcam_src_set_tcam_property;
     iface->get_device_serials = gst_tcam_src_get_device_serials;
+    iface->get_device_serials_backend = gst_tcam_src_get_device_serials_backend;
     iface->get_device_info = gst_tcam_src_get_device_info;
 }
 
@@ -590,6 +631,25 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 }
 
 
+static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self)
+{
+    GstTcamSrc* s = GST_TCAM_SRC(self);
+
+    std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
+
+    GSList* ret = NULL;
+
+    for (const auto& d : devices)
+    {
+        std::string s = d.get_serial() + "-" + d.get_device_type_as_string();
+        ret = g_slist_append(ret,
+                             g_strndup(s.c_str(), s.size()));
+    }
+
+    return ret;
+}
+
+
 static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                               const char* serial,
                                               char** name,
@@ -608,13 +668,38 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
         return FALSE;
     }
 
+    std::string input = serial;
+    std::string actual_serial;
+    std::string type;
+
+    auto pos = input.find("-");
+
+    if (pos != std::string::npos)
+    {
+        actual_serial = input.substr(0, pos);
+        type = input.substr(pos+1);
+    }
+    else
+    {
+        actual_serial = serial;
+    }
+
     for (const auto& d : devices)
     {
         struct tcam_device_info info = d.get_info();
 
-        if (!strncmp (serial, info.serial_number,
+        if (!strncmp (actual_serial.c_str(), info.serial_number,
                       sizeof (info.serial_number)))
         {
+            if (!type.empty())
+            {
+                const char* t = type_to_str(info.type);
+                if (!strncmp(type.c_str(), t, sizeof(*t)))
+                {
+                    continue;
+                }
+            }
+
             ret = TRUE;
             if (name)
             {
@@ -628,21 +713,8 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
             // TODO: unify with deviceinfo::get_device_type_as_string
             if (connection_type)
             {
-                switch (info.type)
-                {
-                    case TCAM_DEVICE_TYPE_V4L2:
-                        *connection_type = g_strdup ("v4l2");
-                        break;
-                    case TCAM_DEVICE_TYPE_ARAVIS:
-                        *connection_type = g_strdup ("aravis");
-                        break;
-                    case TCAM_DEVICE_TYPE_LIBUSB:
-                        *connection_type = g_strdup("libusb");
-                        break;
-                    default:
-                        *connection_type = g_strdup ("unknown");
-                        break;
-                }
+                auto t = type_to_str(info.type);
+                *connection_type = g_strndup(t, sizeof(*t));
             }
             break;
         }
@@ -1147,6 +1219,30 @@ void send_log_to_bus (void* user_data,
 }
 
 
+void separate_serial_and_type (GstTcamSrc* self, const std::string& input)
+{
+    auto pos = input.find("-");
+
+    if (pos != std::string::npos)
+    {
+        // assign to tmp variables
+        // input could be self->device_serial
+        // overwriting it would ivalidate input for
+        // device_type retrieval
+        std::string tmp1 = input.substr(0, pos);
+        std::string tmp2 = input.substr(pos+1);
+
+        self->device_serial = tmp1;
+        self->device_type = str_to_type(tmp2);
+    }
+    else
+    {
+        self->device_serial = input;
+        self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+    }
+}
+
+
 bool gst_tcam_src_init_camera (GstTcamSrc* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
@@ -1162,6 +1258,11 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
         self->all_caps = nullptr;
     }
 
+
+    separate_serial_and_type(self, self->device_serial);
+
+    GST_DEBUG("Opening device. Serial: '%s Type: '%s'",
+              self->device_serial.c_str(), type_to_str(self->device_type));
 
     self->device = new struct device_state;
     self->device->dev = tcam::open_device(self->device_serial, self->device_type);
@@ -1689,13 +1790,14 @@ static void gst_tcam_src_set_property (GObject* object,
             // this check is simply for messaging the user
             // about invalid values
             auto vec = tcam::get_device_type_list_strings();
-            if (std::find(vec.begin() , vec.end(), type) == vec.end())
+            if (std::find(vec.begin() , vec.end(), std::string(type)) == vec.end())
             {
                 GST_ERROR("Unknown device type '%s'", type);
                 self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
             }
             else
             {
+                GST_DEBUG("Setting device type to %s", type);
                 self->device_type = tcam::tcam_device_from_string(type);
             }
             break;

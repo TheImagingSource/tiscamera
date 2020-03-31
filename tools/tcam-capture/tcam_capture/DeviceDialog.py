@@ -40,7 +40,9 @@ class SelectionWidget(QListWidgetItem):
 
         self.layout = QVBoxLayout()
         self.setTextAlignment(Qt.AlignHCenter)
-        self.setText(self.device.model + "\n" + self.device.serial)
+        self.setText(self.device.model + "\n"
+                     + self.device.serial + "\n"
+                     + self.device.device_type)
         self.select_icon()
 
     def select_icon(self):
@@ -147,7 +149,9 @@ class DeviceDialog(QDialog):
             item = SelectionWidget(dev)
             entries.append(item)
             self.camera_box.addItem(item)
-            if selected_dev and dev.serial == selected_dev.serial:
+            if (selected_dev and
+                    dev.serial == selected_dev.serial and
+                    dev.device_type == selected_dev.device_type):
                 item.setSelected(True)
 
     @staticmethod

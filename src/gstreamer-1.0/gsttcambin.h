@@ -56,6 +56,7 @@ struct _GstTcamBin
     GstElement* out_caps = nullptr;
 
     char* device_serial;
+    char* device_type;
 
     GstCaps* target_caps = nullptr;
     GstPad* target_pad;

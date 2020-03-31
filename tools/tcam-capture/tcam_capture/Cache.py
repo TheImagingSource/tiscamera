@@ -27,6 +27,7 @@ class Cache():
 
     def __init__(self):
         self.last_serial = None
+        self.last_device_type = None
         self.last_format = None
 
         self.cache_file = None
@@ -68,6 +69,7 @@ class Cache():
         gen = config[self.gc]
 
         self.last_serial = gen.get("last_serial", self.last_serial)
+        self.last_device_type = gen.get("last_device_type", self.last_device_type)
         self.last_format = gen.get("last_format", self.last_format)
 
     def save(self):
@@ -76,6 +78,8 @@ class Cache():
         config.add_section(self.gc)
         if self.last_serial:
             config[self.gc]["last_serial"] = self.last_serial
+        if self.last_device_type:
+            config[self.gc]["last_device_type"] = self.last_device_type
         if self.last_format:
             config[self.gc]["last_format"] = self.last_format
 
@@ -116,7 +120,7 @@ class Cache():
         """
 
         return os.path.join(self.get_default_cache_directory(),
-                            "properties-{}-state.json".format(self.last_serial))
+                            "properties-{}-{}-state.json".format(self.last_serial, self.last_device_type))
 
     @staticmethod
     def get_default_cache_directory():

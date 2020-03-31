@@ -111,6 +111,7 @@ class TCamCapture(QMainWindow):
         self.app = app
 
         self.serial = serial
+        self.device_type = None
         self.caps_desc = None
         self.selected_format = FmtSelection()
         self.active_format = FmtSelection()
@@ -152,9 +153,11 @@ class TCamCapture(QMainWindow):
                 self.cache.last_serial):
             dev_list = self.indexer.device_list
             serial = self.cache.last_serial
+            dev_type = self.cache.last_device_type
             # check if device exists
-            if any(x.serial == serial for x in dev_list):
+            if any(x.serial == serial and x.device_type == dev_type for x in dev_list):
                 self.serial = serial
+                self.device_type = dev_type
 
                 if not caps_str and self.cache.last_format:
                     caps_str = self.cache.last_format
@@ -163,9 +166,10 @@ class TCamCapture(QMainWindow):
             res, device = DeviceDialog.get_device(self.indexer)
             if res and device:
                 self.serial = device.serial
+                self.device_type = device.device_type
 
         if self.serial:
-            self.open_device(self.serial, caps_str)
+            self.open_device(self.serial, self.device_type, caps_str)
 
         if self.view and fullscreen:
             self.view.toggle_fullscreen()
@@ -394,9 +398,10 @@ class TCamCapture(QMainWindow):
         res, device = DeviceDialog.get_device(self.indexer)
         if res and device:
             self.serial = device.serial
+            self.dev_type = device.device_type
             if self.serial:
                 caps_str = None
-                self.open_device(self.serial, caps_str)
+                self.open_device(self.serial, self.dev_type, caps_str)
 
     def save_image_action(self):
         """
@@ -576,8 +581,10 @@ class TCamCapture(QMainWindow):
             self.cache.save()
             return
 
-        serial = entry.split(" - ")[2]
-        self.open_device(serial)
+        e = entry.split(" - ")
+        serial = e[2]
+        dev_type = e[1]
+        self.open_device(serial, dev_type)
 
     def format_selected_callback(self, fmt: str, resolution: str, fps: str):
         """
@@ -604,10 +611,11 @@ class TCamCapture(QMainWindow):
 
         self.fps_combo.setCurrentText(fps)
 
-    def open_device(self, serial: str, caps_str: str=None):
+    def open_device(self, serial: str, dev_type: str, caps_str: str = None):
         """Open device and starts video stream"""
         self.close()
         self.serial = serial
+        self.dev_type = dev_type
 
         if self.device_list:
             for dev in self.device_list:
@@ -617,7 +625,7 @@ class TCamCapture(QMainWindow):
                     self.update_device_list(self.device_list)
                     break
 
-        self.view = TcamView(self.serial, self)
+        self.view = TcamView(self.serial, self.dev_type, self)
         self.view.set_settings(self.settings)
         self.view.register_device_lost(self.lost_device)
         # create preemptive pipline to make tcambin available
