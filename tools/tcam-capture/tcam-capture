@@ -643,6 +643,7 @@ class TCamCapture(QMainWindow):
         self.view.pause()
 
         self.cache.last_serial = self.serial
+        self.cache.last_device_type = self.dev_type
         self.cache.save()
         state = self.cache.load_device_state()
 
