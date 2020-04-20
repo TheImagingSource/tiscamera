@@ -611,6 +611,8 @@ class TCamCapture(QMainWindow):
 
         self.fps_combo.setCurrentText(fps)
 
+        self.cache.last_format = self.view.caps
+
     def open_device(self, serial: str, dev_type: str, caps_str: str = None):
         """Open device and starts video stream"""
         self.close()
@@ -719,6 +721,7 @@ class TCamCapture(QMainWindow):
 
         self.cache.last_format = None
         self.cache.last_serial = None
+        self.cache.last_device_type = None
 
     def toggle_properties_dialog(self):
         """

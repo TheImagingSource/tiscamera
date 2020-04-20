@@ -69,7 +69,7 @@ class TcamView(QWidget):
         self.current_width = 0
         self.current_height = 0
         self.device_lost_callbacks = []
-        self.caps_desc = None
+        self.caps_desc: CapsDesc = None
         self.video_format = None
         self.retry_countdown = 0
 
@@ -368,6 +368,9 @@ class TcamView(QWidget):
 
         self.tcam = self.pipeline.get_by_name("bin")
 
+        if video_format:
+            self.tcam.set_property("device-caps", video_format)
+
         # This ready is required so that get_caps_desc
         # works and does not return ANY
         self.pipeline.set_state(Gst.State.READY)
@@ -407,6 +410,7 @@ class TcamView(QWidget):
 
             if dbg.startswith("Working with src caps:"):
                 log.info("{}".format(dbg.split(": ")[1]))
+                self.caps = dbg.split(": ")[1]
                 self.fire_format_selected(dbg.split(": ")[1])
             else:
                 log.error("Info from bin: {}".format(dbg))
