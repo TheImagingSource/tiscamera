@@ -345,7 +345,7 @@ class TcamView(QWidget):
         # changing the state from out main thread will cause a deadlock,
         # since the remaining buffers can not be displayed because our main thread
         # is currently in set_state
-        pipeline_str = ("tcambin serial={serial} name=bin use-dutils={dutils} "
+        pipeline_str = ("tcambin serial={serial} name=bin use-dutils={dutils} type={type} "
                         "! video/x-raw,format=BGRx "
                         "! tee name=tee tee. "
                         "! queue max-size-buffers=2 leaky=downstream "
@@ -355,6 +355,7 @@ class TcamView(QWidget):
 
         self.pipeline = None
         self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
+                                                             type=self.dev_type.lower(),
                                                              dutils=self.use_dutils))
 
         sink = self.pipeline.get_by_name("sink")
@@ -375,6 +376,9 @@ class TcamView(QWidget):
         # works and does not return ANY
         self.pipeline.set_state(Gst.State.READY)
         log.debug("Created pipeline and set to READY")
+        log.debug("Pipeline is: {}".format(pipeline_str.format(serial=self.serial,
+                                                               type=self.dev_type.lower(),
+                                                               dutils=self.use_dutils)))
 
     def pause(self):
         log.info("Setting state to PAUSED")
