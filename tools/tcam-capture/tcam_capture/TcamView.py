@@ -519,6 +519,10 @@ class TcamView(QWidget):
 
             return False
 
+        names = self.tcam.get_tcam_property_names()
+        if "Trigger Mode" not in names:
+            return False
+
         try:
             (result, value,
              minval, maxval,
@@ -526,7 +530,7 @@ class TcamView(QWidget):
              valuetype,
              flags,
              category, group) = self.tcam.get_tcam_property("Trigger Mode")
-        except TypeError as e:
+        except TypeError:
             log.warning("get_tcam_property failed for '{}'".format("Trigger Mode"))
             return False
 
