@@ -77,7 +77,13 @@ if (BUILD_TOOLS)
 
 endif (BUILD_TOOLS)
 
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python3-gi (>= 3.20), python-gst-1.0, python3-gst-1.0")
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0, python3-gst-1.0")
+
+# when dealing with -DBUIL_TOOLS=OFF and similar situations
+# the dependency list might end with a trailing `,`
+# this will cause dpkg to report an error and abort the installation
+# remove it as the list will not be touched after this
+string(REGEX REPLACE ",$" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
