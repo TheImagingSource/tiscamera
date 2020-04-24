@@ -1360,9 +1360,20 @@ static void gst_tcambin_set_property (GObject* object,
         }
         case PROP_STATE:
         {
-            bool state = load_device_settings(TCAM_PROP(self),
+            bool state;
+            if (!self->device_serial)
+            {
+                state = load_device_settings(TCAM_PROP(self),
+                                             "",
+                                             g_value_get_string(value));
+            }
+            else
+            {
+                state = load_device_settings(TCAM_PROP(self),
                                               self->device_serial,
                                               g_value_get_string(value));
+            }
+
             if (!state)
             {
                 GST_WARNING("Device may be in an undefined state.");
