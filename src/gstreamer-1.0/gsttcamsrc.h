@@ -59,6 +59,8 @@ struct _GstTcamSrc
 
     struct device_state* device;
 
+    int fps_numerator;
+    int fps_denominator;
     int n_buffers;
     int imagesink_buffers;
 

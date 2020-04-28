@@ -1040,11 +1040,14 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
     double framerate;
     if (frame_rate != nullptr)
     {
-        framerate= (double) gst_value_get_fraction_numerator (frame_rate) /
-            (double) gst_value_get_fraction_denominator (frame_rate);
+        self->fps_numerator = gst_value_get_fraction_numerator(frame_rate);
+        self->fps_denominator = gst_value_get_fraction_denominator(frame_rate);
+        framerate = (double) self->fps_numerator / (double) self->fps_denominator;
     }
     else
     {
+        self->fps_numerator = 1;
+        self->fps_denominator = 1;
         framerate = 1.0;
     }
     struct tcam_video_format format = {};
@@ -1681,6 +1684,63 @@ static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
     return GST_BASE_SRC_CLASS(gst_tcam_src_parent_class)->fixate(bsrc, caps);
 }
 
+static gboolean gst_tcam_src_query (GstBaseSrc* bsrc,
+                                    GstQuery* query)
+{
+    GstTcamSrc *src = GST_TCAM_SRC(bsrc);
+    gboolean res = FALSE;
+
+    switch (GST_QUERY_TYPE (query))
+    {
+        case GST_QUERY_LATENCY:
+        {
+            GstClockTime min_latency;
+            GstClockTime max_latency;
+
+            /* device must be open */
+            if (!src->device->dev)
+            {
+                GST_WARNING_OBJECT(src,
+                                   "Can't give latency since device isn't open !");
+                goto done;
+            }
+
+            /* we must have a framerate */
+            if (src->fps_numerator <= 0 || src->fps_denominator <= 0)
+            {
+                GST_WARNING_OBJECT (src,
+                                    "Can't give latency since framerate isn't fixated !");
+                goto done;
+            }
+
+            /* min latency is the time to capture one frame/field */
+            min_latency = gst_util_uint64_scale_int(GST_SECOND,
+                                                    src->fps_denominator, src->fps_numerator);
+
+            /* max latency is set to NONE because cameras may enter trigger mode
+               and not deliver images for an unspecified amount of time */
+            max_latency = GST_CLOCK_TIME_NONE;
+
+            GST_DEBUG_OBJECT (bsrc,
+                              "report latency min %" GST_TIME_FORMAT " max %" GST_TIME_FORMAT,
+                              GST_TIME_ARGS (min_latency), GST_TIME_ARGS (max_latency));
+
+            /* we are always live, the min latency is 1 frame and the max latency is
+             * the complete buffer of frames. */
+            gst_query_set_latency (query, TRUE, min_latency, max_latency);
+
+            res = TRUE;
+            break;
+        }
+        default:
+            res = GST_BASE_SRC_CLASS(gst_tcam_src_parent_class)->query(bsrc, query);
+            break;
+    }
+
+done:
+
+    return res;
+}
 
 static void gst_tcam_src_init (GstTcamSrc* self)
 {
@@ -2043,6 +2103,7 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
     gstbasesrc_class->unlock = gst_tcam_src_unlock;
     gstbasesrc_class->negotiate = gst_tcam_src_negotiate;
     gstbasesrc_class->get_times = gst_tcam_src_get_times;
+    gstbasesrc_class->query = gst_tcam_src_query;
 
     gstpushsrc_class->create = gst_tcam_src_create;
 }
