@@ -126,9 +126,12 @@ bool version_matches (json j, const std::string& wanted_version=tcam::JSON_FILE_
 }
 
 
-void tcam::load_json_state (std::shared_ptr<CaptureDevice> dev, const std::string& state)
+std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr<CaptureDevice> dev,
+                                                                 const std::string& state)
 {
     json j;
+
+    std::vector<std::string> msgs;
 
     try
     {
@@ -136,18 +139,21 @@ void tcam::load_json_state (std::shared_ptr<CaptureDevice> dev, const std::strin
     }
     catch (json::parse_error& e)
     {
-        tcam_error("Unable to parse property settings. JSON parser returned: %s", e.what());
-        return;
+        std::string s = "Unable to parse property settings. JSON parser returned: ";
+        s.append(e.what());
+        tcam_error(s.c_str());
+        msgs.push_back(s);
+        return {false, msgs};
     }
 
     if (!serial_matches(j, dev->get_device().get_serial()))
     {
-        return;
+        return {false, {"Serial missmatch"}};
     }
 
     if (!version_matches(j))
     {
-        return;
+        return {false, {"Version missmatch"}};
     }
 
 
@@ -185,7 +191,20 @@ void tcam::load_json_state (std::shared_ptr<CaptureDevice> dev, const std::strin
 
         if (p)
         {
-            p->from_string(iter.value().dump());
+            bool value_ret = p->from_string(iter.value().dump());
+
+            if (!value_ret)
+            {
+                msgs.push_back("Unabe to apply '" + iter.value().dump()
+                               + "' to '" + iter.key() + "'. Ignoring.");
+            }
+
+        }
+        else
+        {
+            msgs.push_back("No property with name '" + iter.key() + "'. Ignoring.");
         }
     }
+
+    return {true, msgs};
 }

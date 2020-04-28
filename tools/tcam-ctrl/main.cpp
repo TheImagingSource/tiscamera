@@ -175,12 +175,17 @@ int main (int argc, char *argv[])
         }
 
         std::vector<std::string> vec = app.remaining();
+        std::cout << "Loading: " << vec.at(0) << std::endl;
+        std::pair<bool, std::vector<std::string>> ret = load_json_state(dev, vec.at(0));
 
-        load_json_state(dev, vec.at(0));
-        // bool state = load_device_settings(TCAM_PROP(self),
-        //                                   self->device_serial,
-        //                                   g_value_get_string(value));
-
+        for (const auto& msg : ret.second)
+        {
+            std::cout << msg << std::endl;
+        }
+        if (!ret.first)
+        {
+            return 1;
+        }
     }
 
     return 0;

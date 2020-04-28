@@ -20,7 +20,8 @@
 #include <tcam.h>
 
 #include <string>
-
+#include <utility>
+#include <vector>
 
 namespace tcam
 {
@@ -35,7 +36,9 @@ static const char* JSON_FILE_VERSION_CURRENT  __attribute__ ((unused)) = "v0.1";
 
 std::string create_json_state (std::shared_ptr<CaptureDevice> dev);
 
-void load_json_state (std::shared_ptr<CaptureDevice> dev, const std::string& state);
+
+std::pair<bool, std::vector<std::string>> load_json_state (std::shared_ptr<CaptureDevice> dev,
+                                                                 const std::string& state);
 
 }
 
