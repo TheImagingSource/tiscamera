@@ -285,6 +285,12 @@ std::string Property::to_string () const
 
 bool Property::from_string (const std::string& s)
 {
+    std::string tmp_str = s;
+
+    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'),
+                  tmp_str.end());
+    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '\''),
+                  tmp_str.end());
     try
     {
         switch (prop.type)
@@ -292,7 +298,7 @@ bool Property::from_string (const std::string& s)
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
                 bool val;
-                if (s.compare("true") == 0)
+                if (tmp_str.compare("true") == 0)
                 {
                     val = true;
                 }
@@ -307,19 +313,19 @@ bool Property::from_string (const std::string& s)
             }
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                set_value((int64_t)stoi(s));
+                set_value((int64_t)stoi(tmp_str));
 
                 break;
             }
             case TCAM_PROPERTY_TYPE_DOUBLE:
             {
-                set_value(stod(s));
+                set_value(stod(tmp_str));
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
             case TCAM_PROPERTY_TYPE_STRING:
             {
-                set_value(s);
+                set_value(tmp_str);
                 break;
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
