@@ -115,33 +115,27 @@ int main (int argc, char *argv[])
         return 0;
     }
 
-    // additional check for serial format
-    // <serial>-<dev-type>
-    //
-    auto pos = serial.find("-");
-    std::string new_type;
-
-    if (pos != std::string::npos)
-    {
-        new_type = serial.substr(pos+1);
-        serial = serial.substr(0, pos);
-
-        if (device_type != "unknown" && !device_type.empty())
-        {
-            if (device_type != new_type)
-            {
-                std::cerr << "Given device types in serial and type missmatch. '"
-                          << device_type << "' - " << new_type << std::endl;
-                return 1;
-            }
-        }
-        else
-        {
-            device_type = new_type;
-        }
-    }
-
     auto t = tcam::tcam_device_from_string(device_type);
+
+    auto string_is_valid = [](const std::string &str)
+    {
+
+        auto is_illegal_char = [](const char c)
+                             {
+                                 if ((c <= 'z' && c >= 'a')
+                                     || (c <= 'Z' && c >= 'A')
+                                     || isdigit(c))
+                                     return false;
+                                 return true;
+                             };
+        return find_if(str.begin(), str.end(), is_illegal_char) == str.end();
+    };
+
+    if (!string_is_valid(serial))
+    {
+        std::cerr << "'" << serial << "' is not a valid serial number" << std::endl;
+        return 1;
+    }
 
     auto dev = open_device(serial, t);
 
