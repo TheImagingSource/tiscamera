@@ -43,6 +43,10 @@ These examples exist in all available example languages.
    * - 09
      - device-lost
      - Receives device-lost and other messages and react to them
+   * - 10
+     - metadata
+     - Read meta information like is-damaged, camera capture time, etc.
+       Currently only in available in C.
 
 .. _examples_further:
 
