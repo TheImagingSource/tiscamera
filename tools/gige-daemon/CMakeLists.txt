@@ -13,10 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+find_package(GObject REQUIRED QUIET) # dependency
+find_package(GLIB2   REQUIRED QUIET) # dependency
+find_package(GIO     REQUIRED QUIET) # dependency
+include_directories("${GIO_INCLUDE_DIR}")
+
+include_directories(${GOBJECT_INCLUDE_DIR})
+include_directories(${GLIB2_INCLUDE_DIR})
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/dependencies/aravis/src")
+include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("${CMAKE_SOURCE_DIR}/src/aravis")
 include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
 
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
@@ -24,6 +34,12 @@ add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
 TARGET_LINK_LIBRARIES(gige-daemon tcam)
 TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
 TARGET_LINK_LIBRARIES(gige-daemon "dl")
+
+target_link_libraries(gige-daemon "${ARAVIS_LIB}")
+
+target_link_libraries(gige-daemon "${LIBXML2_LIBRARIES}")
+target_link_libraries(gige-daemon "${GIO_LIBRARIES}")
+target_link_libraries(gige-daemon "${PCAP_LIBRARIES}")
 
 install(TARGETS gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}

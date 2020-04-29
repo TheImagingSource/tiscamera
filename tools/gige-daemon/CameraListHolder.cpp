@@ -19,6 +19,7 @@
 #include "CameraDiscovery.h"
 
 #include "tcam-semaphores.h"
+#include "aravis_utils.h"
 
 #include <sys/sem.h>     /* semaphore functions and structs.     */
 #include <sys/ipc.h>
@@ -151,59 +152,11 @@ void CameraListHolder::index_loop ()
 }
 
 
-static camera_list getCameraList (std::vector<std::string>& interfaces)
+static std::vector<tcam::DeviceInfo> get_aravis_list ()
 {
-    camera_list cameras;
-    std::mutex cam_lock;
-
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras, &cam_lock] (std::shared_ptr<Camera> camera)
-        {
-            std::lock_guard<std::mutex> mutex_lock(cam_lock);
-            cameras.push_back(camera);
-        };
-
-    if (interfaces.empty())
-    {
-        discoverCameras(f);
-    }
-    else
-    {
-        discoverCameras(interfaces, f);
-    }
-    return cameras;
+    return tcam::get_aravis_device_list();
 }
 
-namespace
-{
-
-static std::vector<struct tcam_device_info> get_gige_device_list (std::vector<std::string>& interfaces)
-{
-    // out of the tcam-network lib
-    auto l = getCameraList(interfaces);
-
-    std::vector<struct tcam_device_info> ret;
-
-    ret.reserve(l.size());
-
-    for (const auto& c : l)
-    {
-        struct tcam_device_info info;
-
-        info.type = TCAM_DEVICE_TYPE_ARAVIS;
-
-        strncpy(info.serial_number, c->getSerialNumber().c_str(), sizeof(info.serial_number) - 1);
-        strncpy(info.name, c->getModelName().c_str(), sizeof(info.name) - 1);
-
-        std::string identifier = c->getVendorName() + "-" + c->getSerialNumber();
-
-        strncpy(info.identifier, identifier.c_str(), sizeof(info.identifier) - 1);
-
-        ret.push_back(info);
-    }
-
-    return ret;
-}
-}
 
 void CameraListHolder::loop_function ()
 {
@@ -217,9 +170,15 @@ void CameraListHolder::loop_function ()
         return;
     }
 
-    std::vector<struct tcam_device_info> aravis_list = get_gige_device_list(interface_list);
+    std::vector<tcam::DeviceInfo> aravis_list = get_aravis_list();
+    std::vector<struct tcam_device_info> arv_list;
+    arv_list.reserve(aravis_list.size());
+    for (const auto& e : aravis_list)
+    {
+        arv_list.push_back(e.get_info());
+    }
 
-    if (aravis_list.size() > TCAM_DEVICE_LIST_MAX)
+    if (arv_list.size() > TCAM_DEVICE_LIST_MAX)
     {
         return;
     }
@@ -228,10 +187,10 @@ void CameraListHolder::loop_function ()
 
     struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, 0);
 
-    tmp_ptr->device_count = aravis_list.size();
+    tmp_ptr->device_count = arv_list.size();
 
     struct tcam_device_info* ptr = tmp_ptr->devices;
-    for (const auto dev : aravis_list)
+    for (const auto dev : arv_list)
     {
         memcpy(ptr, &dev, sizeof(struct tcam_device_info));
         ++ptr;

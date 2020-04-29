@@ -51,8 +51,6 @@ private:
 
     void loop_function ();
 
-    std::vector<struct tcam_device_info> get_aravis_device_list ();
-
     std::vector<DeviceInfo> camera_list;
 
     std::vector<std::string> interface_list;
