@@ -11,6 +11,10 @@ This repository will give you additional resources to control your TIS camera.
 * utilities
 * examples on how to interact with your camera
 
+## Documentation
+
+You can find an online version of the included user documentation here:
+
 https://www.theimagingsource.com/documentation/tiscamera/
 
 ## Dependencies
@@ -37,7 +41,7 @@ sudo ./scripts/install-dependencies.sh --compilation --runtime
 sudo ./scripts/install-dependencies.sh --runtime
 ```
 
-### Building tiscamera
+## Building tiscamera
 
 The following commands will build and install our software with default settings. A brief reference of compile time options could be found at the end of this document.
 
@@ -79,7 +83,7 @@ Build tiscamera with suppoort for v4l2 devices.
 Build html user documentation.
 
 - **-DCMAKE_INSTALL_PREFIX**
-Installation target prefix (defaults to /usr/local)
+Installation target prefix (defaults to /usr/)
 
 For a complete overview, read the section [cmake options](https://www.theimagingsource.com/documentation/tiscamera/building.html#cmake-options) in out documentation.
 
@@ -101,12 +105,6 @@ After installation you could try one of our examples or directly start with a gs
 `gst-launch-1.0 tcambin ! videoconvert ! ximagesink`
 
 alternatively start `tcam-capture`
-
-## Documentation
-
-You can find an online version of the included user documentation here:
-
-https://www.theimagingsource.com/documentation/tiscamera/
 
 ## Questions, etc.
 
