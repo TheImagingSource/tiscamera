@@ -136,7 +136,7 @@ int main (int argc, char *argv[])
     printf("Disconnect your camera to trigger a device lost or press enter to stop the stream.\n");
 
     // we work with a event loop to be automatically
-    // be notified when new messages occur.
+    // notified when a new messages occur.
     loop = g_main_loop_new (NULL, FALSE);
     g_main_loop_run (loop);
 

@@ -961,7 +961,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
                 GstStructure* s = gst_structure_new_empty("video/x-raw");
 
-                std::string tmp_format_string;
                 GstCaps* tmp = get_caps_from_element_name("bayer2rgb", "src");
 
                 GstStructure* tmp_struc = gst_structure_copy(gst_caps_get_structure(tmp, 0));

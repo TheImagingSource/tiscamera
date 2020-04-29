@@ -40,7 +40,7 @@ Example:
 
 .. code-block:: sh
 
-   gst-launch-1.0 tcamsrc serial=12341234 state='{\"Exposure\":3000,"Exposure\ Auto":false}' ! ....
+   gst-launch-1.0 tcamsrc serial=12341234 state='{\"Exposure\":3000,"Exposure\ Auto\":false}' ! ....
 
 Please keep in mind that shell environments have special requirements concerning special characters
 such as ``"``, ``'`` and ``:space:`` .

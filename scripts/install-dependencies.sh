@@ -141,6 +141,7 @@ usage () {
     printf "\t--compilation \t Install compilation dependencies\n"
     printf "\t--runtime \t Install runtime dependencies\n"
     printf "\t--no-update \t Do not update the package cache\n"
+    printf "\t--yes \tassume user agrees to actions"
     printf "\t--help \t\t Print this message\n"
 }
 
