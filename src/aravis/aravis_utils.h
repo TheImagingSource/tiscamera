@@ -25,7 +25,7 @@
 
 #include "compiler_defines.h"
 
-VISIBILITY_INTERNAL
+// VISIBILITY_INTERNAL
 
 namespace tcam
 {
@@ -48,6 +48,6 @@ std::vector<DeviceInfo> get_aravis_device_list ();
 
 } /* namespace tcam */
 
-VISIBILITY_POP
+// VISIBILITY_POP
 
 #endif /* TCAM_ARAVIS_UTILS_H */
