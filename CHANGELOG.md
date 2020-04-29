@@ -26,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tiscamera-env.sh script to source installed tiscamera instances
 - cmake option TCAM_ARAVIS_USB_VISION
   Allows usage of USB3Vision via aravis. gige-daemon has to be disabled.
-  v4l2 will automatically disabled.
 - uvc extension unit for 37U cameras.
 - property state system
   tcamsrc and tcambin have the property 'state' containing a JSON string describing
@@ -37,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tcam-ctrl --save` to save property state string
 - caps definitions for polarization cameras
 - TCAM_ARV_PACKET_REQUEST_RATIO environment variable
-- aravis version to HEAD of aravis-0.6 branch
+- tcamsrc now answers latency queries
+- example for gstreamer metadata retrieval
 
 ### Changed
 
@@ -59,10 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-ctrl argument handling has been reworked. This changes the help message.
 - udev rules file now only contains uvc extension loading when v4l2 is configured
 - Line endings in 33U firmware files are handled differently
+- tcam-capture fps display only considers the last 5 seconds
+- aravis version to HEAD of aravis-0.6 branch
 
 ### Fixed
 
-- Compiler warning
+- Compiler warnings
 - Loading of uvc extension units for USB-2.0 cameras
 - Installation path with tcam_capture module
 - Threading issues with GstBus messages
@@ -81,6 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-capture: Double slider behavior is now correct
 - thread lock up in the V4l2Device notification thread during destruction
 - Segfault in device lost callback in gsttcamsrc
+- erroneous dependency description in
+  generated .deb files when working with -DBUILD_TOOLS=OFF
 
 ### Removed
 
@@ -88,6 +92,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcam-ctrl -s flag for setting formats.
 - tcam-ctrl -s flag for setting properties. Replaced with state system.
 - unit tests for tiscamera-dutils. They are now part of the tiscamera-dutils repository
+
+### Known Issues
+
+- On some systems the python3 module installation path is set wrong.
 
 
 ## [0.11.1] - 2019-05-22
