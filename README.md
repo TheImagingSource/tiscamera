@@ -31,7 +31,7 @@ Runtime dependencies for debian can be found in:
 
 dependencies-debian-runtime.txt
 
-On a Debian / Ubuntu system, the following command line could be used to install all required packages in one go:
+On a Debian / Ubuntu system, the following command line can be used to install all required packages in one go:
 
 ```
 # Build dependencies
@@ -43,7 +43,7 @@ sudo ./scripts/install-dependencies.sh --runtime
 
 ## Building tiscamera
 
-The following commands will build and install our software with default settings. A brief reference of compile time options could be found at the end of this document.
+The following commands will build and install our software with default settings.
 
 ```
 git clone https://github.com/TheImagingSource/tiscamera.git
@@ -63,21 +63,21 @@ sudo make install
 ```
 The default installation prefix is `/usr`.
 Some components have to be installed in `/etc` and `/lib`.
-If you want to change it, read the section [installation directories](https://www.theimagingsource.com/documentation/tiscamera/building.html#installation-directories) in our documentation.
+If you want to change the prefix, read the section [installation directories](https://www.theimagingsource.com/documentation/tiscamera/building.html#installation-directories) in our documentation.
 
 #### cmake options
 The most important cmake options are:
 - **-DBUILD_ARAVIS=<ON/OFF>**
-Build tiscamera with support for aravis devices.
+Build tiscamera with support for GigE cameras via aravis.
 
 - **-DBUILD_TOOLS=<ON/OFF>**
-Build additional tools for camera interaction.
+Build additional tools for camera interaction (e.g. firmware tools and tcam-capture).
 
 - **-DBUILD_V4L2=<ON/OFF>**
-Build tiscamera with suppoort for v4l2 devices.
+Build tiscamera with support for USB cameras via UVC/V4L2.
 
 - **-DBUILD_LIBUSB=<ON/OFF>**
-Build tiscamera with suppoort for v4l2 devices.
+Build tiscamera with support for USB cameras via LibUsb (i.e. AFU420, AFU050, DFK73).
 
 - **-DBUILD_DOCUMENTATION=<ON/OFF>**
 Build html user documentation.
@@ -89,7 +89,9 @@ For a complete overview, read the section [cmake options](https://www.theimaging
 
 ### Optional for GigE-Vision devices: Start the gige-daemon
 
-GigE-Vision cameras have a several seconds long delay before they could be reliably detected on the network. To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system:
+GigE-Vision cameras have a several seconds long delay before they can be reliably detected on the network.
+
+To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system:
 
 ```
 sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
@@ -100,7 +102,7 @@ sudo systemctl status gige-daemon.service    # check if statemd say everything i
 
 ## Where to go from here
 
-After installation you could try one of our examples or directly start with a gstreamer pipeline like:
+After installation you can try one of our examples or directly start with a gstreamer pipeline like:
 
 `gst-launch-1.0 tcambin ! videoconvert ! ximagesink`
 
