@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Copyright 2019 The Imaging Source Europe GmbH
 #
@@ -15,10 +15,15 @@
 # limitations under the License.
 
 
-# DIR is used so that execution from other diirectories is possible
+# DIR is used so that execution from other directories is possible
 DIR="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
 SERIAL=""
 CAPS=""
+REST=""
+NUMBER_RUNS=-1
+LOG_FILE=""
+ONLY_LOG=0
+
 
 usage () {
     printf "%s\n" "$0"
@@ -27,23 +32,12 @@ usage () {
     printf "\t-h,--help \t Print this message\n"
     printf "\t--serial TEXT\t Run with specific camera\n"
     printf "\t--caps TEXT\t Run with specific caps\n"
+    printf "\t--rest {NULL,READY}\t Go down to the specified GStreamer State. Default: NULL\n"
+    printf "\t--runs N\t How often to run.. Default: -1 (without end)\n"
+    printf "\t--log FILE\tWrite to log file and stdout\n"
+    printf "\t--only-log\t Only write to log file and not stdout\n"
 }
 
-
-# while getopts "hs:c:" opt; do
-#     case {opt} in
-#         h)
-#             usage
-#             exit
-#             ;;
-#         s)
-#             SERIAL=$OPTARG
-#             ;;
-#         c)
-#             CAPS=$OPTARG
-#             ;;
-#     esac
-# done
 
 while [ "$1" != "" ]; do
     PARAM=$(echo "$1" | awk -F= '{print $1}')
@@ -61,6 +55,21 @@ while [ "$1" != "" ]; do
             shift
             CAPS=$1
             ;;
+        --rest)
+            shift
+            REST=$1
+            ;;
+        --runs)
+            shift
+            NUMBER_RUNS=$1
+            ;;
+        --log)
+            shift
+            LOG_FILE=$1
+            ;;
+        --only-log)
+            ONLY_LOG=1
+            ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
             usage
@@ -70,24 +79,86 @@ while [ "$1" != "" ]; do
     shift
 done
 
+if [ $ONLY_LOG != 0 && $LOG_FILE == "" ]; then
 
-export TCAM_LOG=DEBUG
+    echo "--only-log requires a log file. Specify on with --log"
+
+    exit 1
+fi
+
 
 # allow core files of unlimited size
 ulimit -c unlimited
 
 caps_str=""
-if [ -n "CAPS" ]; then
+if [ ! -z "$CAPS" ]; then
     caps_str="--caps=$CAPS"
 fi
 
 serial_str=""
-if [ -n "SERIAL" ]; then
+if [ ! -z "$SERIAL" ]; then
     serial_str="--serial=$SERIAL"
 fi
 
-while true; do
+rest_str=""
+if [ ! -z "$REST" ]; then
+    rest_str="--rest=$REST"
+fi
 
-    gdb -ex run -ex quit --args $DIR/start-stop $serial_str $caps_str --gst-debug=tcamsrc:5,tcambin:5
+logging=""
+if [ ! -z "$LOG_FILE" ]; then
 
-done
+    if [ $ONLY_LOG == 0 ]; then
+        logging=" 2>&1 | tee -a ${LOG_FILE}"
+    else
+        logging=" 2>&1 >> ${LOG_FILE}"
+    fi
+fi
+
+if [[ $NUMBER_RUNS != ?(-)+([0-9]) ]] ; then
+
+    echo "--runs requires an integer"
+    exit1
+fi
+
+# this is the command that will be executed in the loop
+# we want gdb attached
+# gdb needs to exit after a successfull run
+CMD="gdb -ex run -ex quit --args $DIR/start-stop ${serial_str} ${caps_str} ${logging}"
+
+# due to the logging implementation
+# the usage of `eval` is required.
+# eval evaluates a cmd as if it was
+# typed by the user. This allows
+# pipes to work as intended.
+
+
+
+# helper function
+# prints to stdout
+# and respects --log settings
+say () {
+
+    say_print_cmd="echo $@"
+    eval ${say_print_cmd} $logging
+}
+
+
+if [[ $NUMBER_RUNS == -1 ]] ; then
+
+    echo "Running for ever."
+    while true; do
+
+        eval $CMD
+
+    done
+
+else
+
+    for number in $( seq 1 $NUMBER_RUNS )
+    do
+        echo "==== Run number: ${number}"
+        eval $CMD
+    done
+
+fi

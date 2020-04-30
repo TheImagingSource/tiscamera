@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <gst/gst.h>
 
+#include <map>
 #include <CLI11.hpp>
 
 
@@ -78,6 +79,16 @@ int main (int argc, char *argv[])
     std::string caps_str;
     app.add_option("-c,--caps", caps_str, "GStreamer caps the device shall use.", false);
 
+    GstState rest_state {GST_STATE_NULL};
+
+    std::map<std::string, GstState> state_map {
+        { "NULL", GST_STATE_NULL},
+        { "READY", GST_STATE_READY}
+    };
+
+    app.add_option("-r,--rest", rest_state, "\"Stop\" state that shall be used", "NULL")
+        ->transform(CLI::CheckedTransformer(state_map, CLI::ignore_case));
+
     // allow --gst-debug etc
     app.allow_extras(true);
 
@@ -101,10 +112,15 @@ int main (int argc, char *argv[])
         set_caps(caps_str);
     }
 
-    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+    for (unsigned int i = 0; i < 5; ++i)
+    {
+        gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-    sleep(5);
+        sleep(5);
 
+        gst_element_set_state(pipeline, rest_state);
+
+    }
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
     return 0;
