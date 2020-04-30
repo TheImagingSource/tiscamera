@@ -150,11 +150,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_GPIO,
-        {/* usb 2: */ 0x980920, /* usb 3: */ 0x0199e217},
+        {/* usb 2: */ 0x980920},
     },
     {
         TCAM_PROPERTY_GPIN,
-        {0},
+        { /* usb 3: */ 0x0199e217},
     },
     {
         TCAM_PROPERTY_GPOUT,
