@@ -32,6 +32,12 @@ case, the package naming scheme will be:
 
 `tiscamera_<MAJOR>.<MINOR>.<PATCH>.<COMMIT_COUNT>_<TAG>_<ARCHITECTURE>.deb`
 
+In case of a none release build the build type will be appended to the package name.
+
+`tiscamera_<MAJOR>.<MINOR>.<PATCH>_<ARCHITECTURE>_<RELEASE_TYPE>.deb`
+
+This is used to differentiate debug builds from release builds.
+
 Creation
 ========
 
