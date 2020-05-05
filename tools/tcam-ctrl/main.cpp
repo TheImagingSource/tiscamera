@@ -115,7 +115,38 @@ int main (int argc, char *argv[])
         return 0;
     }
 
-    auto t = tcam::tcam_device_from_string(device_type);
+    TCAM_DEVICE_TYPE t;
+
+    // helper function to handle 12345678-backend situations
+    auto separate_serial_and_type = [&serial, &t] (std::string input)
+    {
+        auto pos = input.find("-");
+
+        if (pos != std::string::npos)
+        {
+            // assign to tmp variables
+            // input could be self->device_serial
+            // overwriting it would ivalidate input for
+            // device_type retrieval
+            std::string tmp1 = input.substr(0, pos);
+            std::string tmp2 = input.substr(pos+1);
+
+            serial = tmp1;
+            t = tcam::tcam_device_from_string(tmp2);
+        }
+        else
+        {
+            serial = input;
+            t = TCAM_DEVICE_TYPE_UNKNOWN;
+        }
+    };
+
+    separate_serial_and_type(serial);
+
+    if (t == TCAM_DEVICE_TYPE_UNKNOWN)
+    {
+        t = tcam::tcam_device_from_string(device_type);
+    }
 
     auto string_is_valid = [](const std::string &str)
     {
