@@ -91,7 +91,7 @@ For a complete overview, read the section [cmake options](https://www.theimaging
 
 GigE-Vision cameras have a several seconds long delay before they can be reliably detected on the network.
 
-To speed up this process for applications, a background daemon is build and installed which detects cameras before an application starts. The following commands will activate the daemon on your system:
+To speed up this process for applications, a background daemon is built and installed, which detects cameras before an application starts. The following commands will activate the daemon on your system:
 
 ```
 sudo systemctl daemon-reload                 # make systemd aware of gige-daemon
