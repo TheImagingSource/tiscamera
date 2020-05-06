@@ -114,14 +114,22 @@ USB3 Vision
 
 .. note::
 
-   This section is only relevant when using a USB 33 or 37 camera.
+   This section is only relevant when using a USB 33, 37 or 38 camera.
 
 In some rare cases platforms do not offer a valid media stack,
 thus preventing the usage of USB cameras with a UVC backend.
 As a workaround, Aravis can be compiled with `--enable-usb`.
 
 This enables Aravis to iterate USB cameras through libusb.
-To ensure functionality, make sure that the UVC driver is blacklisted.
+
+To enable this set the cmake option `TCAM_ARAVIS_USB_VISION` to `ON`.
+
+A selection of the backend can be done via the `type` properties of tcamsrc and tcambin.
+Alternatively it can be appended to the serial.
+
+The backend descriptor for Usb3Vision via aravis is `aravis`.
+
+A valid serial in this context would look like `12345678-aravis`
 
 libusb
 ######

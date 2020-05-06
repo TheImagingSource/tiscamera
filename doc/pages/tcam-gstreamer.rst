@@ -22,6 +22,9 @@ Source elements that retrieves images from a device.
    * - serial
      - string
      - Serial number of the device that shall be used
+   * - type
+     - string
+     - Backend the camera shall use. Available options: v4l2, aravis, libusb, unknown
    * - camera-buffers
      - int
      - Number of internal buffers the backend can use.
@@ -314,6 +317,9 @@ The offered caps are the sum of unfiltered camera caps and caps that will be ava
    * - serial
      - string
      - Serial number of the device that shall be used
+   * - type
+     - string
+     - Backend the camera shall use. Available options: v4l2, aravis, libusb, unknown
    * - device-caps
      - string
      - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc

@@ -81,6 +81,13 @@ cmake options
          
      - ON
 
+   * - TCAM_ARAVIS_USB_VISION
+     - Enables USB3Vision via aravis.
+       When v4l2 and Usb3Vision are enabled cameras will be listed twice but with different bookends.
+       To select Usb3Vision either set the `type` argument to `aravis`,
+       or set the serial to `<serial>-aravis`.
+     - OFF
+       
    * - TCAM_VERSION
      - TCAM release version
      - Current version string

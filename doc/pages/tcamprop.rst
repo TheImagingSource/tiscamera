@@ -33,8 +33,6 @@ Only tcamsrc and tcambin implement these.
    
    Returns: (element-type utf8) (transfer full): a #GSList
    
-   GSList* tcam_prop_get_device_serials (TcamProp* self)
-
         
 .. c:function:: gboolean tcam_prop_get_device_info (TcamProp* self, const char* serial, char** name, char** identifier, char** connection_type)
                 
@@ -50,7 +48,17 @@ Only tcamsrc and tcambin implement these.
    Get details of a given camera.
 
    Returns: True on success
-                                                                                            
+
+.. c:function:: GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
+
+   @self: a #TcamProp
+
+   Retrieve a list of all connected device serial numbers with the backend appended
+
+   Retrieved serials may appear multiple times but with different backends.
+   The format will always be `<serial>-<backend>`
+
+   Returns: (element-type utf8) (transfer full): a #GSList
 
 Property I/O
 ############
