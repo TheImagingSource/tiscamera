@@ -452,7 +452,8 @@ class TCamCapture(QMainWindow):
             action_string = "{model:<18} - {contype:<7} - {serial}".format(model=dev.model,
                                                                            contype=dev.device_type,
                                                                            serial=dev.serial)
-            if dev.serial == self.serial:
+            if (dev.serial == self.serial
+                    and dev.device_type == self.dev_type):
                 active_entry = action_string
             self.device_combo.addItem(action_string)
 
