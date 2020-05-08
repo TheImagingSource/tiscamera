@@ -266,8 +266,8 @@ class PropertyWidget(QWidget):
                 slider.setValue(value)
 
         except OverflowError:
-            log.error("The slider for '{}' had a value outside of the integer "
-                      "range. That should no happen.".format(self.prop.name))
+            log.info("The slider for '{}' had a value outside of the integer "
+                     "range. That should no happen.".format(self.prop.name))
         finally:
             slider.blockSignals(False)
 
