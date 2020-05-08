@@ -606,7 +606,7 @@ bool AravisDevice::start_stream ()
                       "frame-retention", (unsigned) this->arv_options.frame_retention * 1000,
                       NULL);
         g_object_set(this->stream,
-                     "packet-request-ratio", 1.0,
+                     "packet-request-ratio", this->arv_options.packet_request_ratio,
                      NULL);
     }
 
