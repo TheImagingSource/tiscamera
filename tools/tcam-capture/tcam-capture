@@ -453,7 +453,7 @@ class TCamCapture(QMainWindow):
                                                                            contype=dev.device_type,
                                                                            serial=dev.serial)
             if (dev.serial == self.serial
-                    and dev.device_type == self.dev_type):
+                    and dev.device_type.lower() == self.dev_type.lower()):
                 active_entry = action_string
             self.device_combo.addItem(action_string)
 
@@ -584,7 +584,7 @@ class TCamCapture(QMainWindow):
 
         e = entry.split(" - ")
         serial = e[2]
-        dev_type = e[1]
+        dev_type = e[1].strip()  # ensure no whitespace remains
         self.open_device(serial, dev_type)
 
     def format_selected_callback(self, fmt: str, resolution: str, fps: str):
@@ -622,7 +622,8 @@ class TCamCapture(QMainWindow):
 
         if self.device_list:
             for dev in self.device_list:
-                if dev.serial == serial:
+                if (dev.serial == self.serial
+                        and dev.device_type == self.dev_type):
                     self.setWindowTitle("TCam Capture - {}({})".format(dev.model, serial))
                     # update device menu so that mark on opened camera is drawn
                     self.update_device_list(self.device_list)
