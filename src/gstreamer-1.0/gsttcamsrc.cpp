@@ -1241,7 +1241,6 @@ void separate_serial_and_type (GstTcamSrc* self, const std::string& input)
     else
     {
         self->device_serial = input;
-        self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
     }
 }
 
