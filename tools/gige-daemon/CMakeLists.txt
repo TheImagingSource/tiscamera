@@ -23,10 +23,23 @@ include_directories(${GLIB2_INCLUDE_DIR})
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src")
-include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/dependencies/aravis/src")
-include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
-include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src/aravis")
+
+if (TCAM_INTERNAL_ARAVIS)
+
+  # we require two includes
+  # as some header are generated
+  include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/dependencies/aravis/src")
+  include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+
+
+else (TCAM_INTERNAL_ARAVIS)
+
+  include_directories("${aravis_INCLUDE_DIR}")
+
+endif (TCAM_INTERNAL_ARAVIS)
+
+include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
 
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
@@ -35,7 +48,15 @@ TARGET_LINK_LIBRARIES(gige-daemon tcam)
 TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
 TARGET_LINK_LIBRARIES(gige-daemon "dl")
 
-target_link_libraries(gige-daemon "${ARAVIS_LIB}")
+if (TCAM_INTERNAL_ARAVIS)
+
+  target_link_libraries(gige-daemon "${ARAVIS_LIB}")
+
+else (TCAM_INTERNAL_ARAVIS)
+
+  target_link_libraries(gige-daemon "${aravis_LIBRARIES}")
+
+endif (TCAM_INTERNAL_ARAVIS)
 
 target_link_libraries(gige-daemon "${LIBXML2_LIBRARIES}")
 target_link_libraries(gige-daemon "${GIO_LIBRARIES}")
