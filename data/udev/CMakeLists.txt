@@ -13,14 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (TCAM_ARAVIS_USB_VISION)
-
-  set(SILENT "# ")
-else (TCAM_ARAVIS_USB_VISION)
-  set(SILENT "")
-
-endif (TCAM_ARAVIS_USB_VISION)
-
 configure_file(80-theimagingsource-cameras.rules.in 80-theimagingsource-cameras.rules @ONLY)
 
 set(RULE_FILES ${CMAKE_CURRENT_BINARY_DIR}/80-theimagingsource-cameras.rules)
