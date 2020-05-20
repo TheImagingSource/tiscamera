@@ -409,6 +409,12 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     self->src = gst_element_factory_make("tcamsrc", "tcambin-source");
     gst_bin_add(GST_BIN(self), self->src);
 
+    if (self->device_type != nullptr)
+    {
+        GST_INFO("Setting source type to %s", self->device_type);
+        g_object_set(G_OBJECT(self->src), "type", self->device_type, NULL);
+    }
+
     if (self->device_serial != nullptr)
     {
         GST_INFO("Setting source serial to %s", self->device_serial);
