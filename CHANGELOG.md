@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Firmware v3024 for dmk/dfk 22uc03 auto focus cameras
 - tiscamera-env.sh script to source installed tiscamera instances
 - cmake option TCAM_ARAVIS_USB_VISION
-  Allows usage of USB3Vision via aravis. gige-daemon has to be disabled.
+  Allows usage of USB3Vision via aravis.
 - uvc extension unit for 37U cameras.
 - property state system
   tcamsrc and tcambin have the property 'state' containing a JSON string describing
@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TCAM_ARV_PACKET_REQUEST_RATIO environment variable
 - tcamsrc now answers latency queries
 - example for gstreamer metadata retrieval
+- tcamprop function tcam_prop_get_device_serials_backend
+  Retrieves a list of all connected device serial numbers.
+  Appended to the serial number is the backend, separated by a hyphen "-".
 
 ### Changed
 
@@ -61,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Line endings in 33U firmware files are handled differently
 - tcam-capture fps display only considers the last 5 seconds
 - aravis version to HEAD of aravis-0.6 branch
+- gige-daemon now queries aravis directly
 
 ### Fixed
 
@@ -85,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Segfault in device lost callback in gsttcamsrc
 - erroneous dependency description in
   generated .deb files when working with -DBUILD_TOOLS=OFF
+- Wrong property mapping for GPIO for usb33/37 cameras (Now GPIn)
 
 ### Removed
 
