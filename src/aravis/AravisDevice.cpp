@@ -85,9 +85,19 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
     {
         // this means TestPixelFormat, TestWidth, TestHeight are not available
         // could be an UsbVision camera
+        int x1, x2, y1, y2;
+        arv_camera_get_region(this->device->arv_camera, &x1, &y1, &x2, &y2);
+
+        unsigned int height = y2 - y1;
+        unsigned int width = x2 - x1;
+
+        arv_camera_set_region(this->device->arv_camera, 0, 0, s.width, s.height);
 
         min = arv_device_get_float_feature_value(dev, "MinFPS");
         max = arv_device_get_float_feature_value(dev, "MaxFPS");
+
+        arv_camera_set_region(this->device->arv_camera, 0, 0, width, height);
+
     }
 
     if (min == 0.0 && max == 0.0)
@@ -1043,12 +1053,32 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     // the retrieval of all required information
     // e.g. if the camera only offers certain framerates we want to know them
 
+    // the introduction of standard resolutions is not done here
+    // but in the gstreamer source
+    // here a simple device representation is created
+
     // We search for the wanted node and save the intermediate result
     std::string node_to_use;
     auto find_node = [&node_to_use] (ArvGcNode* node)
         {
             return (node_to_use.compare(arv_gc_feature_node_get_name((ArvGcFeatureNode*) node)) == 0);
         };
+
+    // current setting that have to be restored
+    determine_active_video_format();
+    auto reset_format = this->active_video_format;
+
+
+    // reset region to entirety of the sensor
+    // depending on the camera model (z12)
+    // the width/height boundaries may be skewed
+    // due to internal auto offset settings
+    ArvDevice* dev = arv_camera_get_device(this->arv_camera);
+    arv_camera_set_region(arv_camera,
+                          0, 0,
+                          arv_device_get_integer_feature_value(dev, "SensorWidth"),
+                          arv_device_get_integer_feature_value(dev, "SensorHeight")
+        );
 
     // work your way from bottom to top
     // start with frame rates and use everthing until all format descriptions are complete
@@ -1197,4 +1227,6 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
         tcam_error("NO PixelFormat Node");
     }
 
+    // reset format to settings before indexing
+    set_video_format(reset_format);
 }
