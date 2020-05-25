@@ -741,7 +741,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
 
             self->statistics.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
             self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
-            self->statistics.frame_count++;
+            self->statistics.frame_count = arv_buffer_get_frame_id(buffer);
             self->statistics.is_damaged = false;
             // only way to retrieve actual image size
             size_t image_size = 0;
