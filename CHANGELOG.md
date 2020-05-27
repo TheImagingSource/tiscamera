@@ -101,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Known Issues
 
 - On some systems the python3 module installation path is set wrong.
+- tcam-capture sometimes has problems with streaming when handling Usb3Vision cameras.
 
 
 ## [0.11.1] - 2019-05-22
