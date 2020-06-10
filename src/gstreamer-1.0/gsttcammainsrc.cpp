@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "gsttcamsrc.h"
+#include "gsttcammainsrc.h"
 
 #include "tcamgstbase.h"
 #include "tcamgststrings.h"
@@ -45,10 +45,10 @@
 #pragma GCC diagnostic ignored "-Wformat"
 
 
-#define GST_TCAM_SRC_DEFAULT_N_BUFFERS 10
+#define GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS 10
 
-GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
-#define GST_CAT_DEFAULT tcam_src_debug
+GST_DEBUG_CATEGORY_STATIC (tcam_mainsrc_debug);
+#define GST_CAT_DEFAULT tcam_mainsrc_debug
 
 // helper functions
 
@@ -92,7 +92,7 @@ TCAM_DEVICE_TYPE str_to_type (const std::string& str)
 
 struct destroy_transfer
 {
-    GstTcamSrc* self;
+    GstTcamMainSrc* self;
     std::shared_ptr<tcam::ImageBuffer> ptr;
 };
 
@@ -105,11 +105,11 @@ struct device_state
 };
 
 
-static GSList* gst_tcam_src_get_property_names(TcamProp* self);
+static GSList* gst_tcam_mainsrc_get_property_names(TcamProp* self);
 
-static gchar* gst_tcam_src_get_property_type (TcamProp* self, const gchar* name);
+static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* self, const gchar* name);
 
-static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
+static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* self,
                                                 const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
@@ -121,53 +121,53 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
                                                 GValue* category,
                                                 GValue* group);
 
-static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
+static GSList* gst_tcam_mainsrc_get_menu_entries (TcamProp* iface,
                                               const char* menu_name);
 
-static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
+static gboolean gst_tcam_mainsrc_set_tcam_property (TcamProp* self,
                                                 const gchar* name,
                                                 const GValue* value);
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self);
-static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self);
+static GSList* gst_tcam_mainsrc_get_device_serials (TcamProp* self);
+static GSList* gst_tcam_mainsrc_get_device_serials_backend (TcamProp* self);
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type);
 
 
-static bool gst_tcam_src_init_camera (GstTcamSrc* self);
-static void gst_tcam_src_close_camera (GstTcamSrc* self);
+static bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self);
+static void gst_tcam_mainsrc_close_camera (GstTcamMainSrc* self);
 
-static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self);
+static GstCaps* gst_tcam_mainsrc_get_all_camera_caps (GstTcamMainSrc* self);
 
-static void gst_tcam_src_prop_init (TcamPropInterface* iface)
+static void gst_tcam_mainsrc_prop_init (TcamPropInterface* iface)
 {
-    iface->get_property_names = gst_tcam_src_get_property_names;
-    iface->get_property_type = gst_tcam_src_get_property_type;
-    iface->get_property = gst_tcam_src_get_tcam_property;
-    iface->get_menu_entries = gst_tcam_src_get_menu_entries;
-    iface->set_property = gst_tcam_src_set_tcam_property;
-    iface->get_device_serials = gst_tcam_src_get_device_serials;
-    iface->get_device_serials_backend = gst_tcam_src_get_device_serials_backend;
-    iface->get_device_info = gst_tcam_src_get_device_info;
+    iface->get_property_names = gst_tcam_mainsrc_get_property_names;
+    iface->get_property_type = gst_tcam_mainsrc_get_property_type;
+    iface->get_property = gst_tcam_mainsrc_get_tcam_property;
+    iface->get_menu_entries = gst_tcam_mainsrc_get_menu_entries;
+    iface->set_property = gst_tcam_mainsrc_set_tcam_property;
+    iface->get_device_serials = gst_tcam_mainsrc_get_device_serials;
+    iface->get_device_serials_backend = gst_tcam_mainsrc_get_device_serials_backend;
+    iface->get_device_info = gst_tcam_mainsrc_get_device_info;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_PUSH_SRC,
+G_DEFINE_TYPE_WITH_CODE (GstTcamMainSrc, gst_tcam_mainsrc, GST_TYPE_PUSH_SRC,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_src_prop_init))
+                                                gst_tcam_mainsrc_prop_init))
 
 
-static gboolean get_property_by_name (GstTcamSrc* self,
+static gboolean get_property_by_name (GstTcamMainSrc* self,
                                       const gchar* name,
                                       struct tcam_device_property* prop)
 {
 
     if (self->device == nullptr)
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             return FALSE;
         }
@@ -203,22 +203,22 @@ struct property_type_map
 
 /**
  * gst_tcam_get_property_type:
- * @self: a #GstTcamSrcProp
+ * @self: a #GstTcamMainSrcProp
  * @name: a #char* identifying the property to query
  *
  * Return the type of a property
  *
  * Returns: (transfer full): A string describing the property type
  */
-static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
+static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* iface,
                                               const gchar* name)
 {
     gchar* ret = NULL;
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
     if (self->device == nullptr)
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             return NULL;
         }
@@ -269,21 +269,21 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
 }
 
 /**
- * gst_tcam_src_get_property_names:
- * @self: a #GstTcamSrc
+ * gst_tcam_mainsrc_get_property_names:
+ * @self: a #GstTcamMainSrc
  *
  * Return a list of property names
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
+static GSList* gst_tcam_mainsrc_get_property_names (TcamProp* iface)
 {
     GSList* ret = NULL;
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
     if (self->device == nullptr)
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             return nullptr;
         }
@@ -303,7 +303,7 @@ static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 }
 
 
-static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
+static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 GValue* value,
                                                 GValue* min,
@@ -316,11 +316,11 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
                                                 GValue* group)
 {
     gboolean ret = TRUE;
-    GstTcamSrc *self = GST_TCAM_SRC (iface);
+    GstTcamMainSrc *self = GST_TCAM_MAINSRC (iface);
 
     if (self->device == nullptr)
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             return FALSE;
         }
@@ -330,7 +330,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 
     if (property == nullptr)
     {
-        GST_DEBUG_OBJECT (GST_TCAM_SRC (iface), "no property with name: '%s'", name );
+        GST_DEBUG_OBJECT (GST_TCAM_MAINSRC (iface), "no property with name: '%s'", name );
         return FALSE;
     }
 
@@ -404,7 +404,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             {
                 // g_value_set_gtype (type, G_TYPE_INT);
                 g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
+                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_DOUBLE:
@@ -436,7 +436,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             if (type)
             {
                 g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
+                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_STRING:
@@ -465,7 +465,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             if (type)
             {
                 g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
+                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -496,7 +496,7 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
             if (type)
             {
                 g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_src_get_property_type(iface, name));
+                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         default:
@@ -512,12 +512,12 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
+static GSList* gst_tcam_mainsrc_get_menu_entries (TcamProp* iface,
                                               const char* menu_name)
 {
     GSList* ret = NULL;
 
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
     tcam::Property* property = self->device->dev->get_property_by_name(menu_name);
 
@@ -542,11 +542,11 @@ static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
 }
 
 
-static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
+static gboolean gst_tcam_mainsrc_set_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 const GValue* value)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
     tcam::Property* property = self->device->dev->get_property_by_name(name);
 
@@ -611,10 +611,10 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
+static GSList* gst_tcam_mainsrc_get_device_serials (TcamProp* self)
 {
 
-    GstTcamSrc* s = GST_TCAM_SRC(self);
+    GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
     std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
 
@@ -631,9 +631,9 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
 }
 
 
-static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self)
+static GSList* gst_tcam_mainsrc_get_device_serials_backend (TcamProp* self)
 {
-    GstTcamSrc* s = GST_TCAM_SRC(self);
+    GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
     std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
 
@@ -650,13 +650,13 @@ static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self)
 }
 
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type)
 {
-    GstTcamSrc* s = GST_TCAM_SRC(self);
+    GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
     std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
 
@@ -739,20 +739,20 @@ enum
 };
 
 
-static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
-                                                                         GST_PAD_SRC,
-                                                                         GST_PAD_ALWAYS,
-                                                                         GST_STATIC_CAPS ("ANY"));
+static GstStaticPadTemplate tcam_mainsrc_template = GST_STATIC_PAD_TEMPLATE ("src",
+                                                                             GST_PAD_SRC,
+                                                                             GST_PAD_ALWAYS,
+                                                                             GST_STATIC_CAPS ("ANY"));
 
-static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
+static GstCaps* gst_tcam_mainsrc_fixate_caps (GstBaseSrc* bsrc,
                                           GstCaps* caps);
-static gboolean gst_tcam_src_stop (GstBaseSrc* src);
+static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src);
 
 
-static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
+static GstCaps* gst_tcam_mainsrc_get_all_camera_caps (GstTcamMainSrc* self)
 {
 
-    g_return_val_if_fail(GST_IS_TCAM_SRC(self), NULL);
+    g_return_val_if_fail(GST_IS_TCAM_MAINSRC(self), NULL);
 
     if (self->device == NULL)
     {
@@ -777,7 +777,7 @@ static GstCaps* gst_tcam_src_get_all_camera_caps (GstTcamSrc* self)
 }
 
 
-static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
+static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
 {
 
     GstCaps *thiscaps;
@@ -945,7 +945,7 @@ static gboolean gst_tcam_src_negotiate (GstBaseSrc* basesrc)
         /* now fixate */
         if (!gst_caps_is_empty (caps))
         {
-            caps = gst_tcam_src_fixate_caps (basesrc, caps);
+            caps = gst_tcam_mainsrc_fixate_caps (basesrc, caps);
             GST_DEBUG_OBJECT (basesrc, "fixated to: %" GST_PTR_FORMAT, static_cast<void*>(caps));
 
             if (gst_caps_is_any (caps))
@@ -976,10 +976,10 @@ no_nego_needed:
 }
 
 
-static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
+static GstCaps* gst_tcam_mainsrc_get_caps (GstBaseSrc* src,
                                        GstCaps* filter __attribute__((unused)))
 {
-    GstTcamSrc* self = GST_TCAM_SRC(src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
     GstCaps* caps;
 
     if (self->all_caps != NULL)
@@ -988,7 +988,7 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
     }
     else
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             return NULL;
         }
@@ -1003,16 +1003,16 @@ static GstCaps* gst_tcam_src_get_caps (GstBaseSrc* src,
 }
 
 
-static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
+static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
                                       void* data);
 
 
-static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
+static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
                                        GstCaps* caps)
 {
     GST_DEBUG("In tcam_set_caps");
 
-    GstTcamSrc* self = GST_TCAM_SRC(src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
     GstStructure *structure;
 
@@ -1113,7 +1113,7 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
     self->device->sink->set_buffer_number(self->imagesink_buffers);
-    self->device->sink->registerCallback(gst_tcam_src_sh_callback, self);
+    self->device->sink->registerCallback(gst_tcam_mainsrc_sh_callback, self);
     self->device->sink->setVideoFormat(tcam::VideoFormat(format));
 
     self->device->dev->start_stream(self->device->sink);
@@ -1129,9 +1129,9 @@ static gboolean gst_tcam_src_set_caps (GstBaseSrc* src,
 }
 
 
-static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* info __attribute__((unused)), void* user_data)
+static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info* info __attribute__((unused)), void* user_data)
 {
-    GstTcamSrc* self = (GstTcamSrc*) user_data;
+    GstTcamMainSrc* self = (GstTcamMainSrc*) user_data;
 
     GST_ELEMENT_ERROR(GST_ELEMENT(self),
                       RESOURCE, NOT_FOUND,
@@ -1154,7 +1154,7 @@ static void gst_tcam_src_device_lost_callback (const struct tcam_device_info* in
     // do not call stop
     // some users experience segfaults
     // let EOS handle this. gstreamer will call stop for us
-    // gst_tcam_src_stop(GST_BASE_SRC(self));
+    // gst_tcam_mainsrc_stop(GST_BASE_SRC(self));
 }
 
 
@@ -1184,7 +1184,7 @@ void send_log_to_bus (void* user_data,
         return;
     }
 
-    GstTcamSrc* self = GST_TCAM_SRC(user_data);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(user_data);
 
     va_list args;
     va_start(args, message);
@@ -1222,7 +1222,7 @@ void send_log_to_bus (void* user_data,
 }
 
 
-void separate_serial_and_type (GstTcamSrc* self, const std::string& input)
+void separate_serial_and_type (GstTcamMainSrc* self, const std::string& input)
 {
     auto pos = input.find("-");
 
@@ -1245,7 +1245,7 @@ void separate_serial_and_type (GstTcamSrc* self, const std::string& input)
 }
 
 
-bool gst_tcam_src_init_camera (GstTcamSrc* self)
+bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
 
@@ -1272,10 +1272,10 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     if (!self->device->dev)
     {
         GST_ERROR("Unable to open device. No stream possible.");
-        gst_tcam_src_close_camera(self);
+        gst_tcam_mainsrc_close_camera(self);
         return false;
     }
-    self->device->dev->register_device_lost_callback(gst_tcam_src_device_lost_callback, self);
+    self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback, self);
     self->device_serial = self->device->dev->get_device().get_serial();
 
     if (self->device == NULL)
@@ -1285,14 +1285,14 @@ bool gst_tcam_src_init_camera (GstTcamSrc* self)
     }
 
 
-    self->all_caps = gst_tcam_src_get_all_camera_caps(self);
-    //gst_base_src_set_caps (GST_BASE_SRC(self), self->all_caps);
+    self->all_caps = gst_tcam_mainsrc_get_all_camera_caps(self);
+    //gst_base_mainsrc_set_caps (GST_BASE_SRC(self), self->all_caps);
 
     return true;
 }
 
 
-static void gst_tcam_src_close_camera (GstTcamSrc* self)
+static void gst_tcam_mainsrc_close_camera (GstTcamMainSrc* self)
 {
     GST_INFO("Closing device");
     if (self->device != NULL)
@@ -1310,16 +1310,16 @@ static void gst_tcam_src_close_camera (GstTcamSrc* self)
 }
 
 
-static gboolean gst_tcam_src_start (GstBaseSrc* src)
+static gboolean gst_tcam_mainsrc_start (GstBaseSrc* src)
 {
-    GstTcamSrc* self = GST_TCAM_SRC(src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
     self->run = 1000;
     self->is_running = true;
 
     if (self->device == NULL)
     {
-        if (!gst_tcam_src_init_camera(self))
+        if (!gst_tcam_mainsrc_init_camera(self))
         {
             gst_base_src_start_complete(src, GST_FLOW_ERROR);
             return FALSE;
@@ -1334,9 +1334,9 @@ static gboolean gst_tcam_src_start (GstBaseSrc* src)
 }
 
 
-static gboolean gst_tcam_src_stop (GstBaseSrc* src)
+static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 {
-    GstTcamSrc* self = GST_TCAM_SRC(src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
     self->is_running = false;
 
@@ -1377,13 +1377,13 @@ static gboolean gst_tcam_src_stop (GstBaseSrc* src)
 }
 
 
-static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
+static GstStateChangeReturn gst_tcam_mainsrc_change_state (GstElement* element,
                                                        GstStateChange change)
 {
 
     GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
 
-    GstTcamSrc* self = GST_TCAM_SRC(element);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(element);
 
     switch(change)
     {
@@ -1394,12 +1394,12 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
             if (self->device == nullptr)
             {
                 GST_INFO("must initialize device");
-                if (!gst_tcam_src_init_camera(self))
+                if (!gst_tcam_mainsrc_init_camera(self))
                 {
                     GST_INFO("FAILURE to initialize device. Aborting...");
                     return GST_STATE_CHANGE_FAILURE;
                 }
-                self->all_caps = gst_tcam_src_get_all_camera_caps (self);
+                self->all_caps = gst_tcam_mainsrc_get_all_camera_caps (self);
             }
             break;
         }
@@ -1410,7 +1410,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
     }
 
     gst_element_set_locked_state(element, TRUE);
-    ret = GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->change_state(element, change);
+    ret = GST_ELEMENT_CLASS(gst_tcam_mainsrc_parent_class)->change_state(element, change);
     gst_element_set_locked_state(element, FALSE);
 
     if (ret == GST_STATE_CHANGE_FAILURE)
@@ -1425,7 +1425,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
             if (self->device != nullptr)
             {
                 // do not close camera, as a restart with the same device might be wanted
-                gst_tcam_src_close_camera(self);
+                gst_tcam_mainsrc_close_camera(self);
             }
 
             break;
@@ -1437,10 +1437,10 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
 }
 
 
-static void gst_tcam_src_get_times (GstBaseSrc* basesrc,
-                                    GstBuffer* buffer,
-                                    GstClockTime* start,
-                                    GstClockTime* end)
+static void gst_tcam_mainsrc_get_times (GstBaseSrc* basesrc,
+                                        GstBuffer* buffer,
+                                        GstClockTime* start,
+                                        GstClockTime* end)
 {
     if (gst_base_src_is_live (basesrc))
     {
@@ -1469,14 +1469,14 @@ static void buffer_destroy_callback (gpointer data)
 {
     struct destroy_transfer* trans = (destroy_transfer*)data;
 
-    if (!GST_IS_TCAM_SRC(trans->self))
+    if (!GST_IS_TCAM_MAINSRC(trans->self))
     {
         GST_ERROR("Received source is not valid.");
         delete trans;
         return;
     }
 
-    GstTcamSrc* self = trans->self;
+    GstTcamMainSrc* self = trans->self;
     std::unique_lock<std::mutex> lck(self->mtx);
 
     if (trans->ptr == nullptr)
@@ -1498,10 +1498,10 @@ static void buffer_destroy_callback (gpointer data)
 }
 
 
-static void gst_tcam_src_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
+static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
                                       void* data)
 {
-    GstTcamSrc* self = GST_TCAM_SRC(data);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(data);
     GST_TRACE("sh callback");
 
 
@@ -1540,10 +1540,10 @@ void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
 }
 
 
-static GstFlowReturn gst_tcam_src_create (GstPushSrc* push_src,
+static GstFlowReturn gst_tcam_mainsrc_create (GstPushSrc* push_src,
                                           GstBuffer** buffer)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (push_src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (push_src);
 
     std::unique_lock<std::mutex> lck(self->mtx);
 
@@ -1653,10 +1653,10 @@ wait_again:
 }
 
 
-static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
+static GstCaps* gst_tcam_mainsrc_fixate_caps (GstBaseSrc* bsrc,
                                           GstCaps* caps)
 {
-    GstTcamSrc* self = GST_TCAM_SRC(bsrc);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(bsrc);
 
     GstStructure* structure;
     gint width = 0;
@@ -1680,13 +1680,13 @@ static GstCaps* gst_tcam_src_fixate_caps (GstBaseSrc* bsrc,
 
     GST_DEBUG_OBJECT (self, "Fixated caps to %s", gst_caps_to_string(caps));
 
-    return GST_BASE_SRC_CLASS(gst_tcam_src_parent_class)->fixate(bsrc, caps);
+    return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->fixate(bsrc, caps);
 }
 
-static gboolean gst_tcam_src_query (GstBaseSrc* bsrc,
+static gboolean gst_tcam_mainsrc_query (GstBaseSrc* bsrc,
                                     GstQuery* query)
 {
-    GstTcamSrc *src = GST_TCAM_SRC(bsrc);
+    GstTcamMainSrc *src = GST_TCAM_MAINSRC(bsrc);
     gboolean res = FALSE;
 
     switch (GST_QUERY_TYPE (query))
@@ -1732,7 +1732,7 @@ static gboolean gst_tcam_src_query (GstBaseSrc* bsrc,
             break;
         }
         default:
-            res = GST_BASE_SRC_CLASS(gst_tcam_src_parent_class)->query(bsrc, query);
+            res = GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
             break;
     }
 
@@ -1741,7 +1741,7 @@ done:
     return res;
 }
 
-static void gst_tcam_src_init (GstTcamSrc* self)
+static void gst_tcam_mainsrc_init (GstTcamMainSrc* self)
 {
 
     gst_base_src_set_live (GST_BASE_SRC (self), TRUE);
@@ -1770,11 +1770,11 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 }
 
 
-static void gst_tcam_src_finalize (GObject* object)
+static void gst_tcam_mainsrc_finalize (GObject* object)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (object);
 
-    gst_tcam_src_close_camera(self);
+    gst_tcam_mainsrc_close_camera(self);
 
     if (self->all_caps != NULL)
     {
@@ -1793,16 +1793,16 @@ static void gst_tcam_src_finalize (GObject* object)
     (&self->index_)->DeviceIndex::~DeviceIndex();
 
 
-    G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
+    G_OBJECT_CLASS (gst_tcam_mainsrc_parent_class)->finalize (object);
 }
 
 
-static void gst_tcam_src_set_property (GObject* object,
+static void gst_tcam_mainsrc_set_property (GObject* object,
                                        guint prop_id,
                                        const GValue* value,
                                        GParamSpec* pspec)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (object);
 
     switch (prop_id)
     {
@@ -1825,11 +1825,11 @@ static void gst_tcam_src_set_property (GObject* object,
 
                 if (self->device)
                 {
-                    gst_tcam_src_close_camera(self);
+                    gst_tcam_mainsrc_close_camera(self);
                 }
                 if (!self->device_serial.empty())
                 {
-                    if (!gst_tcam_src_init_camera(self))
+                    if (!gst_tcam_mainsrc_init_camera(self))
                     {
                         GST_ERROR("Error while initializing camera.");
                         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
@@ -1915,12 +1915,12 @@ static void gst_tcam_src_set_property (GObject* object,
 }
 
 
-static void gst_tcam_src_get_property (GObject* object,
+static void gst_tcam_mainsrc_get_property (GObject* object,
                                        guint prop_id,
                                        GValue* value,
                                        GParamSpec* pspec)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC (object);
 
     switch (prop_id)
     {
@@ -1991,9 +1991,9 @@ static void gst_tcam_src_get_property (GObject* object,
 }
 
 
-static gboolean gst_tcam_src_unlock (GstBaseSrc* src)
+static gboolean gst_tcam_mainsrc_unlock (GstBaseSrc* src)
 {
-    GstTcamSrc* self = GST_TCAM_SRC(src);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
     self->is_running = false;
 
@@ -2003,16 +2003,16 @@ static gboolean gst_tcam_src_unlock (GstBaseSrc* src)
 }
 
 
-static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
+static void gst_tcam_mainsrc_class_init (GstTcamMainSrcClass* klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
     GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
     GstBaseSrcClass *gstbasesrc_class = GST_BASE_SRC_CLASS (klass);
     GstPushSrcClass *gstpushsrc_class = GST_PUSH_SRC_CLASS (klass);
 
-    gobject_class->finalize = gst_tcam_src_finalize;
-    gobject_class->set_property = gst_tcam_src_set_property;
-    gobject_class->get_property = gst_tcam_src_get_property;
+    gobject_class->finalize = gst_tcam_mainsrc_finalize;
+    gobject_class->set_property = gst_tcam_mainsrc_set_property;
+    gobject_class->get_property = gst_tcam_mainsrc_get_property;
 
     g_object_class_install_property
         (gobject_class,
@@ -2045,7 +2045,7 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
          g_param_spec_int ("camera-buffers",
                            "Number of Buffers",
                            "Number of buffers to use for retrieving images",
-                           1, 256, GST_TCAM_SRC_DEFAULT_N_BUFFERS,
+                           1, 256, GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS,
                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
@@ -2081,7 +2081,7 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                                         "",
                                                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-    GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
+    GST_DEBUG_CATEGORY_INIT (tcam_mainsrc_debug, "tcammainsrc", 0, "tcam interface");
 
     gst_element_class_set_details_simple (element_class,
                                           "Tcam Video Source",
@@ -2090,27 +2090,27 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                           "The Imaging Source <support@theimagingsource.com>");
 
     gst_element_class_add_pad_template (element_class,
-                                        gst_static_pad_template_get (&tcam_src_template));
+                                        gst_static_pad_template_get (&tcam_mainsrc_template));
 
-    element_class->change_state = gst_tcam_src_change_state;
+    element_class->change_state = gst_tcam_mainsrc_change_state;
 
-    gstbasesrc_class->get_caps = gst_tcam_src_get_caps;
-    gstbasesrc_class->set_caps = gst_tcam_src_set_caps;
-    gstbasesrc_class->fixate = gst_tcam_src_fixate_caps;
-    gstbasesrc_class->start = gst_tcam_src_start;
-    gstbasesrc_class->stop = gst_tcam_src_stop;
-    gstbasesrc_class->unlock = gst_tcam_src_unlock;
-    gstbasesrc_class->negotiate = gst_tcam_src_negotiate;
-    gstbasesrc_class->get_times = gst_tcam_src_get_times;
-    gstbasesrc_class->query = gst_tcam_src_query;
+    gstbasesrc_class->get_caps = gst_tcam_mainsrc_get_caps;
+    gstbasesrc_class->set_caps = gst_tcam_mainsrc_set_caps;
+    gstbasesrc_class->fixate = gst_tcam_mainsrc_fixate_caps;
+    gstbasesrc_class->start = gst_tcam_mainsrc_start;
+    gstbasesrc_class->stop = gst_tcam_mainsrc_stop;
+    gstbasesrc_class->unlock = gst_tcam_mainsrc_unlock;
+    gstbasesrc_class->negotiate = gst_tcam_mainsrc_negotiate;
+    gstbasesrc_class->get_times = gst_tcam_mainsrc_get_times;
+    gstbasesrc_class->query = gst_tcam_mainsrc_query;
 
-    gstpushsrc_class->create = gst_tcam_src_create;
+    gstpushsrc_class->create = gst_tcam_mainsrc_create;
 }
 
 
 static gboolean plugin_init (GstPlugin* plugin)
 {
-    return gst_element_register (plugin, "tcamsrc", GST_RANK_NONE, GST_TYPE_TCAM_SRC);
+    return gst_element_register(plugin, "tcammainsrc", GST_RANK_NONE, GST_TYPE_TCAM_MAINSRC);
 }
 
 #ifndef PACKAGE
@@ -2120,10 +2120,10 @@ static gboolean plugin_init (GstPlugin* plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
-                   tcamsrc,
-                   "TCam Video Source",
+                   tcammainsrc,
+                   "TCam Video Main Source",
                    plugin_init,
                    "1.0.0",
                    "Proprietary",
-                   "tcamsrc",
+                   "tcammainsrc",
                    "theimagingsource.com")

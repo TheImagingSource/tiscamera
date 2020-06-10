@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef TCAM_GSTTCAMSRC_H
-#define TCAM_GSTTCAMSRC_H
+#ifndef TCAM_GSTTCAMMAINSRC_H
+#define TCAM_GSTTCAMMAINSRC_H
 
 #include <gst/gst.h>
 #include <gst/base/gstpushsrc.h>
@@ -39,18 +39,18 @@ extern "C"
 G_BEGIN_DECLS
 
 
-#define GST_TYPE_TCAM_SRC           (gst_tcam_src_get_type())
-#define GST_TCAM_SRC(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAM_SRC, GstTcamSrc))
-#define GST_TCAM_SRC_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAM_SRC, GstTcamSrc))
-#define GST_IS_TCAM_SRC(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM_SRC))
-#define GST_IS_TCAM_SRC_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM_SRC))
+#define GST_TYPE_TCAM_MAINSRC           (gst_tcam_mainsrc_get_type())
+#define GST_TCAM_MAINSRC(obj)           (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAM_MAINSRC, GstTcamMainSrc))
+#define GST_TCAM_MAINSRC_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAM_MAINSRC, GstTcamMainSrc))
+#define GST_IS_TCAM_MAINSRC(obj)        (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM_MAINSRC))
+#define GST_IS_TCAM_MAINSRC_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM_MAINSRC))
 
-typedef struct _GstTcamSrc GstTcamSrc;
-typedef struct _GstTcamSrcClass GstTcamSrcClass;
+typedef struct _GstTcamMainSrc GstTcamMainSrc;
+typedef struct _GstTcamMainSrcClass GstTcamMainSrcClass;
 
 struct device_state;
 
-struct _GstTcamSrc
+struct _GstTcamMainSrc
 {
     GstPushSrc element;
 
@@ -84,12 +84,12 @@ struct _GstTcamSrc
 };
 
 
-struct _GstTcamSrcClass
+struct _GstTcamMainSrcClass
 {
     GstPushSrcClass parent_class;
 };
 
-GType gst_tcam_src_get_type (void);
+GType gst_tcam_mainsrc_get_type (void);
 
 G_END_DECLS
 
@@ -99,4 +99,4 @@ G_END_DECLS
 #endif
 
 
-#endif /* TCAM_GSTTCAMSRC_H */
+#endif /* TCAM_GSTTCAMMAINSRC_H */
