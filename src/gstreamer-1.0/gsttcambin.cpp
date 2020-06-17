@@ -303,6 +303,10 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
         GstElement* element = GST_ELEMENT(g_value_get_object(&item));
         if (TCAM_IS_PROP(element))
         {
+            if (g_strcmp0(gst_element_get_name(element), "tcambin-dutils") == 0)
+            {
+                GST_INFO("AHA");
+            }
             if (tcam_prop_set_tcam_property(TCAM_PROP(element),
                                             name,
                                             value))
@@ -1026,6 +1030,31 @@ void set_target_pad (GstTcamBin* self, GstPad* pad __attribute__((unused)))
 }
 
 
+gboolean apply_state (GstTcamBin* self, const std::string& state)
+{
+    bool ret;
+    if (!self->device_serial)
+    {
+        ret = load_device_settings(TCAM_PROP(self),
+                                     "",
+                                     state);
+    }
+    else
+    {
+        ret = load_device_settings(TCAM_PROP(self),
+                                     self->device_serial,
+                                     state);
+    }
+
+    if (!ret)
+    {
+        GST_WARNING("Device may be in an undefined state.");
+    }
+
+    return ret;
+}
+
+
 static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                                                        GstStateChange trans)
 {
@@ -1188,6 +1217,18 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             gst_element_post_message(element, msg);
 
             break;
+        }
+        case GST_STATE_CHANGE_PLAYING_TO_PLAYING:
+        {
+            GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
+
+            if (self->must_apply_state)
+            {
+                apply_state(self, self->state);
+                self->must_apply_state = FALSE;
+            }
+            break;
+
         }
         default:
         {
@@ -1365,21 +1406,27 @@ static void gst_tcambin_set_property (GObject* object,
         }
         case PROP_STATE:
         {
-            bool state;
-            if (!self->device_serial)
+            GstState gstate;
+
+            gst_element_get_state(GST_ELEMENT(self), &gstate, nullptr, 1000000);
+
+            if (gstate == GST_STATE_VOID_PENDING
+                || gstate == GST_STATE_NULL)
             {
-                state = load_device_settings(TCAM_PROP(self),
-                                             "",
-                                             g_value_get_string(value));
-            }
-            else
-            {
-                state = load_device_settings(TCAM_PROP(self),
-                                              self->device_serial,
-                                              g_value_get_string(value));
+                GST_INFO("tcambin not ready. State will be applied once GST_STATE_READY is reached.");
+                self->must_apply_state = TRUE;
+                if (self->state)
+                {
+                    g_free(self->state);
+                }
+                self->state = g_strdup(g_value_get_string(value));
+                break;
             }
 
-            if (!state)
+            self->must_apply_state = FALSE;
+
+            bool ret = apply_state(self, g_value_get_string(value));
+            if (!ret)
             {
                 GST_WARNING("Device may be in an undefined state.");
             }

@@ -67,6 +67,8 @@ struct _GstTcamBin
     gboolean elements_created;
     gboolean elements_linked;
     gboolean target_set;
+    gboolean must_apply_state;
+    char* state;
 
     GstCaps* src_caps = nullptr;
     bool needs_debayer;
