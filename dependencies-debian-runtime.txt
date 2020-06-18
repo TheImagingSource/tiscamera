@@ -8,7 +8,11 @@ gstreamer1.0-plugins-good (>= 1.8.0),
 gstreamer1.0-plugins-bad (>= 1.8.0),
 gstreamer1.0-plugins-ugly (>= 1.8.3),
 libxml2 (>= 2.9.3),
-libzip4 (>= 1.0.1),
+# glob to address different libzip versions
+# ubuntu 20.04 has libzip5
+# both 4 and 5 have versions greater than
+# the documented one
+libzip[4-5] (>= 1.0.1),
 libglib2.0-0 (>= 2.48.2),
 libgirepository-1.0-1 (>= 1.46.0),
 
