@@ -428,6 +428,11 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
     GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
 
+    // query these as late as possible
+    // src needs some time as things can happen async
+    g_object_get(G_OBJECT(self->src), "serial", &self->device_serial, NULL);
+    g_object_get(G_OBJECT(self->src), "type", &self->device_type, NULL);
+    GST_INFO("Opened device has serial: '%s' type: '%s'", self->device_serial, self->device_type);
     return TRUE;
 }
 
