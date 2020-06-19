@@ -1071,7 +1071,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             if (self->src == nullptr)
             {
                 gst_tcambin_create_source(self);
-                g_object_set(self->src, "serial", self->device_serial, NULL);
             }
 
             gst_element_set_state(self->src, GST_STATE_READY);
