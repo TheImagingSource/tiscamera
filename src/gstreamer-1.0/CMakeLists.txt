@@ -15,6 +15,7 @@
 
 set(PLUGINS
   gsttcammainsrc
+  gsttcamsrc
   gsttcamwhitebalance
   gsttcamautoexposure
   gsttcamautofocus
@@ -52,6 +53,7 @@ target_link_libraries(tcamgstbase ${GSTREAMER_VIDEO_LIBRARIES})
 
 
 add_library(gsttcammainsrc SHARED gsttcammainsrc.cpp gstmetatcamstatistics.cpp)
+add_library(gsttcamsrc SHARED gsttcamsrc.cpp)
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp)
 
