@@ -28,6 +28,35 @@
 #include "public_utils.h"
 
 
+bool separate_serial_and_type (const std::string& input,
+                               std::string& serial,
+                               std::string& type)
+{
+    auto pos = input.find("-");
+
+    if (pos != std::string::npos)
+    {
+        // assign to tmp variables
+        // input could be self->device_serial
+        // overwriting it would ivalidate input for
+        // device_type retrieval
+        std::string tmp1 = input.substr(0, pos);
+        std::string tmp2 = input.substr(pos+1);
+
+        serial = tmp1;
+        type = tmp2;
+
+        return true;
+    }
+    else
+    {
+        serial = input;
+    }
+    return false;
+}
+
+
+
 GstElement* tcam_gst_find_camera_src (GstElement* element)
 {
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");

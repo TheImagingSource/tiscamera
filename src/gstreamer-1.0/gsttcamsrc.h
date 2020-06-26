@@ -68,6 +68,11 @@ struct _GstTcamSrc
 
     GstElement* active_source;
 
+    // convenience container
+    // for all source elements
+    // tcamsrc can adress
+    GSList* source_list;
+
     GstElement* main_src;
     //GstElement* mipi_src;
 

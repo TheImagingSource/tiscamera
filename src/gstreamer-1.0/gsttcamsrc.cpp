@@ -43,7 +43,6 @@
 GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
-#define gst_tcamsrc_parent_class parent_class
 
 // helper functions
 
@@ -124,6 +123,7 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* self,
                                               char** identifier,
                                               char** connection_type);
 
+static gboolean open_source_element (GstTcamSrc* self);
 
 
 static void gst_tcam_src_prop_init (TcamPropInterface* iface)
@@ -137,6 +137,9 @@ static void gst_tcam_src_prop_init (TcamPropInterface* iface)
     iface->get_device_serials_backend = gst_tcam_src_get_device_serials_backend;
     iface->get_device_info = gst_tcam_src_get_device_info;
 }
+
+
+#define gst_tcam_src_parent_class parent_class
 
 G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_BIN,
                          G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
@@ -157,7 +160,13 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
     const gchar* ret = NULL;
     GstTcamSrc* self = GST_TCAM_SRC (iface);
 
-    //GST_ERROR("TODO");
+    if (!self->active_source)
+    {
+        if (!open_source_element(self))
+        {
+            return FALSE;
+        }
+    }
 
     ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->active_source),
                                            name);
@@ -176,12 +185,17 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
  */
 static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 {
-    GSList* ret = NULL;
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
-    GST_ERROR("TODO");
+    if (!self->active_source)
+    {
+        if (!open_source_element(self))
+        {
+            return FALSE;
+        }
+    }
 
-    return ret;
+    return tcam_prop_get_tcam_property_names(TCAM_PROP(self->active_source));
 }
 
 
@@ -197,24 +211,39 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
                                                 GValue* category,
                                                 GValue* group)
 {
-    gboolean ret = TRUE;
-    //GstTcamSrc *self = GST_TCAM_SRC (iface);
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
-    GST_ERROR("TODO");
+    if (!self->active_source)
+    {
+        if (!open_source_element(self))
+        {
+            return FALSE;
+        }
+    }
 
-    return ret;
+    return tcam_prop_get_tcam_property(TCAM_PROP(self->active_source),
+                                       name, value,
+                                       min, max,
+                                       def, step,
+                                       type, flags,
+                                       category, group);
 }
 
 
 static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
                                               const char* menu_name)
 {
-    GSList* ret = NULL;
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
-    //GstTcamSrc* self = GST_TCAM_SRC (iface);
-    GST_ERROR("TODO");
+    if (!self->active_source)
+    {
+        if (!open_source_element(self))
+        {
+            return FALSE;
+        }
+    }
 
-    return ret;
+    return tcam_prop_get_tcam_menu_entries(TCAM_PROP(self->active_source), menu_name);
 }
 
 
@@ -222,49 +251,84 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
                                                 const gchar* name,
                                                 const GValue* value)
 {
-    //GstTcamSrc* self = GST_TCAM_SRC (iface);
-    GST_ERROR("TODO");
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
-    return FALSE;
+    if (!self->active_source)
+    {
+        if (!open_source_element(self))
+        {
+            return FALSE;
+        }
+    }
+
+    return tcam_prop_set_tcam_property(TCAM_PROP(self->active_source), name, value);
 }
 
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self)
+static GSList* gst_tcam_src_get_device_serials (TcamProp* iface)
 {
 
-    //GstTcamSrc* self = GST_TCAM_SRC(self);
-
-    GST_ERROR("TODO");
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
     GSList* ret = nullptr;
 
+    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
+    {
+        GSList* tmp = nullptr;
+
+        tmp = tcam_prop_get_device_serials(TCAM_PROP(iter->data));
+
+        // takes ownership of tmp elements
+        // no g_slist_free required
+        ret = g_slist_concat(ret, tmp);
+    }
+
+
     return ret;
 }
 
 
-static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self)
+static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* iface)
 {
-    //GstTcamSrc* self = GST_TCAM_SRC(self);
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
-    GSList* ret = NULL;
+    GSList* ret = nullptr;
 
-    GST_ERROR("TODO");
+    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
+    {
+        GSList* tmp = nullptr;
+
+        tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(iter->data));
+
+        // takes ownership of tmp elements
+        // no g_slist_free required
+        ret = g_slist_concat(ret, tmp);
+    }
 
     return ret;
 }
 
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self,
+static gboolean gst_tcam_src_get_device_info (TcamProp* iface,
                                               const char* serial,
                                               char** name,
                                               char** identifier,
                                               char** connection_type)
 {
-    //GstTcamSrc* self = GST_TCAM_SRC(self);
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
     gboolean ret = FALSE;
 
-    GST_ERROR("TODO");
+    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
+    {
+        ret = tcam_prop_get_device_info(TCAM_PROP(iter->data),
+                                        serial, name, identifier, connection_type);
+
+        if (ret)
+        {
+            break;
+        }
+    }
 
     return ret;
 }
@@ -290,7 +354,7 @@ static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
                                                                          GST_PAD_ALWAYS,
                                                                          GST_STATIC_CAPS ("ANY"));
 
-gboolean close_source_element (GstTcamSrc* self)
+static gboolean close_source_element (GstTcamSrc* self)
 {
 
     GstState state;
@@ -305,7 +369,10 @@ gboolean close_source_element (GstTcamSrc* self)
     if (self->active_source)
     {
         gst_element_set_state(self->active_source, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), self->active_source);
+
+        // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
+        // gst_bin_remove(GST_BIN(self), self->active_source);
+
         self->active_source = nullptr;
         return TRUE;
     }
@@ -314,7 +381,7 @@ gboolean close_source_element (GstTcamSrc* self)
 }
 
 
-gboolean open_source_element (GstTcamSrc* self)
+static gboolean open_source_element (GstTcamSrc* self)
 {
 
     if (self->active_source)
@@ -326,10 +393,16 @@ gboolean open_source_element (GstTcamSrc* self)
         }
     }
 
-    // TODO split serial and type when using 12345678-aravis
+     /*
+      How source selection works
 
+      if serial exists -> use first matching source
+      if serial && type exist -> use matching source
+      if no serial && type -> matching source
+      if no source && no type -> first source with device available
 
-
+      mainsrc has prevalence over other sources for unspecified devices
+     */
 
     if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
@@ -337,32 +410,64 @@ gboolean open_source_element (GstTcamSrc* self)
     }
     else
     {
-        for (const auto& dev : self->device_list)
-        {
-            if (dev.serial == self->device_serial
-                && dev.type == self->device_type)
-            {
 
-                if (dev.source == SOURCE_ELEMENT_MAIN)
+        for (GSList* iter = self->source_list;
+             iter != nullptr && !self->active_source;
+             iter = g_slist_next(iter))
+        {
+            GSList* tmp = nullptr;
+
+            if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN
+                && !self->device_serial.empty())
+            {
+                GST_INFO("Searching for '%s'", self->device_serial.c_str());
+                tmp = tcam_prop_get_device_serials(TCAM_PROP(iter->data));
+
+                for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
                 {
-                    self->active_source = self->main_src;
+                    GST_DEBUG("Comparing '%s' to '%s'", self->device_serial.c_str(), (const char*)i->data);
+
+                    if (g_strcmp0((const char*)i->data, self->device_serial.c_str()) == 0)
+                    {
+
+                        self->active_source = (GstElement*)iter->data;
+                        break;
+                    }
                 }
-                else if (dev.source == SOURCE_ELEMENT_MIPI)
+
+            }
+            else
+            {
+                tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(iter->data));
+
+                for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
                 {
-                    // TODO ADD MIPI here
-                }
-                else if (dev.source == SOURCE_ELEMENT_MIPI_RASPI)
-                {
-                    // TODO add source here
-                }
-                else
-                {
-                    GST_ERROR("No such source available.");
-                    return FALSE;
+                    std::string serial;
+                    std::string type_str;
+                    separate_serial_and_type((const char*)i->data, serial, type_str);
+
+                    if (serial == self->device_serial
+                        && str_to_type(type_str) == self->device_type)
+                    {
+                        self->active_source = (GstElement*)iter->data;
+                        break;
+                    }
                 }
             }
+            g_slist_free(tmp);
         }
     }
+
+    if (!self->active_source)
+    {
+        GST_ERROR("Unable to open a source element. Stream not possible.");
+        return FALSE;
+    }
+
+    g_object_set(self->active_source,
+                 "serial", self->device_serial.c_str(),
+                 "type", type_to_str(self->device_type),
+                 NULL);
 
     gst_bin_add(GST_BIN(self), self->active_source);
 
@@ -378,7 +483,7 @@ gboolean open_source_element (GstTcamSrc* self)
         GST_DEBUG("Ghost pad target set");
     }
 
-    //self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->active_source, "src"), NULL);
+    gst_element_set_state(self->active_source, GST_STATE_READY);
 
     // query these as late as possible
     // src needs some time as things can happen async
@@ -464,7 +569,11 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->n_buffers = -1;
 
     self->active_source = nullptr;
+
+    self->source_list = nullptr;
+
     self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
+    self->source_list = g_slist_append(self->source_list, self->main_src);
 
     self->target_set = FALSE;
     self->all_caps = NULL;
@@ -473,8 +582,6 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
-
-    GST_INFO("Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
 
 
@@ -488,6 +595,14 @@ static void gst_tcam_src_finalize (GObject* object)
         self->all_caps = NULL;
     }
 
+    close_source_element(self);
+
+    g_slist_free(self->source_list);
+
+    // source elements have to be destroyed manually as they are not in the bin
+    //gst_object_unref(self->main_src);
+    self->main_src = nullptr;
+
     G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
 }
 
@@ -498,8 +613,8 @@ static void gst_tcamsrc_dispose (GstTcamSrc* self)
     {
         gst_element_remove_pad(GST_ELEMENT(self), self->pad);
     }
-    // TODO make usable
-    //G_OBJECT_CLASS(parent_class)->dispose((GObject*) self);
+
+    G_OBJECT_CLASS(GST_ELEMENT_CLASS(parent_class))->dispose((GObject*) self);
 }
 
 
@@ -525,6 +640,26 @@ static void gst_tcam_src_set_property (GObject* object,
                 else
                 {
                     self->device_serial = g_value_get_string(value);
+
+                    std::string s;
+                    std::string t;
+
+                    bool sep_ret = separate_serial_and_type(self->device_serial, s, t);
+
+                    if (sep_ret)
+                    {
+                        GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
+                                 s.c_str(), t.c_str());
+
+                        self->device_serial = s;
+                        self->device_type = str_to_type(t);
+
+                        GST_DEBUG("Type interpreted as '%s'", type_to_str(self->device_type));
+
+                    }
+                    // no else
+                    // self->device_serial and s are already equal
+
                 }
 
                 GST_INFO("Set camera serial to %s", self->device_serial.c_str());
@@ -775,10 +910,6 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                                         gst_static_pad_template_get (&tcam_src_template));
 
     element_class->change_state = gst_tcam_src_change_state;
-
-    // gstbasesrc_class->get_caps = gst_tcam_src_get_caps;
-    // gstbasesrc_class->set_caps = gst_tcam_src_set_caps;
-    // gstbasesrc_class->negotiate = gst_tcam_src_negotiate;
 
 }
 

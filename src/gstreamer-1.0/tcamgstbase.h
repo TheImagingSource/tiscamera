@@ -31,6 +31,15 @@ extern "C"
 {
 #endif
 
+
+/**
+ * returns true if serial and type have been found
+ * returns false if only serial has been found
+ */
+bool separate_serial_and_type (const std::string& input,
+                               std::string& serial,
+                               std::string& type);
+
 GstElement* tcam_gst_find_camera_src (GstElement* element);
 
 
