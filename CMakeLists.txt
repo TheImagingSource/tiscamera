@@ -57,39 +57,8 @@ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
-option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
-option(BUILD_V4L2     "Include support for USB cameras"      ON )
-option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
-option(BUILD_TOOLS    "Build additional utilities"           ON)
-option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
-option(BUILD_TESTS    "Build tests."                         OFF)
-
-
-option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
-option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
-
-if (TCAM_ARAVIS_USB_VISION)
-  # activate aravis since we need it for usb3vision
-  set(BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
-
-endif (TCAM_ARAVIS_USB_VISION)
-
-option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
-
-if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
-
-  set(BUILD_GST_1_0 OFF)
-  set(BUILD_ARAVIS OFF)
-  set(BUILD_V4L2 OFF)
-  set(BUILD_LIBUSB OFF)
-  set(BUILD_TOOLS OFF)
-  set(BUILD_DOCUMENTATION OFF)
-  set(BUILD_TESTS OFF)
-
-endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
-
-
+# All option for configuration come from here
+include(CMakeOptions.cmake)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
