@@ -75,6 +75,22 @@ if (TCAM_ARAVIS_USB_VISION)
 
 endif (TCAM_ARAVIS_USB_VISION)
 
+option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
+
+if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+  set(BUILD_GST_1_0 OFF)
+  set(BUILD_ARAVIS OFF)
+  set(BUILD_V4L2 OFF)
+  set(BUILD_LIBUSB OFF)
+  set(BUILD_TOOLS OFF)
+  set(BUILD_DOCUMENTATION OFF)
+  set(BUILD_TESTS OFF)
+
+endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
 
@@ -98,6 +114,18 @@ execute_process ( COMMAND python3 -c "from distutils.sysconfig import get_python
 
 set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
 
+if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+add_subdirectory(src/v4l2)
+add_subdirectory(tools/tcam-uvc-extension-loader/)
+add_subdirectory(data/uvc-extensions/)
+add_subdirectory(data/udev/)
+
+endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+# TODO: these should not always be included
 add_subdirectory(dependencies)
 add_subdirectory(src)
 
@@ -119,9 +147,11 @@ if (BUILD_TESTS)
   add_subdirectory(tests)
 endif (BUILD_TESTS)
 
-
+# TODO: this should not be always on
 install(DIRECTORY examples
   DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+
+endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 
 # uninstall target
@@ -163,6 +193,12 @@ MESSAGE(STATUS "Support for LibUsb cameras:    " ${BUILD_LIBUSB})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "Build documentation            " ${BUILD_DOCUMENTATION})
 MESSAGE(STATUS "Build tests                    " ${BUILD_TESTS})
+MESSAGE(STATUS "")
+
+if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+MESSAGE(STATUS " !! Only building tcam-uvc-extension-loader and associated files !!")
+endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
 MESSAGE(STATUS "Installing binaries to:        " ${TCAM_INSTALL_BIN})

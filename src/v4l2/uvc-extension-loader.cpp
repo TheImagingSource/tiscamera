@@ -16,8 +16,6 @@
 
 #include "uvc-extension-loader.h"
 
-#include "utils.h"
-
 #include "json.hpp"
 
 #include <sys/ioctl.h>
@@ -36,10 +34,34 @@
 using json = nlohmann::json;
 
 
+
+// copied from src/utils.cpp tcam_xioctl
+// that function was the only reason for linking
+// libtcam.so. This way the extension unit loader
+// can be built seperately.
+int xioctl (int fd, unsigned int request, void *arg)
+{
+    constexpr int IOCTL_RETRY = 4;
+
+    int ret = 0;
+    int tries= IOCTL_RETRY;
+    do
+    {
+        ret = ioctl(fd, request, arg);
+        // ret = v4l2_ioctl(fd, request, arg);
+    }
+    while (ret && tries-- &&
+           ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
+
+    return (ret);
+
+}
+
+
 int tcam::uvc::map (int fd,
                     uvc_xu_control_mapping* ctrl)
 {
-    return tcam_xioctl(fd, UVCIOC_CTRL_MAP, ctrl);
+    return xioctl(fd, UVCIOC_CTRL_MAP, ctrl);
 }
 
 

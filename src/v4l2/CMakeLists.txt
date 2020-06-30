@@ -11,6 +11,7 @@ include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
 add_definitions(-DHAVE_USB)
 
+if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 # dfk73 special case
 
 add_library(tcam-dfk73 SHARED dfk73.c)
@@ -25,6 +26,8 @@ install(TARGETS tcam-dfk73
   DESTINATION "${TCAM_INSTALL_LIB}"
   COMPONENT tcam-libdfk73)
 
+endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
 # uvc-extension library
 
 
@@ -35,11 +38,9 @@ include_directories(${LIBUUID_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}/dependencies/json")
 
 add_library(tcam-uvc-extension SHARED
-  uvc-extension-loader.cpp
-  $<TARGET_OBJECTS:tcam-base>) # required for tcam_xioctl
+  uvc-extension-loader.cpp)
 
 target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
-target_link_libraries(tcam-uvc-extension tcam)
 
 install(TARGETS tcam-uvc-extension
   LIBRARY
