@@ -127,6 +127,7 @@ int Camera::resetCounter ()
     return timeoutCounter;
 }
 
+
 std::string Camera::getNetworkInterfaceName ()
 {
     return interface->getInterfaceName();
@@ -488,10 +489,31 @@ int Camera::uploadFirmware (const std::string& filename,
 
     if (getControl())
     {
+        // retrieve current heartbeat and set our own
+        // some cameras run into timeouts
+        auto dev_timeout = getHeartbeatTimeout();
+
+        if (dev_timeout == -1)
+        {
+            abandonControl();
+            return -1;
+        }
+
+        if (!setHeartbeatTimeout(10000)) // 10 seconds
+        {
+            abandonControl();
+            return -1;
+        }
+
+        // actual writing
         retv = upgradeFirmware(writer,
-                                                    this->packet,
-                                                    filename, overrideModelName,
-                                                    progressFunc);
+                               this->packet,
+                               filename, overrideModelName,
+                               progressFunc);
+
+        // reset heartbeat
+        setHeartbeatTimeout(dev_timeout);
+
         abandonControl();
     }
 
@@ -502,6 +524,54 @@ int Camera::uploadFirmware (const std::string& filename,
 std::string Camera::getInterfaceName ()
 {
     return interface->getInterfaceName();
+}
+
+
+int Camera::getHeartbeatTimeout ()
+{
+
+    //0x0938
+
+    uint32_t data;
+    try
+    {
+        retv = this->sendReadRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, &data);
+    }
+    catch (const std::exception &exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    if (retv)
+    {
+        return data;
+    }
+    return -1;
+}
+
+
+bool Camera::setHeartbeatTimeout (uint32_t timeout)
+{
+    bool retv = false;
+    if(!isControlled)
+    {
+        if (!this->getControl())
+        {
+            return false;
+        }
+    }
+
+    uint32_t data = htonl(timeout);
+    try
+    {
+        retv = this->sendWriteRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, data);
+    }
+    catch (const std::exception &exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    return retv;
 }
 
 

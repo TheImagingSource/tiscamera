@@ -203,6 +203,16 @@ public:
     /// call returns
     bool getIsBusy();
 
+    /// @name getHeartbeatTimeout
+    /// @brief queries camera for heartbeat period
+    /// @return the currently set HearbeatTimeout period; -1 on error
+    int Camera::getHeartbeatTimeout ();
+
+    /// @name setHeartbeatTimeout
+    /// @param heartbeat in ms that shall be set
+    /// @return true if hearbeat could be set
+    bool setHeartbeatTimeout (uint32_t timeout);
+
     /// @name sendReadMemory
     /// @param address - address that shall be read
     /// @param value - pointer to container that shall be filled
