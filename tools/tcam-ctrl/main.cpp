@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <unistd.h>
+ #include <sys/stat.h>
 
 #include <CLI11/CLI11.hpp>
 
@@ -201,7 +202,26 @@ int main (int argc, char *argv[])
 
         std::vector<std::string> vec = app.remaining();
         std::cout << "Loading: " << vec.at(0) << std::endl;
-        std::pair<bool, std::vector<std::string>> ret = load_json_state(dev, vec.at(0));
+
+        // TODO: replace with std::filesystem once c++17 is
+        // available on reference system
+
+        std::string json_str;
+
+        struct stat sb;
+
+        if (stat(vec.at(0).c_str(), &sb) == 0 && S_ISREG(sb.st_mode)) // can be open && is regular file
+        {
+            std::ifstream ifs(vec.at(0));
+            json_str = std::string((std::istreambuf_iterator<char>(ifs)),
+                                   (std::istreambuf_iterator<char>()   ));
+
+        }
+        else // string itself is json
+        {
+            json_str = vec.at(0);
+        }
+        std::pair<bool, std::vector<std::string>> ret = load_json_state(dev, json_str);
 
         for (const auto& msg : ret.second)
         {
