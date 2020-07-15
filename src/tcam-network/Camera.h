@@ -206,7 +206,7 @@ public:
     /// @name getHeartbeatTimeout
     /// @brief queries camera for heartbeat period
     /// @return the currently set HearbeatTimeout period; -1 on error
-    int Camera::getHeartbeatTimeout ();
+    int getHeartbeatTimeout ();
 
     /// @name setHeartbeatTimeout
     /// @param heartbeat in ms that shall be set

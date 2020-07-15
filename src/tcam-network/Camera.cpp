@@ -531,7 +531,7 @@ int Camera::getHeartbeatTimeout ()
 {
 
     //0x0938
-
+    bool retv = false;
     uint32_t data;
     try
     {
@@ -600,6 +600,7 @@ bool Camera::getControl ()
     {
         return this->isControlled;
     }
+
     return retv;
 }
 
