@@ -29,9 +29,11 @@ set(cxxflags "${cxxflags} ${INTROSPECTION_CFLAGS} -std=c++11")
 
 add_library(tcamprop SHARED tcamprop.c)
 
-target_link_libraries(tcamprop ${GLIB2_LIBRARIES})
-target_link_libraries(tcamprop ${GObject_LIBRARIES})
-target_link_libraries(tcamprop ${INTROSPECTION_LIBS})
+target_link_libraries(tcamprop
+  PRIVATE
+  ${GLIB2_LIBRARIES}
+  ${GObject_LIBRARIES}
+  ${INTROSPECTION_LIBS})
 
 
 # version number for gobject introspection API

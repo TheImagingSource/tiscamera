@@ -44,6 +44,8 @@ if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
+if (TCAM_ENABLE_BASE_LIBRARIES)
+
 add_subdirectory(algorithms)
 
 
@@ -202,7 +204,6 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
 TARGET_LINK_LIBRARIES(tcam dl)
 
-
 # add_dependencies(tcam-base version-header)
 
 if (BUILD_V4L2)
@@ -254,3 +255,5 @@ install(TARGETS tcam
   LIBRARY
   DESTINATION "${TCAM_INSTALL_LIB}"
   COMPONENT tcam)
+
+endif (TCAM_ENABLE_BASE_LIBRARIES)

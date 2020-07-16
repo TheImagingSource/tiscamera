@@ -98,8 +98,12 @@ if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 add_subdirectory(dependencies)
 add_subdirectory(src)
 
-
-add_subdirectory(data)
+if (TCAM_ENABLE_DATA_INSTALL)
+  add_subdirectory(data)
+  # TODO: this should not be always on
+  install(DIRECTORY examples
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+endif (TCAM_ENABLE_DATA_INSTALL)
 
 
 if (BUILD_TOOLS)
@@ -115,10 +119,6 @@ if (BUILD_TESTS)
 
   add_subdirectory(tests)
 endif (BUILD_TESTS)
-
-# TODO: this should not be always on
-install(DIRECTORY examples
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
 
 endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 

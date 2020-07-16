@@ -37,6 +37,9 @@ endif (TCAM_ARAVIS_USB_VISION)
 
 option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
 
+option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder." ON)
+option(TCAM_ENABLE_BASE_LIBRARIES "Build/install base libraries." ON)
+
 # disable all other things
 # we only want the extension loader and associated things
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
