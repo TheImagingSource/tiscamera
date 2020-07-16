@@ -529,8 +529,6 @@ std::string Camera::getInterfaceName ()
 
 int Camera::getHeartbeatTimeout ()
 {
-
-    //0x0938
     bool retv = false;
     uint32_t data;
     try
@@ -561,7 +559,7 @@ bool Camera::setHeartbeatTimeout (uint32_t timeout)
         }
     }
 
-    uint32_t data = htonl(timeout);
+    uint32_t data = timeout;
     try
     {
         retv = this->sendWriteRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, data);
@@ -580,9 +578,9 @@ bool Camera::getControl ()
     bool retv = false;
     if(!isControlled)
     {
-        uint32_t data = htonl(2);
         try
         {
+            uint32_t data = 2;
             retv = this->sendWriteRegister(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, data);
         }
         catch (const std::exception &exc)
@@ -672,7 +670,7 @@ bool Camera::sendWriteRegister (const uint32_t address, uint32_t value)
     _packet->header.req_id = htons(id);
 
     _packet->ops[0].address = htonl(address);
-    _packet->ops[0].value = value;
+    _packet->ops[0].value = htonl(value);
 
     auto callback_function = [id, &response] (void* msg) -> int
                              {
@@ -740,6 +738,7 @@ bool Camera::sendReadRegister (const uint32_t address, uint32_t* value)
                 memcpy(value, ack->data, sizeof(uint32_t));
             }
             response = ntohs(ack->header.status);
+            *value = ntohl(*value);
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
