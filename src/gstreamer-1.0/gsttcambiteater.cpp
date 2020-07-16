@@ -334,9 +334,6 @@ static gboolean plugin_init (GstPlugin* plugin)
                                 GST_TYPE_TCAMBITEATER);
 }
 
-#ifndef VERSION
-#define VERSION "0.0.1"
-#endif
 #ifndef PACKAGE
 #define PACKAGE "tcambiteater"
 #endif
@@ -353,6 +350,6 @@ GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
                   tcambiteater,
                   "The Imaging Source biteater plugin",
                   plugin_init,
-                  VERSION,
+                  get_version(),
                   "Proprietary",
                   PACKAGE_NAME, GST_PACKAGE_ORIGIN)

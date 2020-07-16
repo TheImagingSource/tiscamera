@@ -985,6 +985,6 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    PACKAGE_NAME,
                    "The Imaging Source auto exposure plugin",
                    plugin_init,
-                   VERSION,
+                   get_version(),
                    "Proprietary",
                    PACKAGE, GST_PACKAGE_ORIGIN)

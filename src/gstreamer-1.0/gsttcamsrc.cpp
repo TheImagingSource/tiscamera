@@ -2117,7 +2117,7 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    tcamsrc,
                    "TCam Video Source",
                    plugin_init,
-                   "1.0.0",
+                   get_version(),
                    "Proprietary",
                    "tcamsrc",
                    "theimagingsource.com")

@@ -1594,7 +1594,7 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    tcambin,
                    "Tcam Video Bin",
                    plugin_init,
-                   TCAMBIN_VERSION,
+                   get_version(),
                    "Proprietary",
                    "tcambin",
                    "theimagingsource.com")
