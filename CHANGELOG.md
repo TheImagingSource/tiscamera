@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- firmware files
+  dfk72uc02_140.euvc
+  dmk72uc02_140.euvc
+  dfk72uc02_af_146.euvc
+  dmk72uc02_af_146.euvc
+- tcam-uvc-extension-loader can now be built/installed without other libraries.
+  Set cmake option TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY to ON to activate.
+
+### Changed
+
+- cmake user options are now all defined in a separate file
+- tcam-ctrl --load now accepts files and attempts to load them as json
+- gstreamer elements no have the same version string that is used for releases
+
+### Fixed
+
+- dependency description allows usage of libzip4 and libzip5
+* 4fb8ec3 - gst: Apply bin state when all elements are verified playing
+- tcambin: ensure serial and type are always defined
+- camera-ip-conf can now correctly write newer firmware versions
+
+### Removed
+
+- firmware files
+  dfk72uc02_129.euvc
+  dfk72uc02_158.euvc
+  dmk72uc02_129.euvc
+  dmk72uc02_146.euvc
+  dmk72uc02_158.euvc
+  dmk72uc02_AF_140.euvc
+  dmk72uc02_af_144.euvc
+  dfk72uc02_AF_140.euvc
+
 ## [0.12.0] - 2020-05-27
 
 ### Added
