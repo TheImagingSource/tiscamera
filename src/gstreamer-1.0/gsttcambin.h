@@ -47,6 +47,7 @@ struct _GstTcamBin
     GstElement* pipeline_caps;
     GstElement* dutils;
     GstElement* biteater;
+    GstElement* bayer_transform;
     GstElement* exposure;
     GstElement* whitebalance;
     GstElement* debayer;
@@ -71,6 +72,7 @@ struct _GstTcamBin
     char* state;
 
     GstCaps* src_caps = nullptr;
+    bool needs_bayer_transform;
     bool needs_debayer;
     bool needs_videoconvert;
     bool needs_jpegdec;

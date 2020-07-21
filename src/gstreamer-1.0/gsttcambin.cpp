@@ -591,6 +591,18 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
         goto finished_element_creation;
     }
 
+    if (tcam_gst_contains_bayer_10_bit(self->src_caps)
+        || tcam_gst_contains_bayer_12_bit(self->src_caps))
+    {
+        if (!create_and_add_element(&self->bayer_transform,
+                                    "by1xtransform",
+                                    "tcambin-bayertransform",
+                                    GST_BIN(self)))
+        {
+            send_missing_element_msg("tcambayertransform");
+            return FALSE;
+        }
+    }
 
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
@@ -828,6 +840,20 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
         }
         // goto finished_element_linking;
 
+    }
+
+    if (self->bayer_transform
+        && self->needs_bayer_transform)
+    {
+        if (!link_elements(self->bayer_transform,
+                           &previous_element,
+                           &self->bayer_transform,
+                           pipeline_description,
+                           "tcambayertransform"))
+        {
+            send_linking_element_msg("tcambayertransform");
+            return FALSE;
+        }
     }
 
     // the following elements only support mono or bayer
@@ -1470,6 +1496,7 @@ static void gst_tcambin_init (GstTcamBin* self)
     self->pipeline_caps = nullptr;
     self->dutils = nullptr;
     self->biteater = nullptr;
+    self->bayer_transform = nullptr;
     self->exposure = nullptr;
     self->whitebalance = nullptr;
     self->debayer = nullptr;
