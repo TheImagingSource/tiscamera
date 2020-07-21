@@ -70,6 +70,8 @@ int main (int argc, char* argv[])
 
     bool test_succeeded = true;
 
+    bool requires_bayertransform;
+    bool bayertransform_expected = false;
     bool requires_bayer;
     bool bayer_expected = false;
     bool requires_videoconvert;
@@ -94,6 +96,7 @@ int main (int argc, char* argv[])
 
     GstCaps* result_caps = find_input_caps(src_caps,
                                            sink_caps,
+                                           requires_bayertransform,
                                            requires_bayer,
                                            requires_videoconvert,
                                            requires_jpegdec, requires_dutils,

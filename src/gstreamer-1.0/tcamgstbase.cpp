@@ -200,6 +200,18 @@ bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
 }
 
 
+bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
+{
+    if (fourcc == FOURCC_GBRG10
+        || fourcc == FOURCC_GRBG10
+        || fourcc == FOURCC_RGGB10
+        || fourcc == FOURCC_BGGR10)
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG12
@@ -283,6 +295,56 @@ bool tcam_gst_is_bayer8_string (const char* format_string)
         || strcmp(format_string, "grbg")  == 0
         || strcmp(format_string, "rggb")  == 0
         || strcmp(format_string, "bggr")  == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool tcam_gst_is_bayer10_string (const char* format_string)
+{
+    if (format_string == nullptr)
+    {
+        return false;
+    }
+
+    if (strncmp(format_string, "gbrg10", strlen("gbrg10"))  == 0
+        || strncmp(format_string, "grbg10", strlen("grbg10"))  == 0
+        || strncmp(format_string, "rggb10", strlen("rggb10"))  == 0
+        || strncmp(format_string, "bggr10", strlen("bggr10"))  == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool tcam_gst_is_bayer10_packed_string (const char* format_string)
+{
+    if (format_string == nullptr)
+    {
+        return false;
+    }
+
+    std::vector<std::string> format_list = {
+        "rggb10p",
+        "grbg10p",
+        "gbrg10p",
+        "bggr10p",
+        "rggb10s",
+        "grbg10s",
+        "gbrg10s",
+        "bggr10s",
+        "rggb10m",
+        "grbg10m",
+        "gbrg10m",
+        "bggr10m",
+    };
+
+    if (std::find(format_list.begin(), format_list.end(), format_string) != format_list.end())
     {
         return true;
     }
@@ -882,6 +944,24 @@ bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps)
 }
 
 
+bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    GstCaps* tmp = gst_caps_from_string("video/x-bayer, format={rggb10, bggr10, gbrg10, grbg10,"
+                                                               "rggb10p, bggr10p, gbrg10p, grbg10p,"
+                                                               "rggb10s, bggr10s, gbrg10s, grbg10s,"
+                                                               "rggb10m, bggr10m, gbrg10m, grbg10m}");
+    gboolean ret =  gst_caps_can_intersect(caps, tmp);
+    gst_caps_unref(tmp);
+
+    return ret;
+}
+
+
 bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps)
 {
     if (caps == nullptr)
@@ -1208,7 +1288,8 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
 // TODO: bayer and videoconvert should consider eachother
 GstCaps* find_input_caps (GstCaps* available_caps,
                           GstCaps* wanted_caps,
-                          bool& requires_bayer,
+                          bool& requires_bayertransform,
+                          bool& requires_bayer2rgb,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegdec,
                           bool& requires_dutils,
@@ -1216,12 +1297,13 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           bool use_dutils
     )
 {
-    requires_bayer = false;
+    requires_bayertransform = false;
+    requires_bayer2rgb = false;
     requires_vidoeconvert = false;
     requires_jpegdec = false;
     requires_dutils = false;
     requires_biteater = false;
-    requires_bayer = false;
+    requires_bayer2rgb = false;
 
     if (!GST_IS_CAPS(available_caps))
     {
@@ -1246,7 +1328,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         gst_object_unref(dutils);
         return find_input_caps_dutils(available_caps,
                                       wanted_caps,
-                                      requires_bayer,
+                                      requires_bayer2rgb,
                                       requires_vidoeconvert,
                                       requires_jpegdec,
                                       requires_dutils,
@@ -1260,7 +1342,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
             && gst_element_factory_can_sink_any_caps(debayer, available_caps))
         {
-            requires_bayer = true;
+            requires_bayer2rgb = true;
             // wanted_caps can be fixed, etc.
             // thus change name to be compatible to bayer2rgb sink pad
             // and create a correct intersection

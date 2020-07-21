@@ -57,6 +57,12 @@ bool tcam_gst_is_fourcc_bayer (const unsigned int fourcc);
 bool tcam_gst_is_bayer8_string (const char* fourcc);
 
 
+bool tcam_gst_is_bayer10_string (const char* format_string);
+
+
+bool tcam_gst_is_bayer10_packed_string (const char* format_string);
+
+
 bool tcam_gst_is_bayer12_string (const char* format_string);
 
 
@@ -73,6 +79,9 @@ bool tcam_gst_is_polarized (const unsigned int fourcc);
 
 
 bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps);
+
+
+bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps);
 
 
 bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps);
@@ -134,7 +143,8 @@ bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring)
 /**
  * @param available_caps - caps the source offers
  * @param wanted_caps - caps the sink wants, if null available_caps will be returned
- * @param requires_bayer(out) - will be set to true when the bayer2rgb element is required
+ * @param requires_bayertransform(out) - will be set to true when the tcambayertransform element is required
+ * @param requires_bayer2rgb(out) - will be set to true when the bayer2rgb element is required
  * @param requires_vidoeconvert(out) - will be set to true when the videoconvert element is required
  * @param requires_jpegconvert(out) - will be set to true when the jpegdec element is required
  * @param requires_biteater(out) - will be set to true when the biteater element is required
@@ -144,7 +154,8 @@ bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring)
  */
 GstCaps* find_input_caps (GstCaps* available_caps,
                           GstCaps* wanted_caps,
-                          bool& requires_bayer,
+                          bool& requires_bayertransform,
+                          bool& requires_bayer2rgb,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegconvert,
                           bool& requires_dutils,

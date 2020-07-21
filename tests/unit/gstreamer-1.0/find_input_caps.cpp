@@ -72,6 +72,7 @@ TEST_CASE("find_input_caps")
                 expected_output = gst_caps_from_string(entry.result.output_caps);
             }
 
+            bool requires_bayertransform;
             bool requires_bayer;
             bool requires_videoconvert;
             bool requires_jpegdec;
@@ -82,6 +83,7 @@ TEST_CASE("find_input_caps")
 
             GstCaps* result_caps = find_input_caps(src_caps,
                                                    sink_caps,
+                                                   requires_bayertransform,
                                                    requires_bayer,
                                                    requires_videoconvert,
                                                    requires_jpegdec, requires_dutils,

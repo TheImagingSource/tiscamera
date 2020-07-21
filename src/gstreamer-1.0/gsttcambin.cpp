@@ -1187,6 +1187,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                 self->user_caps = tmp;
 
                 self->src_caps = find_input_caps(self->user_caps, self->target_caps,
+                                                 self->needs_bayer_transform,
                                                  self->needs_debayer,
                                                  self->needs_videoconvert,
                                                  self->needs_jpegdec,
@@ -1197,6 +1198,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             else
             {
                 self->src_caps = find_input_caps(src_caps, self->target_caps,
+                                                 self->needs_bayer_transform,
                                                  self->needs_debayer,
                                                  self->needs_videoconvert,
                                                  self->needs_jpegdec,
