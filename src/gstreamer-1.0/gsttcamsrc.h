@@ -74,6 +74,7 @@ struct _GstTcamSrc
     GSList* source_list;
 
     GstElement* main_src;
+    GstElement* pimipi_src;
     //GstElement* mipi_src;
 
     std::vector<device_desc> device_list;

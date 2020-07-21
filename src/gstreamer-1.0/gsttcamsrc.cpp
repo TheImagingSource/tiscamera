@@ -404,8 +404,21 @@ static gboolean open_source_element (GstTcamSrc* self)
       mainsrc has prevalence over other sources for unspecified devices
      */
 
-    if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    if (self->device_serial == "virt")
     {
+        GST_DEBUG("Setting active src to tcampimipisrc");
+        self->active_source = self->pimipi_src;
+
+        // g_object_set(self->active_source,
+        //              "serial", self->device_serial.c_str(),
+        //              NULL);
+        // return TRUE;
+    }
+
+    else if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    {
+        // TODO: open first device
+        // this may also be a mipi camera
         self->active_source  = self->main_src;
     }
     else
@@ -502,7 +515,7 @@ static gboolean open_source_element (GstTcamSrc* self)
     }
 
     GST_INFO("Opened device has serial: '%s' type: '%s'",
-             self->device_serial, type_to_str(self->device_type));
+             self->device_serial.c_str(), type_to_str(self->device_type));
 
     return TRUE;
 }
@@ -574,6 +587,8 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
     self->source_list = g_slist_append(self->source_list, self->main_src);
+    self->pimipi_src = gst_element_factory_make("pimipicamsrc", "tcamsrc-pimipisrc");
+    self->source_list = g_slist_append(self->source_list, self->pimipi_src);
 
     self->target_set = FALSE;
     self->all_caps = NULL;
@@ -760,7 +775,7 @@ static void gst_tcam_src_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            GST_ERROR("TODO serial get");
+            GST_ERROR("TODO serial get when src is set.");
 
             g_value_set_string(value, self->device_serial.c_str());
             break;
