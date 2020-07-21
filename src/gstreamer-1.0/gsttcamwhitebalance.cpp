@@ -781,49 +781,37 @@ static gboolean gst_tcamwhitebalance_device_set_whiteblance (GstTcamWhitebalance
              self->res.color.rgb.G,
              self->res.color.rgb.B);
 
-    tcam::CaptureDevice* dev;
-    g_object_get(G_OBJECT(self->res.source_element), "camera", &dev, NULL);
+    GValue val_red = G_VALUE_INIT;
+    g_value_init(&val_red, G_TYPE_INT);
+    g_value_set_int(&val_red, self->res.color.rgb.R);
 
-
-    tcam::Property* p = dev->get_property(TCAM_PROPERTY_GAIN_RED);
-
-    if (p == nullptr)
+    if (!tcam_prop_set_tcam_property(TCAM_PROP(self), "Gain Red", &val_red))
     {
-        GST_ERROR("Unable to retrieve gain red property");
-    }
-
-    if (!p->set_value((int64_t)self->res.color.rgb.R))
-    {
+        GST_WARNING("Unable to set gain red");
         return FALSE;
     }
 
-    p = dev->get_property(TCAM_PROPERTY_GAIN_GREEN);
+    GValue val_green = G_VALUE_INIT;
+    g_value_init(&val_green, G_TYPE_INT);
+    g_value_set_int(&val_green, self->res.color.rgb.G);
 
-    if (p == nullptr)
+    if (!tcam_prop_set_tcam_property(TCAM_PROP(self), "Gain Green", &val_green))
     {
-        GST_ERROR("Unable to retrieve gain green property");
-    }
-
-    if (!p->set_value((int64_t)self->res.color.rgb.G))
-    {
+        GST_WARNING("Unable to set gain green");
         return FALSE;
     }
 
-    p = dev->get_property(TCAM_PROPERTY_GAIN_BLUE);
+    GValue val_blue = G_VALUE_INIT;
+    g_value_init(&val_blue, G_TYPE_INT);
+    g_value_set_int(&val_blue, self->res.color.rgb.B);
 
-    if (p == nullptr)
+    if (!tcam_prop_set_tcam_property(TCAM_PROP(self), "Gain Blue", &val_blue))
     {
-        GST_ERROR("Unable to retrieve gain blue property");
-    }
-
-    if (!p->set_value((int64_t)self->res.color.rgb.B))
-    {
+        GST_WARNING("Unable to set gain blue");
         return FALSE;
     }
 
     return TRUE;
-
-    /* return device_set_rgb(&self->res); */
 }
 
 static uint clip (uint x, uint max)
@@ -1065,91 +1053,92 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 
 static void update_device_resources (struct device_resources* res)
 {
-    tcam::CaptureDevice* dev = nullptr;
 
-    g_object_get(G_OBJECT(res->source_element), "camera", &dev, NULL);
 
-    if (dev == nullptr)
+
+
+
+    // tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
+
+    // if (prop == nullptr)
+    // {
+    //     GST_ERROR("Exposure could not be found!");
+    // }
+    // else
+    // {
+    //     struct tcam_device_property p = prop->get_struct();
+
+    //     res->exposure.min = p.value.i.min;
+    //     res->exposure.max = p.value.i.max;
+    //     res->exposure.value = p.value.i.value;
+    // }
+
+    // prop = dev->get_property(TCAM_PROPERTY_GAIN);
+
+    // if (prop == nullptr)
+    // {
+    //     GST_ERROR("Gain could not be found!");
+    // }
+    // else
+    // {
+    //     struct tcam_device_property p = prop->get_struct();
+
+    //     res->gain.min = p.value.i.min;
+    //     res->gain.max = p.value.i.max;
+    //     res->gain.value = p.value.i.value;
+    // }
+
+    // only indended for int retrieval
+    auto get_int_value = [&res] (const char* name)
+                         {
+                             GValue val = {};
+                             gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(res->source_element),
+                                                                        name,
+                                                                        &val,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr,
+                                                                        nullptr);
+
+                             if (!ret)
+                             {
+                                 printf("Could not query property '%s'\n", name);
+                                 return 0;
+                             }
+                             return g_value_get_int(&val);
+                         };
+
+
+    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(res->source_element));
+
+    for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
-        GST_ERROR("Could not retrieve device. Aborting");
-        return;
+        char* name = (char*)g_slist_nth(names, i)->data;
+
+        if (g_strcmp0(name, "Gain Red") == 0)
+        {
+            res->color.rgb.R = get_int_value(name);
+            // hardcoded from dfk72
+            res->color.default_value = 36;
+        }
+        else if (g_strcmp0(name, "Gain Green") == 0)
+        {
+            res->color.rgb.G = get_int_value(name);
+            // hardcoded from dfk72
+            res->color.default_value = 36;
+        }
+        else if (g_strcmp0(name, "Gain Blue") == 0)
+        {
+            res->color.rgb.B = get_int_value(name);
+            // hardcoded from dfk72
+            res->color.default_value = 36;
+        }
+
     }
-
-    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
-
-    if (prop == nullptr)
-    {
-        GST_ERROR("Exposure could not be found!");
-    }
-    else
-    {
-        struct tcam_device_property p = prop->get_struct();
-
-        res->exposure.min = p.value.i.min;
-        res->exposure.max = p.value.i.max;
-        res->exposure.value = p.value.i.value;
-    }
-
-    prop = dev->get_property(TCAM_PROPERTY_GAIN);
-
-    if (prop == nullptr)
-    {
-        GST_ERROR("Gain could not be found!");
-    }
-    else
-    {
-        struct tcam_device_property p = prop->get_struct();
-
-        res->gain.min = p.value.i.min;
-        res->gain.max = p.value.i.max;
-        res->gain.value = p.value.i.value;
-    }
-
-    prop = dev->get_property(TCAM_PROPERTY_GAIN_RED);
-
-    if (prop == nullptr)
-    {
-        GST_INFO("Gain Red could not be found!");
-    }
-    else
-    {
-        struct tcam_device_property p = prop->get_struct();
-        res->color.rgb.R = p.value.i.value;
-        res->exposure.max = p.value.i.max;
-        // hardcoded from dfk72
-        res->color.default_value = 36;
-    }
-    prop = dev->get_property(TCAM_PROPERTY_GAIN_GREEN);
-
-    if (prop == nullptr)
-    {
-        GST_INFO("Gain Green could not be found!");
-    }
-    else
-    {
-        struct tcam_device_property p = prop->get_struct();
-        res->color.rgb.G = p.value.i.value;
-        res->exposure.max = p.value.i.max;
-        // hardcoded from dfk72
-        res->color.default_value = 36;
-    }
-
-    prop = dev->get_property(TCAM_PROPERTY_GAIN_BLUE);
-
-    if (prop == nullptr)
-    {
-        GST_INFO("Gain Blue could not be found!");
-    }
-    else
-    {
-        struct tcam_device_property p = prop->get_struct();
-        res->color.rgb.B = p.value.i.value;
-        res->exposure.max = p.value.i.max;
-        // hardcoded from dfk72
-        res->color.default_value = 36;
-    }
-
-
 }
 
 

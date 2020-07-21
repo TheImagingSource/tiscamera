@@ -88,8 +88,8 @@ struct device_color
 struct device_resources
 {
     GstElement* source_element;
-    Gain gain;
-    Exposure exposure;
+//    Gain gain;
+    //  Exposure exposure;
     gdouble framerate;
 
     struct device_color color;
