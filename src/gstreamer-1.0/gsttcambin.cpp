@@ -425,9 +425,6 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
         g_object_set(G_OBJECT(self->src), "serial", self->device_serial, NULL);
     }
 
-    self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-    GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
-
     // query these as late as possible
     // src needs some time as things can happen async
     g_object_get(G_OBJECT(self->src), "serial", &self->device_serial, NULL);
@@ -1084,6 +1081,9 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             {
                 g_object_unref(self->out_caps);
             }
+
+            self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+            GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
 
             self->out_caps = gst_element_factory_make("capsfilter", "tcambin-out_caps");
 
