@@ -807,11 +807,12 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
     }
 
-    tcam::CaptureDevice* dev;
-    g_object_get (G_OBJECT (self->camera_src), "camera", &dev, NULL);
-
-    tcam::Property* focus_prop = dev->get_property(TCAM_PROPERTY_FOCUS);
-    struct tcam_device_property prop = focus_prop->get_struct();
+    GValue val = G_VALUE_INIT;
+    GValue min = G_VALUE_INIT;
+    GValue max = G_VALUE_INIT;
+    tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src), "Focus", &val,
+                                &min, &max, nullptr, nullptr, nullptr,
+                                nullptr, nullptr, nullptr);
 
     GstMapInfo info = {};
     gst_buffer_map(buf, &info, GST_MAP_READ);
@@ -830,7 +831,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
                                              image.pitch,
                                              image.length);
 
-    int new_focus_value = prop.value.i.value;
+    int new_focus_value = g_value_get_int(&val);
     img::point p = {0, 0};
 
     // pixel dimensions
@@ -852,8 +853,8 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
             self->roi_top + self->roi_height  // bottom
         };
 
-        self->params.run_cmd_params.focus_range_min = prop.value.i.min;
-        self->params.run_cmd_params.focus_range_max = prop.value.i.max;
+        self->params.run_cmd_params.focus_range_min = g_value_get_int(&min);
+        self->params.run_cmd_params.focus_range_max = g_value_get_int(&max);
         self->params.run_cmd_params.auto_step_divisor = 4;
         self->params.run_cmd_params.focus_device_speed = 500;
         self->params.run_cmd_params.suggest_sweep = false;
@@ -865,7 +866,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         self->params.is_run_cmd = false;
     }
 
-    self->params.device_focus_val = prop.value.i.value;
+    self->params.device_focus_val = g_value_get_int(&val);
 
     autofocus_run(self->focus,
                   std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(),
@@ -881,7 +882,11 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
         {
             GST_INFO("Setting focus to %d", new_focus_value);
 
-            focus_prop->set_value((int64_t)new_focus_value);
+            GValue new_val = G_VALUE_INIT;
+            g_value_init(&new_val, G_TYPE_INT);
+
+            tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), "Focus", &new_val);
+
             self->cur_focus = new_focus_value;
         }
     }
