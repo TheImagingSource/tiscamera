@@ -84,12 +84,12 @@ std::string DeviceInfo::get_device_type_as_string () const
     switch (device.type)
     {
         case TCAM_DEVICE_TYPE_V4L2:
-            return "V4L2";
+            return "v4l2";
         case TCAM_DEVICE_TYPE_ARAVIS:
-            return "Aravis";
+            return "aravis";
         case TCAM_DEVICE_TYPE_LIBUSB:
-            return "LibUsb";
+            return "libusb";
         default:
-            return "Unknown";
+            return "unknown";
     }
 }
