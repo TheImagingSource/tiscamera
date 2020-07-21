@@ -1710,73 +1710,147 @@ void gst_tcamautoexposure_finalize (GObject* object)
 
 static void init_camera_resources (GstTcamautoexposure* self)
 {
-    tcam::CaptureDevice* dev = NULL;
+    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->camera_src));
 
-    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+    bool has_auto_exposure = false;
+    bool has_auto_gain = false;
 
-    struct tcam_device_property p = {};
+    for (unsigned int i = 0; i < g_slist_length(names); ++i)
+    {
+        char* name = (char*)g_slist_nth(names, i)->data;
 
-    if (dev->get_property(TCAM_PROPERTY_GAIN_AUTO) != nullptr ||
-        dev->get_property(TCAM_PROPERTY_EXPOSURE_AUTO) != nullptr)
+        if (g_strcmp0(name, "Exposure") == 0
+            || g_strcmp0(name, "Exposure Time (us)") == 0)
+        {
+            self->exposure_name = name;
+        }
+        else if (g_strcmp0(name, "Gain") == 0)
+        {
+            self->gain_name = name;
+        }
+        else if (g_strcmp0(name, "Iris") == 0)
+        {
+            self->iris_name = name;
+        }
+        else if (g_strcmp0(name, "Exposure Auto") == 0)
+        {
+            has_auto_exposure = true;
+        }
+        else if (g_strcmp0(name, "Gain Auto") == 0)
+        {
+            has_auto_gain = true;
+        }
+    }
+
+    if (has_auto_exposure || has_auto_gain)
     {
         GST_INFO("Device has auto properties. Disabling module.");
         self->module_is_disabled = TRUE;
         return;
     }
 
-    tcam::Property* prop = dev->get_property(TCAM_PROPERTY_EXPOSURE);
-
-    if (prop == nullptr)
+    if (self->exposure_name.empty())
     {
         GST_ERROR("Exposure could not be found!");
     }
     else
     {
-        p = prop->get_struct();
-        self->exposure.min = p.value.i.min;
+        GValue value = {};
+        GValue min = {};
+        GValue max = {};
+        GValue default_value = {};
+        GValue step_size = {};
+        GValue type = {};
+        GValue flags = {};
 
-        // do not set exposure.max
-        // we default to 0
-        // if 0 -> use max setting according to framerate
-        // if max is set by user we use that
-        self->exposure.max = p.value.i.max;
-        self->exposure.value = p.value.i.value;
+        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                   self->exposure_name.c_str(),
+                                                   &value,
+                                                   &min,
+                                                   &max,
+                                                   &default_value,
+                                                   &step_size,
+                                                   &type,
+                                                   &flags,
+                                                   nullptr,
+                                                   nullptr);
+
+        if (!ret)
+        {
+            printf("Could not query property '%s'\n",self->exposure_name.c_str());
+            return;
+        }
+
+        const char* t = g_value_get_string(&type);
+        if (strcmp(t, "integer") == 0)
+        {
+            self->exposure.min = g_value_get_int(&min);
+            // do not set exposure.max
+            // we default to 0
+            // if 0 -> use max setting according to framerate
+            // if max is set by user we use that
+            self->exposure.max = g_value_get_int(&max);
+            self->exposure.value = g_value_get_int(&value);
+        }
 
         self->default_exposure_values.max = 1000000 / double(self->framerate_numerator / self->framerate_denominator);
     }
 
-    p = {};
-    prop = dev->get_property(TCAM_PROPERTY_GAIN);
-
-    if (prop == nullptr)
+    if (self->gain_name.empty())
     {
         GST_ERROR("Gain could not be found!");
     }
     else
     {
-        p = prop->get_struct();
-        if (p.type == TCAM_PROPERTY_TYPE_INTEGER)
+        GValue value = {};
+        GValue min = {};
+        GValue max = {};
+        GValue default_value = {};
+        GValue step_size = {};
+        GValue type = {};
+        GValue flags = {};
+
+        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                   self->gain_name.c_str(),
+                                                   &value,
+                                                   &min,
+                                                   &max,
+                                                   &default_value,
+                                                   &step_size,
+                                                   &type,
+                                                   &flags,
+                                                   nullptr,
+                                                   nullptr);
+
+        if (!ret)
         {
-            self->gain.min = p.value.i.min;
-            self->gain.max = p.value.i.max;
-            self->gain.value = p.value.i.value;
-            self->gain.step = p.value.i.step;
+            printf("Could not query property '%s'\n", self->gain_name.c_str());
+            return;
+        }
+
+
+        if (strcmp(g_value_get_string(&type), "integer") == 0)
+        {
+            self->gain.min = g_value_get_int(&min);
+            self->gain.max = g_value_get_int(&max);
+            self->gain.value = g_value_get_int(&value);
+            self->gain.step = g_value_get_int(&step_size);
         }
         else
         {
             self->gain_is_double = TRUE;
-            if (p.value.d.min == 0.0)
+            if (g_value_get_double(&min) == 0.0)
             {
                 self->gain.min = GAIN_FLOAT_MULTIPLIER;
             }
             else
             {
-                self->gain.min = p.value.d.min * GAIN_FLOAT_MULTIPLIER;
+                self->gain.min = g_value_get_double(&min) * GAIN_FLOAT_MULTIPLIER;
             }
             // self->gain.min = p.value.d.min * GAIN_FLOAT_MULTIPLIER;
-            self->gain.max = p.value.d.max * GAIN_FLOAT_MULTIPLIER;
-            self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
-            self->gain.step = p.value.d.step * GAIN_FLOAT_MULTIPLIER;
+            self->gain.max = g_value_get_double(&max) * GAIN_FLOAT_MULTIPLIER;
+            self->gain.value = g_value_get_double(&value) * GAIN_FLOAT_MULTIPLIER;
+            self->gain.step = g_value_get_double(&step_size) * GAIN_FLOAT_MULTIPLIER;
         }
         if (self->gain_max == 0
             || self->gain_max == G_MAXDOUBLE
@@ -1803,25 +1877,48 @@ static void init_camera_resources (GstTcamautoexposure* self)
         self->exposure_max = self->default_exposure_values.max;
     }
 
-    p = {};
-    prop = dev->get_property(TCAM_PROPERTY_IRIS);
-
-    if (prop == nullptr)
+    if (self->iris_name.empty())
     {
         GST_INFO("Iris could not be found");
     }
     else
     {
         self->has_iris = true;
-        p = prop->get_struct();
+
         //self->iris.min = p.value.i.min;
         // most iris modules are the same
         // with a range from 0 - 1023
         // 100 is a good base number.
         // GigE cameras offer IrisAutoMin that suggests what this should be
+
+        GValue value = {};
+        GValue min = {};
+        GValue max = {};
+        GValue default_value = {};
+        GValue step_size = {};
+        GValue type = {};
+        GValue flags = {};
+        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                   self->iris_name.c_str(),
+                                                   &value,
+                                                   &min,
+                                                   &max,
+                                                   &default_value,
+                                                   &step_size,
+                                                   &type,
+                                                   &flags,
+                                                   nullptr,
+                                                   nullptr);
+
+        if (!ret)
+        {
+            printf("Could not query property '%s'\n", self->iris_name.c_str());
+            return;
+        }
+
         self->iris.min = 100;
-        self->iris.max = p.value.i.max;
-        self->iris.value = p.value.i.value;
+        self->iris.max = g_value_get_int(&max);
+        self->iris.value = g_value_get_int(&value);
 
         if (self->iris_min == 0)
         {
@@ -1859,12 +1956,15 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
         return;
     }
 
-    //GST_INFO("Setting exposure to %f", exposure);
+    GST_INFO("Setting exposure to %f", exposure);
 
-    tcam::CaptureDevice* dev;
-    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+    GValue value = G_VALUE_INIT;
 
-    dev->set_property(TCAM_PROPERTY_EXPOSURE, (int64_t)exposure);
+    g_value_init(&value, G_TYPE_INT);
+    g_value_set_int(&value, exposure);
+
+    tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->exposure_name.c_str(), &value);
+
 }
 
 
@@ -1876,21 +1976,22 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
         return;
     }
 
-    GST_INFO("Setting gain to %f", gain);
-
-    tcam::CaptureDevice* dev;
-    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+    GValue value = G_VALUE_INIT;
 
     if (!self->gain_is_double)
     {
-        dev->set_property(TCAM_PROPERTY_GAIN, (int64_t)std::lround(gain));
+        GST_INFO("Setting gain to %f", gain);
+        g_value_init(&value, G_TYPE_INT);
+        g_value_set_int(&value, gain);
     }
     else
     {
-        dev->set_property(TCAM_PROPERTY_GAIN, (float)gain / GAIN_FLOAT_MULTIPLIER);
+        g_value_init(&value, G_TYPE_DOUBLE);
+        g_value_set_double(&value, (float)gain / GAIN_FLOAT_MULTIPLIER);
         GST_INFO("Setting gain to %f", (float)gain /  GAIN_FLOAT_MULTIPLIER);
-
     }
+    tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->gain_name.c_str(), &value);
+
 }
 
 
@@ -1903,52 +2004,76 @@ static void set_iris (GstTcamautoexposure* self, int iris)
     }
 
     GST_INFO("Setting iris to %d", iris);
+    GValue value = G_VALUE_INIT;
 
-    tcam::CaptureDevice* dev;
-    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
+    g_value_init(&value, G_TYPE_INT);
+    g_value_set_int(&value, iris);
 
-    dev->set_property(TCAM_PROPERTY_IRIS, (int64_t)iris);
+    tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->iris_name.c_str(), &value);
 }
 
 
 void retrieve_current_values (GstTcamautoexposure* self)
 {
-    tcam::CaptureDevice* dev = NULL;
-    g_object_get(G_OBJECT(self->camera_src), "camera", &dev, NULL);
 
-    struct tcam_device_property p = {};
-
-    if (dev == NULL)
-    {
-        GST_ERROR("Tcam did not return a valid device");
-    }
-
-    tcam::Property* prop =  dev->get_property(TCAM_PROPERTY_EXPOSURE);
-
-    if (prop == nullptr)
+    if (self->exposure_name.empty())
     {
         GST_ERROR("Tcam did not return exposure");
     }
     else
     {
-        p = prop->get_struct();
+        GValue value = {};
+        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                   self->exposure_name.c_str(),
+                                                   &value,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr);
+
+        if (!ret)
+        {
+            printf("Could not query property '%s'\n", self->exposure_name.c_str());
+            return;
+        }
+
         //GST_DEBUG("Current exposure is %ld", p.value.i.value);
-        self->exposure.value = p.value.i.value;
+        self->exposure.value = g_value_get_int(&value);
     }
 
-    prop =  dev->get_property(TCAM_PROPERTY_GAIN);
-
-    if (prop == nullptr)
+    if (self->gain_name.empty())
     {
         GST_ERROR("Tcam did not return gain");
     }
     else
     {
-        p = prop->get_struct();
 
-        if (prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+        GValue value = {};
+        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                   self->gain_name.c_str(),
+                                                   &value,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr,
+                                                   nullptr);
+
+        if (!ret)
         {
-            self->gain.value = p.value.i.value;
+            printf("Could not query property '%s'\n", self->gain_name.c_str());
+            return;
+        }
+
+        if (!self->gain_is_double)
+        {
+            self->gain.value = g_value_get_int(&value);
             if (self->gain.value < self->gain.min)
             {
                 self->gain.value = self->gain.min;
@@ -1958,25 +2083,43 @@ void retrieve_current_values (GstTcamautoexposure* self)
         }
         else
         {
-            GST_DEBUG("Current gain is %f", p.value.d.value);
-            if (p.value.d.value != 0)
-                self->gain.value = p.value.d.value * GAIN_FLOAT_MULTIPLIER;
+            double val = g_value_get_double(&value);
+            GST_DEBUG("Current gain is %f", val);
+            if (val != 0)
+                self->gain.value = val * GAIN_FLOAT_MULTIPLIER;
         }
     }
 
     if (self->has_iris)
     {
-        prop =  dev->get_property(TCAM_PROPERTY_IRIS);
-
-        if (prop == nullptr)
+        if (self->iris_name.empty())
         {
             GST_ERROR("Tcam did not return iris");
         }
         else
         {
-            p = prop->get_struct();
+
+            GValue value = {};
+            gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
+                                                       self->iris_name.c_str(),
+                                                       &value,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr,
+                                                       nullptr);
+
+            if (!ret)
+            {
+                printf("Could not query property '%s'\n", self->iris_name.c_str());
+                return;
+            }
+
             //GST_DEBUG("Current iris is %ld", p.value.i.value);
-            self->iris.value = p.value.i.value;
+            self->iris.value = g_value_get_int(&value);
         }
     }
     else

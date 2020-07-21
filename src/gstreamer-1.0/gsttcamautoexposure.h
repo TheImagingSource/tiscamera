@@ -88,15 +88,18 @@ typedef struct GstTcamautoexposure
     gboolean auto_iris;
 
     gboolean gain_is_double;
+    std::string gain_name;
     Gain gain;
     Gain default_gain_values;
     int exposure_min;
     int exposure_max;
     double gain_min;
     double gain_max;
+    std::string exposure_name;
     Exposure exposure;
     Exposure default_exposure_values;
 
+    std::string iris_name;
     int iris_min;
     int iris_max;
     Iris iris;
