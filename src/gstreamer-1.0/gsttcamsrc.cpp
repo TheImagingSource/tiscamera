@@ -58,6 +58,8 @@ const char* type_to_str (TCAM_DEVICE_TYPE type)
             return "aravis";
         case TCAM_DEVICE_TYPE_LIBUSB:
             return "libusb";
+        case TCAM_DEVICE_TYPE_PIMIPI:
+            return "pimipi";
         case TCAM_DEVICE_TYPE_MIPI:
             return "mipi";
         default:
@@ -79,6 +81,10 @@ TCAM_DEVICE_TYPE str_to_type (const std::string& str)
     else if (str == "libusb")
     {
         return TCAM_DEVICE_TYPE_LIBUSB;
+    }
+    else if (str == "pimipi")
+    {
+        return TCAM_DEVICE_TYPE_PIMIPI;
     }
     else if (str == "mipi")
     {

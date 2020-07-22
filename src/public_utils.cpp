@@ -70,6 +70,7 @@ std::vector<TCAM_DEVICE_TYPE> tcam::get_device_type_list ()
         TCAM_DEVICE_TYPE_V4L2,
         TCAM_DEVICE_TYPE_ARAVIS,
         TCAM_DEVICE_TYPE_LIBUSB,
+        TCAM_DEVICE_TYPE_PIMIPI,
         TCAM_DEVICE_TYPE_MIPI};
 }
 
@@ -98,6 +99,7 @@ std::string tcam::tcam_device_type_to_string (TCAM_DEVICE_TYPE type)
         case TCAM_DEVICE_TYPE_V4L2: return "v4l2";
         case TCAM_DEVICE_TYPE_ARAVIS: return "aravis";
         case TCAM_DEVICE_TYPE_LIBUSB: return "libusb";
+        case TCAM_DEVICE_TYPE_PIMIPI: return "mipi";
         case TCAM_DEVICE_TYPE_MIPI: return "mipi";
         default: return "unknown";
     }
@@ -109,6 +111,7 @@ TCAM_DEVICE_TYPE tcam::tcam_device_from_string (const std::string& str)
     if (str == "v4l2") return TCAM_DEVICE_TYPE_V4L2;
     else if (str == "aravis") return TCAM_DEVICE_TYPE_ARAVIS;
     else if (str == "libusb") return TCAM_DEVICE_TYPE_LIBUSB;
+    else if (str == "pimipi") return TCAM_DEVICE_TYPE_PIMIPI;
     else if (str == "mipi") return TCAM_DEVICE_TYPE_MIPI;
 
     return TCAM_DEVICE_TYPE_UNKNOWN;
