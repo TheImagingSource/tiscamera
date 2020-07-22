@@ -809,8 +809,22 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
         // will fail if width is a range so we only handle
         // halfway fixated caps
-        if (gst_structure_get_int(struc, "width", &width))
+        if (gst_structure_get_field_type(struc, "width") == G_TYPE_INT)
         {
+            if (gst_structure_get_int(struc, "width", &height))
+            {
+                if (largest_width <= width)
+                {
+                    largest_width = width;
+                    new_width = true;
+                }
+            }
+        }
+        else if (gst_structure_get_field_type(struc, "width") == GST_TYPE_INT_RANGE)
+        {
+            const GValue* int_range = gst_structure_get_value(struc, "width");
+
+            width = gst_value_get_int_range_max(int_range);
             if (largest_width <= width)
             {
                 largest_width = width;
@@ -819,11 +833,26 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         }
         else
         {
-            tcam_warning("Field 'width' does not have the type 'int'");
+            tcam_warning("Field 'width' does not have a supported type. Current type: '%s'",
+                         g_type_name(gst_structure_get_field_type(struc, "width")));
         }
 
-        if (gst_structure_get_int(struc, "height", &height))
+        if (gst_structure_get_field_type(struc, "height") == G_TYPE_INT)
         {
+            if (gst_structure_get_int(struc, "height", &height))
+            {
+                if (largest_height <= height)
+                {
+                    largest_height = height;
+                    new_height = true;
+                }
+            }
+        }
+        else if (gst_structure_get_field_type(struc, "height") == GST_TYPE_INT_RANGE)
+        {
+            const GValue* int_range = gst_structure_get_value(struc, "height");
+
+            height = gst_value_get_int_range_max(int_range);
             if (largest_height <= height)
             {
                 largest_height = height;
@@ -832,7 +861,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         }
         else
         {
-            tcam_warning("Field 'height' does not have the type 'int'");
+            tcam_warning("Field 'height' does not have a supported type. Current type: '%s'",
+                         g_type_name(gst_structure_get_field_type(struc, "height")));
         }
 
         if (new_width && new_height)
@@ -878,6 +908,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     {
         gst_caps_set_value(largest_caps, "format", gst_structure_get_value(s, "format"));
     }
+    tcam_info("Largest caps are: %s", gst_caps_to_string(largest_caps));
 
     return largest_caps;
 }
