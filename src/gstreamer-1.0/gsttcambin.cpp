@@ -430,6 +430,13 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     g_object_get(G_OBJECT(self->src), "serial", &self->device_serial, NULL);
     g_object_get(G_OBJECT(self->src), "type", &self->device_type, NULL);
     GST_INFO("Opened device has serial: '%s' type: '%s'", self->device_serial, self->device_type);
+
+    // set to READY so that caps are always readable
+    gst_element_set_state(self->src, GST_STATE_READY);
+
+    self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
+    GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
+
     return TRUE;
 }
 
@@ -568,6 +575,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
             GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
             gst_element_post_message(GST_ELEMENT(self), msg);
             g_error_free(err);
+            GST_ERROR("%s", msg_string.c_str());
         };
 
     if (self->has_dutils && self->use_dutils)
@@ -726,10 +734,20 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
     if (!gst_caps_is_fixed(self->src_caps))
     {
         std::string sc = gst_caps_to_string(self->src_caps);
-        self->src_caps = tcam_gst_find_largest_caps(self->src_caps);
+        GstCaps* tmp = tcam_gst_find_largest_caps(self->src_caps);
         GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
                  sc.c_str(),
-                 gst_caps_to_string(self->src_caps));
+                 gst_caps_to_string(tmp));
+
+        if (tmp)
+        {
+            gst_caps_unref(self->src_caps);
+            self->src_caps = tmp;
+        }
+        else
+        {
+            GST_WARNING("Unable to find largest caps. Continuing with unfixated caps.");
+        }
     }
     else
     {
@@ -773,12 +791,13 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
     // helper function to post error messages to GstBus
     auto send_linking_element_msg = [self] (const std::string& element_name)
         {
-            std::string msg_string = "Could not create element '" + element_name + "'.";
+            std::string msg_string = "Could not link element '" + element_name + "'.";
             GError* err = g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN,
                                       "%s", msg_string.c_str());
             GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
             gst_element_post_message(GST_ELEMENT(self), msg);
             g_error_free(err);
+            GST_ERROR("%s", msg_string.c_str());
         };
 
     // helper function to link elements
@@ -1107,9 +1126,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             {
                 g_object_unref(self->out_caps);
             }
-
-            self->src_caps = gst_pad_query_caps(gst_element_get_static_pad(self->src, "src"), NULL);
-            GST_INFO("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->src_caps));
 
             self->out_caps = gst_element_factory_make("capsfilter", "tcambin-out_caps");
 
