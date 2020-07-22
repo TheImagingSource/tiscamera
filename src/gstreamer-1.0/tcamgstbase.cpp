@@ -1335,6 +1335,55 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                                       requires_biteater);
     }
 
+    GstElementFactory* bayer_transform = gst_element_factory_find("by1xtransform");
+
+    if (bayer_transform)
+    {
+        // check if only bayertransform suffices
+        if (gst_element_factory_can_src_any_caps(bayer_transform, wanted_caps)
+            && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
+        {
+            requires_bayertransform = true;
+            // wanted_caps can be fixed, etc.
+            // thus change name to be compatible to bayer2rgb sink pad
+            // and create a correct intersection
+            GstCaps* temp = gst_caps_copy(wanted_caps);
+            gst_caps_change_name(temp, "video/x-bayer");
+
+            GstCaps* ret = gst_caps_intersect(available_caps, temp);
+            gst_caps_unref(temp);
+            gst_object_unref(bayer_transform);
+            return ret;
+        }
+
+
+        GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
+
+        // check if bayertransform + bayer2rgb works
+        if (debayer)
+        {
+            if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+                && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
+            {
+                requires_bayertransform = true;
+                requires_bayer2rgb = true;
+
+                // wanted_caps can be fixed, etc.
+                // thus change name to be compatible to bayer2rgb sink pad
+                // and create a correct intersection
+                GstCaps* temp = gst_caps_copy(wanted_caps);
+                gst_caps_change_name(temp, "video/x-bayer");
+
+                GstCaps* ret = gst_caps_intersect(available_caps, temp);
+                gst_caps_unref(temp);
+                gst_object_unref(bayer_transform);
+                gst_object_unref(debayer);
+
+                return ret;
+            }
+        }
+    }
+
     GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
 
     if (debayer)
@@ -1425,6 +1474,9 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
         gst_object_unref(jpegdec);
     }
+
+    // no transform elements needed
+    // try raw intersection
     GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
     if (!gst_caps_is_empty(intersect))
     {
