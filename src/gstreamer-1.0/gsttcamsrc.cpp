@@ -602,7 +602,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
     self->source_list = g_slist_append(self->source_list, self->main_src);
-    self->pimipi_src = gst_element_factory_make("pimipicamsrc", "tcamsrc-pimipisrc");
+    self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
     self->source_list = g_slist_append(self->source_list, self->pimipi_src);
 
     self->target_set = FALSE;
