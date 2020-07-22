@@ -298,6 +298,12 @@ static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* iface)
     {
         GSList* tmp = nullptr;
 
+        if (!iter->data)
+        {
+            GST_DEBUG("Source list entry is empty.");
+            continue;
+        }
+
         tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(iter->data));
 
         // takes ownership of tmp elements
@@ -386,6 +392,9 @@ static gboolean open_source_element (GstTcamSrc* self)
 
     if (self->active_source)
     {
+        // TODO: check if active_source
+        // uses the correct device to prevent reopening
+        return true;
         if (!close_source_element(self))
         {
             GST_ERROR("Unable to close open source element. Aborting");
@@ -428,6 +437,12 @@ static gboolean open_source_element (GstTcamSrc* self)
              iter != nullptr && !self->active_source;
              iter = g_slist_next(iter))
         {
+            if (!iter->data)
+            {
+                GST_DEBUG("!!!");
+                continue;
+            }
+
             GSList* tmp = nullptr;
 
             if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN
