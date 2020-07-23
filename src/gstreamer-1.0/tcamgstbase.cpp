@@ -1366,7 +1366,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                                       requires_biteater);
     }
 
-    GstElementFactory* bayer_transform = gst_element_factory_find("by1xtransform");
+    GstElementFactory* bayer_transform = gst_element_factory_find("tcamby1xtransform");
 
     if (bayer_transform)
     {

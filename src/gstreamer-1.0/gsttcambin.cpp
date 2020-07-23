@@ -603,7 +603,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self,
         || tcam_gst_contains_bayer_12_bit(self->src_caps))
     {
         if (!create_and_add_element(&self->bayer_transform,
-                                    "by1xtransform",
+                                    "tcamby1xtransform",
                                     "tcambin-bayertransform",
                                     GST_BIN(self)))
         {
