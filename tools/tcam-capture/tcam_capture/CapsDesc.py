@@ -115,6 +115,46 @@ class CapsDesc:
                 # try for frame rate lists
                 field, values, remain = re.split("{|}", substr, maxsplit=3)
                 rates = [x.strip() for x in values.split(",")]
+
+            if type(rates) is Gst.FractionRange:
+                def create_steps_for_range(minval, maxval):
+                    """
+                    python version of utils.cpp:create_steps_for_range
+                    """
+
+                    ret = []
+
+                    ret.append(minval)
+
+                    # ensure steps are always
+                    # so that step/1 can be added
+                    step = int(minval)
+
+                    while step < maxval:
+
+                        if step < 20:
+                            step += 1
+                        elif step < 100:
+                            step += 10
+                        elif step < 1000:
+                            step += 50
+                        else:
+                            step += 100
+
+                        if step < maxval:
+                            ret.append("{}/1".format(str(step)))
+
+                    if ret[-1] != maxval:
+                        ret.append("{}/1".format(str(maxval)))
+
+                    return ret
+
+                minval = rates.start.num / rates.start.denom
+                maxval = rates.stop.num / rates.stop.denom
+
+                # log.info("type {} - {}".format(type(minval), vars(minval)))
+                rates = create_steps_for_range(minval, maxval)
+
             return rates
 
         format_dict = {}
@@ -151,7 +191,8 @@ class CapsDesc:
                     continue
 
                 if (format_name == "video/x-bayer" and
-                        format_string not in ("rggb", "bggr", "gbrg", "grbg") and not
+                        format_string not in ("rggb", "bggr", "gbrg", "grbg",
+                                              "rggb12m", "bggr12m", "gbrg12m", "grbg12m") and not
                         self.have_dutils):
                     continue
 
