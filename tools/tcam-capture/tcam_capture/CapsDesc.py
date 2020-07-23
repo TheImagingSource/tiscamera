@@ -202,6 +202,11 @@ class CapsDesc:
                 width = fmt.get_value("width")
                 height = fmt.get_value("height")
 
+                if type(width) == Gst.IntRange:
+                    # do not handle ranges
+                    # maybe in future releases
+                    continue
+
                 f_str = "{} - {}x{}".format(format_string,
                                             width,
                                             height)
