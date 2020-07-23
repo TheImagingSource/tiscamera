@@ -488,6 +488,10 @@ static void gst_tcambin_clear_elements (GstTcamBin* self)
     {
         remove_element(&self->biteater);
     }
+    if (self->bayer_transform)
+    {
+        remove_element(&self->bayer_transform);
+    }
     if (self->exposure)
     {
         remove_element(&self->exposure);
