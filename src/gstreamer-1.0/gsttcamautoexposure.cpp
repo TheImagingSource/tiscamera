@@ -1720,7 +1720,8 @@ static void init_camera_resources (GstTcamautoexposure* self)
         char* name = (char*)g_slist_nth(names, i)->data;
 
         if (g_strcmp0(name, "Exposure") == 0
-            || g_strcmp0(name, "Exposure Time (us)") == 0)
+            || g_strcmp0(name, "Exposure Time (us)") == 0
+            || g_strcmp0(name, "ExposureTime") == 0)
         {
             self->exposure_name = name;
         }
@@ -1784,13 +1785,21 @@ static void init_camera_resources (GstTcamautoexposure* self)
         const char* t = g_value_get_string(&type);
         if (strcmp(t, "integer") == 0)
         {
+            self->exposure_is_double = FALSE;
             self->exposure.min = g_value_get_int(&min);
             // do not set exposure.max
             // we default to 0
             // if 0 -> use max setting according to framerate
             // if max is set by user we use that
-            self->exposure.max = g_value_get_int(&max);
+            // self->exposure.max = g_value_get_int(&max);
             self->exposure.value = g_value_get_int(&value);
+        }
+        else if (strcmp(t, "double") == 0)
+        {
+            self->exposure_is_double = TRUE;
+            self->exposure.min = g_value_get_double(&min);
+            // self->exposure.max = g_value_get_double(&max);
+            self->exposure.value = g_value_get_double(&value);
         }
 
         self->default_exposure_values.max = 1000000 / double(self->framerate_numerator / self->framerate_denominator);
@@ -1932,7 +1941,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         }
     }
 
-    GST_INFO("Exposure boundaries are %f %d", self->exposure.min, self->exposure_max);
+    GST_INFO("Exposure boundaries are %f %f", self->exposure.min, self->exposure_max);
 
     GST_INFO("Gain boundaries are %f %f", self->gain.min, self->gain.max);
 
@@ -1956,12 +1965,21 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
         return;
     }
 
-    GST_INFO("Setting exposure to %f", exposure);
-
     GValue value = G_VALUE_INIT;
 
-    g_value_init(&value, G_TYPE_INT);
-    g_value_set_int(&value, exposure);
+    if (self->exposure_is_double)
+    {
+        GST_INFO("Setting exposure to %f", exposure);
+        g_value_init(&value, G_TYPE_DOUBLE);
+        g_value_set_double(&value, exposure);
+    }
+    else
+    {
+        GST_INFO("Setting exposure to %d", exposure);
+        g_value_init(&value, G_TYPE_INT);
+        g_value_set_int(&value, exposure);
+    }
+
 
     tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->exposure_name.c_str(), &value);
 
@@ -2042,7 +2060,14 @@ void retrieve_current_values (GstTcamautoexposure* self)
         }
 
         //GST_DEBUG("Current exposure is %ld", p.value.i.value);
-        self->exposure.value = g_value_get_int(&value);
+        if (self->exposure_is_double)
+        {
+            self->exposure.value = g_value_get_double(&value);
+        }
+        else
+        {
+            self->exposure.value = g_value_get_int(&value);
+        }
     }
 
     if (self->gain_name.empty())

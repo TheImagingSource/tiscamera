@@ -95,6 +95,8 @@ typedef struct GstTcamautoexposure
     int exposure_max;
     double gain_min;
     double gain_max;
+
+    gboolean exposure_is_double;
     std::string exposure_name;
     Exposure exposure;
     Exposure default_exposure_values;
