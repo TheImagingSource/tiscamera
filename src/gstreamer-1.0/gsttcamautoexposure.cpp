@@ -283,6 +283,34 @@ static guint tcamautoexposure_string_to_property_id (const char* str)
 }
 
 
+static gboolean gst_tcamautoexposure_is_active_property (GstTcamautoexposure* self,
+                                                         const std::string& name)
+{
+
+    if (name == "Exposure Auto"
+        || name == "Exposure Min"
+        || name == "Exposure Max")
+    {
+        return !self->exposure_name.empty();
+    }
+
+    if (name == "Gain Auto"
+        || name == "Gain Min"
+        || name == "Gain Max")
+    {
+        return !self->gain_name.empty();
+    }
+
+    if (name == "Iris Auto"
+        || name == "Iris Min"
+        || name == "Iris Max")
+    {
+        return self->has_iris;
+    }
+
+    return !self->exposure_name.empty() || !self->gain_name.empty();
+}
+
 
 static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 {
@@ -290,20 +318,30 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
 
     GSList* names = nullptr;
 
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)));
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)));
+    if (element->exposure_name.empty() && element->exposure_name.empty())
+    {
+        return names;
+    }
     names = g_slist_append(names,
                            g_strdup(tcamautoexposure_property_id_to_string(PROP_BRIGHTNESS_REFERENCE)));
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)));
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
-    names = g_slist_append(names,
-                           g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
+    if (!element->exposure_name.empty())
+    {
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)));
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MIN)));
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_EXPOSURE_MAX)));
+    }
+    if (!element->gain_name.empty())
+    {
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_AUTO_GAIN)));
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MIN)));
+        names = g_slist_append(names,
+                               g_strdup(tcamautoexposure_property_id_to_string(PROP_GAIN_MAX)));
+    }
     if (element->has_iris)
     {
         names = g_slist_append(names,
@@ -330,7 +368,13 @@ static gchar* gst_tcamautoexposure_get_property_type (TcamProp* self __attribute
 {
     if (name == nullptr)
     {
-        return 0;
+        GST_ERROR("Name is empty");
+        return nullptr;
+    }
+
+    if (!gst_tcamautoexposure_is_active_property(GST_TCAMAUTOEXPOSURE(self), name))
+    {
+        return nullptr;
     }
 
     if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)) == 0)
@@ -411,6 +455,11 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
     }
 
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(prop);
+
+    if (!gst_tcamautoexposure_is_active_property(self, name))
+    {
+        return FALSE;
+    }
 
     if (g_strcmp0(name, tcamautoexposure_property_id_to_string(PROP_AUTO_EXPOSURE)) == 0)
     {
@@ -1207,6 +1256,12 @@ static gboolean gst_tcamautoexposure_set_tcam_property (TcamProp* self,
     {
         return FALSE;
     }
+
+    if (!gst_tcamautoexposure_is_active_property(GST_TCAMAUTOEXPOSURE(self), name))
+    {
+        return FALSE;
+    }
+
 
     gst_tcamautoexposure_set_property(G_OBJECT(self), id, value, NULL);
     return TRUE;
