@@ -20,9 +20,13 @@
 
 #include <tcam.h>
 
+#include <tcamprop.h>
+
 #include <iostream>
 #include <iomanip>
 #include <unistd.h>
+
+#include <gst/gst.h>
 
 #include <CLI11/CLI11.hpp>
 
@@ -68,6 +72,8 @@ void print_devices (size_t /*t*/)
 
 int main (int argc, char *argv[])
 {
+
+    gst_init(&argc, &argv);
 
     CLI::App app {"Commandline camera manipulation utility."};
 
@@ -149,18 +155,19 @@ int main (int argc, char *argv[])
     }
 
     auto string_is_valid = [](const std::string &str)
-    {
-
-        auto is_illegal_char = [](const char c)
-                             {
-                                 if ((c <= 'z' && c >= 'a')
-                                     || (c <= 'Z' && c >= 'A')
-                                     || isdigit(c))
-                                     return false;
-                                 return true;
-                             };
-        return find_if(str.begin(), str.end(), is_illegal_char) == str.end();
-    };
+                           {
+                               // user serial are generally only numbers
+                               // developer and special devices may contain letters
+                               auto is_illegal_char = [](const char c)
+                                                      {
+                                                          if ((c <= 'z' && c >= 'a')
+                                                              || (c <= 'Z' && c >= 'A')
+                                                              || isdigit(c))
+                                                              return false;
+                                                          return true;
+                                                      };
+                               return find_if(str.begin(), str.end(), is_illegal_char) == str.end();
+                           };
 
     if (!string_is_valid(serial))
     {
@@ -186,7 +193,7 @@ int main (int argc, char *argv[])
     }
     else if (*show_properties)
     {
-        print_properties(dev->get_available_properties());
+        print_properties(serial);
     }
     else if (*save_state)
     {
