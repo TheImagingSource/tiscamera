@@ -500,8 +500,14 @@ static gboolean open_source_element (GstTcamSrc* self)
 
     g_object_set(self->active_source,
                  "serial", self->device_serial.c_str(),
-                 "type", type_to_str(self->device_type),
                  NULL);
+
+    if (self->active_source == self->main_src)
+    {
+        g_object_set(self->active_source,
+                     "type", type_to_str(self->device_type),
+                     NULL);
+    }
 
     gst_bin_add(GST_BIN(self), self->active_source);
 
@@ -523,12 +529,23 @@ static gboolean open_source_element (GstTcamSrc* self)
     // src needs some time as things can happen async
     g_object_get(G_OBJECT(self->active_source), "serial", &self->device_serial, NULL);
 
-    const char* type_str = nullptr;
-    g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
-
-    if (type_str)
+    if (self->active_source == self->main_src)
     {
-        self->device_type = str_to_type(type_str);
+        const char* type_str = nullptr;
+        g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
+
+        if (type_str)
+        {
+            self->device_type = str_to_type(type_str);
+        }
+        else
+        {
+            self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+        }
+    }
+    else if (self->active_source == self->pimipi_src)
+    {
+        self->device_type = TCAM_DEVICE_TYPE_PIMIPI;
     }
     else
     {
