@@ -380,8 +380,10 @@ static gboolean close_source_element (GstTcamSrc* self)
 
     if (self->active_source)
     {
-        gst_element_set_state(self->active_source, GST_STATE_NULL);
-
+        if (state != GST_STATE_NULL)
+        {
+            gst_element_set_state(self->active_source, GST_STATE_NULL);
+        }
         // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
         // gst_bin_remove(GST_BIN(self), self->active_source);
 
@@ -648,13 +650,17 @@ static void gst_tcam_src_finalize (GObject* object)
         self->all_caps = NULL;
     }
 
-    close_source_element(self);
-
+    if (self->active_source)
+    {
+        close_source_element(self);
+    }
     g_slist_free(self->source_list);
 
     // source elements have to be destroyed manually as they are not in the bin
     //gst_object_unref(self->main_src);
     self->main_src = nullptr;
+
+    // TODO iterate source_list and destroy source elements
 
     G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
 }
