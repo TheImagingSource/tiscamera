@@ -21,7 +21,8 @@ A Property consists out of the fields 'name' and 'value'.
 
 In the case of an error a message will the written to TCAM_LOG.
 The property will be ignored.
-                
+
+Properties of the type 'button' are not added to a state description.
 
 .. code-block:: json
 
