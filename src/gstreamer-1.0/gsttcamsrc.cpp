@@ -512,6 +512,10 @@ static gboolean open_source_element (GstTcamSrc* self)
     }
 
     gst_bin_add(GST_BIN(self), self->active_source);
+    // bin takes ownership over source element
+    // we want to hold all source elements outside of
+    // the bin for indexing purposes
+    g_object_ref(self->active_source);
 
     gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
     self->target_pad = gst_element_get_static_pad(self->active_source, "src");
@@ -659,6 +663,7 @@ static void gst_tcam_src_finalize (GObject* object)
     // source elements have to be destroyed manually as they are not in the bin
     //gst_object_unref(self->main_src);
     self->main_src = nullptr;
+    self->pimipi_src = nullptr;
 
     // TODO iterate source_list and destroy source elements
 
