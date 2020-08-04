@@ -385,13 +385,13 @@ static gboolean close_source_element (GstTcamSrc* self)
             gst_element_set_state(self->active_source, GST_STATE_NULL);
         }
         // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
-        // gst_bin_remove(GST_BIN(self), self->active_source);
+        gst_bin_remove(GST_BIN(self), self->active_source);
 
         self->active_source = nullptr;
         return TRUE;
     }
 
-    return FALSE;
+    return TRUE;
 }
 
 
@@ -402,7 +402,7 @@ static gboolean open_source_element (GstTcamSrc* self)
     {
         // TODO: check if active_source
         // uses the correct device to prevent reopening
-        return true;
+        // return true;
         if (!close_source_element(self))
         {
             GST_ERROR("Unable to close open source element. Aborting");

@@ -99,7 +99,7 @@ std::string tcam::tcam_device_type_to_string (TCAM_DEVICE_TYPE type)
         case TCAM_DEVICE_TYPE_V4L2: return "v4l2";
         case TCAM_DEVICE_TYPE_ARAVIS: return "aravis";
         case TCAM_DEVICE_TYPE_LIBUSB: return "libusb";
-        case TCAM_DEVICE_TYPE_PIMIPI: return "mipi";
+        case TCAM_DEVICE_TYPE_PIMIPI: return "pimipi";
         case TCAM_DEVICE_TYPE_MIPI: return "mipi";
         default: return "unknown";
     }
