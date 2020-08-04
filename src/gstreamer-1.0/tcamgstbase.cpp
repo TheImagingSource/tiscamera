@@ -1231,7 +1231,7 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
 
                 gst_object_unref(biteater);
 
-                return available_caps;
+                return gst_caps_copy(available_caps);
             }
             else // dutils only
             {
