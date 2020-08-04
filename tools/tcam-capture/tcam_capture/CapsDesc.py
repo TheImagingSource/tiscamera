@@ -124,7 +124,7 @@ class CapsDesc:
 
                     ret = []
 
-                    ret.append(minval)
+                    ret.append("{}/1".format(str(int(minval))))
 
                     # ensure steps are always
                     # so that step/1 can be added
@@ -145,7 +145,7 @@ class CapsDesc:
                             ret.append("{}/1".format(str(step)))
 
                     if ret[-1] != maxval:
-                        ret.append("{}/1".format(str(maxval)))
+                        ret.append("{}/1".format(str(int(maxval))))
 
                     return ret
 
