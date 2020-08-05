@@ -190,8 +190,13 @@ class CapsDesc:
                       format_string == "None"):
                     continue
 
+                # this exists because non 8-bit bayer
+                # has unly been supported through dutils
+                # with tcamby1xtransform this has changed
+                # now a rewrite of this function is probably a good idea
                 if (format_name == "video/x-bayer" and
                         format_string not in ("rggb", "bggr", "gbrg", "grbg",
+                                              "rggb10m", "bggr10m", "gbrg10m", "grbg10m",
                                               "rggb12m", "bggr12m", "gbrg12m", "grbg12m") and not
                         self.have_dutils):
                     continue
