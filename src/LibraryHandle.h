@@ -22,6 +22,7 @@
 #include <dlfcn.h>
 
 #include <functional>
+#include <stdexcept>
 
 namespace tcam
 {

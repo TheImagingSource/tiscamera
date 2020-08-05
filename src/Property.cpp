@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace tcam;
 
