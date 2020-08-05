@@ -127,6 +127,7 @@ int Camera::resetCounter ()
     return timeoutCounter;
 }
 
+
 std::string Camera::getNetworkInterfaceName ()
 {
     return interface->getInterfaceName();
@@ -488,10 +489,31 @@ int Camera::uploadFirmware (const std::string& filename,
 
     if (getControl())
     {
+        // retrieve current heartbeat and set our own
+        // some cameras run into timeouts
+        auto dev_timeout = getHeartbeatTimeout();
+
+        if (dev_timeout == -1)
+        {
+            abandonControl();
+            return -1;
+        }
+
+        if (!setHeartbeatTimeout(10000)) // 10 seconds
+        {
+            abandonControl();
+            return -1;
+        }
+
+        // actual writing
         retv = upgradeFirmware(writer,
-                                                    this->packet,
-                                                    filename, overrideModelName,
-                                                    progressFunc);
+                               this->packet,
+                               filename, overrideModelName,
+                               progressFunc);
+
+        // reset heartbeat
+        setHeartbeatTimeout(dev_timeout);
+
         abandonControl();
     }
 
@@ -505,15 +527,61 @@ std::string Camera::getInterfaceName ()
 }
 
 
+int Camera::getHeartbeatTimeout ()
+{
+    bool retv = false;
+    uint32_t data;
+    try
+    {
+        retv = this->sendReadRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, &data);
+    }
+    catch (const std::exception &exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    if (retv)
+    {
+        return data;
+    }
+    return -1;
+}
+
+
+bool Camera::setHeartbeatTimeout (uint32_t timeout)
+{
+    bool retv = false;
+    if(!isControlled)
+    {
+        if (!this->getControl())
+        {
+            return false;
+        }
+    }
+
+    uint32_t data = timeout;
+    try
+    {
+        retv = this->sendWriteRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, data);
+    }
+    catch (const std::exception &exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    return retv;
+}
+
+
 bool Camera::getControl ()
 {
     bool retv = false;
     if(!isControlled)
     {
-        uint32_t data = htonl(3);
         try
         {
-            retv = this->sendWriteMemory(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, sizeof(data), &data);
+            uint32_t data = 2;
+            retv = this->sendWriteRegister(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, data);
         }
         catch (const std::exception &exc)
         {
@@ -530,6 +598,7 @@ bool Camera::getControl ()
     {
         return this->isControlled;
     }
+
     return retv;
 }
 
@@ -537,8 +606,7 @@ bool Camera::getControl ()
 bool Camera::abandonControl ()
 {
     bool retv = false;
-    uint32_t data = 0;
-    retv = this->sendWriteMemory(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, 4, &data);
+    retv = this->sendWriteRegister(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, 0);
     if (retv)
     {
         this->isControlled = false;
@@ -585,31 +653,81 @@ bool Camera::isReachable()
 }
 
 
-bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* data)
+bool Camera::sendWriteRegister (const uint32_t address, uint32_t value)
 {
-    if ((size % 4) != 0)
+    unsigned int response = Status::TIMEOUT;
+
+    unsigned short id = generateRequestID();
+    size_t real_size = sizeof(Packet::CMD_WRITEREG);
+
+    std::vector<uint8_t> packet_ (real_size);
+    auto _packet = (Packet::CMD_WRITEREG*)packet_.data();
+
+    _packet->header.magic = 0x42;
+    _packet->header.flag = Flags::NEEDACK;
+    _packet->header.command = htons(Commands::WRITEREG_CMD);
+    _packet->header.length = htons(sizeof(Packet::CMD_WRITEREG) - sizeof(Packet::COMMAND_HEADER));
+    _packet->header.req_id = htons(id);
+
+    _packet->ops[0].address = htonl(address);
+    _packet->ops[0].value = htonl(value);
+
+    auto callback_function = [id, &response] (void* msg) -> int
+                             {
+                                 Packet::ACK_WRITEREG* ack = (Packet::ACK_WRITEREG*) msg;
+                                 response = Status::FAILURE;
+
+                                 if (ntohs(ack->header.ack_id) == id)
+                                 {
+                                     response = ntohs(ack->header.status);
+                                     return Socket::SendAndReceiveSignals::END;
+                                 }
+                                 return Socket::SendAndReceiveSignals::CONTINUE;
+                             };
+
+    try
     {
-        return -1;
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
+            socket->sendAndReceive(getCurrentIP(), _packet, real_size, callback_function);
+            retries--;
+        }
+    }
+    catch (SocketSendToException& exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    return response == Status::SUCCESS;
+}
+
+
+bool Camera::sendReadRegister (const uint32_t address, uint32_t* value)
+{
+
+    if (!value)
+    {
+        return false;
     }
 
     unsigned int response = Status::TIMEOUT;
 
     unsigned short id = generateRequestID();
 
-    Packet::CMD_READMEM _packet = Packet::CMD_READMEM();
+    Packet::CMD_READREG _packet = Packet::CMD_READREG();
 
     _packet.header.magic = 0x42;
     _packet.header.flag = Flags::NEEDACK;
-    _packet.header.command = htons(Commands::READMEM_CMD);
-    _packet.header.length = htons(sizeof(Packet::CMD_READMEM) - sizeof(Packet::COMMAND_HEADER));
+    _packet.header.command = htons(Commands::READREG_CMD);
+    _packet.header.length = htons(sizeof(Packet::CMD_READREG) - sizeof(Packet::COMMAND_HEADER));
     _packet.header.req_id = ntohs(id);
 
-    _packet.count = htons(size);
-    _packet.address = htonl(address);
+    _packet.address[0] = htonl(address);
 
-    auto callback_function = [&data, &id, &size, &response] (void* msg) -> int
+    auto callback_function = [&id, &value, &response] (void* msg) -> int
     {
-        Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*) msg;
+        Packet::ACK_READREG* ack = (Packet::ACK_READREG*) msg;
 
         response = Status::FAILURE;
 
@@ -617,9 +735,10 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
         {
             if (ack->header.status == Status::SUCCESS)
             {
-                memcpy(data, ack->data, size);
+                memcpy(value, ack->data, sizeof(uint32_t));
             }
             response = ntohs(ack->header.status);
+            *value = ntohl(*value);
             return Socket::SendAndReceiveSignals::END;
         }
         return Socket::SendAndReceiveSignals::CONTINUE;
@@ -643,11 +762,69 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
 }
 
 
+bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* data)
+{
+    if ((size % 4) != 0)
+    {
+        return false;
+    }
+
+    unsigned int response = Status::TIMEOUT;
+
+    unsigned short id = generateRequestID();
+
+    Packet::CMD_READMEM _packet = Packet::CMD_READMEM();
+
+    _packet.header.magic = 0x42;
+    _packet.header.flag = Flags::NEEDACK;
+    _packet.header.command = htons(Commands::READMEM_CMD);
+    _packet.header.length = htons(sizeof(Packet::CMD_READMEM) - sizeof(Packet::COMMAND_HEADER));
+    _packet.header.req_id = ntohs(id);
+
+    _packet.count = htons(size);
+    _packet.address = htonl(address);
+
+    auto callback_function = [&data, &id, &size, &response] (void* msg) -> int
+                             {
+                                 Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*) msg;
+
+                                 response = Status::FAILURE;
+
+                                 if (ntohs(ack->header.ack_id) == id)
+                                 {
+                                     if (ack->header.status == Status::SUCCESS)
+                                     {
+                                         memcpy(data, ack->data, size);
+                                     }
+                                     response = ntohs(ack->header.status);
+                                     return Socket::SendAndReceiveSignals::END;
+                                 }
+                                 return Socket::SendAndReceiveSignals::CONTINUE;
+                             };
+
+    try
+    {
+        int retries = tis::PACKET_RETRY_COUNT;
+        while (retries && (response == Status::TIMEOUT))
+        {
+            socket->sendAndReceive(getCurrentIP(), &_packet, sizeof(_packet), callback_function);
+            retries--;
+        }
+    }
+    catch (SocketSendToException& exc)
+    {
+        std::cerr << exc.what() << std::endl;
+    }
+
+    return response == Status::SUCCESS;
+}
+
+
 bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* data)
 {
     if ((size % 4) != 0)
     {
-        return -1;
+        return false;
     }
 
     unsigned int response = Status::TIMEOUT;
@@ -692,6 +869,11 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     catch (SocketSendToException& exc)
     {
         std::cerr << exc.what() << std::endl;
+    }
+
+    if (response == Status::ACCESS_DENIED)
+    {
+        std::cout << "Unable to write. Access Denied." << std::endl;
     }
 
     return response == Status::SUCCESS;

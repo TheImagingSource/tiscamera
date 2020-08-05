@@ -2587,9 +2587,6 @@ static gboolean plugin_init (GstPlugin* plugin)
                                 GST_TYPE_TCAMAUTOEXPOSURE);
 }
 
-#ifndef VERSION
-#define VERSION "0.0.1"
-#endif
 #ifndef PACKAGE
 #define PACKAGE "tcamautoexposure"
 #endif
@@ -2605,6 +2602,6 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    tcamautoexposure,
                    "The Imaging Source auto exposure plugin",
                    plugin_init,
-                   VERSION,
+                   get_version(),
                    "Proprietary",
                    PACKAGE_NAME, GST_PACKAGE_ORIGIN)

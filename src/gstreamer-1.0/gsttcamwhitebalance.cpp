@@ -1308,4 +1308,8 @@ GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
                    GST_VERSION_MINOR,
                    PACKAGE_NAME,
                    "The Imaging Source white balance plugin",
-                   plugin_init, VERSION, "Proprietary", PACKAGE, GST_PACKAGE_ORIGIN)
+                   plugin_init,
+                   get_version(),
+                   "Proprietary",
+                   PACKAGE,
+                   GST_PACKAGE_ORIGIN)

@@ -57,23 +57,8 @@ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
-option(BUILD_ARAVIS   "Include GigE support via aravis"      OFF)
-option(BUILD_V4L2     "Include support for USB cameras"      ON )
-option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
-option(BUILD_TOOLS    "Build additional utilities"           ON)
-option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
-option(BUILD_TESTS    "Build tests."                         OFF)
-
-
-option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
-option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
-
-if (TCAM_ARAVIS_USB_VISION)
-  # activate aravis since we need it for usb3vision
-  set(BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
-
-endif (TCAM_ARAVIS_USB_VISION)
+# All option for configuration come from here
+include(CMakeOptions.cmake)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
@@ -98,11 +83,27 @@ execute_process ( COMMAND python3 -c "from distutils.sysconfig import get_python
 
 set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
 
+if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+add_subdirectory(src/v4l2)
+add_subdirectory(tools/tcam-uvc-extension-loader/)
+add_subdirectory(data/uvc-extensions/)
+add_subdirectory(data/udev/)
+
+endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+# TODO: these should not always be included
 add_subdirectory(dependencies)
 add_subdirectory(src)
 
-
-add_subdirectory(data)
+if (TCAM_ENABLE_DATA_INSTALL)
+  add_subdirectory(data)
+  # TODO: this should not be always on
+  install(DIRECTORY examples
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+endif (TCAM_ENABLE_DATA_INSTALL)
 
 
 if (BUILD_TOOLS)
@@ -119,9 +120,7 @@ if (BUILD_TESTS)
   add_subdirectory(tests)
 endif (BUILD_TESTS)
 
-
-install(DIRECTORY examples
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 
 # uninstall target
@@ -163,6 +162,12 @@ MESSAGE(STATUS "Support for LibUsb cameras:    " ${BUILD_LIBUSB})
 MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
 MESSAGE(STATUS "Build documentation            " ${BUILD_DOCUMENTATION})
 MESSAGE(STATUS "Build tests                    " ${BUILD_TESTS})
+MESSAGE(STATUS "")
+
+if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+MESSAGE(STATUS " !! Only building tcam-uvc-extension-loader and associated files !!")
+endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
 MESSAGE(STATUS "Installing binaries to:        " ${TCAM_INSTALL_BIN})

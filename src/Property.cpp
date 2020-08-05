@@ -330,6 +330,10 @@ bool Property::from_string (const std::string& s)
                 break;
             }
             case TCAM_PROPERTY_TYPE_BUTTON:
+            {
+                set_value();
+                break;
+            }
             case TCAM_PROPERTY_TYPE_UNKNOWN:
             default:
             {

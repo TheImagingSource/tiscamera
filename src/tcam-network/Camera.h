@@ -203,6 +203,29 @@ public:
     /// call returns
     bool getIsBusy();
 
+    /// @name getHeartbeatTimeout
+    /// @brief queries camera for heartbeat period
+    /// @return the currently set HearbeatTimeout period; -1 on error
+    int getHeartbeatTimeout ();
+
+    /// @name setHeartbeatTimeout
+    /// @param heartbeat in ms that shall be set
+    /// @return true if hearbeat could be set
+    bool setHeartbeatTimeout (uint32_t timeout);
+
+    /// @name sendReadMemory
+    /// @param address - address that shall be read
+    /// @param value - pointer to container that shall be filled
+    /// @return true on success
+    /// @brief Sends request for register and fills value with data
+    bool sendReadRegister (const uint32_t address, uint32_t* value);
+
+    /// @name sendWriteMemory
+    /// @param address - memory address to be written
+    /// @param value - information that shall be written
+    /// @return int containing the return value of write attempt
+    bool sendWriteRegister (const uint32_t address, uint32_t value);
+
     /// @name sendReadMemory
     /// @param address - address that shall be read
     /// @param size - size of memory to read
