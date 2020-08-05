@@ -306,6 +306,8 @@ for a correct conversion of these formats. Since tcamdutils are an optional modu
 can not be expected. To ensure identical behavior whether or not tcamdutils are installed, bayer 8-bit will be preferred unless the user explicitly specifies bayer 12/16-bit for the source through the property 'device-caps'. The selected caps for the internal tcamscr will be propagated as a gstbus message with the prefix "Working with src caps: ".
 The offered caps are the sum of unfiltered camera caps and caps that will be available through conversion elements like `bayer2rgb`.
 
+The format that can always be expected to work is `BGRx`. All other formats depend on the used device.
+
 .. list-table:: TcamSrc properties
    :header-rows: 1
    :widths: 25 10 65
