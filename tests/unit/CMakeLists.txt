@@ -21,7 +21,7 @@ if (BUILD_ARAVIS)
   add_subdirectory(tcam-network)
 endif (BUILD_ARAVIS)
 
-include_directories("${CMAKE_SOURCE_DIR}/dependencies/catch")
+include_directories("${TCAM_SOURCE_DIR}/dependencies/catch")
 
 
 set(test-main-src

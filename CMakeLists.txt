@@ -47,9 +47,12 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+set(TCAM_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(TCAM_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
 
 # assure config.h is found
-include_directories("${PROJECT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -149,9 +152,9 @@ if (BUILD_GST_1_0)
 # ensure we have the correct install directories
 # subdirectories make additional checks to find better suited install directories
 # to prevent the user having to set environment variables, etc
-get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
-get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
-get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${CMAKE_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
+get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
+get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
+get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${TCAM_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
 
 endif (BUILD_GST_1_0)
 

@@ -15,7 +15,7 @@
 # Version number for tcam_gigetool
 set(TCAM_GIGETOOL_VERSION "1.0" STRING "Version number for tcam_gigetool")
 
-include_directories(${CMAKE_SOURCE_DIR}/src/tcam-network)
+include_directories(${TCAM_SOURCE_DIR}/src/tcam-network)
 
 add_library(tcam_gigewrapper SHARED gige_wrapper.cpp)
 

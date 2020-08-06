@@ -1,6 +1,6 @@
 
 
-include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("${TCAM_SOURCE_DIR}/src")
 
 find_package(UDev REQUIRED QUIET)
 include_directories(${UDEV_INCLUDE_DIR})
@@ -35,7 +35,7 @@ find_package(LibUuid REQUIRED QUIET)
 
 include_directories(${LIBUUID_INCLUDE_DIRS})
 
-include_directories("${CMAKE_SOURCE_DIR}/dependencies/json")
+include_directories("${TCAM_SOURCE_DIR}/dependencies/json")
 
 add_library(tcam-uvc-extension SHARED
   uvc-extension-loader.cpp)

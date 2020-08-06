@@ -1,6 +1,6 @@
 
-include_directories("${CMAKE_SOURCE_DIR}/dependencies/catch")
-include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
+include_directories("${TCAM_SOURCE_DIR}/dependencies/catch")
+include_directories("${TCAM_SOURCE_DIR}/src/tcam-network")
 
 add_executable(test-tcam-network main.cpp)
 

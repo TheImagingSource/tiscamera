@@ -21,7 +21,7 @@ include_directories(${GSTREAMER_INCLUDE_DIRS})
 include_directories(${GLIB2_INCLUDE_DIR})
 include_directories(${GObject_INCLUDE_DIR})
 
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/CLI11)
+include_directories(${TCAM_SOURCE_DIR}/dependencies/CLI11)
 
 add_executable(start-stop start-stop.cpp)
 

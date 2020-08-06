@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories(${CMAKE_SOURCE_DIR}/src/tcam-network)
+include_directories(${TCAM_SOURCE_DIR}/src/tcam-network)
 
 add_executable(camera-ip-conf main.cpp ConsoleManager.cpp)
 

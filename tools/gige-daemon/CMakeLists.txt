@@ -21,16 +21,16 @@ include_directories("${GIO_INCLUDE_DIR}")
 include_directories(${GOBJECT_INCLUDE_DIR})
 include_directories(${GLIB2_INCLUDE_DIR})
 
-include_directories("${PROJECT_BINARY_DIR}")
-include_directories("${PROJECT_SOURCE_DIR}/src")
-include_directories("${CMAKE_SOURCE_DIR}/src/aravis")
+include_directories("${TCAM_BINARY_DIR}")
+include_directories("${TCAM_SOURCE_DIR}/src")
+include_directories("${TCAM_SOURCE_DIR}/src/aravis")
 
 if (TCAM_INTERNAL_ARAVIS)
 
   # we require two includes
   # as some header are generated
-  include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/dependencies/aravis/src")
-  include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+  include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
+  include_directories(SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 
 
 else (TCAM_INTERNAL_ARAVIS)
@@ -39,8 +39,8 @@ else (TCAM_INTERNAL_ARAVIS)
 
 endif (TCAM_INTERNAL_ARAVIS)
 
-include_directories("${CMAKE_SOURCE_DIR}/src")
-include_directories("${CMAKE_SOURCE_DIR}/src/tcam-network")
+include_directories("${TCAM_SOURCE_DIR}/src")
+include_directories("${TCAM_SOURCE_DIR}/src/tcam-network")
 
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
 

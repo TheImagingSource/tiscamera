@@ -25,7 +25,7 @@ function (git_is_repository is_repo)
 
   execute_process(
     COMMAND git rev-parse --git-dir 2> /dev/null
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ROOT_DIR
     )
 
@@ -43,7 +43,7 @@ endfunction (git_is_repository)
 function (git_commit_hash return_value)
   execute_process(
     COMMAND git log -1 --format=%h
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -60,7 +60,7 @@ function (git_commit_count return_value)
 
   execute_process(
     COMMAND git rev-list --count HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_COUNT
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -76,7 +76,7 @@ endfunction (git_commit_count)
 function (git_commit_tag return_value)
   execute_process(
     COMMAND git describe --exact-match HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_TAG
     ERROR_VARIABLE GIT_TAG_ERROR
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -95,7 +95,7 @@ function (git_branch return_value)
 
   execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )

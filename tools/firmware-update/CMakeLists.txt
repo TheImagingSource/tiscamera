@@ -18,7 +18,7 @@ set(fwu-files
   UsbSession.cpp
   FileHandling.cpp)
 
-include_directories("${CMAKE_SOURCE_DIR}/dependencies/PugiXml")
+include_directories("${TCAM_SOURCE_DIR}/dependencies/PugiXml")
 
 add_executable(firmware-update ${fwu-files} $<TARGET_OBJECTS:33update> $<TARGET_OBJECTS:pugixml_obj>)
 

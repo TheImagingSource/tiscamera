@@ -14,6 +14,6 @@
 # limitations under the License.
 
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/env.sh.in ${CMAKE_BINARY_DIR}/env.sh @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/env.sh.in ${TCAM_BINARY_DIR}/env.sh @ONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tiscamera-env.sh.in ${CMAKE_BINARY_DIR}/tiscamera-env.sh @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tiscamera-env.sh.in ${TCAM_BINARY_DIR}/tiscamera-env.sh @ONLY)

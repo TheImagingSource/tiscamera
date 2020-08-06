@@ -125,8 +125,8 @@ if (TCAM_INTERNAL_ARAVIS)
 
 
   include_directories("${GIO_INCLUDE_DIR}")
-  include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/dependencies/aravis/src")
-  include_directories(SYSTEM "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+  include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
+  include_directories(SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 
 else (TCAM_INTERNAL_ARAVIS)
 
@@ -137,7 +137,7 @@ endif(TCAM_INTERNAL_ARAVIS)
 
 include_directories(${GOBJECT_INCLUDE_DIR})
 include_directories(${GLIB2_INCLUDE_DIR})
-include_directories("${CMAKE_SOURCE_DIR}/tools/gige-daemon")
+include_directories("${TCAM_SOURCE_DIR}/tools/gige-daemon")
 
 
 
@@ -167,7 +167,7 @@ if (BUILD_LIBUSB)
 
 endif (BUILD_LIBUSB)
 
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/dependencies/")
+include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/")
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
@@ -185,7 +185,7 @@ add_custom_command(
   -DGIT_BRANCH="${GIT_BRANCH}"
   -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
   -DGIT_COMMIT_COUNT="${GIT_COMMIT_COUNT}"
-  -P "${CMAKE_SOURCE_DIR}/cmake/create_version_file.cmake"
+  -P "${TCAM_SOURCE_DIR}/cmake/create_version_file.cmake"
   COMMENT ""
   OUTPUT ${TCAM_VERSION_FILE}
   )
@@ -218,7 +218,7 @@ if (BUILD_ARAVIS)
 
   if (TCAM_INTERNAL_ARAVIS)
     add_dependencies(tcam aravis)
-    set(ARAVIS_LIB "${CMAKE_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
+    set(ARAVIS_LIB "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
 
     find_package(LibXml2 REQUIRED QUIET)
     find_package(PCAP REQUIRED QUIET)

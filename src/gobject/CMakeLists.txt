@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories(${CMAKE_SOURCE_DIR}/src/)
+include_directories(${TCAM_SOURCE_DIR}/src/)
 
 find_package(GObject   REQUIRED QUIET)
 find_package(GLIB2     REQUIRED QUIET)
@@ -45,9 +45,9 @@ set_property(TARGET tcamprop PROPERTY SOVERSION ${TCAM_GI_API_VERSION})
 #add_custom_target(tcam-0.1-gir tcam-gobject)
 
 add_custom_command(
-  OUTPUT "${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
+  OUTPUT "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
   DEPENDS tcamprop
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src/gobject"
+  WORKING_DIRECTORY "${TCAM_SOURCE_DIR}/src/gobject"
   COMMAND
   ${INTROSPECTION_SCANNER}
   tcamprop.c tcamprop.h
@@ -56,28 +56,28 @@ add_custom_command(
   --warn-all
   --verbose
   --include=GObject-2.0
-  -I${CMAKE_SOURCE_DIR}/src
+  -I${TCAM_SOURCE_DIR}/src
   --pkg=gobject-2.0
-  --library=tcamprop -L${CMAKE_BINARY_DIR}/src/gobject
-  --output="${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
+  --library=tcamprop -L${TCAM_BINARY_DIR}/src/gobject
+  --output="${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
   )
 
 #add_dependencies(create_gir tcam-gobject)
 
 add_custom_command(
-  OUTPUT "${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib"
-  DEPENDS "${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/src/gobject"
+  OUTPUT "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib"
+  DEPENDS "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
+  WORKING_DIRECTORY "${TCAM_BINARY_DIR}/src/gobject"
   COMMAND
   ${INTROSPECTION_COMPILER}
-  --includedir=${CMAKE_BINARY_DIR}/src/gobject
-  "${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
-  -o "${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib"
+  --includedir=${TCAM_BINARY_DIR}/src/gobject
+  "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
+  -o "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib"
   )
 
 #add_dependencies(create_typelib create_gir)
 
-add_custom_target(create_gobject ALL DEPENDS ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib)
+add_custom_target(create_gobject ALL DEPENDS ${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib)
 
 install(TARGETS tcamprop LIBRARY
   DESTINATION ${TCAM_INSTALL_LIB}
@@ -99,10 +99,10 @@ else()
   set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
 endif()
 
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir
+install(FILES ${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir
   DESTINATION ${TCAM_INSTALL_GIR}
   COMPONENT tcam-introspection)
-install(FILES ${CMAKE_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib
+install(FILES ${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib
   DESTINATION ${TCAM_INSTALL_TYPELIB}
   COMPONENT tcam-introspection)
 install(FILES tcamprop.h

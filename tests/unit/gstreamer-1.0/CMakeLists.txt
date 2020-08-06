@@ -24,10 +24,10 @@ set(test_gst_src
   )
 
 include_directories(".")
-include_directories("${CMAKE_SOURCE_DIR}/dependencies/catch")
-include_directories("${CMAKE_SOURCE_DIR}/src")
-include_directories("${CMAKE_SOURCE_DIR}/src/gstreamer-1.0")
-include_directories("${CMAKE_SOURCE_DIR}/src/gobject")
+include_directories("${TCAM_SOURCE_DIR}/dependencies/catch")
+include_directories("${TCAM_SOURCE_DIR}/src")
+include_directories("${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
+include_directories("${TCAM_SOURCE_DIR}/src/gobject")
 
 include_directories("..")
 

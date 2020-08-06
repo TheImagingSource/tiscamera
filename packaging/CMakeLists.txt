@@ -34,7 +34,7 @@ set(CPACK_PACKAGE_CHECKSUM "SHA512")
 # set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 # load dependency list from central point
-file(STRINGS "${CMAKE_SOURCE_DIR}/dependencies-debian-runtime.txt" debian_dep)
+file(STRINGS "${TCAM_SOURCE_DIR}/dependencies-debian-runtime.txt" debian_dep)
 
 foreach(Line ${debian_dep})
   # Ignore comments and append the rest to a single line.
