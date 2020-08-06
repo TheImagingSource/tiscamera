@@ -129,9 +129,16 @@ configure_file(
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
+# create target uninstall to deinstall tiscamera
+# if tiscamera is a subproject/module
+# create uninstall-tiscamera instead
+if (TARGET uninstall)
+  add_custom_target(uninstall-tiscamera
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
+else (TARGET uninstall)
+  add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif (TARGET uninstall)
 
 add_subdirectory(packaging)
 add_subdirectory(scripts)
