@@ -41,7 +41,7 @@ include_directories(${TCAM_SOURCE_DIR}/dependencies/json)
 
 include_directories(${INTROSPECTION_INCLUDE_DIR})
 
-add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp)
+add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
 target_link_libraries(tcamgstbase tcam)
 target_link_libraries(tcamgstbase tcamprop)
 target_link_libraries(tcamgstbase tcam-algorithms)
