@@ -32,18 +32,8 @@ using namespace tcam;
 void print_properties (const std::string& serial);
 
 
-/**
- * @brief Set property described in string to new value
- * @param g - CaptureDevice of the device that shall be used
- * @param new_prop - string describing the format
- * @return true on success
- */
-bool set_property (std::shared_ptr<CaptureDevice> dev, const std::string& new_prop);
+void print_state_json (const std::string& serial);
 
-
-
-void print_state_json (std::shared_ptr<CaptureDevice> dev);
-
-void load_state_json_string (std::shared_ptr<CaptureDevice> dev, const std::string json_str);
+void load_state_json_string (const std::string& serial, const std::string json_str);
 
 #endif /* CONTROLS_H */

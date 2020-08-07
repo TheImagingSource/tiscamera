@@ -67,7 +67,40 @@ void print_devices (size_t /*t*/)
     DeviceIndex index;
     std::vector<DeviceInfo> device_list = index.get_device_list();
 
-    print_capture_devices(device_list);
+    GstElement* source = gst_element_factory_make("tcamsrc", "source");
+
+    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+    for (GSList* elem = serials; elem; elem = elem->next)
+    {
+        char* name;
+        char* identifier;
+        char* connection_type;
+
+        /* This fills the parameters to the likes of:
+           name='DFK Z12GP031',
+           identifier='The Imaging Source Europe GmbH-11410533'
+           connection_type='aravis'
+           The identifier is the name given by the backend
+           The connection_type identifies the backend that is used.
+           Currently 'aravis', 'v4l2' and 'unknown' exist
+        */
+        gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
+                                                 (gchar*) elem->data,
+                                                 &name,
+                                                 &identifier,
+                                                 &connection_type);
+
+        if (ret) // get_device_info was successfull
+        {
+            printf("Model: %s Serial: %s Type: %s\n",
+                   name, (gchar*)elem->data, connection_type);
+        }
+    }
+
+    g_slist_free(serials);
+    gst_object_unref(source);
+
+//    print_capture_devices(device_list);
 }
 
 
@@ -98,7 +131,7 @@ int main (int argc, char *argv[])
 
     std::string device_type;
     auto existing_device_types = tcam::get_device_type_list_strings();
-    std::set<std::string> s(existing_device_types.begin(),existing_device_types.end());
+    std::set<std::string> s(existing_device_types.begin(), existing_device_types.end());
 
     app.add_set("-t,--type", device_type, s,
                 "camera type", "unknown");
@@ -112,7 +145,7 @@ int main (int argc, char *argv[])
     // CLI11 uses "TEXT" as a filler for the option string arguments
     // replace it with "SERIAL" to make the help text more intuitive.
     app.get_formatter()->label("TEXT", "SERIAL");
-
+    app.require_option();
     app.allow_extras();
 
     CLI11_PARSE(app, argc, argv);
@@ -178,15 +211,15 @@ int main (int argc, char *argv[])
 
     auto dev = open_device(serial, t);
 
-    if (!dev)
-    {
-        std::cerr << "Unable to open device with serial \"" << serial << "\"." << std::endl;
-        return 1;
-    }
+    // if (!dev)
+    // {
+    //     std::cerr << "Unable to open device with serial \"" << serial << "\"." << std::endl;
+    //     return 1;
+    // }
 
     if (*show_caps)
     {
-        list_gstreamer_1_0_formats(dev->get_available_video_formats());
+        list_gstreamer_1_0_formats(serial);
     }
     else if (*show_formats)
     {
@@ -198,7 +231,7 @@ int main (int argc, char *argv[])
     }
     else if (*save_state)
     {
-        print_state_json(dev);
+        print_state_json(serial);
     }
     else if (*load_state)
     {
@@ -228,16 +261,8 @@ int main (int argc, char *argv[])
         {
             json_str = vec.at(0);
         }
-        std::pair<bool, std::vector<std::string>> ret = load_json_state(dev, json_str);
 
-        for (const auto& msg : ret.second)
-        {
-            std::cout << msg << std::endl;
-        }
-        if (!ret.first)
-        {
-            return 1;
-        }
+        load_state_json_string(serial, json_str);
     }
 
     return 0;

@@ -56,14 +56,33 @@ void list_formats (const std::vector<VideoFormatDescription>& available_formats)
 }
 
 
-void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& available_formats)
+void list_gstreamer_1_0_formats (const std::string& serial)
 {
-    // dummy init because gstreamer
-    // is to stupid to not crash without it
-    gst_init(NULL, 0);
+    GstElement* source = gst_element_factory_make("tcamsrc", "source");
+
+    if (!source)
+    {
+        std::cerr << "Unable to create source element." << std::endl;
+        return;
+    }
+
     std::string str;
 
-    if (videoformatsdescription_to_gst_caps_string(available_formats, str))
+    GValue val = {};
+    g_value_init(&val, G_TYPE_STRING);
+    g_value_set_static_string(&val, serial.c_str());
+
+    g_object_set_property(G_OBJECT(source), "serial", &val);
+
+    gst_element_set_state(source, GST_STATE_READY);
+
+    GstPad* pad = gst_element_get_static_pad(source, "src");
+
+    GstCaps* caps = gst_pad_query_caps(pad, NULL);
+
+    str = gst_caps_to_string(caps);
+
+    if (caps)
     {
         // use a regex to insert line breaks for increased readability
         std::regex e ("; ");
@@ -71,16 +90,25 @@ void list_gstreamer_1_0_formats (const std::vector<VideoFormatDescription>& avai
         std::regex paren_e ("\\((string|int|fraction)\\)");
         std::cout << "Available gstreamer-1.0 caps:" << std::endl;
 
-        std::string caps = std::regex_replace(str, e, ";\n");
-        caps = std::regex_replace(caps, wb_e, "");
-        caps = std::regex_replace(caps, paren_e, "");
+        std::string caps_str = std::regex_replace(str, e, ";\n");
+        caps_str = std::regex_replace(caps_str, wb_e, "");
+        caps_str = std::regex_replace(caps_str, paren_e, "");
 
-        std::cout << caps << std::endl;
+        std::cout << caps_str << std::endl;
     }
     else
     {
-        std::cerr << "Unable to display caps. Conversion failed." << std::endl;
+        std::cerr << "Unable to display caps. Conversion failed." << str << std::endl;
     }
+
+    gst_caps_unref(caps);
+    gst_object_unref(pad);
+
+    gst_element_set_state(source, GST_STATE_NULL);
+
+    gst_object_unref(source);
+
+
 }
 
 
