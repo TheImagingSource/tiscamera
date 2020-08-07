@@ -46,8 +46,6 @@ GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 
 // helper functions
 
-
-
 const char* type_to_str (TCAM_DEVICE_TYPE type)
 {
     switch (type)
@@ -93,6 +91,31 @@ TCAM_DEVICE_TYPE str_to_type (const std::string& str)
     else
     {
         return TCAM_DEVICE_TYPE_UNKNOWN;
+    }
+}
+
+
+void separate_serial_and_type (GstTcamSrc* self, const std::string& input,
+                               std::string& serial, TCAM_DEVICE_TYPE& type)
+{
+    auto pos = input.find("-");
+
+    if (pos != std::string::npos)
+    {
+        // assign to tmp variables
+        // input could be self->device_serial
+        // overwriting it would ivalidate input for
+        // device_type retrieval
+        std::string tmp1 = input.substr(0, pos);
+        std::string tmp2 = input.substr(pos+1);
+
+        self->device_serial = tmp1;
+        self->device_type = str_to_type(tmp2);
+    }
+    else
+    {
+        serial = input;
+        type = TCAM_DEVICE_TYPE_UNKNOWN;
     }
 }
 
@@ -385,7 +408,7 @@ static gboolean close_source_element (GstTcamSrc* self)
             gst_element_set_state(self->active_source, GST_STATE_NULL);
         }
         // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
-        gst_bin_remove(GST_BIN(self), self->active_source);
+        //gst_bin_remove(GST_BIN(self), self->active_source);
 
         self->active_source = nullptr;
         return TRUE;
@@ -395,14 +418,56 @@ static gboolean close_source_element (GstTcamSrc* self)
 }
 
 
+static gboolean is_device_already_open (GstTcamSrc* self)
+{
+
+    const char* serial_str = nullptr;
+    TCAM_DEVICE_TYPE device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+
+    // query these as late as possible
+    // src needs some time as things can happen async
+    g_object_get(G_OBJECT(self->active_source), "serial", &serial_str, NULL);
+
+    if (self->active_source == self->main_src)
+    {
+        const char* type_str = nullptr;
+        g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
+
+        if (type_str)
+        {
+            self->device_type = str_to_type(type_str);
+        }
+        else
+        {
+            self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+        }
+    }
+    else if (self->active_source == self->pimipi_src)
+    {
+        device_type = TCAM_DEVICE_TYPE_PIMIPI;
+    }
+
+    if (g_strcmp0(self->device_serial.c_str(), serial_str) == 0
+        && self->device_type == device_type)
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+
 static gboolean open_source_element (GstTcamSrc* self)
 {
 
     if (self->active_source)
     {
-        // TODO: check if active_source
-        // uses the correct device to prevent reopening
-        // return true;
+        // check if the wanted device is already open
+        // the nothing is to do
+        if (is_device_already_open(self))
+        {
+            return true;
+        }
         if (!close_source_element(self))
         {
             GST_ERROR("Unable to close open source element. Aborting");
@@ -434,9 +499,35 @@ static gboolean open_source_element (GstTcamSrc* self)
 
     else if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
-        // TODO: open first device
-        // this may also be a mipi camera
-        self->active_source  = self->main_src;
+        GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(self));
+
+        if (!serials)
+        {
+            GST_ERROR("No devices to open");
+            return FALSE;
+        }
+
+        std::string serial;
+        TCAM_DEVICE_TYPE type;
+        separate_serial_and_type(self, (const char*)serials->data, serial, type);
+
+        g_slist_free(serials);
+
+        if (type == TCAM_DEVICE_TYPE_ARAVIS
+            || type == TCAM_DEVICE_TYPE_V4L2
+            || type == TCAM_DEVICE_TYPE_LIBUSB)
+        {
+            self->active_source = self->main_src;
+        }
+        else if (type == TCAM_DEVICE_TYPE_PIMIPI)
+        {
+            self->active_source = self->pimipi_src;
+        }
+        else
+        {
+            GST_ERROR("Unable to identify device. No Stream possible.");
+            return FALSE;
+        }
     }
     else
     {
