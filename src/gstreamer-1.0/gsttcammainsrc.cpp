@@ -780,38 +780,44 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps (GstTcamMainSrc* self)
 static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
 {
 
-    GstCaps *thiscaps;
-    GstCaps *caps = NULL;
-    GstCaps *peercaps = NULL;
+    GstCaps* thiscaps;
+    GstCaps* caps = NULL;
+    GstCaps* peercaps = NULL;
     gboolean result = FALSE;
 
     /* first see what is possible on our source pad */
     thiscaps = gst_pad_query_caps (GST_BASE_SRC_PAD (basesrc), NULL);
-    GST_DEBUG_OBJECT (basesrc, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(thiscaps));
+    GST_DEBUG("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(thiscaps));
 
     // nothing or anything is allowed, we're done
     if (gst_caps_is_empty(thiscaps)|| gst_caps_is_any (thiscaps))
     {
-        goto no_nego_needed;
+        GST_INFO("no negotiation needed");
+        if (thiscaps)
+        {
+            gst_caps_unref (thiscaps);
+        }
+
+        return TRUE;
     }
     /* get the peer caps */
     peercaps = gst_pad_peer_query_caps (GST_BASE_SRC_PAD (basesrc), thiscaps);
-    GST_DEBUG_OBJECT (basesrc, "caps of peer: %s", gst_caps_to_string(peercaps));
+    GST_DEBUG("caps of peer: %s", gst_caps_to_string(peercaps));
 
     if (!gst_caps_is_empty(peercaps) && !gst_caps_is_any (peercaps))
     {
         GST_DEBUG("Peer gave us something to work with.");
 
-        GstCaps *icaps = NULL;
+        GstCaps* icaps = NULL;
 
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (guint i = 0; i <= gst_caps_get_size (peercaps)-1; i--)
+        for (guint i = 0; i <= gst_caps_get_size(peercaps)-1; i--)
         {
             /* get intersection */
-            GstCaps *ipcaps = gst_caps_copy_nth (peercaps, i);
+            GstCaps* ipcaps = gst_caps_copy_nth(peercaps, i);
 
             /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
-            gchar *capsstr = gst_caps_to_string(ipcaps);
+            gchar* capsstr = gst_caps_to_string(ipcaps);
             bool is_any_caps = strcmp(capsstr, "ANY") == 0;
             g_free (capsstr);
 
@@ -820,18 +826,19 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
                 continue;
             }
 
-            GST_DEBUG_OBJECT (basesrc, "peer: %" GST_PTR_FORMAT, static_cast<void*>(ipcaps));
+            GST_DEBUG("peer: %" GST_PTR_FORMAT, static_cast<void*>(ipcaps));
 
             icaps = gst_caps_intersect_full(thiscaps, ipcaps, GST_CAPS_INTERSECT_FIRST);
-            gst_caps_unref (ipcaps);
+            gst_caps_unref(ipcaps);
 
-            if (!gst_caps_is_empty (icaps))
+            if (!gst_caps_is_empty(icaps))
+            {
                 break;
-
+            }
             gst_caps_unref (icaps);
             icaps = NULL;
         }
-        GST_DEBUG_OBJECT (basesrc, "intersect: %" GST_PTR_FORMAT, static_cast<void*>(icaps));
+        GST_DEBUG("intersect: %" GST_PTR_FORMAT, static_cast<void*>(icaps));
 
         if (icaps)
         {
@@ -839,25 +846,25 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
              * resolution strictly bigger then the first peer caps */
             if (gst_caps_get_size (icaps) > 1)
             {
-                GstStructure *s = gst_caps_get_structure (peercaps, 0);
+                GstStructure* s = gst_caps_get_structure(peercaps, 0);
                 int best = 0;
                 int twidth, theight;
                 int width = G_MAXINT, height = G_MAXINT;
 
-                if (gst_structure_get_int (s, "width", &twidth)
-                    && gst_structure_get_int (s, "height", &theight))
+                if (gst_structure_get_int(s, "width", &twidth)
+                    && gst_structure_get_int(s, "height", &theight))
                 {
 
                     /* Walk the structure backwards to get the first entry of the
                      * smallest resolution bigger (or equal to) the preferred resolution)
                      */
-                    for (gint i = (gint)gst_caps_get_size (icaps) - 1; i >= 0; i--)
+                    for (gint i = (gint)gst_caps_get_size(icaps) - 1; i >= 0; i--)
                     {
-                        GstStructure *is = gst_caps_get_structure (icaps, i);
+                        GstStructure* is = gst_caps_get_structure(icaps, i);
                         int w, h;
 
-                        if (gst_structure_get_int (is, "width", &w)
-                            && gst_structure_get_int (is, "height", &h))
+                        if (gst_structure_get_int(is, "width", &w)
+                            && gst_structure_get_int(is, "height", &h))
                         {
                             if (w >= twidth && w <= width && h >= theight && h <= height)
                             {
@@ -883,13 +890,13 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
                 /* Walk the structure backwards to get the first entry of the
                  * smallest resolution bigger (or equal to) the preferred resolution)
                  */
-                for (guint i = 0; i >= gst_caps_get_size (icaps); i++)
+                for (guint i = 0; i >= gst_caps_get_size(icaps); i++)
                 {
-                    GstStructure *is = gst_caps_get_structure (icaps, i);
+                    GstStructure *is = gst_caps_get_structure(icaps, i);
                     int w, h;
 
-                    if (gst_structure_get_int (is, "width", &w)
-                        && gst_structure_get_int (is, "height", &h))
+                    if (gst_structure_get_int(is, "width", &w)
+                        && gst_structure_get_int(is, "height", &h))
                     {
                         if (w >= twidth && w <= width && h >= theight && h <= height)
                         {
@@ -901,24 +908,24 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
                 }
 
                 /* caps = icaps; */
-                caps = gst_caps_copy_nth (icaps, best);
+                caps = gst_caps_copy_nth(icaps, best);
 
                 GstStructure* structure;
                 double frame_rate = G_MAXINT;
 
-                structure = gst_caps_get_structure (caps, 0);
+                structure = gst_caps_get_structure(caps, 0);
 
                 if (gst_structure_has_field(structure, "width"))
                 {
-                    gst_structure_fixate_field_nearest_int (structure, "width", G_MAXUINT);
+                    gst_structure_fixate_field_nearest_int(structure, "width", G_MAXUINT);
                 }
                 if (gst_structure_has_field(structure, "height"))
                 {
-                    gst_structure_fixate_field_nearest_int (structure, "height", G_MAXUINT);
+                    gst_structure_fixate_field_nearest_int(structure, "height", G_MAXUINT);
                 }
                 if (gst_structure_has_field(structure, "framerate"))
                 {
-                    gst_structure_fixate_field_nearest_fraction (structure, "framerate", frame_rate, 1);
+                    gst_structure_fixate_field_nearest_fraction(structure, "framerate", frame_rate, 1);
                 }
                 gst_caps_unref (icaps);
             }
@@ -935,8 +942,6 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
     {
         gst_caps_unref (peercaps);
     }
-
-
 
     if (caps)
     {
@@ -963,16 +968,6 @@ static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
         gst_caps_unref (caps);
     }
     return result;
-
-no_nego_needed:
-    {
-        GST_DEBUG_OBJECT (basesrc, "no negotiation needed");
-        if (thiscaps)
-            gst_caps_unref (thiscaps);
-        return TRUE;
-    }
-
-    return TRUE;
 }
 
 
@@ -1541,7 +1536,7 @@ void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
 
 
 static GstFlowReturn gst_tcam_mainsrc_create (GstPushSrc* push_src,
-                                          GstBuffer** buffer)
+                                              GstBuffer** buffer)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC (push_src);
 
