@@ -31,16 +31,57 @@ include(CPackComponent)
 # this will always be lower case
 #     tiscamera_MAJ.MIN.PAT_arch_buildtype.deb
 #
+# Manually setting CPACK_DEBIAN_PACKAGE_ARCHITECTURE will overwrite auto detection
+# CPACK_DEBIAN_PACKAGE_ARCHITECTURE is set to `dpkg --print-architecture`.
+# For Raspberry Pis the arch is appended with piX i.e. armhf_piX
+# where X is the pi version that is detected
+# To overwrite this set `PACKAGE_NAME_ONLY_ARCH` to ON
 
 function (create_package_name return_value name version)
 
-  find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
-  if(DPKG_PROGRAM)
-    execute_process(
-      COMMAND ${DPKG_PROGRAM} --print-architecture
-      OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
+  if(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+    find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+    if(DPKG_PROGRAM)
+      execute_process(
+        COMMAND ${DPKG_PROGRAM} --print-architecture
+        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif(DPKG_PROGRAM)
+
+    string(COMPARE EQUAL "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" "armhf" IS_ARMHF)
+
+    # this check is to identify raspberry pi
+    # these systems receive special optimizations that are not always
+    # compatible to other armhf systems, thus needs special identification
+    if(IS_ARMHF AND NOT PACKAGE_NAME_ONLY_ARCH)
+
+      file(READ "/proc/cpuinfo" CPUINFO)
+
+      # cpuinfo should contain a model description
+      # if the OS does not offer that line use
+      # Hardware	: BCM2835 for PI4
+      # Hardware    : BCM2708 for PI1
+      # Hardware    : BCM2709 for PI2 and PI3
+      string(FIND "${CPUINFO}" "Raspberry Pi 3" IS_PI3)
+
+      # find returns -1 if not found
+      # -1 is not considered false
+      if(IS_PI3 GREATER 0)
+        string(APPEND CPACK_DEBIAN_PACKAGE_ARCHITECTURE "_pi3")
+      endif(IS_PI3 GREATER 0)
+
+      string(FIND "${CPUINFO}" "Raspberry Pi 4" IS_PI4)
+
+      if(IS_PI4 GREATER 0)
+        string(APPEND CPACK_DEBIAN_PACKAGE_ARCHITECTURE "_pi4")
+      endif(IS_PI4 GREATER 0)
+
+    endif(IS_ARMHF)
+
+  endif(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+
+  if(CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
     git_commit_tag(GIT_TAG)
 
@@ -97,11 +138,11 @@ function (create_package_name return_value name version)
 
     endif(GIT_TAG)
 
-  else(DPKG_PROGRAM)
+  else(CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
     set(${return_value}
       "${name}_${version}_${CMAKE_SYSTEM_NAME}${build_type}" PARENT_SCOPE)
 
-  endif(DPKG_PROGRAM)
+  endif(CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
 endfunction ()
