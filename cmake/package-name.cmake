@@ -77,7 +77,7 @@ function (create_package_name return_value name version)
         string(APPEND CPACK_DEBIAN_PACKAGE_ARCHITECTURE "_pi4")
       endif(IS_PI4 GREATER 0)
 
-    endif(IS_ARMHF)
+    endif(IS_ARMHF AND NOT PACKAGE_NAME_ONLY_ARCH)
 
   endif(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
