@@ -21,6 +21,7 @@
 #include "internal.h"
 #include "utils.h"
 
+#include <stdexcept>
 #include <algorithm>
 #include <cstring>
 #include <cmath>
