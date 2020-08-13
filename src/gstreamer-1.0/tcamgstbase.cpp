@@ -1230,75 +1230,58 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
             requires_dutils = true;
             gst_object_unref(dutils);
 
-            GstElementFactory* biteater = gst_element_factory_find("tcambiteater");
-            // check if dutils + biteater suffice
-            if (!tcam_gst_contains_bayer_8_bit(available_caps)
-                && ((tcam_gst_contains_bayer_12_bit(available_caps)
-                     || tcam_gst_contains_bayer_16_bit(available_caps)))
-                && gst_element_factory_can_src_any_caps(biteater, wanted_caps))
+            GstCaps* ret;
+            if (!gst_caps_is_fixed(available_caps))
             {
-                requires_biteater = true;
-
-                gst_object_unref(biteater);
-
-                return gst_caps_copy(available_caps);
-            }
-            else // dutils only
-            {
-                gst_object_unref(biteater);
-                GstCaps* ret;
-                if (!gst_caps_is_fixed(available_caps))
+                if (!gst_caps_is_empty(wanted_caps) &&
+                    (g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0))
                 {
-                    if (!gst_caps_is_empty(wanted_caps) &&
-                        (g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0))
+
+                    if (!gst_caps_is_fixed(wanted_caps))
                     {
+                        ret = gst_caps_intersect(available_caps, wanted_caps);
 
-                        if (!gst_caps_is_fixed(wanted_caps))
+                        if (gst_caps_is_empty(ret))
                         {
-                            ret = gst_caps_intersect(available_caps, wanted_caps);
-
-                            if (gst_caps_is_empty(ret))
-                            {
-                                gst_caps_unref(ret);
-                                return gst_caps_copy(available_caps);
-                            }
-
+                            gst_caps_unref(ret);
+                            return gst_caps_copy(available_caps);
                         }
-                        else
-                        {
-                            GstCaps* possible_matches = create_caps_for_formats(available_caps,
-                                                                                wanted_caps);
 
-                            if (!possible_matches || gst_caps_is_empty(possible_matches))
-                            {
-                                tcam_error("No possible matches for dutils.");
-                                return nullptr;
-                            }
-
-                            ret = gst_caps_intersect(available_caps, possible_matches);
-                            gst_caps_unref(possible_matches);
-                        }
                     }
                     else
                     {
-                        ret = tcam_gst_find_largest_caps(available_caps);
+                        GstCaps* possible_matches = create_caps_for_formats(available_caps,
+                                                                            wanted_caps);
+
+                        if (!possible_matches || gst_caps_is_empty(possible_matches))
+                        {
+                            tcam_error("No possible matches for dutils.");
+                            return nullptr;
+                        }
+
+                        ret = gst_caps_intersect(available_caps, possible_matches);
+                        gst_caps_unref(possible_matches);
                     }
                 }
-                else // is fixed
+                else
                 {
-                    ret = gst_caps_copy(available_caps);
+                    ret = tcam_gst_find_largest_caps(available_caps);
                 }
-
-                if (!ret)
-                {
-                    // TODO not compatible
-                    tcam_error("No intersecting caps between dutils and src");
-                    return nullptr;
-                }
-
-                return ret;
             }
-            gst_object_unref(biteater);
+            else // is fixed
+            {
+                ret = gst_caps_copy(available_caps);
+            }
+
+            if (!ret)
+            {
+                // TODO not compatible
+                tcam_error("No intersecting caps between dutils and src");
+                return nullptr;
+            }
+
+            return ret;
+
         }
         gst_object_unref(dutils);
 
