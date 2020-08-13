@@ -87,6 +87,16 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
 }
 
 
+std::string get_plugin_version (const char* plugin_name)
+{
+    GstPlugin* plugin = gst_plugin_load_by_name(plugin_name);
+    const char* version_str = gst_plugin_get_version(plugin);
+    gst_object_unref(plugin);
+
+    return version_str;
+}
+
+
 std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
 {
     std::vector<std::string> ret;

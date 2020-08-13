@@ -43,6 +43,9 @@ bool separate_serial_and_type (const std::string& input,
 GstElement* tcam_gst_find_camera_src (GstElement* element);
 
 
+std::string get_plugin_version (const char* plugin_name);
+
+
 std::vector<std::string> gst_list_to_vector (const GValue* gst_list);
 
 /*
