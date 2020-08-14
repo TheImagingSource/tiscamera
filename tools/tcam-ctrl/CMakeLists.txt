@@ -19,24 +19,22 @@ find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
-include_directories(${GSTREAMER_INCLUDE_DIRS})
-include_directories(${GSTREAMER_BASE_INCLUDE_DIRS})
-include_directories(${GSTREAMER_VIDEO_INCLUDE_DIRS})
-include_directories(${GLIB2_INCLUDE_DIR})
-include_directories(${GObject_INCLUDE_DIR})
-
-
-include_directories("${TCAM_SOURCE_DIR}")
-include_directories("${TCAM_SOURCE_DIR}/dependencies")
-include_directories("${TCAM_SOURCE_DIR}/src")
-include_directories("${TCAM_SOURCE_DIR}/src/gobject")
-include_directories("${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
-include_directories("${TCAM_SOURCE_DIR}/src")
-
 add_executable(tcam-ctrl main.cpp properties.cpp formats.cpp)
+
+target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
+target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
+target_include_directories(tcam-ctrl PRIVATE ${GLIB2_INCLUDE_DIR})
+target_include_directories(tcam-ctrl PRIVATE ${GObject_INCLUDE_DIR})
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/dependencies")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gobject")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
+
 target_link_libraries(tcam-ctrl tcam)
 target_link_libraries(tcam-ctrl tcamgstbase)
-
 
 target_link_libraries(tcam-ctrl ${GSTREAMER_LIBRARIES})
 target_link_libraries(tcam-ctrl ${GSTREAMER_BASE_LIBRARIES})

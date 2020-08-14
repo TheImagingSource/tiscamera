@@ -16,7 +16,6 @@
 include_directories(${TCAM_SOURCE_DIR}/dependencies/PugiXml/)
 
 find_package(LibZip REQUIRED)
-include_directories(${LIBZIP_INCLUDE_DIR})
 
 set(NETWORK_SOURCES
   CameraDiscovery.cpp
@@ -35,7 +34,7 @@ set(NETWORK_SOURCES
   )
 
 add_library(tcam-network SHARED ${NETWORK_SOURCES} $<TARGET_OBJECTS:pugixml_obj>)
-
+target_include_directories(tcam-network PUBLIC ${LIBZIP_INCLUDE_DIR})
 target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
 
 set_property(TARGET tcam-network PROPERTY VERSION ${TCAM_VERSION})

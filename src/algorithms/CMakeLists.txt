@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories("${TCAM_SOURCE_DIR}/src")
-include_directories("${TCAM_BINARY_DIR}")
-
 set(srcs
   roi.cpp
   roi_preset.cpp
@@ -32,10 +29,10 @@ set(srcs
   work_pool.cpp
   parallel.cpp)
 
-# set(PUBLIC_HEADER tcam.h tcam_c.h)
-# TODO: tcam-base shuld link library
-
 add_library(tcam-algorithms SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
+
+target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src")
+target_include_directories(tcam-algorithms PRIVATE "${TCAM_BINARY_DIR}")
 
 set_property(TARGET tcam-algorithms PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam-algorithms PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})

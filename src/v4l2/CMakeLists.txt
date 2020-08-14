@@ -1,20 +1,22 @@
 
 
-include_directories("${TCAM_SOURCE_DIR}/src")
-
-find_package(UDev REQUIRED QUIET)
-include_directories(${UDEV_INCLUDE_DIR})
-add_definitions(-DHAVE_UDEV)
-
-find_package(libusb-1.0 REQUIRED QUIET)
-include_directories(${LIBUSB_1_INCLUDE_DIRS})
-
-add_definitions(-DHAVE_USB)
+# include_directories("${TCAM_SOURCE_DIR}/src")
 
 if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 # dfk73 special case
 
+find_package(UDev REQUIRED QUIET)
+find_package(libusb-1.0 REQUIRED QUIET)
+
 add_library(tcam-dfk73 SHARED dfk73.c)
+
+target_compile_definitions(tcam-dfk73
+  PRIVATE -DHAVE_USB
+  PRIVATE -DHAVE_UDEV)
+
+target_include_directories(tcam-dfk73
+  PRIVATE ${LIBUSB_1_INCLUDE_DIRS}
+  PRIVATE ${UDEV_INCLUDE_DIR})
 
 target_link_libraries(tcam-dfk73 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
 
@@ -30,17 +32,15 @@ endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 # uvc-extension library
 
-
 find_package(LibUuid REQUIRED QUIET)
-
-include_directories(${LIBUUID_INCLUDE_DIRS})
-
-include_directories("${TCAM_SOURCE_DIR}/dependencies/json")
 
 add_library(tcam-uvc-extension SHARED
   uvc-extension-loader.cpp)
 
 target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
+target_include_directories(tcam-uvc-extension
+  PRIVATE ${LIBUUID_INCLUDE_DIRS}
+  PRIVATE "${TCAM_SOURCE_DIR}/dependencies/json")
 
 install(TARGETS tcam-uvc-extension
   LIBRARY

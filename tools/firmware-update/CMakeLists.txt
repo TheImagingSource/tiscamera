@@ -1,9 +1,6 @@
 
 find_package(libusb-1.0 REQUIRED QUIET)
-include_directories(${LIBUSB_1_INCLUDE_DIRS})
-
 find_package(LibZip REQUIRED QUIET)
-include_directories(${LIBZIP_INCLUDE_DIR})
 
 add_subdirectory(33u)
 
@@ -18,8 +15,11 @@ set(fwu-files
   UsbSession.cpp
   FileHandling.cpp)
 
-include_directories("${TCAM_SOURCE_DIR}/dependencies/PugiXml")
-
 add_executable(firmware-update ${fwu-files} $<TARGET_OBJECTS:33update> $<TARGET_OBJECTS:pugixml_obj>)
+
+target_include_directories(firmware-update
+  PRIVATE ${LIBUSB_1_INCLUDE_DIRS}
+  PRIVATE ${LIBZIP_INCLUDE_DIR}
+  PRIVATE "${TCAM_SOURCE_DIR}/dependencies/PugiXml")
 
 target_link_libraries(firmware-update ${LIBUSB_1_LIBRARIES} ${LIBZIP_LIBRARY})

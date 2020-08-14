@@ -16,43 +16,33 @@
 find_package(GObject REQUIRED QUIET) # dependency
 find_package(GLIB2   REQUIRED QUIET) # dependency
 find_package(GIO     REQUIRED QUIET) # dependency
-include_directories("${GIO_INCLUDE_DIR}")
-
-include_directories(${GOBJECT_INCLUDE_DIR})
-include_directories(${GLIB2_INCLUDE_DIR})
-
-include_directories("${TCAM_BINARY_DIR}")
-include_directories("${TCAM_SOURCE_DIR}/src")
-include_directories("${TCAM_SOURCE_DIR}/src/aravis")
-
-if (TCAM_INTERNAL_ARAVIS)
-
-  # we require two includes
-  # as some header are generated
-  include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
-  include_directories(SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
-
-
-else (TCAM_INTERNAL_ARAVIS)
-
-  include_directories("${aravis_INCLUDE_DIR}")
-
-endif (TCAM_INTERNAL_ARAVIS)
-
-include_directories("${TCAM_SOURCE_DIR}/src")
-include_directories("${TCAM_SOURCE_DIR}/src/tcam-network")
 
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
+
+target_include_directories(gige-daemon PRIVATE "${GIO_INCLUDE_DIR}")
+target_include_directories(gige-daemon PRIVATE ${GOBJECT_INCLUDE_DIR})
+target_include_directories(gige-daemon PRIVATE ${GLIB2_INCLUDE_DIR})
+target_include_directories(gige-daemon PRIVATE "${TCAM_BINARY_DIR}")
+target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src")
+target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src/aravis")
+target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src")
+target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src/tcam-network")
 
 TARGET_LINK_LIBRARIES(gige-daemon tcam)
 TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
 TARGET_LINK_LIBRARIES(gige-daemon "dl")
 
 if (TCAM_INTERNAL_ARAVIS)
+  # we require two includes
+  # as some header are generated
+  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
+  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 
   target_link_libraries(gige-daemon "${ARAVIS_LIB}")
 
 else (TCAM_INTERNAL_ARAVIS)
+
+  target_include_directories(gige-daemon PRIVATE "${aravis_INCLUDE_DIR}")
 
   target_link_libraries(gige-daemon "${aravis_LIBRARIES}")
 

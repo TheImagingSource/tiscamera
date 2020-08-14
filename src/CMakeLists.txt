@@ -31,12 +31,6 @@ function(pkg_check_variable _pkg _name)
 endfunction()
 
 
-# If you really want to set additional options from outside CMakeLists.txt you
-# can do this:
-# add_defintions($ENV{CFLAGS})
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 add_subdirectory(gobject)
 
 
@@ -94,22 +88,11 @@ if (BUILD_V4L2)
     # v4l2/v4l2library.cpp
     v4l2/v4l2_api.cpp)
 
-  find_package(UDev REQUIRED QUIET)
-  include_directories(${UDEV_INCLUDE_DIR})
-  add_definitions(-DHAVE_UDEV)
-  add_definitions(-DHAVE_V4L2)
-
-  find_package(libusb-1.0 REQUIRED QUIET)
-  include_directories(${LIBUSB_1_INCLUDE_DIRS})
-
-
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
   add_subdirectory(tcam-network)
-  # add_subdirectory(aravis)
 
-  add_definitions(-DHAVE_ARAVIS)
   set(srcs
     ${srcs}
     aravis/AravisDevice.cpp
@@ -117,29 +100,12 @@ if (BUILD_ARAVIS)
     aravis/aravis_api.cpp
 )
 
-find_package(GObject REQUIRED QUIET) # dependency
-find_package(GLIB2   REQUIRED QUIET) # dependency
-find_package(GIO     REQUIRED QUIET) # dependency
 
-if (TCAM_INTERNAL_ARAVIS)
-
-
-  include_directories("${GIO_INCLUDE_DIR}")
-  include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
-  include_directories(SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
-
-else (TCAM_INTERNAL_ARAVIS)
+if (NOT TCAM_INTERNAL_ARAVIS)
 
   find_package(Aravis REQUIRED QUIET)
-  include_directories(${aravis_INCLUDE_DIR})
 
-endif(TCAM_INTERNAL_ARAVIS)
-
-include_directories(${GOBJECT_INCLUDE_DIR})
-include_directories(${GLIB2_INCLUDE_DIR})
-include_directories("${TCAM_SOURCE_DIR}/tools/gige-daemon")
-
-
+endif(NOT TCAM_INTERNAL_ARAVIS)
 
 
 endif (BUILD_ARAVIS)
@@ -163,7 +129,6 @@ if (BUILD_LIBUSB)
 
   add_definitions(-DHAVE_LIBUSB)
   find_package(libusb-1.0 REQUIRED QUIET)
-  include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
 endif (BUILD_LIBUSB)
 
@@ -208,13 +173,33 @@ TARGET_LINK_LIBRARIES(tcam dl)
 
 if (BUILD_V4L2)
 
-    target_link_libraries(tcam ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
-    target_link_libraries(tcam tcam-dfk73)
+
+  find_package(UDev REQUIRED QUIET)
+  include_directories(tcam PRIVATE ${UDEV_INCLUDE_DIR})
+
+  target_compile_definitions(tcam PRIVATE -DHAVE_UDEV)
+  target_compile_definitions(tcam PRIVATE -DHAVE_V4L2)
+
+  find_package(libusb-1.0 REQUIRED QUIET)
+  target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
+
+  target_link_libraries(tcam ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
+  target_link_libraries(tcam tcam-dfk73)
 
 endif (BUILD_V4L2)
 
 
 if (BUILD_ARAVIS)
+
+  target_compile_definitions(tcam PRIVATE -DHAVE_ARAVIS)
+
+  find_package(GObject REQUIRED QUIET) # dependency
+  find_package(GLIB2   REQUIRED QUIET) # dependency
+  find_package(GIO     REQUIRED QUIET) # dependency
+
+  target_include_directories(tcam PRIVATE ${GOBJECT_INCLUDE_DIR})
+  target_include_directories(tcam PRIVATE ${GLIB2_INCLUDE_DIR})
+  target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/tools/gige-daemon")
 
   if (TCAM_INTERNAL_ARAVIS)
     add_dependencies(tcam aravis)
@@ -223,14 +208,18 @@ if (BUILD_ARAVIS)
     find_package(LibXml2 REQUIRED QUIET)
     find_package(PCAP REQUIRED QUIET)
 
-    target_link_libraries(tcam "${ARAVIS_LIB}")
+    target_include_directories(tcam PRIVATE "${GIO_INCLUDE_DIR}")
+    target_include_directories(tcam SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
+    target_include_directories(tcam PRIVATE SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
 
+    target_link_libraries(tcam "${ARAVIS_LIB}")
     target_link_libraries(tcam "${LIBXML2_LIBRARIES}")
     target_link_libraries(tcam "${GIO_LIBRARIES}")
     target_link_libraries(tcam "${PCAP_LIBRARIES}")
 
   else (TCAM_INTERNAL_ARAVIS)
 
+    target_include_directories(tcam PRIVATE SYSTEM ${aravis_INCLUDE_DIR})
     target_link_libraries(tcam ${aravis_LIBRARIES})
 
   endif (TCAM_INTERNAL_ARAVIS)
@@ -238,6 +227,7 @@ if (BUILD_ARAVIS)
   if (TCAM_ARAVIS_USB_VISION)
 
     find_package(libusb-1.0 REQUIRED QUIET)
+    target_include_directories(tcam PRIVATE "${LIBUSB_1_INCLUDE_DIRS}")
     target_link_libraries(tcam "${LIBUSB_1_LIBRARIES}")
 
   endif (TCAM_ARAVIS_USB_VISION)
@@ -246,7 +236,7 @@ endif (BUILD_ARAVIS)
 
 
 if (BUILD_LIBUSB)
-
+  target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
   target_link_libraries(tcam ${LIBUSB_1_LIBRARIES})
 
 endif (BUILD_LIBUSB)
