@@ -667,7 +667,6 @@ void AravisDevice::determine_packet_request_ratio ()
     std::string arv_prr = tcam::get_environment_variable("TCAM_ARV_PACKET_REQUEST_RATIO", "0.1");
 
     double eps = 0.0;
-    GError* err = nullptr;
 
     try
     {

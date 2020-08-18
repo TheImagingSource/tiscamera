@@ -1215,7 +1215,7 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
                                  bool& requires_vidoeconvert,
                                  bool& /*requires_jpegdec*/,
                                  bool& requires_dutils,
-                                 bool& requires_biteater)
+                                 bool& /*requires_biteater*/)
 {
     requires_vidoeconvert = true;
 
