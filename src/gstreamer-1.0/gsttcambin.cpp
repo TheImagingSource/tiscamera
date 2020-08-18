@@ -1493,6 +1493,27 @@ static void gst_tcambin_set_property (GObject* object,
 }
 
 
+static bool verify_tcamdutils_version ()
+{
+    std::string dutils_version = get_plugin_version("tcamdutils");
+
+    std::string tcam_version = get_version_major();
+    tcam_version += ".";
+    tcam_version += get_version_minor();
+
+    // Only check major.minor
+    // everything else is potential bugfix
+    if (dutils_version.find(tcam_version) == std::string::npos)
+    {
+        GST_WARNING("Version missmatch for tcamdutils. Auto usage disabled. Found '%s' Required: '%s'",
+                    dutils_version.c_str(), tcam_version.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+
 static void gst_tcambin_init (GstTcamBin* self)
 {
     GST_DEBUG("init");
@@ -1507,6 +1528,7 @@ static void gst_tcambin_init (GstTcamBin* self)
     {
         self->has_dutils = TRUE;
         gst_object_unref(factory);
+        self->use_dutils = verify_tcamdutils_version();
     }
     else
     {

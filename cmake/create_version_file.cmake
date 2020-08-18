@@ -35,6 +35,21 @@ const char* get_version_number ()
     return \"${TCAM_VERSION}\";
 }
 
+const char* get_version_major ()
+{
+    return \"${TCAM_VERSION_MAJOR}\";
+}
+
+const char* get_version_minor ()
+{
+    return \"${TCAM_VERSION_MINOR}\";
+}
+
+const char* get_version_patch ()
+{
+    return \"${TCAM_VERSION_PATCH}\";
+}
+
 const char* get_version ()
 {
     return \"${TCAM_VERSION}_${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}\";
