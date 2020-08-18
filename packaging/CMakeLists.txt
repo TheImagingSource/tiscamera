@@ -85,6 +85,32 @@ set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0, python
 # remove it as the list will not be touched after this
 string(REGEX REPLACE ",$" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
 
+#
+# libzip check
+# Ubuntu 18.04 has libzip4
+# Ubuntu 24.04 has libzip5
+# Debian testing (2020.08.18) has libzip4
+# check what package exists and install it
+
+find_program(HAS_APT_CACHE apt-cache)
+
+if (HAS_APT_CACHE)
+  execute_process(COMMAND apt-cache search --names-only libzip4
+    OUTPUT_VARIABLE HAS_LIBZIP4)
+
+  if (HAS_LIBZIP4)
+    string(REGEX REPLACE "libzip\\[4-5\\]" "libzip4" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+    message("=====has libzip4")
+  else (HAS_LIBZIP4)
+    string(REGEX REPLACE "libzip\\[4-5\\]" "libzip5" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+  endif (HAS_LIBZIP4)
+
+else (HAS_APT_CACHE)
+  message(WARNING "No apt-cache. Package dependencies may be wrong.")
+endif (HAS_APT_CACHE)
+# end libzip check
+
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
 
