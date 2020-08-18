@@ -100,7 +100,6 @@ if (HAS_APT_CACHE)
 
   if (HAS_LIBZIP4)
     string(REGEX REPLACE "libzip\\[4-5\\]" "libzip4" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-    message("=====has libzip4")
   else (HAS_LIBZIP4)
     string(REGEX REPLACE "libzip\\[4-5\\]" "libzip5" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
   endif (HAS_LIBZIP4)
