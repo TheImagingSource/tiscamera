@@ -14,5 +14,6 @@
 # limitations under the License.
 
 set(TCAM_VERSION_MAJOR 0)
-set(TCAM_VERSION_MINOR 12)
+set(TCAM_VERSION_MINOR 13)
 set(TCAM_VERSION_PATCH 0)
+set(TCAM_VERSION_MODIFIER "-alpha")
