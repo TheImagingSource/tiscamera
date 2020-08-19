@@ -144,8 +144,8 @@ private:
     VideoFormat active_video_format;
 
     std::vector<VideoFormatDescription> available_videoformats;
-    bool emulate_bayer;
-    uint32_t emulated_fourcc;
+    bool emulate_bayer = false;
+    uint32_t emulated_fourcc = 0;
 
     // v4l2 uses fractions
     // to assure correct handling we store the values received by v4l2
@@ -203,12 +203,6 @@ private:
 
     int index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
 
-    void add_control (struct v4l2_queryctrl* queryctrl,
-                      struct v4l2_ext_control* ctrl,
-                      std::shared_ptr<PropertyImpl> impl);
-
-    bool propertyChangeEvent (const Property&);
-
     void updateV4L2Property (V4l2Device::property_description& desc);
 
     bool changeV4L2Control (const property_description&);
@@ -233,12 +227,7 @@ private:
 
     bool get_frame ();
 
-    bool requeue_mmap_buffer ();
-
-    void init_mmap_buffers ();
     void init_userptr_buffers ();
-
-    void free_mmap_buffers ();
 
     tcam_image_size get_sensor_size () const;
 

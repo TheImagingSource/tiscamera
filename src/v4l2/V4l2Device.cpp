@@ -53,10 +53,7 @@ static const int lost_countdown_default = 5;
 
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
-    : emulate_bayer(false),
-      emulated_fourcc(0),
-      property_handler(nullptr),
-      stop_all(false),
+:     stop_all(false),
       device_is_lost(false),
       abort_all(false),
       is_stream_on(false)
