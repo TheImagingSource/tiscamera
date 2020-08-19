@@ -49,7 +49,7 @@ std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct t
 }
 
 
-static const unsigned char lost_countdown_default = 5;
+static const int lost_countdown_default = 5;
 
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)

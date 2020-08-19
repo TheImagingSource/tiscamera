@@ -139,7 +139,7 @@ private:
     std::condition_variable notification_thread_cond_;
     std::mutex notification_thread_mutex_;
 
-    int fd;
+    int fd = -1;
 
     VideoFormat active_video_format;
 
@@ -163,13 +163,13 @@ private:
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
-    unsigned char lost_countdown;
+    int lost_countdown = 0;
     std::atomic<bool> stop_all;
     std::atomic<bool> device_is_lost;
     std::atomic<bool> abort_all;
 
     std::thread udev_monitor;
-    int udev_monitor_pipe[2];
+    int udev_monitor_pipe[2] = { 0, 0 };
 
     void notification_loop ();
 
@@ -217,7 +217,7 @@ private:
     // streaming related
 
     std::atomic<bool> is_stream_on;
-    struct tcam_stream_statistics statistics;
+    struct tcam_stream_statistics statistics = {};
     size_t current_buffer;
 
     struct buffer_info
