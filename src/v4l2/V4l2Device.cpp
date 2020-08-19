@@ -515,6 +515,7 @@ bool V4l2Device::start_stream ()
 
 bool V4l2Device::stop_stream ()
 {
+    tcam_log( TCAM_LOG_DEBUG, "Stopping stream" );
     int ret = 0;
 
     if (is_stream_on)
@@ -525,7 +526,6 @@ bool V4l2Device::stop_stream ()
         if( ret < 0 )
         {
             tcam_log( TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMOFF %d", errno );
-
         }
     }
 
@@ -536,11 +536,11 @@ bool V4l2Device::stop_stream ()
         work_thread.join();
     }
 
-    tcam_log(TCAM_LOG_DEBUG, "Stopped stream");
-
     if( notification_thread.joinable() ) {  // wait for possible device lost notification to end
         notification_thread.join();
     }
+
+    tcam_log( TCAM_LOG_DEBUG, "Stopped stream" );
 
     if( ret < 0 )
     {
