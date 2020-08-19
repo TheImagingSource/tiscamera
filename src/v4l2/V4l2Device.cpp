@@ -56,7 +56,6 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
     : emulate_bayer(false),
       emulated_fourcc(0),
       property_handler(nullptr),
-      lost_countdown(lost_countdown_default),
       stop_all(false),
       device_is_lost(false),
       abort_all(false),
@@ -1416,6 +1415,8 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
 void V4l2Device::stream ()
 {
+    int lost_countdown = 0;
+
     while (this->is_stream_on)
     {
         fd_set fds;
@@ -1470,8 +1471,8 @@ void V4l2Device::stream ()
             tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
             statistics.frames_dropped++;
 
-            this->lost_countdown--;
-            if (this->lost_countdown <= 0)
+            lost_countdown--;
+            if ( lost_countdown <= 0)
             {
                 this->device_is_lost = true;
                 this->is_stream_on = false;
@@ -1490,13 +1491,13 @@ void V4l2Device::stream ()
         bool ret_value = get_frame();
         if (ret_value)
         {
-            this->lost_countdown = lost_countdown_default;
+            lost_countdown = lost_countdown_default;
             break;
         }
         else
         {
-            this->lost_countdown--;
-            if (this->lost_countdown <= 0)
+            lost_countdown--;
+            if (lost_countdown <= 0)
             {
                 this->device_is_lost = true;
                 this->is_stream_on = false;

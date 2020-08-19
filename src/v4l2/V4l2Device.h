@@ -84,7 +84,7 @@ class V4l2Device : public DeviceInterface
 
     public:
         V4L2FormatHandler (V4l2Device*);
-        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
+        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0) final;
 
     protected:
         V4l2Device* device;
@@ -163,7 +163,6 @@ private:
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
-    int lost_countdown = 0;
     std::atomic<bool> stop_all;
     std::atomic<bool> device_is_lost;
     std::atomic<bool> abort_all;
