@@ -1414,125 +1414,99 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
     return true;
 }
 
-
 void V4l2Device::stream ()
 {
-    current_buffer = 0;
-
     while (this->is_stream_on)
     {
-        if (current_buffer >= buffers.size())
+        fd_set fds;
+
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+
+        /* Timeout. */
+        struct timeval tv;
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
+
+        /* Wait until device gives go */
+        int ret = select(fd + 1, &fds, NULL, NULL, &tv);
+
+        if (ret == -1)
         {
-            current_buffer = 0;
-        }
-        else
-        {
-            current_buffer++;
-        }
-        for (;;)
-        {
-            if (!this->is_stream_on)
-            {
-                break;
-            }
-
-            fd_set fds;
-
-            FD_ZERO(&fds);
-            FD_SET(fd, &fds);
-
-            /* Timeout. */
-            struct timeval tv;
-            tv.tv_sec = 2;
-            tv.tv_usec = 0;
-
-            /* Wait until device gives go */
-            int ret = select(fd + 1, &fds, NULL, NULL, &tv);
-
-            if (ret == -1)
-            {
-                if (errno == EINTR)
-                {
-                    continue;
-                }
-                else
-                {
-                    /* error during select */
-                    tcam_log(TCAM_LOG_ERROR, "Error during select");
-                    return;
-                }
-            }
-
-            auto is_trigger_mode_enabled = [this] ()
-            {
-                for (auto& p : this->property_handler->properties)
-                {
-                    if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
-                    {
-                        return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
-                    }
-
-                }
-                return false;
-            };
-
-            /* timeout! */
-            if (is_trigger_mode_enabled() && ret == 0)
+            if (errno == EINTR)
             {
                 continue;
-            }
-
-
-            if (ret == 0)
-            {
-                tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
-                statistics.frames_dropped++;
-
-                this->lost_countdown--;
-                if (this->lost_countdown <= 0)
-                {
-                    this->device_is_lost = true;
-                    this->is_stream_on = false;
-                    // tcam_error("Unable to retrieve buffer");
-                    this->notification_thread_cond_.notify_all();
-                    break;
-                }
-                continue;
-            }
-
-            if (!is_stream_on)
-            {
-                break;
-            }
-
-            bool ret_value = get_frame();
-            if (ret_value)
-            {
-                this->lost_countdown = lost_countdown_default;
-                break;
             }
             else
             {
-                this->lost_countdown--;
-                if (this->lost_countdown <= 0)
-                {
-                    this->device_is_lost = true;
-                    this->is_stream_on = false;
-
-                    // tcam_error("Unable to retrieve buffer");
-                    this->notification_thread_cond_.notify_all();
-                    break;
-                }
+                /* error during select */
+                tcam_log(TCAM_LOG_ERROR, "Error during select");
+                return;
             }
-            /* receive frame since device is ready */
-            // if ( == 0)
-            // {
-            // break;
-            // }
-            /* EAGAIN - continue select loop. */
+        }
+
+        auto is_trigger_mode_enabled = [this] ()
+        {
+            for (auto& p : this->property_handler->properties)
+            {
+                if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
+                {
+                    return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
+                }
+
+            }
+            return false;
+        };
+
+        /* timeout! */
+        if (is_trigger_mode_enabled() && ret == 0)
+        {
+            continue;
+        }
+
+
+        if (ret == 0)
+        {
+            tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
+            statistics.frames_dropped++;
+
+            this->lost_countdown--;
+            if (this->lost_countdown <= 0)
+            {
+                this->device_is_lost = true;
+                this->is_stream_on = false;
+                // tcam_error("Unable to retrieve buffer");
+                this->notification_thread_cond_.notify_all();
+                break;
+            }
+            continue;
+        }
+
+        if (!is_stream_on)
+        {
+            break;
+        }
+
+        bool ret_value = get_frame();
+        if (ret_value)
+        {
+            this->lost_countdown = lost_countdown_default;
+            break;
+        }
+        else
+        {
+            this->lost_countdown--;
+            if (this->lost_countdown <= 0)
+            {
+                this->device_is_lost = true;
+                this->is_stream_on = false;
+
+                // tcam_error("Unable to retrieve buffer");
+                this->notification_thread_cond_.notify_all();
+                break;
+            }
         }
     }
-
 }
 
 

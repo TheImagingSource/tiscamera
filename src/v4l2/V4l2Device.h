@@ -218,7 +218,6 @@ private:
 
     std::atomic<bool> is_stream_on;
     struct tcam_stream_statistics statistics = {};
-    size_t current_buffer;
 
     struct buffer_info
     {
