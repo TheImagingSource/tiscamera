@@ -17,6 +17,10 @@ const char* get_version_minor ();
 // z
 const char* get_version_patch ();
 
+// version modifier like pre-release descriptions
+// may return empty string
+const char* get_version_modifier ();
+
 // complete version
 // x.y.z_branch/<commit-hash>_rev_<commit-count>
 const char* get_version ();

@@ -50,6 +50,11 @@ const char* get_version_patch ()
     return \"${TCAM_VERSION_PATCH}\";
 }
 
+const char* get_version_modifier ()
+{
+    return \"${TCAM_VERSION_MODIFIER}\";
+}
+
 const char* get_version ()
 {
     return \"${TCAM_VERSION}_${GIT_BRANCH}/${GIT_COMMIT_HASH}_rev_${GIT_COMMIT_COUNT}\";
