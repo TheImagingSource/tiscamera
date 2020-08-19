@@ -54,7 +54,6 @@ static const int lost_countdown_default = 5;
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 :     stop_all(false),
-      device_is_lost(false),
       abort_all(false),
       is_stream_on(false)
 {
@@ -105,8 +104,6 @@ V4l2Device::~V4l2Device ()
     // close write pipe fd
     close(udev_monitor_pipe[1]);
 
-    this->notification_thread_cond_.notify_all();
-
     if (this->fd != -1)
     {
         close(fd);
@@ -123,17 +120,8 @@ V4l2Device::~V4l2Device ()
         udev_monitor.join();
     }
 
-    if (notification_thread.joinable())
+    if (notification_thread.joinable()) // join this just in case stop_stream was not called
     {
-        // deactivate device_lost
-        // we simply want to join all thread as
-        // we already are destroying the device
-        this->device_is_lost = false;
-        {
-            std::lock_guard<std::mutex> lck( this->notification_thread_mutex_ );
-            this->notification_thread_cond_.notify_all();
-        }
-
         notification_thread.join();
     }
 
@@ -513,11 +501,9 @@ void V4l2Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 
 bool V4l2Device::start_stream ()
 {
-    enum v4l2_buf_type type;
-
     init_userptr_buffers();
 
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == tcam_xioctl(fd, VIDIOC_STREAMON, &type))
     {
         tcam_log(TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMON %d", errno);
@@ -528,11 +514,6 @@ bool V4l2Device::start_stream ()
 
     is_stream_on = true;
 
-    if (!this->notification_thread.joinable())
-    {
-        this->notification_thread = std::thread(&V4l2Device::notification_loop, this);
-    }
-
     tcam_log(TCAM_LOG_INFO, "Starting stream in work thread.");
     this->work_thread = std::thread(&V4l2Device::stream, this);
 
@@ -542,67 +523,48 @@ bool V4l2Device::start_stream ()
 
 bool V4l2Device::stop_stream ()
 {
-
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     int ret = 0;
 
     if (is_stream_on)
     {
+        enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         ret = tcam_xioctl(fd, VIDIOC_STREAMOFF, &type);
-    }
 
-    if (ret < 0)
-    {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMOFF %d", errno);
-        return false;
+        if( ret < 0 )
+        {
+            tcam_log( TCAM_LOG_ERROR, "Unable to set ioctl VIDIOC_STREAMOFF %d", errno );
+
+        }
     }
 
     is_stream_on = false;
 
-    if (work_thread.joinable())
+    if( work_thread.joinable() )
     {
-        try
-        {
-            work_thread.join();
-        }
-        catch (const std::runtime_error& e)
-        {
-            tcam_log(TCAM_LOG_ERROR, "%s", e.what());
-        }
+        work_thread.join();
     }
+
     tcam_log(TCAM_LOG_DEBUG, "Stopped stream");
 
+    if( notification_thread.joinable() ) {  // wait for possible device lost notification to end
+        notification_thread.join();
+    }
+
     this->abort_all = true;
+
+    if( ret < 0 )
+    {
+        return false;
+    }
 
     return true;
 }
 
 
-void V4l2Device::notification_loop ()
+void V4l2Device::notify_device_lost_func ()
 {
-    auto reg_check = std::chrono::seconds(2);
-
-    while(this->is_stream_on)
-    {
-        {
-            std::unique_lock<std::mutex> lck(this->notification_thread_mutex_);
-            if( !this->is_stream_on ) {
-                return;
-            }
-            this->notification_thread_cond_.wait_for( lck, reg_check );
-        }
-
-        if (this->device_is_lost)
-        {
-            tcam_info("notifying callbacks about lost device");
-            this->lost_device();
-        }
-
-        if (this->abort_all)
-        {
-            break;
-        }
-    }
+    tcam_info( "notifying callbacks about lost device" );
+    this->lost_device();
 }
 
 
@@ -1471,10 +1433,8 @@ void V4l2Device::stream ()
             lost_countdown--;
             if ( lost_countdown <= 0)
             {
-                this->device_is_lost = true;
                 this->is_stream_on = false;
-                // tcam_error("Unable to retrieve buffer");
-                this->notification_thread_cond_.notify_all();
+                this->notification_thread = std::thread( &V4l2Device::notify_device_lost_func, this );
                 break;
             }
             continue;
@@ -1496,11 +1456,9 @@ void V4l2Device::stream ()
             lost_countdown--;
             if (lost_countdown <= 0)
             {
-                this->device_is_lost = true;
                 this->is_stream_on = false;
 
-                // tcam_error("Unable to retrieve buffer");
-                this->notification_thread_cond_.notify_all();
+                this->notification_thread = std::thread( &V4l2Device::notify_device_lost_func, this );
                 break;
             }
         }

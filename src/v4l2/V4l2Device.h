@@ -136,9 +136,6 @@ private:
 
     std::thread notification_thread;
 
-    std::condition_variable notification_thread_cond_;
-    std::mutex notification_thread_mutex_;
-
     int fd = -1;
 
     VideoFormat active_video_format;
@@ -164,13 +161,12 @@ private:
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
     std::atomic<bool> stop_all;
-    std::atomic<bool> device_is_lost;
     std::atomic<bool> abort_all;
 
     std::thread udev_monitor;
     int udev_monitor_pipe[2] = { 0, 0 };
 
-    void notification_loop ();
+    void notify_device_lost_func ();
 
     void lost_device ();
 
