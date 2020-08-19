@@ -53,9 +53,6 @@ static const int lost_countdown_default = 5;
 
 
 V4l2Device::V4l2Device (const DeviceInfo& device_desc)
-:     stop_all(false),
-      abort_all(false),
-      is_stream_on(false)
 {
     device = device_desc;
 
@@ -72,7 +69,7 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
         tcam_log(TCAM_LOG_ERROR, "Unable to create udev monitor pipe");
         throw std::runtime_error("Failed opening device.");
     }
-    udev_monitor = std::thread(&V4l2Device::monitor_v4l2_device, this);
+    monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
     property_handler = std::make_shared<V4L2PropertyHandler>(this);
     format_handler = std::make_shared<V4L2FormatHandler>(this);
@@ -86,15 +83,16 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 
 V4l2Device::~V4l2Device ()
 {
-    if (is_stream_on)
+    if( is_stream_on ) {
         stop_stream();
+    }
 
-    this->is_stream_on = true;
-    this->stop_all = true;
-    this->abort_all = true;
+    this->is_stream_on = false;
+
+    this->stop_monitor_v4l2_thread = true;
+
     // signal the udev monitor to exit it's poll/select
     ssize_t write_ret = write(udev_monitor_pipe[1], "q", 1);
-
     if (write_ret != 1)
     {
         tcam_error("Error closing udev monitoring pipe. write return '%zd' errno: %s",
@@ -103,6 +101,11 @@ V4l2Device::~V4l2Device ()
 
     // close write pipe fd
     close(udev_monitor_pipe[1]);
+
+    if( monitor_v4l2_thread.joinable() )
+    {
+        monitor_v4l2_thread.join();
+    }
 
     if (this->fd != -1)
     {
@@ -113,11 +116,6 @@ V4l2Device::~V4l2Device ()
     if (work_thread.joinable())
     {
         work_thread.join();
-    }
-
-    if (udev_monitor.joinable())
-    {
-        udev_monitor.join();
     }
 
     if (notification_thread.joinable()) // join this just in case stop_stream was not called
@@ -163,12 +161,6 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     }
 
     tcam_log(TCAM_LOG_DEBUG, "Requested format change to '%s' %x", new_format.to_string().c_str(), new_format.get_fourcc());
-
-    // if (!validate_video_format(new_format))
-    // {
-    // tcam_log(TCAM_LOG_ERROR, "Not a valid format.");
-    // return false;
-    // }
 
     // dequeue all buffers
     struct v4l2_requestbuffers req = {};
@@ -549,8 +541,6 @@ bool V4l2Device::stop_stream ()
     if( notification_thread.joinable() ) {  // wait for possible device lost notification to end
         notification_thread.join();
     }
-
-    this->abort_all = true;
 
     if( ret < 0 )
     {
@@ -1390,12 +1380,11 @@ void V4l2Device::stream ()
 
         /* Wait until device gives go */
         int ret = select(fd + 1, &fds, NULL, NULL, &tv);
-
         if (ret == -1)
         {
             if (errno == EINTR)
             {
-                continue;
+                continue;   // intermittent wake, continue 
             }
             else
             {
@@ -1405,66 +1394,56 @@ void V4l2Device::stream ()
             }
         }
 
-        auto is_trigger_mode_enabled = [this] ()
+        if( !is_stream_on ) // before we recheck any variables, just quit the loop because stop was requested
         {
-            for (auto& p : this->property_handler->properties)
-            {
-                if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
-                {
-                    return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
-                }
-
-            }
-            return false;
-        };
-
-        /* timeout! */
-        if (is_trigger_mode_enabled() && ret == 0)
-        {
-            continue;
+            return;
         }
 
-
-        if (ret == 0)
+        if (ret == 0)   // timeout encountered
         {
+            if( is_trigger_mode_enabled() )
+            {
+                continue;   // timeout while trigger is enabled, just continue
+            }
+
             tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
             statistics.frames_dropped++;
 
             lost_countdown--;
-            if ( lost_countdown <= 0)
-            {
-                this->is_stream_on = false;
-                this->notification_thread = std::thread( &V4l2Device::notify_device_lost_func, this );
-                break;
-            }
-            continue;
-        }
-
-        if (!is_stream_on)
-        {
-            break;
-        }
-
-        bool ret_value = get_frame();
-        if (ret_value)
-        {
-            lost_countdown = lost_countdown_default;
-            break;
         }
         else
         {
-            lost_countdown--;
-            if (lost_countdown <= 0)
+            bool ret_value = get_frame();
+            if (ret_value)
             {
-                this->is_stream_on = false;
-
-                this->notification_thread = std::thread( &V4l2Device::notify_device_lost_func, this );
-                break;
+                lost_countdown = lost_countdown_default;    // reset lost countdown variable
             }
+            else
+            {
+                lost_countdown--;
+            }
+        }
+        if( lost_countdown <= 0 )
+        {
+            this->is_stream_on = false;
+            this->notification_thread = std::thread( &V4l2Device::notify_device_lost_func, this );
+            return;
         }
     }
 }
 
+bool    V4l2Device::is_trigger_mode_enabled()
+{
+    for( auto& p : this->property_handler->properties )
+    {
+        if( p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE )
+        {
+            return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
+        }
+
+    }
+    return false;
+}
 
 bool V4l2Device::get_frame ()
 {
@@ -1594,7 +1573,7 @@ tcam_image_size V4l2Device::get_sensor_size () const
 }
 
 
-void V4l2Device::monitor_v4l2_device ()
+void V4l2Device::monitor_v4l2_thread_func ()
 {
     auto udev = udev_new();
     if (!udev)
@@ -1620,7 +1599,7 @@ void V4l2Device::monitor_v4l2_device ()
     /* This section will run continuously, calling usleep() at
        the end of each pass. This is to demonstrate how to use
        a udev_monitor in a non-blocking way. */
-    while (!stop_all)
+    while (!stop_monitor_v4l2_thread)
     {
         /* Set up the call to select(). In this case, select() will
            only operate on a single file descriptor, the one

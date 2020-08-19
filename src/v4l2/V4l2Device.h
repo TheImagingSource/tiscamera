@@ -132,8 +132,9 @@ public:
 
 private:
 
-    std::thread work_thread;
+    std::atomic<bool> is_stream_on{ false };
 
+    std::thread work_thread;
     std::thread notification_thread;
 
     int fd = -1;
@@ -160,11 +161,13 @@ private:
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
-    std::atomic<bool> stop_all;
-    std::atomic<bool> abort_all;
 
-    std::thread udev_monitor;
+    std::thread monitor_v4l2_thread;
+    std::atomic<bool> stop_monitor_v4l2_thread{ false };
     int udev_monitor_pipe[2] = { 0, 0 };
+
+    void monitor_v4l2_thread_func ();
+
 
     void notify_device_lost_func ();
 
@@ -205,7 +208,6 @@ private:
 
     // streaming related
 
-    std::atomic<bool> is_stream_on;
     struct tcam_stream_statistics statistics = {};
 
     struct buffer_info
@@ -225,9 +227,9 @@ private:
 
     void init_userptr_buffers ();
 
-    tcam_image_size get_sensor_size () const;
+    bool    is_trigger_mode_enabled ();
 
-    void monitor_v4l2_device ();
+    tcam_image_size get_sensor_size () const;
 };
 
 } /* namespace tcam */
