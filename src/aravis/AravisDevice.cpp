@@ -158,7 +158,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     arv_options.packet_timeout = 40;
     arv_options.frame_retention = 200;
 
-    if (device.get_name().find("U") == std::string::npos)
+    if (arv_camera_is_gv_device(this->arv_camera))
     {
         auto_set_packet_size();
         determine_packet_request_ratio();
