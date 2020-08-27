@@ -14,62 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef __TCAM_PROP_H__
-#define __TCAM_PROP_H__
+#ifndef TCAMPROP_H
+#define TCAMPROP_H
 
-#include <glib-object.h>
+#include "Tcam-0.1.h"
 
 G_BEGIN_DECLS
-
-#define TCAM_TYPE_PROP tcam_prop_get_type()
-#ifdef G_DECLARE_INTERFACE
-G_DECLARE_INTERFACE (TcamProp, tcam_prop, TCAM, PROP, GObject)
-#else
-#define TCAM_PROP(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TCAM_TYPE_PROP, TcamProp))
-#define TCAM_IS_PROP(obj)             (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TCAM_TYPE_PROP))
-#define TCAM_PROP_GET_IFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), TCAM_TYPE_PROP, TcamPropInterface))
-GType tcam_prop_get_type (void);
-
-typedef struct _TcamProp TcamProp; /* dummy object */
-typedef struct _TcamPropInterface TcamPropInterface;
-#endif
-
-struct _TcamPropInterface
-{
-	GTypeInterface parent_interface;
-
-	GSList* (*get_property_names) (TcamProp* self);
-	gchar* (*get_property_type) (TcamProp* self,
-                                 const gchar* name);
-	gboolean (*get_property) (TcamProp* self,
-                              const gchar* name,
-                              GValue* value,
-                              GValue* min,
-                              GValue* max,
-                              GValue* def,
-                              GValue* step,
-                              GValue* type,
-                              GValue* flags,
-                              GValue* category,
-                              GValue* group);
-
-    GSList* (*get_menu_entries) (TcamProp* self,
-                                 const char* menu_name);
-
-	gboolean (*set_property) (TcamProp* self,
-                              const gchar* name,
-                              const GValue* value);
-	GSList* (*get_device_serials) (TcamProp* self);
-	GSList* (*get_device_serials_backend) (TcamProp* self);
-	gboolean (*get_device_info) (TcamProp* self,
-                                 const char* serial,
-                                 char** name,
-                                 char** identifier,
-                                 char** connection_type);
-
-};
-
-
 
 GSList* tcam_prop_get_tcam_property_names (TcamProp* self);
 
@@ -107,4 +57,4 @@ gboolean tcam_prop_get_device_info (TcamProp* self,
 
 G_END_DECLS
 
-#endif//__TCAM_PROP_H__
+#endif /* TCAMPROP_H */

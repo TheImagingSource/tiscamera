@@ -48,9 +48,9 @@ GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_property_names)
+    if (iface->get_tcam_property_names)
     {
-	    ret = iface->get_property_names (self);
+	    ret = iface->get_tcam_property_names(self);
     }
 
     return ret;
@@ -77,9 +77,9 @@ const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_property_names)
+    if (iface->get_tcam_property_names)
     {
-	    ret = iface->get_property_type (self, name);
+	    ret = iface->get_tcam_property_type (self, name);
     }
     return ret;
 }
@@ -124,15 +124,16 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_property)
+    if (iface->get_tcam_property)
     {
-        ret = iface->get_property (self, name,
-                                   value,
-                                   min, max,
-                                   def, step,
-                                   type,
-                                   flags,
-                                   category, group);
+        ret = iface->get_tcam_property(self,
+                                       name,
+                                       value,
+                                       min, max,
+                                       def, step,
+                                       type,
+                                       flags,
+                                       category, group);
     }
 
     return ret;
@@ -158,9 +159,9 @@ GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_menu_entries)
+    if (iface->get_tcam_menu_entries)
     {
-	    ret = iface->get_menu_entries (self, name);
+	    ret = iface->get_tcam_menu_entries (self, name);
     }
 
     return ret;
@@ -191,9 +192,9 @@ gboolean tcam_prop_set_tcam_property (TcamProp* self,
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->set_property)
+    if (iface->set_tcam_property)
     {
-        ret = iface->set_property (self, name, value);
+        ret = iface->set_tcam_property(self, name, value);
     }
 
     return ret;
@@ -218,9 +219,9 @@ GSList* tcam_prop_get_device_serials (TcamProp* self)
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_device_serials)
+    if (iface->get_tcam_device_serials)
     {
-        ret = iface->get_device_serials (self);
+        ret = iface->get_tcam_device_serials (self);
     }
 
     return ret;
@@ -247,9 +248,9 @@ GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_device_serials_backend)
+    if (iface->get_tcam_device_serials_backend)
     {
-        ret = iface->get_device_serials_backend (self);
+        ret = iface->get_tcam_device_serials_backend(self);
     }
 
     return ret;
@@ -286,13 +287,13 @@ gboolean tcam_prop_get_device_info (TcamProp* self,
 
     iface = TCAM_PROP_GET_IFACE (self);
 
-    if (iface->get_device_info)
+    if (iface->get_tcam_device_info)
     {
-        ret = iface->get_device_info (self,
-                                      serial,
-                                      name,
-                                      identifier,
-                                      connection_type);
+        ret = iface->get_tcam_device_info(self,
+                                          serial,
+                                          name,
+                                          identifier,
+                                          connection_type);
     }
 
     return ret;

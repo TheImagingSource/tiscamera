@@ -106,13 +106,13 @@ static gboolean gst_tcamautofocus_get_device_info (TcamProp* self,
 
 static void gst_tcamautofocus_prop_init (TcamPropInterface* iface)
 {
-    iface->get_property_names = gst_tcamautofocus_get_property_names;
-    iface->get_property_type = gst_tcamautofocus_get_property_type;
-    iface->get_property = gst_tcamautofocus_get_tcam_property;
-    iface->get_menu_entries = gst_tcamautofocus_get_tcam_menu_entries;
-    iface->set_property = gst_tcamautofocus_set_tcam_property;
-    iface->get_device_serials = gst_tcamautofocus_get_device_serials;
-    iface->get_device_info = gst_tcamautofocus_get_device_info;
+    iface->get_tcam_property_names = gst_tcamautofocus_get_property_names;
+    iface->get_tcam_property_type = gst_tcamautofocus_get_property_type;
+    iface->get_tcam_property = gst_tcamautofocus_get_tcam_property;
+    iface->get_tcam_menu_entries = gst_tcamautofocus_get_tcam_menu_entries;
+    iface->set_tcam_property = gst_tcamautofocus_set_tcam_property;
+    iface->get_tcam_device_serials = gst_tcamautofocus_get_device_serials;
+    iface->get_tcam_device_info = gst_tcamautofocus_get_device_info;
 }
 
 
