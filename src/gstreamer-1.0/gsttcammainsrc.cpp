@@ -651,10 +651,10 @@ static GSList* gst_tcam_mainsrc_get_device_serials_backend (TcamProp* self)
 
 
 static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
-                                              const char* serial,
-                                              char** name,
-                                              char** identifier,
-                                              char** connection_type)
+                                                  const char* serial,
+                                                  char** name,
+                                                  char** identifier,
+                                                  char** connection_type)
 {
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
@@ -714,7 +714,7 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
             if (connection_type)
             {
                 auto t = type_to_str(info.type);
-                *connection_type = g_strndup(t, sizeof(*t));
+                *connection_type = g_strndup(t, strlen(t));
             }
             break;
         }
