@@ -42,29 +42,10 @@ typedef struct GstTcamBitEater
 {
     GstBaseTransform base_tcambiteater;
 
-    GstPad *sinkpad;
-    GstPad *srcpad;
-
-    // std::shared_ptr<std::vector<tcam::Property>> properties;
-
     struct tcam::biteater::biteater_meta be_meta;
-
-    void* biteater;
-
-    bool module_active;
-
 
     tcam_image_buffer buffer_template_in;
     tcam_image_buffer buffer_template_out;
-
-    gint framerate_numerator;
-    gint framerate_denominator;
-
-    unsigned char frame_counter;
-    gboolean gain_is_double;
-
-    GstCaps* src_caps;
-    GstCaps* sink_caps;
 
 } GstTcamBitEater;
 
