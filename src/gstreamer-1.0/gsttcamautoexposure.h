@@ -72,40 +72,31 @@ typedef struct
 
 typedef unsigned char byte;
 
-static const guint dist_mid = 100;
-static const gdouble steps_to_double_brightness = 30.0;
-
-
 typedef struct GstTcamautoexposure
 {
     GstBaseTransform base_tcamautoexposure;
-
-    GstPad *sinkpad;
-    GstPad *srcpad;
 
     gboolean auto_exposure;
     gboolean auto_gain;
     gboolean auto_iris;
 
-    gboolean gain_is_double;
     std::string gain_name;
+    gboolean gain_is_double;
     Gain gain;
-    Gain default_gain_values;
-    int exposure_min;
-    int exposure_max;
     double gain_min;
     double gain_max;
 
-    gboolean exposure_is_double;
     std::string exposure_name;
+    gboolean exposure_is_double;
     Exposure exposure;
     Exposure default_exposure_values;
+    int exposure_min;
+    int exposure_max;
 
     std::string iris_name;
     int iris_min;
     int iris_max;
     Iris iris;
-    bool has_iris;
 
     guint brightness_reference;
 
