@@ -44,14 +44,8 @@ typedef struct GstTcamAutoFocus
 {
     GstBaseTransform base_tis_auto_exposure;
 
-    GstPad *sinkpad;
-    GstPad *srcpad;
-
     gint image_width;
     gint image_height;
-
-    unsigned int framerate_numerator;
-    unsigned int framerate_denominator;
 
     gboolean focus_active;
 

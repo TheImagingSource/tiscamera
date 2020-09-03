@@ -62,13 +62,6 @@ static void gst_tcamautofocus_finalize (GObject* object);
 static GstFlowReturn gst_tcamautofocus_transform_ip (GstBaseTransform* trans,
                                                      GstBuffer* buf);
 
-#if 0
-static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
-                                           GstPadDirection direction,
-                                           GstCaps* caps,
-                                           GstCaps* othercaps);
-#endif
-
 
 /* tcamprop interface*/
 
@@ -458,7 +451,7 @@ static gboolean gst_tcamautofocus_set_tcam_property (TcamProp* self,
     }
 
     gst_tcamautofocus_set_property(G_OBJECT(self),
-                                   tcamautofocus_string_to_property_id(name),
+                                   id,
                                    value, NULL);
     return TRUE;
 }
@@ -591,7 +584,7 @@ static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
 }
 
 
-void gst_tcamautofocus_set_property (GObject* object,
+static void gst_tcamautofocus_set_property (GObject* object,
                                      guint property_id,
                                      const GValue* value,
                                      GParamSpec* pspec)
@@ -678,7 +671,7 @@ void gst_tcamautofocus_set_property (GObject* object,
 }
 
 
-void gst_tcamautofocus_get_property (GObject* object,
+static void gst_tcamautofocus_get_property (GObject* object,
                                      guint property_id,
                                      GValue* value,
                                      GParamSpec* pspec)
@@ -709,7 +702,7 @@ void gst_tcamautofocus_get_property (GObject* object,
 }
 
 
-void gst_tcamautofocus_finalize (GObject* object)
+static void gst_tcamautofocus_finalize (GObject* object)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (object);
 
@@ -718,87 +711,6 @@ void gst_tcamautofocus_finalize (GObject* object)
     self->roi = nullptr;
     G_OBJECT_CLASS (gst_tcamautofocus_parent_class)->finalize (object);
 }
-
-#if 0
-static void gst_tcamautofocus_fixate_caps (GstBaseTransform* base,
-                                           GstPadDirection direction __attribute__((unused)),
-                                           GstCaps* incoming,
-                                           GstCaps* outgoing)
-{
-    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (base);
-
-    GstStructure* ins;
-    GstStructure* outs;
-    gint width, height;
-    uint32_t fourcc;
-    g_return_if_fail (gst_caps_is_fixed (incoming));
-
-    GST_DEBUG_OBJECT (base, "trying to fixate outgoing %" GST_PTR_FORMAT
-                      " based on caps %" GST_PTR_FORMAT, outgoing, incoming);
-
-    ins = gst_caps_get_structure (incoming, 0);
-    outs = gst_caps_get_structure (outgoing, 0);
-
-    if (gst_structure_get_int (ins, "width", &width))
-    {
-        if (gst_structure_has_field (outs, "width"))
-        {
-            gst_structure_fixate_field_nearest_int (outs, "width", width);
-        }
-        self->image_width = width;
-        if (self->roi_width == 0)
-        {
-            self->roi_width = width;
-        }
-    }
-
-    if (gst_structure_get_int (ins, "height", &height))
-    {
-        if (gst_structure_has_field (outs, "height"))
-        {
-            gst_structure_fixate_field_nearest_int (outs, "height", height);
-        }
-        self->image_height = height;
-        if (self->roi_height == 0)
-        {
-            self->roi_height = height;
-        }
-    }
-
-    if (gst_structure_get_field_type (ins, "format") == G_TYPE_STRING)
-    {
-        const char* string;
-
-        string = gst_structure_get_string (ins, "format");
-        fourcc = GST_STR_FOURCC (string);
-    }
-    else
-        fourcc = 0;
-
-    if (fourcc == 0)
-    {
-        GST_WARNING("Unable to determine fourcc. Using Y800");
-        fourcc = FOURCC_BY8;
-    }
-    else
-    {
-        unsigned char bytes[4];
-
-        bytes[0] = (fourcc >> 24) & 0xFF;
-        bytes[1] = (fourcc >> 16) & 0xFF;
-        bytes[2] = (fourcc >> 8) & 0xFF;
-        bytes[3] = fourcc & 0xFF;
-
-        fourcc = GST_MAKE_FOURCC (toupper(bytes[0]),
-                                  toupper(bytes[1]),
-                                  toupper(bytes[2]),
-                                  toupper(bytes[3]));
-
-    }
-}
-#endif
-
-
 
 static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 {
@@ -901,7 +813,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 }
 
 
-gboolean find_image_values (GstTcamAutoFocus* self)
+static gboolean find_image_values (GstTcamAutoFocus* self)
 {
     GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
     GstCaps* caps = gst_pad_get_current_caps(pad);
@@ -927,11 +839,6 @@ gboolean find_image_values (GstTcamAutoFocus* self)
 
     roi_set_image_size(self->roi, {(unsigned int)self->image_width,
                                    (unsigned int)self->image_height});
-
-    gint tmp_n, tmp_d;
-    gst_structure_get_fraction(structure, "framerate", &tmp_n, &tmp_d);
-    self->framerate_numerator = tmp_n < 0 ? 0 : tmp_n;
-    self->framerate_denominator = tmp_d < 0 ? 0 : tmp_d;
 
     return TRUE;
 }
