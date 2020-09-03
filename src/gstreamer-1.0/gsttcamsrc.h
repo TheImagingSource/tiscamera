@@ -77,23 +77,10 @@ struct _GstTcamSrc
     GstElement* pimipi_src;
     //GstElement* mipi_src;
 
-    std::vector<device_desc> device_list;
-
     std::string device_serial;
     TCAM_DEVICE_TYPE device_type;
 
-    int n_buffers;
-    int imagesink_buffers;
-
-    GstCaps* target_caps = nullptr;
-    GstPad* target_pad;
-    gboolean target_set;
-
     GstPad* pad;
-
-    GstCaps *all_caps = nullptr;
-    GstCaps *fixed_caps = nullptr;
-
 };
 
 

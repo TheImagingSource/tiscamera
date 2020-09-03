@@ -35,18 +35,13 @@
 #include <algorithm>
 
 
-//
-// Do not error on format warnings. They should happen only in debug statements anyway
-//
-#pragma GCC diagnostic ignored "-Wformat"
-
 GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
 
 // helper functions
 
-const char* type_to_str (TCAM_DEVICE_TYPE type)
+static const char* type_to_str (TCAM_DEVICE_TYPE type)
 {
     switch (type)
     {
@@ -66,7 +61,7 @@ const char* type_to_str (TCAM_DEVICE_TYPE type)
 }
 
 
-TCAM_DEVICE_TYPE str_to_type (const std::string& str)
+static TCAM_DEVICE_TYPE str_to_type (const std::string& str)
 {
     if (str == "aravis")
     {
@@ -609,9 +604,9 @@ static gboolean open_source_element (GstTcamSrc* self)
     g_object_ref(self->active_source);
 
     gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), NULL);
-    self->target_pad = gst_element_get_static_pad(self->active_source, "src");
+    auto target_pad = gst_element_get_static_pad(self->active_source, "src");
 
-    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), self->target_pad))
+    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(self->pad), target_pad))
     {
         GST_ERROR("Could not set target for ghostpad.");
     }
@@ -714,8 +709,6 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
 static void gst_tcam_src_init (GstTcamSrc* self)
 {
 
-    self->n_buffers = -1;
-
     self->active_source = nullptr;
 
     self->source_list = nullptr;
@@ -724,11 +717,6 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->source_list = g_slist_append(self->source_list, self->main_src);
     self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
     self->source_list = g_slist_append(self->source_list, self->pimipi_src);
-
-    self->target_set = FALSE;
-    self->all_caps = NULL;
-    self->fixed_caps = NULL;
-    self->imagesink_buffers = 10;
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
@@ -739,12 +727,6 @@ static void gst_tcam_src_finalize (GObject* object)
 {
     GstTcamSrc* self = GST_TCAM_SRC (object);
 
-    if (self->all_caps != NULL)
-    {
-        gst_caps_unref (self->all_caps);
-        self->all_caps = NULL;
-    }
-
     if (self->active_source)
     {
         close_source_element(self);
@@ -752,9 +734,14 @@ static void gst_tcam_src_finalize (GObject* object)
     g_slist_free(self->source_list);
 
     // source elements have to be destroyed manually as they are not in the bin
-    //gst_object_unref(self->main_src);
-    self->main_src = nullptr;
-    self->pimipi_src = nullptr;
+    if( self->main_src ) {
+        gst_object_unref( self->main_src );
+        self->main_src = nullptr;
+    }
+    if( self->pimipi_src ) {
+        gst_object_unref( self->pimipi_src );
+        self->pimipi_src = nullptr;
+    }
 
     // TODO iterate source_list and destroy source elements
 
@@ -850,23 +837,14 @@ static void gst_tcam_src_set_property (GObject* object,
         }
         case PROP_CAM_BUFFERS:
         {
-            GstState state;
-            // timeout 1 second
-            auto ret = gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000000);
-            if (ret != GST_STATE_CHANGE_SUCCESS && state != GST_STATE_NULL)
-            {
-                GST_WARNING("camera-buffers can only be set while in GST_STATE_NULL.");
-                break;
-            }
+            GST_ERROR( "TODO PROP_CAM_BUFFERS set" );
 
-            self->imagesink_buffers = g_value_get_int(value);
             break;
         }
         case PROP_NUM_BUFFERS:
         {
-            GST_ERROR("TODO num-buffers set");
+            GST_ERROR("TODO PROP_NUM_BUFFERS set");
 
-            self->n_buffers = g_value_get_int (value);
             break;
         }
         case PROP_DO_TIMESTAMP:
