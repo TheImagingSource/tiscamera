@@ -88,6 +88,8 @@ class TcamView(QWidget):
         self.state = None
         self.videosaver = None
         self.imagesaver = None
+        self.window_id = self.container.winId()
+        self.displaysink = None
 
     def get_caps_desc(self):
         """
@@ -146,6 +148,7 @@ class TcamView(QWidget):
             self.fullscreen_container.hide()
             # self.fullscreen_container.deleteLater()
             self.fullscreen_container = None
+            self.displaysink.set_window_handle(self.window_id)
         else:
             self.is_fullscreen = True
             self.fullscreen_container = TcamScreen()
@@ -155,6 +158,7 @@ class TcamView(QWidget):
             self.fullscreen_container.showFullScreen()
             self.fullscreen_container.show()
             self.container.first_image = True
+            self.displaysink.set_window_handle(self.fullscreen_container.winId())
 
             self.fullscreen_container.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.fullscreen_container.installEventFilter(self.fullscreen_container)
@@ -293,40 +297,31 @@ class TcamView(QWidget):
         callback for appsink new-sample signal
         converts gstbuffer into qpixmap and gives it to the display container
         """
+        self.fps.tick()
+        self.fps_tick()
+
+        if (not (self.videosaver and self.videosaver.accept_buffer) and
+                not (self.imagesaver and self.imagesaver.accept_buffer)):
+            return Gst.FlowReturn.OK
+
         buf = self.pipeline.get_by_name("sink").emit("pull-sample")
         caps = buf.get_caps()
         self.caps = caps
         struc = caps.get_structure(0)
+
+        if self.current_width == 0:
+            self.current_width = struc.get_value("width")
+        if self.current_height == 0:
+            self.current_height = struc.get_value("height")
+
+        if self.container.first_image:
+            self.first_image.emit()
+
         b = buf.get_buffer()
-        try:
-            (ret, buffer_map) = b.map(Gst.MapFlags.READ)
-            if self.current_width == 0:
-                self.current_width = struc.get_value("width")
-            if self.current_height == 0:
-                self.current_height = struc.get_value("height")
-
-            self.fps.tick()
-            self.fps_tick()
-
-            if self.container.first_image:
-                self.first_image.emit()
-
-            self.image = QtGui.QPixmap.fromImage(QtGui.QImage(buffer_map.data,
-                                                              struc.get_value("width"),
-                                                              struc.get_value("height"),
-                                                              QtGui.QImage.Format_ARGB32))
-            if self.fullscreen_container is not None:
-                if self.fullscreen_container.isFullScreen():
-                    self.fullscreen_container.new_pixmap.emit(self.image)
-            else:
-                self.container.new_pixmap.emit(self.image)
-            if self.videosaver and self.videosaver.accept_buffer:
-                self.videosaver.feed_image(b)
-            if self.imagesaver and self.imagesaver.accept_buffer:
-                self.imagesaver.feed_image(b)
-
-        finally:
-            b.unmap(buffer_map)
+        if self.videosaver and self.videosaver.accept_buffer:
+            self.videosaver.feed_image(b)
+        if self.imagesaver and self.imagesaver.accept_buffer:
+            self.imagesaver.feed_image(b)
 
         return Gst.FlowReturn.OK
 
@@ -347,16 +342,21 @@ class TcamView(QWidget):
         # is currently in set_state
         pipeline_str = ("tcambin serial={serial} name=bin use-dutils={dutils} "
                         "! video/x-raw,format=BGRx "
-                        "! tee name=tee tee. "
+                        "! tee name=tee "
+                        "! queue max-size-buffers=2 leaky=downstream "
+                        "! video/x-raw,format=BGRx "
+                        "! appsink name=sink emit-signals=true sync=false drop=true max-buffers=4 "
+                        "tee. "
                         "! queue max-size-buffers=2 leaky=downstream "
                         "! videoconvert "
-                        "! video/x-raw,format=BGRx "
-                        "! appsink name=sink emit-signals=true sync=false")
+                        "! xvimagesink double-buffer=true sync=false name=displaysink draw-borders=false")
 
         self.pipeline = None
         self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
                                                              type=self.dev_type.lower(),
                                                              dutils=self.use_dutils))
+
+        self.displaysink = self.pipeline.get_by_name("displaysink")
 
         sink = self.pipeline.get_by_name("sink")
         sink.connect("new-sample", self.new_buffer)
@@ -366,6 +366,7 @@ class TcamView(QWidget):
         self.bus.enable_sync_message_emission()
         self.bus.connect('message::error', self.on_error)
         self.bus.connect('message::info', self.on_info)
+        self.bus.connect("sync-message::element", self.on_sync_message)
 
         self.tcam = self.pipeline.get_by_name("bin")
 
@@ -379,6 +380,20 @@ class TcamView(QWidget):
         log.debug("Pipeline is: {}".format(pipeline_str.format(serial=self.serial,
                                                                type=self.dev_type.lower(),
                                                                dutils=self.use_dutils)))
+
+    def on_sync_message(self, bus, message):
+
+        structure = message.get_structure()
+        if structure is None:
+            return
+        message_name = structure.get_name()
+        if message_name == "prepare-window-handle":
+
+            # "Note that trying to get the drawingarea XID in your on_sync_message() handler
+            # will cause a segfault because of threading issues."
+            # print 'sinkx_overview win_id: %s (%s)' % (self.gstWindowId, self.video_container.winId())
+            assert self.window_id
+            message.src.set_window_handle(self.window_id)
 
     def pause(self):
         log.info("Setting state to PAUSED")
