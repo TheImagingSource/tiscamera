@@ -35,7 +35,6 @@ bool tcam_property_to_json (TcamProp* prop,
                             const char* name)
 {
     GValue value = G_VALUE_INIT;
-    GValue type = G_VALUE_INIT;
 
     gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(prop),
                                                name,
@@ -44,7 +43,7 @@ bool tcam_property_to_json (TcamProp* prop,
                                                nullptr,
                                                nullptr,
                                                nullptr,
-                                               &type,
+                                               nullptr,
                                                nullptr,
                                                nullptr,
                                                nullptr);
@@ -87,9 +86,11 @@ bool tcam_property_to_json (TcamProp* prop,
     }
     catch (const std::logic_error& err)
     {
+        g_value_unset( &value );
         tcam_error(err.what());
         return false;
     }
+    g_value_unset( &value );
     return true;
 }
 
@@ -132,6 +133,8 @@ std::string create_device_settings (const std::string& serial,
             continue;
         }
 
+        //#TODO if tcam_prop_get_tcam_property_type returns a strdup pointer, we have to delete it here, but it is a const char* ....
+
         bool ret = tcam_property_to_json(tcam,
                                          j["properties"],
                                          (const char*)g_slist_nth_data(names, i));
@@ -141,6 +144,8 @@ std::string create_device_settings (const std::string& serial,
         }
 
     }
+    g_slist_free_full( names, ::g_free );
+
     int indent = 4;
     return j.dump(indent);
 }
@@ -266,6 +271,7 @@ bool load_device_settings (TcamProp* tcam,
             tcam_error("Setting '%s' to '%s' caused an error",
                        iter.key().c_str(), iter.value().dump().c_str());
         }
+        g_value_unset( &value );
 
     }
 
