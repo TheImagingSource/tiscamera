@@ -40,6 +40,7 @@ bool separate_serial_and_type (const std::string& input,
                                std::string& serial,
                                std::string& type);
 
+// Note: Returned element must be freed via g_object_unref
 GstElement* tcam_gst_find_camera_src (GstElement* element);
 
 

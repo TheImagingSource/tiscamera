@@ -102,11 +102,7 @@ struct device_resources
 struct _GstTcamWhitebalance {
     GstBaseTransform base_object;
 
-    GstPad        *srcpad;
-    GstPad        *sinkpad1;
-
     GstVideoInfo vinfo;
-    gdouble        framerate;
     tBY8Pattern    pattern;
     guint expected_buffer_size;
 

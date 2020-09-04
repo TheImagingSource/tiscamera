@@ -519,6 +519,11 @@ static void gst_tcamautofocus_finalize (GObject* object)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (object);
 
+    if( self->camera_src )
+    {
+        g_object_unref( self->camera_src );
+    }
+
     autofocus_destroy(self->focus);
     destroy_roi(self->roi);
     self->roi = nullptr;
