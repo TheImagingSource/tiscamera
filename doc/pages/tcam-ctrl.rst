@@ -62,7 +62,7 @@ Arguments
    this flag allows the user to choose the appropriate backend.
    Defaults to 'unknown', which causes the first device with matching serial to be choosen.
 
-.. option:: --state <SERIAL>
+.. option:: --save <SERIAL>
 
    Prints a JSON description of the device properties and their values.
 
@@ -76,4 +76,6 @@ Arguments
 
    .. code-block:: sh
 
-      tcam-ctrl --load 01810255 '{"Exposure":9000,"Exposure Auto":false}'
+      gst-launch-1.0 tcamsrc serial=12341234 state='{\"Exposure\":3000,"Exposure\ Auto\":false}' ! ....
+
+   Alternatively a file path to a file containing the JSON description can be used.
