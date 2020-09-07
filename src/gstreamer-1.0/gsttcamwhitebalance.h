@@ -76,7 +76,6 @@ typedef struct
 
 struct device_color
 {
-
     gboolean has_whitebalance;
     gboolean has_auto_whitebalance;
     rgb_tripel rgb;
@@ -87,16 +86,11 @@ struct device_color
 
 struct device_resources
 {
-    GstElement* source_element;
-//    Gain gain;
-    //  Exposure exposure;
-    gdouble framerate;
+    device_color color;
 
-    struct device_color color;
+    tcam_image_buffer buffer;
 
-    struct tcam_image_buffer buffer;
-
-    struct tcam::algorithms::whitebalance::wb_settings settings;
+    tcam::algorithms::whitebalance::wb_settings settings;
 };
 
 struct _GstTcamWhitebalance {
@@ -117,7 +111,7 @@ struct _GstTcamWhitebalance {
     gboolean auto_wb;
     gboolean auto_enabled;
     gboolean force_hardware_wb;
-    struct device_resources res;
+    device_resources res;
 };
 
 struct _GstTcamWhitebalanceClass {

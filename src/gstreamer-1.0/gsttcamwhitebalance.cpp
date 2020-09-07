@@ -42,6 +42,7 @@
 #include <cstring>
 
 #include "tcam.h"
+#include "tcamprop_impl_helper.h"   // #TODO use this to implement a better tcamprop interface
 #include <glib-object.h>
 
 GST_DEBUG_CATEGORY_STATIC (gst_tcamwhitebalance_debug_category);
@@ -621,7 +622,7 @@ static void gst_tcamwhitebalance_class_init (GstTcamWhitebalanceClass* klass)
     gst_element_class_add_pad_template(GST_ELEMENT_CLASS(klass),
                                        gst_static_pad_template_get(&gst_tcamwhitebalance_sink_template));
 
-    gst_element_class_set_details_simple(GST_ELEMENT_CLASS(klass),
+    gst_element_class_set_static_metadata(GST_ELEMENT_CLASS(klass),
                                          "The Imaging Source White Balance Element",
                                          "Generic",
                                          "Adjusts white balancing of video data buffers",
@@ -700,7 +701,7 @@ static void gst_tcamwhitebalance_init (GstTcamWhitebalance* self)
 }
 
 
-void gst_tcamwhitebalance_set_property (GObject* object,
+static void gst_tcamwhitebalance_set_property (GObject* object,
                                         guint property_id,
                                         const GValue* value,
                                         GParamSpec* pspec)
@@ -734,7 +735,7 @@ void gst_tcamwhitebalance_set_property (GObject* object,
 }
 
 
-void gst_tcamwhitebalance_get_property (GObject* object,
+static void gst_tcamwhitebalance_get_property (GObject* object,
                                         guint property_id,
                                         GValue* value,
                                         GParamSpec* pspec)
@@ -768,7 +769,7 @@ void gst_tcamwhitebalance_get_property (GObject* object,
 }
 
 
-void gst_tcamwhitebalance_finalize (GObject* object)
+static void gst_tcamwhitebalance_finalize (GObject* object)
 {
     G_OBJECT_CLASS(gst_tcamwhitebalance_parent_class)->finalize (object);
 }
@@ -823,13 +824,13 @@ static uint clip (uint x, uint max)
 
 
 
-uint calc_brightness_from_clr_avg (uint r, uint g, uint b)
+static uint calc_brightness_from_clr_avg (uint r, uint g, uint b)
 {
     return (r * r_factor + g * g_factor + b * b_factor) >> 8;
 }
 
 
-bool is_near_gray (uint r, uint g, uint b)
+static bool is_near_gray (uint r, uint g, uint b)
 {
     uint brightness = calc_brightness_from_clr_avg( r, g, b );
     if ( brightness < NEARGRAY_MIN_BRIGHTNESS ) return false;
@@ -849,7 +850,7 @@ bool is_near_gray (uint r, uint g, uint b)
 }
 
 
-bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
+static bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 {
     unsigned int avg = ((clr->R + clr->G + clr->B) / 3);
     int dr = (int)avg - clr->R;
@@ -908,7 +909,7 @@ bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 }
 
 
-rgb_tripel simulate_whitebalance (const auto_sample_points* data,
+static rgb_tripel simulate_whitebalance (const auto_sample_points* data,
                                   const rgb_tripel* wb,
                                   bool enable_near_gray)
 {
@@ -955,7 +956,7 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data,
 }
 
 
-bool auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, uint* resulting_brightness)
+static bool auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, uint* resulting_brightness)
 {
     rgb_tripel old_wb = *wb;
     if (wb->R < WB_IDENTITY)
@@ -1051,7 +1052,7 @@ static void whitebalance_buffer (GstTcamWhitebalance* self, GstBuffer* buf)
 }
 
 
-static void update_device_resources (struct device_resources* res)
+static void update_device_resources ( GstElement* source_element, device_resources* res )
 {
 
 
@@ -1089,11 +1090,11 @@ static void update_device_resources (struct device_resources* res)
     // }
 
     // only indended for int retrieval
-    auto get_int_value = [&res] (const char* name)
+    auto get_int_value = [source_element] (const std::string& name)
                          {
                              GValue val = {};
-                             gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(res->source_element),
-                                                                        name,
+                             gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source_element),
+                                                                        name.c_str(),
                                                                         &val,
                                                                         nullptr,
                                                                         nullptr,
@@ -1106,58 +1107,58 @@ static void update_device_resources (struct device_resources* res)
 
                              if (!ret)
                              {
-                                 printf("Could not query property '%s'\n", name);
+                                 GST_WARNING("Could not query property '%s'\n", name.c_str() );
                                  return 0;
                              }
-                             return g_value_get_int(&val);
+                             int tmp = g_value_get_int(&val);
+                             g_value_unset( &val );
+                             return tmp;
                          };
 
 
-    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(res->source_element));
-
-    for (unsigned int i = 0; i < g_slist_length(names); ++i)
+    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source_element));
+    for( const auto& name : tcam_helper::gst_consume_GSList_to_vector( names ) )
     {
-        char* name = (char*)g_slist_nth(names, i)->data;
-
-        if (g_strcmp0(name, "Gain Red") == 0)
+        if ( name == "Gain Red" )
         {
             res->color.rgb.R = get_int_value(name);
-            // hardcoded from dfk72
+            // hard coded from dfk72
             res->color.default_value = 36;
         }
-        else if (g_strcmp0(name, "Gain Green") == 0)
+        else if ( name == "Gain Green")
         {
             res->color.rgb.G = get_int_value(name);
-            // hardcoded from dfk72
+            // hard coded from dfk72
             res->color.default_value = 36;
         }
-        else if (g_strcmp0(name, "Gain Blue") == 0)
+        else if ( name == "Gain Blue" )
         {
             res->color.rgb.B = get_int_value(name);
-            // hardcoded from dfk72
+            // hard coded from dfk72
             res->color.default_value = 36;
         }
-
     }
 }
 
 
-static struct device_resources find_source (GstElement* self)
+static device_resources find_source (GstElement* self)
 {
-
-    struct device_resources res = {};
+    device_resources res = {};
     res.color.max = 255;
 
     /* if camera_src is not set we assume that the first default camera src found shall be used */
 
-    res.source_element = tcam_gst_find_camera_src(self);
+    auto source_element = tcam_gst_find_camera_src(self);
 
-    if (res.source_element == nullptr)
+    if( source_element == nullptr )
     {
-        GST_ERROR("Could not find source element");
+        GST_ERROR( "Could not find source element" );
     }
-
-    update_device_resources(&res);
+    else
+    {
+        update_device_resources( source_element, &res );
+        g_object_unref( source_element );
+    }
 
     return res;
 }
@@ -1211,14 +1212,9 @@ static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform* trans,
 
 static gboolean extract_resolution (GstTcamWhitebalance* self)
 {
-
-
     self->res = find_source(GST_ELEMENT(self));
-
-
     return TRUE;
 }
-
 
 /* Entry point */
 static GstFlowReturn gst_tcamwhitebalance_transform_ip (GstBaseTransform* trans, GstBuffer* buf)
