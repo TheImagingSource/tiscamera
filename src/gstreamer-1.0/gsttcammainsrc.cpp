@@ -53,7 +53,7 @@ GST_DEBUG_CATEGORY_STATIC (tcam_mainsrc_debug);
 // helper functions
 
 
-const char* type_to_str (TCAM_DEVICE_TYPE type)
+static const char* type_to_str (TCAM_DEVICE_TYPE type)
 {
     switch (type)
     {
@@ -69,7 +69,7 @@ const char* type_to_str (TCAM_DEVICE_TYPE type)
 }
 
 
-TCAM_DEVICE_TYPE str_to_type (const std::string& str)
+static TCAM_DEVICE_TYPE str_to_type (const std::string& str)
 {
     if (str == "aravis")
     {
@@ -193,12 +193,20 @@ static gboolean get_property_by_name (GstTcamMainSrc* self,
     return FALSE;
 }
 
-
-struct property_type_map
+static const char* prop_type_to_string( TCAM_PROPERTY_TYPE type )
 {
-    enum TCAM_PROPERTY_TYPE typecode;
-    const gchar* type_name;
-};
+    switch( type )
+    {
+    case TCAM_PROPERTY_TYPE_BOOLEAN: return "boolean";
+    case TCAM_PROPERTY_TYPE_INTEGER: return "integer";
+    case TCAM_PROPERTY_TYPE_DOUBLE: return "double";
+    case TCAM_PROPERTY_TYPE_STRING: return "string";
+    case TCAM_PROPERTY_TYPE_ENUMERATION: return "enum";
+    case TCAM_PROPERTY_TYPE_BUTTON: return "button";
+    default:
+        return nullptr;
+    }
+}
 
 
 /**
@@ -213,26 +221,17 @@ struct property_type_map
 static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* iface,
                                               const gchar* name)
 {
-    gchar* ret = NULL;
     GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
     if (self->device == nullptr)
     {
         if (!gst_tcam_mainsrc_init_camera(self))
         {
-            return NULL;
+            return nullptr;
         }
     }
 
     struct tcam_device_property prop;
-    struct property_type_map map[] = {
-        { TCAM_PROPERTY_TYPE_BOOLEAN, "boolean" },
-        { TCAM_PROPERTY_TYPE_INTEGER, "integer" },
-        { TCAM_PROPERTY_TYPE_DOUBLE, "double" },
-        { TCAM_PROPERTY_TYPE_STRING, "string" },
-        { TCAM_PROPERTY_TYPE_ENUMERATION, "enum" },
-        { TCAM_PROPERTY_TYPE_BUTTON, "button" },
-    };
 
     //     g_return_val_if_fail (self->device != NULL, NULL);
     // prefer this so that no gobject error appear
@@ -248,24 +247,12 @@ static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* iface,
         return nullptr;
     }
 
-    // g_return_val_if_fail (get_property_by_name (self,
-    //                                             name,
-    //                                             &prop), NULL);
-    for (std::size_t i = 0; i < G_N_ELEMENTS (map); i++)
-    {
-        if (prop.type == map[i].typecode)
-        {
-            ret = g_strdup (map[i].type_name);
-            break;
-        }
+    const char* prop_type_str = g_strdup( prop_type_to_string( prop.type ) );
+    if( prop_type_str == nullptr ) {
+        return g_strdup( "unknown" );
     }
 
-    if (ret == NULL)
-    {
-        ret = g_strdup ("unknown");
-    }
-
-    return ret;
+    return g_strdup( prop_type_str );
 }
 
 /**
@@ -354,6 +341,12 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
         g_value_init(group, G_TYPE_STRING);
         g_value_set_string(group, tcam::get_control_reference(prop.group.property_group).name.c_str());
     }
+    if( type )
+    {
+        // g_value_set_gtype (type, G_TYPE_INT);
+        g_value_init( type, G_TYPE_STRING );
+        g_value_set_string( type, prop_type_to_string( prop.type ) );
+    }
 
     switch (prop.type)
     {
@@ -400,12 +393,6 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
                 g_value_init (step, G_TYPE_INT);
                 g_value_set_int (step, prop.value.i.step);
             }
-            if (type)
-            {
-                // g_value_set_gtype (type, G_TYPE_INT);
-                g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
-            }
             break;
         case TCAM_PROPERTY_TYPE_DOUBLE:
             if (value)
@@ -433,11 +420,6 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
                 g_value_init (step, G_TYPE_DOUBLE);
                 g_value_set_double (step, prop.value.d.step);
             }
-            if (type)
-            {
-                g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
-            }
             break;
         case TCAM_PROPERTY_TYPE_STRING:
             if (value)
@@ -461,11 +443,6 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
             if (step)
             {
                 g_value_init (def, G_TYPE_STRING);
-            }
-            if (type)
-            {
-                g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -492,11 +469,6 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
             if (step)
             {
                 g_value_init (step, G_TYPE_BOOLEAN);
-            }
-            if (type)
-            {
-                g_value_init(type, G_TYPE_STRING);
-                g_value_set_string(type, gst_tcam_mainsrc_get_property_type(iface, name));
             }
             break;
         default:
@@ -660,10 +632,9 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
 
     std::vector<tcam::DeviceInfo> devices = s->index_.get_device_list();
 
-    int count = devices.size();
     gboolean ret = FALSE;
 
-    if (count <= 0)
+    if( devices.empty() )
     {
         return FALSE;
     }
@@ -779,7 +750,6 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps (GstTcamMainSrc* self)
 
 static gboolean gst_tcam_mainsrc_negotiate (GstBaseSrc* basesrc)
 {
-
     GstCaps* thiscaps;
     GstCaps* caps = NULL;
     GstCaps* peercaps = NULL;
@@ -1014,7 +984,6 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
     int height = 0;
     int width = 0;
     const GValue* frame_rate;
-    const char* caps_string;
     const char* format_string;
 
     GST_INFO("Requested caps = %" GST_PTR_FORMAT, static_cast<void*>(caps));
@@ -1069,28 +1038,6 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
         GST_DEBUG_OBJECT (self, "Frame rate = %g Hz", dbl_frame_rate);
     }
 
-
-    caps_string = tcam_fourcc_to_gst_1_0_caps_string(fourcc);
-    if (caps_string != NULL)
-    {
-        GstStructure *tmp_struct;
-        GstCaps *tmp_caps;
-
-        tmp_caps = gst_caps_new_empty ();
-        tmp_struct = gst_structure_from_string (caps_string, NULL);
-        gst_structure_set (tmp_struct,
-                           "width", G_TYPE_INT, width,
-                           "height", G_TYPE_INT, height,
-                           NULL);
-
-        if (frame_rate != NULL)
-        {
-            gst_structure_set_value (tmp_struct, "framerate", frame_rate);
-        }
-
-        gst_caps_append_structure (tmp_caps, tmp_struct);
-    }
-
     GST_INFO("Start acquisition");
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
@@ -1135,73 +1082,73 @@ static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info
     // let EOS handle this. gstreamer will call stop for us
     // gst_tcam_mainsrc_stop(GST_BASE_SRC(self));
 }
+//
+//
+//void send_log_to_bus (void* user_data,
+//                      enum TCAM_LOG_LEVEL level,
+//                      const char* file,
+//                      int line,
+//                      const char* message,
+//                      ...)
+//{
+//
+//    if (level != TCAM_LOG_ERROR
+//        && level != TCAM_LOG_WARNING)
+//    {
+//        return;
+//    }
+//
+//    /*
+//      This check is to prevent threading issues.
+//      When the application calls gst_set_state(GST_STATE_NULL)
+//      while the backend is still building up or busy
+//      we might end up in this callback while self is already cleaned up.
+//    */
+//    if (!GST_IS_OBJECT(user_data))
+//    {
+//        tcam_info("GstObject tcamsrc does not exist. Messages will not be sent to the GstBus.");
+//        return;
+//    }
+//
+//    GstTcamMainSrc* self = GST_TCAM_MAINSRC(user_data);
+//
+//    va_list args;
+//    va_start(args, message);
+//    va_list tmp_args;
+//    va_copy(tmp_args, args);
+//
+//    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
+//    char *m = new char[size];
+//
+//    vsnprintf(m, size, message, args);
+//
+//    va_end(args);
+//    va_end(tmp_args);
+//
+//    std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
+//    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, "%s", msg_string.c_str());
+//
+//    GstMessage* msg = nullptr;
+//
+//
+//    if (level == TCAM_LOG_ERROR)
+//    {
+//        msg = gst_message_new_error(GST_OBJECT(self), err, m);
+//        GST_ERROR("Backend reported error: %s:%d: %s", file, line, m);
+//    }
+//    else if (level == TCAM_LOG_WARNING)
+//    {
+//        msg = gst_message_new_warning(GST_OBJECT(self), err, m);
+//        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, m);
+//    }
+//
+//    gst_element_post_message(GST_ELEMENT(self), msg);
+//    g_error_free(err);
+//    delete[] m;
+//}
 
 
-void send_log_to_bus (void* user_data,
-                      enum TCAM_LOG_LEVEL level,
-                      const char* file,
-                      int line,
-                      const char* message,
-                      ...)
-{
-
-    if (level != TCAM_LOG_ERROR
-        && level != TCAM_LOG_WARNING)
-    {
-        return;
-    }
-
-    /*
-      This check is to prevent threading issues.
-      When the application calls gst_set_state(GST_STATE_NULL)
-      while the backend is still building up or busy
-      we might end up in this callback while self is already cleaned up.
-    */
-    if (!GST_IS_OBJECT(user_data))
-    {
-        tcam_info("GstObject tcamsrc does not exist. Messages will not be sent to the GstBus.");
-        return;
-    }
-
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(user_data);
-
-    va_list args;
-    va_start(args, message);
-    va_list tmp_args;
-    va_copy(tmp_args, args);
-
-    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
-    char *m = new char[size];
-
-    vsnprintf(m, size, message, args);
-
-    va_end(args);
-    va_end(tmp_args);
-
-    std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
-    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, "%s", msg_string.c_str());
-
-    GstMessage* msg = nullptr;
-
-
-    if (level == TCAM_LOG_ERROR)
-    {
-        msg = gst_message_new_error(GST_OBJECT(self), err, m);
-        GST_ERROR("Backend reported error: %s:%d: %s", file, line, m);
-    }
-    else if (level == TCAM_LOG_WARNING)
-    {
-        msg = gst_message_new_warning(GST_OBJECT(self), err, m);
-        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, m);
-    }
-
-    gst_element_post_message(GST_ELEMENT(self), msg);
-    g_error_free(err);
-    delete[] m;
-}
-
-
-void separate_serial_and_type (GstTcamMainSrc* self, const std::string& input)
+static void separate_serial_and_type (GstTcamMainSrc* self, const std::string& input)
 {
     auto pos = input.find("-");
 
@@ -1224,7 +1171,7 @@ void separate_serial_and_type (GstTcamMainSrc* self, const std::string& input)
 }
 
 
-bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
+static bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
 {
     GST_DEBUG_OBJECT (self, "Initializing device.");
 
@@ -1238,7 +1185,6 @@ bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
         gst_caps_unref(self->all_caps);
         self->all_caps = nullptr;
     }
-
 
     separate_serial_and_type(self, self->device_serial);
 
@@ -1263,9 +1209,7 @@ bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
         return false;
     }
 
-
     self->all_caps = gst_tcam_mainsrc_get_all_camera_caps(self);
-    //gst_base_mainsrc_set_caps (GST_BASE_SRC(self), self->all_caps);
 
     return true;
 }
@@ -1342,6 +1286,8 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
         //gst_message_unref(msg);
 
         // gst_bus_remove_signal_watch(bus);
+
+        g_object_unref( bus );
     }
     else
     {
@@ -1374,6 +1320,10 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state (GstElement* element,
                 {
                     GST_INFO("FAILURE to initialize device. Aborting...");
                     return GST_STATE_CHANGE_FAILURE;
+                }
+                if( self->all_caps ) {
+                    gst_caps_unref( self->all_caps );
+                    self->all_caps = nullptr;
                 }
                 self->all_caps = gst_tcam_mainsrc_get_all_camera_caps (self);
             }
@@ -1458,6 +1408,7 @@ static void buffer_destroy_callback (gpointer data)
     if (trans->ptr == nullptr)
     {
         GST_ERROR("Memory does not seem to exist.");
+        delete trans;
         return;
     }
 
@@ -1495,7 +1446,7 @@ static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buf
 }
 
 
-void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
+static void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
                                   GstStructure* struc)
 {
 
@@ -1639,7 +1590,7 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps (GstBaseSrc* bsrc,
     gint height = 0;
     double frame_rate = 0.0;
 
-    structure = gst_caps_get_structure (caps, 0);
+    structure = gst_caps_get_structure (caps, 0);   // #TODO this seems to be at best curious, at another place we fixate to highest, and here fixate goes to lowest
 
     if (gst_structure_has_field(structure, "width"))
     {
@@ -1719,7 +1670,6 @@ done:
 
 static void gst_tcam_mainsrc_init (GstTcamMainSrc* self)
 {
-
     gst_base_src_set_live (GST_BASE_SRC (self), TRUE);
     gst_base_src_set_format (GST_BASE_SRC (self), GST_FORMAT_TIME);
 
