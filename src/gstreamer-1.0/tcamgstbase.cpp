@@ -97,6 +97,32 @@ std::string get_plugin_version (const char* plugin_name)
 }
 
 
+std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector( GSList* lst )
+{
+    if( lst == nullptr ) {
+        return {};
+    }
+
+    std::vector<std::string> rval;
+    GSList* iter = lst;
+    do
+    {
+        char* str = static_cast<char*>( iter->data );
+
+        rval.push_back( str );
+
+        ::g_free( str );
+
+        iter = g_slist_next( iter );
+    }
+    while( iter != nullptr );
+
+    g_slist_free( lst );
+
+    return rval;
+}
+
+
 std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
 {
     std::vector<std::string> ret;

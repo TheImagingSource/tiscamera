@@ -192,6 +192,12 @@ bool gst_buffer_to_tcam_image_buffer (GstBuffer* buffer, GstCaps* caps, tcam_ima
 
 int calc_pitch (int fourcc, int width);
 
+namespace tcam_helper
+{
+    std::vector<std::string> gst_consume_GSList_to_vector( GSList* lst );
+}
+
+
 #ifdef __cplusplus
 }
 #endif

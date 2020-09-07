@@ -2078,7 +2078,7 @@ static void gst_tcam_mainsrc_class_init (GstTcamMainSrcClass* klass)
 
     GST_DEBUG_CATEGORY_INIT (tcam_mainsrc_debug, "tcammainsrc", 0, "tcam interface");
 
-    gst_element_class_set_details_simple (element_class,
+    gst_element_class_set_static_metadata(element_class,
                                           "Tcam Video Source",
                                           "Source/Video",
                                           "Tcam based source",
