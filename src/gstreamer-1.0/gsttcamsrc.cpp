@@ -90,7 +90,7 @@ static TCAM_DEVICE_TYPE str_to_type (const std::string& str)
 }
 
 
-void separate_serial_and_type (GstTcamSrc* self, const std::string& input,
+static void separate_serial_and_type (GstTcamSrc* self, const std::string& input,
                                std::string& serial, TCAM_DEVICE_TYPE& type)
 {
     auto pos = input.find("-");
@@ -485,13 +485,7 @@ static gboolean open_source_element (GstTcamSrc* self)
     {
         GST_DEBUG("Setting active src to tcampimipisrc");
         self->active_source = self->pimipi_src;
-
-        // g_object_set(self->active_source,
-        //              "serial", self->device_serial.c_str(),
-        //              NULL);
-        // return TRUE;
     }
-
     else if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
         GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(self));
@@ -537,13 +531,14 @@ static gboolean open_source_element (GstTcamSrc* self)
                 continue;
             }
 
-            GSList* tmp = nullptr;
+            GstElement* cur_elem = (GstElement*) iter->data;
 
+            GSList* tmp = nullptr;
             if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN
                 && !self->device_serial.empty())
             {
                 GST_INFO("Searching for '%s'", self->device_serial.c_str());
-                tmp = tcam_prop_get_device_serials(TCAM_PROP(iter->data));
+                tmp = tcam_prop_get_device_serials(TCAM_PROP(cur_elem));
 
                 for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
                 {
@@ -551,8 +546,7 @@ static gboolean open_source_element (GstTcamSrc* self)
 
                     if (g_strcmp0((const char*)i->data, self->device_serial.c_str()) == 0)
                     {
-
-                        self->active_source = (GstElement*)iter->data;
+                        self->active_source = cur_elem;
                         break;
                     }
                 }
@@ -560,7 +554,7 @@ static gboolean open_source_element (GstTcamSrc* self)
             }
             else
             {
-                tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(iter->data));
+                tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(cur_elem));
 
                 for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
                 {
@@ -571,7 +565,7 @@ static gboolean open_source_element (GstTcamSrc* self)
                     if (serial == self->device_serial
                         && str_to_type(type_str) == self->device_type)
                     {
-                        self->active_source = (GstElement*)iter->data;
+                        self->active_source = cur_elem;
                         break;
                     }
                 }
