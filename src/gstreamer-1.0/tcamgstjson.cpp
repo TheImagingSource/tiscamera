@@ -24,17 +24,16 @@
 #include "tcam.h"
 #include <logging.h>
 
-
-
 // for convenience
 using json = nlohmann::json;
 
 
-bool tcam_property_to_json (TcamProp* prop,
+static bool tcam_property_to_json (TcamProp* prop,
                             json& parent,
                             const char* name)
 {
     GValue value = G_VALUE_INIT;
+    GValue type = G_VALUE_INIT;
 
     gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(prop),
                                                name,
@@ -48,11 +47,22 @@ bool tcam_property_to_json (TcamProp* prop,
                                                nullptr,
                                                nullptr);
 
-    if (!ret)
+    if (!ret || g_value_get_string( &type ) == nullptr )
     {
+        g_value_unset( &value );
+        g_value_unset( &type );
+
         tcam_warning("Unable to read property '%s'", name);
         return false;
     }
+
+    if( g_strcmp0( "button", g_value_get_string( &type ) ) == 0 )   // button property can be skipped
+    {
+        g_value_unset( &value );
+        g_value_unset( &type );
+        return true;
+    }
+    g_value_unset( &type );
 
     try
     {
@@ -125,22 +135,14 @@ std::string create_device_settings (const std::string& serial,
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
-        const char* type = tcam_prop_get_tcam_property_type(tcam,
-                                                            (const char*)g_slist_nth_data(names, i));
-
-        if (g_strcmp0("button", type) == 0)
-        {
-            continue;
-        }
-
-        //#TODO if tcam_prop_get_tcam_property_type returns a strdup pointer, we have to delete it here, but it is a const char* ....
+        const char* prop_name = (const char*)g_slist_nth_data( names, i );
 
         bool ret = tcam_property_to_json(tcam,
                                          j["properties"],
-                                         (const char*)g_slist_nth_data(names, i));
+                                         prop_name );
         if (!ret)
         {
-            tcam_warning("Could not convert %s to json.", (const char*)g_slist_nth_data(names, i));
+            tcam_warning("Could not convert %s to json.", prop_name );
         }
 
     }
