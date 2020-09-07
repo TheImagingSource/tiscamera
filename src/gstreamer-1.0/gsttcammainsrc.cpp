@@ -1069,10 +1069,6 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
         GST_DEBUG_OBJECT (self, "Frame rate = %g Hz", dbl_frame_rate);
     }
 
-    if (self->fixed_caps != NULL)
-    {
-        gst_caps_unref (self->fixed_caps);
-    }
 
     caps_string = tcam_fourcc_to_gst_1_0_caps_string(fourcc);
     if (caps_string != NULL)
@@ -1093,18 +1089,9 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
         }
 
         gst_caps_append_structure (tmp_caps, tmp_struct);
-
-        self->fixed_caps = tmp_caps;
-    }
-    else
-    {
-        self->fixed_caps = NULL;
     }
 
     GST_INFO("Start acquisition");
-
-    self->timestamp_offset = 0;
-    self->last_timestamp = 0;
 
     self->device->sink = std::make_shared<tcam::ImageSink>();
     self->device->sink->set_buffer_number(self->imagesink_buffers);
@@ -1113,9 +1100,6 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
 
     self->device->dev->start_stream(self->device->sink);
     self->device->sink->drop_incomplete_frames(self->drop_incomplete_frames);
-
-    self->timestamp_offset = 0;
-    self->last_timestamp = 0;
 
     self->is_running = true;
     GST_INFO("Successfully set caps to: %s", gst_caps_to_string(caps));
@@ -1309,7 +1293,6 @@ static gboolean gst_tcam_mainsrc_start (GstBaseSrc* src)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
-    self->run = 1000;
     self->is_running = true;
 
     if (self->device == NULL)
@@ -1321,8 +1304,6 @@ static gboolean gst_tcam_mainsrc_start (GstBaseSrc* src)
         }
     }
 
-    self->timestamp_offset = 0;
-    self->last_timestamp = 0;
     gst_base_src_start_complete(src, GST_FLOW_OK);
 
     return TRUE;
@@ -1743,7 +1724,6 @@ static void gst_tcam_mainsrc_init (GstTcamMainSrc* self)
     gst_base_src_set_format (GST_BASE_SRC (self), GST_FORMAT_TIME);
 
     self->n_buffers = -1;
-    self->payload = 0;
     self->drop_incomplete_frames = TRUE;
     // explicitly init c++ objects
     // older compiler (e.g. gcc-4.8) can cause segfaults
@@ -1757,7 +1737,6 @@ static void gst_tcam_mainsrc_init (GstTcamMainSrc* self)
     self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
     self->device = NULL;
     self->all_caps = NULL;
-    self->fixed_caps = NULL;
     self->is_running = false;
     self->imagesink_buffers = 10;
 
@@ -1775,11 +1754,6 @@ static void gst_tcam_mainsrc_finalize (GObject* object)
     {
         gst_caps_unref (self->all_caps);
         self->all_caps = NULL;
-    }
-    if (self->fixed_caps != NULL)
-    {
-        gst_caps_unref (self->fixed_caps);
-        self->fixed_caps = NULL;
     }
 
     (&self->device_serial)->std::string::~string();

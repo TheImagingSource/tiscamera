@@ -66,17 +66,8 @@ struct _GstTcamMainSrc
 
     std::atomic<bool> is_running;
     gboolean drop_incomplete_frames;
-    int payload;
-
-    int buffer_timeout_us;
-
-    int run;
 
     GstCaps *all_caps = nullptr;
-    GstCaps *fixed_caps = nullptr;
-
-    guint64 timestamp_offset;
-    guint64 last_timestamp;
 
     std::mutex mtx;
     std::condition_variable cv;
