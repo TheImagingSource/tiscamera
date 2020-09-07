@@ -536,6 +536,10 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     {
         self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
     }
+    if( self->camera_src == nullptr ) {
+        GST_ERROR_OBJECT( self, "Failed to get camera_src" );
+        return;
+    }
 
     GValue val = G_VALUE_INIT;
     GValue min = G_VALUE_INIT;
@@ -554,7 +558,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     image.pitch = calc_pitch(image.format.fourcc,
                              image.format.width);
 
-    img::img_descriptor i = img::to_img_desc(image.pData,
+    img::img_descriptor img_dsc = img::to_img_desc(image.pData,
                                              image.format.fourcc,
                                              image.format.width,
                                              image.format.height,
@@ -599,7 +603,7 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 
     autofocus_run(self->focus,
                   std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(),
-                  i,
+                  img_dsc,
                   self->params,
                   p,
                   pixel_dim,
