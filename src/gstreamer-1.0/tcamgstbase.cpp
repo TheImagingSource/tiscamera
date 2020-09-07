@@ -27,6 +27,18 @@
 
 #include "public_utils.h"
 
+static std::string  gst_caps_to_std_string( const GstCaps* caps )
+{
+    auto tmp = gst_caps_to_string( caps );
+    if( tmp == nullptr ) {
+        return {};
+    }
+
+    std::string rval = tmp;
+    g_free( tmp );
+    return rval;
+}
+
 
 bool separate_serial_and_type (const std::string& input,
                                std::string& serial,
@@ -90,10 +102,19 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
 std::string get_plugin_version (const char* plugin_name)
 {
     GstPlugin* plugin = gst_plugin_load_by_name(plugin_name);
-    const char* version_str = gst_plugin_get_version(plugin);
-    gst_object_unref(plugin);
+    if( plugin == nullptr ) {
+        return {};
+    }
 
-    return version_str;
+    std::string rval;
+    const char* version_str = gst_plugin_get_version(plugin);
+    if( version_str != nullptr ) {
+        rval = version_str;
+    }
+
+    gst_object_unref( plugin );
+
+    return rval;
 }
 
 
@@ -123,7 +144,7 @@ std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector( GSList* lst 
 }
 
 
-std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
+static std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
 {
     std::vector<std::string> ret;
     if (!GST_VALUE_HOLDS_LIST(gst_list))
@@ -165,13 +186,9 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
             return false;
         }
 
-        const static std::vector<std::string> formats = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
+        static const char* formats[] = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
 
-        if (std::find(formats.begin(), formats.end(), str) == formats.end())
-        {
-            return false;
-        }
-        return true;
+        return std::any_of(std::begin( formats), std::end( formats ), [str]( const char* op2 ) { return strcmp( str, op2 ) == 0; } );
     };
 
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
@@ -223,7 +240,7 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
 }
 
 
-bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
+static bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG8
         || fourcc == FOURCC_GRBG8
@@ -234,21 +251,21 @@ bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
     }
     return FALSE;
 }
+//
+//
+//static bool tcam_gst_is_bayer10_fourcc( const uint32_t fourcc )
+//{
+//    if( fourcc == FOURCC_GBRG10
+//        || fourcc == FOURCC_GRBG10
+//        || fourcc == FOURCC_RGGB10
+//        || fourcc == FOURCC_BGGR10 )
+//    {
+//        return TRUE;
+//    }
+//    return FALSE;
+//}
 
-
-bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
-{
-    if (fourcc == FOURCC_GBRG10
-        || fourcc == FOURCC_GRBG10
-        || fourcc == FOURCC_RGGB10
-        || fourcc == FOURCC_BGGR10)
-    {
-        return TRUE;
-    }
-    return FALSE;
-}
-
-bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG12
         || fourcc == FOURCC_GRBG12
@@ -261,7 +278,7 @@ bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
 }
 
 
-bool tcam_gst_is_bayer12_packed_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer12_packed_fourcc (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG12_MIPI_PACKED
         || fourcc == FOURCC_GRBG12_MIPI_PACKED
@@ -282,7 +299,7 @@ bool tcam_gst_is_bayer12_packed_fourcc (const uint32_t fourcc)
 }
 
 
-bool tcam_gst_is_bayer16_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer16_fourcc (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG16
         || fourcc == FOURCC_GRBG16
@@ -294,19 +311,7 @@ bool tcam_gst_is_bayer16_fourcc (const uint32_t fourcc)
     return FALSE;
 }
 
-
-bool tcam_gst_is_fourcc_mono (const uint32_t fourcc)
-{
-    if (fourcc == FOURCC_Y800
-        || fourcc == FOURCC_Y16)
-    {
-        return true;
-    }
-    return false;
-}
-
-
-bool tcam_gst_is_fourcc_yuv (const uint32_t fourcc)
+static bool tcam_gst_is_fourcc_yuv (const uint32_t fourcc)
 {
     if (fourcc == FOURCC_YUYV
         || fourcc == FOURCC_YUY2
@@ -365,7 +370,7 @@ bool tcam_gst_is_bayer10_packed_string (const char* format_string)
         return false;
     }
 
-    std::vector<std::string> format_list = {
+    static const std::array<std::string,12> format_list = {
         "rggb10p",
         "grbg10p",
         "gbrg10p",
@@ -415,7 +420,7 @@ bool tcam_gst_is_bayer12_packed_string (const char* format_string)
         return false;
     }
 
-    std::vector<std::string> format_list = {
+    static const std::array<std::string, 12> format_list = {
         "rggb12p",
         "grbg12p",
         "gbrg12p",
@@ -519,52 +524,7 @@ bool tcam_gst_is_polarized_bayer (const unsigned int fourcc)
 }
 
 
-bool tcam_gst_is_polarized_rgb (const unsigned int fourcc)
-{
-    if (fourcc == FOURCC_POLARIZATION_ADI_RGB8
-        || fourcc == FOURCC_POLARIZATION_ADI_RGB16
-        || fourcc == FOURCC_POLARIZATION_PACKED8
-        || fourcc == FOURCC_POLARIZATION_PACKED16
-        )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool tcam_gst_is_polarized (const unsigned int fourcc)
-{
-    if (fourcc == FOURCC_POLARIZATION_MONO8_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_MONO16_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_MONO12_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_ADI_PLANAR_MONO8
-        || fourcc == FOURCC_POLARIZATION_ADI_PLANAR_MONO16
-        || fourcc == FOURCC_POLARIZATION_ADI_MONO8
-        || fourcc == FOURCC_POLARIZATION_ADI_MONO16
-        || fourcc == FOURCC_POLARIZATION_ADI_RGB8
-        || fourcc == FOURCC_POLARIZATION_ADI_RGB16
-        || fourcc == FOURCC_POLARIZATION_PACKED8
-        || fourcc == FOURCC_POLARIZATION_PACKED16
-        || fourcc == FOURCC_POLARIZATION_PACKED8_BAYER_BG
-        || fourcc == FOURCC_POLARIZATION_PACKED16_BAYER_BG
-        )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-bool tcam_gst_fixate_caps (GstCaps* caps)
+static bool tcam_gst_fixate_caps (GstCaps* caps)
 {
     if (caps == nullptr
         || gst_caps_is_empty(caps)
@@ -592,7 +552,7 @@ bool tcam_gst_fixate_caps (GstCaps* caps)
 }
 
 
-void gst_caps_change_name (GstCaps* caps, const char* name)
+static void gst_caps_change_name (GstCaps* caps, const char* name)
 {
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
     {
@@ -605,16 +565,6 @@ void gst_caps_change_name (GstCaps* caps, const char* name)
         }
     }
 }
-
-
-GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw)
-{
-    GstCaps* caps2 = gst_caps_copy(raw);
-    gst_caps_change_name(caps2, "video/x-bayer");
-    GstCaps* caps1 = gst_caps_intersect((GstCaps*)bayer, caps2);
-    return caps1;
-}
-
 
 bool gst_caps_are_bayer_only (const GstCaps* caps)
 {
@@ -635,34 +585,59 @@ bool gst_caps_are_bayer_only (const GstCaps* caps)
     return true;
 }
 
+static bool is_really_empty_caps( const GstCaps* caps )
+{
+    /*
+gst_caps_is_empty acts erratic, thus we work around the issue with gst_caps_to_string:
+
+--------
+(gdb) print (char*)gst_caps_to_string (caps)
+$4 = 0x555555a8f120 "EMPTY"
+(gdb) print (int)gst_caps_is_empty (caps)
+(process:5873): GStreamer-CRITICAL (recursed) **: gst_caps_is_empty: assertion 'GST_IS_CAPS (caps)' failed
+--------
+
+*/
+
+    if( caps == nullptr ) {
+        return true;
+    }
+
+    auto tmp_caps_string = gst_caps_to_std_string( caps );
+    if( (tmp_caps_string == "EMPTY") || gst_caps_is_any( caps ) )
+    {
+        return true;
+    }
+    return false;
+}
+
 
 /**
  * Helper function to get a list of all available fourccs in caps
  */
-std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
+static std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
 {
+    if( is_really_empty_caps( caps ) ) {
+        return {};
+    }
+
     std::vector<uint32_t> ret;
 
-    /*
-    gst_caps_is_empty acts erratic, thus we work arround the issue with gst_caps_to_string:
 
-    --------
-    (gdb) print (char*)gst_caps_to_string (caps)
-    $4 = 0x555555a8f120 "EMPTY"
-    (gdb) print (int)gst_caps_is_empty (caps)
-    (process:5873): GStreamer-CRITICAL (recursed) **: gst_caps_is_empty: assertion 'GST_IS_CAPS (caps)' failed
-    --------
-
-    */
-    if (!caps || (!g_strcmp0(gst_caps_to_string(caps), "EMPTY")) || gst_caps_is_any(caps))
+    // only add when fourcc is not 0
+    auto add_format = [&ret]( const char* name, const char* fmt )
     {
-        return ret;
-    }
+        uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string( name, fmt );
+        if( fourcc != 0 )
+        {
+            ret.push_back( fourcc );
+        }
+    };
 
     for (guint i = 0; i < gst_caps_get_size(caps); ++i)
     {
         GstStructure* struc = gst_caps_get_structure(caps, i);
-        std::string format_string;
+
         std::vector<std::string> vec;
 
         if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
@@ -674,17 +649,6 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
             vec.push_back(gst_structure_get_string(struc, "format"));
         }
 
-        // code in helper func is needed weither vec is empty or not
-        // prevents code duplication
-        auto helper_func = [&ret] (const char* name, const char* fmt)
-            {
-                uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(name,
-                                                                       fmt);
-                if (fourcc != 0)
-                {
-                    ret.push_back(fourcc);
-                }
-            };
 
         const char* name = gst_structure_get_name(struc);
 
@@ -692,27 +656,27 @@ std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
         {
             for (const auto& fmt : vec)
             {
-                helper_func(name, fmt.c_str());
+                add_format(name, fmt.c_str());
             }
         }
         else
         {
             // this will be the case for things like image/jpeg
             // such caps will have no format field and thus vec.empty() ==
-            helper_func(name, "");
+            add_format(name, "");
         }
     }
 
     // remove duplicate entries
     // probably never enough entries to make switch to std::set a good alternative
-    sort( ret.begin(), ret.end() );
-    ret.erase( unique( ret.begin(), ret.end() ), ret.end() );
+    std::sort( ret.begin(), ret.end() );
+    ret.erase( std::unique( ret.begin(), ret.end() ), ret.end() );
 
     return ret;
 }
 
 
-uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
+static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
 {
     /**
      * prefer bayer 8-bit over everything else
@@ -765,6 +729,7 @@ uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         {
             map[5] = fourcc;
         }
+        //#TODO why is here no mention of bayer10?
         else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
             map[6] = fourcc;
@@ -786,6 +751,9 @@ uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
             tcam_error("Could not associate rank with fourcc %d %s", fourcc,
                        tcam::fourcc_to_description(fourcc));
         }
+    }
+    if( map.empty() ) {
+        return 0;
     }
 
     return map.begin()->second;
@@ -810,12 +778,11 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
      * 2. find the largest resolution
      * 3. for the format with the largest resolution take the highest framerate
      */
-
     std::vector<uint32_t> format_fourccs = index_format_fourccs(incoming);
 
     uint32_t preferred_fourcc = find_preferred_format(format_fourccs);
 
-    if(!g_strcmp0(gst_caps_to_string(incoming), "EMPTY"))
+    if( is_really_empty_caps( incoming ) )
     {
         return nullptr;
     }
@@ -909,7 +876,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
 
-    tcam_info("Fixating assumed largest caps: %s", gst_caps_to_string(largest_caps));
+    tcam_info("Fixating assumed largest caps: %s", gst_caps_to_std_string(largest_caps).c_str());
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
@@ -931,7 +898,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     GValue vh = G_VALUE_INIT;
 
     g_value_init(&vh, G_TYPE_INT);
-    g_value_set_int(&vh, h);
+    g_value_set_int(&vh, h);            // #TODO this function really looks bad here
 
     gst_caps_set_value(largest_caps, "height", &vh);
     largest_caps = gst_caps_new_simple (gst_structure_get_name(s),
@@ -944,7 +911,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     {
         gst_caps_set_value(largest_caps, "format", gst_structure_get_value(s, "format"));
     }
-    tcam_info("Largest caps are: %s", gst_caps_to_string(largest_caps));
+    tcam_info("Largest caps are: %s", gst_caps_to_std_string(largest_caps).c_str());
 
     return largest_caps;
 }
@@ -985,32 +952,6 @@ bool contains_bayer (const GstCaps* caps)
     return false;
 }
 
-bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring)
-{
-    GstCaps *tmpcaps = gst_caps_from_string(capsstring);
-    gboolean ret = gst_caps_can_intersect(caps, tmpcaps);
-    gst_caps_unref(tmpcaps);
-
-    return ret;
-}
-
-
-bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps)
-{
-    if (caps == nullptr)
-    {
-        return false;
-    }
-
-
-    GstCaps* tmp = gst_caps_from_string("video/x-bayer, format={rggb, bggr, gbrg, grbg}");
-    gboolean ret =  gst_caps_can_intersect(caps, tmp);
-    gst_caps_unref(tmp);
-
-    return ret;
-}
-
-
 bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps)
 {
     if (caps == nullptr)
@@ -1046,40 +987,23 @@ bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps)
     return ret;
 }
 
-
-bool tcam_gst_contains_bayer_16_bit (const GstCaps* caps)
-{
-    if (caps == nullptr)
-    {
-        return false;
-    }
-
-    GstCaps* tmp = gst_caps_from_string("video/x-bayer, format={rggb16, bggr16, gbrg16, grbg16}");
-    gboolean ret =  gst_caps_can_intersect(caps, tmp);
-    gst_caps_unref(tmp);
-
-    return ret;
-}
-
-
-GstCaps* get_caps_from_element (GstElement* element, const char* padname)
+static GstCaps* get_caps_from_element (GstElement* element, const char* padname)
 {
     if (!element || !padname)
     {
         return nullptr;
     }
 
-    GstCaps* ret = gst_pad_query_caps(gst_element_get_static_pad(element, padname), NULL);
+    auto pad = gst_element_get_static_pad( element, padname );
+    GstCaps* ret = gst_pad_query_caps(pad, NULL);
+    g_object_unref( pad );
 
     return ret;
 }
 
-
 GstCaps* get_caps_from_element_name (const char* elementname, const char* padname)
 {
-
     GstElement* ele = gst_element_factory_make(elementname, "tmp-element");
-
     if (!ele)
     {
         return nullptr;
@@ -1125,70 +1049,17 @@ std::vector<std::string> index_caps_formats (GstCaps* caps)
     }
 
     // make all entries unique
-    if (ret.size() > 1)
-    {
-        std::sort(ret.begin(), ret.end());
-
-        ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
-    }
+    std::sort(ret.begin(), ret.end());
+    ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
     return ret;
 }
-
-
-std::vector<uint32_t> index_caps_fourcc (GstCaps* caps)
-{
-    // todo missing jpeg
-
-    std::vector<uint32_t> ret;
-
-    for (guint i = 0; i < gst_caps_get_size(caps); ++i)
-    {
-        GstStructure* struc = gst_caps_get_structure(caps, i);
-
-        if (gst_structure_get_field_type(struc, "format") == GST_TYPE_LIST)
-        {
-            auto vec = gst_list_to_vector(gst_structure_get_value(struc, "format"));
-
-            for (const auto& v : vec)
-            {
-                auto fcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
-                                                                v.c_str());
-
-                if (fcc == 0)
-                    continue;
-
-                ret.push_back(fcc);
-            }
-        }
-        else if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
-        {
-            auto fcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(struc),
-                                                            gst_structure_get_string(struc, "format"));
-
-            if (fcc == 0)
-                continue;
-
-            ret.push_back(fcc);
-        }
-    }
-
-    // make all entries unique
-    if (ret.size() > 1)
-    {
-        std::sort(ret.begin(), ret.end());
-
-        ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
-    }
-    return ret;
-}
-
 
 /**
  * @param formats - GstCaps from which the format and name shall be used
  * @param rest - GstCaps from which the rest i.e. width,height,framerate, shall be used, is_fixed has to be true
  * @return GstCaps containing merged caps, user takes ownership
  */
-GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
+static GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
 {
     if (!gst_caps_is_fixed(rest))
     {
@@ -1226,7 +1097,6 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
         {
             gst_caps_set_value(tmp, "framerate", framerate);
         }
-        tcam_info("%s", gst_caps_to_string(tmp));
 
         gst_caps_append(ret, tmp);
     }
@@ -1235,7 +1105,7 @@ GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
 }
 
 
-GstCaps* find_input_caps_dutils (GstCaps* available_caps,
+static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
                                  GstCaps* wanted_caps,
                                  bool& /*requires_bayer*/,
                                  bool& requires_vidoeconvert,
@@ -1247,76 +1117,71 @@ GstCaps* find_input_caps_dutils (GstCaps* available_caps,
 
     GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
 
-    if (dutils)
+    if (!dutils) {
+        tcam_error( "Could not create dutils." );
+        return nullptr;
+    }
+
+    // check if only dutils suffice
+    if (gst_element_factory_can_src_any_caps(dutils, wanted_caps)
+        && gst_element_factory_can_sink_any_caps(dutils, available_caps))
     {
-        // check if only dutils suffice
-        if (gst_element_factory_can_src_any_caps(dutils, wanted_caps)
-            && gst_element_factory_can_sink_any_caps(dutils, available_caps))
+        requires_dutils = true;
+        gst_object_unref(dutils);
+
+        GstCaps* ret;
+        if (!gst_caps_is_fixed(available_caps))
         {
-            requires_dutils = true;
-            gst_object_unref(dutils);
-
-            GstCaps* ret;
-            if (!gst_caps_is_fixed(available_caps))
+            if (!gst_caps_is_empty(wanted_caps) &&
+                (gst_caps_to_std_string(wanted_caps) != "NULL") )
             {
-                if (!gst_caps_is_empty(wanted_caps) &&
-                    (g_strcmp0(gst_caps_to_string(wanted_caps), "NULL") != 0))
+                if (!gst_caps_is_fixed(wanted_caps))
                 {
+                    ret = gst_caps_intersect(available_caps, wanted_caps);
 
-                    if (!gst_caps_is_fixed(wanted_caps))
+                    if (gst_caps_is_empty(ret))
                     {
-                        ret = gst_caps_intersect(available_caps, wanted_caps);
-
-                        if (gst_caps_is_empty(ret))
-                        {
-                            gst_caps_unref(ret);
-                            return gst_caps_copy(available_caps);
-                        }
-
-                    }
-                    else
-                    {
-                        GstCaps* possible_matches = create_caps_for_formats(available_caps,
-                                                                            wanted_caps);
-
-                        if (!possible_matches || gst_caps_is_empty(possible_matches))
-                        {
-                            tcam_error("No possible matches for dutils.");
-                            return nullptr;
-                        }
-
-                        ret = gst_caps_intersect(available_caps, possible_matches);
-                        gst_caps_unref(possible_matches);
+                        gst_caps_unref(ret);
+                        return gst_caps_copy(available_caps);
                     }
                 }
                 else
                 {
-                    ret = tcam_gst_find_largest_caps(available_caps);
+                    GstCaps* possible_matches = create_caps_for_formats(available_caps,
+                                                                        wanted_caps);
+
+                    if (!possible_matches || gst_caps_is_empty(possible_matches))
+                    {
+                        tcam_error("No possible matches for dutils.");
+                        return nullptr;
+                    }
+
+                    ret = gst_caps_intersect(available_caps, possible_matches);
+                    gst_caps_unref(possible_matches);
                 }
             }
-            else // is fixed
+            else
             {
-                ret = gst_caps_copy(available_caps);
+                ret = tcam_gst_find_largest_caps(available_caps);
             }
-
-            if (!ret)
-            {
-                // TODO not compatible
-                tcam_error("No intersecting caps between dutils and src");
-                return nullptr;
-            }
-
-            return ret;
-
         }
-        gst_object_unref(dutils);
+        else // is fixed
+        {
+            ret = gst_caps_copy(available_caps);
+        }
 
-        tcam_error("Could not negotiate caps");
+        if (!ret)
+        {
+            // TODO not compatible
+            tcam_error("No intersecting caps between dutils and src");
+            return nullptr;
+        }
+
+        return ret;
     }
-    else
-    {
-        tcam_error("Could not create dutils.");
-    }
+    gst_object_unref(dutils);
+
+    tcam_error("Could not negotiate caps");
     return nullptr;
 }
 
@@ -1366,12 +1231,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         wanted_caps = gst_caps_copy(available_caps);
     }
 
-    // GstCaps* intersect = gst_caps_intersect(available_caps, wanted_caps);
-    // if (!gst_caps_is_empty(intersect))
-    // {
-    //     return intersect;
-    // }
-    // gst_caps_unref(intersect);
     GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
     if (use_dutils && dutils)
     {
@@ -1479,6 +1338,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
             // this removes things like jpeg
             GstCaps* ret = gst_caps_intersect(available_caps, in);
+            gst_caps_unref( in );
 
             GstCaps* temp = gst_caps_copy(wanted_caps);
             for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
@@ -1487,8 +1347,11 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             }
 
             GstCaps* ret2 = gst_caps_intersect(ret, temp);
-            gst_caps_unref(in);
-            gst_caps_unref(ret);
+
+            gst_caps_unref( temp );
+            gst_caps_unref( ret );
+
+
             gst_object_unref(convert);
             return ret2;
         }
@@ -1538,22 +1401,18 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 }
 
 
-bool fill_structure_fixed_resolution (GstStructure* structure,
+static void fill_structure_fixed_resolution (GstStructure* structure,
                                       const tcam::VideoFormatDescription& format,
                                       const tcam_resolution_description& res)
 {
-
-    std::vector<double> framerates = format.get_frame_rates(res);
-    int framerate_count = framerates.size();
-
     GValue fps_list = G_VALUE_INIT;
     g_value_init(&fps_list, GST_TYPE_LIST);
 
-    for (int f = 0; f < framerate_count; f++)
+    for ( auto rate : format.get_frame_rates( res ) )
     {
         int frame_rate_numerator;
         int frame_rate_denominator;
-        gst_util_double_to_fraction(framerates[f],
+        gst_util_double_to_fraction( rate,
                                     &frame_rate_numerator,
                                     &frame_rate_denominator);
 
@@ -1570,8 +1429,6 @@ bool fill_structure_fixed_resolution (GstStructure* structure,
                        NULL);
 
     gst_structure_take_value(structure, "framerate", &fps_list);
-
-    return true;
 }
 
 
@@ -1671,6 +1528,15 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
 
                 }
 
+
+                std::vector<double> fps = desc.get_frame_rates( r );
+
+                if( fps.empty() )
+                {
+                    // GST_ERROR("Could not find any framerates for format");
+                    continue;
+                }
+
                 // finally also add the range to allow unusual settings like 1920x96@90fps
                 GstStructure* structure = gst_structure_from_string (caps_string, NULL);
 
@@ -1681,14 +1547,6 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
                 GValue h = G_VALUE_INIT;
                 g_value_init(&h, GST_TYPE_INT_RANGE);
                 gst_value_set_int_range(&h, min_height, max_height);
-
-                std::vector<double> fps = desc.get_frame_rates(r);
-
-                if (fps.empty())
-                {
-                    // GST_ERROR("Could not find any framerates for format");
-                    continue;
-                }
 
                 int fps_min_num;
                 int fps_min_den;
@@ -1708,9 +1566,9 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
                                                   fps_min_num, fps_min_den,
                                                   fps_max_num, fps_max_den);
 
-                gst_structure_set_value(structure, "width", &w);
-                gst_structure_set_value(structure,"height", &h);
-                gst_structure_set_value(structure,"framerate", &f);
+                gst_structure_take_value(structure, "width", &w);
+                gst_structure_take_value(structure,"height", &h);
+                gst_structure_take_value(structure,"framerate", &f);
                 gst_caps_append_structure(caps, structure);
             }
             else
@@ -1726,32 +1584,6 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
 
     return caps;
 }
-
-
-bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFormatDescription>& descriptions,
-                                                 std::string& str)
-{
-    GstCaps* caps = convert_videoformatsdescription_to_caps(descriptions);
-
-    if (caps == nullptr || gst_caps_is_empty(caps))
-    {
-        return false;
-    }
-
-    const char* tmp = gst_caps_to_string(caps);
-
-    if (tmp == nullptr)
-    {
-        gst_caps_unref(caps);
-        return false;
-    }
-
-    str = tmp;
-    gst_caps_unref(caps);
-
-    return true;
-}
-
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format)
 {

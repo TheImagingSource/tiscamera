@@ -46,16 +46,10 @@ GstElement* tcam_gst_find_camera_src (GstElement* element);
 
 std::string get_plugin_version (const char* plugin_name);
 
-
-std::vector<std::string> gst_list_to_vector (const GValue* gst_list);
-
 /*
   extracts video/x-raw from caps and checks if only mono is present
 */
 bool tcam_gst_raw_only_has_mono (const GstCaps* src_caps);
-
-
-bool tcam_gst_is_fourcc_bayer (const unsigned int fourcc);
 
 
 bool tcam_gst_is_bayer8_string (const char* fourcc);
@@ -79,11 +73,6 @@ bool tcam_gst_is_bayer16_string (const char* format_string);
 bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc);
 
 
-bool tcam_gst_is_polarized (const unsigned int fourcc);
-
-
-bool tcam_gst_contains_bayer_8_bit (const GstCaps* caps);
-
 
 bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps);
 
@@ -91,26 +80,8 @@ bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps);
 bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps);
 
 
-bool tcam_gst_contains_bayer_16_bit (const GstCaps* caps);
-
-
-bool tcam_gst_fixate_caps (GstCaps* caps);
 
 std::vector<std::string> index_caps_formats (GstCaps* caps);
-
-std::vector<uint32_t> index_caps_fourcc (GstCaps* caps);
-
-
-/**
- * Change the name of the given caps to name
- */
-void gst_caps_change_name (GstCaps* caps, const char* name);
-
-
-/**
- * Create intersecting caps between bayer and gst_caps_change_name(raw, "video/x-bayer")
- */
-GstCaps* bayer_transform_intersect (const GstCaps* bayer, const GstCaps* raw);
 
 
 /**
@@ -139,10 +110,6 @@ bool contains_jpeg (const GstCaps* caps);
  * @return GstCaps from static pad with name padname, can return nullptr
  */
 GstCaps* get_caps_from_element_name (const char* elementname, const char* padname);
-GstCaps* get_caps_from_element (GstElement* element, const char* padname);
-
-
-bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring);
 
 /**
  * @param available_caps - caps the source offers
@@ -168,21 +135,10 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 );
 
 
-bool fill_structure_fixed_resolution (GstStructure* structure,
-                                      const tcam::VideoFormatDescription& format,
-                                      const tcam_resolution_description& res);
-
 
 GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoFormatDescription>& descriptions);
 
 
-/**
- * @param desc - vector of VideoFormatDescriptions that shall be converted
- * @param str(out) - string containing the converted caps
- * @return true if desc could be converted
- */
-bool videoformatsdescription_to_gst_caps_string (const std::vector<tcam::VideoFormatDescription>& descriptions,
-                                                 std::string& str);
 
 
 bool gst_caps_to_tcam_video_format (GstCaps* caps, struct tcam_video_format* format);

@@ -45,23 +45,6 @@ G_BEGIN_DECLS
 typedef struct _GstTcamSrc GstTcamSrc;
 typedef struct _GstTcamSrcClass GstTcamSrcClass;
 
-enum SOURCE_ELEMENT
-{
-    SOURCE_ELEMENT_UNKNOWN = 0,
-    SOURCE_ELEMENT_MAIN = 1,
-    SOURCE_ELEMENT_MIPI = 2,
-    SOURCE_ELEMENT_MIPI_RASPI = 3,
-};
-
-
-struct device_desc
-{
-    SOURCE_ELEMENT source;
-    std::string serial;
-    TCAM_DEVICE_TYPE type;
-};
-
-
 struct _GstTcamSrc
 {
     GstBin parent;
@@ -70,7 +53,7 @@ struct _GstTcamSrc
 
     // convenience container
     // for all source elements
-    // tcamsrc can adress
+    // tcamsrc can address
     GSList* source_list;
 
     GstElement* main_src;
