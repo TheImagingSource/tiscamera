@@ -38,13 +38,6 @@
 #include <queue>
 #include <algorithm>
 
-
-//
-// Do not error on format warnings. They should happen only in debug statements anyway
-//
-#pragma GCC diagnostic ignored "-Wformat"
-
-
 #define GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS 10
 
 GST_DEBUG_CATEGORY_STATIC (tcam_mainsrc_debug);
@@ -1545,8 +1538,8 @@ wait_again:
 
             GST_DEBUG("Added meta info: \n"
                       "gst frame_count: %lu\n"
-                      "backend frame_count %u\n"
-                      "frames_dropped %u\n"
+                      "backend frame_count %lu\n"
+                      "frames_dropped %lu\n"
                       "capture_time_ns:%lu\n"
                       "camera_time_ns: %lu\n"
                       "framerate: %f\n"
