@@ -17,7 +17,7 @@ Supported programming languages: C, Python.
 
     Show the properties of a camera and their settings(range, current value, etc.)
 
-02-set-property
+02-set-properties
 
     Shows how to set a specific property
 
@@ -41,17 +41,14 @@ Supported programming languages: C, Python.
 
     Receive images in an application instead of just showing them.
 
-08-appsink-live
-
-    Receive images in an application, process it and feed it into another pipeline.
-
-09-save-stream
+08-save-stream
 
     Store a stream in a file.
 
-10-device-lost
+09-device-lost
 
     Receive device-lost and other messages and react to them
+
 
 ## Further Examples
 

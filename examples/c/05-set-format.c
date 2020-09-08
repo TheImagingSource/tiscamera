@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = NULL; // set this if you do not want the first found device
+    const char* serial = NULL; // set this if you do not want the first found device
 
     GError* err = NULL;
     const char* pipeline_desc = "tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink";
@@ -49,6 +49,8 @@ int main (int argc, char *argv[])
         g_value_set_static_string(&val, serial);
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
+
+        gst_object_unref( source );
     }
 
 
@@ -95,6 +97,8 @@ int main (int argc, char *argv[])
     getchar();
 
     gst_element_set_state(pipeline, GST_STATE_NULL);
+
+    gst_object_unref( pipeline );
 
     return 0;
 }

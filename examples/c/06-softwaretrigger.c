@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
 
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = NULL; // the serial number of the camera we want to use
+    const char* serial = NULL; // the serial number of the camera we want to use
 
     GError* err = NULL;
 

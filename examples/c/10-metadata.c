@@ -28,7 +28,7 @@
 #include "gstmetatcamstatistics.h"
 
 
-gboolean meta_struc_print (GQuark field_id,
+static gboolean meta_struc_print (GQuark field_id,
                            const GValue* value,
                            gpointer user_data)
 {
@@ -59,7 +59,7 @@ gboolean meta_struc_print (GQuark field_id,
     else if (G_VALUE_TYPE(value) == G_TYPE_UINT64)
     {
         guint64 val = g_value_get_uint64(value);
-        printf("%u\n", val);
+        printf("%lu\n", val);
     }
     else
     {
@@ -73,7 +73,7 @@ gboolean meta_struc_print (GQuark field_id,
   This function will be called in a separate thread when our appsink
   says there is data for us. user_data has to be defined when calling g_signal_connect.
  */
-GstFlowReturn callback (GstElement* sink, void* user_data)
+static GstFlowReturn callback (GstElement* sink, void* user_data)
 
 {
     printf("new sample\n");
@@ -131,12 +131,14 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv);
 
+    const char* serial = NULL; // set this if you do not want the first found device
+
     GError* err = NULL;
 
     // some conversion elements will drop the metadata
     // for the sake of this example we will retrieve buffers
     // directly from the src
-    const char* pipeline_str = "tcamsrc ! appsink name=sink";
+    const char* pipeline_str = "tcamsrc name=source ! appsink name=sink";
 
     GstElement* pipeline = gst_parse_launch(pipeline_str, &err);
 
@@ -145,6 +147,17 @@ int main (int argc, char *argv[])
     {
         printf("Could not create pipeline. Cause: %s\n", err->message);
         return 1;
+    }
+
+    if( serial != NULL )
+    {
+        GstElement* source = gst_bin_get_by_name( GST_BIN( pipeline ), "source" );
+        GValue val = {};
+        g_value_init( &val, G_TYPE_STRING );
+        g_value_set_static_string( &val, serial );
+
+        g_object_set_property( G_OBJECT( source ), "serial", &val );
+        gst_object_unref( source );
     }
 
     /* retrieve the appsink from the pipeline */

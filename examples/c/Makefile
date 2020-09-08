@@ -17,14 +17,12 @@
 
 LIBS:=$(shell pkg-config gstreamer-1.0 --libs)
 LIBS:=$(shell pkg-config gstreamer-video-1.0 --libs)
-LIBS+=$(shell pkg-config gtk+-3.0 --libs)
 LIBS+=$(shell pkg-config gobject-introspection-1.0 --libs)
 LIBS+=$(shell pkg-config tcam --libs)
 LIBS+=-L/home/edt/work/tiscamera/build/src/gobject
 
 CFLAGS:=$(shell pkg-config gstreamer-1.0 --cflags)
 CFLAGS:=$(shell pkg-config gstreamer-video-1.0 --cflags)
-CFLAGS+=$(shell pkg-config gtk+-3.0 --cflags)
 CFLAGS+=$(shell pkg-config gobject-introspection-1.0 --cflags)
 CFLAGS+=$(shell pkg-config tcam --cflags)
 CFLAGS+=-I/home/edt/work/tiscamera/src/gobject/

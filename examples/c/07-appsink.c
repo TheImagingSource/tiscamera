@@ -35,7 +35,7 @@
   when calling g_signal_connect. It can be used to pass objects etc.
   from your other function to the callback.
 */
-GstFlowReturn callback (GstElement* sink, void* user_data)
+static GstFlowReturn callback (GstElement* sink, void* user_data)
 {
     GstSample* sample = NULL;
     /* Retrieve the buffer */
@@ -99,10 +99,11 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv);
 
-    GError* err = NULL;
+    const char* serial = NULL; // the serial number of the camera we want to use
 
     const char* pipeline_str = "tcambin name=source ! videoconvert ! appsink name=sink";
 
+    GError* err = NULL;
     GstElement* pipeline = gst_parse_launch(pipeline_str, &err);
 
     /* test for error */
@@ -110,6 +111,18 @@ int main (int argc, char *argv[])
     {
         printf("Could not create pipeline. Cause: %s\n", err->message);
         return 1;
+    }
+
+    if( serial != NULL )
+    {
+        GstElement* source = gst_bin_get_by_name( GST_BIN( pipeline ), "source" );
+
+        GValue val = {};
+        g_value_init( &val, G_TYPE_STRING );
+        g_value_set_static_string( &val, serial );
+
+        g_object_set_property( G_OBJECT( source ), "serial", &val );
+        gst_object_unref( source );
     }
 
     /* retrieve the appsink from the pipeline */

@@ -28,7 +28,7 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = NULL; // set this if you do not want the first found device
+    const char* serial = NULL; // set this if you do not want the first found device
 
     /* create a tcambin to retrieve device information */
     GstElement* source = gst_element_factory_make("tcambin", "source");
@@ -44,9 +44,9 @@ int main (int argc, char *argv[])
 
     GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
 
-    for (unsigned int i = 0; i < g_slist_length(names); ++i)
+    for ( GSList* cur = names; cur != NULL; cur = cur->next )
     {
-        char* name = (char*)g_slist_nth(names, i)->data;
+        const char* name = (char*)cur->data;
 
         GValue value = {};
         GValue min = {};
@@ -119,8 +119,10 @@ int main (int argc, char *argv[])
             printf("Entries: \n");
             for (unsigned int x = 0; x < g_slist_length(entries); ++x)
             {
-                printf("\t %s\n", g_slist_nth(entries, x)->data);
+                printf("\t %s\n", (char*) g_slist_nth(entries, x)->data);
             }
+
+            g_slist_free_full( entries, g_free );
         }
         else if (strcmp(t, "boolean") == 0)
         {
@@ -137,9 +139,19 @@ int main (int argc, char *argv[])
         {
             printf("Property '%s' has type '%s' .\n", name, t);
         }
+
+        g_value_unset( &value );
+        g_value_unset( &min );
+        g_value_unset( &max );
+        g_value_unset( &default_value );
+        g_value_unset( &step_size );
+        g_value_unset( &type );
+        g_value_unset( &flags );
+        g_value_unset( &category );
+        g_value_unset( &group );
     }
 
-    g_slist_free(names);
+    g_slist_free_full(names,g_free);
     gst_object_unref(source);
 
     return 0;

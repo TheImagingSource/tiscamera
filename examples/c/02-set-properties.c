@@ -37,11 +37,13 @@ void print_properties (GstElement* source)
     {
         printf("Exposure Auto has value: %s\n",
                g_value_get_boolean(&exp_auto_value) ? "true" : "false");
+        g_value_unset( &exp_auto_value );
     }
     else
     {
         printf("Could not query Exposure Auto\n");
     }
+
     GValue gain_auto_value = G_VALUE_INIT;
 
     ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
@@ -53,6 +55,7 @@ void print_properties (GstElement* source)
     {
         printf("Gain Auto has value: %s\n",
                g_value_get_boolean(&gain_auto_value) ? "true" : "false");
+        g_value_unset( &gain_auto_value );
     }
     else
     {
@@ -71,6 +74,7 @@ void print_properties (GstElement* source)
     {
         printf("Exposure has value: %d\n",
                g_value_get_int(&exp_value));
+        g_value_unset( &exp_value );
     }
     else
     {
@@ -122,6 +126,8 @@ int main (int argc, char *argv[])
     tcam_prop_set_tcam_property(TCAM_PROP(source),
                                 "Gain Auto", &set_auto);
 
+    g_value_unset( &set_auto );
+
     GValue set_exposure = G_VALUE_INIT;
     g_value_init(&set_exposure, G_TYPE_INT);
 
@@ -129,6 +135,8 @@ int main (int argc, char *argv[])
 
     tcam_prop_set_tcam_property(TCAM_PROP(source),
                                 "Exposure", &set_exposure);
+
+    g_value_unset( &set_exposure );
 
     /*
       second print for the before/after comparison

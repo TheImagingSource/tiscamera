@@ -25,11 +25,11 @@
 #include "tcamprop.h" /* gobject introspection interface */
 
 
-gboolean stop_program = FALSE;
+static gboolean stop_program = FALSE;
 static GMainLoop* loop;
 
 
-gboolean starts_with (const char* a, const char* b)
+static gboolean starts_with (const char* a, const char* b)
 {
     if (strncmp(a, b, strlen(b)) == 0)
     {
@@ -100,7 +100,7 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = NULL; // set this if you do not want the first found device
+    const char* serial = NULL; // set this if you do not want the first found device
 
     GError* err = NULL;
 
@@ -142,6 +142,8 @@ int main (int argc, char *argv[])
 
     g_main_loop_unref(loop);
     gst_element_set_state(pipeline, GST_STATE_NULL);
+
+    gst_object_unref( pipeline );
 
     return 0;
 }

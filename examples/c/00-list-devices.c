@@ -35,6 +35,8 @@ int main (int argc, char *argv[])
 
     for (GSList* elem = serials; elem; elem = elem->next)
     {
+        const char* device_serial = (gchar*)elem->data;
+
         char* name;
         char* identifier;
         char* connection_type;
@@ -48,19 +50,23 @@ int main (int argc, char *argv[])
                    Currently 'aravis', 'v4l2' and 'unknown' exist
         */
         gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
-                                                 (gchar*) elem->data,
+                                                  device_serial,
                                                  &name,
                                                  &identifier,
                                                  &connection_type);
 
-        if (ret) // get_device_info was successfull
+        if (ret) // get_device_info was successful
         {
             printf("Model: %s Serial: %s Type: %s\n",
                    name, (gchar*)elem->data, connection_type);
+
+            g_free( name );
+            g_free( identifier );
+            g_free( connection_type );
         }
     }
 
-    g_slist_free(serials);
+    g_slist_free_full(serials, g_free);
     gst_object_unref(source);
 
     return 0;

@@ -24,10 +24,9 @@
 
 int main (int argc, char *argv[])
 {
-
     gst_init(&argc, &argv); // init gstreamer
 
-    char* serial = NULL; // the serial number of the camera we want to use
+    const char* serial = NULL; // the serial number of the camera we want to use
 
     GError* err = NULL;
 
@@ -78,6 +77,8 @@ int main (int argc, char *argv[])
 
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);
+
+    gst_object_unref( fsink );
 
     /* the pipeline automatically handles all elements that have been added to it.
        thus they do not have to be cleaned up manually */
