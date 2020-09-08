@@ -1113,8 +1113,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
                                  bool& /*requires_bayer*/,
                                  bool& requires_vidoeconvert,
                                  bool& /*requires_jpegdec*/,
-                                 bool& requires_dutils,
-                                 bool& /*requires_biteater*/)
+                                 bool& requires_dutils)
 {
     requires_vidoeconvert = true;
 
@@ -1211,7 +1210,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegdec,
                           bool& requires_dutils,
-                          bool& requires_biteater,
                           bool use_dutils
     )
 {
@@ -1220,7 +1218,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
     requires_vidoeconvert = false;
     requires_jpegdec = false;
     requires_dutils = false;
-    requires_biteater = false;
     requires_bayer2rgb = false;
 
     if (!GST_IS_CAPS(available_caps))
@@ -1243,8 +1240,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                                       requires_bayer2rgb,
                                       requires_vidoeconvert,
                                       requires_jpegdec,
-                                      requires_dutils,
-                                      requires_biteater);
+                                      requires_dutils);
     }
 
     GstElementFactory* bayer_transform = gst_element_factory_find("tcamby1xtransform");

@@ -506,10 +506,7 @@ static void gst_tcambin_clear_elements (GstTcamBin* self)
     {
         remove_element(&self->dutils);
     }
-    if (self->biteater)
-    {
-        remove_element(&self->biteater);
-    }
+
     if (self->bayer_transform)
     {
         remove_element(&self->bayer_transform);
@@ -608,13 +605,6 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             return FALSE;
         }
 
-        if (!create_and_add_element(&self->biteater,
-                                    "tcambiteater", "tcambin-biteater",
-                                    GST_BIN(self)))
-        {
-            send_missing_element_msg("tcambiteater");
-            return FALSE;
-        }
         // go to finish and do not create other elements
         goto finished_element_creation;
     }
@@ -865,15 +855,6 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
             return FALSE;
         }
 
-        if (!link_elements(self->needs_biteater,
-                           &previous_element,
-                           &self->biteater,
-                           pipeline_description,
-                           "tcambiteater"))
-        {
-                send_linking_element_msg("tcambiteater");
-                return FALSE;
-        }
         // goto finished_element_linking;
 
     }
@@ -1213,9 +1194,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                                                  self->needs_videoconvert,
                                                  self->needs_jpegdec,
                                                  self->needs_dutils,
-                                                 self->needs_biteater,
-                                                 self->use_dutils)
-                );
+                                                 self->use_dutils) );
             }
             else
             {
@@ -1225,9 +1204,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                                                  self->needs_videoconvert,
                                                  self->needs_jpegdec,
                                                  self->needs_dutils,
-                                                 self->needs_biteater,
-                                                 self->use_dutils)
-                                            );
+                                                 self->use_dutils) );
             }
 
             if (!self->data->src_caps || gst_caps_is_empty(self->data->src_caps.get()))
@@ -1511,7 +1488,6 @@ static void gst_tcambin_init (GstTcamBin* self)
 
 
     self->use_dutils = TRUE;
-    self->needs_biteater = TRUE;
     self->elements_linked = FALSE;
 
     self->data = new tcambin_data;
@@ -1533,7 +1509,6 @@ static void gst_tcambin_init (GstTcamBin* self)
     self->src = nullptr;
     self->pipeline_caps = nullptr;
     self->dutils = nullptr;
-    self->biteater = nullptr;
     self->bayer_transform = nullptr;
     self->exposure = nullptr;
     self->whitebalance = nullptr;

@@ -80,8 +80,6 @@ int main (int argc, char* argv[])
     bool jpegdec_expected = false;
     bool requires_dutils;
     bool dutils_expected = false;
-    bool requires_biteater;
-    bool biteater_expected = false;
     bool use_dutils = false;
 
     const char* src_caps_str = "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};";
@@ -100,7 +98,7 @@ int main (int argc, char* argv[])
                                            requires_bayer,
                                            requires_videoconvert,
                                            requires_jpegdec, requires_dutils,
-                                           requires_biteater, use_dutils);
+                                           use_dutils);
 
 
 
@@ -126,10 +124,6 @@ int main (int argc, char* argv[])
 
     test_succeeded = verify_flag("dutils",
                                  requires_dutils, dutils_expected,
-                                 test_succeeded);
-
-    test_succeeded = verify_flag("biteater",
-                                 requires_biteater, biteater_expected,
                                  test_succeeded);
 
     if (test_succeeded)

@@ -28,7 +28,6 @@ struct fic_test_result
     bool requires_bayer;
     bool requires_videoconvert;
     bool requires_jpegdec;
-    bool requires_biteater;
     bool requires_dutils;
 };
 
@@ -88,7 +87,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
             false
         }
     },
@@ -107,7 +105,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
             false
         }
     },
@@ -118,7 +115,6 @@ std::vector<fic_test_data_container> fic_test_data = {
         false,
         {
             caps::DFK72_CAPS,
-            false,
             false,
             false,
             false,
@@ -139,7 +135,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
         }
     },
 
@@ -151,7 +146,6 @@ std::vector<fic_test_data_container> fic_test_data = {
         false,
         {
             "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
-            false,
             false,
             false,
             false,
@@ -173,7 +167,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             "video/x-bayer,format=grbg,width=1280,height=720,framerate={30/1,25/1,15/1,10/1};"
             "video/x-bayer,format=grbg,width=640,height=480,framerate={60/1,30/1,25/1,15/1}",
             true,
-            false,
             false,
             false,
             false,
@@ -249,7 +242,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
         }
     },
 
@@ -267,7 +259,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             "video/x-bayer,format=grbg,width=1280,height=720,framerate={30/1,25/1,15/1,10/1};"
             "video/x-bayer,format=grbg,width=640,height=480,framerate={60/1,30/1,25/1,15/1}",
             true,
-            false,
             false,
             false,
             false,
@@ -293,7 +284,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
         }
     },
 
@@ -306,7 +296,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             "video/x-raw, format=YUY2, width=1280, height=720, framerate=9/1",
             false,
             true,
-            false,
             false,
             false,
         }
@@ -323,7 +312,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             "image/jpeg,width=800,height=600,framerate=30/1; "
             "image/jpeg,width=352,height=288,framerate=30/1; "
             "image/jpeg,width=320,height=240,framerate=30/1",
-            false,
             false,
             false,
             false,
@@ -346,7 +334,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             false,
             false,
-            false,
         }
     },
 
@@ -357,7 +344,6 @@ std::vector<fic_test_data_container> fic_test_data = {
         false,
         {
             "image/jpeg, width=1280, height=960, framerate=60/1",
-            false,
             false,
             false,
             false,
@@ -376,7 +362,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             true,
             true,
             false,
-            false,
         }
     },
     {
@@ -392,7 +377,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             false,
             true,
             true,
-            false,
             false,
         }
     },
@@ -410,7 +394,6 @@ std::vector<fic_test_data_container> fic_test_data = {
             "video/x-raw,format=YUY2,width=320,height=240,framerate={ 30/1 }",
             false,
             true,
-            false,
             false,
             false,
         }
