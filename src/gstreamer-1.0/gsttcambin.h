@@ -38,10 +38,13 @@ G_BEGIN_DECLS
 typedef struct _GstTcamBin GstTcamBin;
 typedef struct _GstTcamBinClass GstTcamBinClass;
 
+struct tcambin_data;
 
 struct _GstTcamBin
 {
     GstBin parent;
+
+    tcambin_data*   data;
 
     GstElement* src;
     GstElement* pipeline_caps;
@@ -54,24 +57,12 @@ struct _GstTcamBin
     GstElement* focus;
     GstElement* jpegdec;
     GstElement* convert;
-    GstElement* out_caps = nullptr;
-
-    char* device_serial;
-    char* device_type;
-
-    GstCaps* target_caps = nullptr;
-    GstPad* target_pad;
-    GstPad* pad;
-
-    GstCaps* user_caps;
 
     gboolean elements_created;
     gboolean elements_linked;
     gboolean target_set;
     gboolean must_apply_state;
-    char* state;
 
-    GstCaps* src_caps = nullptr;
     bool needs_bayer_transform;
     bool needs_debayer;
     bool needs_videoconvert;

@@ -26,11 +26,12 @@
 
 #include <gst/gst.h>
 
+#include "gst_helper.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
 
 /**
  * returns true if serial and type have been found

@@ -27,19 +27,6 @@
 
 #include "public_utils.h"
 
-static std::string  gst_caps_to_std_string( const GstCaps* caps )
-{
-    auto tmp = gst_caps_to_string( caps );
-    if( tmp == nullptr ) {
-        return {};
-    }
-
-    std::string rval = tmp;
-    g_free( tmp );
-    return rval;
-}
-
-
 bool separate_serial_and_type (const std::string& input,
                                std::string& serial,
                                std::string& type)
@@ -603,7 +590,7 @@ $4 = 0x555555a8f120 "EMPTY"
         return true;
     }
 
-    auto tmp_caps_string = gst_caps_to_std_string( caps );
+    auto tmp_caps_string = gst_helper::to_string( caps );
     if( (tmp_caps_string == "EMPTY") || gst_caps_is_any( caps ) )
     {
         return true;
@@ -876,7 +863,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
 
-    tcam_info("Fixating assumed largest caps: %s", gst_caps_to_std_string(largest_caps).c_str());
+    tcam_info("Fixating assumed largest caps: %s", gst_helper::to_string(largest_caps).c_str());
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
@@ -911,7 +898,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     {
         gst_caps_set_value(largest_caps, "format", gst_structure_get_value(s, "format"));
     }
-    tcam_info("Largest caps are: %s", gst_caps_to_std_string(largest_caps).c_str());
+    tcam_info("Largest caps are: %s", gst_helper::to_string(largest_caps).c_str());
 
     return largest_caps;
 }
@@ -1133,7 +1120,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
         if (!gst_caps_is_fixed(available_caps))
         {
             if (!gst_caps_is_empty(wanted_caps) &&
-                (gst_caps_to_std_string(wanted_caps) != "NULL") )
+                (gst_helper::to_string(wanted_caps) != "NULL") )
             {
                 if (!gst_caps_is_fixed(wanted_caps))
                 {
