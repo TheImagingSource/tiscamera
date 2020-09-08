@@ -1157,7 +1157,7 @@ static device_resources find_source (GstElement* self)
     else
     {
         update_device_resources( source_element, &res );
-        g_object_unref( source_element );
+        gst_object_unref( source_element );
     }
 
     return res;

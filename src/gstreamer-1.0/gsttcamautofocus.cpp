@@ -521,7 +521,7 @@ static void gst_tcamautofocus_finalize (GObject* object)
 
     if( self->camera_src )
     {
-        g_object_unref( self->camera_src );
+        gst_object_unref( self->camera_src );
     }
 
     autofocus_destroy(self->focus);

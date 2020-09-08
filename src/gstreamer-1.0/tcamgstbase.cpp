@@ -61,7 +61,7 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
 
     GstPad* src_pad = gst_pad_get_peer(orig_pad);
-    g_object_unref(orig_pad);
+    gst_object_unref(orig_pad);
 
     if (!src_pad)
     {
@@ -983,7 +983,7 @@ static GstCaps* get_caps_from_element (GstElement* element, const char* padname)
 
     auto pad = gst_element_get_static_pad( element, padname );
     GstCaps* ret = gst_pad_query_caps(pad, NULL);
-    g_object_unref( pad );
+    gst_object_unref( pad );
 
     return ret;
 }

@@ -1280,7 +1280,7 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 
         // gst_bus_remove_signal_watch(bus);
 
-        g_object_unref( bus );
+        gst_object_unref( bus );
     }
     else
     {

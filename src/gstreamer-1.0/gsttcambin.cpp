@@ -389,7 +389,7 @@ static gboolean gst_tcam_bin_get_device_info (TcamProp* self __attribute((__unus
                                              name,
                                              identifier,
                                              connection_type);
-    g_object_unref(src);
+    gst_object_unref(src);
 
     return ret;
 }
