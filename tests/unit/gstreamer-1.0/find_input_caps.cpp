@@ -77,7 +77,6 @@ TEST_CASE("find_input_caps")
             bool requires_videoconvert;
             bool requires_jpegdec;
             bool requires_dutils;
-            bool requires_biteater;
             bool use_dutils = entry.use_dutils;
             // bool use_dutils = false;
 
@@ -87,7 +86,7 @@ TEST_CASE("find_input_caps")
                                                    requires_bayer,
                                                    requires_videoconvert,
                                                    requires_jpegdec, requires_dutils,
-                                                   requires_biteater, use_dutils);
+                                                   use_dutils);
 
             if (result_caps)
             {
@@ -109,7 +108,6 @@ TEST_CASE("find_input_caps")
             REQUIRE(requires_videoconvert == entry.result.requires_videoconvert);
             REQUIRE(requires_jpegdec == entry.result.requires_jpegdec);
             REQUIRE(requires_dutils == entry.result.requires_dutils);
-            REQUIRE(requires_biteater == entry.result.requires_biteater);
 
             if (src_caps)
             {
