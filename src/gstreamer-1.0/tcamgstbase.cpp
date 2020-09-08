@@ -790,7 +790,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         return nullptr;
     }
 
-    int largest_index = -1;
+    int largest_index = 0;
     int largest_width = -1;
     int largest_height = -1;
 
