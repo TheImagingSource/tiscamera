@@ -15,7 +15,12 @@
 
 
 add_subdirectory(tcam-ctrl)
-add_subdirectory(tcam-capture)
+
+if (TCAM_BUILD_WITH_GUI)
+
+  add_subdirectory(tcam-capture)
+
+endif (TCAM_BUILD_WITH_GUI)
 
 if (BUILD_V4L2)
 
