@@ -375,7 +375,6 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE_TYPE,
-    PROP_DEVICE,
     PROP_CAM_BUFFERS,
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
@@ -920,11 +919,6 @@ static void gst_tcam_src_get_property (GObject* object,
             g_value_set_string(value, self->device_serial.c_str());
             break;
         }
-        case PROP_DEVICE:
-        {
-            GST_ERROR("TODO device  get");
-            break;
-        }
         case PROP_DEVICE_TYPE:
         {
             g_value_set_string(value, tcam::tcam_device_type_to_string(self->device_type).c_str());
@@ -1004,13 +998,6 @@ static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
                               "auto",
                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_DEVICE,
-         g_param_spec_pointer ("camera",
-                               "Camera Object",
-                               "Camera instance to retrieve additional information",
-                               static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property
         (gobject_class,
          PROP_CAM_BUFFERS,
