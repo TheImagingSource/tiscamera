@@ -46,7 +46,6 @@ struct _GstTcamBin
     GstElement* src;
     GstElement* pipeline_caps;
     GstElement* dutils;
-    GstElement* biteater;
     GstElement* bayer_transform;
     GstElement* exposure;
     GstElement* whitebalance;
@@ -79,7 +78,6 @@ struct _GstTcamBin
     bool has_dutils;   // system has dutils
     bool use_dutils;   // user wants dutils
     bool needs_dutils; // pipeline needs dutils
-    bool needs_biteater;
 };
 
 

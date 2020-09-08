@@ -19,7 +19,6 @@ set(PLUGINS
   gsttcamwhitebalance
   gsttcamautoexposure
   gsttcamautofocus
-  gsttcambiteater
   gsttcambin
   )
 
@@ -59,8 +58,6 @@ add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp)
 add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp)
 
 add_library(gsttcamautofocus SHARED gsttcamautofocus.cpp)
-
-add_library(gsttcambiteater SHARED gsttcambiteater.cpp)
 
 add_library(gsttcambin SHARED gsttcambin.cpp)
 

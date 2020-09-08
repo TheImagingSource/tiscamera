@@ -150,7 +150,6 @@ bool tcam_gst_can_intersect_simple(const GstCaps *caps, const gchar *capsstring)
  * @param requires_bayer2rgb(out) - will be set to true when the bayer2rgb element is required
  * @param requires_vidoeconvert(out) - will be set to true when the videoconvert element is required
  * @param requires_jpegconvert(out) - will be set to true when the jpegdec element is required
- * @param requires_biteater(out) - will be set to true when the biteater element is required
  * @param use_dutils(in) - false when dutils shall be ignored
  *
  * @return possible caps for the source
@@ -162,7 +161,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegconvert,
                           bool& requires_dutils,
-                          bool& requires_biteater,
                           bool use_dutils
 );
 
