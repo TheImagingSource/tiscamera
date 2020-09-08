@@ -883,6 +883,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
+        gst_caps_unref( largest_caps );
+
         GST_ERROR("Cannot fixate largest caps. Returning NULL");
         return nullptr;
     }
@@ -904,7 +906,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
     g_value_set_int(&vh, h);            // #TODO this function really looks bad here
 
     gst_caps_set_value(largest_caps, "height", &vh);
-    largest_caps = gst_caps_new_simple (gst_structure_get_name(s),
+
+    GstCaps* ret_caps = gst_caps_new_simple (gst_structure_get_name(s),
                                         "framerate", GST_TYPE_FRACTION, num, den,
                                         "width", G_TYPE_INT, w,
                                         "height", G_TYPE_INT, h,
@@ -912,11 +915,14 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     if (gst_structure_has_field(s, "format"))
     {
-        gst_caps_set_value(largest_caps, "format", gst_structure_get_value(s, "format"));
+        gst_caps_set_value( ret_caps, "format", gst_structure_get_value(s, "format"));
     }
-    tcam_info("Largest caps are: %s", gst_helper::to_string(largest_caps).c_str());
 
-    return largest_caps;
+    gst_caps_unref( largest_caps );
+
+    tcam_info("Largest caps are: %s", gst_helper::to_string( ret_caps ).c_str());
+
+    return ret_caps;
 }
 
 bool contains_jpeg (const GstCaps* caps)
