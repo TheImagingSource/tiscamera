@@ -608,6 +608,7 @@ static gboolean open_source_element (GstTcamSrc* self)
     {
         GST_DEBUG("Ghost pad target set");
     }
+    gst_object_unref( target_pad );
 
     gst_element_set_state(self->active_source, GST_STATE_READY);
 

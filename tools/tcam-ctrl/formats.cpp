@@ -66,8 +66,6 @@ void list_gstreamer_1_0_formats (const std::string& serial)
         return;
     }
 
-    std::string str;
-
     GValue val = {};
     g_value_init(&val, G_TYPE_STRING);
     g_value_set_static_string(&val, serial.c_str());
@@ -80,7 +78,9 @@ void list_gstreamer_1_0_formats (const std::string& serial)
 
     GstCaps* caps = gst_pad_query_caps(pad, NULL);
 
-    str = gst_caps_to_string(caps);
+    char* cstr = gst_caps_to_string(caps);
+    std::string str = cstr;
+    g_free( cstr );
 
     if (caps)
     {
@@ -107,8 +107,6 @@ void list_gstreamer_1_0_formats (const std::string& serial)
     gst_element_set_state(source, GST_STATE_NULL);
 
     gst_object_unref(source);
-
-
 }
 
 

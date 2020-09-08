@@ -1002,10 +1002,10 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
 static GstCaps* generate_all_caps (GstTcamBin* self)
 {
     gst_helper::gst_unique_ptr<GstPad> in_pad = gst_helper::get_static_pad( self->src, "src" );
-    GstCaps* incoming = gst_pad_query_caps( in_pad.get(), NULL);
+    GstCaps* incoming_caps = gst_pad_query_caps( in_pad.get(), NULL);
 
     // always can be passed through
-    GstCaps* all_caps = gst_caps_copy(incoming);
+    GstCaps* all_caps = gst_caps_copy(incoming_caps);
 
     // we have three scenarios:
     // 1. camera has video/x-raw,format=GRAY8 = passed through
@@ -1057,7 +1057,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
         }
     }
 
-    gst_caps_unref(incoming);
+    gst_caps_unref(incoming_caps);
 
     // TODO: find alternative
     // caps_substract implicitly calls gst_caps_simplify

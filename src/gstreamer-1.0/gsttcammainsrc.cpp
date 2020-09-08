@@ -1510,8 +1510,6 @@ wait_again:
     // add meta statistics data to buffer
     {
 
-        // uint64_t frame_count = (*buffer)->offset; // is not set yet
-        //uint64_t frame_count = gst_pad_get_offset(gst_element_get_static_pad(GST_ELEMENT(self), "src"));
         uint64_t frame_count = self->element.parent.segment.position;
         auto stat = ptr->get_statistics();
 
