@@ -927,14 +927,26 @@ static void gst_tcam_src_get_property (GObject* object,
         }
         case PROP_CAM_BUFFERS:
         {
-            GST_ERROR("TODO cam buffer  get");
-//            g_value_set_int(value, self->imagesink_buffers);
+            if (self->active_source)
+            {
+                g_object_get_property(G_OBJECT(self->active_source), "camera-buffers", value);
+            }
+            else
+            {
+                GST_ERROR("No active source.");
+            }
             break;
         }
         case PROP_NUM_BUFFERS:
         {
-            GST_ERROR("TODO num buffers get");
-            //          g_value_set_int (value, self->n_buffers);
+            if (self->active_source)
+            {
+                g_object_get_property(G_OBJECT(self->active_source), "num-buffers", value);
+            }
+            else
+            {
+                GST_ERROR("No active source.");
+            }
             break;
         }
         case PROP_DO_TIMESTAMP:
