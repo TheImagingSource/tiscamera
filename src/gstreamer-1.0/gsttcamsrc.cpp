@@ -89,32 +89,6 @@ static TCAM_DEVICE_TYPE str_to_type (const std::string& str)
     }
 }
 
-
-static void separate_serial_and_type (GstTcamSrc* self, const std::string& input,
-                               std::string& serial, TCAM_DEVICE_TYPE& type)
-{
-    auto pos = input.find("-");
-
-    if (pos != std::string::npos)
-    {
-        // assign to tmp variables
-        // input could be self->device_serial
-        // overwriting it would ivalidate input for
-        // device_type retrieval
-        std::string tmp1 = input.substr(0, pos);
-        std::string tmp2 = input.substr(pos+1);
-
-        self->device_serial = tmp1;
-        self->device_type = str_to_type(tmp2);
-    }
-    else
-    {
-        serial = input;
-        type = TCAM_DEVICE_TYPE_UNKNOWN;
-    }
-}
-
-
 static GSList* gst_tcam_src_get_property_names (TcamProp* self);
 
 static gchar* gst_tcam_src_get_property_type (TcamProp* self, const gchar* name);
@@ -384,16 +358,15 @@ static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
                                                                          GST_PAD_ALWAYS,
                                                                          GST_STATIC_CAPS ("ANY"));
 
-static gboolean close_source_element (GstTcamSrc* self)
+static bool close_source_element (GstTcamSrc* self)
 {
-
     GstState state;
     gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000);
 
     if (state != GST_STATE_NULL && state != GST_STATE_READY)
     {
         GST_ERROR("Active source is neiter in GST_STATE_NULL nor GST_STATE_READY. Not closing.");
-        return FALSE;
+        return false;
     }
 
     if (self->active_source)
@@ -406,49 +379,22 @@ static gboolean close_source_element (GstTcamSrc* self)
         //gst_bin_remove(GST_BIN(self), self->active_source);
 
         self->active_source = nullptr;
-        return TRUE;
     }
-
-    return TRUE;
+    return true;
 }
 
 
 static gboolean is_device_already_open (GstTcamSrc* self)
 {
+    char* serial_str = nullptr;
 
-    const char* serial_str = nullptr;
-    TCAM_DEVICE_TYPE device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-
-    // query these as late as possible
-    // src needs some time as things can happen async
     g_object_get(G_OBJECT(self->active_source), "serial", &serial_str, NULL);
 
-    if (self->active_source == self->main_src)
-    {
-        const char* type_str = nullptr;
-        g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
+    bool is_serial_same = g_strcmp0( self->device_serial.c_str(), serial_str ) == 0;
 
-        if (type_str)
-        {
-            self->device_type = str_to_type(type_str);
-        }
-        else
-        {
-            self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-        }
-    }
-    else if (self->active_source == self->pimipi_src)
-    {
-        device_type = TCAM_DEVICE_TYPE_PIMIPI;
-    }
+    g_free( serial_str );
 
-    if (g_strcmp0(self->device_serial.c_str(), serial_str) == 0
-        && self->device_type == device_type)
-    {
-        return TRUE;
-    }
-
-    return FALSE;
+    return is_serial_same ? TRUE : FALSE;
 }
 
 
@@ -461,11 +407,9 @@ static gboolean open_source_element (GstTcamSrc* self)
         // the nothing is to do
         if (is_device_already_open(self))
         {
-            return true;
+            return TRUE;
         }
-        if (!close_source_element(self))
-        {
-            GST_ERROR("Unable to close open source element. Aborting");
+        if( !close_source_element(self) ) {
             return FALSE;
         }
     }
@@ -489,28 +433,31 @@ static gboolean open_source_element (GstTcamSrc* self)
     else if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
         GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(self));
-
         if (!serials)
         {
             GST_ERROR("No devices to open");
             return FALSE;
         }
 
-        std::string serial;
-        TCAM_DEVICE_TYPE type;
-        separate_serial_and_type(self, (const char*)serials->data, serial, type);
+        auto vals = separate_serial_and_type( (const char*)serials->data );
 
-        g_slist_free(serials);
+        TCAM_DEVICE_TYPE type = str_to_type( vals.second );
+
+        g_slist_free_full(serials, g_free);
 
         if (type == TCAM_DEVICE_TYPE_ARAVIS
             || type == TCAM_DEVICE_TYPE_V4L2
             || type == TCAM_DEVICE_TYPE_LIBUSB)
         {
             self->active_source = self->main_src;
+            self->device_type = type;
+            self->device_serial = vals.first;
         }
         else if (type == TCAM_DEVICE_TYPE_PIMIPI)
         {
             self->active_source = self->pimipi_src;
+            self->device_type = type;
+            self->device_serial = vals.first;
         }
         else
         {
@@ -570,7 +517,7 @@ static gboolean open_source_element (GstTcamSrc* self)
                     }
                 }
             }
-            g_slist_free(tmp);
+            g_slist_free_full(tmp, g_free);
         }
     }
 
@@ -744,14 +691,17 @@ static void gst_tcam_src_finalize (GObject* object)
 }
 
 
-static void gst_tcamsrc_dispose (GstTcamSrc* self)
+static void gst_tcamsrc_dispose (GObject* object )
 {
+    GstTcamSrc* self = GST_TCAM_SRC( object );
+
     if (self->pad)
     {
         gst_element_remove_pad(GST_ELEMENT(self), self->pad);
+        self->pad = nullptr;
     }
 
-    G_OBJECT_CLASS(GST_ELEMENT_CLASS(parent_class))->dispose((GObject*) self);
+    G_OBJECT_CLASS(GST_ELEMENT_CLASS(parent_class))->dispose( object );
 }
 
 
@@ -776,13 +726,12 @@ static void gst_tcam_src_set_property (GObject* object,
                 }
                 else
                 {
-                    self->device_serial = g_value_get_string(value);
+                    std::string string_value = g_value_get_string(value);
 
                     std::string s;
                     std::string t;
 
-                    bool sep_ret = separate_serial_and_type(self->device_serial, s, t);
-
+                    bool sep_ret = separate_serial_and_type( string_value, s, t);
                     if (sep_ret)
                     {
                         GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
@@ -791,12 +740,15 @@ static void gst_tcam_src_set_property (GObject* object,
                         self->device_serial = s;
                         self->device_type = str_to_type(t);
 
-                        GST_DEBUG("Type interpreted as '%s'", type_to_str(self->device_type));
-
+                        GST_DEBUG("Type interpreted as '%s'", t.c_str());
+                    }
+                    else
+                    {
+                        self->device_serial = string_value;
+                        //self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
                     }
                     // no else
                     // self->device_serial and s are already equal
-
                 }
 
                 GST_INFO("Set camera serial to %s", self->device_serial.c_str());

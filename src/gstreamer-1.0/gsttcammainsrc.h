@@ -66,12 +66,6 @@ struct _GstTcamMainSrc
 
     std::atomic<bool> is_running;
     gboolean drop_incomplete_frames;
-
-    GstCaps *all_caps = nullptr;
-
-    std::mutex mtx;
-    std::condition_variable cv;
-    DeviceIndex index_;
 };
 
 

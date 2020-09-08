@@ -46,6 +46,7 @@ struct _GstTcamBin
 
     tcambin_data*   data;
 
+    // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
     GstElement* src;
     GstElement* pipeline_caps;
     GstElement* dutils;

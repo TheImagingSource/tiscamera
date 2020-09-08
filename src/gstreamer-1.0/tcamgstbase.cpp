@@ -27,6 +27,22 @@
 
 #include "public_utils.h"
 
+
+std::pair<std::string,std::string> separate_serial_and_type( const std::string& input)
+{
+    auto pos = input.find( "-" );
+
+    if( pos != std::string::npos )
+    {
+        std::string tmp1 = input.substr( 0, pos );
+        std::string tmp2 = input.substr( pos + 1 );
+
+        return std::make_pair( tmp1, tmp2 );
+    }
+    return std::make_pair( input, std::string{} );
+}
+
+
 bool separate_serial_and_type (const std::string& input,
                                std::string& serial,
                                std::string& type)

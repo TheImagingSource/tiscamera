@@ -28,11 +28,6 @@
 
 #include "gst_helper.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 /**
  * returns true if serial and type have been found
  * returns false if only serial has been found
@@ -40,6 +35,8 @@ extern "C"
 bool separate_serial_and_type (const std::string& input,
                                std::string& serial,
                                std::string& type);
+
+std::pair<std::string, std::string> separate_serial_and_type( const std::string& input );
 
 // Note: Returned element must be freed via gst_object_unref
 GstElement* tcam_gst_find_camera_src (GstElement* element);
@@ -154,9 +151,5 @@ namespace tcam_helper
     std::vector<std::string> gst_consume_GSList_to_vector( GSList* lst );
 }
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* TCAM_GSTTCAMBASE_H */
