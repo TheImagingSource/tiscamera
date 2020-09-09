@@ -710,205 +710,209 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
 
 }
 
-void gst_tcamautoexposure_set_property (GObject* object,
+static void gst_tcamautoexposure_set_property (GObject* object,
                                         guint property_id,
                                         const GValue* value,
                                         GParamSpec* pspec)
 {
-    GstTcamautoexposure* tcamautoexposure = GST_TCAMAUTOEXPOSURE (object);
+    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE (object);
 
     switch (property_id)
     {
         case PROP_AUTO_EXPOSURE:
         {
-            tcamautoexposure->auto_exposure = g_value_get_boolean(value);
+            self->auto_exposure = g_value_get_boolean(value);
             break;
         }
         case PROP_AUTO_GAIN:
         {
-            tcamautoexposure->auto_gain = g_value_get_boolean(value);
+            self->auto_gain = g_value_get_boolean(value);
             break;
         }
         case PROP_AUTO_IRIS:
         {
-            tcamautoexposure->auto_iris = g_value_get_boolean(value);
+            self->auto_iris = g_value_get_boolean(value);
             break;
         }
         case PROP_CAMERA:
         {
-            tcamautoexposure->camera_src = (GstElement*)g_value_get_object(value);
+            if( self->camera_src ) {
+                gst_object_unref( self->camera_src );
+                self->camera_src = nullptr;
+            }
+            self->camera_src = (GstElement*)g_value_dup_object(value);
             break;
         }
         case PROP_EXPOSURE_MIN:
         {
-            if (g_value_get_int(value) > tcamautoexposure->exposure_max)
+            if (g_value_get_int(value) > self->exposure_max)
             {
                 GST_ERROR("New user value for exposure min is greater or equal to exposure max. Ignoring request.");
                 break;
             }
 
-            tcamautoexposure->exposure_min = g_value_get_int(value);
+            self->exposure_min = g_value_get_int(value);
 
-            if (tcamautoexposure->exposure.value < tcamautoexposure->exposure_min)
+            if (self->exposure.value < self->exposure_min)
             {
-                tcamautoexposure->exposure.value = tcamautoexposure->exposure_min;
-                set_exposure(tcamautoexposure, tcamautoexposure->exposure.value);
+                self->exposure.value = self->exposure_min;
+                set_exposure(self, self->exposure.value);
             }
 
-            if (tcamautoexposure->exposure_min == 0)
+            if (self->exposure_min == 0)
             {
-                tcamautoexposure->exposure_min = tcamautoexposure->default_exposure_values.min;
+                self->exposure_min = self->default_exposure_values.min;
             }
             break;
         }
         case PROP_EXPOSURE_MAX:
         {
-            if (g_value_get_int(value) < tcamautoexposure->exposure_min)
+            if (g_value_get_int(value) < self->exposure_min)
             {
                 GST_ERROR("New user value for exposure max is smaller or equal to exposure min. Ignoring request.");
                 break;
             }
 
-            if (tcamautoexposure->exposure.value > tcamautoexposure->exposure_max)
+            if (self->exposure.value > self->exposure_max)
             {
-                tcamautoexposure->exposure.value = tcamautoexposure->exposure_max;
-                set_exposure(tcamautoexposure, tcamautoexposure->exposure.value);
+                self->exposure.value = self->exposure_max;
+                set_exposure(self, self->exposure.value);
             }
 
-            tcamautoexposure->exposure_max = g_value_get_int(value);
-            if (tcamautoexposure->exposure_max == 0.0)
+            self->exposure_max = g_value_get_int(value);
+            if (self->exposure_max == 0.0)
             {
-                tcamautoexposure->exposure_max = tcamautoexposure->default_exposure_values.max;
+                self->exposure_max = self->default_exposure_values.max;
             }
             break;
         }
         case PROP_GAIN_MIN:
         {
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
-            if (g_value_get_double(value) > tcamautoexposure->gain_max)
+            if (g_value_get_double(value) > self->gain_max)
             {
                 GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
             }
 
-            if (g_value_get_double(value) > tcamautoexposure->gain.min)
+            if (g_value_get_double(value) > self->gain.min)
             {
                 GST_WARNING("New user value for gain min is greater than device gain min.");
-                tcamautoexposure->gain_min = tcamautoexposure->gain.min;
+                self->gain_min = self->gain.min;
                 break;
             }
 
-            tcamautoexposure->gain_min = g_value_get_double(value);
+            self->gain_min = g_value_get_double(value);
 
-            if (tcamautoexposure->gain.value < tcamautoexposure->gain_min)
+            if (self->gain.value < self->gain_min)
             {
-                tcamautoexposure->gain.value = tcamautoexposure->gain_min;
-                set_gain(tcamautoexposure, tcamautoexposure->gain.value);
+                self->gain.value = self->gain_min;
+                set_gain(self, self->gain.value);
             }
 
-            if (tcamautoexposure->gain_min == 0.0)
+            if (self->gain_min == 0.0)
             {
-                tcamautoexposure->gain_min = tcamautoexposure->gain.min;
+                self->gain_min = self->gain.min;
             }
             break;
         }
         case PROP_GAIN_MAX:
         {
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
-            if (g_value_get_double(value) < tcamautoexposure->gain_min)
+            if (g_value_get_double(value) < self->gain_min)
             {
                 GST_ERROR("New user value for gain max is smaller or equal to gain min. Ignoring request.");
                 break;
             }
 
-            if ((g_value_get_double(value) > tcamautoexposure->gain.max))
+            if ((g_value_get_double(value) > self->gain.max))
             {
                 GST_WARNING("New user value for gain max is bigger that device gain max. Ignoring request.");
-                tcamautoexposure->gain_max = tcamautoexposure->gain.max;
+                self->gain_max = self->gain.max;
                 break;
             }
 
-            tcamautoexposure->gain_max = g_value_get_double(value);
+            self->gain_max = g_value_get_double(value);
 
-            if (tcamautoexposure->gain.value > tcamautoexposure->gain_max)
+            if (self->gain.value > self->gain_max)
             {
-                tcamautoexposure->gain.value = tcamautoexposure->gain_max;
-                set_gain(tcamautoexposure, tcamautoexposure->gain.value);
+                self->gain.value = self->gain_max;
+                set_gain(self, self->gain.value);
             }
 
-            if (tcamautoexposure->gain_max == 0.0)
+            if (self->gain_max == 0.0)
             {
-                tcamautoexposure->gain_max = tcamautoexposure->gain.max;
+                self->gain_max = self->gain.max;
             }
             break;
         }
         case PROP_IRIS_MIN:
         {
-            if (g_value_get_int(value) > tcamautoexposure->iris_max)
+            if (g_value_get_int(value) > self->iris_max)
             {
                 GST_ERROR("New user value for iris min is greater or equal to iris max. Ignoring request.");
                 break;
             }
 
-            tcamautoexposure->iris_min = g_value_get_int(value);
+            self->iris_min = g_value_get_int(value);
 
-            if (tcamautoexposure->iris.value < tcamautoexposure->iris_min)
+            if (self->iris.value < self->iris_min)
             {
-                tcamautoexposure->iris.value = tcamautoexposure->iris_min;
-                set_iris(tcamautoexposure, tcamautoexposure->iris.value);
+                self->iris.value = self->iris_min;
+                set_iris(self, self->iris.value);
             }
 
-            if (tcamautoexposure->iris_min == 0)
+            if (self->iris_min == 0)
             {
-                tcamautoexposure->iris_min = tcamautoexposure->iris.min;
+                self->iris_min = self->iris.min;
             }
             break;
         }
         case PROP_IRIS_MAX:
         {
-            if (g_value_get_int(value) < tcamautoexposure->iris_min)
+            if (g_value_get_int(value) < self->iris_min)
             {
                 GST_ERROR("New user value for iris max is smaller or equal to iris min. Ignoring request.");
                 break;
             }
 
-            tcamautoexposure->iris_max = g_value_get_int(value);
-            if (tcamautoexposure->iris_max == 0.0 || tcamautoexposure->iris_max == G_MAXINT)
+            self->iris_max = g_value_get_int(value);
+            if (self->iris_max == 0.0 || self->iris_max == G_MAXINT)
             {
-                tcamautoexposure->iris_max = tcamautoexposure->iris.max;
+                self->iris_max = self->iris.max;
             }
 
-            if (tcamautoexposure->iris.value > tcamautoexposure->iris_max)
+            if (self->iris.value > self->iris_max)
             {
-                tcamautoexposure->iris.value = tcamautoexposure->iris_max;
-                set_iris(tcamautoexposure, tcamautoexposure->iris.value);
+                self->iris.value = self->iris_max;
+                set_iris(self, self->iris.value);
             }
 
             break;
         }
         case PROP_BRIGHTNESS_REFERENCE:
         {
-            tcamautoexposure->brightness_reference = g_value_get_int(value);
+            self->brightness_reference = g_value_get_int(value);
             break;
         }
         case PROP_ROI_LEFT:
         {
-            roi_set_left(tcamautoexposure->roi, g_value_get_int(value));
+            roi_set_left(self->roi, g_value_get_int(value));
             break;
         }
         case PROP_ROI_TOP:
         {
-            roi_set_top(tcamautoexposure->roi, g_value_get_int(value));
+            roi_set_top(self->roi, g_value_get_int(value));
             break;
         }
         case PROP_ROI_WIDTH:
         {
-            roi_set_width(tcamautoexposure->roi, g_value_get_int(value));
+            roi_set_width(self->roi, g_value_get_int(value));
             break;
         }
         case PROP_ROI_HEIGHT:
         {
-            roi_set_height(tcamautoexposure->roi,
+            roi_set_height(self->roi,
                            g_value_get_int(value));
             break;
         }
@@ -920,7 +924,7 @@ void gst_tcamautoexposure_set_property (GObject* object,
     }
 }
 
-void gst_tcamautoexposure_get_property (GObject* object,
+static void gst_tcamautoexposure_get_property (GObject* object,
                                         guint property_id,
                                         GValue* value,
                                         GParamSpec* pspec)
@@ -980,7 +984,7 @@ void gst_tcamautoexposure_get_property (GObject* object,
     }
 }
 
-void gst_tcamautoexposure_finalize (GObject* object)
+static void gst_tcamautoexposure_finalize (GObject* object)
 {
     auto self = GST_TCAMAUTOEXPOSURE(object);
     destroy_roi(self->roi);
@@ -1321,7 +1325,7 @@ static void set_iris (GstTcamautoexposure* self, int iris)
 }
 
 
-void retrieve_current_values (GstTcamautoexposure* self)
+static void retrieve_current_values (GstTcamautoexposure* self)
 {
     if (!self->exposure_name.empty())
     {
@@ -1583,12 +1587,13 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
 }
 
 
-gboolean find_image_values (GstTcamautoexposure* self)
+static gboolean find_image_values (GstTcamautoexposure* self)
 {
     GstPad* pad = GST_BASE_TRANSFORM_SINK_PAD(self);
     GstCaps* caps = gst_pad_get_current_caps(pad);
-
-    gst_caps_to_tcam_video_format(caps, &self->active_format);
+    if( !gst_caps_to_tcam_video_format(caps, &self->active_format) ) {
+        return FALSE;
+    }
 
     GstStructure *structure = gst_caps_get_structure (caps, 0);
 
