@@ -42,7 +42,7 @@ struct tcambin_data
     gst_helper::gst_unique_ptr<GstPad> target_pad;
     gst_helper::gst_unique_ptr<GstCaps> user_caps;
 
-    gst_helper::gst_unique_ptr<GstPad>  pad;
+    GstPad*         src_ghost_pad =  nullptr;   // NOTE: we don't have a reference to this, so this is a observer that will be made invalid in dispose
 
     gst_helper::gst_unique_ptr<GstElement>  out_caps;
 
@@ -1054,7 +1054,7 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 static void set_target_pad (GstTcamBin* self)
 {
 
-    gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->pad.get()), NULL);
+    gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->src_ghost_pad), NULL);
 
     if (self->target_set == FALSE)
     {
@@ -1064,7 +1064,7 @@ static void set_target_pad (GstTcamBin* self)
         }
         else
         {
-            if (!gst_ghost_pad_set_target( GST_GHOST_PAD( self->data->pad.get() ), self->data->target_pad.get()))
+            if (!gst_ghost_pad_set_target( GST_GHOST_PAD( self->data->src_ghost_pad ), self->data->target_pad.get()))
             {
                 GST_ERROR("Could not set target for ghostpad.");
             }
@@ -1121,7 +1121,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
 
             self->data->out_caps.reset(gst_element_factory_make("capsfilter", "tcambin-out_caps"));
 
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->pad.get()),
+            gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->src_ghost_pad),
                                       gst_helper::get_static_pad( self->data->out_caps, "src" ).get() );
 
             GstCaps* all_caps = generate_all_caps(self);
@@ -1139,7 +1139,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
         {
             GST_INFO("READY_TO_PAUSED");
 
-            GstPad* sinkpad = gst_pad_get_peer(self->data->pad.get());
+            gst_helper::gst_unique_ptr<GstPad> sinkpad{ gst_pad_get_peer(self->data->src_ghost_pad) };
 
             if (sinkpad == nullptr)
             {
@@ -1147,7 +1147,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             }
             else
             {
-                GstElement* par = gst_pad_get_parent_element(sinkpad);
+                GstElement* par = gst_pad_get_parent_element(sinkpad.get());
 
                 if (strcmp(g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(par))),
                            "GstCapsFilter") == 0)
@@ -1290,7 +1290,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
         {
             gst_tcambin_clear_source(self);
             gst_tcambin_clear_elements(self);
-            gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->pad.get()), NULL);
+            gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->src_ghost_pad), NULL);
             break;
         }
         default:
@@ -1518,8 +1518,8 @@ static void gst_tcambin_init (GstTcamBin* self)
     self->convert = nullptr;
 
     // NOTE: the result of gst_ghost_pad_new_no_target is a floating reference that is consumer by gst_element_add_pad
-    self->data->pad.reset( gst_ghost_pad_new_no_target("src", GST_PAD_SRC) );
-    gst_element_add_pad(GST_ELEMENT(self), self->data->pad.get());
+    self->data->src_ghost_pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
+    gst_element_add_pad(GST_ELEMENT(self), self->data->src_ghost_pad);
 
     GST_OBJECT_FLAG_SET(self, GST_ELEMENT_FLAG_SOURCE);
 }
@@ -1540,9 +1540,11 @@ static void gst_tcambin_dispose (GstTcamBin* self)
     gst_tcambin_clear_source(self);
     gst_tcambin_clear_elements(self);
 
-    gst_element_remove_pad(GST_ELEMENT(self), self->data->pad.get());
-
-    self->data->pad.release();
+    if( self->data->src_ghost_pad )
+    {
+        gst_element_remove_pad(GST_ELEMENT(self), self->data->src_ghost_pad );  // this actually releases the ghost pad
+        self->data->src_ghost_pad = nullptr;
+    }
 
     G_OBJECT_CLASS(parent_class)->dispose((GObject*) self);
 }
