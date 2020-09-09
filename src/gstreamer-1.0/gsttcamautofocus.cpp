@@ -638,15 +638,13 @@ static gboolean find_image_values (GstTcamAutoFocus* self)
 {
     GstPad* pad  = GST_BASE_TRANSFORM_SINK_PAD(self);
     GstCaps* caps = gst_pad_get_current_caps(pad);
-    GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-    gst_caps_to_tcam_video_format(caps, &self->fmt);
+    if( !gst_caps_to_tcam_video_format(caps, &self->fmt) ) {
+        return FALSE;
+    }
 
-    gint tmp_w, tmp_h;
-    g_return_val_if_fail (gst_structure_get_int (structure, "width", &tmp_w), FALSE);
-    g_return_val_if_fail (gst_structure_get_int (structure, "height", &tmp_h), FALSE);
-    self->image_width = tmp_w < 0 ? 0 : tmp_w;
-    self->image_height = tmp_h < 0 ? 0 : tmp_h;
+    self->image_width = self->fmt.width;
+    self->image_height = self->fmt.height;
 
     if (self->roi_width == 0)
     {
@@ -660,6 +658,8 @@ static gboolean find_image_values (GstTcamAutoFocus* self)
 
     roi_set_image_size(self->roi, {(unsigned int)self->image_width,
                                    (unsigned int)self->image_height});
+
+    gst_caps_unref( caps );
 
     return TRUE;
 }
