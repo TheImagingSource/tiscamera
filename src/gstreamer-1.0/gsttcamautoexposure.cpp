@@ -1648,6 +1648,8 @@ gboolean find_image_values (GstTcamautoexposure* self)
         self->pattern = BG;
     }
 
+    gst_caps_unref( caps );
+
     return TRUE;
 }
 
