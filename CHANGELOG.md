@@ -16,12 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dmk72uc02_af_146.euvc
 - tcam-uvc-extension-loader can now be built/installed without other libraries.
   Set cmake option TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY to ON to activate.
+- tcammainsrc - Replaces tcamsrc in functionality.
+- 'pimipi' device type
+- 11-device-state example
+- CMake switch `TCAM_BUILD_NO_GUI` to disable all gui build targets and dependency inclusions.
+  See documenation for further details.
+- Build target `minimal` to build recommended minimal tiscamera build.
 
 ### Changed
 
 - cmake user options are now all defined in a separate file
 - tcam-ctrl --load now accepts files and attempts to load them as json
-- gstreamer elements no have the same version string that is used for releases
+- gstreamer elements now have the same version string that is used for releases
+- tcamsrc is now a wrapper around all potential TIS source elements
+- tiscamera and tiscamera-dutils are now version locked. tcambin will log a warning
+  when a version mismatch is detected. Use 'use-dutils=true' to overwrite.
+  Mismatching version are not supported.
+- All gstreamer elements now only use tcamprop for property interactions
+- tcam-ctrl now uses tcamsrc for all device interactions
+- tcam-capture now uses xvimagesink for display purposes
 
 ### Fixed
 
@@ -29,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * 4fb8ec3 - gst: Apply bin state when all elements are verified playing
 - tcambin: ensure serial and type are always defined
 - camera-ip-conf can now correctly write newer firmware versions
+- package generation now works under Ubuntu 20.04
+- camera-ip-conf/tcam-gigetool now support newer
+  firmware files that have correct access control
+- Json property descriptions can now be used to set 'button' type properties
 
 ### Removed
 
@@ -41,6 +58,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dmk72uc02_AF_140.euvc
   dmk72uc02_af_144.euvc
   dfk72uc02_AF_140.euvc
+- tcambiteater - functionality is no part of tcamdutils element
+- tcam-capture lost the following features:
+  - zoom
+  - pixel color under mouse
+  - ROI selection/display via overlay
+- tcammainsrc/tcamsrc property `camera`. Use tcamprop instead.
 
 ## [0.12.0] - 2020-05-27
 
