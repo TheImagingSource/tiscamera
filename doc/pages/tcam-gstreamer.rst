@@ -7,10 +7,12 @@ When an element property is also available through the property interface its na
 
 .. _tcamsrc:
 
-tcamsrc
-#######
+tcammainsrc
+###########
 
-Source elements that retrieves images from a device.
+Source elements that retrieves images from a device.  
+The tcammainsrc existed as `tcamsrc` prior to tiscamera 0.13.0.  
+It is used for v4l2, aravis and libusb devices.
 
 .. list-table:: tcamsrc properties
    :header-rows: 1
@@ -75,6 +77,9 @@ The following fields are available:
      - Flag noting if the buffer is damaged in any way. Only useful when drop-incomplete-buffer=false.
        
 For timestamp point of reference values look :any:`timestamps`.
+Please be aware that not all GStreamer elements correctly pass GstMeta information through.  
+Elements like `bayer2rgb` to not copy the meta information.  
+This may affect your usage of elements like `tcambin` as they can use such elements internally.
 
 Messages
 --------
