@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+
+# Copyright 2020 The Imaging Source Europe GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys
+import argparse
+import subprocess
+import json
+import os
+import re
+
+
+def convert_to_str(input_list, seperator):
+    """
+    Join all the strings in list
+    """
+    final_str = seperator.join(input_list)
+    return final_str
+
+
+def get_default_dir():
+    """"""
+    path = os.path.dirname(os.path.realpath(__file__))
+    return path
+
+
+def get_distribution():
+    """
+
+    """
+    "lsb_release"
+
+# No LSB modules are available.
+# Distributor ID:	Raspbian
+# Description:	Raspbian GNU/Linux 10 (buster)
+# Release:	10
+# Codename:	buster
+
+
+# No LSB modules are available.
+# Distributor ID:	Ubuntu
+# Description:	Ubuntu 20.04 LTS
+# Release:	20.04
+# Codename:	focal
+
+# No LSB modules are available.
+# Distributor ID:	Debian
+# Description:	Debian GNU/Linux 10 (buster)
+# Release:	10
+# Codename:	buster
+
+    process = subprocess.Popen(['lsb_release', '-a'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+
+    lsb_str = stdout.decode('UTF-8')
+    release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
+    distribution = re.search("Distributor ID:\\s(.+)$", lsb_str, re.MULTILINE)
+
+    r = release.group(1).replace(".", "")
+    filename = distribution.group(1).lower() + "_" + r + ".dep"
+
+    return filename
+
+
+def update_package_list():
+    """
+
+    """
+    cmd = ["sudo", "apt", "update"]
+    subprocess.call(cmd)
+
+
+def install_packages(package_list: list, yes: bool = False, dry: bool = False):
+    """
+
+    """
+
+    cmd = ["sudo", "apt", "install"]
+    if yes:
+        cmd.append("-y")
+
+    if dry:
+        cmd.append("--dry-run")
+
+    cmd2 = cmd + package_list
+
+    print("\nExecuting: {}\n".format(convert_to_str(cmd2, " ")))
+
+    subprocess.call(cmd2)
+
+
+class Dependency(object):
+
+    def __init__(self, json_node):
+
+        self.name = json_node["name"]
+        self.version = json_node["version"]
+        self.phase = json_node["phase"]
+        self.modules = json_node["modules"]
+
+    def __str__(self):
+
+        return "{} ({}) - {} - {}".format(self.name, self.version, self.modules, self.phase)
+
+    def deb(self):
+        """
+
+        """
+        return "{} ({})".format(self.name, self.version)
+
+
+class DependencyManager(object):
+
+    def __init__(self):
+
+        self.dependencies = []
+        self.distribution = None
+
+        self.parse_args()
+
+        if not self.args.command:
+            self.parser.print_help()
+            return
+
+        # print(self.args)
+
+        if self.args.file:
+            dependency_file = self.args.file
+        else:
+            dependency_file = self.__determine_dependency_file()
+
+        self.modules = self.__extract_modules(self.args.modules)
+
+        try:
+            self.__load_dependencies(dependency_file)
+        except (TypeError, RuntimeError) as e:
+            print("Aborted loading dependencies. Reason: {}".format(e))
+            return
+
+        if self.args.command == "install":
+            self.install()
+        elif self.args.command == "list":
+            self.list()
+        else:  # should not happen, check already after parse_args
+            self.parser.print_help()
+
+    def parse_args(self):
+        """
+        CLI input parsing
+        """
+
+        self.parser = argparse.ArgumentParser(description='Manage dependencies for tiscamera',
+                                              usage='''dependency-manager <command> [<args>]
+
+The most commonly used git commands are:
+    list --package deb         List packages in a manner debian control files understand
+    install                    Install all dependencies
+
+''')
+
+        # Wrapper class to enable shared arguments between subcommands
+        # while ensuring unique arguments are also possible
+        class CommonCommandParser(argparse.ArgumentParser):
+            def __init__(self, *args, **kwargs):
+                super(CommonCommandParser, self).__init__(*args, **kwargs)
+                self.add_argument('--file', "-f",
+                                  help='Manual overwrite for selected dependency file',
+                                  required=False, default=None)
+
+                self.add_argument("--compilation",
+                                  help="Use compilation dependencies",
+                                  action="store_true")
+                self.add_argument("--runtime",
+                                  help="Use runtime dependencies",
+                                  action="store_true")
+
+                self.add_argument('--modules', '-m',
+                                  help='Comma separated list of modules that shall be used',
+                                  type=str, default="")
+
+        subparser = self.parser.add_subparsers(parser_class=CommonCommandParser, dest="command")
+
+        parser_install = subparser.add_parser("install",
+                                              help="Install dependencies",
+                                              add_help=False)
+
+        parser_install.add_argument("--yes", "-y",
+                                    help="Install compilation dependencies",
+                                    action="store_true")
+        parser_install.add_argument("--dry-run", "-s",
+                                    help="Simulate actions but do not touch the system",
+                                    action="store_true")
+        parser_install.add_argument("--no-update",
+                                    help="Do not update the package list before installing",
+                                    action="store_true")
+
+        parser_list = subparser.add_parser("list",
+                                           help="List dependencies",
+                                           add_help=False)
+
+        parser_list.add_argument('--package', choices=['deb', ''], default='',
+                                 help="List dependencies compatible with selected package manager")
+
+        self.args = self.parser.parse_args()
+
+    def __determine_dependency_file(self):
+        """
+        determine the correct dependency file to use
+        based on OS/distribution information
+        """
+        return os.path.join(get_default_dir(), get_distribution())
+
+    def __load_dependencies(self, dependency_file):
+        """
+
+        """
+
+        if not os.path.isfile(dependency_file):
+            raise RuntimeError("No such file")
+
+        with open(dependency_file) as json_data:
+            data = json.load(json_data)
+
+        for e in data["dependencies"]:
+            self.dependencies.append(Dependency(e))
+
+    def __print_deb_list(self, packages):
+        """
+        Print a dependency list that can be used for deb control files
+        """
+        d = [i.deb() for i in packages]
+
+        print(convert_to_str(d, ", "))
+
+    def __create_name_list(self, packages):
+        """
+        Print a dependency list that can be used for apt-get install
+        """
+        d = [i.name for i in packages]
+
+        return convert_to_str(d, " ")
+
+    def __get_phase_dependencies(self, phase: str):
+        """
+        Filter dependencies according to the given phase
+        """
+        phase_deps = []
+
+        if not self.modules:
+            for d in self.dependencies:
+                if d.phase == phase:
+                    phase_deps.append(d)
+        else:
+            for d in self.dependencies:
+                if d.phase == phase and any(item in d.modules for item in self.modules):
+                    phase_deps.append(d)
+
+        return phase_deps
+
+    def collect_dependencies(self,
+                             compilation: bool = False,
+                             runtime: bool = False):
+        """
+        Wrapper function around __get_phase_dependencies
+        """
+
+        # if all phases are identical we either want
+        # everything or have default behavior
+        if compilation == runtime and not self.modules:
+            return self.dependencies
+
+        if compilation:
+            return self.__get_phase_dependencies("compilation")
+        if runtime:
+            return self.__get_phase_dependencies("runtime")
+
+        deps = []
+        for d in self.dependencies:
+            if any(item in d.modules for item in self.modules):
+                deps.append(d)
+        return deps
+
+    def __extract_modules(self, mod_str):
+        """
+        Split comma separated string into a list
+        'aravis,base' => ['aravis', 'base']
+        """
+
+        modules = [item for item in mod_str.split(',')]
+        if len(modules) == 1 and modules[0] == '':
+            modules = []
+        return modules
+
+    def list(self):
+        """
+        'list' subcommand
+        """
+        if self.args.package == "deb":
+
+            self.__print_deb_list(self.collect_dependencies(False, True))
+            return
+
+        # entry string for all lines
+        # ensures all are correctly formatted
+        entries = "{:35}\t{:10}\t{:10}\t\t{}"
+
+        # table header
+        print(entries.format("Name", "Version", "Phase", "Modules"))
+        print("")
+
+        deps = self.collect_dependencies(self.args.compilation, self.args.runtime)
+        for d in deps:
+            print(entries.format(d.name, d.version, d.phase, d.modules))
+
+    def install(self):
+        """
+        'install' subcommand
+        """
+        packages = self.collect_dependencies(self.args.compilation, self.args.runtime)
+
+        if not self.args.no_update:
+            update_package_list()
+
+        install_packages([i.name for i in packages], self.args.yes, self.args.dry_run)
+
+
+if __name__ == "__main__":
+
+    DependencyManager()
