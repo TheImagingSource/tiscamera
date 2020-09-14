@@ -655,9 +655,13 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->source_list = nullptr;
 
     self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
-    self->source_list = g_slist_append(self->source_list, self->main_src);
+    if( self->main_src != nullptr ) {
+        self->source_list = g_slist_append( self->source_list, self->main_src );
+    }
     self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
-    self->source_list = g_slist_append(self->source_list, self->pimipi_src);
+    if( self->pimipi_src != nullptr ) {
+        self->source_list = g_slist_append( self->source_list, self->pimipi_src );
+    }
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
