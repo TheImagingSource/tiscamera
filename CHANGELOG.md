@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CMake switch `TCAM_BUILD_NO_GUI` to disable all gui build targets and dependency inclusions.
   See documenation for further details.
 - Build target `minimal` to build recommended minimal tiscamera build.
+- script dependency-manager as a way to improve dependency handling for users/packaging
 
 ### Changed
 
@@ -35,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All gstreamer elements now only use tcamprop for property interactions
 - tcam-ctrl now uses tcamsrc for all device interactions
 - tcam-capture now uses xvimagesink for display purposes
+- All uses of CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR have been replaced by
+  internal variables
+- Renamed folder for third party libraries from `dependencies` to `external`
+- Moved dependency descriptions to subfolder `dependencies`
 
 ### Fixed
 
@@ -46,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - camera-ip-conf/tcam-gigetool now support newer
   firmware files that have correct access control
 - Json property descriptions can now be used to set 'button' type properties
+- Various memory leaks
 
 ### Removed
 
