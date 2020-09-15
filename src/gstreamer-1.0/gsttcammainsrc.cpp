@@ -103,15 +103,25 @@ struct device_state
     std::mutex mtx;
     std::condition_variable cv;
 
-    void    close()
+    void    stop_and_clear()
     {
         if( dev )
         {
             dev->stop_stream();
         }
-        while( queue.empty() ) {
+        while( !queue.empty() )
+        {
+            auto ptr = queue.front();
             queue.pop();
+            if( sink ) {
+                sink->requeue_buffer( ptr );
+            }
         }
+    }
+
+    void    close()
+    {
+        stop_and_clear();
 
         dev = nullptr;
         sink = nullptr;
@@ -989,7 +999,7 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
 
     GST_INFO("Requested caps = %" GST_PTR_FORMAT, static_cast<void*>(caps));
 
-    self->device->dev->stop_stream();
+    self->device->stop_and_clear();
     self->device->sink = nullptr;
 
     GstStructure* structure = gst_caps_get_structure (caps, 0);
@@ -1205,9 +1215,9 @@ static void gst_tcam_mainsrc_close_camera (GstTcamMainSrc* self)
 {
     GST_INFO_OBJECT( self, "Closing device");
 
+    std::lock_guard<std::mutex> lck( self->device->mtx );
     if( self->device->dev )
     {
-        std::lock_guard<std::mutex> lck(self->device->mtx);
         self->device->close();
     }
 }
@@ -1238,6 +1248,7 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
+    std::unique_lock<std::mutex> lck( self->device->mtx );
     self->is_running = false;
 
     self->device->cv.notify_all();
@@ -1252,8 +1263,7 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 
     // not locking here may cause segfaults
     // when EOS is fired
-    std::unique_lock<std::mutex> lck(self->device->mtx);
-    self->device->dev->stop_stream();
+    self->device->stop_and_clear();
     lck.unlock();
 
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
@@ -1417,8 +1427,9 @@ static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buf
 
     self->device->queue.push(buffer);
 
-    lck.unlock();
     self->device->cv.notify_all();
+
+    lck.unlock();
 }
 
 
@@ -1470,6 +1481,8 @@ wait_again:
     }
 
     std::shared_ptr<tcam::ImageBuffer> ptr = self->device->queue.front();
+    self->device->queue.pop(); // remove buffer from queue
+
     ptr->set_user_data(self);
 
     /* TODO: check why aravis throws an incomplete buffer error
@@ -1488,7 +1501,6 @@ wait_again:
     *buffer = gst_buffer_new_wrapped_full(static_cast<GstMemoryFlags>(0), ptr->get_data(), ptr->get_buffer_size(),
                                           0, ptr->get_image_size(), trans, buffer_destroy_callback);
 
-    self->device->queue.pop(); // remove buffer from queue
 
     // add meta statistics data to buffer
     {
@@ -1866,8 +1878,8 @@ static gboolean gst_tcam_mainsrc_unlock (GstBaseSrc* src)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
 
+    std::lock_guard<std::mutex> lck( self->device->mtx );
     self->is_running = false;
-
     self->device->cv.notify_all();
 
     return TRUE;
