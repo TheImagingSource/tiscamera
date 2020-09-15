@@ -1517,7 +1517,7 @@ wait_again:
                 damaged = "false";
             }
 
-            GST_DEBUG("Added meta info: \n"
+            GST_TRACE("Added meta info: \n"
                       "gst frame_count: %lu\n"
                       "backend frame_count %lu\n"
                       "frames_dropped %lu\n"
