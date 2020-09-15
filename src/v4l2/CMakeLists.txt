@@ -40,7 +40,7 @@ add_library(tcam-uvc-extension SHARED
 target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
 target_include_directories(tcam-uvc-extension
   PRIVATE ${LIBUUID_INCLUDE_DIRS}
-  PRIVATE "${TCAM_SOURCE_DIR}/dependencies/json")
+  PRIVATE "${TCAM_SOURCE_DIR}/external/json")
 
 install(TARGETS tcam-uvc-extension
   LIBRARY

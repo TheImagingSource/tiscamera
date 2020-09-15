@@ -35,8 +35,8 @@ TARGET_LINK_LIBRARIES(gige-daemon "dl")
 if (TCAM_INTERNAL_ARAVIS)
   # we require two includes
   # as some header are generated
-  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
-  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
+  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
   target_link_libraries(gige-daemon "${ARAVIS_LIB}")
 

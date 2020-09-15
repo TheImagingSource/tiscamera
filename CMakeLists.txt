@@ -98,7 +98,7 @@ endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 # TODO: these should not always be included
-add_subdirectory(dependencies)
+add_subdirectory(external)
 add_subdirectory(src)
 
 if (TCAM_ENABLE_DATA_INSTALL)

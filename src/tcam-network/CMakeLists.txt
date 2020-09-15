@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories(${TCAM_SOURCE_DIR}/dependencies/PugiXml/)
+include_directories(${TCAM_SOURCE_DIR}/external/PugiXml/)
 
 find_package(LibZip REQUIRED)
 

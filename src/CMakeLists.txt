@@ -132,7 +132,7 @@ if (BUILD_LIBUSB)
 
 endif (BUILD_LIBUSB)
 
-include_directories(SYSTEM "${TCAM_SOURCE_DIR}/dependencies/")
+include_directories(SYSTEM "${TCAM_SOURCE_DIR}/external/")
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
@@ -207,14 +207,14 @@ if (BUILD_ARAVIS)
 
   if (TCAM_INTERNAL_ARAVIS)
     add_dependencies(tcam aravis)
-    set(ARAVIS_LIB "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
+    set(ARAVIS_LIB "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/.libs/libaravis-0.6.a")
 
     find_package(LibXml2 REQUIRED QUIET)
     find_package(PCAP REQUIRED QUIET)
 
     target_include_directories(tcam PRIVATE "${GIO_INCLUDE_DIR}")
-    target_include_directories(tcam SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/dependencies/aravis/src")
-    target_include_directories(tcam PRIVATE SYSTEM "${TCAM_BINARY_DIR}/dependencies/aravis-prefix/src/aravis-build/src/")
+    target_include_directories(tcam SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
+    target_include_directories(tcam PRIVATE SYSTEM "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
     target_link_libraries(tcam "${ARAVIS_LIB}")
     target_link_libraries(tcam "${LIBXML2_LIBRARIES}")

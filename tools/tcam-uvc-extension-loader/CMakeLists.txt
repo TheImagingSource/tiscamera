@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-include_directories("${TCAM_SOURCE_DIR}/dependencies/CLI11")
+include_directories("${TCAM_SOURCE_DIR}/external/CLI11")
 include_directories("${TCAM_SOURCE_DIR}/src/v4l2")
 
 add_executable(tcam-uvc-extension-loader main.cpp)

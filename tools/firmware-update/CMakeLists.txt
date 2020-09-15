@@ -20,6 +20,6 @@ add_executable(firmware-update ${fwu-files} $<TARGET_OBJECTS:33update> $<TARGET_
 target_include_directories(firmware-update
   PRIVATE ${LIBUSB_1_INCLUDE_DIRS}
   PRIVATE ${LIBZIP_INCLUDE_DIR}
-  PRIVATE "${TCAM_SOURCE_DIR}/dependencies/PugiXml")
+  PRIVATE "${TCAM_SOURCE_DIR}/external/PugiXml")
 
 target_link_libraries(firmware-update ${LIBUSB_1_LIBRARIES} ${LIBZIP_LIBRARY})

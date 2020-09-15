@@ -1,5 +1,5 @@
 
-include_directories("${TCAM_SOURCE_DIR}/dependencies/catch")
+include_directories("${TCAM_SOURCE_DIR}/external/catch")
 include_directories("${TCAM_SOURCE_DIR}/src/tcam-network")
 
 add_executable(test-tcam-network main.cpp)

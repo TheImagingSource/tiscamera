@@ -17,7 +17,7 @@
 # include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
 include_directories("${TCAM_SOURCE_DIR}/tools/firmware-update")
-include_directories("${TCAM_SOURCE_DIR}/dependencies/PugiXml")
+include_directories("${TCAM_SOURCE_DIR}/external/PugiXml")
 
 set(files
   Archive.cpp
