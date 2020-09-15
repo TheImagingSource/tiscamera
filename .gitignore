@@ -11,6 +11,8 @@
 */c/07-appsink
 */c/08-save-stream
 */c/09-device-lost
+*/c/10-metadata
+*/c/11-device-state
 
 # ### VCS ###
 
@@ -124,4 +126,3 @@ CTestTestfile.cmake
 tools/tcam-gigetool/tcamgigetool/version.py
 tools/camera-ip-conf/version.h
 tools/tcam-gigetool/TisGigETool.egg-info/
-
