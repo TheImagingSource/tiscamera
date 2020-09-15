@@ -19,19 +19,15 @@ LIBS:=$(shell pkg-config gstreamer-1.0 --libs)
 LIBS:=$(shell pkg-config gstreamer-video-1.0 --libs)
 LIBS+=$(shell pkg-config gobject-introspection-1.0 --libs)
 LIBS+=$(shell pkg-config tcam --libs)
-LIBS+=-L/home/edt/work/tiscamera/build/src/gobject
 
 CFLAGS:=$(shell pkg-config gstreamer-1.0 --cflags)
 CFLAGS:=$(shell pkg-config gstreamer-video-1.0 --cflags)
 CFLAGS+=$(shell pkg-config gobject-introspection-1.0 --cflags)
 CFLAGS+=$(shell pkg-config tcam --cflags)
-CFLAGS+=-I/home/edt/work/tiscamera/src/gobject/
-CFLAGS+=-I/home/edt/work/tiscamera/src/gstreamer-1.0
-
 
 .PHONY: all clean
 
-EXECS = 00-list-devices 01-list-properties 02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost 10-metadata
+EXECS = 00-list-devices 01-list-properties 02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost 10-metadata 11-device-state
 
 
 all: $(EXECS)
