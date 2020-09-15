@@ -81,12 +81,12 @@ read_file () {
 #
 
 install_dependencies_debian_compilation () {
-    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies-debian-compilation.txt")
+    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies/dependencies-debian-compilation.txt")
 }
 
 
 install_dependencies_debian_runtime () {
-    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies-debian-runtime.txt")
+    sudo apt-get install $ASSUME_YES $(read_file "$TISCAMERA_DIR/dependencies/dependencies-debian-runtime.txt")
 }
 
 
