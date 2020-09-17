@@ -62,14 +62,40 @@ void print_capture_devices (const std::vector<DeviceInfo>& devices)
 }
 
 
+bool separate_serial_and_type (const std::string& input,
+                               std::string& serial,
+                               std::string& type)
+{
+    auto pos = input.find("-");
+
+    if (pos != std::string::npos)
+    {
+        // assign to tmp variables
+        // input could be self->device_serial
+        // overwriting it would ivalidate input for
+        // device_type retrieval
+        std::string tmp1 = input.substr(0, pos);
+        std::string tmp2 = input.substr(pos+1);
+
+        serial = tmp1;
+        type = tmp2;
+
+        return true;
+    }
+    else
+    {
+        serial = input;
+    }
+    return false;
+}
+
+
 void print_devices (size_t /*t*/)
 {
-    DeviceIndex index;
-    std::vector<DeviceInfo> device_list = index.get_device_list();
-
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
-    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+    GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
+
     for (GSList* elem = serials; elem; elem = elem->next)
     {
         char* name;
@@ -92,15 +118,21 @@ void print_devices (size_t /*t*/)
 
         if (ret) // get_device_info was successfull
         {
+            std::string s;
+            std::string t;
+            separate_serial_and_type((gchar*)elem->data, s, t);
+
             printf("Model: %s Serial: %s Type: %s\n",
-                   name, (gchar*)elem->data, connection_type);
+                   name, s.c_str(), connection_type);
+        }
+        else
+        {
+            fprintf(stderr, "Unable to retrieve device info for '%s'", name);
         }
     }
 
     g_slist_free(serials);
     gst_object_unref(source);
-
-//    print_capture_devices(device_list);
 }
 
 

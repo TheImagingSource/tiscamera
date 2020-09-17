@@ -667,12 +667,15 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
     std::string actual_serial;
     std::string type;
 
+    TCAM_DEVICE_TYPE ty = TCAM_DEVICE_TYPE_UNKNOWN;
+
     auto pos = input.find("-");
 
     if (pos != std::string::npos)
     {
         actual_serial = input.substr(0, pos);
         type = input.substr(pos+1);
+        ty = str_to_type(type);
     }
     else
     {
@@ -683,13 +686,12 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
     {
         struct tcam_device_info info = d.get_info();
 
-        if (!strncmp (actual_serial.c_str(), info.serial_number,
-                      sizeof (info.serial_number)))
+        if (!strncmp(actual_serial.c_str(), info.serial_number,
+                     sizeof(info.serial_number)))
         {
-            if (!type.empty())
+            if (ty != TCAM_DEVICE_TYPE_UNKNOWN)
             {
-                const char* t = type_to_str(info.type);
-                if (!strncmp(type.c_str(), t, sizeof(*t)))
+                if (ty != info.type)
                 {
                     continue;
                 }
@@ -698,12 +700,12 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
             ret = TRUE;
             if (name)
             {
-                *name = g_strndup (info.name, sizeof (info.name));
+                *name = g_strndup(info.name, sizeof(info.name));
             }
             if (identifier)
             {
-                *identifier = g_strndup (info.identifier,
-                                         sizeof (info.identifier));
+                *identifier = g_strndup(info.identifier,
+                                        sizeof(info.identifier));
             }
             // TODO: unify with deviceinfo::get_device_type_as_string
             if (connection_type)
