@@ -159,11 +159,6 @@ DaemonClass::DaemonClass (const std::string lock_file,
 
 DaemonClass::~DaemonClass ()
 {
-    if (lock_file_.is_locked())
-    {
-        lock_file_.unlock();
-    }
-
     close_port();
     is_port_open_ = false;
 }
