@@ -969,7 +969,7 @@ static GstCaps* gst_tcam_mainsrc_get_caps (GstBaseSrc* src,
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
     GstCaps* caps;
 
-    if (self->device->all_caps != NULL)
+    if (self->device->all_caps == NULL)
     {
         if (!gst_tcam_mainsrc_init_camera(self))
         {
