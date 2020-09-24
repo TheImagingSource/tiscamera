@@ -170,7 +170,7 @@ The recommended way of addressing a camera is by using its serial number.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 86-101
+         :lines: 90-105
          :linenos:
          :dedent: 4
   
@@ -388,7 +388,7 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 86-88, 100-101, 114-132
+         :lines: 91-93, 104-105, 118-139
          :linenos:
          :dedent: 4
                   

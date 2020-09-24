@@ -47,6 +47,9 @@ These examples exist in all available example languages.
      - metadata
      - Read meta information like is-damaged, camera capture time, etc.
        Currently only in available in C.
+   * - 11
+     - device-state
+     - Save and load JSON device state
 
 .. _examples_further:
 

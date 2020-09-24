@@ -65,3 +65,10 @@ When logging to a file, it is generally recommended to disable color output.
 .. code-block:: sh
 
    gst-launch-1.0 --gst-debug-no-color .....
+
+Aravis
+======
+
+In some cases it might be useful to retrieve log output from aravis itself.
+
+For a description of the details visit the `aravis documentation <https://aravisproject.github.io/docs/aravis-0.8/aravis-building.html>`_.

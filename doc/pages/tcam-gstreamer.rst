@@ -5,12 +5,12 @@ The Imaging Source Gstreamer Plugins
 The following plugins are offered by us.
 When an element property is also available through the property interface its name in said interface will be explicitly listed as "PI: property-name".
 
-.. _tcamsrc:
+.. _tcammainsrc:
 
 tcammainsrc
 ###########
 
-Source elements that retrieves images from a device.  
+Source element that retrieves images from a device.  
 The tcammainsrc existed as `tcamsrc` prior to tiscamera 0.13.0.  
 It is used for v4l2, aravis and libusb devices.
 
@@ -84,7 +84,7 @@ This may affect your usage of elements like `tcambin` as they can use such eleme
 Messages
 --------
 
-The tcamsrc element can send multiple possible messages to the GstBus.
+The tcammainsrc element can send multiple possible messages to the GstBus.
 It is generally recommended to listen for error messages as these will be considered lethal to the video stream and cause a stream stop.
 
 Device lost
@@ -107,6 +107,18 @@ This implies tiscamera was compiled with gstreamer >= 1.10.
    GstStructure* struc = gst_message_parse_error_details(message);
    const char* lost_serial = gst_structure_get_string(struc, "serial");
 
+.. _tcamsrc:
+   
+tcamsrc
+#######
+
+The tcamsrc is a source bin that allows access to all source elements supported by tiscamera.
+It is a convenience wrapper and offers no additional properties.
+
+As of tiscamera 0.13.0 the supported source elements include tcammainsrc and tcampimipisrc.
+   
+.. _tcamautoexposure:
+   
 tcamautoexposure
 ################
 
@@ -205,6 +217,8 @@ Per default the region equals the entire image unless the user defines these val
        | Maximum: image height - exposure roi top
      - Exposure ROI Height
      - Height the ROI shall have.
+
+.. _tcamwhitebalance:
        
 tcamwhitebalance
 ################
@@ -288,6 +302,7 @@ Per default the region equals the entire image unless the user defines these val
      - Focus ROI Height
      - Height the ROI shall have.
 
+.. _tcamdutils:
 
 tcamdutils
 ##########
@@ -297,10 +312,15 @@ Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
 Implements features like HDR.
 Optimized for x64 platforms.
 
+.. _tcambiteater:
+
 tcambiteater
 ############
 
-Converts BGRx 64-bit to BGRx 32-Bit. Only required when using tcamdutils.
+Removed with tiscamera 0.13.0.
+Functionality is now included in tiscamera-dutils
+
+.. _tcambin:
 
 tcambin
 #######
