@@ -42,7 +42,7 @@ static bool tcam_property_to_json (TcamProp* prop,
                                                nullptr,
                                                nullptr,
                                                nullptr,
-                                               nullptr,
+                                               &type,
                                                nullptr,
                                                nullptr,
                                                nullptr);
