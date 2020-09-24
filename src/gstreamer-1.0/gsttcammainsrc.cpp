@@ -43,45 +43,6 @@
 GST_DEBUG_CATEGORY_STATIC (tcam_mainsrc_debug);
 #define GST_CAT_DEFAULT tcam_mainsrc_debug
 
-// helper functions
-
-
-static const char* type_to_str (TCAM_DEVICE_TYPE type)
-{
-    switch (type)
-    {
-        case TCAM_DEVICE_TYPE_V4L2:
-            return "v4l2";
-        case TCAM_DEVICE_TYPE_ARAVIS:
-            return "aravis";
-        case TCAM_DEVICE_TYPE_LIBUSB:
-            return "libusb";
-        default:
-            return "unknown";
-    }
-}
-
-
-static TCAM_DEVICE_TYPE str_to_type (const std::string& str)
-{
-    if (str == "aravis")
-    {
-        return TCAM_DEVICE_TYPE_ARAVIS;
-    }
-    else if (str == "v4l2")
-    {
-        return TCAM_DEVICE_TYPE_V4L2;
-    }
-    else if (str == "libusb")
-    {
-        return TCAM_DEVICE_TYPE_LIBUSB;
-    }
-    else
-    {
-        return TCAM_DEVICE_TYPE_UNKNOWN;
-    }
-}
-
 
 struct destroy_transfer
 {
@@ -105,15 +66,16 @@ struct device_state
 
     void    stop_and_clear()
     {
-        if( dev )
+        if (dev)
         {
             dev->stop_stream();
         }
-        while( !queue.empty() )
+        while (!queue.empty())
         {
             auto ptr = queue.front();
             queue.pop();
-            if( sink ) {
+            if (sink)
+            {
                 sink->requeue_buffer( ptr );
             }
         }
@@ -675,7 +637,7 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
     {
         actual_serial = input.substr(0, pos);
         type = input.substr(pos+1);
-        ty = str_to_type(type);
+        ty = tcam::tcam_device_from_string(type);
     }
     else
     {
@@ -707,11 +669,10 @@ static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
                 *identifier = g_strndup(info.identifier,
                                         sizeof(info.identifier));
             }
-            // TODO: unify with deviceinfo::get_device_type_as_string
             if (connection_type)
             {
-                auto t = type_to_str(info.type);
-                *connection_type = g_strndup(t, strlen(t));
+                auto t = tcam::tcam_device_type_to_string(info.type);
+                *connection_type = g_strndup(t.c_str(), strlen(t.c_str()));
             }
             break;
         }
@@ -1175,7 +1136,7 @@ static void separate_serial_and_type (GstTcamMainSrc* self, const std::string& i
         std::string tmp2 = input.substr(pos+1);
 
         self->device_serial = tmp1;
-        self->device_type = str_to_type(tmp2);
+        self->device_type = tcam::tcam_device_from_string(tmp2);
     }
     else
     {
@@ -1195,7 +1156,7 @@ static bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
     separate_serial_and_type(self, self->device_serial);
 
     GST_DEBUG("Opening device. Serial: '%s Type: '%s'",
-              self->device_serial.c_str(), type_to_str(self->device_type));
+              self->device_serial.c_str(), tcam::tcam_device_type_to_string(self->device_type).c_str());
 
     self->device->dev = tcam::open_device(self->device_serial, self->device_type);
     if (!self->device->dev)

@@ -20,6 +20,9 @@
 #include "standard_properties.h"
 #include "format.h"
 
+#include <algorithm>
+#include <cctype>
+
 using namespace tcam;
 
 const char* tcam::fourcc_to_description (uint32_t fourcc)
@@ -106,8 +109,11 @@ std::string tcam::tcam_device_type_to_string (TCAM_DEVICE_TYPE type)
 }
 
 
-TCAM_DEVICE_TYPE tcam::tcam_device_from_string (const std::string& str)
+TCAM_DEVICE_TYPE tcam::tcam_device_from_string (const std::string& input)
 {
+    std::string str = input;
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
+
     if (str == "v4l2") return TCAM_DEVICE_TYPE_V4L2;
     else if (str == "aravis") return TCAM_DEVICE_TYPE_ARAVIS;
     else if (str == "libusb") return TCAM_DEVICE_TYPE_LIBUSB;
