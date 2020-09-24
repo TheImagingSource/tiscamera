@@ -375,12 +375,7 @@ static gboolean open_source_element (GstTcamSrc* self)
       mainsrc has prevalence over other sources for unspecified devices
      */
 
-    if (self->device_serial == "virt")
-    {
-        GST_DEBUG("Setting active src to tcampimipisrc");
-        self->active_source = self->pimipi_src;
-    }
-    else if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
     {
         GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(self));
         if (!serials)
