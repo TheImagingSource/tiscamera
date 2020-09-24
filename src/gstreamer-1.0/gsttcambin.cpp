@@ -566,6 +566,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     {
         return TRUE;
     }
+
+    gst_tcambin_clear_elements(self);
+
     GST_INFO("creating elements");
 
     if (self->src == nullptr)
@@ -1128,11 +1131,13 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             g_object_set(self->data->out_caps.get(), "caps", all_caps, NULL);
             gst_caps_unref(all_caps);
 
-            if (!gst_tcambin_create_elements(self))
+            if (!self->elements_created)
             {
-                GST_ERROR("Error while creating elements");
+                if (!gst_tcambin_create_elements(self))
+                {
+                    GST_ERROR("Error while creating elements");
+                }
             }
-
             break;
         }
         case GST_STATE_CHANGE_READY_TO_PAUSED:
