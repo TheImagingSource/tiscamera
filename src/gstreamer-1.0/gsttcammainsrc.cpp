@@ -91,37 +91,37 @@ struct device_state
 };
 
 
-static GSList* gst_tcam_mainsrc_get_property_names(TcamProp* self);
+static GSList* gst_tcam_mainsrc_get_property_names (TcamProp* self);
 
 static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* self, const gchar* name);
 
 static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* self,
-                                                const gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group);
+                                                    const gchar* name,
+                                                    GValue* value,
+                                                    GValue* min,
+                                                    GValue* max,
+                                                    GValue* def,
+                                                    GValue* step,
+                                                    GValue* type,
+                                                    GValue* flags,
+                                                    GValue* category,
+                                                    GValue* group);
 
 static GSList* gst_tcam_mainsrc_get_menu_entries (TcamProp* iface,
-                                              const char* menu_name);
+                                                  const char* menu_name);
 
 static gboolean gst_tcam_mainsrc_set_tcam_property (TcamProp* self,
-                                                const gchar* name,
-                                                const GValue* value);
+                                                    const gchar* name,
+                                                    const GValue* value);
 
 static GSList* gst_tcam_mainsrc_get_device_serials (TcamProp* self);
 static GSList* gst_tcam_mainsrc_get_device_serials_backend (TcamProp* self);
 
 static gboolean gst_tcam_mainsrc_get_device_info (TcamProp* self,
-                                              const char* serial,
-                                              char** name,
-                                              char** identifier,
-                                              char** connection_type);
+                                                  const char* serial,
+                                                  char** name,
+                                                  char** identifier,
+                                                  char** connection_type);
 
 
 static bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self);
@@ -205,7 +205,7 @@ static const char* prop_type_to_string( TCAM_PROPERTY_TYPE type )
  * Returns: (transfer full): A string describing the property type
  */
 static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* iface,
-                                              const gchar* name)
+                                                  const gchar* name)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
@@ -233,12 +233,13 @@ static gchar* gst_tcam_mainsrc_get_property_type (TcamProp* iface,
         return nullptr;
     }
 
-    const char* prop_type_str = g_strdup( prop_type_to_string( prop.type ) );
-    if( prop_type_str == nullptr ) {
+    const char* prop_type_str = g_strdup(prop_type_to_string(prop.type));
+    if( prop_type_str == nullptr )
+    {
         return g_strdup( "unknown" );
     }
 
-    return g_strdup( prop_type_str );
+    return g_strdup(prop_type_str);
 }
 
 /**
@@ -262,14 +263,14 @@ static GSList* gst_tcam_mainsrc_get_property_names (TcamProp* iface)
         }
     }
 
-    g_return_val_if_fail (self->device->dev != NULL, NULL);
+    g_return_val_if_fail(self->device->dev != NULL, NULL);
 
     std::vector<tcam::Property*> vec = self->device->dev->get_available_properties();
 
     for (const auto& v : vec)
     {
-        ret = g_slist_append (ret,
-                              g_strdup (v->get_name().c_str()));
+        ret = g_slist_append(ret,
+                             g_strdup(v->get_name().c_str()));
     }
 
     return ret;
@@ -277,16 +278,16 @@ static GSList* gst_tcam_mainsrc_get_property_names (TcamProp* iface)
 
 
 static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group)
+                                                    const gchar* name,
+                                                    GValue* value,
+                                                    GValue* min,
+                                                    GValue* max,
+                                                    GValue* def,
+                                                    GValue* step,
+                                                    GValue* type,
+                                                    GValue* flags,
+                                                    GValue* category,
+                                                    GValue* group)
 {
     gboolean ret = TRUE;
     GstTcamMainSrc *self = GST_TCAM_MAINSRC (iface);
@@ -471,7 +472,7 @@ static gboolean gst_tcam_mainsrc_get_tcam_property (TcamProp* iface,
 
 
 static GSList* gst_tcam_mainsrc_get_menu_entries (TcamProp* iface,
-                                              const char* menu_name)
+                                                  const char* menu_name)
 {
     GSList* ret = NULL;
 
@@ -501,8 +502,8 @@ static GSList* gst_tcam_mainsrc_get_menu_entries (TcamProp* iface,
 
 
 static gboolean gst_tcam_mainsrc_set_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                const GValue* value)
+                                                    const gchar* name,
+                                                    const GValue* value)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC (iface);
 
@@ -580,9 +581,9 @@ static GSList* gst_tcam_mainsrc_get_device_serials (TcamProp* self)
 
     for (const auto& d : devices)
     {
-        ret = g_slist_append (ret,
-                              g_strndup(d.get_serial().c_str(),
-                                        d.get_serial().size()));
+        ret = g_slist_append(ret,
+                             g_strndup(d.get_serial().c_str(),
+                                       d.get_serial().size()));
     }
 
     return ret;
@@ -947,11 +948,11 @@ static GstCaps* gst_tcam_mainsrc_get_caps (GstBaseSrc* src,
 
 
 static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
-                                      void* data);
+                                          void* data);
 
 
 static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
-                                       GstCaps* caps)
+                                           GstCaps* caps)
 {
     GST_DEBUG("In tcam_set_caps");
 
@@ -1029,7 +1030,8 @@ static gboolean gst_tcam_mainsrc_set_caps (GstBaseSrc* src,
 }
 
 
-static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info* info __attribute__((unused)), void* user_data)
+static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info* info __attribute__((unused)),
+                                                   void* user_data)
 {
     GstTcamMainSrc* self = (GstTcamMainSrc*) user_data;
 
@@ -1056,70 +1058,6 @@ static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info
     // let EOS handle this. gstreamer will call stop for us
     // gst_tcam_mainsrc_stop(GST_BASE_SRC(self));
 }
-//
-//
-//void send_log_to_bus (void* user_data,
-//                      enum TCAM_LOG_LEVEL level,
-//                      const char* file,
-//                      int line,
-//                      const char* message,
-//                      ...)
-//{
-//
-//    if (level != TCAM_LOG_ERROR
-//        && level != TCAM_LOG_WARNING)
-//    {
-//        return;
-//    }
-//
-//    /*
-//      This check is to prevent threading issues.
-//      When the application calls gst_set_state(GST_STATE_NULL)
-//      while the backend is still building up or busy
-//      we might end up in this callback while self is already cleaned up.
-//    */
-//    if (!GST_IS_OBJECT(user_data))
-//    {
-//        tcam_info("GstObject tcamsrc does not exist. Messages will not be sent to the GstBus.");
-//        return;
-//    }
-//
-//    GstTcamMainSrc* self = GST_TCAM_MAINSRC(user_data);
-//
-//    va_list args;
-//    va_start(args, message);
-//    va_list tmp_args;
-//    va_copy(tmp_args, args);
-//
-//    size_t size = vsnprintf(NULL, 0, message, tmp_args)+1;
-//    char *m = new char[size];
-//
-//    vsnprintf(m, size, message, args);
-//
-//    va_end(args);
-//    va_end(tmp_args);
-//
-//    std::string msg_string = std::string(file) + ":" + std::to_string(line) + ": " + m;
-//    GError* err = g_error_new(GST_LIBRARY_ERROR, GST_LIBRARY_ERROR_FAILED, "%s", msg_string.c_str());
-//
-//    GstMessage* msg = nullptr;
-//
-//
-//    if (level == TCAM_LOG_ERROR)
-//    {
-//        msg = gst_message_new_error(GST_OBJECT(self), err, m);
-//        GST_ERROR("Backend reported error: %s:%d: %s", file, line, m);
-//    }
-//    else if (level == TCAM_LOG_WARNING)
-//    {
-//        msg = gst_message_new_warning(GST_OBJECT(self), err, m);
-//        GST_WARNING("Backend reported warning: %s:%d: %s", file, line, m);
-//    }
-//
-//    gst_element_post_message(GST_ELEMENT(self), msg);
-//    g_error_free(err);
-//    delete[] m;
-//}
 
 
 static void separate_serial_and_type (GstTcamMainSrc* self, const std::string& input)
@@ -1253,7 +1191,7 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 
 
 static GstStateChangeReturn gst_tcam_mainsrc_change_state (GstElement* element,
-                                                       GstStateChange change)
+                                                           GstStateChange change)
 {
 
     GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
@@ -1375,7 +1313,7 @@ static void buffer_destroy_callback (gpointer data)
 
 
 static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buffer,
-                                      void* data)
+                                          void* data)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(data);
     GST_TRACE("sh callback");
@@ -1397,7 +1335,7 @@ static void gst_tcam_mainsrc_sh_callback (std::shared_ptr<tcam::ImageBuffer> buf
 
 
 static void statistics_to_gst_structure (const tcam_stream_statistics* statistics,
-                                  GstStructure* struc)
+                                         GstStructure* struc)
 {
 
     if (!statistics || !struc)
@@ -1530,7 +1468,7 @@ wait_again:
 
 
 static GstCaps* gst_tcam_mainsrc_fixate_caps (GstBaseSrc* bsrc,
-                                          GstCaps* caps)
+                                              GstCaps* caps)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(bsrc);
 
@@ -1644,7 +1582,8 @@ static void gst_tcam_mainsrc_finalize (GObject* object)
 
     gst_tcam_mainsrc_close_camera(self);
 
-    if( self->device ) {
+    if (self->device)
+    {
         delete self->device;
         self->device = nullptr;
     }
@@ -1774,9 +1713,9 @@ static void gst_tcam_mainsrc_set_property (GObject* object,
 
 
 static void gst_tcam_mainsrc_get_property (GObject* object,
-                                       guint prop_id,
-                                       GValue* value,
-                                       GParamSpec* pspec)
+                                           guint prop_id,
+                                           GValue* value,
+                                           GParamSpec* pspec)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC (object);
 
