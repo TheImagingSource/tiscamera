@@ -188,13 +188,6 @@ class TCamCapture(QMainWindow):
         self.activateWindow()
         self.setFocus()
 
-    def fit_to_window(self):
-        """
-        Resize stream display to fit the available display area
-        """
-        if self.view:
-            self.view.fit_view()
-
     def toggle_fullscreen(self):
         """
         Toggle fullscreen display of live stream
@@ -350,12 +343,6 @@ class TCamCapture(QMainWindow):
 
         self.save_image.triggered.connect(self.save_image_action)
         self.toolbar.addAction(self.save_image)
-
-        self.fit_to_win = QAction("Fit To Window", self)
-        self.fit_to_win.setIcon(QIcon.fromTheme("zoom-fit-best"))
-
-        self.fit_to_win.triggered.connect(self.fit_to_window)
-        self.toolbar.addAction(self.fit_to_win)
 
         self.props_action = QAction("", self)
         self.props_action.setText("Properties")
