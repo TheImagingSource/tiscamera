@@ -150,8 +150,6 @@ int main (int argc, char *argv[])
 
     auto show_caps = app.add_option("-c,--caps", serial,
                                     "list available gstreamer-1.0 caps");
-    auto show_formats = app.add_option("-f,--formats", serial,
-                                       "list available formats");
     auto show_properties = app.add_option("-p,--properties", serial,
                                           "list available device properties");
 
@@ -169,10 +167,8 @@ int main (int argc, char *argv[])
                 "camera type", "unknown");
 
     list_devices->excludes(show_caps);
-    list_devices->excludes(show_formats);
     list_devices->excludes(show_properties);
     show_properties->excludes(show_caps);
-    show_properties->excludes(show_formats);
 
     // CLI11 uses "TEXT" as a filler for the option string arguments
     // replace it with "SERIAL" to make the help text more intuitive.
@@ -187,75 +183,9 @@ int main (int argc, char *argv[])
         return 0;
     }
 
-    TCAM_DEVICE_TYPE t;
-
-    // helper function to handle 12345678-backend situations
-    auto separate_serial_and_type = [&serial, &t] (std::string input)
-    {
-        auto pos = input.find("-");
-
-        if (pos != std::string::npos)
-        {
-            // assign to tmp variables
-            // input could be self->device_serial
-            // overwriting it would ivalidate input for
-            // device_type retrieval
-            std::string tmp1 = input.substr(0, pos);
-            std::string tmp2 = input.substr(pos+1);
-
-            serial = tmp1;
-            t = tcam::tcam_device_from_string(tmp2);
-        }
-        else
-        {
-            serial = input;
-            t = TCAM_DEVICE_TYPE_UNKNOWN;
-        }
-    };
-
-    separate_serial_and_type(serial);
-
-    if (t == TCAM_DEVICE_TYPE_UNKNOWN)
-    {
-        t = tcam::tcam_device_from_string(device_type);
-    }
-
-    auto string_is_valid = [](const std::string &str)
-                           {
-                               // user serial are generally only numbers
-                               // developer and special devices may contain letters
-                               auto is_illegal_char = [](const char c)
-                                                      {
-                                                          if ((c <= 'z' && c >= 'a')
-                                                              || (c <= 'Z' && c >= 'A')
-                                                              || isdigit(c))
-                                                              return false;
-                                                          return true;
-                                                      };
-                               return find_if(str.begin(), str.end(), is_illegal_char) == str.end();
-                           };
-
-    if (!string_is_valid(serial))
-    {
-        std::cerr << "'" << serial << "' is not a valid serial number" << std::endl;
-        return 1;
-    }
-
-    auto dev = open_device(serial, t);
-
-    // if (!dev)
-    // {
-    //     std::cerr << "Unable to open device with serial \"" << serial << "\"." << std::endl;
-    //     return 1;
-    // }
-
     if (*show_caps)
     {
         list_gstreamer_1_0_formats(serial);
-    }
-    else if (*show_formats)
-    {
-        list_formats(dev->get_available_video_formats());
     }
     else if (*show_properties)
     {

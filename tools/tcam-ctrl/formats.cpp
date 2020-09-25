@@ -24,38 +24,6 @@
 #include <regex>
 
 
-void list_formats (const std::vector<VideoFormatDescription>& available_formats)
-{
-    std::cout << "Available format settings:" << std::endl;
-    for (const VideoFormatDescription& f : available_formats)
-    {
-        auto desc = f.get_struct();
-
-        std::cout << "Format: " << desc.description << " - Fourcc(" << desc.fourcc << ")" << std::endl;
-
-        for (const auto& s : f.get_resolutions())
-        {
-            if (s.type == TCAM_RESOLUTION_TYPE_RANGE)
-            {
-                std::cout << "\tResolutionrange: "
-                          << s.min_size.width << "x" << s.min_size.height << " - "
-                          << s.max_size.width << "x" << s.max_size.height << std::endl;
-            }
-            else
-            {
-                std::cout << "\tResolution: " << s.min_size.width << "x" << s.min_size.height << std::endl;
-            }
-            for (const auto& fps : f.get_frame_rates(s))
-            {
-                std::cout << "\t\t" << std::setw(8) << std::fixed << std::setprecision(4)<< fps << " fps" << std::endl;
-            }
-        }
-
-        std::cout << std::endl;
-    }
-}
-
-
 void list_gstreamer_1_0_formats (const std::string& serial)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
