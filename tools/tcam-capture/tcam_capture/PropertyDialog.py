@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from tcam_capture.PropertyWidget import PropertyWidget, Prop
-from tcam_capture.ROICollection import ROICollection, ROIGroup
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget,
                              QFormLayout, QPushButton, QScrollArea)
@@ -38,8 +37,6 @@ class PropertyTree(QWidget):
         self.setup_ui()
         self.property_number = 0
         self.prop_dict = {}
-        self.roi_groups = ROIGroup.get_all_groups()
-        self.roi_widget = None  # currently only one roi per category is expected
 
     def setup_ui(self):
         self.formlayout = QFormLayout()
@@ -54,34 +51,13 @@ class PropertyTree(QWidget):
         # insert spacer only after all other elements have been added
         # self.layout.insertStretch(-1, 1)
 
-        for group in self.roi_groups:
-            if group.is_complete():
-                # log.debug("{} is complete. adding group to global group".format(group.name))
-                self.roi_widget = ROICollection(group)
-                self.layout.addWidget(self.roi_widget)
-                break
-            else:
-                # log.debug("{} is incomplete adding members to global group".format(group.name))
-                for prop in group.properties:
-                    self.prop_dict[prop.prop.name] = prop
-                    self.formlayout.addRow(prop.prop.name, prop)
-
         self.layout.addStretch()
         self.setLayout(self.layout)
 
-    def __add_to_roi_group_maybe(self, prop: PropertyWidget):
-        """
-        Return True on successfull addage to group
-        """
-        for group in self.roi_groups:
-            if group.add_member_maybe(prop):
-                return True
-        return False
-
     def add_property(self, prop: Prop):
         self.prop_dict[prop.name] = PropertyWidget(self.data, prop)
-        if not self.__add_to_roi_group_maybe(self.prop_dict[prop.name]):
-            self.formlayout.addRow(prop.name, self.prop_dict[prop.name])
+        # if not self.__add_to_roi_group_maybe(self.prop_dict[prop.name]):
+        self.formlayout.addRow(prop.name, self.prop_dict[prop.name])
 
         self.property_number = self.property_number + 1
 
@@ -277,8 +253,6 @@ class PropertyDialog(QWidget):
             area.setWidgetResizable(True)
             area.setWidget(tab)
             tab.finish_setup()
-            if tab.roi_widget:
-                tab.roi_widget.display_area = self.display_area
 
             # the order of these entries is equivalent to the tab order
             # in the application
