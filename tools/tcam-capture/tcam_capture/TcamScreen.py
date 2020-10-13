@@ -136,11 +136,21 @@ class TcamScreen(QtWidgets.QGraphicsView):
         self.text_item.setPos(100, 70)
         self.text_item.setPlainText("In Trigger Mode. Waiting for first image...")
 
-        bg = QPixmap(1280, 720)
+        bg = QPixmap(640, 480)
         bg.fill(QColor("grey"))
         self.pix.setPixmap(bg)
         self.image_counter += 1
         self.scene.addItem(self.text_item)
+
+    def remove_wait_for_fist_image(self):
+        """"""
+
+        if not self.first_image:
+            return
+
+        self.scene.removeItem(self.text_item)
+        self.scene.removeItem(self.pix)
+        self.first_image = False
 
     def send_mouse_pixel(self):
         # mouse positions start at 0

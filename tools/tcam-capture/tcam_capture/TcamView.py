@@ -302,6 +302,7 @@ class TcamView(QWidget):
 
         if self.container.first_image:
             self.first_image.emit()
+            self.container.remove_wait_for_fist_image()
 
         buf = self.pipeline.get_by_name("sink").emit("pull-sample")
         caps = buf.get_caps()
