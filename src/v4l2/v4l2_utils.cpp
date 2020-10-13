@@ -149,6 +149,14 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         cp.type = value_type_to_ctrl_type(type);
         // generate id so that identfication of passed through properties is guaranteed
         cp.id = generate_unique_property_id();
+
+        // special workaround for 'Exposure Time (us)'
+        // can be removed once properties are unified
+        if (queryctrl->id == 0x199e201)
+        {
+            cp.group.property_category = TCAM_PROPERTY_CATEGORY_EXPOSURE;
+            cp.group.property_group = TCAM_PROPERTY_EXPOSURE;
+        }
     }
     else
     {
