@@ -190,7 +190,7 @@ class MediaSaver(QObject):
             self.src.emit("push-buffer", gstbuffer)
 
         if self.media_type == MediaType.image:
-            log.info("pushing buffer")
+            log.debug("pushing buffer")
             self.queue_counter -= 1
             if self.queue_counter == 0:
                 self.accept_buffer = False

@@ -300,22 +300,15 @@ class TcamView(QWidget):
         self.fps.tick()
         self.fps_tick()
 
-        if (not (self.videosaver and self.videosaver.accept_buffer) and
-                not (self.imagesaver and self.imagesaver.accept_buffer)):
-            return Gst.FlowReturn.OK
+        if self.container.first_image:
+            self.first_image.emit()
 
         buf = self.pipeline.get_by_name("sink").emit("pull-sample")
         caps = buf.get_caps()
         self.caps = caps
-        struc = caps.get_structure(0)
-
-        if self.current_width == 0:
-            self.current_width = struc.get_value("width")
-        if self.current_height == 0:
-            self.current_height = struc.get_value("height")
-
-        if self.container.first_image:
-            self.first_image.emit()
+        if (not (self.videosaver and self.videosaver.accept_buffer) and
+                not (self.imagesaver and self.imagesaver.accept_buffer)):
+            return Gst.FlowReturn.OK
 
         b = buf.get_buffer()
         if self.videosaver and self.videosaver.accept_buffer:
