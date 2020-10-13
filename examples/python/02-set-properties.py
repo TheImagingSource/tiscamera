@@ -88,6 +88,10 @@ def main():
     camera.set_tcam_property("Exposure Auto", False)
     camera.set_tcam_property("Gain Auto", False)
 
+    # Some cameras offer exposure and gain as doubles instead of integers.
+    # In that case the used GValue type has to be changed when setting the property.
+    # Some cameras might offer 'Exposure' as 'Exposure Time (us)'.
+    # camera.set_tcam_property("Exposure", 3000.0)
     camera.set_tcam_property("Exposure", 3000)
 
     print_properties(camera)

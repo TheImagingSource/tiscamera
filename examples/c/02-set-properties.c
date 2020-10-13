@@ -128,6 +128,20 @@ int main (int argc, char *argv[])
 
     g_value_unset( &set_auto );
 
+    /*
+      Some cameras offer exposure and gain as doubles instead of integers.
+      In that case the used GValue type has to be changed when setting the property.
+      Some cameras might offer 'Exposure' as 'Exposure Time (us)'.
+    */
+    /* GValue set_exposure = G_VALUE_INIT;
+       g_value_init(&set_exposure, G_TYPE_DOUBLE);
+       g_value_set_double(&set_exposure, 3000.0);
+
+       tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                   "Exposure", &set_exposure);
+
+       g_value_unset(&set_exposure); */
+
     GValue set_exposure = G_VALUE_INIT;
     g_value_init(&set_exposure, G_TYPE_INT);
 
@@ -136,7 +150,7 @@ int main (int argc, char *argv[])
     tcam_prop_set_tcam_property(TCAM_PROP(source),
                                 "Exposure", &set_exposure);
 
-    g_value_unset( &set_exposure );
+    g_value_unset(&set_exposure);
 
     /*
       second print for the before/after comparison
