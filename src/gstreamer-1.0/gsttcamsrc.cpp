@@ -312,9 +312,9 @@ static bool close_source_element (GstTcamSrc* self)
     GstState state;
     gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000);
 
-    if (state != GST_STATE_NULL && state != GST_STATE_READY)
+    if (state > GST_STATE_NULL)
     {
-        GST_ERROR("Active source is neiter in GST_STATE_NULL nor GST_STATE_READY. Not closing.");
+        GST_ERROR("Active source is neither in GST_STATE_NULL nor GST_STATE_READY. Not closing.");
         return false;
     }
 
@@ -618,27 +618,29 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
 static void gst_tcam_src_finalize (GObject* object)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamSrc* self = GST_TCAM_SRC(object);
 
     if (self->active_source)
     {
+        gst_element_set_state(self->active_source, GST_STATE_NULL);
+
         close_source_element(self);
     }
     g_slist_free(self->source_list);
 
     // source elements have to be destroyed manually as they are not in the bin
-    if( self->main_src ) {
-        gst_object_unref( self->main_src );
+    if (self->main_src)
+    {
+        gst_object_unref(self->main_src);
         self->main_src = nullptr;
     }
-    if( self->pimipi_src ) {
-        gst_object_unref( self->pimipi_src );
+    if (self->pimipi_src)
+    {
+        gst_object_unref(self->pimipi_src);
         self->pimipi_src = nullptr;
     }
 
-    // TODO iterate source_list and destroy source elements
-
-    G_OBJECT_CLASS (gst_tcam_src_parent_class)->finalize (object);
+    G_OBJECT_CLASS(gst_tcam_src_parent_class)->finalize(object);
 }
 
 
