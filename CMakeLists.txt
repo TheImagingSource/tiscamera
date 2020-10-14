@@ -95,7 +95,24 @@ add_subdirectory(data/udev/)
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
-if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
+
+  add_subdirectory(external)
+  add_subdirectory(tools/firmware-update)
+
+endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
+
+
+if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+
+  add_subdirectory(external)
+  add_subdirectory(src/tcam-network/)
+  add_subdirectory(tools/camera-ip-conf)
+
+endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+
+
+if (NOT TCAM_EXCLUSIVE_BUILD)
 
 # TODO: these should not always be included
 add_subdirectory(external)
@@ -123,7 +140,7 @@ if (BUILD_TESTS)
   add_subdirectory(tests)
 endif (BUILD_TESTS)
 
-endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+endif (NOT TCAM_EXCLUSIVE_BUILD)
 
 
 # uninstall target

@@ -36,10 +36,14 @@ if (TCAM_ARAVIS_USB_VISION)
 endif (TCAM_ARAVIS_USB_VISION)
 
 option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
+option(TCAM_BUILD_FIRMWARE_UPDATE_ONLY "Disable all other libraries/tool and only build firmware-update." OFF)
+option(TCAM_BUILD_CAMERA_IP_CONF_ONLY "Disable all other libraries/tool and only build camera-ip-conf." OFF)
 
 option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder." ON)
 option(TCAM_ENABLE_BASE_LIBRARIES "Build/install base libraries." ON)
 option(TCAM_BUILD_WITH_GUI "Build/install with GUI applications/dependencies" ON)
+
+set(TCAM_EXCLUSIVE_BUILD "Internal convenience flag to signify a tool is built exclusively." INTERNAL OFF)
 
 # disable all other things
 # we only want the extension loader and associated things
@@ -53,5 +57,43 @@ if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
   set(BUILD_DOCUMENTATION OFF)
   set(BUILD_TESTS OFF)
   set(TCAM_ARAVIS_USB_VISION OFF)
+  set(TCAM_EXCLUSIVE_BUILD ON)
+
+  set(TCAM_BUILD_FIRMWARE_UPDATE_ONLY OFF)
+  set(TCAM_BUILD_CAMERA_IP_CONF_ONLY OFF)
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
+
+if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
+
+  set(BUILD_GST_1_0 OFF)
+  set(BUILD_ARAVIS OFF)
+  set(BUILD_V4L2 OFF)
+  set(BUILD_LIBUSB OFF)
+  set(BUILD_TOOLS OFF)
+  set(BUILD_DOCUMENTATION OFF)
+  set(BUILD_TESTS OFF)
+  set(TCAM_ARAVIS_USB_VISION OFF)
+
+  set(TCAM_EXCLUSIVE_BUILD ON)
+  set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
+  set(TCAM_BUILD_CAMERA_IP_CONF_ONLY OFF)
+
+endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
+
+if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+
+  set(BUILD_GST_1_0 OFF)
+  set(BUILD_ARAVIS OFF)
+  set(BUILD_V4L2 OFF)
+  set(BUILD_LIBUSB OFF)
+  set(BUILD_TOOLS OFF)
+  set(BUILD_DOCUMENTATION OFF)
+  set(BUILD_TESTS OFF)
+  set(TCAM_ARAVIS_USB_VISION OFF)
+
+  set(TCAM_EXCLUSIVE_BUILD ON)
+  set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
+  set(TCAM_BUILD_FIRMWARE_UPDATE_ONLY OFF)
+
+endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
