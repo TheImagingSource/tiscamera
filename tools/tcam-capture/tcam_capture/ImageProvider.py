@@ -26,9 +26,9 @@ class ImageProvider():
     def _find_correct_image_location(self):
         pass
 
-    def get_device_image(self, name: str="default"):
+    def get_device_image(self, name: str = "default"):
 
-        if name is "default":
+        if name == "default":
             return self.get_default()
 
     def get_default(self):
