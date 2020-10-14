@@ -18,6 +18,7 @@
 
 #include "tcamgstbase.h"
 #include "tcamgststrings.h"
+#include "tcamgstjson.h"
 
 #include "tcamprop.h"
 #include "tcam.h"
@@ -755,22 +756,46 @@ static void gst_tcam_src_set_property (GObject* object,
             }
             else
             {
-                GST_ERROR("TODO do-timestamp set");
-                // g_value_set_boolean(value, TRUE);
+                GST_WARNING("No active source.");
             }
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            GST_ERROR("TODO drop-incomplete-drames set");
-
-            //g_object_
-            //self->drop_incomplete_frames = g_value_get_boolean(value);
+            if (self->active_source)
+            {
+                g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
+            }
+            else
+            {
+                GST_WARNING("No active source.");
+            }
             break;
         }
         case PROP_STATE:
         {
-            GST_ERROR("TODO state set");
+
+            if (self->active_source)
+            {
+                if (self->active_source == self->main_src)
+                {
+                    g_object_set_property(G_OBJECT(self->active_source), "state", value);
+                }
+                else if (self->active_source == self->pimipi_src)
+                {
+                    bool state = load_device_settings(TCAM_PROP(self),
+                                                      self->device_serial,
+                                                      g_value_get_string(value));
+                    if (!state)
+                    {
+                        GST_WARNING("Device may be in an undefined state.");
+                    }
+                }
+            }
+            else
+            {
+                GST_WARNING("No active source.");
+            }
             break;
         }
         default:
@@ -793,8 +818,6 @@ static void gst_tcam_src_get_property (GObject* object,
     {
         case PROP_SERIAL:
         {
-            GST_ERROR("TODO serial get when src is set.");
-
             g_value_set_string(value, self->device_serial.c_str());
             break;
         }
@@ -808,11 +831,18 @@ static void gst_tcam_src_get_property (GObject* object,
         {
             if (self->active_source)
             {
-                g_object_get_property(G_OBJECT(self->active_source), "camera-buffers", value);
+                if (self->active_source == self->main_src)
+                {
+                    g_object_get_property(G_OBJECT(self->active_source), "camera-buffers", value);
+                }
+                else
+                {
+                    GST_WARNING("Source element does not support camera-buffers.");
+                }
             }
             else
             {
-                GST_ERROR("No active source.");
+                GST_WARNING("No active source.");
             }
             break;
         }
@@ -820,11 +850,18 @@ static void gst_tcam_src_get_property (GObject* object,
         {
             if (self->active_source)
             {
-                g_object_get_property(G_OBJECT(self->active_source), "num-buffers", value);
+                if (self->active_source == self->main_src)
+                {
+                    g_object_get_property(G_OBJECT(self->active_source), "num-buffers", value);
+                }
+                else
+                {
+                    GST_WARNING("Source element does not support num-buffers.");
+                }
             }
             else
             {
-                GST_ERROR("No active source.");
+                GST_WARNING("No active source.");
             }
             break;
         }
@@ -836,20 +873,39 @@ static void gst_tcam_src_get_property (GObject* object,
             }
             else
             {
-                g_value_set_boolean(value, TRUE);
+                GST_WARNING("No active source.");
             }
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            GST_ERROR("TODO incomplete-frames  get");
-
-            //g_value_set_boolean(value, self->drop_incomplete_frames);
+            if (self->active_source)
+            {
+                g_object_get_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
+            }
+            else
+            {
+                GST_WARNING("No active source.");
+            }
             break;
         }
         case PROP_STATE:
         {
-            GST_ERROR("TODO state  get");
+
+            if (self->active_source == self->main_src)
+            {
+                g_object_get_property(G_OBJECT(self->active_source), "state", value);
+            }
+            else if (self->active_source == self->pimipi_src)
+            {
+                std::string tmp = create_device_settings(self->device_serial,
+                                                         TCAM_PROP(self)).c_str();
+                g_value_set_string(value, tmp.c_str());
+            }
+            else
+            {
+                GST_WARNING("No active source.");
+            }
             break;
         }
         default:

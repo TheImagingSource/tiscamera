@@ -1699,7 +1699,7 @@ static void gst_tcam_mainsrc_set_property (GObject* object,
                                               g_value_get_string(value));
             if (!state)
             {
-                GST_WARNING(". Device may be in an undefined state.");
+                GST_WARNING("Device may be in an undefined state.");
             }
             break;
         }
