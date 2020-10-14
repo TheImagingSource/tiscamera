@@ -43,7 +43,7 @@ option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder."
 option(TCAM_ENABLE_BASE_LIBRARIES "Build/install base libraries." ON)
 option(TCAM_BUILD_WITH_GUI "Build/install with GUI applications/dependencies" ON)
 
-set(TCAM_EXCLUSIVE_BUILD "Internal convenience flag to signify a tool is built exclusively." INTERNAL OFF)
+set(TCAM_EXCLUSIVE_BUILD OFF CACHE INTERNAL "Internal convenience flag to signify a tool is built exclusively.")
 
 # disable all other things
 # we only want the extension loader and associated things

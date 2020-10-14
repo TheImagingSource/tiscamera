@@ -88,10 +88,10 @@ set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installat
 
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
-add_subdirectory(src/v4l2)
-add_subdirectory(tools/tcam-uvc-extension-loader/)
-add_subdirectory(data/uvc-extensions/)
-add_subdirectory(data/udev/)
+  add_subdirectory(src/v4l2)
+  add_subdirectory(tools/tcam-uvc-extension-loader/)
+  add_subdirectory(data/uvc-extensions/)
+  add_subdirectory(data/udev/)
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
@@ -114,40 +114,50 @@ endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
 
 if (NOT TCAM_EXCLUSIVE_BUILD)
 
-# TODO: these should not always be included
-add_subdirectory(external)
-add_subdirectory(src)
+  # TODO: these should not always be included
+  add_subdirectory(external)
+  add_subdirectory(src)
 
-if (TCAM_ENABLE_DATA_INSTALL)
-  add_subdirectory(data)
-  # TODO: this should not be always on
-  install(DIRECTORY examples
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
-endif (TCAM_ENABLE_DATA_INSTALL)
+  if (TCAM_ENABLE_DATA_INSTALL)
+    add_subdirectory(data)
+    # TODO: this should not be always on
+    install(DIRECTORY examples
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/")
+  endif (TCAM_ENABLE_DATA_INSTALL)
 
 
-if (BUILD_TOOLS)
-  add_subdirectory(tools)
-endif (BUILD_TOOLS)
+  if (BUILD_TOOLS)
+    add_subdirectory(tools)
+  endif (BUILD_TOOLS)
 
-if (BUILD_DOCUMENTATION)
-  add_subdirectory(doc)
-endif (BUILD_DOCUMENTATION)
+  if (BUILD_DOCUMENTATION)
+    add_subdirectory(doc)
+  endif (BUILD_DOCUMENTATION)
 
-if (BUILD_TESTS)
-  enable_testing()
+  if (BUILD_TESTS)
+    enable_testing()
 
-  add_subdirectory(tests)
-endif (BUILD_TESTS)
+    add_subdirectory(tests)
+  endif (BUILD_TESTS)
+
+  if (BUILD_GST_1_0)
+
+    # ensure we have the correct install directories
+    # subdirectories make additional checks to find better suited install directories
+    # to prevent the user having to set environment variables, etc
+    get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
+    get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
+    get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${TCAM_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
+
+  endif (BUILD_GST_1_0)
 
 endif (NOT TCAM_EXCLUSIVE_BUILD)
 
-
 # uninstall target
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
 
 # create target uninstall to deinstall tiscamera
 # if tiscamera is a subproject/module
@@ -160,20 +170,12 @@ else (TARGET uninstall)
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif (TARGET uninstall)
 
+# is never installed, etc. can come last
+
 add_subdirectory(packaging)
 add_subdirectory(scripts)
 
 
-if (BUILD_GST_1_0)
-
-# ensure we have the correct install directories
-# subdirectories make additional checks to find better suited install directories
-# to prevent the user having to set environment variables, etc
-get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
-get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
-get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${TCAM_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
-
-endif (BUILD_GST_1_0)
 
 #
 #
