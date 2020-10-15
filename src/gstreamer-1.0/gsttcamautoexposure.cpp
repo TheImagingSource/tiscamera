@@ -153,7 +153,7 @@ G_DEFINE_TYPE_WITH_CODE( GstTcamautoexposure, gst_tcamautoexposure, GST_TYPE_BAS
         gst_tcamautoexposure_prop_init ) )
 
 
-    
+
 using namespace tcamprop_impl_helper;
 
 static const prop_entry tcamautoexposure_properties[] =
@@ -407,10 +407,10 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         }
         else
         {
-            fill_double( value, self->gain_min );
+            fill_double( value, self->gain_max );
             fill_double( min, self->gain.min );
             fill_double( max, self->gain.max );
-            fill_double( def, self->gain.min );
+            fill_double( def, self->gain.max );
             fill_double( step, 1 );
         }
         return TRUE;
@@ -736,8 +736,9 @@ static void gst_tcamautoexposure_set_property (GObject* object,
         }
         case PROP_CAMERA:
         {
-            if( self->camera_src ) {
-                gst_object_unref( self->camera_src );
+            if (self->camera_src)
+            {
+                gst_object_unref(self->camera_src);
                 self->camera_src = nullptr;
             }
             self->camera_src = (GstElement*)g_value_dup_object(value);
@@ -802,7 +803,7 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
-            self->gain_min = g_value_get_double(value);
+            self->gain_min = g_value_get_double(value)* GAIN_FLOAT_MULTIPLIER;
 
             if (self->gain.value < self->gain_min)
             {
@@ -832,7 +833,7 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
-            self->gain_max = g_value_get_double(value);
+            self->gain_max = g_value_get_double(value) * GAIN_FLOAT_MULTIPLIER;
 
             if (self->gain.value > self->gain_max)
             {
@@ -1155,7 +1156,17 @@ static void init_camera_resources (GstTcamautoexposure* self)
             }
             // self->gain.min = p.value.d.min * GAIN_FLOAT_MULTIPLIER;
             self->gain.max = g_value_get_double(&max) * GAIN_FLOAT_MULTIPLIER;
-            self->gain.value = g_value_get_double(&value) * GAIN_FLOAT_MULTIPLIER;
+
+            double gain_value = g_value_get_double(&value);
+
+            if (gain_value != 0)
+            {
+                self->gain.value = gain_value * GAIN_FLOAT_MULTIPLIER;
+            }
+            else
+            {
+                self->gain.value = self->gain.min;
+            }
             self->gain.step = g_value_get_double(&step_size) * GAIN_FLOAT_MULTIPLIER;
         }
         if (self->gain_max == 0
