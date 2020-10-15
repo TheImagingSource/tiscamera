@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dmk72uc02_af_146.euvc
 - tcam-uvc-extension-loader can now be built/installed without other libraries.
   Set cmake option TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY to ON to activate.
+- camera-ip-conf can now be built/installed without other libraries.
+  Set cmake option TCAM_BUILD_CAMERA_IP_CONF_ONLY to ON to activate.
+- firmware-update can now be built/installed without other libraries.
+  Set cmake option TCAM_BUILD_FIRMWARE_UPDATE_ONLY to ON to activate.
 - tcammainsrc - Replaces tcamsrc in functionality.
 - 'pimipi' device type
 - 11-device-state example
@@ -23,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   See documenation for further details.
 - Build target `minimal` to build recommended minimal tiscamera build.
 - script dependency-manager as a way to improve dependency handling for users/packaging
+- conflicts, provides, replaces fields in Debian package description for `tiscamera-tcamprop`
+- dependency-manager - replacement for install-dependencies.sh
+  offers wider range of functionality and allows addressal of different distributions
+  See documentation for further details
 
 ### Changed
 
@@ -40,11 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   internal variables
 - Renamed folder for third party libraries from `dependencies` to `external`
 - Moved dependency descriptions to subfolder `dependencies`
+- Examples now have correct memory handling
+- 'Exposure Time (us)' now has category 'Exposure'
 
 ### Fixed
 
 - dependency description allows usage of libzip4 and libzip5
-* 4fb8ec3 - gst: Apply bin state when all elements are verified playing
+- gst: Apply bin state when all elements are verified playing
 - tcambin: ensure serial and type are always defined
 - camera-ip-conf can now correctly write newer firmware versions
 - package generation now works under Ubuntu 20.04
@@ -52,6 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   firmware files that have correct access control
 - Json property descriptions can now be used to set 'button' type properties
 - Various memory leaks
+- gige-daemon now correctly deletes lock file
+- serial-type combinations where not always correctly identified.
+  Now `Aravis` and other capitalized strings are converted to lowercase before being
+  interpreted.
 
 ### Removed
 
