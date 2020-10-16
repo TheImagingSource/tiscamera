@@ -33,7 +33,7 @@ def list_devices():
     """
     source = Gst.ElementFactory.make("tcambin")
 
-    serials = source.get_device_serials()
+    serials = source.get_device_serials_backend()
 
     for single_serial in serials:
 

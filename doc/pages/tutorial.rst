@@ -143,7 +143,7 @@ and :c:func:`tcam_prop_get_device_info`
 
       .. literalinclude:: ../../examples/c/00-list-devices.c
          :language: c
-         :lines: 28-62
+         :lines: 28-69
          :emphasize-lines: 7, 23-27
          :linenos:
          :dedent: 4
@@ -191,7 +191,7 @@ which will free up all hardware resources.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 138-141
+         :lines: 161-163
          :linenos:
          :dedent: 4
 
@@ -199,7 +199,7 @@ which will free up all hardware resources.
 
       .. literalinclude:: ../../examples/python/02-set-properties.py
          :language: python
-         :lines: 95-96
+         :lines: 99-100
          :linenos:
          :dedent: 4
 
@@ -237,7 +237,7 @@ The printed caps are GStreamer compatible and can be copy-pasted for configurati
 
       .. literalinclude:: ../../examples/python/04-list-formats.py
          :language: python
-         :lines: 112, 124, 34
+         :lines: 181, 192, 33
          :linenos:
          :dedent: 4
 
@@ -253,7 +253,7 @@ Setting Caps
 
       .. literalinclude:: ../../examples/c/05-set-format.c
          :language: c
-         :lines: 32-36,55-69,76-79
+         :lines: 32-36,55-69,76-80
          :linenos:
          :dedent: 4
                   
@@ -265,7 +265,7 @@ Setting Caps
          :linenos:
          :dedent: 4
                   
-This code can be found in the example `04-set-format`.
+This code can be found in the example `05-set-format`.
 
 As an alternative to creating the GstCaps manually, you can also use ``gst_caps_from_string``.
 This function takes a format string description and converts it to a valid GstCaps instance.
@@ -303,7 +303,7 @@ To enable image retrieval, the following steps need to be taken.
 
       .. literalinclude:: ../../examples/c/07-appsink.c
          :language: c
-         :lines:  102-106, 114-123
+         :lines:  104-107, 128-137
          :linenos:
          :dedent: 4
                   
@@ -311,7 +311,7 @@ To enable image retrieval, the following steps need to be taken.
 
       .. literalinclude:: ../../examples/python/07-appsink.py
          :language: python
-         :lines: 94-97, 108-116
+         :lines: 93-96, 107-115
          :linenos: 
          :dedent: 4
                   
@@ -331,7 +331,7 @@ The image `sample` that is given to the function contains the image, video caps 
 
       .. literalinclude:: ../../examples/python/07-appsink.py
          :language: python
-         :lines: 37-51, 86
+         :lines: 36-52, 82-85
          :linenos:
 
 This code can be found in the example `07-appsink`.
@@ -361,7 +361,7 @@ For an overview of available properties, type the following into a terminal:
 
       .. literalinclude:: ../../examples/c/01-list-properties.c
          :language: c
-         :lines: 33-35, 45-78, 140-143
+         :lines: 33-35, 45-78, 142-155
          :linenos:
          :dedent: 4
                      
@@ -388,7 +388,7 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
       .. literalinclude:: ../../examples/c/02-set-properties.c
          :language: c
-         :lines: 91-93, 104-105, 118-139
+         :lines: 90-93, 104-105, 118-124, 129
          :linenos:
          :dedent: 4
                   
@@ -396,7 +396,7 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
       .. literalinclude:: ../../examples/python/02-set-properties.py
          :language: python
-         :lines: 74-75, 80-82, 88-91
+         :lines: 74-75, 80-82, 88
          :linenos:
          :dedent: 4
                   

@@ -66,7 +66,6 @@ int main (int argc, char *argv[])
 
     gst_caps_append_structure (caps, structure);
 
-
     GstElement* capsfilter = gst_bin_get_by_name(GST_BIN(pipeline), "filter");
 
     if (capsfilter == NULL)
