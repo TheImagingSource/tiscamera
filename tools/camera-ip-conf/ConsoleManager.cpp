@@ -344,14 +344,16 @@ void setCamera (const std::vector<std::string>& args)
         gateway = camera->getPersistentGateway();
     }
 
-    std::string err_reason;
-    if (!verifySettings(ip, subnet, gateway, err_reason))
+    if (ip.empty() and subnet.empty() and gateway.empty())
     {
-        std::cout << "Security checks failed. Changes were not written." << std::endl
-                  << err_reason << std::endl;
-        return;
+        std::string err_reason;
+        if (!verifySettings(ip, subnet, gateway, err_reason))
+        {
+            std::cout << "Security checks failed. Changes were not written." << std::endl
+                      << err_reason << std::endl;
+            return;
+        }
     }
-
 
     if (write_changes)
     {
