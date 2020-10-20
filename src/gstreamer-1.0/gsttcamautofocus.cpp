@@ -618,6 +618,8 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
             GValue new_val = G_VALUE_INIT;
             g_value_init(&new_val, G_TYPE_INT);
 
+            g_value_set_int(&new_val, new_focus_value);
+
             tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), "Focus", &new_val);
 
             self->cur_focus = new_focus_value;
