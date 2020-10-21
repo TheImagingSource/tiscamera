@@ -711,9 +711,9 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
 }
 
 static void gst_tcamautoexposure_set_property (GObject* object,
-                                        guint property_id,
-                                        const GValue* value,
-                                        GParamSpec* pspec)
+                                               guint property_id,
+                                               const GValue* value,
+                                               GParamSpec* pspec)
 {
     GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE (object);
 
@@ -1004,31 +1004,31 @@ static void init_camera_resources (GstTcamautoexposure* self)
     bool has_auto_gain = false;
 
     {
-        GSList* names = tcam_prop_get_tcam_property_names( TCAM_PROP( self->camera_src ) );
+        GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(self->camera_src));
 
-        for( unsigned int i = 0; i < g_slist_length( names ); ++i )
+        for (unsigned int i = 0; i < g_slist_length(names); ++i)
         {
-            char* name = (char*)g_slist_nth( names, i )->data;
+            char* name = (char*)g_slist_nth(names, i)->data;
 
-            if( g_strcmp0( name, "Exposure" ) == 0
-                || g_strcmp0( name, "Exposure Time (us)" ) == 0
-                || g_strcmp0( name, "ExposureTime" ) == 0 )
+            if (g_strcmp0(name, "Exposure") == 0
+                || g_strcmp0(name, "Exposure Time (us)") == 0
+                || g_strcmp0(name, "ExposureTime") == 0)
             {
                 self->exposure_name = name;
             }
-            else if( g_strcmp0( name, "Gain" ) == 0 )
+            else if( g_strcmp0(name, "Gain") == 0)
             {
                 self->gain_name = name;
             }
-            else if( g_strcmp0( name, "Iris" ) == 0 )
+            else if( g_strcmp0(name, "Iris") == 0)
             {
                 self->iris_name = name;
             }
-            else if( g_strcmp0( name, "Exposure Auto" ) == 0 )
+            else if( g_strcmp0(name, "Exposure Auto") == 0)
             {
                 has_auto_exposure = true;
             }
-            else if( g_strcmp0( name, "Gain Auto" ) == 0 )
+            else if( g_strcmp0(name, "Gain Auto") == 0)
             {
                 has_auto_gain = true;
             }
@@ -1048,6 +1048,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
     if (self->exposure_name.empty())
     {
         GST_ERROR("Exposure could not be found!");
+        self->auto_exposure = FALSE;
     }
     else
     {
@@ -1099,15 +1100,16 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
         GST_INFO( "Exposure boundaries are %f %d", self->exposure.min, self->exposure_max );
 
-        g_value_unset( &value );
-        g_value_unset( &min );
-        g_value_unset( &max );
-        g_value_unset( &type );
+        g_value_unset(&value);
+        g_value_unset(&min);
+        g_value_unset(&max);
+        g_value_unset(&type);
     }
 
     if (self->gain_name.empty())
     {
         GST_ERROR("Gain could not be found!");
+        self->auto_gain = FALSE;
     }
     else
     {
@@ -1182,11 +1184,11 @@ static void init_camera_resources (GstTcamautoexposure* self)
         }
         GST_INFO( "Gain boundaries are %f %f", self->gain.min, self->gain.max );
 
-        g_value_unset( &value );
-        g_value_unset( &min );
-        g_value_unset( &max );
-        g_value_unset( &step_size );
-        g_value_unset( &type );
+        g_value_unset(&value);
+        g_value_unset(&min);
+        g_value_unset(&max);
+        g_value_unset(&step_size);
+        g_value_unset(&type);
     }
 
     if (self->exposure_min == 0
@@ -1204,6 +1206,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
     if (self->iris_name.empty())
     {
         GST_INFO("Iris could not be found");
+        self->auto_iris = FALSE;
     }
     else
     {
@@ -1266,6 +1269,12 @@ static void set_exposure (GstTcamautoexposure* self, gdouble exposure)
         return;
     }
 
+    if (self->exposure_name.empty())
+    {
+        GST_WARNING("Attempting to set exposure while name is empty. Ignoring.");
+        return;
+    }
+
     GValue value = G_VALUE_INIT;
 
     if (self->exposure_is_double)
@@ -1296,6 +1305,12 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
         return;
     }
 
+    if (self->gain_name.empty())
+    {
+        GST_WARNING("Attempting to set exposure while name is empty. Ignoring.");
+        return;
+    }
+
     GValue value = G_VALUE_INIT;
 
     if (!self->gain_is_double)
@@ -1321,6 +1336,12 @@ static void set_iris (GstTcamautoexposure* self, int iris)
     if (!G_IS_OBJECT(self->camera_src))
     {
         GST_WARNING("Have no camera source to set iris.");
+        return;
+    }
+
+    if (self->iris_name.empty())
+    {
+        GST_WARNING("Attempting to set iris while name is empty. Ignoring.");
         return;
     }
 
