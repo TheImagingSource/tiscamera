@@ -27,6 +27,8 @@
 
 #include "tcam.h"
 
+#include "general.h"
+
 using namespace tcam;
 
 static const size_t name_width = 40;
@@ -40,6 +42,12 @@ void print_properties (const std::string& serial)
     if (!source)
     {
         std::cerr << "Unable to create source element." << std::endl;
+        return;
+    }
+
+    if (!is_valid_device_serial(source, serial))
+    {
+        std::cerr << "Device with given serial does not exist." << std::endl;
         return;
     }
 
@@ -199,16 +207,25 @@ void print_state_json (const std::string& serial)
         return;
     }
 
+    if (!is_valid_device_serial(source, serial))
+    {
+        std::cerr << "Device with given serial does not exist." << std::endl;
+        return;
+    }
+
     GValue val = {};
     g_value_init(&val, G_TYPE_STRING);
     g_value_set_static_string(&val, serial.c_str());
 
     g_object_set_property(G_OBJECT(source), "serial", &val);
 
+    gst_element_set_state(source, GST_STATE_READY);
+
     const char* state_str = nullptr;
     g_object_get(G_OBJECT(source), "state", &state_str, NULL);
 
     std::cout << state_str << std::endl;
+    gst_element_set_state(source, GST_STATE_NULL);
 
     gst_object_unref(source);
 }
@@ -221,6 +238,12 @@ void load_state_json_string (const std::string& serial, const std::string json_s
     if (!source)
     {
         std::cerr << "Unable to create source element." << std::endl;
+        return;
+    }
+
+    if (!is_valid_device_serial(source, serial))
+    {
+        std::cerr << "Device with given serial does not exist." << std::endl;
         return;
     }
 

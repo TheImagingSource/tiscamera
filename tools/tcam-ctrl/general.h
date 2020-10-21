@@ -19,7 +19,7 @@
 
 #include <string>
 
-
+#include <gst/gst.h>
 
 inline std::string extract_directory (const std::string& path)
 {
@@ -37,10 +37,6 @@ inline std::string change_extension (const std::string& path, const std::string&
     return extract_directory( path ) +filename.substr( 0, filename.find_last_of( '.' ) ) +ext;
 }
 
-bool save_device_list (const std::string& filename);
-
-bool save_device_settings (const std::string& serial, const std::string& filename);
-
-bool load_device_settings (const std::string& serial, const std::string& filename);
+bool is_valid_device_serial (GstElement* source, const std::string& serial);
 
 #endif /* GENERAL_H */

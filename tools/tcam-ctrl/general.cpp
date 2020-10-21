@@ -1,57 +1,40 @@
-
+/*
+ * Copyright 2020 The Imaging Source Europe GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "general.h"
 
-#include "tcam.h"
-
-#include <unistd.h>
-
-#include <memory>
-#include <iostream>
-
-using namespace tcam;
+#include "tcamprop.h"
 
 
-bool save_device_list (const std::string& filename)
+bool is_valid_device_serial (GstElement* source, const std::string& serial)
 {
-    if (filename.empty())
+    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+
+    for (GSList* elem = serials; elem; elem = elem->next)
     {
-        return false;
+        const char* device_serial = (gchar*)elem->data;
+
+        if (serial.compare(device_serial) == 0)
+        {
+            g_slist_free_full(serials, g_free);
+            return true;
+        }
     }
 
-    std::vector<DeviceInfo> device_list = get_device_list();
-
-    export_device_list(device_list, filename);
-
-    return false;
-}
-
-
-bool save_device_settings (const std::string& serial, const std::string& filename)
-{
-    auto dev = open_device(serial);
-
-    if (dev == nullptr)
-    {
-        std::cout << "WHAT" << std::endl;
-    }
-
-    dev->save_configuration(filename);
-
-    return false;
-}
-
-
-bool load_device_settings (const std::string& serial, const std::string& filename)
-{
-    auto dev = open_device(serial);
-
-    if (dev == nullptr)
-    {
-        std::cout << "WHAT" << std::endl;
-    }
-
-    dev->load_configuration(filename);
+    g_slist_free_full(serials, g_free);
 
     return false;
 }

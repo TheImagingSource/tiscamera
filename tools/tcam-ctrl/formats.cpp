@@ -15,6 +15,7 @@
  */
 
 #include "formats.h"
+#include "general.h"
 
 #include "tcamgststrings.h"
 #include "tcamgstbase.h" // videoformatsdescription_to_gst_caps_string
@@ -31,6 +32,12 @@ void list_gstreamer_1_0_formats (const std::string& serial)
     if (!source)
     {
         std::cerr << "Unable to create source element." << std::endl;
+        return;
+    }
+
+    if (!is_valid_device_serial(source, serial))
+    {
+        std::cerr << "Device with given serial does not exist." << std::endl;
         return;
     }
 
