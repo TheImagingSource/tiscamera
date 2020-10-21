@@ -69,7 +69,7 @@ class TcamView(QWidget):
         self.current_width = 0
         self.current_height = 0
         self.device_lost_callbacks = []
-        self.caps_desc: CapsDesc = None
+        self.caps_desc = CapsDesc(None)
         self.video_format = None
         self.retry_countdown = 0
 
