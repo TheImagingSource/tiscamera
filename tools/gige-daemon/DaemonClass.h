@@ -23,7 +23,7 @@
 class LockFile
 {
 public:
-    LockFile (const std::string filename);
+    explicit LockFile (const std::string& filename);
 
     ~LockFile ();
 
@@ -58,8 +58,8 @@ class DaemonClass
 {
 public:
 
-    DaemonClass (const std::string lock_file,
-                bool open_ports=true);
+    explicit DaemonClass (const std::string& lock_file,
+                          bool open_ports=true);
 
     ~DaemonClass ();
 

@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 
-LockFile::LockFile (const std::string filename)
+LockFile::LockFile (const std::string& filename)
     : lockfile_name_(filename), lock_file_(nullptr), file_handle_(-1)
 {}
 
@@ -96,7 +96,12 @@ void LockFile::destroy_lock_file ()
     // lock_file->close();
     // lock_file = nullptr;
 
-    remove(lockfile_name_.c_str());
+    int ret = remove(lockfile_name_.c_str());
+
+    if (ret < 1)
+    {
+        std::cerr << "Unable to delete lock file: " << strerror(errno)<< std::endl;
+    }
 }
 
 
@@ -145,7 +150,7 @@ std::string LockFile::get_file_content () const
 }
 
 
-DaemonClass::DaemonClass (const std::string lock_file,
+DaemonClass::DaemonClass (const std::string& lock_file,
                           bool open_ports)
     : lock_file_(LockFile(lock_file)), is_port_open_(false)
 {
@@ -214,6 +219,7 @@ int DaemonClass::daemonize (signal_callback callback, bool fork_process)
             exit(EXIT_SUCCESS);
         }
     }
+
     for (i = getdtablesize(); i >= 0; --i)
     {
         close(i); /* close all descriptors */

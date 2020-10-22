@@ -71,13 +71,7 @@ CameraListHolder::~CameraListHolder ()
         work_thread.join();
     }
 
-    struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
-    d->device_count = 0;
-    memset(d->devices, 0, sizeof(struct tcam_gige_device_list) * TCAM_DEVICE_LIST_MAX);
-    shmdt(d);
-
     shmctl(shmid, IPC_RMID, NULL);
-
 }
 
 
@@ -134,12 +128,6 @@ void CameraListHolder::stop ()
 {
     this->continue_loop = false;
     cv.notify_all();
-    shmctl(shmid, IPC_RMID, NULL);
-
-    if (this->work_thread.joinable())
-    {
-        this->work_thread.join();
-    }
 }
 
 

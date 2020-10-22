@@ -131,7 +131,6 @@ void signal_handler (int sig)
 
             CameraListHolder::get_instance().stop();
             daemon_instance.stop_daemon();
-            _exit(0);
 
             break;
         default:
@@ -192,14 +191,25 @@ int main (int argc, char *argv[])
 
                 interfaces.push_back(argv[x]);
             }
+
+            // block signals in this thread and subsequently
+            // spawned threads
+            sigset_t sigset;
+            sigemptyset(&sigset);
+            sigaddset(&sigset, SIGINT);
+            sigaddset(&sigset, SIGTERM);
+            pthread_sigmask(SIG_BLOCK, &sigset, nullptr);
+
             CameraListHolder::get_instance().set_interface_list(interfaces);
             CameraListHolder::get_instance().run();
 
-            // we now suspend this thread and wait until a SIGTERM arrives
-            sigset_t mask;
-            sigprocmask(0, 0, &mask);
-            sigdelset(&mask, SIGTERM);
-            sigsuspend(&mask);
+            int signum = 0;
+            // wait until a signal is delivered:
+            sigwait(&sigset, &signum);
+
+            signal_handler(signum);
+
+            return 0;
         }
         else if (strcmp("stop", argv[i]) == 0)
         {
@@ -211,7 +221,7 @@ int main (int argc, char *argv[])
             }
             else
             {
-                std::cout << "Could not stop daemon." << std::endl;
+                std::cout << "Could not stop daemon. " << strerror(errno) << std::endl;
 
                 return 1;
             }
