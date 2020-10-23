@@ -32,7 +32,7 @@ def convert_to_str(input_list, seperator):
 
 def get_default_dir():
     """"""
-    path = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../dependencies")
     return path
 
 
@@ -199,7 +199,7 @@ The most commonly used git commands are:
                                               add_help=False)
 
         parser_install.add_argument("--yes", "-y",
-                                    help="Install compilation dependencies",
+                                    help="Assume 'yes' for prompts",
                                     action="store_true")
         parser_install.add_argument("--dry-run", "-s",
                                     help="Simulate actions but do not touch the system",
@@ -230,7 +230,7 @@ The most commonly used git commands are:
         """
 
         if not os.path.isfile(dependency_file):
-            raise RuntimeError("No such file")
+            raise RuntimeError("Unable to find file: '{}'".format(dependency_file))
 
         with open(dependency_file) as json_data:
             data = json.load(json_data)
