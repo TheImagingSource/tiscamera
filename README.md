@@ -21,24 +21,23 @@ https://www.theimagingsource.com/documentation/tiscamera/
 
 ### Compilation
 
-Compilation dependencies for debian can be found in:
+Compilation dependencies for debian can be found be executing:
 
-dependencies-debian-compilation.txt
+    ./scripts/dependency-manager list --compilation
 
 ### Runtime
 
-Runtime dependencies for debian can be found in:
+Runtime dependencies for debian can by executing:
 
-dependencies-debian-runtime.txt
+    ./scripts/dependency-manager list --runtime
+
 
 On a Debian / Ubuntu system, the following command line can be used to install all required packages in one go:
 
 ```
-# Build dependencies
-sudo ./scripts/install-dependencies.sh --compilation --runtime
 
-# Runtime dependencies
-sudo ./scripts/install-dependencies.sh --runtime
+./scripts/dependency-manager install
+
 ```
 
 ## Building tiscamera
