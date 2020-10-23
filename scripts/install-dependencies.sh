@@ -162,6 +162,8 @@ get_dir
 
 get_distribution
 
+echo "Deprecation warning!"
+echo "Please consider switching to dependency-manager"
 
 while [ "$1" != "" ]; do
     PARAM=$(echo "$1" | awk -F= '{print $1}')

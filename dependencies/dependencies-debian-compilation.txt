@@ -1,3 +1,7 @@
+# THIS FILE IS DEPRECATED
+# USE dependency-manager
+# AND CORRESPONDING .dep FILES
+
 git (>= 1:2.7.4),
 g++ (>= 4:5.3.1),
 cmake (>= 3.2),
