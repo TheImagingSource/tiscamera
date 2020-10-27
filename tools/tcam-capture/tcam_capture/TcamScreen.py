@@ -148,8 +148,10 @@ class TcamScreen(QtWidgets.QGraphicsView):
         if not self.first_image:
             return
 
-        self.scene.removeItem(self.text_item)
-        self.scene.removeItem(self.pix)
+        if self.text_item in self.scene.items():
+            self.scene.removeItem(self.text_item)
+        if self.pix in self.scene.items():
+            self.scene.removeItem(self.pix)
         self.first_image = False
 
     def send_mouse_pixel(self):
