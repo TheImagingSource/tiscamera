@@ -12,7 +12,8 @@ Currently, only the creation of Debian packages is supported.
 
 A release will be published at https://github.com/TheImagingSource/tiscamera/releases .
 
-At this moment only amd64 releases are available.
+As of 0.12.0 packages offered by The Imaging Source are available for amd64, aarch64, and Raspberry Pi 4 (armhf).  
+These packages are created with the options `BUILD_TOOLS`, `BUILD_V4L2`, `BUILD_LIBUSB`, `BUILD_ARAVIS` and `BUILD_DOCUMENTATION` set to `ON`.
 
 Naming
 ======
@@ -80,3 +81,11 @@ To deinstall the package, execute:
 .. code-block:: sh
 
    sudo apt remove tiscamera
+
+
+Provides/Conflicts/Replaces
+===========================
+
+`tiscamera` serves as a drop in replacement for the package `tiscamera-tcamprop`.
+
+`tiscamera-tcamprop` is a library that only contains the gobject introduction interface that is already contained in tiscamera.

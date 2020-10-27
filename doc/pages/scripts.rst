@@ -16,6 +16,21 @@ The dependency-manager script is a simple helper tool for the dependency managem
 
    Currently only Debian/Ubuntu are supported.
 
+.. list-table:: list arguments
+   :header-rows: 1
+   :widths: 25 10 65
+
+   * - Option
+     - Short
+     - Description
+
+   * - --file
+     - -f
+     - Manual overwrite for selected dependency file
+
+Listing
+-------
+   
 To list all dependencies execute:
 
 .. code-block:: sh
@@ -34,6 +49,67 @@ Sample output:
 
    libzip4 (>= 1.0.1), libglib2.0-0 (>= 2.48.2), libgirepository-1.0-1 (>= 1.46.0), libusb-1.0-0 (>= 2:1.0.20), libuuid1 (>= 2.27), libudev1 (>= 229), libgstreamer1.0-0 (>= 1.8.3), gstreamer1.0-plugins-base (>= 1.8.0), gstreamer1.0-plugins-good (>= 1.8.0), gstreamer1.0-plugins-bad (>= 1.8.0), gstreamer1.0-plugins-ugly (>= 1.8.3), libxml2 (>= 2.9.3), libpcap0.8 (>= 1.7.4-2), python3-pyqt5 (>= 5.5.1), python3-gi (>= 3.20.0)
 
+
+.. list-table:: list arguments
+   :header-rows: 1
+   :widths: 25 10 65
+
+   * - Option
+     - Short
+     - Description
+
+   * - --compilation
+     -
+     - Install compilation dependencies
+   * - --runtime
+     -
+     - Install runtime dependencies
+   * - --modules
+     - -m
+     - Only use listed modules, if not given all will be used
+   * - --package
+     -
+     - List dependencies compatible with selected package manager. Supported values: `deb`.
+      
+   
+Installation
+------------
+
+To install dependencies execute:
+
+.. code-block:: sh
+
+   dependency-manager install
+
+The following options are available for the install command:
+
+.. list-table:: install arguments
+   :header-rows: 1
+   :widths: 25 10 65
+
+   * - Option
+     - Short
+     - Description
+
+   * - --compilation
+     -
+     - Install compilation dependencies
+   * - --runtime
+     -
+     - Install runtime dependencies
+   * - --modules
+     - -m
+     - Only use listed modules, if not given all will be used
+   * - --yes
+     - -y
+     - Assume 'yes' for prompts
+   * - --dry-run
+     - -s
+     - Simulate actions but do not touch the system
+   * - --no-update
+     -
+     - Do not update the package cache before installing
+
 File Format
 -----------
 
@@ -41,7 +117,7 @@ The file format the dependency manager uses is JSON.
 
 All dependency descriptions are located in `<tiscamera>/dependencies/`
 
-.. code-block:: JSON
+.. code-block:: json-object
 
    {
        dependencies: [
@@ -53,6 +129,8 @@ All dependency descriptions are located in `<tiscamera>/dependencies/`
            }
        ]
    }
+
+.. _install_dependencies_sh:   
    
 =======================
 install-dependencies.sh
@@ -77,7 +155,9 @@ To install all dependencies, call
 .. code-block:: sh
 
    scripts/install-dependencies.sh --compilation --runtime
-
+   
+.. _env_sh:
+   
 ======
 env.sh
 ======
@@ -96,6 +176,8 @@ To source it, call the following in the build directory
 
 Now additional commands like :ref:`tcam_ctrl` or :ref:`tcam_capture` should be available.
 
+.. _tiscamera_env_sh:
+
 ================
 tiscamera-env.sh
 ================
@@ -110,7 +192,7 @@ To source it, call the following in the build directory
 
 .. code-block:: sh
 
-. ./tiscamera-env.sh
+   . ./tiscamera-env.sh
 
 The script is not installed. It can be found in the build directory under `./tiscamera-env.sh`
 

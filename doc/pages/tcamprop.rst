@@ -36,14 +36,14 @@ Only tcamsrc and tcambin implement these.
         
 .. c:function:: gboolean tcam_prop_get_device_info (TcamProp* self, const char* serial, char** name, char** identifier, char** connection_type)
                 
-   @self: a #TcamProp
-   @serial: (in): serial number of camera to query
-   @name: (out) (optional): location to store an allocated string.
-   Use g_free() to free the returned string
-   @identifier: (out) (optional): location to store an allocated string.
-   Use g_free() to free the returned string
-   @connection_type: (out) (optional): location to store an allocated string.
-   Use g_free() to free the returned string
+   | @self: a #TcamProp
+   | @serial: (in): serial number of camera to query
+   | @name: (out) (optional): location to store an allocated string.
+   |                          Use g_free() to free the returned string
+   | @identifier: (out) (optional): location to store an allocated string.
+   |                                Use g_free() to free the returned string
+   | @connection_type: (out) (optional): location to store an allocated string.
+   |                                     Use g_free() to free the returned string
                 
    Get details of a given camera.
 
@@ -55,8 +55,10 @@ Only tcamsrc and tcambin implement these.
 
    Retrieve a list of all connected device serial numbers with the backend appended
 
-   Retrieved serials may appear multiple times but with different backends.
-   The format will always be `<serial>-<backend>`
+   | Retrieved serials may appear multiple times but with different backends.
+   | The format will always be `<serial>-<backend>`.
+   | The contained strings will have to be freed by the user.
+   | Call `g_slist_free_full(<list_var>, ::g_free)` to clear the list and the contained strings.
 
    Returns: (element-type utf8) (transfer full): a #GSList
 

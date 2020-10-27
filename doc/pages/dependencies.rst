@@ -10,7 +10,7 @@ This system is currently Ubuntu 18.04 LTS.
 Compilation Dependencies
 ========================
 
-The dependencies are also listed in `dependencies-debian-compilation.txt`
+The dependencies are also listed in the `*.dep` file. Please use the file for your distribution.
 
 +---------------------------------+------------------+--------------------------+
 | Name                            |Minimal Version   |Note                      |
@@ -62,7 +62,7 @@ The dependencies are also listed in `dependencies-debian-compilation.txt`
 Runtime Dependencies
 ====================
 
-The dependencies are also listed in `dependencies-debian-runtime.txt`
+The dependencies are also listed in the `*.dep` file. Please use the file for your distribution.
 
 +-----------------------------+----------------+-------------------------------+
 |Name                         |Minimal Version |Note                           |

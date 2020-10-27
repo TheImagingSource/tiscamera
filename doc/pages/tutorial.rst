@@ -44,7 +44,9 @@ To install all dependencies, execute the following command in the tiscamera dire
 
 .. code-block:: sh
 
-   ./scripts/install-dependencies.sh --runtime --compilation
+   ./scripts/dependency-manager install
+
+To install only runtime or compilation dependencies use the additional arguments `--runtime` and `--compilation`.
 
 
 Configuration
