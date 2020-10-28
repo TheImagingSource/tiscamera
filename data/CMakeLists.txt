@@ -22,7 +22,7 @@ if (BUILD_TOOLS)
   # add_subdirectory(bash-completion)
 endif (BUILD_TOOLS)
 
-if (BUILD_ARAVIS)
+if (BUILD_ARAVIS AND BUILD_TOOLS)
 
   # leave as a reminder on how to handle aravis versions should a
   # more internal pkg-config file be needed
@@ -36,7 +36,8 @@ if (BUILD_ARAVIS)
   # endif (${aravis_VERSION} MATCHES "-1")
 
   add_subdirectory(systemd)
-endif (BUILD_ARAVIS)
+endif (BUILD_ARAVIS AND BUILD_TOOLS)
+
 
 if (BUILD_V4L2)
 
@@ -54,7 +55,10 @@ if (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 
 endif (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 
+if (NOT TCAM_EXCLUSIVE_BUILD)
 
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/tcam.pc.cmake  ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc DESTINATION ${TCAM_INSTALL_PKGCONFIG})
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam.pc DESTINATION ${TCAM_INSTALL_PKGCONFIG})
+
+endif (NOT TCAM_EXCLUSIVE_BUILD)
