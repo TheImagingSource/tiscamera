@@ -194,8 +194,6 @@ bool load_device_settings (TcamProp* tcam,
         tcam_debug("State string has no version. Omitting check.");
     }
 
-    tcam_error(version.c_str());
-
     if (!serial_str.empty())
     {
         if (serial_str.compare(serial) != 0)
