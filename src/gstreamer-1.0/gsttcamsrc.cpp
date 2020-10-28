@@ -600,6 +600,8 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->active_source = nullptr;
 
     self->source_list = nullptr;
+    new (&self->device_serial) std::string("");
+    self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
 
     self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
     if (self->main_src != nullptr)
@@ -640,6 +642,7 @@ static void gst_tcam_src_finalize (GObject* object)
         gst_object_unref(self->pimipi_src);
         self->pimipi_src = nullptr;
     }
+    (&self->device_serial)->std::string::~string();
 
     G_OBJECT_CLASS(gst_tcam_src_parent_class)->finalize(object);
 }
