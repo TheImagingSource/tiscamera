@@ -18,12 +18,14 @@ Capture Time
    This requires Gstreamer version >= 1.14.
 
 All GstBuffer contain a capture time that can be retrieved by calling
-`gst_buffer_get_reference_timestamp_meta <https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gstreamer/html/GstBuffer.html#gst-buffer-get-reference-timestamp-meta>`_ for the associated buffer.
+`gst_buffer_get_meta(buffer, g_type_from_name("TcamStatisticsMetaApi"))` for the associated buffer.
 The retrieved timestamp will tell when the backend/driver on the computer captured the image.
 This timestamp will always be in nanoseconds.
 
 This frame of reference will depend on the backend.
 When unsure about the used backend, call `tcam-ctrl -l` in a terminal and check the 'Type' column.
+
+For an implementation example, see c example `10-metadata.c`
 
 V4L2 Kernel Driver
 ++++++++++++++++++
@@ -44,7 +46,8 @@ Camera Capture Time
 .. note::
    This requires Gstreamer version >= 1.14.
 
-GigE cameras deliver an additional timestamp that describes the time when the camera itself captured the image. This timestamp can be retrieved by calling `gst_buffer_get_reference_timestamp_meta <https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gstreamer/html/GstBuffer.html#gst-buffer-get-reference-timestamp-meta>`_ with the required GstCaps reference set to NULL.
+GigE cameras deliver an additional timestamp that describes the time when the camera itself captured the image.
+This timestamp can be retrieved by calling `gst_buffer_get_meta(buffer, g_type_from_name("TcamStatisticsMetaApi"))`.
 
 This timestamp will always be in nanoseconds.
 
