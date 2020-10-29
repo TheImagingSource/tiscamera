@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - dependency-manager - replacement for install-dependencies.sh
   offers wider range of functionality and allows addressal of different distributions
   See documentation for further details
+- C_INCLUDE_PATH to env.sh
 
 ### Changed
 
@@ -68,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Now `Aravis` and other capitalized strings are converted to lowercase before being
   interpreted.
 - camera-ip-conf was unable to set name without ip/netmask/gateway
+- various documentation errors
 
 ### Removed
 
