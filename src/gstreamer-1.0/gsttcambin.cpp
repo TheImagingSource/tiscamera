@@ -32,7 +32,7 @@
 
 #include "gst_helper.h"
 
-struct tcambin_data 
+struct tcambin_data
 {
     std::string     device_serial;
     std::string     device_type;
@@ -440,11 +440,14 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     }
 
 
+    // set to READY so that caps are always readable
+    gst_element_set_state(self->src, GST_STATE_READY);
+
     char* serial_from_src = nullptr;
     char* type_from_src = nullptr;
     // query these as late as possible
     // src needs some time as things can happen async
-    g_object_get(G_OBJECT(self->src), 
+    g_object_get(G_OBJECT(self->src),
                   "serial", &serial_from_src,
                   "type", &type_from_src,
                   NULL);
@@ -452,9 +455,6 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     self->data->device_type = type_from_src != nullptr ? type_from_src : std::string();
 
     GST_INFO_OBJECT( self, "Opened device has serial: '%s' type: '%s'", self->data->device_serial.c_str(), self->data->device_type.c_str() );
-
-    // set to READY so that caps are always readable
-    gst_element_set_state(self->src, GST_STATE_READY);
 
     self->data->src_caps = gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
     GST_INFO_OBJECT( self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->data->src_caps.get()));
