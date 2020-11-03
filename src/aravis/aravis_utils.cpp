@@ -98,6 +98,11 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         prop.type = value_type_to_ctrl_type(type);
         // generate id so that identfication of passed through properties is guaranteed
         prop.id = generate_unique_property_id();
+
+        if (strcmp(prop.name, "BalanceRatioRaw") == 0)
+        {
+            prop.group = {TCAM_PROPERTY_CATEGORY_COLOR, TCAM_PROPERTY_INVALID, 0};
+        }
     }
     else
     {
