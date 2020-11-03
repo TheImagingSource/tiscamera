@@ -155,9 +155,8 @@ int main (int argc, char *argv[])
 
     auto save_state = app.add_option("--save", serial,
                                      "Print a JSON string containing all properties and their current values");
-    std::string state;
     auto load_state = app.add_option("--load", serial,
-                                     "Read a JSON string containing properties and their values and set them in the device");
+                                     "Read a JSON string/file containing properties and their values and set them in the device");
 
     std::string device_type;
     auto existing_device_types = tcam::get_device_type_list_strings();
