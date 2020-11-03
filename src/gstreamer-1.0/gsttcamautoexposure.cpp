@@ -792,18 +792,18 @@ static void gst_tcamautoexposure_set_property (GObject* object,
             GST_DEBUG("Setting gain min to : %f", g_value_get_double(value));
             if (g_value_get_double(value) > self->gain_max)
             {
-                GST_ERROR("New user value for gain min is greater or equal to gain max. Ignoring request.");
+                GST_WARNING("New user value for gain min is greater or equal to gain max. Ignoring request.");
                 break;
             }
 
-            if (g_value_get_double(value) > self->gain.min)
+            if (g_value_get_double(value) < self->gain.min)
             {
-                GST_WARNING("New user value for gain min is greater than device gain min.");
+                GST_WARNING("New user value for gain min (%f) is greater than device gain min (%f).", g_value_get_double(value), self->gain.min);
                 self->gain_min = self->gain.min;
                 break;
             }
 
-            self->gain_min = g_value_get_double(value)* GAIN_FLOAT_MULTIPLIER;
+            self->gain_min = g_value_get_double(value);
 
             if (self->gain.value < self->gain_min)
             {
@@ -822,7 +822,7 @@ static void gst_tcamautoexposure_set_property (GObject* object,
             GST_DEBUG("Setting gain max to : %f", g_value_get_double(value));
             if (g_value_get_double(value) < self->gain_min)
             {
-                GST_ERROR("New user value for gain max is smaller or equal to gain min. Ignoring request.");
+                GST_WARNING("New user value for gain max is smaller or equal to gain min. Ignoring request.");
                 break;
             }
 
@@ -1315,7 +1315,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 
     if (!self->gain_is_double)
     {
-        GST_INFO("Setting gain to %f", gain);
+        GST_INFO("Setting gain to int %f", gain );
         g_value_init(&value, G_TYPE_INT);
         g_value_set_int(&value, gain);
     }
@@ -1323,7 +1323,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     {
         g_value_init(&value, G_TYPE_DOUBLE);
         g_value_set_double(&value, (float)gain / GAIN_FLOAT_MULTIPLIER);
-        GST_INFO("Setting gain to %f", (float)gain /  GAIN_FLOAT_MULTIPLIER);
+        GST_INFO("Setting gain to float %f", (float)gain /  GAIN_FLOAT_MULTIPLIER);
     }
     tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->gain_name.c_str(), &value);
 
