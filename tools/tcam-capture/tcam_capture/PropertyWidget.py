@@ -140,8 +140,8 @@ class PropertyWidget(QWidget):
 
         self.sld.setFocusPolicy(Qt.NoFocus)
         try:
-            self.sld.setRange(int(self.prop.minval * 100), int(self.prop.maxval * 100))
             self.sld.blockSignals(True)
+            self.sld.setRange(int(self.prop.minval * 100), int(self.prop.maxval * 100))
             self.sld.setValue(int(self.prop.value * 100))
             self.sld.blockSignals(False)
 
