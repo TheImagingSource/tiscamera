@@ -833,7 +833,7 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
-            self->gain_max = g_value_get_double(value) * GAIN_FLOAT_MULTIPLIER;
+            self->gain_max = g_value_get_double(value);
 
             if (self->gain.value > self->gain_max)
             {
@@ -841,7 +841,7 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 set_gain(self, self->gain.value);
             }
 
-            if (self->gain_max == 0.0)
+            if (self->gain_max == G_MAXDOUBLE)
             {
                 self->gain_max = self->gain.max;
             }
@@ -1315,7 +1315,7 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
 
     if (!self->gain_is_double)
     {
-        GST_INFO("Setting gain to int %f", gain );
+        GST_INFO("Setting gain to int %f", gain);
         g_value_init(&value, G_TYPE_INT);
         g_value_set_int(&value, gain);
     }
@@ -1591,14 +1591,12 @@ static void correct_brightness (GstTcamautoexposure* self, GstBuffer* buf)
 
     if (self->color_format == BAYER)
     {
-        GST_DEBUG("Calculating brightness");
         brightness = image_brightness_bayer(&buffer);
     }
     else
     {
         if (self->bit_depth == 8)
         {
-            GST_DEBUG("Calculating brightness for gray");
             brightness = buffer_brightness_gray(&buffer);
         }
         else
