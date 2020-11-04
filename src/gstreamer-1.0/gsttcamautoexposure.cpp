@@ -363,7 +363,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         fill_int( min, self->exposure.min );
         fill_int( max, self->exposure.max );
         fill_int( def, self->exposure.min );
-        fill_int( step, 1 );
+        fill_int( step, self->exposure.step );
         return TRUE;
     }
     else if (entry->prop_id == PROP_EXPOSURE_MAX)
@@ -372,7 +372,7 @@ static gboolean gst_tcamautoexposure_get_tcam_property (TcamProp* prop,
         fill_int( min, self->exposure.min );
         fill_int( max, self->exposure.max );
         fill_int( def, self->exposure.max );
-        fill_int( step, 1 );
+        fill_int( step, self->exposure.step );
         return TRUE;
     }
     else if (entry->prop_id == PROP_GAIN_MIN)
@@ -679,6 +679,7 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->exposure = {};
     self->exposure.min = 0;
     self->exposure.value = 0;
+    self->exposure.step = 1;
     self->exposure.max = G_MAXINT;
 
     self->exposure_min = 0;
@@ -780,6 +781,12 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 set_exposure(self, self->exposure.value);
             }
 
+            if (g_value_get_int(value) % (int)self->exposure.step != 0)
+            {
+                GST_ERROR("Wrong step size. Please use a value that is divisible by %f", self->exposure.step);
+                break;
+            }
+
             self->exposure_max = g_value_get_int(value);
             if (self->exposure_max == 0.0)
             {
@@ -800,6 +807,12 @@ static void gst_tcamautoexposure_set_property (GObject* object,
             {
                 GST_WARNING("New user value for gain min (%f) is greater than device gain min (%f).", g_value_get_double(value), self->gain.min);
                 self->gain_min = self->gain.min;
+                break;
+            }
+
+            if (g_value_get_int(value) % (int)self->exposure.step != 0)
+            {
+                GST_ERROR("Wrong step size. Please use a value that is divisible by %f", self->exposure.step);
                 break;
             }
 
@@ -1055,6 +1068,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
         GValue value = {};
         GValue min = {};
         GValue max = {};
+        GValue step = {};
         GValue type = {};
 
         gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(self->camera_src),
@@ -1063,7 +1077,7 @@ static void init_camera_resources (GstTcamautoexposure* self)
                                                    &min,
                                                    &max,
                                                    nullptr,
-                                                   nullptr,
+                                                   &step,
                                                    &type,
                                                    nullptr,
                                                    nullptr,
@@ -1086,6 +1100,8 @@ static void init_camera_resources (GstTcamautoexposure* self)
             // if max is set by user we use that
             // self->exposure.max = g_value_get_int(&max);
             self->exposure.value = g_value_get_int(&value);
+
+            self->exposure.step = g_value_get_int(&step);
         }
         else if (strcmp(t, "double") == 0)
         {
@@ -1093,12 +1109,22 @@ static void init_camera_resources (GstTcamautoexposure* self)
             self->exposure.min = g_value_get_double(&min);
             // self->exposure.max = g_value_get_double(&max);
             self->exposure.value = g_value_get_double(&value);
+            self->exposure.step = g_value_get_double(&step);
         }
 
         self->default_exposure_values.min = self->exposure.min;
         self->default_exposure_values.max = 1000000 / double(self->framerate_numerator / self->framerate_denominator);
 
+        // This is done the prevent error down the line.
+        // By setting max to something framerate related it may not align with the
+        // possible step size. This can lead to the algorithm trying to set
+        // exposure to a value that is the calculated max but that cannot be set.
+        // Thus realign with stepsize.
+        auto modulo = (int)self->default_exposure_values.max % (int)self->exposure.step;
+        self->default_exposure_values.max -= modulo;
+
         GST_INFO( "Exposure boundaries are %f %d", self->exposure.min, self->exposure_max );
+        GST_INFO( "Exposure boundaries are %f %f", self->exposure.min, self->default_exposure_values.max );
 
         g_value_unset(&value);
         g_value_unset(&min);
@@ -1544,7 +1570,7 @@ static void new_exposure (GstTcamautoexposure* self, unsigned int brightness)
     exposure.max = self->exposure_max;
     exposure.val = self->exposure.value;
     exposure.do_auto = self->auto_exposure;
-    // exposure.granularity = self->exposure.step;
+    exposure.granularity = self->exposure.step;
 
     algorithms::property_cont_iris iris = {};
     if (!self->iris_name.empty())
