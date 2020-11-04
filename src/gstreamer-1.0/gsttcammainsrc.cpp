@@ -1362,6 +1362,25 @@ static GstFlowReturn gst_tcam_mainsrc_create (GstPushSrc* push_src,
 
     std::unique_lock<std::mutex> lck(self->device->mtx);
 
+    static unsigned long frame_count;
+
+    if (self->n_buffers != -1)
+    {
+        /*
+          TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
+        */
+        if (frame_count >= (guint)self->n_buffers)
+        {
+            GST_INFO("Stopping stream after %lu buffers.", frame_count);
+            return GST_FLOW_EOS;
+        }
+        else
+        {
+            GST_INFO("%lu", frame_count);
+        }
+        frame_count++;
+    }
+
 wait_again:
     // wait until new buffer arrives or stop waiting when we have to shut down
     while (self->is_running && self->device->queue.empty())
@@ -1448,20 +1467,6 @@ wait_again:
         }
 
     } // end meta data
-
-    // GST_DEBUG("Pushing buffer...");
-
-    if (self->n_buffers != -1)
-    {
-        /*
-            TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
-        */
-        if (ptr->get_statistics().frame_count >= (guint)self->n_buffers)
-        {
-            GST_INFO("Stopping stream after %lu buffers.", ptr->get_statistics().frame_count);
-            return GST_FLOW_EOS;
-        }
-    }
 
     return GST_FLOW_OK;
 }
