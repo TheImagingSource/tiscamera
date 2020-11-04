@@ -348,6 +348,182 @@ static gboolean is_device_already_open (GstTcamSrc* self)
 }
 
 
+static void apply_element_property (GstTcamSrc* self,
+                                    guint prop_id,
+                                    const GValue* value,
+                                    GParamSpec* pspec)
+{
+
+    switch (prop_id)
+    {
+        case PROP_SERIAL:
+        {
+            GstState state;
+            gst_element_get_state(GST_ELEMENT(self), &state, NULL, 200);
+            if (state == GST_STATE_NULL)
+            {
+                if (g_value_get_string(value) == NULL)
+                {
+                    self->device_serial.clear();
+                }
+                else
+                {
+                    std::string string_value = g_value_get_string(value);
+
+                    std::string s;
+                    std::string t;
+
+                    bool sep_ret = separate_serial_and_type( string_value, s, t);
+                    if (sep_ret)
+                    {
+                        GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
+                                 s.c_str(), t.c_str());
+
+                        self->device_serial = s;
+                        self->device_type = tcam::tcam_device_from_string(t);
+
+                        GST_DEBUG("Type interpreted as '%s'", tcam::tcam_device_type_to_string(self->device_type).c_str());
+                    }
+                    else
+                    {
+                        self->device_serial = string_value;
+                        //self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+                    }
+                    // no else
+                    // self->device_serial and s are already equal
+                }
+
+                GST_INFO("Set camera serial to %s", self->device_serial.c_str());
+
+                if (!self->device_serial.empty())
+                {
+                    // TODO
+                }
+                else
+                {
+                    GST_DEBUG("Successfully opened device");
+                }
+            }
+            break;
+        }
+        case PROP_DEVICE_TYPE:
+        {
+            const char* type = g_value_get_string(value);
+
+            // this check is simply for messaging the user
+            // about invalid values
+            auto vec = tcam::get_device_type_list_strings();
+            if (std::find(vec.begin() , vec.end(), std::string(type)) == vec.end())
+            {
+                GST_ERROR("Unknown device type '%s'", type);
+                self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+            }
+            else
+            {
+                GST_DEBUG("Setting device type to %s", type);
+                self->device_type = tcam::tcam_device_from_string(type);
+            }
+            break;
+        }
+        case PROP_CAM_BUFFERS:
+        {
+            if (self->active_source == self->main_src)
+            {
+                g_object_set_property(G_OBJECT(self->active_source), "camera-buffers", value);
+            }
+            else
+            {
+                if (self->active_source)
+                {
+                    GST_INFO("Used source element does not support \"camera-buffers\".");
+                }
+                else
+                {
+                    self->cam_buffers = g_value_get_int(value);
+                }
+            }
+
+            break;
+        }
+        case PROP_NUM_BUFFERS:
+        {
+            if (self->active_source == self->main_src)
+            {
+                g_object_set_property(G_OBJECT(self->active_source), "num-buffers", value);
+            }
+            else
+            {
+                if (self->active_source)
+                {
+                    GST_INFO("Used source element does not support \"num-buffers\".");
+                }
+                else
+                {
+                    self->num_buffers = g_value_get_int(value);
+                }
+            }
+
+            break;
+        }
+        case PROP_DO_TIMESTAMP:
+        {
+            if (self->active_source)
+            {
+                g_object_set_property(G_OBJECT(self->active_source), "do-timestamp", value);
+            }
+            else
+            {
+                self->do_timestamp = g_value_get_boolean(value);
+            }
+            break;
+        }
+        case PROP_DROP_INCOMPLETE_FRAMES:
+        {
+            if (self->active_source)
+            {
+                g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
+            }
+            else
+            {
+                self->drop_incomplete_frames = g_value_get_boolean(value);
+            }
+            break;
+        }
+        case PROP_STATE:
+        {
+
+            if (self->active_source)
+            {
+                if (self->active_source == self->main_src)
+                {
+                    g_object_set_property(G_OBJECT(self->active_source), "state", value);
+                }
+                else if (self->active_source == self->pimipi_src)
+                {
+                    bool state = load_device_settings(TCAM_PROP(self),
+                                                      self->device_serial,
+                                                      g_value_get_string(value));
+                    if (!state)
+                    {
+                        GST_WARNING("Device may be in an undefined state.");
+                    }
+                }
+            }
+            else
+            {
+                GST_WARNING("No active source.");
+            }
+            break;
+        }
+        default:
+        {
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(G_OBJECT(self), prop_id, pspec);
+            break;
+        }
+    }
+}
+
+
 static gboolean open_source_element (GstTcamSrc* self)
 {
 
@@ -501,9 +677,37 @@ static gboolean open_source_element (GstTcamSrc* self)
     {
         GST_DEBUG("Ghost pad target set");
     }
-    gst_object_unref( target_pad );
+    gst_object_unref(target_pad);
 
     gst_element_set_state(self->active_source, GST_STATE_READY);
+
+    GValue val = G_VALUE_INIT;
+
+    g_value_init(&val, G_TYPE_INT);
+    g_value_set_int(&val, self->cam_buffers);
+    // manually set all properties to ensure they are correctly applied
+    apply_element_property(self, PROP_CAM_BUFFERS, &val, nullptr);
+
+    // g_value_reset(&val);
+    // g_value_init(&val, G_TYPE_INT);
+    g_value_set_int(&val, self->num_buffers);
+
+    apply_element_property(self, PROP_NUM_BUFFERS, &val, nullptr);
+
+    // g_value_reset(&val);
+
+    GValue val_bool = G_VALUE_INIT;
+
+    g_value_init(&val_bool, G_TYPE_BOOLEAN);
+    g_value_set_boolean(&val_bool, self->drop_incomplete_frames);
+
+    apply_element_property(self, PROP_DROP_INCOMPLETE_FRAMES, &val_bool, nullptr);
+
+    // g_value_reset(&val);
+    // g_value_init(&val, G_TYPE_BOOLEAN);
+    g_value_set_boolean(&val_bool, self->do_timestamp);
+
+    apply_element_property(self, PROP_DO_TIMESTAMP, &val_bool, nullptr);
 
     // query these as late as possible
     // src needs some time as things can happen async
@@ -616,6 +820,12 @@ static void gst_tcam_src_init (GstTcamSrc* self)
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
+
+    self->cam_buffers = 10;
+    self->do_timestamp = false;
+    self->drop_incomplete_frames = true;
+    self->num_buffers = -1;
+
 }
 
 
@@ -669,144 +879,8 @@ static void gst_tcam_src_set_property (GObject* object,
 {
     GstTcamSrc* self = GST_TCAM_SRC (object);
 
-    switch (prop_id)
-    {
-        case PROP_SERIAL:
-        {
-            GstState state;
-            gst_element_get_state(GST_ELEMENT(self), &state, NULL, 200);
-            if (state == GST_STATE_NULL)
-            {
-                if (g_value_get_string(value) == NULL)
-                {
-                    self->device_serial.clear();
-                }
-                else
-                {
-                    std::string string_value = g_value_get_string(value);
+    apply_element_property(self, prop_id, value, pspec);
 
-                    std::string s;
-                    std::string t;
-
-                    bool sep_ret = separate_serial_and_type( string_value, s, t);
-                    if (sep_ret)
-                    {
-                        GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
-                                 s.c_str(), t.c_str());
-
-                        self->device_serial = s;
-                        self->device_type = tcam::tcam_device_from_string(t);
-
-                        GST_DEBUG("Type interpreted as '%s'", tcam::tcam_device_type_to_string(self->device_type).c_str());
-                    }
-                    else
-                    {
-                        self->device_serial = string_value;
-                        //self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-                    }
-                    // no else
-                    // self->device_serial and s are already equal
-                }
-
-                GST_INFO("Set camera serial to %s", self->device_serial.c_str());
-
-                if (!self->device_serial.empty())
-                {
-                }
-                else
-                {
-                    GST_DEBUG("Successfully opened device");
-                }
-            }
-            break;
-        }
-        case PROP_DEVICE_TYPE:
-        {
-            const char* type = g_value_get_string(value);
-
-            // this check is simply for messaging the user
-            // about invalid values
-            auto vec = tcam::get_device_type_list_strings();
-            if (std::find(vec.begin() , vec.end(), std::string(type)) == vec.end())
-            {
-                GST_ERROR("Unknown device type '%s'", type);
-                self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-            }
-            else
-            {
-                GST_DEBUG("Setting device type to %s", type);
-                self->device_type = tcam::tcam_device_from_string(type);
-            }
-            break;
-        }
-        case PROP_CAM_BUFFERS:
-        {
-            GST_ERROR( "TODO PROP_CAM_BUFFERS set" );
-
-            break;
-        }
-        case PROP_NUM_BUFFERS:
-        {
-            GST_ERROR("TODO PROP_NUM_BUFFERS set");
-
-            break;
-        }
-        case PROP_DO_TIMESTAMP:
-        {
-            if (self->active_source)
-            {
-                g_object_set_property(G_OBJECT(self->active_source), "do-timestamp", value);
-            }
-            else
-            {
-                GST_WARNING("No active source.");
-            }
-            break;
-        }
-        case PROP_DROP_INCOMPLETE_FRAMES:
-        {
-            if (self->active_source)
-            {
-                g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
-            }
-            else
-            {
-                GST_WARNING("No active source.");
-            }
-            break;
-        }
-        case PROP_STATE:
-        {
-
-            if (self->active_source)
-            {
-                if (self->active_source == self->main_src)
-                {
-                    g_object_set_property(G_OBJECT(self->active_source), "state", value);
-                }
-                else if (self->active_source == self->pimipi_src)
-                {
-                    bool state = load_device_settings(TCAM_PROP(self),
-                                                      self->device_serial,
-                                                      g_value_get_string(value));
-                    if (!state)
-                    {
-                        GST_WARNING("Device may be in an undefined state.");
-                    }
-                }
-            }
-            else
-            {
-                GST_WARNING("No active source.");
-            }
-            break;
-        }
-        default:
-        {
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-            break;
-        }
-    }
 }
 
 

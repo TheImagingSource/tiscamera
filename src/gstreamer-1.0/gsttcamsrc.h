@@ -63,6 +63,11 @@ struct _GstTcamSrc
     std::string device_serial;
     TCAM_DEVICE_TYPE device_type;
 
+    gint cam_buffers;
+    gboolean drop_incomplete_frames;
+    gboolean do_timestamp;
+    gint num_buffers;
+
     GstPad* pad;
 };
 
