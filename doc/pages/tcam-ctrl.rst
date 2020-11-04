@@ -71,11 +71,15 @@ Arguments
 .. option:: --load <SERIAL> <JSON>
 
    Load the JSON string and set the properties to the specified values.
+   Alternatively a file path to a file containing the JSON description can be used.
 
    See :any:`state` for a JSON description.
 
    .. code-block:: sh
 
-      gst-launch-1.0 tcamsrc serial=12341234 state='{\"Exposure\":3000,"Exposure\ Auto\":false}' ! ....
+      # load from file
+      tcam-ctrl --load <SERIAL> <FILEPATH>
 
-   Alternatively a file path to a file containing the JSON description can be used.
+      # load string
+      tcam-ctrl --load <SERIAL> '{\"Exposure\":3000,"Exposure\ Auto\":false}'
+
