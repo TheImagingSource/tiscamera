@@ -35,15 +35,19 @@ class Cache():
 
     def reset(self):
         """Delete cache contents"""
-        folder = self.get_default_cache_directory()
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                # elif os.path.isdir(file_path): shutil.rmtree(file_path)
-            except Exception as e:
-                log.error(e)
+        try:
+            folder = self.get_default_cache_directory()
+            for the_file in os.listdir(folder):
+                file_path = os.path.join(folder, the_file)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                    # elif os.path.isdir(file_path): shutil.rmtree(file_path)
+                except Exception as e:
+                    log.error(e)
+        except FileNotFoundError:
+            # this means there is no cache directory
+            pass
 
     def get_cache_file(self,
                        directory: str=None,
