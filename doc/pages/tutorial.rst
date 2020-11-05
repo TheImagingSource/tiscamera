@@ -143,20 +143,79 @@ and :c:func:`tcam_prop_get_device_info`
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/00-list-devices.c
-         :language: c
-         :lines: 28-69
-         :emphasize-lines: 7, 23-27
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         gst_init(&argc, &argv); // init gstreamer
+
+         /* create a tcambin to retrieve device information */
+         GstElement* source = gst_element_factory_make("tcambin", "source");
+
+         /* retrieve a single linked list of serials of the available devices */
+         GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+
+         for (GSList* elem = serials; elem; elem = elem->next)
+         {
+             const char* device_serial = (gchar*)elem->data;
+
+             char* name;
+             char* identifier;
+             char* connection_type;
+
+             /* This fills the parameters to the likes of:
+             name='DFK Z12GP031',
+             identifier='The Imaging Source Europe GmbH-11410533'
+             connection_type='aravis'
+             The identifier is the name given by the backend
+             The connection_type identifies the backend that is used.
+             Currently 'aravis', 'v4l2' and 'unknown' exist
+             */
+             gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
+                                                      device_serial,
+                                                      &name,
+                                                      &identifier,
+                                                      &connection_type);
+
+             if (ret) // get_device_info was successful
+             {
+                 printf("Model: %s Serial: %s Type: %s\n",
+                        name, (gchar*)elem->data, connection_type);
+
+                 g_free(name);
+                 g_free(identifier);
+                 g_free(connection_type);
+             }
+         }
+
+         g_slist_free_full(serials, g_free);
 
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/00-list-devices.py
-         :language: python
-         :lines: 34-57
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
+                  
+         source = Gst.ElementFactory.make("tcambin")
+   
+         serials = source.get_device_serials_backend()
+   
+         for single_serial in serials:
+   
+             # This returns someting like:
+             # (True,
+             #  name='DFK Z12GP031',
+             #  identifier='The Imaging Source Europe GmbH-11410533',
+             #  connection_type='aravis')
+             # The identifier is the name given by the backend
+             # The connection_type identifies the backend that is used.
+             #     Currently 'aravis', 'v4l2', 'libusb' and 'unknown' exist
+             (return_value, model,
+             identifier, connection_type) = source.get_device_info(single_serial)
+   
+             # return value would be False when a non-existant serial is used
+             # since we are iterating get_device_serials this should not happen
+             if return_value:
+   
+                 print("Model: {} Serial: {} Type: {}".format(model,
+                                                              single_serial,
+                                                              connection_type))
 
 This code can be found in the example `00-list-devices`.
 
@@ -170,19 +229,40 @@ The recommended way of addressing a camera is by using its serial number.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/02-set-properties.c
-         :language: c
-         :lines: 90-105
-         :linenos:
-         :dedent: 4
-  
+      .. code-block:: c
+                   
+         /* create a tcambin to retrieve device information */
+         GstElement* source = gst_element_factory_make("tcambin", "source");
+   
+         const char* serial = NULL;
+   
+         if (serial != NULL)
+         {
+             GValue val = {};
+             g_value_init(&val, G_TYPE_STRING);
+             g_value_set_static_string(&val, serial);
+   
+             g_object_set_property(G_OBJECT(source), "serial", &val);
+         }
+   
+         /* in the READY state the camera will always be initialized */
+         gst_element_set_state(source, GST_STATE_READY);
+
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/02-set-properties.py
-         :language: python
-         :lines: 71-81
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
+                  
+         # Set this to a serial string for a specific camera
+         serial = None
+
+         camera = Gst.ElementFactory.make("tcambin")
+   
+         if serial:
+             # This is gstreamer set_property
+             camera.set_property("serial", serial)
+   
+         # in the READY state the camera will always be initialized
+         camera.set_state(Gst.State.READY)
 
 To close a device, it is sufficient to set the GStreamer state to NULL
 which will free up all hardware resources.
@@ -191,21 +271,19 @@ which will free up all hardware resources.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/02-set-properties.c
-         :language: c
-         :lines: 161-163
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         gst_element_set_state(source, GST_STATE_NULL);
+
+         gst_object_unref(source);
 
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/02-set-properties.py
-         :language: python
-         :lines: 99-100
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
 
-                  
+         # cleanup, reset state
+         camera.set_state(Gst.State.NULL)
+                           
 This code can be found in the example `02-set-properties`.
             
 Streaming
@@ -229,19 +307,26 @@ The printed caps are GStreamer compatible and can be copy-pasted for configurati
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/04-list-formats.c
-         :language: c
-         :lines: 33-35, 45-52
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         /* create a tcambin to retrieve device information */
+         GstElement* source = gst_element_factory_make("tcambin", "source");
+
+         /* Setting the state to ready ensures that all resources
+         are initialized and that we really get all format capabilities */
+         gst_element_set_state(source, GST_STATE_READY);
+
+         GstPad* pad = gst_element_get_static_pad(source, "src");
+
+         GstCaps* caps = gst_pad_query_caps(pad, NULL);
 
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/04-list-formats.py
-         :language: python
-         :lines: 181, 192, 33
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+                  
+         source = Gst.ElementFactory.make("tcambin")
+         source.set_state(Gst.State.READY)
+         caps = source.get_static_pad("src").query_caps()
 
 This code can be found in the example `04-list-formats`.
 
@@ -253,19 +338,54 @@ Setting Caps
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/05-set-format.c
-         :language: c
-         :lines: 32-36,55-69,76-80
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         GError* err = NULL;
+         const char* pipeline_desc = "tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink";
+         GstElement* pipeline = gst_parse_launch(pipeline_desc, &err);
+         
+         GstCaps* caps = gst_caps_new_empty();
+         GstStructure* structure = gst_structure_from_string("video/x-raw", NULL);
+         gst_structure_set(structure,
+                           "format", G_TYPE_STRING, "BGRx",
+                           "width", G_TYPE_INT, 640,
+                           "height", G_TYPE_INT, 480,
+                           "framerate", GST_TYPE_FRACTION, 30, 1,
+                           NULL);
+         gst_caps_append_structure (caps, structure);
+         
+         GstElement* capsfilter = gst_bin_get_by_name(GST_BIN(pipeline), "filter");
+         
+         g_object_set(G_OBJECT(capsfilter), "caps", caps, NULL);
+         gst_object_unref(capsfilter);
+         gst_caps_unref(caps);
+
                   
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/05-set-format.py
-         :language: python
-         :lines: 38-42, 49-64
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
+
+         pipeline = Gst.parse_launch("tcambin name=bin"
+                                     " ! capsfilter name=filter"
+                                     " ! videoconvert"
+                                     " ! ximagesink")
+   
+         caps = Gst.Caps.new_empty()
+   
+         structure = Gst.Structure.new_from_string("video/x-raw")
+         structure.set_value("width", 640)
+         structure.set_value("height", 480)
+   
+         try:
+             fraction = Gst.Fraction(30, 1)
+             structure.set_value("framerate", fraction)
+         except TypeError:
+             struc_string = structure.to_string()
+   
+             struc_string += ",framerate={}/{}".format(30, 1)
+             structure.free()
+             structure, end = structure.from_string(struc_string)
+
                   
 This code can be found in the example `05-set-format`.
 
@@ -303,19 +423,40 @@ To enable image retrieval, the following steps need to be taken.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/07-appsink.c
-         :language: c
-         :lines:  104-107, 128-137
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         const char* pipeline_str = "tcambin name=source ! videoconvert ! appsink name=sink";
+
+         GError* err = NULL;
+         GstElement* pipeline = gst_parse_launch(pipeline_str, &err);
+         /* retrieve the appsink from the pipeline */
+         GstElement* sink = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+   
+         // tell appsink to notify us when it receives an image
+         g_object_set(G_OBJECT(sink), "emit-signals", TRUE, NULL);
+   
+         // tell appsink what function to call when it notifies us
+         g_signal_connect(sink, "new-sample", G_CALLBACK(callback), NULL);
+   
+         gst_object_unref(sink);
                   
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/07-appsink.py
-         :language: python
-         :lines: 93-96, 107-115
-         :linenos: 
-         :dedent: 4
+      .. code-block:: python
+
+         pipeline = Gst.parse_launch("tcambin name=source"
+                                     " ! videoconvert"
+                                     " ! appsink name=sink")
+
+         sink = pipeline.get_by_name("sink")
+
+         # tell appsink to notify us when it receives an image
+         sink.set_property("emit-signals", True)
+
+         user_data = "This is our user data"
+
+         # tell appsink what function to call when it notifies us
+         sink.connect("new-sample", callback, user_data)
                   
 The image `sample` that is given to the function contains the image, video caps and other additional information that maybe required for image processing.
 
@@ -324,17 +465,55 @@ The image `sample` that is given to the function contains the image, video caps 
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/07-appsink.c
-         :language: c
-         :lines: 32-45, 51, 90-95
-         :linenos:
+      .. code-block:: c
+
+         /*
+         This function will be called in a separate thread when our appsink
+         says there is data for us. user_data has to be defined
+         when calling g_signal_connect. It can be used to pass objects etc.
+         from your other function to the callback.
+         */
+         static GstFlowReturn callback (GstElement* sink, void* user_data)
+         {
+             GstSample* sample = NULL;
+             /* Retrieve the buffer */
+             g_signal_emit_by_name(sink, "pull-sample", &sample, NULL);
+
+             if (sample)
+             {
+                 GstBuffer* buffer = gst_sample_get_buffer(sample);
+
+                 // delete our reference so that gstreamer can handle the sample
+                 gst_sample_unref (sample);
+             }
+             return GST_FLOW_OK;
+         }
                   
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/07-appsink.py
-         :language: python
-         :lines: 36-52, 82-85
-         :linenos:
+      .. code-block:: python
+
+         def callback(appsink, user_data):
+             """
+             This function will be called in a separate thread when our appsink
+             says there is data for us. user_data has to be defined
+             when calling g_signal_connect. It can be used to pass objects etc.
+             from your other function to the callback.
+             """
+             sample = appsink.emit("pull-sample")
+
+             if sample:
+
+                 caps = sample.get_caps()
+
+                 gst_buffer = sample.get_buffer()
+
+                 try:
+                     (ret, buffer_map) = gst_buffer.map(Gst.MapFlags.READ)
+                 finally:
+                     gst_buffer.unmap(buffer_map)
+
+             return Gst.FlowReturn.OK
 
 This code can be found in the example `07-appsink`.
 
@@ -361,20 +540,79 @@ For an overview of available properties, type the following into a terminal:
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/01-list-properties.c
-         :language: c
-         :lines: 33-35, 45-78, 142-155
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+
+         /* create a tcambin to retrieve device information */
+         GstElement* source = gst_element_factory_make("tcambin", "source");
+
+         GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
+
+         for (GSList* cur = names; cur != NULL; cur = cur->next)
+         {
+             const char* name = (char*)cur->data;
+
+             GValue value = {};
+             GValue min = {};
+             GValue max = {};
+             GValue default_value = {};
+             GValue step_size = {};
+             GValue type = {};
+             GValue flags = {};
+             GValue category = {};
+             GValue group = {};
+
+             gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
+                                                        name,
+                                                        &value,
+                                                        &min,
+                                                        &max,
+                                                        &default_value,
+                                                        &step_size,
+                                                        &type,
+                                                        &flags,
+                                                        &category,
+                                                        &group);
+
+             if (!ret)
+             {
+                 printf("Could not query property '%s'\n", name);
+                 continue;
+             }
+
+             g_value_unset( &value );
+             g_value_unset( &min );
+             g_value_unset( &max );
+             g_value_unset( &default_value );
+             g_value_unset( &step_size );
+             g_value_unset( &type );
+             g_value_unset( &flags );
+             g_value_unset( &category );
+             g_value_unset( &group );
+         }
+
+         g_slist_free_full(names,g_free);
+         gst_object_unref(source);
                      
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/01-list-properties.py
-         :language: python
-         :lines: 37-40, 44-56 
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
+                      
+         # we create a source element to retrieve a property list through it
+         camera = Gst.ElementFactory.make("tcambin")
 
+         # serial is defined, thus make the source open that device
+         property_names = camera.get_tcam_property_names()
+
+         for name in property_names:
+
+             (ret, value,
+              min_value, max_value,
+              default_value, step_size,
+              value_type, flags,
+              category, group) = camera.get_tcam_property(name)
+
+             if not ret:
+                 print("could not receive value {}".format(name))
                   
 This code can be found in the example `01-list-properties`.
 
@@ -388,19 +626,35 @@ The responsible function is `tcam_prop_set_tcam_property`.
 
    .. group-tab:: c
 
-      .. literalinclude:: ../../examples/c/02-set-properties.c
-         :language: c
-         :lines: 90-93, 104-105, 118-124, 129
-         :linenos:
-         :dedent: 4
+      .. code-block:: c
+                  
+         /* create a tcambin to retrieve device information */
+         GstElement* source = gst_element_factory_make("tcambin", "source");
+
+         const char* serial = NULL;
+         /* in the READY state the camera will always be initialized */
+         gst_element_set_state(source, GST_STATE_READY);
+         GValue set_auto = G_VALUE_INIT;
+         g_value_init(&set_auto, G_TYPE_BOOLEAN);
+
+         g_value_set_boolean(&set_auto, FALSE);
+         
+         tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                     "Exposure Auto", &set_auto);
+         g_value_unset(&set_auto);
+
                   
    .. group-tab:: python
 
-      .. literalinclude:: ../../examples/python/02-set-properties.py
-         :language: python
-         :lines: 74-75, 80-82, 88
-         :linenos:
-         :dedent: 4
+      .. code-block:: python
+
+         camera = Gst.ElementFactory.make("tcambin")
+
+         # in the READY state the camera will always be initialized
+         camera.set_state(Gst.State.READY)
+
+         camera.set_tcam_property("Exposure Auto", False)
+
                   
 This code can be found in the example `02-set-properties`.
 
