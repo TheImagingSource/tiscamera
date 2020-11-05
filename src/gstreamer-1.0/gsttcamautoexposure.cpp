@@ -753,6 +753,12 @@ static void gst_tcamautoexposure_set_property (GObject* object,
                 break;
             }
 
+            if (g_value_get_int(value) % (int)self->exposure.step != 0)
+            {
+                GST_ERROR("Wrong step size. Please use a value that is divisible by %f", self->exposure.step);
+                break;
+            }
+
             self->exposure_min = g_value_get_int(value);
 
             if (self->exposure.value < self->exposure_min)
@@ -807,12 +813,6 @@ static void gst_tcamautoexposure_set_property (GObject* object,
             {
                 GST_WARNING("New user value for gain min (%f) is greater than device gain min (%f).", g_value_get_double(value), self->gain.min);
                 self->gain_min = self->gain.min;
-                break;
-            }
-
-            if (g_value_get_int(value) % (int)self->exposure.step != 0)
-            {
-                GST_ERROR("Wrong step size. Please use a value that is divisible by %f", self->exposure.step);
                 break;
             }
 
