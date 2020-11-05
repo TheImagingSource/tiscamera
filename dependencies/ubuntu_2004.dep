@@ -164,6 +164,12 @@
             "modules": ["aravis"]
         },
         {
+            "name": "libtool",
+            "version": ">= 2.4.6",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
             "name": "autoconf",
             "version": ">= 2.69-9",
             "phase": "compilation",
