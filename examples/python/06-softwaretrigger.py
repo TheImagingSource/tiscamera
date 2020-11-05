@@ -49,14 +49,19 @@ def main():
     # this is simply to show that the device is running
     time.sleep(2)
 
-    source.set_tcam_property("Trigger Mode", True)
+    trigger_mode_type = source.get_tcam_property_type("Trigger Mode")
+
+    if trigger_mode_type == "enum":
+        source.set_tcam_property("Trigger Mode", "On")
+    else:
+        source.set_tcam_property("Trigger Mode", True)
 
     wait = True
     while wait:
-        input_text = input("Press space + enter to trigger an image.\n q + enter to stop the stream.")
+        input_text = input("Press 'Enter' to trigger an image.\n q + enter to stop the stream.")
         if input_text == "q":
             break
-        elif input_text == " ":
+        else:
             ret = source.set_tcam_property("Software Trigger", True)
 
             if ret:
@@ -66,7 +71,10 @@ def main():
 
     # deactivate trigger mode
     # this is simply to prevent confusion when the camera ist started without wanting to trigger
-    source.set_tcam_property("Trigger Mode", False)
+    if trigger_mode_type == "enum":
+        source.set_tcam_property("Trigger Mode", "Off")
+    else:
+        source.set_tcam_property("Trigger Mode", False)
 
     # this stops the pipeline and frees all resources
     pipeline.set_state(Gst.State.NULL)
