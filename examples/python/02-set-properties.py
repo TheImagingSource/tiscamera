@@ -38,7 +38,7 @@ def print_properties(camera):
      category, group) = camera.get_tcam_property("Exposure Auto")
 
     if ret:
-        print("Expposure Auto has value: {}".format(value))
+        print("Exposure Auto has value: {}".format(value))
     else:
         print("Could not query Exposure Auto")
 
@@ -57,12 +57,12 @@ def print_properties(camera):
      min_value, max_value,
      default_value, step_size,
      value_type, flags,
-     category, group) = camera.get_tcam_property("Exposure")
+     category, group) = camera.get_tcam_property("Brightness")
 
     if ret:
-        print("Exposure has value: {}".format(value))
+        print("Brightness has value: {}".format(value))
     else:
-        print("Could not query Exposure")
+        print("Could not query Brightness")
 
 
 def main():
@@ -92,7 +92,7 @@ def main():
     # In that case the used GValue type has to be changed when setting the property.
     # Some cameras might offer 'Exposure' as 'Exposure Time (us)'.
     # camera.set_tcam_property("Exposure", 3000.0)
-    camera.set_tcam_property("Exposure", 3000)
+    camera.set_tcam_property("Brightness", 200)
 
     print_properties(camera)
 

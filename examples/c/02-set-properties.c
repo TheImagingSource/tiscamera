@@ -62,23 +62,23 @@ void print_properties (GstElement* source)
         printf("Could not query Gain Auto\n");
     }
 
-    GValue exp_value = G_VALUE_INIT;
+    GValue brightness_value = G_VALUE_INIT;
 
     ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                      "Exposure",
-                                      &exp_value,
+                                      "Brightness",
+                                      &brightness_value,
                                       NULL, NULL, NULL, NULL,
                                       NULL, NULL, NULL, NULL);
 
     if (ret)
     {
-        printf("Exposure has value: %d\n",
-               g_value_get_int(&exp_value));
-        g_value_unset( &exp_value );
+        printf("Brightness has value: %d\n",
+               g_value_get_int(&brightness_value));
+        g_value_unset(&brightness_value);
     }
     else
     {
-        printf("Could not query Exposure\n");
+        printf("Could not query Brightness\n");
     }
 }
 
@@ -128,29 +128,15 @@ int main (int argc, char *argv[])
 
     g_value_unset( &set_auto );
 
-    /*
-      Some cameras offer exposure and gain as doubles instead of integers.
-      In that case the used GValue type has to be changed when setting the property.
-      Some cameras might offer 'Exposure' as 'Exposure Time (us)'.
-    */
-    /* GValue set_exposure = G_VALUE_INIT;
-       g_value_init(&set_exposure, G_TYPE_DOUBLE);
-       g_value_set_double(&set_exposure, 3000.0);
+    GValue set_brightness = G_VALUE_INIT;
+    g_value_init(&set_brightness, G_TYPE_INT);
 
-       tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                   "Exposure", &set_exposure);
-
-       g_value_unset(&set_exposure); */
-
-    GValue set_exposure = G_VALUE_INIT;
-    g_value_init(&set_exposure, G_TYPE_INT);
-
-    g_value_set_int(&set_exposure, 3000);
+    g_value_set_int(&set_brightness, 200);
 
     tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                "Exposure", &set_exposure);
+                                "Brightness", &set_brightness);
 
-    g_value_unset(&set_exposure);
+    g_value_unset(&set_brightness);
 
     /*
       second print for the before/after comparison
