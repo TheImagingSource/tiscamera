@@ -2,14 +2,6 @@
     margin-bottom: 2em;
 }
 
-.sphinx-tabs:last-child {
-    margin-bottom: 1em;
-}
-
-.sphinx-tabs .sphinx-menu .item p {
-    margin: 0;
-}
-
 .sphinx-tabs .sphinx-menu a.item {
     color: #2980b9 !important;
 }
@@ -30,7 +22,14 @@
     box-sizing: border-box;
 }
 
-.sphinx-tab.tab.active {
+.tab div[class^='highlight']:last-child {
+    margin-bottom: 0;
+}
+
+.tab .wy-plain-list-disc:last-child,
+.rst-content .section ul:last-child,
+.rst-content .toctree-wrapper ul:last-child,
+article ul:last-child {
     margin-bottom: 0;
 }
 
