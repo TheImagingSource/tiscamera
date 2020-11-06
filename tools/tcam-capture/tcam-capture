@@ -99,6 +99,18 @@ class FmtSelection:
                 self.fps == other.fps)
 
 
+def split_serial(serial: str):
+    """
+    Split the given serial string when discovering '-'
+    Returns serial and type
+    """
+
+    if "-" in serial:
+        return serial.split("-", 1)
+    else:
+        return serial
+
+
 class TCamCapture(QMainWindow):
     """
     Main application window for tcam-capture
@@ -110,8 +122,15 @@ class TCamCapture(QMainWindow):
         app.aboutToQuit.connect(self.quit)
         self.app = app
 
-        self.serial = serial
-        self.device_type = None
+        # support <serial> and <serial>-<type>
+        s = split_serial(serial)
+        if type(s) is str:
+            self.serial = serial
+            self.device_type = ""
+        else:
+            self.serial = s[0]
+            self.device_type = s[1]
+
         self.caps_desc = None
         self.selected_format = FmtSelection()
         self.active_format = FmtSelection()
@@ -385,10 +404,10 @@ class TCamCapture(QMainWindow):
         res, device = DeviceDialog.get_device(self.indexer)
         if res and device:
             self.serial = device.serial
-            self.dev_type = device.device_type
+            self.device_type = device.device_type
             if self.serial:
                 caps_str = None
-                self.open_device(self.serial, self.dev_type, caps_str)
+                self.open_device(self.serial, self.device_type, caps_str)
 
     def save_image_action(self):
         """
@@ -440,7 +459,8 @@ class TCamCapture(QMainWindow):
                                                                            contype=dev.device_type,
                                                                            serial=dev.serial)
             if (dev.serial == self.serial
-                    and dev.device_type.lower() == self.dev_type.lower()):
+                    and (self.device_type == ""
+                         or dev.device_type.lower() == self.device_type.lower())):
                 active_entry = action_string
             self.device_combo.addItem(action_string)
 
@@ -610,13 +630,14 @@ class TCamCapture(QMainWindow):
         if self.device_list:
             for dev in self.device_list:
                 if (dev.serial == self.serial
-                        and dev.device_type == self.dev_type):
+                        and (self.device_type == ""
+                             or dev.device_type == self.device_type)):
                     self.setWindowTitle("TCam Capture - {}({})".format(dev.model, serial))
                     # update device menu so that mark on opened camera is drawn
                     self.update_device_list(self.device_list)
                     break
 
-        self.view = TcamView(self.serial, self.dev_type, self)
+        self.view = TcamView(self.serial, self.device_type, self)
         self.view.set_settings(self.settings)
         self.view.register_device_lost(self.lost_device)
         # create preemptive pipline to make tcambin available
@@ -634,7 +655,7 @@ class TCamCapture(QMainWindow):
         self.view.pause()
 
         self.cache.last_serial = self.serial
-        self.cache.last_device_type = self.dev_type
+        self.cache.last_device_type = self.device_type
         self.cache.save()
         state = self.cache.load_device_state()
 
