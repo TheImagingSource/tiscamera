@@ -33,18 +33,23 @@ set(CPACK_PACKAGE_CHECKSUM "SHA512")
 # Due to this problem we have to manually track dependencies.
 # set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
-# load dependency list from central point
-file(STRINGS "${TCAM_SOURCE_DIR}/dependencies/dependencies-debian-runtime.txt" debian_dep)
 
-foreach(Line ${debian_dep})
-  # Ignore comments and append the rest to a single line.
-  if(NOT "${Line}" MATCHES "^#.*$")
-    string(REPLACE "\n" "" Line "${Line}")
-    set(debian_dependencies "${debian_dependencies}${Line}")
-  endif()
-endforeach()
+if (TCAM_EXCLUSIVE_BUILD)
+  set(TCAM_PACKAGE_MODULES "")
+else (TCAM_EXCLUSIVE_BUILD)
+  set(TCAM_PACKAGE_MODULES "base,gstreamer")
+endif (TCAM_EXCLUSIVE_BUILD)
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "${debian_dependencies}")
+
+function(add_deps dep)
+  if (NOT "${TCAM_PACKAGE_MODULES}" STREQUAL "")
+    set(TCAM_PACKAGE_MODULES "${TCAM_PACKAGE_MODULES},")
+  endif (NOT "${TCAM_PACKAGE_MODULES}" STREQUAL "")
+
+  set(TCAM_PACKAGE_MODULES "${TCAM_PACKAGE_MODULES}${dep}" PARENT_SCOPE)
+
+endfunction()
+
 
 set(CPACK_SET_DESTDIR "on")
 
@@ -63,6 +68,8 @@ if (BUILD_ARAVIS)
   set(ARAVIS_POSTINST "systemctl enable gige-daemon.service
         systemctl start gige-daemon.service")
 
+  add_deps("aravis")
+
 else (BUILD_ARAVIS)
 
   set(ARAVIS_PRERM "")
@@ -72,43 +79,39 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_TOOLS)
 
-  # no comma separating CPACK_DEBIAN_PACKAGE_DEPENDS and others as the previous list should end with one
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS} python3-pyqt5 (>= 5.5)")
+  add_deps("tools")
+
+  if (TCAM_BUILD_WITH_GUI)
+
+    add_deps("gui")
+
+  endif (TCAM_BUILD_WITH_GUI)
 
 endif (BUILD_TOOLS)
 
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0, python3-gst-1.0")
+if (BUILD_DOCUMENTATION)
+      add_deps("documentation")
+endif (BUILD_DOCUMENTATION)
+
+message("${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}")
+
+set(DEB_DEPENDENCY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES})
+
+# execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}
+execute_process(COMMAND ${DEB_DEPENDENCY_CMD}
+  WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
+  OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_DEPENDS
+  RESULT_VARIABLE BLA)
+
+### required for tcam-capture
+
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0")
 
 # when dealing with -DBUIL_TOOLS=OFF and similar situations
 # the dependency list might end with a trailing `,`
 # this will cause dpkg to report an error and abort the installation
 # remove it as the list will not be touched after this
 string(REGEX REPLACE ",$" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-
-#
-# libzip check
-# Ubuntu 18.04 has libzip4
-# Ubuntu 24.04 has libzip5
-# Debian testing (2020.08.18) has libzip4
-# check what package exists and install it
-
-find_program(HAS_APT_CACHE apt-cache)
-
-if (HAS_APT_CACHE)
-  execute_process(COMMAND apt-cache search --names-only libzip4
-    OUTPUT_VARIABLE HAS_LIBZIP4)
-
-  if (HAS_LIBZIP4)
-    string(REGEX REPLACE "libzip\\[4-5\\]" "libzip4" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-  else (HAS_LIBZIP4)
-    string(REGEX REPLACE "libzip\\[4-5\\]" "libzip5" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-  endif (HAS_LIBZIP4)
-
-else (HAS_APT_CACHE)
-  message(WARNING "No apt-cache. Package dependencies may be wrong.")
-endif (HAS_APT_CACHE)
-# end libzip check
-
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
