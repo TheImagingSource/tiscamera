@@ -628,7 +628,7 @@ class TCamCapture(QMainWindow):
         """Open device and starts video stream"""
         self.close()
         self.serial = serial
-        self.dev_type = dev_type
+        self.device_type = dev_type
 
         if self.device_list:
             for dev in self.device_list:
