@@ -123,14 +123,17 @@ class TCamCapture(QMainWindow):
         self.app = app
 
         # support <serial> and <serial>-<type>
-        s = split_serial(serial)
-        if type(s) is str:
+        if serial:
+            s = split_serial(serial)
+            if type(s) is str:
+                self.serial = serial
+                self.device_type = ""
+            else:
+                self.serial = s[0]
+                self.device_type = s[1]
+        else:
             self.serial = serial
             self.device_type = ""
-        else:
-            self.serial = s[0]
-            self.device_type = s[1]
-
         self.caps_desc = None
         self.selected_format = FmtSelection()
         self.active_format = FmtSelection()
