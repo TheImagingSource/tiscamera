@@ -93,7 +93,7 @@ if (BUILD_DOCUMENTATION)
       add_deps("documentation")
 endif (BUILD_DOCUMENTATION)
 
-message("${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}")
+#message("${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}")
 
 set(DEB_DEPENDENCY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES})
 
@@ -112,6 +112,10 @@ set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0")
 # this will cause dpkg to report an error and abort the installation
 # remove it as the list will not be touched after this
 string(REGEX REPLACE ",$" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+# remove line breaks
+# they may be in the string due to dependency-manager being a commandlione tool
+# line breaks may cause the package to not be installable
+string(REGEX REPLACE "\n" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
