@@ -482,7 +482,7 @@ class TcamView(QWidget):
         """
         err, dbg = msg.parse_error()
 
-        if msg.src.get_name() == "tcambin-source":
+        if "tcamsrc-" in msg.src.get_name():
 
             if err:
 
