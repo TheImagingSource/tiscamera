@@ -47,6 +47,8 @@ int main (int argc, char *argv[])
     /* Device is now in a state for interactions */
 
     GValue state = G_VALUE_INIT;
+
+    g_value_init(&state, G_TYPE_STRING);
     /*
       We print the properties for a before/after comparison,
     */
