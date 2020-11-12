@@ -826,17 +826,17 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                 }
             }
         }
-        else if (gst_structure_get_field_type(struc, "width") == GST_TYPE_INT_RANGE)
-        {
-            const GValue* int_range = gst_structure_get_value(struc, "width");
+        // else if (gst_structure_get_field_type(struc, "width") == GST_TYPE_INT_RANGE)
+        // {
+        //     const GValue* int_range = gst_structure_get_value(struc, "width");
 
-            width = gst_value_get_int_range_max(int_range);
-            if (largest_width < width)
-            {
-                largest_width = width;
-                new_width = true;
-            }
-        }
+        //     width = gst_value_get_int_range_max(int_range);
+        //     if (largest_width < width)
+        //     {
+        //         largest_width = width;
+        //         new_width = true;
+        //     }
+        // }
         else
         {
             tcam_warning("Field 'width' does not have a supported type. Current type: '%s'",
@@ -854,17 +854,17 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                 }
             }
         }
-        else if (gst_structure_get_field_type(struc, "height") == GST_TYPE_INT_RANGE)
-        {
-            const GValue* int_range = gst_structure_get_value(struc, "height");
+        // else if (gst_structure_get_field_type(struc, "height") == GST_TYPE_INT_RANGE)
+        // {
+        //     const GValue* int_range = gst_structure_get_value(struc, "height");
 
-            height = gst_value_get_int_range_max(int_range);
-            if (largest_height < height)
-            {
-                largest_height = height;
-                new_height = true;
-            }
-        }
+        //     height = gst_value_get_int_range_max(int_range);
+        //     if (largest_height < height)
+        //     {
+        //         largest_height = height;
+        //         new_height = true;
+        //     }
+        // }
         else
         {
             tcam_warning("Field 'height' does not have a supported type. Current type: '%s'",
