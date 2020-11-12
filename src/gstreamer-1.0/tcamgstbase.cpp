@@ -817,7 +817,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // halfway fixated caps
         if (gst_structure_get_field_type(struc, "width") == G_TYPE_INT)
         {
-            if (gst_structure_get_int(struc, "width", &height))
+            if (gst_structure_get_int(struc, "width", &width))
             {
                 if (largest_width < width)
                 {
@@ -839,8 +839,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // }
         else
         {
-            tcam_warning("Field 'width' does not have a supported type. Current type: '%s'",
-                         g_type_name(gst_structure_get_field_type(struc, "width")));
+            tcam_info("Field 'width' does not have a supported type. Current type: '%s'",
+                      g_type_name(gst_structure_get_field_type(struc, "width")));
         }
 
         if (gst_structure_get_field_type(struc, "height") == G_TYPE_INT)
@@ -867,8 +867,8 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // }
         else
         {
-            tcam_warning("Field 'height' does not have a supported type. Current type: '%s'",
-                         g_type_name(gst_structure_get_field_type(struc, "height")));
+            tcam_info("Field 'height' does not have a supported type. Current type: '%s'",
+                      g_type_name(gst_structure_get_field_type(struc, "height")));
         }
 
         if (new_width && new_height)
