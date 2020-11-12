@@ -831,7 +831,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
             const GValue* int_range = gst_structure_get_value(struc, "width");
 
             width = gst_value_get_int_range_max(int_range);
-            if (largest_width <= width)
+            if (largest_width < width)
             {
                 largest_width = width;
                 new_width = true;
@@ -859,7 +859,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
             const GValue* int_range = gst_structure_get_value(struc, "height");
 
             height = gst_value_get_int_range_max(int_range);
-            if (largest_height <= height)
+            if (largest_height < height)
             {
                 largest_height = height;
                 new_height = true;
