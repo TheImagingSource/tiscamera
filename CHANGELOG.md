@@ -68,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - serial-type combinations where not always correctly identified.
   Now `Aravis` and other capitalized strings are converted to lowercase before being
   interpreted.
+- tcamsrc (now tcammainsrc) num-buffers delivered buffer where one short
 - camera-ip-conf was unable to set name without ip/netmask/gateway
 - various documentation errors
 
@@ -89,6 +90,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ROI selection/display via overlay
   - fit-to-view
 - tcammainsrc/tcamsrc property `camera`. Use tcamprop instead.
+
+### Known Issues
+
+- Device lost for GigE cameras can be extremely slow.
 
 ## [0.12.0] - 2020-05-27
 
