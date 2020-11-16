@@ -231,7 +231,7 @@ void print_state_json (const std::string& serial)
 }
 
 
-void load_state_json_string (const std::string& serial, const std::string json_str)
+void load_state_json_string (const std::string& serial, const std::string& json_str)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -253,7 +253,10 @@ void load_state_json_string (const std::string& serial, const std::string json_s
 
     g_object_set_property(G_OBJECT(source), "serial", &val);
 
+    gst_element_set_state(source, GST_STATE_READY);
+
     g_object_set(G_OBJECT(source), "state", json_str.c_str(), NULL);
+    gst_element_set_state(source, GST_STATE_NULL);
 
     gst_object_unref(source);
 }

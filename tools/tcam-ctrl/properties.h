@@ -34,6 +34,6 @@ void print_properties (const std::string& serial);
 
 void print_state_json (const std::string& serial);
 
-void load_state_json_string (const std::string& serial, const std::string json_str);
+void load_state_json_string (const std::string& serial, const std::string& json_str);
 
 #endif /* CONTROLS_H */
