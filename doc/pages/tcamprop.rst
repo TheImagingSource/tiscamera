@@ -17,7 +17,42 @@ as well as possibilities for device discovery.
 
 .. c:type:: TcamProp
 
-   This object is typically a converted gstreamer element like tcambin or tcamautoexposure.
+    This object is typically a converted gstreamer element like tcambin or tcamautoexposure.
+
+.. c:type:: GSList
+
+    In tcamprop this is always a list with element-type utf8 which has to be deallocated via:
+
+    Example:
+
+    .. code-block:: c
+
+        GSList* list = tcam_prop_get_device_serials( self );
+        
+        // ... do sth with list
+        
+        g_slist_free_full( list, ::g_free );
+
+.. c:type:: GValue
+
+    GObject based variant type, used as arguments.
+    
+    Note: If you receive out-parameter with this, the caller is responsible of clearing the contents via :cpp:texpr:`g_value_unset( &var )`
+
+    Example:
+
+    .. code-block:: c
+
+        GValue value = G_VALUE_INIT;
+        GValue group = G_VALUE_INIT;
+
+        gboolean res = tcam_prop_get_tcam_property( self, "Gain", &value, ..., &group );
+        if( res ) {
+            // ... stuff
+        }
+        g_value_unset( &value );
+        g_value_unset( &group );
+
 
 Device Discovery
 ################
@@ -65,24 +100,30 @@ Only tcamsrc and tcambin implement these.
 Property I/O
 ############
 
+tcam_prop_get_tcam_property_names
+---------------------------------
+
+.. c:function:: GSList* tcam_prop_get_tcam_property_names(TcamProp* self)
+
+    Retrieve a list of all currently available properties.
+
+    @self: a #TcamProp
+
+    Returns: (element-type utf8) (transfer full): a #GSList
 
 
-GSList* tcam_prop_get_tcam_property_names(TcamProp* self)
----------------------------------------------------------
+tcam_prop_get_tcam_property
+---------------------------
 
-Arguments
-^^^^^^^^^
+.. c:function:: gboolean tcam_prop_get_tcam_property(TcamProp* self, const gchar* name, GValue* value, GValue* min, GValue* max, GValue* def, GValue* step, GValue* type, GValue* flags, GValue* category, GValue* group)
 
-**self** - Pointer to the TcamProp instance that shall be used.
+    Queries the specified property for its value, range, etc.
 
-Returns
-^^^^^^^
+    @self: Pointer to #TcamProp instance that shall be queried.
 
-Pointer to a GSList containing all property names the TcamProp object offers.
+    @name: Name of the property to query.
 
-gboolean tcam_prop_get_tcam_property(TcamProp* self, const gchar* name, GValue* value, GValue* min, GValue* max, GValue* def, GValue* step, GValue* type, GValue* flags, GValue* category, GValue* group)
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+    Returns: A gboolean. TRUE if query could be answered and values filled.
 
 .. list-table:: Arguments
    :header-rows: 1
@@ -148,50 +189,46 @@ gboolean tcam_prop_get_tcam_property(TcamProp* self, const gchar* name, GValue* 
      -
      - Out
      - Yes
-        
-**Returns**
-
-A gboolean. TRUE if query could be answered and values filled.
-
-
-const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name)
----------------------------------------------------------------------------------
-
-self: TcamProp*
-  Pointer to TcamProp instance that shall be queried.
-name: const gchar*
-  Name of the property for which the property type shall be returned.
-
-**Returns**
-
-A pointer to a c-string containing the type of the requested property.
-Returns NULL when property does not exist.
 
 tcam_prop_get_tcam_menu_entries
 -------------------------------
 
-**self**: TcamProp*
-  Pointer to TcamProp instance that shall be queried.
+.. c:function:: GSList* tcam_prop_get_tcam_menu_entries( TcamProp* self, const gchar* name )
 
-**name**: const gchar*
-  Name of the property for which the menu entries shall be returned.
+    If the specified property is a string list, this returnes the available string entries.
 
-**Returns**:
-  A pointer to a GSList containing the c-strings of all entries.
+    @self: Pointer to #TcamProp instance that shall be queried.
+
+    @name: Name of the property for which the menu entries shall be returned.
+
+    Returns: A pointer to a #GSList containing the c-strings of all entries. (element-type utf8) (transfer full): a #GSList
 
 
 tcam_prop_set_tcam_property
 ---------------------------
 
-**self**: TcamProp*
-  Pointer to TcamProp instance that shall be queried.
-   
-**name**: const gchar*
-  Name of the property for which the property type shall be returned.
+.. c:function:: gboolean tcam_prop_set_tcam_property( TcamProp* self, const gchar* name, const GValue* value )
 
-**value**: const GValue*
-  value that shall be set.
+    @self: Pointer to #TcamProp instance that shall be queried.
 
-**Returns**
+    @name: Name of the property.
 
-Pointer to a GSList containing all property names the TcamProp object offers.
+    @value: Value that shall be set
+
+    Returns: TRUE if setting this property was successful, otherwise FALSE.
+
+
+tcam_prop_get_tcam_property_type
+--------------------------------
+
+.. c:function:: const gchar* tcam_prop_get_tcam_property_type( TcamProp* self, const gchar* name )
+
+    Deprecated!
+
+    Returns the 'type' of the specified property.
+
+    @self: Pointer to #TcamProp instance that shall be queried.
+
+    @name: Name of the property.
+
+    Returns: A pointer to a c-string containing the type of the requested property. Returns NULL when property does not exist.
