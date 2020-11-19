@@ -1035,6 +1035,11 @@ static void gst_tcam_mainsrc_device_lost_callback (const struct tcam_device_info
 {
     GstTcamMainSrc* self = (GstTcamMainSrc*) user_data;
 
+    if (!self->is_running)
+    {
+        return;
+    }
+
     GST_ELEMENT_ERROR(GST_ELEMENT(self),
                       RESOURCE, NOT_FOUND,
                       ("Device lost (%s)", self->device_serial.c_str()),
