@@ -103,7 +103,7 @@ void print_properties (const std::string& serial)
                       << " max=" << g_value_get_int(&max)
                       << " step=" << g_value_get_int(&step_size)
                       << " default=" << g_value_get_int(&default_value)
-                      << " value=" << g_value_get_int(&default_value)
+                      << " value=" << g_value_get_int(&value)
                       << " category=" << g_value_get_string(&category)
                       << " group=" << g_value_get_string(&group)
                       << std::endl;
