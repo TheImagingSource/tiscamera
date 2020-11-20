@@ -217,6 +217,12 @@
             "version": ">= 3.20.0",
             "phase": "runtime",
             "modules": ["gui", "tools"]
+        },
+        {
+            "name": "python3-gst-1.0",
+            "version": ">= 1.14.0",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
         }
     ]
 
