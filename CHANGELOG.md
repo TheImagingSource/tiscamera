@@ -94,6 +94,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Known Issues
 
 - Device lost for GigE cameras can be extremely slow.
+- Documentation: RemovedInSphinx40Warning: The app.add_javascript() is deprecated.
+                 Please use app.add_js_file() instead. app.add_javascript(path)
+        Not fixed due to sphinx version incompatability on older Ubuntu versions.
+- tcam-capture may experience a thread lock when changing format on some systems.
+  Reliable reproducability was not possible during testing.
 
 ## [0.12.0] - 2020-05-27
 
