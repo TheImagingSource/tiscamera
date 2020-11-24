@@ -26,7 +26,7 @@ option(BUILD_DOCUMENTATION "Build internal code documentation"    OFF)
 option(BUILD_TESTS    "Build tests."                         OFF)
 
 
-option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
+option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" OFF)
 option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
 
 if (TCAM_ARAVIS_USB_VISION)

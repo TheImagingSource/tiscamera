@@ -45,11 +45,11 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     // Check if an existing control should be used
     // if no control was found simply pass the genicam feature through
 
-    const char* feature = arv_gc_feature_node_get_name ((ArvGcFeatureNode*) node);
+    const char* feature = arv_gc_feature_node_get_name((ArvGcFeatureNode*) node);
 
     Property::VALUE_TYPE type = Property::INTEGER;
 
-    const char* node_type = arv_dom_node_get_node_name (ARV_DOM_NODE (node));
+    const char* node_type = arv_dom_node_get_node_name(ARV_DOM_NODE (node));
 
     if (strcmp(node_type, "Integer") == 0)
     {
@@ -88,6 +88,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     // type which the control shall use
     TCAM_PROPERTY_TYPE type_to_use;
     tcam_device_property prop = {};
+
+    GError* err = nullptr;
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
@@ -145,7 +147,16 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                 }
             }
 
-            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera),
+                                                                            feature,
+                                                                            &err);
+
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis string: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
             if (!current_value)
             {
@@ -175,7 +186,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             const GSList* children;
             const GSList* iter;
 
-            children = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION (node));
+            children = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION(node));
 
             std::map<std::string, int> var;
 
@@ -183,9 +194,10 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             {
                 if (arv_gc_feature_node_is_implemented((ArvGcFeatureNode*) iter->data, NULL))
                 {
-                    if (strcmp(arv_dom_node_get_node_name((ArvDomNode*) iter->data), "EnumEntry") == 0)
+                    if (strcmp(arv_dom_node_get_node_name((ArvDomNode*)iter->data), "EnumEntry") == 0)
                     {
-                        var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
+                        var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*)iter->data),
+                                    var.size());
                     }
                 }
             }
@@ -198,7 +210,16 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                 return std::make_shared<PropertyBoolean>(impl, prop, type);
             }
 
-            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera), feature);
+            const char* current_value = arv_device_get_string_feature_value(arv_camera_get_device(camera),
+                                                                            feature,
+                                                                            &err);
+
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis string: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
             if (strcmp(current_value, "On") == 0)
             {
@@ -231,7 +252,15 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         {
             //camera_property prop = {};
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
-            prop.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera),
+                                                                      feature,
+                                                                      &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis int: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
             prop.value.i.default_value = prop.value.i.value;
 
             prop.value.i.step = 1;
@@ -239,7 +268,14 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             arv_device_get_integer_feature_bounds(arv_camera_get_device(camera),
                                                   feature,
                                                   &prop.value.i.min,
-                                                  &prop.value.i.max);
+                                                  &prop.value.i.max,
+                                                  &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis int bounds: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
             return std::make_shared<PropertyInteger>(impl, prop, type);
 
@@ -248,14 +284,31 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         {
 
             prop.type = TCAM_PROPERTY_TYPE_DOUBLE;
-            prop.value.d.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.d.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera),
+                                                                      feature,
+                                                                      &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis int: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
             prop.value.d.default_value = prop.value.i.value;
 
 
             prop.value.d.step = 1.0;
 
             int64_t min, max;
-            arv_device_get_integer_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+            arv_device_get_integer_feature_bounds(arv_camera_get_device(camera),
+                                                  feature,
+                                                  &min, &max,
+                                                  &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis integer bounds: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
             prop.value.d.min = min;
             prop.value.d.max = max;
@@ -289,14 +342,32 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         if (type_to_use == TCAM_PROPERTY_TYPE_INTEGER)
         {
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
-            prop.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
+            prop.value.i.value = arv_device_get_float_feature_value(arv_camera_get_device(camera),
+                                                                    feature,
+                                                                    &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis float: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
             prop.value.i.default_value = prop.value.i.value;
 
 
             prop.value.i.step = 1;
 
             double min, max;
-            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+            arv_device_get_float_feature_bounds(arv_camera_get_device(camera),
+                                                feature,
+                                                &min, &max,
+                                                &err);
+
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis float bounds: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
             prop.value.i.min = min;
             prop.value.i.max = max;
@@ -308,9 +379,26 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             double min, max;
 
-            arv_device_get_float_feature_bounds(arv_camera_get_device(camera), feature, &min, &max);
+            arv_device_get_float_feature_bounds(arv_camera_get_device(camera),
+                                                feature,
+                                                &min, &max,
+                                                &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis float bounds: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
+            prop.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera),
+                                                                    feature,
+                                                                    &err);
+            if (err)
+            {
+                tcam_error("Unable to retrieve aravis float: %s", err->message);
+                g_clear_error(&err);
+                return nullptr;
+            }
 
-            prop.value.d.value = arv_device_get_float_feature_value(arv_camera_get_device(camera), feature);
             prop.value.d.min = min;
             prop.value.d.max = max;
             prop.value.d.default_value = prop.value.d.value;
@@ -330,7 +418,14 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         prop.value.i.step = 1;
 
         prop.value.b.value = arv_device_get_boolean_feature_value(arv_camera_get_device(camera),
-                                                                  feature);
+                                                                  feature,
+                                                                  &err);
+        if (err)
+        {
+            tcam_error("Unable to retrieve aravis bool: %s", err->message);
+            g_clear_error(&err);
+            return nullptr;
+        }
 
         prop.value.b.default_value = prop.value.b.value;
 
