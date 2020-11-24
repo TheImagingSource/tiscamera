@@ -45,6 +45,49 @@ option(TCAM_BUILD_WITH_GUI "Build/install with GUI applications/dependencies" ON
 
 set(TCAM_EXCLUSIVE_BUILD OFF CACHE INTERNAL "Internal convenience flag to signify a tool is built exclusively.")
 
+
+set(TCAM_ENABLED_MODULES "" CACHE INTERNAL "Descriptor of enabled modules")
+
+if (NOT TCAM_EXCLUSIVE_BUILD)
+
+  function(add_module _module)
+
+    if ("${TCAM_ENABLED_MODULES}" STREQUAL "")
+      set(TCAM_ENABLED_MODULES "${_module}" PARENT_SCOPE)
+    else ()
+      set(TCAM_ENABLED_MODULES "${TCAM_ENABLED_MODULES}_${_module}" PARENT_SCOPE)
+    endif ("${TCAM_ENABLED_MODULES}" STREQUAL "")
+  endfunction()
+
+  if (BUILD_GST_1_0)
+    add_module("gst")
+  endif (BUILD_GST_1_0)
+
+  if (BUILD_ARAVIS)
+    add_module("aravis")
+  endif (BUILD_ARAVIS)
+
+  if (BUILD_V4L2)
+    add_module("v4l2")
+  endif (BUILD_V4L2)
+  if (BUILD_LIBUSB)
+    add_module("libusb")
+  endif (BUILD_LIBUSB)
+
+  if (BUILD_TOOLS)
+    add_module("tools")
+  endif (BUILD_TOOLS)
+
+  if (BUILD_DOCUMENTATION)
+    add_module("doc")
+  endif (BUILD_DOCUMENTATION)
+
+  if (BUILD_TESTS)
+    add_module("tests")
+  endif (BUILD_TESTS)
+
+endif (NOT TCAM_EXCLUSIVE_BUILD)
+
 # disable all other things
 # we only want the extension loader and associated things
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
@@ -61,6 +104,8 @@ if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
   set(TCAM_BUILD_FIRMWARE_UPDATE_ONLY OFF)
   set(TCAM_BUILD_CAMERA_IP_CONF_ONLY OFF)
+
+  set(TCAM_ENABLED_MODULES "tcam-uvc-extension-loader")
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
@@ -79,6 +124,8 @@ if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
   set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
   set(TCAM_BUILD_CAMERA_IP_CONF_ONLY OFF)
 
+  set(TCAM_ENABLED_MODULES "firmware-update")
+
 endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 
 if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
@@ -95,5 +142,7 @@ if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
   set(TCAM_EXCLUSIVE_BUILD ON)
   set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
   set(TCAM_BUILD_FIRMWARE_UPDATE_ONLY OFF)
+
+  set(TCAM_ENABLED_MODULES "camera-ip-conf")
 
 endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)

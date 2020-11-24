@@ -31,4 +31,6 @@ const char* get_aravis_version_number ();
 
 const char* get_aravis_version ();
 
+const char* get_enabled_modules ();
+
 #endif /* TCAM_VERSION_H */

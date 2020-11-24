@@ -100,9 +100,10 @@ Logger::Logger ():
     {
         char b[1024];
         sprintf(b,
-                "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s",
+                "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s\n\tModules:\t%s",
                 get_version(),
-                get_aravis_version());
+                get_aravis_version(),
+                get_enabled_modules());
 
         va_list args;
         log("", TCAM_LOG_DEBUG, "Logger", __LINE__, b, args);

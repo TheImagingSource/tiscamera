@@ -75,4 +75,9 @@ const char* get_aravis_version ()
     return \"${ARAVIS_VERSION}_version_${ARAVIS_GIT_COMMIT_HASH}\";
 }
 
+const char* get_enabled_modules ()
+{
+    return \"${ENABLED_MODULES}\";
+}
+
 ")

@@ -39,7 +39,8 @@ void print_version (size_t /*t*/)
 {
     std::cout << "Versions: "<< std::endl
               << "\tTcam:\t" << get_version() << std::endl
-              << "\tAravis:\t" << get_aravis_version() << std::endl;
+              << "\tAravis:\t" << get_aravis_version() << std::endl
+              << "\tModules:\t" << get_enabled_modules() << std::endl;
 }
 
 
