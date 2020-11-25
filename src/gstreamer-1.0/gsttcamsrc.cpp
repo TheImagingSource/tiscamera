@@ -900,8 +900,14 @@ static void gst_tcam_src_get_property (GObject* object,
         }
         case PROP_DEVICE_TYPE:
         {
-            g_value_set_string(value, tcam::tcam_device_type_to_string(self->device_type).c_str());
-
+            if (self->active_source)
+            {
+                g_object_get_property(G_OBJECT(self->active_source), "type", value);
+            }
+            else
+            {
+                g_value_set_string(value, tcam::tcam_device_type_to_string(self->device_type).c_str());
+            }
             break;
         }
         case PROP_CAM_BUFFERS:

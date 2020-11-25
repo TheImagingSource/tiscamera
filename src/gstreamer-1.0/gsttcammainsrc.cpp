@@ -1110,7 +1110,7 @@ static bool gst_tcam_mainsrc_init_camera (GstTcamMainSrc* self)
     }
     self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback, self);
     self->device_serial = self->device->dev->get_device().get_serial();
-
+    self->device_type = self->device->dev->get_device().get_device_type();
     self->device->all_caps.reset( gst_tcam_mainsrc_get_all_camera_caps(self) );
 
     return true;
