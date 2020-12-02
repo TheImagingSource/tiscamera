@@ -612,8 +612,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         goto finished_element_creation;
     }
 
-    if (tcam_gst_contains_bayer_10_bit(self->data->src_caps.get())
-        || tcam_gst_contains_bayer_12_bit( self->data->src_caps.get() ))
+    if (self->data->device_type == "pimipi" and
+        (tcam_gst_contains_bayer_10_bit(self->data->src_caps.get())
+         || tcam_gst_contains_bayer_12_bit( self->data->src_caps.get())))
     {
         if (!create_and_add_element(&self->bayer_transform,
                                     "tcamby1xtransform",
