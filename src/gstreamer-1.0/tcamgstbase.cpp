@@ -1317,6 +1317,35 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             gst_object_unref(debayer);
             return ret;
         }
+
+        GstElementFactory* convert = gst_element_factory_find("videoconvert");
+
+        if (convert)
+        {
+            if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
+                && gst_element_factory_can_sink_any_caps(debayer, available_caps))
+            {
+                requires_bayer2rgb = true;
+                requires_vidoeconvert = true;
+                // wanted_caps can be fixed, etc.
+                // thus change name to be compatible to bayer2rgb sink pad
+                // and create a correct intersection
+                GstCaps* temp = gst_caps_copy(wanted_caps);
+                gst_caps_change_name(temp, "video/x-bayer");
+
+                GstCaps* ret = gst_caps_intersect(available_caps, temp);
+                gst_caps_unref(temp);
+                gst_object_unref(debayer);
+                gst_object_unref(convert);
+
+                return ret;
+            }
+
+        }
+        gst_object_unref(convert);
+        gst_object_unref(debayer);
+
+        return nullptr;
     }
     gst_object_unref(debayer);
 
