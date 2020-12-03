@@ -35,12 +35,12 @@ std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& de
     }
     catch (const std::runtime_error& err)
     {
-        tcam_error("Encountered Error while creating device interface. %s", err.what());
+        SPDLOG_ERROR("Encountered Error while creating device interface. {}", err.what());
         return nullptr;
     }
     catch (...)
     {
-        tcam_error("Caught unhandled exception while opening device.");
+        SPDLOG_ERROR("Caught unhandled exception while opening device.");
     }
     return nullptr;
 }

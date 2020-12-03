@@ -41,7 +41,7 @@ CaptureDeviceImpl::CaptureDeviceImpl (const DeviceInfo& _device)
 {
     if (!open_device(_device))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to open device");
+        SPDLOG_ERROR("Unable to open device");
         throw bad_device();
     }
     const auto serial = open_device_info.get_serial();
@@ -64,7 +64,7 @@ bool CaptureDeviceImpl::open_device (const DeviceInfo& device_desc)
         bool ret = close_device();
         if (ret == false)
         {
-            tcam_log(TCAM_LOG_ERROR, "Unable to close previous device.");
+            SPDLOG_ERROR("Unable to close previous device.");
             // setError(Error("A device is already open", EPERM));
             return false;
         }
@@ -130,7 +130,7 @@ void CaptureDeviceImpl::deviceindex_lost_cb (const DeviceInfo& info, void* user_
 
     const auto i = info.get_info();
 
-    tcam_info("Received lost from index");
+    SPDLOG_INFO("Received lost from index");
 
     for (const auto& data : self->device_lost_callback_data_)
     {
@@ -156,7 +156,7 @@ bool CaptureDeviceImpl::close_device ()
     device.reset();
     property_handler = nullptr;
 
-    tcam_log(TCAM_LOG_INFO, "Closed device %s.", name.c_str());
+    SPDLOG_INFO("Closed device {}.", name.c_str());
 
     return true;
 }
@@ -219,7 +219,7 @@ bool CaptureDeviceImpl::start_stream (std::shared_ptr<SinkInterface> sink)
 {
     if (!is_device_open())
     {
-        tcam_log(TCAM_LOG_ERROR, "Device is not open");
+        SPDLOG_ERROR("Device is not open");
         return false;
     }
 

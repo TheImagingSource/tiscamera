@@ -42,13 +42,13 @@ tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
     // LibusbDevice tracks open interfaces and closes them automatically
     if (!usb_device_->open_interface(0))
     {
-        tcam_error("Failed to open camera interface - %d. \n"
+        SPDLOG_ERROR("Failed to open camera interface - {}. \n"
                    "Please check device permissions!", 0);
     }
 
     if (!usb_device_->open_interface(1))
     {
-        tcam_error("Failed to open camera interface - %d. \n"
+        SPDLOG_ERROR("Failed to open camera interface - {}. \n"
                    "Please check device permissions!", 1);
     }
     property_handler = std::make_shared<AFU050PropertyHandler>(this);
@@ -173,7 +173,7 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
 {
     if (is_stream_on)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set format. Stream is running.");
+        SPDLOG_ERROR("Unable to set format. Stream is running.");
         return false;
     }
     // {
@@ -207,7 +207,7 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
 
     if (index == -1)
     {
-        tcam_log(TCAM_LOG_ERROR, "Format is not supported. %s", format.to_string().c_str());
+        SPDLOG_ERROR("Format is not supported. {}", format.to_string().c_str());
         return false;
     }
     active_video_format = format;
@@ -258,7 +258,7 @@ bool tcam::AFU050Device::set_sink (std::shared_ptr<SinkInterface> s)
 
 bool tcam::AFU050Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
-    tcam_log(TCAM_LOG_INFO, "Received %d buffer from external allocator.", buffs.size());
+    SPDLOG_INFO("Received {} buffer from external allocator.", buffs.size());
 
     buffers.reserve(buffs.size());
 
@@ -316,7 +316,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
     {
         if (transfer->status == LIBUSB_TRANSFER_CANCELLED)
         {
-            tcam_debug("FREE");
+            SPDLOG_TRACE("FREE");
             libusb_free_transfer(transfer);
         }
         else if (transfer->status == LIBUSB_TRANSFER_NO_DEVICE)
@@ -325,7 +325,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
             libusb_free_transfer(transfer);
             return;
         }
-        tcam_error("libusb transfer returned with: %d", transfer->status);
+        SPDLOG_ERROR("libusb transfer returned with: {}", transfer->status);
     }
 
     if (!is_stream_on)
@@ -378,7 +378,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
 
             if ((jpegsize + cplen) > JPEGBUF_SIZE)
             {
-                tcam_error("Image is to big. Dropping...");
+                SPDLOG_ERROR("Image is to big. Dropping...");
                 //JPEG too big, dropping
                 jpegptr = 0;
                 jpegsize = 0;
@@ -420,7 +420,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
                 }
                 else
                 {
-                    tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
+                    SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
                 }
                 free(jpegbuf);
                 jpegbuf = 0;
@@ -461,11 +461,11 @@ bool tcam::AFU050Device::start_stream ()
 
     if (is_stream_on)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to start stream. Stream is already running.");
+        SPDLOG_ERROR("Unable to start stream. Stream is already running.");
         return false;
     }
 
-    tcam_log(TCAM_LOG_INFO, "Starting stream...");
+    SPDLOG_INFO("Starting stream...");
     current_buffer = 0;
     stop_all = false;
     is_stream_on = true;
@@ -497,7 +497,7 @@ bool tcam::AFU050Device::start_stream ()
                 lost_device();
             }
 
-            tcam_debug("ret < 0");
+            SPDLOG_DEBUG("ret < 0");
             break;
         }
 
@@ -529,7 +529,7 @@ void AFU050Device::add_int (const TCAM_PROPERTY_ID id, const VC_UNIT unit, const
         return;
     }
 
-    tcam_debug("adding int %d %d %d", id, unit, prop);
+    SPDLOG_DEBUG("adding int {} {} {}", id, unit, prop);
 
     struct tcam_device_property p = tcam::create_empty_property(id);
     p.value.i.value = get_int_value(unit, prop, GET_CUR);
@@ -657,7 +657,7 @@ int AFU050Device::set_video_format (uint8_t format_index,
         lost_device();
     }
 
-    tcam_log(TCAM_LOG_DEBUG, "set_video_format transfer ended with %d", ret);
+    SPDLOG_DEBUG("set_video_format transfer ended with {}", ret);
 
     return ret;
 }
@@ -672,7 +672,7 @@ bool AFU050Device::get_bool_value (enum VC_UNIT unit, unsigned char property, en
                            (unsigned char*)&value,
                            cmd);
     if (ret)
-        tcam_log(TCAM_LOG_ERROR, "get_control returned with: %d", ret);
+        SPDLOG_ERROR("get_control returned with: {}", ret);
     return (value ? 1: 0);
 }
 
@@ -685,7 +685,7 @@ bool AFU050Device::set_bool_value (enum VC_UNIT unit, unsigned char property, bo
                            4,
                            (unsigned char*)&val);
     if (!ret)
-        tcam_log(TCAM_LOG_ERROR, "set_control returned with: %d", ret);
+        SPDLOG_ERROR("set_control returned with: {}", ret);
     return ret;
 }
 
@@ -699,7 +699,7 @@ int AFU050Device::get_int_value (const enum VC_UNIT unit, const unsigned char pr
                            (unsigned char*)&value,
                            cmd);
     if (!ret)
-        tcam_log(TCAM_LOG_ERROR, "get_control returned with: %d", ret);
+        SPDLOG_ERROR("get_control returned with: {}", ret);
     return value;
 }
 
@@ -711,6 +711,6 @@ bool AFU050Device::set_int_value (enum VC_UNIT unit, unsigned char property, int
                            4,
                            (unsigned char*)&value);
     if (!ret)
-        tcam_log(TCAM_LOG_ERROR, "set_control returned with: %d", ret);
+        SPDLOG_ERROR("set_control returned with: {}", ret);
     return ret;
 }

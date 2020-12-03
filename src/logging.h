@@ -23,6 +23,10 @@
 #include "compiler_defines.h"
 
 
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+
+#include "spdlog/spdlog.h"
+
 enum TCAM_LOG_TARGET
 {
     NONE         = 0,
@@ -100,7 +104,7 @@ private:
     void open_logfile ();
     void close_logfile ();
 
-    TCAM_LOG_LEVEL level;
+    enum spdlog::level::level_enum level;
     std::string log_file;
     TCAM_LOG_TARGET target;
     logging_callback callback;
@@ -122,35 +126,5 @@ enum TCAM_LOG_LEVEL tcam_get_logging_level ();
 */
 void tcam_logging_init(enum TCAM_LOG_TARGET target, enum TCAM_LOG_LEVEL level);
 
-
-/*
-  @brief logging function; follows printf syntax
-*/
-void tcam_logging (enum TCAM_LOG_LEVEL level, const char* function, int line, const char* message, ...);
-
-void tcam_logging (const char* module,
-                  enum TCAM_LOG_LEVEL level,
-                  const char* function,
-                  int line,
-                  const char* message,
-                  ...);
-
-/*
-  Convience wrapper macro
-*/
-
-#pragma GCC system_header
-
-#define FILENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-
-#define tcam_log(level, message, ...) (tcam_logging(level, FILENAME , __LINE__, message, ##__VA_ARGS__))
-
-#define tcam__log(module, level, message, ...) (tcam_logging(module, level, FILENAME, __LINE__, message, ##__VA_ARGS__))
-
-#define tcam_error(message, ...) (tcam_log(TCAM_LOG_ERROR, message, ##__VA_ARGS__))
-#define tcam_warning(message, ...) (tcam_log(TCAM_LOG_WARNING, message, ##__VA_ARGS__))
-#define tcam_info(message, ...) (tcam_log(TCAM_LOG_INFO, message, ##__VA_ARGS__))
-#define tcam_debug(message, ...) (tcam_log(TCAM_LOG_DEBUG, message, ##__VA_ARGS__))
-#define tcam_trace(message, ...) (tcam_log(TCAM_LOG_TRACE, message, ##__VA_ARGS__))
 
 #endif /* TCAM_LOGGING_H */

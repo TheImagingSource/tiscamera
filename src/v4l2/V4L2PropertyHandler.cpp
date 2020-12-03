@@ -67,7 +67,7 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
         }
 
 
-        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
+        SPDLOG_ERROR("Unable to find Property \"{}\"", new_property.get_name().c_str());
         return false;
     }
 
@@ -83,7 +83,7 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
         }
         else
         {
-            tcam_log(TCAM_LOG_ERROR, "Emulated property not implemented \"%s\"", new_property.get_name().c_str());
+            SPDLOG_ERROR("Emulated property not implemented \"{}\"", new_property.get_name().c_str());
             return false;
         }
     }
@@ -104,7 +104,7 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
                 }
                 else
                 {
-                    tcam_error("mapping type not implemented");
+                    SPDLOG_ERROR("mapping type not implemented");
                 }
                 break;
             }
@@ -141,7 +141,7 @@ bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
     if (desc == properties.end())
     {
         std::string s = "Unable to find Property \"" + p.get_name() + "\"";
-        tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
+        SPDLOG_ERROR("{}", s.c_str());
         return false;
     }
 

@@ -152,7 +152,7 @@ static std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
     std::vector<std::string> ret;
     if (!GST_VALUE_HOLDS_LIST(gst_list))
     {
-        tcam_error("Given GValue is not a list.");
+        SPDLOG_ERROR("Given GValue is not a list.");
         return ret;
     }
 
@@ -167,7 +167,7 @@ static std::vector<std::string> gst_list_to_vector (const GValue* gst_list)
         }
         else
         {
-            tcam_error("NOT IMPLEMENTED. TYPE CAN NOT BE INTERPRETED");
+            SPDLOG_ERROR("NOT IMPLEMENTED. TYPE CAN NOT BE INTERPRETED");
         }
     }
 
@@ -223,7 +223,7 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
                 }
                 else
                 {
-                    tcam_error("Cannot handle format type in GstStructure.");
+                    SPDLOG_ERROR("Cannot handle format type in GstStructure.");
                 }
             }
             else
@@ -751,8 +751,9 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         }
         else
         {
-            tcam_error("Could not associate rank with fourcc %d %s", fourcc,
-                       tcam::fourcc_to_description(fourcc));
+            SPDLOG_ERROR("Could not associate rank with fourcc {:x} {}",
+                         fourcc,
+                         tcam::fourcc_to_description(fourcc));
         }
     }
     if( map.empty() ) {
@@ -839,7 +840,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // }
         else
         {
-            tcam_info("Field 'width' does not have a supported type. Current type: '%s'",
+            SPDLOG_INFO("Field 'width' does not have a supported type. Current type: '{}'",
                       g_type_name(gst_structure_get_field_type(struc, "width")));
         }
 
@@ -867,7 +868,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
         // }
         else
         {
-            tcam_info("Field 'height' does not have a supported type. Current type: '%s'",
+            SPDLOG_INFO("Field 'height' does not have a supported type. Current type: '{}'",
                       g_type_name(gst_structure_get_field_type(struc, "height")));
         }
 
@@ -879,7 +880,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
 
-    tcam_info("Fixating assumed largest caps: %s", gst_helper::to_string(largest_caps).c_str());
+    SPDLOG_INFO("Fixating assumed largest caps: {}", gst_helper::to_string(largest_caps).c_str());
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
@@ -920,7 +921,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
 
     gst_caps_unref( largest_caps );
 
-    tcam_info("Largest caps are: %s", gst_helper::to_string( ret_caps ).c_str());
+    SPDLOG_INFO("Largest caps are: {}", gst_helper::to_string( ret_caps ).c_str());
 
     return ret_caps;
 }
@@ -1084,7 +1085,7 @@ static GstCaps* create_caps_for_formats (GstCaps* formats, GstCaps* rest)
 
     if (caps_formats.empty())
     {
-        tcam_error("Could not identify formats for caps creation");
+        SPDLOG_ERROR("Could not identify formats for caps creation");
         return nullptr;
     }
 
@@ -1126,7 +1127,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
     GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
 
     if (!dutils) {
-        tcam_error( "Could not create dutils." );
+        SPDLOG_ERROR( "Could not create dutils." );
         return nullptr;
     }
 
@@ -1160,7 +1161,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
 
                     if (!possible_matches || gst_caps_is_empty(possible_matches))
                     {
-                        tcam_error("No possible matches for dutils.");
+                        SPDLOG_ERROR("No possible matches for dutils.");
                         return nullptr;
                     }
 
@@ -1181,7 +1182,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
         if (!ret)
         {
             // TODO not compatible
-            tcam_error("No intersecting caps between dutils and src");
+            SPDLOG_ERROR("No intersecting caps between dutils and src");
             return nullptr;
         }
 
@@ -1189,7 +1190,7 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
     }
     gst_object_unref(dutils);
 
-    tcam_error("Could not negotiate caps");
+    SPDLOG_ERROR("Could not negotiate caps");
     return nullptr;
 }
 
@@ -1315,8 +1316,45 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             GstCaps* ret = gst_caps_intersect(available_caps, temp);
             gst_caps_unref(temp);
             gst_object_unref(debayer);
-            return ret;
+            if (ret)
+            {
+                return ret;
+            }
+
         }
+
+
+        GstElementFactory* convert = gst_element_factory_find("videoconvert");
+
+        if (convert)
+        {
+            if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
+                && gst_element_factory_can_sink_any_caps(debayer, available_caps))
+            {
+                requires_bayer2rgb = true;
+                requires_vidoeconvert = true;
+                // wanted_caps can be fixed, etc.
+                // thus change name to be compatible to bayer2rgb sink pad
+                // and create a correct intersection
+                GstCaps* temp = gst_caps_copy(wanted_caps);
+                gst_caps_change_name(temp, "video/x-bayer");
+
+                GstCaps* ret = gst_caps_intersect(available_caps, temp);
+                gst_caps_unref(temp);
+                gst_object_unref(debayer);
+                gst_object_unref(convert);
+
+                if (ret)
+                {
+                    return ret;
+                }
+            }
+
+        }
+        gst_object_unref(convert);
+        gst_object_unref(debayer);
+
+        return nullptr;
     }
     gst_object_unref(debayer);
 
@@ -1445,7 +1483,7 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
     {
         if (desc.get_fourcc() == 0)
         {
-            tcam_info("Format has empty fourcc. Ignoring");
+            SPDLOG_INFO("Format has empty fourcc. Ignoring");
             continue;
         }
 
@@ -1453,12 +1491,10 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
 
         if (caps_string == nullptr)
         {
-            tcam_warning("Format has empty caps string. Ignoring %s",
+            SPDLOG_WARN("Format has empty caps string. Ignoring {}",
                          tcam::fourcc_to_description(desc.get_fourcc()));
             continue;
         }
-
-        // tcam_error("Found '%s' pixel format string", caps_string);
 
         std::vector<struct tcam_resolution_description> res = desc.get_resolutions();
 
@@ -1495,7 +1531,6 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
 
                     if (framerates.empty())
                     {
-                        // tcam_log(TCAM_LOG_WARNING, "No available framerates. Ignoring format.");
                         continue;
                     }
 

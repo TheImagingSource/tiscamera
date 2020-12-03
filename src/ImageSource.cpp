@@ -43,7 +43,7 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 
         if (buffer.empty())
         {
-            tcam_log(TCAM_LOG_ERROR, "ImageSource has no image buffer!");
+            SPDLOG_ERROR("ImageSource has no image buffer!");
             return false;
         }
 
@@ -54,18 +54,18 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 
         if ( device->start_stream())
         {
-            tcam_log(TCAM_LOG_DEBUG, "PLAYING....");
+            SPDLOG_DEBUG("PLAYING....");
         }
         else
         {
-            tcam_log(TCAM_LOG_ERROR, "Unable to start stream from device.");
+            SPDLOG_ERROR("Unable to start stream from device.");
             return false;
         }
 
     }
     else if (current_status == TCAM_PIPELINE_STOPPED)
     {
-        tcam_log(TCAM_LOG_INFO, "Source changed to state STOPPED");
+        SPDLOG_INFO("Source changed to state STOPPED");
         device->stop_stream();
         device->release_buffers();
     }
@@ -83,7 +83,7 @@ TCAM_PIPELINE_STATUS ImageSource::get_status () const
 
 bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 {
-    //tcam_log(TCAM_LOG_DEBUG, "Received device to use as source.");
+    //SPDLOG_DEBUG("Received device to use as source.");
 
     if (current_status == TCAM_PIPELINE_PAUSED || current_status == TCAM_PIPELINE_PLAYING)
     {
@@ -126,7 +126,7 @@ void ImageSource::push_image (std::shared_ptr<ImageBuffer> _buffer)
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "Pipeline over expiration date.");
+        SPDLOG_ERROR("Pipeline over expiration date.");
     }
 }
 

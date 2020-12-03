@@ -69,8 +69,8 @@ void* tcam::LibraryHandle::open_library (const std::string& name,
 
     if (!library_handle)
     {
-        tcam_info("Could not load library %s", library_name.c_str());
-        tcam_info("    Reason: %s", dlerror());
+        SPDLOG_INFO("Could not load library {}", library_name.c_str());
+        SPDLOG_INFO("    Reason: {}", dlerror());
     }
 
     return library_handle;

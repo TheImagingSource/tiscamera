@@ -142,7 +142,9 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
-        tcam_log(TCAM_LOG_WARNING, "Unable to find std property. Passing raw property identifier through. '%s'(%x)", (char*)queryctrl->name, queryctrl->id);
+        SPDLOG_WARN("Unable to find std property. Passing raw property identifier through. '{}'({:x})",
+                    (char*)queryctrl->name,
+                    queryctrl->id);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
@@ -180,10 +182,9 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             }
             else
             {
-                tcam_log(TCAM_LOG_ERROR,
-                        "Boolean '%s' has impossible default value: %d Setting to false",
-                        cp.name,
-                        queryctrl->default_value);
+                SPDLOG_ERROR("Boolean '{}' has impossible default value: {} Setting to false",
+                           cp.name,
+                           queryctrl->default_value);
                 cp.value.b.default_value = false;
             }
 
@@ -197,10 +198,9 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             }
             else
             {
-                tcam_log(TCAM_LOG_ERROR,
-                        "Boolean '%s' has impossible value: %d Setting to false",
-                        cp.name,
-                        ctrl->value);
+                SPDLOG_ERROR("Boolean '{}' has impossible value: {} Setting to false",
+                           cp.name,
+                           ctrl->value);
                 cp.value.b.value = false;
             }
             cp.flags = flags;
@@ -215,17 +215,15 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
             if (cp.value.i.min > cp.value.i.max)
             {
-                tcam_log(TCAM_LOG_ERROR,
-                         "Range boundaries for property '%s' are faulty. Ignoring property as a precaution.",
-                         cp.name);
+                SPDLOG_ERROR("Range boundaries for property '{}' are faulty. Ignoring property as a precaution.",
+                           cp.name);
                 return nullptr;
             }
 
             if (cp.value.i.step == 0)
             {
-                tcam_log(TCAM_LOG_WARNING,
-                         "Detected stepsize 0 for property %s. Setting to 1.",
-                         cp.name);
+                SPDLOG_WARN("Detected stepsize 0 for property {}. Setting to 1.",
+                             cp.name);
 
                 cp.value.i.step = 1;
             }
@@ -275,7 +273,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
             if (m.empty())
             {
-                tcam_debug("Enum %s does not have any entries. Ignoring.", cp.name);
+                SPDLOG_DEBUG("Enum {} does not have any entries. Ignoring.", cp.name);
                 return nullptr;
             }
 
@@ -291,7 +289,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         {
             std::string s = "Unknown V4L2 Control type: ";
             s.append((char*)queryctrl->name);
-            tcam_log(TCAM_LOG_ERROR, s.c_str());
+            SPDLOG_ERROR(s.c_str());
             break;
         }
     }

@@ -61,7 +61,7 @@ bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& ne
 
     if (desc == properties.end())
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to find Property \"%s\"", new_property.get_name().c_str());
+        SPDLOG_ERROR("Unable to find Property \"{}\"", new_property.get_name().c_str());
         return false;
     }
 
@@ -69,7 +69,7 @@ bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& ne
 
     if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
     {
-        tcam_debug("Setting int %s to: %d",
+        SPDLOG_DEBUG("Setting int {} to: {}",
                    desc->prop->get_name().c_str(),
                    (std::static_pointer_cast<PropertyInteger>(desc->prop))->get_value());
 
@@ -78,19 +78,19 @@ bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& ne
     }
     else if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
-        tcam_debug("Setting bool %s to: %d", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
+        SPDLOG_DEBUG("Setting bool {} to: {}", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
 
         return device->set_bool_value(desc->unit, desc->id, (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
     }
     else if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_BUTTON)
     {
-        tcam_debug("Setting button %s to: %d", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
+        SPDLOG_DEBUG("Setting button {} to: {}", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
 
         return device->set_bool_value(desc->unit, desc->id, 1);
     }
     else
     {
-        tcam_error("Cannot set property");
+        SPDLOG_ERROR("Cannot set property");
     }
 
     return false;
@@ -109,7 +109,7 @@ bool AFU050Device::AFU050PropertyHandler::get_property (tcam::Property& p)
     if (desc == properties.end())
     {
         std::string s = "Unable to find Property \"" + p.get_name() + "\"";
-        tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
+        SPDLOG_ERROR("{}", s.c_str());
         return false;
     }
 

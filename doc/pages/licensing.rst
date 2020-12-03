@@ -31,6 +31,9 @@ The following projects are included in this project:
    * - CLI11
      - 3-Clause BSD-License
      - https://github.com/CLIUtils/CLI11
+   * - spdlog
+     - MIT
+     - https://github.com/gabime/spdlog
    * - sphinx-tabs
      - MIT
      - https://github.com/djungelorm/sphinx-tabs

@@ -84,7 +84,8 @@ int tcam::tcam_xioctl (int fd, unsigned int request, void *arg)
 
     if (ret && (tries <= 0))
     {
-        tcam_log(TCAM_LOG_ERROR,"ioctl (%i) retried %i times - giving up: %s)\n", request, IOCTL_RETRY, strerror(errno));
+        SPDLOG_ERROR("ioctl (%i) retried %i times - giving up: {})\n",
+                   request, IOCTL_RETRY, strerror(errno));
     }
 
     return (ret);
@@ -151,7 +152,7 @@ uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint3
 
     if (!img::is_known_fcc(fourcc))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unknown fourcc %d", fourcc);
+        SPDLOG_ERROR("Unknown fourcc {:x}", fourcc);
     }
 
     uint64_t size = width * height * ((double)img::get_bits_per_pixel(fourcc) / 8);
@@ -296,13 +297,13 @@ unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
         }
         catch (const std::invalid_argument& e)
         {
-            tcam_log(TCAM_LOG_ERROR, "Could not convert line \"%s\" to valid pid.", line.c_str());
+            SPDLOG_ERROR("Could not convert line \"{}\" to valid pid.", line.c_str());
         }
         f.close();
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "Could not open file \"%s\"", filename.c_str());
+        SPDLOG_ERROR("Could not open file \"{}\"", filename.c_str());
     }
 
     return ret;

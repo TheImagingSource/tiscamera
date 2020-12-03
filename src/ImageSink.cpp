@@ -48,11 +48,11 @@ bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
                 return false;
             }
         }
-        tcam_log(TCAM_LOG_INFO, "Pipeline started playing");
+        SPDLOG_INFO("Pipeline started playing");
     }
     else if (status == TCAM_PIPELINE_STOPPED)
     {
-        tcam_log(TCAM_LOG_INFO, "Pipeline stopped playing");
+        SPDLOG_INFO("Pipeline stopped playing");
     }
 
     return true;
@@ -137,7 +137,7 @@ void ImageSink::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
     }
     else
     {
-        tcam_error("Could not requeue buffer. No Source.");
+        SPDLOG_ERROR("Could not requeue buffer. No Source.");
     }
 }
 
@@ -231,7 +231,7 @@ void ImageSink::drop_incomplete_frames (bool drop_them)
     }
     else
     {
-        tcam_info("Unable to get source object to tell it if imcomplete frames should be locked");
+        SPDLOG_INFO("Unable to get source object to tell it if imcomplete frames should be locked");
     }
 }
 
@@ -244,7 +244,7 @@ bool ImageSink::should_incomplete_frames_be_dropped () const
     }
     else
     {
-        tcam_error("Unable to get source object to query if imcomplete frames should be locked");
+        SPDLOG_ERROR("Unable to get source object to query if imcomplete frames should be locked");
         return true;
     }
 }

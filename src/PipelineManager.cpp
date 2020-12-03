@@ -80,7 +80,7 @@ bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
         if (create_pipeline())
         {
             start_playing();
-            tcam_log(TCAM_LOG_INFO, "All pipeline elements set to PLAYING.");
+            SPDLOG_INFO("All pipeline elements set to PLAYING.");
         }
         else
         {
@@ -124,7 +124,7 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
     device_properties = device->getProperties();
     available_input_formats = device->get_available_video_formats();
 
-    tcam_log(TCAM_LOG_DEBUG, "Received %zu formats.", available_input_formats.size());
+    SPDLOG_DEBUG("Received {} formats.", available_input_formats.size());
 
     distributeProperties();
 
@@ -147,7 +147,7 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 
     if (available_output_formats.empty())
     {
-        tcam_log(TCAM_LOG_ERROR, "No output formats available.");
+        SPDLOG_ERROR("No output formats available.");
         return false;
     }
 
@@ -216,10 +216,9 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 
     for (const auto& v : available_input_formats)
     {
-        tcam_log(TCAM_LOG_DEBUG,
-                "Found device fourcc '%s' - %x",
-                fourcc2description(v.get_fourcc()),
-                v.get_fourcc());
+        SPDLOG_DEBUG("Found device fourcc '{}' - {:x}",
+                   fourcc2description(v.get_fourcc()),
+                   v.get_fourcc());
 
         device_fourcc.push_back(v.get_fourcc());
     }
@@ -231,13 +230,13 @@ bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS _status)
 {
     if (source == nullptr)
     {
-        tcam_log(TCAM_LOG_ERROR, "Source is not defined");
+        SPDLOG_ERROR("Source is not defined");
         return false;
     }
 
     if (!source->set_status(_status))
     {
-        tcam_log(TCAM_LOG_ERROR, "Source did not accept status change");
+        SPDLOG_ERROR("Source did not accept status change");
         return false;
     }
 
@@ -251,14 +250,14 @@ bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS _status)
     {
         if (_status != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
         {
-            tcam_warning("Sink is not defined.");
+            SPDLOG_WARN("Sink is not defined.");
         }
         return false;
     }
 
     if (!sink->set_status(_status))
     {
-        tcam_log(TCAM_LOG_ERROR, "Sink spewed error");
+        SPDLOG_ERROR("Sink spewed error");
         return false;
     }
 
@@ -279,17 +278,15 @@ bool PipelineManager::validate_pipeline ()
 
     if (in_format != this->input_format)
     {
-        tcam_log(TCAM_LOG_DEBUG,
-                "Video format in source does not match pipeline: '%s' != '%s'",
-                in_format.to_string().c_str(),
-                input_format.to_string().c_str());
+        SPDLOG_DEBUG("Video format in source does not match pipeline: '{}' != '{}'",
+                   in_format.to_string().c_str(),
+                   input_format.to_string().c_str());
         return false;
     }
     else
     {
-        tcam_log(TCAM_LOG_DEBUG,
-                 "Starting pipeline with format: '%s'",
-                 in_format.to_string().c_str());
+        SPDLOG_DEBUG("Starting pipeline with format: '{}'",
+                   in_format.to_string().c_str());
     }
 
     VideoFormat in;
@@ -301,16 +298,15 @@ bool PipelineManager::validate_pipeline ()
 
         if (in != in_format)
         {
-            tcam_log(TCAM_LOG_ERROR,
-                    "Ingoing video format for filter %s is not compatible with previous element. '%s' != '%s'",
-                    f->getDescription().name.c_str(),
-                    in_format.to_string().c_str(),
-                    in.to_string().c_str());
+            SPDLOG_ERROR("Ingoing video format for filter {} is not compatible with previous element. '{}' != '{}'",
+                       f->getDescription().name.c_str(),
+                       in_format.to_string().c_str(),
+                       in.to_string().c_str());
             return false;
         }
         else
         {
-            tcam_log(TCAM_LOG_DEBUG, "Filter %s connected to pipeline -- %s",
+            SPDLOG_DEBUG("Filter {} connected to pipeline -- {}",
                     f->getDescription().name.c_str(),
                     out.to_string().c_str());
             // save output for next comparison
@@ -320,7 +316,7 @@ bool PipelineManager::validate_pipeline ()
 
     if (in_format != this->output_format)
     {
-        tcam_log(TCAM_LOG_ERROR, "Video format in sink does not match pipeline '%s' != '%s'",
+        SPDLOG_ERROR("Video format in sink does not match pipeline '{}' != '{}'",
                 in_format.to_string().c_str(),
                 output_format.to_string().c_str());
         return false;
@@ -368,26 +364,24 @@ bool PipelineManager::create_conversion_pipeline ()
                 {
                     if (f->setVideoFormat(input_format, output_format))
                     {
-                        tcam_log(TCAM_LOG_DEBUG,
-                                "Added filter \"%s\" to pipeline",
-                                s.c_str());
+                        SPDLOG_DEBUG("Added filter \"{}\" to pipeline",
+                                   s.c_str());
                         filter_pipeline.push_back(f);
                     }
                     else
                     {
-                        tcam_log(TCAM_LOG_DEBUG,
-                                "Filter %s did not accept format settings",
-                                s.c_str());
+                        SPDLOG_DEBUG("Filter {} did not accept format settings",
+                                   s.c_str());
                     }
                 }
                 else
                 {
-                    tcam_log(TCAM_LOG_DEBUG, "Filter %s does not use the device output formats.", s.c_str());
+                    SPDLOG_DEBUG("Filter {} does not use the device output formats.", s.c_str());
                 }
             }
             else
             {
-                tcam_log(TCAM_LOG_DEBUG, "Filter %s is not applicable", s.c_str());
+                SPDLOG_DEBUG("Filter {} is not applicable", s.c_str());
 
             }
         }
@@ -419,14 +413,14 @@ bool PipelineManager::add_interpretation_filter ()
 
             if (all_formats ||isFilterApplicable(input_format.get_fourcc(), f->getDescription().input_fourcc))
             {
-                tcam_log(TCAM_LOG_DEBUG, "Adding filter '%s' after source", s.c_str());
+                SPDLOG_DEBUG("Adding filter '{}' after source", s.c_str());
                 f->setVideoFormat(input_format, input_format);
                 filter_pipeline.insert(filter_pipeline.begin(), f);
                 continue;
             }
             else
             {
-                tcam_log(TCAM_LOG_DEBUG, "Filter '%s' not usable after source", s.c_str());
+                SPDLOG_DEBUG("Filter '{}' not usable after source", s.c_str());
             }
 
             if (f->setVideoFormat(input_format, input_format))
@@ -451,29 +445,29 @@ bool PipelineManager::create_pipeline ()
 
     if (!create_conversion_pipeline())
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to determine conversion pipeline.");
+        SPDLOG_ERROR("Unable to determine conversion pipeline.");
         return false;
     }
 
     if (!source->setVideoFormat(input_format))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set video format in source.");
+        SPDLOG_ERROR("Unable to set video format in source.");
         return false;
     }
 
     if (!sink->setVideoFormat(output_format))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set video format in sink.");
+        SPDLOG_ERROR("Unable to set video format in sink.");
         return false;
     }
 
     if (!source->set_buffer_collection(sink->get_buffer_collection()))
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set buffer collection.");
+        SPDLOG_ERROR("Unable to set buffer collection.");
         return false;
     }
 
-    tcam_log(TCAM_LOG_INFO, "Pipeline creation successful.");
+    SPDLOG_INFO("Pipeline creation successful.");
 
     std::string ppl = "source -> ";
 
@@ -483,7 +477,7 @@ bool PipelineManager::create_pipeline ()
         ppl += " -> ";
     }
     ppl += " sink";
-    tcam_log(TCAM_LOG_INFO, "%s" , ppl.c_str());
+    SPDLOG_INFO("{}" , ppl.c_str());
 
     return true;
 }
@@ -494,13 +488,13 @@ bool PipelineManager::start_playing ()
 
     if (!set_sink_status(TCAM_PIPELINE_PLAYING))
     {
-        tcam_log(TCAM_LOG_ERROR, "Sink refused to change to state PLAYING");
+        SPDLOG_ERROR("Sink refused to change to state PLAYING");
         goto error;
     }
 
     if (!set_source_status(TCAM_PIPELINE_PLAYING))
     {
-        tcam_log(TCAM_LOG_ERROR, "Source refused to change to state PLAYING");
+        SPDLOG_ERROR("Source refused to change to state PLAYING");
         goto error;
     }
 
@@ -520,7 +514,7 @@ bool PipelineManager::stop_playing ()
 
     if (!set_source_status(TCAM_PIPELINE_STOPPED))
     {
-        tcam_log(TCAM_LOG_ERROR, "Source refused to change to state STOP");
+        SPDLOG_ERROR("Source refused to change to state STOP");
         return false;
     }
 
@@ -528,9 +522,8 @@ bool PipelineManager::stop_playing ()
     {
         if (!f->setStatus(TCAM_PIPELINE_STOPPED))
         {
-            tcam_log(TCAM_LOG_ERROR,
-                    "Filter %s refused to change to state STOP",
-                    f->getDescription().name.c_str());
+            SPDLOG_ERROR("Filter {} refused to change to state STOP",
+                       f->getDescription().name.c_str());
             return false;
         }
     }
@@ -581,7 +574,7 @@ void PipelineManager::push_image (std::shared_ptr<ImageBuffer> buffer)
     }
     else
     {
-      tcam_log(TCAM_LOG_ERROR, "Sink is NULL");
+      SPDLOG_ERROR("Sink is NULL");
     }
 }
 
@@ -617,6 +610,6 @@ bool PipelineManager::should_incomplete_frames_be_dropped () const
         return source->should_incomplete_frames_be_dropped();
     }
 
-    tcam_error("No shource to ask if incomplete frames should be dropped.");
+    SPDLOG_ERROR("No shource to ask if incomplete frames should be dropped.");
     return true;
 }

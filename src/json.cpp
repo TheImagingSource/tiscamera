@@ -82,7 +82,7 @@ bool serial_matches (json j, const std::string& serial)
     }
     catch (json::out_of_range& e)
     {
-        tcam_debug("State string has no serial. Omitting check.");
+        SPDLOG_DEBUG("State string has no serial. Omitting check.");
         return true;
     }
 
@@ -90,7 +90,7 @@ bool serial_matches (json j, const std::string& serial)
     {
         if (serial_str.compare(serial) != 0)
         {
-            tcam_error("Serial mismatch. State string will not be evaluated.");
+            SPDLOG_ERROR("Serial mismatch. State string will not be evaluated.");
             return false;
         }
     }
@@ -107,18 +107,18 @@ bool version_matches (json j, const std::string& wanted_version=tcam::JSON_FILE_
     }
     catch (json::out_of_range& e)
     {
-        tcam_debug("State string has no version. Omitting check.");
+        SPDLOG_DEBUG("State string has no version. Omitting check.");
         return true;
     }
 
-    tcam_error(version.c_str());
+    SPDLOG_ERROR(version.c_str());
 
 
     if (!version.empty())
     {
         if (version != wanted_version)
         {
-            tcam_error("Version mismatch for state file.");
+            SPDLOG_ERROR("Version mismatch for state file.");
             return false;
         }
     }
@@ -141,7 +141,7 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr
     {
         std::string s = "Unable to parse property settings. JSON parser returned: ";
         s.append(e.what());
-        tcam_error(s.c_str());
+        SPDLOG_ERROR(s.c_str());
         msgs.push_back(s);
         return {false, msgs};
     }

@@ -138,9 +138,8 @@ bool PropertyHandler::set_property (const Property& p)
         {
             if (prop.external_property->is_read_only())
             {
-                tcam_log(TCAM_LOG_ERROR,
-                         "Property '%s' is read only",
-                         prop.external_property->get_name().c_str());
+                SPDLOG_ERROR("Property '{}' is read only",
+                           prop.external_property->get_name().c_str());
                 return false;
             }
 
@@ -239,7 +238,7 @@ void PropertyHandler::generate_properties ()
 {
     if (device_properties.empty())
     {
-        tcam_log(TCAM_LOG_ERROR, "No device properties to work with");
+        SPDLOG_ERROR("No device properties to work with");
         return;
     }
 
@@ -270,7 +269,7 @@ void PropertyHandler::generate_properties ()
     {
         handle_flags(p);
     }
-    tcam_log(TCAM_LOG_DEBUG, "Created %zu properties", external_properties.size());
+    SPDLOG_DEBUG("Created %zu properties", external_properties.size());
 }
 
 
@@ -321,7 +320,7 @@ void PropertyHandler::handle_flags (std::shared_ptr<Property>& p)
 
             if (pea == nullptr)
             {
-                tcam_log(TCAM_LOG_ERROR, "Auto Exposure property could not be found");
+                SPDLOG_ERROR("Auto Exposure property could not be found");
             }
             bool vla = static_cast<PropertyBoolean&>(*pea).get_value();
             toggle_read_only(TCAM_PROPERTY_EXPOSURE, vla);

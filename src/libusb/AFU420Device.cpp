@@ -47,12 +47,12 @@ tcam::AFU420Device::AFU420Device (const DeviceInfo& info)
 
     if (usb_device_ == nullptr)
     {
-        tcam_log(TCAM_LOG_ERROR, "Failed to open device.");
+        SPDLOG_ERROR("Failed to open device.");
     }
 
     if (!usb_device_->open_interface(0))
     {
-        tcam_error("Failed to open camera interface - %d. \n"
+        SPDLOG_ERROR("Failed to open camera interface - {}. \n"
                    "Please check device permissions!", 0);
     }
 
@@ -87,25 +87,25 @@ tcam::AFU420Device::~AFU420Device ()
     }
 
     transfer_items.clear();
-    tcam_debug("AFU420 destroyed");
+    SPDLOG_DEBUG("AFU420 destroyed");
 }
 
 
 void print_resolution_conf (AFU420Device::sResolutionConf conf)
 {
-    tcam_info("\nxaddrstart: %d\n \
-yaddrstart: %d\n \
-xaddrstop: %d\n \
-yaddrstop: %d\n \
-xoutputsize: %d\n \
-youtputsize: %d\n \
-crop x offset: %d\n \
-crop y offset: %d\n \
-crop img width: %d\n \
-crop img height: %d\n \
-hor binning: %d\n \
-ver binning: %d\n \
-framerate: %d\n",
+    SPDLOG_INFO("\nxaddrstart: {}\n \
+yaddrstart: {}\n \
+xaddrstop: {}\n \
+yaddrstop: {}\n \
+xoutputsize: {}\n \
+youtputsize: {}\n \
+crop x offset: {}\n \
+crop y offset: {}\n \
+crop img width: {}\n \
+crop img height: {}\n \
+hor binning: {}\n \
+ver binning: {}\n \
+framerate: {}\n",
               conf.x_addr_start,
               conf.y_addr_start,
               conf.x_addr_end,
@@ -130,7 +130,7 @@ void AFU420Device::query_active_format ()
     int ret = control_read(bpp, BASIC_USB_TO_PC_GET_BIT_DEPTH, 1);
     if (ret < 0)
     {
-        tcam_error("Could not query bit depth.");
+        SPDLOG_ERROR("Could not query bit depth.");
         return;
     }
 
@@ -144,7 +144,7 @@ void AFU420Device::query_active_format ()
     }
     else
     {
-        tcam_error("Received bogus bit depth of '%d'", bpp);
+        SPDLOG_ERROR("Received bogus bit depth of '{}'", bpp);
         //return;
     }
 
@@ -152,7 +152,7 @@ void AFU420Device::query_active_format ()
     ret = read_resolution_config_from_device(conf);
     if (ret <= 0)
     {
-        tcam_error("Could not read resolution config. LibUsb returned: %d", ret);
+        SPDLOG_ERROR("Could not read resolution config. LibUsb returned: {}", ret);
         return;
     }
 
@@ -165,7 +165,7 @@ void AFU420Device::query_active_format ()
 
     active_video_format = VideoFormat(format);
 
-    tcam_debug("Active format is: %s", active_video_format.to_string().c_str());
+    SPDLOG_DEBUG("Active format is: {}", active_video_format.to_string().c_str());
 }
 
 
@@ -176,7 +176,7 @@ int AFU420Device::read_resolution_config_from_device (sResolutionConf& conf)
     int ret = control_read(tmp, BASIC_USB_TO_PC_RES_FPS, 0, 0);
     if (ret <= 0)
     {
-        tcam_error("Could not read resolution config from device. LibUsb returned: %d", ret);
+        SPDLOG_ERROR("Could not read resolution config from device. LibUsb returned: {}", ret);
         return ret;
     }
 
@@ -278,7 +278,7 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
                                                                          tcam_image_size binning)
 {
 
-    // tcam_debug("Creating resolutionconf with input:\nstart: %dx%d\nstream_dim %dx%d\nbinning %d%d",
+    // SPDLOG_DEBUG("Creating resolutionconf with input:\nstart: {}x{}\nstream_dim {}x{}\nbinning {}{}",
     //            start.width, start.height,
     //            stream_dim.width, stream_dim.height,
     //            binning.width, binning.height);
@@ -301,7 +301,7 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
         (binning.width != 4) && (binning.height != 4) &&
         (binning.width != 8) && (binning.height != 8) )
     {
-        tcam_error("Invalid binning factor for videoformat.");
+        SPDLOG_ERROR("Invalid binning factor for videoformat.");
         return res_conf;
     }
 
@@ -326,26 +326,26 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
     // check if the ROI is inside the visible area
     if( (roi_start.width > (m_uPixelMaxX - m_uPixelMinX)) || (roi_start.height > (m_uPixelMaxY - m_uPixelMinY)) )
     {
-        tcam_error("Invalid roi start. %dx%d", roi_start.width, roi_start.height);
+        SPDLOG_ERROR("Invalid roi start. {}x{}", roi_start.width, roi_start.height);
         return res_conf;
     }
 
     // both start values have to be a multiple of 4 (startX maybe %12?)
     if( roi_start.width % 4 || roi_start.height % 4 )
     {
-        tcam_error("Invalid roi start.");
+        SPDLOG_ERROR("Invalid roi start.");
         return res_conf;
     }
 
     if( (res_on_sensor_dim.width > m_uPixelMaxX) || (res_on_sensor_dim.height > m_uPixelMaxY) )
     {
-        tcam_error("Invalid dimensions (too large) for videoformat.");
+        SPDLOG_ERROR("Invalid dimensions (too large) for videoformat.");
         return res_conf;
     }
 
     if( res_on_sensor_dim.width % 4 || res_on_sensor_dim.width % 12 || res_on_sensor_dim.height % 4 )
     {
-        tcam_error("Invalid dimensions (step) for videoformat.");
+        SPDLOG_ERROR("Invalid dimensions (step) for videoformat.");
         return res_conf;
     }
 
@@ -400,8 +400,8 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf (const t
     // restart the previous stream if the end address pixel are not correct
     if( (res_conf.x_addr_end > (unsigned short)m_uPixelMaxX) || (res_conf.y_addr_end > (unsigned short)m_uPixelMaxY) )
     {
-        tcam_error("ResolutionConfig could not be created. end pixel address does not make sense.");
-        tcam_error("%d > %d   %d > %d", res_conf.x_addr_end, (unsigned short)m_uPixelMaxX,
+        SPDLOG_ERROR("ResolutionConfig could not be created. end pixel address does not make sense.");
+        SPDLOG_ERROR("{} > {}   {} > {}", res_conf.x_addr_end, (unsigned short)m_uPixelMaxX,
                    res_conf.y_addr_end, (unsigned short)m_uPixelMaxY);
         return sResolutionConf{};
     }
@@ -432,10 +432,10 @@ void AFU420Device::read_firmware_version ()
     }
     else
     {
-        tcam_error("Could not read firmware version");
+        SPDLOG_ERROR("Could not read firmware version");
     }
 
-    tcam_info("Firmware version is %d.%d.%d.%d \n", a, b, c, d);
+    SPDLOG_INFO("Firmware version is {}.{}.{}.{} \n", a, b, c, d);
 }
 
 
@@ -500,7 +500,7 @@ void AFU420Device::create_formats ()
             add_res(fmt, f);
         }
 
-        //tcam_info("Adding fmt to fmt_list");
+        //SPDLOG_INFO("Adding fmt to fmt_list");
         VideoFormatDescription format(nullptr, desc, rf);
         available_videoformats.push_back(format);
     }
@@ -540,7 +540,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
                     return p.property;
                 }
             }
-            tcam_error("Invalid property");
+            SPDLOG_ERROR("Invalid property");
             return nullptr;
         };
 
@@ -602,22 +602,22 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
 {
     if (is_stream_on)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to set format. Stream is running.");
+        SPDLOG_ERROR("Unable to set format. Stream is running.");
         return false;
     }
 
-    tcam_info("Attempting to set format to: '%s'", format.to_string().c_str());
+    SPDLOG_INFO("Attempting to set format to: '{}'", format.to_string().c_str());
 
     int ret = setup_bit_depth(img::get_bits_per_pixel(format.get_fourcc()));
 
     if (ret < 0)
     {
-        tcam_error("Could not set bit depth. Aborting. %d", ret);
+        SPDLOG_ERROR("Could not set bit depth. Aborting. {}", ret);
         return false;
     }
     else
     {
-        tcam_debug("Set bit depth. %d", ret);
+        SPDLOG_DEBUG("Set bit depth. {}", ret);
     }
 
     auto conf = videoformat_to_resolution_conf(format);
@@ -626,7 +626,7 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
 
     if (ret <= 0)
     {
-        tcam_error("Could not set bit depth. Aborting.");
+        SPDLOG_ERROR("Could not set bit depth. Aborting.");
         return false;
     }
 
@@ -637,7 +637,7 @@ bool tcam::AFU420Device::set_video_format (const VideoFormat& format)
 
     active_video_format = format;
 
-    tcam_info("Set format to: %s", active_video_format.to_string().c_str());
+    SPDLOG_INFO("Set format to: {}", active_video_format.to_string().c_str());
 
     return true;
 }
@@ -660,13 +660,13 @@ bool tcam::AFU420Device::set_framerate (double framerate)
     // set the frame rate in the camera (frame rate will be sent as 7.7FPS = 770)
     unsigned short val = ((unsigned short)(framerate * 100.0));
 
-    tcam_debug("Attempting to set framerate value %d", val);
+    SPDLOG_DEBUG("Attempting to set framerate value {}", val);
 
     int ret = control_write(BASIC_PC_TO_USB_FPS, val, 1);
 
     if (ret < 0)
     {
-        tcam_error("Could not set framerate. LibUsb returned: %d", ret);
+        SPDLOG_ERROR("Could not set framerate. LibUsb returned: {}", ret);
         return false;
     }
 
@@ -689,7 +689,7 @@ bool tcam::AFU420Device::set_sink (std::shared_ptr<SinkInterface> s)
 
 bool tcam::AFU420Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
-    tcam_log(TCAM_LOG_INFO, "Received %d buffer from external allocator.", buffs.size());
+    SPDLOG_INFO("Received {} buffer from external allocator.", buffs.size());
 
     buffers.reserve(buffs.size());
 
@@ -731,7 +731,7 @@ void AFU420Device::push_buffer ()
 
     if (usbbulk_image_size_ - current_buffer_->get_image_size() != 0)
     {
-        tcam_warning("Image buffer does not contain enough data. Dropping frame...");
+        SPDLOG_WARN("Image buffer does not contain enough data. Dropping frame...");
 
         statistics.frames_dropped++;
         requeue_buffer(current_buffer_);
@@ -742,12 +742,12 @@ void AFU420Device::push_buffer ()
 
     if (auto ptr = listener.lock())
     {
-        //tcam_debug("Transferred data %d - buf size %d expected size %d ", offset_,
+        //SPDLOG_DEBUG("Transferred data {} - buf size {} expected size {} ", offset_,
         //           current_buffer_->get_image_size(),
         //           active_video_format.get_required_buffer_size());
         statistics.frame_count++;
         current_buffer_->set_statistics(statistics);
-        tcam_debug("push image");
+        SPDLOG_DEBUG("push image");
         ptr->push_image(current_buffer_);
         current_buffer_ = nullptr;
         transfered_size_ = 0;
@@ -755,7 +755,7 @@ void AFU420Device::push_buffer ()
     }
     else
     {
-        tcam_error("ImageSink expired. Unable to deliver images.");
+        SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
     }
 }
 
@@ -810,7 +810,7 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header (unsigned
     tcam_image_size dim = get_stream_dim();
     if (uWidth != dim.width || uHeight != dim.height)
     {
-        tcam_error("Dimensions do not fit.");
+        SPDLOG_ERROR("Dimensions do not fit.");
         return res;
     }
     res.frame_id = get_hdr_field_at( 0x10 );
@@ -832,7 +832,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         // do not free transfers
         //libusb_free_transfer(xfr);
 
-        //tcam_debug("stream is off");
+        //SPDLOG_DEBUG("stream is off");
         return;
     }
 
@@ -840,7 +840,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
         {
             if (libusb_submit_transfer(_xfr) < 0)
             {
-                tcam_error("error re-submitting URB\n");
+                SPDLOG_ERROR("error re-submitting URB\n");
             }
         };
 
@@ -849,10 +849,10 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
     {
         if (xfr->status == LIBUSB_TRANSFER_CANCELLED)
         {
-            tcam_debug("transfer is cancelled");
+            SPDLOG_DEBUG("transfer is cancelled");
             return;
         }
-		tcam_error("transfer status %d", xfr->status);
+		SPDLOG_ERROR("transfer status {}", xfr->status);
         submit_transfer(xfr);
 
         if (lost_countdown == 0)
@@ -879,7 +879,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
 
             if (current_buffer_ == nullptr)
             {
-                tcam_error("No buffer to work with. Dropping image");
+                SPDLOG_ERROR("No buffer to work with. Dropping image");
                 statistics.frames_dropped++;
                 submit_transfer(xfr);
                 have_header = false;
@@ -903,7 +903,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
             return;
         }
 
-        tcam_error("Can not get buffer to fill with image data. Aborting libusb callback.");
+        SPDLOG_ERROR("Can not get buffer to fill with image data. Aborting libusb callback.");
         no_buffer_counter++;
         if (no_buffer_counter >= no_buffer_counter_max)
         {
@@ -927,7 +927,7 @@ void tcam::AFU420Device::transfer_callback (struct libusb_transfer* xfr)
     bool is_complete_image = offset_ >= usbbulk_image_size_;
     if (is_complete_image || is_trailer)
     {
-        tcam_debug("image complete");
+        SPDLOG_DEBUG("image complete");
         push_buffer();
         have_header = false;
     }
@@ -940,7 +940,7 @@ std::shared_ptr<tcam::ImageBuffer> tcam::AFU420Device::get_next_buffer ()
 {
     if (buffers.empty())
     {
-        tcam_error("No buffers to work with.");
+        SPDLOG_ERROR("No buffers to work with.");
         return nullptr;
     }
 
@@ -948,13 +948,13 @@ std::shared_ptr<tcam::ImageBuffer> tcam::AFU420Device::get_next_buffer ()
     {
         if (b.is_queued)
         {
-            //tcam_error("returning buffer %p", b.buffer->get_data());
+            //SPDLOG_ERROR("returning buffer %p", b.buffer->get_data());
             b.is_queued = false;
             return b.buffer;
         }
     }
 
-    tcam_error("No free buffers available! %d", buffers.size());
+    SPDLOG_ERROR("No free buffers available! {}", buffers.size());
     return nullptr;
 }
 
@@ -1020,7 +1020,7 @@ bool tcam::AFU420Device::start_stream ()
 
     if (ret < 0)
     {
-        tcam_error("Stream could not be started. Aborting");
+        SPDLOG_ERROR("Stream could not be started. Aborting");
         return false;
     }
 
@@ -1028,7 +1028,7 @@ bool tcam::AFU420Device::start_stream ()
     is_stream_on = true;
     stop_all = false;
 
-    tcam_info("Stream started");
+    SPDLOG_INFO("Stream started");
 
     return true;
 }
@@ -1036,7 +1036,7 @@ bool tcam::AFU420Device::start_stream ()
 
 bool tcam::AFU420Device::stop_stream ()
 {
-    tcam_info("stop_stream called");
+    SPDLOG_INFO("stop_stream called");
     stop_all = true;
     is_stream_on = false;
 
@@ -1055,12 +1055,6 @@ bool tcam::AFU420Device::stop_stream ()
 
 int AFU420Device::set_resolution_config (sResolutionConf conf, resolution_config_mode mode)
 {
-    // tcam_info("Setting resolution conf:\n\tbinning %dx%d\n\toffset %dx%d\n\tres: %dx%d",
-    //           conf.hor_binning, conf.ver_binning,
-    //           conf.x_addr_start, conf.y_addr_start,
-    //           conf.x_output_size, conf.y_output_size);
-
-
     auto serialized_conf = serialize_resolution_config(conf);
 
     uint16_t test_mode = mode == resolution_config_mode::test ? 1 : 0;
@@ -1085,7 +1079,7 @@ int AFU420Device::setup_bit_depth (int bpp)
 
     if (hr < 0)
     {
-        tcam_error("Failed to set a bit depth. This is most likely a too old firmware. %d %s",
+        SPDLOG_ERROR("Failed to set a bit depth. This is most likely a too old firmware. {} {}",
                    hr, libusb_strerror((libusb_error)hr));
 
         return hr;
@@ -1105,14 +1099,14 @@ int AFU420Device::get_fps_max (double& max,
     int hr = setup_bit_depth(src_bpp);
     if (hr < 0)
     {
-        tcam_error("could not set bit depth");
+        SPDLOG_ERROR("could not set bit depth");
     }
 
     auto conf = CreateResolutionConf(pos, dim, binning);
 
     if (conf.x_output_size == 0)
     {
-        tcam_error("resolution size has output size 0");
+        SPDLOG_ERROR("resolution size has output size 0");
         return EINVAL;
     }
 
@@ -1120,7 +1114,7 @@ int AFU420Device::get_fps_max (double& max,
 
     if (hr <= 0)
     {
-        tcam_error("Could not set resolution config (%d)", hr);
+        SPDLOG_ERROR("Could not set resolution config ({})", hr);
         return hr;
     }
 
@@ -1146,26 +1140,6 @@ int AFU420Device::get_frame_rate_range (uint32_t strm_fmt_id,
                                         double& min_fps,
                                         double& max_fps)
 {
-
-    // for( auto&& e : frame_rate_cache_ )
-    // {
-    //     if (e.strm_fmt_id != strm_fmt_id)
-    //     {
-    //         continue;
-    //     }
-    //     if (e.scaling_factor_id != scaling_factor_id)
-    //     {
-    //         continue;
-    //     }
-    //     if (e.dim.width != dim.width || e.dim.height != dim.height)
-    //     {
-    //         continue;
-    //     }
-    //     min_fps = e.min_fps;
-    //     max_fps = e.max_fps;
-    //     return 0;
-    // }
-
     const auto& stream_fmt_list = get_stream_format_descs ();
 
     auto f = std::find_if(stream_fmt_list.begin(), stream_fmt_list.end(),
@@ -1176,29 +1150,21 @@ int AFU420Device::get_frame_rate_range (uint32_t strm_fmt_id,
 
     if (f == stream_fmt_list.end())
     {
-        tcam_debug("???");
+        SPDLOG_DEBUG("???");
         // return EINVAL;
     }
-    // auto func = [this, src_bpp = f->src_bpp, scaling_factor_id, dim, &min_fps, &max_fps]()
-        // {                       //
 
-            uint32_t binning = scaling_factor_id;
-            if (binning <= 1)
-            {
-                binning = 0;
-            }
+    uint32_t binning = scaling_factor_id;
+    if (binning <= 1)
+    {
+        binning = 0;
+    }
 
-            min_fps = 2.f;
-            max_fps = 30.f;
+    min_fps = 2.f;
+    max_fps = 30.f;
 
-            int hr = get_fps_max( max_fps, { 0, 0 }, dim, { binning, binning }, f->src_bpp );
+    int hr = get_fps_max( max_fps, { 0, 0 }, dim, { binning, binning }, f->src_bpp );
 
-            //tcam_debug("afu420::cam_c42_device::get_frame_rate_range" ", for dim={%d,%d}, bin=%d => max_fps=%f.", dim.width, dim.height, binning, max_fps );
-
-            // return hr;
-        // };
-
-    // int hr = func();
     if (hr == 0)
     {
         frame_rate_cache_.push_back( { strm_fmt_id, scaling_factor_id, dim, min_fps, max_fps } );
@@ -1285,15 +1251,6 @@ int AFU420Device::control_write (unsigned char ucRequest,
                                  uint16_t ushIndex,
                                  std::vector<unsigned char>& data)
 {
-    // return usb_device_->control_transfer(HOST_TO_DEVICE,
-    //                                      (uint8_t)ucRequest,
-    //                                      ushValue,
-    //                                      ushIndex,
-    //                                      (unsigned char*)data.data(), data.size());
-
-    // tcam_debug("hhhhhhhhhhhh");
-    //tcam_debug("control_write ucRequest %x, ushValue %d, ushIndex %d datasize %d", ucRequest, ushValue, ushIndex, sizeof(data));
-
     unsigned int timeout = 500;
     int rval = libusb_control_transfer(usb_device_->get_handle(),
                                        LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
@@ -1319,15 +1276,6 @@ int AFU420Device::read_reg (T& value, unsigned char ucRequest, uint16_t ushValue
                                        (unsigned char*)&value, sizeof(T),
                                        timeout);
     return rval;
-
-
-    tcam_error("asdasdadsasdasdasdasdadsasd");
-    return usb_device_->control_transfer(LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                         (uint8_t)ucRequest,
-                                         ushValue,
-                                         ushIndex,
-                                         value);
-
 }
 
 
@@ -1370,8 +1318,6 @@ int AFU420Device::control_read (uint64_t& value,
 int AFU420Device::control_read (std::vector<uint8_t>& value, unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex)
 {
     unsigned int timeout = 500;
-
-    //tcam_debug("transfer_read: %x %d %d", ucRequest, ushValue, ushIndex);
 
     int rval = libusb_control_transfer(usb_device_->get_handle(),
                                        LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,

@@ -46,35 +46,35 @@ static const char* loglevel2string (const enum TCAM_LOG_LEVEL level)
 }
 
 
-static enum TCAM_LOG_LEVEL string2loglevel (const char* level)
+static spdlog::level::level_enum string2loglevel (const char* level)
 {
 
     if (strcmp("OFF", level) == 0)
     {
-        return TCAM_LOG_OFF;
+        return spdlog::level::off;
     }
     else if (strcmp("TRACE", level) == 0)
     {
-        return TCAM_LOG_TRACE;
+        return spdlog::level::trace;
     }
     else if (strcmp("DEBUG", level) == 0)
     {
-        return TCAM_LOG_DEBUG;
+        return spdlog::level::debug;
     }
     else if (strcmp("INFO", level) == 0)
     {
-        return TCAM_LOG_INFO;
+        return spdlog::level::info;
     }
     else if (strcmp("WARNING", level) == 0)
     {
-        return TCAM_LOG_WARNING;
+        return spdlog::level::warn;
     }
     else if (strcmp("ERROR", level) == 0)
     {
-        return TCAM_LOG_ERROR;
+        return spdlog::level::err;
     }
     else
-        return TCAM_LOG_ERROR;
+        return spdlog::level::err;
 }
 
 
@@ -87,6 +87,8 @@ Logger::Logger ():
 #define TCAM_LOG_ENV_NAME "TCAM_LOG"
 #endif
 
+
+
     static const char* env_name = TCAM_LOG_ENV_NAME;
 
     load_default_settings();
@@ -96,23 +98,29 @@ Logger::Logger ():
         level = string2loglevel(log_def);
     }
 
-    if (level >= TCAM_LOG_DEBUG)
-    {
-        char b[1024];
-        sprintf(b,
-                "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s\n\tModules:\t%s",
-                get_version(),
-                get_aravis_version(),
-                get_enabled_modules());
+    spdlog::set_pattern("[%Y%m%dT%T] [%^%-7l%$] %s:%#: %v");
+    // spdlog::set_level(spdlog::level::debug);
+    spdlog::set_level(level);
 
-        va_list args;
-        log("", TCAM_LOG_DEBUG, "Logger", __LINE__, b, args);
-    }
+    spdlog::set_error_handler([](const std::string& msg)
+    {
+        std::cerr << "my err handler: " << msg << std::endl;
+    });
+
+    char b[1024];
+    sprintf(b,
+            "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s\n\tModules:\t%s",
+            get_version(),
+            get_aravis_version(),
+            get_enabled_modules());
+
+    SPDLOG_INFO(b);
+
 }
 
 void Logger::load_default_settings ()
 {
-    level = TCAM_LOG_OFF;
+    level = spdlog::level::err;
     target = STDIO;
     log_file = "/tmp/tis.log";
 }
@@ -125,10 +133,10 @@ void Logger::log (const char* module __attribute__((unused)),
                   const char* message,
                   va_list args)
 {
-    if (_level < level)
-    {
-        return;
-    }
+    // if (_level < level)
+    // {
+    //     return;
+    // }
 
     // local copy of va_list
     // required because vsnprintf calls va_arg()
@@ -226,13 +234,13 @@ void Logger::log_to_file (const char* message __attribute__((unused)))
 
 void Logger::set_log_level (enum TCAM_LOG_LEVEL l)
 {
-    level = l;
+    //level = l;
 }
 
 
 enum TCAM_LOG_LEVEL Logger::get_log_level () const
 {
-    return level;
+    // return level;
 }
 
 

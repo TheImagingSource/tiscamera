@@ -52,7 +52,7 @@ static bool tcam_property_to_json (TcamProp* prop,
         g_value_unset( &value );
         g_value_unset( &type );
 
-        tcam_warning("Unable to read property '%s'", name);
+        SPDLOG_WARN("Unable to read property '{}'", name);
         return false;
     }
 
@@ -97,7 +97,7 @@ static bool tcam_property_to_json (TcamProp* prop,
     catch (const std::logic_error& err)
     {
         g_value_unset( &value );
-        tcam_error(err.what());
+        SPDLOG_ERROR(err.what());
         return false;
     }
     g_value_unset( &value );
@@ -127,7 +127,7 @@ std::string create_device_settings (const std::string& serial,
     }
     catch (std::logic_error& err)
     {
-        tcam_error(err.what());
+        SPDLOG_ERROR(err.what());
         return "";
     }
 
@@ -142,7 +142,7 @@ std::string create_device_settings (const std::string& serial,
                                          prop_name );
         if (!ret)
         {
-            tcam_warning("Could not convert %s to json.", prop_name );
+            SPDLOG_WARN("Could not convert {} to json.", prop_name );
         }
 
     }
@@ -162,7 +162,7 @@ bool load_device_settings (TcamProp* tcam,
         return false;
     }
 
-    tcam_info(cache.c_str());
+    SPDLOG_INFO(cache.c_str());
     json j;
     try
     {
@@ -170,7 +170,7 @@ bool load_device_settings (TcamProp* tcam,
     }
     catch (json::parse_error& e)
     {
-        tcam_error("Unable to parse property settings. JSON parser returned: %s", e.what());
+        SPDLOG_ERROR("Unable to parse property settings. JSON parser returned: {}", e.what());
         return false;
     }
 
@@ -181,7 +181,7 @@ bool load_device_settings (TcamProp* tcam,
     }
     catch (json::out_of_range& e)
     {
-        tcam_debug("State string has no serial. Omitting check.");
+        SPDLOG_DEBUG("State string has no serial. Omitting check.");
     }
 
     std::string version;
@@ -191,14 +191,14 @@ bool load_device_settings (TcamProp* tcam,
     }
     catch (json::out_of_range& e)
     {
-        tcam_debug("State string has no version. Omitting check.");
+        SPDLOG_DEBUG("State string has no version. Omitting check.");
     }
 
     if (!serial_str.empty())
     {
         if (serial_str.compare(serial) != 0)
         {
-            tcam_error("Serial mismatch. State string will not be evaluated.");
+            SPDLOG_ERROR("Serial mismatch. State string will not be evaluated.");
             return false;
         }
     }
@@ -207,7 +207,7 @@ bool load_device_settings (TcamProp* tcam,
     {
         if (version != tcam::JSON_FILE_VERSION_CURRENT)
         {
-            tcam_error("Version mismatch for state file.");
+            SPDLOG_ERROR("Version mismatch for state file.");
             return false;
         }
     }
@@ -268,8 +268,8 @@ bool load_device_settings (TcamProp* tcam,
 
         if (!ret)
         {
-            tcam_error("Setting '%s' to '%s' caused an error",
-                       iter.key().c_str(), iter.value().dump().c_str());
+            SPDLOG_ERROR("Setting '{}' to '{}' caused an error",
+                         iter.key().c_str(), iter.value().dump().c_str());
         }
         g_value_unset( &value );
 

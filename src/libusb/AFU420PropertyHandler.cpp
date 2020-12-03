@@ -55,7 +55,7 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
 
     if (desc == properties.end())
     {
-        tcam_error("Device does not have property '%s'", new_property.get_name().c_str());
+        SPDLOG_ERROR("Device does not have property '{}'", new_property.get_name().c_str());
         return false;
     }
 
@@ -182,7 +182,7 @@ bool AFU420Device::AFU420PropertyHandler::get_property (tcam::Property& p)
     if (desc == properties.end())
     {
         std::string s = "Unable to find Property \"" + p.get_name() + "\"";
-        tcam_log(TCAM_LOG_ERROR, "%s", s.c_str());
+        SPDLOG_ERROR("{}", s.c_str());
         return false;
     }
 

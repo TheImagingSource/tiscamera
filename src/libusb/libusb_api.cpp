@@ -37,7 +37,7 @@ DeviceInterface* open_libusb_device (const struct tcam_device_info* device)
     }
     else
     {
-        tcam_error("Unable to identify requested LibUsb Backend %x", device->additional_identifier);
+        SPDLOG_ERROR("Unable to identify requested LibUsb Backend %x", device->additional_identifier);
         return nullptr;
     }
 }

@@ -44,7 +44,7 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
         cp.flags = set_bit(cp.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 
         auto property_auto_offset = std::make_shared<PropertyBoolean>(impl, cp, Property::BOOLEAN);
-        tcam_log(TCAM_LOG_DEBUG, "Adding 'Offset Auto Center' to property list");
+        SPDLOG_DEBUG("Adding 'Offset Auto Center' to property list");
 
         new_properties.push_back(property_auto_offset);
     }

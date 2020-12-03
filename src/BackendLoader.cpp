@@ -71,6 +71,8 @@ std::shared_ptr<BackendLoader> BackendLoader::get_instance ()
 
 tcam::BackendLoader::BackendLoader ()
 {
+    // logger cal required to ensure defaults are correctly set
+    Logger::getInstance();
     load_backends();
 }
 
@@ -151,10 +153,10 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend (BackendLoad
     {
         return ret;
     }
-    tcam_trace("retrieving list for %s", b.name.c_str());
+    SPDLOG_TRACE("retrieving list for {}", b.name.c_str());
     size_t t = b.get_device_list_size();
 
-    tcam_trace("Amount of devices: %d", t);
+    SPDLOG_TRACE("Amount of devices: {}", t);
 
     struct tcam_device_info *temp = new struct tcam_device_info[t];
 

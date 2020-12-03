@@ -331,7 +331,7 @@ bool AFU420Device::create_binning ()
 
     if (ptr == nullptr)
     {
-        tcam_error("Could not create binning property. Continuing without.");
+        SPDLOG_ERROR("Could not create binning property. Continuing without.");
     }
     else
     {
@@ -344,7 +344,7 @@ bool AFU420Device::create_binning ()
 
     if (ptr == nullptr)
     {
-        tcam_error("Could not create binning property. Continuing without.");
+        SPDLOG_ERROR("Could not create binning property. Continuing without.");
     }
     else
     {
@@ -561,7 +561,7 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         }
         default:
         {
-            tcam_warning("Property %s does not belong to this device", desc.property->get_name().c_str());
+            SPDLOG_WARN("Property {} does not belong to this device", desc.property->get_name().c_str());
             break;
         }
     }
@@ -578,11 +578,11 @@ int64_t AFU420Device::get_exposure ()
 
     if (ret < 0)
     {
-        tcam_error("Unable to read property 'Exposure. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to read property 'Exposure. LibUsb returned {}", ret);
     }
     else
     {
-        tcam_debug("exposure returned value: %u", value);
+        SPDLOG_DEBUG("exposure returned value: {}", value);
     }
     return value;
 }
@@ -596,12 +596,12 @@ bool AFU420Device::set_exposure (int64_t exposure)
 
     if (ret < 0)
     {
-        tcam_error("Unable to write property 'Exposure'. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to write property 'Exposure'. LibUsb returned {}", ret);
         return false;
     }
     else
     {
-        //tcam_debug("Exposure returned value: %u", value);
+        //SPDLOG_DEBUG("Exposure returned value: {}", value);
     }
     return true;
 }
@@ -615,11 +615,11 @@ int64_t AFU420Device::get_gain ()
 
     if (ret < 0)
     {
-        tcam_error("Unable to read property 'Gain'. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to read property 'Gain'. LibUsb returned {}", ret);
     }
     else
     {
-        tcam_debug("Gain returned value: %u", value / 100);
+        SPDLOG_DEBUG("Gain returned value: {}", value / 100);
     }
     return value / 100;
 }
@@ -633,12 +633,12 @@ bool AFU420Device::set_gain (int64_t gain)
 
     if (ret < 0)
     {
-        tcam_error("Unable to write property 'Gain'. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to write property 'Gain'. LibUsb returned {}", ret);
         return false;
     }
     else
     {
-        //tcam_debug("Gain value: %u written", value);
+        //SPDLOG_DEBUG("Gain value: {} written", value);
     }
     return true;
 }
@@ -652,12 +652,12 @@ int64_t AFU420Device::get_focus ()
 
     if (ret < 0)
     {
-        tcam_error("Unable to read property 'Focus'. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to read property 'Focus'. LibUsb returned {}", ret);
         return ret;
     }
     else
     {
-        tcam_debug("Focus returned value: %u", value);
+        SPDLOG_DEBUG("Focus returned value: {}", value);
     }
     return value;
 }
@@ -671,12 +671,12 @@ bool AFU420Device::set_focus (int64_t focus)
 
     if (ret < 0)
     {
-        tcam_error("Unable to write property 'Focus'. LibUsb returned %d", ret);
+        SPDLOG_ERROR("Unable to write property 'Focus'. LibUsb returned {}", ret);
         return false;
     }
     else
     {
-        tcam_debug("Gain value: %u written", value);
+        SPDLOG_DEBUG("Gain value: {} written", value);
     }
     return true;
 }
@@ -689,7 +689,7 @@ bool AFU420Device::set_shutter (bool open)
 
     if (ret < 0)
     {
-        tcam_error("Could not write Shutter flag.");
+        SPDLOG_ERROR("Could not write Shutter flag.");
         return false;
     }
     return true;
@@ -703,7 +703,7 @@ bool AFU420Device::get_shutter ()
 
     if (ret < 0)
     {
-        tcam_error("Could not write Shutter flag.");
+        SPDLOG_ERROR("Could not write Shutter flag.");
         return false;
     }
 
@@ -726,7 +726,7 @@ int64_t AFU420Device::get_hdr ()
 
     if (ret < 0)
     {
-        tcam_error("Could not read hdr. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not read hdr. Libusb returned {}", ret);
     }
 
     return value;
@@ -747,7 +747,7 @@ bool AFU420Device::set_hdr (int64_t hdr)
 
     if (ret < 0)
     {
-        tcam_error("Could not write hdr value. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not write hdr value. Libusb returned {}", ret);
         return false;
     }
     return true;
@@ -791,7 +791,7 @@ bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
 
     if (!((dValue >= 0.0) && (dValue <= (4.0 - (1.0 / 256.0)))))
     {
-        tcam_error("color gain is out of bounds %f", dValue);
+        SPDLOG_ERROR("color gain is out of bounds {}", dValue);
         return false;
     }
 
@@ -817,7 +817,7 @@ bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
 
     if (ret < 0)
     {
-        tcam_error("Could not read color gain value. Libsub returned %d", ret);
+        SPDLOG_ERROR("Could not read color gain value. Libsub returned {}", ret);
         return false;
     }
 
@@ -833,7 +833,7 @@ int AFU420Device::read_strobe (strobe_data& strobe)
 
     if (ret < 0)
     {
-        tcam_error("Could not read strobe. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not read strobe. Libusb returned {}", ret);
     }
     return ret;
 }
@@ -889,7 +889,7 @@ bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
 
     if (ret < 0)
     {
-        tcam_error("Could not write strobe. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not write strobe. Libusb returned {}", ret);
         return false;
     }
 
@@ -905,7 +905,7 @@ int64_t AFU420Device::get_ois_mode ()
 
     if (ret < 0)
     {
-        tcam_error("Could not read ois mode. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not read ois mode. Libusb returned {}", ret);
         return ret;
     }
     return mode;
@@ -918,7 +918,7 @@ bool AFU420Device::set_ois_mode (int64_t mode)
 
     if (ret < 0)
     {
-        tcam_error("Could not write ois mode. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not write ois mode. Libusb returned {}", ret);
 
         return false;
     }
@@ -938,7 +938,7 @@ bool AFU420Device::set_ois_pos (const int64_t& x_pos, const int64_t& y_pos)
 
     if (ret < 0)
     {
-        tcam_error("Could not write OIS position. Libusb returned %d", ret);
+        SPDLOG_ERROR("Could not write OIS position. Libusb returned {}", ret);
         return false;
     }
 

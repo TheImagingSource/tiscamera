@@ -34,7 +34,7 @@ Indexer::~Indexer ()
     }
     catch (const std::system_error& err)
     {
-        tcam_error("Unable to join thread. Exception: %s", err.what());
+        SPDLOG_ERROR("Unable to join thread. Exception: {}", err.what());
     }
 }
 
@@ -100,7 +100,7 @@ void Indexer::update_device_list_thread ()
 
             if (found == tmp_dev_list.end())
             {
-                tcam_info("Lost device %s - %s. Contacting callbacks",
+                SPDLOG_INFO("Lost device {} - {}. Contacting callbacks",
                            d.get_name().c_str(), d.get_serial().c_str());
                 lost_list.push_back(d);
             }
@@ -184,7 +184,7 @@ std::vector<DeviceInfo> Indexer::get_device_list () const
 void Indexer::register_device_lost (dev_callback cb,
                                     void* user_data)
 {
-    tcam_debug("Registered device lost callback");
+    SPDLOG_DEBUG("Registered device lost callback");
 
     std::lock_guard<std::mutex> lock(mtx_);
     callbacks_.push_back({cb, user_data, ""});
@@ -195,7 +195,7 @@ void Indexer::register_device_lost (dev_callback cb,
                                     void* user_data,
                                     const std::string& serial)
 {
-    tcam_debug("Registered device lost callback for %s", serial.c_str());
+    SPDLOG_DEBUG("Registered device lost callback for {}", serial.c_str());
     std::lock_guard<std::mutex> lock(mtx_);
     callbacks_.push_back({cb, user_data, serial});
 }

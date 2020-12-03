@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(PugiXml)
+add_subdirectory(PugiXml EXCLUDE_FROM_ALL)
+
+add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
 include(ExternalProject)
 

@@ -61,7 +61,7 @@ Property& Property::operator= (const Property& other)
 
 void Property::reset ()
 {
-    tcam_log(TCAM_LOG_INFO, "Resetting property to initial values.");
+    SPDLOG_INFO("Resetting property to initial values.");
     prop = ref_prop;
 
     notify_impl();
@@ -540,7 +540,7 @@ void Property::notify_impl ()
     }
     else
     {
-        tcam_log(TCAM_LOG_ERROR, "PropertyImpl expired. Property %s is corrupted.", this->get_name().c_str());
+        SPDLOG_ERROR("PropertyImpl expired. Property {} is corrupted.", this->get_name().c_str());
     }
 }
 

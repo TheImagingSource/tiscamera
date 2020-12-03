@@ -125,7 +125,7 @@ const char* tcam::fourcc2description (uint32_t fourcc)
         }
     }
 
-    tcam_info("No string for fourcc 0x%x", fourcc);
+    SPDLOG_INFO("No string for fourcc {:x}", fourcc);
 
     return "";
 }

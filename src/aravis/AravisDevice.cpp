@@ -116,7 +116,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
         {
             // alternative failed
             // return empty vector and let format handle it
-            tcam_error("Unable to determine what framerate settings are used.");
+            SPDLOG_ERROR("Unable to determine what framerate settings are used.");
             return ret;
         }
 
@@ -139,7 +139,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
         return ret;
     }
 
-    tcam_trace("Queried: %dx%d fourcc %d Received min: %f max %f", s.width, s.height, pixelformat, min, max);
+    SPDLOG_TRACE("Queried: {}x{} fourcc {} Received min: {} max {}", s.width, s.height, pixelformat, min, max);
 
     ret = create_steps_for_range(min, max);
 
@@ -158,7 +158,7 @@ AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     this->arv_camera = arv_camera_new (this->device.get_info().identifier, &err);
     if (err)
     {
-        tcam_error("Error while creating arv_camera: %s", err->message);
+        SPDLOG_ERROR("Error while creating arv_camera: {}", err->message);
         g_clear_error(&err);
     }
     if (this->arv_camera == NULL)
@@ -194,7 +194,7 @@ AravisDevice::~AravisDevice ()
 {
     if (arv_camera != NULL)
     {
-        tcam_log(TCAM_LOG_INFO, "Destroying arvcamera");
+        SPDLOG_INFO("Destroying arvcamera");
         g_object_unref (arv_camera);
         arv_camera = NULL;
     }
@@ -215,7 +215,7 @@ std::vector<std::shared_ptr<Property>> AravisDevice::getProperties ()
     {
         vec.push_back(p.prop);
     }
-    tcam_log(TCAM_LOG_DEBUG, "Returning %d properties", vec.size());
+    SPDLOG_DEBUG("Returning {} properties", vec.size());
 
     return vec;
 }
@@ -245,14 +245,14 @@ bool AravisDevice::set_property (const Property& p)
     {
         case Property::INTEGER:
         {
-            tcam_debug("Integer %s: %d",
+            SPDLOG_DEBUG("Integer {}: {}",
                        pm->arv_ident.c_str(),
                        ((PropertyInteger&) p).get_value());
 
             arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), ((PropertyInteger&) p).get_value(), &err);
             if (err)
             {
-                tcam_error("Unable to set integer: %s", err->message);
+                SPDLOG_ERROR("Unable to set integer: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -261,11 +261,11 @@ bool AravisDevice::set_property (const Property& p)
         }
         case Property::INTSWISSKNIFE:
         {
-            tcam_debug("Swissknife");
+            SPDLOG_DEBUG("Swissknife");
             arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), ((PropertyInteger&) (p)).get_value(), &err);
             if (err)
             {
-                tcam_error("Unable to set Swissknife: %s", err->message);
+                SPDLOG_ERROR("Unable to set Swissknife: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -285,14 +285,14 @@ bool AravisDevice::set_property (const Property& p)
                 d = ((PropertyDouble&) (p)).get_value();
             }
 
-            tcam_debug("Sending property change for (float) %s %f",
+            SPDLOG_DEBUG("Sending property change for (float) {} {}",
                        p.get_name().c_str(), d);
             arv_device_set_float_feature_value(_device, pm->arv_ident.c_str(),
                                                d,
                                                &err);
             if (err)
             {
-                tcam_error("Unable to set float: %s", err->message);
+                SPDLOG_ERROR("Unable to set float: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -308,7 +308,7 @@ bool AravisDevice::set_property (const Property& p)
 
             if (err)
             {
-                tcam_error("Unable to set button/command: %s", err->message);
+                SPDLOG_ERROR("Unable to set button/command: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -317,7 +317,7 @@ bool AravisDevice::set_property (const Property& p)
         }
         case Property::BOOLEAN:
         {
-            tcam_debug("Bool %s", pm->arv_ident.c_str());
+            SPDLOG_DEBUG("Bool {}", pm->arv_ident.c_str());
             if (((PropertyBoolean&) p).get_value())
             {
                 arv_device_set_integer_feature_value(_device, pm->arv_ident.c_str(), 1, &err);
@@ -329,7 +329,7 @@ bool AravisDevice::set_property (const Property& p)
 
             if (err)
             {
-                tcam_error("Unable to set bool: %s", err->message);
+                SPDLOG_ERROR("Unable to set bool: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -353,7 +353,7 @@ bool AravisDevice::set_property (const Property& p)
 
                  if (err)
                  {
-                     tcam_error("Unable to set enum: %s", err->message);
+                     SPDLOG_ERROR("Unable to set enum: {}", err->message);
                      g_clear_error(&err);
                      break;
                  }
@@ -381,7 +381,7 @@ bool AravisDevice::set_property (const Property& p)
 
                         if (err)
                         {
-                            tcam_error("Unable to set enum: %s", err->message);
+                            SPDLOG_ERROR("Unable to set enum: {}", err->message);
                             g_clear_error(&err);
                         }
                         break;
@@ -392,12 +392,12 @@ bool AravisDevice::set_property (const Property& p)
             {
                 std::string val = ((PropertyEnumeration&) p).get_value();
 
-                tcam_debug("Setting '%s' to '%s'", pm->arv_ident.c_str(), val.c_str());
+                SPDLOG_DEBUG("Setting '{}' to '{}'", pm->arv_ident.c_str(), val.c_str());
                 arv_device_set_string_feature_value(_device, pm->arv_ident.c_str(), val.c_str(), &err);
 
                 if (err)
                 {
-                    tcam_error("Unable to set enum: %s", err->message);
+                    SPDLOG_ERROR("Unable to set enum: {}", err->message);
                     g_clear_error(&err);
                     break;
                 }
@@ -408,7 +408,7 @@ bool AravisDevice::set_property (const Property& p)
         case Property::UNDEFINED:
         default:
         {
-            tcam_error("%s NOT SUPPORTED!!!", p.get_name().c_str());
+            SPDLOG_ERROR("{} NOT SUPPORTED!!!", p.get_name().c_str());
             break;
         }
     }
@@ -441,14 +441,14 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                          &err);
             if (err)
             {
-                tcam_error("Unable to retrieve bool: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve bool: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
 
             if (b < 0 || b > 1)
             {
-                tcam_error("WHA? %s %d", mapping.arv_ident.c_str(), b);
+                SPDLOG_ERROR("Bool has undefined internal value {} {}", mapping.arv_ident.c_str(), b);
             }
             auto struc = p->get_struct();
 
@@ -465,7 +465,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                              &err));
             if (err)
             {
-                tcam_error("Unable to retrieve enum/string: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve enum/string: {}", err->message);
                 g_clear_error(&err);
             }
             break;
@@ -478,7 +478,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                          &err);
             if (err)
             {
-                tcam_error("Unable to retrieve integer: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve integer: {}", err->message);
                 g_clear_error(&err);
                 break;
             }
@@ -498,7 +498,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                               &err);
                 if (err)
                 {
-                    tcam_error("Unable to retrieve float: %s", err->message);
+                    SPDLOG_ERROR("Unable to retrieve float: {}", err->message);
                     g_clear_error(&err);
                     break;
                 }
@@ -517,7 +517,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
                                                               &err);
                 if (err)
                 {
-                    tcam_error("Unable to retrieve float: %s", err->message);
+                    SPDLOG_ERROR("Unable to retrieve float: {}", err->message);
                     g_clear_error(&err);
                     break;
                 }
@@ -542,7 +542,7 @@ void AravisDevice::update_property (struct property_mapping& mapping)
 
 bool AravisDevice::set_video_format (const VideoFormat& new_format)
 {
-    tcam_debug("Setting format to '%s'", new_format.to_string().c_str());
+    SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string().c_str());
     GError* err = nullptr;
 
     // // arv_camera_set_frame_rate overwrites TriggerSelector and TriggerMode
@@ -563,7 +563,7 @@ bool AravisDevice::set_video_format (const VideoFormat& new_format)
 
     if (err)
     {
-        tcam_error("Unable to set pixel format: %s", err->message);
+        SPDLOG_ERROR("Unable to set pixel format: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -578,7 +578,7 @@ bool AravisDevice::set_video_format (const VideoFormat& new_format)
                           new_format.get_size().width, new_format.get_size().height, &err);
     if (err)
     {
-        tcam_error("Unable to set region: %s", err->message);
+        SPDLOG_ERROR("Unable to set region: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -603,14 +603,14 @@ void AravisDevice::determine_active_video_format ()
 
     if (err)
     {
-        tcam_error("Unable to retrieve frame rate: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve frame rate: {}", err->message);
         g_clear_error(&err);
     }
 
     active_video_format.set_fourcc(aravis2fourcc(arv_camera_get_pixel_format(this->arv_camera, &err)));
     if (err)
     {
-        tcam_error("Unable to retrieve pixel format: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve pixel format: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -619,7 +619,7 @@ void AravisDevice::determine_active_video_format ()
 
     if (err)
     {
-        tcam_error("Unable to retrieve region: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve region: {}", err->message);
         g_clear_error(&err);
         return;
     }
@@ -662,7 +662,7 @@ bool AravisDevice::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>
 
     if (err)
     {
-        tcam_error("Unable to retrieve payload: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve payload: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -698,7 +698,7 @@ void AravisDevice::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
     {
         if (b.buffer == buffer)
         {
-            //tcam_log(TCAM_LOG_DEBUG, "Returning buffer to aravis.");
+            //SPDLOG_DEBUG("Returning buffer to aravis.");
             arv_stream_push_buffer(this->stream, b.arv_buffer);
             b.is_queued = true;
         }
@@ -710,13 +710,13 @@ bool AravisDevice::start_stream ()
 {
     if (arv_camera == nullptr)
     {
-        tcam_log(TCAM_LOG_ERROR, "ArvCamera missing!");
+        SPDLOG_ERROR("ArvCamera missing!");
         return false;
     }
 
     if (buffers.size() < 2)
     {
-        tcam_log(TCAM_LOG_ERROR, "Need at least two buffers.");
+        SPDLOG_ERROR("Need at least two buffers.");
         return false;
     }
 
@@ -734,16 +734,16 @@ bool AravisDevice::start_stream ()
                 {
                     if (!arv_make_thread_high_priority(-10))
                     {
-                        tcam_warning("Unable to make aravis capture thread real time or high priority");
+                        SPDLOG_WARN("Unable to make aravis capture thread real time or high priority");
                     }
                     else
                     {
-                        tcam_warning("Aravis capture thread is running in high priority mode");
+                        SPDLOG_WARN("Aravis capture thread is running in high priority mode");
                     }
                 }
                 else
                 {
-                    tcam_info("Aravis capture thread is running as a real time thread");
+                    SPDLOG_INFO("Aravis capture thread is running as a real time thread");
                 }
             }
         };
@@ -754,14 +754,14 @@ bool AravisDevice::start_stream ()
 
     if (err)
     {
-        tcam_error("Unable to create stream: %s", err->message);
+        SPDLOG_ERROR("Unable to create stream: {}", err->message);
         g_clear_error(&err);
         return false;
     }
 
     if (this->stream == nullptr)
     {
-        tcam_error("Unable to create ArvStream.");
+        SPDLOG_ERROR("Unable to create ArvStream.");
         return false;
     }
 
@@ -795,7 +795,7 @@ bool AravisDevice::start_stream ()
 
     if (err)
     {
-        tcam_error("Unable to set acquisition mode: %s", err->message);
+        SPDLOG_ERROR("Unable to set acquisition mode: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -804,13 +804,13 @@ bool AravisDevice::start_stream ()
 
     g_signal_connect (stream, "new-buffer", G_CALLBACK (callback), this);
 
-    tcam_info("Starting actual stream...");
+    SPDLOG_INFO("Starting actual stream...");
 
     arv_camera_start_acquisition(this->arv_camera, &err);
 
     if (err)
     {
-        tcam_error("Unable to start stream: %s", err->message);
+        SPDLOG_ERROR("Unable to start stream: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -833,7 +833,7 @@ bool AravisDevice::stop_stream ()
 
     if (err)
     {
-        tcam_error("Unable to stop stream: %s", err->message);
+        SPDLOG_ERROR("Unable to stop stream: {}", err->message);
         g_clear_error(&err);
         return false;
     }
@@ -861,7 +861,7 @@ void AravisDevice::determine_packet_request_ratio ()
     }
     catch (...)
     {
-        tcam_warning("Unable to interpret the value for TCAM_ARV_PACKET_REQUEST_RATIO. Falling back to default value.");
+        SPDLOG_WARN("Unable to interpret the value for TCAM_ARV_PACKET_REQUEST_RATIO. Falling back to default value.");
     }
 
     if (eps <= 0.0 || eps > 1.0)
@@ -887,7 +887,7 @@ void AravisDevice::auto_set_packet_size ()
     }
     catch (...)
     {
-        tcam_warning("Unable to interpret the value for TCAM_GIGE_PACKET_SIZE. Falling back to default values.");
+        SPDLOG_WARN("Unable to interpret the value for TCAM_GIGE_PACKET_SIZE. Falling back to default values.");
     }
 
     GError* err = nullptr;
@@ -897,22 +897,22 @@ void AravisDevice::auto_set_packet_size ()
         guint packet_size = arv_camera_gv_auto_packet_size(this->arv_camera, &err);
         if (err)
         {
-            tcam_error("Unable to determine auto packet size: %s", err->message);
+            SPDLOG_ERROR("Unable to determine auto packet size: {}", err->message);
             g_clear_error(&err);
             return;
         }
-        tcam_info("Automatically set packet size to %u bytes", packet_size);
+        SPDLOG_INFO("Automatically set packet size to {} bytes", packet_size);
     }
     else
     {
         arv_camera_gv_set_packet_size(arv_camera, eps, &err);
         if (err)
         {
-            tcam_error("Unable to set packet size: %s", err->message);
+            SPDLOG_ERROR("Unable to set packet size: {}", err->message);
             g_clear_error(&err);
             return;
         }
-        tcam_info("Set packet size according to environment to: %d", eps);
+        SPDLOG_INFO("Set packet size according to environment to: {}", eps);
     }
 }
 
@@ -922,7 +922,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
     AravisDevice* self = static_cast<AravisDevice*>(user_data);
     if (self == NULL)
     {
-        tcam_log(TCAM_LOG_ERROR, "Callback camera instance is NULL.");
+        SPDLOG_ERROR("Callback camera instance is NULL.");
         return;
     }
     if (self->stream == NULL)
@@ -938,7 +938,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
 
         if (status == ARV_BUFFER_STATUS_SUCCESS)
         {
-            tcam_trace("Received new buffer.");
+            SPDLOG_TRACE("Received new buffer.");
 
             self->statistics.capture_time_ns = arv_buffer_get_system_timestamp(buffer);
             self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
@@ -967,7 +967,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
                 }
                 else
                 {
-                    tcam_log(TCAM_LOG_ERROR, "ImageSink expired. Unable to deliver images.");
+                    SPDLOG_ERROR("ImageSink expired. Unable to deliver images.");
                     arv_stream_push_buffer(self->stream, buffer);
                     return;
                 }
@@ -1000,7 +1000,7 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
                         {
                             break;
                         }
-                        tcam_warning("Image has missing packets. Sending incomplete buffer as requested.");
+                        SPDLOG_WARN("Image has missing packets. Sending incomplete buffer as requested.");
                         self->statistics.capture_time_ns = arv_buffer_get_timestamp(buffer);
                         self->statistics.camera_time_ns = arv_buffer_get_timestamp(buffer);
                         self->statistics.frame_count++;
@@ -1063,27 +1063,10 @@ void AravisDevice::callback (ArvStream* stream __attribute__((unused)), void* us
             }
             arv_stream_push_buffer(self->stream, buffer);
         no_back_push:
-            tcam_log(TCAM_LOG_WARNING, msg.c_str());
+            SPDLOG_WARN(msg.c_str());
         }
     }
-    else
-    {
-        // switch (type)
-        // {
-        // case ARV_STREAM_CALLBACK_TYPE_INIT:
-        // // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: thread initialization", source->mClassName.c_str());
-        // break;
-        // case ARV_STREAM_CALLBACK_TYPE_EXIT:
-        // // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: thread end", source->mClassName.c_str());
-        // break;
-        //case ARV_STREAM_CALLBACK_TYPE_START_BUFFER:
-        // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: buffer filling start", source->mClassName.c_str());
-        // break;
-        //case ARV_STREAM_CALLBACK_TYPE_BUFFER_DONE:
-        // g_log(NULL, G_LOG_LEVEL_DEBUG, "%s - Stream callback: buffer filled", source->mClassName.c_str());
-        // break;
-        // }
-    }
+
 
 }
 
@@ -1234,7 +1217,7 @@ void AravisDevice::iterate_genicam (const char* feature)
 
             if (m.prop == nullptr)
             {
-                tcam_log(TCAM_LOG_ERROR, "Property '%s' is null", m.arv_ident.c_str());
+                SPDLOG_ERROR("Property '{}' is null", m.arv_ident.c_str());
                 return;
             }
 
@@ -1314,7 +1297,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             childs = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION(*binning_node));
             if (err)
             {
-                tcam_error("Unable to retrieve enum entries: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve enum entries: {}", err->message);
                 g_clear_error(&err);
 
             }
@@ -1363,7 +1346,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max, &err);
     if (err)
     {
-        tcam_error("Unable to retrieve width bounds: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -1371,7 +1354,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
     if (err)
     {
-        tcam_error("Unable to retrieve height bounds: %s", err->message);
+        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
         g_clear_error(&err);
     }
 
@@ -1394,7 +1377,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
         if (err)
         {
-            tcam_error("Unable to retrieve available pixel formats: %s", err->message);
+            SPDLOG_ERROR("Unable to retrieve available pixel formats: {}", err->message);
             g_clear_error(&err);
         }
 
@@ -1403,13 +1386,13 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
         if (err)
         {
-            tcam_error("Unable to retrieve pixel format description strings: %s", err->message);
+            SPDLOG_ERROR("Unable to retrieve pixel format description strings: {}", err->message);
             g_clear_error(&err);
         }
 
         if ( n_formats != n2_formats )
         {
-            tcam_log ( TCAM_LOG_ERROR, "Format retrieval encountered nonsensical information" );
+            SPDLOG_ERROR("Format retrieval encountered nonsensical information" );
         }
 
         for (unsigned int i = 0; i < n_formats; ++i)
@@ -1422,7 +1405,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
 
             if (desc.fourcc == 0)
             {
-                tcam_log(TCAM_LOG_ERROR, "Input format no supported! \"%x\" - %s", format_ptr[i], format_str[i]);
+                SPDLOG_ERROR("Input format no supported! \"{:x}\" - {}", format_ptr[i], format_str[i]);
                 continue;
             }
 
@@ -1451,7 +1434,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
             std::vector<struct framerate_mapping> res_vec;
             res_vec.push_back(rf);
 
-            tcam_log(TCAM_LOG_DEBUG, "Adding format desc: %s (%x) ", desc.description, desc.fourcc);
+            SPDLOG_DEBUG("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
 
             this->available_videoformats.push_back ( VideoFormatDescription (format_handler, desc, res_vec ) );
 
@@ -1459,7 +1442,7 @@ void AravisDevice::index_genicam_format (ArvGcNode* /* node */ )
     }
     else
     {
-        tcam_error("NO PixelFormat Node");
+        SPDLOG_ERROR("NO PixelFormat Node");
     }
 
     // reset format to settings before indexing

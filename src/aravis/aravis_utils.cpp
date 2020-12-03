@@ -77,7 +77,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else
     {
-        tcam_error("%s has unknown node type '%s'", feature, node_type);
+        SPDLOG_ERROR("{} has unknown node type '{}'", feature, node_type);
         return nullptr;
     }
 
@@ -93,7 +93,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
-        tcam_warning("Unable to find std property. Passing raw property identifier through. %s", feature);
+        SPDLOG_WARN("Unable to find std property. Passing raw property identifier through. {}", feature);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(prop.name, feature, sizeof(prop.name));
@@ -140,8 +140,6 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                 {
                     if (strcmp(arv_dom_node_get_node_name((ArvDomNode*) iter->data), "EnumEntry") == 0)
                     {
-                        // tcam_log(TCAM_LOG_DEBUG, "    Adding enum entry: '%s' %s", arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data));
-
                         var.emplace(arv_gc_feature_node_get_name((ArvGcFeatureNode*) iter->data), var.size());
                     }
                 }
@@ -153,21 +151,21 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             if (err)
             {
-                tcam_error("Unable to retrieve aravis string: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis string: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
 
             if (!current_value)
             {
-                tcam_error("The current value of %s is NULL. Ignoring", prop.name);
+                SPDLOG_ERROR("The current value of {} is NULL. Ignoring", prop.name);
                 return nullptr;
             }
 
             prop.value.i.value = var.at(current_value);
             prop.value.i.default_value = prop.value.i.value;
 
-            tcam_log(TCAM_LOG_DEBUG, "Returning EnumerationProperty for %s", prop.name);
+            SPDLOG_DEBUG("Returning EnumerationProperty for {}", prop.name);
 
             return std::make_shared<PropertyEnumeration>(impl, prop, var, type);
         }
@@ -175,7 +173,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         {
             prop.type = TCAM_PROPERTY_TYPE_INTEGER;
 
-            tcam_log(TCAM_LOG_DEBUG, "Returning IntegerProperty for %s", prop.name);
+            SPDLOG_DEBUG("Returning IntegerProperty for {}", prop.name);
 
             return  std::make_shared<PropertyInteger>(impl, prop, type);
         }
@@ -204,9 +202,8 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             if (var.size() != 2)
             {
-                tcam_log(TCAM_LOG_ERROR,
-                         "'%s' has more values that expected and can not be properly mapped.",
-                         prop.name);
+                SPDLOG_ERROR("'{}' has more values that expected and can not be properly mapped.",
+                           prop.name);
                 return std::make_shared<PropertyBoolean>(impl, prop, type);
             }
 
@@ -216,7 +213,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             if (err)
             {
-                tcam_error("Unable to retrieve aravis string: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis string: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -233,7 +230,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
             // prop.value.b.value = var.at(current_value);
             prop.value.b.default_value = prop.value.b.value;
 
-            tcam_log(TCAM_LOG_DEBUG, "Returning BooleanProperty for %s", prop.name);
+            SPDLOG_DEBUG("Returning BooleanProperty for {}", prop.name);
 
             return std::make_shared<PropertyBoolean>(impl, prop, type);
         }
@@ -257,7 +254,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                                       &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis int: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis int: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -272,7 +269,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                   &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis int bounds: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis int bounds: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -289,7 +286,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                                       &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis int: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis int: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -305,7 +302,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                   &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis integer bounds: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis integer bounds: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -317,7 +314,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         }
         else
         {
-            tcam_log(TCAM_LOG_ERROR, "\n\nBAD");
+            SPDLOG_ERROR("\n\nBAD");
         }
 
         // ctrl.value.i.value = arv_device_get_integer_feature_value(arv_camera_get_device(camera), feature);
@@ -331,11 +328,6 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     }
     else if (strcmp(node_type, "IntSwissKnife") == 0)
     {
-        // printf ("%s: '%s'%s\n",
-        //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),
-        //         feature,
-        //         arv_gc_feature_node_is_available (ARV_GC_FEATURE_NODE (node), NULL) ? "" : " (Not available)");
-
     }
     else if (strcmp(node_type, "Float") == 0)
     {
@@ -347,7 +339,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                                     &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis float: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis float: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -364,7 +356,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
 
             if (err)
             {
-                tcam_error("Unable to retrieve aravis float bounds: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis float bounds: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -385,7 +377,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                 &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis float bounds: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis float bounds: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -394,7 +386,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                                     &err);
             if (err)
             {
-                tcam_error("Unable to retrieve aravis float: %s", err->message);
+                SPDLOG_ERROR("Unable to retrieve aravis float: {}", err->message);
                 g_clear_error(&err);
                 return nullptr;
             }
@@ -422,7 +414,7 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
                                                                   &err);
         if (err)
         {
-            tcam_error("Unable to retrieve aravis bool: %s", err->message);
+            SPDLOG_ERROR("Unable to retrieve aravis bool: {}", err->message);
             g_clear_error(&err);
             return nullptr;
         }
@@ -436,11 +428,6 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
     {
         // ignore them
 
-        // printf ("== %s: '%s' (ignored)\n",
-        //         arv_dom_node_get_node_name (ARV_DOM_NODE (node)),
-        //         feature);
-
-
         if (type_to_use == TCAM_PROPERTY_TYPE_BUTTON)
         {
             prop.type = TCAM_PROPERTY_TYPE_BUTTON;
@@ -449,12 +436,12 @@ std::shared_ptr<Property> tcam::create_property (ArvCamera* camera,
         }
         else
         {
-            tcam_log(TCAM_LOG_DEBUG,"Unknown property conversion required");
+            SPDLOG_DEBUG("Unknown property conversion required");
         }
     }
     else
     {
-        tcam_log(TCAM_LOG_WARNING, "Unknown Control '%s'", feature);
+        SPDLOG_WARN("Unknown Control '{}'", feature);
     }
 
     return nullptr;
@@ -561,7 +548,7 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
 
     if (!is_running)
     {
-        tcam_log( TCAM_LOG_ERROR, "Could not find gige-daemon. Using internal methods" );
+        SPDLOG_ERROR("Could not find gige-daemon. Using internal methods" );
         return get_aravis_device_list();
     }
 
@@ -571,9 +558,9 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     int shmid = shmget( shmkey, sizeof( struct tcam_gige_device_list ), 0644 );
     if (shmid < 0)
     {
-        tcam_log(TCAM_LOG_ERROR, "Unable to connect to gige-daemon. Using internal methods");
+        SPDLOG_ERROR("Unable to connect to gige-daemon. Using internal methods");
         auto vec = get_aravis_device_list();
-        tcam_log(TCAM_LOG_ERROR, "Aravis gave us %d", vec.size());
+        SPDLOG_ERROR("Aravis gave us {}", vec.size());
         return vec;
     }
 
@@ -644,7 +631,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
         }
         else
         {
-            tcam_log(TCAM_LOG_WARNING, "Unable to determine model name.");
+            SPDLOG_WARN("Unable to determine model name.");
         }
 
         strcpy(info.serial_number, arv_get_device_serial_nbr(i));
