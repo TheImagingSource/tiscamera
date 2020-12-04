@@ -173,6 +173,8 @@ private:
 
     void lost_device ();
 
+    void update_stream_timeout ();
+
     /**
      * @brief iterate over all v4l2 format descriptions and convert them
      *        into the internal representation
@@ -215,6 +217,8 @@ private:
         std::shared_ptr<ImageBuffer> buffer;
         bool is_queued;
     };
+
+    std::atomic<int> stream_timeout_sec_ {10};
 
     // std::vector<std::shared_ptr<ImageBuffer>> buffers;
     std::vector<buffer_info> buffers;

@@ -491,6 +491,24 @@ void V4l2Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 }
 
 
+void V4l2Device::update_stream_timeout ()
+{
+    for (const auto& p : property_handler->properties)
+    {
+        if (p.prop->get_name() == "Exposure Time (us)" ||
+            p.prop->get_name() == "ExposureTime" ||
+            p.prop->get_name() == "Exposure Time" || // uses µs
+            p.prop->get_name() == "Exposure")
+        {
+            stream_timeout_sec_ = (p.prop->get_struct().value.i.value / 1000000) + 2;
+            break;
+        }
+    }
+    tcam_debug("Setting stream timeout to %d", stream_timeout_sec_.load());
+
+}
+
+
 bool V4l2Device::start_stream ()
 {
     init_userptr_buffers();
@@ -505,6 +523,8 @@ bool V4l2Device::start_stream ()
     statistics = {};
 
     is_stream_on = true;
+
+    update_stream_timeout();
 
     tcam_log(TCAM_LOG_INFO, "Starting stream in work thread.");
     this->work_thread = std::thread(&V4l2Device::stream, this);
@@ -1309,6 +1329,16 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     TCAM_PROPERTY_TYPE type = prop_desc.prop->get_type();
 
+    const std::string name = prop_desc.prop->get_name();
+
+    if (name == "Exposure" ||
+        name == "ExposureTime" ||
+        name == "Exposure Time" ||
+        name == "Exposure Time (us)")
+    {
+        update_stream_timeout();
+    }
+
     if (type == TCAM_PROPERTY_TYPE_STRING ||
         type == TCAM_PROPERTY_TYPE_UNKNOWN ||
         type == TCAM_PROPERTY_TYPE_DOUBLE)
@@ -1365,6 +1395,14 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 void V4l2Device::stream ()
 {
     int lost_countdown = 0;
+    // period elapsed for current image
+    int waited_seconds = 0;
+    // maximum_waiting period
+    // do not compare waited_seconds with stream_timeout_sec_ directly
+    // stream_timeout_sec_ may be set to low values while we are
+    // still waiting for a long exposure image
+    // still 'step in between' prevents such errors
+    int waiting_period = stream_timeout_sec_;
 
     while (this->is_stream_on)
     {
@@ -1373,9 +1411,11 @@ void V4l2Device::stream ()
         FD_ZERO(&fds);
         FD_SET(fd, &fds);
 
+        int select_timeout = 2;
+
         /* Timeout. */
         struct timeval tv;
-        tv.tv_sec = 2;
+        tv.tv_sec = select_timeout;
         tv.tv_usec = 0;
 
         /* Wait until device gives go */
@@ -1384,7 +1424,7 @@ void V4l2Device::stream ()
         {
             if (errno == EINTR)
             {
-                continue;   // intermittent wake, continue 
+                continue;   // intermittent wake, continue
             }
             else
             {
@@ -1406,10 +1446,17 @@ void V4l2Device::stream ()
                 continue;   // timeout while trigger is enabled, just continue
             }
 
-            tcam_log(TCAM_LOG_ERROR, "Timeout while waiting for new image buffer.");
-            statistics.frames_dropped++;
-
-            lost_countdown--;
+            if (waited_seconds < waiting_period)
+            {
+                waited_seconds += select_timeout;
+            }
+            else
+            {
+                tcam_error("Timeout while waiting for new image buffer.");
+                statistics.frames_dropped++;
+                waited_seconds = 0;
+                lost_countdown--;
+            }
         }
         else
         {
@@ -1422,6 +1469,7 @@ void V4l2Device::stream ()
             {
                 lost_countdown--;
             }
+            waiting_period = stream_timeout_sec_;
         }
         if( lost_countdown <= 0 )
         {
