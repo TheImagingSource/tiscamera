@@ -104,7 +104,7 @@ Logger::Logger ():
 
     spdlog::set_error_handler([](const std::string& msg)
     {
-        std::cerr << "my err handler: " << msg << std::endl;
+        SPDLOG_ERROR("Error while handling logging message: {}", msg);
     });
 
     char b[1024];
