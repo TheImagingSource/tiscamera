@@ -58,7 +58,7 @@ add_custom_command(
   -I${TCAM_SOURCE_DIR}/src
   -I${CMAKE_CURRENT_SOURCE_DIR}/
   --pkg=gobject-2.0
-  --library=tcamprop -L${TCAM_BINARY_DIR}/src/gobject
+  --library=tcamprop -L${TCAM_BINARY_DIR}/lib
   --output="${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
   )
 
@@ -70,7 +70,7 @@ add_custom_command(
   WORKING_DIRECTORY "${TCAM_BINARY_DIR}/src/gobject"
   COMMAND
   ${INTROSPECTION_COMPILER}
-  --includedir=${TCAM_BINARY_DIR}/src/gobject
+  --includedir=${TCAM_BINARY_DIR}/lib
   "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir"
   -o "${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.typelib"
   )

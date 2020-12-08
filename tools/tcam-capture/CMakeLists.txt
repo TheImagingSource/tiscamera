@@ -54,4 +54,9 @@ if (PYTHONINTERP_FOUND)
     DESTINATION "${TCAM_INSTALL_PYTHON3_MODULES}/tcam_capture"
     COMPONENT tcam-capture)
 
+  # add softlink to build dir
+  # this ensures tcam-capture works with env.sh
+  ADD_CUSTOM_TARGET(link_target ALL
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/tcam-capture ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tcam-capture)
+
 endif (PYTHONINTERP_FOUND)
