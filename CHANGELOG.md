@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Module configuration string to log and version info
+
+### Changed
+
+- aravis API version is now 0.8.
+  Please use external aravis installations.
+- output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
+
 ## [0.13.0] - 2020-11-23
 
 ### Added
@@ -27,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 11-device-state example
 - CMake switch `TCAM_BUILD_NO_GUI` to disable all gui build targets and dependency inclusions.
   See documenation for further details.
-- Build target `minimal` to build recommended minimal tiscamera build.
 - script dependency-manager as a way to improve dependency handling for users/packaging
 - conflicts, provides, replaces fields in Debian package description for `tiscamera-tcamprop`
 - dependency-manager - replacement for install-dependencies.sh
