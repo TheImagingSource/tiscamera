@@ -711,16 +711,24 @@ static gboolean open_source_element (GstTcamSrc* self)
 
     // query these as late as possible
     // src needs some time as things can happen async
-    g_object_get(G_OBJECT(self->active_source), "serial", &self->device_serial, NULL);
+    char* device_serial = nullptr;
+    g_object_get(G_OBJECT(self->active_source), "serial", &device_serial, NULL);
+    if( device_serial ) {
+        self->device_serial = device_serial;
+        g_free( device_serial );
+    } else {
+        self->device_serial = {};
+    }
 
     if (self->active_source == self->main_src)
     {
-        const char* type_str = nullptr;
+        char* type_str = nullptr;
         g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
 
         if (type_str)
         {
             self->device_type = tcam::tcam_device_from_string(type_str);
+            g_free( type_str );
         }
         else
         {
