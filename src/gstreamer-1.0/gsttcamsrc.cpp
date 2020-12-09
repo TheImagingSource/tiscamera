@@ -775,15 +775,6 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
         }
     }
 
-    gst_element_set_locked_state(element, TRUE);
-    ret = GST_ELEMENT_CLASS(gst_tcam_src_parent_class)->change_state(element, change);
-    gst_element_set_locked_state(element, FALSE);
-
-    if (ret == GST_STATE_CHANGE_FAILURE)
-    {
-        return ret;
-    }
-
     switch(change)
     {
         case GST_STATE_CHANGE_READY_TO_NULL:
