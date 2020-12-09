@@ -84,7 +84,7 @@ int tcam::tcam_xioctl (int fd, unsigned int request, void *arg)
 
     if (ret && (tries <= 0))
     {
-        SPDLOG_ERROR("ioctl (%i) retried %i times - giving up: {})\n",
+        SPDLOG_ERROR("ioctl ({}) retried {} times - giving up: {})\n",
                    request, IOCTL_RETRY, strerror(errno));
     }
 

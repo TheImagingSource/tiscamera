@@ -269,7 +269,7 @@ void PropertyHandler::generate_properties ()
     {
         handle_flags(p);
     }
-    SPDLOG_DEBUG("Created %zu properties", external_properties.size());
+    SPDLOG_DEBUG("Created {} properties", external_properties.size());
 }
 
 
