@@ -454,6 +454,13 @@ static gboolean gst_tcambin_create_source (GstTcamBin* self)
     self->data->device_serial = serial_from_src != nullptr ? serial_from_src : std::string();
     self->data->device_type = type_from_src != nullptr ? type_from_src : std::string();
 
+    if( serial_from_src ) {
+        g_free( serial_from_src );
+    }
+    if( type_from_src ) {
+        g_free( type_from_src );
+    }
+
     GST_INFO_OBJECT( self, "Opened device has serial: '%s' type: '%s'", self->data->device_serial.c_str(), self->data->device_type.c_str() );
 
     self->data->src_caps = gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
