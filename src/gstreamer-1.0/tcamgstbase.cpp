@@ -1296,6 +1296,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                 return ret;
             }
         }
+        gst_object_unref(bayer_transform);
     }
 
     GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
@@ -1347,7 +1348,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
 
         // fall through so that other conversion can be tested
     }
-    gst_object_unref(debayer);
 
     GstElementFactory* convert = gst_element_factory_find("videoconvert");
 

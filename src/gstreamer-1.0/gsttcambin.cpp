@@ -545,6 +545,14 @@ static gboolean create_and_add_element (GstElement** element,
                                         const char* element_name,
                                         GstBin* bin)
 {
+    auto factory = gst_element_factory_find(factory_name);
+
+    if (!factory)
+    {
+        return FALSE;
+    }
+    gst_object_unref(factory);
+
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
     {

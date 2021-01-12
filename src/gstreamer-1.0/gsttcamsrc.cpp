@@ -807,15 +807,26 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     new (&self->device_serial) std::string("");
     self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
 
-    self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
-    if (self->main_src != nullptr)
+    auto mainsrc_fact = gst_element_factory_find("tcammainsrc");
+    if (mainsrc_fact)
     {
-        self->source_list = g_slist_append( self->source_list, self->main_src );
+        self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
+        if (self->main_src != nullptr)
+        {
+            self->source_list = g_slist_append( self->source_list, self->main_src );
+        }
+        gst_object_unref(mainsrc_fact);
     }
-    self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
-    if (self->pimipi_src != nullptr)
+
+    auto pimipi_fact = gst_element_factory_find("tcampimipisrc");
+    if (pimipi_fact)
     {
-        self->source_list = g_slist_append( self->source_list, self->pimipi_src );
+        self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
+        if (self->pimipi_src != nullptr)
+        {
+            self->source_list = g_slist_append( self->source_list, self->pimipi_src );
+        }
+        gst_object_unref(pimipi_fact);
     }
 
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
