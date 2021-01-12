@@ -1345,7 +1345,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         gst_object_unref(convert);
         gst_object_unref(debayer);
 
-        return nullptr;
+        // fall through so that other conversion can be tested
     }
     gst_object_unref(debayer);
 
