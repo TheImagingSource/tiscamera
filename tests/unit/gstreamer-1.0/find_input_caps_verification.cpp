@@ -81,6 +81,7 @@ int main (int argc, char* argv[])
     bool requires_dutils;
     bool dutils_expected = false;
     bool use_dutils = false;
+    bool use_by1xtransform = false;
 
     const char* src_caps_str = "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};";
     const char* sink_caps_str = "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1";
@@ -98,7 +99,8 @@ int main (int argc, char* argv[])
                                            requires_bayer,
                                            requires_videoconvert,
                                            requires_jpegdec, requires_dutils,
-                                           use_dutils);
+                                           use_dutils,
+                                           use_by1xtransform);
 
 
 

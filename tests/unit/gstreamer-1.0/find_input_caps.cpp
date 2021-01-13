@@ -78,6 +78,7 @@ TEST_CASE("find_input_caps")
             bool requires_jpegdec;
             bool requires_dutils;
             bool use_dutils = entry.use_dutils;
+            bool use_by1xtransform = false;
             // bool use_dutils = false;
 
             GstCaps* result_caps = find_input_caps(src_caps,
@@ -86,7 +87,8 @@ TEST_CASE("find_input_caps")
                                                    requires_bayer,
                                                    requires_videoconvert,
                                                    requires_jpegdec, requires_dutils,
-                                                   use_dutils);
+                                                   use_dutils,
+                                                   use_by1xtransform);
 
             if (result_caps)
             {

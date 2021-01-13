@@ -72,6 +72,12 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc);
 
 
 
+bool tcam_gst_contains_mono_10_bit (const GstCaps* caps);
+
+
+bool tcam_gst_contains_mono_12_bit (const GstCaps* caps);
+
+
 bool tcam_gst_contains_bayer_10_bit (const GstCaps* caps);
 
 
@@ -127,7 +133,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegconvert,
                           bool& requires_dutils,
-                          bool use_dutils
+                          bool use_dutils,
+                          bool use_by1xtransform
 );
 
 
