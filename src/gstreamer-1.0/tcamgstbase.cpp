@@ -1005,7 +1005,7 @@ bool tcam_gst_contains_mono_10_bit (const GstCaps* caps)
         return false;
     }
 
-    GstCaps* tmp = gst_caps_from_string("video/x-bayer, format={GRAY10, GRAY10, GRAY10, GRAY10,"
+    GstCaps* tmp = gst_caps_from_string("video/x-raw, format={GRAY10, GRAY10, GRAY10, GRAY10,"
                                         "GRAY10p, GRAY10p, GRAY10p, GRAY10p,"
                                         "GRAY10s, GRAY10s, GRAY10s, GRAY10s,"
                                         "GRAY10m, GRAY10m, GRAY10m, GRAY10m}");
@@ -1023,10 +1023,10 @@ bool tcam_gst_contains_mono_12_bit (const GstCaps* caps)
         return false;
     }
 
-    GstCaps* tmp = gst_caps_from_string("video/x-bayer, format={GRAY12, GRAY12, GRAY12, GRAY12,"
-                                                               "GRAY12p, GRAY12p, GRAY12p, GRAY12p,"
-                                                               "GRAY12s, GRAY12s, GRAY12s, GRAY12s,"
-                                                               "GRAY12m, GRAY12m, GRAY12m, GRAY12m}");
+    GstCaps* tmp = gst_caps_from_string("video/x-raw, format={GRAY12, GRAY12, GRAY12, GRAY12,"
+                                        "GRAY12p, GRAY12p, GRAY12p, GRAY12p,"
+                                        "GRAY12s, GRAY12s, GRAY12s, GRAY12s,"
+                                        "GRAY12m, GRAY12m, GRAY12m, GRAY12m}");
     gboolean ret =  gst_caps_can_intersect(caps, tmp);
     gst_caps_unref(tmp);
 
