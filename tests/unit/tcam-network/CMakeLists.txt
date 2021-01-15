@@ -6,4 +6,4 @@ add_executable(test-tcam-network main.cpp)
 
 target_link_libraries(test-tcam-network tcam-network)
 
-add_test(tcam-network test-tcam-network)
+add_tis_test(test-tcam-network)

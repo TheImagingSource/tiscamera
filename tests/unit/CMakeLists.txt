@@ -13,6 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+macro (add_tis_test test)
+  add_test (NAME ${test} COMMAND $<TARGET_FILE:${test}> WORKING_DIRECTORY ${TCAM_BINARY_DIR}/bin)
+endmacro (add_tis_test)
+
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
@@ -32,4 +37,4 @@ add_executable(test-main-lib ${test-main-src})
 
 target_link_libraries(test-main-lib tcam)
 
-add_test(main-lib test-main-lib)
+add_tis_test(test-main-lib)

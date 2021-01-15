@@ -55,12 +55,12 @@ target_link_libraries(test-gstreamer-1.0 ${GSTREAMER_BASE_LIBRARIES})
 target_link_libraries(test-gstreamer-1.0 ${GSTREAMER_VIDEO_LIBRARIES})
 target_link_libraries(test-gstreamer-1.0 ${GOBJECT_LIBRARIES})
 target_link_libraries(test-gstreamer-1.0 ${GLIB2_LIBRARIES})
-add_test(NAME gstreamer COMMAND test-gstreamer-1.0)
+add_tis_test(test-gstreamer-1.0)
 
 
 
 add_executable(find-input-caps-verification find_input_caps_verification.cpp)
-# add_test(gstreamer tcam-test-gstreamer-1.0)
+add_tis_test(find-input-caps-verification)
 
 target_link_libraries(find-input-caps-verification tcam)
 target_link_libraries(find-input-caps-verification tcamgstbase)
