@@ -115,6 +115,33 @@ bool contains_jpeg (const GstCaps* caps);
  */
 GstCaps* get_caps_from_element_name (const char* elementname, const char* padname);
 
+
+struct input_caps_required_modules
+{
+    bool bayertransform = false;
+    bool bayer2rgb = false;
+    bool videoconvert = false;
+    bool jpegdec = false;
+    bool dutils = false;
+
+    void reset()
+    {
+        bayertransform = false;
+        bayer2rgb = false;
+        videoconvert = false;
+        jpegdec = false;
+        dutils = false;
+    }
+};
+
+
+struct input_caps_toggles
+{
+    bool use_dutils = false;
+    bool use_by1xtransform = false;
+};
+
+
 /**
  * @param available_caps - caps the source offers
  * @param wanted_caps - caps the sink wants, if null available_caps will be returned
@@ -128,13 +155,8 @@ GstCaps* get_caps_from_element_name (const char* elementname, const char* padnam
  */
 GstCaps* find_input_caps (GstCaps* available_caps,
                           GstCaps* wanted_caps,
-                          bool& requires_bayertransform,
-                          bool& requires_bayer2rgb,
-                          bool& requires_vidoeconvert,
-                          bool& requires_jpegconvert,
-                          bool& requires_dutils,
-                          bool use_dutils,
-                          bool use_by1xtransform
+                          struct input_caps_required_modules& modules,
+                          struct input_caps_toggles toggles
 );
 
 

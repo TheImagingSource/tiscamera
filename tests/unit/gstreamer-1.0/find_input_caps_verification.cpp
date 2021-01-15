@@ -70,6 +70,9 @@ int main (int argc, char* argv[])
 
     bool test_succeeded = true;
 
+    struct input_caps_required_modules modules;
+    struct input_caps_toggles toggles;
+
     bool requires_bayertransform;
     bool bayertransform_expected = false;
     bool requires_bayer;
@@ -95,14 +98,8 @@ int main (int argc, char* argv[])
 
     GstCaps* result_caps = find_input_caps(src_caps,
                                            sink_caps,
-                                           requires_bayertransform,
-                                           requires_bayer,
-                                           requires_videoconvert,
-                                           requires_jpegdec, requires_dutils,
-                                           use_dutils,
-                                           use_by1xtransform);
-
-
+                                           modules,
+                                           toggles);
 
     if (!gst_caps_is_equal(result_caps, expected_caps))
     {

@@ -72,23 +72,13 @@ TEST_CASE("find_input_caps")
                 expected_output = gst_caps_from_string(entry.result.output_caps);
             }
 
-            bool requires_bayertransform;
-            bool requires_bayer;
-            bool requires_videoconvert;
-            bool requires_jpegdec;
-            bool requires_dutils;
-            bool use_dutils = entry.use_dutils;
-            bool use_by1xtransform = false;
-            // bool use_dutils = false;
+            struct input_caps_required_modules modules;
+            struct input_caps_toggles toggles;
 
             GstCaps* result_caps = find_input_caps(src_caps,
                                                    sink_caps,
-                                                   requires_bayertransform,
-                                                   requires_bayer,
-                                                   requires_videoconvert,
-                                                   requires_jpegdec, requires_dutils,
-                                                   use_dutils,
-                                                   use_by1xtransform);
+                                                   modules,
+                                                   toggles);
 
             if (result_caps)
             {
@@ -106,10 +96,10 @@ TEST_CASE("find_input_caps")
                 REQUIRE(result_caps == expected_output);
             }
 
-            REQUIRE(requires_bayer == entry.result.requires_bayer);
-            REQUIRE(requires_videoconvert == entry.result.requires_videoconvert);
-            REQUIRE(requires_jpegdec == entry.result.requires_jpegdec);
-            REQUIRE(requires_dutils == entry.result.requires_dutils);
+            REQUIRE(modules.bayer2rgb == entry.result.requires_bayer);
+            REQUIRE(modules.videoconvert == entry.result.requires_videoconvert);
+            REQUIRE(modules.jpegdec == entry.result.requires_jpegdec);
+            REQUIRE(modules.dutils == entry.result.requires_dutils);
 
             if (src_caps)
             {

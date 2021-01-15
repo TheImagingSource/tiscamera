@@ -20,6 +20,8 @@
 #include <gst/gst.h>
 #include <girepository.h>
 
+#include "tcamgstbase.h"
+
 #ifndef __cplusplus
 extern "C"
 {
@@ -63,13 +65,11 @@ struct _GstTcamBin
     gboolean target_set;
     gboolean must_apply_state;
 
-    bool needs_bayer_transform;
-    bool needs_debayer;
-    bool needs_videoconvert;
-    bool needs_jpegdec;
-    bool has_dutils;   // system has dutils
-    bool use_dutils;   // user wants dutils
-    bool needs_dutils; // pipeline needs dutils
+    gboolean has_dutils;
+
+    struct input_caps_required_modules modules;
+    struct input_caps_toggles toggles;
+
 };
 
 

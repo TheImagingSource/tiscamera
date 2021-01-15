@@ -613,7 +613,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
             GST_ERROR("%s", msg_string.c_str());
         };
 
-    if (self->has_dutils && self->use_dutils)
+    if (self->has_dutils && self->toggles.use_dutils)
     {
         if (!create_and_add_element(&self->dutils,
                                     "tcamdutils", "tcambin-dutils",
@@ -642,8 +642,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
 
-    if (contains_bayer( self->data->src_caps.get() )
-        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() )
+    if ((contains_bayer( self->data->src_caps.get() )
+        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() ))
         && self->data->device_type != "pimipi")
     {
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
@@ -860,9 +860,9 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
 
     GstElement* previous_element = self->pipeline_caps;
 
-    if (self->has_dutils && self->needs_dutils)
+    if (self->has_dutils && self->modules.dutils)
     {
-        if (!link_elements((self->has_dutils && self->needs_dutils),
+        if (!link_elements((self->has_dutils && self->modules.dutils),
                            &previous_element,
                            &self->dutils,
                            pipeline_description,
@@ -877,9 +877,9 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
     }
 
     if (self->bayer_transform
-        && self->needs_bayer_transform)
+        && self->modules.bayertransform)
     {
-        if (!link_elements(self->bayer_transform,
+        if (!link_elements(self->modules.bayertransform,
                            &previous_element,
                            &self->bayer_transform,
                            pipeline_description,
@@ -944,7 +944,7 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
         }
     }
 
-    if (!link_elements(self->needs_debayer,
+    if (!link_elements(self->modules.bayer2rgb,
                        &previous_element,
                        &self->debayer,
                        pipeline_description,
@@ -954,7 +954,7 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
         return FALSE;
     }
 
-    if (!link_elements(self->needs_jpegdec,
+    if (!link_elements(self->modules.jpegdec,
                        &previous_element,
                        &self->jpegdec,
                        pipeline_description,
@@ -966,7 +966,7 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
 
     // this is needed to allow for conversions such as
     // GRAY8 to BGRx that can exist when device-caps are set
-    if (!link_elements(self->needs_videoconvert,
+    if (!link_elements(self->modules.videoconvert,
                        &previous_element,
                        &self->convert,
                        pipeline_description,
@@ -1192,7 +1192,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             // it is not always obvious how to create a pipeline with it
             // when using non pimipi cameras
             // for now (2021.01.13) ignore it if that is the case
-            bool use_by1xtransform = g_strcmp0("pimipi", self->data->device_type.c_str()) == 0;
+            self->toggles.use_by1xtransform = g_strcmp0("pimipi", self->data->device_type.c_str()) == 0;
 
             if (self->data->user_caps)
             {
@@ -1215,24 +1215,14 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                           gst_helper::to_string( self->data->user_caps ).c_str());
 
                 self->data->src_caps.reset( find_input_caps(self->data->user_caps.get(), self->data->target_caps.get(),
-                                                            self->needs_bayer_transform,
-                                                            self->needs_debayer,
-                                                            self->needs_videoconvert,
-                                                            self->needs_jpegdec,
-                                                            self->needs_dutils,
-                                                            self->use_dutils,
-                                                            use_by1xtransform) );
+                                                            self->modules,
+                                                            self->toggles) );
             }
             else
             {
                 self->data->src_caps.reset( find_input_caps(src_caps.get(), self->data->target_caps.get(),
-                                                            self->needs_bayer_transform,
-                                                            self->needs_debayer,
-                                                            self->needs_videoconvert,
-                                                            self->needs_jpegdec,
-                                                            self->needs_dutils,
-                                                            self->use_dutils,
-                                                            use_by1xtransform) );
+                                                            self->modules,
+                                                            self->toggles) );
             }
 
             if (!self->data->src_caps || gst_caps_is_empty(self->data->src_caps.get()))
@@ -1374,7 +1364,7 @@ static void gst_tcambin_get_property (GObject* object,
         }
         case PROP_USE_DUTILS:
         {
-            g_value_set_boolean(value, self->use_dutils);
+            g_value_set_boolean(value, self->toggles.use_dutils);
             break;
         }
         case PROP_STATE:
@@ -1441,7 +1431,7 @@ static void gst_tcambin_set_property (GObject* object,
         }
         case PROP_USE_DUTILS:
         {
-            self->use_dutils = g_value_get_boolean(value);
+            self->toggles.use_dutils = g_value_get_boolean(value);
 
             GstState state;
 
@@ -1518,7 +1508,7 @@ static void gst_tcambin_init (GstTcamBin* self)
     GST_DEBUG_OBJECT( self, "init" );
 
 
-    self->use_dutils = TRUE;
+    self->toggles.use_dutils = TRUE;
     self->elements_linked = FALSE;
 
     self->data = new tcambin_data;
@@ -1529,12 +1519,12 @@ static void gst_tcambin_init (GstTcamBin* self)
     {
         self->has_dutils = TRUE;
         gst_object_unref(factory);
-        self->use_dutils = verify_tcamdutils_version();
+        self->toggles.use_dutils = verify_tcamdutils_version();
     }
     else
     {
         self->has_dutils = FALSE;
-        self->use_dutils = FALSE;
+        self->toggles.use_dutils = FALSE;
     }
 
     self->src = nullptr;

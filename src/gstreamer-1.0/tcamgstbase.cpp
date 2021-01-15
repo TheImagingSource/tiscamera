@@ -1250,21 +1250,11 @@ static GstCaps* find_input_caps_dutils (GstCaps* available_caps,
 // TODO: bayer and videoconvert should consider eachother
 GstCaps* find_input_caps (GstCaps* available_caps,
                           GstCaps* wanted_caps,
-                          bool& requires_bayertransform,
-                          bool& requires_bayer2rgb,
-                          bool& requires_vidoeconvert,
-                          bool& requires_jpegdec,
-                          bool& requires_dutils,
-                          bool use_dutils,
-                          bool use_by1xtransform
+                          struct input_caps_required_modules& modules,
+                          struct input_caps_toggles toggles
     )
 {
-    requires_bayertransform = false;
-    requires_bayer2rgb = false;
-    requires_vidoeconvert = false;
-    requires_jpegdec = false;
-    requires_dutils = false;
-    requires_bayer2rgb = false;
+    modules.reset();
 
     if (!GST_IS_CAPS(available_caps))
     {
@@ -1278,18 +1268,18 @@ GstCaps* find_input_caps (GstCaps* available_caps,
     }
 
     GstElementFactory* dutils = gst_element_factory_find("tcamdutils");
-    if (use_dutils && dutils)
+    if (toggles.use_dutils && dutils)
     {
         gst_object_unref(dutils);
         return find_input_caps_dutils(available_caps,
                                       wanted_caps,
-                                      requires_bayer2rgb,
-                                      requires_vidoeconvert,
-                                      requires_jpegdec,
-                                      requires_dutils);
+                                      modules.bayer2rgb,
+                                      modules.videoconvert,
+                                      modules.jpegdec,
+                                      modules.dutils);
     }
 
-    if (use_by1xtransform)
+    if (toggles.use_by1xtransform)
     {
         GstElementFactory* bayer_transform = gst_element_factory_find("tcamby1xtransform");
 
@@ -1299,7 +1289,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             if (gst_element_factory_can_src_any_caps(bayer_transform, wanted_caps)
                 && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
             {
-                requires_bayertransform = true;
+                modules.bayertransform = true;
                 // wanted_caps can be fixed, etc.
                 // thus change name to be compatible to bayer2rgb sink pad
                 // and create a correct intersection
@@ -1320,8 +1310,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                 if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
                     && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
                 {
-                    requires_bayertransform = true;
-                    requires_bayer2rgb = true;
+                    modules.bayertransform = true;
+                    modules.bayer2rgb = true;
 
                     // wanted_caps can be fixed, etc.
                     // thus change name to be compatible to bayer2rgb sink pad
@@ -1356,8 +1346,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                     }
                     gst_caps_unref(intersect);
 
-                    requires_bayertransform = true;
-                    requires_vidoeconvert = true;
+                    modules.bayertransform = true;
+                    modules.videoconvert = true;
                     // wanted_caps can be fixed, etc.
 
                     GstCaps* in = get_caps_from_element_name("tcamby1xtransform", "sink");
@@ -1397,7 +1387,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
             && gst_element_factory_can_sink_any_caps(debayer, available_caps))
         {
-            requires_bayer2rgb = true;
+            modules.bayer2rgb = true;
             // wanted_caps can be fixed, etc.
             // thus change name to be compatible to bayer2rgb sink pad
             // and create a correct intersection
@@ -1421,8 +1411,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
                 && gst_element_factory_can_sink_any_caps(debayer, available_caps))
             {
-                requires_bayer2rgb = true;
-                requires_vidoeconvert = true;
+                modules.bayer2rgb = true;
+                modules.videoconvert = true;
                 // wanted_caps can be fixed, etc.
                 // thus change name to be compatible to bayer2rgb sink pad
                 // and create a correct intersection
@@ -1464,7 +1454,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             }
             gst_caps_unref(intersect);
 
-            requires_vidoeconvert = true;
+            modules.videoconvert = true;
             // wanted_caps can be fixed, etc.
 
             GstCaps* in = get_caps_from_element_name("videoconvert", "sink");
@@ -1499,8 +1489,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
         if (gst_element_factory_can_src_any_caps(jpegdec, wanted_caps)
             && gst_element_factory_can_sink_any_caps(jpegdec, available_caps))
         {
-            requires_jpegdec = true;
-            requires_vidoeconvert = true;
+            modules.jpegdec = true;
+            modules.videoconvert = true;
             // wanted_caps can be fixed, etc.
             // thus change name to be compatible to jpegdec sink pad
             // and create a correct intersection
