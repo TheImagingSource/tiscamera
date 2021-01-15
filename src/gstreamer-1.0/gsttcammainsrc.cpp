@@ -1139,12 +1139,9 @@ static gboolean gst_tcam_mainsrc_start (GstBaseSrc* src)
     {
         if (!gst_tcam_mainsrc_init_camera(self))
         {
-            gst_base_src_start_complete(src, GST_FLOW_ERROR);
             return FALSE;
         }
     }
-
-    gst_base_src_start_complete(src, GST_FLOW_OK);
 
     return TRUE;
 }
@@ -1174,21 +1171,6 @@ static gboolean gst_tcam_mainsrc_stop (GstBaseSrc* src)
 
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
 
-    GstBus* bus = gst_element_get_bus(GST_ELEMENT(src));
-    if (bus)
-    {
-        //  auto msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_EOS);
-
-        //gst_message_unref(msg);
-
-        // gst_bus_remove_signal_watch(bus);
-
-        gst_object_unref( bus );
-    }
-    else
-    {
-        GST_WARNING("NO BUS============================");
-    }
     GST_DEBUG("Stopped acquisition");
 
     return TRUE;

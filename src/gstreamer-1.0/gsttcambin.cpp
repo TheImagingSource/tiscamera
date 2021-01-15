@@ -552,6 +552,14 @@ static gboolean create_and_add_element (GstElement** element,
                                         const char* element_name,
                                         GstBin* bin)
 {
+    auto factory = gst_element_factory_find(factory_name);
+
+    if (!factory)
+    {
+        return FALSE;
+    }
+    gst_object_unref(factory);
+
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
     {
@@ -619,9 +627,7 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         goto finished_element_creation;
     }
 
-    if (self->data->device_type == "pimipi" and
-        (tcam_gst_contains_bayer_10_bit(self->data->src_caps.get())
-         || tcam_gst_contains_bayer_12_bit( self->data->src_caps.get())))
+    if (self->data->device_type == "pimipi")
     {
         if (!create_and_add_element(&self->bayer_transform,
                                     "tcamby1xtransform",
@@ -636,9 +642,9 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
 
-    //if (gst_caps_are_bayer_only(self->src_caps)
     if (contains_bayer( self->data->src_caps.get() )
-        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() ))
+        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() )
+        && self->data->device_type != "pimipi")
     {
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
         {
@@ -1181,6 +1187,13 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             gst_helper::gst_unique_ptr<GstCaps> src_caps = gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
             GST_INFO_OBJECT( self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
 
+            // this flag is to used to make the creation of pipelines easier
+            // while tcamby1xtransform can convert between many formats
+            // it is not always obvious how to create a pipeline with it
+            // when using non pimipi cameras
+            // for now (2021.01.13) ignore it if that is the case
+            bool use_by1xtransform = g_strcmp0("pimipi", self->data->device_type.c_str()) == 0;
+
             if (self->data->user_caps)
             {
                 GstCaps* tmp = gst_caps_intersect(self->data->user_caps.get(), src_caps.get());
@@ -1202,22 +1215,24 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                           gst_helper::to_string( self->data->user_caps ).c_str());
 
                 self->data->src_caps.reset( find_input_caps(self->data->user_caps.get(), self->data->target_caps.get(),
-                                                 self->needs_bayer_transform,
-                                                 self->needs_debayer,
-                                                 self->needs_videoconvert,
-                                                 self->needs_jpegdec,
-                                                 self->needs_dutils,
-                                                 self->use_dutils) );
+                                                            self->needs_bayer_transform,
+                                                            self->needs_debayer,
+                                                            self->needs_videoconvert,
+                                                            self->needs_jpegdec,
+                                                            self->needs_dutils,
+                                                            self->use_dutils,
+                                                            use_by1xtransform) );
             }
             else
             {
                 self->data->src_caps.reset( find_input_caps(src_caps.get(), self->data->target_caps.get(),
-                                                 self->needs_bayer_transform,
-                                                 self->needs_debayer,
-                                                 self->needs_videoconvert,
-                                                 self->needs_jpegdec,
-                                                 self->needs_dutils,
-                                                 self->use_dutils) );
+                                                            self->needs_bayer_transform,
+                                                            self->needs_debayer,
+                                                            self->needs_videoconvert,
+                                                            self->needs_jpegdec,
+                                                            self->needs_dutils,
+                                                            self->use_dutils,
+                                                            use_by1xtransform) );
             }
 
             if (!self->data->src_caps || gst_caps_is_empty(self->data->src_caps.get()))
@@ -1282,7 +1297,10 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
         }
     }
 
+    gst_element_set_locked_state(element, TRUE);
     ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
+    gst_element_set_locked_state(element, FALSE);
+
     if (ret == GST_STATE_CHANGE_FAILURE)
     {
         return ret;

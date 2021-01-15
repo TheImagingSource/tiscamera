@@ -121,7 +121,7 @@ function (create_package_name return_value name version)
 
         if ("${GIT_BRANCH}" STREQUAL "master")
           set(${return_value}
-            "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
+            "${name}_${version}.${GIT_COMMIT_COUNT}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
         else ()
           set(${return_value}
             "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}"

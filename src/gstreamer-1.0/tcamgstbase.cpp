@@ -189,7 +189,9 @@ bool tcam_gst_raw_only_has_mono (const GstCaps* caps)
             return false;
         }
 
-        static const char* formats[] = {"GRAY8", "GRAY16_LE", "GRAY16_BE"};
+        static const char* formats[] = {"GRAY8", "GRAY16_LE", "GRAY16_BE",
+                                        "GRAY12p", "GRAY10p",
+                                        "GRAY12m", "GRAY10m"};
 
         return std::any_of(std::begin( formats), std::end( formats ), [str]( const char* op2 ) { return strcmp( str, op2 ) == 0; } );
     };
@@ -997,6 +999,42 @@ bool tcam_gst_contains_bayer_12_bit (const GstCaps* caps)
     return ret;
 }
 
+bool tcam_gst_contains_mono_10_bit (const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    GstCaps* tmp = gst_caps_from_string("video/x-raw, format={GRAY10, GRAY10, GRAY10, GRAY10,"
+                                        "GRAY10p, GRAY10p, GRAY10p, GRAY10p,"
+                                        "GRAY10s, GRAY10s, GRAY10s, GRAY10s,"
+                                        "GRAY10m, GRAY10m, GRAY10m, GRAY10m}");
+    gboolean ret =  gst_caps_can_intersect(caps, tmp);
+    gst_caps_unref(tmp);
+
+    return ret;
+}
+
+
+bool tcam_gst_contains_mono_12_bit (const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    GstCaps* tmp = gst_caps_from_string("video/x-raw, format={GRAY12, GRAY12, GRAY12, GRAY12,"
+                                        "GRAY12p, GRAY12p, GRAY12p, GRAY12p,"
+                                        "GRAY12s, GRAY12s, GRAY12s, GRAY12s,"
+                                        "GRAY12m, GRAY12m, GRAY12m, GRAY12m}");
+    gboolean ret =  gst_caps_can_intersect(caps, tmp);
+    gst_caps_unref(tmp);
+
+    return ret;
+}
+
+
 static GstCaps* get_caps_from_element (GstElement* element, const char* padname)
 {
     if (!element || !padname)
@@ -1217,7 +1255,8 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           bool& requires_vidoeconvert,
                           bool& requires_jpegdec,
                           bool& requires_dutils,
-                          bool use_dutils
+                          bool use_dutils,
+                          bool use_by1xtransform
     )
 {
     requires_bayertransform = false;
@@ -1250,39 +1289,17 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                                       requires_dutils);
     }
 
-    GstElementFactory* bayer_transform = gst_element_factory_find("tcamby1xtransform");
-
-    if (bayer_transform)
+    if (use_by1xtransform)
     {
-        // check if only bayertransform suffices
-        if (gst_element_factory_can_src_any_caps(bayer_transform, wanted_caps)
-            && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
+        GstElementFactory* bayer_transform = gst_element_factory_find("tcamby1xtransform");
+
+        if (bayer_transform)
         {
-            requires_bayertransform = true;
-            // wanted_caps can be fixed, etc.
-            // thus change name to be compatible to bayer2rgb sink pad
-            // and create a correct intersection
-            GstCaps* temp = gst_caps_copy(wanted_caps);
-            gst_caps_change_name(temp, "video/x-bayer");
-
-            GstCaps* ret = gst_caps_intersect(available_caps, temp);
-            gst_caps_unref(temp);
-            gst_object_unref(bayer_transform);
-            return ret;
-        }
-
-
-        GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
-
-        // check if bayertransform + bayer2rgb works
-        if (debayer)
-        {
-            if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+            // check if only bayertransform suffices
+            if (gst_element_factory_can_src_any_caps(bayer_transform, wanted_caps)
                 && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
             {
                 requires_bayertransform = true;
-                requires_bayer2rgb = true;
-
                 // wanted_caps can be fixed, etc.
                 // thus change name to be compatible to bayer2rgb sink pad
                 // and create a correct intersection
@@ -1292,10 +1309,84 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                 GstCaps* ret = gst_caps_intersect(available_caps, temp);
                 gst_caps_unref(temp);
                 gst_object_unref(bayer_transform);
-                gst_object_unref(debayer);
-
                 return ret;
             }
+
+            GstElementFactory* debayer = gst_element_factory_find("bayer2rgb");
+
+            // check if bayertransform + bayer2rgb works
+            if (debayer && !tcam_gst_raw_only_has_mono(available_caps))
+            {
+                if (gst_element_factory_can_src_any_caps(debayer, wanted_caps)
+                    && gst_element_factory_can_sink_any_caps(bayer_transform, available_caps))
+                {
+                    requires_bayertransform = true;
+                    requires_bayer2rgb = true;
+
+                    // wanted_caps can be fixed, etc.
+                    // thus change name to be compatible to bayer2rgb sink pad
+                    // and create a correct intersection
+                    GstCaps* temp = gst_caps_copy(wanted_caps);
+                    gst_caps_change_name(temp, "video/x-bayer");
+
+                    GstCaps* ret = gst_caps_intersect(available_caps, temp);
+                    gst_caps_unref(temp);
+                    gst_object_unref(bayer_transform);
+                    gst_object_unref(debayer);
+
+                    return ret;
+                }
+            }
+
+            GstElementFactory* convert = gst_element_factory_find("videoconvert");
+
+            if (convert)
+            {
+                auto transform_out_caps = get_caps_from_element_name("tcamby1xtransform", "src");
+
+                if (gst_element_factory_can_src_any_caps(convert, wanted_caps)
+                    && gst_element_factory_can_sink_any_caps(convert, transform_out_caps))
+                {
+                    // this intersection check is to ensure that we can't just pass
+                    // the caps through and really need this additional element
+                    GstCaps* intersect = gst_caps_intersect(transform_out_caps, wanted_caps);
+                    if (!gst_caps_is_empty(intersect))
+                    {
+                        return intersect;
+                    }
+                    gst_caps_unref(intersect);
+
+                    requires_bayertransform = true;
+                    requires_vidoeconvert = true;
+                    // wanted_caps can be fixed, etc.
+
+                    GstCaps* in = get_caps_from_element_name("tcamby1xtransform", "sink");
+
+                    // this removes things like jpeg
+                    GstCaps* ret = gst_caps_intersect(available_caps, in);
+                    gst_caps_unref( in );
+
+                    GstCaps* temp = gst_caps_copy(wanted_caps);
+                    for (unsigned int i = 0; i < gst_caps_get_size(temp); ++i)
+                    {
+                        gst_structure_remove_field(gst_caps_get_structure(temp, i), "format");
+                    }
+
+                    GstCaps* ret2 = gst_caps_intersect(ret, temp);
+
+                    gst_caps_unref( temp );
+                    gst_caps_unref( ret );
+
+
+                    gst_object_unref(convert);
+                    return ret2;
+                }
+                gst_object_unref(convert);
+
+            }
+
+            gst_object_unref(debayer);
+            gst_object_unref(bayer_transform);
         }
     }
 
@@ -1322,7 +1413,6 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             }
 
         }
-
 
         GstElementFactory* convert = gst_element_factory_find("videoconvert");
 
@@ -1351,12 +1441,12 @@ GstCaps* find_input_caps (GstCaps* available_caps,
             }
 
         }
+
         gst_object_unref(convert);
         gst_object_unref(debayer);
 
-        return nullptr;
+        // fall through so that other conversion can be tested
     }
-    gst_object_unref(debayer);
 
     GstElementFactory* convert = gst_element_factory_find("videoconvert");
 
