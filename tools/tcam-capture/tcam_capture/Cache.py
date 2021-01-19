@@ -85,7 +85,10 @@ class Cache():
         if self.last_device_type:
             config[self.gc]["last_device_type"] = self.last_device_type
         if self.last_format:
-            config[self.gc]["last_format"] = self.last_format
+            if type(self.last_format) == str:
+                config[self.gc]["last_format"] = self.last_format
+            else:
+                log.error("last_format type cannot be parsed: {}".format(type(self.last_format)))
 
         os.makedirs(os.path.dirname(self.get_cache_file()), exist_ok=True)
 
