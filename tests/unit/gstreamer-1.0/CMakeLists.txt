@@ -18,7 +18,7 @@ set(test_gst_src
   main.cpp
   find_input_caps.cpp
   find_largest_caps.cpp
-  find_input_caps_test_data.h
+  find_input_caps_test_data.cpp
   index_caps_formats.cpp
   find_camera_src.cpp
   )

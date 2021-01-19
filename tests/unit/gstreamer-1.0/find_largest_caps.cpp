@@ -22,31 +22,38 @@
 
 #include "find_largest_caps_test_data.h"
 
-TEST_CASE("find_largest_caps") {
-  for (unsigned int x = 0; x < flc_test_data.size(); x++) {
-    auto &entry = flc_test_data.at(x);
+TEST_CASE("find_largest_caps")
+{
+    for (unsigned int x = 0; x < flc_test_data.size(); x++)
+    {
+        auto &entry = flc_test_data.at(x);
 
-    GstCaps *in = nullptr;
-    GstCaps *out = nullptr;
+        GstCaps* in = nullptr;
+        GstCaps* out = nullptr;
 
-    if (entry.input_caps)
-      in = gst_caps_from_string(entry.input_caps);
+        if (entry.input_caps)
+        {
+            in = gst_caps_from_string(entry.input_caps);
+        }
+        if (entry.expected_output)
+        {
+            out = gst_caps_from_string(entry.expected_output);
+        }
+        else
+        {
 
-    if (entry.expected_output)
-      out = gst_caps_from_string(entry.expected_output);
-    else {
+        }
+
+        GstCaps* result = tcam_gst_find_largest_caps(in);
+
+        INFO("caps in:  " << gst_caps_to_string(in) << "\n\n");
+        INFO("caps out: " << gst_caps_to_string(result) << "\n\n");
+        INFO("expected: " << gst_caps_to_string(out) << "\n\n");
+
+        REQUIRE(gst_caps_is_equal(result, out));
+
+        gst_caps_unref(in);
+        gst_caps_unref(result);
+        gst_caps_unref(out);
     }
-
-    GstCaps *result = tcam_gst_find_largest_caps(in);
-
-    INFO("in " << gst_caps_to_string(in));
-    INFO("result " << gst_caps_to_string(result));
-    INFO("expected " << gst_caps_to_string(out));
-
-    REQUIRE(gst_caps_is_equal(result, out));
-
-    gst_caps_unref(in);
-    gst_caps_unref(result);
-    gst_caps_unref(out);
-  }
 }

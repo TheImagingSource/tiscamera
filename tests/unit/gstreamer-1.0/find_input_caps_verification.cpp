@@ -125,6 +125,10 @@ int main (int argc, char* argv[])
                                  requires_dutils, dutils_expected,
                                  test_succeeded);
 
+    test_succeeded = verify_flag("by1xtransform",
+                                 requires_bayertransform, bayertransform_expected,
+                                 test_succeeded);
+
     if (test_succeeded)
     {
         printf("Caps test succeeded\n");

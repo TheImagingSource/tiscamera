@@ -40,10 +40,13 @@ TEST_CASE("find_input_caps")
     //     WARN("No tcamdutils. Not all tests will be run");
     //     has_dutils = false;
     // }
+    bool use_dutils = false;
+    init_test_data(use_dutils);
+    auto test_data = get_test_data();
 
-    for (unsigned int x = 0; x < fic_test_data.size(); x++)
+    for (unsigned int x = 0; x < test_data.size(); x++)
     {
-        auto &entry = fic_test_data.at(x);
+        auto &entry = test_data.at(x);
 
         // if (entry.use_dutils && !has_dutils)
         // {
@@ -57,19 +60,19 @@ TEST_CASE("find_input_caps")
             GstCaps* sink_caps = nullptr;
             GstCaps* expected_output = nullptr;
 
-            if (entry.input_caps)
+            if (!entry.input_caps.empty())
             {
-                src_caps = gst_caps_from_string(entry.input_caps);
+                src_caps = gst_caps_from_string(entry.input_caps.c_str());
             }
 
-            if (entry.sink_caps)
+            if (!entry.sink_caps.empty())
             {
-                sink_caps = gst_caps_from_string(entry.sink_caps);
+                sink_caps = gst_caps_from_string(entry.sink_caps.c_str());
             }
 
-            if (entry.result.output_caps)
+            if (!entry.result.output_caps.empty())
             {
-                expected_output = gst_caps_from_string(entry.result.output_caps);
+                expected_output = gst_caps_from_string(entry.result.output_caps.c_str());
             }
 
             struct input_caps_required_modules modules;
@@ -96,10 +99,7 @@ TEST_CASE("find_input_caps")
                 REQUIRE(result_caps == expected_output);
             }
 
-            REQUIRE(modules.bayer2rgb == entry.result.requires_bayer);
-            REQUIRE(modules.videoconvert == entry.result.requires_videoconvert);
-            REQUIRE(modules.jpegdec == entry.result.requires_jpegdec);
-            REQUIRE(modules.dutils == entry.result.requires_dutils);
+            REQUIRE(modules == entry.result.modules);
 
             if (src_caps)
             {

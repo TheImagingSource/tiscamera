@@ -874,7 +874,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
                       g_type_name(gst_structure_get_field_type(struc, "height")));
         }
 
-        if (new_width && new_height)
+        if (new_width || new_height)
         {
             largest_index = i;
         }
@@ -1254,7 +1254,7 @@ GstCaps* find_input_caps (GstCaps* available_caps,
                           struct input_caps_toggles toggles
     )
 {
-    modules.reset();
+    reset_input_caps_modules(modules);
 
     if (!GST_IS_CAPS(available_caps))
     {

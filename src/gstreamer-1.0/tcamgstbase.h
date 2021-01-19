@@ -124,15 +124,30 @@ struct input_caps_required_modules
     bool jpegdec = false;
     bool dutils = false;
 
-    void reset()
+    bool operator== (const struct input_caps_required_modules& other) const
     {
-        bayertransform = false;
-        bayer2rgb = false;
-        videoconvert = false;
-        jpegdec = false;
-        dutils = false;
+        if (bayertransform == other.bayertransform
+            && bayer2rgb == other.bayer2rgb
+            && videoconvert == other.videoconvert
+            && jpegdec == other.jpegdec
+            && dutils == other.dutils)
+        {
+            return true;
+        }
+        return false;
     }
 };
+
+
+static void reset_input_caps_modules (struct input_caps_required_modules& modules)
+{
+    modules.bayertransform = false;
+    modules.bayer2rgb = false;
+    modules.videoconvert = false;
+    modules.jpegdec = false;
+    modules.dutils = false;
+}
+
 
 
 struct input_caps_toggles
