@@ -1097,14 +1097,14 @@ static gboolean apply_state (GstTcamBin* self, const std::string& state)
     if ( self->data->device_serial.empty() )
     {
         ret = load_device_settings(TCAM_PROP(self),
-                                     "",
-                                     state);
+                                   "",
+                                   state);
     }
     else
     {
         ret = load_device_settings(TCAM_PROP(self),
-                                     self->data->device_serial,
-                                     state);
+                                   self->data->device_serial,
+                                   state);
     }
 
     if (!ret)
@@ -1465,7 +1465,9 @@ static void gst_tcambin_set_property (GObject* object,
             gst_element_get_state(GST_ELEMENT(self), &gstate, nullptr, 1000000);
 
             if (gstate == GST_STATE_VOID_PENDING
-                || gstate == GST_STATE_NULL)
+                || gstate == GST_STATE_NULL
+                || gstate == GST_STATE_READY
+                || gstate == GST_STATE_PAUSED)
             {
                 GST_INFO("tcambin not ready. State will be applied once GST_STATE_READY is reached.");
                 self->must_apply_state = TRUE;
