@@ -104,6 +104,14 @@ function (create_package_name return_value name version)
     # we do not want '_Debug' as a string but '_debug'
     string(TOLOWER "${build_type}" build_type)
 
+    set(distribution "")
+    if (TCAM_DISTRIBUTION_DESCRIPTION)
+
+      set(distribution "_${TCAM_DISTRIBUTION_DESCRIPTION}")
+
+
+    endif (TCAM_DISTRIBUTION_DESCRIPTION)
+
     if (GIT_TAG)
 
       set(${return_value}
@@ -121,10 +129,10 @@ function (create_package_name return_value name version)
 
         if ("${GIT_BRANCH}" STREQUAL "master")
           set(${return_value}
-            "${name}_${version}.${GIT_COMMIT_COUNT}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
+            "${name}_${version}.${GIT_COMMIT_COUNT}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}" PARENT_SCOPE)
         else ()
           set(${return_value}
-            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}"
+            "${name}_${version}.${GIT_COMMIT_COUNT}~${GIT_BRANCH}_${GIT_COMMIT_HASH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}"
             PARENT_SCOPE)
 
         endif ("${GIT_BRANCH}" STREQUAL "master")
@@ -132,7 +140,7 @@ function (create_package_name return_value name version)
       else () # this will be the case when users download the github zip and compiles on deb systems
 
         set(${return_value}
-          "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${build_type}" PARENT_SCOPE)
+          "${name}_${version}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}${distribution}${build_type}" PARENT_SCOPE)
 
       endif(GIT_COMMIT_HASH)
 
