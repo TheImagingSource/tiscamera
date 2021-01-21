@@ -168,7 +168,7 @@ class DependencyManager(object):
         elif self.args.command == "list":
             self.list()
         elif self.args.command == "dist-release":
-            print(get_distribution_release())
+            print(get_distribution_release(), end="")
         else:  # should not happen, check already after parse_args
             self.parser.print_help()
 
