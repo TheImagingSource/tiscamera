@@ -303,7 +303,7 @@ unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
     }
     else
     {
-        SPDLOG_ERROR("Could not open file \"{}\"", filename.c_str());
+        SPDLOG_INFO("Could not open file \"{}\"", filename.c_str());
     }
 
     return ret;

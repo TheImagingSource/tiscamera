@@ -548,7 +548,7 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
 
     if (!is_running)
     {
-        SPDLOG_ERROR("Could not find gige-daemon. Using internal methods" );
+        SPDLOG_INFO("Could not find gige-daemon. Using internal methods" );
         return get_aravis_device_list();
     }
 
@@ -558,9 +558,9 @@ std::vector<DeviceInfo> tcam::get_gige_device_list ()
     int shmid = shmget( shmkey, sizeof( struct tcam_gige_device_list ), 0644 );
     if (shmid < 0)
     {
-        SPDLOG_ERROR("Unable to connect to gige-daemon. Using internal methods");
+        SPDLOG_INFO("Unable to connect to gige-daemon. Using internal methods");
         auto vec = get_aravis_device_list();
-        SPDLOG_ERROR("Aravis gave us {}", vec.size());
+        SPDLOG_DEBUG("Aravis gave us {}", vec.size());
         return vec;
     }
 
