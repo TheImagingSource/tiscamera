@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- tcambin applies state descriptions when changing to GST_STATE_PLAYING
+- debian package name for master branch now contains commit count
+- debian package name now contains distribution release to prevent
+  confusion about installation problems due to dependencies
+
+### Fixed
+
+- tcam-capture display bug for bools
+- tcambin caps negotiations for GRAY16_LE
+- multiple memory leaks
+- deadlock in tcammainsrc
+
 ## [0.13.0] - 2020-11-23
 
 ### Added
