@@ -15,7 +15,7 @@
  */
 
 #include "biteater.h"
-#include "../image_transform_base.h"
+#include "image_transform_base.h"
 
 
 void tcam::biteater::para_callback::call (const tcam_image_buffer& image_in,
@@ -99,12 +99,12 @@ struct tcam::biteater::offsets tcam::biteater::offsets_for_fourcc (unsigned int 
 
     switch (fourcc)
     {
-        case FOURCC_RGB32:
+        case FOURCC_BGRA32:
         {
             ret = {2, 1, 0, 3};
             break;
         }
-        case FOURCC_RGB64: // BGRX 16Bit per Channel
+        case FOURCC_BGRA64: // BGRX 16Bit per Channel
         {
             // ret = {4, 2, 0, 6};
             ret = {4, 2, 0, 6};

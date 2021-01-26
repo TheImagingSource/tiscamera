@@ -63,16 +63,16 @@ int sqrt_ (int n)
 
 static int CalcRegionCenterDistance (const img::img_descriptor& image, const RegionInfo& region)
 {
-    int imageCenterX = image.dim_x / 2;
-    int imageCenterY = image.dim_y / 2;
+    int imageCenterX = image.dim.cx / 2;
+    int imageCenterY = image.dim.cy / 2;
     int blockCenterX = region.x + region.width / 2;
     int blockCenterY = region.y + region.height / 2;
 
     int dx = abs_(imageCenterX - blockCenterX);
     int dy = abs_(imageCenterY - blockCenterY);
 
-    int ndx = (dx * 100) / image.dim_x;
-    int ndy = (dy * 100) / image.dim_y;
+    int ndx = (dx * 100) / image.dim.cx;
+    int ndy = (dy * 100) / image.dim.cy;
 
     return sqrt_(ndx * ndx + ndy * ndy);
 }
@@ -178,16 +178,16 @@ static int autofocus_get_contrast (const img::img_descriptor& image, const Regio
 
 static void autofocus_get_all_regions_ (const img::img_descriptor& image, RegionInfo* regions, int regionCount)
 {
-    int regions_x = image.dim_x / REGION_SIZE;
-    int regions_y = image.dim_y / REGION_SIZE;
+    int regions_x = image.dim.cx / REGION_SIZE;
+    int regions_y = image.dim.cy / REGION_SIZE;
 
     if (regions_x * regions_y > regionCount)
     {
         return;
     }
 
-    int start_x = (image.dim_x - regions_x * REGION_SIZE) / 2;
-    int start_y = (image.dim_y - regions_y * REGION_SIZE) / 2;
+    int start_x = (image.dim.cx - regions_x * REGION_SIZE) / 2;
+    int start_y = (image.dim.cy - regions_y * REGION_SIZE) / 2;
 
     for (int y = 0; y < regions_y; ++y)
     {
@@ -252,7 +252,7 @@ static int	calc_needed_region_count (int img_width, int img_height, int region_s
 static void	autofocus_find_region (const img::img_descriptor& image, RegionInfo& region)
 {
 
-    int region_count = calc_needed_region_count( image.dim_x, image.dim_y, REGION_SIZE );
+    int region_count = calc_needed_region_count( image.dim.cx, image.dim.cy, REGION_SIZE );
     RegionInfo* regions = new RegionInfo[region_count];
 
     autofocus_get_all_regions_( image, regions, region_count );
@@ -291,9 +291,9 @@ static bool is_user_roi_valid (const img::img_descriptor& image, const img::rect
         return false;
     if( r.left < 0 )
         return false;
-    if( r.right > (long)image.dim_x )
+    if( r.right > (long)image.dim.cx )
         return false;
-    if( r.bottom > (long)image.dim_y )
+    if( r.bottom > (long)image.dim.cy )
         return false;
     return true;
 }
@@ -361,14 +361,14 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
         img.type != FOURCC_Y16 &&
         img::is_by16_fcc( img.type ) &&
         img::is_by8_fcc( img.type ) &&
-        img.type != FOURCC_RGB32 &&
-        img.type != FOURCC_RGB24)
+        img.type != FOURCC_BGRA32 &&
+        img.type != FOURCC_BGR24)
     {
         return false;
     }
 
     // force this to prevent too small images
-    if (img.dim_x < REGION_SIZE || img.dim_y < REGION_SIZE)
+    if (img.dim.cx < REGION_SIZE || img.dim.cy < REGION_SIZE)
     {
         return false;
     }
@@ -390,8 +390,8 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
         else
             min_time_to_wait_for_focus_change_ = 300;
 
-        init_width_ = img.dim_x;
-        init_height_ = img.dim_y;
+        init_width_ = img.dim.cx;
+        init_height_ = img.dim.cy;
         init_pitch_ = img.pitch;
         init_pixel_dim_ = pixel_dim;
         init_offset_ = offsets;
@@ -408,9 +408,9 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
     }
     else
     {
-        if (img.dim_x != (unsigned int)init_width_
-            || img.dim_y != (unsigned int)init_height_
-            || img.pitch != (unsigned int)init_pitch_
+        if (img.dim.cx != init_width_
+            || img.dim.cy != init_height_
+            || img.pitch != init_pitch_
             || init_pixel_dim_.cx != pixel_dim.cx
             || init_pixel_dim_.cy != pixel_dim.cy
             || init_offset_.x != offsets.x

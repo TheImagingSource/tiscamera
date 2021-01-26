@@ -256,31 +256,6 @@ static bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
     }
     return FALSE;
 }
-//
-//
-//static bool tcam_gst_is_bayer10_fourcc( const uint32_t fourcc )
-//{
-//    if( fourcc == FOURCC_GBRG10
-//        || fourcc == FOURCC_GRBG10
-//        || fourcc == FOURCC_RGGB10
-//        || fourcc == FOURCC_BGGR10 )
-//    {
-//        return TRUE;
-//    }
-//    return FALSE;
-//}
-
-static bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
-{
-    if (fourcc == FOURCC_GBRG12
-        || fourcc == FOURCC_GRBG12
-        || fourcc == FOURCC_RGGB12
-        || fourcc == FOURCC_BGGR12)
-    {
-        return TRUE;
-    }
-    return FALSE;
-}
 
 
 static bool tcam_gst_is_bayer12_packed_fourcc (const uint32_t fourcc)
@@ -318,11 +293,14 @@ static bool tcam_gst_is_bayer16_fourcc (const uint32_t fourcc)
 
 static bool tcam_gst_is_fourcc_yuv (const uint32_t fourcc)
 {
-    if (fourcc == FOURCC_YUYV
-        || fourcc == FOURCC_YUY2
-        || fourcc == FOURCC_Y444
-        || fourcc == FOURCC_Y422
-        || fourcc == FOURCC_Y411)
+    if (fourcc == FOURCC_YUY2
+        || fourcc == FOURCC_UYVY
+        || fourcc == FOURCC_I420
+        || fourcc == FOURCC_YV16
+        || fourcc == FOURCC_IYU1
+        || fourcc == FOURCC_IYU2
+        || fourcc == FOURCC_Y411
+        || fourcc == FOURCC_NV12)
     {
         return true;
     }
@@ -479,8 +457,8 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc)
         || fourcc == GST_MAKE_FOURCC('B', 'G', 'R', 'A')
         || fourcc == GST_MAKE_FOURCC('A', 'B', 'G', 'R')
         || fourcc == FOURCC_BGR24
-        || fourcc == FOURCC_RGB32
-        || fourcc == FOURCC_RGB64)
+        || fourcc == FOURCC_BGRA32
+        || fourcc == FOURCC_BGRA64)
     {
         return TRUE;
     }
@@ -493,7 +471,6 @@ bool tcam_gst_is_polarized_mono (const unsigned int fourcc)
 {
     if (fourcc == FOURCC_POLARIZATION_MONO8_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_MONO16_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_MONO12_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_MONO12_SPACKED_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_MONO12_PACKED_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_ADI_PLANAR_MONO8
@@ -513,11 +490,10 @@ bool tcam_gst_is_polarized_mono (const unsigned int fourcc)
 
 bool tcam_gst_is_polarized_bayer (const unsigned int fourcc)
 {
-    if (fourcc == FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0
-        || fourcc == FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0
+    if (fourcc == FOURCC_POLARIZATION_BG8_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BG16_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BG12_SPACKED_90_45_135_0
+        || fourcc == FOURCC_POLARIZATION_BG12_PACKED_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_PACKED8_BAYER_BG
         || fourcc == FOURCC_POLARIZATION_PACKED16_BAYER_BG
         )
@@ -735,7 +711,7 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
             map[5] = fourcc;
         }
         //#TODO why is here no mention of bayer10?
-        else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
+        else if (tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
             map[6] = fourcc;
         }

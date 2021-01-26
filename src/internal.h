@@ -38,6 +38,6 @@
 #include "standard_properties.h"
 #include "PipelineManager.h"
 
-#include "image_transform_base.h"
+#include "include/img/image_transform_base.h"
 
 #endif /* TCAM_INTERNAL_H */

@@ -40,12 +40,4 @@ void list_gstreamer_1_0_formats (const std::string& serial);
 void print_active_format (const VideoFormat& format);
 
 
-/**
- * @brief Set video format for device
- * @param g - CaptureDevice of the device which shall be used
- * @param new_format - string describing the format that shall be set
- * @return true on success
- */
-bool set_active_format (std::shared_ptr<CaptureDevice> dev, const std::string& new_format);
-
 #endif /* FORMATS_H */

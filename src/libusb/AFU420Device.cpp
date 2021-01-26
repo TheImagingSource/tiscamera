@@ -455,9 +455,9 @@ DeviceInfo tcam::AFU420Device::get_device_description () const
 void AFU420Device::create_formats ()
 {
     std::vector<stream_fmt_data> fmt_list{
-        stream_fmt_data{0, 8, FOURCC_GBRG8, FOURCC_RGB32, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0},
+        stream_fmt_data{0, 8, FOURCC_GBRG8, FOURCC_BGRA32, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0},
         stream_fmt_data{1, 8, FOURCC_GBRG8, FOURCC_Y800, min_sensor_dim_, max_sensor_dim_, step, 2.0, 30.0},
-        stream_fmt_data{2, 12, FOURCC_GBRG12_MIPI_PACKED, FOURCC_RGB64, min_sensor_dim_, max_sensor_dim_by12, step, 2.0, 30.0},
+        stream_fmt_data{2, 12, FOURCC_GBRG12_MIPI_PACKED, FOURCC_BGRA64, min_sensor_dim_, max_sensor_dim_by12, step, 2.0, 30.0},
         stream_fmt_data{3, 12, FOURCC_GBRG12_MIPI_PACKED, FOURCC_Y16, min_sensor_dim_, max_sensor_dim_by12, step, 2.0, 30.0},
     };
 

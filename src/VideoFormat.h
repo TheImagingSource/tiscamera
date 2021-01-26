@@ -73,8 +73,6 @@ public:
 
     std::string to_string () const;
 
-    bool from_string (const std::string&);
-
     /**
      * Description for getRequiredBufferSize.
      * @return size in bytes an image with this format will have

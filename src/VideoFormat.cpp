@@ -126,51 +126,51 @@ std::string VideoFormat::to_string () const
 }
 
 
-bool VideoFormat::from_string (const std::string& desc)
-{
-    tcam_video_format f = {};
+// bool VideoFormat::from_string (const std::string& desc)
+// {
+//     tcam_video_format f = {};
 
-    auto vec = split_string(desc, ",");
+//     auto vec = split_string(desc, ",");
 
-    for (auto v : vec)
-    {
-        auto val = split_string(v, "=");
+//     for (auto v : vec)
+//     {
+//         auto val = split_string(v, "=");
 
-        if (val.size() != 2)
-        {
-            SPDLOG_ERROR("Received faulty VideoFormat String \"{}\"", v.c_str());
-            return false;
-        }
+//         if (val.size() != 2)
+//         {
+//             SPDLOG_ERROR("Received faulty VideoFormat String \"{}\"", v.c_str());
+//             return false;
+//         }
 
-        if (val[0].compare("format") == 0)
-        {
-            SPDLOG_ERROR("format is  \"{}\"", val[1].c_str());
+//         if (val[0].compare("format") == 0)
+//         {
+//             SPDLOG_ERROR("format is  \"{}\"", val[1].c_str());
 
-            f.fourcc  = description2fourcc(val[1].c_str());
-        }
-        else if (val[0].compare("width") == 0)
-        {
-            f.width = stoi(val[1]);
-        }
-        else if (val[0].compare("height") == 0)
-        {
-            f.height = stoi(val[1]);
-        }
-        else if (val[0].compare("framerate") == 0)
-        {
-            f.framerate = stod(val[1]);
-        }
-        else
-        {
-            SPDLOG_ERROR("Unknown descriptor in VideoFormat String \"{}\"", val[0].c_str());
-            return false;
-        }
-    }
+//             f.fourcc  = description2fourcc(val[1].c_str());
+//         }
+//         else if (val[0].compare("width") == 0)
+//         {
+//             f.width = stoi(val[1]);
+//         }
+//         else if (val[0].compare("height") == 0)
+//         {
+//             f.height = stoi(val[1]);
+//         }
+//         else if (val[0].compare("framerate") == 0)
+//         {
+//             f.framerate = stod(val[1]);
+//         }
+//         else
+//         {
+//             SPDLOG_ERROR("Unknown descriptor in VideoFormat String \"{}\"", val[0].c_str());
+//             return false;
+//         }
+//     }
 
-    this->format = f;
+//     this->format = f;
 
-    return true;
-}
+//     return true;
+// }
 
 
 uint64_t VideoFormat::get_required_buffer_size () const

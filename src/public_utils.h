@@ -30,10 +30,6 @@ namespace tcam
 
 const char* fourcc_to_description (uint32_t fourcc);
 
-
-uint32_t description_to_fourcc (const char* description);
-
-
 std::string category2string (TCAM_PROPERTY_CATEGORY);
 
 std::string property_id_to_string (TCAM_PROPERTY_ID);

@@ -92,21 +92,3 @@ void print_active_format (const VideoFormat& format)
               << "\nResolution: \t" << format.get_size().width << "x" << format.get_size().height
               << "\nFramerate: \t" << format.get_framerate() << "\n" << std::endl;
 }
-
-
-bool set_active_format (std::shared_ptr<CaptureDevice> dev, const std::string& new_format)
-{
-    VideoFormat v;
-
-    bool ret = v.from_string(new_format);
-
-    if (ret)
-    {
-        return dev->set_video_format(v);
-    }
-    else
-    {
-        std::cout << "Invalid string description!" << std::endl;
-    }
-    return false;
-}

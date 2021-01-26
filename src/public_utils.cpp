@@ -31,12 +31,6 @@ const char* tcam::fourcc_to_description (uint32_t fourcc)
 }
 
 
-uint32_t tcam::description_to_fourcc (const char* description)
-{
-    return description2fourcc(description);
-}
-
-
 std::string tcam::category2string (TCAM_PROPERTY_CATEGORY category)
 {
     switch (category)

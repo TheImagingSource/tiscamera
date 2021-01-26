@@ -28,7 +28,7 @@ typedef struct
 static TcamGstMapping tcam_gst_caps_info[] =
 {
     {
-        FOURCC_RGB32,
+        FOURCC_BGRA32,
         "video/x-raw, format=(string)BGRx",
         "video/x-raw",
         "BGRx",
@@ -40,7 +40,7 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "BGR",
     },
     {
-        FOURCC_RGB64,
+        FOURCC_BGRA64,
         "video/x-raw, format=(string)RGBx64",
         "video/x-raw",
         "RGBx64",
@@ -52,13 +52,13 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "GRAY8",
     },
     {
-        FOURCC_Y12_PACKED,
+        FOURCC_MONO12_PACKED,
         "video/x-raw, format=(string)GRAY12p",
         "video/x-raw",
         "GRAY12p"
     },
     {
-        FOURCC_Y12_SPACKED,
+        FOURCC_MONO12_SPACKED,
         "video/x-raw, format=(string)GRAY12sp",
         "video/x-raw",
         "GRAY12sp"
@@ -88,50 +88,6 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-bayer, format=(string)bggr",
         "video/x-bayer",    "bggr",
     },
-
-    {
-        FOURCC_GBRG10,
-        "video/x-bayer, format=(string)gbrg10",
-        "video/x-bayer",    "gbrg10",
-    },
-    {
-        FOURCC_BGGR10,
-        "video/x-bayer, format=(string)bggr10",
-        "video/x-bayer",    "bggr10",
-    },
-    {
-        FOURCC_GRBG10,
-        "video/x-bayer, format=(string)grbg10",
-        "video/x-bayer",    "grbg10",
-    },
-    {
-        FOURCC_RGGB10,
-        "video/x-bayer, format=(string)rggb10",
-        "video/x-bayer",    "rggb10",
-    },
-
-    {
-        FOURCC_GBRG12,
-        "video/x-bayer, format=(string)gbrg12",
-        "video/x-bayer",    "gbrg12",
-    },
-    {
-        FOURCC_BGGR12,
-        "video/x-bayer, format=(string)bggr12",
-        "video/x-bayer",    "bggr12",
-    },
-    {
-        FOURCC_GRBG12,
-        "video/x-bayer, format=(string)grbg12",
-        "video/x-bayer",    "grbg12",
-    },
-    {
-        FOURCC_RGGB12,
-        "video/x-bayer, format=(string)rggb12",
-        "video/x-bayer",    "rggb12",
-    },
-
-
     {
         FOURCC_GBRG12_PACKED,
         "video/x-bayer, format=(string)gbrg12p",
@@ -217,7 +173,7 @@ static TcamGstMapping tcam_gst_caps_info[] =
     },
 
     {
-        FOURCC_YUYV,
+        FOURCC_YUY2,
         "video/x-raw, format=(string)YUY2",
         "video/x-raw", "YUY2",
     },
@@ -232,11 +188,6 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-raw",  "UYVY",
     },
     {
-        FOURCC_Y422,
-        "video/x-raw, format=(string)Y422",
-        "video/x-raw", "Y422",
-    },
-    {
         FOURCC_Y411,
         "video/x-raw, format=(string)IYU1",
         "video/x-raw", "IYU1",
@@ -247,22 +198,22 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "image/jpeg", "",
     },
     {
-        FOURCC_POLARIZATION_BAYER_BG8_90_45_135_0,
+        FOURCC_POLARIZATION_BG8_90_45_135_0,
         "video/x-bayer, format=(string)bggr_polarized_90_45_135_0",
         "video/x-bayer", "bggr_polarized_90_45_135_0",
     },
     {
-        FOURCC_POLARIZATION_BAYER_BG12_PACKED_90_45_135_0,
+        FOURCC_POLARIZATION_BG12_PACKED_90_45_135_0,
         "video/x-bayer, format=(string)bggr12p_polarized_90_45_135_0",
         "video/x-bayer", "bggr12p_polarized_90_45_135_0",
     },
     {
-        FOURCC_POLARIZATION_BAYER_BG12_SPACKED_90_45_135_0,
+        FOURCC_POLARIZATION_BG12_SPACKED_90_45_135_0,
         "video/x-bayer, format=(string)bggr12sp_polarized_90_45_135_0",
         "video/x-bayer", "bggr12sp_polarized_90_45_135_0",
     },
     {
-        FOURCC_POLARIZATION_BAYER_BG16_90_45_135_0,
+        FOURCC_POLARIZATION_BG16_90_45_135_0,
         "video/x-bayer, format=(string)bggr16_polarized_90_45_135_0",
         "video/x-bayer", "bggr16_polarized_90_45_135_0",
     },

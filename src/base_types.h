@@ -26,7 +26,12 @@
 #include <stdbool.h>
 #include <cstring>
 #include "property_identifications.h"
-#include "image_fourcc.h"
+#include "include/img/image_fourcc.h"
+
+#ifndef byte
+typedef uint8_t byte;
+#endif
+
 
 /**
 * @name TCAM_PIPELINE_STATUS
