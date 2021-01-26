@@ -32,6 +32,7 @@ target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
 target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gobject")
 target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
 target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/include/img")
 
 target_link_libraries(tcam-ctrl tcam)
 target_link_libraries(tcam-ctrl tcamgstbase)

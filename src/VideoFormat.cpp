@@ -18,6 +18,7 @@
 #include "logging.h"
 #include "utils.h"
 #include "format.h"
+#include "fcc_to_string.h"
 
 #include <iomanip>              // setprecision
 #include <sstream>
@@ -116,7 +117,7 @@ std::string VideoFormat::to_string () const
     std::string s;
 
     s  = "format=";
-    s += fourcc2description(format.fourcc);
+    s += img::fcc_to_string(format.fourcc);
     s += ",";
     s += "width="     + std::to_string(format.width)   + ",";
     s += "height="    + std::to_string(format.height)  + ",";

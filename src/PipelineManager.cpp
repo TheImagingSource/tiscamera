@@ -22,6 +22,7 @@
 #include <cstring>
 #include <algorithm>
 #include <utils.h>
+#include "fcc_to_string.h"
 
 using namespace tcam;
 
@@ -217,8 +218,8 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
     for (const auto& v : available_input_formats)
     {
         SPDLOG_DEBUG("Found device fourcc '{}' - {:x}",
-                   fourcc2description(v.get_fourcc()),
-                   v.get_fourcc());
+                     img::fcc_to_string(v.get_fourcc()),
+                     v.get_fourcc());
 
         device_fourcc.push_back(v.get_fourcc());
     }

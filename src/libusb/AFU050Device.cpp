@@ -23,6 +23,7 @@
 #include "standard_properties.h"
 #include "format.h"
 #include "afu050_definitions.h"
+#include "fcc_to_string.h"
 
 #include <algorithm>
 #include <cstring>
@@ -97,7 +98,7 @@ void AFU050Device::create_formats ()
     struct tcam_video_format_description desc = {};
 
     desc.fourcc = FOURCC_MJPG;
-    memcpy(desc.description, fourcc2description(desc.fourcc), sizeof(desc.description));
+    memcpy(desc.description, img::fcc_to_string(desc.fourcc).c_str(), sizeof(desc.description));
 
     std::vector<struct framerate_mapping> rf;
 

@@ -24,15 +24,6 @@
 namespace tcam
 {
 
-
-/**
- * Description for fourcc2description.
- * @param fourcc - format type that shall be descriped
- * @return description of the fourcc; NULL if none
- */
-const char* fourcc2description (uint32_t fourcc);
-
-
 /**
  * @brief convert string to fourcc
  * @param description - string that shall be converted

@@ -25,11 +25,6 @@
 
 using namespace tcam;
 
-const char* tcam::fourcc_to_description (uint32_t fourcc)
-{
-    return fourcc2description(fourcc);
-}
-
 
 std::string tcam::category2string (TCAM_PROPERTY_CATEGORY category)
 {

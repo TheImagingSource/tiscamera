@@ -22,11 +22,6 @@
 
 #include <cstring>
 
-const char* tcam::fourcc2description (uint32_t fourcc)
-{
-    return img::fcc_to_string(fourcc).c_str();
-}
-
 
 uint32_t tcam::description2fourcc (const char* /*description*/)
 {

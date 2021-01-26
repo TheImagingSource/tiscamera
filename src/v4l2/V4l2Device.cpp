@@ -24,6 +24,7 @@
 #include <errno.h>
 #include "v4l2_uvc_identifier.h"
 #include "dfk73.h"
+#include "fcc_to_string.h"
 
 #include <algorithm>
 #include <unistd.h>
@@ -313,9 +314,9 @@ bool V4l2Device::set_framerate (double framerate)
         for (frmival.index = 0; tcam_xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; frmival.index++)
         {
             SPDLOG_DEBUG("F: {} {}x{} @ {}/{}",
-                       fourcc2description(frmival.pixel_format),
-                       frmival.width, frmival.height,
-                       frmival.discrete.numerator, frmival.discrete.denominator);
+                         img::fcc_to_string(frmival.pixel_format),
+                         frmival.width, frmival.height,
+                         frmival.discrete.numerator, frmival.discrete.denominator);
             // Workaround for erratic frame rate handling of dfk73uc cameras:
             // Always set the highest possible frame rate for the current
             // video format via the UVC control. Then set the sensor clock
@@ -685,7 +686,7 @@ void V4l2Device::index_formats ()
         VideoFormatDescription format(nullptr, desc, rf);
         this->available_videoformats.push_back(format);
 
-        SPDLOG_DEBUG("Found format: {}", fourcc2description(format.get_fourcc()));
+        SPDLOG_DEBUG("Found format: {}", img::fcc_to_string(format.get_fourcc()));
 
     }
 

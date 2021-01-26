@@ -17,6 +17,8 @@
 #include "formats.h"
 #include "general.h"
 
+#include "fcc_to_string.h"
+
 #include "tcamgststrings.h"
 #include "tcamgstbase.h" // videoformatsdescription_to_gst_caps_string
 #include <gst/gst.h> // gst_init
@@ -88,7 +90,7 @@ void list_gstreamer_1_0_formats (const std::string& serial)
 void print_active_format (const VideoFormat& format)
 {
     std::cout << "Active format:\n"
-              << "Format: \t" << fourcc_to_description(format.get_fourcc())
+              << "Format: \t" << img::fcc_to_string(format.get_fourcc())
               << "\nResolution: \t" << format.get_size().width << "x" << format.get_size().height
               << "\nFramerate: \t" << format.get_framerate() << "\n" << std::endl;
 }

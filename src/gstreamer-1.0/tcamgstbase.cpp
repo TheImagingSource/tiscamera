@@ -21,6 +21,7 @@
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 #include <algorithm> //std::find
+#include "fcc_to_string.h"
 
 #include "tcamgststrings.h"
 #include "image_transform_base.h"
@@ -731,7 +732,7 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         {
             SPDLOG_ERROR("Could not associate rank with fourcc {:x} {}",
                          fourcc,
-                         tcam::fourcc_to_description(fourcc));
+                         img::fcc_to_string(fourcc).c_str());
         }
     }
     if( map.empty() ) {
@@ -1548,7 +1549,7 @@ GstCaps* convert_videoformatsdescription_to_caps (const std::vector<tcam::VideoF
         if (caps_string == nullptr)
         {
             SPDLOG_WARN("Format has empty caps string. Ignoring {}",
-                         tcam::fourcc_to_description(desc.get_fourcc()));
+                        img::fcc_to_string(desc.get_fourcc()));
             continue;
         }
 
