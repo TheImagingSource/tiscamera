@@ -16,8 +16,8 @@
 
 #include "format.h"
 
-#include "image_fourcc.h"
-#include "fcc_to_string.h"
+#include "img/image_fourcc.h"
+#include "img/fcc_to_string.h"
 #include "logging.h"
 
 #include <cstring>

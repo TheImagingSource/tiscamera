@@ -15,7 +15,7 @@
  */
 
 #include "biteater.h"
-#include "image_transform_base.h"
+#include "img/image_transform_base.h"
 
 
 void tcam::biteater::para_callback::call (const tcam_image_buffer& image_in,

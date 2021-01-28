@@ -15,7 +15,7 @@
  */
 
 #include "auto_focus.h"
-#include "image_fourcc_func.h"
+#include "img/image_fourcc_func.h"
 
 #include <stdio.h>
 

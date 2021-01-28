@@ -24,8 +24,8 @@
 #include "format.h"
 #include "utils.h"
 #include "public_utils.h"
-#include "image_transform_base.h"
-#include "fcc_to_string.h"
+#include "img/image_transform_base.h"
+#include "img/fcc_to_string.h"
 
 #include <algorithm>
 #include <cstring>

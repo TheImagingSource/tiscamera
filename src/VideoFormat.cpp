@@ -18,7 +18,7 @@
 #include "logging.h"
 #include "utils.h"
 #include "format.h"
-#include "fcc_to_string.h"
+#include "img/fcc_to_string.h"
 
 #include <iomanip>              // setprecision
 #include <sstream>

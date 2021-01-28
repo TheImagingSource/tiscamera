@@ -32,7 +32,7 @@ set(srcs
 add_library(tcam-algorithms SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
 
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src")
-target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src/include/img")
+target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_BINARY_DIR}")
 
 set_property(TARGET tcam-algorithms PROPERTY VERSION ${TCAM_VERSION})

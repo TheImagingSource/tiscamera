@@ -21,10 +21,10 @@
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 #include <algorithm> //std::find
-#include "fcc_to_string.h"
+#include "img/fcc_to_string.h"
 
 #include "tcamgststrings.h"
-#include "image_transform_base.h"
+#include "img/image_transform_base.h"
 
 #include "public_utils.h"
 

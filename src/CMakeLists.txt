@@ -62,7 +62,7 @@ add_library(tcam-base OBJECT ${base})
 
 target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include")
-target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/src/include/img")
+target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
 
 set( srcs
   BackendLoader.cpp
@@ -168,7 +168,7 @@ add_custom_target(generate-version-file
 
 
 add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base> ${TCAM_VERSION_FILE})
-target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/src/include/img")
+target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
 
 add_dependencies(tcam-base generate-version-file)
 

@@ -21,7 +21,7 @@
 
 // #include <dutils_img_pipe/auto_alg_params.h>
 
-#include "image_transform_base.h"
+#include "img/image_transform_base.h"
 #include "auto_alg_params.h"
 
 namespace

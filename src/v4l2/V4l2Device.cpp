@@ -24,7 +24,7 @@
 #include <errno.h>
 #include "v4l2_uvc_identifier.h"
 #include "dfk73.h"
-#include "fcc_to_string.h"
+#include "img/fcc_to_string.h"
 
 #include <algorithm>
 #include <unistd.h>

@@ -16,7 +16,7 @@
 
 #include "RegionOfInterest.h"
 
-#include "image_transform_base.h"
+#include "img/image_transform_base.h"
 
 #include "math.h"
 

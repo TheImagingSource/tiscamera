@@ -23,7 +23,7 @@
 #include "standard_properties.h"
 #include "format.h"
 #include "afu050_definitions.h"
-#include "fcc_to_string.h"
+#include "img/fcc_to_string.h"
 
 #include <algorithm>
 #include <cstring>

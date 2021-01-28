@@ -20,7 +20,7 @@
 #include "logging.h"
 
 #include "internal.h"
-#include "image_fourcc.h"
+#include "img/image_fourcc.h"
 
 #include <algorithm>
 #include <vector>

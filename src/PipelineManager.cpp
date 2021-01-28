@@ -22,7 +22,7 @@
 #include <cstring>
 #include <algorithm>
 #include <utils.h>
-#include "fcc_to_string.h"
+#include "img/fcc_to_string.h"
 
 using namespace tcam;
 

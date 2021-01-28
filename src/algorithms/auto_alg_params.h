@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "image_helper_types.h"
+#include "img/image_helper_types.h"
 
 
 

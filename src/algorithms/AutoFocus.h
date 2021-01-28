@@ -18,7 +18,7 @@
 #define _AUTOFOCUS_H_
 
 #include <stdbool.h>
-#include "image_transform_base.h"
+#include "img/image_transform_base.h"
 #include "auto_alg_params.h"
 
 #ifdef __cplusplus
