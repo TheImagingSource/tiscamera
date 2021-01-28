@@ -120,6 +120,7 @@ typedef struct GstTcamautoexposure
     gint frame_counter;
 
     gboolean module_is_disabled;
+    gboolean camera_initialized;
 
 } GstTcamautoexposure;
 

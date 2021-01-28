@@ -50,23 +50,11 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain);
 
 static void set_iris (GstTcamautoexposure* self, int iris);
 
-static void gst_tcamautoexposure_set_property (GObject* object,
-                                               guint property_id,
-                                               const GValue* value,
-                                               GParamSpec* pspec);
-static void gst_tcamautoexposure_get_property (GObject* object,
-                                               guint property_id,
-                                               GValue* value,
-                                               GParamSpec* pspec);
-static void gst_tcamautoexposure_finalize (GObject* object);
-
-
-static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
-                                                        GstBuffer* buf);
 static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform * trans,
                                                GstCaps * incaps, GstCaps * outcaps);
 
 static void init_camera_resources (GstTcamautoexposure* self);
+static gboolean find_image_values (GstTcamautoexposure* self);
 
 
 enum
@@ -101,6 +89,10 @@ static void gst_tcamautoexposure_get_property (GObject* object,
                                                GValue* value,
                                                GParamSpec* pspec);
 static void gst_tcamautoexposure_finalize (GObject* object);
+
+
+static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
+                                                               GstStateChange trans);
 
 static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans, GstBuffer* buf);
 
@@ -548,10 +540,11 @@ static void gst_tcamautoexposure_class_init (GstTcamautoexposureClass* klass)
 
     GST_DEBUG_CATEGORY_INIT(gst_tcamautoexposure_debug_category, "tcamautoexposure", 0, "tcam autoexposure");
 
-
+    GST_ELEMENT_CLASS(klass)->change_state = gst_tcamautoexposure_change_state;
     gobject_class->set_property = gst_tcamautoexposure_set_property;
     gobject_class->get_property = gst_tcamautoexposure_get_property;
     gobject_class->finalize = gst_tcamautoexposure_finalize;
+
     base_transform_class->transform_ip = gst_tcamautoexposure_transform_ip;
     base_transform_class->set_caps = GST_DEBUG_FUNCPTR (gst_tcamautoexposure_set_caps);
 
@@ -700,6 +693,8 @@ static void gst_tcamautoexposure_init (GstTcamautoexposure *self)
     self->iris_max = G_MAXINT;
 
     self->camera_src = NULL;
+    self->camera_initialized = FALSE;
+
     self->module_is_disabled = FALSE;
 
     tcam_image_size s = {SAMPLING_MIN_WIDTH, SAMPLING_MIN_HEIGHT};
@@ -1003,13 +998,80 @@ static void gst_tcamautoexposure_finalize (GObject* object)
     auto self = GST_TCAMAUTOEXPOSURE(object);
     destroy_roi(self->roi);
 
-    if( self->camera_src ) {
-        gst_object_unref( self->camera_src );
+    if (self->camera_src)
+    {
+        gst_object_unref(self->camera_src);
     }
 
     G_OBJECT_CLASS (gst_tcamautoexposure_parent_class)->finalize (object);
 }
 
+
+static GstStateChangeReturn gst_tcamautoexposure_change_state (GstElement* element,
+                                                               GstStateChange trans)
+{
+    GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
+
+    GstTcamautoexposure* self = GST_TCAMAUTOEXPOSURE(element);
+
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_PAUSED_TO_PLAYING:
+        {
+
+            if (self->camera_src == NULL)
+            {
+                self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+                if (self->camera_src == nullptr)
+                {
+                    GST_ERROR("Could not find source element");
+                    return GST_STATE_CHANGE_FAILURE;
+                }
+                else
+                {
+                    self->camera_initialized = FALSE;
+
+                    // find_image_values(self);
+                    // init_camera_resources(self);
+                }
+            }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    gst_element_set_locked_state(element, TRUE);
+    ret = GST_ELEMENT_CLASS(gst_tcamautoexposure_parent_class)->change_state(element, trans);
+    gst_element_set_locked_state(element, FALSE);
+
+    if (ret == GST_STATE_CHANGE_FAILURE)
+    {
+        return ret;
+    }
+
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_READY_TO_NULL:
+        {
+            if (self->camera_src)
+            {
+                gst_object_unref(self->camera_src);
+                self->camera_src = NULL;
+                self->camera_initialized = FALSE;
+            }
+
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+    return ret;
+}
 
 static void init_camera_resources (GstTcamautoexposure* self)
 {
@@ -1284,6 +1346,8 @@ static void init_camera_resources (GstTcamautoexposure* self)
 
         GST_INFO( "Iris boundaries are %d %d", self->iris.min, self->iris.max );
     }
+
+    self->camera_initialized = TRUE;
 }
 
 
@@ -1736,18 +1800,9 @@ static GstFlowReturn gst_tcamautoexposure_transform_ip (GstBaseTransform* trans,
         }
     }
 
-    if (self->camera_src == NULL)
+    if (!self->camera_initialized)
     {
-        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
-        if (self->camera_src == nullptr)
-        {
-            GST_ERROR("Could not find source element");
-            return GST_FLOW_ERROR;
-        }
-        else
-        {
-            init_camera_resources(self);
-        }
+        init_camera_resources(self);
     }
 
     if (self->auto_exposure == FALSE
