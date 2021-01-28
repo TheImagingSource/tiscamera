@@ -41,7 +41,8 @@ TEST_CASE("find_input_caps")
     //     has_dutils = false;
     // }
     bool use_dutils = false;
-    init_test_data(use_dutils);
+    bool use_by1xtransform = false;
+    init_test_data(use_dutils, use_by1xtransform);
     auto test_data = get_test_data();
 
     for (unsigned int x = 0; x < test_data.size(); x++)

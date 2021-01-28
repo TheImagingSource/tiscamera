@@ -37,22 +37,10 @@ struct fic_test_data_container
     std::string sink_caps;
     struct input_caps_toggles toggles;
     fic_test_result result;
-
-    // fic_test_data_container (  const char *name_,
-    //                            const char *input_caps_,
-    //                            const char *sink_caps_,
-    //                            bool use_dutils_,
-    //                            fic_test_result& result_)
-    //     : name(name_),
-    //       input_caps(input_caps_),
-    //       sink_caps(sink_caps_),
-    //       use_dutils(use_dutils_),
-    //       result(result_)
-    // {};
 };
 
 
-void init_test_data (bool use_dutlis);
+void init_test_data (bool use_pimipi, bool use_dutlis);
 
 std::vector<fic_test_data_container> get_test_data ();
 
