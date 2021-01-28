@@ -51,6 +51,9 @@ enum
 
 /* prototypes */
 
+static GstStateChangeReturn gst_tcamautofocus_change_state (GstElement* element,
+                                                            GstStateChange trans);
+
 static void gst_tcamautofocus_set_property (GObject* object,
                                             guint property_id,
                                             const GValue* value,
@@ -334,6 +337,7 @@ static void gst_tcamautofocus_class_init (GstTcamAutoFocusClass* klass)
                                           "Adjusts the image focus by setting camera properties.",
                                           "The Imaging Source Europe GmbH <support@theimagingsource.com>");
 
+    GST_ELEMENT_CLASS(klass)->change_state = gst_tcamautofocus_change_state;
     gobject_class->set_property = gst_tcamautofocus_set_property;
     gobject_class->get_property = gst_tcamautofocus_get_property;
     gobject_class->finalize = gst_tcamautofocus_finalize;
@@ -403,10 +407,69 @@ static void gst_tcamautofocus_init (GstTcamAutoFocus *self)
 }
 
 
+static GstStateChangeReturn gst_tcamautofocus_change_state (GstElement* element,
+                                                            GstStateChange trans)
+{
+    GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
+
+    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(element);
+
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_PAUSED_TO_PLAYING:
+        {
+
+            if (self->camera_src == NULL)
+            {
+                self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+                if (self->camera_src == nullptr)
+                {
+                    GST_ERROR("Could not find source element");
+                    return GST_STATE_CHANGE_FAILURE;
+                }
+            }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    gst_element_set_locked_state(element, TRUE);
+    ret = GST_ELEMENT_CLASS(gst_tcamautofocus_parent_class)->change_state(element, trans);
+    gst_element_set_locked_state(element, FALSE);
+
+    if (ret == GST_STATE_CHANGE_FAILURE)
+    {
+        return ret;
+    }
+
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_READY_TO_NULL:
+        {
+            if (self->camera_src)
+            {
+                gst_object_unref(self->camera_src);
+                self->camera_src = NULL;
+            }
+
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+    return ret;
+}
+
+
 static void gst_tcamautofocus_set_property (GObject* object,
-                                     guint property_id,
-                                     const GValue* value,
-                                     GParamSpec* pspec)
+                                            guint property_id,
+                                            const GValue* value,
+                                            GParamSpec* pspec)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (object);
 
@@ -485,9 +548,9 @@ static void gst_tcamautofocus_set_property (GObject* object,
 
 
 static void gst_tcamautofocus_get_property (GObject* object,
-                                     guint property_id,
-                                     GValue* value,
-                                     GParamSpec* pspec)
+                                            guint property_id,
+                                            GValue* value,
+                                            GParamSpec* pspec)
 {
     GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (object);
 
@@ -517,27 +580,29 @@ static void gst_tcamautofocus_get_property (GObject* object,
 
 static void gst_tcamautofocus_finalize (GObject* object)
 {
-    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS (object);
+    GstTcamAutoFocus* self = GST_TCAMAUTOFOCUS(object);
 
-    if( self->camera_src )
+    if (self->camera_src)
     {
-        gst_object_unref( self->camera_src );
+        gst_object_unref(self->camera_src);
     }
 
     autofocus_destroy(self->focus);
     destroy_roi(self->roi);
     self->roi = nullptr;
-    G_OBJECT_CLASS (gst_tcamautofocus_parent_class)->finalize (object);
+    G_OBJECT_CLASS(gst_tcamautofocus_parent_class)->finalize(object);
 }
 
 static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
 {
+    // if (self->camera_src == nullptr)
+    // {
+    //     self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
+    // }
+
     if (self->camera_src == nullptr)
     {
-        self->camera_src = tcam_gst_find_camera_src(GST_ELEMENT(self));
-    }
-    if( self->camera_src == nullptr ) {
-        GST_ERROR_OBJECT( self, "Failed to get camera_src" );
+        GST_ERROR("Failed to get camera_src");
         return;
     }
 
