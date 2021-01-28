@@ -44,8 +44,8 @@ TEST_CASE("VideoFormat Tests")
     {
         format.set_fourcc(FOURCC_MJPG);
 
-        REQUIRE(format.get_pitch_size() == 1280);
-        REQUIRE(format.get_required_buffer_size() == 614400);
+        REQUIRE(format.get_pitch_size() == 1920);
+        REQUIRE(format.get_required_buffer_size() == 921600);
     }
 
     SECTION("Size AND format change results in different pitch/buffer size")
@@ -71,6 +71,6 @@ TEST_CASE("VideoFormat Tests")
     SECTION("To string", "[VideoFormat::to_string]")
     {
 
-        REQUIRE(format.to_string() == "format=Y800,width=640,height=480,framerate=30.000000");
+        REQUIRE(format.to_string() == "format=Mono8,width=640,height=480,framerate=30.000000");
     }
 }
