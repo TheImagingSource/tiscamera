@@ -346,7 +346,7 @@ The format that can always be expected to work is `BGRx`. All other formats depe
      - Serial number of the device that shall be used
    * - type
      - string
-     - Backend the camera shall use. Available options: v4l2, aravis, libusb, unknown
+     - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
    * - device-caps
      - string
      - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
