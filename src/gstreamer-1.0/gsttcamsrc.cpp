@@ -636,6 +636,13 @@ static gboolean open_source_element (GstTcamSrc* self)
                         self->active_source = cur_elem;
                         break;
                     }
+                    // serial empty && type wished
+                    else if (self->device_serial.empty()
+                             && tcam::tcam_device_from_string(type_str) == self->device_type)
+                    {
+                        self->active_source = cur_elem;
+                        break;
+                    }
                 }
             }
             g_slist_free_full(tmp, g_free);
