@@ -101,6 +101,8 @@ namespace by_transform
         case FOURCC_RGGBFloat:	return by_pattern::RG;
         case FOURCC_GRBGFloat:	return by_pattern::GR;
 
+        case FOURCC_PWL_RG12_MIPI:  return by_pattern::RG;
+
         };
 
         //assert( false && "input was not a bayer type, so break" );        // input was not a bayer type, so break

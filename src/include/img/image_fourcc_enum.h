@@ -7,6 +7,7 @@ namespace img
 {
 	enum class fourcc : uint32_t
 	{
+		FCC_NULL = 0,
 		BGR24 = FOURCC_BGR24,
 		BGRA32 = FOURCC_BGRA32,
 		BGRA64 = FOURCC_BGRA64,
@@ -15,16 +16,17 @@ namespace img
 
 		YUY2 = FOURCC_YUY2,
 		UYVY = FOURCC_UYVY,
-		YV16 = FOURCC_YV16,  // planar
-		I420 = FOURCC_I420,  // planar
 		IYU1 = FOURCC_IYU1,
 		Y411 = FOURCC_Y411,      // the same format as IYU1
 		IYU2 = FOURCC_IYU2,
 		NV12 = FOURCC_NV12,
+		YV12 = FOURCC_YV12,
 
 		RAW8 = FOURCC_RAW8,
 		RAW16 = FOURCC_RAW16,
+		RAW24 = FOURCC_RAW24,
 		RAW32 = FOURCC_RAW32,
+		RAWFloat = FOURCC_RAWFloat,
 
 		MONO8 = FOURCC_MONO8,
 		MONO16 = FOURCC_MONO16,

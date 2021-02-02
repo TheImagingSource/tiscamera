@@ -28,9 +28,13 @@
 
 #define FOURCC_BGRFloat			mmioFOURCC( 'B', 'G', 'r', 'f' )    // BGR, channel: 32-bit float, little endian, struct: 96-bit
 
-#define FOURCC_RAW8				mmioFOURCC( 'R', 'A', 'W', '1' )	// 8-bit uint8_t
-#define FOURCC_RAW16			mmioFOURCC( 'R', 'A', 'W', '2' )	// 16-bit uint16_t, little endian, full range
-#define FOURCC_RAW32			mmioFOURCC( 'R', 'A', 'W', '4' )	// 32-bit uint32_t, little endian, full range
+#define FOURCC_RAW8				mmioFOURCC( 'R', 'A', 'W', '1' )	// 8-bit
+#define FOURCC_RAW16			mmioFOURCC( 'R', 'A', 'W', '2' )	// 16-bit
+#define FOURCC_RAW24			mmioFOURCC( 'R', 'A', 'W', '3' )	// 24-bit
+#define FOURCC_RAW32			mmioFOURCC( 'R', 'A', 'W', '4' )	// 32-bit
+
+#define FOURCC_RAWFloat			mmioFOURCC( 'R', 'A', 'W', 'f' )	// float, little endian
+
 
 #define FOURCC_HSV24		    mmioFOURCC( 'H', 'S', 'V', '3' )    // HSV, channel: 8-bit, struct: 24-bit
 #define FOURCC_HSVx32		    mmioFOURCC( 'H', 'S', 'V', '4' )    // HSVx, channel: 8-bit, struct: 32-bit, x channel => unused
@@ -38,12 +42,13 @@
 // YUV formats
 #define FOURCC_YUY2			    mmioFOURCC('Y', 'U', 'Y', '2')		// YUYV, channel: 8-bit, effective bit depth 16-bit
 #define FOURCC_UYVY			    mmioFOURCC('U', 'Y', 'V', 'Y')		// UYVY, channel: 8-bit, effective bit depth 16-bit
-#define FOURCC_I420			    mmioFOURCC('I', '4', '2', '0')      // Y plane, U + V plane sub-sampled horizontally x2, so 2x1
-#define FOURCC_YV16			    mmioFOURCC('Y', 'V', '1', '6')		// Y plane, U + V plane sub-sampled horizontally and vertically each x2, so 2x2 sub sampling
+#define FOURCC_I420			    mmioFOURCC('I', '4', '2', '0')      // Y plane, U + V plane sub-sampled 2x2
+#define FOURCC_YV16			    mmioFOURCC('Y', 'V', '1', '6')		// Y plane, U + V plane sub-sampled 2x1
 #define FOURCC_IYU1             mmioFOURCC('I', 'Y', 'U', '1')      // the same as Y411
 #define FOURCC_IYU2             mmioFOURCC('I', 'Y', 'U', '2')      // the same as Y444
 #define FOURCC_Y411			    mmioFOURCC('Y', '4', '1', '1')      // TIYUV: 1394 conferencing camera 4:1:1 mode 2, 12 bit
 #define FOURCC_NV12				mmioFOURCC('N', 'V', '1', '2')      // YUV 4:1:1 format, Y Plane, Interleaved 2x2 subsampled V/U Plane, 12 bit  see https://www.fourcc.org/pixel-format/yuv-nv12/
+#define FOURCC_YV12				mmioFOURCC('Y', 'V', '1', '2')      // YUV 4:1:1 format, Y Plane, 2x2 subsampled V plane, 2x2 subcampled U Plane, 12 bit  see https://www.fourcc.org/pixel-format/yuv-yv12/
 
 //#define FOURCC_Y444			    mmioFOURCC('Y', '4', '4', '4')      // TIYUV: 1394 conferencing camera 4:4:4 mode 0, 24 bit
 //#define FOURCC_Y422			    FOURCC_UYVY

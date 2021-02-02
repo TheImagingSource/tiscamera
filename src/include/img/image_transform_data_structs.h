@@ -66,7 +66,7 @@ namespace img
     struct pwl_transform_params
     {
         float   window_in_bits = 24.f;       // [1.f;24.f]  step=0.1f
-        float   level_in_bits = 23.f;        // [1.f;24.f]  step=0.1f
+        float   level_in_bits = 0.f;        // [-24.f;24.f]  step=0.1f
     };
 }
 

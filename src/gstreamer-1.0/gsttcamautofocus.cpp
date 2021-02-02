@@ -623,12 +623,12 @@ static void transform_tcam (GstTcamAutoFocus* self, GstBuffer* buf)
     image.pitch = calc_pitch(image.format.fourcc,
                              image.format.width);
 
-    img::img_descriptor img_dsc = img::make_img_desc(image.pData,
-                                                     image.format.fourcc,
-                                                     {image.format.width,
-                                                     image.format.height},
-                                                     image.pitch,
-                                                     image.length);
+    img::img_type t = {};
+    t.type = image.format.fourcc;
+    t.dim = {(int)image.format.width, (int)image.format.height};
+    t.buffer_length = image.length;
+
+    img::img_descriptor img_dsc = img::make_img_desc_from_linear_memory(t, image.pData);
 
     int new_focus_value = g_value_get_int(&val);
     img::point p = {0, 0};

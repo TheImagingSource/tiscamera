@@ -8,35 +8,40 @@
 
 namespace img
 {
-    inline std::string      fcc_to_string( uint32_t fcc );		// This returns a more descriptive string
-    inline std::string      fcc_to_FCCstring( uint32_t fcc );	// converts to either the string BGR* or the actual fourcc chars
+    std::string      fcc_to_string( fourcc fcc );		// This returns a more descriptive string
+    std::string      fcc_to_FCCstring( fourcc fcc );	// converts to either the string BGR* or the actual fourcc chars
 
-	inline std::string      fcc_to_FCCstring( uint32_t fcc )
+	inline std::string      fcc_to_FCCstring( uint32_t fcc ) { return fcc_to_FCCstring( static_cast<fourcc>(fcc) ); }
+    inline std::string      fcc_to_FCCstring( fourcc fcc )
     {
         switch( fcc )
         {
-        case FOURCC_BGR24:  return "BGR24";
-        case FOURCC_BGRA32: return "BGRA32";
-        case FOURCC_BGRA64: return "BGRA64";
-        case 0:             return "NULL";
+        case fourcc::BGR24:		return "BGR24";
+        case fourcc::BGRA32:	return "BGRA32";
+        case fourcc::BGRA64:	return "BGRA64";
+		case fourcc::FCC_NULL:  return "NULL";
         default:
             break;
         }
 
+		uint32_t fcc_val = static_cast<uint32_t>(fcc);
+
         const char fccBuf[5] = {
-            static_cast<char>((fcc >> 0) & 0xff),
-            static_cast<char>((fcc >> 8) & 0xff),
-            static_cast<char>((fcc >> 16) & 0xff),
-            static_cast<char>((fcc >> 24) & 0xff),
+            static_cast<char>((fcc_val >> 0) & 0xff),
+            static_cast<char>((fcc_val >> 8) & 0xff),
+            static_cast<char>((fcc_val >> 16) & 0xff),
+            static_cast<char>((fcc_val >> 24) & 0xff),
             '\0'
         };
         return fccBuf;
     }
 
-	inline std::string      fcc_to_string( uint32_t fcc )
+	inline std::string      fcc_to_string( uint32_t fcc ) { return fcc_to_string( static_cast<fourcc>( fcc ) ); }
+	inline std::string      fcc_to_string( fourcc fcc )
 	{
-		switch( (fourcc) fcc )
+		switch( fcc )
 		{
+		case fourcc::FCC_NULL:						return "NULL";
 		case fourcc::BGR24:							return "BGR24";
 		case fourcc::BGRA32:						return "BGRA32";
 		case fourcc::BGRA64:						return "BGRA64";
@@ -44,16 +49,17 @@ namespace img
 
 		case fourcc::RAW8:							return "Raw8";
 		case fourcc::RAW16:							return "Raw16";
+        case fourcc::RAW24:							return "Raw24";
 		case fourcc::RAW32:							return "Raw32";
+        case fourcc::RAWFloat:						return "RawFloat";
 
 		case fourcc::YUY2:							return "YUY2";
 		case fourcc::UYVY:							return "UYVY";
-		case fourcc::YV16:							return "YV16";
-		case fourcc::I420:							return "I420";
 		case fourcc::IYU1:							return "IYU1";
 		case fourcc::Y411:							return "Y411";
 		case fourcc::IYU2:							return "IYU2";
 		case fourcc::NV12:							return "NV12";
+		case fourcc::YV12:							return "YV12";
 
 		case fourcc::MJPG:							return "MJPG";
 

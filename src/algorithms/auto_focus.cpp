@@ -91,7 +91,7 @@ static int autofocus_get_contrast_ ( const img::img_descriptor& image, const Reg
     const int LINE_COUNT = 7;
 
     void* region_start = img::get_line_start<TChannelType>( image, region.y ) + region.x;
-    int stride = image.pitch;
+    int stride = image.pitch();
 
     int step_y = region.height / (LINE_COUNT + 1) + 1;
     int step_x = region.width / (LINE_COUNT + 1) + 1;
@@ -392,7 +392,7 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
 
         init_width_ = img.dim.cx;
         init_height_ = img.dim.cy;
-        init_pitch_ = img.pitch;
+        init_pitch_ = img.pitch();
         init_pixel_dim_ = pixel_dim;
         init_offset_ = offsets;
 
@@ -410,7 +410,7 @@ bool auto_alg::auto_focus::auto_alg_run (uint64_t time_point,
     {
         if (img.dim.cx != init_width_
             || img.dim.cy != init_height_
-            || img.pitch != init_pitch_
+            || img.pitch() != init_pitch_
             || init_pixel_dim_.cx != pixel_dim.cx
             || init_pixel_dim_.cy != pixel_dim.cy
             || init_offset_.x != offsets.x

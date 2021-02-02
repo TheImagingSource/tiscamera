@@ -13,6 +13,9 @@ namespace img
         int y = 0;
     };
 
+    constexpr bool operator==( const point& lhs, const point& rhs ) noexcept { return (lhs.x == rhs.x) && (lhs.y == rhs.y); }
+    constexpr bool operator!=( const point& lhs, const point& rhs ) noexcept { return !(lhs == rhs); }
+
     struct dim
     {
         int cx = 0;
