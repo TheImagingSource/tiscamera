@@ -115,11 +115,11 @@ For questions simply open a ticket or write us a mail at support@theimagingsourc
 
 All files are published under the Apache License 2.0, unless otherwise noted.
 
-Included libraries:
-PugiXml 1.6, which is available under the "MIT" license.
-The json library by Niels Lohmann, which is available under the "MIT" license.
-7z, which is published as public domain.
-aravis, which is available under the LGPLv2.
-CLI11, available under the 3-Clause BSD-License
-Catch2, which is published under the Boost Software License, Version 1.0
-spdlog, which is available under the "MIT" license.
+Included libraries:  
+PugiXml 1.6, which is available under the "MIT" license.  
+The json library by Niels Lohmann, which is available under the "MIT" license.  
+7z, which is published as public domain.  
+aravis, which is available under the LGPLv2.  
+CLI11, available under the 3-Clause BSD-License  
+Catch2, which is published under the Boost Software License, Version 1.0  
+spdlog, which is available under the "MIT" license.  
