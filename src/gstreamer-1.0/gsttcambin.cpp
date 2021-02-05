@@ -658,7 +658,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
         }
 
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+            && (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr
+                || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus Auto") == nullptr))
         {
             if (!create_and_add_element(&self->focus,
                                         "tcamautofocus", "tcambin-focus",
@@ -1139,7 +1140,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
             self->data->out_caps.reset(gst_element_factory_make("capsfilter", "tcambin-out_caps"));
 
             gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->src_ghost_pad),
-                                      gst_helper::get_static_pad( self->data->out_caps, "src" ).get() );
+                                     gst_helper::get_static_pad( self->data->out_caps, "src" ).get() );
 
             GstCaps* all_caps = generate_all_caps(self);
             g_object_set(self->data->out_caps.get(), "caps", all_caps, NULL);
