@@ -36,6 +36,20 @@ def get_default_dir():
     return path
 
 
+def get_distribution_release():
+    process = subprocess.Popen(['lsb_release', '-a'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+
+    lsb_str = stdout.decode('UTF-8')
+    release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
+    distribution = re.search("Distributor ID:\\s(.+)$", lsb_str, re.MULTILINE)
+
+    return "{}_{}".format(distribution.group(1).lower(),
+                          release.group(1).replace(".", ""))
+
+
 def get_distribution():
     """
 
@@ -136,8 +150,6 @@ class DependencyManager(object):
             self.parser.print_help()
             return
 
-        # print(self.args)
-
         if self.args.file:
             dependency_file = self.args.file
         else:
@@ -155,6 +167,8 @@ class DependencyManager(object):
             self.install()
         elif self.args.command == "list":
             self.list()
+        elif self.args.command == "dist-release":
+            print(get_distribution_release(), end="")
         else:  # should not happen, check already after parse_args
             self.parser.print_help()
 
@@ -215,6 +229,12 @@ The most commonly used git commands are:
         parser_list.add_argument('--package', choices=['deb', ''], default='',
                                  help="List dependencies compatible with selected package manager")
 
+        # self.parser.add_argument("dist-release",
+        #                          help="Print simplefied distribution release identifier",
+        #                          action="store_true")
+        parser_install = subparser.add_parser("dist-release",
+                                              help="Give distribution release information",
+                                              add_help=False)
         self.args = self.parser.parse_args()
 
     def __determine_dependency_file(self):

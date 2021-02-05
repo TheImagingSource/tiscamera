@@ -36,5 +36,20 @@ bool is_valid_device_serial (GstElement* source, const std::string& serial)
 
     g_slist_free_full(serials, g_free);
 
+    GSList* serials_backend = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
+
+    for (GSList* elem = serials_backend; elem; elem = elem->next)
+    {
+        const char* device_serial = (gchar*)elem->data;
+
+        if (serial.compare(device_serial) == 0)
+        {
+            g_slist_free_full(serials_backend, g_free);
+            return true;
+        }
+    }
+
+    g_slist_free_full(serials_backend, g_free);
+
     return false;
 }

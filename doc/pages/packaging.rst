@@ -22,11 +22,11 @@ The naming scheme for the packages follows these rules:
 
 The package is created on the master branch and is thus treated as a release.
 
-`tiscamera_<MAJOR>.<MINOR>.<PATCH>.<COMMIT_COUNT>_<ARCHITECTURE>.deb`
+`tiscamera_<MAJOR>.<MINOR>.<PATCH>.<COMMIT_COUNT>_<ARCHITECTURE>_<RELEASE_NAME>.deb`
 
 Any other branch used will result in the following scheme:
 
-`tiscamera_<MAJOR>.<MINOR>.<PATCH>.<COMMIT_COUNT>~<BRANCH>_<COMMIT_HASH>_<ARCHITECTURE>.deb`
+`tiscamera_<MAJOR>.<MINOR>.<PATCH>.<COMMIT_COUNT>~<BRANCH>_<COMMIT_HASH>_<ARCHITECTURE>_<RELEASE_NAME>.deb`
 
 This will be overwritten when a tag is present for the current commit. In this
 case, the package naming scheme will be:

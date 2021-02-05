@@ -327,10 +327,9 @@ class PropertyWidget(QWidget):
 
         elif self.prop.valuetype == "boolean":
 
-            if self.prop.value and not self.toggle.isChecked():
-                self.toggle.blockSignals(True)
-                self.toggle.toggle()
-                self.toggle.blockSignals(False)
+            self.toggle.blockSignals(True)
+            self.toggle.setChecked(self.prop.value)
+            self.toggle.blockSignals(False)
 
         elif self.prop.valuetype == "string":
             pass
