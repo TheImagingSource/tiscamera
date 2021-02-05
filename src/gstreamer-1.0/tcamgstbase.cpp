@@ -657,6 +657,15 @@ static std::vector<uint32_t> index_format_fourccs (const GstCaps* caps)
     return ret;
 }
 
+void reset_input_caps_modules (struct input_caps_required_modules& modules)
+{
+    modules.bayertransform = false;
+    modules.bayer2rgb = false;
+    modules.videoconvert = false;
+    modules.jpegdec = false;
+    modules.dutils = false;
+}
+
 
 static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
 {

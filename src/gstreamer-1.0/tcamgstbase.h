@@ -139,15 +139,7 @@ struct input_caps_required_modules
 };
 
 
-static void reset_input_caps_modules (struct input_caps_required_modules& modules)
-{
-    modules.bayertransform = false;
-    modules.bayer2rgb = false;
-    modules.videoconvert = false;
-    modules.jpegdec = false;
-    modules.dutils = false;
-}
-
+void reset_input_caps_modules (struct input_caps_required_modules& modules);
 
 
 struct input_caps_toggles
