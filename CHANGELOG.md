@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.1] - 2021.02.05
+
 ### Changed
 
 - tcambin applies state descriptions when changing to GST_STATE_PLAYING
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcambin caps negotiations for GRAY16_LE
 - multiple memory leaks
 - deadlock in tcammainsrc
+- device lost no longer fires when using long exposure times
+- tcam-ctrl did not correctly verify <serial>-<type> combos
 
 ## [0.13.0] - 2020-11-23
 
