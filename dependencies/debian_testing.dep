@@ -125,7 +125,12 @@
             "phase": "compilation",
             "modules": ["documentation"]
         },
-
+        {
+            "name": "libc6",
+            "version": ">= 2.31",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
         {
             "name": "libgstreamer1.0-0",
             "version": ">= 1.8.3",
@@ -223,7 +228,14 @@
             "version": ">= 1.14.0",
             "phase": "runtime",
             "modules": ["gui", "tools"]
+        },
+        {
+            "name": "python3",
+            "version": ">= 3.8.0",
+            "phase": "runtime",
+            "modules": ["gui", "gige", "tools"]
         }
+
     ]
 
 }
