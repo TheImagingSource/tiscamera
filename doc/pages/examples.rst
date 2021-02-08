@@ -1,4 +1,6 @@
 
+.. _examples:
+
 ########
 Examples
 ########
@@ -50,6 +52,10 @@ These examples exist in all available example languages.
    * - 11
      - device-state
      - Save and load JSON device state
+
+It may be neccessary to install additional development packages when using pre-compiled tiscamera packages.
+See :ref:`dependencies`.
+
 
 .. _examples_further:
 
