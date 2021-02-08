@@ -47,9 +47,9 @@ public:
      * @brief informs all filter about new format and checks if a valid pipeline can be created
      * @return true is device and pipeline allow format; else false
      */
-    bool setVideoFormat (const VideoFormat&);
+    bool setVideoFormat (const VideoFormat&) override;
 
-    VideoFormat getVideoFormat () const;
+    VideoFormat getVideoFormat () const override;
 
     /**
      *
@@ -57,12 +57,12 @@ public:
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties ();
 
-    bool set_status (TCAM_PIPELINE_STATUS);
+    bool set_status (TCAM_PIPELINE_STATUS) override;
 
     /**
      * @return TCAM_PIPELINE_STATUS the pipeline currently has
      */
-    TCAM_PIPELINE_STATUS get_status () const;
+    TCAM_PIPELINE_STATUS get_status () const override;
 
     /**
      * @brief Reset the pipeline to PIPELINE_STOPPED.
@@ -84,11 +84,11 @@ public:
     std::shared_ptr<SinkInterface> getSink ();
 
     // @brief callback for ImageSource
-    void push_image (std::shared_ptr<ImageBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>) override;
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>) override;
 
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () override;
 
     void drop_incomplete_frames (bool drop_them) override;
 

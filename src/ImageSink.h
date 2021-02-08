@@ -42,26 +42,26 @@ public:
 
     ImageSink ();
 
-    bool set_status (TCAM_PIPELINE_STATUS);
-    TCAM_PIPELINE_STATUS get_status () const;
+    bool set_status (TCAM_PIPELINE_STATUS) override;
+    TCAM_PIPELINE_STATUS get_status () const override;
 
-    bool setVideoFormat (const VideoFormat&);
+    bool setVideoFormat (const VideoFormat&) override;
 
-    VideoFormat getVideoFormat () const;
+    VideoFormat getVideoFormat () const override;
 
     bool registerCallback (shared_callback, void*);
     bool registerCallback (sink_callback, void*);
     bool registerCallback (c_callback, void*);
 
-    void push_image (std::shared_ptr<ImageBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>) override;
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>);
+    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
 
     bool set_buffer_number (size_t);
 
     bool set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>> new_buffers);
 
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () override;
 
     bool delete_buffer_collection ();
 
@@ -69,7 +69,7 @@ public:
      * used to set the pipelinemanager instance that is called
      * for things like requeue_buffer
      */
-    void set_source (std::weak_ptr<SinkInterface>);
+    void set_source (std::weak_ptr<SinkInterface>) override;
 
     void drop_incomplete_frames (bool drop_them) override;
     bool should_incomplete_frames_be_dropped () const override;

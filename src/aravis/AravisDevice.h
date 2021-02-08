@@ -71,32 +71,32 @@ public:
 
     ~AravisDevice ();
 
-    DeviceInfo get_device_description () const;
+    DeviceInfo get_device_description () const override;
 
-    std::vector<std::shared_ptr<Property>> getProperties () ;
+    std::vector<std::shared_ptr<Property>> getProperties () override;
 
-    bool set_property (const Property&);
+    bool set_property (const Property&) override;
 
-    bool get_property (Property&);
+    bool get_property (Property&) override;
 
     void update_property (struct property_mapping& mapping);
 
-    bool set_video_format (const VideoFormat&);
+    bool set_video_format (const VideoFormat&) override;
 
-    VideoFormat get_active_video_format () const;
+    VideoFormat get_active_video_format () const override;
 
-    std::vector<VideoFormatDescription> get_available_video_formats ();
+    std::vector<VideoFormatDescription> get_available_video_formats () override;
 
-    bool set_sink (std::shared_ptr<SinkInterface>);
+    bool set_sink (std::shared_ptr<SinkInterface>) override;
 
-    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>);
-    bool release_buffers ();
+    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>) override;
+    bool release_buffers () override;
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>) override;
 
-    bool start_stream ();
+    bool start_stream () override;
 
-    bool stop_stream ();
+    bool stop_stream () override;
 
 private:
 
@@ -131,7 +131,7 @@ private:
     };
 
     std::vector<buffer_info> buffers;
-    unsigned int current_buffer;
+
     struct tcam_stream_statistics statistics;
 
     struct aravis_options

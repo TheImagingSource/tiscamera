@@ -627,7 +627,7 @@ std::vector<DeviceInfo> tcam::get_aravis_device_list ()
             SPDLOG_WARN("Unable to determine model name.");
         }
 
-        strcpy(info.serial_number, arv_get_device_serial_nbr(i));
+        strncpy(info.serial_number, arv_get_device_serial_nbr(i), sizeof(info.serial_number));
 
         device_list.push_back(DeviceInfo(info));
     }

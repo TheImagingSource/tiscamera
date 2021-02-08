@@ -40,25 +40,25 @@ public:
 
     ~ImageSource ();
 
-    bool set_status (TCAM_PIPELINE_STATUS);
+    bool set_status (TCAM_PIPELINE_STATUS) override;
 
-    TCAM_PIPELINE_STATUS get_status () const;
+    TCAM_PIPELINE_STATUS get_status () const override;
 
     bool setDevice (std::shared_ptr<DeviceInterface>);
 
-    bool setVideoFormat (const VideoFormat&);
+    bool setVideoFormat (const VideoFormat&) override;
 
-    VideoFormat getVideoFormat () const;
+    VideoFormat getVideoFormat () const override;
 
-    void push_image (std::shared_ptr<ImageBuffer>);
+    void push_image (std::shared_ptr<ImageBuffer>) override;
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>);
+    void requeue_buffer (std::shared_ptr<ImageBuffer>) override;
 
     bool setSink (std::shared_ptr<SinkInterface>);
 
     bool set_buffer_collection (const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers);
 
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection ();
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () override;
 
     void drop_incomplete_frames (bool drop_them) override;
     bool should_incomplete_frames_be_dropped () const override;
