@@ -72,19 +72,13 @@ int main (int argc, char* argv[])
 
     struct input_caps_required_modules modules;
     struct input_caps_toggles toggles;
+    struct input_caps_required_modules expected;
 
-    bool requires_bayertransform;
-    bool bayertransform_expected = false;
-    bool requires_bayer;
-    bool bayer_expected = false;
-    bool requires_videoconvert;
-    bool videoconvert_expected = false;
-    bool requires_jpegdec;
-    bool jpegdec_expected = false;
-    bool requires_dutils;
-    bool dutils_expected = false;
-    bool use_dutils = false;
-    bool use_by1xtransform = false;
+    expected.bayertransform = false;
+    expected.bayer2rgb = false;
+    expected.videoconvert = false;
+    expected.jpegdec = false;
+    expected.dutils = false;
 
     const char* src_caps_str = "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};";
     const char* sink_caps_str = "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1";
@@ -110,23 +104,23 @@ int main (int argc, char* argv[])
     }
 
     test_succeeded = verify_flag("bayer",
-                                 requires_bayer, bayer_expected,
+                                 modules.bayer2rgb, expected.bayer2rgb,
                                  test_succeeded);
 
     test_succeeded = verify_flag("videoconvert",
-                                 requires_videoconvert, videoconvert_expected,
+                                 modules.videoconvert, expected.videoconvert,
                                  test_succeeded);
 
     test_succeeded = verify_flag("jpegenc",
-                                 requires_jpegdec, jpegdec_expected,
+                                 modules.jpegdec, expected.jpegdec,
                                  test_succeeded);
 
     test_succeeded = verify_flag("dutils",
-                                 requires_dutils, dutils_expected,
+                                 modules.dutils, expected.dutils,
                                  test_succeeded);
 
     test_succeeded = verify_flag("by1xtransform",
-                                 requires_bayertransform, bayertransform_expected,
+                                 modules.bayertransform, expected.bayertransform,
                                  test_succeeded);
 
     if (test_succeeded)

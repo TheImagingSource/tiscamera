@@ -28,7 +28,7 @@ set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PAT
 
 set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 
-
+include("CompilerWarnings")
 include("git-helper")
 
 git_commit_hash(GIT_COMMIT_HASH)

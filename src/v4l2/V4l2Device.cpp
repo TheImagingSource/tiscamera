@@ -1131,7 +1131,7 @@ void V4l2Device::create_special_property (int _fd,
         {
             SPDLOG_ERROR("Boolean '{}' has impossible value: {} Setting to false",
                          cp.name,
-                         ctrl->value);
+                         (int)ctrl->value);
             cp.value.b.value = false;
         }
         cp.flags = flags;

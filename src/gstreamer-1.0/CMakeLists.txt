@@ -29,7 +29,7 @@ find_package(GObjectIntrospection REQUIRED QUIET)
 
 add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
 target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
-
+set_project_warnings(tcamgstbase)
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
@@ -89,6 +89,8 @@ foreach (t IN ITEMS ${PLUGINS})
   target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
   target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
   target_link_libraries(${t} ${GSTREAMER_VIDEO_LIBRARIES})
+
+  set_project_warnings(${t})
 
 endforeach (t)
 

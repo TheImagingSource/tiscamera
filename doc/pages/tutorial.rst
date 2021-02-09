@@ -38,7 +38,7 @@ Dependencies
 ============
 
 The project requires multiple dependencies to compile.
-For a complete list of dependencies, see :any:`dependencies`.
+For a complete list of dependencies, see :ref:`dependencies`.
 
 To install all dependencies, execute the following command in the tiscamera directory:
 

@@ -75,6 +75,11 @@ void init_test_data (bool use_pimipi,
         init_dutils_test_data();
     }
 
+    if (use_pimipi)
+    {
+        return;
+    }
+
     // request is for bayer only
     // input caps contain bayer & GRAY8
     add_test("pass-trough bayer",

@@ -18,6 +18,8 @@
 #define __GST_TCAMWHITEBALANCE_H__
 
 #include <gst/gst.h>
+#include <gst/video/video.h>
+
 #include <gst/base/gstbasetransform.h>
 #include <gst/gstbuffer.h>
 

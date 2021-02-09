@@ -149,8 +149,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates (const str
 
 AravisDevice::AravisDevice (const DeviceInfo& device_desc)
     : handler(nullptr),
-      stream(NULL),
-      current_buffer(0)
+      stream(NULL)
 {
     device = device_desc;
     GError* err = NULL;

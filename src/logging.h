@@ -27,22 +27,6 @@
 
 #include "spdlog/spdlog.h"
 
-enum TCAM_LOG_TARGET
-{
-    NONE         = 0,
-    STDIO        = 1,
-    LOGFILE      = 2,
-    USER_DEFINED = 3,
-};
-
-/*
-  @brief Define target for logging output
-*/
-void tcam_set_logging_target (enum TCAM_LOG_TARGET target);
-
-void tcam_set_logging_file (const char* logfile);
-
-const char* tcam_get_logging_file ();
 
 
 enum TCAM_LOG_LEVEL
@@ -67,22 +51,6 @@ public:
 
     static Logger& getInstance ();
 
-    void log (const char* module,
-              enum TCAM_LOG_LEVEL level,
-              const char* function,
-              int line,
-              const char* message,
-              va_list);
-
-    void set_log_level (enum TCAM_LOG_LEVEL);
-    enum TCAM_LOG_LEVEL get_log_level () const;
-
-    void set_target (enum TCAM_LOG_TARGET);
-    enum TCAM_LOG_TARGET get_target () const;
-
-    void set_log_file (const std::string& filename);
-    std::string get_log_file () const;
-
     void set_external_callback (logging_callback cb_function, void* user_data);
     void delete_external_callback ();
 
@@ -95,36 +63,11 @@ private:
 
     Logger(Logger &&) = delete;
     Logger operator=(Logger &&) = delete;
-
     void load_default_settings ();
 
-    void log_to_stdout (const char* message);
-    void log_to_file (const char* message);
-
-    void open_logfile ();
-    void close_logfile ();
-
     enum spdlog::level::level_enum level;
-    std::string log_file;
-    TCAM_LOG_TARGET target;
     logging_callback callback;
     void* cb_user_data;
-    FILE* logfile;
 };
-
-/*
-  @brief Set the general log level. Everything lower will be discarded.
-*/
-void tcam_set_logging_level (enum TCAM_LOG_LEVEL level);
-
-
-enum TCAM_LOG_LEVEL tcam_get_logging_level ();
-
-/*
-  @brief Convenience function; wraps definitions of log-level, target,
-  into one function
-*/
-void tcam_logging_init(enum TCAM_LOG_TARGET target, enum TCAM_LOG_LEVEL level);
-
 
 #endif /* TCAM_LOGGING_H */

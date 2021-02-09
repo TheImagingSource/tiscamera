@@ -54,6 +54,7 @@ static const int max_work_item_count = 32;
 
 struct func_caller
 {
+    virtual ~func_caller() = default;
     virtual void call (const tcam_image_buffer& dst,
                        const tcam_image_buffer& src) = 0;
 };

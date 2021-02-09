@@ -57,9 +57,9 @@ public:
      */
     virtual std::vector<std::shared_ptr<Property>> getProperties () = 0;
 
-    virtual bool set_property (const Property&) = 0;
+    virtual bool set_property (const Property&) override = 0;
 
-    virtual bool get_property (Property&) = 0;
+    virtual bool get_property (Property&) override = 0;
 
     /**
      * @brief Set Format in he actual device

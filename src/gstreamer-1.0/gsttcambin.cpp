@@ -841,8 +841,8 @@ static gboolean gst_tcambin_link_elements (GstTcamBin* self)
                     return false;
                 }
 
-                gboolean ret = gst_element_link(*previous_element, *element);
-                if (!ret)
+                gboolean link_ret = gst_element_link(*previous_element, *element);
+                if (!link_ret)
                 {
                     return false;
                 }

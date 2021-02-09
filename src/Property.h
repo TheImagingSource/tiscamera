@@ -59,8 +59,6 @@ public:
 
     virtual ~Property ();
 
-    virtual Property& operator= (const Property&);
-
     void reset ();
 
     /**

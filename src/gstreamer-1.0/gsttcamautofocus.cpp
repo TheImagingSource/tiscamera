@@ -160,11 +160,31 @@ static GSList* gst_tcamautofocus_get_property_names (TcamProp* self __attribute_
 {
     GSList* names = nullptr;
 
-    names = g_slist_append(names, g_strdup( find_property_entry(PROP_AUTO)->prop_name));
-    names = g_slist_append(names, g_strdup( find_property_entry(PROP_LEFT)->prop_name ));
-    names = g_slist_append(names, g_strdup( find_property_entry(PROP_TOP)->prop_name ));
-    names = g_slist_append(names, g_strdup( find_property_entry(PROP_WIDTH)->prop_name ));
-    names = g_slist_append(names, g_strdup( find_property_entry(PROP_HEIGHT)->prop_name ));
+    auto p = find_property_entry(PROP_AUTO);
+    if (p)
+    {
+        names = g_slist_append(names, g_strdup( p->prop_name));
+    }
+    p = find_property_entry(PROP_LEFT);
+    if (p)
+    {
+        names = g_slist_append(names, g_strdup( p->prop_name ));
+    }
+    p = find_property_entry(PROP_AUTO);
+    if (p)
+    {
+        names = g_slist_append(names, g_strdup( p->prop_name ));
+    }
+    p = find_property_entry(PROP_AUTO);
+    if (p)
+    {
+        names = g_slist_append(names, g_strdup( p->prop_name ));
+    }
+    p = find_property_entry(PROP_AUTO);
+    if (p)
+    {
+        names = g_slist_append(names, g_strdup(p->prop_name ));
+    }
 
     return names;
 }

@@ -54,8 +54,8 @@ public:
 
     ~DeviceIndex ();
 
-    DeviceIndex& operator=(DeviceIndex&) = default;
-    DeviceIndex(DeviceIndex&) = default;
+    DeviceIndex& operator=(DeviceIndex&) = delete;
+    DeviceIndex(DeviceIndex&) = delete;
 
     std::vector<DeviceInfo> get_device_list () const;
 

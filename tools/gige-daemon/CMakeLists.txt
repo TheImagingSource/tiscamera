@@ -18,6 +18,7 @@ find_package(GLIB2   REQUIRED QUIET) # dependency
 find_package(GIO     REQUIRED QUIET) # dependency
 
 add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
+set_project_warnings(gige-daemon)
 
 target_include_directories(gige-daemon PRIVATE "${GIO_INCLUDE_DIR}")
 target_include_directories(gige-daemon PRIVATE ${GOBJECT_INCLUDE_DIR})

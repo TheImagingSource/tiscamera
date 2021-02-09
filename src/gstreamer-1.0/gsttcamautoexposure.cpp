@@ -225,8 +225,17 @@ static GSList* gst_tcamautoexposure_get_property_names (TcamProp* self)
         return nullptr;
     }
 
-    auto append = []( GSList* list, guint id ) {
-        return g_slist_append( list, g_strdup( find_tcamautoexposure_property_entry( id )->prop_name ) );
+    auto append = []( GSList* list, guint id )
+    {
+        auto prop = find_tcamautoexposure_property_entry(id);
+        if (prop)
+        {
+            return g_slist_append( list, g_strdup( prop->prop_name ) );
+        }
+        else
+        {
+            return list;
+        }
     };
 
     GSList* names = nullptr;
@@ -1412,8 +1421,9 @@ static void set_gain (GstTcamautoexposure* self, gdouble gain)
     else
     {
         g_value_init(&value, G_TYPE_DOUBLE);
-        g_value_set_double(&value, (float)gain / GAIN_FLOAT_MULTIPLIER);
-        GST_INFO("Setting gain to float %f", (float)gain /  GAIN_FLOAT_MULTIPLIER);
+
+        g_value_set_double(&value, (double)((double)gain / GAIN_FLOAT_MULTIPLIER));
+        GST_INFO("Setting gain to float %f", (double)((double)gain / GAIN_FLOAT_MULTIPLIER));
     }
     tcam_prop_set_tcam_property(TCAM_PROP(self->camera_src), self->gain_name.c_str(), &value);
 
@@ -1855,28 +1865,28 @@ static gboolean gst_tcamautoexposure_set_caps (GstBaseTransform* trans,
 
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {
-        const char *format;
-        format = gst_structure_get_string (structure, "format");
+        const char *caps_format;
+        caps_format = gst_structure_get_string (structure, "format");
         self->color_format = BAYER;
-        if (g_str_equal (format, "bggr"))
+        if (g_str_equal (caps_format, "bggr"))
         {
             self->pattern = BG;
         }
-        else if (g_str_equal (format, "gbrg"))
+        else if (g_str_equal (caps_format, "gbrg"))
         {
             self->pattern = GB;
         }
-        else if (g_str_equal (format, "grbg"))
+        else if (g_str_equal (caps_format, "grbg"))
         {
             self->pattern = GR;
         }
-        else if (g_str_equal (format, "rggb"))
+        else if (g_str_equal (caps_format, "rggb"))
         {
             self->pattern = RG;
         }
         else
         {
-            g_critical("Format '%s' not handled by this element", format);
+            g_critical("Format '%s' not handled by this element", caps_format);
             g_return_val_if_reached(false);
         }
     }

@@ -20,6 +20,7 @@ include_directories("${TCAM_SOURCE_DIR}/src/v4l2")
 add_executable(tcam-uvc-extension-loader main.cpp)
 
 target_link_libraries(tcam-uvc-extension-loader tcam-uvc-extension)
+set_project_warnings(tcam-uvc-extension-loader)
 
 install(TARGETS tcam-uvc-extension-loader
   DESTINATION "${TCAM_INSTALL_BIN}"

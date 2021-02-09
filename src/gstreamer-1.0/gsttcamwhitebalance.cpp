@@ -206,7 +206,8 @@ static gchar* gst_tcamwhitebalance_get_property_type (TcamProp* self __attribute
 {
     if (strcmp(name, "whitebalance-red") == 0)
     {
-        return strdup("integer");
+        return strdup("integer");        // NOLINT
+
     }
     else if (strcmp(name, "whitebalance-green") == 0)
     {
@@ -917,8 +918,12 @@ static rgb_tripel simulate_whitebalance (const auto_sample_points* data,
     rgb_tripel result_near_gray = { 0, 0, 0 };
     unsigned int count_near_gray = 0;
 
-    uint i;
-    for (i = 0; i < data->cnt; ++i)
+    if (data->cnt == 0)
+    {
+        return result;
+    }
+
+    for (uint i = 0; i < data->cnt; ++i)
     {
         unsigned int r = clip( data->samples[i].r * wb->R / WB_IDENTITY, WB_MAX );
         unsigned int g = clip( data->samples[i].g * wb->G / WB_IDENTITY, WB_MAX );
@@ -948,6 +953,10 @@ static rgb_tripel simulate_whitebalance (const auto_sample_points* data,
     }
     else
     {
+        if (count_near_gray == 0)
+        {
+            count_near_gray = 1;
+        }
         result_near_gray.R /= count_near_gray;
         result_near_gray.G /= count_near_gray;
         result_near_gray.B /= count_near_gray;
@@ -1178,27 +1187,27 @@ static gboolean gst_tcamwhitebalance_set_caps (GstBaseTransform* trans,
 
     if (g_str_equal(gst_structure_get_name(structure), "video/x-bayer"))
     {
-        const char* format;
-        format = gst_structure_get_string (structure, "format");
-        if (g_str_equal(format, "bggr"))
+        const char* caps_format;
+        caps_format = gst_structure_get_string (structure, "format");
+        if (g_str_equal(caps_format, "bggr"))
         {
             self->pattern = BG;
         }
-        else if (g_str_equal(format, "gbrg"))
+        else if (g_str_equal(caps_format, "gbrg"))
         {
             self->pattern = GB;
         }
-        else if (g_str_equal(format, "grbg"))
+        else if (g_str_equal(caps_format, "grbg"))
         {
             self->pattern = GR;
         }
-        else if (g_str_equal(format, "rggb"))
+        else if (g_str_equal(caps_format, "rggb"))
         {
             self->pattern = RG;
         }
         else
         {
-            g_critical("Format '%s' not handled by this element", format);
+            g_critical("Format '%s' not handled by this element", caps_format);
             g_return_val_if_reached(false);
         }
     }

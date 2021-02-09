@@ -37,6 +37,7 @@ unsigned int get_logical_cpu_count ();
 
 struct work_context
 {
+    virtual ~work_context() = default;
     virtual void do_one () = 0;
 };
 

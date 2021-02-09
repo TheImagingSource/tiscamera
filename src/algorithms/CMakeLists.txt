@@ -30,6 +30,7 @@ set(srcs
   parallel.cpp)
 
 add_library(tcam-algorithms SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
+set_project_warnings(tcam-algorithms)
 
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src")
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src/include/")

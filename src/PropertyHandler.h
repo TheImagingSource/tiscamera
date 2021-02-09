@@ -21,8 +21,9 @@
 
 #include <vector>
 #include <memory>
+#include "compiler_defines.h"
 
-#pragma GCC visibility push (internal)
+VISIBILITY_INTERNAL
 
 namespace tcam
 {
@@ -96,6 +97,6 @@ private:
 
 } /* namespace tcam */
 
-#pragma GCC visibility pop
+VISIBILITY_POP
 
 #endif /* TCAM_PROPERTYHANDLER_H */

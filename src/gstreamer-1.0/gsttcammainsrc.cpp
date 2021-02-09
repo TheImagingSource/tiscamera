@@ -600,9 +600,9 @@ static GSList* gst_tcam_mainsrc_get_device_serials_backend (TcamProp* self)
 
     for (const auto& d : devices)
     {
-        std::string s = d.get_serial() + "-" + d.get_device_type_as_string();
+        std::string long_serial = d.get_serial() + "-" + d.get_device_type_as_string();
         ret = g_slist_append(ret,
-                             g_strndup(s.c_str(), s.size()));
+                             g_strndup(long_serial.c_str(), long_serial.size()));
     }
 
     return ret;
@@ -1412,7 +1412,7 @@ wait_again:
     // add meta statistics data to buffer
     {
 
-        uint64_t frame_count = self->element.parent.segment.position;
+        uint64_t gst_frame_count = self->element.parent.segment.position;
         auto stat = ptr->get_statistics();
 
         GstStructure* struc = gst_structure_new_empty("TcamStatistics");
@@ -1444,7 +1444,7 @@ wait_again:
                       "camera_time_ns: %lu\n"
                       "framerate: %f\n"
                       "is_damaged: %s\n",
-                      frame_count,
+                      gst_frame_count,
                       stat.frame_count,
                       stat.frames_dropped,
                       stat.capture_time_ns,

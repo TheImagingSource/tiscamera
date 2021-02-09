@@ -199,8 +199,8 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             else
             {
                 SPDLOG_ERROR("Boolean '{}' has impossible value: {} Setting to false",
-                           cp.name,
-                           ctrl->value);
+                             cp.name,
+                             (int)ctrl->value);
                 cp.value.b.value = false;
             }
             cp.flags = flags;

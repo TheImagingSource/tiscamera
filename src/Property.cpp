@@ -47,18 +47,6 @@ Property::~Property ()
 {}
 
 
-Property& Property::operator= (const Property& other)
-{
-    this->prop = other.prop;
-    // this->ref_prop = other.ref_prop;
-    this->string_map = other.string_map;
-    this->value_type = other.value_type;
-    this->impl = other.impl;
-
-    return *this;
-}
-
-
 void Property::reset ()
 {
     SPDLOG_INFO("Resetting property to initial values.");
