@@ -15,6 +15,7 @@
  */
 
 #include "Properties.h"
+
 #include "logging.h"
 #include "utils.h" // tcam_xioctl
 
@@ -24,28 +25,25 @@
 using namespace tcam;
 
 
-
-
-PropertyString::PropertyString (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& _prop,
-                                VALUE_TYPE t)
+PropertyString::PropertyString(std::shared_ptr<PropertyImpl> prop_impl,
+                               const tcam_device_property& _prop,
+                               VALUE_TYPE t)
     : Property(_prop, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyString::~PropertyString ()
-{}
+PropertyString::~PropertyString() {}
 
 
-std::string PropertyString::get_default () const
+std::string PropertyString::get_default() const
 {
     return prop.value.s.default_value;
 }
 
 
-bool PropertyString::set_value (const std::string& new_value)
+bool PropertyString::set_value(const std::string& new_value)
 {
     if (is_read_only())
     {
@@ -63,44 +61,36 @@ bool PropertyString::set_value (const std::string& new_value)
 }
 
 
-std::string PropertyString::get_value () const
+std::string PropertyString::get_value() const
 {
     return prop.value.s.value;
 }
 
 
-
-
-
-
-PropertyEnumeration::PropertyEnumeration (std::shared_ptr<PropertyImpl> prop_impl,
-                                          const tcam_device_property& _prop,
-                                          const std::map<std::string, int>& values,
-                                          VALUE_TYPE t)
+PropertyEnumeration::PropertyEnumeration(std::shared_ptr<PropertyImpl> prop_impl,
+                                         const tcam_device_property& _prop,
+                                         const std::map<std::string, int>& values,
+                                         VALUE_TYPE t)
     : Property(_prop, values, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyEnumeration::~PropertyEnumeration ()
-{}
+PropertyEnumeration::~PropertyEnumeration() {}
 
 
-std::vector<std::string> PropertyEnumeration::get_values () const
+std::vector<std::string> PropertyEnumeration::get_values() const
 {
     std::vector<std::string> vec;
 
-    for (auto m : string_map)
-    {
-        vec.push_back(std::get<0>(m));
-    }
+    for (auto m : string_map) { vec.push_back(std::get<0>(m)); }
 
     return vec;
 }
 
 
-std::string PropertyEnumeration::get_default () const
+std::string PropertyEnumeration::get_default() const
 {
     for (const auto& s : string_map)
     {
@@ -113,7 +103,7 @@ std::string PropertyEnumeration::get_default () const
 }
 
 
-bool PropertyEnumeration::set_value (const std::string& new_value)
+bool PropertyEnumeration::set_value(const std::string& new_value)
 {
     if (is_read_only())
     {
@@ -135,7 +125,7 @@ bool PropertyEnumeration::set_value (const std::string& new_value)
 }
 
 
-std::string PropertyEnumeration::get_value () const
+std::string PropertyEnumeration::get_value() const
 {
     for (const auto& s : string_map)
     {
@@ -149,35 +139,31 @@ std::string PropertyEnumeration::get_value () const
 }
 
 
-std::map<std::string, int> PropertyEnumeration::get_mapping () const
+std::map<std::string, int> PropertyEnumeration::get_mapping() const
 {
     return string_map;
 }
 
 
-
-
-
-PropertyBoolean::PropertyBoolean (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& _prop,
-                                VALUE_TYPE t)
+PropertyBoolean::PropertyBoolean(std::shared_ptr<PropertyImpl> prop_impl,
+                                 const tcam_device_property& _prop,
+                                 VALUE_TYPE t)
     : Property(_prop, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyBoolean::~PropertyBoolean ()
-{}
+PropertyBoolean::~PropertyBoolean() {}
 
 
-bool PropertyBoolean::get_default () const
+bool PropertyBoolean::get_default() const
 {
     return prop.value.b.default_value;
 }
 
 
-bool PropertyBoolean::set_value (bool value)
+bool PropertyBoolean::set_value(bool value)
 {
     if (is_read_only())
     {
@@ -191,60 +177,55 @@ bool PropertyBoolean::set_value (bool value)
 }
 
 
-bool PropertyBoolean::get_value () const
+bool PropertyBoolean::get_value() const
 {
     return prop.value.b.value;
 }
 
 
-
-
-
-
-PropertyInteger::PropertyInteger (std::shared_ptr<PropertyImpl> prop_impl,
-                                  const tcam_device_property& _prop,
-                                  VALUE_TYPE t)
-    : Property (_prop, t)
+PropertyInteger::PropertyInteger(std::shared_ptr<PropertyImpl> prop_impl,
+                                 const tcam_device_property& _prop,
+                                 VALUE_TYPE t)
+    : Property(_prop, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyInteger::~PropertyInteger ()
-{}
+PropertyInteger::~PropertyInteger() {}
 
 
-int64_t PropertyInteger::get_default () const
+int64_t PropertyInteger::get_default() const
 {
     return prop.value.i.default_value;
 }
 
 
-int64_t PropertyInteger::get_min () const
+int64_t PropertyInteger::get_min() const
 {
     return this->prop.value.i.min;
 }
 
 
-int64_t PropertyInteger::get_max () const
+int64_t PropertyInteger::get_max() const
 {
     return this->prop.value.i.max;
 }
 
 
-int64_t PropertyInteger::get_step () const
+int64_t PropertyInteger::get_step() const
 {
-  return this->prop.value.i.step;
+    return this->prop.value.i.step;
 }
 
 
-int64_t PropertyInteger::get_value () const
+int64_t PropertyInteger::get_value() const
 {
     return this->prop.value.i.value;
 }
 
 
-bool PropertyInteger::set_value (int64_t new_value)
+bool PropertyInteger::set_value(int64_t new_value)
 {
     // if (is_read_only())
     // return false;
@@ -268,54 +249,49 @@ bool PropertyInteger::set_value (int64_t new_value)
 }
 
 
-
-
-
-
-PropertyDouble::PropertyDouble (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& _prop,
-                                VALUE_TYPE t)
+PropertyDouble::PropertyDouble(std::shared_ptr<PropertyImpl> prop_impl,
+                               const tcam_device_property& _prop,
+                               VALUE_TYPE t)
     : Property(_prop, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyDouble::~PropertyDouble ()
-{}
+PropertyDouble::~PropertyDouble() {}
 
 
-double PropertyDouble::get_default () const
+double PropertyDouble::get_default() const
 {
     return prop.value.d.default_value;
 }
 
 
-double PropertyDouble::get_min () const
+double PropertyDouble::get_min() const
 {
     return this->prop.value.d.min;
 }
 
 
-double PropertyDouble::get_max () const
+double PropertyDouble::get_max() const
 {
     return this->prop.value.d.max;
 }
 
 
-double PropertyDouble::get_step () const
+double PropertyDouble::get_step() const
 {
     return this->prop.value.d.step;
 }
 
 
-double PropertyDouble::get_value () const
+double PropertyDouble::get_value() const
 {
     return this->prop.value.d.value;
 }
 
 
-bool PropertyDouble::set_value (double new_value)
+bool PropertyDouble::set_value(double new_value)
 {
     if (is_read_only())
     {
@@ -337,23 +313,19 @@ bool PropertyDouble::set_value (double new_value)
 }
 
 
-
-
-
-PropertyButton::PropertyButton (std::shared_ptr<PropertyImpl> prop_impl,
-                                const tcam_device_property& _prop,
-                                VALUE_TYPE t)
+PropertyButton::PropertyButton(std::shared_ptr<PropertyImpl> prop_impl,
+                               const tcam_device_property& _prop,
+                               VALUE_TYPE t)
     : Property(_prop, t)
 {
     impl = prop_impl;
 }
 
 
-PropertyButton::~PropertyButton ()
-{}
+PropertyButton::~PropertyButton() {}
 
 
-bool PropertyButton::activate ()
+bool PropertyButton::activate()
 {
     if (is_read_only())
         return false;

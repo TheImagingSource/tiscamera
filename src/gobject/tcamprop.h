@@ -21,39 +21,35 @@
 
 G_BEGIN_DECLS
 
-GSList* tcam_prop_get_tcam_property_names (TcamProp* self);
+GSList* tcam_prop_get_tcam_property_names(TcamProp* self);
 
-const gchar *tcam_prop_get_tcam_property_type (TcamProp* self,
-                                               const gchar* name);
+const gchar* tcam_prop_get_tcam_property_type(TcamProp* self, const gchar* name);
 
-gboolean tcam_prop_get_tcam_property (TcamProp* self,
-                                      const gchar* name,
-                                      GValue* value,
-                                      GValue* min,
-                                      GValue* max,
-                                      GValue* def,
-                                      GValue* step,
-                                      GValue* type,
-                                      GValue* flags,
-                                      GValue* category,
-                                      GValue* group);
+gboolean tcam_prop_get_tcam_property(TcamProp* self,
+                                     const gchar* name,
+                                     GValue* value,
+                                     GValue* min,
+                                     GValue* max,
+                                     GValue* def,
+                                     GValue* step,
+                                     GValue* type,
+                                     GValue* flags,
+                                     GValue* category,
+                                     GValue* group);
 
-GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
-                                         const char* name);
+GSList* tcam_prop_get_tcam_menu_entries(TcamProp* self, const char* name);
 
-gboolean tcam_prop_set_tcam_property (TcamProp* self,
-                                      const gchar* name,
-                                      const GValue* value);
+gboolean tcam_prop_set_tcam_property(TcamProp* self, const gchar* name, const GValue* value);
 
-GSList* tcam_prop_get_device_serials (TcamProp* self);
+GSList* tcam_prop_get_device_serials(TcamProp* self);
 
-GSList* tcam_prop_get_device_serials_backend (TcamProp* self);
+GSList* tcam_prop_get_device_serials_backend(TcamProp* self);
 
-gboolean tcam_prop_get_device_info (TcamProp* self,
-                                    const char* serial,
-                                    char** name,
-                                    char** identifier,
-                                    char** connection_type);
+gboolean tcam_prop_get_device_info(TcamProp* self,
+                                   const char* serial,
+                                   char** name,
+                                   char** identifier,
+                                   char** connection_type);
 
 G_END_DECLS
 

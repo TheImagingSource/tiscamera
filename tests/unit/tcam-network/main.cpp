@@ -18,7 +18,6 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-
 #include "tcam-network.h"
 
 #include <iostream>
@@ -36,25 +35,22 @@ TEST_CASE("Verify a IP address string is a valid address", "[isValidIpAddress]")
 TEST_CASE("Verify IP settings are legal", "[verification]")
 {
     std::string err_reason;
-    REQUIRE(tis::verifySettings("255.255.255.0", "255.255.0.0", "168.254.1.0",
-                                err_reason) == false);
+    REQUIRE(tis::verifySettings("255.255.255.0", "255.255.0.0", "168.254.1.0", err_reason)
+            == false);
     // test that err_reason is set to someting since test failed.
     REQUIRE(!err_reason.empty());
 
     err_reason.clear();
-    REQUIRE(tis::verifySettings("127.0.0.1", "255.255.255.0", "192.168.0.1",
-                                err_reason) == false);
+    REQUIRE(tis::verifySettings("127.0.0.1", "255.255.255.0", "192.168.0.1", err_reason) == false);
     REQUIRE(!err_reason.empty());
 
     err_reason.clear();
-    REQUIRE(tis::verifySettings("0.0.0.0", "255.255.255.0", "192.168.0.1",
-                                err_reason) == false);
+    REQUIRE(tis::verifySettings("0.0.0.0", "255.255.255.0", "192.168.0.1", err_reason) == false);
     REQUIRE(!err_reason.empty());
 
 
     err_reason.clear();
-    REQUIRE(tis::verifySettings("0.0.0.0", "255.255.255.0", "192.168.0.1",
-                                err_reason) == false);
+    REQUIRE(tis::verifySettings("0.0.0.0", "255.255.255.0", "192.168.0.1", err_reason) == false);
     REQUIRE(!err_reason.empty());
 
     // std::cout << err_reason << "\n";

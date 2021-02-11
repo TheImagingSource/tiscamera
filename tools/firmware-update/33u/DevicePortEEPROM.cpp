@@ -15,66 +15,69 @@
  */
 
 #include "DevicePortEEPROM.h"
+
 #include "ReportProgress.h"
 
-#include <set>
 #include <algorithm>
+#include <set>
 
 
 namespace lib33u
 {
 namespace firmware_update
 {
-	DevicePortEEPROM::DevicePortEEPROM( const std::string& name, const pugi::xml_node& /*port_config*/ )
-		: name_ { name }
-	{
-	}
+DevicePortEEPROM::DevicePortEEPROM(const std::string& name, const pugi::xml_node& /*port_config*/)
+    : name_ { name }
+{
+}
 
-	std::string DevicePortEEPROM::name()
-	{
-		return name_;
-	}
+std::string DevicePortEEPROM::name()
+{
+    return name_;
+}
 
-	void DevicePortEEPROM::upload( Camera & dev, const std::vector<UploadItem>& items, util::progress::IReportProgress& progress )
-	{
-		try
-		{
-			upload_internal( dev, items, progress );
-		}
-		catch( std::exception& )
-		{
-			// Some error occurred... Re-try once
-			upload_internal( dev, items, progress );
-		}
-	}
-
-    namespace
+void DevicePortEEPROM::upload(Camera& dev,
+                              const std::vector<UploadItem>& items,
+                              util::progress::IReportProgress& progress)
+{
+    try
     {
-        static std::vector<uint8_t> ensure_length_alignment( const std::vector<uint8_t>& data, int alignment )
-        {
-            std::vector<uint8_t> copy = data;
-
-            while( copy.size() % alignment )
-            {
-                copy.push_back( 0 );                
-            }
-
-            return copy;
-        }
+        upload_internal(dev, items, progress);
     }
+    catch (std::exception&)
+    {
+        // Some error occurred... Re-try once
+        upload_internal(dev, items, progress);
+    }
+}
 
-	void DevicePortEEPROM::upload_internal( Camera& cam, const std::vector<UploadItem>& items, util::progress::IReportProgress& progress )
-	{
-        auto items_progress = util::progress::MapItemProgress( progress, items.size() );
+namespace
+{
+static std::vector<uint8_t> ensure_length_alignment(const std::vector<uint8_t>& data, int alignment)
+{
+    std::vector<uint8_t> copy = data;
 
-        for( auto& upload : items )
-        {
-            auto padded_data = ensure_length_alignment( upload.data, 4 );
+    while (copy.size() % alignment) { copy.push_back(0); }
 
-            cam.eeprom().write_verify( upload.offset, padded_data.data(), padded_data.size(), items_progress );
+    return copy;
+}
+} // namespace
 
-            items_progress.report_item();
-        }
-	}
+void DevicePortEEPROM::upload_internal(Camera& cam,
+                                       const std::vector<UploadItem>& items,
+                                       util::progress::IReportProgress& progress)
+{
+    auto items_progress = util::progress::MapItemProgress(progress, items.size());
+
+    for (auto& upload : items)
+    {
+        auto padded_data = ensure_length_alignment(upload.data, 4);
+
+        cam.eeprom().write_verify(
+            upload.offset, padded_data.data(), padded_data.size(), items_progress);
+
+        items_progress.report_item();
+    }
+}
 } /* namespace firmware_update */
 } /* namespace lib33u */

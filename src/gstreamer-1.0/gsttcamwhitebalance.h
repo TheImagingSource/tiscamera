@@ -17,110 +17,114 @@
 #ifndef __GST_TCAMWHITEBALANCE_H__
 #define __GST_TCAMWHITEBALANCE_H__
 
-#include <gst/gst.h>
-#include <gst/video/video.h>
+#include "algorithms/tcam-algorithm.h"
 
 #include <gst/base/gstbasetransform.h>
+#include <gst/gst.h>
 #include <gst/gstbuffer.h>
-
-#include "algorithms/tcam-algorithm.h"
+#include <gst/video/video.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define GST_TYPE_TCAMWHITEBALANCE            (gst_tcamwhitebalance_get_type())
-#define GST_TCAMWHITEBALANCE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_TCAMWHITEBALANCE,GstTcamWhitebalance))
-#define GST_TCAMWHITEBALANCE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_TCAMWHITEBALANCE,GstTcamWhitebalanceClass))
-#define GST_IS_TCAMWHITEBALANCE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_TCAMWHITEBALANCE))
-#define GST_IS_TCAMWHITEBALANCE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_TCAMWHITEBALANCE))
+#define GST_TYPE_TCAMWHITEBALANCE (gst_tcamwhitebalance_get_type())
+#define GST_TCAMWHITEBALANCE(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAMWHITEBALANCE, GstTcamWhitebalance))
+#define GST_TCAMWHITEBALANCE_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAMWHITEBALANCE, GstTcamWhitebalanceClass))
+#define GST_IS_TCAMWHITEBALANCE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMWHITEBALANCE))
+#define GST_IS_TCAMWHITEBALANCE_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMWHITEBALANCE))
 
-typedef struct _GstTcamWhitebalance GstTcamWhitebalance;
-typedef struct _GstTcamWhitebalanceClass GstTcamWhitebalanceClass;
-
-
-static const guint MAX_STEPS = 20;
-static guint WB_IDENTITY = 64;
-static guint WB_MAX = 255;
-static const guint BREAK_DIFF = 2;
-
-const guint NEARGRAY_MIN_BRIGHTNESS      = 10;
-const guint NEARGRAY_MAX_BRIGHTNESS      = 253;
-const float NEARGRAY_MAX_COLOR_DEVIATION = 0.25f;
-const float NEARGRAY_REQUIRED_AMOUNT     = 0.08f;
-
-/* rgb values have to be evaluated differently. These are the according factors */
-static const guint r_factor = (guint32)((1 << 8) * 0.299f);
-static const guint g_factor = (guint32)((1 << 8) * 0.587f);
-static const guint b_factor = (guint32)((1 << 8) * 0.114f);
-
-typedef unsigned char byte;
+    typedef struct _GstTcamWhitebalance GstTcamWhitebalance;
+    typedef struct _GstTcamWhitebalanceClass GstTcamWhitebalanceClass;
 
 
-typedef struct
-{
-    gdouble min;
-    gdouble max;
-    gdouble value;
+    static const guint MAX_STEPS = 20;
+    static guint WB_IDENTITY = 64;
+    static guint WB_MAX = 255;
+    static const guint BREAK_DIFF = 2;
 
-} Gain;
+    const guint NEARGRAY_MIN_BRIGHTNESS = 10;
+    const guint NEARGRAY_MAX_BRIGHTNESS = 253;
+    const float NEARGRAY_MAX_COLOR_DEVIATION = 0.25f;
+    const float NEARGRAY_REQUIRED_AMOUNT = 0.08f;
 
+    /* rgb values have to be evaluated differently. These are the according factors */
+    static const guint r_factor = (guint32)((1 << 8) * 0.299f);
+    static const guint g_factor = (guint32)((1 << 8) * 0.587f);
+    static const guint b_factor = (guint32)((1 << 8) * 0.114f);
 
-typedef struct
-{
-    gdouble min;
-    gdouble max;
-    gdouble value;
-
-} Exposure;
-
-
-struct device_color
-{
-    gboolean has_whitebalance;
-    gboolean has_auto_whitebalance;
-    rgb_tripel rgb;
-    gint max; // highest possible value. usually 255
-    gint default_value; // Availalbe for V4l2. Aravis may not.
-};
+    typedef unsigned char byte;
 
 
-struct device_resources
-{
-    device_color color;
+    typedef struct
+    {
+        gdouble min;
+        gdouble max;
+        gdouble value;
 
-    tcam_image_buffer buffer;
-
-    tcam::algorithms::whitebalance::wb_settings settings;
-};
-
-struct _GstTcamWhitebalance {
-    GstBaseTransform base_object;
-
-    GstVideoInfo vinfo;
-    tBY8Pattern    pattern;
-    guint expected_buffer_size;
+    } Gain;
 
 
-    /* user defined values */
-    guint red;
-    guint green;
-    guint blue;
+    typedef struct
+    {
+        gdouble min;
+        gdouble max;
+        gdouble value;
 
-    /* persistent values */
-    rgb_tripel rgb;
-    gboolean auto_wb;
-    gboolean auto_enabled;
-    gboolean force_hardware_wb;
-    device_resources res;
-};
+    } Exposure;
 
-struct _GstTcamWhitebalanceClass {
-    GstBaseTransformClass gstbasetransform_class;
-};
 
-GType gst_tcamwhitebalance_get_type (void);
+    struct device_color
+    {
+        gboolean has_whitebalance;
+        gboolean has_auto_whitebalance;
+        rgb_tripel rgb;
+        gint max; // highest possible value. usually 255
+        gint default_value; // Availalbe for V4l2. Aravis may not.
+    };
+
+
+    struct device_resources
+    {
+        device_color color;
+
+        tcam_image_buffer buffer;
+
+        tcam::algorithms::whitebalance::wb_settings settings;
+    };
+
+    struct _GstTcamWhitebalance
+    {
+        GstBaseTransform base_object;
+
+        GstVideoInfo vinfo;
+        tBY8Pattern pattern;
+        guint expected_buffer_size;
+
+
+        /* user defined values */
+        guint red;
+        guint green;
+        guint blue;
+
+        /* persistent values */
+        rgb_tripel rgb;
+        gboolean auto_wb;
+        gboolean auto_enabled;
+        gboolean force_hardware_wb;
+        device_resources res;
+    };
+
+    struct _GstTcamWhitebalanceClass
+    {
+        GstBaseTransformClass gstbasetransform_class;
+    };
+
+    GType gst_tcamwhitebalance_get_type(void);
 
 #ifdef __cplusplus
 }

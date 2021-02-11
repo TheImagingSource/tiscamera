@@ -17,9 +17,8 @@
 #ifndef TCAM_JSON_H
 #define TCAM_JSON_H
 
-#include <tcam.h>
-
 #include <string>
+#include <tcam.h>
 #include <utility>
 #include <vector>
 
@@ -27,20 +26,20 @@ namespace tcam
 {
 
 
-static const char* JSON_FILE_VERSION_CURRENT  __attribute__ ((unused)) = "v0.1";
+static const char* JSON_FILE_VERSION_CURRENT __attribute__((unused)) = "v0.1";
 
 
 // bool version_matches (const char* version=JSON_FILE_VERSION_CURRENT);
 
 // serial_matches ();
 
-std::string create_json_state (std::shared_ptr<CaptureDevice> dev);
+std::string create_json_state(std::shared_ptr<CaptureDevice> dev);
 
 
-std::pair<bool, std::vector<std::string>> load_json_state (std::shared_ptr<CaptureDevice> dev,
-                                                                 const std::string& state);
+std::pair<bool, std::vector<std::string>> load_json_state(std::shared_ptr<CaptureDevice> dev,
+                                                          const std::string& state);
 
-}
+} // namespace tcam
 
 
 #endif /* TCAM_JSON_H */

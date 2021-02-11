@@ -22,12 +22,12 @@ namespace lib33u
 {
 namespace device_interface
 {
-	namespace VendorCommands
-	{
-		const uint8_t GENCP = 0x30;
-		const uint8_t GENCP_MAX_WRITE = 0x22;
-		const uint8_t GENCP_MAX_READ = 0x23;
-		const uint8_t I2C = 0x18;
-	}
-}
-}
+namespace VendorCommands
+{
+const uint8_t GENCP = 0x30;
+const uint8_t GENCP_MAX_WRITE = 0x22;
+const uint8_t GENCP_MAX_READ = 0x23;
+const uint8_t I2C = 0x18;
+} // namespace VendorCommands
+} // namespace device_interface
+} // namespace lib33u

@@ -15,49 +15,41 @@
  */
 
 #include "AFU050Device.h"
-
 #include "UsbHandler.h"
 #include "UsbSession.h"
-
+#include "afu050_definitions.h"
+#include "format.h"
 #include "logging.h"
 #include "standard_properties.h"
-#include "format.h"
-#include "afu050_definitions.h"
 
 #include <algorithm>
 #include <cstring>
-
 #include <unistd.h>
 
 using namespace tcam;
 
 
-tcam::AFU050Device::AFU050PropertyHandler::AFU050PropertyHandler (AFU050Device* dev)
-    : device(dev)
-{}
+tcam::AFU050Device::AFU050PropertyHandler::AFU050PropertyHandler(AFU050Device* dev) : device(dev) {}
 
 
-std::vector<std::shared_ptr<Property>> tcam::AFU050Device::AFU050PropertyHandler::create_property_vector ()
+std::vector<std::shared_ptr<Property>> tcam::AFU050Device::AFU050PropertyHandler::
+    create_property_vector()
 {
     std::vector<std::shared_ptr<Property>> props;
 
-    for ( const auto& p : properties )
-    {
-        props.push_back(p.prop);
-    }
+    for (const auto& p : properties) { props.push_back(p.prop); }
 
     return props;
 }
 
 
-bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& new_property)
+bool AFU050Device::AFU050PropertyHandler::set_property(const tcam::Property& new_property)
 {
-    auto f = [&new_property] (const property_description& d)
-        {
-            return ((*d.prop).get_name().compare(new_property.get_name()) == 0);
-        };
+    auto f = [&new_property](const property_description& d) {
+        return ((*d.prop).get_name().compare(new_property.get_name()) == 0);
+    };
 
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
+    auto desc = std::find_if(properties.begin(), properties.end(), f);
 
     if (desc == properties.end())
     {
@@ -70,21 +62,30 @@ bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& ne
     if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
     {
         SPDLOG_DEBUG("Setting int {} to: {}",
-                   desc->prop->get_name().c_str(),
-                   (std::static_pointer_cast<PropertyInteger>(desc->prop))->get_value());
+                     desc->prop->get_name().c_str(),
+                     (std::static_pointer_cast<PropertyInteger>(desc->prop))->get_value());
 
-        return device->set_int_value(desc->unit, desc->id,
-                                     (std::static_pointer_cast<PropertyInteger>(desc->prop))->get_value());
+        return device->set_int_value(
+            desc->unit,
+            desc->id,
+            (std::static_pointer_cast<PropertyInteger>(desc->prop))->get_value());
     }
     else if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
-        SPDLOG_DEBUG("Setting bool {} to: {}", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
+        SPDLOG_DEBUG("Setting bool {} to: {}",
+                     desc->prop->get_name().c_str(),
+                     (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
 
-        return device->set_bool_value(desc->unit, desc->id, (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
+        return device->set_bool_value(
+            desc->unit,
+            desc->id,
+            (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
     }
     else if (desc->prop->get_type() == TCAM_PROPERTY_TYPE_BUTTON)
     {
-        SPDLOG_DEBUG("Setting button {} to: {}", desc->prop->get_name().c_str(), (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
+        SPDLOG_DEBUG("Setting button {} to: {}",
+                     desc->prop->get_name().c_str(),
+                     (std::static_pointer_cast<PropertyBoolean>(desc->prop))->get_value());
 
         return device->set_bool_value(desc->unit, desc->id, 1);
     }
@@ -97,14 +98,13 @@ bool AFU050Device::AFU050PropertyHandler::set_property (const tcam::Property& ne
 }
 
 
-bool AFU050Device::AFU050PropertyHandler::get_property (tcam::Property& p)
+bool AFU050Device::AFU050PropertyHandler::get_property(tcam::Property& p)
 {
-    auto f = [&p] (const property_description& d)
-        {
-            return ((*d.prop).get_name().compare(p.get_name()) == 0);
-        };
+    auto f = [&p](const property_description& d) {
+        return ((*d.prop).get_name().compare(p.get_name()) == 0);
+    };
 
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
+    auto desc = std::find_if(properties.begin(), properties.end(), f);
 
     if (desc == properties.end())
     {

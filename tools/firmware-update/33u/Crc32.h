@@ -25,7 +25,7 @@ namespace util
 {
 namespace crc32
 {
-	uint32_t calc (uint32_t crc, const void *buf, size_t size);
+uint32_t calc(uint32_t crc, const void* buf, size_t size);
 
 } /* namespace crc32 */
 } /* namespace util */

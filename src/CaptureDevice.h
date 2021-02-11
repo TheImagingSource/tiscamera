@@ -20,14 +20,14 @@
 #include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "Properties.h"
-#include "VideoFormat.h"
 #include "SinkInterface.h"
+#include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "standard_properties.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 /**
  * @addtogroup API
@@ -43,15 +43,14 @@ class CaptureDevice
 {
 
 public:
+    CaptureDevice();
+    explicit CaptureDevice(const DeviceInfo&);
 
-    CaptureDevice ();
-    explicit CaptureDevice (const DeviceInfo&);
+    CaptureDevice(const CaptureDevice&) = delete;
 
-    CaptureDevice (const CaptureDevice&) = delete;
+    CaptureDevice operator=(const CaptureDevice&) = delete;
 
-    CaptureDevice operator= (const CaptureDevice&) = delete;
-
-    ~CaptureDevice ();
+    ~CaptureDevice();
 
     // device related:
 
@@ -59,16 +58,16 @@ public:
      * Check if device is currently open
      * @return true if a device is open
      */
-    bool is_device_open () const;
+    bool is_device_open() const;
 
     /**
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    DeviceInfo get_device () const;
+    DeviceInfo get_device() const;
 
 
-    bool register_device_lost_callback (tcam_device_lost_callback callback, void* user_data);
+    bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data);
 
 
     // property related:
@@ -76,18 +75,17 @@ public:
     /**
      * @return vector containing all available properties
      */
-    std::vector<Property*> get_available_properties ();
+    std::vector<Property*> get_available_properties();
 
 
-    Property* get_property (TCAM_PROPERTY_ID id);
-    Property* get_property_by_name (const std::string& name);
+    Property* get_property(TCAM_PROPERTY_ID id);
+    Property* get_property_by_name(const std::string& name);
 
 
     /**
      *
      */
-    template<class TProperty>
-    TProperty* find_property (TCAM_PROPERTY_ID id)
+    template<class TProperty> TProperty* find_property(TCAM_PROPERTY_ID id)
     {
         for (auto p : get_available_properties())
         {
@@ -100,18 +98,17 @@ public:
                     return nullptr;
                 }
 
-                return (TProperty*) p;
-
+                return (TProperty*)p;
             }
         }
         return nullptr;
     }
 
 
-    bool set_property (TCAM_PROPERTY_ID, const int64_t& value);
-    bool set_property (TCAM_PROPERTY_ID, const double& value);
-    bool set_property (TCAM_PROPERTY_ID, const bool& value);
-    bool set_property (TCAM_PROPERTY_ID, const std::string& value);
+    bool set_property(TCAM_PROPERTY_ID, const int64_t& value);
+    bool set_property(TCAM_PROPERTY_ID, const double& value);
+    bool set_property(TCAM_PROPERTY_ID, const bool& value);
+    bool set_property(TCAM_PROPERTY_ID, const std::string& value);
 
     // videoformat related:
 
@@ -119,7 +116,7 @@ public:
     /**
      * @return vector containing all available video format settings
      */
-    std::vector<VideoFormatDescription> get_available_video_formats () const;
+    std::vector<VideoFormatDescription> get_available_video_formats() const;
 
 
     /**
@@ -127,13 +124,13 @@ public:
      * @param new_format - format the device shall use
      * @return true if device accepted the given VideoFormat
      */
-    bool set_video_format (const VideoFormat& new_format);
+    bool set_video_format(const VideoFormat& new_format);
 
 
     /**
      * @return Currently used video format
      */
-    VideoFormat get_active_video_format () const;
+    VideoFormat get_active_video_format() const;
 
     // playback related:
 
@@ -142,22 +139,22 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream (std::shared_ptr<SinkInterface> sink);
+    bool start_stream(std::shared_ptr<SinkInterface> sink);
 
 
     /**
      * @brief Stop currently running stream
      * @return true if stream could successfully be stopped
      */
-    bool stop_stream ();
+    bool stop_stream();
 
 private:
-
     std::unique_ptr<CaptureDeviceImpl> impl;
 
 }; /* class CaptureDevice */
 
-std::shared_ptr<CaptureDevice> open_device (const std::string& serial, TCAM_DEVICE_TYPE type=TCAM_DEVICE_TYPE_UNKNOWN);
+std::shared_ptr<CaptureDevice> open_device(const std::string& serial,
+                                           TCAM_DEVICE_TYPE type = TCAM_DEVICE_TYPE_UNKNOWN);
 
 } /* namespace tcam */
 

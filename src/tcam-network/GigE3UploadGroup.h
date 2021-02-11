@@ -34,6 +34,6 @@ struct UploadGroup
     std::vector<UploadItem> Items;
 }; /* struct UploadGroup */
 
-} /*namespace GigE3 */\
+} /*namespace GigE3 */
 
 } /* namespace FirmwareUpdate */

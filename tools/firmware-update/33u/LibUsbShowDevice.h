@@ -17,11 +17,11 @@
 #pragma once
 
 #include "IUsbDevice.h"
-#include "UsbSession.h"
 #include "UsbCamera.h"
+#include "UsbSession.h"
 
-#include <memory>
 #include <cstdint>
+#include <memory>
 
 using namespace tis;
 
@@ -42,30 +42,30 @@ class ShowDevice : public IUsbDevice
 
     int interface;
 
-    void claim_interface ();
+    void claim_interface();
 
-    void release_interface ();
+    void release_interface();
 
 public:
-    ShowDevice (std::shared_ptr<UsbSession> ksps, device_info device);
-    ~ShowDevice ();
+    ShowDevice(std::shared_ptr<UsbSession> ksps, device_info device);
+    ~ShowDevice();
 
     // Inherited via IUSBDevice
-    virtual uint16_t product_id () override;
-    virtual void open () override;
-    virtual void read_vendor_request (uint8_t req,
+    virtual uint16_t product_id() override;
+    virtual void open() override;
+    virtual void read_vendor_request(uint8_t req,
+                                     uint16_t value,
+                                     uint16_t index,
+                                     uint8_t* buffer,
+                                     uint16_t length) override;
+
+    virtual void write_vendor_request(uint8_t req,
                                       uint16_t value,
                                       uint16_t index,
-                                      uint8_t* buffer,
+                                      const uint8_t* data,
                                       uint16_t length) override;
-
-    virtual void write_vendor_request (uint8_t req,
-                                       uint16_t value,
-                                       uint16_t index,
-                                       const uint8_t* data,
-                                       uint16_t length) override;
 };
 
-} /* namespace lib33u */
+} // namespace libusb
 } /* namespace driver_interface */
-} /* namespace libusb */
+} // namespace lib33u

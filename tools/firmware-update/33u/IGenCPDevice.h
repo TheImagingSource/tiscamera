@@ -23,17 +23,15 @@ namespace lib33u
 {
 namespace driver_interface
 {
-	struct IGenCPDevice
-	{
-		virtual ~IGenCPDevice()
-		{
-		}
+struct IGenCPDevice
+{
+    virtual ~IGenCPDevice() {}
 
-		virtual uint16_t max_read_mem() const = 0;
-		virtual uint16_t max_write_mem() const = 0;
+    virtual uint16_t max_read_mem() const = 0;
+    virtual uint16_t max_write_mem() const = 0;
 
-		virtual void read_mem( uint64_t address, uint8_t* buffer, uint16_t length ) const = 0;
-		virtual void write_mem( uint64_t address, const uint8_t* buffer, uint16_t length ) = 0;
-	};
+    virtual void read_mem(uint64_t address, uint8_t* buffer, uint16_t length) const = 0;
+    virtual void write_mem(uint64_t address, const uint8_t* buffer, uint16_t length) = 0;
+};
 } /* namespace driver_interface */
 } /* namespace lib33u */

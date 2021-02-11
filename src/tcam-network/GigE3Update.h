@@ -26,13 +26,13 @@ namespace FirmwareUpdate
 namespace GigE3
 {
 
-Status upgradeFirmware (IFirmwareWriter& dev,
-                        const std::string& fileName,
-                        const std::string& modelName,
-                        const std::string& originalModelName,
-                        tReportProgressFunc progressFunc);
+Status upgradeFirmware(IFirmwareWriter& dev,
+                       const std::string& fileName,
+                       const std::string& modelName,
+                       const std::string& originalModelName,
+                       tReportProgressFunc progressFunc);
 
-std::vector<std::string> getModelNamesFromPackage (const std::string& fileName);
+std::vector<std::string> getModelNamesFromPackage(const std::string& fileName);
 
 } /* namespace GigE3 */
 

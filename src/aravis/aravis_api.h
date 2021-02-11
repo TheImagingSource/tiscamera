@@ -18,11 +18,11 @@
 
 #include <cstring>
 
-DeviceInterface* open_aravis_device (const struct tcam_device_info* device);
+DeviceInterface* open_aravis_device(const struct tcam_device_info* device);
 
-size_t get_aravis_device_list_size ();
+size_t get_aravis_device_list_size();
 
 /**
  * @return number of copied device_infos
  */
-size_t get_aravis_device_list (struct tcam_device_info* array, size_t array_size);
+size_t get_aravis_device_list(struct tcam_device_info* array, size_t array_size);

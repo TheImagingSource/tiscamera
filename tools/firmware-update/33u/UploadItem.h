@@ -16,17 +16,17 @@
 
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace lib33u
 {
 namespace firmware_update
 {
-	struct UploadItem
-	{
-		std::vector<uint8_t> data;
-		uint32_t offset;
-	};
-}
-}
+struct UploadItem
+{
+    std::vector<uint8_t> data;
+    uint32_t offset;
+};
+} // namespace firmware_update
+} // namespace lib33u

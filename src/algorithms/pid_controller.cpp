@@ -18,24 +18,18 @@
 
 using namespace algorithms::detail;
 
-pid_controller::pid_controller (float p, float i, float d, float e_sum_limit)
-    : _P( p ),
-    _I( i ),
-    _D( d ),
-    _e_sum_limit( e_sum_limit ),
-    _e_sum( 0 ),
-    _e_prev( 0 ),
-    _e_prev_valid( false )
+pid_controller::pid_controller(float p, float i, float d, float e_sum_limit)
+    : _P(p), _I(i), _D(d), _e_sum_limit(e_sum_limit), _e_sum(0), _e_prev(0), _e_prev_valid(false)
 {
 }
 
-void pid_controller::reset ()
+void pid_controller::reset()
 {
     _e_sum = 0;
     _e_prev_valid = false;
 }
 
-float pid_controller::step (float e, float fps)
+float pid_controller::step(float e, float fps)
 {
     _e_sum += e;
 

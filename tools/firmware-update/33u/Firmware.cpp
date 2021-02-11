@@ -15,35 +15,34 @@
  */
 
 #include "Firmware.h"
+
 #include "FirmwarePackage.h"
 
 namespace lib33u
 {
-	using namespace firmware_update;
+using namespace firmware_update;
 
-	Firmware::Firmware (std::unique_ptr<IFirmware> impl)
-		: impl_ { std::move( impl ) }
-	{
-	}
+Firmware::Firmware(std::unique_ptr<IFirmware> impl) : impl_ { std::move(impl) } {}
 
-	int Firmware::version () const
-	{
-		return impl_->version();
-	}
-
-	std::vector<DeviceTypeDesc> Firmware::device_types () const
-	{
-		return impl_->device_types();
-	}
-
-	void Firmware::upload (Camera& dev, util::progress::IReportProgress& progress,
-                           DeviceTypeDesc overrideDeviceType)
-	{
-		return impl_->upload( dev, progress, overrideDeviceType );
-	}
-
-	Firmware Firmware::load_package (const std::string& fn)
-	{
-		return { std::unique_ptr<FirmwarePackage>( new FirmwarePackage(fn) ) };
-	}
+int Firmware::version() const
+{
+    return impl_->version();
 }
+
+std::vector<DeviceTypeDesc> Firmware::device_types() const
+{
+    return impl_->device_types();
+}
+
+void Firmware::upload(Camera& dev,
+                      util::progress::IReportProgress& progress,
+                      DeviceTypeDesc overrideDeviceType)
+{
+    return impl_->upload(dev, progress, overrideDeviceType);
+}
+
+Firmware Firmware::load_package(const std::string& fn)
+{
+    return { std::unique_ptr<FirmwarePackage>(new FirmwarePackage(fn)) };
+}
+} // namespace lib33u

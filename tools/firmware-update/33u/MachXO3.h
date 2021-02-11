@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <string>
-#include <map>
+#include "I2CDevice.h"
+
 #include <cstdint>
 #include <functional>
+#include <map>
+#include <string>
 #include <vector>
-
-#include "I2CDevice.h"
 
 namespace MachXO3
 {
@@ -77,35 +77,56 @@ class DeviceInfo
     int _ufmEraseDelay;
     int _tRefresh;
 
-    static std::map<DeviceType,DeviceInfo> AllTypes;
+    static std::map<DeviceType, DeviceInfo> AllTypes;
 
 public:
-    DeviceType type () const { return _type; }
-    std::string name () const { return _name; }
-    int numCfgPages () const { return _numCfgPages; }
-    int numUFMPages () const { return _numUFMPages; }
-    int cfgEraseDelay () const { return _cfgEraseDelay; }
-    int ufmEraseDelay () const { return _ufmEraseDelay; }
-    int tRefresh () const { return _tRefresh; }
+    DeviceType type() const
+    {
+        return _type;
+    }
+    std::string name() const
+    {
+        return _name;
+    }
+    int numCfgPages() const
+    {
+        return _numCfgPages;
+    }
+    int numUFMPages() const
+    {
+        return _numUFMPages;
+    }
+    int cfgEraseDelay() const
+    {
+        return _cfgEraseDelay;
+    }
+    int ufmEraseDelay() const
+    {
+        return _ufmEraseDelay;
+    }
+    int tRefresh() const
+    {
+        return _tRefresh;
+    }
 
 public:
-    DeviceInfo (DeviceType type, std::string name, int cfgPages, int ufmPages, int cfgErase, int ufmErase, int trefresh)
-        : _type(type),
-          _name(name),
-          _numCfgPages(cfgPages),
-          _numUFMPages(ufmPages),
-          _cfgEraseDelay(cfgErase),
-          _ufmEraseDelay(ufmErase),
-          _tRefresh(trefresh)
-    {}
+    DeviceInfo(DeviceType type,
+               std::string name,
+               int cfgPages,
+               int ufmPages,
+               int cfgErase,
+               int ufmErase,
+               int trefresh)
+        : _type(type), _name(name), _numCfgPages(cfgPages), _numUFMPages(ufmPages),
+          _cfgEraseDelay(cfgErase), _ufmEraseDelay(ufmErase), _tRefresh(trefresh)
+    {
+    }
 
-    DeviceInfo ()
-        : DeviceInfo( DeviceType::MachXO2_Unknown, std::string(), 0, 0, 0, 0, 0 )
-    {}
+    DeviceInfo() : DeviceInfo(DeviceType::MachXO2_Unknown, std::string(), 0, 0, 0, 0, 0) {}
 
 public:
-    static DeviceInfo Find (std::string deviceNameLine);
-    static DeviceInfo Find (uint32_t idCode);
+    static DeviceInfo Find(std::string deviceNameLine);
+    static DeviceInfo Find(uint32_t idCode);
 };
 
 class MachXO3Device
@@ -117,32 +138,35 @@ public:
     MachXO3Device(I2C::I2CDevice& itf);
 
 public:
-    const DeviceInfo& info () const { return _info; }
+    const DeviceInfo& info() const
+    {
+        return _info;
+    }
 
 private:
-    uint32_t QueryIDCode ()
+    uint32_t QueryIDCode()
     {
         return _itf.read<uint32_t>(Commands::IDCODE_PUB);
     }
 
-    std::vector<uint8_t> ReadConfiguration (std::function<void(int)> reportProgress);
-    void WriteUserCode (uint32_t uc);
-    void EnableTransparentConfigurationMode ();
-    void EraseFlash ();
-    void WriteConfiguration (const std::vector<uint8_t> data,
-                             std::function<void(int)> reportProgress);
-    void SetProgramDone ();
-    void Refresh ();
+    std::vector<uint8_t> ReadConfiguration(std::function<void(int)> reportProgress);
+    void WriteUserCode(uint32_t uc);
+    void EnableTransparentConfigurationMode();
+    void EraseFlash();
+    void WriteConfiguration(const std::vector<uint8_t> data,
+                            std::function<void(int)> reportProgress);
+    void SetProgramDone();
+    void Refresh();
 
-    bool CheckBusy ();
-    int ReadStatus ();
-    bool CheckStatusFail ();
+    bool CheckBusy();
+    int ReadStatus();
+    bool CheckStatusFail();
 
 public:
-    uint32_t QueryUserCode ();
-    bool UpdateConfiguration (const JedecFile& jedec,
-                              std::function<void(const char*, int)> reportProgress,
-                              bool forceUpdate = false);
+    uint32_t QueryUserCode();
+    bool UpdateConfiguration(const JedecFile& jedec,
+                             std::function<void(const char*, int)> reportProgress,
+                             bool forceUpdate = false);
 }; /* class DeviceInfo */
 
 } /* namespace MachXO3 */

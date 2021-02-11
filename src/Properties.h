@@ -19,9 +19,9 @@
 
 #include "Property.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 
 /**
@@ -40,18 +40,14 @@ namespace tcam
 class PropertyString : public Property
 {
 public:
+    PropertyString(std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
+    ~PropertyString();
 
-    PropertyString (std::shared_ptr<PropertyImpl>,
-                    const tcam_device_property&,
-                    VALUE_TYPE);
-    ~PropertyString ();
+    std::string get_default() const;
 
-    std::string get_default () const;
-
-    bool set_value (const std::string&);
-    std::string get_value () const;
+    bool set_value(const std::string&);
+    std::string get_value() const;
 };
-
 
 
 /*
@@ -60,25 +56,22 @@ public:
 class PropertyEnumeration : public Property
 {
 public:
+    PropertyEnumeration(std::shared_ptr<PropertyImpl>,
+                        const tcam_device_property&,
+                        const std::map<std::string, int>&,
+                        VALUE_TYPE);
 
-    PropertyEnumeration (std::shared_ptr<PropertyImpl>,
-                         const tcam_device_property&,
-                         const std::map<std::string, int>&,
-                         VALUE_TYPE);
+    ~PropertyEnumeration();
 
-    ~PropertyEnumeration ();
+    std::vector<std::string> get_values() const;
 
-    std::vector<std::string> get_values () const;
+    std::string get_default() const;
 
-    std::string get_default () const;
+    bool set_value(const std::string&);
+    std::string get_value() const;
 
-    bool set_value (const std::string&);
-    std::string get_value () const;
-
-    std::map<std::string, int> get_mapping () const;
-
+    std::map<std::string, int> get_mapping() const;
 };
-
 
 
 /*
@@ -87,18 +80,16 @@ public:
 class PropertyBoolean : public Property
 {
 public:
+    PropertyBoolean(std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
 
-    PropertyBoolean (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
+    ~PropertyBoolean();
 
-    ~PropertyBoolean ();
+    bool get_default() const;
 
-    bool get_default () const;
+    bool set_value(bool);
 
-    bool set_value (bool);
-
-    bool get_value () const;
+    bool get_value() const;
 };
-
 
 
 /*
@@ -107,19 +98,18 @@ public:
 class PropertyInteger : public Property
 {
 public:
+    PropertyInteger(std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
 
-    PropertyInteger (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
+    ~PropertyInteger();
 
-    ~PropertyInteger ();
+    int64_t get_default() const;
 
-    int64_t get_default () const;
+    int64_t get_min() const;
+    int64_t get_max() const;
+    int64_t get_step() const;
+    int64_t get_value() const;
 
-    int64_t get_min () const;
-    int64_t get_max () const;
-    int64_t get_step () const;
-    int64_t get_value () const;
-
-    bool set_value (int64_t);
+    bool set_value(int64_t);
 
     static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_INTEGER;
 };
@@ -131,18 +121,17 @@ public:
 class PropertyDouble : public Property
 {
 public:
+    PropertyDouble(std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
+    ~PropertyDouble();
 
-    PropertyDouble (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
-    ~PropertyDouble ();
+    double get_default() const;
 
-    double get_default () const;
+    double get_min() const;
+    double get_max() const;
+    double get_step() const;
+    double get_value() const;
 
-    double get_min () const;
-    double get_max () const;
-    double get_step () const;
-    double get_value () const;
-
-    bool set_value (double);
+    bool set_value(double);
 
     static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_DOUBLE;
 };
@@ -154,11 +143,10 @@ public:
 class PropertyButton : public Property
 {
 public:
+    PropertyButton(std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
+    ~PropertyButton();
 
-    PropertyButton (std::shared_ptr<PropertyImpl>, const tcam_device_property&, VALUE_TYPE);
-    ~PropertyButton ();
-
-    bool activate ();
+    bool activate();
 
 private:
     static const TCAM_PROPERTY_TYPE type = TCAM_PROPERTY_TYPE_BUTTON;

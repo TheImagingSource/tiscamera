@@ -14,42 +14,36 @@
  * limitations under the License.
  */
 
+#include "PropertyGeneration.h"
 #include "V4l2Device.h"
 #include "logging.h"
 #include "utils.h"
-#include "PropertyGeneration.h"
 
 #include <algorithm>
 
 using namespace tcam;
 
 
-V4l2Device::V4L2PropertyHandler::V4L2PropertyHandler (V4l2Device* dev)
-    : device(dev)
-{}
+V4l2Device::V4L2PropertyHandler::V4L2PropertyHandler(V4l2Device* dev) : device(dev) {}
 
 
-std::vector<std::shared_ptr<Property>> V4l2Device::V4L2PropertyHandler::create_property_vector ()
+std::vector<std::shared_ptr<Property>> V4l2Device::V4L2PropertyHandler::create_property_vector()
 {
     std::vector<std::shared_ptr<Property>> props;
 
-    for ( const auto& p : properties )
-    {
-        props.push_back(p.prop);
-    }
+    for (const auto& p : properties) { props.push_back(p.prop); }
 
     return props;
 }
 
 
-bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property)
+bool V4l2Device::V4L2PropertyHandler::set_property(const Property& new_property)
 {
-    auto f = [&new_property] (const property_description& d)
-        {
-            return ((*d.prop).get_name().compare(new_property.get_name()) == 0);
-        };
+    auto f = [&new_property](const property_description& d) {
+        return ((*d.prop).get_name().compare(new_property.get_name()) == 0);
+    };
 
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
+    auto desc = std::find_if(properties.begin(), properties.end(), f);
 
     if (desc == properties.end())
     {
@@ -83,7 +77,8 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
         }
         else
         {
-            SPDLOG_ERROR("Emulated property not implemented \"{}\"", new_property.get_name().c_str());
+            SPDLOG_ERROR("Emulated property not implemented \"{}\"",
+                         new_property.get_name().c_str());
             return false;
         }
     }
@@ -129,14 +124,13 @@ bool V4l2Device::V4L2PropertyHandler::set_property (const Property& new_property
 }
 
 
-bool V4l2Device::V4L2PropertyHandler::get_property (Property& p)
+bool V4l2Device::V4L2PropertyHandler::get_property(Property& p)
 {
-    auto f = [&p] (const property_description& d)
-        {
-            return ((*d.prop).get_name().compare(p.get_name()) == 0);
-        };
+    auto f = [&p](const property_description& d) {
+        return ((*d.prop).get_name().compare(p.get_name()) == 0);
+    };
 
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
+    auto desc = std::find_if(properties.begin(), properties.end(), f);
 
     if (desc == properties.end())
     {

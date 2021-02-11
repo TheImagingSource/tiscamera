@@ -16,33 +16,35 @@
 
 #pragma once
 
-#include "IFirmware.h"
-#include "IDevicePort.h"
 #include "DeviceType.h"
+#include "IDevicePort.h"
+#include "IFirmware.h"
 
+#include <map>
 #include <memory>
 #include <string>
-#include <map>
 
 namespace lib33u
 {
 namespace firmware_update
 {
-	class FirmwarePackage : public IFirmware
-	{
-	public:
-		virtual int version() const override;
-		virtual std::vector<DeviceTypeDesc> device_types() const override;
-		virtual void upload( Camera& dev, util::progress::IReportProgress& progress, DeviceTypeDesc overrideDeviceType ) override;
+class FirmwarePackage : public IFirmware
+{
+public:
+    virtual int version() const override;
+    virtual std::vector<DeviceTypeDesc> device_types() const override;
+    virtual void upload(Camera& dev,
+                        util::progress::IReportProgress& progress,
+                        DeviceTypeDesc overrideDeviceType) override;
 
-	public:
-		FirmwarePackage( const std::string& fn );
+public:
+    FirmwarePackage(const std::string& fn);
 
-	private:
-		int version_;
+private:
+    int version_;
 
-		std::map<std::string, std::shared_ptr<IDevicePort>> ports_;
-		std::map<uint16_t, DeviceType> device_types_;
-	};
+    std::map<std::string, std::shared_ptr<IDevicePort>> ports_;
+    std::map<uint16_t, DeviceType> device_types_;
+};
 } /* namespace firmware_update */
 } /* namespace lib33u */

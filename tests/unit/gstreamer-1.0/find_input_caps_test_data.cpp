@@ -22,22 +22,21 @@
 std::vector<fic_test_data_container> fic_test_data = {};
 
 
-void add_test (const std::string& name,
-               const std::string& input_caps,
-               const std::string& sink_caps,
-               struct input_caps_toggles toggles,
-               const std::string& expected_caps,
-               const input_caps_required_modules& expected_modules)
+void add_test(const std::string& name,
+              const std::string& input_caps,
+              const std::string& sink_caps,
+              struct input_caps_toggles toggles,
+              const std::string& expected_caps,
+              const input_caps_required_modules& expected_modules)
 {
     struct fic_test_result res = {};
     res.output_caps = expected_caps;
     res.modules = expected_modules;
-    fic_test_data.push_back({name, input_caps, sink_caps, toggles, res});
-
+    fic_test_data.push_back({ name, input_caps, sink_caps, toggles, res });
 }
 
 
-void init_dutils_test_data ()
+void init_dutils_test_data()
 {
 
     //     .name = "yuv dutils handling",
@@ -60,12 +59,10 @@ void init_dutils_test_data ()
     //         .requires_biteater = false,
     //         .requires_dutils = false,
     //     }
-
 }
 
 
-void init_test_data (bool use_pimipi,
-                     bool use_dutlis)
+void init_test_data(bool use_pimipi, bool use_dutlis)
 {
     struct input_caps_toggles toggles = {};
     struct input_caps_required_modules modules = {};
@@ -93,8 +90,7 @@ void init_test_data (bool use_pimipi,
              "video/x-bayer,format=grbg,width=1280,height=960,framerate={30/1,25/1,15/1,10/1};"
              "video/x-bayer,format=grbg,width=1280,height=720,framerate={30/1,25/1,15/1,10/1};"
              "video/x-bayer,format=grbg,width=640,height=480,framerate={60/1,30/1,25/1,15/1}",
-             modules
-        );
+             modules);
 
     // add_test("Empty sink caps",
     //          caps::DFK72_CAPS,
@@ -104,7 +100,7 @@ void init_test_data (bool use_pimipi,
     //          modules
     //     );
 
-    modules.bayer2rgb=true;
+    modules.bayer2rgb = true;
 
     // request is any kind of raw
     // since bayer is better than mono
@@ -144,11 +140,11 @@ void init_test_data (bool use_pimipi,
              caps::ECU010_CAPS,
              "image/jpeg",
              toggles,
-            "image/jpeg,width=640,height=480,framerate=30/1; "
-            "image/jpeg,width=1280,height=720,framerate=30/1; "
-            "image/jpeg,width=800,height=600,framerate=30/1; "
-            "image/jpeg,width=352,height=288,framerate=30/1; "
-            "image/jpeg,width=320,height=240,framerate=30/1",
+             "image/jpeg,width=640,height=480,framerate=30/1; "
+             "image/jpeg,width=1280,height=720,framerate=30/1; "
+             "image/jpeg,width=800,height=600,framerate=30/1; "
+             "image/jpeg,width=352,height=288,framerate=30/1; "
+             "image/jpeg,width=320,height=240,framerate=30/1",
              modules);
 
     reset_input_caps_modules(modules);
@@ -172,10 +168,9 @@ void init_test_data (bool use_pimipi,
              "video/x-raw,format=BGRx,width=1280,height=720,framerate=9/1",
              toggles,
              "video/x-raw, format=YUY2, width=1280, height=720, framerate=9/1",
-             modules
-    );
-//         }
-//     },
+             modules);
+    //         }
+    //     },
 
     reset_input_caps_modules(modules);
     modules.videoconvert = true;
@@ -188,23 +183,26 @@ void init_test_data (bool use_pimipi,
              modules);
 
     reset_input_caps_modules(modules);
-    add_test("Mono and mono8 wanted",
-             "video/x-raw,format=GRAY8,width=1600,height=1200,framerate={201, 15/1, 15/2, 15/4};"
-             "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
-             "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
-             toggles,
-             "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
-             modules);
+    add_test(
+        "Mono and mono8 wanted",
+        "video/x-raw,format=GRAY8,width=1600,height=1200,framerate={201, 15/1, 15/2, 15/4};"
+        "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
+        "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
+        toggles,
+        "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
+        modules);
 
     add_test("GRAY8 wanted from format list",
-             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
+             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
+             "15/2, 15/4};",
              "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
              toggles,
              "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
              modules);
 
     add_test("GRAY16 wanted from format list",
-             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
+             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
+             "15/2, 15/4};",
              "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate=15/1",
              toggles,
              "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate=15/1",
@@ -212,10 +210,12 @@ void init_test_data (bool use_pimipi,
 
     modules.videoconvert = true;
     add_test("Mono wanted for BGRx out",
-             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
+             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
+             "15/2, 15/4};",
              "video/x-raw,format=BGRx",
              toggles,
-             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
+             "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
+             "15/2, 15/4};",
 
              modules);
 
@@ -243,11 +243,10 @@ void init_test_data (bool use_pimipi,
              "video/x-raw, format=YUY2, width=352, height=288, framerate={ 30/1 }; "
              "video/x-raw, format=YUY2, width=320, height=240, framerate={ 30/1 }",
              modules);
-
 }
 
 
-std::vector<fic_test_data_container> get_test_data ()
+std::vector<fic_test_data_container> get_test_data()
 {
     return fic_test_data;
 }

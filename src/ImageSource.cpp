@@ -20,12 +20,10 @@
 
 using namespace tcam;
 
-ImageSource::ImageSource ()
-    : current_status(TCAM_PIPELINE_UNDEFINED)
-{}
+ImageSource::ImageSource() : current_status(TCAM_PIPELINE_UNDEFINED) {}
 
 
-ImageSource::~ImageSource ()
+ImageSource::~ImageSource()
 {
     if (device != nullptr)
     {
@@ -34,7 +32,7 @@ ImageSource::~ImageSource ()
 }
 
 
-bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
+bool ImageSource::set_status(TCAM_PIPELINE_STATUS status)
 {
     current_status = status;
 
@@ -52,7 +50,7 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 
         stream_start = std::chrono::steady_clock::now();
 
-        if ( device->start_stream())
+        if (device->start_stream())
         {
             SPDLOG_DEBUG("PLAYING....");
         }
@@ -61,7 +59,6 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
             SPDLOG_ERROR("Unable to start stream from device.");
             return false;
         }
-
     }
     else if (current_status == TCAM_PIPELINE_STOPPED)
     {
@@ -75,13 +72,13 @@ bool ImageSource::set_status (TCAM_PIPELINE_STATUS status)
 }
 
 
-TCAM_PIPELINE_STATUS ImageSource::get_status () const
+TCAM_PIPELINE_STATUS ImageSource::get_status() const
 {
     return current_status;
 }
 
 
-bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
+bool ImageSource::setDevice(std::shared_ptr<DeviceInterface> dev)
 {
     //SPDLOG_DEBUG("Received device to use as source.");
 
@@ -96,19 +93,19 @@ bool ImageSource::setDevice (std::shared_ptr<DeviceInterface> dev)
 }
 
 
-bool ImageSource::setVideoFormat (const VideoFormat& f)
+bool ImageSource::setVideoFormat(const VideoFormat& f)
 {
     return device->set_video_format(f);
 }
 
 
-VideoFormat ImageSource::getVideoFormat () const
+VideoFormat ImageSource::getVideoFormat() const
 {
     return device->get_active_video_format();
 }
 
 
-void ImageSource::push_image (std::shared_ptr<ImageBuffer> _buffer)
+void ImageSource::push_image(std::shared_ptr<ImageBuffer> _buffer)
 {
     auto stats = _buffer->get_statistics();
     auto end = std::chrono::steady_clock::now();
@@ -116,7 +113,9 @@ void ImageSource::push_image (std::shared_ptr<ImageBuffer> _buffer)
 
     if (stats.frame_count > 0 && std::chrono::duration_cast<std::chrono::seconds>(elapsed).count())
     {
-        stats.framerate = (double)stats.frame_count / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+        stats.framerate =
+            (double)stats.frame_count
+            / (double)std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
     }
     _buffer->set_statistics(stats);
 
@@ -131,13 +130,13 @@ void ImageSource::push_image (std::shared_ptr<ImageBuffer> _buffer)
 }
 
 
-void ImageSource::requeue_buffer (std::shared_ptr<ImageBuffer> _buffer)
+void ImageSource::requeue_buffer(std::shared_ptr<ImageBuffer> _buffer)
 {
     device->requeue_buffer(_buffer);
 }
 
 
-bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
+bool ImageSource::setSink(std::shared_ptr<SinkInterface> sink)
 {
     this->pipeline = sink;
 
@@ -145,7 +144,8 @@ bool ImageSource::setSink (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers)
+bool ImageSource::set_buffer_collection(
+    const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers)
 {
     if (current_status == TCAM_PIPELINE_PLAYING)
     {
@@ -157,19 +157,19 @@ bool ImageSource::set_buffer_collection (const std::vector<std::shared_ptr<Image
     return true;
 }
 
-std::vector<std::shared_ptr<ImageBuffer>> ImageSource::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> ImageSource::get_buffer_collection()
 {
     return this->buffer;
 }
 
 
-void ImageSource::drop_incomplete_frames (bool drop_them)
+void ImageSource::drop_incomplete_frames(bool drop_them)
 {
     drop_frames_ = drop_them;
 }
 
 
-bool ImageSource::should_incomplete_frames_be_dropped () const
+bool ImageSource::should_incomplete_frames_be_dropped() const
 {
     return drop_frames_;
 }

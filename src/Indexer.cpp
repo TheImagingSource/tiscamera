@@ -1,8 +1,8 @@
 
 #include "Indexer.h"
 
-#include "logging.h"
 #include "BackendLoader.h"
+#include "logging.h"
 
 #include <algorithm>
 
@@ -10,17 +10,15 @@ using namespace tcam;
 
 std::weak_ptr<Indexer> Indexer::indexer_ptr;
 
-Indexer::Indexer ()
-    : continue_thread_(true),
-      wait_period_(2),
-      have_list_(false),
+Indexer::Indexer()
+    : continue_thread_(true), wait_period_(2), have_list_(false),
       backend_loader_(BackendLoader::get_instance())
 {
-    work_thread_ = std::thread (&Indexer::update_device_list_thread, this);
+    work_thread_ = std::thread(&Indexer::update_device_list_thread, this);
 }
 
 
-Indexer::~Indexer ()
+Indexer::~Indexer()
 {
     continue_thread_ = false;
     wait_for_next_run_.notify_all();
@@ -39,7 +37,7 @@ Indexer::~Indexer ()
 }
 
 
-std::shared_ptr<Indexer> Indexer::get_instance ()
+std::shared_ptr<Indexer> Indexer::get_instance()
 {
     auto obj = indexer_ptr.lock();
 
@@ -47,7 +45,9 @@ std::shared_ptr<Indexer> Indexer::get_instance ()
     {
         // Indexer() is private
         // we have to create a wrapper to pass is to make_shared
-        struct make_shared_enabler : public Indexer {};
+        struct make_shared_enabler : public Indexer
+        {
+        };
 
         obj = std::make_shared<make_shared_enabler>();
 
@@ -59,12 +59,11 @@ std::shared_ptr<Indexer> Indexer::get_instance ()
 }
 
 
-
-void Indexer::update_device_list_thread ()
+void Indexer::update_device_list_thread()
 {
     auto first_list = fetch_device_list_backend();
 
-    std::unique_lock<std::mutex> lock( mtx_ );
+    std::unique_lock<std::mutex> lock(mtx_);
     device_list_ = first_list;
     have_list_ = true;
     wait_for_list_.notify_all();
@@ -87,21 +86,21 @@ void Indexer::update_device_list_thread ()
 
         for (const auto& d : device_list_)
         {
-            auto f = [&d](const DeviceInfo& info)
+            auto f = [&d](const DeviceInfo& info) {
+                if (d.get_serial().compare(info.get_serial()) == 0)
                 {
-                    if (d.get_serial().compare(info.get_serial()) == 0)
-                    {
-                        return true;
-                    }
-                    return false;
-                };
+                    return true;
+                }
+                return false;
+            };
 
             auto found = std::find_if(tmp_dev_list.begin(), tmp_dev_list.end(), f);
 
             if (found == tmp_dev_list.end())
             {
                 SPDLOG_INFO("Lost device {} - {}. Contacting callbacks",
-                           d.get_name().c_str(), d.get_serial().c_str());
+                            d.get_name().c_str(),
+                            d.get_serial().c_str());
                 lost_list.push_back(d);
             }
         }
@@ -116,7 +115,7 @@ void Indexer::update_device_list_thread ()
         {
             for (auto& c : cbs)
             {
-                if (c.serial.empty() || c.serial.compare( d.get_serial() ) == 0)
+                if (c.serial.empty() || c.serial.compare(d.get_serial()) == 0)
                 {
                     c.callback(d, c.data);
                 }
@@ -128,7 +127,7 @@ void Indexer::update_device_list_thread ()
 }
 
 
-std::vector<DeviceInfo> Indexer::fetch_device_list_backend () const
+std::vector<DeviceInfo> Indexer::fetch_device_list_backend() const
 {
     auto tmp_dev_list = backend_loader_->get_device_list_all_backends();
 
@@ -137,8 +136,7 @@ std::vector<DeviceInfo> Indexer::fetch_device_list_backend () const
 }
 
 
-
-void Indexer::sort_device_list (std::vector<DeviceInfo>& lst)
+void Indexer::sort_device_list(std::vector<DeviceInfo>& lst)
 {
     /*
       Sorting of devices shall create the following order:
@@ -148,24 +146,22 @@ void Indexer::sort_device_list (std::vector<DeviceInfo>& lst)
       sorted serials, if no name is given
     */
 
-    auto compareDeviceInfo = [] (const DeviceInfo& info1, const DeviceInfo& info2)
+    auto compareDeviceInfo = [](const DeviceInfo& info1, const DeviceInfo& info2) {
+        if (info1.get_device_type() >= info2.get_device_type())
         {
-            if (info1.get_device_type() >= info2.get_device_type())
+            if (info1.get_serial() > info2.get_serial())
             {
-                if (info1.get_serial() > info2.get_serial())
-                {
-                    return false;
-                }
-
+                return false;
             }
-            return true;
-        };
+        }
+        return true;
+    };
 
     std::sort(lst.begin(), lst.end(), compareDeviceInfo);
 }
 
 
-std::vector<DeviceInfo> Indexer::get_device_list () const
+std::vector<DeviceInfo> Indexer::get_device_list() const
 {
 
     // wait for work_thread to deliver first valid list
@@ -173,35 +169,29 @@ std::vector<DeviceInfo> Indexer::get_device_list () const
     // our thread would retrieve an empty list without this wait loop
 
     std::unique_lock<std::mutex> lock(mtx_);
-    while (!have_list_)
-    {
-        wait_for_list_.wait_for(lock, std::chrono::seconds(wait_period_));
-    }
+    while (!have_list_) { wait_for_list_.wait_for(lock, std::chrono::seconds(wait_period_)); }
     return device_list_;
 }
 
 
-void Indexer::register_device_lost (dev_callback cb,
-                                    void* user_data)
+void Indexer::register_device_lost(dev_callback cb, void* user_data)
 {
     SPDLOG_DEBUG("Registered device lost callback");
 
     std::lock_guard<std::mutex> lock(mtx_);
-    callbacks_.push_back({cb, user_data, ""});
+    callbacks_.push_back({ cb, user_data, "" });
 }
 
 
-void Indexer::register_device_lost (dev_callback cb,
-                                    void* user_data,
-                                    const std::string& serial)
+void Indexer::register_device_lost(dev_callback cb, void* user_data, const std::string& serial)
 {
     SPDLOG_DEBUG("Registered device lost callback for {}", serial.c_str());
     std::lock_guard<std::mutex> lock(mtx_);
-    callbacks_.push_back({cb, user_data, serial});
+    callbacks_.push_back({ cb, user_data, serial });
 }
 
 
-void Indexer::remove_device_lost (dev_callback callback)
+void Indexer::remove_device_lost(dev_callback callback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
 
@@ -219,8 +209,7 @@ void Indexer::remove_device_lost (dev_callback callback)
 }
 
 
-void Indexer::remove_device_lost (dev_callback callback,
-                                  const std::string& serial)
+void Indexer::remove_device_lost(dev_callback callback, const std::string& serial)
 {
     std::lock_guard<std::mutex> lock(mtx_);
 

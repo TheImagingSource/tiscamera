@@ -17,9 +17,8 @@
 #ifndef TCAM_FORMAT_H
 #define TCAM_FORMAT_H
 
-#include <string>
-
 #include <cstdint>
+#include <string>
 
 namespace tcam
 {
@@ -29,19 +28,19 @@ namespace tcam
  * @param description - string that shall be converted
  * @return fourcc of the description; 0 if none
  */
-uint32_t description2fourcc (const char* description);
+uint32_t description2fourcc(const char* description);
 
 
 /**
  * @brief
  */
-std::string fourcc2string (uint32_t fourcc);
+std::string fourcc2string(uint32_t fourcc);
 
 
 /**
  *
  */
-uint32_t string2fourcc (const std::string& s);
+uint32_t string2fourcc(const std::string& s);
 
 } /* namespace tcam */
 

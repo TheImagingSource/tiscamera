@@ -14,61 +14,53 @@
  * limitations under the License.
  */
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <algorithm>
-#include <cstring>
-#include <unistd.h>
-
-#include "Indexer.h"
-
-#include "utils.h"
-#include "logging.h"
 #include "DeviceIndex.h"
 
 #include "BackendLoader.h"
+#include "Indexer.h"
+#include "logging.h"
+#include "utils.h"
+
+#include <algorithm>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <unistd.h>
+#include <vector>
 
 using namespace tcam;
 
 
-DeviceIndex::DeviceIndex ()
-    : indexer_(Indexer::get_instance()),
-      device_list(std::vector<DeviceInfo>()),
+DeviceIndex::DeviceIndex()
+    : indexer_(Indexer::get_instance()), device_list(std::vector<DeviceInfo>()),
       callbacks(std::vector<callback_data>())
 {
-
 }
 
 
-DeviceIndex::~DeviceIndex ()
+DeviceIndex::~DeviceIndex()
 {
-    for (auto& cb : callbacks)
-    {
-        indexer_->remove_device_lost(cb.callback);
-    }
+    for (auto& cb : callbacks) { indexer_->remove_device_lost(cb.callback); }
 }
 
 
-void DeviceIndex::register_device_lost (dev_callback c, void* user_data)
+void DeviceIndex::register_device_lost(dev_callback c, void* user_data)
 {
-    callbacks.push_back({c, user_data, ""});
+    callbacks.push_back({ c, user_data, "" });
 
     indexer_->register_device_lost(c, user_data);
 }
 
 
-void DeviceIndex::register_device_lost (dev_callback c,
-                                        void* user_data,
-                                        const std::string& serial)
+void DeviceIndex::register_device_lost(dev_callback c, void* user_data, const std::string& serial)
 {
-    callbacks.push_back({c, user_data, serial});
+    callbacks.push_back({ c, user_data, serial });
 
     indexer_->register_device_lost(c, user_data, serial);
 }
 
 
-void DeviceIndex::remove_device_lost (dev_callback callback)
+void DeviceIndex::remove_device_lost(dev_callback callback)
 {
     indexer_->remove_device_lost(callback);
 
@@ -86,7 +78,7 @@ void DeviceIndex::remove_device_lost (dev_callback callback)
 }
 
 
-void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& serial)
+void DeviceIndex::remove_device_lost(dev_callback callback, const std::string& serial)
 {
     indexer_->remove_device_lost(callback, serial);
 
@@ -104,7 +96,7 @@ void DeviceIndex::remove_device_lost (dev_callback callback, const std::string& 
 }
 
 
-bool DeviceIndex::fill_device_info (DeviceInfo& info) const
+bool DeviceIndex::fill_device_info(DeviceInfo& info) const
 {
     if (!info.get_serial().empty())
     {
@@ -134,7 +126,7 @@ bool DeviceIndex::fill_device_info (DeviceInfo& info) const
 }
 
 
-std::vector<DeviceInfo> DeviceIndex::get_device_list () const
+std::vector<DeviceInfo> DeviceIndex::get_device_list() const
 {
     if (!indexer_)
     {

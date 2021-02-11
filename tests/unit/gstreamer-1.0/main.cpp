@@ -24,12 +24,13 @@
  * We require an own main to have a single location where things like
  * gst_init can be called. multiple setups should be avoided.
  */
-int main(int argc, char *argv[]) {
-  gst_init(&argc, &argv);
+int main(int argc, char* argv[])
+{
+    gst_init(&argc, &argv);
 
-  int result = Catch::Session().run(argc, argv);
+    int result = Catch::Session().run(argc, argv);
 
-  gst_deinit();
+    gst_deinit();
 
-  return result;
+    return result;
 }

@@ -17,14 +17,13 @@
 #ifndef TCAM_IMAGESOURCE_H
 #define TCAM_IMAGESOURCE_H
 
-#include "base_types.h"
-#include "SinkInterface.h"
 #include "DeviceInterface.h"
+#include "SinkInterface.h"
+#include "base_types.h"
+#include "compiler_defines.h"
 
 #include <chrono>
 #include <memory>
-
-#include "compiler_defines.h"
 
 VISIBILITY_INTERNAL
 
@@ -35,36 +34,34 @@ class ImageSource : public SinkInterface, public std::enable_shared_from_this<Im
 {
 
 public:
+    ImageSource();
 
-    ImageSource ();
+    ~ImageSource();
 
-    ~ImageSource ();
+    bool set_status(TCAM_PIPELINE_STATUS) override;
 
-    bool set_status (TCAM_PIPELINE_STATUS) override;
+    TCAM_PIPELINE_STATUS get_status() const override;
 
-    TCAM_PIPELINE_STATUS get_status () const override;
+    bool setDevice(std::shared_ptr<DeviceInterface>);
 
-    bool setDevice (std::shared_ptr<DeviceInterface>);
+    bool setVideoFormat(const VideoFormat&) override;
 
-    bool setVideoFormat (const VideoFormat&) override;
+    VideoFormat getVideoFormat() const override;
 
-    VideoFormat getVideoFormat () const override;
+    void push_image(std::shared_ptr<ImageBuffer>) override;
 
-    void push_image (std::shared_ptr<ImageBuffer>) override;
+    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>) override;
+    bool setSink(std::shared_ptr<SinkInterface>);
 
-    bool setSink (std::shared_ptr<SinkInterface>);
+    bool set_buffer_collection(const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers);
 
-    bool set_buffer_collection (const std::vector<std::shared_ptr<ImageBuffer>>& new_buffers);
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection() override;
 
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () override;
-
-    void drop_incomplete_frames (bool drop_them) override;
-    bool should_incomplete_frames_be_dropped () const override;
+    void drop_incomplete_frames(bool drop_them) override;
+    bool should_incomplete_frames_be_dropped() const override;
 
 private:
-
     TCAM_PIPELINE_STATUS current_status;
 
     std::shared_ptr<DeviceInterface> device;
@@ -76,7 +73,6 @@ private:
     std::weak_ptr<SinkInterface> pipeline;
 
     bool drop_frames_ = true;
-
 };
 
 } /* namespace tcam */

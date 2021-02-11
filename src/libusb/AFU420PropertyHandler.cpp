@@ -15,41 +15,34 @@
  */
 
 #include "AFU420Device.h"
-
+#include "PropertyGeneration.h" // handle_auto_center
 #include "logging.h"
 #include "utils.h"
-#include "PropertyGeneration.h" // handle_auto_center
 
 #include <algorithm>
 
 using namespace tcam;
 
 
-
-tcam::AFU420Device::AFU420PropertyHandler::AFU420PropertyHandler (AFU420Device* dev)
-    : device(dev)
-{}
+tcam::AFU420Device::AFU420PropertyHandler::AFU420PropertyHandler(AFU420Device* dev) : device(dev) {}
 
 
-std::vector<std::shared_ptr<Property>> tcam::AFU420Device::AFU420PropertyHandler::create_property_vector ()
+std::vector<std::shared_ptr<Property>> tcam::AFU420Device::AFU420PropertyHandler::
+    create_property_vector()
 {
     std::vector<std::shared_ptr<Property>> props;
 
-    for ( const auto& p : properties )
-    {
-        props.push_back(p.property);
-    }
+    for (const auto& p : properties) { props.push_back(p.property); }
 
     return props;
 }
 
 
-bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& new_property)
+bool AFU420Device::AFU420PropertyHandler::set_property(const tcam::Property& new_property)
 {
-    auto f = [&new_property] (const property_description& d)
-        {
-            return ((*d.property).get_ID() == new_property.get_ID());
-        };
+    auto f = [&new_property](const property_description& d) {
+        return ((*d.property).get_ID() == new_property.get_ID());
+    };
 
     auto desc = std::find_if(properties.begin(), properties.end(), f);
 
@@ -77,21 +70,26 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         }
         case TCAM_PROPERTY_GAIN_RED:
         {
-            return device->set_color_gain_factor(color_gain::ColorGainRed, new_property.get_struct().value.i.value);
+            return device->set_color_gain_factor(color_gain::ColorGainRed,
+                                                 new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_GAIN_GREEN:
         {
-            device->set_color_gain_factor(color_gain::ColorGainGreen1, new_property.get_struct().value.i.value);
-            return device->set_color_gain_factor(color_gain::ColorGainGreen2, new_property.get_struct().value.i.value);
+            device->set_color_gain_factor(color_gain::ColorGainGreen1,
+                                          new_property.get_struct().value.i.value);
+            return device->set_color_gain_factor(color_gain::ColorGainGreen2,
+                                                 new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_GAIN_BLUE:
         {
-            return device->set_color_gain_factor(color_gain::ColorGainBlue, new_property.get_struct().value.i.value);
+            return device->set_color_gain_factor(color_gain::ColorGainBlue,
+                                                 new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_OFFSET_AUTO:
         {
             auto props = device->getProperties();
-            return tcam::handle_auto_center(new_property, props, {}, device->active_video_format.get_size());
+            return tcam::handle_auto_center(
+                new_property, props, {}, device->active_video_format.get_size());
         }
         case TCAM_PROPERTY_OFFSET_X:
         {
@@ -119,27 +117,33 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
         }
         case TCAM_PROPERTY_STROBE_DELAY:
         {
-            return device->set_strobe(strobe_parameter::first_strobe_delay, new_property.get_struct().value.i.value);
+            return device->set_strobe(strobe_parameter::first_strobe_delay,
+                                      new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_STROBE_DELAY_SECOND:
         {
-            return device->set_strobe(strobe_parameter::second_strobe_delay, new_property.get_struct().value.i.value);
+            return device->set_strobe(strobe_parameter::second_strobe_delay,
+                                      new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_STROBE_DURATION:
         {
-            return device->set_strobe(strobe_parameter::first_strobe_duration, new_property.get_struct().value.i.value);
+            return device->set_strobe(strobe_parameter::first_strobe_duration,
+                                      new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_STROBE_DURATION_SECOND:
         {
-            return device->set_strobe(strobe_parameter::second_strobe_duration, new_property.get_struct().value.i.value);
+            return device->set_strobe(strobe_parameter::second_strobe_duration,
+                                      new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_STROBE_POLARITY:
         {
-            return device->set_strobe(strobe_parameter::polarity, new_property.get_struct().value.b.value ? 1 : 0);
+            return device->set_strobe(strobe_parameter::polarity,
+                                      new_property.get_struct().value.b.value ? 1 : 0);
         }
         case TCAM_PROPERTY_STROBE_MODE:
         {
-            return device->set_strobe(strobe_parameter::mode, new_property.get_struct().value.i.value);
+            return device->set_strobe(strobe_parameter::mode,
+                                      new_property.get_struct().value.i.value);
         }
         case TCAM_PROPERTY_OIS_MODE:
         {
@@ -170,14 +174,13 @@ bool AFU420Device::AFU420PropertyHandler::set_property (const tcam::Property& ne
 }
 
 
-bool AFU420Device::AFU420PropertyHandler::get_property (tcam::Property& p)
+bool AFU420Device::AFU420PropertyHandler::get_property(tcam::Property& p)
 {
-    auto f = [&p] (const property_description& d)
-        {
-            return ((*d.property).get_name().compare(p.get_name()) == 0);
-        };
+    auto f = [&p](const property_description& d) {
+        return ((*d.property).get_name().compare(p.get_name()) == 0);
+    };
 
-    auto desc = std::find_if(properties.begin(), properties.end(),f);
+    auto desc = std::find_if(properties.begin(), properties.end(), f);
 
     if (desc == properties.end())
     {

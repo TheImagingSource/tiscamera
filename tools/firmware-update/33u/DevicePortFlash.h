@@ -17,7 +17,6 @@
 #pragma once
 
 #include "IDevicePort.h"
-
 #include "pugi.h"
 
 #include <string>
@@ -26,21 +25,25 @@ namespace lib33u
 {
 namespace firmware_update
 {
-	class DevicPortFlash : public IDevicePort
-	{
-	public:
-		DevicPortFlash( const std::string& name, const pugi::xml_node& port_config );
+class DevicPortFlash : public IDevicePort
+{
+public:
+    DevicPortFlash(const std::string& name, const pugi::xml_node& port_config);
 
-	public:
-		virtual std::string name() override;
-		virtual void upload( Camera & dev, const std::vector<UploadItem>& items, util::progress::IReportProgress& progress ) override;
+public:
+    virtual std::string name() override;
+    virtual void upload(Camera& dev,
+                        const std::vector<UploadItem>& items,
+                        util::progress::IReportProgress& progress) override;
 
-	private:
-		std::string name_;
+private:
+    std::string name_;
 
-	private:
-		void upload_internal( Camera& dev, const std::vector<UploadItem>& items, util::progress::IReportProgress& progress );
-	};
+private:
+    void upload_internal(Camera& dev,
+                         const std::vector<UploadItem>& items,
+                         util::progress::IReportProgress& progress);
+};
 
-} /* namespace device_interface */
+} // namespace firmware_update
 } /* namespace lib33u */

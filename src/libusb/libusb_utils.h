@@ -9,7 +9,7 @@
 namespace tcam
 {
 
-std::vector<DeviceInfo> get_libusb_device_list ();
+std::vector<DeviceInfo> get_libusb_device_list();
 
 } // namespace tcam
 

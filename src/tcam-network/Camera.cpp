@@ -15,55 +15,57 @@
  */
 
 #include "Camera.h"
-#include "utils.h"
+
 #include "Firmware.h"
+#include "utils.h"
 
-#include <thread>
-#include <future>
-#include <iostream>
 #include <algorithm>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <linux/if.h>
-#include <netdb.h>
 #include <arpa/inet.h>
 #include <cstring>
-#include <ifaddrs.h>
 #include <errno.h>
+#include <future>
+#include <ifaddrs.h>
+#include <iostream>
+#include <linux/if.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <thread>
 
 namespace tis
 {
 
-std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type)
+std::shared_ptr<Camera> getCameraFromList(const camera_list cameras,
+                                          const std::string& identifier,
+                                          camera_ident id_type)
 {
     std::shared_ptr<Camera> rval;
 
-    std::function<bool(std::shared_ptr<Camera>)> f = [&identifier, &id_type] (std::shared_ptr<Camera> cam)
+    std::function<bool(std::shared_ptr<Camera>)> f = [&identifier,
+                                                      &id_type](std::shared_ptr<Camera> cam) {
+        if (id_type == CAMERA_MAC)
         {
-            if (id_type == CAMERA_MAC)
+            if (cam->getMAC().compare(identifier) == 0)
             {
-                if (cam->getMAC().compare(identifier) == 0)
-                {
-                    return true;
-                }
+                return true;
             }
-            else if (id_type == CAMERA_NAME)
+        }
+        else if (id_type == CAMERA_NAME)
+        {
+            if (cam->getUserDefinedName().compare(identifier) == 0)
             {
-                if (cam->getUserDefinedName().compare(identifier) == 0)
-                {
-                    return true;
-                }
+                return true;
             }
-            else
+        }
+        else
+        {
+            if (cam->getSerialNumber().compare(identifier) == 0)
             {
-                if (cam->getSerialNumber().compare(identifier) == 0)
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
-        };
+        }
+        return false;
+    };
 
     auto iter = find_if(cameras.begin(), cameras.end(), f);
 
@@ -75,11 +77,11 @@ std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std:
 }
 
 
-Camera::Camera (const Packet::ACK_DISCOVERY& _packet,
-                std::shared_ptr<NetworkInterface> _interface,
-                int timeoutIntervals)
-    : packet(_packet), interface(_interface),
-      timeoutCounter(timeoutIntervals), timeoutCounterDefault(timeoutIntervals)
+Camera::Camera(const Packet::ACK_DISCOVERY& _packet,
+               std::shared_ptr<NetworkInterface> _interface,
+               int timeoutIntervals)
+    : packet(_packet), interface(_interface), timeoutCounter(timeoutIntervals),
+      timeoutCounterDefault(timeoutIntervals)
 {
     this->socket = interface->createSocket();
 
@@ -96,13 +98,13 @@ Camera::~Camera()
 }
 
 
-std::shared_ptr<Socket> Camera::getSocket ()
+std::shared_ptr<Socket> Camera::getSocket()
 {
     return this->socket;
 }
 
 
-int Camera::generateRequestID ()
+int Camera::generateRequestID()
 {
     this->requestID++;
     if (this->requestID == 0)
@@ -114,62 +116,62 @@ int Camera::generateRequestID ()
 }
 
 
-int Camera::reduceCounter ()
+int Camera::reduceCounter()
 {
     timeoutCounter--;
     return timeoutCounter;
 }
 
 
-int Camera::resetCounter ()
+int Camera::resetCounter()
 {
     timeoutCounter = timeoutCounterDefault;
     return timeoutCounter;
 }
 
 
-std::string Camera::getNetworkInterfaceName ()
+std::string Camera::getNetworkInterfaceName()
 {
     return interface->getInterfaceName();
 }
 
 
-void Camera::updateCamera (std::shared_ptr<Camera> cam)
+void Camera::updateCamera(std::shared_ptr<Camera> cam)
 {
     this->packet = cam->packet;
 }
 
 
-std::string Camera::getModelName ()
+std::string Camera::getModelName()
 {
     return this->packet.ModelName;
 }
 
 
-std::string Camera::getSerialNumber ()
+std::string Camera::getSerialNumber()
 {
     return this->packet.Serialnumber;
 }
 
 
-std::string Camera::getVendorName ()
+std::string Camera::getVendorName()
 {
     return this->packet.ManufacturerName;
 }
 
 
-std::string Camera::getUserDefinedName ()
+std::string Camera::getUserDefinedName()
 {
     return this->packet.UserDefinedName;
 }
 
 
-bool Camera::setUserDefinedName (const std::string& name)
+bool Camera::setUserDefinedName(const std::string& name)
 {
     if (getControl())
     {
         char buf[16];
-        strcpy(buf, name.substr(0,15).c_str());
+        strcpy(buf, name.substr(0, 15).c_str());
         return sendWriteMemory(Register::USER_DEFINED_NAME_REGISTER, sizeof(buf), &buf);
     }
     else
@@ -179,38 +181,39 @@ bool Camera::setUserDefinedName (const std::string& name)
 }
 
 
-const std::string Camera::getMAC ()
+const std::string Camera::getMAC()
 {
-    return int2mac(((uint64_t) ntohs(this->packet.DeviceMACHigh)) << 32 |ntohl(this->packet.DeviceMACLow));
+    return int2mac(((uint64_t)ntohs(this->packet.DeviceMACHigh)) << 32
+                   | ntohl(this->packet.DeviceMACLow));
 }
 
 
-const std::string Camera::getCurrentIP ()
+const std::string Camera::getCurrentIP()
 {
     return int2ip(this->packet.CurrentIP);
 }
 
 
-const std::string Camera::getCurrentSubnet ()
+const std::string Camera::getCurrentSubnet()
 {
     return int2ip(this->packet.CurrentSubnetMask);
 }
 
 
-const std::string Camera::getCurrentGateway ()
+const std::string Camera::getCurrentGateway()
 {
     return int2ip(this->packet.DefaultGateway);
 }
 
 
-bool Camera::isStaticIPactive ()
+bool Camera::isStaticIPactive()
 {
     uint32_t i = 0;
     sendReadMemory(Register::CURRENT_IPCFG_REGISTER, 4, &i);
 
     const int static_ip_bit = 0x0;
 
-    if (ntohl(i) & (1<<(static_ip_bit)))
+    if (ntohl(i) & (1 << (static_ip_bit)))
     {
         return true;
     }
@@ -218,14 +221,14 @@ bool Camera::isStaticIPactive ()
 }
 
 
-bool Camera::setStaticIPstate (const bool on)
+bool Camera::setStaticIPstate(const bool on)
 {
     bool retv = false;
     if (getControl())
     {
         const int static_ip_bit = 0x00;
-        const int dhcp_bit      = 0x01;
-        const int llaBit        = 0x02;
+        const int dhcp_bit = 0x01;
+        const int llaBit = 0x02;
 
         uint32_t data = ntohl(this->packet.IPConfigCurrent);
         if (on)
@@ -270,13 +273,13 @@ bool Camera::setStaticIPstate (const bool on)
 }
 
 
-bool Camera::isDHCPactive ()
+bool Camera::isDHCPactive()
 {
     uint32_t i = 0;
     sendReadMemory(Register::CURRENT_IPCFG_REGISTER, 4, &i);
 
     const int dhcpBit = 0x01;
-    if (htonl(i) & (1<<(dhcpBit)))
+    if (htonl(i) & (1 << (dhcpBit)))
     {
         return true;
     }
@@ -285,14 +288,14 @@ bool Camera::isDHCPactive ()
 }
 
 
-bool Camera::setDHCPstate (const bool on)
+bool Camera::setDHCPstate(const bool on)
 {
     bool retv = false;
     if (getControl())
     {
         const int static_ip_bit = 0x00;
-        const int dhcpBit       = 0x01;
-        const int llaBit        = 0x02;
+        const int dhcpBit = 0x01;
+        const int llaBit = 0x02;
         uint32_t data = ntohl(this->packet.IPConfigCurrent);
 
         if (on)
@@ -323,7 +326,7 @@ bool Camera::setDHCPstate (const bool on)
                 data &= ~(0x01 << static_ip_bit);
             }
             data = htonl(data);
-            retv =  this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
+            retv = this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
         }
         abandonControl();
     }
@@ -331,17 +334,17 @@ bool Camera::setDHCPstate (const bool on)
 }
 
 
-bool Camera::setIPconfigState (const bool dhcp, const bool staticIP)
+bool Camera::setIPconfigState(const bool dhcp, const bool staticIP)
 {
     bool retv = false;
     if (getControl())
     {
         const int static_ip_bit = 0x00;
-        const int dhcpBit       = 0x01;
-        const int llaBit        = 0x02;
+        const int dhcpBit = 0x01;
+        const int llaBit = 0x02;
         uint32_t data = ntohl(this->packet.IPConfigCurrent);
 
-        data |= (0x01 << llaBit);  // always on
+        data |= (0x01 << llaBit); // always on
 
         if (dhcp)
         {
@@ -362,7 +365,7 @@ bool Camera::setIPconfigState (const bool dhcp, const bool staticIP)
         }
 
         data = htonl(data);
-        retv =  this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
+        retv = this->sendWriteMemory(Register::CURRENT_IPCFG_REGISTER, 4, &data);
 
         abandonControl();
     }
@@ -370,7 +373,7 @@ bool Camera::setIPconfigState (const bool dhcp, const bool staticIP)
 }
 
 
-const std::string Camera::getPersistentIP ()
+const std::string Camera::getPersistentIP()
 {
     uint32_t ip = 0;
 
@@ -385,7 +388,7 @@ const std::string Camera::getPersistentIP ()
 }
 
 
-bool Camera::setPersistentIP (const std::string& ip)
+bool Camera::setPersistentIP(const std::string& ip)
 {
     bool retv = false;
     if (getControl())
@@ -398,7 +401,7 @@ bool Camera::setPersistentIP (const std::string& ip)
 }
 
 
-const std::string Camera::getPersistentSubnet ()
+const std::string Camera::getPersistentSubnet()
 {
     uint32_t ip;
     if (sendReadMemory(Register::PERSISTANT_SUBNETMASK_REGISTER, 4, &ip))
@@ -412,7 +415,7 @@ const std::string Camera::getPersistentSubnet ()
 }
 
 
-bool Camera::setPersistentSubnet (const std::string& subnet)
+bool Camera::setPersistentSubnet(const std::string& subnet)
 {
     bool retv = false;
     if (getControl())
@@ -425,7 +428,7 @@ bool Camera::setPersistentSubnet (const std::string& subnet)
 }
 
 
-const std::string Camera::getPersistentGateway ()
+const std::string Camera::getPersistentGateway()
 {
     uint32_t ip;
     if (sendReadMemory(Register::PERSISTANT_DEFAULTGATEWAY_REGISTER, 4, &ip))
@@ -439,7 +442,7 @@ const std::string Camera::getPersistentGateway ()
 }
 
 
-bool Camera::setPersistentGateway (const std::string& gateway)
+bool Camera::setPersistentGateway(const std::string& gateway)
 {
     bool retv = false;
     if (getControl())
@@ -452,7 +455,7 @@ bool Camera::setPersistentGateway (const std::string& gateway)
 }
 
 
-bool Camera::forceIP (const std::string& ip, const std::string& subnet, const std::string& gateway)
+bool Camera::forceIP(const std::string& ip, const std::string& subnet, const std::string& gateway)
 {
     uint32_t _ip = ip2int(ip);
     uint32_t _subnet = ip2int(subnet);
@@ -465,7 +468,7 @@ bool Camera::forceIP (const std::string& ip, const std::string& subnet, const st
     // we want to reset to ip configuration
     // and will not get an ack paket
     // assume everything is ok
-    if ( _ip == 0 && _subnet == 0 && _gateway == 0 )
+    if (_ip == 0 && _subnet == 0 && _gateway == 0)
     {
         returnVal = true;
     }
@@ -474,15 +477,15 @@ bool Camera::forceIP (const std::string& ip, const std::string& subnet, const st
 }
 
 
-std::string Camera::getFirmwareVersion ()
+std::string Camera::getFirmwareVersion()
 {
     return this->packet.DeviceVersion;
 }
 
 
-int Camera::uploadFirmware (const std::string& filename,
-                            const std::string& overrideModelName,
-                            std::function<void(int, const std::string&)> progressFunc)
+int Camera::uploadFirmware(const std::string& filename,
+                           const std::string& overrideModelName,
+                           std::function<void(int, const std::string&)> progressFunc)
 {
     FirmwareUpdate::Status retv = FirmwareUpdate::Status::DeviceAccessFailed;
     FwdFirmwareWriter writer = FwdFirmwareWriter(*this);
@@ -506,10 +509,7 @@ int Camera::uploadFirmware (const std::string& filename,
         }
 
         // actual writing
-        retv = upgradeFirmware(writer,
-                               this->packet,
-                               filename, overrideModelName,
-                               progressFunc);
+        retv = upgradeFirmware(writer, this->packet, filename, overrideModelName, progressFunc);
 
         // reset heartbeat
         setHeartbeatTimeout(dev_timeout);
@@ -521,13 +521,13 @@ int Camera::uploadFirmware (const std::string& filename,
 }
 
 
-std::string Camera::getInterfaceName ()
+std::string Camera::getInterfaceName()
 {
     return interface->getInterfaceName();
 }
 
 
-int Camera::getHeartbeatTimeout ()
+int Camera::getHeartbeatTimeout()
 {
     bool retv = false;
     uint32_t data;
@@ -535,7 +535,7 @@ int Camera::getHeartbeatTimeout ()
     {
         retv = this->sendReadRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, &data);
     }
-    catch (const std::exception &exc)
+    catch (const std::exception& exc)
     {
         std::cerr << exc.what() << std::endl;
     }
@@ -548,10 +548,10 @@ int Camera::getHeartbeatTimeout ()
 }
 
 
-bool Camera::setHeartbeatTimeout (uint32_t timeout)
+bool Camera::setHeartbeatTimeout(uint32_t timeout)
 {
     bool retv = false;
-    if(!isControlled)
+    if (!isControlled)
     {
         if (!this->getControl())
         {
@@ -564,7 +564,7 @@ bool Camera::setHeartbeatTimeout (uint32_t timeout)
     {
         retv = this->sendWriteRegister(Register::HEARTBEAT_TIMEOUT_REGISTER, data);
     }
-    catch (const std::exception &exc)
+    catch (const std::exception& exc)
     {
         std::cerr << exc.what() << std::endl;
     }
@@ -573,17 +573,17 @@ bool Camera::setHeartbeatTimeout (uint32_t timeout)
 }
 
 
-bool Camera::getControl ()
+bool Camera::getControl()
 {
     bool retv = false;
-    if(!isControlled)
+    if (!isControlled)
     {
         try
         {
             uint32_t data = 2;
             retv = this->sendWriteRegister(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, data);
         }
-        catch (const std::exception &exc)
+        catch (const std::exception& exc)
         {
             std::cerr << exc.what() << std::endl;
         }
@@ -603,7 +603,7 @@ bool Camera::getControl ()
 }
 
 
-bool Camera::abandonControl ()
+bool Camera::abandonControl()
 {
     bool retv = false;
     retv = this->sendWriteRegister(Register::CONTROLCHANNEL_PRIVELEGE_REGISTER, 0);
@@ -620,7 +620,7 @@ bool Camera::getIsBusy()
         return false;
 
     bool retv = true;
-    if(getControl())
+    if (getControl())
     {
         retv = false;
         abandonControl();
@@ -629,10 +629,10 @@ bool Camera::getIsBusy()
 }
 
 
-void Camera::resetIP ()
+void Camera::resetIP()
 {
     abandonControl();
-    this->sendForceIP(0,0,0);
+    this->sendForceIP(0, 0, 0);
 }
 
 
@@ -653,14 +653,14 @@ bool Camera::isReachable()
 }
 
 
-bool Camera::sendWriteRegister (const uint32_t address, uint32_t value)
+bool Camera::sendWriteRegister(const uint32_t address, uint32_t value)
 {
     unsigned int response = Status::TIMEOUT;
 
     unsigned short id = generateRequestID();
     size_t real_size = sizeof(Packet::CMD_WRITEREG);
 
-    std::vector<uint8_t> packet_ (real_size);
+    std::vector<uint8_t> packet_(real_size);
     auto _packet = (Packet::CMD_WRITEREG*)packet_.data();
 
     _packet->header.magic = 0x42;
@@ -672,18 +672,17 @@ bool Camera::sendWriteRegister (const uint32_t address, uint32_t value)
     _packet->ops[0].address = htonl(address);
     _packet->ops[0].value = htonl(value);
 
-    auto callback_function = [id, &response] (void* msg) -> int
-                             {
-                                 Packet::ACK_WRITEREG* ack = (Packet::ACK_WRITEREG*) msg;
-                                 response = Status::FAILURE;
+    auto callback_function = [id, &response](void* msg) -> int {
+        Packet::ACK_WRITEREG* ack = (Packet::ACK_WRITEREG*)msg;
+        response = Status::FAILURE;
 
-                                 if (ntohs(ack->header.ack_id) == id)
-                                 {
-                                     response = ntohs(ack->header.status);
-                                     return Socket::SendAndReceiveSignals::END;
-                                 }
-                                 return Socket::SendAndReceiveSignals::CONTINUE;
-                             };
+        if (ntohs(ack->header.ack_id) == id)
+        {
+            response = ntohs(ack->header.status);
+            return Socket::SendAndReceiveSignals::END;
+        }
+        return Socket::SendAndReceiveSignals::CONTINUE;
+    };
 
     try
     {
@@ -703,7 +702,7 @@ bool Camera::sendWriteRegister (const uint32_t address, uint32_t value)
 }
 
 
-bool Camera::sendReadRegister (const uint32_t address, uint32_t* value)
+bool Camera::sendReadRegister(const uint32_t address, uint32_t* value)
 {
 
     if (!value)
@@ -725,9 +724,8 @@ bool Camera::sendReadRegister (const uint32_t address, uint32_t* value)
 
     _packet.address[0] = htonl(address);
 
-    auto callback_function = [&id, &value, &response] (void* msg) -> int
-    {
-        Packet::ACK_READREG* ack = (Packet::ACK_READREG*) msg;
+    auto callback_function = [&id, &value, &response](void* msg) -> int {
+        Packet::ACK_READREG* ack = (Packet::ACK_READREG*)msg;
 
         response = Status::FAILURE;
 
@@ -762,7 +760,7 @@ bool Camera::sendReadRegister (const uint32_t address, uint32_t* value)
 }
 
 
-bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* data)
+bool Camera::sendReadMemory(const uint32_t address, const uint32_t size, void* data)
 {
     if ((size % 4) != 0)
     {
@@ -784,23 +782,22 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
     _packet.count = htons(size);
     _packet.address = htonl(address);
 
-    auto callback_function = [&data, &id, &size, &response] (void* msg) -> int
-                             {
-                                 Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*) msg;
+    auto callback_function = [&data, &id, &size, &response](void* msg) -> int {
+        Packet::ACK_READMEM* ack = (Packet::ACK_READMEM*)msg;
 
-                                 response = Status::FAILURE;
+        response = Status::FAILURE;
 
-                                 if (ntohs(ack->header.ack_id) == id)
-                                 {
-                                     if (ack->header.status == Status::SUCCESS)
-                                     {
-                                         memcpy(data, ack->data, size);
-                                     }
-                                     response = ntohs(ack->header.status);
-                                     return Socket::SendAndReceiveSignals::END;
-                                 }
-                                 return Socket::SendAndReceiveSignals::CONTINUE;
-                             };
+        if (ntohs(ack->header.ack_id) == id)
+        {
+            if (ack->header.status == Status::SUCCESS)
+            {
+                memcpy(data, ack->data, size);
+            }
+            response = ntohs(ack->header.status);
+            return Socket::SendAndReceiveSignals::END;
+        }
+        return Socket::SendAndReceiveSignals::CONTINUE;
+    };
 
     try
     {
@@ -820,7 +817,7 @@ bool Camera::sendReadMemory (const uint32_t address, const uint32_t size, void* 
 }
 
 
-bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* data)
+bool Camera::sendWriteMemory(const uint32_t address, const size_t size, void* data)
 {
     if ((size % 4) != 0)
     {
@@ -832,7 +829,7 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     unsigned short id = generateRequestID();
     size_t real_size = sizeof(Packet::CMD_WRITEMEM) + (size - sizeof(uint32_t));
 
-    std::vector<uint8_t> packet_ (real_size);
+    std::vector<uint8_t> packet_(real_size);
     auto _packet = (Packet::CMD_WRITEMEM*)packet_.data();
 
     _packet->header.magic = 0x42;
@@ -844,9 +841,8 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
     memcpy(&_packet->data, data, size);
     _packet->address = htonl(address);
 
-    auto callback_function = [id, &response] (void* msg) -> int
-    {
-        Packet::ACK_WRITEMEM* ack = (Packet::ACK_WRITEMEM*) msg;
+    auto callback_function = [id, &response](void* msg) -> int {
+        Packet::ACK_WRITEMEM* ack = (Packet::ACK_WRITEMEM*)msg;
         response = Status::FAILURE;
 
         if (ntohs(ack->header.ack_id) == id)
@@ -880,7 +876,7 @@ bool Camera::sendWriteMemory (const uint32_t address, const size_t size, void* d
 }
 
 
-void Camera::sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32_t gateway)
+void Camera::sendForceIP(const uint32_t ip, const uint32_t subnet, const uint32_t gateway)
 {
     unsigned short id = generateRequestID();
     auto s = getSocket();

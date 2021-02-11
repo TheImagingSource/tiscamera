@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include <gst/gst.h>
-
 #include "catch.hpp"
-
 #include "tcamgstbase.h"
+
+#include <gst/gst.h>
 
 /**
  * This test aimes to verify that multiple sources are correctly identified
@@ -29,12 +28,12 @@ TEST_CASE("tcam_gst_find_camera_src")
     GError* err = nullptr;
 
     const char* pipeline_str = "tcamsrc name=test-source1 "
-        "! bayer2rgb "
-        "! videoconvert name=test-conv1 "
-        "! videomixer name=mix ! videoconvert ! fakesink "
-        " tcamsrc name=test-source2 "
-        "! bayer2rgb name=test-b2r2 "
-        "! videoconvert ! mix.";
+                               "! bayer2rgb "
+                               "! videoconvert name=test-conv1 "
+                               "! videomixer name=mix ! videoconvert ! fakesink "
+                               " tcamsrc name=test-source2 "
+                               "! bayer2rgb name=test-b2r2 "
+                               "! videoconvert ! mix.";
 
     GstElement* pipeline = gst_parse_launch(pipeline_str, &err);
 

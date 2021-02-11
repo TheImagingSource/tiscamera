@@ -33,11 +33,9 @@ typedef struct roi_area
     unsigned int width;
     unsigned int height;
 
-    bool operator== (const struct roi_area& other) const
+    bool operator==(const struct roi_area& other) const
     {
-        if (top == other.top
-            && left == other.left
-            && width == other.width
+        if (top == other.top && left == other.left && width == other.width
             && height == other.height)
         {
             return true;
@@ -45,7 +43,7 @@ typedef struct roi_area
         return false;
     }
 
-    bool operator!= (const struct roi_area& other) const
+    bool operator!=(const struct roi_area& other) const
     {
         return !operator==(other);
     }
@@ -67,19 +65,16 @@ typedef struct roi_cache
     float width_cache;
     float height_cache;
 
-    bool empty () const
+    bool empty() const
     {
-        if (left_cache == 0
-            && top_cache == 0
-            && width_cache == 0
-            && height_cache == 0)
+        if (left_cache == 0 && top_cache == 0 && width_cache == 0 && height_cache == 0)
         {
             return true;
         }
         return false;
     }
 
-    void clear ()
+    void clear()
     {
         left_cache = 0;
         top_cache = 0;

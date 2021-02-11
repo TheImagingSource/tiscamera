@@ -17,15 +17,14 @@
 #include "RegionOfInterest.h"
 
 #include "img/image_transform_base.h"
-
 #include "math.h"
 
 using namespace roi;
 
-RegionOfInterest::RegionOfInterest (const tcam_image_size& min_size,
-                                    const tcam_image_size& image_size,
-                                    ROI_CHANGE_BEHAVIOR behavior,
-                                    ROI_PRESET preset)
+RegionOfInterest::RegionOfInterest(const tcam_image_size& min_size,
+                                   const tcam_image_size& image_size,
+                                   ROI_CHANGE_BEHAVIOR behavior,
+                                   ROI_PRESET preset)
     : min_size_(min_size), image_size_(image_size), behavior_(behavior), preset_(preset)
 {
 
@@ -35,16 +34,15 @@ RegionOfInterest::RegionOfInterest (const tcam_image_size& min_size,
 }
 
 
-roi_area RegionOfInterest::get () const
+roi_area RegionOfInterest::get() const
 {
     return roi_;
 }
 
 
-bool RegionOfInterest::set_position (unsigned int left, unsigned int top)
+bool RegionOfInterest::set_position(unsigned int left, unsigned int top)
 {
-    if (!roi_fits_image(image_size_,
-                        {left, top, roi_.width, roi_.height}))
+    if (!roi_fits_image(image_size_, { left, top, roi_.width, roi_.height }))
     {
         return false;
     }
@@ -58,10 +56,9 @@ bool RegionOfInterest::set_position (unsigned int left, unsigned int top)
 }
 
 
-bool RegionOfInterest::set_top (unsigned int top)
+bool RegionOfInterest::set_top(unsigned int top)
 {
-    if (!roi_fits_image(image_size_,
-                        {roi_.left, top, roi_.width, roi_.height}))
+    if (!roi_fits_image(image_size_, { roi_.left, top, roi_.width, roi_.height }))
     {
         return false;
     }
@@ -75,10 +72,9 @@ bool RegionOfInterest::set_top (unsigned int top)
 }
 
 
-bool RegionOfInterest::set_left (unsigned int left)
+bool RegionOfInterest::set_left(unsigned int left)
 {
-    if (!roi_fits_image(image_size_,
-                        {left, roi_.top, roi_.width, roi_.height}))
+    if (!roi_fits_image(image_size_, { left, roi_.top, roi_.width, roi_.height }))
     {
         return false;
     }
@@ -90,17 +86,14 @@ bool RegionOfInterest::set_left (unsigned int left)
 }
 
 
-
-
-bool RegionOfInterest::set_size (unsigned int width, unsigned int height)
+bool RegionOfInterest::set_size(unsigned int width, unsigned int height)
 {
-    if (width < min_size_.width
-        || height < min_size_.height)
+    if (width < min_size_.width || height < min_size_.height)
     {
         return false;
     }
 
-    if (!roi_fits_image(image_size_, {roi_.left, roi_.top, width, height}))
+    if (!roi_fits_image(image_size_, { roi_.left, roi_.top, width, height }))
     {
         return false;
     }
@@ -115,13 +108,13 @@ bool RegionOfInterest::set_size (unsigned int width, unsigned int height)
 }
 
 
-bool RegionOfInterest::set_width (unsigned int width)
+bool RegionOfInterest::set_width(unsigned int width)
 {
     if (width < min_size_.width)
     {
         return false;
     }
-    if (!roi_fits_image(image_size_, {roi_.left, roi_.top, width, roi_.height}))
+    if (!roi_fits_image(image_size_, { roi_.left, roi_.top, width, roi_.height }))
     {
         return false;
     }
@@ -136,13 +129,13 @@ bool RegionOfInterest::set_width (unsigned int width)
 }
 
 
-bool RegionOfInterest::set_height (unsigned int height)
+bool RegionOfInterest::set_height(unsigned int height)
 {
     if (height < min_size_.height)
     {
         return false;
     }
-    if (!roi_fits_image(image_size_, {roi_.left, roi_.top, roi_.width, height}))
+    if (!roi_fits_image(image_size_, { roi_.left, roi_.top, roi_.width, height }))
     {
         return false;
     }
@@ -155,13 +148,13 @@ bool RegionOfInterest::set_height (unsigned int height)
 }
 
 
-bool RegionOfInterest::fits (const tcam_image_size& image_size) const
+bool RegionOfInterest::fits(const tcam_image_size& image_size) const
 {
     return roi_fits_image(image_size, roi_);
 }
 
 
-bool RegionOfInterest::set_image_size (const tcam_image_size& image_size)
+bool RegionOfInterest::set_image_size(const tcam_image_size& image_size)
 {
     auto old_image_size = image_size_;
 
@@ -171,12 +164,7 @@ bool RegionOfInterest::set_image_size (const tcam_image_size& image_size)
 
     roi_area new_roi = {};
 
-    if (!calculate_new_roi(old_image_size,
-                           image_size_,
-                           roi_,
-                           new_roi,
-                           behavior_,
-                           cache_))
+    if (!calculate_new_roi(old_image_size, image_size_, roi_, new_roi, behavior_, cache_))
     {
         //printf("calculate_new_roi failed!\n");
 
@@ -220,12 +208,12 @@ bool RegionOfInterest::set_image_size (const tcam_image_size& image_size)
  * @return bool if calculation was successful
  * @
  */
-bool RegionOfInterest::calculate_new_roi (const tcam_image_size& /* old_size */,
-                                          const tcam_image_size& new_size,
-                                          const roi_area& /* old_roi */,
-                                          roi_area& new_roi,
-                                          ROI_CHANGE_BEHAVIOR behavior,
-                                          roi_object& /* cache */)
+bool RegionOfInterest::calculate_new_roi(const tcam_image_size& /* old_size */,
+                                         const tcam_image_size& new_size,
+                                         const roi_area& /* old_roi */,
+                                         roi_area& new_roi,
+                                         ROI_CHANGE_BEHAVIOR behavior,
+                                         roi_object& /* cache */)
 {
 
     switch (behavior)
@@ -246,8 +234,7 @@ bool RegionOfInterest::calculate_new_roi (const tcam_image_size& /* old_size */,
     }
 }
 
-tcam_image_size calc_relative_position (const roi_cache& cache,
-                                        const tcam_image_size& new_size)
+tcam_image_size calc_relative_position(const roi_cache& cache, const tcam_image_size& new_size)
 {
     tcam_image_size s;
 
@@ -257,24 +244,22 @@ tcam_image_size calc_relative_position (const roi_cache& cache,
     return s;
 }
 
-tcam_image_size calc_relative_roi_size (const roi_cache& cache,
-                                        const tcam_image_size& new_size)
+tcam_image_size calc_relative_roi_size(const roi_cache& cache, const tcam_image_size& new_size)
 {
     tcam_image_size s;
 
-    s.width  = round(cache.width_cache * new_size.width / 100);
+    s.width = round(cache.width_cache * new_size.width / 100);
     s.height = round(cache.height_cache * new_size.height / 100);
 
     return s;
 }
 
 
-bool RegionOfInterest::set_minimal_size (const tcam_image_size& min)
+bool RegionOfInterest::set_minimal_size(const tcam_image_size& min)
 {
     if (min.width > roi_.width || min.height > roi_.height)
     {
-        if (!roi_fits_image(image_size_, {roi_.left, roi_.top,
-                                          min.width, min.height}))
+        if (!roi_fits_image(image_size_, { roi_.left, roi_.top, min.width, min.height }))
         {
             return false;
         }
@@ -287,7 +272,6 @@ bool RegionOfInterest::set_minimal_size (const tcam_image_size& min)
         {
             roi_.height = min.height;
         }
-
     }
 
     min_size_ = min;
@@ -296,7 +280,7 @@ bool RegionOfInterest::set_minimal_size (const tcam_image_size& min)
 }
 
 
-void RegionOfInterest::set_preset (ROI_PRESET preset)
+void RegionOfInterest::set_preset(ROI_PRESET preset)
 {
     preset_ = preset;
 
@@ -304,7 +288,7 @@ void RegionOfInterest::set_preset (ROI_PRESET preset)
 }
 
 
-size_t RegionOfInterest::roi_buffer_size () const
+size_t RegionOfInterest::roi_buffer_size() const
 {
     // TODO: format
     return (roi_.height * roi_.width);
@@ -314,22 +298,21 @@ size_t RegionOfInterest::roi_buffer_size () const
 /**
  * Creates a new image buffer by memcpying the ROI from the given buffer
  */
-bool RegionOfInterest::copy_roi (const tcam_image_buffer& image,
-                                 tcam_image_buffer& image_roi) const
+bool RegionOfInterest::copy_roi(const tcam_image_buffer& image, tcam_image_buffer& image_roi) const
 {
-// always first multiply bpp and then divide by 8 to fix formats with actual 12 bpp
+    // always first multiply bpp and then divide by 8 to fix formats with actual 12 bpp
     int fourcc = image.format.fourcc;
     int src_width = image.format.width;
 
     size_t bpp = img::get_bits_per_pixel(fourcc);
 
-	size_t bytesPerLineIn = src_width * bpp / 8;
+    size_t bytesPerLineIn = src_width * bpp / 8;
     size_t bytesPerLineOut = roi_.width * bpp / 8;
 
     int startRow = roi_.top;
     int endRow = roi_.top + roi_.height;
 
-	byte* pIn = image.pData;
+    byte* pIn = image.pData;
 
     size_t size = roi_buffer_size() * bpp / 8;
     byte* pOut = (byte*)malloc(size);
@@ -338,13 +321,13 @@ bool RegionOfInterest::copy_roi (const tcam_image_buffer& image,
 
 
     byte* po = pOut;
-	for (int y = startRow; y < endRow; ++y)
-	{
+    for (int y = startRow; y < endRow; ++y)
+    {
         std::memcpy(po, pIn, bytesPerLineOut);
 
-		po += bytesPerLineOut;
-		pIn += bytesPerLineIn;
-	}
+        po += bytesPerLineOut;
+        pIn += bytesPerLineIn;
+    }
 
     image_roi = {};
 
@@ -361,13 +344,12 @@ bool RegionOfInterest::copy_roi (const tcam_image_buffer& image,
     return true;
 }
 
-bool RegionOfInterest::extract_roi_view (const tcam_image_buffer& image,
-                                         tcam_image_buffer& image_roi) const
+bool RegionOfInterest::extract_roi_view(const tcam_image_buffer& image,
+                                        tcam_image_buffer& image_roi) const
 {
     size_t bpp = img::get_bits_per_pixel(image.format.fourcc);
 
-    image_roi.pData = image.pData + (roi_.top * image.format.width * bpp / 8
-                               + roi_.left * bpp / 8);
+    image_roi.pData = image.pData + (roi_.top * image.format.width * bpp / 8 + roi_.left * bpp / 8);
 
     image_roi.pitch = roi_.width * bpp / 8;
 
@@ -378,7 +360,7 @@ bool RegionOfInterest::extract_roi_view (const tcam_image_buffer& image,
 }
 
 
-void RegionOfInterest::calculate_roi_based_on_cache ()
+void RegionOfInterest::calculate_roi_based_on_cache()
 {
     roi_area new_roi = {};
 
@@ -419,27 +401,25 @@ void RegionOfInterest::calculate_roi_based_on_cache ()
     }
 
 
-
     roi_ = new_roi;
 }
 
 
-roi_cache RegionOfInterest::fill_cache (const tcam_image_size& image,
-                                        const roi_area& roi)
+roi_cache RegionOfInterest::fill_cache(const tcam_image_size& image, const roi_area& roi)
 {
     roi_cache cache = {};
 
     cache.left_cache = (double)roi.left / image.width * 100;
-    cache.top_cache  = (double)roi.top  / image.height * 100;
+    cache.top_cache = (double)roi.top / image.height * 100;
 
-    cache.width_cache  = (double)roi.width / image.width * 100;
+    cache.width_cache = (double)roi.width / image.width * 100;
     cache.height_cache = (double)roi.height / image.height * 100;
 
     return cache;
 }
 
 
-void RegionOfInterest::apply_preset ()
+void RegionOfInterest::apply_preset()
 {
     /*
       for 2594x1944
@@ -464,7 +444,7 @@ void RegionOfInterest::apply_preset ()
         }
         case ROI_PRESET_CENTER_25:
         {
-            cache_ = { 50.0-12.5, 50-12.5, 25, 25 };
+            cache_ = { 50.0 - 12.5, 50 - 12.5, 25, 25 };
             break;
         }
         case ROI_PRESET_BOTTOM_HALF:
@@ -484,5 +464,4 @@ void RegionOfInterest::apply_preset ()
         }
     }
     calculate_roi_based_on_cache();
-
 }

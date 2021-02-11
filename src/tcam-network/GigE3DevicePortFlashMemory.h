@@ -38,27 +38,30 @@ class DevicePortFlashMemory : public IDevicePort
     uint32_t baseAddress_;
 
 public:
-    virtual std::string name () override { return name_; }
+    virtual std::string name() override
+    {
+        return name_;
+    }
 
-    virtual Status Configure (const std::string& name,
-                              const pugi::xml_node& portConfigElem) override;
-    virtual Status CheckItems (const std::vector<UploadItem>& items) override;
-    virtual Status UploadItems (IFirmwareWriter& dev,
-                                const std::vector<UploadItem>& items,
-                                tReportProgressFunc progressFunc) override;
+    virtual Status Configure(const std::string& name,
+                             const pugi::xml_node& portConfigElem) override;
+    virtual Status CheckItems(const std::vector<UploadItem>& items) override;
+    virtual Status UploadItems(IFirmwareWriter& dev,
+                               const std::vector<UploadItem>& items,
+                               tReportProgressFunc progressFunc) override;
 
 private:
-    void AddEraseRequests (const UploadItem& item, std::set<uint32_t>& requests);
+    void AddEraseRequests(const UploadItem& item, std::set<uint32_t>& requests);
 
-    Status WriteDeviceMemory (IFirmwareWriter& dev,
-                              uint32_t address,
-                              const std::vector<uint8_t>& data,
-                              tReportProgressFunc progressFunc);
-
-    Status ReadDeviceMemory (IFirmwareWriter& dev,
+    Status WriteDeviceMemory(IFirmwareWriter& dev,
                              uint32_t address,
-                             std::vector<uint8_t>& buffer,
+                             const std::vector<uint8_t>& data,
                              tReportProgressFunc progressFunc);
+
+    Status ReadDeviceMemory(IFirmwareWriter& dev,
+                            uint32_t address,
+                            std::vector<uint8_t>& buffer,
+                            tReportProgressFunc progressFunc);
 
 }; /* class DevicePortFlashMemory */
 

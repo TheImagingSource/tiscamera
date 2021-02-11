@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+#include "image_sampling.h"
+
 #include <string.h> // for memset
 
 
-#include "image_sampling.h"
-
-
 #ifndef ARRAYSIZE
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
 
 /* retrieve sampling points for image analysis */
-void get_sampling_points (unsigned char* data,
-                          auto_sample_points* points,
-                          tBY8Pattern pattern,
-                          int width, int height)
+void get_sampling_points(unsigned char* data,
+                         auto_sample_points* points,
+                         tBY8Pattern pattern,
+                         int width,
+                         int height)
 {
 
     static const unsigned int bypp = 1;
@@ -45,7 +45,7 @@ void get_sampling_points (unsigned char* data,
     unsigned int y;
     for (y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
     {
-        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
+        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
 
         byte* pLine = (byte*)data + first_line_offset + y * bytes_per_line;
         byte* pNextLine = pLine + bytes_per_line;
@@ -54,38 +54,38 @@ void get_sampling_points (unsigned char* data,
         for (col = samplingColStep; col < (width - samplingColStep); col += samplingColStep)
         {
             unsigned int r = 0, g = 0, b = 0;
-            if ( y & 1 )
+            if (y & 1)
             {
                 if (col & 1)
                 {
-                    r = pLine[col+bypp];
+                    r = pLine[col + bypp];
                     g = pLine[col];
                     b = pNextLine[col];
                 }
                 else
                 {
                     r = pLine[col];
-                    g = pLine[col+bypp];
-                    b = pNextLine[col+bypp];
+                    g = pLine[col + bypp];
+                    b = pNextLine[col + bypp];
                 }
             }
             else
             {
                 if (col & 1)
                 {
-                    r = pNextLine[col+bypp];
-                    g = pLine[col+bypp];
+                    r = pNextLine[col + bypp];
+                    g = pLine[col + bypp];
                     b = pLine[col];
                 }
                 else
                 {
                     r = pNextLine[col];
                     g = pLine[col];
-                    b = pLine[col+bypp];
+                    b = pLine[col + bypp];
                 }
             }
 
-            if (cnt < ARRAYSIZE( points->samples ))
+            if (cnt < ARRAYSIZE(points->samples))
             {
                 points->samples[cnt].r = (byte)r;
                 points->samples[cnt].g = (byte)g;
@@ -98,8 +98,7 @@ void get_sampling_points (unsigned char* data,
 }
 
 
-void get_sampling_points_from_buffer (image_buffer* buf,
-                                      auto_sample_points* points)
+void get_sampling_points_from_buffer(image_buffer* buf, auto_sample_points* points)
 {
     unsigned int* data = (unsigned int*)buf->image;
 
@@ -115,52 +114,52 @@ void get_sampling_points_from_buffer (image_buffer* buf,
     unsigned int cnt = 0;
     unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
 
-    for (unsigned int y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
+    for (unsigned int y = sampling_line_step; y < (height - sampling_line_step);
+         y += sampling_line_step)
     {
-        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
+        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
 
         byte* pLine = (byte*)data + first_line_offset + y * bytes_per_line;
         byte* pNextLine = pLine + bytes_per_line;
 
-        for (unsigned int col = samplingColStep;
-             col < (width - samplingColStep);
+        for (unsigned int col = samplingColStep; col < (width - samplingColStep);
              col += samplingColStep)
         {
             unsigned int r = 0;
             unsigned int g = 0;
             unsigned int b = 0;
-            if ( y & 1 )
+            if (y & 1)
             {
                 if (col & 1)
                 {
-                    r = pLine[col+bypp];
+                    r = pLine[col + bypp];
                     g = pLine[col];
                     b = pNextLine[col];
                 }
                 else
                 {
                     r = pLine[col];
-                    g = pLine[col+bypp];
-                    b = pNextLine[col+bypp];
+                    g = pLine[col + bypp];
+                    b = pNextLine[col + bypp];
                 }
             }
             else
             {
                 if (col & 1)
                 {
-                    r = pNextLine[col+bypp];
-                    g = pLine[col+bypp];
+                    r = pNextLine[col + bypp];
+                    g = pLine[col + bypp];
                     b = pLine[col];
                 }
                 else
                 {
                     r = pNextLine[col];
                     g = pLine[col];
-                    b = pLine[col+bypp];
+                    b = pLine[col + bypp];
                 }
             }
 
-            if (cnt < ARRAYSIZE( points->samples ))
+            if (cnt < ARRAYSIZE(points->samples))
             {
                 points->samples[cnt].r = (byte)r;
                 points->samples[cnt].g = (byte)g;
@@ -173,14 +172,15 @@ void get_sampling_points_from_buffer (image_buffer* buf,
 }
 
 
-static unsigned int clip (unsigned int x)
+static unsigned int clip(unsigned int x)
 {
-	if( x > 255 ) return 255;
-	return x;
+    if (x > 255)
+        return 255;
+    return x;
 }
 
 
-unsigned int image_brightness_bayer (image_buffer* buf)
+unsigned int image_brightness_bayer(image_buffer* buf)
 {
     auto_sample_points points;
     memset(&points, 0, sizeof(points));
@@ -206,10 +206,10 @@ unsigned int image_brightness_bayer (image_buffer* buf)
 }
 
 
-unsigned int buffer_brightness_gray (image_buffer* buf)
+unsigned int buffer_brightness_gray(image_buffer* buf)
 {
     unsigned int brightness = 0;
-    unsigned char *data = (unsigned char*)buf->image;
+    unsigned char* data = (unsigned char*)buf->image;
 
     /* GstCaps *caps = GST_BUFFER_CAPS(buf); */
     /* GstStructure *structure = gst_caps_get_structure (caps, 0); */
@@ -228,16 +228,14 @@ unsigned int buffer_brightness_gray (image_buffer* buf)
     unsigned int y_accu = 0;
     unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
 
-    for (unsigned int y = sampling_line_step;
-         y < (height - sampling_line_step);
+    for (unsigned int y = sampling_line_step; y < (height - sampling_line_step);
          y += sampling_line_step)
     {
         unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
 
         byte* pLine = data + y * pitch;
 
-        for (unsigned int col = samplingColStep;
-             col < (width - samplingColStep);
+        for (unsigned int col = samplingColStep; col < (width - samplingColStep);
              col += samplingColStep)
         {
             ++cnt;
@@ -253,10 +251,10 @@ unsigned int buffer_brightness_gray (image_buffer* buf)
 }
 
 
-unsigned int buffer_brightness_gray16 (image_buffer* buf)
+unsigned int buffer_brightness_gray16(image_buffer* buf)
 {
     unsigned int brightness = 0;
-    unsigned short *data = (unsigned short*)buf->image;
+    unsigned short* data = (unsigned short*)buf->image;
 
     unsigned int width = buf->width;
     unsigned int height = buf->height;
@@ -266,16 +264,14 @@ unsigned int buffer_brightness_gray16 (image_buffer* buf)
     unsigned long y_accu = 0;
     unsigned int sampling_line_step = height / (SAMPLING_LINES + 1);
 
-    for (unsigned int y = sampling_line_step;
-         y < (height - sampling_line_step);
+    for (unsigned int y = sampling_line_step; y < (height - sampling_line_step);
          y += sampling_line_step)
     {
         unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
 
         unsigned short* pLine = data + y * pitch;
 
-        for (unsigned int col = samplingColStep;
-             col < (width - samplingColStep);
+        for (unsigned int col = samplingColStep; col < (width - samplingColStep);
              col += samplingColStep)
         {
             ++cnt;
@@ -287,5 +283,5 @@ unsigned int buffer_brightness_gray16 (image_buffer* buf)
     {
         brightness = y_accu / cnt;
     }
-    return brightness ;
+    return brightness;
 }

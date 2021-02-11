@@ -42,11 +42,11 @@ enum class RowType
 
 
 template<typename TCharIterator>
-std::string getline (TCharIterator& begin, TCharIterator end, std::string delim)
+std::string getline(TCharIterator& begin, TCharIterator end, std::string delim)
 {
     std::string line;
 
-    for ( ; begin != end && !std::equal(delim.begin(), delim.end(), begin); ++begin)
+    for (; begin != end && !std::equal(delim.begin(), delim.end(), begin); ++begin)
     {
         line += *begin;
     }
@@ -60,19 +60,19 @@ std::string getline (TCharIterator& begin, TCharIterator end, std::string delim)
 }
 
 
-bool string_startswith (const std::string& s, const std::string& start)
+bool string_startswith(const std::string& s, const std::string& start)
 {
     return s.length() >= start.length() && s.substr(0, start.length()) == start;
 }
 
 
-bool string_contains (const std::string& str, const std::string& sub)
+bool string_contains(const std::string& str, const std::string& sub)
 {
     return str.find(sub) != std::string::npos;
 }
 
 
-void ParseFuseLine (const std::string& line, std::vector<uint8_t>& dest)
+void ParseFuseLine(const std::string& line, std::vector<uint8_t>& dest)
 {
     int n = 0;
 
@@ -90,7 +90,7 @@ void ParseFuseLine (const std::string& line, std::vector<uint8_t>& dest)
 }
 
 
-std::vector<uint8_t> ParseFeatureRow (const std::string& line, int len)
+std::vector<uint8_t> ParseFeatureRow(const std::string& line, int len)
 {
     std::vector<uint8_t> result(len);
     int n = 8 * len - 1;
@@ -111,12 +111,12 @@ std::vector<uint8_t> ParseFeatureRow (const std::string& line, int len)
 }
 
 
-uint32_t ParseUserCode (const std::string& data)
+uint32_t ParseUserCode(const std::string& data)
 {
     if (data[0] == 'H')
     {
         uint32_t uc;
-        sscanf( data.c_str(), "H%08X", &uc );
+        sscanf(data.c_str(), "H%08X", &uc);
         return uc;
     }
     else
@@ -132,7 +132,7 @@ uint32_t ParseUserCode (const std::string& data)
 }
 
 
-std::string RemoveTrailingStar (const std::string& s)
+std::string RemoveTrailingStar(const std::string& s)
 {
     if (s[s.length() - 1] == '*')
         return s.substr(0, s.length() - 1);
@@ -143,7 +143,7 @@ std::string RemoveTrailingStar (const std::string& s)
 } /* namespace */
 
 
-JedecFile JedecFile::Parse (const std::vector<uint8_t>& data)
+JedecFile JedecFile::Parse(const std::vector<uint8_t>& data)
 {
     RowType state = RowType::COMMENT;
 
@@ -168,23 +168,23 @@ JedecFile JedecFile::Parse (const std::vector<uint8_t>& data)
             state = RowType::FUSE_DATA;
         else if (string_startswith(line, "NOTE"))
             state = RowType::COMMENT;
-        else if (string_startswith( line, "G"))
+        else if (string_startswith(line, "G"))
             state = RowType::SECURITY_FUSE;
         else if (string_startswith(line, "L"))
             state = RowType::FUSE_LIST;
-        else if (string_startswith( line, "C"))
+        else if (string_startswith(line, "C"))
             state = RowType::FUSE_CHECKSUM;
-        else if(string_startswith( line, "*"))
+        else if (string_startswith(line, "*"))
             state = RowType::END_DATA;
-        else if(string_startswith( line, "D"))
+        else if (string_startswith(line, "D"))
             state = RowType::FUSE_DEFAULT;
-        else if(string_startswith( line, "U"))
+        else if (string_startswith(line, "U"))
             state = RowType::USER_CODE;
-        else if(string_startswith(line, "E"))
+        else if (string_startswith(line, "E"))
             state = RowType::FEATURE_ROW;
-        else if(string_startswith( line, "QF"))
+        else if (string_startswith(line, "QF"))
             state = RowType::FUSE_SIZE;
-        else if(string_startswith(line, "\x03"))
+        else if (string_startswith(line, "\x03"))
             state = RowType::DONE;
 
         switch (state)

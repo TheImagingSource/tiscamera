@@ -20,8 +20,8 @@
 #include "base_types.h"
 #include "standard_properties.h"
 #include "v4l2_uvc_identifier.h"
-#include <linux/videodev2.h>
 
+#include <linux/videodev2.h>
 #include <vector>
 
 struct v4l2_property
@@ -31,40 +31,42 @@ struct v4l2_property
 };
 
 
-static const std::vector<struct v4l2_property> v4l2_mappings =
-{
+static const std::vector<struct v4l2_property> v4l2_mappings = {
     {
         TCAM_PROPERTY_INVALID,
         {},
     },
     {
         TCAM_PROPERTY_EXPOSURE,
-        { V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_CID_EXPOSURE,
-        // TCAM_V4L2_EXPOSURE_TIME_US
+        {
+            V4L2_CID_EXPOSURE_ABSOLUTE,
+            V4L2_CID_EXPOSURE,
+            // TCAM_V4L2_EXPOSURE_TIME_US
         },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO,
-        { V4L2_CID_AUTO_EXPOSURE_BIAS,
-                     0x009a0901, // exposure-auto
-                     0x0199e202 // auto-shutter
+        {
+            V4L2_CID_AUTO_EXPOSURE_BIAS,
+            0x009a0901, // exposure-auto
+            0x0199e202 // auto-shutter
         },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
-        { 0x0199e203},
+        { 0x0199e203 },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
-        {0x199e254},
+        { 0x199e254 },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT,
-        {0x199e256},
+        { 0x199e256 },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_LOWER_LIMIT,
-        {0x199e255},
+        { 0x199e255 },
     },
     {
         TCAM_PROPERTY_GAIN,
@@ -76,11 +78,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_GAIN_GREEN,
-        {  0x980922, TCAM_V4L2_CID_EUVC_GAIN_G },
+        { 0x980922, TCAM_V4L2_CID_EUVC_GAIN_G },
     },
     {
         TCAM_PROPERTY_GAIN_BLUE,
-        {  0x980923, TCAM_V4L2_CID_EUVC_GAIN_B },
+        { 0x980923, TCAM_V4L2_CID_EUVC_GAIN_B },
     },
     {
         TCAM_PROPERTY_GAIN_AUTO,
@@ -96,23 +98,23 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_TRIGGER_MODE,
-        { V4L2_CID_PRIVACY, 0x0199e208, 0x980924},
+        { V4L2_CID_PRIVACY, 0x0199e208, 0x980924 },
     },
     {
         TCAM_PROPERTY_TRIGGER_SOURCE,
-        {0},
+        { 0 },
     },
     {
         TCAM_PROPERTY_TRIGGER_ACTIVATION,
-        {0},
+        { 0 },
     },
     {
         TCAM_PROPERTY_SOFTWARETRIGGER,
-        {/* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209},
+        { /* usb 2: */ 0x980926, /* usb 3: */ 0x0199e209 },
     },
     {
         TCAM_PROPERTY_TRIGGER_DELAY,
-        {0x199e210},
+        { 0x199e210 },
     },
     {
         TCAM_PROPERTY_TRIGGER_POLARITY,
@@ -146,51 +148,51 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
 
     {
         TCAM_PROPERTY_WB_PRESET,
-        {/* usb 3: */ 0x0199e207},
+        { /* usb 3: */ 0x0199e207 },
     },
     {
         TCAM_PROPERTY_GPIO,
-        {/* usb 2: */ 0x980920},
+        { /* usb 2: */ 0x980920 },
     },
     {
         TCAM_PROPERTY_GPIN,
-        { /* usb 3: */ 0x0199e217},
+        { /* usb 3: */ 0x0199e217 },
     },
     {
         TCAM_PROPERTY_GPOUT,
-        {0x0199e216},
+        { 0x0199e216 },
     },
     {
         TCAM_PROPERTY_OFFSET_X,
-        {0x00980927 /*usb2*/, 0x0199e218 /*usb3*/},
+        { 0x00980927 /*usb2*/, 0x0199e218 /*usb3*/ },
     },
     {
         TCAM_PROPERTY_OFFSET_Y,
-        {0x00980928 /*usb2*/, 0x0199e219/*usb3*/},
+        { 0x00980928 /*usb2*/, 0x0199e219 /*usb3*/ },
     },
     {
         TCAM_PROPERTY_OFFSET_AUTO,
-        {0x0199e220},
+        { 0x0199e220 },
     },
     {
         TCAM_PROPERTY_BRIGHTNESS,
-        {V4L2_CID_BRIGHTNESS},
+        { V4L2_CID_BRIGHTNESS },
     },
     {
         TCAM_PROPERTY_CONTRAST,
-        {V4L2_CID_CONTRAST},
+        { V4L2_CID_CONTRAST },
     },
     {
         TCAM_PROPERTY_SATURATION,
-        {V4L2_CID_SATURATION},
+        { V4L2_CID_SATURATION },
     },
     {
         TCAM_PROPERTY_HUE,
-        {V4L2_CID_HUE},
+        { V4L2_CID_HUE },
     },
     {
         TCAM_PROPERTY_GAMMA,
-        {V4L2_CID_GAMMA},
+        { V4L2_CID_GAMMA },
     },
     {
         TCAM_PROPERTY_WB,
@@ -198,11 +200,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_WB_AUTO,
-        {0x0098090c},
+        { 0x0098090c },
     },
     {
         TCAM_PROPERTY_WB_RED,
-        {0x0098090e},
+        { 0x0098090e },
     },
     {
         TCAM_PROPERTY_WB_GREEN,
@@ -210,7 +212,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_WB_BLUE,
-        {0x0098090f},
+        { 0x0098090f },
     },
     {
         TCAM_PROPERTY_WB_AUTO_PRESET,
@@ -234,11 +236,11 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_FOCUS,
-        {V4L2_CID_FOCUS_ABSOLUTE},
+        { V4L2_CID_FOCUS_ABSOLUTE },
     },
     {
         TCAM_PROPERTY_ZOOM,
-        {V4L2_CID_ZOOM_ABSOLUTE},
+        { V4L2_CID_ZOOM_ABSOLUTE },
     },
     {
         TCAM_PROPERTY_FOCUS_AUTO,
@@ -246,27 +248,27 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_FOCUS_ONE_PUSH,
-        {0x199e206},
+        { 0x199e206 },
     },
     {
         TCAM_PROPERTY_STROBE_ENABLE,
-        {0x0199e211},
+        { 0x0199e211 },
     },
     {
         TCAM_PROPERTY_STROBE_DELAY,
-        {0x199e215},
+        { 0x199e215 },
     },
     {
         TCAM_PROPERTY_STROBE_POLARITY,
-        {0x199e212},
+        { 0x199e212 },
     },
     {
         TCAM_PROPERTY_STROBE_EXPOSURE,
-        {0x199e213},
+        { 0x199e213 },
     },
     {
         TCAM_PROPERTY_STROBE_DURATION,
-        {0x199e214},
+        { 0x199e214 },
     },
     {
         TCAM_PROPERTY_BINNING,
@@ -278,7 +280,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_SHARPNESS,
-        { 0x0098091b},
+        { 0x0098091b },
     },
     {
         TCAM_PROPERTY_NOISE_REDUCTION,
@@ -286,7 +288,7 @@ static const std::vector<struct v4l2_property> v4l2_mappings =
     },
     {
         TCAM_PROPERTY_FACE_DETECTION,
-        { 0x199e233},
+        { 0x199e233 },
     },
     {
         TCAM_PROPERTY_IMAGE_STABILIZATION,

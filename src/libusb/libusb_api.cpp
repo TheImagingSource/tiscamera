@@ -25,7 +25,7 @@
 #include <cstring>
 
 
-DeviceInterface* open_libusb_device (const struct tcam_device_info* device)
+DeviceInterface* open_libusb_device(const struct tcam_device_info* device)
 {
     if (strcmp(device->additional_identifier, "804") == 0)
     {
@@ -37,13 +37,14 @@ DeviceInterface* open_libusb_device (const struct tcam_device_info* device)
     }
     else
     {
-        SPDLOG_ERROR("Unable to identify requested LibUsb Backend %x", device->additional_identifier);
+        SPDLOG_ERROR("Unable to identify requested LibUsb Backend %x",
+                     device->additional_identifier);
         return nullptr;
     }
 }
 
 
-size_t get_libusb_device_list_size ()
+size_t get_libusb_device_list_size()
 {
     auto vec = get_libusb_device_list();
     return vec.size();
@@ -53,7 +54,7 @@ size_t get_libusb_device_list_size ()
 /**
  * @return number of copied device_infos
  */
-size_t get_libusb_device_list (struct tcam_device_info* array, size_t array_size)
+size_t get_libusb_device_list(struct tcam_device_info* array, size_t array_size)
 {
     auto vec = get_libusb_device_list();
 

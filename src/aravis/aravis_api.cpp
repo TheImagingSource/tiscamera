@@ -21,13 +21,13 @@
 
 #include <cstring>
 
-DeviceInterface* open_aravis_device (const struct tcam_device_info* device)
+DeviceInterface* open_aravis_device(const struct tcam_device_info* device)
 {
     return new AravisDevice(DeviceInfo(*device));
 }
 
 
-size_t get_aravis_device_list_size ()
+size_t get_aravis_device_list_size()
 {
     return get_gige_device_count();
 }
@@ -36,7 +36,7 @@ size_t get_aravis_device_list_size ()
 /**
  * @return number of copied device_infos
  */
-size_t get_aravis_device_list (struct tcam_device_info* array, size_t array_size)
+size_t get_aravis_device_list(struct tcam_device_info* array, size_t array_size)
 {
     auto vec = get_gige_device_list();
 

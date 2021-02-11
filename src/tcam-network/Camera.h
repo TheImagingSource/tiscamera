@@ -17,39 +17,41 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include "gigevision.h"
 #include "NetworkInterface.h"
+#include "gigevision.h"
+
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
 
 namespace tis
 {
-    class NetworkInterface;
-    class Socket;
-    class Camera;
-    typedef std::vector<std::shared_ptr<Camera>> camera_list;
+class NetworkInterface;
+class Socket;
+class Camera;
+typedef std::vector<std::shared_ptr<Camera>> camera_list;
 
-    enum camera_ident
-    {
-        CAMERA_NAME = 0,
-        CAMERA_SERIAL,
-        CAMERA_MAC
-    };
+enum camera_ident
+{
+    CAMERA_NAME = 0,
+    CAMERA_SERIAL,
+    CAMERA_MAC
+};
 
-    /// @name getCameraFromList
-    /// @param cameras - vector containing cameras that shall be searched
-    /// @param identifier - string containing the serial of the wished camera
-    /// @param id_type - camera_ident describing the identifier; default CAMERA_SERIAL
-    /// @return shared pointer to the wished camera, else null
-    std::shared_ptr<Camera> getCameraFromList (const camera_list cameras, const std::string& identifier, camera_ident id_type = CAMERA_SERIAL);
+/// @name getCameraFromList
+/// @param cameras - vector containing cameras that shall be searched
+/// @param identifier - string containing the serial of the wished camera
+/// @param id_type - camera_ident describing the identifier; default CAMERA_SERIAL
+/// @return shared pointer to the wished camera, else null
+std::shared_ptr<Camera> getCameraFromList(const camera_list cameras,
+                                          const std::string& identifier,
+                                          camera_ident id_type = CAMERA_SERIAL);
 
-    const int PACKET_RETRY_COUNT = 5;
+const int PACKET_RETRY_COUNT = 5;
 class Camera
 {
 private:
-
     /// received acknowledge packet
     Packet::ACK_DISCOVERY packet;
 
@@ -72,117 +74,118 @@ private:
     int timeoutCounterDefault;
 
 public:
-
-    Camera (const Packet::ACK_DISCOVERY& packet, std::shared_ptr<NetworkInterface> _interface, int timeoutIntervals = 3);
+    Camera(const Packet::ACK_DISCOVERY& packet,
+           std::shared_ptr<NetworkInterface> _interface,
+           int timeoutIntervals = 3);
 
     /// copy constructor
-    Camera (const Camera& _camera) = delete;
-    Camera& operator=(const Camera& ) = delete;
+    Camera(const Camera& _camera) = delete;
+    Camera& operator=(const Camera&) = delete;
 
     ~Camera();
 
     /// @name getSocket
     /// @return Socket object from Camera
-    std::shared_ptr<Socket> getSocket ();
+    std::shared_ptr<Socket> getSocket();
 
     /// @name generateRequestID
     /// @return returns a new request id
-    int generateRequestID ();
+    int generateRequestID();
 
     /// @name reduceCounter
     /// @return new value of counter
-    int reduceCounter ();
+    int reduceCounter();
 
     /// @name resetCounter
     /// @return new value of value
     /// @brief resets counter to initial value
-    int resetCounter ();
+    int resetCounter();
 
-    std::string getNetworkInterfaceName ();
+    std::string getNetworkInterfaceName();
 
     /// @name updateCamera
     /// @param cam - new camera instance
     /// @brief updates this camera with the information given by cam
-    void updateCamera (std::shared_ptr<Camera> cam);
+    void updateCamera(std::shared_ptr<Camera> cam);
 
     /// @name getModelName
     /// @return string containing the model name
-    std::string getModelName ();
+    std::string getModelName();
 
     /// @name getSerialNumber
     /// @return string containing the unique serial number
-    std::string getSerialNumber ();
+    std::string getSerialNumber();
 
     /// @name getVendorName
     /// @return string containing the vendor description
-    std::string getVendorName ();
+    std::string getVendorName();
 
     /// @name getUserDefinedName
     /// @return string containing the user defined name
-    std::string getUserDefinedName ();
+    std::string getUserDefinedName();
 
     /// @name setUserDefinedName
     /// @param name - string containing name to be used; 16 chars maximum
     /// @return true on success
-    bool setUserDefinedName (const std::string& name);
+    bool setUserDefinedName(const std::string& name);
 
     /// @name getMAC
     /// @return string containing the mac address in format XX:XX:XX:XX:XX:XX
-    const std::string getMAC ();
+    const std::string getMAC();
 
-    const std::string getCurrentIP ();
-    const std::string getCurrentSubnet ();
-    const std::string getCurrentGateway ();
+    const std::string getCurrentIP();
+    const std::string getCurrentSubnet();
+    const std::string getCurrentGateway();
 
-    bool isStaticIPactive ();
-    bool setStaticIPstate (const bool on);
-    bool isDHCPactive ();
-    bool setDHCPstate (const bool on);
+    bool isStaticIPactive();
+    bool setStaticIPstate(const bool on);
+    bool isDHCPactive();
+    bool setDHCPstate(const bool on);
 
     /// @name setIPconfigState
     /// @param dhcp - true if dhcp shall be active
     /// @param staticIP - true is static IP shall be active
     /// @return true on success
     /// @brief Sets the ip configuration according to the given flags
-    bool setIPconfigState (const bool dhcp, const bool staticIP);
+    bool setIPconfigState(const bool dhcp, const bool staticIP);
 
-    const std::string getPersistentIP ();
-    bool setPersistentIP (const std::string& ip);
-    const std::string getPersistentSubnet ();
-    bool setPersistentSubnet (const std::string& ip);
-    const std::string getPersistentGateway ();
-    bool setPersistentGateway (const std::string& ip);
+    const std::string getPersistentIP();
+    bool setPersistentIP(const std::string& ip);
+    const std::string getPersistentSubnet();
+    bool setPersistentSubnet(const std::string& ip);
+    const std::string getPersistentGateway();
+    bool setPersistentGateway(const std::string& ip);
 
     /// @name forceIP
     /// @param ip - address to be used
     /// @param subnet - subnet address to be used
     /// @param gateway - gateway to be used
     /// @return true on success
-    bool forceIP (const std::string& ip, const std::string& subnet, const std::string& gateway);
+    bool forceIP(const std::string& ip, const std::string& subnet, const std::string& gateway);
 
     /// @name getFirmwareVersion
     /// @return string containing information about current firmware
-    std::string getFirmwareVersion ();
+    std::string getFirmwareVersion();
 
     /// @name uploadFirmware
     /// @param filename - string containing the location of the firmware that shall be used
     /// @param overrideModelName - string containing the model name that shall be used. empty on default
     /// @param progressFunc callback function to inform over progress
     /// @return true on success
-    int uploadFirmware (const std::string& filename,
-                        const std::string& overrideModelName,
-                        std::function<void(int, const std::string&)> progressFunc);
+    int uploadFirmware(const std::string& filename,
+                       const std::string& overrideModelName,
+                       std::function<void(int, const std::string&)> progressFunc);
 
     /// @name getInterfaceName
     /// @return name of interface used for communication
-    std::string getInterfaceName ();
+    std::string getInterfaceName();
 
     /// checks if camera is reachable from interface
     bool isReachable();
 
     /// @name resetIP
     /// @brief makes camera re-run its ipconfiguration cycle
-    void resetIP ();
+    void resetIP();
 
     /// @name getControl
     /// @brief sets control bits on camera to assure exclusive control
@@ -206,25 +209,25 @@ public:
     /// @name getHeartbeatTimeout
     /// @brief queries camera for heartbeat period
     /// @return the currently set HearbeatTimeout period; -1 on error
-    int getHeartbeatTimeout ();
+    int getHeartbeatTimeout();
 
     /// @name setHeartbeatTimeout
     /// @param heartbeat in ms that shall be set
     /// @return true if hearbeat could be set
-    bool setHeartbeatTimeout (uint32_t timeout);
+    bool setHeartbeatTimeout(uint32_t timeout);
 
     /// @name sendReadMemory
     /// @param address - address that shall be read
     /// @param value - pointer to container that shall be filled
     /// @return true on success
     /// @brief Sends request for register and fills value with data
-    bool sendReadRegister (const uint32_t address, uint32_t* value);
+    bool sendReadRegister(const uint32_t address, uint32_t* value);
 
     /// @name sendWriteMemory
     /// @param address - memory address to be written
     /// @param value - information that shall be written
     /// @return int containing the return value of write attempt
-    bool sendWriteRegister (const uint32_t address, uint32_t value);
+    bool sendWriteRegister(const uint32_t address, uint32_t value);
 
     /// @name sendReadMemory
     /// @param address - address that shall be read
@@ -232,25 +235,23 @@ public:
     /// @param data - pointer to container that shall be filled
     /// @return true on success
     /// @brief Sends request for register and fills data with value
-    bool sendReadMemory (const uint32_t address, const uint32_t size, void* data);
+    bool sendReadMemory(const uint32_t address, const uint32_t size, void* data);
 
     /// @name sendWriteMemory
     /// @param address - memory address to be written
     /// @param size - size of data that shall be written
     /// @param data - pointer to information that shall be written
     /// @return int containing the return value of write attempt
-    bool sendWriteMemory (const uint32_t address, const size_t size, void* data);
+    bool sendWriteMemory(const uint32_t address, const size_t size, void* data);
 
 private:
-
     /// @name sendForceIP
     /// @param ip - ip address camera shall use
     /// @param netmask - netmask camera shall use
     /// @param gateway - gateway camera shall use
-    void sendForceIP (const uint32_t ip, const uint32_t subnet, const uint32_t gateway);
-
+    void sendForceIP(const uint32_t ip, const uint32_t subnet, const uint32_t gateway);
 };
 
-} /* namespace tis_network */
+} // namespace tis
 
 #endif /* _CAMERA_H_ */

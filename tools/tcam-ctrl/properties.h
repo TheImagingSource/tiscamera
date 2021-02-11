@@ -17,11 +17,10 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include <tcam.h>
-
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <tcam.h>
+#include <vector>
 
 using namespace tcam;
 
@@ -29,11 +28,11 @@ using namespace tcam;
  * @brief print function for properties
  * @param properties - Property collection that shall be printed
  */
-void print_properties (const std::string& serial);
+void print_properties(const std::string& serial);
 
 
-void print_state_json (const std::string& serial);
+void print_state_json(const std::string& serial);
 
-void load_state_json_string (const std::string& serial, const std::string& json_str);
+void load_state_json_string(const std::string& serial, const std::string& json_str);
 
 #endif /* CONTROLS_H */

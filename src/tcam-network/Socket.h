@@ -17,14 +17,15 @@
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
 
+#include "gigevision.h"
+
+#include <functional>
 #include <memory>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <functional>
 
-#include "gigevision.h"
-
-namespace tis {
+namespace tis
+{
 class NetworkInterface;
 }
 
@@ -37,7 +38,7 @@ namespace tis
 /// @struct SocketCreationException
 struct SocketCreationException : public std::exception
 {
-    const char* what () const throw ()
+    const char* what() const throw()
     {
         return "Socket creation returned -1.";
     }
@@ -47,7 +48,7 @@ struct SocketCreationException : public std::exception
 /// @struct SocketBindingException
 struct SocketBindingException : public std::exception
 {
-    const char* what () const throw ()
+    const char* what() const throw()
     {
         return "Unable to bind Socket to Interface.";
     }
@@ -57,7 +58,7 @@ struct SocketBindingException : public std::exception
 /// @struct SocketSendToException
 struct SocketSendToException : public std::exception
 {
-    const char* what () const throw ()
+    const char* what() const throw()
     {
         return "Error while trying to send package";
     }
@@ -67,35 +68,33 @@ struct SocketSendToException : public std::exception
 class Socket
 {
 private:
-
     // actual file descriptor
     int fd;
 
     // timeout in milliseconds
     int timeout_ms;
 
-public :
-
+public:
     // send and receive signals
     enum SendAndReceiveSignals
     {
         CONTINUE, // continue waiting for incoming packets
-        END       // end waiting now
+        END // end waiting now
     };
 
     /// Constructor
-    explicit Socket (const sockaddr_in& address, int timeout=1500);
+    explicit Socket(const sockaddr_in& address, int timeout = 1500);
 
     /// copy constructor
-    Socket (const Socket& _socket) = delete;
-    Socket& operator=(const Socket& ) = delete;
+    Socket(const Socket& _socket) = delete;
+    Socket& operator=(const Socket&) = delete;
 
-    ~Socket ();
+    ~Socket();
 
     /// @name setBroadcast
     /// @param enable - bool of the wished state
     /// @return true on success
-    bool setBroadcast (bool enable);
+    bool setBroadcast(bool enable);
 
     /// @name sendAndReceive
     /// @param destination_address - address that shall receive data
@@ -103,16 +102,20 @@ public :
     /// @param size - size of data
     /// @param callback - callback function that should be called on response; can return -1 to end waiting for additional response packages
     /// @param broadcast - wether this shall be broadcasted or not
-    void sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*)> callback, const bool broadcast = false);
+    void sendAndReceive(const std::string& destination_address,
+                        void* data,
+                        size_t size,
+                        std::function<int(void*)> callback,
+                        const bool broadcast = false);
 
 private:
     /// @name createSocket
     /// @return new socket fd
-    int createSocket ();
+    int createSocket();
 
     /// @name bindTo
     /// @param address - sockaddr_in containing the interface desciption this socket shall be bind to
-    void bindTo (const sockaddr_in& address);
+    void bindTo(const sockaddr_in& address);
 
 }; /* class Socket */
 

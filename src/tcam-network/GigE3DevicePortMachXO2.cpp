@@ -17,16 +17,16 @@
 #include "GigE3DevicePortMachXO2.h"
 
 #include "GigE3Progress.h"
-
-#include "MachXO2.h"
 #include "JedecFile.h"
+#include "MachXO2.h"
 
 #include <exception>
 
 using namespace FirmwareUpdate;
 
-FirmwareUpdate::Status GigE3::DevicePortMachXO2::Configure (const std::string& name,
-                                                            const pugi::xml_node& portConfigElem __attribute__((unused)))
+FirmwareUpdate::Status GigE3::DevicePortMachXO2::Configure(const std::string& name,
+                                                           const pugi::xml_node& portConfigElem
+                                                           __attribute__((unused)))
 {
     name_ = name;
 
@@ -34,7 +34,7 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::Configure (const std::string& n
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems (const std::vector<UploadItem>& items)
+FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems(const std::vector<UploadItem>& items)
 {
     // We cannot upload 2 items into MachXO2
     if (items.size() > 1)
@@ -42,7 +42,7 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems (const std::vector<U
 
     for (auto&& i : items)
     {
-        auto jedec = MachXO2::JedecFile::Parse( *i.Data );
+        auto jedec = MachXO2::JedecFile::Parse(*i.Data);
 
         // If the data is not valid jedec, the device type should not be detectable
         if (jedec.deviceType() == MachXO2::DeviceType::MachXO2_Unknown)
@@ -57,23 +57,25 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::CheckItems (const std::vector<U
 namespace
 {
 
-std::function<void(const char*, int)> forwardAdvancedProgress(std::function<void(int,
-                                                                                 const std::string& )> progressFunc)
+std::function<void(const char*, int)> forwardAdvancedProgress(
+    std::function<void(int, const std::string&)> progressFunc)
 {
-    return [=](const char* msg, int progress) { progressFunc(progress, msg); };
+    return [=](const char* msg, int progress) {
+        progressFunc(progress, msg);
+    };
 }
 
 
 I2C::DataArray s_i2cWriteData;
 
 
-size_t AlignBufferSize (size_t size, int alignment)
+size_t AlignBufferSize(size_t size, int alignment)
 {
     return ((size + (alignment - 1)) / alignment) * alignment;
 }
 
 
-I2C::DataArray AlignExpandBuffer (const I2C::DataArray& buffer, int alignment)
+I2C::DataArray AlignExpandBuffer(const I2C::DataArray& buffer, int alignment)
 {
     auto result = buffer;
 
@@ -84,10 +86,10 @@ I2C::DataArray AlignExpandBuffer (const I2C::DataArray& buffer, int alignment)
 }
 
 
-I2C::DataArray I2CTransaction (IFirmwareWriter& itf,
-                               uint8_t i2cDev,
-                               const I2C::DataArray& writeData,
-                               uint16_t readRequestLength)
+I2C::DataArray I2CTransaction(IFirmwareWriter& itf,
+                              uint8_t i2cDev,
+                              const I2C::DataArray& writeData,
+                              uint16_t readRequestLength)
 {
     uint32_t maxWriteLength = 0;
     uint32_t maxReadLength = 0;
@@ -98,25 +100,26 @@ I2C::DataArray I2CTransaction (IFirmwareWriter& itf,
 
     if (writeData.size() > maxWriteLength)
     {
-        throw std::runtime_error( "writeData.size() > maxWriteLength" );
+        throw std::runtime_error("writeData.size() > maxWriteLength");
     }
 
     if (readRequestLength > maxReadLength)
     {
-        throw std::runtime_error( "readRequestLength > maxReadLength" );
+        throw std::runtime_error("readRequestLength > maxReadLength");
     }
 
     auto writeBuffer = AlignExpandBuffer(writeData, 4);
-    if (!itf.write( 0xE0001000, writeBuffer.data(), writeBuffer.size()))
+    if (!itf.write(0xE0001000, writeBuffer.data(), writeBuffer.size()))
     {
-        throw std::runtime_error( "The device did not accept the write buffer" );
+        throw std::runtime_error("The device did not accept the write buffer");
     }
 
     uint32_t cmd = ((uint32_t)readRequestLength << 16) | ((uint32_t)writeData.size() << 8) | i2cDev;
 
-    if(!itf.write(0xE0000000, cmd))
+    if (!itf.write(0xE0000000, cmd))
     {
-        throw std::runtime_error( "The device returned an error when trying to issue an I2C command" );
+        throw std::runtime_error(
+            "The device returned an error when trying to issue an I2C command");
     }
 
     size_t readBufferSize = AlignBufferSize(readRequestLength, 4);
@@ -125,7 +128,7 @@ I2C::DataArray I2CTransaction (IFirmwareWriter& itf,
     if (readBufferSize)
     {
         unsigned int readCount = 0;
-        if(!itf.read( 0xE0002000, (unsigned)readBuffer.size(), readBuffer.data(), readCount))
+        if (!itf.read(0xE0002000, (unsigned)readBuffer.size(), readBuffer.data(), readCount))
         {
             throw std::runtime_error("Failed to read the I2C read buffer form the device");
         }
@@ -136,10 +139,9 @@ I2C::DataArray I2CTransaction (IFirmwareWriter& itf,
 }
 
 
-I2C::WriteAction forwardI2CWrite (IFirmwareWriter& itf)
+I2C::WriteAction forwardI2CWrite(IFirmwareWriter& itf)
 {
-    return [&](uint8_t i2cDev, const I2C::DataArray& command, bool combineWithRead)
-    {
+    return [&](uint8_t i2cDev, const I2C::DataArray& command, bool combineWithRead) {
         if (combineWithRead)
         {
             s_i2cWriteData = command;
@@ -152,10 +154,9 @@ I2C::WriteAction forwardI2CWrite (IFirmwareWriter& itf)
 }
 
 
-I2C::ReadAction forwardI2CRead (IFirmwareWriter& itf)
+I2C::ReadAction forwardI2CRead(IFirmwareWriter& itf)
 {
-    return [&](uint8_t i2cDev, uint16_t requestLength, bool combineWithWrite) -> I2C::DataArray
-    {
+    return [&](uint8_t i2cDev, uint16_t requestLength, bool combineWithWrite) -> I2C::DataArray {
         if (!combineWithWrite)
         {
             throw std::runtime_error("combineWithWrite has to be <true> for GigE cameras");
@@ -163,7 +164,8 @@ I2C::ReadAction forwardI2CRead (IFirmwareWriter& itf)
 
         if (s_i2cWriteData.empty())
         {
-            throw std::runtime_error("I2CWrite has to be called with combineWithRead == <true> before calling I2CRead for GigE cameras");
+            throw std::runtime_error("I2CWrite has to be called with combineWithRead == <true> "
+                                     "before calling I2CRead for GigE cameras");
         }
 
         auto result = I2CTransaction(itf, i2cDev, s_i2cWriteData, requestLength);
@@ -175,7 +177,7 @@ I2C::ReadAction forwardI2CRead (IFirmwareWriter& itf)
 }
 
 
-size_t queryMaxI2cReadLength (IFirmwareWriter& itf)
+size_t queryMaxI2cReadLength(IFirmwareWriter& itf)
 {
     uint32_t maxReadLength = 0;
     if (!itf.read(0xE0000008, maxReadLength))
@@ -187,9 +189,9 @@ size_t queryMaxI2cReadLength (IFirmwareWriter& itf)
 } // namespace
 
 
-FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems (IFirmwareWriter& dev,
-                                                              const std::vector<UploadItem>& items,
-                                                              tReportProgressFunc progressFunc)
+FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems(IFirmwareWriter& dev,
+                                                             const std::vector<UploadItem>& items,
+                                                             tReportProgressFunc progressFunc)
 {
     auto&& item = items.front();
 
@@ -197,7 +199,8 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems (IFirmwareWriter& d
     {
         auto jedec = MachXO2::JedecFile::Parse(*item.Data);
 
-        I2C::I2CDevice i2c(0x80, forwardI2CWrite(dev), forwardI2CRead(dev), queryMaxI2cReadLength(dev));
+        I2C::I2CDevice i2c(
+            0x80, forwardI2CWrite(dev), forwardI2CRead(dev), queryMaxI2cReadLength(dev));
         MachXO2::MachXO2Device mxo2_dev(i2c);
 
         if (mxo2_dev.UpdateConfiguration(jedec, forwardAdvancedProgress(progressFunc)))
@@ -210,7 +213,7 @@ FirmwareUpdate::Status GigE3::DevicePortMachXO2::UploadItems (IFirmwareWriter& d
             return FirmwareUpdate::Status::SuccessNoActionRequired;
         }
     }
-    catch(const std::exception&)
+    catch (const std::exception&)
     {
         return FirmwareUpdate::Status::MachXO2UpdateFailed;
     }

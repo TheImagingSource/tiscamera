@@ -16,22 +16,20 @@
 
 #include "PipelineManager.h"
 
+#include "img/fcc_to_string.h"
 #include "internal.h"
 
-#include <ctime>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <ctime>
 #include <utils.h>
-#include "img/fcc_to_string.h"
 
 using namespace tcam;
 
-PipelineManager::PipelineManager ()
-    : status(TCAM_PIPELINE_UNDEFINED), current_ppl_buffer(0)
-{}
+PipelineManager::PipelineManager() : status(TCAM_PIPELINE_UNDEFINED), current_ppl_buffer(0) {}
 
 
-PipelineManager::~PipelineManager ()
+PipelineManager::~PipelineManager()
 {
     if (status == TCAM_PIPELINE_PLAYING)
     {
@@ -44,13 +42,13 @@ PipelineManager::~PipelineManager ()
 }
 
 
-std::vector<std::shared_ptr<Property>> PipelineManager::getFilterProperties ()
+std::vector<std::shared_ptr<Property>> PipelineManager::getFilterProperties()
 {
     return filter_properties;
 }
 
 
-std::vector<VideoFormatDescription> PipelineManager::getAvailableVideoFormats () const
+std::vector<VideoFormatDescription> PipelineManager::getAvailableVideoFormats() const
 {
     return available_output_formats;
 }
@@ -63,13 +61,13 @@ bool PipelineManager::setVideoFormat(const VideoFormat& f)
 }
 
 
-VideoFormat PipelineManager::getVideoFormat () const
+VideoFormat PipelineManager::getVideoFormat() const
 {
     return this->output_format;
 }
 
 
-bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
+bool PipelineManager::set_status(TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
         return true;
@@ -91,20 +89,20 @@ bool PipelineManager::set_status (TCAM_PIPELINE_STATUS s)
     }
     else if (status == TCAM_PIPELINE_STOPPED)
     {
-      stop_playing();
+        stop_playing();
     }
 
     return true;
 }
 
 
-TCAM_PIPELINE_STATUS PipelineManager::get_status () const
+TCAM_PIPELINE_STATUS PipelineManager::get_status() const
 {
     return status;
 }
 
 
-bool PipelineManager::destroyPipeline ()
+bool PipelineManager::destroyPipeline()
 {
     set_status(TCAM_PIPELINE_STOPPED);
 
@@ -115,7 +113,7 @@ bool PipelineManager::destroyPipeline ()
 }
 
 
-bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
+bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -156,13 +154,13 @@ bool PipelineManager::setSource (std::shared_ptr<DeviceInterface> device)
 }
 
 
-std::shared_ptr<ImageSource> PipelineManager::getSource ()
+std::shared_ptr<ImageSource> PipelineManager::getSource()
 {
     return source;
 }
 
 
-bool PipelineManager::setSink (std::shared_ptr<SinkInterface> s)
+bool PipelineManager::setSink(std::shared_ptr<SinkInterface> s)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -177,23 +175,19 @@ bool PipelineManager::setSink (std::shared_ptr<SinkInterface> s)
 }
 
 
-std::shared_ptr<SinkInterface> PipelineManager::getSink ()
+std::shared_ptr<SinkInterface> PipelineManager::getSink()
 {
     return sink;
 }
 
 
-void PipelineManager::distributeProperties ()
+void PipelineManager::distributeProperties()
 {
-    for (auto& f : available_filter)
-    {
-        f->setDeviceProperties(device_properties);
-    }
+    for (auto& f : available_filter) { f->setDeviceProperties(device_properties); }
 }
 
 
-static bool isFilterApplicable (uint32_t fourcc,
-                                const std::vector<uint32_t>& vec)
+static bool isFilterApplicable(uint32_t fourcc, const std::vector<uint32_t>& vec)
 {
     if (std::find(vec.begin(), vec.end(), fourcc) == vec.end())
     {
@@ -203,23 +197,22 @@ static bool isFilterApplicable (uint32_t fourcc,
 }
 
 
-void PipelineManager::create_input_format (uint32_t fourcc)
+void PipelineManager::create_input_format(uint32_t fourcc)
 {
     input_format = output_format;
     input_format.set_fourcc(fourcc);
 }
 
 
-std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
+std::vector<uint32_t> PipelineManager::getDeviceFourcc()
 {
     // for easy usage we create a vector<fourcc> for avail. inputs
     std::vector<uint32_t> device_fourcc;
 
     for (const auto& v : available_input_formats)
     {
-        SPDLOG_DEBUG("Found device fourcc '{}' - {:x}",
-                     img::fcc_to_string(v.get_fourcc()),
-                     v.get_fourcc());
+        SPDLOG_DEBUG(
+            "Found device fourcc '{}' - {:x}", img::fcc_to_string(v.get_fourcc()), v.get_fourcc());
 
         device_fourcc.push_back(v.get_fourcc());
     }
@@ -227,7 +220,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc ()
 }
 
 
-bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS _status)
+bool PipelineManager::set_source_status(TCAM_PIPELINE_STATUS _status)
 {
     if (source == nullptr)
     {
@@ -245,11 +238,12 @@ bool PipelineManager::set_source_status (TCAM_PIPELINE_STATUS _status)
 }
 
 
-bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS _status)
+bool PipelineManager::set_sink_status(TCAM_PIPELINE_STATUS _status)
 {
     if (sink == nullptr)
     {
-        if (_status != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
+        if (_status
+            != TCAM_PIPELINE_STOPPED) // additional check to prevent warning when pipeline comes up
         {
             SPDLOG_WARN("Sink is not defined.");
         }
@@ -266,7 +260,7 @@ bool PipelineManager::set_sink_status (TCAM_PIPELINE_STATUS _status)
 }
 
 
-bool PipelineManager::validate_pipeline ()
+bool PipelineManager::validate_pipeline()
 {
     // check if pipeline is valid
     if (source.get() == nullptr || sink.get() == nullptr)
@@ -280,14 +274,13 @@ bool PipelineManager::validate_pipeline ()
     if (in_format != this->input_format)
     {
         SPDLOG_DEBUG("Video format in source does not match pipeline: '{}' != '{}'",
-                   in_format.to_string().c_str(),
-                   input_format.to_string().c_str());
+                     in_format.to_string().c_str(),
+                     input_format.to_string().c_str());
         return false;
     }
     else
     {
-        SPDLOG_DEBUG("Starting pipeline with format: '{}'",
-                   in_format.to_string().c_str());
+        SPDLOG_DEBUG("Starting pipeline with format: '{}'", in_format.to_string().c_str());
     }
 
     VideoFormat in;
@@ -299,17 +292,18 @@ bool PipelineManager::validate_pipeline ()
 
         if (in != in_format)
         {
-            SPDLOG_ERROR("Ingoing video format for filter {} is not compatible with previous element. '{}' != '{}'",
-                       f->getDescription().name.c_str(),
-                       in_format.to_string().c_str(),
-                       in.to_string().c_str());
+            SPDLOG_ERROR("Ingoing video format for filter {} is not compatible with previous "
+                         "element. '{}' != '{}'",
+                         f->getDescription().name.c_str(),
+                         in_format.to_string().c_str(),
+                         in.to_string().c_str());
             return false;
         }
         else
         {
             SPDLOG_DEBUG("Filter {} connected to pipeline -- {}",
-                    f->getDescription().name.c_str(),
-                    out.to_string().c_str());
+                         f->getDescription().name.c_str(),
+                         out.to_string().c_str());
             // save output for next comparison
             in_format = out;
         }
@@ -318,8 +312,8 @@ bool PipelineManager::validate_pipeline ()
     if (in_format != this->output_format)
     {
         SPDLOG_ERROR("Video format in sink does not match pipeline '{}' != '{}'",
-                in_format.to_string().c_str(),
-                output_format.to_string().c_str());
+                     in_format.to_string().c_str(),
+                     output_format.to_string().c_str());
         return false;
     }
 
@@ -327,7 +321,7 @@ bool PipelineManager::validate_pipeline ()
 }
 
 
-bool PipelineManager::create_conversion_pipeline ()
+bool PipelineManager::create_conversion_pipeline()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
@@ -365,14 +359,12 @@ bool PipelineManager::create_conversion_pipeline ()
                 {
                     if (f->setVideoFormat(input_format, output_format))
                     {
-                        SPDLOG_DEBUG("Added filter \"{}\" to pipeline",
-                                   s.c_str());
+                        SPDLOG_DEBUG("Added filter \"{}\" to pipeline", s.c_str());
                         filter_pipeline.push_back(f);
                     }
                     else
                     {
-                        SPDLOG_DEBUG("Filter {} did not accept format settings",
-                                   s.c_str());
+                        SPDLOG_DEBUG("Filter {} did not accept format settings", s.c_str());
                     }
                 }
                 else
@@ -383,7 +375,6 @@ bool PipelineManager::create_conversion_pipeline ()
             else
             {
                 SPDLOG_DEBUG("Filter {} is not applicable", s.c_str());
-
             }
         }
     }
@@ -391,7 +382,7 @@ bool PipelineManager::create_conversion_pipeline ()
 }
 
 
-bool PipelineManager::add_interpretation_filter ()
+bool PipelineManager::add_interpretation_filter()
 {
 
     // if a valid pipeline can be created insert additional filter (e.g. autoexposure)
@@ -401,7 +392,7 @@ bool PipelineManager::add_interpretation_filter ()
     {
         if (f->getDescription().type == FILTER_TYPE_INTERPRET)
         {
-            std::string s  = f->getDescription().name;
+            std::string s = f->getDescription().name;
             // applicable to sink
             bool all_formats = false;
             if (f->getDescription().input_fourcc.size() == 1)
@@ -412,7 +403,8 @@ bool PipelineManager::add_interpretation_filter ()
                 }
             }
 
-            if (all_formats ||isFilterApplicable(input_format.get_fourcc(), f->getDescription().input_fourcc))
+            if (all_formats
+                || isFilterApplicable(input_format.get_fourcc(), f->getDescription().input_fourcc))
             {
                 SPDLOG_DEBUG("Adding filter '{}' after source", s.c_str());
                 f->setVideoFormat(input_format, input_format);
@@ -434,7 +426,7 @@ bool PipelineManager::add_interpretation_filter ()
 }
 
 
-bool PipelineManager::create_pipeline ()
+bool PipelineManager::create_pipeline()
 {
     if (source.get() == nullptr || sink.get() == nullptr)
     {
@@ -478,13 +470,13 @@ bool PipelineManager::create_pipeline ()
         ppl += " -> ";
     }
     ppl += " sink";
-    SPDLOG_INFO("{}" , ppl.c_str());
+    SPDLOG_INFO("{}", ppl.c_str());
 
     return true;
 }
 
 
-bool PipelineManager::start_playing ()
+bool PipelineManager::start_playing()
 {
 
     if (!set_sink_status(TCAM_PIPELINE_PLAYING))
@@ -509,7 +501,7 @@ error:
 }
 
 
-bool PipelineManager::stop_playing ()
+bool PipelineManager::stop_playing()
 {
     status = TCAM_PIPELINE_STOPPED;
 
@@ -524,7 +516,7 @@ bool PipelineManager::stop_playing ()
         if (!f->setStatus(TCAM_PIPELINE_STOPPED))
         {
             SPDLOG_ERROR("Filter {} refused to change to state STOP",
-                       f->getDescription().name.c_str());
+                         f->getDescription().name.c_str());
             return false;
         }
     }
@@ -537,7 +529,7 @@ bool PipelineManager::stop_playing ()
 }
 
 
-void PipelineManager::push_image (std::shared_ptr<ImageBuffer> buffer)
+void PipelineManager::push_image(std::shared_ptr<ImageBuffer> buffer)
 {
     if (status == TCAM_PIPELINE_STOPPED)
     {
@@ -575,12 +567,12 @@ void PipelineManager::push_image (std::shared_ptr<ImageBuffer> buffer)
     }
     else
     {
-      SPDLOG_ERROR("Sink is NULL");
+        SPDLOG_ERROR("Sink is NULL");
     }
 }
 
 
-void PipelineManager::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
+void PipelineManager::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 {
     if (source)
     {
@@ -589,13 +581,13 @@ void PipelineManager::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 }
 
 
-std::vector<std::shared_ptr<ImageBuffer>> PipelineManager::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> PipelineManager::get_buffer_collection()
 {
     return std::vector<std::shared_ptr<ImageBuffer>>();
 }
 
 
-void PipelineManager::drop_incomplete_frames (bool drop_them)
+void PipelineManager::drop_incomplete_frames(bool drop_them)
 {
     if (source)
     {
@@ -604,7 +596,7 @@ void PipelineManager::drop_incomplete_frames (bool drop_them)
 }
 
 
-bool PipelineManager::should_incomplete_frames_be_dropped () const
+bool PipelineManager::should_incomplete_frames_be_dropped() const
 {
     if (source)
     {

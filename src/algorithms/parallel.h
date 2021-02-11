@@ -17,9 +17,9 @@
 #ifndef TCAM_ALGORITHM_PARALLEL_H
 #define TCAM_ALGORITHM_PARALLEL_H
 
+#include "std_latch.h"
 #include "tcam.h"
 #include "work_pool.h"
-#include "std_latch.h"
 
 using namespace tcam::algorithms::work_pool;
 
@@ -38,42 +38,39 @@ namespace parallel
  * @param split_height
  * @param is_last_item
  */
-tcam_image_buffer split_image_buffer (const tcam_image_buffer& img_to_split,
-                                      int idx_to_generate,
-                                      unsigned int split_height,
-                                      bool is_last_item);
+tcam_image_buffer split_image_buffer(const tcam_image_buffer& img_to_split,
+                                     int idx_to_generate,
+                                     unsigned int split_height,
+                                     bool is_last_item);
 
 /**
  * @param image_height
  * @param suggested_split_count
  */
-unsigned int calc_split_height (unsigned int image_height,
-                                int& suggested_split_count);
+unsigned int calc_split_height(unsigned int image_height, int& suggested_split_count);
 
 static const int max_work_item_count = 32;
 
 struct func_caller
 {
     virtual ~func_caller() = default;
-    virtual void call (const tcam_image_buffer& dst,
-                       const tcam_image_buffer& src) = 0;
+    virtual void call(const tcam_image_buffer& dst, const tcam_image_buffer& src) = 0;
 };
 
 class parallel_state
 {
 public:
-    parallel_state ();
-    ~parallel_state ();
+    parallel_state();
+    ~parallel_state();
 
-    int get_default_concurrency ();
+    int get_default_concurrency();
 
-    void queue_and_wait (func_caller* func,
-                         tcam_image_buffer dst,
-                         tcam_image_buffer src,
-                         int max_conc);
+    void queue_and_wait(func_caller* func,
+                        tcam_image_buffer dst,
+                        tcam_image_buffer src,
+                        int max_conc);
 
 private:
-
     work_pool::work_pool* thread_pool_ref_ = nullptr;
     threading::latch img_ready_latch_;
 
@@ -92,14 +89,14 @@ private:
         tcam_image_buffer split_dst;
         tcam_image_buffer split_src;
 
-        virtual void do_one () final;
+        virtual void do_one() final;
     };
 
-    void construct_from_split_ (func_caller* func,
-                                tcam_image_buffer& dst,
-                                tcam_image_buffer& src,
-                                int split_count,
-                                int split_height);
+    void construct_from_split_(func_caller* func,
+                               tcam_image_buffer& dst,
+                               tcam_image_buffer& src,
+                               int split_count,
+                               int split_height);
 
     struct split_image_context work_item_space_[max_work_item_count];
 

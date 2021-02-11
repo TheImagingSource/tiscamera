@@ -29,10 +29,10 @@ enum ROI_CHANGE_BEHAVIOR
 };
 
 
-const char* roi_change_behavior_to_string (ROI_CHANGE_BEHAVIOR behavior);
+const char* roi_change_behavior_to_string(ROI_CHANGE_BEHAVIOR behavior);
 
 
-ROI_CHANGE_BEHAVIOR roi_change_behavior_from_string (const char* str);
+ROI_CHANGE_BEHAVIOR roi_change_behavior_from_string(const char* str);
 
 
 // std::ostream& operator<< (std::ostream& out, ROI_CHANGE_BEHAVIOR behavior)

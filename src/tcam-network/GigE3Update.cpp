@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-#include <iostream>
-
 #include "GigE3Update.h"
 
+#include "FirmwarePackage.h"
 #include "GigE3Package.h"
 #include "GigE3Progress.h"
 
-#include "FirmwarePackage.h"
+#include <iostream>
 
 namespace FirmwareUpdate
 {
 
-bool groupUploadRequired (IFirmwareWriter& dev, const GigE3::UploadGroup& group)
+bool groupUploadRequired(IFirmwareWriter& dev, const GigE3::UploadGroup& group)
 {
     uint32_t version = 0;
-    dev.read( group.VersionCheckRegister, version );
+    dev.read(group.VersionCheckRegister, version);
 
     return version != group.Version;
 }
 
 
-Status initiateColdReboot (IFirmwareWriter& dev)
+Status initiateColdReboot(IFirmwareWriter& dev)
 {
     if (dev.write(0xEF000004, 0xC07DB007))
     {
@@ -49,11 +48,11 @@ Status initiateColdReboot (IFirmwareWriter& dev)
 }
 
 
-Status GigE3::upgradeFirmware (IFirmwareWriter& dev,
-                               const std::string& fileName,
-                               const std::string& modelName,
-                               const std::string& originalModelName __attribute__((unused)),
-                               tReportProgressFunc progressFunc)
+Status GigE3::upgradeFirmware(IFirmwareWriter& dev,
+                              const std::string& fileName,
+                              const std::string& modelName,
+                              const std::string& originalModelName __attribute__((unused)),
+                              tReportProgressFunc progressFunc)
 {
     Package package;
     auto status = package.Load(fileName);
@@ -80,12 +79,11 @@ Status GigE3::upgradeFirmware (IFirmwareWriter& dev,
     {
         return Status::SuccessNoActionRequired;
     }
-    mapItemProgress groupItemProgress (progressFunc, 0, 100,
-                                       (int) necessaryGroups.size(),
-                                       std::string());
+    mapItemProgress groupItemProgress(
+        progressFunc, 0, 100, (int)necessaryGroups.size(), std::string());
     for (auto&& group : necessaryGroups)
     {
-        groupItemProgress( 0, "Updating " + group.Name );
+        groupItemProgress(0, "Updating " + group.Name);
 
         status = group.DestionationPort->UploadItems(dev, group.Items, groupItemProgress);
         if (failed(status))
@@ -94,11 +92,11 @@ Status GigE3::upgradeFirmware (IFirmwareWriter& dev,
         groupItemProgress.NextItem();
     }
 
-    return initiateColdReboot( dev );
+    return initiateColdReboot(dev);
 }
 
 
-std::vector<std::string> GigE3::getModelNamesFromPackage (const std::string& fileName)
+std::vector<std::string> GigE3::getModelNamesFromPackage(const std::string& fileName)
 {
     return GigE3::Package::FindModelNames(fileName);
 }

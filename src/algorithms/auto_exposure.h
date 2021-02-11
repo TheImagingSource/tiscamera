@@ -24,39 +24,39 @@ namespace algorithms
 // simple definition of an int property
 struct property_cont
 {
-    int  min;
-    int  max;
+    int min;
+    int max;
 
-    int  val;
+    int val;
     bool do_auto;
 };
 
 struct property_cont_exposure : public property_cont
 {
-    int		granularity;
+    int granularity;
 };
 
 struct property_cont_gain : public property_cont
 {
     // Number of steps the gain has to be changed to achieve double image brightness
-    double	steps_to_double_brightness;     // only needed for pwm iris
-    bool    is_db_gain;                     // seemingly always true in the gigecam driver
+    double steps_to_double_brightness; // only needed for pwm iris
+    bool is_db_gain; // seemingly always true in the gigecam driver
 };
 
 struct property_cont_iris : public property_cont
 {
     // Currently configured frame rate
-    double	camera_fps;
+    double camera_fps;
 
-    bool	is_pwm_iris;
+    bool is_pwm_iris;
 };
 
 
 struct gain_exposure_iris_values
 {
-    int     exposure;
-    int     gain;
-    int     iris;
+    int exposure;
+    int gain;
+    int iris;
 };
 
 
@@ -69,16 +69,17 @@ struct gain_exposure_iris_values
 /// @return struct containing the calculated setting
 ///
 ///
-gain_exposure_iris_values calc_auto_gain_exposure_iris (int brightness,
-                                                        int reference_value,
-                                                        const algorithms::property_cont_gain& gain_desc,
-                                                        const algorithms::property_cont_exposure& exposure_desc,
-                                                        const algorithms::property_cont& iris_desc);
+gain_exposure_iris_values calc_auto_gain_exposure_iris(
+    int brightness,
+    int reference_value,
+    const algorithms::property_cont_gain& gain_desc,
+    const algorithms::property_cont_exposure& exposure_desc,
+    const algorithms::property_cont& iris_desc);
 
 
-int calc_auto_pwm_iris (float corrected_brightness,
-                        unsigned int reference_value,
-                        const algorithms::property_cont_iris& iris_desc,
-                        detail::pid_controller& iris_controller);
+int calc_auto_pwm_iris(float corrected_brightness,
+                       unsigned int reference_value,
+                       const algorithms::property_cont_iris& iris_desc,
+                       detail::pid_controller& iris_controller);
 
 } /* namespace algorithms */

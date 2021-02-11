@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-#include <iostream> // cerr
-
 #include "CameraDiscovery.h"
-#include "utils.h"
-#include "gigevision.h"
 
+#include "gigevision.h"
+#include "utils.h"
+
+#include <algorithm>
+#include <cstring>
+#include <errno.h>
+#include <iostream> // cerr
 #include <linux/if.h>
 #include <netdb.h>
-#include <cstring>
-
 #include <thread>
-#include <algorithm>
-#include <errno.h>
 
 namespace tis
 {
 
-std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces ()
+std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces()
 {
     struct ifaddrs* addrs;
     struct ifaddrs* addrs_del;
@@ -53,16 +52,14 @@ std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces ()
         // ignore VPN and inactive
         // VPN do not exhibit valid addresses and can cause
         // crashes, therfore jump over them
-        if ((addrs->ifa_addr == NULL) || ! (addrs->ifa_flags & IFF_RUNNING))
+        if ((addrs->ifa_addr == NULL) || !(addrs->ifa_flags & IFF_RUNNING))
         {
             addrs = addrs->ifa_next;
             continue;
         }
 
-        if  ( addrs->ifa_addr->sa_family == AF_INET
-              && !(addrs->ifa_flags & IFF_LOOPBACK)
-              && !(addrs->ifa_flags & IFF_POINTOPOINT)
-              &&  (addrs->ifa_flags & IFF_BROADCAST) )
+        if (addrs->ifa_addr->sa_family == AF_INET && !(addrs->ifa_flags & IFF_LOOPBACK)
+            && !(addrs->ifa_flags & IFF_POINTOPOINT) && (addrs->ifa_flags & IFF_BROADCAST))
         {
             auto inf = std::shared_ptr<NetworkInterface>(new NetworkInterface(addrs));
             interfaces.push_back(inf);
@@ -75,7 +72,7 @@ std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces ()
 }
 
 
-void discoverCameras (std::function<void (std::shared_ptr<Camera>)> const & discover_call)
+void discoverCameras(std::function<void(std::shared_ptr<Camera>)> const& discover_call)
 {
     std::vector<std::shared_ptr<Camera>> cameras;
     auto interfaces = detectNetworkInterfaces();
@@ -92,18 +89,16 @@ void discoverCameras (std::function<void (std::shared_ptr<Camera>)> const & disc
     for (auto& inf : interfaces)
     {
         std::shared_ptr<NetworkInterface> ni = inf;
-        thread_list.push_back(std::thread( [inf, discover_call] () { sendDiscovery(inf, discover_call); } ));
+        thread_list.push_back(
+            std::thread([inf, discover_call]() { sendDiscovery(inf, discover_call); }));
     }
 
-    for (auto& thr : thread_list)
-    {
-        thr.join();
-    }
+    for (auto& thr : thread_list) { thr.join(); }
 }
 
 
-void discoverCameras (std::vector<std::string> selectected_interfaces,
-                      std::function<void (std::shared_ptr<Camera>)> const & discover_call)
+void discoverCameras(std::vector<std::string> selectected_interfaces,
+                     std::function<void(std::shared_ptr<Camera>)> const& discover_call)
 {
     std::vector<std::shared_ptr<Camera>> cameras;
     auto interfaces = detectNetworkInterfaces();
@@ -119,40 +114,42 @@ void discoverCameras (std::vector<std::string> selectected_interfaces,
 
     for (auto& inf : interfaces)
     {
-        if (std::find(selectected_interfaces.begin(), selectected_interfaces.end(), inf->getInterfaceName()) != selectected_interfaces.end())
+        if (std::find(selectected_interfaces.begin(),
+                      selectected_interfaces.end(),
+                      inf->getInterfaceName())
+            != selectected_interfaces.end())
         {
             std::shared_ptr<NetworkInterface> ni = inf;
-            thread_list.push_back(std::thread( [inf, discover_call] () { sendDiscovery(inf, discover_call); } ));
+            thread_list.push_back(
+                std::thread([inf, discover_call]() { sendDiscovery(inf, discover_call); }));
         }
     }
 
-    for (auto& thr : thread_list)
-    {
-        thr.join();
-    }
+    for (auto& thr : thread_list) { thr.join(); }
 }
 
 
-void sendDiscovery (std::shared_ptr<NetworkInterface> interface, std::function<void (std::shared_ptr<Camera>)> const & discover_call)
+void sendDiscovery(std::shared_ptr<NetworkInterface> interface,
+                   std::function<void(std::shared_ptr<Camera>)> const& discover_call)
 {
     Packet::CMD_DISCOVERY discovery_packet;
-    discovery_packet.header.command = htons( Commands::DISCOVERY_CMD );
-    discovery_packet.header.flag    = Flags::NEEDACK;
-    discovery_packet.header.length  = htons( 0 );
-    discovery_packet.header.magic   = 0x42;
-    discovery_packet.header.req_id  = htons( 1 );
+    discovery_packet.header.command = htons(Commands::DISCOVERY_CMD);
+    discovery_packet.header.flag = Flags::NEEDACK;
+    discovery_packet.header.length = htons(0);
+    discovery_packet.header.magic = 0x42;
+    discovery_packet.header.req_id = htons(1);
 
-    auto callback = [&interface, &discover_call] (void* msg)
-        {
-            Packet::ACK_DISCOVERY* ack = (Packet::ACK_DISCOVERY*) msg;
-            auto cam = std::shared_ptr<Camera>(new Camera(*ack, interface));
-            discover_call(cam);
-            return Socket::SendAndReceiveSignals::CONTINUE;
-        };
+    auto callback = [&interface, &discover_call](void* msg) {
+        Packet::ACK_DISCOVERY* ack = (Packet::ACK_DISCOVERY*)msg;
+        auto cam = std::shared_ptr<Camera>(new Camera(*ack, interface));
+        discover_call(cam);
+        return Socket::SendAndReceiveSignals::CONTINUE;
+    };
     try
     {
         auto s = interface->createSocket();
-        s->sendAndReceive("255.255.255.255", &discovery_packet, sizeof(discovery_packet), callback, true);
+        s->sendAndReceive(
+            "255.255.255.255", &discovery_packet, sizeof(discovery_packet), callback, true);
     }
     catch (SocketSendToException& e)
     {
@@ -160,54 +157,52 @@ void sendDiscovery (std::shared_ptr<NetworkInterface> interface, std::function<v
     }
 }
 
-void sendIpRecovery (const std::string mac, const ip4_address_t ip, const ip4_address_t netmask, const ip4_address_t gateway)
+void sendIpRecovery(const std::string mac,
+                    const ip4_address_t ip,
+                    const ip4_address_t netmask,
+                    const ip4_address_t gateway)
 {
     int id = 2;
-    uint64_t macmac  = mac2int(mac);
+    uint64_t macmac = mac2int(mac);
     uint16_t machigh = macmac >> 32 & 0xFFFF;
-    uint32_t maclow  = macmac & 0xFFFFFFFF;
+    uint32_t maclow = macmac & 0xFFFFFFFF;
 
     Packet::CMD_FORCEIP packet;
 
     packet.header.magic = 0x42;
     packet.header.flag = Flags::NEEDACK;
     packet.header.command = htons(Commands::FORCEIP_CMD);
-    packet.header.length = htons(sizeof(Packet::CMD_FORCEIP)-sizeof(Packet::COMMAND_HEADER));
+    packet.header.length = htons(sizeof(Packet::CMD_FORCEIP) - sizeof(Packet::COMMAND_HEADER));
     packet.header.req_id = id;
 
-    packet.DeviceMACHigh = htons(machigh) ;
-    packet.DeviceMACLow = htonl(maclow) ;
+    packet.DeviceMACHigh = htons(machigh);
+    packet.DeviceMACLow = htonl(maclow);
 
     packet.StaticIP = ip;
     packet.StaticSubnetMask = netmask;
     packet.StaticGateway = gateway;
 
-    auto bf = [&] (std::shared_ptr<NetworkInterface> interface)
+    auto bf = [&](std::shared_ptr<NetworkInterface> interface) {
+        auto s = interface->createSocket();
+        try
         {
-            auto s = interface->createSocket();
-            try
-            {
-                s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
-            }
-            catch (SocketSendToException& e)
-            {
-
-            }
-        };
+            s->sendAndReceive("255.255.255.255", &packet, sizeof(packet), NULL, true);
+        }
+        catch (SocketSendToException& e)
+        {
+        }
+    };
 
     auto interfaces = detectNetworkInterfaces();
     std::vector<std::thread> t;
 
     // Send through each interface
-    for (auto& i :interfaces)
+    for (auto& i : interfaces)
     {
-        t.push_back(std::thread( [&] () { bf(i); } ));
+        t.push_back(std::thread([&]() { bf(i); }));
     }
 
-    for (auto& th : t)
-    {
-        th.join();
-    }
+    for (auto& th : t) { th.join(); }
 }
 
 } /* namespace tis */

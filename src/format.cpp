@@ -16,20 +16,20 @@
 
 #include "format.h"
 
-#include "img/image_fourcc.h"
 #include "img/fcc_to_string.h"
+#include "img/image_fourcc.h"
 #include "logging.h"
 
 #include <cstring>
 
 
-uint32_t tcam::description2fourcc (const char* /*description*/)
+uint32_t tcam::description2fourcc(const char* /*description*/)
 {
     return 0;
 }
 
 
-std::string tcam::fourcc2string (uint32_t fourcc)
+std::string tcam::fourcc2string(uint32_t fourcc)
 {
     // #TODO this is wrong on ARM !!
 
@@ -41,7 +41,7 @@ std::string tcam::fourcc2string (uint32_t fourcc)
 
     bla.i = fourcc;
 
-    std::string s (bla.c);
+    std::string s(bla.c);
 
     // std::string s ( (char*)&fourcc);
     // s += "\0";
@@ -49,14 +49,14 @@ std::string tcam::fourcc2string (uint32_t fourcc)
 }
 
 
-uint32_t tcam::string2fourcc (const std::string& s)
+uint32_t tcam::string2fourcc(const std::string& s)
 {
-    if(s.length() != 4)
+    if (s.length() != 4)
     {
         return 0;
     }
 
-    uint32_t fourcc = mmioFOURCC(s[0],s[1],s[2],s[3]);
+    uint32_t fourcc = mmioFOURCC(s[0], s[1], s[2], s[3]);
 
     return fourcc;
 }

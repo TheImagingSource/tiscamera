@@ -23,14 +23,14 @@
 using namespace tcam;
 
 
-ImageSink::ImageSink ()
-    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), c_back(nullptr),
-      user_data(nullptr), last_image_buffer(), external_buffer(false),
-      buffer_number(10), buffers()
-{}
+ImageSink::ImageSink()
+    : status(TCAM_PIPELINE_UNDEFINED), callback(nullptr), c_back(nullptr), user_data(nullptr),
+      last_image_buffer(), external_buffer(false), buffer_number(10), buffers()
+{
+}
 
 
-bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
+bool ImageSink::set_status(TCAM_PIPELINE_STATUS s)
 {
     if (status == s)
     {
@@ -59,13 +59,13 @@ bool ImageSink::set_status (TCAM_PIPELINE_STATUS s)
 }
 
 
-TCAM_PIPELINE_STATUS ImageSink::get_status () const
+TCAM_PIPELINE_STATUS ImageSink::get_status() const
 {
     return status;
 }
 
 
-bool ImageSink::setVideoFormat (const VideoFormat& new_format)
+bool ImageSink::setVideoFormat(const VideoFormat& new_format)
 {
     if (status == TCAM_PIPELINE_PLAYING)
     {
@@ -78,13 +78,13 @@ bool ImageSink::setVideoFormat (const VideoFormat& new_format)
 }
 
 
-VideoFormat ImageSink::getVideoFormat () const
+VideoFormat ImageSink::getVideoFormat() const
 {
     return format;
 }
 
 
-bool ImageSink::registerCallback (shared_callback sc, void* ud)
+bool ImageSink::registerCallback(shared_callback sc, void* ud)
 {
     this->sh_callback = sc;
     this->user_data = ud;
@@ -93,7 +93,7 @@ bool ImageSink::registerCallback (shared_callback sc, void* ud)
 }
 
 
-bool ImageSink::registerCallback (sink_callback sc, void* ud)
+bool ImageSink::registerCallback(sink_callback sc, void* ud)
 {
     this->callback = sc;
     this->user_data = ud;
@@ -102,7 +102,7 @@ bool ImageSink::registerCallback (sink_callback sc, void* ud)
 }
 
 
-bool ImageSink::registerCallback (c_callback cc, void* ud)
+bool ImageSink::registerCallback(c_callback cc, void* ud)
 {
     this->c_back = cc;
     this->user_data = ud;
@@ -111,7 +111,7 @@ bool ImageSink::registerCallback (c_callback cc, void* ud)
 }
 
 
-void ImageSink::push_image (std::shared_ptr<ImageBuffer> buffer)
+void ImageSink::push_image(std::shared_ptr<ImageBuffer> buffer)
 {
     last_image_buffer = buffer->getImageBuffer();
     if (sh_callback)
@@ -129,7 +129,7 @@ void ImageSink::push_image (std::shared_ptr<ImageBuffer> buffer)
 }
 
 
-void ImageSink::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
+void ImageSink::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 {
     if (auto ptr = source_.lock())
     {
@@ -142,7 +142,7 @@ void ImageSink::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 }
 
 
-bool ImageSink::set_buffer_number (size_t new_number)
+bool ImageSink::set_buffer_number(size_t new_number)
 {
     if (status == TCAM_PIPELINE_PLAYING)
     {
@@ -160,7 +160,7 @@ bool ImageSink::set_buffer_number (size_t new_number)
 }
 
 
-bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>> new_buffers)
+bool ImageSink::set_buffer_collection(std::vector<std::shared_ptr<ImageBuffer>> new_buffers)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -175,7 +175,7 @@ bool ImageSink::set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>>
 }
 
 
-std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection ()
+std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection()
 {
     if (buffers.empty())
     {
@@ -186,7 +186,7 @@ std::vector<std::shared_ptr<ImageBuffer>> ImageSink::get_buffer_collection ()
 }
 
 
-bool ImageSink::delete_buffer_collection ()
+bool ImageSink::delete_buffer_collection()
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -199,7 +199,7 @@ bool ImageSink::delete_buffer_collection ()
 }
 
 
-void ImageSink::set_source (std::weak_ptr<SinkInterface> source)
+void ImageSink::set_source(std::weak_ptr<SinkInterface> source)
 {
     if (status == TCAM_PIPELINE_PLAYING || status == TCAM_PIPELINE_PAUSED)
     {
@@ -210,7 +210,7 @@ void ImageSink::set_source (std::weak_ptr<SinkInterface> source)
 }
 
 
-bool ImageSink::initialize_internal_buffer ()
+bool ImageSink::initialize_internal_buffer()
 {
     buffers.clear();
 
@@ -223,7 +223,7 @@ bool ImageSink::initialize_internal_buffer ()
 }
 
 
-void ImageSink::drop_incomplete_frames (bool drop_them)
+void ImageSink::drop_incomplete_frames(bool drop_them)
 {
     if (auto source = source_.lock())
     {
@@ -236,7 +236,7 @@ void ImageSink::drop_incomplete_frames (bool drop_them)
 }
 
 
-bool ImageSink::should_incomplete_frames_be_dropped () const
+bool ImageSink::should_incomplete_frames_be_dropped() const
 {
     if (auto source = source_.lock())
     {

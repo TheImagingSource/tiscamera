@@ -17,11 +17,10 @@
 #ifndef TCAM_TEST_FIND_INPUT_CAPS_DATA_H
 #define TCAM_TEST_FIND_INPUT_CAPS_DATA_H
 
+#include "tcamgstbase.h"
+
 #include <string>
 #include <vector>
-
-
-#include "tcamgstbase.h"
 
 struct fic_test_result
 {
@@ -40,9 +39,9 @@ struct fic_test_data_container
 };
 
 
-void init_test_data (bool use_pimipi, bool use_dutlis);
+void init_test_data(bool use_pimipi, bool use_dutlis);
 
-std::vector<fic_test_data_container> get_test_data ();
+std::vector<fic_test_data_container> get_test_data();
 
 
 #endif /* TCAM_TEST_FIND_INPUT_CAPS_DATA_H */

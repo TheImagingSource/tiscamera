@@ -18,8 +18,8 @@
 
 #include "MachXO3.h"
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace MachXO3
 {
@@ -33,28 +33,40 @@ class JedecFile
     std::vector<uint8_t> _featureBits;
 
 public:
-    DeviceType deviceType () const { return _deviceType; }
-    uint32_t userCode () const { return _userCode; }
-    const std::vector<uint8_t>& configurationData () const { return _configurationData; }
-    const std::vector<uint8_t>& featureRow () const { return _featureRow; }
-    const std::vector<uint8_t>& featureBits () const { return _featureBits; }
+    DeviceType deviceType() const
+    {
+        return _deviceType;
+    }
+    uint32_t userCode() const
+    {
+        return _userCode;
+    }
+    const std::vector<uint8_t>& configurationData() const
+    {
+        return _configurationData;
+    }
+    const std::vector<uint8_t>& featureRow() const
+    {
+        return _featureRow;
+    }
+    const std::vector<uint8_t>& featureBits() const
+    {
+        return _featureBits;
+    }
 
 private:
-    JedecFile (DeviceType devType, uint32_t uc,
-               std::vector<uint8_t> configurationData,
-               std::vector<uint8_t> featureRow,
-               std::vector<uint8_t> featureBits)
-        : _deviceType(devType),
-          _userCode(uc),
-          _configurationData(configurationData),
-          _featureRow(featureRow),
-          _featureBits(featureBits)
+    JedecFile(DeviceType devType,
+              uint32_t uc,
+              std::vector<uint8_t> configurationData,
+              std::vector<uint8_t> featureRow,
+              std::vector<uint8_t> featureBits)
+        : _deviceType(devType), _userCode(uc), _configurationData(configurationData),
+          _featureRow(featureRow), _featureBits(featureBits)
     {
     }
 
 public:
-
-    static JedecFile Parse (const std::vector<uint8_t>& data);
+    static JedecFile Parse(const std::vector<uint8_t>& data);
 
 }; /* class JedecFile */
 

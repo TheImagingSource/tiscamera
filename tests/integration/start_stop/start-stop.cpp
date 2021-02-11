@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
+#include <CLI11.hpp>
 #include <cstdio>
 #include <gst/gst.h>
-
 #include <map>
-#include <CLI11.hpp>
+#include <unistd.h>
 
 
 GstElement* pipeline;
 
-static void create_pipeline ()
+static void create_pipeline()
 {
     GError* err = NULL;
     pipeline = gst_parse_launch("tcambin name=tcam \
                                 ! videoconvert \
-                                ! fakesink", &err);
+                                ! fakesink",
+                                &err);
 
     if (pipeline == NULL)
     {
@@ -39,7 +39,7 @@ static void create_pipeline ()
 }
 
 
-static void set_caps (const std::string& caps)
+static void set_caps(const std::string& caps)
 {
     GstElement* tcam = gst_bin_get_by_name(GST_BIN(pipeline), "tcam");
 
@@ -53,7 +53,7 @@ static void set_caps (const std::string& caps)
 }
 
 
-static void set_serial (const char* serial)
+static void set_serial(const char* serial)
 {
     auto tcam = gst_bin_get_by_name(GST_BIN(pipeline), "tcam");
 
@@ -69,9 +69,9 @@ static void set_serial (const char* serial)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    CLI::App app {"start-stop test"};
+    CLI::App app { "start-stop test" };
 
     std::string serial;
     app.add_option("-s,--serial", serial, "Serial number of the file that shall be used.", false);
@@ -79,12 +79,10 @@ int main (int argc, char *argv[])
     std::string caps_str;
     app.add_option("-c,--caps", caps_str, "GStreamer caps the device shall use.", false);
 
-    GstState rest_state {GST_STATE_NULL};
+    GstState rest_state { GST_STATE_NULL };
 
-    std::map<std::string, GstState> state_map {
-        { "NULL", GST_STATE_NULL},
-        { "READY", GST_STATE_READY}
-    };
+    std::map<std::string, GstState> state_map { { "NULL", GST_STATE_NULL },
+                                                { "READY", GST_STATE_READY } };
 
     app.add_option("-r,--rest", rest_state, "\"Stop\" state that shall be used", "NULL")
         ->transform(CLI::CheckedTransformer(state_map, CLI::ignore_case));
@@ -119,7 +117,6 @@ int main (int argc, char *argv[])
         sleep(5);
 
         gst_element_set_state(pipeline, rest_state);
-
     }
     gst_element_set_state(pipeline, GST_STATE_NULL);
 

@@ -16,26 +16,22 @@
 
 #include "properties.h"
 
+#include "general.h"
+#include "tcam.h"
+#include "tcamprop.h"
 #include "utils.h"
 
-#include <iostream>
-#include <iomanip>
-#include <memory>
-
 #include <gst/gst.h>
-#include "tcamprop.h"
-
-#include "tcam.h"
-
-#include "general.h"
+#include <iomanip>
+#include <iostream>
+#include <memory>
 
 using namespace tcam;
 
 static const size_t name_width = 40;
 
 
-
-void print_properties (const std::string& serial)
+void print_properties(const std::string& serial)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -97,36 +93,32 @@ void print_properties (const std::string& serial)
         const char* t = g_value_get_string(&type);
         if (strcmp(t, "integer") == 0)
         {
-            std::cout << std::setw(name_width) << name
-                      << "(int)"<< std::right
-                      << " min=" << g_value_get_int(&min)
-                      << " max=" << g_value_get_int(&max)
+            std::cout << std::setw(name_width) << name << "(int)" << std::right
+                      << " min=" << g_value_get_int(&min) << " max=" << g_value_get_int(&max)
                       << " step=" << g_value_get_int(&step_size)
                       << " default=" << g_value_get_int(&default_value)
                       << " value=" << g_value_get_int(&value)
                       << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group)
-                      << std::endl;
+                      << " group=" << g_value_get_string(&group) << std::endl;
         }
         else if (strcmp(t, "double") == 0)
         {
-            std::cout << std::setw(name_width) << name
-                      << "(double)"<< std::right
-                      << " min=" << g_value_get_double(&min)
-                      << " max=" << g_value_get_double(&max)
+            std::cout << std::setw(name_width) << name << "(double)" << std::right
+                      << " min=" << g_value_get_double(&min) << " max=" << g_value_get_double(&max)
                       << " step=" << g_value_get_double(&step_size)
                       << " default=" << g_value_get_double(&default_value)
                       << " value=" << g_value_get_double(&value)
                       << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group)
-                      << std::endl;
+                      << " group=" << g_value_get_string(&group) << std::endl;
         }
         else if (strcmp(t, "string") == 0)
         {
             printf("%s(string) value: %s default: %s  grouping %s %s\n",
                    name,
-                   g_value_get_string(&value), g_value_get_string(&default_value),
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_string(&value),
+                   g_value_get_string(&default_value),
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else if (strcmp(t, "enum") == 0)
         {
@@ -139,9 +131,8 @@ void print_properties (const std::string& serial)
             }
 
 
-            std::cout << std::setw(name_width) << name
-                      << "(enum) "
-                      << " default="<< std::setw(6) << g_value_get_string(&default_value)
+            std::cout << std::setw(name_width) << name << "(enum) "
+                      << " default=" << std::setw(6) << g_value_get_string(&default_value)
                       << " category=" << g_value_get_string(&category)
                       << " group=" << g_value_get_string(&group)
                       << "\n\t\t\t\t\t\tvalue=" << g_value_get_string(&value) << std::endl;
@@ -152,8 +143,7 @@ void print_properties (const std::string& serial)
         }
         else if (strcmp(t, "boolean") == 0)
         {
-            std::cout << std::setw(name_width) << name
-                      << "(bool)"
+            std::cout << std::setw(name_width) << name << "(bool)"
                       << " default=";
             if (g_value_get_boolean(&default_value))
             {
@@ -173,16 +163,13 @@ void print_properties (const std::string& serial)
                 std::cout << "false";
             }
             std::cout << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group)
-                      << std::endl;
+                      << " group=" << g_value_get_string(&group) << std::endl;
         }
         else if (strcmp(t, "button") == 0)
         {
-            std::cout << std::setw(name_width) << name
-                      << "(button)"
+            std::cout << std::setw(name_width) << name << "(button)"
                       << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group)
-                      << std::endl;
+                      << " group=" << g_value_get_string(&group) << std::endl;
         }
         else
         {
@@ -192,11 +179,10 @@ void print_properties (const std::string& serial)
 
     g_slist_free(names);
     gst_object_unref(source);
-
 }
 
 
-void print_state_json (const std::string& serial)
+void print_state_json(const std::string& serial)
 {
 
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
@@ -223,9 +209,10 @@ void print_state_json (const std::string& serial)
 
     char* state_str = nullptr;
     g_object_get(G_OBJECT(source), "state", &state_str, NULL);
-    if( state_str != nullptr ) {
+    if (state_str != nullptr)
+    {
         std::cout << state_str << std::endl;
-        g_free( state_str );
+        g_free(state_str);
     }
     gst_element_set_state(source, GST_STATE_NULL);
 
@@ -233,7 +220,7 @@ void print_state_json (const std::string& serial)
 }
 
 
-void load_state_json_string (const std::string& serial, const std::string& json_str)
+void load_state_json_string(const std::string& serial, const std::string& json_str)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 

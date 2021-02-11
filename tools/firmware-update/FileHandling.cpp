@@ -19,7 +19,7 @@
 #include <zip.h>
 
 
-std::vector<unsigned char> load_file (const std::string& filename)
+std::vector<unsigned char> load_file(const std::string& filename)
 {
     std::vector<unsigned char> contents;
 
@@ -31,7 +31,7 @@ std::vector<unsigned char> load_file (const std::string& filename)
 
     fseek(pF, 0, SEEK_END);
     long fileLen = ftell(pF);
-    if(fileLen)
+    if (fileLen)
     {
         contents.resize(fileLen);
 
@@ -40,21 +40,18 @@ std::vector<unsigned char> load_file (const std::string& filename)
         read_ret = fread(&contents[0], 1, fileLen, pF);
         fclose(pF);
 
-        while (contents.size() % 4)
-        {
-            contents.push_back(0);
-        }
+        while (contents.size() % 4) { contents.push_back(0); }
     }
     return contents;
 }
 
 
-bool is_package_file (const std::string& fileName)
+bool is_package_file(const std::string& fileName)
 {
     std::string ending = ".fwpack";
     if (fileName.length() >= ending.length())
     {
-        if (fileName.compare (fileName.length() - ending.length(), ending.length(), ending) == 0)
+        if (fileName.compare(fileName.length() - ending.length(), ending.length(), ending) == 0)
         {
             return true;
         }
@@ -64,12 +61,12 @@ bool is_package_file (const std::string& fileName)
 }
 
 
-std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName,
-                                                      const std::string& fileName)
+std::vector<unsigned char> extract_file_from_package(const std::string& packageFileName,
+                                                     const std::string& fileName)
 {
     //Open the ZIP archive
     int err = 0;
-    zip *z = zip_open(packageFileName.c_str(), 0, &err);
+    zip* z = zip_open(packageFileName.c_str(), 0, &err);
 
     //Search for the file of given name
     struct zip_stat st;
@@ -80,7 +77,7 @@ std::vector<unsigned char> extract_file_from_package (const std::string& package
     std::vector<unsigned char> result(st.size);
 
     //Read the compressed file
-    zip_file *f = zip_fopen(z, fileName.c_str(), 0);
+    zip_file* f = zip_fopen(z, fileName.c_str(), 0);
 
     zip_fread(f, result.data(), st.size);
 
@@ -90,11 +87,13 @@ std::vector<unsigned char> extract_file_from_package (const std::string& package
 }
 
 
-bool has_ending (const std::string& fullString,  const std::string& ending)
+bool has_ending(const std::string& fullString, const std::string& ending)
 {
     if (fullString.length() >= ending.length())
     {
-        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+        return (
+            0
+            == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
     }
     else
     {
@@ -103,7 +102,7 @@ bool has_ending (const std::string& fullString,  const std::string& ending)
 }
 
 
-bool is_valid_firmware_file (const std::string& firmware)
+bool is_valid_firmware_file(const std::string& firmware)
 {
     std::string usb2_ending = ".euvc";
     std::string usb3_ending = ".fw";

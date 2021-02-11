@@ -17,22 +17,21 @@
 #ifndef TCAM_V4L2_UTILS_H
 #define TCAM_V4L2_UTILS_H
 
-#include "Properties.h"
 #include "DeviceInfo.h"
+#include "Properties.h"
+#include "compiler_defines.h"
 
 #include <linux/videodev2.h>
-
-#include "compiler_defines.h"
 
 VISIBILITY_INTERNAL
 
 namespace tcam
 {
 
-uint32_t convert_v4l2_flags (uint32_t v4l2_flags);
+uint32_t convert_v4l2_flags(uint32_t v4l2_flags);
 
 
-TCAM_PROPERTY_ID find_v4l2_mapping (int v4l2_id);
+TCAM_PROPERTY_ID find_v4l2_mapping(int v4l2_id);
 
 /**
  * @brief Create Property and return shared_ptr to base class
@@ -44,7 +43,7 @@ TCAM_PROPERTY_ID find_v4l2_mapping (int v4l2_id);
  *
  * @return shared_ptr to newly created Property; nullptr on failure
  */
-std::shared_ptr<Property> create_property (int fd,
+std::shared_ptr<Property> create_property(int fd,
                                           struct v4l2_queryctrl* queryctrl,
                                           struct v4l2_ext_control* ctrl,
                                           std::shared_ptr<PropertyImpl> impl);
@@ -55,7 +54,7 @@ std::shared_ptr<Property> create_property (int fd,
  * @brief lists all supported v4l2 devices
  * @return vector containing all found v4l2 devices
  */
-std::vector<DeviceInfo> get_v4l2_device_list ();
+std::vector<DeviceInfo> get_v4l2_device_list();
 
 } /* namespace tcam */
 

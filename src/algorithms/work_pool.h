@@ -17,12 +17,13 @@
 #ifndef TCAM_ALGORITHM_WORK_POOL_H
 #define TCAM_ALGORITHM_WORK_POOL_H
 
-#include <thread>
-#include <mutex>
-#include <vector>
-#include <atomic>
 #include "pthread_semaphore.h"
 #include "std_latch.h"
+
+#include <atomic>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 namespace tcam
 {
@@ -33,25 +34,25 @@ namespace algorithms
 namespace work_pool
 {
 
-unsigned int get_logical_cpu_count ();
+unsigned int get_logical_cpu_count();
 
 struct work_context
 {
     virtual ~work_context() = default;
-    virtual void do_one () = 0;
+    virtual void do_one() = 0;
 };
 
 class work_pool
 {
 public:
-    work_pool ();
-    ~work_pool ();
+    work_pool();
+    ~work_pool();
 
-    bool start ();
-    void stop ();
+    bool start();
+    void stop();
 
     template<class T>
-    void queue_items_and_wait (threading::latch& all_items_finished, T* vec, int cnt)
+    void queue_items_and_wait(threading::latch& all_items_finished, T* vec, int cnt)
     {
         all_items_finished.reset(cnt);
 
@@ -63,30 +64,25 @@ public:
     }
 
 private:
-
-    template<class T>
-    void queue_items_ (T* vec, int cnt)
+    template<class T> void queue_items_(T* vec, int cnt)
     {
         {
             std::lock_guard<std::mutex> lck(vec_lock_);
 
-            vec_.insert(vec_.begin(), cnt, (work_context*) nullptr);
-            for (int i = 0; i < cnt; ++i)
-            {
-                vec_[i] = vec + i;
-            }
+            vec_.insert(vec_.begin(), cnt, (work_context*)nullptr);
+            for (int i = 0; i < cnt; ++i) { vec_[i] = vec + i; }
         }
-        sem_.up( cnt );
+        sem_.up(cnt);
     }
 
-    void worker_thread_function (int thread_index);
+    void worker_thread_function(int thread_index);
 
     std::vector<std::thread> thread_list_;
     std::mutex vec_lock_;
 
     std::vector<work_context*> vec_;
 
-    work_context* pop ();
+    work_context* pop();
 
     threading::semaphore sem_;
 
@@ -95,9 +91,9 @@ private:
 }; // class work_pool
 
 
-work_pool* acquire_default_work_pool ();
+work_pool* acquire_default_work_pool();
 
-void release_default_work_pool (work_pool* pool);
+void release_default_work_pool(work_pool* pool);
 
 } // namespace work_pool
 

@@ -15,41 +15,40 @@
  */
 
 
-#include <vector>
+#include "tcam-semaphores.h"
+#include "tcam.h"
+
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
-
-#include "tcam.h"
-#include "tcam-semaphores.h"
+#include <vector>
 
 using namespace tcam;
 
 class CameraListHolder
 {
 public:
+    ~CameraListHolder();
 
-    ~CameraListHolder ();
+    static CameraListHolder& get_instance();
 
-    static CameraListHolder& get_instance ();
+    std::vector<DeviceInfo> get_camera_list();
 
-    std::vector<DeviceInfo> get_camera_list ();
+    std::vector<std::string> get_interface_list() const;
 
-    std::vector<std::string> get_interface_list () const;
+    void set_interface_list(std::vector<std::string>&);
 
-    void set_interface_list (std::vector<std::string>&);
+    void run();
 
-    void run ();
-
-    void stop ();
+    void stop();
 
 private:
-    CameraListHolder ();
+    CameraListHolder();
 
-    void index_loop ();
+    void index_loop();
 
-    void loop_function ();
+    void loop_function();
 
     std::vector<DeviceInfo> camera_list;
 
@@ -67,5 +66,5 @@ private:
 
     key_t semaphore_key;
 
-    tcam::semaphore     semaphore_id;
+    tcam::semaphore semaphore_id;
 };

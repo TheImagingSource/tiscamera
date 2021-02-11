@@ -17,8 +17,8 @@
 #ifndef TCAM_ALGORITHMS_BITEATER_H
 #define TCAM_ALGORITHMS_BITEATER_H
 
-#include "tcam.h"
 #include "parallel.h"
+#include "tcam.h"
 
 #include <memory>
 
@@ -37,12 +37,9 @@ struct offsets
     unsigned char b;
     unsigned char a;
 
-    bool empty () const
+    bool empty() const
     {
-        if (r == 0
-            && g == 0
-            && b == 0
-            && a == 0)
+        if (r == 0 && g == 0 && b == 0 && a == 0)
         {
             return true;
         }
@@ -61,22 +58,21 @@ struct biteater_meta
 
 struct para_callback : parallel::func_caller
 {
-    void call (const tcam_image_buffer& dst,
-               const tcam_image_buffer& src);
+    void call(const tcam_image_buffer& dst, const tcam_image_buffer& src);
 };
 
 
-struct offsets offsets_for_fourcc (unsigned int fourcc);
+struct offsets offsets_for_fourcc(unsigned int fourcc);
 
 
-bool init_meta (struct biteater_meta& meta,
-                const tcam_video_format& in,
-                const tcam_video_format& out);
+bool init_meta(struct biteater_meta& meta,
+               const tcam_video_format& in,
+               const tcam_video_format& out);
 
 
-bool transform (const struct tcam_image_buffer* image_in,
-                struct tcam_image_buffer* image_out,
-                const struct biteater_meta& meta);
+bool transform(const struct tcam_image_buffer* image_in,
+               struct tcam_image_buffer* image_out,
+               const struct biteater_meta& meta);
 
 } // namespace biteater
 

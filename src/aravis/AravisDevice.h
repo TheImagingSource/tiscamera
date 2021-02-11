@@ -38,11 +38,12 @@ class AravisDevice : public DeviceInterface
     class AravisPropertyHandler : public PropertyImpl
     {
         friend class AravisDevice;
-    public:
-        AravisPropertyHandler (AravisDevice*);
 
-        bool get_property (Property&);
-        bool set_property (const Property&);
+    public:
+        AravisPropertyHandler(AravisDevice*);
+
+        bool get_property(Property&);
+        bool set_property(const Property&);
 
     protected:
         std::vector<property_mapping> properties;
@@ -57,60 +58,59 @@ class AravisDevice : public DeviceInterface
         friend class AravisDevice;
 
     public:
-        AravisFormatHandler (AravisDevice*);
-        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
+        AravisFormatHandler(AravisDevice*);
+        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
+
     protected:
         AravisDevice* device;
     };
 
 public:
+    AravisDevice(const DeviceInfo&);
 
-    AravisDevice (const DeviceInfo&);
+    AravisDevice() = delete;
 
-    AravisDevice () = delete;
+    ~AravisDevice();
 
-    ~AravisDevice ();
+    DeviceInfo get_device_description() const override;
 
-    DeviceInfo get_device_description () const override;
+    std::vector<std::shared_ptr<Property>> getProperties() override;
 
-    std::vector<std::shared_ptr<Property>> getProperties () override;
+    bool set_property(const Property&) override;
 
-    bool set_property (const Property&) override;
+    bool get_property(Property&) override;
 
-    bool get_property (Property&) override;
+    void update_property(struct property_mapping& mapping);
 
-    void update_property (struct property_mapping& mapping);
+    bool set_video_format(const VideoFormat&) override;
 
-    bool set_video_format (const VideoFormat&) override;
+    VideoFormat get_active_video_format() const override;
 
-    VideoFormat get_active_video_format () const override;
+    std::vector<VideoFormatDescription> get_available_video_formats() override;
 
-    std::vector<VideoFormatDescription> get_available_video_formats () override;
+    bool set_sink(std::shared_ptr<SinkInterface>) override;
 
-    bool set_sink (std::shared_ptr<SinkInterface>) override;
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) override;
+    bool release_buffers() override;
 
-    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>) override;
-    bool release_buffers () override;
+    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>) override;
+    bool start_stream() override;
 
-    bool start_stream () override;
-
-    bool stop_stream () override;
+    bool stop_stream() override;
 
 private:
-
     // helper function to set
     // aravis packet-request-ratio
-    void determine_packet_request_ratio ();
+    void determine_packet_request_ratio();
 
     // helper function to set packet size
     // depending on env and auto negotiation
-    void auto_set_packet_size ();
+    void auto_set_packet_size();
 
     static void callback(ArvStream* stream, void* user_data);
 
-    static void device_lost (ArvGvDevice* device, void* user_data);
+    static void device_lost(ArvGvDevice* device, void* user_data);
 
     std::shared_ptr<AravisPropertyHandler> handler;
 
@@ -154,11 +154,11 @@ private:
     // found nodes that contain format information
     std::vector<ArvGcNode*> format_nodes;
 
-    void determine_active_video_format ();
+    void determine_active_video_format();
 
-    void index_genicam ();
-    void iterate_genicam (const char* feature);
-    void index_genicam_format (ArvGcNode* /* node */ );
+    void index_genicam();
+    void iterate_genicam(const char* feature);
+    void index_genicam_format(ArvGcNode* /* node */);
 
 }; /* class GigeCapture */
 

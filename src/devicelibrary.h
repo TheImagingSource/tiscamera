@@ -31,21 +31,19 @@ extern "C"
         // std::shared_ptr<DeviceInterface> (*create_device) (const DeviceInfo& device);
         // std::vector<DeviceInfo> (*get_device_list) ();
 
-        DeviceInterface* (*open_device) (const struct tcam_device_info*);
+        DeviceInterface* (*open_device)(const struct tcam_device_info*);
 
 
-        size_t (*get_device_list_size) ();
+        size_t (*get_device_list_size)();
 
         /**
          * @return number of copied device_infos
          */
-        size_t (*get_device_list) (struct tcam_device_info* array, size_t array_size);
-
+        size_t (*get_device_list)(struct tcam_device_info* array, size_t array_size);
     };
 
 
-
-    struct libinfo_v1* get_library_functions_v1 ();
+    struct libinfo_v1* get_library_functions_v1();
 
 
 #ifdef __cplusplus

@@ -15,18 +15,18 @@
  */
 #include "LibraryHandle.h"
 
-#include <dlfcn.h>
-
-#include <string>
-
 #include "internal.h"
 
+#include <dlfcn.h>
+#include <string>
 
-std::shared_ptr<LibraryHandle> tcam::LibraryHandle::open (const std::string& name,
-                                                          const std::string& path)
+
+std::shared_ptr<LibraryHandle> tcam::LibraryHandle::open(const std::string& name,
+                                                         const std::string& path)
 {
     // std::shared_ptr<LibraryHandle> lib = std::make_shared<LibraryHandle>(name, path);
-    std::shared_ptr<LibraryHandle> lib = std::shared_ptr<LibraryHandle>(new LibraryHandle(name, path));
+    std::shared_ptr<LibraryHandle> lib =
+        std::shared_ptr<LibraryHandle>(new LibraryHandle(name, path));
 
     if (!lib->handle_)
     {
@@ -36,14 +36,13 @@ std::shared_ptr<LibraryHandle> tcam::LibraryHandle::open (const std::string& nam
 }
 
 
-tcam::LibraryHandle::LibraryHandle (const std::string& name,
-                                    const std::string& path)
+tcam::LibraryHandle::LibraryHandle(const std::string& name, const std::string& path)
 {
     handle_ = open_library(name, path);
 }
 
 
-tcam::LibraryHandle::~LibraryHandle ()
+tcam::LibraryHandle::~LibraryHandle()
 {
     if (handle_ != nullptr)
     {
@@ -52,8 +51,7 @@ tcam::LibraryHandle::~LibraryHandle ()
 }
 
 
-void* tcam::LibraryHandle::open_library (const std::string& name,
-                                         const std::string& path)
+void* tcam::LibraryHandle::open_library(const std::string& name, const std::string& path)
 {
     std::string library_name;
     if (!path.empty())

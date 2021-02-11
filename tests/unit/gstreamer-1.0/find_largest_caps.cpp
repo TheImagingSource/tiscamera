@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-#include <catch.hpp>
-
-#include <gst/gst.h>
-
+#include "find_largest_caps_test_data.h"
 #include "tcamgstbase.h"
 
-#include "find_largest_caps_test_data.h"
+#include <catch.hpp>
+#include <gst/gst.h>
 
 TEST_CASE("find_largest_caps")
 {
     for (unsigned int x = 0; x < flc_test_data.size(); x++)
     {
-        auto &entry = flc_test_data.at(x);
+        auto& entry = flc_test_data.at(x);
 
         GstCaps* in = nullptr;
         GstCaps* out = nullptr;
@@ -41,7 +39,6 @@ TEST_CASE("find_largest_caps")
         }
         else
         {
-
         }
 
         GstCaps* result = tcam_gst_find_largest_caps(in);

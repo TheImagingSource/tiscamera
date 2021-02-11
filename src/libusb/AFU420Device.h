@@ -18,23 +18,23 @@
 #define TCAM_AFU420DEVICE_H
 
 #include "DeviceInterface.h"
+#include "FormatHandlerInterface.h"
+#include "LibusbDevice.h"
+#include "UsbSession.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
-#include "FormatHandlerInterface.h"
-#include "UsbSession.h"
-#include "LibusbDevice.h"
 //#include "afu420_definitions.h"
 
 #include "ep_defines_r42.h"
 #include "ep_defines_rx.h"
 #include "struct_defines_rx.h"
 
+#include <atomic>
+#include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
 #include <memory>
+#include <mutex> // std::mutex, std::unique_lock
 #include <thread>
-#include <mutex>              // std::mutex, std::unique_lock
-#include <condition_variable> // std::condition_variable
-#include <atomic>
 
 
 VISIBILITY_INTERNAL
@@ -56,16 +56,15 @@ class AFU420Device : public DeviceInterface
         friend class AFU420Device;
 
     public:
-        AFU420PropertyHandler (AFU420Device*);
+        AFU420PropertyHandler(AFU420Device*);
 
 
-        std::vector<std::shared_ptr<Property>> create_property_vector ();
+        std::vector<std::shared_ptr<Property>> create_property_vector();
 
-        bool set_property (const Property&);
-        bool get_property (Property&);
+        bool set_property(const Property&);
+        bool get_property(Property&);
 
     protected:
-
         std::vector<struct property_description> properties;
 
         AFU420Device* device;
@@ -76,64 +75,63 @@ class AFU420Device : public DeviceInterface
         friend class AFU420Device;
 
     public:
-        AFU420FormatHandler (AFU420Device*);
-        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
+        AFU420FormatHandler(AFU420Device*);
+        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
 
     protected:
         AFU420Device* device;
     };
 
 public:
+    explicit AFU420Device(const DeviceInfo&);
 
-    explicit AFU420Device (const DeviceInfo&);
+    AFU420Device() = delete;
 
-    AFU420Device () = delete;
+    ~AFU420Device();
 
-    ~AFU420Device ();
+    AFU420Device(AFU420Device&) = delete;
 
-    AFU420Device (AFU420Device&) = delete;
+    AFU420Device& operator=(const AFU420Device&) = delete;
 
-    AFU420Device& operator= (const AFU420Device&) = delete;
+    DeviceInfo get_device_description() const;
 
-    DeviceInfo get_device_description () const;
+    std::vector<std::shared_ptr<Property>> getProperties();
 
-    std::vector<std::shared_ptr<Property>> getProperties ();
+    bool set_property(const Property&);
 
-    bool set_property (const Property&);
+    bool get_property(Property&);
 
-    bool get_property (Property&);
+    bool set_video_format(const VideoFormat&);
 
-    bool set_video_format (const VideoFormat&);
+    VideoFormat get_active_video_format() const;
 
-    VideoFormat get_active_video_format () const;
+    std::vector<VideoFormatDescription> get_available_video_formats();
 
-    std::vector<VideoFormatDescription> get_available_video_formats ();
+    bool set_framerate(double framerate);
 
-    bool set_framerate (double framerate);
+    double get_framerate();
 
-    double get_framerate ();
+    bool set_sink(std::shared_ptr<SinkInterface>);
 
-    bool set_sink (std::shared_ptr<SinkInterface>);
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
 
-    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>);
+    bool release_buffers();
 
-    bool release_buffers ();
+    void requeue_buffer(std::shared_ptr<ImageBuffer>);
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>);
+    bool start_stream();
 
-    bool start_stream ();
-
-    bool stop_stream ();
+    bool stop_stream();
 
 
-#pragma pack( push, 1)
+#pragma pack(push, 1)
     struct strobe_data
     {
-        uint8_t		mode;
-        uint32_t	delay_control;
-        uint32_t	width_high_ctrl;
-        uint32_t	width_low_ctrl;
-        uint32_t	width2_high_ctrl;
+        uint8_t mode;
+        uint32_t delay_control;
+        uint32_t width_high_ctrl;
+        uint32_t width_low_ctrl;
+        uint32_t width2_high_ctrl;
     };
 #pragma pack(pop)
 
@@ -172,28 +170,26 @@ public:
 
     struct sResolutionConf
     {
-        uint16_t    x_addr_start;				// ROI_Start always +4
-        uint16_t    y_addr_start;				// ROI_Start always +4
-        uint16_t    x_addr_end;					// ROI End
-        uint16_t    y_addr_end;					// ROI End
+        uint16_t x_addr_start; // ROI_Start always +4
+        uint16_t y_addr_start; // ROI_Start always +4
+        uint16_t x_addr_end; // ROI End
+        uint16_t y_addr_end; // ROI End
 
-        uint16_t    x_output_size;				// pixel to readout
-        uint16_t    y_output_size;				// pixel to readout
+        uint16_t x_output_size; // pixel to readout
+        uint16_t y_output_size; // pixel to readout
 
-        uint16_t    digital_crop_x_offset;		//
-        uint16_t    digital_crop_y_offset;		//
-        uint16_t    digital_crop_image_width;	// pixel to readout
-        uint16_t    digital_crop_image_height;	// pixel to readout
+        uint16_t digital_crop_x_offset; //
+        uint16_t digital_crop_y_offset; //
+        uint16_t digital_crop_image_width; // pixel to readout
+        uint16_t digital_crop_image_height; // pixel to readout
 
-        uint8_t     hor_binning;
-        uint8_t     ver_binning;
+        uint8_t hor_binning;
+        uint8_t ver_binning;
 
-        uint16_t    defaultFramerate;				// framerate
+        uint16_t defaultFramerate; // framerate
     };
 
 private:
-
-
     enum class resolution_config_mode
     {
         test,
@@ -208,28 +204,32 @@ private:
     tcam_image_size max_sensor_dim_by12 = { 5424, 5360 };
     tcam_image_size step = { 12, 4 };
 
-    static const int    m_uPixelMaxX = 7728 - 12 + 3;			// max horizontal: 7728;	-12: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
-    static const int    m_uPixelMaxY = 5368 - 4 + 3;			// max vertival: 5368;		 -4: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
-    static const int    m_uPixelMinX = 0x100;
-    static const int    m_uPixelMinY = 0x98;
+    static const int m_uPixelMaxX =
+        7728 - 12
+        + 3; // max horizontal: 7728;	-12: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
+    static const int m_uPixelMaxY =
+        5368 - 4
+        + 3; // max vertival: 5368;		 -4: n?chst kleinere aufloesung;	+3: aufwerten f?r +4 pixel start offset
+    static const int m_uPixelMinX = 0x100;
+    static const int m_uPixelMinY = 0x98;
 
     struct sResolutionConf active_resolution_conf_;
 
     struct stream_fmt_data
     {
-        int         id;
+        int id;
 
-        int         src_bpp;
+        int src_bpp;
 
-        uint32_t    fmt_in;
-        uint32_t    fmt_out;
+        uint32_t fmt_in;
+        uint32_t fmt_out;
 
         tcam_image_size dim_min;
         tcam_image_size dim_max;
         tcam_image_size dim_step;
 
-        double      fps_min;
-        double      fps_max;
+        double fps_min;
+        double fps_max;
     };
 
     std::thread work_thread;
@@ -255,33 +255,35 @@ private:
     std::thread udev_monitor;
 
 
-    struct AFU420Device::sResolutionConf CreateResolutionConf (const tcam_image_size start,
-                                                               const tcam_image_size stream_dim,
-                                                               tcam_image_size binning);
+    struct AFU420Device::sResolutionConf CreateResolutionConf(const tcam_image_size start,
+                                                              const tcam_image_size stream_dim,
+                                                              tcam_image_size binning);
 
-    static std::vector<uint8_t> serialize_resolution_config (const struct AFU420Device::sResolutionConf& cfg);
-    static AFU420Device::sResolutionConf deserialize_resolution_config (std::vector<uint8_t> serialized_data) noexcept( true );
+    static std::vector<uint8_t> serialize_resolution_config(
+        const struct AFU420Device::sResolutionConf& cfg);
+    static AFU420Device::sResolutionConf deserialize_resolution_config(
+        std::vector<uint8_t> serialized_data) noexcept(true);
 
-    sResolutionConf videoformat_to_resolution_conf (const VideoFormat& format);
+    sResolutionConf videoformat_to_resolution_conf(const VideoFormat& format);
 
-    void read_firmware_version ();
+    void read_firmware_version();
 
-    tcam_image_size transform_roi_start (tcam_image_size pos, tcam_image_size video_dim);
+    tcam_image_size transform_roi_start(tcam_image_size pos, tcam_image_size video_dim);
 
 
-    void notification_loop ();
+    void notification_loop();
 
     std::atomic_int lost_countdown;
 
     //void lost_device ();
 
-    void determine_active_video_format ();
+    void determine_active_video_format();
 
-    void create_formats ();
+    void create_formats();
 
-    void create_property (struct property_description);
+    void create_property(struct property_description);
 
-    void create_properties ();
+    void create_properties();
 
     // streaming related
 
@@ -293,7 +295,7 @@ private:
 
     std::vector<buffer_info> buffers;
 
-    std::shared_ptr<tcam::ImageBuffer> get_next_buffer ();
+    std::shared_ptr<tcam::ImageBuffer> get_next_buffer();
 
     volatile std::atomic_bool is_stream_on;
     struct tcam_stream_statistics statistics;
@@ -305,10 +307,10 @@ private:
 
     std::weak_ptr<SinkInterface> listener;
 
-    static void LIBUSB_CALL libusb_bulk_callback (struct libusb_transfer* trans);
-    void transfer_callback (struct libusb_transfer* transfer);
+    static void LIBUSB_CALL libusb_bulk_callback(struct libusb_transfer* trans);
+    void transfer_callback(struct libusb_transfer* transfer);
 
-    void push_buffer ();
+    void push_buffer();
 
     struct header_res
     {
@@ -317,44 +319,44 @@ private:
         size_t size;
     };
 
-    struct header_res check_and_eat_img_header (unsigned char* data,
-                                                size_t data_size);
+    struct header_res check_and_eat_img_header(unsigned char* data, size_t data_size);
 
-    bool get_frame ();
+    bool get_frame();
 
-    void init_buffers ();
+    void init_buffers();
 
-    void monitor_device ();
+    void monitor_device();
 
-    bool update_property (property_description& desc);
+    bool update_property(property_description& desc);
 
 
-    std::vector<stream_fmt_data>        stream_format_list_;
+    std::vector<stream_fmt_data> stream_format_list_;
 
     const std::vector<stream_fmt_data>& get_stream_format_descs() const
     {
         return stream_format_list_;
     }
 
-    int set_resolution_config (sResolutionConf conf, resolution_config_mode mode);
+    int set_resolution_config(sResolutionConf conf, resolution_config_mode mode);
 
-    int setup_bit_depth (int bpp);
+    int setup_bit_depth(int bpp);
 
 
-    int get_fps_max (double& max,
-                     tcam_image_size pos,
-                     tcam_image_size dim,
-                     tcam_image_size binning,
-                     int src_bpp);
+    int get_fps_max(double& max,
+                    tcam_image_size pos,
+                    tcam_image_size dim,
+                    tcam_image_size binning,
+                    int src_bpp);
 
-    int get_frame_rate_range (uint32_t strm_fmt_id,
-                              int scaling_factor_id,
-                              tcam_image_size dim,
-                              double& min_fps, double& max_fps);
+    int get_frame_rate_range(uint32_t strm_fmt_id,
+                             int scaling_factor_id,
+                             tcam_image_size dim,
+                             double& min_fps,
+                             double& max_fps);
 
-    void query_active_format ();
+    void query_active_format();
 
-    int read_resolution_config_from_device (sResolutionConf& conf);
+    int read_resolution_config_from_device(sResolutionConf& conf);
 
     struct bulk_transfer_item
     {
@@ -363,7 +365,7 @@ private:
         //uint8_t buffer[2048];
         void* transfer;
 
-        ~bulk_transfer_item ()
+        ~bulk_transfer_item()
         {
             if (transfer != nullptr)
             {
@@ -381,89 +383,117 @@ private:
     unsigned int usbbulk_image_size_ = 0;
     static const int actual_image_prefix_size_ = 4;
 
-    size_t get_packet_header_size () const { return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_) / 8;};
+    size_t get_packet_header_size() const
+    {
+        return (actual_image_prefix_size_ * active_video_format.get_size().width * image_bit_depth_)
+               / 8;
+    };
 
 
-    struct frame_rate_cache_item {
-        uint32_t        strm_fmt_id;
-        int             scaling_factor_id;
+    struct frame_rate_cache_item
+    {
+        uint32_t strm_fmt_id;
+        int scaling_factor_id;
         tcam_image_size dim;
 
         double min_fps;
         double max_fps;
     };
 
-    std::vector<frame_rate_cache_item>  frame_rate_cache_;
-    int                     image_bit_depth_ = 8;
+    std::vector<frame_rate_cache_item> frame_rate_cache_;
+    int image_bit_depth_ = 8;
 
-    int get_stream_bitdepth() const {return image_bit_depth_;};
+    int get_stream_bitdepth() const
+    {
+        return image_bit_depth_;
+    };
 
-    tcam_image_size get_stream_dim() {return active_video_format.get_size();};
+    tcam_image_size get_stream_dim()
+    {
+        return active_video_format.get_size();
+    };
 
     std::mutex control_transfer_mtx_;
 
     bool has_optics_;
-    void check_for_optics ();
-    bool has_optics () {return has_optics_;}
-    bool has_ois_unit () {return has_optics_;};
+    void check_for_optics();
+    bool has_optics()
+    {
+        return has_optics_;
+    }
+    bool has_ois_unit()
+    {
+        return has_optics_;
+    };
 
-    bool create_exposure ();
-    bool create_gain ();
-    bool create_focus ();
-    bool create_hdr ();
-    bool create_shutter ();
-    bool create_color_gain ();
-    bool create_strobe ();
+    bool create_exposure();
+    bool create_gain();
+    bool create_focus();
+    bool create_hdr();
+    bool create_shutter();
+    bool create_color_gain();
+    bool create_strobe();
 
-    bool create_offsets ();
-    bool create_binning ();
-    bool create_ois ();
+    bool create_offsets();
+    bool create_binning();
+    bool create_ois();
 
-    int64_t get_exposure ();
+    int64_t get_exposure();
     bool set_exposure(int64_t exposure_in_us);
-    int64_t get_gain ();
-    bool set_gain (int64_t gain);
-    int64_t get_focus ();
-    bool set_focus (int64_t focus);
-    bool get_shutter ();
-    bool set_shutter (bool open);
+    int64_t get_gain();
+    bool set_gain(int64_t gain);
+    int64_t get_focus();
+    bool set_focus(int64_t focus);
+    bool get_shutter();
+    bool set_shutter(bool open);
 
-    int64_t get_hdr ();
-    bool set_hdr (int64_t);
+    int64_t get_hdr();
+    bool set_hdr(int64_t);
 
-    bool get_color_gain_factor (color_gain eColor, double& dValue);
-    bool set_color_gain_factor (color_gain eColor, int dValue);
-    int read_strobe (strobe_data& strobe);
-    int64_t get_strobe (strobe_parameter param);
-    bool set_strobe (strobe_parameter param, int64_t);
+    bool get_color_gain_factor(color_gain eColor, double& dValue);
+    bool set_color_gain_factor(color_gain eColor, int dValue);
+    int read_strobe(strobe_data& strobe);
+    int64_t get_strobe(strobe_parameter param);
+    bool set_strobe(strobe_parameter param, int64_t);
 
-    int64_t get_ois_mode ();
-    bool set_ois_mode (int64_t mode);
+    int64_t get_ois_mode();
+    bool set_ois_mode(int64_t mode);
 
-    bool get_ois_pos (int64_t& x_pos,
-                      int64_t& y_pos);
-    bool set_ois_pos (const int64_t& x_pos,
-                      const int64_t& y_pos);
+    bool get_ois_pos(int64_t& x_pos, int64_t& y_pos);
+    bool set_ois_pos(const int64_t& x_pos, const int64_t& y_pos);
 
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint16_t data);
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint32_t data);
-    int control_write (unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, std::vector<unsigned char>& data);
+    int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
+    int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);
+    int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint16_t data);
+    int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint32_t data);
+    int control_write(unsigned char ucRequest,
+                      uint16_t ushValue,
+                      uint16_t ushIndex,
+                      std::vector<unsigned char>& data);
 
     template<class T>
-    int read_reg (T& value, unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex);
+    int read_reg(T& value, unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex);
 
-    int control_read (uint8_t& value, unsigned char ucRequest,
-                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint16_t& value, unsigned char ucRequest,
-                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint32_t& value, unsigned char ucRequest,
-                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (uint64_t& value, unsigned char ucRequest,
-                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
-    int control_read (std::vector<uint8_t>& value, unsigned char ucRequest,
-                      uint16_t ushValue = 0, uint16_t ushIndex = 0);
+    int control_read(uint8_t& value,
+                     unsigned char ucRequest,
+                     uint16_t ushValue = 0,
+                     uint16_t ushIndex = 0);
+    int control_read(uint16_t& value,
+                     unsigned char ucRequest,
+                     uint16_t ushValue = 0,
+                     uint16_t ushIndex = 0);
+    int control_read(uint32_t& value,
+                     unsigned char ucRequest,
+                     uint16_t ushValue = 0,
+                     uint16_t ushIndex = 0);
+    int control_read(uint64_t& value,
+                     unsigned char ucRequest,
+                     uint16_t ushValue = 0,
+                     uint16_t ushIndex = 0);
+    int control_read(std::vector<uint8_t>& value,
+                     unsigned char ucRequest,
+                     uint16_t ushValue = 0,
+                     uint16_t ushIndex = 0);
 };
 
 } /* namespace tcam */

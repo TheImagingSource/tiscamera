@@ -24,22 +24,20 @@ namespace util
 {
 namespace progress
 {
-	class ForwardProgress : public IReportProgress
-	{
-	public:
-		ForwardProgress (IReportProgress& fwd)
-			: fwd_(fwd)
-		{}
+class ForwardProgress : public IReportProgress
+{
+public:
+    ForwardProgress(IReportProgress& fwd) : fwd_(fwd) {}
 
-	public:
-		virtual void report_percentage (int pct) override;
-		virtual void report_group (const std::string& msg) override;
-		virtual void report_step (const std::string& msg) override;
-		virtual void report_speed (float speed, const std::string& unit) override;
+public:
+    virtual void report_percentage(int pct) override;
+    virtual void report_group(const std::string& msg) override;
+    virtual void report_step(const std::string& msg) override;
+    virtual void report_speed(float speed, const std::string& unit) override;
 
-	private:
-		IReportProgress& fwd_;
-	};
+private:
+    IReportProgress& fwd_;
+};
 } /* namespace progress */
 } /* namespace util */
 } /* namespace lib33u */

@@ -18,10 +18,9 @@
 #define TCAM_PROPERTYGENERATION_H
 
 #include "Properties.h"
+#include "compiler_defines.h"
 
 #include <memory>
-
-#include "compiler_defines.h"
 
 VISIBILITY_INTERNAL
 
@@ -34,8 +33,9 @@ namespace tcam
  * @param impl - PropertyImpl that shall be used for new properties
  * @return vector containing the simulated properties; can be empty
  */
-std::vector<std::shared_ptr<Property>> generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
-                                                                      std::shared_ptr<PropertyImpl> impl);
+std::vector<std::shared_ptr<Property>> generate_simulated_properties(
+    std::vector<std::shared_ptr<Property>> props,
+    std::shared_ptr<PropertyImpl> impl);
 
 
 /**
@@ -45,10 +45,10 @@ std::vector<std::shared_ptr<Property>> generate_simulated_properties (std::vecto
  * @param current_format - current image size
  * @return true on success
  */
-bool handle_auto_center (const Property& new_property,
-                         std::vector<std::shared_ptr<Property>>& props,
-                         const tcam_image_size& sensor,
-                         const tcam_image_size& current_format);
+bool handle_auto_center(const Property& new_property,
+                        std::vector<std::shared_ptr<Property>>& props,
+                        const tcam_image_size& sensor,
+                        const tcam_image_size& current_format);
 
 } /* namespace tcam */
 

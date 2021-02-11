@@ -17,10 +17,10 @@
 #include "gstmetatcamstatistics.h"
 
 
-GType tcam_statistics_meta_api_get_type (void)
+GType tcam_statistics_meta_api_get_type(void)
 {
     static volatile GType type;
-    static const gchar* tags[] = {"id", "val", NULL};
+    static const gchar* tags[] = { "id", "val", NULL };
 
     if (g_once_init_enter(&type))
     {
@@ -31,37 +31,36 @@ GType tcam_statistics_meta_api_get_type (void)
 }
 
 
-static gboolean tcam_statistics_meta_init (GstMeta* meta,
-                                           gpointer /* params */,
-                                           GstBuffer* /* buffer */)
+static gboolean tcam_statistics_meta_init(GstMeta* meta,
+                                          gpointer /* params */,
+                                          GstBuffer* /* buffer */)
 {
-    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
+    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*)meta;
 
     tcam->structure = nullptr;
-        //gst_structure_new_empty("TcamStatistics");
+    //gst_structure_new_empty("TcamStatistics");
 
     return TRUE;
 }
 
 
-static gboolean tcam_statistics_meta_transform (GstBuffer* trans_buffer,
-                                                GstMeta* meta,
-                                                GstBuffer* /* buffer */,
-                                                GQuark type,
-                                                gpointer /* data */)
+static gboolean tcam_statistics_meta_transform(GstBuffer* trans_buffer,
+                                               GstMeta* meta,
+                                               GstBuffer* /* buffer */,
+                                               GQuark type,
+                                               gpointer /* data */)
 {
     g_return_val_if_fail(GST_IS_BUFFER(trans_buffer), FALSE);
     // g_return_val_if_fail(statistics, nullptr);
 
     // we always copy
 
-    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
+    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*)meta;
 
     if (GST_META_TRANSFORM_IS_COPY(type))
     {
-        TcamStatisticsMeta* trans_tcam = (TcamStatisticsMeta*) gst_buffer_add_meta(trans_buffer,
-                                                                                   TCAM_STATISTICS_META_INFO,
-                                                                                   nullptr);
+        TcamStatisticsMeta* trans_tcam = (TcamStatisticsMeta*)gst_buffer_add_meta(
+            trans_buffer, TCAM_STATISTICS_META_INFO, nullptr);
 
         if (!trans_tcam)
         {
@@ -74,9 +73,9 @@ static gboolean tcam_statistics_meta_transform (GstBuffer* trans_buffer,
 }
 
 
-static void tcam_statistics_meta_free (GstMeta* meta, GstBuffer* /* buffer */)
+static void tcam_statistics_meta_free(GstMeta* meta, GstBuffer* /* buffer */)
 {
-    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*) meta;
+    TcamStatisticsMeta* tcam = (TcamStatisticsMeta*)meta;
 
     if (tcam->structure)
     {
@@ -87,7 +86,7 @@ static void tcam_statistics_meta_free (GstMeta* meta, GstBuffer* /* buffer */)
 }
 
 
-const GstMetaInfo* tcam_statistics_meta_get_info (void)
+const GstMetaInfo* tcam_statistics_meta_get_info(void)
 {
     static const GstMetaInfo* meta_info = nullptr;
 
@@ -106,17 +105,15 @@ const GstMetaInfo* tcam_statistics_meta_get_info (void)
 }
 
 
-TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta (GstBuffer* buffer,
-                                                         GstStructure* statistics)
+TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta(GstBuffer* buffer, GstStructure* statistics)
 {
 
     g_return_val_if_fail(GST_IS_BUFFER(buffer), nullptr);
     g_return_val_if_fail(statistics, nullptr);
 
 
-    TcamStatisticsMeta* meta = (TcamStatisticsMeta*) gst_buffer_add_meta(buffer,
-                                                                         TCAM_STATISTICS_META_INFO,
-                                                                         nullptr);
+    TcamStatisticsMeta* meta =
+        (TcamStatisticsMeta*)gst_buffer_add_meta(buffer, TCAM_STATISTICS_META_INFO, nullptr);
 
     if (!meta)
     {

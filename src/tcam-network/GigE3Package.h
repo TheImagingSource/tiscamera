@@ -16,16 +16,14 @@
 
 #pragma once
 
+#include "FirmwareUpgrade.h"
 #include "GigE3DevicePort.h"
 #include "GigE3UploadGroup.h"
 
-#include "FirmwareUpgrade.h"
-
-#include <pugi.h>
-
-#include <memory>
-#include <vector>
 #include <map>
+#include <memory>
+#include <pugi.h>
+#include <vector>
 
 class TiXmlDocument;
 
@@ -40,13 +38,13 @@ struct UploadGroup;
 class Package
 {
 public:
-    static std::vector<std::string> FindModelNames (const std::string& packageFileName);
+    static std::vector<std::string> FindModelNames(const std::string& packageFileName);
 
 public:
-    Status Load (const std::string& packageFileName);
+    Status Load(const std::string& packageFileName);
 
-    IDevicePort* find_port (const std::string& port_name);
-    std::vector<UploadGroup>* find_upload_groups (const std::string& model_name);
+    IDevicePort* find_port(const std::string& port_name);
+    std::vector<UploadGroup>* find_upload_groups(const std::string& model_name);
 
 private:
     std::string packageFileName_;
@@ -59,15 +57,15 @@ private:
     std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> file_data_cache_;
 
 private:
-    Status ReadPackageInfo (const pugi::xml_document& doc);
-    Status ReadDevicePorts (const pugi::xml_document& doc);
-    Status ReadDeviceTypes (const pugi::xml_document& doc);
-    Status ReadUploadGroup (const pugi::xml_node& uploadGroupElem, UploadGroup& group);
-    Status ReadUploadItem (const pugi::xml_node& uploadItemElem, UploadItem& item);
+    Status ReadPackageInfo(const pugi::xml_document& doc);
+    Status ReadDevicePorts(const pugi::xml_document& doc);
+    Status ReadDeviceTypes(const pugi::xml_document& doc);
+    Status ReadUploadGroup(const pugi::xml_node& uploadGroupElem, UploadGroup& group);
+    Status ReadUploadItem(const pugi::xml_node& uploadItemElem, UploadItem& item);
 
-    std::shared_ptr<IDevicePort> CreateDevicePort (const std::string& portType);
+    std::shared_ptr<IDevicePort> CreateDevicePort(const std::string& portType);
 
-    std::shared_ptr<std::vector<uint8_t>> ExtractFile( const std::string& fileName );
+    std::shared_ptr<std::vector<uint8_t>> ExtractFile(const std::string& fileName);
 }; /* class Package */
 
 } /* namespace GigE3 */

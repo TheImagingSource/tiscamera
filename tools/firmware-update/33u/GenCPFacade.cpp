@@ -23,37 +23,36 @@ namespace lib33u
 {
 namespace device_interface
 {
-	std::vector<uint8_t> GenCPFacade::read_mem (uint64_t address, uint16_t length) const
-	{
-		std::vector<uint8_t> result( length );
-		read_mem(address, result.data(), (uint16_t)result.size());
-		return result;
-	}
+std::vector<uint8_t> GenCPFacade::read_mem(uint64_t address, uint16_t length) const
+{
+    std::vector<uint8_t> result(length);
+    read_mem(address, result.data(), (uint16_t)result.size());
+    return result;
+}
 
-	void GenCPFacade::write_mem (uint64_t address, const std::vector<uint8_t>& buffer)
-	{
-		if (buffer.size() > std::numeric_limits<uint16_t>::max())
-        {
-			throw std::range_error("buffer too large");
-        }
-		write_mem(address, buffer.data(), (uint16_t)buffer.size());
-	}
+void GenCPFacade::write_mem(uint64_t address, const std::vector<uint8_t>& buffer)
+{
+    if (buffer.size() > std::numeric_limits<uint16_t>::max())
+    {
+        throw std::range_error("buffer too large");
+    }
+    write_mem(address, buffer.data(), (uint16_t)buffer.size());
+}
 
-	std::string GenCPFacade::read_string (uint64_t address, uint16_t length) const
-	{
-		uint16_t aligned_length = (uint16_t)((length + 3) & 0xFFFC);
+std::string GenCPFacade::read_string(uint64_t address, uint16_t length) const
+{
+    uint16_t aligned_length = (uint16_t)((length + 3) & 0xFFFC);
 
-		std::string buffer;
-		buffer.resize( aligned_length );
+    std::string buffer;
+    buffer.resize(aligned_length);
 
-		read_mem(address,
-                 reinterpret_cast<uint8_t*>(&buffer[0]),
-                 static_cast<uint16_t>(buffer.length()) );
+    read_mem(
+        address, reinterpret_cast<uint8_t*>(&buffer[0]), static_cast<uint16_t>(buffer.length()));
 
-		auto actual_length = strlen( buffer.c_str() );
-		buffer.resize( actual_length );
+    auto actual_length = strlen(buffer.c_str());
+    buffer.resize(actual_length);
 
-		return buffer;
-	}
+    return buffer;
+}
 } /* namespace device_interface */
 } /* namespace lib33u */

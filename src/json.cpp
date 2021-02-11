@@ -15,11 +15,11 @@
  */
 
 
+#include "logging.h"
+
+#include <iostream>
 #include <json.h>
 #include <json/json.hpp>
-
-#include "logging.h"
-#include <iostream>
 
 
 using json = nlohmann::json;
@@ -27,17 +27,15 @@ using json = nlohmann::json;
 // std::string
 
 
-bool property_to_json (tcam::Property* prop,
-                       json& parent)
+bool property_to_json(tcam::Property* prop, json& parent)
 {
-    parent.push_back(json::object_t::value_type(prop->get_name(),
-                                                prop->to_string()));
+    parent.push_back(json::object_t::value_type(prop->get_name(), prop->to_string()));
 
     return true;
 }
 
 
-std::string tcam::create_json_state (std::shared_ptr<CaptureDevice> dev)
+std::string tcam::create_json_state(std::shared_ptr<CaptureDevice> dev)
 {
     auto props = dev->get_available_properties();
 
@@ -73,7 +71,7 @@ std::string tcam::create_json_state (std::shared_ptr<CaptureDevice> dev)
 }
 
 
-bool serial_matches (json j, const std::string& serial)
+bool serial_matches(json j, const std::string& serial)
 {
     std::string serial_str;
     try
@@ -98,7 +96,7 @@ bool serial_matches (json j, const std::string& serial)
 }
 
 
-bool version_matches (json j, const std::string& wanted_version=tcam::JSON_FILE_VERSION_CURRENT)
+bool version_matches(json j, const std::string& wanted_version = tcam::JSON_FILE_VERSION_CURRENT)
 {
     std::string version;
     try
@@ -126,8 +124,8 @@ bool version_matches (json j, const std::string& wanted_version=tcam::JSON_FILE_
 }
 
 
-std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr<CaptureDevice> dev,
-                                                                 const std::string& state)
+std::pair<bool, std::vector<std::string>> tcam::load_json_state(std::shared_ptr<CaptureDevice> dev,
+                                                                const std::string& state)
 {
     json j;
 
@@ -143,17 +141,17 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr
         s.append(e.what());
         SPDLOG_ERROR(s.c_str());
         msgs.push_back(s);
-        return {false, msgs};
+        return { false, msgs };
     }
 
     if (!serial_matches(j, dev->get_device().get_serial()))
     {
-        return {false, {"Serial missmatch"}};
+        return { false, { "Serial missmatch" } };
     }
 
     if (!version_matches(j))
     {
-        return {false, {"Version missmatch"}};
+        return { false, { "Version missmatch" } };
     }
 
 
@@ -195,10 +193,9 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr
 
             if (!value_ret)
             {
-                msgs.push_back("Unabe to apply '" + iter.value().dump()
-                               + "' to '" + iter.key() + "'. Ignoring.");
+                msgs.push_back("Unabe to apply '" + iter.value().dump() + "' to '" + iter.key()
+                               + "'. Ignoring.");
             }
-
         }
         else
         {
@@ -206,5 +203,5 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state (std::shared_ptr
         }
     }
 
-    return {true, msgs};
+    return { true, msgs };
 }

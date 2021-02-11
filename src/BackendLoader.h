@@ -18,16 +18,14 @@
 #define TCAM_BACKEND_LOADER_H
 
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <functional>
-
+#include "DeviceInterface.h"
+#include "LibraryHandle.h"
 #include "base_types.h"
 
-#include "DeviceInterface.h"
-
-#include "LibraryHandle.h"
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
 
 VISIBILITY_INTERNAL
 
@@ -37,11 +35,10 @@ namespace tcam
 class BackendLoader
 {
 private:
+    BackendLoader();
+    ~BackendLoader();
 
-    BackendLoader ();
-    ~BackendLoader ();
-
-    BackendLoader& operator= (const BackendLoader&) = delete;
+    BackendLoader& operator=(const BackendLoader&) = delete;
 
     static std::weak_ptr<BackendLoader> instance;
 
@@ -49,22 +46,21 @@ private:
 
     std::vector<backend> backends;
 
-    void load_backends ();
+    void load_backends();
 
 
-    void unload_backends ();
+    void unload_backends();
 
-    std::vector<DeviceInfo> get_device_list_from_backend (BackendLoader::backend& b);
+    std::vector<DeviceInfo> get_device_list_from_backend(BackendLoader::backend& b);
 
 public:
+    static std::shared_ptr<BackendLoader> get_instance();
 
-    static std::shared_ptr<BackendLoader> get_instance ();
+    std::shared_ptr<DeviceInterface> open_device(const DeviceInfo&);
 
-    std::shared_ptr<DeviceInterface> open_device (const DeviceInfo&);
+    std::vector<DeviceInfo> get_device_list_all_backends();
 
-    std::vector<DeviceInfo> get_device_list_all_backends ();
-
-    std::vector<DeviceInfo> get_device_list (enum TCAM_DEVICE_TYPE);
+    std::vector<DeviceInfo> get_device_list(enum TCAM_DEVICE_TYPE);
 
 }; /* class BackendLoader*/
 

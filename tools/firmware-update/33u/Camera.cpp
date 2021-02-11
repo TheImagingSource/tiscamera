@@ -15,67 +15,71 @@
  */
 
 #include "Camera.h"
+
 #include "MemoryMap.h"
 #include "VendorCommands.h"
 
 namespace lib33u
 {
-Camera::Impl::Impl (std::shared_ptr<driver_interface::IUsbDevice> dev)
-    : device_ { dev }
-    , gencp_ { dev }
-    , flash_ { gencp_ }
-    , eeprom_ { gencp_ }
-	{}
+Camera::Impl::Impl(std::shared_ptr<driver_interface::IUsbDevice> dev)
+    : device_ { dev }, gencp_ { dev }, flash_ { gencp_ }, eeprom_ { gencp_ }
+{
+}
 
-uint16_t Camera::Impl::product_id () const
+uint16_t Camera::Impl::product_id() const
 {
     return device_->product_id();
 }
 
-std::string Camera::Impl::model_description () const
+std::string Camera::Impl::model_description() const
 {
-    return gencp_.read_string( device_interface::MemoryMap::CAMERA_INFO + 0x20, 0x40 );
+    return gencp_.read_string(device_interface::MemoryMap::CAMERA_INFO + 0x20, 0x40);
 }
 
-std::string Camera::Impl::fpga_version () const
+std::string Camera::Impl::fpga_version() const
 {
-    return gencp_.read_string( device_interface::MemoryMap::CAMERA_INFO + 0x00, 0x20 );
+    return gencp_.read_string(device_interface::MemoryMap::CAMERA_INFO + 0x00, 0x20);
 }
 
-std::string Camera::Impl::nios_firmware_version () const
+std::string Camera::Impl::nios_firmware_version() const
 {
-    return gencp_.read_string( device_interface::MemoryMap::CAMERA_INFO + 0x60, 0x20 );
+    return gencp_.read_string(device_interface::MemoryMap::CAMERA_INFO + 0x60, 0x20);
 }
 
-int Camera::Impl::firmware_version () const
+int Camera::Impl::firmware_version() const
 {
-    return device_->read_vendor_request<int>( 1, 0, 0 );
+    return device_->read_vendor_request<int>(1, 0, 0);
 }
 
-void Camera::Impl::i2c_write( uint8_t dev, const std::vector<uint8_t>& data, bool combine_with_read )
+void Camera::Impl::i2c_write(uint8_t dev, const std::vector<uint8_t>& data, bool combine_with_read)
 {
     uint16_t flag = combine_with_read ? 1 : 0;
 
-    device_->write_vendor_request( device_interface::VendorCommands::I2C, dev, flag, data.data(), data.size() );
+    device_->write_vendor_request(
+        device_interface::VendorCommands::I2C, dev, flag, data.data(), data.size());
 }
-std::vector<uint8_t> Camera::Impl::i2c_read( uint8_t dev, size_t request_length, bool combine_with_read )
+std::vector<uint8_t> Camera::Impl::i2c_read(uint8_t dev,
+                                            size_t request_length,
+                                            bool combine_with_read)
 {
     uint16_t flag = combine_with_read ? 1 : 0;
 
-    std::vector<uint8_t> result( request_length );
-    device_->read_vendor_request( device_interface::VendorCommands::I2C, dev, flag, result.data(), result.size() );
+    std::vector<uint8_t> result(request_length);
+    device_->read_vendor_request(
+        device_interface::VendorCommands::I2C, dev, flag, result.data(), result.size());
 
     return result;
 }
 
-Camera::Camera (std::shared_ptr<driver_interface::IUsbDevice> dev)
-    : impl_ { std::unique_ptr<Impl>( new Impl(dev) ) }
-	{}
+Camera::Camera(std::shared_ptr<driver_interface::IUsbDevice> dev)
+    : impl_ { std::unique_ptr<Impl>(new Impl(dev)) }
+{
+}
 
-Camera Camera::attach (std::shared_ptr<driver_interface::IUsbDevice> dev)
+Camera Camera::attach(std::shared_ptr<driver_interface::IUsbDevice> dev)
 {
     dev->open();
-    return Camera( dev );
+    return Camera(dev);
 }
 
-}
+} // namespace lib33u

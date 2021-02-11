@@ -15,19 +15,19 @@
  */
 
 #include "formats.h"
-#include "general.h"
 
 #include "fcc_to_string.h"
-
-#include "tcamgststrings.h"
+#include "general.h"
 #include "tcamgstbase.h" // videoformatsdescription_to_gst_caps_string
+#include "tcamgststrings.h"
+
 #include <gst/gst.h> // gst_init
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <regex>
 
 
-void list_gstreamer_1_0_formats (const std::string& serial)
+void list_gstreamer_1_0_formats(const std::string& serial)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -57,14 +57,14 @@ void list_gstreamer_1_0_formats (const std::string& serial)
 
     char* cstr = gst_caps_to_string(caps);
     std::string str = cstr;
-    g_free( cstr );
+    g_free(cstr);
 
     if (caps)
     {
         // use a regex to insert line breaks for increased readability
-        std::regex e ("; ");
-        std::regex wb_e (" ");
-        std::regex paren_e ("\\((string|int|fraction)\\)");
+        std::regex e("; ");
+        std::regex wb_e(" ");
+        std::regex paren_e("\\((string|int|fraction)\\)");
         std::cout << "Available gstreamer-1.0 caps:" << std::endl;
 
         std::string caps_str = std::regex_replace(str, e, ";\n");
@@ -87,10 +87,11 @@ void list_gstreamer_1_0_formats (const std::string& serial)
 }
 
 
-void print_active_format (const VideoFormat& format)
+void print_active_format(const VideoFormat& format)
 {
     std::cout << "Active format:\n"
-              << "Format: \t" << img::fcc_to_string(format.get_fourcc())
-              << "\nResolution: \t" << format.get_size().width << "x" << format.get_size().height
-              << "\nFramerate: \t" << format.get_framerate() << "\n" << std::endl;
+              << "Format: \t" << img::fcc_to_string(format.get_fourcc()) << "\nResolution: \t"
+              << format.get_size().width << "x" << format.get_size().height << "\nFramerate: \t"
+              << format.get_framerate() << "\n"
+              << std::endl;
 }

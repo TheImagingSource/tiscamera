@@ -22,25 +22,25 @@ namespace util
 {
 namespace progress
 {
-	void ForwardProgress::report_percentage (int pct)
-	{
-		fwd_.report_percentage(pct);
-	}
+void ForwardProgress::report_percentage(int pct)
+{
+    fwd_.report_percentage(pct);
+}
 
-	void ForwardProgress::report_group (const std::string& msg)
-	{
-		fwd_.report_group(msg);
-	}
+void ForwardProgress::report_group(const std::string& msg)
+{
+    fwd_.report_group(msg);
+}
 
-	void ForwardProgress::report_step (const std::string& msg)
-	{
-		fwd_.report_step(msg);
-	}
+void ForwardProgress::report_step(const std::string& msg)
+{
+    fwd_.report_step(msg);
+}
 
-	void ForwardProgress::report_speed (float speed, const std::string& unit)
-	{
-		fwd_.report_speed(speed, unit);
-	}
+void ForwardProgress::report_speed(float speed, const std::string& unit)
+{
+    fwd_.report_speed(speed, unit);
+}
 } /* namespace progress */
 } /* namespace util */
 } /* namespace lib33u */

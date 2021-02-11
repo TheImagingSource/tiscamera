@@ -17,12 +17,11 @@
 #ifndef TCAM_VIDEOFORMATDESCRIPTION_H
 #define TCAM_VIDEOFORMATDESCRIPTION_H
 
+#include "VideoFormat.h"
 #include "base_types.h"
 
-#include "VideoFormat.h"
-
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace tcam
 {
@@ -41,72 +40,69 @@ struct framerate_mapping
 class VideoFormatDescription
 {
 public:
+    VideoFormatDescription() = delete;
 
-    VideoFormatDescription () = delete;
+    VideoFormatDescription(std::shared_ptr<FormatHandlerInterface> handler,
+                           const struct tcam_video_format_description&,
+                           const std::vector<framerate_mapping>&);
 
-    VideoFormatDescription (std::shared_ptr<FormatHandlerInterface> handler,
-                            const struct tcam_video_format_description&,
-                            const std::vector<framerate_mapping>&);
-
-    VideoFormatDescription (const VideoFormatDescription&);
-
-
-    explicit VideoFormatDescription (const struct tcam_video_format_description&);
+    VideoFormatDescription(const VideoFormatDescription&);
 
 
-    VideoFormatDescription& operator= (const VideoFormatDescription&);
+    explicit VideoFormatDescription(const struct tcam_video_format_description&);
 
-    bool operator== (const VideoFormatDescription& other) const;
-    bool operator!= (const VideoFormatDescription& other) const;
 
-    bool operator== (const struct tcam_video_format_description& other) const;
-    bool operator!= (const struct tcam_video_format_description& other) const;
+    VideoFormatDescription& operator=(const VideoFormatDescription&);
+
+    bool operator==(const VideoFormatDescription& other) const;
+    bool operator!=(const VideoFormatDescription& other) const;
+
+    bool operator==(const struct tcam_video_format_description& other) const;
+    bool operator!=(const struct tcam_video_format_description& other) const;
 
     /**
      * Returns a struct representation of the format description
      * @return tcam_video_format_description
      */
-    struct tcam_video_format_description get_struct () const;
+    struct tcam_video_format_description get_struct() const;
 
     /**
      * Returns the pixel format used
      * @return uint32 containging the fourcc
      */
-    uint32_t get_fourcc () const;
+    uint32_t get_fourcc() const;
 
     /**
      * Returns the binning used
      * @return uint32 containging the fourcc
      */
-    uint32_t get_binning () const;
+    uint32_t get_binning() const;
 
     /**
      * Returns the skipping used
      */
-    uint32_t get_skipping () const;
+    uint32_t get_skipping() const;
 
 
-    std::vector<struct tcam_resolution_description> get_resolutions () const;
+    std::vector<struct tcam_resolution_description> get_resolutions() const;
 
-    std::vector<double> get_frame_rates (const tcam_resolution_description& size) const;
+    std::vector<double> get_frame_rates(const tcam_resolution_description& size) const;
 
-    std::vector<double> get_framerates (const tcam_image_size& s) const;
+    std::vector<double> get_framerates(const tcam_image_size& s) const;
 
 
-    VideoFormat create_video_format (unsigned int width,
-                                     unsigned int height,
-                                     double framerate) const;
+    VideoFormat create_video_format(unsigned int width,
+                                    unsigned int height,
+                                    double framerate) const;
 
-    bool is_valid_video_format (const VideoFormat&) const;
+    bool is_valid_video_format(const VideoFormat&) const;
 
 private:
-
     tcam_video_format_description format;
 
     std::vector<framerate_mapping> res;
 
     std::weak_ptr<FormatHandlerInterface> format_handler;
-
 };
 
 } /* namespace tcam */

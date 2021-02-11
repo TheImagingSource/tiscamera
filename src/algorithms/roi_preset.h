@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 // namespace roi
 // {
@@ -36,10 +36,10 @@ enum ROI_PRESET
 };
 
 
-const char* roi_preset_to_string (ROI_PRESET preset);
+const char* roi_preset_to_string(ROI_PRESET preset);
 
 
-ROI_PRESET roi_preset_from_string (const char* str);
+ROI_PRESET roi_preset_from_string(const char* str);
 
 
 // std::ostream& operator<< (std::ostream& out, ROI_PRESET preset)

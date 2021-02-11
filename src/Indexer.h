@@ -2,14 +2,14 @@
 #ifndef TCAM_INDEXER
 #define TCAM_INDEXER
 
-#include <memory>
-#include <vector>
-#include <mutex>
-#include <thread>
+#include "DeviceInfo.h"
+
 #include <atomic>
 #include <condition_variable>
-
-#include "DeviceInfo.h"
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 //#include "BackendLoader.h"
 
@@ -22,7 +22,7 @@ namespace tcam
 
 #ifndef dev_callback
 
-typedef void (*dev_callback) (const DeviceInfo&, void* user_data);
+typedef void (*dev_callback)(const DeviceInfo&, void* user_data);
 
 #endif /* dev_callback */
 
@@ -32,24 +32,18 @@ class BackendLoader;
 class Indexer
 {
 public:
+    static std::shared_ptr<Indexer> get_instance();
 
-    static std::shared_ptr<Indexer> get_instance ();
+    std::vector<DeviceInfo> get_device_list() const;
 
-    std::vector<DeviceInfo> get_device_list () const;
+    void register_device_lost(dev_callback cb, void* user_data);
 
-    void register_device_lost (dev_callback cb,
-                               void* user_data);
+    void register_device_lost(dev_callback cb, void* user_data, const std::string& serial);
 
-    void register_device_lost (dev_callback cb,
-                               void* user_data,
-                               const std::string& serial);
-
-    void remove_device_lost (dev_callback callback);
-    void remove_device_lost (dev_callback callback,
-                             const std::string& serial);
+    void remove_device_lost(dev_callback callback);
+    void remove_device_lost(dev_callback callback, const std::string& serial);
 
 private:
-
     // The Indexer is a pseudo singleton
     // It stores a weak_ptr to itself and returns it,
     // should multiple instances of the class be requested
@@ -60,12 +54,12 @@ private:
     // instances cease to exist.
     static std::weak_ptr<Indexer> indexer_ptr;
 
-    Indexer ();
-    ~Indexer ();
+    Indexer();
+    ~Indexer();
 
-    void update_device_list_thread ();
-    std::vector<DeviceInfo> fetch_device_list_backend () const;
-    static void sort_device_list (std::vector<DeviceInfo>& lst);
+    void update_device_list_thread();
+    std::vector<DeviceInfo> fetch_device_list_backend() const;
+    static void sort_device_list(std::vector<DeviceInfo>& lst);
 
     bool continue_thread_;
     mutable std::mutex mtx_;

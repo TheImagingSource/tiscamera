@@ -15,17 +15,14 @@
  */
 
 #include "ConsoleManager.h"
+#include "version.h"
 
+#include <exception>
+#include <iostream>
+#include <libgen.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <exception>
-#include <stdexcept>
-#include <libgen.h>
-
-#include <libgen.h>
-
-#include "version.h"
 
 using namespace tis;
 
@@ -33,10 +30,12 @@ using namespace tis;
 /// @name printHelp
 /// @param name - program name
 /// @brief prints complete overview over possible actions
-void printHelp (char *execName)
+void printHelp(char* execName)
 {
-    std::cout << "\n" << execName << " - configuration tool for The Imaging Source GigE cameras"
-              << "\n\nusage: " << execName << " [command] [args]        - execute specified command\n\n"
+    std::cout << "\n"
+              << execName << " - configuration tool for The Imaging Source GigE cameras"
+              << "\n\nusage: " << execName
+              << " [command] [args]        - execute specified command\n\n"
 
               << "Available commands:\n"
               << "    list     - list all available GigE cameras\n"
@@ -70,10 +69,12 @@ void printHelp (char *execName)
               << "  Temporarily set a fixed IP address, gateway and subnet mask for the camera\n"
               << "  with the serial number 27710767. The camera does not need to be on the same\n"
               << "  subnet:\n\n"
-              << "    " << execName << " rescue ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n\n"
+              << "    " << execName
+              << " rescue ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n\n"
               << "  Permanently set a fixed IP adress on the same camera. Camera needs to be\n"
               << "  on the same subnet:\n\n"
-              << "    " << execName << " set ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n"
+              << "    " << execName
+              << " set ip=192.168.1.100 gateway=192.168.1.1 subnet=255.255.255.0 -s 27710767\n"
               << std::endl;
 
     std::cout << "Version Information:\n\n"
@@ -82,7 +83,7 @@ void printHelp (char *execName)
 }
 
 
-void handleCommandlineArguments (const int argc, char* argv[])
+void handleCommandlineArguments(const int argc, char* argv[])
 {
     if (argc == 1)
     {
@@ -92,7 +93,7 @@ void handleCommandlineArguments (const int argc, char* argv[])
 
     // std::string makes things easier to handle
     // we don;t need the program name itself and just ignore it
-    std::vector<std::string> args(argv+1, argv + argc);
+    std::vector<std::string> args(argv + 1, argv + argc);
 
     try
     {
@@ -131,8 +132,9 @@ void handleCommandlineArguments (const int argc, char* argv[])
             else if (arg.compare("forceip") == 0)
             {
                 std::cout << "\n!!! Using the 'forceip' is DEPRECATED !!!"
-                "\nThis command got replaced by the 'rescue' command and will be "
-                "removed in the future!\n" << std::endl;
+                             "\nThis command got replaced by the 'rescue' command and will be "
+                             "removed in the future!\n"
+                          << std::endl;
                 rescue(args);
                 break;
             }
@@ -155,14 +157,13 @@ void handleCommandlineArguments (const int argc, char* argv[])
     }
     catch (std::exception& exc)
     {
-        std::cout << "\n" << exc.what()
-                  << "\n" << std::endl;
+        std::cout << "\n" << exc.what() << "\n" << std::endl;
         exit(1);
     }
 }
 
 
-int main (int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     handleCommandlineArguments(argc, argv);
 

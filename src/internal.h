@@ -26,18 +26,17 @@
 #ifndef TCAM_INTERNAL_H
 #define TCAM_INTERNAL_H
 
+#include "DeviceInterface.h"
+#include "FilterBase.h"
+#include "PipelineManager.h"
+#include "Properties.h"
+#include "VideoFormat.h"
+#include "VideoFormatDescription.h"
 #include "base_types.h"
 #include "format.h"
-#include "DeviceInterface.h"
-#include "utils.h"
-#include "logging.h"
-#include "VideoFormatDescription.h"
-#include "VideoFormat.h"
-#include "FilterBase.h"
-#include "Properties.h"
-#include "standard_properties.h"
-#include "PipelineManager.h"
-
 #include "include/img/image_transform_base.h"
+#include "logging.h"
+#include "standard_properties.h"
+#include "utils.h"
 
 #endif /* TCAM_INTERNAL_H */

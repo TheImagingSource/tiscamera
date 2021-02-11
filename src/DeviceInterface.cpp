@@ -15,9 +15,9 @@
  */
 
 #include "DeviceInterface.h"
-#include "logging.h"
 
 #include "BackendLoader.h"
+#include "logging.h"
 
 #include <algorithm>
 #include <memory>
@@ -25,7 +25,7 @@
 using namespace tcam;
 
 
-std::shared_ptr<DeviceInterface> tcam::openDeviceInterface (const DeviceInfo& device)
+std::shared_ptr<DeviceInterface> tcam::openDeviceInterface(const DeviceInfo& device)
 {
 
     try

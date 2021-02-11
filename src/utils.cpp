@@ -17,36 +17,43 @@
 #include "utils.h"
 
 #include "internal.h"
-#include <fstream>
+
 #include <algorithm>
-#include <cstring>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <limits>
 #include <cmath>
 #include <cstring>
+#include <errno.h>
+#include <fstream>
+#include <limits>
 #include <signal.h> // kill
+#include <sys/ioctl.h>
 
 using namespace tcam;
 
-std::string tcam::propertyType2String (TCAM_PROPERTY_TYPE type)
+std::string tcam::propertyType2String(TCAM_PROPERTY_TYPE type)
 {
     switch (type)
     {
-        case TCAM_PROPERTY_TYPE_BOOLEAN: return "boolean";
-        case TCAM_PROPERTY_TYPE_INTEGER: return "integer";
-        case TCAM_PROPERTY_TYPE_DOUBLE: return "double";
-        case TCAM_PROPERTY_TYPE_STRING: return "string";
-        case TCAM_PROPERTY_TYPE_ENUMERATION: return "enum";
-        case TCAM_PROPERTY_TYPE_BUTTON: return "button";
-        case TCAM_PROPERTY_TYPE_UNKNOWN: return "unknown";
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+            return "boolean";
+        case TCAM_PROPERTY_TYPE_INTEGER:
+            return "integer";
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+            return "double";
+        case TCAM_PROPERTY_TYPE_STRING:
+            return "string";
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+            return "enum";
+        case TCAM_PROPERTY_TYPE_BUTTON:
+            return "button";
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
+            return "unknown";
         default:
             return "<UNKNOWN ENUM ENTRY>";
     }
 }
 
 
-std::vector<std::string> tcam::split_string (const std::string& to_split, const std::string &delim)
+std::vector<std::string> tcam::split_string(const std::string& to_split, const std::string& delim)
 {
     std::vector<std::string> vec;
 
@@ -68,32 +75,30 @@ std::vector<std::string> tcam::split_string (const std::string& to_split, const 
 }
 
 
-int tcam::tcam_xioctl (int fd, unsigned int request, void *arg)
+int tcam::tcam_xioctl(int fd, unsigned int request, void* arg)
 {
     constexpr int IOCTL_RETRY = 4;
 
     int ret = 0;
-    int tries= IOCTL_RETRY;
-    do
-    {
+    int tries = IOCTL_RETRY;
+    do {
         ret = ioctl(fd, request, arg);
         // ret = v4l2_ioctl(fd, request, arg);
-    }
-    while (ret && tries-- &&
-           ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
+    } while (ret && tries-- && ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
 
     if (ret && (tries <= 0))
     {
         SPDLOG_ERROR("ioctl ({}) retried {} times - giving up: {})\n",
-                   request, IOCTL_RETRY, strerror(errno));
+                     request,
+                     IOCTL_RETRY,
+                     strerror(errno));
     }
 
     return (ret);
-
 }
 
 
-std::vector<double> tcam::create_steps_for_range (double min, double max)
+std::vector<double> tcam::create_steps_for_range(double min, double max)
 {
     std::vector<double> vec;
 
@@ -143,7 +148,7 @@ std::vector<double> tcam::create_steps_for_range (double min, double max)
 }
 
 
-uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint32_t fourcc)
+uint64_t tcam::get_buffer_length(unsigned int width, unsigned int height, uint32_t fourcc)
 {
     if (width == 0 || height == 0 || fourcc == 0)
     {
@@ -161,7 +166,7 @@ uint64_t tcam::get_buffer_length (unsigned int width, unsigned int height, uint3
 }
 
 
-unsigned int tcam::tcam_get_required_buffer_size (const struct tcam_video_format* format)
+unsigned int tcam::tcam_get_required_buffer_size(const struct tcam_video_format* format)
 {
     if (format == nullptr)
     {
@@ -171,7 +176,7 @@ unsigned int tcam::tcam_get_required_buffer_size (const struct tcam_video_format
     return get_buffer_length(format->width, format->height, format->fourcc);
 }
 
-uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
+uint32_t tcam::get_pitch_length(unsigned int width, uint32_t fourcc)
 {
     if (width == 0 || fourcc == 0)
     {
@@ -182,11 +187,10 @@ uint32_t tcam::get_pitch_length (unsigned int width, uint32_t fourcc)
 }
 
 
-bool tcam::is_buffer_complete (const struct tcam_image_buffer* buffer)
+bool tcam::is_buffer_complete(const struct tcam_image_buffer* buffer)
 {
-    auto size = tcam::get_buffer_length(buffer->format.width,
-                                        buffer->format.height,
-                                        buffer->format.fourcc);
+    auto size =
+        tcam::get_buffer_length(buffer->format.width, buffer->format.height, buffer->format.fourcc);
 
     if (size != buffer->length)
     {
@@ -196,7 +200,8 @@ bool tcam::is_buffer_complete (const struct tcam_image_buffer* buffer)
 }
 
 
-tcam_image_size tcam::calculate_auto_center (const tcam_image_size& sensor, const tcam_image_size& image)
+tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
+                                            const tcam_image_size& image)
 {
     tcam_image_size ret = {};
 
@@ -205,15 +210,15 @@ tcam_image_size tcam::calculate_auto_center (const tcam_image_size& sensor, cons
         return ret;
     }
 
-    ret.width = (sensor.width / 2) - (image.width /2);
+    ret.width = (sensor.width / 2) - (image.width / 2);
     ret.height = (sensor.height / 2) - (image.height / 2);
 
     return ret;
 }
 
 
-std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
-                                               TCAM_PROPERTY_ID property_id)
+std::shared_ptr<Property> tcam::find_property(std::vector<std::shared_ptr<Property>>& properties,
+                                              TCAM_PROPERTY_ID property_id)
 {
     for (auto& p : properties)
     {
@@ -227,16 +232,15 @@ std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Prope
 }
 
 
-std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Property>>& properties,
-                                               const std::string& property_name)
+std::shared_ptr<Property> tcam::find_property(std::vector<std::shared_ptr<Property>>& properties,
+                                              const std::string& property_name)
 {
 
-    auto f = [&property_name] (const std::shared_ptr<Property>& p)
-        {
-            if (p->get_name().compare(property_name) == 0)
-                return true;
-            return false;
-        };
+    auto f = [&property_name](const std::shared_ptr<Property>& p) {
+        if (p->get_name().compare(property_name) == 0)
+            return true;
+        return false;
+    };
 
     auto iter = std::find_if(properties.begin(), properties.end(), f);
 
@@ -249,15 +253,15 @@ std::shared_ptr<Property> tcam::find_property (std::vector<std::shared_ptr<Prope
 }
 
 
-bool tcam::compare_double (double val1, double val2)
+bool tcam::compare_double(double val1, double val2)
 {
     return std::fabs(val1 - val2) < std::numeric_limits<double>::epsilon();
 }
 
 
-bool tcam::in_range (const tcam_image_size& minimum,
-                     const tcam_image_size& maximum,
-                     const tcam_image_size& value)
+bool tcam::in_range(const tcam_image_size& minimum,
+                    const tcam_image_size& maximum,
+                    const tcam_image_size& value)
 {
     if (minimum.width > value.width || maximum.width < value.width)
     {
@@ -271,7 +275,7 @@ bool tcam::in_range (const tcam_image_size& minimum,
 }
 
 
-TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
+TCAM_PROPERTY_ID tcam::generate_unique_property_id()
 {
     static unsigned int id_to_use;
     static unsigned int id_prefix = 0x199f0000;
@@ -282,7 +286,7 @@ TCAM_PROPERTY_ID tcam::generate_unique_property_id ()
 }
 
 
-unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
+unsigned int tcam::get_pid_from_lockfile(const std::string& filename)
 {
     std::ifstream f(filename);
     unsigned int ret = 0;
@@ -310,7 +314,7 @@ unsigned int tcam::get_pid_from_lockfile (const std::string& filename)
 }
 
 
-bool tcam::is_process_running (unsigned int pid)
+bool tcam::is_process_running(unsigned int pid)
 {
     int ret = kill(pid, 0);
 
@@ -330,27 +334,25 @@ bool tcam::is_process_running (unsigned int pid)
 }
 
 
-std::map<std::string, int> create_binning_entry_map (int min, int max)
+std::map<std::string, int> create_binning_entry_map(int min, int max)
 {
     std::map<std::string, int> map;
 
-    for (int i = min; i <= max; i += i)
-    {
-        map.emplace(std::to_string(i), i);
-    }
+    for (int i = min; i <= max; i += i) { map.emplace(std::to_string(i), i); }
 
     return map;
 }
 
 
-std::shared_ptr<Property> tcam::create_binning_property (TCAM_PROPERTY_ID id,
-                                                         std::shared_ptr<PropertyImpl> handler,
-                                                         int min, int max,
-                                                         int value, int default_value)
+std::shared_ptr<Property> tcam::create_binning_property(TCAM_PROPERTY_ID id,
+                                                        std::shared_ptr<PropertyImpl> handler,
+                                                        int min,
+                                                        int max,
+                                                        int value,
+                                                        int default_value)
 {
 
-    if (id != TCAM_PROPERTY_BINNING_HORIZONTAL
-        && id != TCAM_PROPERTY_BINNING_VERTICAL
+    if (id != TCAM_PROPERTY_BINNING_HORIZONTAL && id != TCAM_PROPERTY_BINNING_VERTICAL
         && id != TCAM_PROPERTY_BINNING)
     {
         return nullptr;
@@ -381,18 +383,20 @@ std::shared_ptr<Property> tcam::create_binning_property (TCAM_PROPERTY_ID id,
 }
 
 
-double tcam::map_value_ranges (double input_start, double input_end,
-                               double output_start, double output_end,
-                               double value)
+double tcam::map_value_ranges(double input_start,
+                              double input_end,
+                              double output_start,
+                              double output_end,
+                              double value)
 {
-    return (value - input_start) * (output_end - output_start) / (input_end - input_start) - output_start;
+    return (value - input_start) * (output_end - output_start) / (input_end - input_start)
+           - output_start;
 }
 
 
-std::string tcam::get_environment_variable (const std::string& name,
-                                            const std::string& backup)
+std::string tcam::get_environment_variable(const std::string& name, const std::string& backup)
 {
-    char *value = getenv(name.c_str());
+    char* value = getenv(name.c_str());
 
     if (!value)
     {

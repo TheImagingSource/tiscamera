@@ -17,13 +17,12 @@
 #ifndef TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H
 #define TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H
 
-#include <vector>
-#include <string>
 #include <functional>
-
+#include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <linux/videodev2.h>
-#include <linux/usb/video.h>
+#include <string>
+#include <vector>
 
 namespace tcam
 {
@@ -47,8 +46,7 @@ struct description
  * @param ctrl - control description that shall be used
  * @return 0 on success, -1 on error, errno will be set
  */
-int map (int fd,
-          uvc_xu_control_mapping* ctrl);
+int map(int fd, uvc_xu_control_mapping* ctrl);
 
 
 /**
@@ -57,9 +55,9 @@ int map (int fd,
  * @param mappings - descriptions that shall be used
  * @param cb - callback function for warning/error messages for single mappings
  */
-void apply_mappings (int fd,
-                     std::vector<description>& mappings,
-                     std::function<void(const std::string&)> cb);
+void apply_mappings(int fd,
+                    std::vector<description>& mappings,
+                    std::function<void(const std::string&)> cb);
 
 
 /**
@@ -69,8 +67,8 @@ void apply_mappings (int fd,
  * @return vector of description structs for the mapping provided by the file
  *         will be empty on error
  */
-std::vector<description> load_description_file (const std::string& filename,
-                                                std::function<void(const std::string&)> cb);
+std::vector<description> load_description_file(const std::string& filename,
+                                               std::function<void(const std::string&)> cb);
 
 } /* namespace uvc */
 

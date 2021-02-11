@@ -22,16 +22,16 @@
  * @{
  */
 
-#include "version.h"
-#include "base_types.h"
 #include "CaptureDevice.h"
-#include "Properties.h"
-#include "ImageBuffer.h"
-#include "DeviceInfo.h"
 #include "DeviceIndex.h"
+#include "DeviceInfo.h"
+#include "ImageBuffer.h"
 #include "ImageSink.h"
-#include "public_utils.h"
+#include "Properties.h"
+#include "base_types.h"
 #include "json.h"
+#include "public_utils.h"
+#include "version.h"
 
 /** @} */
 

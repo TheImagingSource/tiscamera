@@ -22,35 +22,32 @@ namespace lib33u
 {
 namespace driver_interface
 {
-	struct IUsbDevice
-	{
-		virtual ~IUsbDevice ()
-		{}
+struct IUsbDevice
+{
+    virtual ~IUsbDevice() {}
 
-		virtual uint16_t product_id () = 0;
-		virtual void open () = 0;
+    virtual uint16_t product_id() = 0;
+    virtual void open() = 0;
 
-		virtual void read_vendor_request (uint8_t req,
-                                          uint16_t value,
-                                          uint16_t index,
-                                          uint8_t* buffer,
-                                          uint16_t length) = 0;
+    virtual void read_vendor_request(uint8_t req,
+                                     uint16_t value,
+                                     uint16_t index,
+                                     uint8_t* buffer,
+                                     uint16_t length) = 0;
 
-		template<typename T> T read_vendor_request (uint8_t req,
-                                                    uint16_t value,
-                                                    uint16_t index)
-		{
-			T val;
-			read_vendor_request(req, value, index, reinterpret_cast<uint8_t*>(&val), sizeof(val));
+    template<typename T> T read_vendor_request(uint8_t req, uint16_t value, uint16_t index)
+    {
+        T val;
+        read_vendor_request(req, value, index, reinterpret_cast<uint8_t*>(&val), sizeof(val));
 
-			return val;
-		}
+        return val;
+    }
 
-		virtual void write_vendor_request (uint8_t req,
-                                           uint16_t value,
-                                           uint16_t index,
-                                           const uint8_t* data,
-                                           uint16_t length) = 0;
-	};
-}
-}
+    virtual void write_vendor_request(uint8_t req,
+                                      uint16_t value,
+                                      uint16_t index,
+                                      const uint8_t* data,
+                                      uint16_t length) = 0;
+};
+} // namespace driver_interface
+} // namespace lib33u

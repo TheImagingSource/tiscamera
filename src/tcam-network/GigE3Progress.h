@@ -22,12 +22,9 @@ namespace FirmwareUpdate
 namespace GigE3
 {
 
-inline tReportProgressFunc mapProgress (tReportProgressFunc progressFunc,
-                                        int beginPct,
-                                        int endPct)
+inline tReportProgressFunc mapProgress(tReportProgressFunc progressFunc, int beginPct, int endPct)
 {
-    return [=](int pct, const std::string& msg)
-    {
+    return [=](int pct, const std::string& msg) {
         progressFunc(beginPct + pct * (endPct - beginPct) / 100, msg);
     };
 }
@@ -38,24 +35,25 @@ struct mapItemProgress
     int numItems_;
     int pos_;
 
-    mapItemProgress (tReportProgressFunc progressFunc,
-                     int beginPct, int endPct,
-                     int numItems, const std::string& msg)
-        : progressFunc_{mapProgress(progressFunc, beginPct, endPct)},
-          numItems_{numItems},
-          pos_{0}
+    mapItemProgress(tReportProgressFunc progressFunc,
+                    int beginPct,
+                    int endPct,
+                    int numItems,
+                    const std::string& msg)
+        : progressFunc_ { mapProgress(progressFunc, beginPct, endPct) }, numItems_ { numItems },
+          pos_ { 0 }
     {
         progressFunc(beginPct, msg);
     }
 
-    void NextItem ()
+    void NextItem()
     {
         pos_ += 1;
 
         this->operator()(0, std::string());
     }
 
-    void operator () (int pct, const std::string& msg)
+    void operator()(int pct, const std::string& msg)
     {
         int itemStepPct = pos_ * 100 / numItems_;
 

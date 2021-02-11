@@ -19,9 +19,9 @@
 #include "IGenCPDevice.h"
 #include "IUsbDevice.h"
 
-#include <mutex>
-#include <memory>
 #include <cstdint>
+#include <memory>
+#include <mutex>
 
 namespace lib33u
 {
@@ -29,28 +29,28 @@ namespace device_interface
 {
 namespace gencp
 {
-	class GenCPDevice : public driver_interface::IGenCPDevice
-	{
-	private:
-		std::shared_ptr<driver_interface::IUsbDevice> dev_;
-		mutable std::mutex mtx_;
+class GenCPDevice : public driver_interface::IGenCPDevice
+{
+private:
+    std::shared_ptr<driver_interface::IUsbDevice> dev_;
+    mutable std::mutex mtx_;
 
-		mutable uint16_t device_read_buffer_size_ = 0;
-		mutable uint16_t device_write_buffer_size_ = 0;
+    mutable uint16_t device_read_buffer_size_ = 0;
+    mutable uint16_t device_write_buffer_size_ = 0;
 
-	public:
-		GenCPDevice( std::shared_ptr<driver_interface::IUsbDevice> dev );
+public:
+    GenCPDevice(std::shared_ptr<driver_interface::IUsbDevice> dev);
 
-	public:
-		virtual uint16_t max_read_mem() const override;
-		virtual uint16_t max_write_mem() const override;
-		virtual void read_mem( uint64_t address, uint8_t * buffer, uint16_t length ) const override;
-		virtual void write_mem( uint64_t address, const uint8_t * buffer, uint16_t length ) override;
+public:
+    virtual uint16_t max_read_mem() const override;
+    virtual uint16_t max_write_mem() const override;
+    virtual void read_mem(uint64_t address, uint8_t* buffer, uint16_t length) const override;
+    virtual void write_mem(uint64_t address, const uint8_t* buffer, uint16_t length) override;
 
-	private:
-		uint16_t device_read_buffer_size() const;
-		uint16_t device_write_buffer_size() const;
-	};
+private:
+    uint16_t device_read_buffer_size() const;
+    uint16_t device_write_buffer_size() const;
+};
 
 } /* namespace gencp */
 } /* namespace device_interface */

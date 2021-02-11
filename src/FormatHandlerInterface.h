@@ -17,8 +17,8 @@
 #ifndef TCAM_FORMATHANDLERINTERFACE_H
 #define TCAM_FORMATHANDLERINTERFACE_H
 
-#include "compiler_defines.h"
 #include "base_types.h"
+#include "compiler_defines.h"
 
 #include <vector>
 
@@ -30,10 +30,10 @@ namespace tcam
 class FormatHandlerInterface
 {
 public:
+    virtual ~FormatHandlerInterface() {};
 
-    virtual ~FormatHandlerInterface () {};
-
-    virtual std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0) = 0;
+    virtual std::vector<double> get_framerates(const struct tcam_image_size&,
+                                               int pixelformat = 0) = 0;
 };
 
 } /* namespace tcam */

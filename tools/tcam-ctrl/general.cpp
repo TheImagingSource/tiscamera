@@ -19,7 +19,7 @@
 #include "tcamprop.h"
 
 
-bool is_valid_device_serial (GstElement* source, const std::string& serial)
+bool is_valid_device_serial(GstElement* source, const std::string& serial)
 {
     GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
 

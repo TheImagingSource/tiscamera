@@ -19,9 +19,9 @@
 #define GST_META_TCAM_STATISTICS_H
 
 
+#include <glib/gstdio.h>
 #include <gst/gst.h>
 #include <gst/video/video.h>
-#include <glib/gstdio.h>
 
 typedef struct _GstMetaTcamStatistics TcamStatisticsMeta;
 
@@ -33,7 +33,7 @@ struct _GstMetaTcamStatistics
 };
 
 // registering out metadata API definition
-GType tcam_statistics_meta_api_get_type (void);
+GType tcam_statistics_meta_api_get_type(void);
 #define TCAM_STATISTICS_META_API_TYPE (tcam_statistics_meta_api_get_type())
 
 // finds and returns the metadata
@@ -41,10 +41,10 @@ GType tcam_statistics_meta_api_get_type (void);
     ((TcamStatisticsMeta*)gst_buffer_get_meta((b), TCAM_STATISTICS_META_API_TYPE))
 
 
-const GstMetaInfo* tcam_statistics_meta_get_info (void);
+const GstMetaInfo* tcam_statistics_meta_get_info(void);
 #define TCAM_STATISTICS_META_INFO (tcam_statistics_meta_get_info())
 
-TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta (GstBuffer* buffer,
-                                                         GstStructure* statistics);
+TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta(GstBuffer* buffer,
+                                                        GstStructure* statistics);
 
 #endif /* GST_META_TCAM_STATISTICS_H */

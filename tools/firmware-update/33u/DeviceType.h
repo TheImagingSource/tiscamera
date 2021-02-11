@@ -25,11 +25,11 @@ namespace lib33u
 {
 namespace firmware_update
 {
-	struct DeviceType
-	{
-		DeviceTypeDesc desc;
+struct DeviceType
+{
+    DeviceTypeDesc desc;
 
-		std::vector<UploadGroup> upload_groups;
-	};
-}
-}
+    std::vector<UploadGroup> upload_groups;
+};
+} // namespace firmware_update
+} // namespace lib33u

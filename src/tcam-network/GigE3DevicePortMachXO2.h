@@ -31,13 +31,17 @@ class DevicePortMachXO2 : public IDevicePort
     std::string name_;
 
 public:
-    virtual std::string name () override { return name_; }
+    virtual std::string name() override
+    {
+        return name_;
+    }
 
-    virtual Status Configure (const std::string& name, const pugi::xml_node& portConfigElem) override;
-    virtual Status CheckItems (const std::vector<UploadItem>& items) override;
-    virtual Status UploadItems (IFirmwareWriter& dev,
-                                const std::vector<UploadItem>& items,
-                                tReportProgressFunc progressFunc) override;
+    virtual Status Configure(const std::string& name,
+                             const pugi::xml_node& portConfigElem) override;
+    virtual Status CheckItems(const std::vector<UploadItem>& items) override;
+    virtual Status UploadItems(IFirmwareWriter& dev,
+                               const std::vector<UploadItem>& items,
+                               tReportProgressFunc progressFunc) override;
 
 }; /* class DevicePortMachXO2 */
 

@@ -18,29 +18,29 @@
 
 #include "CameraDiscovery.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <linux/if.h>
-#include <netdb.h>
-#include <ifaddrs.h>
 #include <arpa/inet.h>
-#include <glob.h>
 #include <cstring>
-#include <sstream>
 #include <exception>
 #include <fstream>
-#include <stdexcept>
+#include <glob.h>
+#include <ifaddrs.h>
+#include <linux/if.h>
 #include <mutex>
+#include <netdb.h>
+#include <sstream>
+#include <stdexcept>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 namespace tis
 {
 
-bool isRPFilterActive ()
+bool isRPFilterActive()
 {
     bool ret = false;
     glob_t glob_result;
     glob("/proc/sys/net/ipv4/conf/**/rp_filter", GLOB_TILDE, NULL, &glob_result);
-    for(unsigned int i=0; i < glob_result.gl_pathc; ++i)
+    for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
     {
         std::string s;
         std::ifstream f;
@@ -62,7 +62,7 @@ bool isRPFilterActive ()
 }
 
 
-bool startsWith (const std::string& searchThrough, const std::string& searchFor)
+bool startsWith(const std::string& searchThrough, const std::string& searchFor)
 {
     if (searchThrough.empty() || searchFor.empty())
     {
@@ -86,7 +86,7 @@ bool startsWith (const std::string& searchThrough, const std::string& searchFor)
 }
 
 
-bool isValidIpAddress (const std::string& ipAddress)
+bool isValidIpAddress(const std::string& ipAddress)
 {
     struct sockaddr_in sa;
     int result = inet_aton(ipAddress.c_str(), &(sa.sin_addr));
@@ -95,7 +95,7 @@ bool isValidIpAddress (const std::string& ipAddress)
 }
 
 
-std::shared_ptr<NetworkInterface> findNetworkInterfaceForAddress (const std::string& ipAddress)
+std::shared_ptr<NetworkInterface> findNetworkInterfaceForAddress(const std::string& ipAddress)
 {
     uint32_t remote_addr = ip2int(ipAddress);
 
@@ -116,10 +116,10 @@ std::shared_ptr<NetworkInterface> findNetworkInterfaceForAddress (const std::str
 }
 
 
-bool verifySettings (const std::string& ip,
-                     const std::string& subnet,
-                     const std::string& gateway __attribute__((unused)),
-                     std::string& reason_out)
+bool verifySettings(const std::string& ip,
+                    const std::string& subnet,
+                    const std::string& gateway __attribute__((unused)),
+                    std::string& reason_out)
 {
     // security checks to ensure settings are valid
     uint32_t ip_int = ip2int(ip);
@@ -169,9 +169,9 @@ bool verifySettings (const std::string& ip,
 }
 
 
-std::string int2ip (const ip4_address_t addr)
+std::string int2ip(const ip4_address_t addr)
 {
-    struct in_addr addrs = {addr};
+    struct in_addr addrs = { addr };
 
     // inet_ntoa expects network byte order
     std::string a = inet_ntoa(addrs);
@@ -179,33 +179,30 @@ std::string int2ip (const ip4_address_t addr)
 }
 
 
-std::string int2mac (const uint64_t mac)
+std::string int2mac(const uint64_t mac)
 {
     std::stringstream s;
     s << std::hex << mac;
     std::string m = s.str();
 
     // standardize mac to 12 digits
-    while (m.size() != 12)
-    {
-        m.insert(0,"0");
-    }
+    while (m.size() != 12) { m.insert(0, "0"); }
 
     // make output readable
     // adjust for previously inserted colons by incrementing place
-    m.insert(2,":");
-    m.insert(5,":");
-    m.insert(8,":");
-    m.insert(11,":");
-    m.insert(14,":");
+    m.insert(2, ":");
+    m.insert(5, ":");
+    m.insert(8, ":");
+    m.insert(11, ":");
+    m.insert(14, ":");
 
     return m;
 }
 
 
-unsigned int readHexByte (const char** beg, const char* end)
+unsigned int readHexByte(const char** beg, const char* end)
 {
-    if(end - *beg < 2)
+    if (end - *beg < 2)
     {
         throw std::invalid_argument("");
     }
@@ -213,23 +210,23 @@ unsigned int readHexByte (const char** beg, const char* end)
     unsigned hi = (*beg)[0], lo = (*beg)[1];
     *beg += 2;
     hi -= hi >= '0' && hi <= '9' ? '0' :
-        hi >= 'a' && hi <= 'f' ? 'a' - 10 :
-        hi >= 'A' && hi <= 'F' ? 'A' - 10 :
-        throw std::invalid_argument("");
+          hi >= 'a' && hi <= 'f' ? 'a' - 10 :
+          hi >= 'A' && hi <= 'F' ? 'A' - 10 :
+                                   throw std::invalid_argument("");
 
     lo -= lo >= '0' && lo <= '9' ? '0' :
-        lo >= 'a' && lo <= 'f' ? 'a' - 10 :
-        lo >= 'A' && lo <= 'F' ? 'A' - 10 :
-        throw std::invalid_argument("");
+          lo >= 'a' && lo <= 'f' ? 'a' - 10 :
+          lo >= 'A' && lo <= 'F' ? 'A' - 10 :
+                                   throw std::invalid_argument("");
 
     return hi << 4 | lo;
 }
 
 
-uint64_t mac2int (const std::string& mac)
+uint64_t mac2int(const std::string& mac)
 {
-    char const *beg = mac.data();
-    char const *end = beg + mac.size();
+    char const* beg = mac.data();
+    char const* end = beg + mac.size();
     uint64_t r = 0;
     try
     {
@@ -262,7 +259,7 @@ uint64_t mac2int (const std::string& mac)
 }
 
 
-ip4_address_t ip2int (const std::string& ip)
+ip4_address_t ip2int(const std::string& ip)
 {
     struct in_addr addr;
 
@@ -275,43 +272,43 @@ ip4_address_t ip2int (const std::string& ip)
 }
 
 
-sockaddr_in fillAddr (const std::string &address, const unsigned short port)
+sockaddr_in fillAddr(const std::string& address, const unsigned short port)
 {
     static std::mutex mutex;
 
-    std::lock_guard<std::mutex>lck(mutex);
+    std::lock_guard<std::mutex> lck(mutex);
 
     sockaddr_in retv = sockaddr_in();
     retv.sin_family = AF_INET;
 
-    hostent *host;  // Resolve name
+    hostent* host; // Resolve name
     if ((host = gethostbyname(address.c_str())) == NULL)
     {
         // TODO throw exception
     }
-    retv.sin_addr.s_addr = *((unsigned int*) host->h_addr_list[0]);
+    retv.sin_addr.s_addr = *((unsigned int*)host->h_addr_list[0]);
 
-    retv.sin_port = htons(port);     // Assign port in network byte order
+    retv.sin_port = htons(port); // Assign port in network byte order
 
     return retv;
 }
 
 
-bool isValidMAC (const std::string& mac)
+bool isValidMAC(const std::string& mac)
 {
     const char* s = mac.c_str();
-    for(int i = 0; i < 17; i++)
+    for (int i = 0; i < 17; i++)
     {
-        if(i % 3 != 2 && !isxdigit(s[i]))
+        if (i % 3 != 2 && !isxdigit(s[i]))
         {
             return false;
         }
-        if(i % 3 == 2 && s[i] != ':')
+        if (i % 3 == 2 && s[i] != ':')
         {
             return false;
         }
     }
-    if(s[17] != '\0')
+    if (s[17] != '\0')
     {
         return false;
     }

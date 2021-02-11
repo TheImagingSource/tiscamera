@@ -17,14 +17,13 @@
 #ifndef TCAM_ALGORITHM_H
 #define TCAM_ALGORITHM_H
 
-#include "base_types.h"
-
-#include "roi.h"
 #include "AutoFocus.h"
-#include "image_sampling.h"
-#include "bayer.h"
-#include "whitebalance.h"
-#include "biteater.h"
 #include "auto_exposure.h"
+#include "base_types.h"
+#include "bayer.h"
+#include "biteater.h"
+#include "image_sampling.h"
+#include "roi.h"
+#include "whitebalance.h"
 
 #endif /* TCAM_ALGORITHM_H */

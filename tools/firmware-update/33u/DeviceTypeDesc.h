@@ -16,17 +16,17 @@
 
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace lib33u
 {
 namespace firmware_update
 {
-	struct DeviceTypeDesc
-	{
-		std::string description;
-		uint16_t product_id;
-	};
-}
-}
+struct DeviceTypeDesc
+{
+    std::string description;
+    uint16_t product_id;
+};
+} // namespace firmware_update
+} // namespace lib33u

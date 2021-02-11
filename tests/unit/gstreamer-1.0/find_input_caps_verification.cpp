@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include <gst/gst.h>
-
+#include "caps/caps.h"
 #include "tcamgstbase.h"
 
-#include "caps/caps.h"
+#include <gst/gst.h>
 
 //
 //
@@ -28,9 +27,7 @@
 //
 //
 
-bool verify_flag (const char* name,
-                  bool flag, bool expected,
-                  bool still_good)
+bool verify_flag(const char* name, bool flag, bool expected, bool still_good)
 {
     if (flag != expected)
     {
@@ -64,7 +61,7 @@ bool verify_flag (const char* name,
 }
 
 
-int main (int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     gst_init(&argc, &argv);
 
@@ -80,9 +77,12 @@ int main (int argc, char* argv[])
     expected.jpegdec = false;
     expected.dutils = false;
 
-    const char* src_caps_str = "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};";
+    const char* src_caps_str =
+        "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, 15/2, "
+        "15/4};";
     const char* sink_caps_str = "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1";
-    const char* expected_caps_str = "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1";
+    const char* expected_caps_str =
+        "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1";
 
     // STOP EDITING
 
@@ -90,10 +90,7 @@ int main (int argc, char* argv[])
     GstCaps* sink_caps = gst_caps_from_string(sink_caps_str);
     GstCaps* expected_caps = gst_caps_from_string(expected_caps_str);
 
-    GstCaps* result_caps = find_input_caps(src_caps,
-                                           sink_caps,
-                                           modules,
-                                           toggles);
+    GstCaps* result_caps = find_input_caps(src_caps, sink_caps, modules, toggles);
 
     if (!gst_caps_is_equal(result_caps, expected_caps))
     {
@@ -103,25 +100,17 @@ int main (int argc, char* argv[])
         test_succeeded = false;
     }
 
-    test_succeeded = verify_flag("bayer",
-                                 modules.bayer2rgb, expected.bayer2rgb,
-                                 test_succeeded);
+    test_succeeded = verify_flag("bayer", modules.bayer2rgb, expected.bayer2rgb, test_succeeded);
 
-    test_succeeded = verify_flag("videoconvert",
-                                 modules.videoconvert, expected.videoconvert,
-                                 test_succeeded);
+    test_succeeded =
+        verify_flag("videoconvert", modules.videoconvert, expected.videoconvert, test_succeeded);
 
-    test_succeeded = verify_flag("jpegenc",
-                                 modules.jpegdec, expected.jpegdec,
-                                 test_succeeded);
+    test_succeeded = verify_flag("jpegenc", modules.jpegdec, expected.jpegdec, test_succeeded);
 
-    test_succeeded = verify_flag("dutils",
-                                 modules.dutils, expected.dutils,
-                                 test_succeeded);
+    test_succeeded = verify_flag("dutils", modules.dutils, expected.dutils, test_succeeded);
 
-    test_succeeded = verify_flag("by1xtransform",
-                                 modules.bayertransform, expected.bayertransform,
-                                 test_succeeded);
+    test_succeeded = verify_flag(
+        "by1xtransform", modules.bayertransform, expected.bayertransform, test_succeeded);
 
     if (test_succeeded)
     {

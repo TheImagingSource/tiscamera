@@ -17,18 +17,17 @@
 #ifndef _USBHANDLER_H_
 #define _USBHANDLER_H_
 
-#include <vector>
-#include <string>
-#include <memory>
-
-#include <libusb-1.0/libusb.h>
-
-#include "UsbSession.h"
-#include "UsbCamera.h"
+#include "FileHandling.h"
+#include "Usb2Camera.h"
 #include "Usb33Camera.h"
 #include "Usb3Camera.h"
-#include "Usb2Camera.h"
-#include "FileHandling.h"
+#include "UsbCamera.h"
+#include "UsbSession.h"
+
+#include <libusb-1.0/libusb.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace tis
 {
@@ -41,22 +40,22 @@ private:
     std::shared_ptr<UsbSession> session;
 
 public:
-    UsbHandler ();
-    ~UsbHandler ();
+    UsbHandler();
+    ~UsbHandler();
 
-    UsbHandler (const UsbHandler& _handler) = delete;
+    UsbHandler(const UsbHandler& _handler) = delete;
     UsbHandler& operator=(const UsbHandler&) = delete;
 
     /// @name get_device_list
     /// @return vector of device_info of found cameras
-    std::vector<device_info> get_device_list ();
+    std::vector<device_info> get_device_list();
 
     /// @name open_camera
     /// @param serial - string containing the serial number of the camera that shall be opened
     /// @return shared pointer to the opened usb camera; Reutrns nullptr on failure
-    std::shared_ptr<UsbCamera> open_camera (std::string serial);
+    std::shared_ptr<UsbCamera> open_camera(std::string serial);
 
-    std::shared_ptr<UsbSession> get_session ();
+    std::shared_ptr<UsbSession> get_session();
 
 }; /* class UsbHandler */
 

@@ -16,29 +16,31 @@
 
 #pragma once
 
-#include "IFirmware.h"
 #include "Camera.h"
+#include "IFirmware.h"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace lib33u
 {
-	using namespace firmware_update;
+using namespace firmware_update;
 
-	class Firmware : public IFirmware
-	{
-	public:
-		virtual int version () const override;
-		virtual std::vector<DeviceTypeDesc> device_types () const override;
-		virtual void upload (Camera & dev, util::progress::IReportProgress& progress, DeviceTypeDesc overrideDeviceType = {}) override;
+class Firmware : public IFirmware
+{
+public:
+    virtual int version() const override;
+    virtual std::vector<DeviceTypeDesc> device_types() const override;
+    virtual void upload(Camera& dev,
+                        util::progress::IReportProgress& progress,
+                        DeviceTypeDesc overrideDeviceType = {}) override;
 
-	public:
-		static Firmware load_package (const std::string& fn);
+public:
+    static Firmware load_package(const std::string& fn);
 
-	private:
-		std::unique_ptr<IFirmware> impl_;
+private:
+    std::unique_ptr<IFirmware> impl_;
 
-		Firmware (std::unique_ptr<IFirmware> impl);
-	};
-}
+    Firmware(std::unique_ptr<IFirmware> impl);
+};
+} // namespace lib33u

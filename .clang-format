@@ -1,0 +1,89 @@
+﻿---
+BasedOnStyle: Microsoft
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: 'false'
+AlignConsecutiveDeclarations: 'false'
+AlignEscapedNewlines: Left
+AlignOperands: 'true'
+AlignTrailingComments: 'false'
+AllowAllArgumentsOnNextLine: 'true'
+AllowAllConstructorInitializersOnNextLine: 'true'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+AllowShortBlocksOnASingleLine: 'Empty'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: 'Empty'
+AllowShortIfStatementsOnASingleLine: 'Never'
+AllowShortLambdasOnASingleLine: 'Inline'
+AllowShortLoopsOnASingleLine: 'true'
+AlwaysBreakAfterReturnType: 'None'
+AlwaysBreakBeforeMultilineStrings: 'false'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: 'true'
+  AfterClass: 'true'
+  AfterControlStatement: 'Always'
+  AfterEnum: 'true'
+  AfterFunction: 'true'
+  AfterNamespace: 'true'
+  AfterStruct: 'true'
+  AfterUnion: 'true'
+  AfterExternBlock: 'true'
+  BeforeCatch: 'true'
+  BeforeElse: 'true'
+  BeforeLambdaBody: 'true'
+  IndentBraces: 'false'
+  SplitEmptyFunction: 'false'
+  SplitEmptyRecord: 'false'
+  SplitEmptyNamespace: 'false'
+BreakBeforeBraces: 'Allman'
+BreakBeforeTernaryOperators: 'false'
+BreakBeforeBinaryOperators: 'NonAssignment'
+BreakConstructorInitializers: 'BeforeColon'
+BreakInheritanceList: AfterColon
+BreakStringLiterals: 'true'
+ColumnLimit: '100'
+CompactNamespaces: 'false'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'false'
+Cpp11BracedListStyle: 'false'
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: 'true'
+IncludeBlocks: Regroup
+IndentCaseLabels: 'true'
+IndentGotoLabels: 'false'
+IndentPPDirectives: "None"
+IndentWidth: '4'
+IndentWrappedFunctionNames: 'true'
+KeepEmptyLinesAtTheStartOfBlocks: 'true'
+Language: Cpp
+MaxEmptyLinesToKeep: '2'
+NamespaceIndentation: None
+PointerAlignment: Left
+ReflowComments: 'false'
+SortIncludes: 'true'
+SortUsingDeclarations: 'true'
+SpaceAfterCStyleCast: 'false'
+SpaceAfterLogicalNot: 'false'
+SpaceAfterTemplateKeyword: 'false'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeCpp11BracedList: 'true'
+SpaceBeforeCtorInitializerColon: 'true'
+SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeParens: 'ControlStatements'
+SpaceBeforeRangeBasedForLoopColon: 'true'
+SpaceBeforeSquareBrackets: 'false'
+SpaceInEmptyBlock: 'false'
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInContainerLiterals: 'true'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Auto
+TabWidth: '4'
+UseTab: Never
+
+...

@@ -29,20 +29,19 @@ class PropertyImpl
 {
 
 public:
-
-    virtual ~PropertyImpl () {};
+    virtual ~PropertyImpl() {};
 
     /**
      * Set internal properties to the values described in parameter
      * @return true is given property values where successfully applied; else false
      */
-    virtual bool set_property (const Property&) = 0;
+    virtual bool set_property(const Property&) = 0;
 
     /**
      * Fill given property with the currently used values
      * @return true if property was successfully filled; else false
      */
-    virtual bool get_property (Property&) = 0;
+    virtual bool get_property(Property&) = 0;
 };
 
 } /* namespace tcam */

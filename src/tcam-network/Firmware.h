@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "FirmwareUpgrade.h"
 #include "Camera.h"
+#include "FirmwareUpgrade.h"
 
 namespace tis
 {
@@ -24,31 +24,32 @@ class FwdFirmwareWriter : public FirmwareUpdate::IFirmwareWriter
 {
 
 public:
-    FwdFirmwareWriter (Camera& cam ) : device_itf_(cam)
-    {}
+    FwdFirmwareWriter(Camera& cam) : device_itf_(cam) {}
 
 
-    ~FwdFirmwareWriter ()
-    {}
+    ~FwdFirmwareWriter() {}
 
 
-    virtual bool write (uint32_t addr, void* pData, size_t data_size, unsigned int /* timeout_in_ms = 2000 */)
+    virtual bool write(uint32_t addr,
+                       void* pData,
+                       size_t data_size,
+                       unsigned int /* timeout_in_ms = 2000 */)
     {
-        return device_itf_.sendWriteMemory( addr, data_size, (byte*) pData );
+        return device_itf_.sendWriteMemory(addr, data_size, (byte*)pData);
     }
 
 
-    virtual bool write (uint32_t addr, uint32_t val, unsigned int /* timeout_in_ms = 2000 */)
+    virtual bool write(uint32_t addr, uint32_t val, unsigned int /* timeout_in_ms = 2000 */)
     {
         uint32_t tmp_val = ntohl(val);
-        return device_itf_.sendWriteMemory(addr, sizeof( tmp_val ), (byte*) &tmp_val);
+        return device_itf_.sendWriteMemory(addr, sizeof(tmp_val), (byte*)&tmp_val);
     }
 
 
-    virtual bool read (uint32_t addr, uint32_t& val, unsigned int /*timeout_in_ms = 2000 */)
+    virtual bool read(uint32_t addr, uint32_t& val, unsigned int /*timeout_in_ms = 2000 */)
     {
         uint32_t tmp_val;
-        auto hr = device_itf_.sendReadMemory(addr, 4, (byte*) &tmp_val);
+        auto hr = device_itf_.sendReadMemory(addr, 4, (byte*)&tmp_val);
 
         if (hr)
         {
@@ -58,9 +59,13 @@ public:
     }
 
 
-    virtual bool read (uint32_t addr, unsigned int data_size, void* pData, unsigned int& read_count , unsigned int /* timeout_in_ms = 2000 */)
+    virtual bool read(uint32_t addr,
+                      unsigned int data_size,
+                      void* pData,
+                      unsigned int& read_count,
+                      unsigned int /* timeout_in_ms = 2000 */)
     {
-        auto hr = device_itf_.sendReadMemory (addr, data_size, (byte*) pData);
+        auto hr = device_itf_.sendReadMemory(addr, data_size, (byte*)pData);
 
         if (hr)
         {
@@ -80,5 +85,3 @@ private:
 }; /* class FwdFirmwareWriter */
 
 } /* namespace tis */
-
-

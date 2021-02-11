@@ -15,34 +15,35 @@
  */
 
 #include "V4l2Device.h"
+
+#include "PropertyGeneration.h"
+#include "dfk73.h"
 #include "format.h"
+#include "img/fcc_to_string.h"
 #include "logging.h"
+#include "standard_properties.h"
 #include "utils.h"
 #include "v4l2_utils.h"
-#include "PropertyGeneration.h"
-#include "standard_properties.h"
-#include <errno.h>
 #include "v4l2_uvc_identifier.h"
-#include "dfk73.h"
-#include "img/fcc_to_string.h"
 
 #include <algorithm>
-#include <unistd.h>
-#include <fcntl.h>              /* O_RDWR O_NONBLOCK */
-#include <linux/videodev2.h>
-#include <cstring>              /* memcpy*/
+#include <cstring> /* memcpy*/
+#include <errno.h>
+#include <fcntl.h> /* O_RDWR O_NONBLOCK */
 #include <libudev.h>
+#include <linux/videodev2.h>
+#include <unistd.h>
 
 using namespace tcam;
 
 
-V4l2Device::V4L2FormatHandler::V4L2FormatHandler (V4l2Device* dev)
-    : device(dev)
-{}
+V4l2Device::V4L2FormatHandler::V4L2FormatHandler(V4l2Device* dev) : device(dev) {}
 
 
-std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s __attribute__((unused)),
-                                                                  int pixelformat __attribute__((unused)))
+std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s
+                                                                  __attribute__((unused)),
+                                                                  int pixelformat
+                                                                  __attribute__((unused)))
 {
     std::vector<double> ret;
 
@@ -53,14 +54,16 @@ std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct t
 static const int lost_countdown_default = 5;
 
 
-V4l2Device::V4l2Device (const DeviceInfo& device_desc)
+V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 {
     device = device_desc;
 
     if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
         SPDLOG_ERROR("Unable to open device \'{}\'. Reported error: {}({})",
-                     device.get_info().identifier, strerror(errno), errno);
+                     device.get_info().identifier,
+                     strerror(errno),
+                     errno);
 
         throw std::runtime_error("Failed opening device.");
     }
@@ -82,9 +85,10 @@ V4l2Device::V4l2Device (const DeviceInfo& device_desc)
 }
 
 
-V4l2Device::~V4l2Device ()
+V4l2Device::~V4l2Device()
 {
-    if( is_stream_on ) {
+    if (is_stream_on)
+    {
         stop_stream();
     }
 
@@ -97,13 +101,14 @@ V4l2Device::~V4l2Device ()
     if (write_ret != 1)
     {
         SPDLOG_ERROR("Error closing udev monitoring pipe. write returned '{}' errno: {}",
-                     write_ret, strerror(errno));
+                     write_ret,
+                     strerror(errno));
     }
 
     // close write pipe fd
     close(udev_monitor_pipe[1]);
 
-    if( monitor_v4l2_thread.joinable() )
+    if (monitor_v4l2_thread.joinable())
     {
         monitor_v4l2_thread.join();
     }
@@ -123,38 +128,36 @@ V4l2Device::~V4l2Device ()
     {
         notification_thread.join();
     }
-
 }
 
 
-DeviceInfo V4l2Device::get_device_description () const
+DeviceInfo V4l2Device::get_device_description() const
 {
     return device;
 }
 
 
-std::vector<std::shared_ptr<Property>> V4l2Device::getProperties ()
+std::vector<std::shared_ptr<Property>> V4l2Device::getProperties()
 {
     return property_handler->create_property_vector();
 }
 
 
-bool V4l2Device::set_property (const Property& new_property)
+bool V4l2Device::set_property(const Property& new_property)
 {
-    SPDLOG_INFO("Setting property \"{}\"",
-                new_property.get_name().c_str());
+    SPDLOG_INFO("Setting property \"{}\"", new_property.get_name().c_str());
 
     return property_handler->set_property(new_property);
 }
 
 
-bool V4l2Device::get_property (Property& p)
+bool V4l2Device::get_property(Property& p)
 {
     return property_handler->get_property(p);
 }
 
 
-bool V4l2Device::set_video_format (const VideoFormat& new_format)
+bool V4l2Device::set_video_format(const VideoFormat& new_format)
 {
     if (is_stream_on == true)
     {
@@ -169,8 +172,8 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     // dequeue all buffers
     struct v4l2_requestbuffers req = {};
 
-    req.count  = 0; // free all buffers
-    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.count = 0; // free all buffers
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_USERPTR;
 
     if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req))
@@ -179,7 +182,7 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
                      strerror(errno));
     }
 
-    uint32_t fourcc  = new_format.get_fourcc();
+    uint32_t fourcc = new_format.get_fourcc();
 
     // use greyscale for camera interaction
     if (emulate_bayer)
@@ -224,34 +227,32 @@ bool V4l2Device::set_video_format (const VideoFormat& new_format)
     /* validation */
 
     determine_active_video_format();
-    SPDLOG_DEBUG("Active format is: '{}'",
-                 active_video_format.to_string().c_str());
+    SPDLOG_DEBUG("Active format is: '{}'", active_video_format.to_string().c_str());
 
     return true;
 }
 
 
-bool V4l2Device::validate_video_format (const VideoFormat& format __attribute__((unused))) const
+bool V4l2Device::validate_video_format(const VideoFormat& format __attribute__((unused))) const
 {
     return false;
 }
 
 
-VideoFormat V4l2Device::get_active_video_format () const
+VideoFormat V4l2Device::get_active_video_format() const
 {
     return active_video_format;
 }
 
 
-std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats ()
+std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats()
 {
-    SPDLOG_DEBUG("Returning {} formats.",
-                 available_videoformats.size());
+    SPDLOG_DEBUG("Returning {} formats.", available_videoformats.size());
     return available_videoformats;
 }
 
 
-bool V4l2Device::set_framerate (double framerate)
+bool V4l2Device::set_framerate(double framerate)
 {
     if (is_stream_on == true)
     {
@@ -261,10 +262,7 @@ bool V4l2Device::set_framerate (double framerate)
 
     std::vector<double> vec;
 
-    for (auto& d : framerate_conversions)
-    {
-        vec.push_back(d.fps);
-    }
+    for (auto& d : framerate_conversions) { vec.push_back(d.fps); }
 
     std::sort(vec.begin(), vec.end());
 
@@ -278,15 +276,11 @@ bool V4l2Device::set_framerate (double framerate)
 
     framerate = *iter_low;
 
-    auto f =[&framerate] (const framerate_conv& _f)
-        {
-            return compare_double(framerate, _f.fps);
-        };
+    auto f = [&framerate](const framerate_conv& _f) {
+        return compare_double(framerate, _f.fps);
+    };
 
-    auto fps = std::find_if(framerate_conversions.begin(),
-                            framerate_conversions.end(),
-                            f);
-
+    auto fps = std::find_if(framerate_conversions.begin(), framerate_conversions.end(), f);
 
 
     if (fps == framerate_conversions.end())
@@ -311,12 +305,15 @@ bool V4l2Device::set_framerate (double framerate)
         frmival.width = fmt.get_size().width;
         frmival.height = fmt.get_size().height;
 
-        for (frmival.index = 0; tcam_xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; frmival.index++)
+        for (frmival.index = 0; tcam_xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
+             frmival.index++)
         {
             SPDLOG_DEBUG("F: {} {}x{} @ {}/{}",
                          img::fcc_to_string(frmival.pixel_format),
-                         frmival.width, frmival.height,
-                         frmival.discrete.numerator, frmival.discrete.denominator);
+                         frmival.width,
+                         frmival.height,
+                         frmival.discrete.numerator,
+                         frmival.discrete.denominator);
             // Workaround for erratic frame rate handling of dfk73uc cameras:
             // Always set the highest possible frame rate for the current
             // video format via the UVC control. Then set the sensor clock
@@ -334,8 +331,8 @@ bool V4l2Device::set_framerate (double framerate)
                 parm.parm.capture.timeperframe.numerator = frmival.discrete.numerator;
                 parm.parm.capture.timeperframe.denominator = frmival.discrete.denominator;
             }
-            if ((frmival.discrete.numerator == fps->numerator) &&
-                (frmival.discrete.denominator == fps->denominator))
+            if ((frmival.discrete.numerator == fps->numerator)
+                && (frmival.discrete.denominator == fps->denominator))
             {
                 fi_index = frmival.index;
                 // fi_index = 1;
@@ -386,7 +383,7 @@ bool V4l2Device::set_framerate (double framerate)
 }
 
 
-double V4l2Device::get_framerate ()
+double V4l2Device::get_framerate()
 {
     // what about range framerates?
     // - ranges are not supported by uvc
@@ -394,7 +391,7 @@ double V4l2Device::get_framerate ()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    int ret = tcam_xioctl( fd, VIDIOC_G_PARM, &parm );
+    int ret = tcam_xioctl(fd, VIDIOC_G_PARM, &parm);
 
     if (ret < 0)
     {
@@ -406,11 +403,12 @@ double V4l2Device::get_framerate ()
                 parm.parm.capture.timeperframe.denominator,
                 parm.parm.capture.timeperframe.numerator);
 
-    return (double)parm.parm.capture.timeperframe.denominator / (double)parm.parm.capture.timeperframe.numerator;
+    return (double)parm.parm.capture.timeperframe.denominator
+           / (double)parm.parm.capture.timeperframe.numerator;
 }
 
 
-bool V4l2Device::set_sink (std::shared_ptr<SinkInterface> sink)
+bool V4l2Device::set_sink(std::shared_ptr<SinkInterface> sink)
 {
     if (is_stream_on)
     {
@@ -423,7 +421,7 @@ bool V4l2Device::set_sink (std::shared_ptr<SinkInterface> sink)
 }
 
 
-bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> b)
+bool V4l2Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
 {
     if (is_stream_on)
     {
@@ -436,7 +434,7 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> b
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
-        buffer_info info = {b.at(i), false};
+        buffer_info info = { b.at(i), false };
 
         this->buffers.push_back(info);
     }
@@ -445,7 +443,7 @@ bool V4l2Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> b
 }
 
 
-bool V4l2Device::release_buffers ()
+bool V4l2Device::release_buffers()
 {
     if (is_stream_on)
     {
@@ -457,7 +455,7 @@ bool V4l2Device::release_buffers ()
 }
 
 
-void V4l2Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
+void V4l2Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 {
     for (unsigned int i = 0; i < buffers.size(); ++i)
     {
@@ -486,13 +484,12 @@ void V4l2Device::requeue_buffer (std::shared_ptr<ImageBuffer> buffer)
 }
 
 
-void V4l2Device::update_stream_timeout ()
+void V4l2Device::update_stream_timeout()
 {
     for (const auto& p : property_handler->properties)
     {
-        if (p.prop->get_name() == "Exposure Time (us)" ||
-            p.prop->get_name() == "ExposureTime" ||
-            p.prop->get_name() == "Exposure Time" || // uses µs
+        if (p.prop->get_name() == "Exposure Time (us)" || p.prop->get_name() == "ExposureTime"
+            || p.prop->get_name() == "Exposure Time" || // uses µs
             p.prop->get_name() == "Exposure")
         {
             stream_timeout_sec_ = (p.prop->get_struct().value.i.value / 1000000) + 2;
@@ -500,11 +497,10 @@ void V4l2Device::update_stream_timeout ()
         }
     }
     SPDLOG_DEBUG("Setting stream timeout to {}", stream_timeout_sec_.load());
-
 }
 
 
-bool V4l2Device::start_stream ()
+bool V4l2Device::start_stream()
 {
     init_userptr_buffers();
 
@@ -529,7 +525,7 @@ bool V4l2Device::start_stream ()
 }
 
 
-bool V4l2Device::stop_stream ()
+bool V4l2Device::stop_stream()
 {
     SPDLOG_DEBUG("Stopping stream");
     int ret = 0;
@@ -539,7 +535,7 @@ bool V4l2Device::stop_stream ()
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         ret = tcam_xioctl(fd, VIDIOC_STREAMOFF, &type);
 
-        if( ret < 0 )
+        if (ret < 0)
         {
             SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMOFF {}", errno);
         }
@@ -547,18 +543,19 @@ bool V4l2Device::stop_stream ()
 
     is_stream_on = false;
 
-    if( work_thread.joinable() )
+    if (work_thread.joinable())
     {
         work_thread.join();
     }
 
-    if( notification_thread.joinable() ) {  // wait for possible device lost notification to end
+    if (notification_thread.joinable())
+    { // wait for possible device lost notification to end
         notification_thread.join();
     }
 
     SPDLOG_DEBUG("Stopped stream");
 
-    if( ret < 0 )
+    if (ret < 0)
     {
         return false;
     }
@@ -567,14 +564,14 @@ bool V4l2Device::stop_stream ()
 }
 
 
-void V4l2Device::notify_device_lost_func ()
+void V4l2Device::notify_device_lost_func()
 {
     SPDLOG_INFO("notifying callbacks about lost device");
     this->lost_device();
 }
 
 
-void V4l2Device::lost_device ()
+void V4l2Device::lost_device()
 {
     this->notify_device_lost();
 }
@@ -584,7 +581,7 @@ void V4l2Device::lost_device ()
  * in kernel versions < 3.15 uvcvideo does not correctly interpret bayer 8-bit
  * this function detects those cases and corrects all settings
  */
-static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
+static bool checkForBayer(const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
 {
 
     new_desc = fmtdesc;
@@ -626,14 +623,14 @@ static bool checkForBayer (const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtde
 }
 
 
-void V4l2Device::index_formats ()
+void V4l2Device::index_formats()
 {
     struct v4l2_fmtdesc fmtdesc = {};
     struct v4l2_frmsizeenum frms = {};
 
     fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    for (fmtdesc.index = 0; ! tcam_xioctl (fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index ++)
+    for (fmtdesc.index = 0; !tcam_xioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index++)
     {
         struct tcam_video_format_description desc = {};
 
@@ -642,12 +639,12 @@ void V4l2Device::index_formats ()
 
         // internal fourcc definitions are identical with v4l2
         desc.fourcc = new_desc.pixelformat;
-        memcpy (desc.description, new_desc.description, sizeof(new_desc.description));
+        memcpy(desc.description, new_desc.description, sizeof(new_desc.description));
         frms.pixel_format = fmtdesc.pixelformat;
 
         std::vector<struct framerate_mapping> rf;
 
-        for (frms.index = 0; ! tcam_xioctl (fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
+        for (frms.index = 0; !tcam_xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
             {
@@ -687,13 +684,11 @@ void V4l2Device::index_formats ()
         this->available_videoformats.push_back(format);
 
         SPDLOG_DEBUG("Found format: {}", img::fcc_to_string(format.get_fourcc()));
-
     }
-
 }
 
 
-std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum& frms)
+std::vector<double> V4l2Device::index_framerates(const struct v4l2_frmsizeenum& frms)
 {
     struct v4l2_frmivalenum frmival = {};
 
@@ -703,7 +698,8 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
 
     std::vector<double> f;
 
-    for (frmival.index = 0; tcam_xioctl( fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival ) >= 0; frmival.index++)
+    for (frmival.index = 0; tcam_xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
+         frmival.index++)
     {
         if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE)
         {
@@ -712,10 +708,10 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
             // we however use framerates as fps (e.g. 30/1)
             // therefor we have to switch numerator and denominator
 
-            double frac = (double)frmival.discrete.denominator/frmival.discrete.numerator;
+            double frac = (double)frmival.discrete.denominator / frmival.discrete.numerator;
             f.push_back(frac);
 
-            framerate_conv c = {frac, frmival.discrete.numerator, frmival.discrete.denominator};
+            framerate_conv c = { frac, frmival.discrete.numerator, frmival.discrete.denominator };
             framerate_conversions.push_back(c);
         }
         else
@@ -731,7 +727,7 @@ std::vector<double> V4l2Device::index_framerates (const struct v4l2_frmsizeenum&
     return f;
 }
 
-void V4l2Device::determine_active_video_format ()
+void V4l2Device::determine_active_video_format()
 {
 
     struct v4l2_format fmt = {};
@@ -751,7 +747,7 @@ void V4l2Device::determine_active_video_format ()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    ret = tcam_xioctl( fd, VIDIOC_G_PARM, &parm );
+    ret = tcam_xioctl(fd, VIDIOC_G_PARM, &parm);
 
     if (ret < 0)
     {
@@ -777,21 +773,21 @@ void V4l2Device::determine_active_video_format ()
 }
 
 
-void V4l2Device::create_emulated_properties ()
+void V4l2Device::create_emulated_properties()
 {
-    auto tmp_props = generate_simulated_properties(property_handler->create_property_vector(),
-                                                   property_handler);
+    auto tmp_props =
+        generate_simulated_properties(property_handler->create_property_vector(), property_handler);
 
     for (auto& p : tmp_props)
     {
-        property_description pd = { EMULATED_PROPERTY, 0, false, p};
+        property_description pd = { EMULATED_PROPERTY, 0, false, p };
         SPDLOG_DEBUG("Adding '{}' to property list", p->get_name().c_str());
         property_handler->properties.push_back(pd);
     }
 }
 
 
-void V4l2Device::sort_properties ()
+void V4l2Device::sort_properties()
 {
     if (property_handler->properties.empty())
     {
@@ -799,20 +795,18 @@ void V4l2Device::sort_properties ()
     }
 
     int id;
-    auto search_func = [&id] (const property_description& desc)
+    auto search_func = [&id](const property_description& desc) {
+        if (desc.id == id)
         {
-            if (desc.id == id)
-            {
-                return true;
-            }
-            return false;
-        };
+            return true;
+        }
+        return false;
+    };
 
     // ensure only one exposure interface is published
     id = TCAM_V4L2_EXPOSURE_TIME_US;
-    auto exp_prop = std::find_if(property_handler->properties.begin(),
-                                 property_handler->properties.end(),
-                                 search_func);
+    auto exp_prop = std::find_if(
+        property_handler->properties.begin(), property_handler->properties.end(), search_func);
 
     if (exp_prop != property_handler->properties.end())
     {
@@ -823,8 +817,7 @@ void V4l2Device::sort_properties ()
         auto p = property_handler->properties.begin();
         while (p != property_handler->properties.end())
         {
-            if (p->id != TCAM_V4L2_EXPOSURE_TIME_US
-                && p->prop->get_ID() == TCAM_PROPERTY_EXPOSURE)
+            if (p->id != TCAM_V4L2_EXPOSURE_TIME_US && p->prop->get_ID() == TCAM_PROPERTY_EXPOSURE)
             {
                 property_handler->special_properties.push_back(*p);
                 p = property_handler->properties.erase(p);
@@ -897,8 +890,8 @@ void V4l2Device::sort_properties ()
 }
 
 
-std::shared_ptr<Property> V4l2Device::apply_conversion_factor (std::shared_ptr<Property> prop,
-                                                               const double factor)
+std::shared_ptr<Property> V4l2Device::apply_conversion_factor(std::shared_ptr<Property> prop,
+                                                              const double factor)
 {
 
     auto s = prop->get_struct();
@@ -912,7 +905,8 @@ std::shared_ptr<Property> V4l2Device::apply_conversion_factor (std::shared_ptr<P
         s.value.i.default_value *= factor;
 
 
-        return std::make_shared<Property>(PropertyInteger(property_handler, s, prop->get_value_type()));
+        return std::make_shared<Property>(
+            PropertyInteger(property_handler, s, prop->get_value_type()));
     }
     else if (s.type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
@@ -922,17 +916,19 @@ std::shared_ptr<Property> V4l2Device::apply_conversion_factor (std::shared_ptr<P
         s.value.d.value *= factor;
         s.value.d.default_value *= factor;
 
-        return std::make_shared<Property>(PropertyDouble(property_handler, s, prop->get_value_type()));
+        return std::make_shared<Property>(
+            PropertyDouble(property_handler, s, prop->get_value_type()));
     }
     else
     {
-        SPDLOG_ERROR("Trying to apply conversion factor to property that does not represent numbers!");
+        SPDLOG_ERROR(
+            "Trying to apply conversion factor to property that does not represent numbers!");
         return nullptr;
     }
 }
 
 
-void V4l2Device::create_conversion_factors ()
+void V4l2Device::create_conversion_factors()
 {
     if (property_handler->properties.empty())
     {
@@ -940,19 +936,17 @@ void V4l2Device::create_conversion_factors ()
     }
 
     TCAM_PROPERTY_ID id;
-    auto search_func = [&id] (const property_description& desc)
+    auto search_func = [&id](const property_description& desc) {
+        if (desc.prop->get_ID() == id)
         {
-            if (desc.prop->get_ID() == id)
-            {
-                return true;
-            }
-            return false;
-        };
+            return true;
+        }
+        return false;
+    };
 
     id = TCAM_PROPERTY_EXPOSURE;
-    auto exposure = std::find_if(property_handler->properties.begin(),
-                                 property_handler->properties.end(),
-                                 search_func);
+    auto exposure = std::find_if(
+        property_handler->properties.begin(), property_handler->properties.end(), search_func);
 
     if (exposure != property_handler->properties.end())
     {
@@ -976,7 +970,7 @@ void V4l2Device::create_conversion_factors ()
 }
 
 
-bool V4l2Device::extension_unit_is_loaded ()
+bool V4l2Device::extension_unit_is_loaded()
 {
     struct v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
@@ -993,7 +987,7 @@ bool V4l2Device::extension_unit_is_loaded ()
 }
 
 
-void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
+void V4l2Device::index_all_controls(std::shared_ptr<PropertyImpl> impl)
 {
     bool extension_unit_exists = false;
     // test for loaded extension unit.
@@ -1011,7 +1005,8 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
     }
     if (!extension_unit_exists)
     {
-        SPDLOG_WARN("The property extension unit does not exist. Not all properties will be accessible.");
+        SPDLOG_WARN(
+            "The property extension unit does not exist. Not all properties will be accessible.");
     }
 
     struct v4l2_queryctrl qctrl = {};
@@ -1032,13 +1027,11 @@ void V4l2Device::index_all_controls (std::shared_ptr<PropertyImpl> impl)
 }
 
 
-
 // TODO: replace with a more general purpose solution
-void V4l2Device::create_special_property (int _fd,
-                                          struct v4l2_queryctrl* queryctrl,
-                                          struct v4l2_ext_control* ctrl,
-                                          std::shared_ptr<PropertyImpl> impl
-    )
+void V4l2Device::create_special_property(int _fd,
+                                         struct v4l2_queryctrl* queryctrl,
+                                         struct v4l2_ext_control* ctrl,
+                                         std::shared_ptr<PropertyImpl> impl)
 {
 
     if (ctrl->id == 0x009a0901) // exposure auto map
@@ -1073,14 +1066,16 @@ void V4l2Device::create_special_property (int _fd,
             if (tcam_xioctl(_fd, VIDIOC_QUERYMENU, &qmenu))
                 continue;
 
-            std::string map_string((char*) qmenu.name);
+            std::string map_string((char*)qmenu.name);
             m.emplace(map_string, i);
         }
 
-        auto internal_prop = std::make_shared<Property>(PropertyEnumeration(impl, cp, m, Property::ENUM));
+        auto internal_prop =
+            std::make_shared<Property>(PropertyEnumeration(impl, cp, m, Property::ENUM));
         //handler->special_properties.push_back
 
-        property_handler->special_properties.push_back({(int)ctrl->id, 0.0, false, internal_prop});
+        property_handler->special_properties.push_back(
+            { (int)ctrl->id, 0.0, false, internal_prop });
 
         int active_value = cp.value.i.value;
         int default_value = cp.value.i.default_value;
@@ -1136,18 +1131,17 @@ void V4l2Device::create_special_property (int _fd,
         }
         cp.flags = flags;
 
-        auto external_prop = std::make_shared<Property>(PropertyBoolean(impl, cp, Property::BOOLEAN));
+        auto external_prop =
+            std::make_shared<Property>(PropertyBoolean(impl, cp, Property::BOOLEAN));
 
-        property_handler->properties.push_back({(int)ctrl->id, 0.0, true, external_prop});
+        property_handler->properties.push_back({ (int)ctrl->id, 0.0, true, external_prop });
 
-        property_handler->mappings.push_back({external_prop, internal_prop, mapping});
-
+        property_handler->mappings.push_back({ external_prop, internal_prop, mapping });
     }
-
 }
 
 
-int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl)
+int V4l2Device::index_control(struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl)
 {
 
     if (qctrl->flags & V4L2_CTRL_FLAG_DISABLED)
@@ -1168,13 +1162,12 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     ctrls.count = 1;
     ctrls.controls = &ext_ctrl;
 
-    if (V4L2_CTRL_ID2CLASS(qctrl->id) != V4L2_CTRL_CLASS_USER &&
-        qctrl->id < V4L2_CID_PRIVATE_BASE)
+    if (V4L2_CTRL_ID2CLASS(qctrl->id) != V4L2_CTRL_CLASS_USER && qctrl->id < V4L2_CID_PRIVATE_BASE)
     {
         if (qctrl->type == V4L2_CTRL_TYPE_STRING)
         {
             ext_ctrl.size = qctrl->maximum + 1;
-            ext_ctrl.string = (char *)malloc(ext_ctrl.size);
+            ext_ctrl.string = (char*)malloc(ext_ctrl.size);
             ext_ctrl.string[0] = 0;
         }
 
@@ -1206,8 +1199,8 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
     std::vector<int> special_properties = { 0x009a0901 /* exposure auto */ };
 
-    if (std::find(special_properties.begin(),
-                  special_properties.end(), ext_ctrl.id) != special_properties.end())
+    if (std::find(special_properties.begin(), special_properties.end(), ext_ctrl.id)
+        != special_properties.end())
     {
         create_special_property(fd, qctrl, &ext_ctrl, impl);
         return 0;
@@ -1231,7 +1224,8 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
 
     static std::vector<TCAM_PROPERTY_ID> special_controls = {};
 
-    if (std::find(special_controls.begin(), special_controls.end(), p->get_ID()) != special_controls.end())
+    if (std::find(special_controls.begin(), special_controls.end(), p->get_ID())
+        != special_controls.end())
     {
         property_handler->special_properties.push_back(desc);
     }
@@ -1247,9 +1241,9 @@ int V4l2Device::index_control (struct v4l2_queryctrl* qctrl, std::shared_ptr<Pro
     return 1;
 }
 
-bool save_value_of_control (const v4l2_control* ctrl,
-                            tcam_device_property* cp,
-                            double conversion_factor)
+bool save_value_of_control(const v4l2_control* ctrl,
+                           tcam_device_property* cp,
+                           double conversion_factor)
 {
     switch (cp->type)
     {
@@ -1288,11 +1282,10 @@ bool save_value_of_control (const v4l2_control* ctrl,
             return false;
         }
     }
-
 }
 
 
-void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
+void V4l2Device::updateV4L2Property(V4l2Device::property_description& desc)
 {
     struct v4l2_control ctrl = {};
     ctrl.id = desc.id;
@@ -1305,37 +1298,34 @@ void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
     if (tcam_xioctl(fd, VIDIOC_G_CTRL, &ctrl))
     {
         SPDLOG_ERROR("Could not retrieve current value of {}. ioctl return '{}'",
-                     desc.prop->get_name().c_str(), strerror(errno));
+                     desc.prop->get_name().c_str(),
+                     strerror(errno));
     }
 
     auto cp = desc.prop->get_struct();
 
     save_value_of_control(&ctrl, &cp, desc.conversion_factor);
-    SPDLOG_TRACE("Updated property {} to {}",
-                 desc.prop->get_name().c_str(), cp.value.i.value);
+    SPDLOG_TRACE("Updated property {} to {}", desc.prop->get_name().c_str(), cp.value.i.value);
 
     desc.prop->set_struct(cp);
 }
 
 
-bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
+bool V4l2Device::changeV4L2Control(const property_description& prop_desc)
 {
 
     TCAM_PROPERTY_TYPE type = prop_desc.prop->get_type();
 
     const std::string name = prop_desc.prop->get_name();
 
-    if (name == "Exposure" ||
-        name == "ExposureTime" ||
-        name == "Exposure Time" ||
-        name == "Exposure Time (us)")
+    if (name == "Exposure" || name == "ExposureTime" || name == "Exposure Time"
+        || name == "Exposure Time (us)")
     {
         update_stream_timeout();
     }
 
-    if (type == TCAM_PROPERTY_TYPE_STRING ||
-        type == TCAM_PROPERTY_TYPE_UNKNOWN ||
-        type == TCAM_PROPERTY_TYPE_DOUBLE)
+    if (type == TCAM_PROPERTY_TYPE_STRING || type == TCAM_PROPERTY_TYPE_UNKNOWN
+        || type == TCAM_PROPERTY_TYPE_DOUBLE)
     {
         SPDLOG_ERROR("Property type not supported. Property changes not submitted to device.");
         return false;
@@ -1373,20 +1363,20 @@ bool V4l2Device::changeV4L2Control (const property_description& prop_desc)
 
     if (ret < 0)
     {
-        SPDLOG_ERROR("Unable to submit property change for {}.", prop_desc.prop->get_name().c_str());
+        SPDLOG_ERROR("Unable to submit property change for {}.",
+                     prop_desc.prop->get_name().c_str());
     }
     else
     {
-        SPDLOG_DEBUG("Changed ctrl {} to value {}.",
-                     prop_desc.prop->get_name().c_str(),
-                     ctrl.value);
+        SPDLOG_DEBUG(
+            "Changed ctrl {} to value {}.", prop_desc.prop->get_name().c_str(), ctrl.value);
     }
 
     return true;
 }
 
 
-void V4l2Device::stream ()
+void V4l2Device::stream()
 {
     int lost_countdown = 0;
     // period elapsed for current image
@@ -1418,7 +1408,7 @@ void V4l2Device::stream ()
         {
             if (errno == EINTR)
             {
-                continue;   // intermittent wake, continue
+                continue; // intermittent wake, continue
             }
             else
             {
@@ -1435,11 +1425,11 @@ void V4l2Device::stream ()
             return;
         }
 
-        if (ret == 0)   // timeout encountered
+        if (ret == 0) // timeout encountered
         {
-            if( is_trigger_mode_enabled() )
+            if (is_trigger_mode_enabled())
             {
-                continue;   // timeout while trigger is enabled, just continue
+                continue; // timeout while trigger is enabled, just continue
             }
 
             if (waited_seconds < waiting_period)
@@ -1459,7 +1449,7 @@ void V4l2Device::stream ()
             bool ret_value = get_frame();
             if (ret_value)
             {
-                lost_countdown = lost_countdown_default;    // reset lost countdown variable
+                lost_countdown = lost_countdown_default; // reset lost countdown variable
             }
             else
             {
@@ -1479,19 +1469,18 @@ void V4l2Device::stream ()
 
 bool V4l2Device::is_trigger_mode_enabled()
 {
-    for( auto& p : this->property_handler->properties )
+    for (auto& p : this->property_handler->properties)
     {
-        if( p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE )
+        if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
         {
             return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
         }
-
     }
     return false;
 }
 
 
-bool V4l2Device::get_frame ()
+bool V4l2Device::get_frame()
 {
     struct v4l2_buffer buf = {};
 
@@ -1532,12 +1521,13 @@ bool V4l2Device::get_frame ()
     }
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
-    statistics.capture_time_ns = ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
+    statistics.capture_time_ns =
+        ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
     statistics.frame_count++;
     buffers.at(buf.index).buffer->set_statistics(statistics);
 
     auto desc = buffers.at(buf.index).buffer->getImageBuffer();
-    desc.length =  buf.bytesused;
+    desc.length = buf.bytesused;
     buffers.at(buf.index).buffer->set_image_buffer(desc);
 
     SPDLOG_TRACE("pushing new buffer");
@@ -1556,15 +1546,15 @@ bool V4l2Device::get_frame ()
 }
 
 
-void V4l2Device::init_userptr_buffers ()
+void V4l2Device::init_userptr_buffers()
 {
 
     SPDLOG_DEBUG("Will use {} buffers", buffers.size());
 
     struct v4l2_requestbuffers req = {};
 
-    req.count  = buffers.size();
-    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.count = buffers.size();
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_USERPTR;
 
     if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req))
@@ -1590,8 +1580,8 @@ void V4l2Device::init_userptr_buffers ()
         buf.m.userptr = (unsigned long)buffers.at(i).buffer->get_data();
         buf.length = buffers.at(i).buffer->get_buffer_size();
 
-        SPDLOG_DEBUG("Queueing buffer({}) with length {}",
-                     buffers.at(i).buffer->get_data(), buf.length);
+        SPDLOG_DEBUG(
+            "Queueing buffer({}) with length {}", buffers.at(i).buffer->get_data(), buf.length);
 
         if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
         {
@@ -1607,12 +1597,12 @@ void V4l2Device::init_userptr_buffers ()
 }
 
 
-tcam_image_size V4l2Device::get_sensor_size () const
+tcam_image_size V4l2Device::get_sensor_size() const
 {
     tcam_image_size size = {};
     for (const auto& f : available_videoformats)
     {
-        for (const auto& r :f.get_resolutions())
+        for (const auto& r : f.get_resolutions())
         {
             if (r.max_size.width > size.width || r.max_size.height > size.width)
             {
@@ -1625,7 +1615,7 @@ tcam_image_size V4l2Device::get_sensor_size () const
 }
 
 
-void V4l2Device::monitor_v4l2_thread_func ()
+void V4l2Device::monitor_v4l2_thread_func()
 {
     auto udev = udev_new();
     if (!udev)
@@ -1690,7 +1680,7 @@ void V4l2Device::monitor_v4l2_thread_func ()
                     else
                     {
                         SPDLOG_WARN("Received an event for device: '{}' This should not happen.",
-                                     udev_device_get_action(dev));
+                                    udev_device_get_action(dev));
                     }
                 }
 

@@ -16,13 +16,13 @@
 
 
 #include "UsbSession.h"
+
 #include <stdexcept>
 
 namespace tis
 {
 
-UsbSession::UsbSession ()
-    : session(nullptr)
+UsbSession::UsbSession() : session(nullptr)
 {
     int ret = libusb_init(&this->session);
     if (ret < 0)
@@ -39,16 +39,15 @@ UsbSession::UsbSession ()
     libusb_set_debug(this->session, 3);
 
 #endif
-
 }
 
 
-UsbSession::~UsbSession ()
+UsbSession::~UsbSession()
 {
     libusb_exit(this->session);
 }
 
-libusb_context* UsbSession::get_session ()
+libusb_context* UsbSession::get_session()
 {
     return this->session;
 }

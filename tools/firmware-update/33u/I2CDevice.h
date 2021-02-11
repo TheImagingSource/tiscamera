@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <functional>
-#include <vector>
 #include <cstdint>
 #include <cstring>
+#include <functional>
+#include <vector>
 
 namespace I2C
 {
@@ -36,34 +36,33 @@ class I2CDevice
     size_t _maxReadLength;
 
 public:
-    I2CDevice (uint8_t dev, WriteAction write, ReadAction read, size_t maxReadLength)
-        : _dev( dev ),
-          _write( write ),
-          _read( read ),
-          _maxReadLength( maxReadLength )
-    {}
+    I2CDevice(uint8_t dev, WriteAction write, ReadAction read, size_t maxReadLength)
+        : _dev(dev), _write(write), _read(read), _maxReadLength(maxReadLength)
+    {
+    }
 
 public:
-    size_t maxReadLength () { return _maxReadLength; }
+    size_t maxReadLength()
+    {
+        return _maxReadLength;
+    }
 
 private:
-    DataArray I2CTransaction (const DataArray& args, uint16_t requestLength)
+    DataArray I2CTransaction(const DataArray& args, uint16_t requestLength)
     {
-        _write( _dev, args, true);
+        _write(_dev, args, true);
         return _read(_dev, requestLength, true);
     }
 
 public:
-    template<typename T, uint16_t TCommandSize>
-    T read (const uint8_t (&command)[TCommandSize])
+    template<typename T, uint16_t TCommandSize> T read(const uint8_t (&command)[TCommandSize])
     {
         DataArray arr(std::begin(command), std::end(command));
 
         return read<T>(arr);
     }
 
-    template<typename T>
-    T read (const DataArray& command)
+    template<typename T> T read(const DataArray& command)
     {
         auto buffer = I2CTransaction(command, sizeof(T));
 
@@ -72,8 +71,7 @@ public:
         return result;
     }
 
-    template<uint16_t TCommandSize>
-    void write (const uint8_t( &command )[TCommandSize])
+    template<uint16_t TCommandSize> void write(const uint8_t (&command)[TCommandSize])
     {
         DataArray arr(std::begin(command), std::end(command));
 
@@ -81,29 +79,29 @@ public:
     }
 
     template<typename TArg, uint16_t TCommandSize>
-    void write (const uint8_t(&command)[TCommandSize], const TArg& arg)
+    void write(const uint8_t (&command)[TCommandSize], const TArg& arg)
     {
         DataArray arr(std::begin(command), std::end(command));
 
         arr.resize(TCommandSize + sizeof(arg));
         memcpy(arr.data() + TCommandSize, &arg, sizeof(arg));
 
-        return write( arr );
+        return write(arr);
     }
 
-    void write (const DataArray& command)
+    void write(const DataArray& command)
     {
         _write(_dev, command, false);
     }
 
     template<uint16_t TCommandSize>
-    DataArray transaction (const uint8_t (&command)[TCommandSize], uint16_t requestLength)
+    DataArray transaction(const uint8_t (&command)[TCommandSize], uint16_t requestLength)
     {
-        DataArray arr (std::begin(command), std::end(command));
+        DataArray arr(std::begin(command), std::end(command));
 
         return I2CTransaction(arr, requestLength);
     }
 
 }; /* class I2CDevice*/
 
-} /* I2C */
+} // namespace I2C

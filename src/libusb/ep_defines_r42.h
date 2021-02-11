@@ -9,29 +9,25 @@
 #define EP_DEFINES_R42_H_
 
 
-
-#define SETTING_SIZE							8
+#define SETTING_SIZE 8
 
 struct SSetting
 {
-	unsigned short pixelX;
-	unsigned short pixelY;
-	unsigned char fps;
-	unsigned char dump0;
-	unsigned short dump1;
-
+    unsigned short pixelX;
+    unsigned short pixelY;
+    unsigned char fps;
+    unsigned char dump0;
+    unsigned short dump1;
 };
 
 
 typedef struct SSetting SSSetting;
 
 
+#define FLASH_STROBE_ADJUSTMENT (200.0)
 
-#define FLASH_STROBE_ADJUSTMENT      (200.0)
 
-
-#define R42_FIRMWARE_VERSION					(200)
-
+#define R42_FIRMWARE_VERSION (200)
 
 
 /* PC out, camera in
@@ -84,54 +80,45 @@ typedef struct SSetting SSSetting;
 */
 
 
+#define ADVANCED_PC_TO_USB_REGISTER_CONTROLLER 0xB1
+#define ADVANCED_PC_TO_USB_REGISTER_FOCUS      0xB2
+#define ADVANCED_PC_TO_USB_REGISTER_OIS        0xB3
+#define ADVANCED_PC_TO_USB_COLOR_GAIN          0xB5
+#define ADVANCED_PC_TO_USB_SET_LINE_DELAY      0xBA
+#define ADVANCED_PC_TO_USB_RES_FPS             0x74 // read all resolution settings
+#define ADVANCED_PC_TO_USB_BASE_CONFIG         0xF0 // load vid, pid and camera stuff like image size
+#define ADVANCED_PC_TO_USB_DATA_FLASH          0x33
+#define ADVANCED_PC_TO_USB_AF                  0xEC
+#define ADVANCED_PC_TO_USB_PIX_CORRECT         0xEB
+#define ADVANCED_PC_TO_USB_UPDATE_FIRMWARE     0xC0
+#define ADVANCED_PC_TO_USB_WRITE               0x03
+#define ADVANCED_PC_TO_USB_OIS_MODE            0x76
+#define ADVANCED_PC_TO_USB_OIS_POS             0x75
+#define ADVANCED_PC_TO_USB_SINGLE_SHOT_MODE    0x77
+#define ADVANCED_PC_TO_USB_PIC_CLK             0x71
 
+#define ADVANCED_USB_TO_PC_EEPROM_READ_EP0 0x03
+#define ADVANCED_USB_TO_PC_LINE_LENGTH     0x70
+#define ADVANCED_USB_TO_PC_PIX_CLK         0x71
+#define ADVANCED_PC_TO_USB_BINNING_WEIGHT  0x78
+#define ADVANCED_USB_TO_PC_BINNING_WEIGHT  0x78
 
+#define ADVANCED_USB_TO_PC_REGISTER_CONTROLLER 0xB1
+#define ADVANCED_USB_TO_PC_REGISTER_FOCUS      0xB2
+#define ADVANCED_USB_TO_PC_REGISTER_OIS        0xB3
+#define ADVANCED_USB_TO_PC_COLOR_GAIN          0xB5
 
-#define ADVANCED_PC_TO_USB_REGISTER_CONTROLLER		0xB1
-#define ADVANCED_PC_TO_USB_REGISTER_FOCUS			0xB2
-#define ADVANCED_PC_TO_USB_REGISTER_OIS				0xB3
-#define ADVANCED_PC_TO_USB_COLOR_GAIN				0xB5
-#define ADVANCED_PC_TO_USB_SET_LINE_DELAY			0xBA
-#define ADVANCED_PC_TO_USB_RES_FPS					0x74	// read all resolution settings
-#define ADVANCED_PC_TO_USB_BASE_CONFIG				0xF0	// load vid, pid and camera stuff like image size
-#define ADVANCED_PC_TO_USB_DATA_FLASH				0x33
-#define ADVANCED_PC_TO_USB_AF						0xEC
-#define ADVANCED_PC_TO_USB_PIX_CORRECT				0xEB
-#define ADVANCED_PC_TO_USB_UPDATE_FIRMWARE			0xC0
-#define ADVANCED_PC_TO_USB_WRITE					0x03
-#define ADVANCED_PC_TO_USB_OIS_MODE					0x76
-#define ADVANCED_PC_TO_USB_OIS_POS 					0x75
-#define ADVANCED_PC_TO_USB_SINGLE_SHOT_MODE			0x77
-#define	ADVANCED_PC_TO_USB_PIC_CLK					0x71
+#define ADVANCED_USB_TO_PC_FOCUS_MIN_MAX  0xB8 //4 bytes in, macro (2byte), infinity (2byte)
+#define ADVANCED_USB_TO_PC_GET_LENSCALIB  0xB9 //869 bytes lenscalib
+#define ADVANCED_USB_TO_PC_GET_LINE_DELAY 0xBA
+#define ADVANCED_USB_TO_PC_GET_GYRO       0xBC
 
-#define ADVANCED_USB_TO_PC_EEPROM_READ_EP0			0x03
-#define ADVANCED_USB_TO_PC_LINE_LENGTH				0x70
-#define ADVANCED_USB_TO_PC_PIX_CLK					0x71
-#define ADVANCED_PC_TO_USB_BINNING_WEIGHT			0x78
-#define ADVANCED_USB_TO_PC_BINNING_WEIGHT			0x78
+#define ADVANCED_USB_TO_PC_RES_HORIZONTAL 0x72
+#define ADVANCED_USB_TO_PC_RES_VERTICAL   0x73
 
-#define ADVANCED_USB_TO_PC_REGISTER_CONTROLLER		0xB1
-#define ADVANCED_USB_TO_PC_REGISTER_FOCUS			0xB2
-#define ADVANCED_USB_TO_PC_REGISTER_OIS				0xB3
-#define ADVANCED_USB_TO_PC_COLOR_GAIN				0xB5
-
-#define ADVANCED_USB_TO_PC_FOCUS_MIN_MAX			0xB8	//4 bytes in, macro (2byte), infinity (2byte)
-#define ADVANCED_USB_TO_PC_GET_LENSCALIB			0xB9	//869 bytes lenscalib
-#define ADVANCED_USB_TO_PC_GET_LINE_DELAY			0xBA
-#define ADVANCED_USB_TO_PC_GET_GYRO					0xBC
-
-#define ADVANCED_USB_TO_PC_RES_HORIZONTAL			0x72
-#define ADVANCED_USB_TO_PC_RES_VERTICAL				0x73
-
-#define ADVANCED_USB_TO_PC_BASE_CONFIG				0xF0	// load vid, pid and camera stuff like image size
-#define ADVANCED_USB_TO_PC_ORIG_MIN_LINE_LENGTH		0x23
-#define ADVANCED_USB_TO_PC_HAS_OPTICS				0xF1
-
-
-
-
-
-
+#define ADVANCED_USB_TO_PC_BASE_CONFIG          0xF0 // load vid, pid and camera stuff like image size
+#define ADVANCED_USB_TO_PC_ORIG_MIN_LINE_LENGTH 0x23
+#define ADVANCED_USB_TO_PC_HAS_OPTICS           0xF1
 
 
 #endif /* EP_DEFINES_H_ */

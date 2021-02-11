@@ -18,17 +18,17 @@
 #define TCAM_AFU050DEVICE_H
 
 #include "DeviceInterface.h"
-#include "VideoFormat.h"
-#include "VideoFormatDescription.h"
 #include "FormatHandlerInterface.h"
 #include "LibusbDevice.h"
+#include "VideoFormat.h"
+#include "VideoFormatDescription.h"
 #include "afu050_definitions.h"
 
+#include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
 #include <memory>
+#include <mutex> // std::mutex, std::unique_lock
 #include <thread>
-#include <mutex>              // std::mutex, std::unique_lock
-#include <condition_variable> // std::condition_variable
 
 VISIBILITY_INTERNAL
 
@@ -42,7 +42,7 @@ class AFU050Device : public DeviceInterface
         FMT2592x1944 = 1,
         FMT1920x1080 = 2,
         FMT1280x960 = 3
-    }AFU050_VIDEO_FORMAT;
+    } AFU050_VIDEO_FORMAT;
 
 
     struct property_description
@@ -57,16 +57,15 @@ class AFU050Device : public DeviceInterface
         friend class AFU050Device;
 
     public:
-        AFU050PropertyHandler (AFU050Device*);
+        AFU050PropertyHandler(AFU050Device*);
 
 
-        std::vector<std::shared_ptr<Property>> create_property_vector ();
+        std::vector<std::shared_ptr<Property>> create_property_vector();
 
-        bool set_property (const Property&);
-        bool get_property (Property&);
+        bool set_property(const Property&);
+        bool get_property(Property&);
 
     protected:
-
         std::vector<property_description> properties;
 
         AFU050Device* device;
@@ -77,62 +76,60 @@ class AFU050Device : public DeviceInterface
         friend class AFU050Device;
 
     public:
-        AFU050FormatHandler (AFU050Device*);
-        std::vector<double> get_framerates (const struct tcam_image_size&, int pixelformat=0);
+        AFU050FormatHandler(AFU050Device*);
+        std::vector<double> get_framerates(const struct tcam_image_size&, int pixelformat = 0);
 
     protected:
         AFU050Device* device;
     };
 
 public:
+    explicit AFU050Device(const DeviceInfo&);
 
-    explicit AFU050Device (const DeviceInfo&);
+    AFU050Device() = delete;
 
-    AFU050Device () = delete;
+    ~AFU050Device();
 
-    ~AFU050Device ();
+    DeviceInfo get_device_description() const;
 
-    DeviceInfo get_device_description () const;
+    std::vector<std::shared_ptr<Property>> getProperties();
 
-    std::vector<std::shared_ptr<Property>> getProperties ();
+    bool set_property(const Property&);
 
-    bool set_property (const Property&);
+    bool get_property(Property&);
 
-    bool get_property (Property&);
+    bool set_video_format(const VideoFormat&);
 
-    bool set_video_format (const VideoFormat&);
+    bool validate_video_format(const VideoFormat&) const;
 
-    bool validate_video_format (const VideoFormat&) const;
+    VideoFormat get_active_video_format() const;
 
-    VideoFormat get_active_video_format () const;
+    std::vector<VideoFormatDescription> get_available_video_formats();
 
-    std::vector<VideoFormatDescription> get_available_video_formats ();
+    bool set_framerate(double framerate);
 
-    bool set_framerate (double framerate);
+    double get_framerate();
 
-    double get_framerate ();
+    bool set_sink(std::shared_ptr<SinkInterface>);
 
-    bool set_sink (std::shared_ptr<SinkInterface>);
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
 
-    bool initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>>);
+    bool release_buffers();
 
-    bool release_buffers ();
+    void requeue_buffer(std::shared_ptr<ImageBuffer>);
 
-    void requeue_buffer (std::shared_ptr<ImageBuffer>);
+    bool start_stream();
 
-    bool start_stream ();
-
-    bool stop_stream ();
+    bool stop_stream();
 
 private:
-
     std::unique_ptr<LibusbDevice> usb_device_;
 
     static const int UVC_SET_CUR = 0x1;
     static const int UVC_GET_CUR = 0x81;
-    static const int LEN_IN_BUFFER = 1024*32;
+    static const int LEN_IN_BUFFER = 1024 * 32;
     static const int TRANSFER_COUNT = 32;
-    static const int JPEGBUF_SIZE = 1024*1024*5;
+    static const int JPEGBUF_SIZE = 1024 * 1024 * 5;
 
     std::thread work_thread;
 
@@ -158,15 +155,15 @@ private:
 
     std::thread udev_monitor;
 
-    void notification_loop ();
+    void notification_loop();
 
-    void lost_device ();
+    void lost_device();
 
-    void determine_active_video_format ();
+    void determine_active_video_format();
 
-    void create_formats ();
+    void create_formats();
 
-    void create_properties ();
+    void create_properties();
 
     // streaming related
 
@@ -190,37 +187,42 @@ private:
 
     std::vector<struct libusb_transfer*> transfers;
 
-    static void LIBUSB_CALL libusb_bulk_callback (struct libusb_transfer* trans);
-    void transfer_callback (struct libusb_transfer* transfer);
+    static void LIBUSB_CALL libusb_bulk_callback(struct libusb_transfer* trans);
+    void transfer_callback(struct libusb_transfer* transfer);
 
-    void stream ();
+    void stream();
 
-    bool get_frame ();
+    bool get_frame();
 
-    void init_buffers ();
+    void init_buffers();
 
-    void monitor_device ();
+    void monitor_device();
 
-    void add_int (const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop);
+    void add_int(const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop);
 
-    void add_bool (TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop);
+    void add_bool(TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop);
 
-    bool update_property (property_description& desc);
+    bool update_property(property_description& desc);
 
-    bool set_control (int unit, int ctrl, int len, unsigned char *value);
+    bool set_control(int unit, int ctrl, int len, unsigned char* value);
 
-    bool get_control (int unit, int ctrl, int len, unsigned char *value, enum CONTROL_CMD cmd=GET_CUR);
+    bool get_control(int unit,
+                     int ctrl,
+                     int len,
+                     unsigned char* value,
+                     enum CONTROL_CMD cmd = GET_CUR);
 
-    int set_video_format (uint8_t format_index ,uint8_t frame_index, uint32_t frame_interval);
+    int set_video_format(uint8_t format_index, uint8_t frame_index, uint32_t frame_interval);
 
-    bool get_bool_value (enum VC_UNIT unit, unsigned char property, enum CONTROL_CMD);
+    bool get_bool_value(enum VC_UNIT unit, unsigned char property, enum CONTROL_CMD);
 
-    bool set_bool_value (enum VC_UNIT unit, unsigned char property, bool value);
+    bool set_bool_value(enum VC_UNIT unit, unsigned char property, bool value);
 
-    int get_int_value (const enum VC_UNIT unit, const unsigned char property, const enum CONTROL_CMD);
+    int get_int_value(const enum VC_UNIT unit,
+                      const unsigned char property,
+                      const enum CONTROL_CMD);
 
-    bool set_int_value (enum VC_UNIT unit, unsigned char property, int value);
-
+    bool set_int_value(enum VC_UNIT unit, unsigned char property, int value);
 };
 
 } /* namespace tcam */

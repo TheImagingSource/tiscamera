@@ -19,7 +19,7 @@
 
 TEST_CASE("VideoFormat Tests")
 {
-    struct tcam_video_format format_struct = {FOURCC_Y800, 0, 0, 640, 480, 30.0};
+    struct tcam_video_format format_struct = { FOURCC_Y800, 0, 0, 640, 480, 30.0 };
 
     tcam::VideoFormat format(format_struct);
 

@@ -24,13 +24,13 @@ static work_pool::work_pool* g_default_pool = nullptr;
 static long g_pool_ref_count = 0;
 
 
-unsigned int tcam::algorithms::work_pool::get_logical_cpu_count ()
+unsigned int tcam::algorithms::work_pool::get_logical_cpu_count()
 {
     return std::thread::hardware_concurrency();
 }
 
 
-work_pool::work_pool* work_pool::acquire_default_work_pool ()
+work_pool::work_pool* work_pool::acquire_default_work_pool()
 {
     std::lock_guard<std::mutex> lck(g_pool_lock);
 
@@ -55,7 +55,7 @@ work_pool::work_pool* work_pool::acquire_default_work_pool ()
 }
 
 
-void work_pool::release_default_work_pool (work_pool* /* pool */)
+void work_pool::release_default_work_pool(work_pool* /* pool */)
 {
     std::lock_guard<std::mutex> lck(g_pool_lock);
 
@@ -67,18 +67,16 @@ void work_pool::release_default_work_pool (work_pool* /* pool */)
 }
 
 
-tcam::algorithms::work_pool::work_pool::work_pool ()
-    : ended_flag_(false)
-{}
+tcam::algorithms::work_pool::work_pool::work_pool() : ended_flag_(false) {}
 
 
-tcam::algorithms::work_pool::work_pool::~work_pool ()
+tcam::algorithms::work_pool::work_pool::~work_pool()
 {
     stop();
 }
 
 
-bool tcam::algorithms::work_pool::work_pool::start ()
+bool tcam::algorithms::work_pool::work_pool::start()
 {
     ended_flag_ = false;
 
@@ -88,30 +86,27 @@ bool tcam::algorithms::work_pool::work_pool::start ()
 
     for (unsigned int index = 0; index < num_worker_threads; ++index)
     {
-        thread_list_.emplace_back( [this, index] {worker_thread_function(index); } );
+        thread_list_.emplace_back([this, index] { worker_thread_function(index); });
     }
-    vec_.reserve( 64 );
+    vec_.reserve(64);
 
     return true;
 }
 
 
-void tcam::algorithms::work_pool::work_pool::stop ()
+void tcam::algorithms::work_pool::work_pool::stop()
 {
     ended_flag_ = true;
 
-    sem_.up( (int) thread_list_.size() );
-    for( auto&& thrd : thread_list_ )
-    {
-        thrd.join();
-    }
+    sem_.up((int)thread_list_.size());
+    for (auto&& thrd : thread_list_) { thrd.join(); }
     thread_list_.clear();
 
     sem_.reset();
 }
 
 
-void tcam::algorithms::work_pool::work_pool::worker_thread_function (int /* thread_index*/)
+void tcam::algorithms::work_pool::work_pool::worker_thread_function(int /* thread_index*/)
 {
     while (!ended_flag_)
     {
@@ -131,7 +126,7 @@ void tcam::algorithms::work_pool::work_pool::worker_thread_function (int /* thre
     }
 }
 
-tcam::algorithms::work_pool::work_context* tcam::algorithms::work_pool::work_pool::pop ()
+tcam::algorithms::work_pool::work_context* tcam::algorithms::work_pool::work_pool::pop()
 {
     std::lock_guard<decltype(vec_lock_)> lck(vec_lock_);
 

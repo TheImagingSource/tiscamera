@@ -18,19 +18,18 @@
 
 #include "IUsbDevice.h"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace lib33u
 {
 namespace driver_interface
 {
-	struct IUsbDeviceEnumerator
-	{
-		virtual ~IUsbDeviceEnumerator ()
-		{}
+struct IUsbDeviceEnumerator
+{
+    virtual ~IUsbDeviceEnumerator() {}
 
-		virtual std::vector<std::shared_ptr<IUsbDevice>> enum_all () = 0;
-	};
-}
-}
+    virtual std::vector<std::shared_ptr<IUsbDevice>> enum_all() = 0;
+};
+} // namespace driver_interface
+} // namespace lib33u

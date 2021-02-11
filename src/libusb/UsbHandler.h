@@ -17,18 +17,16 @@
 #ifndef TCAM_USBHANDLER_H
 #define TCAM_USBHANDLER_H
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <thread>
-#include <atomic>
-
-#include <libusb-1.0/libusb.h>
-
-#include "UsbSession.h"
-#include "LibusbDevice.h"
-
 #include "DeviceInfo.h"
+#include "LibusbDevice.h"
+#include "UsbSession.h"
+
+#include <atomic>
+#include <libusb-1.0/libusb.h>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 namespace tcam
 {
@@ -39,30 +37,29 @@ class UsbHandler
 {
 private:
     std::shared_ptr<UsbSession> session;
-    UsbHandler ();
-    ~UsbHandler ();
+    UsbHandler();
+    ~UsbHandler();
 
 public:
-
     static UsbHandler& get_instance();
 
-    UsbHandler (const UsbHandler& _handler) = delete;
+    UsbHandler(const UsbHandler& _handler) = delete;
     UsbHandler& operator=(const UsbHandler&) = delete;
 
-    std::unique_ptr<LibusbDevice> open_device_ (const std::string& serial);
+    std::unique_ptr<LibusbDevice> open_device_(const std::string& serial);
 
-    struct libusb_device_handle* open_device (const std::string& serial);
+    struct libusb_device_handle* open_device(const std::string& serial);
 
     /// @name get_device_list
     /// @return vector of device_info of found cameras
-    std::vector<DeviceInfo> get_device_list ();
+    std::vector<DeviceInfo> get_device_list();
 
     /// @name open_camera
     /// @param serial - string containing the serial number of the camera that shall be opened
     /// @return shared pointer to the opened usb camera; Returns nullptr on failure
     // std::shared_ptr<UsbCamera> open_camera (std::string serial);
 
-    std::shared_ptr<UsbSession> get_session ();
+    std::shared_ptr<UsbSession> get_session();
 
     /**
      * event related stuff
@@ -71,7 +68,7 @@ public:
     std::atomic_bool run_event_thread;
     std::thread event_thread;
 
-    void handle_events ();
+    void handle_events();
 
 }; /* class UsbHandler */
 

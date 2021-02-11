@@ -17,18 +17,17 @@
 #ifndef TCAM_CAPTUREDEVICEIMPL_H
 #define TCAM_CAPTUREDEVICEIMPL_H
 
+#include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "DeviceInterface.h"
-#include "Properties.h"
 #include "PipelineManager.h"
+#include "Properties.h"
 #include "PropertyHandler.h"
-#include "DeviceIndex.h"
+#include "internal.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-
-#include "internal.h"
 
 VISIBILITY_INTERNAL
 
@@ -39,12 +38,11 @@ class CaptureDeviceImpl
 {
 
 public:
+    explicit CaptureDeviceImpl();
 
-    explicit CaptureDeviceImpl ();
+    explicit CaptureDeviceImpl(const DeviceInfo& device);
 
-    explicit CaptureDeviceImpl (const DeviceInfo& device);
-
-    ~CaptureDeviceImpl ();
+    ~CaptureDeviceImpl();
 
 
     /**
@@ -52,7 +50,7 @@ public:
      * @param filename - string containing the filename of the xml description
      * @return true on success; on error Error will be set
      */
-    bool load_configuration (const std::string& filename);
+    bool load_configuration(const std::string& filename);
 
 
     /**
@@ -60,7 +58,7 @@ public:
      * @param filename - string containing the filename under which the xml shall be saved
      * @return true on success; on error Error will be set
      */
-    bool save_configuration (const std::string& filename);
+    bool save_configuration(const std::string& filename);
 
     // device related:
 
@@ -70,38 +68,38 @@ public:
      * @param device - DeviceInfo description of the device that shall be opened
      * @return true on success; on error Error will be set
      */
-    bool open_device (const DeviceInfo& device);
+    bool open_device(const DeviceInfo& device);
 
 
     /**
      * Check if device is currently open
      * @return true if a device is open
      */
-    bool is_device_open () const;
+    bool is_device_open() const;
 
 
     /**
      * Return description of current device
      * @return description of the currently open device. empty if no device is open
      */
-    DeviceInfo get_device () const;
+    DeviceInfo get_device() const;
 
 
-    bool register_device_lost_callback (tcam_device_lost_callback callback, void* user_data);
+    bool register_device_lost_callback(tcam_device_lost_callback callback, void* user_data);
 
 
     /**
      * Closes the open device. All streams will be stopped.
      * @return true on success; on error Error will be set
      */
-    bool close_device ();
+    bool close_device();
 
     // property related:
 
     /**
      * @return vector containing all available properties
      */
-    std::vector<Property*> get_available_properties ();
+    std::vector<Property*> get_available_properties();
 
     // videoformat related:
 
@@ -109,7 +107,7 @@ public:
     /**
      * @return vector containing all available video format settings
      */
-    std::vector<VideoFormatDescription> get_available_video_formats () const;
+    std::vector<VideoFormatDescription> get_available_video_formats() const;
 
 
     /**
@@ -117,13 +115,13 @@ public:
      * @param new_format - format the device shall use
      * @return true if device accepted the given VideoFormat
      */
-    bool set_video_format (const VideoFormat& new_format);
+    bool set_video_format(const VideoFormat& new_format);
 
 
     /**
      * @return Currently used video format
      */
-    VideoFormat get_active_video_format () const;
+    VideoFormat get_active_video_format() const;
 
     // playback related:
 
@@ -132,18 +130,17 @@ public:
      * @param sink - SinkInterface that shall be called for new images
      * @return true if stream could successfully be initialized
      */
-    bool start_stream (std::shared_ptr<SinkInterface> sink);
+    bool start_stream(std::shared_ptr<SinkInterface> sink);
 
 
     /**
      * @brief Stop currently running stream
      * @return true if stream could successfully be stopped
      */
-    bool stop_stream ();
+    bool stop_stream();
 
 private:
-
-    static void deviceindex_lost_cb (const DeviceInfo&, void* user_data);
+    static void deviceindex_lost_cb(const DeviceInfo&, void* user_data);
 
     struct device_lost_cb_data
     {

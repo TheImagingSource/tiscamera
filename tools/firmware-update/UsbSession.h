@@ -17,8 +17,8 @@
 #ifndef _USBSESSION_H_
 #define _USBSESSION_H_
 
-#include <memory>
 #include <libusb-1.0/libusb.h>
+#include <memory>
 
 namespace tis
 {
@@ -29,13 +29,13 @@ private:
     libusb_context* session;
 
 public:
-    UsbSession ();
-    ~UsbSession ();
+    UsbSession();
+    ~UsbSession();
 
-    UsbSession (const UsbSession& _session) = delete;
+    UsbSession(const UsbSession& _session) = delete;
     UsbSession& operator=(const UsbSession&) = delete;
 
-    libusb_context* get_session ();
+    libusb_context* get_session();
 
 }; /* class UsbSession */
 

@@ -25,15 +25,16 @@ G_BEGIN_DECLS
 
 #ifdef G_DECLARE_INTERFACE
 
-G_DECLARE_INTERFACE (TcamProp, tcam_prop, TCAM, PROP, GObject)
+G_DECLARE_INTERFACE(TcamProp, tcam_prop, TCAM, PROP, GObject)
 
 #else
 
-#define TCAM_PROP(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TCAM_TYPE_PROP, TcamProp))
-#define TCAM_IS_PROP(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TCAM_TYPE_PROP))
-#define TCAM_PROP_GET_IFACE(inst) (G_TYPE_INSTANCE_GET_INTERFACE ((inst), TCAM_TYPE_PROP, TcamPropInterface))
+#define TCAM_PROP(obj)    (G_TYPE_CHECK_INSTANCE_CAST((obj), TCAM_TYPE_PROP, TcamProp))
+#define TCAM_IS_PROP(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), TCAM_TYPE_PROP))
+#define TCAM_PROP_GET_IFACE(inst) \
+    (G_TYPE_INSTANCE_GET_INTERFACE((inst), TCAM_TYPE_PROP, TcamPropInterface))
 
-GType tcam_prop_get_type (void);
+GType tcam_prop_get_type(void);
 
 typedef struct _TcamProp TcamProp; /* dummy object */
 typedef struct _TcamPropInterface TcamPropInterface;
@@ -44,35 +45,30 @@ struct _TcamPropInterface
 {
     GTypeInterface parent_interface;
 
-    GSList* (*get_tcam_property_names) (TcamProp* self);
-    gchar* (*get_tcam_property_type) (TcamProp* self,
-                                      const gchar* name);
-    gboolean (*get_tcam_property) (TcamProp* self,
-                                   const gchar* name,
-                                   GValue* value,
-                                   GValue* min,
-                                   GValue* max,
-                                   GValue* def,
-                                   GValue* step,
-                                   GValue* type,
-                                   GValue* flags,
-                                   GValue* category,
-                                   GValue* group);
+    GSList* (*get_tcam_property_names)(TcamProp* self);
+    gchar* (*get_tcam_property_type)(TcamProp* self, const gchar* name);
+    gboolean (*get_tcam_property)(TcamProp* self,
+                                  const gchar* name,
+                                  GValue* value,
+                                  GValue* min,
+                                  GValue* max,
+                                  GValue* def,
+                                  GValue* step,
+                                  GValue* type,
+                                  GValue* flags,
+                                  GValue* category,
+                                  GValue* group);
 
-    GSList* (*get_tcam_menu_entries) (TcamProp* self,
-                                      const char* name);
+    GSList* (*get_tcam_menu_entries)(TcamProp* self, const char* name);
 
-    gboolean (*set_tcam_property) (TcamProp* self,
-                                   const gchar* name,
-                                   const GValue* value);
-    GSList* (*get_tcam_device_serials) (TcamProp* self);
-    GSList* (*get_tcam_device_serials_backend) (TcamProp* self);
-    gboolean (*get_tcam_device_info) (TcamProp* self,
-                                      const char* serial,
-                                      char** name,
-                                      char** identifier,
-                                      char** connection_type);
-
+    gboolean (*set_tcam_property)(TcamProp* self, const gchar* name, const GValue* value);
+    GSList* (*get_tcam_device_serials)(TcamProp* self);
+    GSList* (*get_tcam_device_serials_backend)(TcamProp* self);
+    gboolean (*get_tcam_device_info)(TcamProp* self,
+                                     const char* serial,
+                                     char** name,
+                                     char** identifier,
+                                     char** connection_type);
 };
 
 G_END_DECLS

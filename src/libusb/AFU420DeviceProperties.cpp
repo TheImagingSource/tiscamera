@@ -15,10 +15,8 @@
  */
 
 #include "AFU420Device.h"
-
-#include "standard_properties.h"
 #include "logging.h"
-
+#include "standard_properties.h"
 #include "utils.h"
 
 #include <cmath>
@@ -26,7 +24,7 @@
 using namespace tcam;
 
 
-bool AFU420Device::create_exposure ()
+bool AFU420Device::create_exposure()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_EXPOSURE);
 
@@ -44,13 +42,13 @@ bool AFU420Device::create_exposure ()
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-bool AFU420Device::create_gain ()
+bool AFU420Device::create_gain()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_GAIN);
 
@@ -71,13 +69,13 @@ bool AFU420Device::create_gain ()
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-bool AFU420Device::create_focus ()
+bool AFU420Device::create_focus()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_FOCUS);
 
@@ -92,13 +90,13 @@ bool AFU420Device::create_focus ()
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-bool AFU420Device::create_shutter ()
+bool AFU420Device::create_shutter()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_SHUTTER);
 
@@ -107,13 +105,13 @@ bool AFU420Device::create_shutter ()
 
     auto property = std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-bool AFU420Device::create_hdr ()
+bool AFU420Device::create_hdr()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_HDR);
     // hdr sets the exposure divider for the dark lines in the hdr image.
@@ -127,25 +125,25 @@ bool AFU420Device::create_hdr ()
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-double color_gain_to_camera (double value)
+double color_gain_to_camera(double value)
 {
     return map_value_ranges(0, 255, 0, (4.0 - (1.0 / 256.0)), value);
 }
 
 
-int camera_to_color_gain (double value)
+int camera_to_color_gain(double value)
 {
     return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
 }
 
 
-bool AFU420Device::create_color_gain ()
+bool AFU420Device::create_color_gain()
 {
     /*
       gain works in a weird way.
@@ -170,7 +168,7 @@ bool AFU420Device::create_color_gain ()
 
     auto property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     /// gain green
     prop = create_empty_property(TCAM_PROPERTY_GAIN_GREEN);
@@ -187,7 +185,7 @@ bool AFU420Device::create_color_gain ()
 
     property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
 
     /// gain blue
@@ -205,20 +203,21 @@ bool AFU420Device::create_color_gain ()
 
     property = std::make_shared<PropertyDouble>(property_handler, prop, Property::FLOAT);
 
-    property_handler->properties.push_back({property});
+    property_handler->properties.push_back({ property });
 
     return true;
 }
 
 
-bool AFU420Device::create_strobe ()
+bool AFU420Device::create_strobe()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_STROBE_ENABLE);
 
     prop.value.b.value = false;
     prop.value.b.default_value = false;
 
-    property_handler->properties.push_back({std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN) });
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_DELAY);
     prop.value.i.min = 0;
@@ -226,7 +225,8 @@ bool AFU420Device::create_strobe ()
     prop.value.i.step = 1;
     prop.value.i.value = get_strobe(strobe_parameter::first_strobe_delay);
     prop.value.i.default_value = prop.value.i.value;
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_DURATION);
@@ -235,7 +235,8 @@ bool AFU420Device::create_strobe ()
     prop.value.i.step = 1;
     prop.value.i.value = get_strobe(strobe_parameter::first_strobe_duration);
     prop.value.i.default_value = prop.value.i.value;
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_DELAY_SECOND);
@@ -245,7 +246,8 @@ bool AFU420Device::create_strobe ()
     prop.value.i.value = get_strobe(strobe_parameter::second_strobe_delay);
     prop.value.i.default_value = prop.value.i.value;
 
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_DURATION_SECOND);
@@ -254,13 +256,15 @@ bool AFU420Device::create_strobe ()
     prop.value.i.step = 1;
     prop.value.i.value = get_strobe(strobe_parameter::second_strobe_duration);
     prop.value.i.default_value = prop.value.i.value;
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_POLARITY);
     prop.value.b.value = false;
     prop.value.b.default_value = false;
-    property_handler->properties.push_back({std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN) });
 
     prop = create_empty_property(TCAM_PROPERTY_STROBE_MODE);
     prop.value.i.min = 1;
@@ -273,13 +277,14 @@ bool AFU420Device::create_strobe ()
     mode_map.emplace("Single Strobe", 1);
     mode_map.emplace("Double Strobe", 2);
 
-    property_handler->properties.push_back({std::make_shared<PropertyEnumeration>(property_handler, prop, mode_map, Property::ENUM)});
+    property_handler->properties.push_back({ std::make_shared<PropertyEnumeration>(
+        property_handler, prop, mode_map, Property::ENUM) });
 
     return true;
 }
 
 
-bool AFU420Device::create_offsets ()
+bool AFU420Device::create_offsets()
 {
     auto prop = create_empty_property(TCAM_PROPERTY_OFFSET_X);
 
@@ -290,10 +295,7 @@ bool AFU420Device::create_offsets ()
 
     auto property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
-
-
-
+    property_handler->properties.push_back({ property });
 
 
     prop = create_empty_property(TCAM_PROPERTY_OFFSET_Y);
@@ -305,9 +307,7 @@ bool AFU420Device::create_offsets ()
 
     property = std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER);
 
-    property_handler->properties.push_back({property});
-
-
+    property_handler->properties.push_back({ property });
 
 
     prop = create_empty_property(TCAM_PROPERTY_OFFSET_AUTO);
@@ -316,18 +316,19 @@ bool AFU420Device::create_offsets ()
     prop.value.b.default_value = false;
     prop.flags = TCAM_PROPERTY_FLAG_REQUIRES_RESTART;
 
-    auto property_auto = std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
+    auto property_auto =
+        std::make_shared<PropertyBoolean>(property_handler, prop, Property::BOOLEAN);
 
-    property_handler->properties.push_back({property_auto});
+    property_handler->properties.push_back({ property_auto });
 
     return true;
 }
 
 
-bool AFU420Device::create_binning ()
+bool AFU420Device::create_binning()
 {
-    auto ptr = create_binning_property(TCAM_PROPERTY_BINNING_HORIZONTAL,
-                                       property_handler, 1, 8, 1, 1);
+    auto ptr =
+        create_binning_property(TCAM_PROPERTY_BINNING_HORIZONTAL, property_handler, 1, 8, 1, 1);
 
     if (ptr == nullptr)
     {
@@ -336,11 +337,10 @@ bool AFU420Device::create_binning ()
     else
     {
         ptr->set_flags(TCAM_PROPERTY_FLAG_REQUIRES_RESTART);
-        property_handler->properties.push_back({ptr});
+        property_handler->properties.push_back({ ptr });
     }
 
-    ptr = create_binning_property(TCAM_PROPERTY_BINNING_VERTICAL,
-                                  property_handler, 1, 8, 1, 1);
+    ptr = create_binning_property(TCAM_PROPERTY_BINNING_VERTICAL, property_handler, 1, 8, 1, 1);
 
     if (ptr == nullptr)
     {
@@ -349,14 +349,14 @@ bool AFU420Device::create_binning ()
     else
     {
         ptr->set_flags(TCAM_PROPERTY_FLAG_REQUIRES_RESTART);
-        property_handler->properties.push_back({ptr});
+        property_handler->properties.push_back({ ptr });
     }
 
     return true;
 }
 
 
-bool AFU420Device::create_ois ()
+bool AFU420Device::create_ois()
 {
     tcam_device_property prop = create_empty_property(TCAM_PROPERTY_OIS_MODE);
 
@@ -374,9 +374,10 @@ bool AFU420Device::create_ois ()
     map.emplace("ON with center cervo", 4);
     map.emplace("ON Circle Mode", 5);
 
-    auto ois_mode = std::make_shared<PropertyEnumeration>(property_handler, prop, map, Property::ENUM);
+    auto ois_mode =
+        std::make_shared<PropertyEnumeration>(property_handler, prop, map, Property::ENUM);
 
-    property_handler->properties.push_back({ois_mode});
+    property_handler->properties.push_back({ ois_mode });
 
     int64_t x_pos = 0;
     int64_t y_pos = 0;
@@ -388,7 +389,8 @@ bool AFU420Device::create_ois ()
     prop.value.i.step = 1;
     prop.value.i.value = x_pos;
     prop.value.i.default_value = 0;
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     prop = create_empty_property(TCAM_PROPERTY_OIS_POS_Y);
@@ -397,14 +399,15 @@ bool AFU420Device::create_ois ()
     prop.value.i.step = 1;
     prop.value.i.value = y_pos;
     prop.value.i.default_value = 0;
-    property_handler->properties.push_back({std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER)});
+    property_handler->properties.push_back(
+        { std::make_shared<PropertyInteger>(property_handler, prop, Property::INTEGER) });
 
 
     return true;
 }
 
 
-void AFU420Device::create_properties ()
+void AFU420Device::create_properties()
 {
     create_exposure();
     create_gain();
@@ -425,9 +428,9 @@ void AFU420Device::create_properties ()
 }
 
 
-bool AFU420Device::update_property (tcam::AFU420Device::property_description &desc)
+bool AFU420Device::update_property(tcam::AFU420Device::property_description& desc)
 {
-    switch(desc.property->get_ID())
+    switch (desc.property->get_ID())
     {
         case TCAM_PROPERTY_EXPOSURE:
         {
@@ -561,7 +564,8 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
         }
         default:
         {
-            SPDLOG_WARN("Property {} does not belong to this device", desc.property->get_name().c_str());
+            SPDLOG_WARN("Property {} does not belong to this device",
+                        desc.property->get_name().c_str());
             break;
         }
     }
@@ -570,7 +574,7 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
 }
 
 
-int64_t AFU420Device::get_exposure ()
+int64_t AFU420Device::get_exposure()
 {
     uint16_t value = 0;
 
@@ -588,7 +592,7 @@ int64_t AFU420Device::get_exposure ()
 }
 
 
-bool AFU420Device::set_exposure (int64_t exposure)
+bool AFU420Device::set_exposure(int64_t exposure)
 {
     uint16_t value = exposure;
 
@@ -607,7 +611,7 @@ bool AFU420Device::set_exposure (int64_t exposure)
 }
 
 
-int64_t AFU420Device::get_gain ()
+int64_t AFU420Device::get_gain()
 {
     uint16_t value = 0;
 
@@ -625,7 +629,7 @@ int64_t AFU420Device::get_gain ()
 }
 
 
-bool AFU420Device::set_gain (int64_t gain)
+bool AFU420Device::set_gain(int64_t gain)
 {
     uint16_t value = gain;
 
@@ -644,7 +648,7 @@ bool AFU420Device::set_gain (int64_t gain)
 }
 
 
-int64_t AFU420Device::get_focus ()
+int64_t AFU420Device::get_focus()
 {
     uint16_t value = 0;
 
@@ -663,7 +667,7 @@ int64_t AFU420Device::get_focus ()
 }
 
 
-bool AFU420Device::set_focus (int64_t focus)
+bool AFU420Device::set_focus(int64_t focus)
 {
     uint16_t value = focus;
 
@@ -682,7 +686,7 @@ bool AFU420Device::set_focus (int64_t focus)
 }
 
 
-bool AFU420Device::set_shutter (bool open)
+bool AFU420Device::set_shutter(bool open)
 {
     unsigned short ushValue = open ? 0xFFFF : 0x0;
     int ret = control_write(BASIC_PC_TO_USB_SHUTTER, ushValue);
@@ -696,7 +700,7 @@ bool AFU420Device::set_shutter (bool open)
 }
 
 
-bool AFU420Device::get_shutter ()
+bool AFU420Device::get_shutter()
 {
     unsigned short ushValue = 0x0;
     int ret = control_read(ushValue, BASIC_PC_TO_USB_SHUTTER);
@@ -718,7 +722,7 @@ bool AFU420Device::get_shutter ()
 }
 
 
-int64_t AFU420Device::get_hdr ()
+int64_t AFU420Device::get_hdr()
 {
     uint16_t value = 0;
 
@@ -733,7 +737,7 @@ int64_t AFU420Device::get_hdr ()
 }
 
 
-bool AFU420Device::set_hdr (int64_t hdr)
+bool AFU420Device::set_hdr(int64_t hdr)
 {
     if (hdr == 1)
     {
@@ -754,15 +758,23 @@ bool AFU420Device::set_hdr (int64_t hdr)
 }
 
 
-bool AFU420Device::get_color_gain_factor (color_gain eColor, double& dValue)
+bool AFU420Device::get_color_gain_factor(color_gain eColor, double& dValue)
 {
     unsigned short ushColor = 0;
     switch (eColor)
     {
-        case color_gain::ColorGainRed:        ushColor = 1; break;
-        case color_gain::ColorGainGreen1:     ushColor = 0; break;
-        case color_gain::ColorGainGreen2:     ushColor = 3; break;
-        case color_gain::ColorGainBlue:       ushColor = 2; break;
+        case color_gain::ColorGainRed:
+            ushColor = 1;
+            break;
+        case color_gain::ColorGainGreen1:
+            ushColor = 0;
+            break;
+        case color_gain::ColorGainGreen2:
+            ushColor = 3;
+            break;
+        case color_gain::ColorGainBlue:
+            ushColor = 2;
+            break;
         default:
             return false;
             break;
@@ -785,7 +797,7 @@ bool AFU420Device::get_color_gain_factor (color_gain eColor, double& dValue)
 }
 
 
-bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
+bool AFU420Device::set_color_gain_factor(color_gain eColor, int value)
 {
     double dValue = color_gain_to_camera(value);
 
@@ -803,12 +815,21 @@ bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
     ushValue |= (unsigned short)round(dValue * 256.0);
 
     unsigned short ushColor = 0;
-    switch( eColor )
+    switch (eColor)
     {
-        case color_gain::ColorGainRed:        ushColor = 1; break;;
-        case color_gain::ColorGainGreen1:     ushColor = 0; break;
-        case color_gain::ColorGainGreen2:     ushColor = 3; break;
-        case color_gain::ColorGainBlue:       ushColor = 2; break;
+        case color_gain::ColorGainRed:
+            ushColor = 1;
+            break;
+            ;
+        case color_gain::ColorGainGreen1:
+            ushColor = 0;
+            break;
+        case color_gain::ColorGainGreen2:
+            ushColor = 3;
+            break;
+        case color_gain::ColorGainBlue:
+            ushColor = 2;
+            break;
         default:
             return false;
     }
@@ -821,15 +842,18 @@ bool AFU420Device::set_color_gain_factor (color_gain eColor, int value)
         return false;
     }
 
-	return true;
+    return true;
 }
 
 
-int AFU420Device::read_strobe (strobe_data& strobe)
+int AFU420Device::read_strobe(strobe_data& strobe)
 {
     int ret = usb_device_->control_transfer(DEVICE_TO_HOST,
-                                            BASIC_PC_TO_USB_FLASH_STROBE, 0, 5,
-                                            (unsigned char*) &strobe,sizeof(strobe));
+                                            BASIC_PC_TO_USB_FLASH_STROBE,
+                                            0,
+                                            5,
+                                            (unsigned char*)&strobe,
+                                            sizeof(strobe));
 
     if (ret < 0)
     {
@@ -839,52 +863,59 @@ int AFU420Device::read_strobe (strobe_data& strobe)
 }
 
 
-int64_t AFU420Device::get_strobe (strobe_parameter param)
+int64_t AFU420Device::get_strobe(strobe_parameter param)
 {
     uint32_t value;
     int ret = 0;
-	if (param == strobe_parameter::polarity)
+    if (param == strobe_parameter::polarity)
     {
-		ret = control_read(value, BASIC_PC_TO_USB_FLASH_STROBE, 0, 5);
-	}
+        ret = control_read(value, BASIC_PC_TO_USB_FLASH_STROBE, 0, 5);
+    }
 
-	strobe_data tmp = {};
-	ret = read_strobe(tmp);
-	if (ret < 0)
+    strobe_data tmp = {};
+    ret = read_strobe(tmp);
+    if (ret < 0)
     {
         return -1;
-	}
+    }
 
     switch (param)
     {
-        case strobe_parameter::mode:                    value = tmp.mode; break;
-        case strobe_parameter::first_strobe_delay:      value = tmp.delay_control; break;
-        case strobe_parameter::first_strobe_duration:   value = tmp.width_high_ctrl; break;
-        case strobe_parameter::second_strobe_delay:     value = tmp.width_low_ctrl; break;
-        case strobe_parameter::second_strobe_duration:  value = tmp.width2_high_ctrl; break;
-        default: return -1;
+        case strobe_parameter::mode:
+            value = tmp.mode;
+            break;
+        case strobe_parameter::first_strobe_delay:
+            value = tmp.delay_control;
+            break;
+        case strobe_parameter::first_strobe_duration:
+            value = tmp.width_high_ctrl;
+            break;
+        case strobe_parameter::second_strobe_delay:
+            value = tmp.width_low_ctrl;
+            break;
+        case strobe_parameter::second_strobe_duration:
+            value = tmp.width2_high_ctrl;
+            break;
+        default:
+            return -1;
     };
     return value;
 }
 
 
-bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
+bool AFU420Device::set_strobe(strobe_parameter param, int64_t strobe)
 {
     uint16_t value = strobe;
     int ret = 0;
     if (param == strobe_parameter::mode)
     {
-        ret = usb_device_->control_transfer(HOST_TO_DEVICE,
-                                                BASIC_PC_TO_USB_FLASH_STROBE,
-                                                value, 0,
-                                                value);
+        ret = usb_device_->control_transfer(
+            HOST_TO_DEVICE, BASIC_PC_TO_USB_FLASH_STROBE, value, 0, value);
     }
     else
     {
-        ret = usb_device_->control_transfer(HOST_TO_DEVICE,
-                                                BASIC_PC_TO_USB_FLASH_STROBE,
-                                                0, (uint16_t)param,
-                                                value);
+        ret = usb_device_->control_transfer(
+            HOST_TO_DEVICE, BASIC_PC_TO_USB_FLASH_STROBE, 0, (uint16_t)param, value);
     }
 
     if (ret < 0)
@@ -897,7 +928,7 @@ bool AFU420Device::set_strobe (strobe_parameter param, int64_t strobe)
 }
 
 
-int64_t AFU420Device::get_ois_mode ()
+int64_t AFU420Device::get_ois_mode()
 {
     uint16_t mode = 0;
 
@@ -912,7 +943,7 @@ int64_t AFU420Device::get_ois_mode ()
 }
 
 
-bool AFU420Device::set_ois_mode (int64_t mode)
+bool AFU420Device::set_ois_mode(int64_t mode)
 {
     int ret = control_write(ADVANCED_PC_TO_USB_OIS_MODE, (uint16_t)mode);
 
@@ -926,13 +957,14 @@ bool AFU420Device::set_ois_mode (int64_t mode)
 }
 
 
-bool AFU420Device::get_ois_pos (int64_t& x_pos __attribute__((unused)), int64_t& y_pos __attribute__((unused)))
+bool AFU420Device::get_ois_pos(int64_t& x_pos __attribute__((unused)),
+                               int64_t& y_pos __attribute__((unused)))
 {
     return false;
 }
 
 
-bool AFU420Device::set_ois_pos (const int64_t& x_pos, const int64_t& y_pos)
+bool AFU420Device::set_ois_pos(const int64_t& x_pos, const int64_t& y_pos)
 {
     int ret = control_write(ADVANCED_PC_TO_USB_OIS_POS, (uint16_t)x_pos, (uint16_t)y_pos);
 

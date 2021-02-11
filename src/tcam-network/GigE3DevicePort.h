@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "GigE3UploadItem.h"
-
 #include "FirmwareUpgrade.h"
+#include "GigE3UploadItem.h"
 
 #include <pugi.h>
 #include <string>
@@ -35,20 +34,19 @@ namespace GigE3
 class IDevicePort
 {
 public:
-    virtual std::string name () = 0;
+    virtual std::string name() = 0;
 
 
 public:
-    virtual Status Configure (const std::string& name,
-                              const pugi::xml_node& portConfigElem) = 0;
+    virtual Status Configure(const std::string& name, const pugi::xml_node& portConfigElem) = 0;
 
     // Check whether all the items are consistent with the requirements of this device port
-    virtual Status CheckItems (const std::vector<UploadItem>& items) = 0;
+    virtual Status CheckItems(const std::vector<UploadItem>& items) = 0;
 
     // Upload all items through the device port
-    virtual Status UploadItems (IFirmwareWriter& dev,
-                                const std::vector<UploadItem>& items,
-                                tReportProgressFunc progressFunc) = 0;
+    virtual Status UploadItems(IFirmwareWriter& dev,
+                               const std::vector<UploadItem>& items,
+                               tReportProgressFunc progressFunc) = 0;
 }; /* class IDevicePort */
 
 } /* namespace GigE3 */

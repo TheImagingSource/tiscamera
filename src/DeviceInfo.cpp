@@ -21,12 +21,10 @@
 
 using namespace tcam;
 
-DeviceInfo::DeviceInfo (const struct tcam_device_info& device_desc)
-    : device(device_desc)
-{}
+DeviceInfo::DeviceInfo(const struct tcam_device_info& device_desc) : device(device_desc) {}
 
 
-DeviceInfo::DeviceInfo ()
+DeviceInfo::DeviceInfo()
 {
     device.type = TCAM_DEVICE_TYPE_UNKNOWN;
 
@@ -36,50 +34,50 @@ DeviceInfo::DeviceInfo ()
 }
 
 
-DeviceInfo::DeviceInfo (const DeviceInfo& other)
+DeviceInfo::DeviceInfo(const DeviceInfo& other)
 {
     this->device = other.device;
 }
 
 
-DeviceInfo& DeviceInfo::operator= (const DeviceInfo& other)
+DeviceInfo& DeviceInfo::operator=(const DeviceInfo& other)
 {
     this->device = other.device;
     return *this;
 }
 
 
-struct tcam_device_info DeviceInfo::get_info () const
+struct tcam_device_info DeviceInfo::get_info() const
 {
     return device;
 }
 
 
-std::string DeviceInfo::get_name () const
+std::string DeviceInfo::get_name() const
 {
     return device.name;
 }
 
 
-std::string DeviceInfo::get_serial () const
+std::string DeviceInfo::get_serial() const
 {
     return device.serial_number;
 }
 
 
-std::string DeviceInfo::get_identifier () const
+std::string DeviceInfo::get_identifier() const
 {
     return device.identifier;
 }
 
 
-enum TCAM_DEVICE_TYPE DeviceInfo::get_device_type () const
+enum TCAM_DEVICE_TYPE DeviceInfo::get_device_type() const
 {
     return device.type;
 }
 
 
-std::string DeviceInfo::get_device_type_as_string () const
+std::string DeviceInfo::get_device_type_as_string() const
 {
     switch (device.type)
     {

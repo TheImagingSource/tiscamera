@@ -15,47 +15,50 @@
  */
 
 
+#include "Usb2Camera.h"
+
+#include "FileHandling.h"
+
 #include <iostream>
+#include <stdexcept>
 #include <string.h>
 #include <unistd.h>
-#include <stdexcept>
-
-#include "Usb2Camera.h"
-#include "FileHandling.h"
 
 static const short TIMEOUT = 10000;
 
-#define EEPROM_SIZE 16384
-#define DATA_SIZE   512
-#define FIRMWARE_END (EEPROM_SIZE - DATA_SIZE)
-#define FLAGS_LOCATION (FIRMWARE_END-1)
+#define EEPROM_SIZE     16384
+#define DATA_SIZE       512
+#define FIRMWARE_END    (EEPROM_SIZE - DATA_SIZE)
+#define FLAGS_LOCATION  (FIRMWARE_END - 1)
 #define PID_LOCATION_LO (0x5a)
 #define PID_LOCATION_HI (0x5b)
 
-#define min(a,b)            ((a<b)?(a):(b))
+#define min(a, b) ((a < b) ? (a) : (b))
 
 namespace tis
 {
 
-Usb2Camera::Usb2Camera (std::shared_ptr<UsbSession> session, device_info dev, unsigned int _interface):
-    UsbCamera(session, dev, _interface)
+Usb2Camera::Usb2Camera(std::shared_ptr<UsbSession> session,
+                       device_info dev,
+                       unsigned int _interface)
+    : UsbCamera(session, dev, _interface)
 {
     open();
 }
 
 
-Usb2Camera::~Usb2Camera ()
-{}
+Usb2Camera::~Usb2Camera() {}
 
 
-int Usb2Camera::get_firmware_version ()
+int Usb2Camera::get_firmware_version()
 {
     const int size = 2;
     int i = -1;
     unsigned char data[size];
 
     int ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_IN | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_CLASS,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_RECIPIENT_DEVICE
+                                          | LIBUSB_REQUEST_TYPE_CLASS,
                                       0x81,
                                       0x2d << 8,
                                       0x1 << 8,
@@ -65,7 +68,8 @@ int Usb2Camera::get_firmware_version ()
 
     if (ret < 0)
     {
-        throw std::runtime_error("Unable to read firmware version. Libusb returned " + std::to_string(ret) + ".");
+        throw std::runtime_error("Unable to read firmware version. Libusb returned "
+                                 + std::to_string(ret) + ".");
     }
     else
     {
@@ -75,55 +79,52 @@ int Usb2Camera::get_firmware_version ()
 }
 
 
-std::string Usb2Camera::get_firmware_version_string ()
+std::string Usb2Camera::get_firmware_version_string()
 {
     return std::to_string(get_firmware_version());
 }
 
 
-int Usb2Camera::delete_firmware (std::function<void(int)> /* progress */)
+int Usb2Camera::delete_firmware(std::function<void(int)> /* progress */)
 {
     return -1;
 }
 
 
-int Usb2Camera::usbbuffer_to_string (unsigned char* usbbuffer,
-                                     int buffer_size,
-                                     char* string,
-                                     int string_size )
+int Usb2Camera::usbbuffer_to_string(unsigned char* usbbuffer,
+                                    int buffer_size,
+                                    char* string,
+                                    int string_size)
 {
     int s = usbbuffer[0];
 
-    if ( s > buffer_size )
+    if (s > buffer_size)
     {
         return -1;
     }
 
-    if ( usbbuffer[1] != 0x03 )
+    if (usbbuffer[1] != 0x03)
     {
         return -1;
     }
 
-    if ( ( (s-2)/2 ) > string_size )
+    if (((s - 2) / 2) > string_size)
     {
         return -1;
     }
 
-    for (int i = 2; i < s; i+=2 )
-    {
-        string[ i/2 - 1 ] = usbbuffer[i];
-    }
+    for (int i = 2; i < s; i += 2) { string[i / 2 - 1] = usbbuffer[i]; }
 
     return 0;
 }
 
 
-int Usb2Camera::string_to_usbbuffer (unsigned char* usbbuffer, int buffer_size, const char* string)
+int Usb2Camera::string_to_usbbuffer(unsigned char* usbbuffer, int buffer_size, const char* string)
 {
-    size_t length = strlen((char*) string );
+    size_t length = strlen((char*)string);
     int len = length * 2 + 4;
 
-    if ( buffer_size < len )
+    if (buffer_size < len)
     {
         return 0;
     }
@@ -133,113 +134,124 @@ int Usb2Camera::string_to_usbbuffer (unsigned char* usbbuffer, int buffer_size, 
     unsigned int i;
     for (i = 0; i < length; i++)
     {
-        usbbuffer[ 2 + ( 2 * i ) ] = string[i];
-        usbbuffer[ 3 + ( 2 * i ) ] = 0x0;
+        usbbuffer[2 + (2 * i)] = string[i];
+        usbbuffer[3 + (2 * i)] = 0x0;
     }
 
-    usbbuffer[ 2 + ( 2 * i ) ] = 0x0;
-    usbbuffer[ 3 + ( 2 * i ) ] = 0x0;
+    usbbuffer[2 + (2 * i)] = 0x0;
+    usbbuffer[3 + (2 * i)] = 0x0;
 
 
     return len;
 }
 
 
-int Usb2Camera::download_firmware (std::vector<unsigned char>& firmware, std::function<void(int)> progress)
+int Usb2Camera::download_firmware(std::vector<unsigned char>& firmware,
+                                  std::function<void(int)> progress)
 {
     int ret;
     const int len = 64;
     unsigned short addr = 0;
     size_t max = firmware.size();
 
-    ret = libusb_control_transfer( this->dev_handle,
-                                   LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                   0x2,
-                                   0,
-                                   0xa1,
-                                   (unsigned char*)&addr,
-                                   2,
-                                   TIMEOUT);
+    ret = libusb_control_transfer(this->dev_handle,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                      | LIBUSB_RECIPIENT_DEVICE,
+                                  0x2,
+                                  0,
+                                  0xa1,
+                                  (unsigned char*)&addr,
+                                  2,
+                                  TIMEOUT);
     if (ret < 0)
-        throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+        throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret)
+                                 + ".");
 
-    usleep( 2000 );
-    for (unsigned int i = 0; i < max; i += len )
+    usleep(2000);
+    for (unsigned int i = 0; i < max; i += len)
     {
-        ret = libusb_control_transfer( this->dev_handle,
-                                       LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                       0x3, // No-Stop Serial Bus Request
-                                       0,
-                                       0xa0,
-                                       firmware.data()+i,
-                                       len,
-                                       TIMEOUT);
+        ret = libusb_control_transfer(this->dev_handle,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
+                                      0x3, // No-Stop Serial Bus Request
+                                      0,
+                                      0xa0,
+                                      firmware.data() + i,
+                                      len,
+                                      TIMEOUT);
         if (ret < 0)
         {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
         }
         else
         {
-            progress( i * 100 / max);
+            progress(i * 100 / max);
         }
     }
     return 0;
 }
 
 
-int Usb2Camera::upload_firmware_file (unsigned char* data, unsigned int size, std::function<void(int)> progress)
+int Usb2Camera::upload_firmware_file(unsigned char* data,
+                                     unsigned int size,
+                                     std::function<void(int)> progress)
 {
     int ret = -1;
 
     const int len = 32;
     unsigned char buffer[256] = { 0 };
 
-    for (unsigned int i = 0; i < size; i+=len )
+    for (unsigned int i = 0; i < size; i += len)
     {
-        buffer[0] = ( i >> 8 ) & 0xff;
+        buffer[0] = (i >> 8) & 0xff;
         buffer[1] = i & 0xff;
 
-        memcpy (buffer + 2, data + i, len);
+        memcpy(buffer + 2, data + i, len);
 
-        ret = libusb_control_transfer( this->dev_handle,
-                                       LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                       0x2,
-                                       0,
-                                       0xa1,
-                                       buffer,
-                                       len + 2,
-                                       TIMEOUT);
-        if ( ret < 0 )
+        ret = libusb_control_transfer(this->dev_handle,
+                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
+                                      0x2,
+                                      0,
+                                      0xa1,
+                                      buffer,
+                                      len + 2,
+                                      TIMEOUT);
+        if (ret < 0)
         {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
         }
-        if ( ( i % 1024 ) == 0 )
+        if ((i % 1024) == 0)
         {
-            progress(i/size);
-        }
-
-
-        ret = libusb_control_transfer( this->dev_handle,
-                                       LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                       0x2, // No-Stop Serial Bus Request
-                                       0,
-                                       0xa0,
-                                       buffer,
-                                       len,
-                                       TIMEOUT);
-        if ( ret < 0 )
-        {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+            progress(i / size);
         }
 
-        usleep( 5000 );
+
+        ret = libusb_control_transfer(this->dev_handle,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
+                                      0x2, // No-Stop Serial Bus Request
+                                      0,
+                                      0xa0,
+                                      buffer,
+                                      len,
+                                      TIMEOUT);
+        if (ret < 0)
+        {
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
+        }
+
+        usleep(5000);
     }
 
     return ret;
 }
 
 
-char* Usb2Camera::read_string (int index)
+char* Usb2Camera::read_string(int index)
 {
     unsigned char usb_buffer[255];
     static char string[255];
@@ -247,60 +259,61 @@ char* Usb2Camera::read_string (int index)
     int addr;
     int len;
 
-    read_eeprom(0x60 + ( index * 2 ), usb_buffer, 2 );
+    read_eeprom(0x60 + (index * 2), usb_buffer, 2);
 
     addr = usb_buffer[0] + 0x54;
 
     len = usb_buffer[1];
 
-    read_eeprom(addr, usb_buffer, len );
-    usbbuffer_to_string( usb_buffer, len, string, strsize );
+    read_eeprom(addr, usb_buffer, len);
+    usbbuffer_to_string(usb_buffer, len, string, strsize);
 
     return string;
 }
 
 
-void Usb2Camera::get_strings (char* strvendor,
-                              char* strproduct,
-                              char* strserial,
-                              int bufsize )
+void Usb2Camera::get_strings(char* strvendor, char* strproduct, char* strserial, int bufsize)
 {
     libusb_device_descriptor usbdev;
     int ret = libusb_get_device_descriptor(libusb_get_device(this->dev_handle), &usbdev);
 
     if (ret < 0)
     {
-        throw std::runtime_error("Unable to retrieve descrptor. Libusb returned " + std::to_string(ret) + ".");
+        throw std::runtime_error("Unable to retrieve descrptor. Libusb returned "
+                                 + std::to_string(ret) + ".");
     }
 
-    libusb_get_string_descriptor_ascii( this->dev_handle, usbdev.iManufacturer,(unsigned char*) strvendor, bufsize );
-    libusb_get_string_descriptor_ascii( this->dev_handle, usbdev.iProduct, (unsigned char*)strproduct, bufsize );
-    libusb_get_string_descriptor_ascii( this->dev_handle, usbdev.iSerialNumber, (unsigned char*)strserial, bufsize );
+    libusb_get_string_descriptor_ascii(
+        this->dev_handle, usbdev.iManufacturer, (unsigned char*)strvendor, bufsize);
+    libusb_get_string_descriptor_ascii(
+        this->dev_handle, usbdev.iProduct, (unsigned char*)strproduct, bufsize);
+    libusb_get_string_descriptor_ascii(
+        this->dev_handle, usbdev.iSerialNumber, (unsigned char*)strserial, bufsize);
 }
 
 
-char* Usb2Camera::read_string_from_image ( unsigned char* image, int index )
+char* Usb2Camera::read_string_from_image(unsigned char* image, int index)
 {
     static char static_buffer[255];
 
     int addr = image[0x60 + index * 2] + 0x54;
     int len = image[0x60 + index * 2 + 1];
 
-    usbbuffer_to_string( image + addr, len, static_buffer, sizeof(static_buffer) );
+    usbbuffer_to_string(image + addr, len, static_buffer, sizeof(static_buffer));
 
     return static_buffer;
 }
 
-bool Usb2Camera::apply_strings ( const char** strings, unsigned char* eeprom_image )
+bool Usb2Camera::apply_strings(const char** strings, unsigned char* eeprom_image)
 {
     int pos0 = 0xbe;
-    int len0 = string_to_usbbuffer( eeprom_image + pos0, 512 - pos0, strings[0] );
+    int len0 = string_to_usbbuffer(eeprom_image + pos0, 512 - pos0, strings[0]);
     int pos1 = pos0 + len0;
-    int len1 = string_to_usbbuffer( eeprom_image + pos1, 512 - pos1, strings[1] );
+    int len1 = string_to_usbbuffer(eeprom_image + pos1, 512 - pos1, strings[1]);
     int pos2 = pos1 + len1;
-    int len2 = string_to_usbbuffer( eeprom_image + pos2, 512 - pos2, strings[2] );
+    int len2 = string_to_usbbuffer(eeprom_image + pos2, 512 - pos2, strings[2]);
 
-    if( !len0 || !len1 || !len2 )
+    if (!len0 || !len1 || !len2)
     {
         return false;
     }
@@ -315,43 +328,43 @@ bool Usb2Camera::apply_strings ( const char** strings, unsigned char* eeprom_ima
     return true;
 }
 
-bool Usb2Camera::patch_strings (const char* model,
-                                const char* vendor,
-                                const char* serial,
-                                unsigned char* eeprom_image)
+bool Usb2Camera::patch_strings(const char* model,
+                               const char* vendor,
+                               const char* serial,
+                               unsigned char* eeprom_image)
 {
     const char* strings[3] = { 0 };
 
-    for (unsigned int i = 0; i < 3; ++i )
+    for (unsigned int i = 0; i < 3; ++i)
     {
-        char* str = read_string_from_image( eeprom_image, i );
-        if( !strcmp( str, "vv" ) )
+        char* str = read_string_from_image(eeprom_image, i);
+        if (!strcmp(str, "vv"))
         {
             strings[i] = vendor;
         }
-        else if( !strcmp( str, "pp") )
+        else if (!strcmp(str, "pp"))
         {
             strings[i] = model;
         }
-        else if( !strcmp( str, "123") )
+        else if (!strcmp(str, "123"))
         {
             strings[i] = serial;
         }
     }
 
-    for (unsigned int i = 0; i < 3; ++i )
+    for (unsigned int i = 0; i < 3; ++i)
     {
-        if( !strings[i] ) return false;
+        if (!strings[i])
+            return false;
     }
 
-    return apply_strings( strings, eeprom_image );
-
+    return apply_strings(strings, eeprom_image);
 }
 
 
-bool Usb2Camera::upload_firmware (const std::string& firmware_package,
-                                  const std::string& /* firmware */,
-                                  std::function<void(int)> progress)
+bool Usb2Camera::upload_firmware(const std::string& firmware_package,
+                                 const std::string& /* firmware */,
+                                 std::function<void(int)> progress)
 {
     // This function loads a single firmware description
     // patches the file with the corresponding camera specific values
@@ -386,11 +399,9 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
     char serial[128];
     get_strings(vendor, model, serial, 128);
 
-    auto map_progress = [] ( std::function<void(int)> progress, int begin, int end )
-    {
-        return [=]( int x )
-        {
-            progress( begin + x * (end-begin) / 100 );
+    auto map_progress = [](std::function<void(int)> progress, int begin, int end) {
+        return [=](int x) {
+            progress(begin + x * (end - begin) / 100);
         };
     };
 
@@ -399,7 +410,7 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 
     upload_firmware_file(&fw[0], fw.size(), map_progress(progress, 0, 49));
 
-    std::vector<unsigned char> buffer (fw.size());
+    std::vector<unsigned char> buffer(fw.size());
 
     try
     {
@@ -421,11 +432,11 @@ bool Usb2Camera::upload_firmware (const std::string& firmware_package,
 }
 
 
-int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
+int Usb2Camera::set_mode(UVC_COMPLIANCE mode)
 {
     unsigned short addr = FLAGS_LOCATION;
     unsigned char buffer[3];
-    buffer[0] = ( addr >> 8 ) & 0xff;
+    buffer[0] = (addr >> 8) & 0xff;
     buffer[1] = addr & 0xff;
 
     unsigned short pid;
@@ -447,9 +458,10 @@ int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
         ret = set_productid(pid);
         buffer[2] = 0 & 0xff;
     }
-    usleep (10000);
+    usleep(10000);
     ret = libusb_control_transfer(this->dev_handle,
-                                  LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_VENDOR,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE
+                                      | LIBUSB_REQUEST_TYPE_VENDOR,
                                   0x2,
                                   0,
                                   0xa1,
@@ -463,7 +475,8 @@ int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
     }
 
     ret = libusb_control_transfer(this->dev_handle,
-                                  LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE | LIBUSB_REQUEST_TYPE_VENDOR,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_RECIPIENT_DEVICE
+                                      | LIBUSB_REQUEST_TYPE_VENDOR,
                                   0x2,
                                   0,
                                   0xa1,
@@ -475,7 +488,7 @@ int Usb2Camera::set_mode (UVC_COMPLIANCE mode)
 }
 
 
-UVC_COMPLIANCE Usb2Camera::get_mode ()
+UVC_COMPLIANCE Usb2Camera::get_mode()
 {
     unsigned char mode;
 
@@ -488,23 +501,22 @@ UVC_COMPLIANCE Usb2Camera::get_mode ()
         throw;
     }
 
-    if ( mode & 0x1)
+    if (mode & 0x1)
         return CAMERA_INTERFACE_MODE_UVC;
     else
         return CAMERA_INTERFACE_MODE_PROPRIETARY;
-
 }
 
-unsigned int Usb2Camera::get_eeprom_size ()
+unsigned int Usb2Camera::get_eeprom_size()
 {
     unsigned char bufa[64];
     unsigned char bufb[64];
 
-    if (!read_eeprom (0, bufa, sizeof(bufa)))
+    if (!read_eeprom(0, bufa, sizeof(bufa)))
     {
         return 0;
     }
-    if (!read_eeprom (16384, bufb, sizeof(bufb)))
+    if (!read_eeprom(16384, bufb, sizeof(bufb)))
     {
         return 0;
     }
@@ -516,73 +528,37 @@ unsigned int Usb2Camera::get_eeprom_size ()
     return 32768;
 }
 
-int Usb2Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
+int Usb2Camera::write_eeprom(unsigned int addr, unsigned char* data, unsigned int size)
 {
     int ret = 0;
     unsigned char buffer[256] = { 0 };
-    int len = ( size < 32 ) ? size : 32;
+    int len = (size < 32) ? size : 32;
     unsigned int i;
-    for (i = 0; (i + len) < size; i += len )
+    for (i = 0; (i + len) < size; i += len)
     {
-        buffer[0] = ( (addr+i) >> 8 ) & 0xff;
-        buffer[1] = (addr+i) & 0xff;
+        buffer[0] = ((addr + i) >> 8) & 0xff;
+        buffer[1] = (addr + i) & 0xff;
 
-        memcpy( buffer + 2, data + i, len );
+        memcpy(buffer + 2, data + i, len);
 
         ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
                                       0x2,
                                       0,
                                       0xa1,
                                       buffer,
                                       len + 2,
                                       TIMEOUT);
-        if( ret < 0 )
+        if (ret < 0)
         {
             throw std::runtime_error("Error while requesting write permission. Libusb returned "
                                      + std::to_string(ret) + ".");
         }
 
         ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                      0x2, // No-Stop Serial Bus Request
-                                      0,
-                                      0xa0,
-                                      buffer,
-                                      len,
-                                      TIMEOUT);
-        if ( ret < 0 )
-        {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
-        }
-
-        usleep( 5000 );
-    }
-
-    if ( (ret>=0) && ( i < (size ) ) )
-    {
-        len = (size-1) - i;
-
-        buffer[0] = ( (addr+i) >> 8 ) & 0xff;
-        buffer[1] = (addr+i) & 0xff;
-
-        memcpy( buffer + 2, data + i, len );
-
-        ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-                                      0x2,
-                                      0,
-                                      0xa1,
-                                      buffer,
-                                      len + 2,
-                                      TIMEOUT);
-        if ( ret < 0 )
-        {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
-        }
-
-        ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
                                       0x2, // No-Stop Serial Bus Request
                                       0,
                                       0xa0,
@@ -591,7 +567,50 @@ int Usb2Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned i
                                       TIMEOUT);
         if (ret < 0)
         {
-            throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
+        }
+
+        usleep(5000);
+    }
+
+    if ((ret >= 0) && (i < (size)))
+    {
+        len = (size - 1) - i;
+
+        buffer[0] = ((addr + i) >> 8) & 0xff;
+        buffer[1] = (addr + i) & 0xff;
+
+        memcpy(buffer + 2, data + i, len);
+
+        ret = libusb_control_transfer(this->dev_handle,
+                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
+                                      0x2,
+                                      0,
+                                      0xa1,
+                                      buffer,
+                                      len + 2,
+                                      TIMEOUT);
+        if (ret < 0)
+        {
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
+        }
+
+        ret = libusb_control_transfer(this->dev_handle,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
+                                      0x2, // No-Stop Serial Bus Request
+                                      0,
+                                      0xa0,
+                                      buffer,
+                                      len,
+                                      TIMEOUT);
+        if (ret < 0)
+        {
+            throw std::runtime_error("Unable to request data. Libusb returned "
+                                     + std::to_string(ret) + ".");
         }
     }
 
@@ -599,19 +618,20 @@ int Usb2Camera::write_eeprom (unsigned int addr, unsigned char* data, unsigned i
 }
 
 
-int Usb2Camera::read_eeprom (unsigned int addr, unsigned char* data, unsigned int size)
+int Usb2Camera::read_eeprom(unsigned int addr, unsigned char* data, unsigned int size)
 {
     unsigned char tmp[2];
-    const int len = (64 < size) ? 64: size;
+    const int len = (64 < size) ? 64 : size;
     int ret;
 
-    memset( data, 0x0, size );
+    memset(data, 0x0, size);
 
-    tmp[0] = ( addr >> 8 ) & 0xff;
+    tmp[0] = (addr >> 8) & 0xff;
     tmp[1] = addr & 0xff;
 
     ret = libusb_control_transfer(this->dev_handle,
-                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                      | LIBUSB_RECIPIENT_DEVICE,
                                   0x3,
                                   0,
                                   0xa1,
@@ -620,24 +640,27 @@ int Usb2Camera::read_eeprom (unsigned int addr, unsigned char* data, unsigned in
                                   TIMEOUT);
     if (ret < 0)
     {
-        throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret) + ".");
+        throw std::runtime_error("Unable to request data. Libusb returned " + std::to_string(ret)
+                                 + ".");
     }
 
-    usleep( 2000 );
+    usleep(2000);
 
-    for (unsigned int i = 0; i < size; i += len )
+    for (unsigned int i = 0; i < size; i += len)
     {
         ret = libusb_control_transfer(this->dev_handle,
-                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR
+                                          | LIBUSB_RECIPIENT_DEVICE,
                                       0x2,
                                       0,
                                       0xa0,
-                                      (unsigned char*)data+i,
+                                      (unsigned char*)data + i,
                                       len,
                                       TIMEOUT);
-        if ( ret < 0 )
+        if (ret < 0)
         {
-            throw std::runtime_error("Error while reading data. Libusb returned " + std::to_string(ret) + ".");
+            throw std::runtime_error("Error while reading data. Libusb returned "
+                                     + std::to_string(ret) + ".");
         }
     }
 
@@ -645,31 +668,32 @@ int Usb2Camera::read_eeprom (unsigned int addr, unsigned char* data, unsigned in
 }
 
 
-int Usb2Camera::get_productid (unsigned short& pid)
+int Usb2Camera::get_productid(unsigned short& pid)
 {
     unsigned short addr = PID_LOCATION_LO;
     int ret;
     unsigned char buffer[2];
 
-    ret = read_eeprom (addr, buffer, 2);
+    ret = read_eeprom(addr, buffer, 2);
     pid = buffer[0] | buffer[1] << 8;
 
     return ret;
 }
 
 
-int Usb2Camera::set_productid (unsigned short pid)
+int Usb2Camera::set_productid(unsigned short pid)
 {
     unsigned short addr = PID_LOCATION_LO;
     int ret;
     unsigned char buffer[4];
-    buffer[0] = ( addr >> 8 ) & 0xff;
+    buffer[0] = (addr >> 8) & 0xff;
     buffer[1] = addr & 0xff;
     buffer[2] = pid & 0xff;
     buffer[3] = (pid >> 8) & 0xff;
 
     ret = libusb_control_transfer(this->dev_handle,
-                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR
+                                      | LIBUSB_RECIPIENT_DEVICE,
                                   0x2,
                                   0,
                                   0xa1,

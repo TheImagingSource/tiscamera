@@ -16,60 +16,56 @@
 
 #include "CaptureDevice.h"
 
-#include "logging.h"
-#include "utils.h"
-
 #include "CaptureDeviceImpl.h"
 #include "DeviceIndex.h"
+#include "logging.h"
+#include "utils.h"
 
 using namespace tcam;
 
 
-CaptureDevice::CaptureDevice ()
-    : impl(new CaptureDeviceImpl())
-{}
+CaptureDevice::CaptureDevice() : impl(new CaptureDeviceImpl()) {}
 
 
-CaptureDevice::CaptureDevice (const DeviceInfo& info)
-    : impl(new CaptureDeviceImpl())
+CaptureDevice::CaptureDevice(const DeviceInfo& info) : impl(new CaptureDeviceImpl())
 {
     impl->open_device(info);
 }
 
 
-CaptureDevice::~CaptureDevice ()
-{}
+CaptureDevice::~CaptureDevice() {}
 
 
-bool CaptureDevice::is_device_open () const
+bool CaptureDevice::is_device_open() const
 {
-    return impl->is_device_open ();
+    return impl->is_device_open();
 }
 
 
-DeviceInfo CaptureDevice::get_device () const
+DeviceInfo CaptureDevice::get_device() const
 {
     return impl->get_device();
 }
 
 
-bool CaptureDevice::register_device_lost_callback (tcam_device_lost_callback callback, void* user_data)
+bool CaptureDevice::register_device_lost_callback(tcam_device_lost_callback callback,
+                                                  void* user_data)
 {
     return impl->register_device_lost_callback(callback, user_data);
 }
 
 
-std::vector<Property*> CaptureDevice::get_available_properties ()
+std::vector<Property*> CaptureDevice::get_available_properties()
 {
     return impl->get_available_properties();
 }
 
 
-Property* CaptureDevice::get_property (TCAM_PROPERTY_ID id)
+Property* CaptureDevice::get_property(TCAM_PROPERTY_ID id)
 {
     auto properties = get_available_properties();
 
-    for (auto& p :  properties)
+    for (auto& p : properties)
     {
         if (p->get_ID() == id)
         {
@@ -80,7 +76,7 @@ Property* CaptureDevice::get_property (TCAM_PROPERTY_ID id)
 }
 
 
-Property* CaptureDevice::get_property_by_name (const std::string& name)
+Property* CaptureDevice::get_property_by_name(const std::string& name)
 {
     if (name.empty())
     {
@@ -89,7 +85,7 @@ Property* CaptureDevice::get_property_by_name (const std::string& name)
 
     auto properties = get_available_properties();
 
-    for (auto& p :  properties)
+    for (auto& p : properties)
     {
         if (p->get_name().compare(name) == 0)
         {
@@ -100,7 +96,7 @@ Property* CaptureDevice::get_property_by_name (const std::string& name)
 }
 
 
-bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const int64_t& value)
+bool CaptureDevice::set_property(TCAM_PROPERTY_ID id, const int64_t& value)
 {
     auto vec = get_available_properties();
 
@@ -119,7 +115,7 @@ bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const int64_t& value)
 }
 
 
-bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const double& value)
+bool CaptureDevice::set_property(TCAM_PROPERTY_ID id, const double& value)
 {
     auto vec = get_available_properties();
 
@@ -138,7 +134,7 @@ bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const double& value)
 }
 
 
-bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const bool& value)
+bool CaptureDevice::set_property(TCAM_PROPERTY_ID id, const bool& value)
 {
     auto vec = get_available_properties();
 
@@ -157,7 +153,7 @@ bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const bool& value)
 }
 
 
-bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const std::string& value)
+bool CaptureDevice::set_property(TCAM_PROPERTY_ID id, const std::string& value)
 {
     auto vec = get_available_properties();
 
@@ -176,50 +172,49 @@ bool CaptureDevice::set_property (TCAM_PROPERTY_ID id, const std::string& value)
 }
 
 
-std::vector<VideoFormatDescription> CaptureDevice::get_available_video_formats () const
+std::vector<VideoFormatDescription> CaptureDevice::get_available_video_formats() const
 {
     return impl->get_available_video_formats();
 }
 
 
-bool CaptureDevice::set_video_format (const VideoFormat& new_format)
+bool CaptureDevice::set_video_format(const VideoFormat& new_format)
 {
     return impl->set_video_format(new_format);
 }
 
 
-VideoFormat CaptureDevice::get_active_video_format () const
+VideoFormat CaptureDevice::get_active_video_format() const
 {
     return impl->get_active_video_format();
 }
 
 
-bool CaptureDevice::start_stream (std::shared_ptr<SinkInterface> sink)
+bool CaptureDevice::start_stream(std::shared_ptr<SinkInterface> sink)
 {
     return impl->start_stream(sink);
 }
 
 
-bool CaptureDevice::stop_stream ()
+bool CaptureDevice::stop_stream()
 {
     return impl->stop_stream();
 }
 
 
-std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial, TCAM_DEVICE_TYPE type)
+std::shared_ptr<CaptureDevice> tcam::open_device(const std::string& serial, TCAM_DEVICE_TYPE type)
 {
-    auto _open = [](const DeviceInfo& info) -> std::shared_ptr<CaptureDevice>
-              {
-                  try
-                  {
-                      return std::make_shared<CaptureDevice>(info);
-                  }
-                  catch (const std::exception& err)
-                  {
-                      SPDLOG_ERROR("Could not open CaptureDevice. Exception:\"{}\"", err.what());
-                      return nullptr;
-                  }
-              };
+    auto _open = [](const DeviceInfo& info) -> std::shared_ptr<CaptureDevice> {
+        try
+        {
+            return std::make_shared<CaptureDevice>(info);
+        }
+        catch (const std::exception& err)
+        {
+            SPDLOG_ERROR("Could not open CaptureDevice. Exception:\"{}\"", err.what());
+            return nullptr;
+        }
+    };
 
 
     DeviceIndex index;
@@ -228,8 +223,7 @@ std::shared_ptr<CaptureDevice> tcam::open_device (const std::string& serial, TCA
 
 
         if ((d.get_serial().compare(serial) == 0 || serial.empty())
-            &&
-            (type == TCAM_DEVICE_TYPE_UNKNOWN || d.get_device_type() == type))
+            && (type == TCAM_DEVICE_TYPE_UNKNOWN || d.get_device_type() == type))
         {
             return _open(d);
         }

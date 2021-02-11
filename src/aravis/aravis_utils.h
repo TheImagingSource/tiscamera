@@ -17,12 +17,9 @@
 #ifndef TCAM_ARAVIS_UTILS_H
 #define TCAM_ARAVIS_UTILS_H
 
-#include "Properties.h"
-
-#include "arv.h"
-
 #include "DeviceInfo.h"
-
+#include "Properties.h"
+#include "arv.h"
 #include "compiler_defines.h"
 
 // VISIBILITY_INTERNAL
@@ -30,21 +27,21 @@
 namespace tcam
 {
 
-std::shared_ptr<Property> create_property (ArvCamera* camera,
+std::shared_ptr<Property> create_property(ArvCamera* camera,
                                           ArvGcNode* node,
                                           std::shared_ptr<PropertyImpl> impl);
 
 
-uint32_t aravis2fourcc (uint32_t aravis);
-uint32_t fourcc2aravis (uint32_t fourcc);
+uint32_t aravis2fourcc(uint32_t aravis);
+uint32_t fourcc2aravis(uint32_t fourcc);
 
-unsigned int get_gige_device_count ();
+unsigned int get_gige_device_count();
 
-std::vector<DeviceInfo> get_gige_device_list ();
+std::vector<DeviceInfo> get_gige_device_list();
 
-unsigned int get_aravis_device_count ();
+unsigned int get_aravis_device_count();
 
-std::vector<DeviceInfo> get_aravis_device_list ();
+std::vector<DeviceInfo> get_aravis_device_list();
 
 } /* namespace tcam */
 

@@ -2,9 +2,9 @@
 #pragma once
 
 #include <atomic>
-#include <mutex>
 #include <cassert>
 #include <condition_variable>
+#include <mutex>
 
 namespace threading
 {
@@ -12,54 +12,57 @@ namespace threading
 class latch
 {
 public:
-    explicit latch( int cnt = 0 ) noexcept
-        : count_( cnt )
-    {
-    }
+    explicit latch(int cnt = 0) noexcept : count_(cnt) {}
     ~latch() = default;
 
-    void    count_down() noexcept
+    void count_down() noexcept
     {
-        std::unique_lock<std::mutex> lck( signal_locked_ );
-        int res = count_.fetch_sub( 1 );
-        if( res == 1 ) {
+        std::unique_lock<std::mutex> lck(signal_locked_);
+        int res = count_.fetch_sub(1);
+        if (res == 1)
+        {
             signal_.notify_all();
         }
     }
-    void    wait() noexcept
+    void wait() noexcept
     {
-        if( count_ == 0 ) {       // if count is already 0, we don't have to wait
+        if (count_ == 0)
+        { // if count is already 0, we don't have to wait
             return;
         }
-        std::unique_lock<std::mutex> lck( signal_locked_ );
-        signal_.wait( lck, [this] { return count_ == 0; } );     // count is still > 0, so wait on the signal
+        std::unique_lock<std::mutex> lck(signal_locked_);
+        signal_.wait(lck,
+                     [this] { return count_ == 0; }); // count is still > 0, so wait on the signal
     }
-    bool    try_wait() noexcept
+    bool try_wait() noexcept
     {
         return count_ == 0;
     }
-    void    count_down_and_wait() noexcept
+    void count_down_and_wait() noexcept
     {
-        std::unique_lock<std::mutex> lck( signal_locked_ );
-        int res = count_.fetch_sub( 1 );
-        if( res > 1 ) {
-            signal_.wait( lck, [this]{ return count_ == 0; } );     // count is still > 0, so wait on the signal
+        std::unique_lock<std::mutex> lck(signal_locked_);
+        int res = count_.fetch_sub(1);
+        if (res > 1)
+        {
+            signal_.wait(
+                lck, [this] { return count_ == 0; }); // count is still > 0, so wait on the signal
         }
         else
         {
-            signal_.notify_all();    // we were the last
+            signal_.notify_all(); // we were the last
         }
     }
 
-    void    reset( int cnt ) noexcept
+    void reset(int cnt) noexcept
     {
         count_ = cnt;
     }
-private:
-    std::atomic<int>        count_;
 
-    std::mutex              signal_locked_;
+private:
+    std::atomic<int> count_;
+
+    std::mutex signal_locked_;
 
     std::condition_variable signal_;
 };
-}
+} // namespace threading

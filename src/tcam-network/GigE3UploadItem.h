@@ -17,9 +17,9 @@
 #pragma once
 
 #include <map>
-#include <vector>
 #include <memory>
 #include <stdint.h>
+#include <vector>
 
 typedef uint8_t byte;
 

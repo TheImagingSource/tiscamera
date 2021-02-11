@@ -17,29 +17,24 @@
 #include "CameraListHolder.h"
 
 #include "CameraDiscovery.h"
-
-#include "tcam-semaphores.h"
 #include "aravis_utils.h"
-
-#include <sys/sem.h>     /* semaphore functions and structs.     */
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/msg.h>
-
 #include "gige-daemon.h"
+#include "tcam-semaphores.h"
 
-#include <stdlib.h>
-#include <sstream>
 #include <cstring>
-
-#include <sys/types.h>   /* various type definitions.            */
-#include <sys/ipc.h>     /* general SysV IPC structures          */
+#include <sstream>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/ipc.h> /* general SysV IPC structures          */
+#include <sys/msg.h>
+#include <sys/sem.h> /* semaphore functions and structs.     */
+#include <sys/shm.h>
+#include <sys/types.h> /* various type definitions.            */
 
 using namespace tis;
 
 
-CameraListHolder::CameraListHolder ()
-    : continue_loop(true)
+CameraListHolder::CameraListHolder() : continue_loop(true)
 {
     // to understand shared memory use this guide:
     // http://beej.us/guide/bgipc/output/html/multipage/shm.html
@@ -63,7 +58,7 @@ CameraListHolder::CameraListHolder ()
 }
 
 
-CameraListHolder::~CameraListHolder ()
+CameraListHolder::~CameraListHolder()
 {
     continue_loop = false;
     if (work_thread.joinable())
@@ -75,7 +70,7 @@ CameraListHolder::~CameraListHolder ()
 }
 
 
-CameraListHolder& CameraListHolder::get_instance ()
+CameraListHolder& CameraListHolder::get_instance()
 {
     static CameraListHolder instance;
 
@@ -83,9 +78,9 @@ CameraListHolder& CameraListHolder::get_instance ()
 }
 
 
-std::vector<DeviceInfo> CameraListHolder::get_camera_list ()
+std::vector<DeviceInfo> CameraListHolder::get_camera_list()
 {
-    std::lock_guard<semaphore> lck( semaphore_id );
+    std::lock_guard<semaphore> lck(semaphore_id);
 
     struct tcam_gige_device_list* d = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
@@ -96,22 +91,19 @@ std::vector<DeviceInfo> CameraListHolder::get_camera_list ()
 
     std::vector<DeviceInfo> ret;
 
-    for (unsigned int i = 0; i < d->device_count; ++i)
-    {
-        ret.push_back(DeviceInfo(d->devices[i]));
-    }
+    for (unsigned int i = 0; i < d->device_count; ++i) { ret.push_back(DeviceInfo(d->devices[i])); }
 
     return ret;
 }
 
 
-std::vector<std::string> CameraListHolder::get_interface_list () const
+std::vector<std::string> CameraListHolder::get_interface_list() const
 {
     return interface_list;
 }
 
 
-void CameraListHolder::set_interface_list (std::vector<std::string>& interfaces)
+void CameraListHolder::set_interface_list(std::vector<std::string>& interfaces)
 {
     // std::mutex cam_lock;
     std::lock_guard<std::mutex> mutex_lock(mtx);
@@ -119,34 +111,29 @@ void CameraListHolder::set_interface_list (std::vector<std::string>& interfaces)
 }
 
 
-void CameraListHolder::run ()
-{
-}
+void CameraListHolder::run() {}
 
 
-void CameraListHolder::stop ()
+void CameraListHolder::stop()
 {
     this->continue_loop = false;
     cv.notify_all();
 }
 
 
-void CameraListHolder::index_loop ()
+void CameraListHolder::index_loop()
 {
-    while (continue_loop)
-    {
-        loop_function();
-    }
+    while (continue_loop) { loop_function(); }
 }
 
 
-static std::vector<tcam::DeviceInfo> get_aravis_list ()
+static std::vector<tcam::DeviceInfo> get_aravis_list()
 {
     return tcam::get_aravis_device_list();
 }
 
 
-void CameraListHolder::loop_function ()
+void CameraListHolder::loop_function()
 {
     std::unique_lock<std::mutex> lck(mtx);
 
@@ -161,19 +148,16 @@ void CameraListHolder::loop_function ()
     std::vector<tcam::DeviceInfo> aravis_list = get_aravis_list();
     std::vector<struct tcam_device_info> arv_list;
     arv_list.reserve(aravis_list.size());
-    for (const auto& e : aravis_list)
-    {
-        arv_list.push_back(e.get_info());
-    }
+    for (const auto& e : aravis_list) { arv_list.push_back(e.get_info()); }
 
     if (arv_list.size() > TCAM_DEVICE_LIST_MAX)
     {
         return;
     }
 
-    std::lock_guard<semaphore> lck2( semaphore_id );
+    std::lock_guard<semaphore> lck2(semaphore_id);
 
-    struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*) shmat(shmid, NULL, 0);
+    struct tcam_gige_device_list* tmp_ptr = (struct tcam_gige_device_list*)shmat(shmid, NULL, 0);
 
     tmp_ptr->device_count = arv_list.size();
 

@@ -15,39 +15,39 @@
  */
 
 #include "Property.h"
+
 #include "base_types.h"
 #include "logging.h"
 #include "utils.h"
 
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 #include <stdexcept>
 
 using namespace tcam;
 
 
-Property::Property ()
-    : value_type(UNDEFINED), prop(), ref_prop()
-{}
+Property::Property() : value_type(UNDEFINED), prop(), ref_prop() {}
 
 
-Property::Property (const tcam_device_property& property, VALUE_TYPE t)
+Property::Property(const tcam_device_property& property, VALUE_TYPE t)
     : value_type(t), prop(property), ref_prop(property)
-{}
+{
+}
 
 
-Property::Property (const tcam_device_property& property,
-                    const std::map<std::string, int>& mapping,
-                    VALUE_TYPE t)
+Property::Property(const tcam_device_property& property,
+                   const std::map<std::string, int>& mapping,
+                   VALUE_TYPE t)
     : value_type(t), prop(property), ref_prop(property), string_map(mapping)
-{}
+{
+}
 
 
-Property::~Property ()
-{}
+Property::~Property() {}
 
 
-void Property::reset ()
+void Property::reset()
 {
     SPDLOG_INFO("Resetting property to initial values.");
     prop = ref_prop;
@@ -56,7 +56,7 @@ void Property::reset ()
 }
 
 
-bool Property::update ()
+bool Property::update()
 {
     if (auto ptr = impl.lock())
     {
@@ -66,74 +66,74 @@ bool Property::update ()
 }
 
 
-TCAM_PROPERTY_ID Property::get_ID () const
+TCAM_PROPERTY_ID Property::get_ID() const
 {
     return prop.id;
 }
 
 
-std::string Property::get_name () const
+std::string Property::get_name() const
 {
     return prop.name;
 }
 
 
-TCAM_PROPERTY_TYPE Property::get_type () const
+TCAM_PROPERTY_TYPE Property::get_type() const
 {
     return prop.type;
 }
 
 
-bool Property::can_be_changed () const
+bool Property::can_be_changed() const
 {
     return (is_read_only() && is_disabled());
 }
 
 
-bool Property::is_read_only () const
+bool Property::is_read_only() const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_READ_ONLY);
 }
 
 
-bool Property::is_write_only () const
+bool Property::is_write_only() const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
 }
 
 
-bool Property::is_disabled () const
+bool Property::is_disabled() const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_DISABLED);
 }
 
 
-bool Property::is_external () const
+bool Property::is_external() const
 {
     return is_bit_set(prop.flags, TCAM_PROPERTY_FLAG_EXTERNAL);
 }
 
 
-uint32_t Property::get_flags () const
+uint32_t Property::get_flags() const
 {
     return prop.flags;
 }
 
 
-bool Property::set_flags (uint32_t new_flags)
+bool Property::set_flags(uint32_t new_flags)
 {
     prop.flags = new_flags;
     return true;
 }
 
 
-struct tcam_device_property Property::get_struct () const
+struct tcam_device_property Property::get_struct() const
 {
     return prop;
 }
 
 
-bool Property::set_struct (const struct tcam_device_property& p)
+bool Property::set_struct(const struct tcam_device_property& p)
 {
     set_struct_value(p);
     prop.flags = p.flags;
@@ -141,7 +141,7 @@ bool Property::set_struct (const struct tcam_device_property& p)
 }
 
 
-void Property::set_struct_value (const struct tcam_device_property& p)
+void Property::set_struct_value(const struct tcam_device_property& p)
 {
     switch (prop.type)
     {
@@ -170,41 +170,43 @@ void Property::set_struct_value (const struct tcam_device_property& p)
     }
 }
 
-void Property::get_struct_value (struct tcam_device_property& p)
+void Property::get_struct_value(struct tcam_device_property& p)
 {
     switch (prop.type)
     {
         case TCAM_PROPERTY_TYPE_STRING:
-            std::strncpy( p.value.s.value, prop.value.s.value, sizeof(p.value.s.value));
-            std::strncpy( p.value.s.default_value, prop.value.s.default_value, sizeof(p.value.s.default_value));
+            std::strncpy(p.value.s.value, prop.value.s.value, sizeof(p.value.s.value));
+            std::strncpy(p.value.s.default_value,
+                         prop.value.s.default_value,
+                         sizeof(p.value.s.default_value));
             break;
         case TCAM_PROPERTY_TYPE_ENUMERATION:
             p.value.i.value = prop.value.i.value;
-	    p.value.i.min = prop.value.i.min;
-	    p.value.i.max = prop.value.i.max;
-	    p.value.i.default_value = prop.value.i.default_value;
-	    p.value.i.step = prop.value.i.step;
+            p.value.i.min = prop.value.i.min;
+            p.value.i.max = prop.value.i.max;
+            p.value.i.default_value = prop.value.i.default_value;
+            p.value.i.step = prop.value.i.step;
             break;
         case TCAM_PROPERTY_TYPE_INTEGER:
             p.value.i.value = prop.value.i.value;
-	    p.value.i.min = prop.value.i.min;
-	    p.value.i.max = prop.value.i.max;
-	    p.value.i.default_value = prop.value.i.default_value;
-	    p.value.i.step = prop.value.i.step;
+            p.value.i.min = prop.value.i.min;
+            p.value.i.max = prop.value.i.max;
+            p.value.i.default_value = prop.value.i.default_value;
+            p.value.i.step = prop.value.i.step;
             break;
         case TCAM_PROPERTY_TYPE_DOUBLE:
             p.value.d.value = prop.value.d.value;
-	    p.value.d.min = prop.value.d.min;
-	    p.value.d.max = prop.value.d.max;
-	    p.value.d.default_value = prop.value.d.default_value;
-	    p.value.d.step = prop.value.d.step;
+            p.value.d.min = prop.value.d.min;
+            p.value.d.max = prop.value.d.max;
+            p.value.d.default_value = prop.value.d.default_value;
+            p.value.d.step = prop.value.d.step;
             break;
         case TCAM_PROPERTY_TYPE_BUTTON:
             // do nothing
             break;
         case TCAM_PROPERTY_TYPE_BOOLEAN:
             p.value.b.value = prop.value.b.value;
-	    p.value.b.default_value = prop.value.b.default_value;
+            p.value.b.default_value = prop.value.b.default_value;
             break;
         case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
@@ -213,13 +215,13 @@ void Property::get_struct_value (struct tcam_device_property& p)
 }
 
 
-Property::VALUE_TYPE Property::get_value_type () const
+Property::VALUE_TYPE Property::get_value_type() const
 {
     return value_type;
 }
 
 
-std::string Property::to_string () const
+std::string Property::to_string() const
 {
     std::string property_string;
 
@@ -251,20 +253,16 @@ std::string Property::to_string () const
         {
             property_string += prop.value.s.value;
             break;
-
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-
         }
         case TCAM_PROPERTY_TYPE_UNKNOWN:
         default:
         {
-
         }
     }
 
@@ -272,14 +270,12 @@ std::string Property::to_string () const
 }
 
 
-bool Property::from_string (const std::string& s)
+bool Property::from_string(const std::string& s)
 {
     std::string tmp_str = s;
 
-    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'),
-                  tmp_str.end());
-    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '\''),
-                  tmp_str.end());
+    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '"'), tmp_str.end());
+    tmp_str.erase(std::remove(tmp_str.begin(), tmp_str.end(), '\''), tmp_str.end());
     try
     {
         switch (prop.type)
@@ -342,7 +338,7 @@ bool Property::from_string (const std::string& s)
 }
 
 
-bool Property::set_property (const Property& p)
+bool Property::set_property(const Property& p)
 {
     if (impl.expired())
     {
@@ -355,7 +351,7 @@ bool Property::set_property (const Property& p)
 }
 
 
-bool Property::set_value (const int64_t& value, bool notify)
+bool Property::set_value(const int64_t& value, bool notify)
 {
     if (impl.expired())
     {
@@ -379,7 +375,7 @@ bool Property::set_value (const int64_t& value, bool notify)
 }
 
 
-bool Property::set_value (const double& value, bool notify)
+bool Property::set_value(const double& value, bool notify)
 {
     if (impl.expired())
     {
@@ -403,7 +399,7 @@ bool Property::set_value (const double& value, bool notify)
 }
 
 
-bool Property::set_value (const bool& value, bool notify)
+bool Property::set_value(const bool& value, bool notify)
 {
     if (impl.expired())
     {
@@ -423,7 +419,7 @@ bool Property::set_value (const bool& value, bool notify)
 }
 
 
-bool Property::set_value (const std::string& value, bool notify)
+bool Property::set_value(const std::string& value, bool notify)
 {
     if (impl.expired())
     {
@@ -459,7 +455,7 @@ bool Property::set_value (const std::string& value, bool notify)
     return false;
 }
 
-bool Property::set_value ()
+bool Property::set_value()
 {
     if (impl.expired())
     {
@@ -471,7 +467,7 @@ bool Property::set_value ()
 }
 
 
-bool Property::set_property_from_struct (const tcam_device_property& _prop)
+bool Property::set_property_from_struct(const tcam_device_property& _prop)
 {
 
     if (impl.expired())
@@ -482,11 +478,9 @@ bool Property::set_property_from_struct (const tcam_device_property& _prop)
     notify_impl();
 
     return true;
-
-
 }
 
-bool Property::get_property_from_struct (tcam_device_property& _prop)
+bool Property::get_property_from_struct(tcam_device_property& _prop)
 {
 
     if (impl.expired())
@@ -504,23 +498,20 @@ std::vector<std::string> Property::get_possible_values() const
     std::vector<std::string> ret;
     ret.reserve(string_map.size());
 
-    for (const auto& e : string_map)
-    {
-        ret.push_back(e.first);
-    }
+    for (const auto& e : string_map) { ret.push_back(e.first); }
 
     return ret;
 }
 
 
-bool Property::get_property (Property& p)
+bool Property::get_property(Property& p)
 {
     p.set_struct(prop);
     return true;
 }
 
 
-void Property::notify_impl ()
+void Property::notify_impl()
 {
     if (auto ptr = impl.lock())
     {
@@ -533,7 +524,7 @@ void Property::notify_impl ()
 }
 
 
-TCAM_PROPERTY_TYPE tcam::value_type_to_ctrl_type (const Property::VALUE_TYPE& t)
+TCAM_PROPERTY_TYPE tcam::value_type_to_ctrl_type(const Property::VALUE_TYPE& t)
 {
     switch (t)
     {

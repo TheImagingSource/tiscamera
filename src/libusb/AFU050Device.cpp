@@ -18,23 +18,21 @@
 
 #include "UsbHandler.h"
 #include "UsbSession.h"
-
+#include "afu050_definitions.h"
+#include "format.h"
+#include "img/fcc_to_string.h"
 #include "logging.h"
 #include "standard_properties.h"
-#include "format.h"
-#include "afu050_definitions.h"
-#include "img/fcc_to_string.h"
 
 #include <algorithm>
 #include <cstring>
-
 #include <fstream>
 #include <unistd.h>
 
 using namespace tcam;
 
 
-tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
+tcam::AFU050Device::AFU050Device(const DeviceInfo& info)
 {
     device = info;
 
@@ -44,13 +42,15 @@ tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
     if (!usb_device_->open_interface(0))
     {
         SPDLOG_ERROR("Failed to open camera interface - {}. \n"
-                   "Please check device permissions!", 0);
+                     "Please check device permissions!",
+                     0);
     }
 
     if (!usb_device_->open_interface(1))
     {
         SPDLOG_ERROR("Failed to open camera interface - {}. \n"
-                   "Please check device permissions!", 1);
+                     "Please check device permissions!",
+                     1);
     }
     property_handler = std::make_shared<AFU050PropertyHandler>(this);
 
@@ -58,13 +58,13 @@ tcam::AFU050Device::AFU050Device (const DeviceInfo& info)
     create_formats();
 }
 
-tcam::AFU050Device::~AFU050Device ()
+tcam::AFU050Device::~AFU050Device()
 {
     stop_stream();
 }
 
 
-void tcam::AFU050Device::lost_device ()
+void tcam::AFU050Device::lost_device()
 {
     device_is_lost = true;
 
@@ -79,13 +79,13 @@ void tcam::AFU050Device::lost_device ()
 }
 
 
-DeviceInfo tcam::AFU050Device::get_device_description () const
+DeviceInfo tcam::AFU050Device::get_device_description() const
 {
     return device;
 }
 
 
-void AFU050Device::create_formats ()
+void AFU050Device::create_formats()
 {
 
     // typedef enum
@@ -102,21 +102,20 @@ void AFU050Device::create_formats ()
 
     std::vector<struct framerate_mapping> rf;
 
-    auto add_res = [&rf] (int width, int height, double fps)
-        {
-            struct tcam_resolution_description res = {};
-            res.type = TCAM_RESOLUTION_TYPE_FIXED;
-            res.min_size.width = width;
-            res.min_size.height = height;
-            res.max_size.width = width;
-            res.max_size.height = height;
+    auto add_res = [&rf](int width, int height, double fps) {
+        struct tcam_resolution_description res = {};
+        res.type = TCAM_RESOLUTION_TYPE_FIXED;
+        res.min_size.width = width;
+        res.min_size.height = height;
+        res.max_size.width = width;
+        res.max_size.height = height;
 
-            std::vector<double> f;
-            f.push_back(fps);
+        std::vector<double> f;
+        f.push_back(fps);
 
-            framerate_mapping r = { res, f };
-            rf.push_back(r);
-        };
+        framerate_mapping r = { res, f };
+        rf.push_back(r);
+    };
 
     add_res(2592, 1944, 15.0);
     add_res(1920, 1080, 30.0);
@@ -127,7 +126,7 @@ void AFU050Device::create_formats ()
 }
 
 
-void AFU050Device::create_properties ()
+void AFU050Device::create_properties()
 {
     add_int(TCAM_PROPERTY_EXPOSURE, VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
     add_bool(TCAM_PROPERTY_EXPOSURE_AUTO, VC_UNIT_EXTENSION_UNIT, XU_AUTO_EXPOSURE);
@@ -148,29 +147,28 @@ void AFU050Device::create_properties ()
 
     // add_int(TCAM_PROPERTY_FOCUS_X, VC_UNIT_EXTENSION_UNIT, PU_);
     // add_int(TCAM_PROPERTY_FOCUS_Y, VC_UNIT_EXTENSION_UNIT, PU_);
-
 }
 
 
-std::vector<std::shared_ptr<Property>> tcam::AFU050Device::getProperties ()
+std::vector<std::shared_ptr<Property>> tcam::AFU050Device::getProperties()
 {
     return property_handler->create_property_vector();
 }
 
 
-bool tcam::AFU050Device::set_property (const Property& p)
+bool tcam::AFU050Device::set_property(const Property& p)
 {
     return property_handler->set_property(p);
 }
 
 
-bool tcam::AFU050Device::get_property (Property& p)
+bool tcam::AFU050Device::get_property(Property& p)
 {
     return property_handler->get_property(p);
 }
 
 
-bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
+bool tcam::AFU050Device::set_video_format(const VideoFormat& format)
 {
     if (is_stream_on)
     {
@@ -183,26 +181,25 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
     // AFU050_FMT_1280X960 = 3
     // }afu050_video_format_t;
 
-    auto get_format_index = [] (const VideoFormat& _format)
+    auto get_format_index = [](const VideoFormat& _format) {
+        auto s = _format.get_struct();
+        if (s.width == 2592 && s.height == 1944 && s.framerate == 15.0)
         {
-            auto s = _format.get_struct();
-            if (s.width == 2592 && s.height == 1944 && s.framerate == 15.0)
-            {
-                return 1;
-            }
-            else if (s.width == 1920 && s.height == 1080 && s.framerate == 30.0)
-            {
-                return 2;
-            }
-            else if (s.width == 1280 && s.height == 960 && s.framerate == 60.0)
-            {
-                return 3;
-            }
-            else
-            {
-                return -1;
-            }
-        };
+            return 1;
+        }
+        else if (s.width == 1920 && s.height == 1080 && s.framerate == 30.0)
+        {
+            return 2;
+        }
+        else if (s.width == 1280 && s.height == 960 && s.framerate == 60.0)
+        {
+            return 3;
+        }
+        else
+        {
+            return -1;
+        }
+    };
 
     int index = get_format_index(format);
 
@@ -219,59 +216,56 @@ bool tcam::AFU050Device::set_video_format (const VideoFormat& format)
 }
 
 
-bool tcam::AFU050Device::validate_video_format (const VideoFormat&) const
+bool tcam::AFU050Device::validate_video_format(const VideoFormat&) const
 {
     return false;
 }
 
 
-VideoFormat tcam::AFU050Device::get_active_video_format () const
+VideoFormat tcam::AFU050Device::get_active_video_format() const
 {
     // TODO: set when initializing device;
     return active_video_format;
 }
 
 
-std::vector<VideoFormatDescription> tcam::AFU050Device::get_available_video_formats ()
+std::vector<VideoFormatDescription> tcam::AFU050Device::get_available_video_formats()
 {
     return available_videoformats;
 }
 
 
-bool tcam::AFU050Device::set_framerate (double framerate __attribute__((unused)))
+bool tcam::AFU050Device::set_framerate(double framerate __attribute__((unused)))
 {
     return false;
 }
 
 
-double tcam::AFU050Device::get_framerate ()
+double tcam::AFU050Device::get_framerate()
 {
     return active_video_format.get_framerate();
 }
 
 
-bool tcam::AFU050Device::set_sink (std::shared_ptr<SinkInterface> s)
+bool tcam::AFU050Device::set_sink(std::shared_ptr<SinkInterface> s)
 {
     listener = s;
     return true;
 }
 
 
-bool tcam::AFU050Device::initialize_buffers (std::vector<std::shared_ptr<ImageBuffer>> buffs)
+bool tcam::AFU050Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
     SPDLOG_INFO("Received {} buffer from external allocator.", buffs.size());
 
     buffers.reserve(buffs.size());
 
-    for (auto& b : buffs)
-    {
-        buffers.push_back({b, false});
-    }
+    for (auto& b : buffs) { buffers.push_back({ b, false }); }
     return true;
 }
 
 
-void tcam::AFU050Device::init_buffers ()
+void tcam::AFU050Device::init_buffers()
 {
     static const int num_buffers = 10;
 
@@ -287,19 +281,19 @@ void tcam::AFU050Device::init_buffers ()
         b.pData = (unsigned char*)malloc(JPEGBUF_SIZE);
         b.size = JPEGBUF_SIZE;
 
-        buffers.push_back({std::make_shared<ImageBuffer>(b, true), false});
+        buffers.push_back({ std::make_shared<ImageBuffer>(b, true), false });
     }
 }
 
 
-bool tcam::AFU050Device::release_buffers ()
+bool tcam::AFU050Device::release_buffers()
 {
     buffers.clear();
     return true;
 }
 
 
-void tcam::AFU050Device::requeue_buffer (std::shared_ptr<ImageBuffer> buf)
+void tcam::AFU050Device::requeue_buffer(std::shared_ptr<ImageBuffer> buf)
 {
     for (auto& b : buffers)
     {
@@ -311,7 +305,7 @@ void tcam::AFU050Device::requeue_buffer (std::shared_ptr<ImageBuffer> buf)
 }
 
 
-void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
+void tcam::AFU050Device::transfer_callback(struct libusb_transfer* transfer)
 {
     if (transfer->status != LIBUSB_TRANSFER_COMPLETED)
     {
@@ -346,15 +340,13 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
     {
         if (!jpegbuf)
         {
-            unsigned char* start_of_image =
-                (unsigned char*)memmem(ptr + processed,
-                                       ( transfer->actual_length - processed),
-                                       "\xff\xd8", 2);
+            unsigned char* start_of_image = (unsigned char*)memmem(
+                ptr + processed, (transfer->actual_length - processed), "\xff\xd8", 2);
             if (start_of_image)
             {
                 if (!jpegbuf)
                 {
-                    jpegbuf = (unsigned char*) malloc(JPEGBUF_SIZE);
+                    jpegbuf = (unsigned char*)malloc(JPEGBUF_SIZE);
                 }
 
                 processed = start_of_image - transfer->buffer;
@@ -367,14 +359,13 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
 
         if (jpegbuf)
         {
-            unsigned char* end_of_image = (unsigned char*)memmem(ptr + processed,
-                                                                 transfer->actual_length - processed,
-                                                                 "\xff\xd9", 2);
+            unsigned char* end_of_image = (unsigned char*)memmem(
+                ptr + processed, transfer->actual_length - processed, "\xff\xd9", 2);
             int cplen = transfer->actual_length - processed;
 
             if (end_of_image)
             {
-                cplen = (((end_of_image) - ptr) - processed) + 2;
+                cplen = (((end_of_image)-ptr) - processed) + 2;
             }
 
             if ((jpegsize + cplen) > JPEGBUF_SIZE)
@@ -388,9 +379,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
                 break;
             }
 
-            memcpy(jpegbuf + jpegptr,
-                   ptr + processed,
-                   cplen);
+            memcpy(jpegbuf + jpegptr, ptr + processed, cplen);
             processed += cplen;
             jpegptr += cplen;
             jpegsize += cplen;
@@ -435,7 +424,7 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
 
     if (is_stream_on)
     {
-         //submit the next transfer
+        //submit the next transfer
         int ret = libusb_submit_transfer(transfer);
         if (ret == LIBUSB_ERROR_NO_DEVICE)
         {
@@ -448,14 +437,14 @@ void tcam::AFU050Device::transfer_callback (struct libusb_transfer* transfer)
     }
 }
 
-void LIBUSB_CALL tcam::AFU050Device::libusb_bulk_callback (struct libusb_transfer* trans)
+void LIBUSB_CALL tcam::AFU050Device::libusb_bulk_callback(struct libusb_transfer* trans)
 {
     AFU050Device* self = reinterpret_cast<AFU050Device*>(trans->user_data);
     self->transfer_callback(trans);
 }
 
 
-bool tcam::AFU050Device::start_stream ()
+bool tcam::AFU050Device::start_stream()
 {
 #define USB_ENDPOINT_IN (LIBUSB_ENDPOINT_IN | 2)
 
@@ -480,14 +469,14 @@ bool tcam::AFU050Device::start_stream ()
         uint8_t* buf = (uint8_t*)malloc(LEN_IN_BUFFER);
 
         struct libusb_transfer* transfer_in = libusb_alloc_transfer(0);
-        libusb_fill_bulk_transfer( transfer_in,
-                                   usb_device_->get_handle(),
-                                   USB_ENDPOINT_IN,
-                                   buf,
-                                   LEN_IN_BUFFER,
-                                   AFU050Device::libusb_bulk_callback,
-                                   this,
-                                   0);
+        libusb_fill_bulk_transfer(transfer_in,
+                                  usb_device_->get_handle(),
+                                  USB_ENDPOINT_IN,
+                                  buf,
+                                  LEN_IN_BUFFER,
+                                  AFU050Device::libusb_bulk_callback,
+                                  this,
+                                  0);
 
         //submit the transfer, all following transfers are initiated from the CB
         int ret = libusb_submit_transfer(transfer_in);
@@ -509,7 +498,7 @@ bool tcam::AFU050Device::start_stream ()
 }
 
 
-bool tcam::AFU050Device::stop_stream ()
+bool tcam::AFU050Device::stop_stream()
 {
     stop_all = true;
     is_stream_on = false;
@@ -523,7 +512,7 @@ bool tcam::AFU050Device::stop_stream ()
 }
 
 
-void AFU050Device::add_int (const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop)
+void AFU050Device::add_int(const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop)
 {
     if (id == TCAM_PROPERTY_INVALID || unit == VC_UNIT_HEADER || prop == 0)
     {
@@ -538,12 +527,13 @@ void AFU050Device::add_int (const TCAM_PROPERTY_ID id, const VC_UNIT unit, const
     p.value.i.min = get_int_value(unit, prop, GET_MIN);
     p.value.i.max = get_int_value(unit, prop, GET_MAX);
     p.value.i.step = get_int_value(unit, prop, GET_RES);
-    std::shared_ptr<Property> property = std::make_shared<PropertyInteger>(this->property_handler, p, Property::INTEGER);
-    this->property_handler->properties.push_back({unit, prop, property});
+    std::shared_ptr<Property> property =
+        std::make_shared<PropertyInteger>(this->property_handler, p, Property::INTEGER);
+    this->property_handler->properties.push_back({ unit, prop, property });
 }
 
 
-void AFU050Device::add_bool (TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop)
+void AFU050Device::add_bool(TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop)
 {
     if (id == TCAM_PROPERTY_INVALID || unit == VC_UNIT_HEADER || prop == 0)
     {
@@ -553,20 +543,23 @@ void AFU050Device::add_bool (TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char pr
     struct tcam_device_property p = tcam::create_empty_property(id);
     p.value.i.value = get_bool_value(unit, prop, GET_CUR);
     p.value.i.default_value = get_bool_value(unit, prop, GET_DEF);
-    std::shared_ptr<Property> property = std::make_shared<PropertyBoolean>(this->property_handler, p, Property::INTEGER);
-    this->property_handler->properties.push_back({unit, prop, property});
+    std::shared_ptr<Property> property =
+        std::make_shared<PropertyBoolean>(this->property_handler, p, Property::INTEGER);
+    this->property_handler->properties.push_back({ unit, prop, property });
 }
 
 
-bool AFU050Device::update_property (property_description& desc)
+bool AFU050Device::update_property(property_description& desc)
 {
     if (desc.prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
     {
-        (std::static_pointer_cast<PropertyInteger>(desc.prop))->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
+        (std::static_pointer_cast<PropertyInteger>(desc.prop))
+            ->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
     }
     else if (desc.prop->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
     {
-        (std::static_pointer_cast<PropertyBoolean>(desc.prop))->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
+        (std::static_pointer_cast<PropertyBoolean>(desc.prop))
+            ->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
     }
     else
     {
@@ -576,19 +569,17 @@ bool AFU050Device::update_property (property_description& desc)
 }
 
 
-bool AFU050Device::set_control (int unit,
-                                int ctrl,
-                                int len,
-                                unsigned char* value)
+bool AFU050Device::set_control(int unit, int ctrl, int len, unsigned char* value)
 {
     int ret = libusb_control_transfer(usb_device_->get_handle(),
-                                      LIBUSB_ENDPOINT_OUT |
-                                      LIBUSB_REQUEST_TYPE_CLASS |
-                                      LIBUSB_RECIPIENT_DEVICE,
+                                      LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS
+                                          | LIBUSB_RECIPIENT_DEVICE,
                                       UVC_SET_CUR,
                                       ctrl << 8,
                                       unit << 8,
-                                      value, len, 10000 );
+                                      value,
+                                      len,
+                                      10000);
 
     if (ret == LIBUSB_ERROR_NO_DEVICE)
     {
@@ -599,20 +590,21 @@ bool AFU050Device::set_control (int unit,
 }
 
 
-bool AFU050Device::get_control (int unit,
-                                int ctrl,
-                                int len,
-                                unsigned char* value,
-                                enum CONTROL_CMD cmd)
+bool AFU050Device::get_control(int unit,
+                               int ctrl,
+                               int len,
+                               unsigned char* value,
+                               enum CONTROL_CMD cmd)
 {
     int ret = libusb_control_transfer(usb_device_->get_handle(),
-                                      LIBUSB_ENDPOINT_IN |
-                                      LIBUSB_REQUEST_TYPE_CLASS |
-                                      LIBUSB_RECIPIENT_DEVICE,
+                                      LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS
+                                          | LIBUSB_RECIPIENT_DEVICE,
                                       cmd,
                                       ctrl << 8,
                                       unit << 8,
-                                      value, len, 10000);
+                                      value,
+                                      len,
+                                      10000);
 
     if (ret == LIBUSB_ERROR_NO_DEVICE)
     {
@@ -627,9 +619,9 @@ bool AFU050Device::get_control (int unit,
 }
 
 
-int AFU050Device::set_video_format (uint8_t format_index,
-                                    uint8_t frame_index,
-                                    uint32_t frame_interval)
+int AFU050Device::set_video_format(uint8_t format_index,
+                                   uint8_t frame_index,
+                                   uint32_t frame_interval)
 {
     int ret;
     uint8_t buf[34];
@@ -644,14 +636,15 @@ int AFU050Device::set_video_format (uint8_t format_index,
     buf[7] = (frame_interval >> 24) & 0xff;
 
     ret = libusb_control_transfer(usb_device_->get_handle(),
-                                  LIBUSB_ENDPOINT_OUT |
-                                  LIBUSB_REQUEST_TYPE_CLASS |
-                                  LIBUSB_RECIPIENT_INTERFACE,
+                                  LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS
+                                      | LIBUSB_RECIPIENT_INTERFACE,
                                   UVC_SET_CUR,
                                   0x2 << 8, // VS_COMMIT
                                   1,
-                                  buf, sizeof(buf), 10000);
-// frame_interval = buf[4] | ((uint32_t)buf[5]<<8) | ((uint32_t)buf[6]<<16) | ((uint32_t)buf[7]<<24);
+                                  buf,
+                                  sizeof(buf),
+                                  10000);
+    // frame_interval = buf[4] | ((uint32_t)buf[5]<<8) | ((uint32_t)buf[6]<<16) | ((uint32_t)buf[7]<<24);
 
     if (ret == LIBUSB_ERROR_NO_DEVICE)
     {
@@ -664,53 +657,41 @@ int AFU050Device::set_video_format (uint8_t format_index,
 }
 
 
-bool AFU050Device::get_bool_value (enum VC_UNIT unit, unsigned char property, enum CONTROL_CMD cmd)
+bool AFU050Device::get_bool_value(enum VC_UNIT unit, unsigned char property, enum CONTROL_CMD cmd)
 {
     int value = 0;
-    bool ret = get_control(unit,
-                           property,
-                           4,
-                           (unsigned char*)&value,
-                           cmd);
+    bool ret = get_control(unit, property, 4, (unsigned char*)&value, cmd);
     if (ret)
         SPDLOG_ERROR("get_control returned with: {}", ret);
-    return (value ? 1: 0);
+    return (value ? 1 : 0);
 }
 
 
-bool AFU050Device::set_bool_value (enum VC_UNIT unit, unsigned char property, bool value)
+bool AFU050Device::set_bool_value(enum VC_UNIT unit, unsigned char property, bool value)
 {
     char val = (value ? 1 : 0);
-    bool ret = set_control(unit,
-                           property,
-                           4,
-                           (unsigned char*)&val);
+    bool ret = set_control(unit, property, 4, (unsigned char*)&val);
     if (!ret)
         SPDLOG_ERROR("set_control returned with: {}", ret);
     return ret;
 }
 
 
-int AFU050Device::get_int_value (const enum VC_UNIT unit, const unsigned char property, const enum CONTROL_CMD cmd)
+int AFU050Device::get_int_value(const enum VC_UNIT unit,
+                                const unsigned char property,
+                                const enum CONTROL_CMD cmd)
 {
     int value = 0;
-    bool ret = get_control(unit,
-                           property,
-                           4,
-                           (unsigned char*)&value,
-                           cmd);
+    bool ret = get_control(unit, property, 4, (unsigned char*)&value, cmd);
     if (!ret)
         SPDLOG_ERROR("get_control returned with: {}", ret);
     return value;
 }
 
 
-bool AFU050Device::set_int_value (enum VC_UNIT unit, unsigned char property, int value)
+bool AFU050Device::set_int_value(enum VC_UNIT unit, unsigned char property, int value)
 {
-    bool ret = set_control(unit,
-                           property,
-                           4,
-                           (unsigned char*)&value);
+    bool ret = set_control(unit, property, 4, (unsigned char*)&value);
     if (!ret)
         SPDLOG_ERROR("set_control returned with: {}", ret);
     return ret;

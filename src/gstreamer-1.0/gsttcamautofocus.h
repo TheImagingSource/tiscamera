@@ -17,64 +17,67 @@
 #ifndef _GST_TCAMAUTOFOCUS_H_
 #define _GST_TCAMAUTOFOCUS_H_
 
-#include <gst/base/gstbasetransform.h>
 #include "algorithms/tcam-algorithm.h"
+
+#include <gst/base/gstbasetransform.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-G_BEGIN_DECLS
+    G_BEGIN_DECLS
 
-#define GST_TYPE_TCAMAUTOFOCUS            (gst_tcamautofocus_get_type())
-#define GST_TCAMAUTOFOCUS(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAMAUTOFOCUS, GstTcamAutoFocus))
-#define GST_TCAMAUTOFOCUS_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAMAUTOFOCUS, GstTcamAutoFocusClass))
-#define GST_IS_TCAMAUTOFOCUS(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMAUTOFOCUS))
-#define GST_IS_TCAMAUTOFOCUS_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMAUTOFOCUS))
+#define GST_TYPE_TCAMAUTOFOCUS (gst_tcamautofocus_get_type())
+#define GST_TCAMAUTOFOCUS(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAMAUTOFOCUS, GstTcamAutoFocus))
+#define GST_TCAMAUTOFOCUS_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAMAUTOFOCUS, GstTcamAutoFocusClass))
+#define GST_IS_TCAMAUTOFOCUS(obj)       (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMAUTOFOCUS))
+#define GST_IS_TCAMAUTOFOCUS_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMAUTOFOCUS))
 
 
-typedef unsigned char byte;
+    typedef unsigned char byte;
 
 
-/* names of gstreamer elements used for camera interaction */
-/* static const char* CAMERASRC_NETWORK = "GstAravis"; */
+    /* names of gstreamer elements used for camera interaction */
+    /* static const char* CAMERASRC_NETWORK = "GstAravis"; */
 
-typedef struct GstTcamAutoFocus
-{
-    GstBaseTransform base_tis_auto_exposure;
+    typedef struct GstTcamAutoFocus
+    {
+        GstBaseTransform base_tis_auto_exposure;
 
-    gint image_width;
-    gint image_height;
+        gint image_width;
+        gint image_height;
 
-    gboolean focus_active;
+        gboolean focus_active;
 
-    GstElement* camera_src;
-    AutoFocus* focus;
+        GstElement* camera_src;
+        AutoFocus* focus;
 
-    gint cur_focus;
+        gint cur_focus;
 
-    gint roi_left;
-    gint roi_top;
-    gint roi_width;
-    gint roi_height;
+        gint roi_left;
+        gint roi_top;
+        gint roi_width;
+        gint roi_height;
 
-    ROI* roi;
+        ROI* roi;
 
-    tcam_video_format fmt;
+        tcam_video_format fmt;
 
-    gboolean init_focus;
-    auto_alg::auto_focus_params params;
-} GstTcamAutoFocus;
+        gboolean init_focus;
+        auto_alg::auto_focus_params params;
+    } GstTcamAutoFocus;
 
-typedef struct GstTcamAutoFocusClass
-{
-    GstBaseTransformClass base_tcamautofocus_class;
-} GstTcamAutoFocusClass;
+    typedef struct GstTcamAutoFocusClass
+    {
+        GstBaseTransformClass base_tcamautofocus_class;
+    } GstTcamAutoFocusClass;
 
-GType gst_tcamautofocus_get_type (void);
+    GType gst_tcamautofocus_get_type(void);
 
-G_END_DECLS
+    G_END_DECLS
 
 #ifdef __cplusplus
 }

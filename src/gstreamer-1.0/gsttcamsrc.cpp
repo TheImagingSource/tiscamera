@@ -16,66 +16,62 @@
 
 #include "gsttcamsrc.h"
 
-#include "tcamgstbase.h"
-#include "tcamgststrings.h"
-#include "tcamgstjson.h"
-
-#include "tcamprop.h"
-#include "tcam.h"
-
 #include "logging.h"
-#include <unistd.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "tcam.h"
+#include "tcamgstbase.h"
+#include "tcamgstjson.h"
+#include "tcamgststrings.h"
+#include "tcamprop.h"
 
-
-#include <stdio.h>
-#include <vector>
-#include <queue>
 #include <algorithm>
+#include <assert.h>
+#include <queue>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <vector>
 
 
-GST_DEBUG_CATEGORY_STATIC (tcam_src_debug);
+GST_DEBUG_CATEGORY_STATIC(tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
 
-static GSList* gst_tcam_src_get_property_names (TcamProp* self);
+static GSList* gst_tcam_src_get_property_names(TcamProp* self);
 
-static gchar* gst_tcam_src_get_property_type (TcamProp* self, const gchar* name);
+static gchar* gst_tcam_src_get_property_type(TcamProp* self, const gchar* name);
 
-static gboolean gst_tcam_src_get_tcam_property (TcamProp* self,
-                                                const gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group);
+static gboolean gst_tcam_src_get_tcam_property(TcamProp* self,
+                                               const gchar* name,
+                                               GValue* value,
+                                               GValue* min,
+                                               GValue* max,
+                                               GValue* def,
+                                               GValue* step,
+                                               GValue* type,
+                                               GValue* flags,
+                                               GValue* category,
+                                               GValue* group);
 
-static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
-                                              const char* menu_name);
+static GSList* gst_tcam_src_get_menu_entries(TcamProp* iface, const char* menu_name);
 
-static gboolean gst_tcam_src_set_tcam_property (TcamProp* self,
-                                                const gchar* name,
-                                                const GValue* value);
+static gboolean gst_tcam_src_set_tcam_property(TcamProp* self,
+                                               const gchar* name,
+                                               const GValue* value);
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* self);
-static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* self);
+static GSList* gst_tcam_src_get_device_serials(TcamProp* self);
+static GSList* gst_tcam_src_get_device_serials_backend(TcamProp* self);
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* self,
-                                              const char* serial,
-                                              char** name,
-                                              char** identifier,
-                                              char** connection_type);
+static gboolean gst_tcam_src_get_device_info(TcamProp* self,
+                                             const char* serial,
+                                             char** name,
+                                             char** identifier,
+                                             char** connection_type);
 
-static gboolean open_source_element (GstTcamSrc* self);
+static gboolean open_source_element(GstTcamSrc* self);
 
 
-static void gst_tcam_src_prop_init (TcamPropInterface* iface)
+static void gst_tcam_src_prop_init(TcamPropInterface* iface)
 {
     iface->get_tcam_property_names = gst_tcam_src_get_property_names;
     iface->get_tcam_property_type = gst_tcam_src_get_property_type;
@@ -90,9 +86,10 @@ static void gst_tcam_src_prop_init (TcamPropInterface* iface)
 
 #define gst_tcam_src_parent_class parent_class
 
-G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_BIN,
-                         G_IMPLEMENT_INTERFACE (TCAM_TYPE_PROP,
-                                                gst_tcam_src_prop_init))
+G_DEFINE_TYPE_WITH_CODE(GstTcamSrc,
+                        gst_tcam_src,
+                        GST_TYPE_BIN,
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcam_src_prop_init))
 
 /**
  * gst_tcam_get_property_type:
@@ -103,11 +100,10 @@ G_DEFINE_TYPE_WITH_CODE (GstTcamSrc, gst_tcam_src, GST_TYPE_BIN,
  *
  * Returns: (transfer full): A string describing the property type
  */
-static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
-                                              const gchar* name)
+static gchar* gst_tcam_src_get_property_type(TcamProp* iface, const gchar* name)
 {
     const gchar* ret = NULL;
-    GstTcamSrc* self = GST_TCAM_SRC (iface);
+    GstTcamSrc* self = GST_TCAM_SRC(iface);
 
     if (!self->active_source)
     {
@@ -117,8 +113,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
         }
     }
 
-    ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->active_source),
-                                           name);
+    ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->active_source), name);
 
 
     return (gchar*)ret;
@@ -132,7 +127,7 @@ static gchar* gst_tcam_src_get_property_type (TcamProp* iface,
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
+static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -148,17 +143,17 @@ static GSList* gst_tcam_src_get_property_names (TcamProp* iface)
 }
 
 
-static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                GValue* value,
-                                                GValue* min,
-                                                GValue* max,
-                                                GValue* def,
-                                                GValue* step,
-                                                GValue* type,
-                                                GValue* flags,
-                                                GValue* category,
-                                                GValue* group)
+static gboolean gst_tcam_src_get_tcam_property(TcamProp* iface,
+                                               const gchar* name,
+                                               GValue* value,
+                                               GValue* min,
+                                               GValue* max,
+                                               GValue* def,
+                                               GValue* step,
+                                               GValue* type,
+                                               GValue* flags,
+                                               GValue* category,
+                                               GValue* group)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -171,16 +166,20 @@ static gboolean gst_tcam_src_get_tcam_property (TcamProp* iface,
     }
 
     return tcam_prop_get_tcam_property(TCAM_PROP(self->active_source),
-                                       name, value,
-                                       min, max,
-                                       def, step,
-                                       type, flags,
-                                       category, group);
+                                       name,
+                                       value,
+                                       min,
+                                       max,
+                                       def,
+                                       step,
+                                       type,
+                                       flags,
+                                       category,
+                                       group);
 }
 
 
-static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
-                                              const char* menu_name)
+static GSList* gst_tcam_src_get_menu_entries(TcamProp* iface, const char* menu_name)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -196,9 +195,9 @@ static GSList* gst_tcam_src_get_menu_entries (TcamProp* iface,
 }
 
 
-static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
-                                                const gchar* name,
-                                                const GValue* value)
+static gboolean gst_tcam_src_set_tcam_property(TcamProp* iface,
+                                               const gchar* name,
+                                               const GValue* value)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -214,7 +213,7 @@ static gboolean gst_tcam_src_set_tcam_property (TcamProp* iface,
 }
 
 
-static GSList* gst_tcam_src_get_device_serials (TcamProp* iface)
+static GSList* gst_tcam_src_get_device_serials(TcamProp* iface)
 {
 
     GstTcamSrc* self = GST_TCAM_SRC(iface);
@@ -237,7 +236,7 @@ static GSList* gst_tcam_src_get_device_serials (TcamProp* iface)
 }
 
 
-static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* iface)
+static GSList* gst_tcam_src_get_device_serials_backend(TcamProp* iface)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -264,11 +263,11 @@ static GSList* gst_tcam_src_get_device_serials_backend (TcamProp* iface)
 }
 
 
-static gboolean gst_tcam_src_get_device_info (TcamProp* iface,
-                                              const char* serial,
-                                              char** name,
-                                              char** identifier,
-                                              char** connection_type)
+static gboolean gst_tcam_src_get_device_info(TcamProp* iface,
+                                             const char* serial,
+                                             char** name,
+                                             char** identifier,
+                                             char** connection_type)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
 
@@ -276,8 +275,8 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* iface,
 
     for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
     {
-        ret = tcam_prop_get_device_info(TCAM_PROP(iter->data),
-                                        serial, name, identifier, connection_type);
+        ret = tcam_prop_get_device_info(
+            TCAM_PROP(iter->data), serial, name, identifier, connection_type);
 
         if (ret)
         {
@@ -287,7 +286,6 @@ static gboolean gst_tcam_src_get_device_info (TcamProp* iface,
 
     return ret;
 }
-
 
 
 enum
@@ -303,12 +301,10 @@ enum
 };
 
 
-static GstStaticPadTemplate tcam_src_template = GST_STATIC_PAD_TEMPLATE ("src",
-                                                                         GST_PAD_SRC,
-                                                                         GST_PAD_ALWAYS,
-                                                                         GST_STATIC_CAPS ("ANY"));
+static GstStaticPadTemplate tcam_src_template =
+    GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS("ANY"));
 
-static bool close_source_element (GstTcamSrc* self)
+static bool close_source_element(GstTcamSrc* self)
 {
     GstState state;
     gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000);
@@ -334,24 +330,24 @@ static bool close_source_element (GstTcamSrc* self)
 }
 
 
-static gboolean is_device_already_open (GstTcamSrc* self)
+static gboolean is_device_already_open(GstTcamSrc* self)
 {
     char* serial_str = nullptr;
 
     g_object_get(G_OBJECT(self->active_source), "serial", &serial_str, NULL);
 
-    bool is_serial_same = g_strcmp0( self->device_serial.c_str(), serial_str ) == 0;
+    bool is_serial_same = g_strcmp0(self->device_serial.c_str(), serial_str) == 0;
 
-    g_free( serial_str );
+    g_free(serial_str);
 
     return is_serial_same ? TRUE : FALSE;
 }
 
 
-static void apply_element_property (GstTcamSrc* self,
-                                    guint prop_id,
-                                    const GValue* value,
-                                    GParamSpec* pspec)
+static void apply_element_property(GstTcamSrc* self,
+                                   guint prop_id,
+                                   const GValue* value,
+                                   GParamSpec* pspec)
 {
 
     switch (prop_id)
@@ -373,16 +369,18 @@ static void apply_element_property (GstTcamSrc* self,
                     std::string s;
                     std::string t;
 
-                    bool sep_ret = separate_serial_and_type( string_value, s, t);
+                    bool sep_ret = separate_serial_and_type(string_value, s, t);
                     if (sep_ret)
                     {
                         GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
-                                 s.c_str(), t.c_str());
+                                 s.c_str(),
+                                 t.c_str());
 
                         self->device_serial = s;
                         self->device_type = tcam::tcam_device_from_string(t);
 
-                        GST_DEBUG("Type interpreted as '%s'", tcam::tcam_device_type_to_string(self->device_type).c_str());
+                        GST_DEBUG("Type interpreted as '%s'",
+                                  tcam::tcam_device_type_to_string(self->device_type).c_str());
                     }
                     else
                     {
@@ -413,7 +411,7 @@ static void apply_element_property (GstTcamSrc* self,
             // this check is simply for messaging the user
             // about invalid values
             auto vec = tcam::get_device_type_list_strings();
-            if (std::find(vec.begin() , vec.end(), std::string(type)) == vec.end())
+            if (std::find(vec.begin(), vec.end(), std::string(type)) == vec.end())
             {
                 GST_ERROR("Unknown device type '%s'", type);
                 self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
@@ -481,7 +479,8 @@ static void apply_element_property (GstTcamSrc* self,
         {
             if (self->active_source)
             {
-                g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
+                g_object_set_property(
+                    G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
             }
             else
             {
@@ -500,9 +499,8 @@ static void apply_element_property (GstTcamSrc* self,
                 }
                 else if (self->active_source == self->pimipi_src)
                 {
-                    bool state = load_device_settings(TCAM_PROP(self),
-                                                      self->device_serial,
-                                                      g_value_get_string(value));
+                    bool state = load_device_settings(
+                        TCAM_PROP(self), self->device_serial, g_value_get_string(value));
                     if (!state)
                     {
                         GST_WARNING("Device may be in an undefined state.");
@@ -524,7 +522,7 @@ static void apply_element_property (GstTcamSrc* self,
 }
 
 
-static gboolean open_source_element (GstTcamSrc* self)
+static gboolean open_source_element(GstTcamSrc* self)
 {
 
     if (self->active_source)
@@ -541,7 +539,7 @@ static gboolean open_source_element (GstTcamSrc* self)
         }
     }
 
-     /*
+    /*
       How source selection works
 
       if serial exists -> use first matching source
@@ -567,8 +565,7 @@ static gboolean open_source_element (GstTcamSrc* self)
 
         g_slist_free_full(serials, g_free);
 
-        if (type == TCAM_DEVICE_TYPE_ARAVIS
-            || type == TCAM_DEVICE_TYPE_V4L2
+        if (type == TCAM_DEVICE_TYPE_ARAVIS || type == TCAM_DEVICE_TYPE_V4L2
             || type == TCAM_DEVICE_TYPE_LIBUSB)
         {
             self->active_source = self->main_src;
@@ -589,8 +586,7 @@ static gboolean open_source_element (GstTcamSrc* self)
     }
     else
     {
-        for (GSList* iter = self->source_list;
-             iter != nullptr && !self->active_source;
+        for (GSList* iter = self->source_list; iter != nullptr && !self->active_source;
              iter = g_slist_next(iter))
         {
             if (!iter->data)
@@ -599,18 +595,19 @@ static gboolean open_source_element (GstTcamSrc* self)
                 continue;
             }
 
-            GstElement* cur_elem = (GstElement*) iter->data;
+            GstElement* cur_elem = (GstElement*)iter->data;
 
             GSList* tmp = nullptr;
-            if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN
-                && !self->device_serial.empty())
+            if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN && !self->device_serial.empty())
             {
                 GST_INFO("Searching for '%s'", self->device_serial.c_str());
                 tmp = tcam_prop_get_device_serials(TCAM_PROP(cur_elem));
 
                 for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
                 {
-                    GST_DEBUG("Comparing '%s' to '%s'", self->device_serial.c_str(), (const char*)i->data);
+                    GST_DEBUG("Comparing '%s' to '%s'",
+                              self->device_serial.c_str(),
+                              (const char*)i->data);
 
                     if (g_strcmp0((const char*)i->data, self->device_serial.c_str()) == 0)
                     {
@@ -618,7 +615,6 @@ static gboolean open_source_element (GstTcamSrc* self)
                         break;
                     }
                 }
-
             }
             else
             {
@@ -658,13 +654,12 @@ static gboolean open_source_element (GstTcamSrc* self)
     if (self->active_source == self->main_src)
     {
         g_object_set(self->active_source,
-                     "type", tcam::tcam_device_type_to_string(self->device_type).c_str(),
+                     "type",
+                     tcam::tcam_device_type_to_string(self->device_type).c_str(),
                      NULL);
     }
 
-    g_object_set(self->active_source,
-                 "serial", self->device_serial.c_str(),
-                 NULL);
+    g_object_set(self->active_source, "serial", self->device_serial.c_str(), NULL);
 
 
     gst_bin_add(GST_BIN(self), self->active_source);
@@ -720,10 +715,13 @@ static gboolean open_source_element (GstTcamSrc* self)
     // src needs some time as things can happen async
     char* device_serial = nullptr;
     g_object_get(G_OBJECT(self->active_source), "serial", &device_serial, NULL);
-    if( device_serial ) {
+    if (device_serial)
+    {
         self->device_serial = device_serial;
-        g_free( device_serial );
-    } else {
+        g_free(device_serial);
+    }
+    else
+    {
         self->device_serial = {};
     }
 
@@ -735,7 +733,7 @@ static gboolean open_source_element (GstTcamSrc* self)
         if (type_str)
         {
             self->device_type = tcam::tcam_device_from_string(type_str);
-            g_free( type_str );
+            g_free(type_str);
         }
         else
         {
@@ -752,21 +750,21 @@ static gboolean open_source_element (GstTcamSrc* self)
     }
 
     GST_INFO("Opened device has serial: '%s' type: '%s'",
-             self->device_serial.c_str(), tcam::tcam_device_type_to_string(self->device_type).c_str());
+             self->device_serial.c_str(),
+             tcam::tcam_device_type_to_string(self->device_type).c_str());
 
     return TRUE;
 }
 
 
-static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
-                                                       GstStateChange change)
+static GstStateChangeReturn gst_tcam_src_change_state(GstElement* element, GstStateChange change)
 {
 
     GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
 
     GstTcamSrc* self = GST_TCAM_SRC(element);
 
-    switch(change)
+    switch (change)
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
@@ -799,7 +797,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
         return ret;
     }
 
-    switch(change)
+    switch (change)
     {
         case GST_STATE_CHANGE_READY_TO_NULL:
         {
@@ -813,7 +811,7 @@ static GstStateChangeReturn gst_tcam_src_change_state (GstElement* element,
 }
 
 
-static void gst_tcam_src_init (GstTcamSrc* self)
+static void gst_tcam_src_init(GstTcamSrc* self)
 {
 
     self->active_source = nullptr;
@@ -828,7 +826,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
         self->main_src = gst_element_factory_make("tcammainsrc", "tcamsrc-mainsrc");
         if (self->main_src != nullptr)
         {
-            self->source_list = g_slist_append( self->source_list, self->main_src );
+            self->source_list = g_slist_append(self->source_list, self->main_src);
         }
         gst_object_unref(mainsrc_fact);
     }
@@ -839,7 +837,7 @@ static void gst_tcam_src_init (GstTcamSrc* self)
         self->pimipi_src = gst_element_factory_make("tcampimipisrc", "tcamsrc-pimipisrc");
         if (self->pimipi_src != nullptr)
         {
-            self->source_list = g_slist_append( self->source_list, self->pimipi_src );
+            self->source_list = g_slist_append(self->source_list, self->pimipi_src);
         }
         gst_object_unref(pimipi_fact);
     }
@@ -851,11 +849,10 @@ static void gst_tcam_src_init (GstTcamSrc* self)
     self->do_timestamp = false;
     self->drop_incomplete_frames = true;
     self->num_buffers = -1;
-
 }
 
 
-static void gst_tcam_src_finalize (GObject* object)
+static void gst_tcam_src_finalize(GObject* object)
 {
     GstTcamSrc* self = GST_TCAM_SRC(object);
 
@@ -884,9 +881,9 @@ static void gst_tcam_src_finalize (GObject* object)
 }
 
 
-static void gst_tcamsrc_dispose (GObject* object )
+static void gst_tcamsrc_dispose(GObject* object)
 {
-    GstTcamSrc* self = GST_TCAM_SRC( object );
+    GstTcamSrc* self = GST_TCAM_SRC(object);
 
     if (self->pad)
     {
@@ -894,28 +891,27 @@ static void gst_tcamsrc_dispose (GObject* object )
         self->pad = nullptr;
     }
 
-    G_OBJECT_CLASS(GST_ELEMENT_CLASS(parent_class))->dispose( object );
+    G_OBJECT_CLASS(GST_ELEMENT_CLASS(parent_class))->dispose(object);
 }
 
 
-static void gst_tcam_src_set_property (GObject* object,
-                                       guint prop_id,
-                                       const GValue* value,
-                                       GParamSpec* pspec)
+static void gst_tcam_src_set_property(GObject* object,
+                                      guint prop_id,
+                                      const GValue* value,
+                                      GParamSpec* pspec)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamSrc* self = GST_TCAM_SRC(object);
 
     apply_element_property(self, prop_id, value, pspec);
-
 }
 
 
-static void gst_tcam_src_get_property (GObject* object,
-                                       guint prop_id,
-                                       GValue* value,
-                                       GParamSpec* pspec)
+static void gst_tcam_src_get_property(GObject* object,
+                                      guint prop_id,
+                                      GValue* value,
+                                      GParamSpec* pspec)
 {
-    GstTcamSrc* self = GST_TCAM_SRC (object);
+    GstTcamSrc* self = GST_TCAM_SRC(object);
 
     switch (prop_id)
     {
@@ -932,7 +928,8 @@ static void gst_tcam_src_get_property (GObject* object,
             }
             else
             {
-                g_value_set_string(value, tcam::tcam_device_type_to_string(self->device_type).c_str());
+                g_value_set_string(value,
+                                   tcam::tcam_device_type_to_string(self->device_type).c_str());
             }
             break;
         }
@@ -990,7 +987,8 @@ static void gst_tcam_src_get_property (GObject* object,
         {
             if (self->active_source)
             {
-                g_object_get_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
+                g_object_get_property(
+                    G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
             }
             else
             {
@@ -1007,8 +1005,8 @@ static void gst_tcam_src_get_property (GObject* object,
             }
             else if (self->active_source == self->pimipi_src)
             {
-                std::string tmp = create_device_settings(self->device_serial,
-                                                         TCAM_PROP(self)).c_str();
+                std::string tmp =
+                    create_device_settings(self->device_serial, TCAM_PROP(self)).c_str();
                 g_value_set_string(value, tmp.c_str());
             }
             else
@@ -1019,102 +1017,108 @@ static void gst_tcam_src_get_property (GObject* object,
         }
         default:
         {
-            G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
             break;
         }
     }
 }
 
 
-static void gst_tcam_src_class_init (GstTcamSrcClass* klass)
+static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
 {
-    GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-    GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
+    GObjectClass* gobject_class = G_OBJECT_CLASS(klass);
+    GstElementClass* element_class = GST_ELEMENT_CLASS(klass);
 
     gobject_class->finalize = gst_tcam_src_finalize;
-    gobject_class->dispose = (GObjectFinalizeFunc) gst_tcamsrc_dispose;
+    gobject_class->dispose = (GObjectFinalizeFunc)gst_tcamsrc_dispose;
     gobject_class->set_property = gst_tcam_src_set_property;
     gobject_class->get_property = gst_tcam_src_get_property;
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_SERIAL,
-         g_param_spec_string ("serial",
-                              "Camera serial",
-                              "Serial of the camera",
-                              NULL,
-                              static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_SERIAL,
+        g_param_spec_string("serial",
+                            "Camera serial",
+                            "Serial of the camera",
+                            NULL,
+                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-   g_object_class_install_property
-        (gobject_class,
-         PROP_DEVICE_TYPE,
-         g_param_spec_string ("type",
-                              "Camera type",
-                              "type/backend of the camera",
-                              "auto",
-                              static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_DEVICE_TYPE,
+        g_param_spec_string("type",
+                            "Camera type",
+                            "type/backend of the camera",
+                            "auto",
+                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-    g_object_class_install_property
-        (gobject_class,
-         PROP_CAM_BUFFERS,
-         g_param_spec_int ("camera-buffers",
-                           "Number of Buffers",
-                           "Number of buffers to use for retrieving images",
-                           1, 256, 10,
-                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
-    g_object_class_install_property
-        (gobject_class,
-         PROP_NUM_BUFFERS,
-         g_param_spec_int ("num-buffers",
-                           "Number of Buffers",
-                           "Number of buffers to send before ending pipeline (-1 = unlimited)",
-                           -1, G_MAXINT, -1,
-                           static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
-    g_object_class_install_property
-        (gobject_class,
-         PROP_DO_TIMESTAMP,
-         g_param_spec_boolean ("do-timestamp",
-                               "Do timestamp",
-                               "Apply current stream time to buffers",
-                               true,
-                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
-    g_object_class_install_property
-        (gobject_class,
-         PROP_DROP_INCOMPLETE_FRAMES,
-         g_param_spec_boolean ("drop-incomplete-buffer",
-                               "Drop incomplete buffers",
-                               "Drop buffer that are incomplete.",
-                               true,
-                               static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_CAM_BUFFERS,
+        g_param_spec_int("camera-buffers",
+                         "Number of Buffers",
+                         "Number of buffers to use for retrieving images",
+                         1,
+                         256,
+                         10,
+                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_NUM_BUFFERS,
+        g_param_spec_int("num-buffers",
+                         "Number of Buffers",
+                         "Number of buffers to send before ending pipeline (-1 = unlimited)",
+                         -1,
+                         G_MAXINT,
+                         -1,
+                         static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_DO_TIMESTAMP,
+        g_param_spec_boolean("do-timestamp",
+                             "Do timestamp",
+                             "Apply current stream time to buffers",
+                             true,
+                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
+                                                      | G_PARAM_CONSTRUCT)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_DROP_INCOMPLETE_FRAMES,
+        g_param_spec_boolean("drop-incomplete-buffer",
+                             "Drop incomplete buffers",
+                             "Drop buffer that are incomplete.",
+                             true,
+                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
+                                                      | G_PARAM_CONSTRUCT)));
 
 
-    g_object_class_install_property(gobject_class,
-                                    PROP_STATE,
-                                    g_param_spec_string("state",
-                                                        "Property State",
-                                                        "Property values the internal elements shall use",
-                                                        "",
-                                                        static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_STATE,
+        g_param_spec_string("state",
+                            "Property State",
+                            "Property values the internal elements shall use",
+                            "",
+                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
-    GST_DEBUG_CATEGORY_INIT (tcam_src_debug, "tcamsrc", 0, "tcam interface");
+    GST_DEBUG_CATEGORY_INIT(tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
-    gst_element_class_set_static_metadata (element_class,
+    gst_element_class_set_static_metadata(element_class,
                                           "Tcam Video Source",
                                           "Source/Video",
                                           "Tcam based source",
                                           "The Imaging Source <support@theimagingsource.com>");
 
-    gst_element_class_add_pad_template (element_class,
-                                        gst_static_pad_template_get (&tcam_src_template));
+    gst_element_class_add_pad_template(element_class,
+                                       gst_static_pad_template_get(&tcam_src_template));
 
     element_class->change_state = gst_tcam_src_change_state;
-
 }
 
 
-static gboolean plugin_init (GstPlugin* plugin)
+static gboolean plugin_init(GstPlugin* plugin)
 {
-    return gst_element_register (plugin, "tcamsrc", GST_RANK_NONE, GST_TYPE_TCAM_SRC);
+    return gst_element_register(plugin, "tcamsrc", GST_RANK_NONE, GST_TYPE_TCAM_SRC);
 }
 
 #ifndef PACKAGE
@@ -1122,12 +1126,12 @@ static gboolean plugin_init (GstPlugin* plugin)
 #endif
 
 
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-                   GST_VERSION_MINOR,
-                   tcamsrc,
-                   "TCam Video Source",
-                   plugin_init,
-                   get_version(),
-                   "Proprietary",
-                   "tcamsrc",
-                   "theimagingsource.com")
+GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
+                  GST_VERSION_MINOR,
+                  tcamsrc,
+                  "TCam Video Source",
+                  plugin_init,
+                  get_version(),
+                  "Proprietary",
+                  "tcamsrc",
+                  "theimagingsource.com")

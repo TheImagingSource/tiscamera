@@ -17,14 +17,14 @@
 #ifndef TCAM_FILTERBASE_H
 #define TCAM_FILTERBASE_H
 
-#include "base_types.h"
+#include "ImageBuffer.h"
 #include "Properties.h"
 #include "VideoFormatDescription.h"
-#include "ImageBuffer.h"
+#include "base_types.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 using namespace tcam;
 // {
@@ -32,8 +32,8 @@ using namespace tcam;
 enum FILTER_TYPE
 {
     FILTER_TYPE_UNKNOWN = 0,
-    FILTER_TYPE_CONVERSION,  /* used for static transformations (e.g. colorspace conversions) */
-    FILTER_TYPE_INTERPRET,   /* image interpretation / manipulation from device properties */
+    FILTER_TYPE_CONVERSION, /* used for static transformations (e.g. colorspace conversions) */
+    FILTER_TYPE_INTERPRET, /* image interpretation / manipulation from device properties */
 };
 
 
@@ -51,25 +51,24 @@ struct FilterDescription
 class FilterBase
 {
 public:
+    virtual ~FilterBase() {};
 
-    virtual ~FilterBase () {};
+    virtual struct FilterDescription getDescription() const = 0;
 
-    virtual struct FilterDescription getDescription () const = 0;
+    virtual bool transform(ImageBuffer& in, ImageBuffer& out) = 0;
 
-    virtual bool transform (ImageBuffer& in, ImageBuffer& out ) = 0;
+    virtual bool apply(std::shared_ptr<ImageBuffer>) = 0;
 
-    virtual bool apply (std::shared_ptr<ImageBuffer>) = 0;
+    virtual bool setStatus(TCAM_PIPELINE_STATUS) = 0;
 
-    virtual bool setStatus (TCAM_PIPELINE_STATUS) = 0;
+    virtual TCAM_PIPELINE_STATUS getStatus() const = 0;
 
-    virtual TCAM_PIPELINE_STATUS getStatus () const = 0;
+    virtual bool setVideoFormat(const VideoFormat& in, const VideoFormat& out) = 0;
+    virtual void getVideoFormat(VideoFormat& in, VideoFormat& out) const = 0;
 
-    virtual bool setVideoFormat (const VideoFormat& in, const VideoFormat& out) = 0;
-    virtual void getVideoFormat (VideoFormat& in, VideoFormat& out) const = 0;
+    virtual void setDeviceProperties(std::vector<std::shared_ptr<Property>>) = 0;
 
-    virtual void setDeviceProperties (std::vector<std::shared_ptr<Property>>) = 0;
-
-    virtual std::vector<std::shared_ptr<Property>> getFilterProperties () = 0;
+    virtual std::vector<std::shared_ptr<Property>> getFilterProperties() = 0;
 };
 
 extern "C"
@@ -89,10 +88,9 @@ extern "C"
 
     // void destroy (FilterBase*);
 
-    FB* create ();
+    FB* create();
 
-    void destroy (FB*);
-
+    void destroy(FB*);
 }
 
 // } /* namespace tcam */

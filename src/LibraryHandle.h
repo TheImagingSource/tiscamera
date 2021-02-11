@@ -17,11 +17,9 @@
 #ifndef TCAM_LIBRARYHANDLE_H
 #define TCAM_LIBRARYHANDLE_H
 
-#include <memory>
-
 #include <dlfcn.h>
-
 #include <functional>
+#include <memory>
 #include <stdexcept>
 
 namespace tcam
@@ -30,30 +28,26 @@ namespace tcam
 class LibraryHandle
 {
 public:
-
     /// @name: open
     /// @param: name - name of the library that shall be opened
     /// @param: optional path to the library
     /// @return shared_ptr or nullptr
     /// Tries to open the specified library
-    static std::shared_ptr<LibraryHandle> open (const std::string& name,
-                                                const std::string& path = "");
+    static std::shared_ptr<LibraryHandle> open(const std::string& name,
+                                               const std::string& path = "");
+
 private:
+    LibraryHandle(const std::string& name, const std::string& path = "");
 
-    LibraryHandle (const std::string& name,
-                   const std::string& path = "");
+    LibraryHandle(const LibraryHandle&) = delete;
 
-    LibraryHandle (const LibraryHandle&) = delete;
-
-    LibraryHandle& operator= (const LibraryHandle&) = delete;
+    LibraryHandle& operator=(const LibraryHandle&) = delete;
 
 public:
+    ~LibraryHandle();
 
-    ~LibraryHandle ();
 
-
-    template<class T>
-    std::function<T> load(std::string const& functionName)
+    template<class T> std::function<T> load(std::string const& functionName)
     {
         dlerror();
         void* const result = dlsym(handle_, functionName.c_str());
@@ -62,7 +56,8 @@ public:
             char* const error = dlerror();
             if (error)
             {
-                throw std::logic_error("can't find symbol named \"" + functionName + "\": " + error);
+                throw std::logic_error("can't find symbol named \"" + functionName
+                                       + "\": " + error);
             }
         }
 
@@ -70,11 +65,8 @@ public:
     }
 
 
-
 private:
-
-    static void* open_library (const std::string& name,
-                               const std::string& path = "");
+    static void* open_library(const std::string& name, const std::string& path = "");
 
     void* handle_;
 

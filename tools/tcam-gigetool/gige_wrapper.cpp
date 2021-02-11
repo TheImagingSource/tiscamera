@@ -1,25 +1,27 @@
-#include "CameraDiscovery.h"
-#include "Camera.h"
-#include "utils.h"
-#include <algorithm>
-#include <unistd.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-
-#include <assert.h>
-
-#include <thread>
-#include <mutex>
-#include <exception>
-
 #include "gige_wrapper.h"
+
+#include "Camera.h"
+#include "CameraDiscovery.h"
+#include "utils.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <exception>
+#include <limits.h>
+#include <mutex>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <thread>
+#include <unistd.h>
 
 #define MAX_CAMERAS 64
 
-#define COPY_STRING(x,y) {strncpy(x, y, sizeof(x)-1);}
+#define COPY_STRING(x, y)             \
+    {                                 \
+        strncpy(x, y, sizeof(x) - 1); \
+    }
 
 using namespace tis;
 
@@ -28,16 +30,18 @@ struct g_camera_info
     camera_list cameras;
 };
 
-struct g_camera_info *g_camera_info = NULL;
+struct g_camera_info* g_camera_info = NULL;
 
 void init(void)
 {
     if (g_camera_info)
         return;
-    g_camera_info = new(struct g_camera_info);
+    g_camera_info = new (struct g_camera_info);
 }
 
-void copy_to_tcam(struct tcam_camera *tcam, std::shared_ptr<Camera> camera, int get_persistent_values)
+void copy_to_tcam(struct tcam_camera* tcam,
+                  std::shared_ptr<Camera> camera,
+                  int get_persistent_values)
 {
     memset((void*)tcam, 0, sizeof(tcam));
     COPY_STRING(tcam->model_name, camera->getModelName().c_str());
@@ -48,7 +52,8 @@ void copy_to_tcam(struct tcam_camera *tcam, std::shared_ptr<Camera> camera, int 
     COPY_STRING(tcam->interface_name, camera->getNetworkInterfaceName().c_str());
     COPY_STRING(tcam->mac_address, camera->getMAC().c_str());
     tcam->is_reachable = camera->isReachable();
-    if (tcam->is_reachable && get_persistent_values){
+    if (tcam->is_reachable && get_persistent_values)
+    {
         COPY_STRING(tcam->persistent_ip, camera->getPersistentIP().c_str());
         COPY_STRING(tcam->persistent_netmask, camera->getPersistentSubnet().c_str());
         COPY_STRING(tcam->persistent_gateway, camera->getPersistentGateway().c_str());
@@ -67,8 +72,8 @@ int get_camera_list(discover_callback_t callback, int get_persistent_values)
     camera_list cameras;
     std::mutex cam_lock;
 
-    std::function<void(std::shared_ptr<Camera>)> f = [&cam_lock, &cameras] (std::shared_ptr<Camera> camera)
-    {
+    std::function<void(std::shared_ptr<Camera>)> f = [&cam_lock,
+                                                      &cameras](std::shared_ptr<Camera> camera) {
         std::lock_guard<std::mutex> mutex_lock(cam_lock);
         cameras.push_back(camera);
     };
@@ -86,7 +91,7 @@ int get_camera_list(discover_callback_t callback, int get_persistent_values)
     return 0;
 }
 
-int get_camera_details(char *identifier, struct tcam_camera *tcam)
+int get_camera_details(char* identifier, struct tcam_camera* tcam)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
@@ -105,7 +110,7 @@ int get_camera_details(char *identifier, struct tcam_camera *tcam)
     return 0;
 }
 
-int set_persistent_parameter_s(char *identifier, char *key, char *value)
+int set_persistent_parameter_s(char* identifier, char* key, char* value)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
@@ -120,7 +125,7 @@ int set_persistent_parameter_s(char *identifier, char *key, char *value)
     if (!camera)
         return NO_DEVICE;
 
-    if(!strcmp(key, "ip"))
+    if (!strcmp(key, "ip"))
     {
         ret = camera->setPersistentIP(value);
     }
@@ -144,7 +149,7 @@ int set_persistent_parameter_s(char *identifier, char *key, char *value)
     return ret != 0 ? SUCCESS : FAILURE;
 }
 
-int set_persistent_parameter_i(char *identifier, char *key, int value)
+int set_persistent_parameter_i(char* identifier, char* key, int value)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
@@ -159,7 +164,7 @@ int set_persistent_parameter_i(char *identifier, char *key, int value)
     if (!camera)
         return NO_DEVICE;
 
-    if(!strcmp(key, "dhcp"))
+    if (!strcmp(key, "dhcp"))
     {
         ret = camera->setDHCPstate(value != 0);
     }
@@ -167,14 +172,15 @@ int set_persistent_parameter_i(char *identifier, char *key, int value)
     {
         ret = camera->setStaticIPstate(value != 0);
     }
-    else{
+    else
+    {
         return INVALID_PARAMETER;
     }
 
     return ret != 0 ? SUCCESS : FAILURE;
 }
 
-int upload_firmware(char *identifier, char *path, upload_callback_t callback)
+int upload_firmware(char* identifier, char* path, upload_callback_t callback)
 {
     assert(g_camera_info);
     std::shared_ptr<Camera> camera;
@@ -188,8 +194,7 @@ int upload_firmware(char *identifier, char *path, upload_callback_t callback)
     if (!camera)
         return NO_DEVICE;
 
-    auto func = [callback] (int progress,const std::string& s)
-    {
+    auto func = [callback](int progress, const std::string& s) {
         callback(s.c_str(), progress);
     };
 
@@ -198,12 +203,14 @@ int upload_firmware(char *identifier, char *path, upload_callback_t callback)
     return ret;
 }
 
-std::string string_format(const std::string &fmt, ...) {
-    int size=1;
+std::string string_format(const std::string& fmt, ...)
+{
+    int size = 1;
     std::string str;
     va_list ap;
 
-    while (1) {
+    while (1)
+    {
         str.resize(size);
         va_start(ap, fmt);
         int n = vsnprintf(&str[0], size, fmt.c_str(), ap);
@@ -223,25 +230,25 @@ std::string parseHexMac(std::string hexmac)
     if (hexmac.length() != 13)
         return "";
 
-    std::string mac = hexmac.substr(0,2);
-    for (int i=2; i < 12; i+=2)
-        mac += ":" + hexmac.substr(i,2);
+    std::string mac = hexmac.substr(0, 2);
+    for (int i = 2; i < 12; i += 2) mac += ":" + hexmac.substr(i, 2);
     return mac;
 }
 
 std::string serialToMac(std::string serial)
 {
-    if(serial.length() != 8)
+    if (serial.length() != 8)
         return "";
-    std::string tmp = serial.substr(2,2);
-    tmp = tmp.substr(1,1) + tmp.substr(0,1);
-    int macPart = std::stoi(serial.substr(4,4)) + (10000 * (std::stoi(tmp) - 9)) + (10000 * 30 * (std::stoi(serial.substr(0,2)) - 1));
+    std::string tmp = serial.substr(2, 2);
+    tmp = tmp.substr(1, 1) + tmp.substr(0, 1);
+    int macPart = std::stoi(serial.substr(4, 4)) + (10000 * (std::stoi(tmp) - 9))
+                  + (10000 * 30 * (std::stoi(serial.substr(0, 2)) - 1));
     std::string prefix = "000748";
     std::string macString = prefix + std::string(string_format("%06x", macPart));
     return parseHexMac(macString);
 }
 
-int rescue(char *mac, char* ip, char *netmask, char *gateway)
+int rescue(char* mac, char* ip, char* netmask, char* gateway)
 {
     int ret = -1;
 

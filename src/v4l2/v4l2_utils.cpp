@@ -16,23 +16,22 @@
 
 #include "v4l2_utils.h"
 
-#include "v4l2_property_mapping.h"
-#include "utils.h"
 #include "logging.h"
+#include "utils.h"
+#include "v4l2_property_mapping.h"
 
 #if HAVE_UDEV
 #include <libudev.h>
 #endif
 
-#include <glob.h>
-
-#include <vector>
 #include <algorithm>
+#include <glob.h>
+#include <vector>
 
 using namespace tcam;
 
 
-uint32_t tcam::convert_v4l2_flags (uint32_t v4l2_flags)
+uint32_t tcam::convert_v4l2_flags(uint32_t v4l2_flags)
 {
     uint32_t internal_flags = 0;
 
@@ -48,20 +47,17 @@ uint32_t tcam::convert_v4l2_flags (uint32_t v4l2_flags)
     {
         internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_READ_ONLY);
     }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_UPDATE))
-    {}
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_UPDATE)) {}
     if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_INACTIVE))
     {
         internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_INACTIVE);
     }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_SLIDER))
-    {}
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_SLIDER)) {}
     if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_WRITE_ONLY))
     {
         internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
     }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_VOLATILE))
-    {}
+    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_VOLATILE)) {}
     // if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_HAS_PAYLOAD))
     // {}
 
@@ -69,14 +65,13 @@ uint32_t tcam::convert_v4l2_flags (uint32_t v4l2_flags)
 }
 
 
-TCAM_PROPERTY_ID tcam::find_v4l2_mapping (int v4l2_id)
+TCAM_PROPERTY_ID tcam::find_v4l2_mapping(int v4l2_id)
 {
-    auto f = [v4l2_id] (int p)
-        {
-            if (v4l2_id == p)
-                return true;
-            return false;
-        };
+    auto f = [v4l2_id](int p) {
+        if (v4l2_id == p)
+            return true;
+        return false;
+    };
 
     for (const auto& m : v4l2_mappings)
     {
@@ -89,10 +84,10 @@ TCAM_PROPERTY_ID tcam::find_v4l2_mapping (int v4l2_id)
 }
 
 
-std::shared_ptr<Property> tcam::create_property (int fd,
-                                                 struct v4l2_queryctrl* queryctrl,
-                                                 struct v4l2_ext_control* ctrl,
-                                                 std::shared_ptr<PropertyImpl> impl)
+std::shared_ptr<Property> tcam::create_property(int fd,
+                                                struct v4l2_queryctrl* queryctrl,
+                                                struct v4l2_ext_control* ctrl,
+                                                std::shared_ptr<PropertyImpl> impl)
 {
 
     // assure we have the typ
@@ -133,7 +128,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         }
     }
 
-    auto prop_id = find_v4l2_mapping (ctrl->id);
+    auto prop_id = find_v4l2_mapping(ctrl->id);
 
     auto ctrl_m = get_control_reference(prop_id);
 
@@ -142,9 +137,10 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
     if (ctrl_m.id == TCAM_PROPERTY_INVALID)
     {
-        SPDLOG_WARN("Unable to find std property. Passing raw property identifier through. '{}'({:x})",
-                    (char*)queryctrl->name,
-                    queryctrl->id);
+        SPDLOG_WARN(
+            "Unable to find std property. Passing raw property identifier through. '{}'({:x})",
+            (char*)queryctrl->name,
+            queryctrl->id);
         // pass through and do not associate with anything existing
         type_to_use = value_type_to_ctrl_type(type);
         memcpy(cp.name, (char*)queryctrl->name, sizeof(cp.name));
@@ -183,8 +179,8 @@ std::shared_ptr<Property> tcam::create_property (int fd,
             else
             {
                 SPDLOG_ERROR("Boolean '{}' has impossible default value: {} Setting to false",
-                           cp.name,
-                           queryctrl->default_value);
+                             cp.name,
+                             queryctrl->default_value);
                 cp.value.b.default_value = false;
             }
 
@@ -215,15 +211,15 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 
             if (cp.value.i.min > cp.value.i.max)
             {
-                SPDLOG_ERROR("Range boundaries for property '{}' are faulty. Ignoring property as a precaution.",
-                           cp.name);
+                SPDLOG_ERROR("Range boundaries for property '{}' are faulty. Ignoring property as "
+                             "a precaution.",
+                             cp.name);
                 return nullptr;
             }
 
             if (cp.value.i.step == 0)
             {
-                SPDLOG_WARN("Detected stepsize 0 for property {}. Setting to 1.",
-                             cp.name);
+                SPDLOG_WARN("Detected stepsize 0 for property {}. Setting to 1.", cp.name);
 
                 cp.value.i.step = 1;
             }
@@ -240,8 +236,9 @@ std::shared_ptr<Property> tcam::create_property (int fd,
         // }
         case TCAM_PROPERTY_TYPE_STRING:
         {
-            memcpy(cp.value.s.value,(char*)queryctrl->name, sizeof(cp.value.s.value));
-            memcpy(cp.value.s.default_value, (char*)queryctrl->name, sizeof(cp.value.s.default_value));
+            memcpy(cp.value.s.value, (char*)queryctrl->name, sizeof(cp.value.s.value));
+            memcpy(
+                cp.value.s.default_value, (char*)queryctrl->name, sizeof(cp.value.s.default_value));
             cp.flags = flags;
 
             return std::make_shared<Property>(PropertyString(impl, cp, type));
@@ -267,7 +264,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
                 if (tcam_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
                     continue;
 
-                std::string map_string((char*) qmenu.name);
+                std::string map_string((char*)qmenu.name);
                 m.emplace(map_string, i);
             }
 
@@ -297,7 +294,7 @@ std::shared_ptr<Property> tcam::create_property (int fd,
 }
 
 
-std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
+std::vector<DeviceInfo> tcam::get_v4l2_device_list()
 {
     std::vector<DeviceInfo> device_list;
 
@@ -314,17 +311,16 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
     struct udev_list_entry* devices = udev_enumerate_get_list_entry(enumerate);
     struct udev_list_entry* dev_list_entry;
 
-    auto device_is_known = [&device_list] (const DeviceInfo& info)
+    auto device_is_known = [&device_list](const DeviceInfo& info) {
+        for (const auto& dev : device_list)
         {
-            for (const auto& dev : device_list)
+            if (dev.get_serial() == info.get_serial())
             {
-                if (dev.get_serial() == info.get_serial())
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
-        };
+        }
+        return false;
+    };
 
     udev_list_entry_foreach(dev_list_entry, devices)
     {
@@ -347,7 +343,8 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
            is changed to the path of the usb device behind it (/sys/class/....) */
         strcpy(needed_path, udev_device_get_devnode(dev));
 
-        struct udev_device* parent_device = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
+        struct udev_device* parent_device =
+            udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
 
         /* skip this device if we can't get the usb parent */
         if (!parent_device)
@@ -366,7 +363,8 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list ()
 
         static const char* TCAM_VENDOR_ID_STRING = "199e";
 
-        if (strcmp(udev_device_get_sysattr_value(parent_device, "idVendor"), TCAM_VENDOR_ID_STRING) == 0)
+        if (strcmp(udev_device_get_sysattr_value(parent_device, "idVendor"), TCAM_VENDOR_ID_STRING)
+            == 0)
         {
             tcam_device_info info = {};
             info.type = TCAM_DEVICE_TYPE_V4L2;

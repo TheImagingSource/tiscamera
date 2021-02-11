@@ -15,17 +15,18 @@
  */
 
 #include "logging.h"
+
 #include "version.h"
 
-#include <stdio.h>              /* printf, fopen */
-#include <stdarg.h>             /* va_args */
-#include <string.h>             /* memcpy */
-#include <time.h>               /* time_t */
-#include <vector>
 #include <chrono>
+#include <stdarg.h> /* va_args */
+#include <stdio.h> /* printf, fopen */
+#include <string.h> /* memcpy */
+#include <time.h> /* time_t */
+#include <vector>
 
 
-static spdlog::level::level_enum string2loglevel (const char* level)
+static spdlog::level::level_enum string2loglevel(const char* level)
 {
 
     if (strcmp("OFF", level) == 0)
@@ -57,15 +58,13 @@ static spdlog::level::level_enum string2loglevel (const char* level)
 }
 
 
-Logger::Logger ():
-    callback(nullptr)
+Logger::Logger() : callback(nullptr)
 
 {
 
 #ifndef TCAM_LOG_ENV_NAME
 #define TCAM_LOG_ENV_NAME "TCAM_LOG"
 #endif
-
 
 
     static const char* env_name = TCAM_LOG_ENV_NAME;
@@ -81,32 +80,28 @@ Logger::Logger ():
     // spdlog::set_level(spdlog::level::debug);
     spdlog::set_level(level);
 
-    spdlog::set_error_handler([](const std::string& msg)
-    {
+    spdlog::set_error_handler([](const std::string& msg) {
         SPDLOG_ERROR("Error while handling logging message: {}", msg);
     });
 
     char b[1024];
-    sprintf(b,
-            "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s\n\tModules:\t%s",
-            get_version(),
-            get_aravis_version(),
-            get_enabled_modules());
+    sprintf(
+        b,
+        "\nThe following library versions are used:\n\tTcam:\t%s\n\tAravis:\t%s\n\tModules:\t%s",
+        get_version(),
+        get_aravis_version(),
+        get_enabled_modules());
 
     SPDLOG_INFO(b);
-
 }
 
-void Logger::load_default_settings ()
+void Logger::load_default_settings()
 {
     level = spdlog::level::err;
-
 }
 
 
-
-
-Logger& Logger::getInstance ()
+Logger& Logger::getInstance()
 {
     static Logger instance;
 

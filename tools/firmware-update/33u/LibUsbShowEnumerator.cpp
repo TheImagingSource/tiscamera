@@ -15,6 +15,7 @@
  */
 
 #include "LibUsbShowEnumerator.h"
+
 #include "LibUsbShowDevice.h"
 #include "UsbHandler.h"
 
@@ -27,23 +28,23 @@ namespace driver_interface
 {
 namespace libusb
 {
-	std::vector<std::shared_ptr<IUsbDevice>> ShowDeviceEnumerator::enum_all ()
-	{
-        tis::UsbHandler usb;
+std::vector<std::shared_ptr<IUsbDevice>> ShowDeviceEnumerator::enum_all()
+{
+    tis::UsbHandler usb;
 
-        auto dev = usb.get_device_list();
+    auto dev = usb.get_device_list();
 
-		std::vector<std::shared_ptr<IUsbDevice>> devices;
+    std::vector<std::shared_ptr<IUsbDevice>> devices;
 
-		for (auto& d : dev)
-        {
-            auto new_dev = std::make_shared<ShowDevice>(usb.get_session(), d);
+    for (auto& d : dev)
+    {
+        auto new_dev = std::make_shared<ShowDevice>(usb.get_session(), d);
 
-            devices.push_back(new_dev);
-        }
+        devices.push_back(new_dev);
+    }
 
-		return devices;
-	}
+    return devices;
+}
 } /* namespace libusb */
 } /* namespace driver_interface */
 } /* namespace lib33u */

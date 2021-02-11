@@ -17,8 +17,8 @@
 #ifndef TCAM_IMAGESINK_H
 #define TCAM_IMAGESINK_H
 
-#include "base_types.h"
 #include "SinkInterface.h"
+#include "base_types.h"
 
 #include <memory>
 #include <vector>
@@ -39,45 +39,43 @@ namespace tcam
 class ImageSink : public SinkInterface
 {
 public:
+    ImageSink();
 
-    ImageSink ();
+    bool set_status(TCAM_PIPELINE_STATUS) override;
+    TCAM_PIPELINE_STATUS get_status() const override;
 
-    bool set_status (TCAM_PIPELINE_STATUS) override;
-    TCAM_PIPELINE_STATUS get_status () const override;
+    bool setVideoFormat(const VideoFormat&) override;
 
-    bool setVideoFormat (const VideoFormat&) override;
+    VideoFormat getVideoFormat() const override;
 
-    VideoFormat getVideoFormat () const override;
+    bool registerCallback(shared_callback, void*);
+    bool registerCallback(sink_callback, void*);
+    bool registerCallback(c_callback, void*);
 
-    bool registerCallback (shared_callback, void*);
-    bool registerCallback (sink_callback, void*);
-    bool registerCallback (c_callback, void*);
-
-    void push_image (std::shared_ptr<ImageBuffer>) override;
+    void push_image(std::shared_ptr<ImageBuffer>) override;
 
     void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
 
-    bool set_buffer_number (size_t);
+    bool set_buffer_number(size_t);
 
-    bool set_buffer_collection (std::vector<std::shared_ptr<ImageBuffer>> new_buffers);
+    bool set_buffer_collection(std::vector<std::shared_ptr<ImageBuffer>> new_buffers);
 
-    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () override;
+    std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection() override;
 
-    bool delete_buffer_collection ();
+    bool delete_buffer_collection();
 
     /**
      * used to set the pipelinemanager instance that is called
      * for things like requeue_buffer
      */
-    void set_source (std::weak_ptr<SinkInterface>) override;
+    void set_source(std::weak_ptr<SinkInterface>) override;
 
-    void drop_incomplete_frames (bool drop_them) override;
-    bool should_incomplete_frames_be_dropped () const override;
+    void drop_incomplete_frames(bool drop_them) override;
+    bool should_incomplete_frames_be_dropped() const override;
 
 
 private:
-
-    bool initialize_internal_buffer ();
+    bool initialize_internal_buffer();
 
     std::weak_ptr<SinkInterface> source_;
 
@@ -95,7 +93,6 @@ private:
 
     size_t buffer_number;
     std::vector<std::shared_ptr<ImageBuffer>> buffers;
-
 };
 
 } /* namespace tcam */

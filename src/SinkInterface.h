@@ -18,7 +18,6 @@
 #define TCAM_SINKINTERFACE_H
 
 #include "ImageBuffer.h"
-
 #include "VideoFormat.h"
 
 #include <memory>
@@ -30,29 +29,27 @@ namespace tcam
 class SinkInterface
 {
 public:
+    virtual ~SinkInterface() {};
 
-    virtual ~SinkInterface () {};
+    virtual bool set_status(TCAM_PIPELINE_STATUS) = 0;
 
-    virtual bool set_status (TCAM_PIPELINE_STATUS) = 0;
+    virtual TCAM_PIPELINE_STATUS get_status() const = 0;
 
-    virtual TCAM_PIPELINE_STATUS get_status () const = 0;
+    virtual bool setVideoFormat(const VideoFormat&) = 0;
 
-    virtual bool setVideoFormat (const VideoFormat&) = 0;
+    virtual VideoFormat getVideoFormat() const = 0;
 
-    virtual VideoFormat getVideoFormat () const = 0;
+    virtual void push_image(std::shared_ptr<ImageBuffer>) = 0;
 
-    virtual void push_image (std::shared_ptr<ImageBuffer>) = 0;
+    virtual void requeue_buffer(std::shared_ptr<ImageBuffer>) = 0;
 
-    virtual void requeue_buffer (std::shared_ptr<ImageBuffer>) = 0;
+    virtual std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection() = 0;
 
-    virtual std::vector<std::shared_ptr<ImageBuffer>> get_buffer_collection () = 0;
+    virtual void set_source(std::weak_ptr<SinkInterface>) {};
 
-    virtual void set_source (std::weak_ptr<SinkInterface>) {};
+    virtual void drop_incomplete_frames(bool drop_them) = 0;
 
-    virtual void drop_incomplete_frames (bool drop_them) = 0;
-
-    virtual bool should_incomplete_frames_be_dropped () const = 0;
-
+    virtual bool should_incomplete_frames_be_dropped() const = 0;
 };
 
 } /* namespace tcam */

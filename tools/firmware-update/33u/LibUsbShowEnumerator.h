@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-
 #include "IUsbDevice.h"
 #include "IUsbDeviceEnumerator.h"
+
+#include <memory>
+#include <vector>
 
 namespace lib33u
 {
@@ -28,11 +28,11 @@ namespace driver_interface
 {
 namespace libusb
 {
-	class ShowDeviceEnumerator : public IUsbDeviceEnumerator
-	{
-	public:
-		virtual std::vector<std::shared_ptr<IUsbDevice>> enum_all () override;
-	};
-}
-}
-}
+class ShowDeviceEnumerator : public IUsbDeviceEnumerator
+{
+public:
+    virtual std::vector<std::shared_ptr<IUsbDevice>> enum_all() override;
+};
+} // namespace libusb
+} // namespace driver_interface
+} // namespace lib33u

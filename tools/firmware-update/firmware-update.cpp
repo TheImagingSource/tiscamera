@@ -16,46 +16,50 @@
 
 #include "UsbHandler.h"
 
-#include <string>
-#include <vector>
+#include <exception>
+#include <getopt.h>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
-#include <getopt.h>
-#include <exception>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace tis;
 
-void usage (const std::string& program_name)
+void usage(const std::string& program_name)
 {
-    std::cout << std::endl
-              << program_name << " - Firmware update tool for USB cameras" << std::endl
-              << std::endl
-              << "usage: " << program_name << " [-l | --list]" << std::endl
-              << "usage: " << program_name << " [-i | --info] [-d serial]" << std::endl
-              << "usage: " << program_name << " [-u | --upload] [-d serial] [-f | --file file]" << std::endl
-              << "usage: " << program_name << " [-d serial] [-m | --mode {u|uvc|p|proprietary}]" << std::endl
-              << std::endl
-              << "Options:" << std::endl
-              << "  --list\t-l\tlist cameras that can be accessed" << std::endl
-              << "  --device\t-d\tcamera that shall be interacted with" << std::endl
-              << "  --info\t-i\tprint information about the specified camera" << std::endl
-              << "  --upload\t-u\tupload firmware" << std::endl
-              << "  --mode\t-m\tswitch operating mode of camera (uvc/proprietary) (only USB2 cameras)" << std::endl
-              << "  --file\t-f\tfirmware file to use" << std::endl
-              << std::endl;
+    std::cout
+        << std::endl
+        << program_name << " - Firmware update tool for USB cameras" << std::endl
+        << std::endl
+        << "usage: " << program_name << " [-l | --list]" << std::endl
+        << "usage: " << program_name << " [-i | --info] [-d serial]" << std::endl
+        << "usage: " << program_name << " [-u | --upload] [-d serial] [-f | --file file]"
+        << std::endl
+        << "usage: " << program_name << " [-d serial] [-m | --mode {u|uvc|p|proprietary}]"
+        << std::endl
+        << std::endl
+        << "Options:" << std::endl
+        << "  --list\t-l\tlist cameras that can be accessed" << std::endl
+        << "  --device\t-d\tcamera that shall be interacted with" << std::endl
+        << "  --info\t-i\tprint information about the specified camera" << std::endl
+        << "  --upload\t-u\tupload firmware" << std::endl
+        << "  --mode\t-m\tswitch operating mode of camera (uvc/proprietary) (only USB2 cameras)"
+        << std::endl
+        << "  --file\t-f\tfirmware file to use" << std::endl
+        << std::endl;
 }
 
 
-void list_devices ()
+void list_devices()
 {
     UsbHandler usb;
 
     std::vector<device_info> devs;
     try
     {
-         devs = usb.get_device_list();
+        devs = usb.get_device_list();
     }
     catch (const std::runtime_error& err)
     {
@@ -67,30 +71,30 @@ void list_devices ()
     unsigned short id_width = 9;
     unsigned short serial_width = 12;
 
-    std::cout << std::endl << std::left
-              << "Found " << devs.size() << " device(s)." << std::endl << std::endl
-              << std::setw(name_width)   << "Name" << " - "
-              << std::setw(id_width)     << "ID " << " - "
-              << std::setw(serial_width) << "Serialnumber" << std::endl;
+    std::cout << std::endl
+              << std::left << "Found " << devs.size() << " device(s)." << std::endl
+              << std::endl
+              << std::setw(name_width) << "Name"
+              << " - " << std::setw(id_width) << "ID "
+              << " - " << std::setw(serial_width) << "Serialnumber" << std::endl;
 
     for (auto& d : devs)
     {
-        std::cout << std::setw(name_width) << d.product
-                  << " - " << std::hex << d.idVendor << ":" << d.idProduct << std::dec
-                  << " - " << d.serial<< std::endl;
+        std::cout << std::setw(name_width) << d.product << " - " << std::hex << d.idVendor << ":"
+                  << d.idProduct << std::dec << " - " << d.serial << std::endl;
     }
     std::cout << std::endl;
-
 }
 
 
 // query user for strings that shall be used in the camera
 // the values from the parameters will be displayed as defaults
-void query_device_strings (std::string& vendor, std::string& device, std::string& serial)
+void query_device_strings(std::string& vendor, std::string& device, std::string& serial)
 {
     std::string input;
 
-    std::cout << "Please insert the following strings that shall be used as camera descriptions." << std::endl
+    std::cout << "Please insert the following strings that shall be used as camera descriptions."
+              << std::endl
               << "Vendor Description [" << vendor << "]: ";
     std::getline(std::cin, input);
 
@@ -118,7 +122,8 @@ void query_device_strings (std::string& vendor, std::string& device, std::string
               << std::endl
               << "Vendor: " << vendor << std::endl
               << "Device: " << device << std::endl
-              << "Serial: " << serial << std::endl << std::endl;
+              << "Serial: " << serial << std::endl
+              << std::endl;
     std::cout << "Do you really want to write these strings?[y/N] ";
 
     std::string confirm;
@@ -127,7 +132,7 @@ void query_device_strings (std::string& vendor, std::string& device, std::string
         std::getline(std::cin, confirm);
         if (confirm.compare("y") == 0 || confirm.compare("Y") == 0)
         {
-            std::cout << "Applying strings" <<std::endl;
+            std::cout << "Applying strings" << std::endl;
             break;
         }
         else if (confirm.empty() || confirm.compare("n") || confirm.compare("N"))
@@ -143,7 +148,7 @@ void query_device_strings (std::string& vendor, std::string& device, std::string
 }
 
 
-void print_device_info (const std::string& serial_number)
+void print_device_info(const std::string& serial_number)
 {
     UsbHandler usb;
 
@@ -151,8 +156,7 @@ void print_device_info (const std::string& serial_number)
 
     if (cam == NULL)
     {
-        std::cerr << "Unable to find device with serial \""
-                  << serial_number << "\"" << std::endl;
+        std::cerr << "Unable to find device with serial \"" << serial_number << "\"" << std::endl;
         return;
     }
 
@@ -162,7 +166,8 @@ void print_device_info (const std::string& serial_number)
               << "Device manufacturer: " << d.manufacturer << std::endl
               << "Product name:        " << d.product << std::endl
               << "Serial number:       " << d.serial << std::endl
-              << "VendorID:ProductID:  " << std::hex << d.idVendor << ":" << d.idProduct << std::dec << std::endl;
+              << "VendorID:ProductID:  " << std::hex << d.idVendor << ":" << d.idProduct << std::dec
+              << std::endl;
 
     if (cam->get_firmware_version() != -1)
     {
@@ -194,7 +199,8 @@ void print_device_info (const std::string& serial_number)
         std::cout << "\n!!! FIRMWARE UPGRADE REQUIRED !!!\n\n";
         std::cout << "To correctly interact with this camera under Linux\n";
         std::cout << "this device requires a firmware upgrade.\n\n";
-        std::cout << "Please contact the manufacturer to receive the concerning firmware files." << std::endl;
+        std::cout << "Please contact the manufacturer to receive the concerning firmware files."
+                  << std::endl;
     }
 
     std::cout << std::endl;
@@ -203,7 +209,7 @@ void print_device_info (const std::string& serial_number)
 
 // toggle uvc mode in USB2 cameras
 // USB3 cameras do net have this "feature" and have to be ignored
-void set_device_mode (const std::string& serial_number, const std::string& mode)
+void set_device_mode(const std::string& serial_number, const std::string& mode)
 {
     UsbHandler usb;
 
@@ -211,8 +217,7 @@ void set_device_mode (const std::string& serial_number, const std::string& mode)
 
     if (cam == NULL)
     {
-        std::cerr << "Unable to find device with serial \""
-                  << serial_number << "\"" << std::endl;
+        std::cerr << "Unable to find device with serial \"" << serial_number << "\"" << std::endl;
         return;
     }
     auto type = cam->get_camera_type();
@@ -239,7 +244,8 @@ void set_device_mode (const std::string& serial_number, const std::string& mode)
         std::cerr << std::endl
                   << "Unknown mode identifier \"" << mode << "\"." << std::endl
                   << "Please try again with a valid one." << std::endl
-                  << "Allowed ones are: 'uvc' and 'proprietary'." << std::endl << std::endl;
+                  << "Allowed ones are: 'uvc' and 'proprietary'." << std::endl
+                  << std::endl;
         return;
     }
 
@@ -254,10 +260,10 @@ void set_device_mode (const std::string& serial_number, const std::string& mode)
 }
 
 
-void upload_to_device (const std::string& serial_number,
-                       const std::string& firmware,
-                       std::string model = "",
-                       bool assume_yes = false)
+void upload_to_device(const std::string& serial_number,
+                      const std::string& firmware,
+                      std::string model = "",
+                      bool assume_yes = false)
 {
     UsbHandler usb;
 
@@ -265,8 +271,7 @@ void upload_to_device (const std::string& serial_number,
 
     if (cam == NULL)
     {
-        std::cerr << "Unable to find device with serial \""
-                  << serial_number << "\"" << std::endl;
+        std::cerr << "Unable to find device with serial \"" << serial_number << "\"" << std::endl;
         return;
     }
     std::cout << std::endl;
@@ -274,16 +279,17 @@ void upload_to_device (const std::string& serial_number,
     if (!assume_yes)
     {
         std::cout << "!!! Attention !!!" << std::endl
-                  << "This action could break your camera." << std::endl << std::endl
+                  << "This action could break your camera." << std::endl
+                  << std::endl
                   << "Do you really want to proceed? [y/N] ";
 
         while (1)
         {
             std::string s;
             std::getline(std::cin, s);
-            if (s.compare("y") == 0 || s.compare("Y") == 0 )
+            if (s.compare("y") == 0 || s.compare("Y") == 0)
                 break;
-            else if (s.empty() || s.compare("n") == 0 || s.compare("N") == 0 )
+            else if (s.empty() || s.compare("n") == 0 || s.compare("N") == 0)
             {
                 std::cout << "Aborting..." << std::endl;
                 return;
@@ -295,12 +301,11 @@ void upload_to_device (const std::string& serial_number,
         }
     }
 
-    auto func = [] (int progress)
-        {
-            std::cout << "\r    " << progress << " %";
+    auto func = [](int progress) {
+        std::cout << "\r    " << progress << " %";
 
-            std::cout.flush();
-        };
+        std::cout.flush();
+    };
 
     device_info dev = cam->get_device_info();
 
@@ -320,19 +325,16 @@ void upload_to_device (const std::string& serial_number,
     }
     catch (const std::runtime_error& err)
     {
-        std::cout << std::endl << "There was a mistake. " << std::endl
-                  << err.what() << std::endl;
+        std::cout << std::endl << "There was a mistake. " << std::endl << err.what() << std::endl;
     }
 
     if (success)
     {
-        std::cout << std::endl << std::endl
-                  << "Upload successful!" << std::endl;
+        std::cout << std::endl << std::endl << "Upload successful!" << std::endl;
 
         if (dev.idVendor != 0x04b4)
         {
-            std::cout << "Please reconnect your camera."<< std::endl
-                      << std::endl;
+            std::cout << "Please reconnect your camera." << std::endl << std::endl;
         }
         else
         {
@@ -350,7 +352,7 @@ void upload_to_device (const std::string& serial_number,
 }
 
 
-void delete_firmware (std::string& serial_number)
+void delete_firmware(std::string& serial_number)
 {
     UsbHandler usb;
 
@@ -358,26 +360,23 @@ void delete_firmware (std::string& serial_number)
 
     if (cam == NULL)
     {
-        std::cerr << "Unable to find device with serial \""
-                  << serial_number << "\"" << std::endl;
+        std::cerr << "Unable to find device with serial \"" << serial_number << "\"" << std::endl;
         return;
     }
     std::cout << std::endl;
 
-    auto func = [] (int progress)
-        {
-            std::cout << "\r    " << progress << " %";
+    auto func = [](int progress) {
+        std::cout << "\r    " << progress << " %";
 
-            std::cout.flush();
-        };
+        std::cout.flush();
+    };
 
     cam->delete_firmware(func);
     std::cout << std::endl;
-
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     std::string program_name(argv[0]);
     std::string firmware_file = "";
@@ -388,7 +387,7 @@ int main (int argc, char *argv[])
 
     enum mode
     {
-        UNKNOWN =0,
+        UNKNOWN = 0,
         LIST,
         DETAILS,
         MODE,
@@ -398,27 +397,23 @@ int main (int argc, char *argv[])
 
     mode active_mode = UNKNOWN;
 
-    static struct option long_options[] =
-        {
-            {"help",   no_argument,       0, 'h'},
-            {"device", required_argument, 0, 'd'},
-            {"list",   no_argument,       0, 'l'},
-            {"upload", required_argument, 0, 'u'},
-            {"mode",   required_argument, 0, 'm'},
-            {"file",   required_argument, 0, 'f'},
-            {"model",  required_argument, 0, 'o'},
-            {"set",    no_argument,       0, 's'},
-            {"yes",    no_argument,       0, 'y'},
-            {"delete", no_argument,       0, '9'},
-            {0,        0,                 0, 0}
-        };
+    static struct option long_options[] = { { "help", no_argument, 0, 'h' },
+                                            { "device", required_argument, 0, 'd' },
+                                            { "list", no_argument, 0, 'l' },
+                                            { "upload", required_argument, 0, 'u' },
+                                            { "mode", required_argument, 0, 'm' },
+                                            { "file", required_argument, 0, 'f' },
+                                            { "model", required_argument, 0, 'o' },
+                                            { "set", no_argument, 0, 's' },
+                                            { "yes", no_argument, 0, 'y' },
+                                            { "delete", no_argument, 0, '9' },
+                                            { 0, 0, 0, 0 } };
 
     while (1)
     {
         int option_index = 0;
 
-        int c = getopt_long (argc, argv, "uyd:lim:f:s:o:h",
-                             long_options, &option_index);
+        int c = getopt_long(argc, argv, "uyd:lim:f:s:o:h", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -478,9 +473,11 @@ int main (int argc, char *argv[])
         return 64;
     }
 
-    if ((active_mode == UPLOAD || active_mode == DETAILS || active_mode == MODE) && serial_number.empty())
+    if ((active_mode == UPLOAD || active_mode == DETAILS || active_mode == MODE)
+        && serial_number.empty())
     {
-        std::cerr << "Missing camera identification. Please specify which camera shall be used." << std::endl;
+        std::cerr << "Missing camera identification. Please specify which camera shall be used."
+                  << std::endl;
         return 64;
     }
 

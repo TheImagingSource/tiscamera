@@ -17,15 +17,15 @@
 #ifndef TCAM_CAMERA_INDEX_H
 #define TCAM_CAMERA_INDEX_H
 
-#include "base_types.h"
 #include "DeviceInfo.h"
+#include "base_types.h"
 
-#include <vector>
-#include <thread>
-#include <mutex>
 #include <atomic>
 #include <condition_variable>
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 /**
  * @addtogroup API
@@ -37,7 +37,7 @@ namespace tcam
 
 #ifndef dev_callback
 
-typedef void (*dev_callback) (const DeviceInfo&, void* user_data);
+typedef void (*dev_callback)(const DeviceInfo&, void* user_data);
 
 #endif /* dev_callback */
 
@@ -48,16 +48,14 @@ class DeviceIndex
 {
 
 public:
+    explicit DeviceIndex();
 
-
-    explicit DeviceIndex ();
-
-    ~DeviceIndex ();
+    ~DeviceIndex();
 
     DeviceIndex& operator=(DeviceIndex&) = delete;
     DeviceIndex(DeviceIndex&) = delete;
 
-    std::vector<DeviceInfo> get_device_list () const;
+    std::vector<DeviceInfo> get_device_list() const;
 
 
     /**
@@ -65,8 +63,7 @@ public:
      * @param callback - function pointer to use
      * @brief
      */
-    void register_device_lost (dev_callback callback,
-                               void* user_data);
+    void register_device_lost(dev_callback callback, void* user_data);
 
     /**
      * @name register_device_lost
@@ -75,9 +72,7 @@ public:
      *                 lost for the callback to be called
      * @brief
      */
-    void register_device_lost (dev_callback callback,
-                               void* user_data,
-                               const std::string& serial);
+    void register_device_lost(dev_callback callback, void* user_data, const std::string& serial);
 
 
     /**
@@ -85,19 +80,18 @@ public:
      * @param callback - function pointer to use
      * @brief
      */
-    void remove_device_lost (dev_callback callback);
+    void remove_device_lost(dev_callback callback);
 
-    void remove_device_lost (dev_callback callback, const std::string& serial);
+    void remove_device_lost(dev_callback callback, const std::string& serial);
 
     /**
      * @param[in/out] DeviceInfo that shall be filled. \
      *                Must contain identifier or serial
      * @return true if device found and argument could be filled
      */
-    bool fill_device_info (DeviceInfo&) const;
+    bool fill_device_info(DeviceInfo&) const;
 
 private:
-
     std::shared_ptr<Indexer> indexer_;
 
     mutable std::mutex mtx;
@@ -112,7 +106,6 @@ private:
     };
 
     std::vector<callback_data> callbacks;
-
 };
 
 } /* namespace tcam */

@@ -16,21 +16,18 @@
 
 #include "tcamgstjson.h"
 
+#include "tcam.h"
+
 #include <fstream>
 #include <iostream>
-
 #include <json.hpp>
-
-#include "tcam.h"
 #include <logging.h>
 
 // for convenience
 using json = nlohmann::json;
 
 
-static bool tcam_property_to_json (TcamProp* prop,
-                            json& parent,
-                            const char* name)
+static bool tcam_property_to_json(TcamProp* prop, json& parent, const char* name)
 {
     GValue value = G_VALUE_INIT;
     GValue type = G_VALUE_INIT;
@@ -47,26 +44,26 @@ static bool tcam_property_to_json (TcamProp* prop,
                                                nullptr,
                                                nullptr);
 
-    if (!ret || g_value_get_string( &type ) == nullptr )
+    if (!ret || g_value_get_string(&type) == nullptr)
     {
-        g_value_unset( &value );
-        g_value_unset( &type );
+        g_value_unset(&value);
+        g_value_unset(&type);
 
         SPDLOG_WARN("Unable to read property '{}'", name);
         return false;
     }
 
-    if( g_strcmp0( "button", g_value_get_string( &type ) ) == 0 )   // button property can be skipped
+    if (g_strcmp0("button", g_value_get_string(&type)) == 0) // button property can be skipped
     {
-        g_value_unset( &value );
-        g_value_unset( &type );
+        g_value_unset(&value);
+        g_value_unset(&type);
         return true;
     }
-    g_value_unset( &type );
+    g_value_unset(&type);
 
     try
     {
-        switch(G_VALUE_TYPE(&value))
+        switch (G_VALUE_TYPE(&value))
         {
             case G_TYPE_INT:
             {
@@ -85,7 +82,8 @@ static bool tcam_property_to_json (TcamProp* prop,
             }
             case G_TYPE_BOOLEAN:
             {
-                parent.push_back(json::object_t::value_type(name, (bool)g_value_get_boolean(&value)));
+                parent.push_back(
+                    json::object_t::value_type(name, (bool)g_value_get_boolean(&value)));
                 break;
             }
             default:
@@ -96,19 +94,16 @@ static bool tcam_property_to_json (TcamProp* prop,
     }
     catch (const std::logic_error& err)
     {
-        g_value_unset( &value );
+        g_value_unset(&value);
         SPDLOG_ERROR(err.what());
         return false;
     }
-    g_value_unset( &value );
+    g_value_unset(&value);
     return true;
 }
 
 
-
-
-std::string create_device_settings (const std::string& serial,
-                                    TcamProp* tcam)
+std::string create_device_settings(const std::string& serial, TcamProp* tcam)
 {
     if (!tcam)
     {
@@ -135,27 +130,22 @@ std::string create_device_settings (const std::string& serial,
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
-        const char* prop_name = (const char*)g_slist_nth_data( names, i );
+        const char* prop_name = (const char*)g_slist_nth_data(names, i);
 
-        bool ret = tcam_property_to_json(tcam,
-                                         j["properties"],
-                                         prop_name );
+        bool ret = tcam_property_to_json(tcam, j["properties"], prop_name);
         if (!ret)
         {
-            SPDLOG_WARN("Could not convert {} to json.", prop_name );
+            SPDLOG_WARN("Could not convert {} to json.", prop_name);
         }
-
     }
-    g_slist_free_full( names, ::g_free );
+    g_slist_free_full(names, ::g_free);
 
     int indent = 4;
     return j.dump(indent);
 }
 
 
-bool load_device_settings (TcamProp* tcam,
-                           const std::string& serial,
-                           const std::string& cache)
+bool load_device_settings(TcamProp* tcam, const std::string& serial, const std::string& cache)
 {
     if (!tcam)
     {
@@ -269,10 +259,10 @@ bool load_device_settings (TcamProp* tcam,
         if (!ret)
         {
             SPDLOG_ERROR("Setting '{}' to '{}' caused an error",
-                         iter.key().c_str(), iter.value().dump().c_str());
+                         iter.key().c_str(),
+                         iter.value().dump().c_str());
         }
-        g_value_unset( &value );
-
+        g_value_unset(&value);
     }
 
     return true;

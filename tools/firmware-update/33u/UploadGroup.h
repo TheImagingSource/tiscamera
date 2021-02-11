@@ -18,23 +18,23 @@
 
 #include "UploadItem.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace lib33u
 {
 namespace firmware_update
 {
-	struct IDevicePort;
+struct IDevicePort;
 
-	struct UploadGroup
-	{
-		std::string name;
-		std::shared_ptr<IDevicePort> port;
-		std::vector<UploadItem> items;
-		std::string version;
-		uint64_t version_check_register;
-		bool defines_device_type;
-	};
-}
-}
+struct UploadGroup
+{
+    std::string name;
+    std::shared_ptr<IDevicePort> port;
+    std::vector<UploadItem> items;
+    std::string version;
+    uint64_t version_check_register;
+    bool defines_device_type;
+};
+} // namespace firmware_update
+} // namespace lib33u

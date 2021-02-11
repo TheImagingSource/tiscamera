@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-#include <fstream> // filebuf
-
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fstream> // filebuf
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 class LockFile
 {
 public:
-    explicit LockFile (const std::string& filename);
+    explicit LockFile(const std::string& filename);
 
-    ~LockFile ();
+    ~LockFile();
 
-    bool file_exists () const;
+    bool file_exists() const;
 
-    bool lock ();
+    bool lock();
 
-    bool unlock ();
+    bool unlock();
 
-    std::string get_file_name () const;
+    std::string get_file_name() const;
 
-    bool is_locked () const;
+    bool is_locked() const;
 
-    std::string get_file_content () const;
+    std::string get_file_content() const;
 
 private:
-
     std::string lockfile_name_;
     std::filebuf* lock_file_;
     int file_handle_;
 
-    bool create_lock_file ();
+    bool create_lock_file();
 
-    void destroy_lock_file ();
-
+    void destroy_lock_file();
 };
 
 
@@ -57,11 +54,9 @@ typedef void (*signal_callback)(int signal);
 class DaemonClass
 {
 public:
+    explicit DaemonClass(const std::string& lock_file, bool open_ports = true);
 
-    explicit DaemonClass (const std::string& lock_file,
-                          bool open_ports=true);
-
-    ~DaemonClass ();
+    ~DaemonClass();
 
     // forks the process and lets the process continue in the background
     // returns:
@@ -69,31 +64,30 @@ public:
     //    0 - code is running the forked instance
     //  > 0 - PID of the forked instace; you are running the original caller
     // @param fork_process - true if fork shall be called
-    int daemonize (signal_callback, bool fork_process);
+    int daemonize(signal_callback, bool fork_process);
 
     // stop all daemon functions
     // should only be called from the forked process
-    bool stop_daemon ();
+    bool stop_daemon();
 
     // kills the daemon process by sending SIGTERM to the forked
     // process. Has to be handled in the user defined
     // signal_callback
-    bool undaemonize ();
+    bool undaemonize();
 
     // checks if a daemon instance is already running
     // only works when same lock_file is used
-    bool is_daemonized ();
+    bool is_daemonized();
 
     // return pid of the daemon process
-    int get_daemon_pid ();
+    int get_daemon_pid();
 
 private:
+    static void handle_signal(int sig);
 
-    static void handle_signal (int sig);
+    void open_port();
 
-    void open_port ();
-
-    void close_port ();
+    void close_port();
 
     LockFile lock_file_;
 

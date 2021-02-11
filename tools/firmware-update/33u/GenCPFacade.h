@@ -16,78 +16,77 @@
 
 #pragma once
 
+#include "GenCPDevice.h"
 #include "IGenCPDevice.h"
 #include "IUsbDevice.h"
-#include "GenCPDevice.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace lib33u
 {
 namespace device_interface
 {
-	class GenCPFacade
-	{
-		std::unique_ptr<driver_interface::IGenCPDevice> dev_;
+class GenCPFacade
+{
+    std::unique_ptr<driver_interface::IGenCPDevice> dev_;
 
-	public:
-		GenCPFacade( std::shared_ptr<driver_interface::IUsbDevice> dev )
-			: dev_ { std::unique_ptr<device_interface::gencp::GenCPDevice>(new  device_interface::gencp::GenCPDevice(dev) ) }
-		{
-		}
+public:
+    GenCPFacade(std::shared_ptr<driver_interface::IUsbDevice> dev)
+        : dev_ { std::unique_ptr<device_interface::gencp::GenCPDevice>(
+            new device_interface::gencp::GenCPDevice(dev)) }
+    {
+    }
 
-	public:
-		void read_mem( uint64_t address, uint8_t* buffer, uint16_t length ) const
-		{
-			dev_->read_mem( address, buffer, length );
-		}
-		void write_mem( uint64_t address, const uint8_t* buffer, uint16_t length )
-		{
-			dev_->write_mem( address, buffer, length );
-		}
+public:
+    void read_mem(uint64_t address, uint8_t* buffer, uint16_t length) const
+    {
+        dev_->read_mem(address, buffer, length);
+    }
+    void write_mem(uint64_t address, const uint8_t* buffer, uint16_t length)
+    {
+        dev_->write_mem(address, buffer, length);
+    }
 
-		uint16_t max_read_mem() const
-		{
-			return dev_->max_read_mem();
-		}
-		uint16_t max_write_mem() const
-		{
-			return dev_->max_write_mem();
-		}
+    uint16_t max_read_mem() const
+    {
+        return dev_->max_read_mem();
+    }
+    uint16_t max_write_mem() const
+    {
+        return dev_->max_write_mem();
+    }
 
-	public:
-		std::vector<uint8_t> read_mem( uint64_t address, uint16_t length ) const;
-		void write_mem( uint64_t address, const std::vector<uint8_t>& buffer );
+public:
+    std::vector<uint8_t> read_mem(uint64_t address, uint16_t length) const;
+    void write_mem(uint64_t address, const std::vector<uint8_t>& buffer);
 
-		std::string read_string( uint64_t address, uint16_t length ) const;
+    std::string read_string(uint64_t address, uint16_t length) const;
 
-		template<typename T>
-		T read( uint64_t address )
-		{
-			uint32_t value;
-			read_mem( address, reinterpret_cast<uint8_t*>(&value), sizeof( value ) );
+    template<typename T> T read(uint64_t address)
+    {
+        uint32_t value;
+        read_mem(address, reinterpret_cast<uint8_t*>(&value), sizeof(value));
 
-			return value;
-		}
+        return value;
+    }
 
-		template<typename T>
-		void write( uint64_t address, T value )
-		{
-			write_mem( address, reinterpret_cast<uint8_t*>(&value), sizeof( value ) );
-		}
+    template<typename T> void write(uint64_t address, T value)
+    {
+        write_mem(address, reinterpret_cast<uint8_t*>(&value), sizeof(value));
+    }
 
-		uint32_t read_u32( uint64_t address )
-		{
-			return read<uint32_t>( address );
-		}
+    uint32_t read_u32(uint64_t address)
+    {
+        return read<uint32_t>(address);
+    }
 
-		void write_u32( uint64_t address, uint32_t value )
-		{
-			write( address, value );
-		}
-	};
+    void write_u32(uint64_t address, uint32_t value)
+    {
+        write(address, value);
+    }
+};
 } /* namespace device_interface */
 } /* namespace lib33u */

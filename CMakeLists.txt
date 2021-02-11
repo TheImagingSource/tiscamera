@@ -82,6 +82,9 @@ set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACH
 #set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions" CACHE PATH "Installation folder for bash auto completion.")
 
 
+include("clang-format")
+
+
 find_package(PythonInterp 3 REQUIRED QUIET)
 
 

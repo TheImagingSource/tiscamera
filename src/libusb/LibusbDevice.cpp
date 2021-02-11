@@ -15,15 +15,14 @@
  */
 
 #include "LibusbDevice.h"
-#include "UsbHandler.h"
 
+#include "UsbHandler.h"
 #include "logging.h"
 
 #include <algorithm>
 
-tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s,
-                                  const std::string& serial)
-    :session_(s)
+tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, const std::string& serial)
+    : session_(s)
 {
 
     device_handle_ = UsbHandler::get_instance().open_device(serial);
@@ -35,8 +34,8 @@ tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s,
 }
 
 
-tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s, libusb_device* dev)
-    :session_(s), device_(dev)
+tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, libusb_device* dev)
+    : session_(s), device_(dev)
 {
     if (device_)
     {
@@ -56,12 +55,9 @@ tcam::LibusbDevice::LibusbDevice (std::shared_ptr<tcam::UsbSession> s, libusb_de
 }
 
 
-tcam::LibusbDevice::~LibusbDevice ()
+tcam::LibusbDevice::~LibusbDevice()
 {
-    for (auto& interface : open_interfaces_)
-    {
-        close_interface(interface);
-    }
+    for (auto& interface : open_interfaces_) { close_interface(interface); }
 
     if (device_handle_)
     {
@@ -75,15 +71,16 @@ tcam::LibusbDevice::~LibusbDevice ()
 }
 
 
-struct libusb_device_handle* tcam::LibusbDevice::get_handle ()
+struct libusb_device_handle* tcam::LibusbDevice::get_handle()
 {
     return device_handle_;
 }
 
 
-bool tcam::LibusbDevice::open_interface (int interface)
+bool tcam::LibusbDevice::open_interface(int interface)
 {
-    if (std::find(open_interfaces_.begin(), open_interfaces_.end(), interface) != open_interfaces_.end())
+    if (std::find(open_interfaces_.begin(), open_interfaces_.end(), interface)
+        != open_interfaces_.end())
     {
         SPDLOG_WARN("Interface {} is already open.", interface);
         return false;
@@ -103,7 +100,7 @@ bool tcam::LibusbDevice::open_interface (int interface)
 }
 
 
-bool tcam::LibusbDevice::close_interface (int interface)
+bool tcam::LibusbDevice::close_interface(int interface)
 {
     int ret = libusb_release_interface(device_handle_, interface);
 
@@ -124,7 +121,7 @@ bool tcam::LibusbDevice::close_interface (int interface)
 }
 
 
-bool tcam::LibusbDevice::is_superspeed ()
+bool tcam::LibusbDevice::is_superspeed()
 {
     if (!device_)
     {
@@ -139,7 +136,7 @@ bool tcam::LibusbDevice::is_superspeed ()
 }
 
 
-int tcam::LibusbDevice::get_max_packet_size (int endpoint)
+int tcam::LibusbDevice::get_max_packet_size(int endpoint)
 {
     if (!device_)
     {
@@ -150,25 +147,20 @@ int tcam::LibusbDevice::get_max_packet_size (int endpoint)
 }
 
 
-int tcam::LibusbDevice::internal_control_transfer (uint8_t RequestType,
-                                                   uint8_t Request,
-                                                   uint16_t Value,
-                                                   uint16_t Index,
-                                                   unsigned char* data,
-                                                   unsigned int size,
-                                                   unsigned int timeout)
+int tcam::LibusbDevice::internal_control_transfer(uint8_t RequestType,
+                                                  uint8_t Request,
+                                                  uint16_t Value,
+                                                  uint16_t Index,
+                                                  unsigned char* data,
+                                                  unsigned int size,
+                                                  unsigned int timeout)
 {
-    return libusb_control_transfer(device_handle_,
-                                   RequestType,
-                                   Request,
-                                   Value,
-                                   Index,
-                                   (unsigned char*)&data, size,
-                                   timeout);
+    return libusb_control_transfer(
+        device_handle_, RequestType, Request, Value, Index, (unsigned char*)&data, size, timeout);
 }
 
 
-void tcam::LibusbDevice::halt_endpoint (int endpoint)
+void tcam::LibusbDevice::halt_endpoint(int endpoint)
 {
     if (libusb_clear_halt(device_handle_, endpoint) != 0)
     {
@@ -177,10 +169,10 @@ void tcam::LibusbDevice::halt_endpoint (int endpoint)
 }
 
 
-bool tcam::LibusbDevice::register_device_lost_callback (tcam_device_lost_callback callback,
-                                                        void* user_data)
+bool tcam::LibusbDevice::register_device_lost_callback(tcam_device_lost_callback callback,
+                                                       void* user_data)
 {
-    struct callback_container cc = {callback, user_data};
+    struct callback_container cc = { callback, user_data };
 
     lost_callbacks.push_back(cc);
 
@@ -188,12 +180,9 @@ bool tcam::LibusbDevice::register_device_lost_callback (tcam_device_lost_callbac
 }
 
 
-void tcam::LibusbDevice::notify_device_lost ()
+void tcam::LibusbDevice::notify_device_lost()
 {
     // auto dev = device.get_info();
 
-    for (const auto& cc : lost_callbacks)
-    {
-        cc.callback(nullptr, cc.user_data);
-    }
+    for (const auto& cc : lost_callbacks) { cc.callback(nullptr, cc.user_data); }
 }

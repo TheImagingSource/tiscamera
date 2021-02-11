@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
+#include "formats.h"
 #include "general.h"
 #include "properties.h"
-#include "formats.h"
-
-#include <tcam.h>
-
-#include <tcamprop.h>
-
-#include <iostream>
-#include <iomanip>
-#include <unistd.h>
- #include <sys/stat.h>
-
-#include <gst/gst.h>
 
 #include <CLI11/CLI11.hpp>
+#include <gst/gst.h>
+#include <iomanip>
+#include <iostream>
+#include <sys/stat.h>
+#include <tcam.h>
+#include <tcamprop.h>
+#include <unistd.h>
 
 using namespace tcam;
 
 
-
-void print_version (size_t /*t*/)
+void print_version(size_t /*t*/)
 {
-    std::cout << "Versions: "<< std::endl
+    std::cout << "Versions: " << std::endl
               << "\tTcam:\t" << get_version() << std::endl
               << "\tAravis:\t" << get_aravis_version() << std::endl
               << "\tModules:\t" << get_enabled_modules() << std::endl;
 }
 
 
-void print_capture_devices (const std::vector<DeviceInfo>& devices)
+void print_capture_devices(const std::vector<DeviceInfo>& devices)
 {
     if (devices.size() == 0)
     {
@@ -56,16 +51,15 @@ void print_capture_devices (const std::vector<DeviceInfo>& devices)
         std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
         for (const auto& d : devices)
         {
-            std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t" << d.get_serial() << std::endl;
+            std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t"
+                      << d.get_serial() << std::endl;
         }
         std::cout << std::endl;
     }
 }
 
 
-bool separate_serial_and_type (const std::string& input,
-                               std::string& serial,
-                               std::string& type)
+bool separate_serial_and_type(const std::string& input, std::string& serial, std::string& type)
 {
     auto pos = input.find("-");
 
@@ -76,7 +70,7 @@ bool separate_serial_and_type (const std::string& input,
         // overwriting it would ivalidate input for
         // device_type retrieval
         std::string tmp1 = input.substr(0, pos);
-        std::string tmp2 = input.substr(pos+1);
+        std::string tmp2 = input.substr(pos + 1);
 
         serial = tmp1;
         type = tmp2;
@@ -91,7 +85,7 @@ bool separate_serial_and_type (const std::string& input,
 }
 
 
-void print_devices (size_t /*t*/)
+void print_devices(size_t /*t*/)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -111,11 +105,8 @@ void print_devices (size_t /*t*/)
            The connection_type identifies the backend that is used.
            Currently 'aravis', 'v4l2' and 'unknown' exist
         */
-        gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
-                                                 (gchar*) elem->data,
-                                                 &name,
-                                                 &identifier,
-                                                 &connection_type);
+        gboolean ret = tcam_prop_get_device_info(
+            TCAM_PROP(source), (gchar*)elem->data, &name, &identifier, &connection_type);
 
         if (ret) // get_device_info was successfull
         {
@@ -123,8 +114,7 @@ void print_devices (size_t /*t*/)
             std::string t;
             separate_serial_and_type((gchar*)elem->data, s, t);
 
-            printf("Model: %s Serial: %s Type: %s\n",
-                   name, s.c_str(), connection_type);
+            printf("Model: %s Serial: %s Type: %s\n", name, s.c_str(), connection_type);
         }
         else
         {
@@ -137,34 +127,35 @@ void print_devices (size_t /*t*/)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 
     gst_init(&argc, &argv);
 
-    CLI::App app {"Commandline camera manipulation utility."};
+    CLI::App app { "Commandline camera manipulation utility." };
 
-    auto show_version = app.add_flag_function("--version", print_version, "list used library versions");
+    auto show_version =
+        app.add_flag_function("--version", print_version, "list used library versions");
     auto list_devices = app.add_flag_function("-l,--list", print_devices, "list capture devices");
 
     std::string serial;
 
-    auto show_caps = app.add_option("-c,--caps", serial,
-                                    "list available gstreamer-1.0 caps");
-    auto show_properties = app.add_option("-p,--properties", serial,
-                                          "list available device properties");
+    auto show_caps = app.add_option("-c,--caps", serial, "list available gstreamer-1.0 caps");
+    auto show_properties =
+        app.add_option("-p,--properties", serial, "list available device properties");
 
-    auto save_state = app.add_option("--save", serial,
-                                     "Print a JSON string containing all properties and their current values");
-    auto load_state = app.add_option("--load", serial,
-                                     "Read a JSON string/file containing properties and their values and set them in the device");
+    auto save_state = app.add_option(
+        "--save", serial, "Print a JSON string containing all properties and their current values");
+    auto load_state = app.add_option("--load",
+                                     serial,
+                                     "Read a JSON string/file containing properties and their "
+                                     "values and set them in the device");
 
     std::string device_type;
     auto existing_device_types = tcam::get_device_type_list_strings();
     std::set<std::string> s(existing_device_types.begin(), existing_device_types.end());
 
-    app.add_set("-t,--type", device_type, s,
-                "camera type", "unknown");
+    app.add_set("-t,--type", device_type, s, "camera type", "unknown");
 
     list_devices->excludes(show_caps);
     list_devices->excludes(show_properties);
@@ -212,12 +203,12 @@ int main (int argc, char *argv[])
 
         struct stat sb;
 
-        if (stat(vec.at(0).c_str(), &sb) == 0 && S_ISREG(sb.st_mode)) // can be open && is regular file
+        if (stat(vec.at(0).c_str(), &sb) == 0
+            && S_ISREG(sb.st_mode)) // can be open && is regular file
         {
             std::ifstream ifs(vec.at(0));
             json_str = std::string((std::istreambuf_iterator<char>(ifs)),
-                                   (std::istreambuf_iterator<char>()   ));
-
+                                   (std::istreambuf_iterator<char>()));
         }
         else // string itself is json
         {

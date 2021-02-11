@@ -18,11 +18,11 @@
 
 #include <cstring>
 
-DeviceInterface* open_v4l2_device (const struct tcam_device_info* device);
+DeviceInterface* open_v4l2_device(const struct tcam_device_info* device);
 
-size_t get_v4l2_device_list_size ();
+size_t get_v4l2_device_list_size();
 
 /**
  * @return number of copied device_infos
  */
-size_t get_v4l2_device_list (struct tcam_device_info* array, size_t array_size);
+size_t get_v4l2_device_list(struct tcam_device_info* array, size_t array_size);

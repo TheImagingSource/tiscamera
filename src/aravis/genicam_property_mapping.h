@@ -19,9 +19,9 @@
 
 #include "standard_properties.h"
 
-#include <vector>
 #include <algorithm>
 #include <string>
+#include <vector>
 
 using namespace tcam;
 
@@ -29,51 +29,51 @@ using namespace tcam;
 struct aravis_property
 {
     TCAM_PROPERTY_ID id;
-    std::vector<std::string> genicam_name; // list of genicam identifiers that shall be mapped to control
+    std::vector<std::string>
+        genicam_name; // list of genicam identifiers that shall be mapped to control
 };
 
 
-static std::vector<struct aravis_property> aravis_mappings =
-{
+static std::vector<struct aravis_property> aravis_mappings = {
     {
         TCAM_PROPERTY_INVALID,
         {},
     },
     {
         TCAM_PROPERTY_EXPOSURE,
-        {"ExposureTime"},
+        { "ExposureTime" },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO,
-        {"ExposureAuto"},
+        { "ExposureAuto" },
     },
     {
         TCAM_PROPERTY_HIGHLIGHT_REDUCTION,
-        {"ExposureAutoHighlighReduction"},
+        { "ExposureAutoHighlighReduction" },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_REFERENCE,
-        {"ExposureAutoReference"},
+        { "ExposureAutoReference" },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT_AUTO,
-        {"ExposureAutoUpperLimitAuto"},
+        { "ExposureAutoUpperLimitAuto" },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_UPPER_LIMIT,
-        {"ExposureAutoUpperLimit"},
+        { "ExposureAutoUpperLimit" },
     },
     {
         TCAM_PROPERTY_EXPOSURE_AUTO_LOWER_LIMIT,
-        {"ExposureAutoLowerLimit"},
+        { "ExposureAutoLowerLimit" },
     },
     {
         TCAM_PROPERTY_GAIN,
-        {"Gain"},
+        { "Gain" },
     },
     {
         TCAM_PROPERTY_GAIN_AUTO,
-        {"GainAuto"},
+        { "GainAuto" },
     },
     {
         TCAM_PROPERTY_GAIN_RED,
@@ -89,299 +89,283 @@ static std::vector<struct aravis_property> aravis_mappings =
     },
     {
         TCAM_PROPERTY_GAIN_AUTO_UPPER_LIMIT,
-        {"GainAutoUpperLimit"},
+        { "GainAutoUpperLimit" },
     },
     {
         TCAM_PROPERTY_GAIN_AUTO_LOWER_LIMIT,
-        {"GainAutoLowerLimit"},
+        { "GainAutoLowerLimit" },
     },
     {
         TCAM_PROPERTY_TRIGGER_MODE,
-        {"TriggerMode"},
+        { "TriggerMode" },
     },
     {
         TCAM_PROPERTY_TRIGGER_SOURCE,
-        {"TriggerSource"},
+        { "TriggerSource" },
     },
     {
         TCAM_PROPERTY_TRIGGER_ACTIVATION,
-        {"TriggerActivation"},
+        { "TriggerActivation" },
     },
     {
         TCAM_PROPERTY_SOFTWARETRIGGER,
-        {"TriggerSoftware"},
+        { "TriggerSoftware" },
     },
     {
         TCAM_PROPERTY_TRIGGER_DENOISE,
-        {"TriggerDenoise"},
+        { "TriggerDenoise" },
     },
     {
         TCAM_PROPERTY_TRIGGER_MASK,
-        {"TriggerMask"},
+        { "TriggerMask" },
     },
     {
         TCAM_PROPERTY_TRIGGER_DEBOUNCER,
-        {"TriggerDebouncer"},
+        { "TriggerDebouncer" },
     },
     {
         TCAM_PROPERTY_TRIGGER_DELAY,
-        {"TriggerDelay"},
+        { "TriggerDelay" },
     },
     {
         TCAM_PROPERTY_TRIGGER_SELECTOR,
-        {"TriggerSelector"},
+        { "TriggerSelector" },
     },
     {
         TCAM_PROPERTY_TRIGGER_OPERATION,
-        {"TriggerOperation"},
+        { "TriggerOperation" },
     },
     {
         TCAM_PROPERTY_GPIO,
-        {"GPIO"},
+        { "GPIO" },
     },
     {
         TCAM_PROPERTY_GPIN,
-        {"GPIn"},
+        { "GPIn" },
     },
     {
         TCAM_PROPERTY_GPOUT,
-        {"GPOut"},
+        { "GPOut" },
     },
     {
         TCAM_PROPERTY_OFFSET_X,
-        {"OffsetX"},
+        { "OffsetX" },
     },
     {
         TCAM_PROPERTY_OFFSET_Y,
-        {"OffsetY"},
+        { "OffsetY" },
     },
     {
         TCAM_PROPERTY_OFFSET_AUTO,
-        {"OffsetAutoCenter"},
+        { "OffsetAutoCenter" },
     },
     {
         TCAM_PROPERTY_BRIGHTNESS,
-        {"Brightness"},
+        { "Brightness" },
     },
     {
         TCAM_PROPERTY_CONTRAST,
-        {"Contrast"},
+        { "Contrast" },
     },
     {
         TCAM_PROPERTY_SATURATION,
-        {"Saturation"},
+        { "Saturation" },
     },
     {
         TCAM_PROPERTY_HUE,
-        {"Hue"},
+        { "Hue" },
     },
     {
         TCAM_PROPERTY_GAMMA,
-        {"Gamma"},
+        { "Gamma" },
     },
     {
         TCAM_PROPERTY_WB_AUTO,
-        {"BalanceWhiteAuto"},
+        { "BalanceWhiteAuto" },
     },
     {
         TCAM_PROPERTY_WB_MODE,
-        {"BalanceWhiteMode"},
+        { "BalanceWhiteMode" },
     },
     {
         TCAM_PROPERTY_WB_TEMPERATURE,
-        {"BalanceWhiteTemperature"},
+        { "BalanceWhiteTemperature" },
     },
-    {
-        TCAM_PROPERTY_BALANCERATIO_SELECTOR,
-        {"BalanceRatioSelector"}
-    },
-    {
-        TCAM_PROPERTY_BALANCERATIO,
-        {"BalanceRatio"}
-    },
-    {
-        TCAM_PROPERTY_BALANCE_WHITE_AUTO_PRESET,
-        {"BalanceWhiteAutoPreset"}
-    },
-    {
-        TCAM_PROPERTY_BALANCE_WHITE_TEMPERATURE_PRESET,
-        {"BalanceWhiteTemperaturePreset"}
-    },
+    { TCAM_PROPERTY_BALANCERATIO_SELECTOR, { "BalanceRatioSelector" } },
+    { TCAM_PROPERTY_BALANCERATIO, { "BalanceRatio" } },
+    { TCAM_PROPERTY_BALANCE_WHITE_AUTO_PRESET, { "BalanceWhiteAutoPreset" } },
+    { TCAM_PROPERTY_BALANCE_WHITE_TEMPERATURE_PRESET, { "BalanceWhiteTemperaturePreset" } },
     {
         TCAM_PROPERTY_IRCUT,
-        {"IRCutFilter"},
+        { "IRCutFilter" },
     },
     {
         TCAM_PROPERTY_IRIS,
-        {"Iris"},
+        { "Iris" },
     },
     {
         TCAM_PROPERTY_FOCUS,
-        {"Focus"},
+        { "Focus" },
     },
     {
         TCAM_PROPERTY_ZOOM,
-        {"Zoom"},
+        { "Zoom" },
     },
     {
         TCAM_PROPERTY_FOCUS_AUTO,
-        {"FocusAuto"},
+        { "FocusAuto" },
     },
     {
         TCAM_PROPERTY_STROBE_ENABLE,
-        {"StrobeEnable"},
+        { "StrobeEnable" },
     },
     {
         TCAM_PROPERTY_STROBE_OPERATION,
-        {"StrobeOperation"},
+        { "StrobeOperation" },
     },
     {
         TCAM_PROPERTY_STROBE_POLARITY,
-        {"StrobePolarity"},
+        { "StrobePolarity" },
     },
     {
         TCAM_PROPERTY_STROBE_DELAY,
-        {"StrobeDelay"},
+        { "StrobeDelay" },
     },
     {
         TCAM_PROPERTY_STROBE_DURATION,
-        {"StrobeDuration"},
+        { "StrobeDuration" },
     },
     {
         TCAM_PROPERTY_BINNING,
-        {"Binning"},
+        { "Binning" },
     },
     {
         TCAM_PROPERTY_BINNING_VERTICAL,
-        {"BinningHorizontal"},
+        { "BinningHorizontal" },
     },
     {
         TCAM_PROPERTY_BINNING_HORIZONTAL,
-        {"BinningVertical"},
+        { "BinningVertical" },
     },
     {
         TCAM_PROPERTY_BLACKLEVEL,
-        {"BlackLevel"},
+        { "BlackLevel" },
     },
     {
         TCAM_PROPERTY_CHUNK_MODE_ACTIVE,
-        {"ChunkModeActive"},
+        { "ChunkModeActive" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_COUNT,
-        {"DeviceStreamChannelCount"},
+        { "DeviceStreamChannelCount" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_SELECTOR,
-        {"DeviceStreamChannelSelector"},
+        { "DeviceStreamChannelSelector" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_TYPE,
-        {"DeviceStreamChannelType"},
+        { "DeviceStreamChannelType" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_LINK,
-        {"DeviceStreamChannelLink"},
+        { "DeviceStreamChannelLink" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_ENDIANNESS,
-        {"DeviceStreamChannelEndianness"},
+        { "DeviceStreamChannelEndianness" },
     },
     {
         TCAM_PROPERTY_STREAM_CHANNEL_PACKET_SIZE,
-        {"DeviceStreamChannelPacketSize"},
+        { "DeviceStreamChannelPacketSize" },
     },
     {
         TCAM_PROPERTY_EVENT_CHANNEL_COUNT,
-        {"DeviceStreamChannelPacketSize"},
+        { "DeviceStreamChannelPacketSize" },
     },
     {
         TCAM_PROPERTY_PAYLOAD_SIZE,
-        {"PayloadSize"},
+        { "PayloadSize" },
     },
     {
         TCAM_PROPERTY_PAYLOAD_PER_FRAME,
-        {"PayloadPerFrame"},
+        { "PayloadPerFrame" },
     },
     {
         TCAM_PROPERTY_PAYLOAD_PER_PACKET,
-        {"PayloadPerPacket"},
+        { "PayloadPerPacket" },
     },
     {
         TCAM_PROPERTY_TOTAL_PACKET_SIZE,
-        {"TotalPacketSize"},
+        { "TotalPacketSize" },
     },
     {
         TCAM_PROPERTY_PACKETS_PER_FRAME,
-        {"PacketsPerFrame"},
+        { "PacketsPerFrame" },
     },
     {
         TCAM_PROPERTY_PACKET_TIME_US,
-        {"PacketTimeUS"},
+        { "PacketTimeUS" },
     },
     {
         TCAM_PROPERTY_REVERSE_X,
-        {"ReverseX"},
+        { "ReverseX" },
     },
     {
         TCAM_PROPERTY_REVERSE_Y,
-        {"ReverseY"},
+        { "ReverseY" },
     },
     {
         TCAM_PROPERTY_CHUNK_IMX174_FRAME_ID,
-        {"ChunkIMX174FrameId"},
+        { "ChunkIMX174FrameId" },
     },
     {
         TCAM_PROPERTY_CHUNK_IMX174_FRAME_SET,
-        {"ChunkIMX174FrameSet"},
+        { "ChunkIMX174FrameSet" },
     },
     {
         TCAM_PROPERTY_IMX174_WDR_SHUTTER2,
-        {"IMX174WDRShutter2"},
+        { "IMX174WDRShutter2" },
     },
     {
         TCAM_PROPERTY_IMX174_HARDWARE_WDR_ENABLE,
-        {"IMX174HardwareWDREnable"},
+        { "IMX174HardwareWDREnable" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_CONTROL,
-        {"AutoFunctionsROIEnable"},
+        { "AutoFunctionsROIEnable" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_LEFT,
-        {"AutoFunctionsROILeft"},
+        { "AutoFunctionsROILeft" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_HEIGHT,
-        {"AutoFunctionsROIHeight"},
+        { "AutoFunctionsROIHeight" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_TOP,
-        {"AutoFunctionsROITop"},
+        { "AutoFunctionsROITop" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_WIDTH,
-        {"AutoFunctionsROIWidth"},
+        { "AutoFunctionsROIWidth" },
     },
     {
         TCAM_PROPERTY_AUTO_FUNCTIONS_ROI_PRESET,
-        {"AutoFunctionsROIPreset"},
+        { "AutoFunctionsROIPreset" },
     },
-    {
-        TCAM_PROPERTY_TRIGGER_BURST_COUNT,
-        {"AcquisitionBurstFrameCount"}
-    },
+    { TCAM_PROPERTY_TRIGGER_BURST_COUNT, { "AcquisitionBurstFrameCount" } },
 };
 
 
-static TCAM_PROPERTY_ID find_mapping (const std::string& genicam_id)
+static TCAM_PROPERTY_ID find_mapping(const std::string& genicam_id)
 {
-    auto f = [&genicam_id] (std::string p)
-        {
-            if (genicam_id == p)
-                return true;
-            return false;
-        };
+    auto f = [&genicam_id](std::string p) {
+        if (genicam_id == p)
+            return true;
+        return false;
+    };
 
     for (const auto& m : aravis_mappings)
     {

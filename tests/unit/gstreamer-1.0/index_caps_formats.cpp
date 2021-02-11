@@ -1,11 +1,10 @@
 
-#include <catch.hpp>
-#include <gst/gst.h>
-
 #include "tcamgstbase.h"
 
-#include <vector>
+#include <catch.hpp>
+#include <gst/gst.h>
 #include <string>
+#include <vector>
 
 
 TEST_CASE("tcamgstbase.cpp::index_caps_formats")
@@ -17,7 +16,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {"video/x-raw,format=GRAY16_LE"};
+        std::vector<std::string> expected = { "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }
@@ -29,7 +28,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {"video/x-raw,format=GRAY16_LE"};
+        std::vector<std::string> expected = { "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }
@@ -41,10 +40,8 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {
-            "video/x-bayer,format=rggb",
-            "video/x-raw,format=GRAY16_LE"
-        };
+        std::vector<std::string> expected = { "video/x-bayer,format=rggb",
+                                              "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }
@@ -58,10 +55,8 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {
-            "video/x-bayer,format=rggb",
-            "video/x-raw,format=GRAY16_LE"
-        };
+        std::vector<std::string> expected = { "video/x-bayer,format=rggb",
+                                              "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }
@@ -74,11 +69,9 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {
-            "video/x-bayer,format=rggb",
-            "video/x-bayer,format=rggb16",
-            "video/x-raw,format=GRAY16_LE"
-        };
+        std::vector<std::string> expected = { "video/x-bayer,format=rggb",
+                                              "video/x-bayer,format=rggb16",
+                                              "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }
@@ -94,11 +87,9 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
 
         std::vector<std::string> out = index_caps_formats(in);
 
-        std::vector<std::string> expected = {
-            "video/x-bayer,format=rggb",
-            "video/x-bayer,format=rggb16",
-            "video/x-raw,format=GRAY16_LE"
-        };
+        std::vector<std::string> expected = { "video/x-bayer,format=rggb",
+                                              "video/x-bayer,format=rggb16",
+                                              "video/x-raw,format=GRAY16_LE" };
 
         REQUIRE(out == expected);
     }

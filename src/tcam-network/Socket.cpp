@@ -15,15 +15,14 @@
  */
 
 #include "Socket.h"
-#include <unistd.h>
 
 #include <exception>
+#include <unistd.h>
 
 namespace tis
 {
 
-Socket::Socket (const sockaddr_in& address, int timeout)
-    : fd(-1), timeout_ms(timeout)
+Socket::Socket(const sockaddr_in& address, int timeout) : fd(-1), timeout_ms(timeout)
 {
     try
     {
@@ -46,13 +45,13 @@ Socket::Socket (const sockaddr_in& address, int timeout)
 }
 
 
-Socket::~Socket ()
+Socket::~Socket()
 {
     close(fd);
 }
 
 
-int Socket::createSocket ()
+int Socket::createSocket()
 {
     int s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -64,13 +63,13 @@ int Socket::createSocket ()
     int val = 0;
 
     // assure that in case of error we still can use the port and no EADDRINUSE will be returned for new sockets
-    setsockopt (s, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof (val));
+    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 
     return s;
 }
 
 
-void Socket::bindTo (const sockaddr_in& address)
+void Socket::bindTo(const sockaddr_in& address)
 {
     int bind_res = bind(fd, (const struct sockaddr*)&address, sizeof(address));
 
@@ -81,7 +80,7 @@ void Socket::bindTo (const sockaddr_in& address)
 }
 
 
-bool Socket::setBroadcast (bool enable)
+bool Socket::setBroadcast(bool enable)
 {
     int result;
     int val = 0;
@@ -90,18 +89,23 @@ bool Socket::setBroadcast (bool enable)
     {
         val = 1;
     }
-    result = setsockopt (this->fd, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof (val));
+    result = setsockopt(this->fd, SOL_SOCKET, SO_BROADCAST, (char*)&val, sizeof(val));
 
     return result == 0;
 }
 
 
-void Socket::sendAndReceive (const std::string& destination_address, void* data, size_t size, std::function<int(void*)> callback, const bool broadcast)
+void Socket::sendAndReceive(const std::string& destination_address,
+                            void* data,
+                            size_t size,
+                            std::function<int(void*)> callback,
+                            const bool broadcast)
 {
     sockaddr_in destAddr = fillAddr(destination_address, STANDARD_GVCP_PORT);
     setBroadcast(broadcast);
 
-    ssize_t send = sendto(fd, (uint8_t*)data, size, 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
+    ssize_t send =
+        sendto(fd, (uint8_t*)data, size, 0, (struct sockaddr*)&destAddr, sizeof(destAddr));
     if (send <= 0)
     {
         throw SocketSendToException();
@@ -122,7 +126,7 @@ void Socket::sendAndReceive (const std::string& destination_address, void* data,
         FD_ZERO(&fds);
         FD_SET(fd, &fds);
 
-        while (select(fd+1, &fds, NULL, NULL, &timeout) > 0)
+        while (select(fd + 1, &fds, NULL, NULL, &timeout) > 0)
         {
             char msg[1024];
 

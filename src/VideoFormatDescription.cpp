@@ -16,9 +16,9 @@
 
 #include "VideoFormatDescription.h"
 
+#include "FormatHandlerInterface.h"
 #include "logging.h"
 #include "utils.h"
-#include "FormatHandlerInterface.h"
 
 #include <algorithm>
 #include <cstring>
@@ -26,16 +26,16 @@
 using namespace tcam;
 
 
-VideoFormatDescription::VideoFormatDescription (std::shared_ptr<FormatHandlerInterface> handler,
-                                                const struct tcam_video_format_description& f,
-                                                const std::vector<framerate_mapping>& r)
+VideoFormatDescription::VideoFormatDescription(std::shared_ptr<FormatHandlerInterface> handler,
+                                               const struct tcam_video_format_description& f,
+                                               const std::vector<framerate_mapping>& r)
     : res(r), format_handler(handler)
 {
     memcpy(&format, &f, sizeof(format));
 }
 
 
-VideoFormatDescription::VideoFormatDescription (const VideoFormatDescription& other)
+VideoFormatDescription::VideoFormatDescription(const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
     format_handler = other.format_handler;
@@ -43,7 +43,7 @@ VideoFormatDescription::VideoFormatDescription (const VideoFormatDescription& ot
 }
 
 
-VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDescription& other)
+VideoFormatDescription& VideoFormatDescription::operator=(const VideoFormatDescription& other)
 {
     memcpy(&format, &other.format, sizeof(format));
     format_handler = other.format_handler;
@@ -53,20 +53,20 @@ VideoFormatDescription& VideoFormatDescription::operator= (const VideoFormatDesc
 }
 
 
-bool VideoFormatDescription::operator== (const VideoFormatDescription& other) const
+bool VideoFormatDescription::operator==(const VideoFormatDescription& other) const
 {
     // TODO: complete comparison
     return (memcmp(&format, &other.format, sizeof(format)) == 0);
 }
 
 
-bool VideoFormatDescription::operator!= (const VideoFormatDescription& other) const
+bool VideoFormatDescription::operator!=(const VideoFormatDescription& other) const
 {
     return !(*this == other);
 }
 
 
-bool VideoFormatDescription::operator== (const struct tcam_video_format_description& other) const
+bool VideoFormatDescription::operator==(const struct tcam_video_format_description& other) const
 {
     if (format == other)
     {
@@ -76,50 +76,48 @@ bool VideoFormatDescription::operator== (const struct tcam_video_format_descript
 }
 
 
-bool VideoFormatDescription::operator!= (const struct tcam_video_format_description& other) const
+bool VideoFormatDescription::operator!=(const struct tcam_video_format_description& other) const
 {
     return !(*this == other);
 }
 
 
-struct tcam_video_format_description VideoFormatDescription::get_struct () const
+struct tcam_video_format_description VideoFormatDescription::get_struct() const
 {
     return format;
 }
 
 
-uint32_t VideoFormatDescription::get_fourcc () const
+uint32_t VideoFormatDescription::get_fourcc() const
 {
     return format.fourcc;
 }
 
 
-uint32_t VideoFormatDescription::get_binning () const
+uint32_t VideoFormatDescription::get_binning() const
 {
     return format.binning;
 }
 
 
-uint32_t VideoFormatDescription::get_skipping () const
+uint32_t VideoFormatDescription::get_skipping() const
 {
     return format.skipping;
 }
 
 
-std::vector<struct tcam_resolution_description> VideoFormatDescription::get_resolutions () const
+std::vector<struct tcam_resolution_description> VideoFormatDescription::get_resolutions() const
 {
     std::vector<struct tcam_resolution_description> vec;
 
-    for (const auto& r : res)
-    {
-        vec.push_back(r.resolution);
-    }
+    for (const auto& r : res) { vec.push_back(r.resolution); }
 
     return vec;
 }
 
 
-std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resolution_description& desc) const
+std::vector<double> VideoFormatDescription::get_frame_rates(
+    const tcam_resolution_description& desc) const
 {
 
     for (const auto& m : res)
@@ -134,7 +132,7 @@ std::vector<double> VideoFormatDescription::get_frame_rates (const tcam_resoluti
 }
 
 
-std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_size& s) const
+std::vector<double> VideoFormatDescription::get_framerates(const tcam_image_size& s) const
 {
     if (auto handler = format_handler.lock())
     {
@@ -163,9 +161,9 @@ std::vector<double> VideoFormatDescription::get_framerates (const tcam_image_siz
 }
 
 
-VideoFormat VideoFormatDescription::create_video_format (unsigned int width,
-                                                         unsigned int height,
-                                                         double framerate) const
+VideoFormat VideoFormatDescription::create_video_format(unsigned int width,
+                                                        unsigned int height,
+                                                        double framerate) const
 {
 
     // TODO validity check
@@ -184,7 +182,8 @@ VideoFormat VideoFormatDescription::create_video_format (unsigned int width,
 bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
 {
 
-    if (fmt.get_fourcc() != format.fourcc) {
+    if (fmt.get_fourcc() != format.fourcc)
+    {
         return false;
     }
 
@@ -193,17 +192,16 @@ bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
 
     auto size = fmt.get_size();
 
-    auto is_valid_resolution = [&size](const tcam_resolution_description &_res)
+    auto is_valid_resolution = [&size](const tcam_resolution_description& _res) {
+        if (_res.type == TCAM_RESOLUTION_TYPE_FIXED)
         {
-            if (_res.type == TCAM_RESOLUTION_TYPE_FIXED)
-            {
-                return _res.min_size == size;
-            }
-            else // TCAM_RESOLUTION_TYPE_RANGE
-            {
-                return in_range(_res.min_size, _res.max_size, size);
-            }
-        };
+            return _res.min_size == size;
+        }
+        else // TCAM_RESOLUTION_TYPE_RANGE
+        {
+            return in_range(_res.min_size, _res.max_size, size);
+        }
+    };
 
     auto resolutions = get_resolutions();
 
@@ -213,10 +211,9 @@ bool VideoFormatDescription::is_valid_video_format(const VideoFormat& fmt) const
         {
             auto fps = get_framerates(size);
 
-            auto iter = std::find_if(fps.begin(), fps.end(), [=](double val)
-                                     {
-                                         return compare_double(fmt.get_framerate(), val);
-                                     });
+            auto iter = std::find_if(fps.begin(), fps.end(), [=](double val) {
+                return compare_double(fmt.get_framerate(), val);
+            });
 
             if (iter == fps.end())
             {

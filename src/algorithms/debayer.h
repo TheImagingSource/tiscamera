@@ -24,7 +24,8 @@ namespace algorithm
 {
 
 
-enum {
+enum
+{
     WB_MODE_MANUAL = 0,
     WB_MODE_AUTO,
     WB_MODE_ONE_PUSH
@@ -49,12 +50,12 @@ struct _debayer_data
 typedef struct _debayer_data debayer_data_t;
 
 
-void debayer (const unsigned char* input_buffer,
-              unsigned int input_pitch,
-              const unsigned int fourcc_in,
-              unsigned char* output_buffer,
-              unsigned int output_pitch,
-              const unsigned int fourcc_out);
+void debayer(const unsigned char* input_buffer,
+             unsigned int input_pitch,
+             const unsigned int fourcc_in,
+             unsigned char* output_buffer,
+             unsigned int output_pitch,
+             const unsigned int fourcc_out);
 
 } /* namespace algorithm */
 

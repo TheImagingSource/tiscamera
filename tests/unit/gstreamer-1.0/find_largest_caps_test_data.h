@@ -22,15 +22,16 @@
 
 struct flc_test_data_container
 {
-    const char *name;
-    const char *input_caps;
-    const char *expected_output;
+    const char* name;
+    const char* input_caps;
+    const char* expected_output;
 
-    flc_test_data_container (const char* name_,
-                             const char* input_caps_,
-                             const char* expected_output_)
+    flc_test_data_container(const char* name_,
+                            const char* input_caps_,
+                            const char* expected_output_)
         : name(name_), input_caps(input_caps_), expected_output(expected_output_)
-    {}
+    {
+    }
 };
 
 std::vector<struct flc_test_data_container> flc_test_data = {

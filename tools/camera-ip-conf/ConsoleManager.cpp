@@ -15,37 +15,37 @@
  */
 
 #include "ConsoleManager.h"
-#include "CameraDiscovery.h"
-#include "Camera.h"
-#include "utils.h"
-#include <algorithm>
-#include <unistd.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdarg.h>
 
-#include <thread>
-#include <mutex>
+#include "Camera.h"
+#include "CameraDiscovery.h"
+#include "utils.h"
+
+#include <algorithm>
 #include <exception>
+#include <limits.h>
+#include <mutex>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <thread>
+#include <unistd.h>
 
 namespace tis
 {
 
-std::string getArgumentValue (const std::vector<std::string>& args,
-                              const std::string& long_name,
-                              const std::string& short_name)
+std::string getArgumentValue(const std::vector<std::string>& args,
+                             const std::string& long_name,
+                             const std::string& short_name)
 {
     std::string retv;
 
-    auto iter = find_if(args.begin(), args.end(),  [&long_name, &short_name] (std::string s)
-                        {
-                            if ((startsWith(s, long_name)) || (startsWith(s, short_name)))
-                            {
-                                return true;
-                            }
-                            return false;
-                        });
+    auto iter = find_if(args.begin(), args.end(), [&long_name, &short_name](std::string s) {
+        if ((startsWith(s, long_name)) || (startsWith(s, short_name)))
+        {
+            return true;
+        }
+        return false;
+    });
 
     if (iter == args.end())
     {
@@ -53,10 +53,10 @@ std::string getArgumentValue (const std::vector<std::string>& args,
     }
     if ((*iter).find("=") != std::string::npos)
     {
-            std::string s = *iter;
-            unsigned pos = s.find("=");
+        std::string s = *iter;
+        unsigned pos = s.find("=");
 
-            retv = s.substr(pos+1);
+        retv = s.substr(pos + 1);
     }
     else if (std::next(iter) != args.end())
     {
@@ -67,13 +67,13 @@ std::string getArgumentValue (const std::vector<std::string>& args,
 }
 
 
-camera_list getCameraList ()
+camera_list getCameraList()
 {
     camera_list cameras;
     std::mutex cam_lock;
 
-    std::function<void(std::shared_ptr<Camera>)> f = [&cameras, &cam_lock] (std::shared_ptr<Camera> camera)
-    {
+    std::function<void(std::shared_ptr<Camera>)> f = [&cameras,
+                                                      &cam_lock](std::shared_ptr<Camera> camera) {
         std::lock_guard<std::mutex> mutex_lock(cam_lock);
         cameras.push_back(camera);
     };
@@ -84,13 +84,13 @@ camera_list getCameraList ()
 }
 
 
-std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args)
+std::shared_ptr<Camera> findCamera(const std::vector<std::string>& args)
 {
     std::shared_ptr<Camera> retv;
 
     std::string serial = getArgumentValue(args, "--serial", "-s");
-    std::string name   = getArgumentValue(args, "--name",   "-n");
-    std::string mac    = getArgumentValue(args, "--mac",    "-m");
+    std::string name = getArgumentValue(args, "--name", "-n");
+    std::string mac = getArgumentValue(args, "--mac", "-m");
 
     if (serial.empty() && name.empty() && mac.empty())
     {
@@ -121,7 +121,7 @@ std::shared_ptr<Camera> findCamera (const std::vector<std::string>& args)
 }
 
 
-void listCameras ()
+void listCameras()
 {
     camera_list cameras = getCameraList();
 
@@ -140,39 +140,27 @@ void listCameras ()
     }
 
     // header for table
-    std::cout << "\n" << std::left << std::setw(15) << "Model"
-              << std::setw(3)  << " - "
-              << std::setw(9)  << "Serial"
-              << std::setw(3)  << " - "
-              << std::setw(15) << "User Def. Name"
-              << std::setw(3)  << " - "
-              << std::setw(15) << "Current IP"
-              << std::setw(3)  << " - "
-              << std::setw(15) << "Current Netmask"
-              << std::setw(3)  << " - "
-              << std::setw(15) << "Current Gateway"
-              << std::endl;
+    std::cout << "\n"
+              << std::left << std::setw(15) << "Model" << std::setw(3) << " - " << std::setw(9)
+              << "Serial" << std::setw(3) << " - " << std::setw(15) << "User Def. Name"
+              << std::setw(3) << " - " << std::setw(15) << "Current IP" << std::setw(3) << " - "
+              << std::setw(15) << "Current Netmask" << std::setw(3) << " - " << std::setw(15)
+              << "Current Gateway" << std::endl;
 
     for (const auto& cam : cameras)
     {
-        std::cout << std::left << std::setw(15) << cam->getModelName()
-                  << std::setw(3)  << " - "
-                  << std::setw(9)  << cam->getSerialNumber()
-                  << std::setw(3)  << " - "
-                  << std::setw(15) << cam->getUserDefinedName()
-                  << std::setw(3)  << " - "
-                  << std::setw(15) << cam->getCurrentIP()
-                  << std::setw(3)  << " - "
-                  << std::setw(15) << cam->getCurrentSubnet()
-                  << std::setw(3)  << " - "
-                  << std::setw(15) << cam->getCurrentGateway()
-                  << std::endl;
+        std::cout << std::left << std::setw(15) << cam->getModelName() << std::setw(3) << " - "
+                  << std::setw(9) << cam->getSerialNumber() << std::setw(3) << " - "
+                  << std::setw(15) << cam->getUserDefinedName() << std::setw(3) << " - "
+                  << std::setw(15) << cam->getCurrentIP() << std::setw(3) << " - " << std::setw(15)
+                  << cam->getCurrentSubnet() << std::setw(3) << " - " << std::setw(15)
+                  << cam->getCurrentGateway() << std::endl;
     }
     std::cout << std::endl;
 }
 
 
-void printCameraInformation (const std::vector<std::string>& args)
+void printCameraInformation(const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
 
@@ -183,7 +171,7 @@ void printCameraInformation (const std::vector<std::string>& args)
     }
 
     bool reachable = false;
-    if(!camera->isReachable())
+    if (!camera->isReachable())
     {
         std::cout << "\n========================================"
                   << "\n>  Camera is currently not reachable!  <"
@@ -205,31 +193,33 @@ void printCameraInformation (const std::vector<std::string>& args)
               << "\nCurrent Subnet:     " << camera->getCurrentSubnet()
               << "\nCurrent Gateway:    " << camera->getCurrentGateway()
               << "\n\nDHCP is:   " << (camera->isDHCPactive() ? "enabled" : "disabled")
-              << "\nStatic is: " << (camera->isStaticIPactive() ? "enabled" : "disabled") << std::endl;
+              << "\nStatic is: " << (camera->isStaticIPactive() ? "enabled" : "disabled")
+              << std::endl;
 
     if (reachable)
     {
         std::cout << "\n\nPersistent IP:      " << camera->getPersistentIP()
                   << "\nPersistent Subnet:  " << camera->getPersistentSubnet()
-                  << "\nPersistent Gateway: " << camera->getPersistentGateway() << "\n" <<  std::endl;
+                  << "\nPersistent Gateway: " << camera->getPersistentGateway() << "\n"
+                  << std::endl;
     }
 }
 
 
-void writeChanges (std::shared_ptr<Camera> camera,
-                   const std::string ip,
-                   const std::string subnet,
-                   const std::string gateway)
+void writeChanges(std::shared_ptr<Camera> camera,
+                  const std::string ip,
+                  const std::string subnet,
+                  const std::string gateway)
 {
     std::cout << "Writing changes...." << std::endl;
     if (!camera->setPersistentIP(ip))
     {
-        throw std::runtime_error( "  Unable to set IP address.");
+        throw std::runtime_error("  Unable to set IP address.");
     }
 
     if (!camera->setPersistentSubnet(subnet))
     {
-        throw std::runtime_error( "  Unable to set Subnetmask.");
+        throw std::runtime_error("  Unable to set Subnetmask.");
     }
 
     if (!camera->setPersistentGateway(gateway))
@@ -239,7 +229,7 @@ void writeChanges (std::shared_ptr<Camera> camera,
 }
 
 
-int isAccessible (const std::vector<std::string>& args)
+int isAccessible(const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
 
@@ -247,14 +237,16 @@ int isAccessible (const std::vector<std::string>& args)
 }
 
 
-int isAccessible (std::shared_ptr<Camera> camera)
+int isAccessible(std::shared_ptr<Camera> camera)
 {
     int ret = false;
 
     if (camera == NULL)
     {
         ret = false;
-    } else {
+    }
+    else
+    {
         if (camera->getControl())
         {
             ret = true;
@@ -265,15 +257,16 @@ int isAccessible (std::shared_ptr<Camera> camera)
     if (ret == false)
     {
         std::cout << "Could not gain read/write access to the camera.\n"
-        "Please make sure the camera is on the same network as the host computer \n"
-        "and no other application is currently accessing the device." << std::endl;
+                     "Please make sure the camera is on the same network as the host computer \n"
+                     "and no other application is currently accessing the device."
+                  << std::endl;
     }
 
     return ret;
 }
 
 
-void setCamera (const std::vector<std::string>& args)
+void setCamera(const std::vector<std::string>& args)
 {
     auto camera = findCamera(args);
 
@@ -361,14 +354,15 @@ void setCamera (const std::vector<std::string>& args)
         {
             writeChanges(camera, ip, subnet, gateway);
         }
-        catch (std::runtime_error const &run)
+        catch (std::runtime_error const& run)
         {
             throw run;
         }
     }
 
     // if one exists we have to check them both
-    if (!getArgumentValue(args, "dhcp", "").empty() || !getArgumentValue(args, "static", "").empty())
+    if (!getArgumentValue(args, "dhcp", "").empty()
+        || !getArgumentValue(args, "static", "").empty())
     {
         bool dhcp = camera->isDHCPactive();
         bool staticIP = camera->isStaticIPactive();
@@ -395,7 +389,8 @@ void setCamera (const std::vector<std::string>& args)
             }
             else
             {
-                throw std::invalid_argument("Unable to interpret static ip argument as value: " + s);
+                throw std::invalid_argument("Unable to interpret static ip argument as value: "
+                                            + s);
             }
         }
         std::cout << "DHCP will be: " << ((dhcp) ? "on" : "off")
@@ -412,19 +407,18 @@ void setCamera (const std::vector<std::string>& args)
         }
     }
 
-    auto iter_name = find_if(args.begin(), args.end(), [] (std::string s)
-                             {
-                                 if (startsWith(s, "name"))
-                                 {
-                                     return true;
-                                 }
-                                 return false;
-                             });
+    auto iter_name = find_if(args.begin(), args.end(), [](std::string s) {
+        if (startsWith(s, "name"))
+        {
+            return true;
+        }
+        return false;
+    });
     // if name exists we have to evaluate to allow the setting of empty names
     if (iter_name != args.end())
     {
         std::string name = getArgumentValue(args, "name", "");
-        std::cout << "Setting user defined name to \"" <<  name << "\" ...." << std::endl;
+        std::cout << "Setting user defined name to \"" << name << "\" ...." << std::endl;
         if (camera->setUserDefinedName(name))
         {
             std::cout << "  Done." << std::endl;
@@ -436,27 +430,28 @@ void setCamera (const std::vector<std::string>& args)
     }
     std::cout << std::endl;
     std::cout << "Configuration written to camera EEPROM.\n"
-    "Power-cycle the camera to activate the new settings." << std::endl;
+                 "Power-cycle the camera to activate the new settings."
+              << std::endl;
 }
 
 
-void forceIP (const std::vector<std::string>& args)
+void forceIP(const std::vector<std::string>& args)
 {
-    std::string ip = getArgumentValue (args, "ip", "");
+    std::string ip = getArgumentValue(args, "ip", "");
     if (ip.empty() || !isValidIpAddress(ip))
     {
         std::cout << "Please specifiy a valid IP address." << std::endl;
         return;
     }
 
-    std::string subnet = getArgumentValue (args, "subnet", "");
+    std::string subnet = getArgumentValue(args, "subnet", "");
     if (subnet.empty() || !isValidIpAddress(subnet))
     {
         std::cout << "Please specifiy a valid subnet mask." << std::endl;
         return;
     }
 
-    std::string gateway = getArgumentValue (args, "gateway", "");
+    std::string gateway = getArgumentValue(args, "gateway", "");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specifiy a gateway address." << std::endl;
@@ -480,20 +475,18 @@ void forceIP (const std::vector<std::string>& args)
     }
 
     std::cout << "\nEnforcing IP Configuration.\n\n"
-              << "Serial Number:     " << camera->getSerialNumber()
-              << "\nCurrent Settings:"
+              << "Serial Number:     " << camera->getSerialNumber() << "\nCurrent Settings:"
               << "\n    IP:      " << camera->getCurrentIP()
               << "\n    Subnet:  " << camera->getCurrentSubnet()
               << "\n    Gateway: " << camera->getCurrentGateway()
               << "\n\nDo you really want to enforce the following configuration?\n"
-              << "\n    IP:     " << ip
-              << "\n    Subnet: " << subnet
-              << "\n    Gateway:" << gateway << std::endl;
+              << "\n    IP:     " << ip << "\n    Subnet: " << subnet << "\n    Gateway:" << gateway
+              << std::endl;
     std::cout << "\n\nEnforce IP? [y/N] ";
 
     std::string really;
     std::cin >> really;
-    if (really.compare("y") == 0 )
+    if (really.compare("y") == 0)
     {
         std::cout << "\nSending forceIP....\n" << std::endl;
         if (camera->forceIP(ip, subnet, gateway))
@@ -512,7 +505,7 @@ void forceIP (const std::vector<std::string>& args)
 }
 
 
-void upgradeFirmware (const std::vector<std::string>& args)
+void upgradeFirmware(const std::vector<std::string>& args)
 {
     std::string firmware = getArgumentValue(args, "firmware", "");
     if (firmware.empty())
@@ -521,19 +514,19 @@ void upgradeFirmware (const std::vector<std::string>& args)
         return;
     }
 
-    char actualpath [PATH_MAX+1];
-    std::string cF (realpath(firmware.c_str(), actualpath));
+    char actualpath[PATH_MAX + 1];
+    std::string cF(realpath(firmware.c_str(), actualpath));
 
     std::cout << "Updating the camera using the file: " << cF << std::endl;
     std::cout << "\n!!! IMPORTANT NOTE !!!\n"
-    "Do not interrupt the firmware update process.\n"
-    "Do not disconnect the camera during the firmware update process.\n"
-    "A failed firmware update may render the camera unusable.\n\n"
-    "Start the update process [y/N]";
+                 "Do not interrupt the firmware update process.\n"
+                 "Do not disconnect the camera during the firmware update process.\n"
+                 "A failed firmware update may render the camera unusable.\n\n"
+                 "Start the update process [y/N]";
 
     std::string really;
     std::cin >> really;
-    if (really.compare("y") != 0 )
+    if (really.compare("y") != 0)
         return;
 
     std::string overrideModelName = getArgumentValue(args, "overrideModelName", "");
@@ -551,17 +544,16 @@ void upgradeFirmware (const std::vector<std::string>& args)
         return;
     }
 
-    auto func = [] (int progress,const std::string& s)
-        {
-            std::cout << "\r";
+    auto func = [](int progress, const std::string& s) {
+        std::cout << "\r";
 
-            std::cout << std::setw(5) << progress << "%";
-            if (s != "")
-            {
-                std::cout << std::setw(40) << s;
-            }
-            std::cout.flush();
-        };
+        std::cout << std::setw(5) << progress << "%";
+        if (s != "")
+        {
+            std::cout << std::setw(40) << s;
+        }
+        std::cout.flush();
+    };
 
 
     std::cout << std::endl;
@@ -574,14 +566,14 @@ Please reconnect your camera to assure full functionality.\n";
     else
     {
         std::cout << "\n\nERROR during upgrade. Firmware upload aborted.\n"
-        "Do not disconnect the camera yet. Please retry the firmware update.\n"
-        "Contact the technical support if this message keeps comming up.\n";
+                     "Do not disconnect the camera yet. Please retry the firmware update.\n"
+                     "Contact the technical support if this message keeps comming up.\n";
     }
     std::cout << std::endl;
 }
 
 
-std::string string_format (const std::string& fmt, ...)
+std::string string_format(const std::string& fmt, ...)
 {
     int size = 1;
     std::string str;
@@ -610,38 +602,36 @@ std::string string_format (const std::string& fmt, ...)
 }
 
 
-std::string parseHexMac (const std::string& hexmac)
+std::string parseHexMac(const std::string& hexmac)
 {
     if (hexmac.length() != 13)
     {
         return "";
     }
 
-    std::string mac = hexmac.substr(0,2);
-    for (int i=2; i < 12; i+=2)
-    {
-        mac += ":" + hexmac.substr(i,2);
-    }
+    std::string mac = hexmac.substr(0, 2);
+    for (int i = 2; i < 12; i += 2) { mac += ":" + hexmac.substr(i, 2); }
     return mac;
 }
 
 
-std::string serialToMac (const std::string& serial)
+std::string serialToMac(const std::string& serial)
 {
-    if(serial.length() != 8)
+    if (serial.length() != 8)
     {
         return "";
     }
-    std::string tmp = serial.substr(2,2);
-    tmp = tmp.substr(1,1) + tmp.substr(0,1);
-    int macPart = std::stoi(serial.substr(4,4)) + (10000 * (std::stoi(tmp) - 9)) + (10000 * 30 * (std::stoi(serial.substr(0,2)) - 1));
+    std::string tmp = serial.substr(2, 2);
+    tmp = tmp.substr(1, 1) + tmp.substr(0, 1);
+    int macPart = std::stoi(serial.substr(4, 4)) + (10000 * (std::stoi(tmp) - 9))
+                  + (10000 * 30 * (std::stoi(serial.substr(0, 2)) - 1));
     std::string prefix = "000748";
     std::string macString = prefix + std::string(string_format("%06x", macPart));
     return parseHexMac(macString);
 }
 
 
-void rescue (std::vector<std::string> args)
+void rescue(std::vector<std::string> args)
 {
     std::string mac = getArgumentValue(args, "--mac", "-m");
     if (mac.empty())
@@ -676,7 +666,7 @@ void rescue (std::vector<std::string> args)
         return;
     }
 
-    std::string gateway = getArgumentValue (args,"gateway", "");
+    std::string gateway = getArgumentValue(args, "gateway", "");
     if (gateway.empty() || !isValidIpAddress(gateway))
     {
         std::cout << "Please specify a gateway address." << std::endl;
@@ -701,7 +691,8 @@ void rescue (std::vector<std::string> args)
     }
 
     std::cout << "Rescue packet sent. Camera configuration will be lost on next power cycle.\n"
-    "Use 'set' command to make permanent configuration changes." << std::endl;
+                 "Use 'set' command to make permanent configuration changes."
+              << std::endl;
 }
 
 } /* namespace tis */

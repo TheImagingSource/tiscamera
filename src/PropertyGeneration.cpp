@@ -17,26 +17,26 @@
 #include "PropertyGeneration.h"
 
 #include "base_types.h"
-#include "utils.h"
 #include "logging.h"
-
 #include "standard_properties.h"
+#include "utils.h"
 
-#include <linux/videodev2.h>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <linux/videodev2.h>
 
 using namespace tcam;
 
-std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std::vector<std::shared_ptr<Property>> props,
-                                                                            std::shared_ptr<PropertyImpl> impl)
+std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties(
+    std::vector<std::shared_ptr<Property>> props,
+    std::shared_ptr<PropertyImpl> impl)
 {
     std::vector<std::shared_ptr<Property>> new_properties;
 
     // requirements for auto center
-    if (find_property(props, TCAM_PROPERTY_OFFSET_AUTO) == nullptr &&
-        find_property(props, TCAM_PROPERTY_OFFSET_X) != nullptr &&
-        find_property(props, TCAM_PROPERTY_OFFSET_Y) != nullptr)
+    if (find_property(props, TCAM_PROPERTY_OFFSET_AUTO) == nullptr
+        && find_property(props, TCAM_PROPERTY_OFFSET_X) != nullptr
+        && find_property(props, TCAM_PROPERTY_OFFSET_Y) != nullptr)
     {
         tcam_device_property cp = create_empty_property(TCAM_PROPERTY_OFFSET_AUTO);
         cp.value.b.default_value = false;
@@ -53,10 +53,10 @@ std::vector<std::shared_ptr<Property>> tcam::generate_simulated_properties (std:
 }
 
 
-bool tcam::handle_auto_center (const Property& new_property,
-                               std::vector<std::shared_ptr<Property>>& props,
-                               const tcam_image_size& sensor,
-                               const tcam_image_size& current_format)
+bool tcam::handle_auto_center(const Property& new_property,
+                              std::vector<std::shared_ptr<Property>>& props,
+                              const tcam_image_size& sensor,
+                              const tcam_image_size& current_format)
 {
     if (new_property.get_type() != TCAM_PROPERTY_TYPE_BOOLEAN)
     {

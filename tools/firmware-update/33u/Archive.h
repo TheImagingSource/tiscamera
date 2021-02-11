@@ -17,11 +17,11 @@
 #pragma once
 
 #include "lib/7z/7z.h"
-#include "lib/7z/7zFile.h"
 #include "lib/7z/7zAlloc.h"
+#include "lib/7z/7zFile.h"
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace lib33u
@@ -39,16 +39,14 @@ private:
         size_t size_;
 
     public:
-        Entry (std::shared_ptr<uint8_t> ptr, size_t size)
-            : data_ { ptr }, size_ { size }
-        {}
+        Entry(std::shared_ptr<uint8_t> ptr, size_t size) : data_ { ptr }, size_ { size } {}
 
-        const uint8_t* data () const
+        const uint8_t* data() const
         {
             return data_.get();
         }
 
-        size_t size () const
+        size_t size() const
         {
             return size_;
         }
@@ -61,21 +59,21 @@ private:
         CSzArEx db_;
         std::map<std::string, Entry> file_index_;
 
-        Data (const std::string& fn);
+        Data(const std::string& fn);
 
-        Entry read (const std::string& fn) const;
+        Entry read(const std::string& fn) const;
     };
 
 private:
     std::unique_ptr<Data> data;
 
-    Archive (const std::string& fn);
+    Archive(const std::string& fn);
 
 public:
-    static Archive open (const std::string& fn);
+    static Archive open(const std::string& fn);
 
 public:
-    Entry read (const std::string& fn) const;
+    Entry read(const std::string& fn) const;
 };
 
 } /* namespace sz */

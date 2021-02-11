@@ -18,18 +18,19 @@
 
 #include "internal.h"
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 using namespace tcam;
 
 
-ImageBuffer::ImageBuffer (const struct tcam_image_buffer& buf, bool owns_memory)
+ImageBuffer::ImageBuffer(const struct tcam_image_buffer& buf, bool owns_memory)
     : is_own_memory(owns_memory), buffer(buf)
-{}
+{
+}
 
 
-ImageBuffer::ImageBuffer (const VideoFormat& format, bool owns_memory)
+ImageBuffer::ImageBuffer(const VideoFormat& format, bool owns_memory)
     : is_own_memory(owns_memory), buffer()
 {
     buffer.size = format.get_required_buffer_size();
@@ -47,7 +48,7 @@ ImageBuffer::ImageBuffer (const VideoFormat& format, bool owns_memory)
 }
 
 
-ImageBuffer::~ImageBuffer ()
+ImageBuffer::~ImageBuffer()
 {
     if (is_own_memory)
     {
@@ -59,50 +60,51 @@ ImageBuffer::~ImageBuffer ()
 }
 
 
-tcam_image_buffer ImageBuffer::getImageBuffer ()
+tcam_image_buffer ImageBuffer::getImageBuffer()
 {
     return buffer;
 }
 
-void ImageBuffer::set_image_buffer (tcam_image_buffer buf)
+void ImageBuffer::set_image_buffer(tcam_image_buffer buf)
 {
     this->buffer = buf;
 }
 
 
-unsigned char* ImageBuffer::get_data ()
+unsigned char* ImageBuffer::get_data()
 {
     return buffer.pData;
 }
 
 
-size_t ImageBuffer::get_buffer_size () const
+size_t ImageBuffer::get_buffer_size() const
 {
     return buffer.size;
 }
 
 
-size_t ImageBuffer::get_image_size () const
+size_t ImageBuffer::get_image_size() const
 {
     return buffer.length;
 }
 
 
-struct tcam_stream_statistics ImageBuffer::get_statistics () const
+struct tcam_stream_statistics ImageBuffer::get_statistics() const
 {
     return buffer.statistics;
 }
 
 
-bool ImageBuffer::set_statistics (const struct tcam_stream_statistics& stats)
+bool ImageBuffer::set_statistics(const struct tcam_stream_statistics& stats)
 {
-    buffer.statistics = stats;;
+    buffer.statistics = stats;
+    ;
 
     return true;
 }
 
 
-bool ImageBuffer::set_data (const unsigned char* data, size_t size, unsigned int offset)
+bool ImageBuffer::set_data(const unsigned char* data, size_t size, unsigned int offset)
 {
     if (size + offset > buffer.size)
     {
@@ -124,16 +126,16 @@ bool ImageBuffer::set_data (const unsigned char* data, size_t size, unsigned int
 }
 
 
-bool ImageBuffer::lock ()
+bool ImageBuffer::lock()
 {
     buffer.lock_count++;
     return true;
 }
 
 
-bool ImageBuffer::unlock ()
+bool ImageBuffer::unlock()
 {
-    if (buffer.lock_count >=1)
+    if (buffer.lock_count >= 1)
     {
         buffer.lock_count--;
     }
@@ -141,7 +143,7 @@ bool ImageBuffer::unlock ()
 }
 
 
-bool ImageBuffer::is_locked () const
+bool ImageBuffer::is_locked() const
 {
     if (buffer.lock_count == 0)
     {
@@ -151,26 +153,25 @@ bool ImageBuffer::is_locked () const
 }
 
 
-bool ImageBuffer::is_complete () const
+bool ImageBuffer::is_complete() const
 {
     return tcam::is_buffer_complete(&this->buffer);
 }
 
 
-
-void ImageBuffer::set_user_data (void* data)
+void ImageBuffer::set_user_data(void* data)
 {
     buffer.user_data = data;
 }
 
 
-void* ImageBuffer::get_user_data ()
+void* ImageBuffer::get_user_data()
 {
     return buffer.user_data;
 }
 
 
-void ImageBuffer::clear ()
+void ImageBuffer::clear()
 {
     memset(buffer.pData, 0, buffer.length);
 }

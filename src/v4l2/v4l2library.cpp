@@ -22,13 +22,13 @@
 
 VISIBILITY_INTERNAL
 
-DeviceInterface* open_device (const struct tcam_device_info* device)
+DeviceInterface* open_device(const struct tcam_device_info* device)
 {
     return open_v4l2_device(device);
 }
 
 
-size_t get_device_list_size ()
+size_t get_device_list_size()
 {
     return get_v4l2_device_list_size();
 }
@@ -37,14 +37,14 @@ size_t get_device_list_size ()
 /**
  * @return number of copied device_infos
  */
-size_t get_device_list (struct tcam_device_info* array, size_t array_size)
+size_t get_device_list(struct tcam_device_info* array, size_t array_size)
 {
     return get_v4l2_device_list(array, array_size);
 }
 
 VISIBILITY_POP
 
-struct libinfo_v1* get_library_functions_v1 ()
+struct libinfo_v1* get_library_functions_v1()
 {
     struct libinfo_v1* info = new libinfo_v1();
 

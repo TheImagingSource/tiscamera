@@ -16,26 +16,25 @@
 
 #include "GigE3Package.h"
 
+#include "FirmwarePackage.h"
 #include "GigE3DevicePortFlashMemory.h"
 #include "GigE3DevicePortMachXO2.h"
 #include "GigE3UploadGroup.h"
 #include "GigE3UploadItem.h"
 
-#include "FirmwarePackage.h"
-
-#include <pugi.h>
-
 #include <memory>
+#include <pugi.h>
 
 using namespace FirmwareUpdate;
 
 
-std::vector<std::string> GigE3::Package::FindModelNames (const std::string& packageFileName)
+std::vector<std::string> GigE3::Package::FindModelNames(const std::string& packageFileName)
 {
     std::vector<std::string> result;
 
     pugi::xml_document doc;
-    auto load_res = doc.load_string(FirmwarePackage::extractTextFile(packageFileName, "manifest.xml").c_str());
+    auto load_res =
+        doc.load_string(FirmwarePackage::extractTextFile(packageFileName, "manifest.xml").c_str());
 
     if (load_res != pugi::status_ok)
     {
@@ -43,7 +42,7 @@ std::vector<std::string> GigE3::Package::FindModelNames (const std::string& pack
     }
 
     auto deviceTypeElement = doc.child("FirmwarePackage").child("DeviceTypes").child("DeviceType");
-    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
+    for (; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
     {
         auto modelName = deviceTypeElement.attribute("Name").as_string();
         if (modelName)
@@ -55,7 +54,7 @@ std::vector<std::string> GigE3::Package::FindModelNames (const std::string& pack
 }
 
 
-GigE3::IDevicePort* GigE3::Package::find_port (const std::string& port_name)
+GigE3::IDevicePort* GigE3::Package::find_port(const std::string& port_name)
 {
     for (auto&& port : ports_)
     {
@@ -68,9 +67,9 @@ GigE3::IDevicePort* GigE3::Package::find_port (const std::string& port_name)
 }
 
 
-std::vector<GigE3::UploadGroup>* GigE3::Package::find_upload_groups (const std::string& model_name)
+std::vector<GigE3::UploadGroup>* GigE3::Package::find_upload_groups(const std::string& model_name)
 {
-    auto it = device_types_.find (model_name);
+    auto it = device_types_.find(model_name);
     if (it == device_types_.end())
     {
         return nullptr;
@@ -79,7 +78,7 @@ std::vector<GigE3::UploadGroup>* GigE3::Package::find_upload_groups (const std::
 }
 
 
-FirmwareUpdate::Status GigE3::Package::Load (const std::string& packageFileName)
+FirmwareUpdate::Status GigE3::Package::Load(const std::string& packageFileName)
 {
     packageFileName_ = packageFileName;
 
@@ -114,7 +113,7 @@ FirmwareUpdate::Status GigE3::Package::Load (const std::string& packageFileName)
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadPackageInfo (const pugi::xml_document& doc)
+FirmwareUpdate::Status GigE3::Package::ReadPackageInfo(const pugi::xml_document& doc)
 {
     auto root = doc.child("FirmwarePackage");
 
@@ -136,12 +135,12 @@ FirmwareUpdate::Status GigE3::Package::ReadPackageInfo (const pugi::xml_document
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const pugi::xml_document& doc)
+FirmwareUpdate::Status GigE3::Package::ReadDevicePorts(const pugi::xml_document& doc)
 {
     ports_.clear();
 
     auto portElement = doc.child("FirmwarePackage").child("DevicePorts").child("DevicePort");
-    for ( ; portElement; portElement = portElement.next_sibling("DevicePort"))
+    for (; portElement; portElement = portElement.next_sibling("DevicePort"))
     {
         auto portName = portElement.attribute("Name").as_string();
         auto portType = portElement.attribute("Type").as_string();
@@ -151,7 +150,7 @@ FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const pugi::xml_document
         {
             return Status::InvalidFile;
         }
-        auto port = CreateDevicePort( portType );
+        auto port = CreateDevicePort(portType);
         if (!port)
         {
             return Status::InvalidFile;
@@ -168,12 +167,12 @@ FirmwareUpdate::Status GigE3::Package::ReadDevicePorts (const pugi::xml_document
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes (const pugi::xml_document& doc)
+FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes(const pugi::xml_document& doc)
 {
     device_types_.clear();
 
     auto deviceTypeElement = doc.child("FirmwarePackage").child("DeviceTypes").child("DeviceType");
-    for ( ; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
+    for (; deviceTypeElement; deviceTypeElement = deviceTypeElement.next_sibling("DeviceType"))
     {
         auto modelName = deviceTypeElement.attribute("Name").as_string();
         if (!modelName)
@@ -183,7 +182,7 @@ FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes (const pugi::xml_document
         std::vector<UploadGroup> groups;
 
         auto uploadGroupElem = deviceTypeElement.child("UploadGroup");
-        for ( ; uploadGroupElem; uploadGroupElem = uploadGroupElem.next_sibling("UploadGroup"))
+        for (; uploadGroupElem; uploadGroupElem = uploadGroupElem.next_sibling("UploadGroup"))
         {
             UploadGroup group;
 
@@ -202,7 +201,7 @@ FirmwareUpdate::Status GigE3::Package::ReadDeviceTypes (const pugi::xml_document
 }
 
 
-static bool parseHexOrDecimal (const char* text, uint32_t& val)
+static bool parseHexOrDecimal(const char* text, uint32_t& val)
 {
     if (sscanf(text, "0x%x", &val))
     {
@@ -217,7 +216,7 @@ static bool parseHexOrDecimal (const char* text, uint32_t& val)
 }
 
 
-static bool parseAttribute (const pugi::xml_node& elem, const char* attributeName, uint32_t& val)
+static bool parseAttribute(const pugi::xml_node& elem, const char* attributeName, uint32_t& val)
 {
     auto attrText = elem.attribute(attributeName).as_string();
     if (!attrText)
@@ -228,8 +227,8 @@ static bool parseAttribute (const pugi::xml_node& elem, const char* attributeNam
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const pugi::xml_node& uploadGroupElem,
-                                                        UploadGroup& group)
+FirmwareUpdate::Status GigE3::Package::ReadUploadGroup(const pugi::xml_node& uploadGroupElem,
+                                                       UploadGroup& group)
 {
     auto groupName = uploadGroupElem.attribute("Name").as_string();
     auto destinationName = uploadGroupElem.attribute("Destination").as_string();
@@ -237,7 +236,7 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const pugi::xml_node& up
     {
         return Status::InvalidFile;
     }
-    auto port = find_port( destinationName );
+    auto port = find_port(destinationName);
     if (!port)
     {
         return Status::InvalidFile;
@@ -254,12 +253,12 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const pugi::xml_node& up
     group.Name = groupName;
 
     auto uploadItemElem = uploadGroupElem.child("Upload");
-    for ( ; uploadItemElem != nullptr; uploadItemElem = uploadItemElem.next_sibling("Upload"))
+    for (; uploadItemElem != nullptr; uploadItemElem = uploadItemElem.next_sibling("Upload"))
     {
         UploadItem item;
 
         auto status = ReadUploadItem(uploadItemElem, item);
-        if (failed( status))
+        if (failed(status))
         {
             return status;
         }
@@ -275,8 +274,8 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadGroup (const pugi::xml_node& up
 }
 
 
-FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& uploadItemElem,
-                                                       UploadItem& item)
+FirmwareUpdate::Status GigE3::Package::ReadUploadItem(const pugi::xml_node& uploadItemElem,
+                                                      UploadItem& item)
 {
     for (auto attr : uploadItemElem.attributes())
     {
@@ -287,9 +286,7 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& upl
                 return Status::InvalidFile; // No two "data" elements allowed
             }
             item.Data = ExtractFile(attr.value());
-            if (item.Data->empty())
-            {
-            }
+            if (item.Data->empty()) {}
         }
         else if (attr.name() == std::string("String"))
         {
@@ -314,8 +311,8 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& upl
                 return Status::InvalidFile;
             }
             item.Data = std::make_shared<std::vector<uint8_t>>();
-            item.Data->resize( sizeof(data) );
-            memcpy( item.Data->data(), &data, sizeof(data) );
+            item.Data->resize(sizeof(data));
+            memcpy(item.Data->data(), &data, sizeof(data));
         }
         else
         {
@@ -331,14 +328,14 @@ FirmwareUpdate::Status GigE3::Package::ReadUploadItem (const pugi::xml_node& upl
     auto len = item.Params.find("Length");
     if (len != item.Params.end())
     {
-        item.Data->resize( len->second, 0 );
+        item.Data->resize(len->second, 0);
     }
 
     return Status::Success;
 }
 
 
-std::shared_ptr<GigE3::IDevicePort> GigE3::Package::CreateDevicePort (const std::string& portType)
+std::shared_ptr<GigE3::IDevicePort> GigE3::Package::CreateDevicePort(const std::string& portType)
 {
     if (portType == "Flash")
     {
@@ -351,12 +348,13 @@ std::shared_ptr<GigE3::IDevicePort> GigE3::Package::CreateDevicePort (const std:
     return nullptr;
 }
 
-std::shared_ptr<std::vector<uint8_t>> GigE3::Package::ExtractFile( const std::string& fileName )
+std::shared_ptr<std::vector<uint8_t>> GigE3::Package::ExtractFile(const std::string& fileName)
 {
     auto& cached = file_data_cache_[fileName];
-    if( cached == nullptr )
+    if (cached == nullptr)
     {
-        cached = std::make_shared<std::vector<uint8_t>>( FirmwarePackage::extractFile(packageFileName_, fileName) );
+        cached = std::make_shared<std::vector<uint8_t>>(
+            FirmwarePackage::extractFile(packageFileName_, fileName));
     }
     return cached;
 }

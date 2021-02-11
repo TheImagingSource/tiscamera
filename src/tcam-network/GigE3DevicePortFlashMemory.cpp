@@ -23,9 +23,7 @@
 using namespace FirmwareUpdate;
 
 
-bool parseAttribute (const pugi::xml_node& elem,
-                     const char* attributeName,
-                     uint32_t& val)
+bool parseAttribute(const pugi::xml_node& elem, const char* attributeName, uint32_t& val)
 {
     auto attrText = elem.attribute(attributeName).as_string();
     if (!attrText)
@@ -46,22 +44,29 @@ bool parseAttribute (const pugi::xml_node& elem,
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortFlashMemory::Configure (const std::string& name,
-                                                                const pugi::xml_node& portConfigElem)
+FirmwareUpdate::Status GigE3::DevicePortFlashMemory::Configure(const std::string& name,
+                                                               const pugi::xml_node& portConfigElem)
 {
-    if (!parseAttribute(portConfigElem, "EraseAddress", eraseAddress_)) return Status::InvalidFile;
-    if (!parseAttribute(portConfigElem, "UnlockCode", unlockCode_)) return Status::InvalidFile;
-    if (!parseAttribute(portConfigElem, "UnlockAddress", unlockAddress_)) return Status::InvalidFile;
-    if (!parseAttribute(portConfigElem, "BlockSize", blockSize_)) return Status::InvalidFile;
-    if (!parseAttribute(portConfigElem, "Length", length_)) return Status::InvalidFile;
-    if (!parseAttribute(portConfigElem, "BaseAddress", baseAddress_)) return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "EraseAddress", eraseAddress_))
+        return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "UnlockCode", unlockCode_))
+        return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "UnlockAddress", unlockAddress_))
+        return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "BlockSize", blockSize_))
+        return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "Length", length_))
+        return Status::InvalidFile;
+    if (!parseAttribute(portConfigElem, "BaseAddress", baseAddress_))
+        return Status::InvalidFile;
 
     name_ = name;
     return Status::Success;
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortFlashMemory::CheckItems (const std::vector<UploadItem>& items)
+FirmwareUpdate::Status GigE3::DevicePortFlashMemory::CheckItems(
+    const std::vector<UploadItem>& items)
 {
     for (auto&& i : items)
     {
@@ -75,26 +80,23 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::CheckItems (const std::vect
 }
 
 
-std::vector<uint8_t> PadData (const std::vector<uint8_t>& data, int alignment)
+std::vector<uint8_t> PadData(const std::vector<uint8_t>& data, int alignment)
 {
     std::vector<uint8_t> result(data.begin(), data.end());
 
-    while (result.size() % alignment)
-        result.push_back(0);
+    while (result.size() % alignment) result.push_back(0);
 
     return result;
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortFlashMemory::UploadItems (IFirmwareWriter& dev,
-                                                                  const std::vector<UploadItem>& items,
-                                                                  tReportProgressFunc progressFunc )
+FirmwareUpdate::Status GigE3::DevicePortFlashMemory::UploadItems(
+    IFirmwareWriter& dev,
+    const std::vector<UploadItem>& items,
+    tReportProgressFunc progressFunc)
 {
     std::set<uint32_t> eraseRequests;
-    for (auto&& i : items)
-    {
-        AddEraseRequests(i, eraseRequests);
-    }
+    for (auto&& i : items) { AddEraseRequests(i, eraseRequests); }
 
     if (!dev.write(unlockAddress_, unlockCode_))
     {
@@ -148,8 +150,8 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::UploadItems (IFirmwareWrite
 }
 
 
-void GigE3::DevicePortFlashMemory::AddEraseRequests (const GigE3::UploadItem& item,
-                                                     std::set<uint32_t>& requests)
+void GigE3::DevicePortFlashMemory::AddEraseRequests(const GigE3::UploadItem& item,
+                                                    std::set<uint32_t>& requests)
 {
     uint32_t startBlockOffset = item.Params.at("Offset") % blockSize_;
     requests.insert(item.Params.at("Offset") - startBlockOffset);
@@ -157,14 +159,14 @@ void GigE3::DevicePortFlashMemory::AddEraseRequests (const GigE3::UploadItem& it
     uint32_t spaceToEndOfBlock = blockSize_ - startBlockOffset;
     if (item.Data->size() > spaceToEndOfBlock)
     {
-        uint32_t remainingLength = (uint32_t) item.Data->size() - spaceToEndOfBlock;
+        uint32_t remainingLength = (uint32_t)item.Data->size() - spaceToEndOfBlock;
         uint32_t offset = item.Params.at("Offset") + spaceToEndOfBlock;
 
         while (remainingLength > 0)
         {
             requests.insert(offset);
 
-            uint32_t step = std::min( blockSize_, remainingLength );
+            uint32_t step = std::min(blockSize_, remainingLength);
             remainingLength -= step;
             offset += step;
         }
@@ -172,10 +174,11 @@ void GigE3::DevicePortFlashMemory::AddEraseRequests (const GigE3::UploadItem& it
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortFlashMemory::WriteDeviceMemory (IFirmwareWriter& dev,
-                                                                        uint32_t address,
-                                                                        const std::vector<uint8_t>& data,
-                                                                        tReportProgressFunc progressFunc)
+FirmwareUpdate::Status GigE3::DevicePortFlashMemory::WriteDeviceMemory(
+    IFirmwareWriter& dev,
+    uint32_t address,
+    const std::vector<uint8_t>& data,
+    tReportProgressFunc progressFunc)
 {
     //const size_t StepSize = 1024 * 16;
     const size_t StepSize = 512;
@@ -185,11 +188,12 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::WriteDeviceMemory (IFirmwar
 
     while (bytesRemaining > 0)
     {
-        size_t stepBytes = std::min( bytesRemaining, StepSize );
+        size_t stepBytes = std::min(bytesRemaining, StepSize);
 
         if (!dev.write((uint32_t)(address + bytesWritten),
                        (uint32_t*)(data.data() + bytesWritten),
-                       (size_t) stepBytes, 0))
+                       (size_t)stepBytes,
+                       0))
         {
             return Status::WriteError;
         }
@@ -204,10 +208,11 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::WriteDeviceMemory (IFirmwar
 }
 
 
-FirmwareUpdate::Status GigE3::DevicePortFlashMemory::ReadDeviceMemory (IFirmwareWriter& dev,
-                                                                       uint32_t address,
-                                                                       std::vector<uint8_t>& buffer,
-                                                                       tReportProgressFunc progressFunc)
+FirmwareUpdate::Status GigE3::DevicePortFlashMemory::ReadDeviceMemory(
+    IFirmwareWriter& dev,
+    uint32_t address,
+    std::vector<uint8_t>& buffer,
+    tReportProgressFunc progressFunc)
 {
     //const size_t StepSize = 1024 * 16;
     const size_t StepSize = 512;
@@ -217,7 +222,7 @@ FirmwareUpdate::Status GigE3::DevicePortFlashMemory::ReadDeviceMemory (IFirmware
 
     while (bytesRemaining > 0)
     {
-        size_t stepBytes = std::min( bytesRemaining, StepSize );
+        size_t stepBytes = std::min(bytesRemaining, StepSize);
 
         unsigned int stepBytesRead = 0;
         if (!dev.read((uint32_t)(address + bytesRead),

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-#include <iostream>
-#include <stdexcept>
-
 #include "UsbHandler.h"
-#include "LibusbDevice.h"
 
+#include "LibusbDevice.h"
 #include "logging.h"
 
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <stdexcept>
 
 namespace tcam
 {
 
-UsbHandler& UsbHandler::get_instance ()
+UsbHandler& UsbHandler::get_instance()
 {
     static UsbHandler instance;
 
@@ -36,8 +35,7 @@ UsbHandler& UsbHandler::get_instance ()
 }
 
 
-UsbHandler::UsbHandler ():
-    session(new UsbSession()), run_event_thread(true)
+UsbHandler::UsbHandler() : session(new UsbSession()), run_event_thread(true)
 {
     event_thread = std::thread(&UsbHandler::handle_events, this);
 }
@@ -53,7 +51,7 @@ UsbHandler::~UsbHandler()
 }
 
 
-std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& serial)
+std::unique_ptr<LibusbDevice> UsbHandler::open_device_(const std::string& serial)
 {
     std::unique_ptr<LibusbDevice> ret = nullptr;
 
@@ -73,7 +71,8 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& seria
         int r = libusb_get_device_descriptor(devs[i], &desc);
         if (r < 0)
         {
-            throw std::runtime_error("Unable to retrieve device descriptor. " + std::to_string(cnt));
+            throw std::runtime_error("Unable to retrieve device descriptor. "
+                                     + std::to_string(cnt));
         }
 
         // ignore all devices that are not from TIS or otherwise needed
@@ -93,7 +92,8 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& seria
 
         char tmp_str[sizeof(tcam_device_info::serial_number)];
 
-        libusb_get_string_descriptor_ascii(dev, desc.iSerialNumber,
+        libusb_get_string_descriptor_ascii(dev,
+                                           desc.iSerialNumber,
                                            (unsigned char*)tmp_str,
                                            sizeof(tcam_device_info::serial_number));
         if (serial.compare(tmp_str) == 0)
@@ -112,44 +112,39 @@ std::unique_ptr<LibusbDevice> UsbHandler::open_device_ (const std::string& seria
 }
 
 
-void printdev(libusb_device *dev)
+void printdev(libusb_device* dev)
 {
     libusb_device_descriptor desc;
     int r = libusb_get_device_descriptor(dev, &desc);
-    if (r < 0) {
+    if (r < 0)
+    {
         std::cout << "failed to get device descriptor" << std::endl;
         return;
     }
-    std::cout << "Number of possible configurations: "
-         << (int) desc.bNumConfigurations << " ";
-    std::cout << "Device Class: " << (int) desc.bDeviceClass << " ";
+    std::cout << "Number of possible configurations: " << (int)desc.bNumConfigurations << " ";
+    std::cout << "Device Class: " << (int)desc.bDeviceClass << " ";
     std::cout << "VendorID: " << desc.idVendor << " ";
     std::cout << "ProductID: " << desc.idProduct << std::endl;
-    libusb_config_descriptor *config;
+    libusb_config_descriptor* config;
     libusb_get_config_descriptor(dev, 0, &config);
-    std::cout << "Interfaces: " << (int) config->bNumInterfaces << " ||| ";
-    const libusb_interface *inter;
-    const libusb_interface_descriptor *interdesc;
-    const libusb_endpoint_descriptor *epdesc;
-    for (int i = 0; i < (int) config->bNumInterfaces; i++)
+    std::cout << "Interfaces: " << (int)config->bNumInterfaces << " ||| ";
+    const libusb_interface* inter;
+    const libusb_interface_descriptor* interdesc;
+    const libusb_endpoint_descriptor* epdesc;
+    for (int i = 0; i < (int)config->bNumInterfaces; i++)
     {
         inter = &config->interface[i];
-        std::cout << "Number of alternate settings: " << inter->num_altsetting
-             << " | ";
+        std::cout << "Number of alternate settings: " << inter->num_altsetting << " | ";
         for (int j = 0; j < inter->num_altsetting; j++)
         {
             interdesc = &inter->altsetting[j];
-            std::cout << "Interface Number: " << (int) interdesc->bInterfaceNumber
-                 << " | ";
-            std::cout << "Number of endpoints: " << (int) interdesc->bNumEndpoints
-                 << " | ";
-            for (int k = 0; k < (int) interdesc->bNumEndpoints; k++)
+            std::cout << "Interface Number: " << (int)interdesc->bInterfaceNumber << " | ";
+            std::cout << "Number of endpoints: " << (int)interdesc->bNumEndpoints << " | ";
+            for (int k = 0; k < (int)interdesc->bNumEndpoints; k++)
             {
                 epdesc = &interdesc->endpoint[k];
-                std::cout << "Descriptor Type: " << (int) epdesc->bDescriptorType
-                     << " | ";
-                std::cout << "EP Address: " << (int) epdesc->bEndpointAddress
-                     << " | ";
+                std::cout << "Descriptor Type: " << (int)epdesc->bDescriptorType << " | ";
+                std::cout << "EP Address: " << (int)epdesc->bEndpointAddress << " | ";
             }
         }
     }
@@ -158,7 +153,7 @@ void printdev(libusb_device *dev)
 }
 
 
-struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
+struct libusb_device_handle* UsbHandler::open_device(const std::string& serial)
 {
     struct libusb_device_handle* ret = nullptr;
 
@@ -177,7 +172,8 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
         int r = libusb_get_device_descriptor(devs[i], &desc);
         if (r < 0)
         {
-            throw std::runtime_error("Unable to retrieve device descriptor. " + std::to_string(cnt));
+            throw std::runtime_error("Unable to retrieve device descriptor. "
+                                     + std::to_string(cnt));
         }
 
         // ignore all devices that are not from TIS or otherwise needed
@@ -197,7 +193,8 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
 
         char tmp_str[sizeof(tcam_device_info::serial_number)];
 
-        libusb_get_string_descriptor_ascii(ret, desc.iSerialNumber,
+        libusb_get_string_descriptor_ascii(ret,
+                                           desc.iSerialNumber,
                                            (unsigned char*)tmp_str,
                                            sizeof(tcam_device_info::serial_number));
         if (serial.compare(tmp_str) == 0)
@@ -215,7 +212,6 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
         }
 
         libusb_close(ret);
-
     }
 
     libusb_free_device_list(devs, 1);
@@ -225,7 +221,7 @@ struct libusb_device_handle* UsbHandler::open_device (const std::string& serial)
 }
 
 
-std::vector<DeviceInfo> UsbHandler::get_device_list ()
+std::vector<DeviceInfo> UsbHandler::get_device_list()
 {
     libusb_device** devs;
 
@@ -245,7 +241,8 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
         int r = libusb_get_device_descriptor(devs[i], &desc);
         if (r < 0)
         {
-            throw std::runtime_error("Unable to retrieve device descriptor. " + std::to_string(cnt));
+            throw std::runtime_error("Unable to retrieve device descriptor. "
+                                     + std::to_string(cnt));
         }
 
         // ignore all devices that are not from TIS or otherwise needed
@@ -255,7 +252,7 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
         if (desc.idProduct != 0x8209 && desc.idProduct != 0x0804)
             continue;
 
-        tcam_device_info d = { };
+        tcam_device_info d = {};
 
         d.type = TCAM_DEVICE_TYPE_LIBUSB;
 
@@ -268,11 +265,13 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
             continue;
         }
 
-        snprintf((char*)d.additional_identifier, sizeof(d.additional_identifier),
-                 "%x", desc.idProduct);
+        snprintf(
+            (char*)d.additional_identifier, sizeof(d.additional_identifier), "%x", desc.idProduct);
 
-        libusb_get_string_descriptor_ascii(dh, desc.iProduct, (unsigned char*)d.name, sizeof(d.name));
-        libusb_get_string_descriptor_ascii(dh, desc.iSerialNumber, (unsigned char*)d.serial_number, sizeof(d.serial_number));
+        libusb_get_string_descriptor_ascii(
+            dh, desc.iProduct, (unsigned char*)d.name, sizeof(d.name));
+        libusb_get_string_descriptor_ascii(
+            dh, desc.iSerialNumber, (unsigned char*)d.serial_number, sizeof(d.serial_number));
 
         libusb_close(dh);
         ret.push_back(DeviceInfo(d));
@@ -284,22 +283,20 @@ std::vector<DeviceInfo> UsbHandler::get_device_list ()
 }
 
 
-std::shared_ptr<UsbSession> UsbHandler::get_session ()
+std::shared_ptr<UsbSession> UsbHandler::get_session()
 {
     return this->session;
 }
 
 
-void UsbHandler::handle_events ()
+void UsbHandler::handle_events()
 {
     struct timeval tv = {};
     tv.tv_usec = 200;
     while (run_event_thread)
     {
-        libusb_handle_events_timeout_completed(this->session->get_session(),
-                                               &tv,
-                                               nullptr);
+        libusb_handle_events_timeout_completed(this->session->get_session(), &tv, nullptr);
     }
 }
 
-} /* namespace tis */
+} // namespace tcam

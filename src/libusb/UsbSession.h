@@ -17,8 +17,8 @@
 #ifndef TCAM_USBSESSION_H
 #define TCAM_USBSESSION_H
 
-#include <memory>
 #include <libusb-1.0/libusb.h>
+#include <memory>
 
 namespace tcam
 {
@@ -29,13 +29,13 @@ private:
     libusb_context* session;
 
 public:
-    UsbSession ();
-    ~UsbSession ();
+    UsbSession();
+    ~UsbSession();
 
-    UsbSession (const UsbSession& _session) = delete;
+    UsbSession(const UsbSession& _session) = delete;
     UsbSession& operator=(const UsbSession&) = delete;
 
-    libusb_context* get_session ();
+    libusb_context* get_session();
 
 }; /* class UsbSession */
 

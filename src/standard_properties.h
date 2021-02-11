@@ -18,12 +18,11 @@
 #define TCAM_STANDARD_PROPERTIES_H
 
 #include "base_types.h"
+#include "compiler_defines.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
-#include <cstring>
-
-#include "compiler_defines.h"
 
 VISIBILITY_INTERNAL
 
@@ -43,22 +42,25 @@ namespace tcam
 struct control_reference
 {
     TCAM_PROPERTY_ID id;
-    std::string name;               // name for external usage
+    std::string name; // name for external usage
     enum TCAM_PROPERTY_TYPE type_to_use; // type outgoing control shall have
     tcam_property_group group;
 
-    control_reference (TCAM_PROPERTY_ID id_,
-                       const std::string& name_,
-                       enum TCAM_PROPERTY_TYPE type_to_use_,
-                       tcam_property_group group_)
+    control_reference(TCAM_PROPERTY_ID id_,
+                      const std::string& name_,
+                      enum TCAM_PROPERTY_TYPE type_to_use_,
+                      tcam_property_group group_)
         : id(id_), name(name_), type_to_use(type_to_use_), group(group_)
-    { }
+    {
+    }
 };
 
-static const control_reference INVALID_STD_PROPERTY (TCAM_PROPERTY_INVALID,
-                                                     "INVALID_PORPERTY",
-                                                     TCAM_PROPERTY_TYPE_UNKNOWN,
-                                                     { TCAM_PROPERTY_CATEGORY_UNKNOWN, TCAM_PROPERTY_INVALID, 0});
+static const control_reference INVALID_STD_PROPERTY(TCAM_PROPERTY_INVALID,
+                                                    "INVALID_PORPERTY",
+                                                    TCAM_PROPERTY_TYPE_UNKNOWN,
+                                                    { TCAM_PROPERTY_CATEGORY_UNKNOWN,
+                                                      TCAM_PROPERTY_INVALID,
+                                                      0 });
 // {
 //     .id = TCAM_PROPERTY_INVALID,
 //     .name = "INVALID_PORPERTY",
@@ -67,8 +69,7 @@ static const control_reference INVALID_STD_PROPERTY (TCAM_PROPERTY_INVALID,
 // };
 
 
-static const std::vector<struct control_reference> ctrl_reference_table =
-{
+static const std::vector<struct control_reference> ctrl_reference_table = {
     {
         TCAM_PROPERTY_INVALID,
         "INVALID_PORPERTY",
@@ -792,7 +793,7 @@ static const std::vector<struct control_reference> ctrl_reference_table =
 };
 
 
-inline control_reference get_control_reference (TCAM_PROPERTY_ID wanted_id)
+inline control_reference get_control_reference(TCAM_PROPERTY_ID wanted_id)
 {
     for (const auto& ref : ctrl_reference_table)
     {
@@ -803,7 +804,7 @@ inline control_reference get_control_reference (TCAM_PROPERTY_ID wanted_id)
 }
 
 
-inline TCAM_PROPERTY_ID string2property_id (const std::string& name)
+inline TCAM_PROPERTY_ID string2property_id(const std::string& name)
 {
     for (const auto& ref : ctrl_reference_table)
     {
@@ -817,7 +818,7 @@ inline TCAM_PROPERTY_ID string2property_id (const std::string& name)
 }
 
 
-inline std::string property_id2string (TCAM_PROPERTY_ID id)
+inline std::string property_id2string(TCAM_PROPERTY_ID id)
 {
     for (const auto& ref : ctrl_reference_table)
     {
@@ -830,7 +831,7 @@ inline std::string property_id2string (TCAM_PROPERTY_ID id)
 }
 
 
-inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
+inline tcam_device_property create_empty_property(TCAM_PROPERTY_ID id)
 {
     auto ref = get_control_reference(id);
 
@@ -844,7 +845,7 @@ inline tcam_device_property create_empty_property (TCAM_PROPERTY_ID id)
 }
 
 
-inline TCAM_PROPERTY_TYPE get_reference_property_type (TCAM_PROPERTY_ID id)
+inline TCAM_PROPERTY_TYPE get_reference_property_type(TCAM_PROPERTY_ID id)
 {
     return get_control_reference(id).type_to_use;
 }

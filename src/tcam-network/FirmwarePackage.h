@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace FirmwareUpdate
 {
@@ -23,13 +23,11 @@ namespace FirmwareUpdate
 namespace FirmwarePackage
 {
 
-bool isPackageFile (const std::string& fileName);
+bool isPackageFile(const std::string& fileName);
 
-std::vector<uint8_t> extractFile (const std::string& packageFileName,
-                                  const std::string& fileName);
+std::vector<uint8_t> extractFile(const std::string& packageFileName, const std::string& fileName);
 
-std::string extractTextFile (const std::string& packageFileName,
-                             const std::string& fileName);
+std::string extractTextFile(const std::string& packageFileName, const std::string& fileName);
 
 } /* namespace FirmwarePackage */
 

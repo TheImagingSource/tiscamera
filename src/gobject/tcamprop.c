@@ -16,10 +16,10 @@
 
 #include "tcamprop.h"
 
-G_DEFINE_INTERFACE (TcamProp, tcam_prop, G_TYPE_OBJECT)
+G_DEFINE_INTERFACE(TcamProp, tcam_prop, G_TYPE_OBJECT)
 
 
-static void tcam_prop_default_init (__attribute__((unused))TcamPropInterface* klass)
+static void tcam_prop_default_init(__attribute__((unused)) TcamPropInterface* klass)
 {
     /* GObjectClass *object_class = G_OBJECT_CLASS (klass); */
 
@@ -38,19 +38,19 @@ static void tcam_prop_default_init (__attribute__((unused))TcamPropInterface* kl
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
+GSList* tcam_prop_get_tcam_property_names(TcamProp* self)
 {
     GSList* ret = NULL;
     TcamPropInterface* iface;
 
-    g_return_val_if_fail (self != NULL, NULL);
-    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROP(self), NULL);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_property_names)
     {
-	    ret = iface->get_tcam_property_names(self);
+        ret = iface->get_tcam_property_names(self);
     }
 
     return ret;
@@ -66,20 +66,20 @@ GSList* tcam_prop_get_tcam_property_names (TcamProp* self)
  *
  * Returns: (transfer full): A string describing the property type
  */
-const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name)
+const gchar* tcam_prop_get_tcam_property_type(TcamProp* self, const gchar* name)
 {
     TcamPropInterface* iface;
     gchar* ret = NULL;
 
-    g_return_val_if_fail (self != NULL, NULL);
-    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
-    g_return_val_if_fail (name != NULL, NULL);
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROP(self), NULL);
+    g_return_val_if_fail(name != NULL, NULL);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_property_names)
     {
-	    ret = iface->get_tcam_property_type (self, name);
+        ret = iface->get_tcam_property_type(self, name);
     }
     return ret;
 }
@@ -103,42 +103,35 @@ const gchar* tcam_prop_get_tcam_property_type (TcamProp* self, const gchar* name
  *
  * Returns: True on success
  */
-gboolean tcam_prop_get_tcam_property (TcamProp* self,
-                                      const gchar* name,
-                                      GValue* value,
-                                      GValue* min,
-                                      GValue* max,
-                                      GValue* def,
-                                      GValue* step,
-                                      GValue* type,
-                                      GValue* flags,
-                                      GValue* category,
-                                      GValue* group)
+gboolean tcam_prop_get_tcam_property(TcamProp* self,
+                                     const gchar* name,
+                                     GValue* value,
+                                     GValue* min,
+                                     GValue* max,
+                                     GValue* def,
+                                     GValue* step,
+                                     GValue* type,
+                                     GValue* flags,
+                                     GValue* category,
+                                     GValue* group)
 {
     TcamPropInterface* iface;
     gboolean ret = FALSE;
 
-    g_return_val_if_fail (self != NULL, FALSE);
-    g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
-    g_return_val_if_fail (name != NULL, FALSE);
+    g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(TCAM_IS_PROP(self), FALSE);
+    g_return_val_if_fail(name != NULL, FALSE);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_property)
     {
-        ret = iface->get_tcam_property(self,
-                                       name,
-                                       value,
-                                       min, max,
-                                       def, step,
-                                       type,
-                                       flags,
-                                       category, group);
+        ret = iface->get_tcam_property(
+            self, name, value, min, max, def, step, type, flags, category, group);
     }
 
     return ret;
 }
-
 
 
 /**
@@ -148,20 +141,19 @@ gboolean tcam_prop_get_tcam_property (TcamProp* self,
  *
  * Returns: (element-type utf8) (transfer full): a #GSList
  */
-GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
-                                         const char* name)
+GSList* tcam_prop_get_tcam_menu_entries(TcamProp* self, const char* name)
 {
     GSList* ret = NULL;
     TcamPropInterface* iface;
 
-    g_return_val_if_fail (self != NULL, NULL);
-    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROP(self), NULL);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_menu_entries)
     {
-	    ret = iface->get_tcam_menu_entries (self, name);
+        ret = iface->get_tcam_menu_entries(self, name);
     }
 
     return ret;
@@ -178,19 +170,17 @@ GSList* tcam_prop_get_tcam_menu_entries (TcamProp* self,
  *
  * Returns: true on success
  */
-gboolean tcam_prop_set_tcam_property (TcamProp* self,
-                                      const gchar* name,
-                                      const GValue* value)
+gboolean tcam_prop_set_tcam_property(TcamProp* self, const gchar* name, const GValue* value)
 {
-    TcamPropInterface *iface;
+    TcamPropInterface* iface;
     gboolean ret = FALSE;
 
-    g_return_val_if_fail (self != NULL, FALSE);
-    g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
-    g_return_val_if_fail (name != NULL, FALSE);
-    g_return_val_if_fail (value != NULL, FALSE);
+    g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(TCAM_IS_PROP(self), FALSE);
+    g_return_val_if_fail(name != NULL, FALSE);
+    g_return_val_if_fail(value != NULL, FALSE);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->set_tcam_property)
     {
@@ -209,19 +199,19 @@ gboolean tcam_prop_set_tcam_property (TcamProp* self,
  *
  * Returns: (element-type utf8) (transfer full): a #GSList
  */
-GSList* tcam_prop_get_device_serials (TcamProp* self)
+GSList* tcam_prop_get_device_serials(TcamProp* self)
 {
     TcamPropInterface* iface;
     GSList* ret = NULL;
 
-    g_return_val_if_fail (self != NULL, NULL);
-    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROP(self), NULL);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_device_serials)
     {
-        ret = iface->get_tcam_device_serials (self);
+        ret = iface->get_tcam_device_serials(self);
     }
 
     return ret;
@@ -238,15 +228,15 @@ GSList* tcam_prop_get_device_serials (TcamProp* self)
  *
  * Returns: (element-type utf8) (transfer full): a #GSList
  */
-GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
+GSList* tcam_prop_get_device_serials_backend(TcamProp* self)
 {
     TcamPropInterface* iface;
     GSList* ret = NULL;
 
-    g_return_val_if_fail (self != NULL, NULL);
-    g_return_val_if_fail (TCAM_IS_PROP (self), NULL);
+    g_return_val_if_fail(self != NULL, NULL);
+    g_return_val_if_fail(TCAM_IS_PROP(self), NULL);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_device_serials_backend)
     {
@@ -272,28 +262,24 @@ GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
  *
  * Returns: True on success
  */
-gboolean tcam_prop_get_device_info (TcamProp* self,
-                                    const char* serial,
-                                    char** name,
-                                    char** identifier,
-                                    char** connection_type)
+gboolean tcam_prop_get_device_info(TcamProp* self,
+                                   const char* serial,
+                                   char** name,
+                                   char** identifier,
+                                   char** connection_type)
 {
     TcamPropInterface* iface;
     gboolean ret = FALSE;
 
-    g_return_val_if_fail (self != NULL, FALSE);
-    g_return_val_if_fail (TCAM_IS_PROP (self), FALSE);
-    g_return_val_if_fail (serial != NULL, FALSE);
+    g_return_val_if_fail(self != NULL, FALSE);
+    g_return_val_if_fail(TCAM_IS_PROP(self), FALSE);
+    g_return_val_if_fail(serial != NULL, FALSE);
 
-    iface = TCAM_PROP_GET_IFACE (self);
+    iface = TCAM_PROP_GET_IFACE(self);
 
     if (iface->get_tcam_device_info)
     {
-        ret = iface->get_tcam_device_info(self,
-                                          serial,
-                                          name,
-                                          identifier,
-                                          connection_type);
+        ret = iface->get_tcam_device_info(self, serial, name, identifier, connection_type);
     }
 
     return ret;

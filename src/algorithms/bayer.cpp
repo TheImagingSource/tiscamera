@@ -17,47 +17,62 @@
 #include "bayer.h"
 
 
-tBY8Pattern next_pixel (tBY8Pattern pattern)
+tBY8Pattern next_pixel(tBY8Pattern pattern)
 {
     switch (pattern)
     {
-        case GB:    return BG;
-        case GR:    return RG;
-        case RG:    return GR;
+        case GB:
+            return BG;
+        case GR:
+            return RG;
+        case RG:
+            return GR;
         case BG:
-        default:    return GB;
+        default:
+            return GB;
     };
     return BG;
 }
 
 
-tBY8Pattern next_line (tBY8Pattern pattern)
+tBY8Pattern next_line(tBY8Pattern pattern)
 {
     switch (pattern)
     {
-        case GB:    return RG;
-        case GR:    return BG;
-        case RG:    return GB;
-        case BG:    return GR;
-        default:    return BG;
-    };
-}
-
-
-const char* bayer_to_string (tBY8Pattern pattern)
-{
-    switch (pattern)
-    {
-        case GB:    return "gbrg";
-        case GR:    return "grbg";
-        case RG:    return "rggb";
+        case GB:
+            return RG;
+        case GR:
+            return BG;
+        case RG:
+            return GB;
         case BG:
-        default:    return "bggr";
+            return GR;
+        default:
+            return BG;
     };
 }
 
 
-unsigned int initial_offset (tBY8Pattern pattern, unsigned int line_width, unsigned int bytes_per_pixel)
+const char* bayer_to_string(tBY8Pattern pattern)
+{
+    switch (pattern)
+    {
+        case GB:
+            return "gbrg";
+        case GR:
+            return "grbg";
+        case RG:
+            return "rggb";
+        case BG:
+        default:
+            return "bggr";
+    };
+}
+
+
+unsigned int initial_offset(tBY8Pattern pattern,
+                            unsigned int line_width,
+                            unsigned int bytes_per_pixel)
 {
     unsigned int first_line_offset = 0;
 

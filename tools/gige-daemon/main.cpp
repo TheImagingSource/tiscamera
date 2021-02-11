@@ -15,32 +15,28 @@
  */
 
 
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/msg.h>
-
-
-#include <stdio.h>
-#include <iostream>
-#include <cstring>
-#include <csignal>
-
-#include <unistd.h>
-
 #include "CameraListHolder.h"
 #include "DaemonClass.h"
-
 #include "gige-daemon.h"
 #include "tcam-semaphores.h"
+
+#include <csignal>
+#include <cstring>
+#include <iostream>
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <sys/shm.h>
+#include <unistd.h>
 
 static const std::string RUNNING_DIR = "/";
 static const std::string LOCK_FILE = "/var/lock/gige-daemon.lock";
 static const std::string LOG_FILE = "gige-daemon.log";
 
-DaemonClass daemon_instance (LOCK_FILE);
+DaemonClass daemon_instance(LOCK_FILE);
 
 
-std::vector<struct tcam_device_info> get_camera_list ()
+std::vector<struct tcam_device_info> get_camera_list()
 {
 
     key_t shmkey = ftok("/tmp/tcam-gige-camera-list", 'G');
@@ -69,10 +65,7 @@ std::vector<struct tcam_device_info> get_camera_list ()
 
     ret.reserve(d->device_count);
 
-    for (unsigned int i = 0; i < d->device_count; ++i)
-    {
-        ret.push_back(d->devices[i]);
-    }
+    for (unsigned int i = 0; i < d->device_count; ++i) { ret.push_back(d->devices[i]); }
 
     shmdt(d);
 
@@ -82,18 +75,15 @@ std::vector<struct tcam_device_info> get_camera_list ()
 }
 
 
-void print_camera_list ()
+void print_camera_list()
 {
     auto cam_list = get_camera_list();
 
-    for (const auto& c : cam_list)
-    {
-        std::cout << c.identifier << std::endl;
-    }
+    for (const auto& c : cam_list) { std::cout << c.identifier << std::endl; }
 }
 
 
-void print_camera_list_long ()
+void print_camera_list_long()
 {
     auto cam_list = get_camera_list();
 
@@ -104,9 +94,9 @@ void print_camera_list_long ()
 }
 
 
-void print_help (const char* prog_name)
+void print_help(const char* prog_name)
 {
-    std::cout << prog_name <<" - GigE Indexing daemon\n"
+    std::cout << prog_name << " - GigE Indexing daemon\n"
               << "\n"
               << "Usage:\n"
               << "\t" << prog_name << " list \t - list camera names\n"
@@ -114,11 +104,11 @@ void print_help (const char* prog_name)
               << "\t" << prog_name << " start \t - start daemon and fork\n"
               << "\t\t --no-fork \t - run daemon without forking\n"
               << "\t" << prog_name << " stop \t - stop daemon\n"
-              <<std::endl;
+              << std::endl;
 }
 
 
-void signal_handler (int sig)
+void signal_handler(int sig)
 {
     switch (sig)
     {
@@ -140,7 +130,7 @@ void signal_handler (int sig)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     for (int i = 1; i < argc; ++i)
     {
@@ -226,7 +216,6 @@ int main (int argc, char *argv[])
                 return 1;
             }
         }
-
     }
 
     print_help(argv[0]);

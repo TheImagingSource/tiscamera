@@ -21,15 +21,15 @@
 #include <string>
 #include <vector>
 
-std::vector<uint8_t> open_firmware_file (std::string& filename);
+std::vector<uint8_t> open_firmware_file(std::string& filename);
 
-std::vector<unsigned char> load_file (const std::string& filename);
+std::vector<unsigned char> load_file(const std::string& filename);
 
-bool is_package_file (const std::string& fileName);
+bool is_package_file(const std::string& fileName);
 
-std::vector<unsigned char> extract_file_from_package (const std::string& packageFileName,
-                                                      const std::string& fileName);
+std::vector<unsigned char> extract_file_from_package(const std::string& packageFileName,
+                                                     const std::string& fileName);
 
-bool is_valid_firmware_file (const std::string& firmware);
+bool is_valid_firmware_file(const std::string& firmware);
 
 #endif /* _FILE_HANDLING_H_ */

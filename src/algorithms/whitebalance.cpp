@@ -15,9 +15,10 @@
  */
 
 #include "whitebalance.h"
-#include <stdlib.h>
+
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 
 static const uint MAX_STEPS = 20;
@@ -25,10 +26,10 @@ static uint WB_IDENTITY = 64;
 static uint WB_MAX = 255;
 static const int BREAK_DIFF = 2;
 
-const uint NEARGRAY_MIN_BRIGHTNESS      = 10;
-const uint NEARGRAY_MAX_BRIGHTNESS      = 253;
+const uint NEARGRAY_MIN_BRIGHTNESS = 10;
+const uint NEARGRAY_MAX_BRIGHTNESS = 253;
 const float NEARGRAY_MAX_COLOR_DEVIATION = 0.25f;
-const float NEARGRAY_REQUIRED_AMOUNT     = 0.08f;
+const float NEARGRAY_REQUIRED_AMOUNT = 0.08f;
 
 /* rgb values have to be evaluated differently. These are the according factors */
 static const uint r_factor = (uint32_t)((1 << 8) * 0.299f);
@@ -37,8 +38,8 @@ static const uint b_factor = (uint32_t)((1 << 8) * 0.114f);
 
 
 /* number of sample points */
-#define SAMPLING_LINES      30
-#define SAMPLING_COLUMNS    40
+#define SAMPLING_LINES   30
+#define SAMPLING_COLUMNS 40
 
 typedef unsigned char byte;
 
@@ -51,18 +52,17 @@ typedef struct auto_sample_points
         byte b;
     } samples[1500];
 
-    unsigned int	cnt;
+    unsigned int cnt;
 } auto_sample_points;
 
 
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
-
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 
 
 /* retrieve sampling points for image analysis */
-void get_sampling_points (struct tcam::algorithms::whitebalance::wb_settings* settings,
-                          struct tcam_image_buffer& buffer,
-                          auto_sample_points* points)
+void get_sampling_points(struct tcam::algorithms::whitebalance::wb_settings* settings,
+                         struct tcam_image_buffer& buffer,
+                         auto_sample_points* points)
 {
     unsigned int* data = (unsigned int*)buffer.pData;
 
@@ -82,7 +82,7 @@ void get_sampling_points (struct tcam::algorithms::whitebalance::wb_settings* se
     unsigned int y;
     for (y = sampling_line_step; y < (height - sampling_line_step); y += sampling_line_step)
     {
-        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS+1));
+        unsigned int samplingColStep = ((width) / (SAMPLING_COLUMNS + 1));
 
         byte* pLine = (byte*)data + first_line_offset + y * bytes_per_line;
         byte* pNextLine = pLine + bytes_per_line;
@@ -91,38 +91,38 @@ void get_sampling_points (struct tcam::algorithms::whitebalance::wb_settings* se
         for (col = samplingColStep; col < (width - samplingColStep); col += samplingColStep)
         {
             unsigned int r = 0, g = 0, b = 0;
-            if ( y & 1 )
+            if (y & 1)
             {
                 if (col & 1)
                 {
-                    r = pLine[col+bypp];
+                    r = pLine[col + bypp];
                     g = pLine[col];
                     b = pNextLine[col];
                 }
                 else
                 {
                     r = pLine[col];
-                    g = pLine[col+bypp];
-                    b = pNextLine[col+bypp];
+                    g = pLine[col + bypp];
+                    b = pNextLine[col + bypp];
                 }
             }
             else
             {
                 if (col & 1)
                 {
-                    r = pNextLine[col+bypp];
-                    g = pLine[col+bypp];
+                    r = pNextLine[col + bypp];
+                    g = pLine[col + bypp];
                     b = pLine[col];
                 }
                 else
                 {
                     r = pNextLine[col];
                     g = pLine[col];
-                    b = pLine[col+bypp];
+                    b = pLine[col + bypp];
                 }
             }
 
-            if (cnt < ARRAYSIZE( points->samples ))
+            if (cnt < ARRAYSIZE(points->samples))
             {
                 points->samples[cnt].r = (byte)r;
                 points->samples[cnt].g = (byte)g;
@@ -135,43 +135,44 @@ void get_sampling_points (struct tcam::algorithms::whitebalance::wb_settings* se
 }
 
 
-static uint clip (uint x, uint max)
+static uint clip(uint x, uint max)
 {
-    if ( x > max )
+    if (x > max)
         return max;
     return x;
 }
 
 
-uint calc_brightness_from_clr_avg (uint r, uint g, uint b)
+uint calc_brightness_from_clr_avg(uint r, uint g, uint b)
 {
     return (r * r_factor + g * g_factor + b * b_factor) >> 8;
 }
 
 
-bool is_near_gray (uint r, uint g, uint b)
+bool is_near_gray(uint r, uint g, uint b)
 {
-    uint brightness = calc_brightness_from_clr_avg( r, g, b );
-    if ( brightness < NEARGRAY_MIN_BRIGHTNESS ) return false;
-    if ( brightness > NEARGRAY_MAX_BRIGHTNESS ) return false;
+    uint brightness = calc_brightness_from_clr_avg(r, g, b);
+    if (brightness < NEARGRAY_MIN_BRIGHTNESS)
+        return false;
+    if (brightness > NEARGRAY_MAX_BRIGHTNESS)
+        return false;
 
-    uint deltaR = abs( (int)r - (int)brightness );
-    uint deltaG = abs( (int)g - (int)brightness );
-    uint deltaB = abs( (int)b - (int)brightness );
+    uint deltaR = abs((int)r - (int)brightness);
+    uint deltaG = abs((int)g - (int)brightness);
+    uint deltaB = abs((int)b - (int)brightness);
 
     float devR = deltaR / (float)brightness;
     float devG = deltaG / (float)brightness;
     float devB = deltaB / (float)brightness;
 
-    return ((devR < NEARGRAY_MAX_COLOR_DEVIATION) &&
-            (devG < NEARGRAY_MAX_COLOR_DEVIATION) &&
-            (devB < NEARGRAY_MAX_COLOR_DEVIATION));
+    return ((devR < NEARGRAY_MAX_COLOR_DEVIATION) && (devG < NEARGRAY_MAX_COLOR_DEVIATION)
+            && (devB < NEARGRAY_MAX_COLOR_DEVIATION));
 }
 
 
-rgb_tripel simulate_whitebalance (const auto_sample_points* data,
-                                  const rgb_tripel* wb,
-                                  bool enable_near_gray)
+rgb_tripel simulate_whitebalance(const auto_sample_points* data,
+                                 const rgb_tripel* wb,
+                                 bool enable_near_gray)
 {
     rgb_tripel result = { 0, 0, 0 };
     rgb_tripel result_near_gray = { 0, 0, 0 };
@@ -180,15 +181,15 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data,
     uint i;
     for (i = 0; i < data->cnt; ++i)
     {
-        unsigned int r = clip( data->samples[i].r * wb->R / WB_IDENTITY, WB_MAX );
-        unsigned int g = clip( data->samples[i].g * wb->G / WB_IDENTITY, WB_MAX );
-        unsigned int b = clip( data->samples[i].b * wb->B / WB_IDENTITY, WB_MAX );
+        unsigned int r = clip(data->samples[i].r * wb->R / WB_IDENTITY, WB_MAX);
+        unsigned int g = clip(data->samples[i].g * wb->G / WB_IDENTITY, WB_MAX);
+        unsigned int b = clip(data->samples[i].b * wb->B / WB_IDENTITY, WB_MAX);
 
         result.R += r;
         result.G += g;
         result.B += b;
 
-        if ( is_near_gray( r, g, b ) )
+        if (is_near_gray(r, g, b))
         {
             result_near_gray.R += r;
             result_near_gray.G += g;
@@ -216,30 +217,30 @@ rgb_tripel simulate_whitebalance (const auto_sample_points* data,
 }
 
 
-static rgb_tripel average_color_cam (const auto_sample_points* data )
+static rgb_tripel average_color_cam(const auto_sample_points* data)
 {
     rgb_tripel result = { 0, 0, 0 };
 
-	uint i;
+    uint i;
     for (i = 0; i < data->cnt; ++i)
     {
-        unsigned int r =  data->samples[i].r ;
-        unsigned int g = data->samples[i].g ;
-        unsigned int b = data->samples[i].b ;
+        unsigned int r = data->samples[i].r;
+        unsigned int g = data->samples[i].g;
+        unsigned int b = data->samples[i].b;
 
         result.R += r;
         result.G += g;
         result.B += b;
     }
 
-	result.R /= data->cnt;
-	result.G /= data->cnt;
-	result.B /= data->cnt;
-	return result;
+    result.R /= data->cnt;
+    result.G /= data->cnt;
+    result.B /= data->cnt;
+    return result;
 }
 
 
-bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
+bool wb_auto_step(rgb_tripel* clr, rgb_tripel* wb)
 {
     unsigned int avg = ((clr->R + clr->G + clr->B) / 3);
     int dr = (int)avg - clr->R;
@@ -248,9 +249,9 @@ bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 
     if (abs(dr) < BREAK_DIFF && abs(dg) < BREAK_DIFF && abs(db) < BREAK_DIFF)
     {
-        wb->R = clip( wb->R, WB_MAX );
-        wb->G = clip( wb->G, WB_MAX );
-        wb->B = clip( wb->B, WB_MAX );
+        wb->R = clip(wb->R, WB_MAX);
+        wb->G = clip(wb->G, WB_MAX);
+        wb->B = clip(wb->B, WB_MAX);
 
         return true;
     }
@@ -296,7 +297,7 @@ bool wb_auto_step (rgb_tripel* clr, rgb_tripel* wb )
 }
 
 
-bool auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, uint* resulting_brightness)
+bool auto_whitebalance(const auto_sample_points* data, rgb_tripel* wb, uint* resulting_brightness)
 {
     rgb_tripel old_wb = *wb;
     if (wb->R < WB_IDENTITY)
@@ -322,22 +323,22 @@ bool auto_whitebalance (const auto_sample_points* data, rgb_tripel* wb, uint* re
 
         // Simulate white balance once more, this time always on the whole image
         rgb_tripel tmp2 = simulate_whitebalance(data, wb, false);
-        *resulting_brightness = calc_brightness_from_clr_avg( tmp2.R, tmp2.G, tmp2.B );
+        *resulting_brightness = calc_brightness_from_clr_avg(tmp2.R, tmp2.G, tmp2.B);
 
         if (wb_auto_step(&tmp, wb))
         {
             return true;
         }
     }
-    wb->R = clip( wb->R, WB_MAX );
-    wb->G = clip( wb->G, WB_MAX );
-    wb->B = clip( wb->B, WB_MAX );
+    wb->R = clip(wb->R, WB_MAX);
+    wb->G = clip(wb->G, WB_MAX);
+    wb->B = clip(wb->B, WB_MAX);
 
     return false;
 }
 
 
-bool auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb)
+bool auto_whitebalance_cam(const auto_sample_points* data, rgb_tripel* wb)
 {
     rgb_tripel old_wb = *wb;
 
@@ -357,21 +358,21 @@ bool auto_whitebalance_cam (const auto_sample_points* data, rgb_tripel* wb)
         wb->B -= 1;
     }
 
-    rgb_tripel averageColor = average_color_cam( data);
-    if(wb_auto_step(&averageColor, wb ) )
+    rgb_tripel averageColor = average_color_cam(data);
+    if (wb_auto_step(&averageColor, wb))
     {
         return true;
     }
 
-    wb->R = clip( wb->R, WB_MAX );
-    wb->G = clip( wb->G, WB_MAX );
-    wb->B = clip( wb->B, WB_MAX );
+    wb->R = clip(wb->R, WB_MAX);
+    wb->G = clip(wb->G, WB_MAX);
+    wb->B = clip(wb->B, WB_MAX);
 
     return false;
 }
 
 
-byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern pattern)
+byte wb_pixel_c(byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern pattern)
 {
     unsigned int val = pixel;
     switch (pattern)
@@ -391,35 +392,38 @@ byte wb_pixel_c (byte pixel, byte wb_r, byte wb_g, byte wb_b, tBY8Pattern patter
         default:
             return 0;
     };
-    return ( val > 0xFF ? 0xFF : (byte)(val));
+    return (val > 0xFF ? 0xFF : (byte)(val));
 }
 
 
-static void wb_line_c (byte* dest_line,
-                       byte* src_line,
-                       unsigned int dim_x,
-                       byte wb_r, byte wb_g, byte wb_b,
-                       tBY8Pattern pattern)
+static void wb_line_c(byte* dest_line,
+                      byte* src_line,
+                      unsigned int dim_x,
+                      byte wb_r,
+                      byte wb_g,
+                      byte wb_b,
+                      tBY8Pattern pattern)
 {
     const tBY8Pattern even_pattern = pattern;
     const tBY8Pattern odd_pattern = next_pixel(pattern);
     uint x;
     for (x = 0; x < dim_x; x += 2)
     {
-        unsigned int v0 = wb_pixel_c( src_line[x], wb_r, wb_g, wb_b,even_pattern );
-        unsigned int v1 = wb_pixel_c( src_line[x+1], wb_r, wb_g, wb_b, odd_pattern );
+        unsigned int v0 = wb_pixel_c(src_line[x], wb_r, wb_g, wb_b, even_pattern);
+        unsigned int v1 = wb_pixel_c(src_line[x + 1], wb_r, wb_g, wb_b, odd_pattern);
         *((uint16_t*)(dest_line + x)) = (uint16_t)(v1 << 8 | v0);
     }
 
     if (x == (dim_x - 1))
     {
-        dest_line[x] = wb_pixel_c( src_line[x], wb_r, wb_g, wb_b, even_pattern );
+        dest_line[x] = wb_pixel_c(src_line[x], wb_r, wb_g, wb_b, even_pattern);
     }
 }
 
 
-void tcam::algorithms::whitebalance::para_wb_callback::call (const tcam_image_buffer& image_in,
-                                                             const tcam_image_buffer& /* image_out */)
+void tcam::algorithms::whitebalance::para_wb_callback::call(
+    const tcam_image_buffer& image_in,
+    const tcam_image_buffer& /* image_out */)
 {
 
     unsigned int* data = (unsigned int*)image_in.pData;
@@ -432,32 +436,37 @@ void tcam::algorithms::whitebalance::para_wb_callback::call (const tcam_image_bu
     tBY8Pattern odd = next_line(settings->pattern);
 
     unsigned int y;
-    for (y = 0 ; y < (dim_y - 1); y += 2)
+    for (y = 0; y < (dim_y - 1); y += 2)
     {
         byte* line0 = (byte*)data + y * pitch;
         byte* line1 = (byte*)data + (y + 1) * pitch;
 
-        wb_line_c(line0, line0, dim_x,
-                  settings->rgb.R, settings->rgb.G, settings->rgb.B,
+        wb_line_c(line0,
+                  line0,
+                  dim_x,
+                  settings->rgb.R,
+                  settings->rgb.G,
+                  settings->rgb.B,
                   settings->pattern);
-        wb_line_c(line1, line1, dim_x,
-                  settings->rgb.R, settings->rgb.G, settings->rgb.B,
-                  odd);
+        wb_line_c(line1, line1, dim_x, settings->rgb.R, settings->rgb.G, settings->rgb.B, odd);
     }
 
     if (y == (dim_y - 1))
     {
         byte* line = (byte*)data + y * pitch;
-        wb_line_c(line, line, dim_x,
-                  settings->rgb.R, settings->rgb.G, settings->rgb.B,
+        wb_line_c(line,
+                  line,
+                  dim_x,
+                  settings->rgb.R,
+                  settings->rgb.G,
+                  settings->rgb.B,
                   settings->pattern);
     }
-
 }
 
 
-static void	wb_image_c (struct tcam::algorithms::whitebalance::wb_settings* settings,
-                        struct tcam_image_buffer& buffer)
+static void wb_image_c(struct tcam::algorithms::whitebalance::wb_settings* settings,
+                       struct tcam_image_buffer& buffer)
 {
     /* unsigned char*           pData;    /\**< pointer to actual image buffer *\/ */
     /* unsigned int             length;   /\**< size of image in bytes *\/ */
@@ -477,23 +486,18 @@ static void	wb_image_c (struct tcam::algorithms::whitebalance::wb_settings* sett
 
 
     settings->para->queue_and_wait(&cb, buffer, buffer, 0);
-
-
 }
 
 
-void apply_wb_by8_c (struct tcam::algorithms::whitebalance::wb_settings* settings,
-                     struct tcam_image_buffer& buffer)
+void apply_wb_by8_c(struct tcam::algorithms::whitebalance::wb_settings* settings,
+                    struct tcam_image_buffer& buffer)
 {
     wb_image_c(settings, buffer);
 }
 
 
-
-
-
-void tcam::algorithms::whitebalance::whitebalance_buffer (struct wb_settings* settings,
-                                                          struct tcam_image_buffer& buffer)
+void tcam::algorithms::whitebalance::whitebalance_buffer(struct wb_settings* settings,
+                                                         struct tcam_image_buffer& buffer)
 {
     if (settings == NULL)
     {
@@ -516,7 +520,7 @@ void tcam::algorithms::whitebalance::whitebalance_buffer (struct wb_settings* se
     {
         auto_sample_points points = {};
 
-        get_sampling_points (settings, buffer, &points);
+        get_sampling_points(settings, buffer, &points);
 
         unsigned int resulting_brightness = 0;
         auto_whitebalance(&points, &rgb, &resulting_brightness);

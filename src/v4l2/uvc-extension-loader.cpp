@@ -18,56 +18,46 @@
 
 #include "json.hpp"
 
+#include <fcntl.h>
+#include <fstream>
+#include <limits.h> // LONG_MAX
 #include <sys/ioctl.h>
-
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <uuid/uuid.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <limits.h> // LONG_MAX
-
-#include <fstream>
-
 using json = nlohmann::json;
-
 
 
 // copied from src/utils.cpp tcam_xioctl
 // that function was the only reason for linking
 // libtcam.so. This way the extension unit loader
 // can be built seperately.
-int xioctl (int fd, unsigned int request, void *arg)
+int xioctl(int fd, unsigned int request, void* arg)
 {
     constexpr int IOCTL_RETRY = 4;
 
     int ret = 0;
-    int tries= IOCTL_RETRY;
-    do
-    {
+    int tries = IOCTL_RETRY;
+    do {
         ret = ioctl(fd, request, arg);
         // ret = v4l2_ioctl(fd, request, arg);
-    }
-    while (ret && tries-- &&
-           ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
+    } while (ret && tries-- && ((errno == EINTR) || (errno == EAGAIN) || (errno == ETIMEDOUT)));
 
     return (ret);
-
 }
 
 
-int tcam::uvc::map (int fd,
-                    uvc_xu_control_mapping* ctrl)
+int tcam::uvc::map(int fd, uvc_xu_control_mapping* ctrl)
 {
     return xioctl(fd, UVCIOC_CTRL_MAP, ctrl);
 }
 
 
-void tcam::uvc::apply_mappings (int fd,
-                                std::vector<tcam::uvc::description>& mappings,
-                                std::function<void(const std::string&)> cb)
+void tcam::uvc::apply_mappings(int fd,
+                               std::vector<tcam::uvc::description>& mappings,
+                               std::function<void(const std::string&)> cb)
 {
     for (auto& m : mappings)
     {
@@ -82,17 +72,17 @@ void tcam::uvc::apply_mappings (int fd,
         if (ret != 0)
         {
             std::string msg = "Error while mapping '" + std::string((char*)m.mapping.name)
-                + "': errno: " + std::to_string(errno) + " - " + strerror(errno);
+                              + "': errno: " + std::to_string(errno) + " - " + strerror(errno);
             cb(msg);
         }
     }
 }
 
 
-__u8 string_to_u8 (const std::string& input)
+__u8 string_to_u8(const std::string& input)
 {
     char* p;
-    long n = strtol( input.c_str(), & p, 16 );
+    long n = strtol(input.c_str(), &p, 16);
 
     // this means an error occured
     if (n == LONG_MAX || n == LONG_MIN || n > UCHAR_MAX)
@@ -104,10 +94,10 @@ __u8 string_to_u8 (const std::string& input)
 }
 
 
-__u32 string_to_u32 (const std::string& input)
+__u32 string_to_u32(const std::string& input)
 {
     char* p;
-    long n = strtol( input.c_str(), & p, 16 );
+    long n = strtol(input.c_str(), &p, 16);
 
     // this means an error occured
     if (n == LONG_MAX || n == LONG_MIN)
@@ -119,7 +109,7 @@ __u32 string_to_u32 (const std::string& input)
 }
 
 
-__u8 parse_uvc_type (const std::string& str)
+__u8 parse_uvc_type(const std::string& str)
 {
     if (str == "unsigned")
     {
@@ -150,7 +140,7 @@ __u8 parse_uvc_type (const std::string& str)
 }
 
 
-__u8 parse_v4l2_type (const std::string& str)
+__u8 parse_v4l2_type(const std::string& str)
 {
     if (str == "bitmask")
     {
@@ -181,8 +171,9 @@ __u8 parse_v4l2_type (const std::string& str)
 }
 
 
-std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std::string& filename,
-                                                                      std::function<void(const std::string&)> cb)
+std::vector<tcam::uvc::description> tcam::uvc::load_description_file(
+    const std::string& filename,
+    std::function<void(const std::string&)> cb)
 {
     static const int max_string_length = 31;
 
@@ -200,8 +191,8 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
     }
     catch (json::parse_error& err)
     {
-        std::string msg = std::string(err.what())
-            + " - This occurred around byte " + std::to_string(err.byte);
+        std::string msg =
+            std::string(err.what()) + " - This occurred around byte " + std::to_string(err.byte);
         cb(msg);
         return mappings;
     }
@@ -219,8 +210,8 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
 
         if (map.id == 0)
         {
-            std::string msg = "Could not convert id field to valid u8 for "
-                + m.at("name").get<std::string>();
+            std::string msg =
+                "Could not convert id field to valid u8 for " + m.at("name").get<std::string>();
             cb(msg);
             continue;
         }
@@ -228,7 +219,7 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
         if (m.at("name").get<std::string>().size() > max_string_length)
         {
             std::string msg = "V4L2 name is to long! " + m.at("name").get<std::string>()
-                + " will be cut off. Reduce to 31 Characters or less.";
+                              + " will be cut off. Reduce to 31 Characters or less.";
             cb(msg);
         }
         strcpy((char*)map.name, m.at("name").get<std::string>().c_str());
@@ -252,8 +243,8 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
         map.v4l2_type = parse_v4l2_type(m.at("v4l2_type").get<std::string>());
         if (map.v4l2_type == 0)
         {
-            std::string msg = "v4l2_type for '" + m.at("name").get<std::string>()
-                + "' does not make sense.";
+            std::string msg =
+                "v4l2_type for '" + m.at("name").get<std::string>() + "' does not make sense.";
             cb(msg);
             continue;
         }
@@ -273,8 +264,8 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
 
                 if (str.size() > max_string_length)
                 {
-                    std::string msg = "Menu Entry '" + str
-                        + "' is too long. Reduce to 31 Characters or less.";
+                    std::string msg =
+                        "Menu Entry '" + str + "' is too long. Reduce to 31 Characters or less.";
                     cb(msg);
                 }
 
@@ -282,7 +273,6 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file (const std:
 
                 desc.entries.push_back(entry);
             }
-
         }
         mappings.push_back(desc);
     }

@@ -21,8 +21,8 @@
 
 // #include <dutils_img_pipe/auto_alg_params.h>
 
-#include "img/image_transform_base.h"
 #include "auto_alg_params.h"
+#include "img/image_transform_base.h"
 
 namespace
 {
@@ -35,18 +35,21 @@ namespace auto_alg
 class auto_focus
 {
 public:
-    auto_focus ();
+    auto_focus();
 
-    bool auto_alg_run (uint64_t time_point,
-                       const img::img_descriptor& img,
-                       const auto_alg::auto_focus_params& state,
-                       img::point offsets,
-                       img::dim pixel_dim,
-                       int& new_focus_vale);
+    bool auto_alg_run(uint64_t time_point,
+                      const img::img_descriptor& img,
+                      const auto_alg::auto_focus_params& state,
+                      img::point offsets,
+                      img::dim pixel_dim,
+                      int& new_focus_vale);
 
-    bool is_running () const;
+    bool is_running() const;
 
-    void reset () { end(); }
+    void reset()
+    {
+        end();
+    }
 
 private:
     /*
@@ -54,41 +57,43 @@ private:
      *	@return	true when a new focus value was evaluated and should be submitted to the focus control
      *	@param new_focus_vale	When true was returned, this contains the new focus value to set
      */
-    bool	analyze_frame (uint64_t now, const img::img_descriptor& img, int& new_focus_vale);
+    bool analyze_frame(uint64_t now, const img::img_descriptor& img, int& new_focus_vale);
 
-    void	run (int focus_val,
-                 int min, int max,
-                 const img::rect& roi,
-                 int speed, int auto_step_divisor,
-                 bool suggest_sweep);
-    void	end ();
-    bool	analyze_frame_ (const img::img_descriptor& img, int& new_focus_vale);
+    void run(int focus_val,
+             int min,
+             int max,
+             const img::rect& roi,
+             int speed,
+             int auto_step_divisor,
+             bool suggest_sweep);
+    void end();
+    bool analyze_frame_(const img::img_descriptor& img, int& new_focus_vale);
 
-    void	restart_roi (const RegionInfo& info);
-    void	find_region (const img::img_descriptor& image, img::rect roi, RegionInfo& region);
+    void restart_roi(const RegionInfo& info);
+    void find_region(const img::img_descriptor& image, img::rect roi, RegionInfo& region);
 
-    int		calc_next_focus ();
+    int calc_next_focus();
 
-    int		get_sharpness (const img::img_descriptor& img);
+    int get_sharpness(const img::img_descriptor& img);
 
-    bool	check_wait_condition (uint64_t now);
-    void	arm_focus_timer (uint64_t now, int diff);
+    bool check_wait_condition(uint64_t now);
+    void arm_focus_timer(uint64_t now, int diff);
 
-    void	update_focus (int focus_val);
+    void update_focus(int focus_val);
 
     struct data_holder
     {
-        int	x, y, width, height;
+        int x, y, width, height;
 
-        int	    stepCount;
-        int		focus_val;
+        int stepCount;
+        int focus_val;
 
-        int		left, right;
+        int left, right;
 
-        int		prev_sharpness;
-        int		prev_focus;
+        int prev_sharpness;
+        int prev_focus;
 
-        int		sweep_step;
+        int sweep_step;
 
         enum
         {
@@ -100,26 +105,26 @@ private:
         } state;
     } data;
 
-    img::rect			user_roi_;
+    img::rect user_roi_;
 
-    int	            init_width_, init_height_;
-    int             init_pitch_;
-    img::dim       init_pixel_dim_;
-    img::point		init_offset_;
+    int init_width_, init_height_;
+    int init_pitch_;
+    img::dim init_pixel_dim_;
+    img::point init_offset_;
 
-    int				focus_min_;
-    int				focus_max_;
+    int focus_min_;
+    int focus_max_;
     // time in ms for moving between min and max
-    int				max_time_to_wait_for_focus_change_;
+    int max_time_to_wait_for_focus_change_;
     // minimum speed for moving between any focus values
-    int				min_time_to_wait_for_focus_change_;
+    int min_time_to_wait_for_focus_change_;
 
-    int				auto_step_divisor_;
+    int auto_step_divisor_;
 
-    bool			sweep_suggested_;
+    bool sweep_suggested_;
 
-    uint64_t        img_wait_endtime_;  // in us
-    int				img_wait_cnt_;
+    uint64_t img_wait_endtime_; // in us
+    int img_wait_cnt_;
 };
 
 } /* namespace auto_alg */

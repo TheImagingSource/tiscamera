@@ -23,37 +23,42 @@ namespace lib33u
 {
 namespace device_interface
 {
-	class Flash
-	{
-		GenCPFacade& gencp_;
+class Flash
+{
+    GenCPFacade& gencp_;
 
-	public:
-		Flash( GenCPFacade& gencp )
-			: gencp_ (gencp)
-		{
-		}
+public:
+    Flash(GenCPFacade& gencp) : gencp_(gencp) {}
 
-		static const uint32_t FLASH_PAGE_SIZE = 0x10000;
+    static const uint32_t FLASH_PAGE_SIZE = 0x10000;
 
-	private:
-		void unlock();
-		void lock();
-		uint32_t block_crc32( uint32_t address, uint32_t length ) const;
-		void block_write( uint32_t address, const uint8_t* data, uint16_t length );
-		void erase_page( uint32_t address );
+private:
+    void unlock();
+    void lock();
+    uint32_t block_crc32(uint32_t address, uint32_t length) const;
+    void block_write(uint32_t address, const uint8_t* data, uint16_t length);
+    void erase_page(uint32_t address);
 
-	public:
-		void erase( uint32_t address, uint32_t length );
-		void write_verify( uint32_t address, const uint8_t* data, uint32_t length, util::progress::IReportProgress& progress );
-		void erase_write_verify( uint32_t address, const uint8_t* data, uint32_t length, util::progress::IReportProgress& progress );
+public:
+    void erase(uint32_t address, uint32_t length);
+    void write_verify(uint32_t address,
+                      const uint8_t* data,
+                      uint32_t length,
+                      util::progress::IReportProgress& progress);
+    void erase_write_verify(uint32_t address,
+                            const uint8_t* data,
+                            uint32_t length,
+                            util::progress::IReportProgress& progress);
 
-	public:
-		std::vector<uint8_t> read( uint32_t address, uint32_t length ) const;
+public:
+    std::vector<uint8_t> read(uint32_t address, uint32_t length) const;
 
-		void erase_write_verify( uint32_t address, const std::vector<uint8_t> data, util::progress::IReportProgress& progress )
-		{
-			erase_write_verify( address, data.data(), static_cast<uint32_t>(data.size()), progress );
-		}
-	};
+    void erase_write_verify(uint32_t address,
+                            const std::vector<uint8_t> data,
+                            util::progress::IReportProgress& progress)
+    {
+        erase_write_verify(address, data.data(), static_cast<uint32_t>(data.size()), progress);
+    }
+};
 } /* namespace device_interface */
 } /* namespace lib33u */

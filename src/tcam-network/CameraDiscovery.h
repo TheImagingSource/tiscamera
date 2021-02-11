@@ -20,36 +20,40 @@
 #include "Camera.h"
 #include "NetworkInterface.h"
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
 
 namespace tis
 {
-    /// @name detectInterfaces
-    /// @return vector containing all usable network interfaces and a corresponding socket; empty on error
-    std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces ();
+/// @name detectInterfaces
+/// @return vector containing all usable network interfaces and a corresponding socket; empty on error
+std::vector<std::shared_ptr<NetworkInterface>> detectNetworkInterfaces();
 
-    /// @name discoverCameras
-    /// @param discover_call - function to call on discovery of a camera
-    void discoverCameras (const std::function<void(std::shared_ptr<Camera>)> &discover_call);
+/// @name discoverCameras
+/// @param discover_call - function to call on discovery of a camera
+void discoverCameras(const std::function<void(std::shared_ptr<Camera>)>& discover_call);
 
-    /// @name discoverCameras
-    /// @param selectected_interfaces - vector of interface names that shall be queried
-    /// @param discover_call - function to call on discovery of a camera
-    void discoverCameras (std::vector<std::string> selectected_interfaces,
-                          std::function<void (std::shared_ptr<Camera>)> const & discover_call);
+/// @name discoverCameras
+/// @param selectected_interfaces - vector of interface names that shall be queried
+/// @param discover_call - function to call on discovery of a camera
+void discoverCameras(std::vector<std::string> selectected_interfaces,
+                     std::function<void(std::shared_ptr<Camera>)> const& discover_call);
 
-    /// @name
-    /// @param interface - object describing the interface that shall be pinged
-    /// @param discover_call - function to call on discovery of a camera
-    void sendDiscovery (std::shared_ptr<NetworkInterface> interface, const std::function<void(std::shared_ptr<Camera>)> &discover_call);
+/// @name
+/// @param interface - object describing the interface that shall be pinged
+/// @param discover_call - function to call on discovery of a camera
+void sendDiscovery(std::shared_ptr<NetworkInterface> interface,
+                   const std::function<void(std::shared_ptr<Camera>)>& discover_call);
 
-    /// @name sendRescue
-    /// @param mac - MAC address of the camera
-    /// @brief sends forceIP on all interfaces for the wished ip
-    void sendIpRecovery (const std::string mac, const uint32_t ip, const uint32_t netmask, const uint32_t gateway);
+/// @name sendRescue
+/// @param mac - MAC address of the camera
+/// @brief sends forceIP on all interfaces for the wished ip
+void sendIpRecovery(const std::string mac,
+                    const uint32_t ip,
+                    const uint32_t netmask,
+                    const uint32_t gateway);
 
-}
+} // namespace tis
 #endif /* _CAMERA_DISCOVERY_H_ */

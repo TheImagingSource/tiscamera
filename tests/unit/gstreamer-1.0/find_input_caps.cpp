@@ -15,12 +15,11 @@
  */
 
 #include "catch.hpp"
+#include "find_input_caps_test_data.h"
 #include "tcamgstbase.h"
-#include <regex>
 
 #include <gst/gst.h>
-
-#include "find_input_caps_test_data.h"
+#include <regex>
 
 /**
  * This file contains all tests for the function 'find_input_caps'
@@ -47,7 +46,7 @@ TEST_CASE("find_input_caps")
 
     for (unsigned int x = 0; x < test_data.size(); x++)
     {
-        auto &entry = test_data.at(x);
+        auto& entry = test_data.at(x);
 
         // if (entry.use_dutils && !has_dutils)
         // {
@@ -79,17 +78,13 @@ TEST_CASE("find_input_caps")
             struct input_caps_required_modules modules;
             struct input_caps_toggles toggles;
 
-            GstCaps* result_caps = find_input_caps(src_caps,
-                                                   sink_caps,
-                                                   modules,
-                                                   toggles);
+            GstCaps* result_caps = find_input_caps(src_caps, sink_caps, modules, toggles);
 
             if (result_caps)
             {
                 std::regex e("; ");
                 INFO("Result caps: "
-                     << std::regex_replace(gst_caps_to_string(result_caps), e, ";\n")
-                     << "\n\n");
+                     << std::regex_replace(gst_caps_to_string(result_caps), e, ";\n") << "\n\n");
                 INFO("Expected caps: "
                      << std::regex_replace(gst_caps_to_string(expected_output), e, ";\n"));
 
