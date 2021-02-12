@@ -1406,6 +1406,7 @@ wait_again:
                                           trans,
                                           buffer_destroy_callback);
 
+    gst_buffer_set_flags(*buffer, GST_BUFFER_FLAG_LIVE);
 
     // add meta statistics data to buffer
     {
