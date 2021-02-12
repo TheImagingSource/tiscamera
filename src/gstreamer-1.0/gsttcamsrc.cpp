@@ -814,6 +814,7 @@ static GstStateChangeReturn gst_tcam_src_change_state(GstElement* element, GstSt
 static void gst_tcam_src_init(GstTcamSrc* self)
 {
 
+    g_object_set(self, "message-forward", TRUE, NULL);
     self->active_source = nullptr;
 
     self->source_list = nullptr;
