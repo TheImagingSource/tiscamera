@@ -94,16 +94,6 @@ foreach (t IN ITEMS ${PLUGINS})
 
 endforeach (t)
 
-pkg_check_variable(gstreamer-1.0 pluginsdir)
-pkg_check_variable(gstreamer-1.0 includedir)
-
-if (GSTREAMER_1.0_PLUGINSDIR)
-  set(TCAM_INSTALL_GST_1_0 ${GSTREAMER_1.0_PLUGINSDIR} CACHE PATH "gstreamer-1.0 module installation path")
-
-else()
-  set(TCAM_INSTALL_GST_1_0 "${CMAKE_INSTALL_PREFIX}/lib/gstreamer-1.0" CACHE PATH "gstreamer-1.0 module installation path")
-endif()
-
 install(TARGETS tcamgstbase
   LIBRARY
   DESTINATION "${TCAM_INSTALL_LIB}"
@@ -114,5 +104,5 @@ install(TARGETS ${PLUGINS}
   COMPONENT tcam-gstreamer-1)
 
 install(FILES gstmetatcamstatistics.h
-  DESTINATION "${GSTREAMER_1.0_INCLUDEDIR}"
+  DESTINATION "${TCAM_INSTALL_GST_1_0_HEADER}"
   COMPONENT tcam-gstreamer-1)

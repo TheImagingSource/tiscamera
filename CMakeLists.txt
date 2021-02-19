@@ -69,28 +69,10 @@ include(CMakeOptions.cmake)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
 
-set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
-set(TCAM_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
-set(TCAM_INSTALL_BIN "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "binary installation path")
-set(TCAM_INSTALL_UDEV "/etc/udev/rules.d" CACHE PATH "udev rules installation path")
-set(TCAM_INSTALL_UVCDYNCTRL "/usr/share/uvcdynctrl/data/199e" CACHE PATH "uvcdynctrl rules installation path")
-set(TCAM_INSTALL_SYSTEMD "/lib/systemd/system/" CACHE PATH "systemd unit installation path")
-set(TCAM_INSTALL_PKGCONFIG "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" CACHE PATH "pkgconfig installation path")
-set(TCAM_INSTALL_DOCUMENTATION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/doc" CACHE PATH "documentation installation path")
-set(TCAM_INSTALL_UVC_EXTENSION "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/uvc-extension/" CACHE PATH "Folder for uvc extension descriptions")
-set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACHE PATH "Folder for storing .desktop files")
-#set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions" CACHE PATH "Installation folder for bash auto completion.")
-
+include(CMakeInstall.cmake)
 
 include("clang-format")
 
-
-find_package(PythonInterp 3 REQUIRED QUIET)
-
-
-execute_process ( COMMAND python3 -c "from distutils.sysconfig import get_python_lib; lb=get_python_lib(); print(lb.startswith('${CMAKE_INSTALL_PREFIX}') and lb or lb)" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
 
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
@@ -189,31 +171,4 @@ add_subdirectory(scripts)
 
 # Give overview over build configuration
 
-MESSAGE(STATUS "")
-MESSAGE(STATUS "Build gstreamer-1.0 plugins:   " ${BUILD_GST_1_0})
-MESSAGE(STATUS "Support for GigE via aravis:   " ${BUILD_ARAVIS})
-MESSAGE(STATUS "Support for USB cameras:       " ${BUILD_V4L2})
-MESSAGE(STATUS "Support for LibUsb cameras:    " ${BUILD_LIBUSB})
-MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
-MESSAGE(STATUS "Build documentation            " ${BUILD_DOCUMENTATION})
-MESSAGE(STATUS "Build tests                    " ${BUILD_TESTS})
-MESSAGE(STATUS "")
-
-if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
-MESSAGE(STATUS " !! Only building tcam-uvc-extension-loader and associated files !!")
-endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
-
-MESSAGE(STATUS "")
-MESSAGE(STATUS "Installation prefix:           " ${CMAKE_INSTALL_PREFIX})
-MESSAGE(STATUS "Installing binaries to:        " ${TCAM_INSTALL_BIN})
-MESSAGE(STATUS "Installing libraries to:       " ${TCAM_INSTALL_LIB})
-MESSAGE(STATUS "Installing header to:          " ${TCAM_INSTALL_INCLUDE})
-MESSAGE(STATUS "Installing udev rules to:      " ${TCAM_INSTALL_UDEV})
-MESSAGE(STATUS "Installing systemd units to:   " ${TCAM_INSTALL_SYSTEMD})
-MESSAGE(STATUS "Installing uvcdynctrl rules to:" ${TCAM_INSTALL_UVCDYNCTRL})
-MESSAGE(STATUS "Installing desktop files to:   " ${TCAM_INSTALL_DESKTOP_FILES})
-MESSAGE(STATUS "Installing data files to:      " ${TCAM_INSTALL_IMAGE_DIR})
-MESSAGE(STATUS "Installing gstreamer-1.0 to:   " ${TCAM_INSTALL_GST_1_0})
-MESSAGE(STATUS "Installing gobject-introspection to: " ${TCAM_INSTALL_GIR})
-MESSAGE(STATUS "Installing introspection typelib to: " ${TCAM_INSTALL_TYPELIB})
-MESSAGE(STATUS "")
+print_install_overview()
