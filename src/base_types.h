@@ -132,6 +132,9 @@ struct tcam_resolution_description
     struct tcam_image_size min_size; /**< smallest available resolution */
     struct tcam_image_size max_size; /**< biggest available resolution */
 
+    unsigned int width_step_size;
+    unsigned int height_step_size;
+
     uint32_t framerate_count; /**< number of framerates this resolution supports */
 
     bool operator==(const struct tcam_resolution_description& other) const

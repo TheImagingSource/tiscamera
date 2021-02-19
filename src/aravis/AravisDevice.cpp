@@ -1322,9 +1322,11 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
     int width_min = 0;
     int width_max = 0;
+    int width_step = 0;
 
     int height_min = 0;
     int height_max = 0;
+    int height_step = 0;
 
     arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max, &err);
     if (err)
@@ -1335,6 +1337,20 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
     arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max, &err);
 
+    if (err)
+    {
+        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+        g_clear_error(&err);
+    }
+
+    width_step = arv_camera_get_width_increment(this->arv_camera, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+        g_clear_error(&err);
+    }
+
+    height_step = arv_camera_get_height_increment(this->arv_camera, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
@@ -1410,6 +1426,8 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
             else
             {
                 rf.resolution.type = TCAM_RESOLUTION_TYPE_RANGE;
+                rf.resolution.width_step_size = width_step;
+                rf.resolution.height_step_size = height_step;
             }
 
             fps = this->format_handler->get_framerates(max, desc.fourcc);

@@ -1607,11 +1607,11 @@ GstCaps* convert_videoformatsdescription_to_caps(
 
                 GValue w = G_VALUE_INIT;
                 g_value_init(&w, GST_TYPE_INT_RANGE);
-                gst_value_set_int_range(&w, min_width, max_width);
+                gst_value_set_int_range_step(&w, min_width, max_width, r.width_step_size);
 
                 GValue h = G_VALUE_INIT;
                 g_value_init(&h, GST_TYPE_INT_RANGE);
-                gst_value_set_int_range(&h, min_height, max_height);
+                gst_value_set_int_range_step(&h, min_height, max_height, r.height_step_size);
 
                 int fps_min_num;
                 int fps_min_den;
