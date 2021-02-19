@@ -1596,6 +1596,8 @@ GstCaps* convert_videoformatsdescription_to_caps(
 
                 std::vector<double> fps = desc.get_frame_rates(r);
 
+                std::vector<double> highest_fps = desc.get_framerates({min_width, min_height});
+
                 if (fps.empty())
                 {
                     // GST_ERROR("Could not find any framerates for format");
@@ -1620,7 +1622,7 @@ GstCaps* convert_videoformatsdescription_to_caps(
                 gst_util_double_to_fraction(
                     *std::min_element(fps.begin(), fps.end()), &fps_min_num, &fps_min_den);
                 gst_util_double_to_fraction(
-                    *std::max_element(fps.begin(), fps.end()), &fps_max_num, &fps_max_den);
+                    *std::max_element(highest_fps.begin(), highest_fps.end()), &fps_max_num, &fps_max_den);
 
                 GValue f = G_VALUE_INIT;
                 g_value_init(&f, GST_TYPE_FRACTION_RANGE);
