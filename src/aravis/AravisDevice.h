@@ -21,6 +21,7 @@
 #include "FormatHandlerInterface.h"
 
 #include <arv.h>
+#include <atomic>
 
 VISIBILITY_INTERNAL
 
@@ -133,7 +134,7 @@ private:
     std::vector<buffer_info> buffers;
 
     struct tcam_stream_statistics statistics;
-
+    std::atomic<bool> is_lost = false;
     struct aravis_options
     {
         bool auto_socket_buffer;

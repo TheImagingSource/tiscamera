@@ -215,6 +215,11 @@ std::vector<std::shared_ptr<Property>> AravisDevice::getProperties()
 
 bool AravisDevice::set_property(const Property& p)
 {
+    if (is_lost)
+    {
+        return false;
+    }
+
     auto f = [p](const property_mapping& m) {
         return p.get_name().compare(m.prop->get_name()) == 0;
     };
@@ -410,6 +415,10 @@ bool AravisDevice::get_property(Property& p)
 
 void AravisDevice::update_property(struct property_mapping& mapping)
 {
+    if (is_lost)
+    {
+        return;
+    }
     auto& p = mapping.prop;
 
     auto _device = arv_camera_get_device(arv_camera);
@@ -522,6 +531,11 @@ void AravisDevice::update_property(struct property_mapping& mapping)
 
 bool AravisDevice::set_video_format(const VideoFormat& new_format)
 {
+    if (is_lost)
+    {
+        return false;
+    }
+
     SPDLOG_DEBUG("Setting format to '{}'", new_format.to_string().c_str());
     GError* err = nullptr;
 
@@ -1056,6 +1070,8 @@ no_back_push:
 void AravisDevice::device_lost(ArvGvDevice* device __attribute__((unused)), void* user_data)
 {
     AravisDevice* self = (AravisDevice*)user_data;
+
+    self->is_lost = true;
 
     self->notify_device_lost();
 }
