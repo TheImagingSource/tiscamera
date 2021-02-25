@@ -19,6 +19,8 @@
 #include <cstring>
 #include <string>
 
+#include <algorithm>
+
 using namespace tcam;
 
 DeviceInfo::DeviceInfo(const struct tcam_device_info& device_desc) : device(device_desc) {}
@@ -46,6 +48,16 @@ DeviceInfo& DeviceInfo::operator=(const DeviceInfo& other)
     return *this;
 }
 
+bool DeviceInfo::operator==(const DeviceInfo& other) const
+{
+    if (strcmp(device.name, other.device.name) == 0 && device.type == other.device.type
+        && strcmp(device.identifier, other.device.identifier) == 0)
+    {
+        return true;
+    }
+    return false;
+}
+
 
 struct tcam_device_info DeviceInfo::get_info() const
 {
@@ -56,6 +68,23 @@ struct tcam_device_info DeviceInfo::get_info() const
 std::string DeviceInfo::get_name() const
 {
     return device.name;
+}
+
+
+std::string DeviceInfo::get_name_safe() const
+{
+    std::string ret = device.name;
+
+    for(std::string::iterator it = ret.begin(); it != ret.end(); ++it)
+    {
+        if(*it == ' ')
+        {
+            *it = '_';
+        }
+    }
+    std::transform(ret.begin(), ret.end(), ret.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return ret;
 }
 
 

@@ -49,6 +49,8 @@ public:
 
     DeviceInfo& operator=(const DeviceInfo&);
 
+    bool operator==(const DeviceInfo& other) const;
+
     /**
      * @name get_info
      * @brief returns a struct version of the device description
@@ -61,6 +63,8 @@ public:
      * @return string containing the device model
      */
     std::string get_name() const;
+
+    std::string get_name_safe() const;
 
     /**
      * @return string containing the serial number of the device
