@@ -14,7 +14,6 @@
 # limitations under the License.
 
 set(PLUGINS
-  gsttcammainsrc
   gsttcamsrc
   gsttcamwhitebalance
   gsttcamautoexposure
@@ -52,8 +51,11 @@ target_link_libraries(tcamgstbase ${GSTREAMER_BASE_LIBRARIES})
 target_link_libraries(tcamgstbase ${GSTREAMER_VIDEO_LIBRARIES})
 
 
-add_library(gsttcammainsrc SHARED gsttcammainsrc.cpp gstmetatcamstatistics.cpp)
-add_library(gsttcamsrc SHARED gsttcamsrc.cpp)
+add_library(gsttcamsrc SHARED gsttcamsrc.cpp
+  gsttcammainsrc.cpp
+  gstmetatcamstatistics.cpp
+  gsttcamdeviceprovider.cpp
+  gsttcamdevice.cpp)
 
 add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp)
 

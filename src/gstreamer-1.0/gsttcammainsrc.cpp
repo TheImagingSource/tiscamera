@@ -1879,24 +1879,3 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
 
     gstpushsrc_class->create = gst_tcam_mainsrc_create;
 }
-
-
-static gboolean plugin_init(GstPlugin* plugin)
-{
-    return gst_element_register(plugin, "tcammainsrc", GST_RANK_NONE, GST_TYPE_TCAM_MAINSRC);
-}
-
-#ifndef PACKAGE
-#define PACKAGE "tcam"
-#endif
-
-
-GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
-                  GST_VERSION_MINOR,
-                  tcammainsrc,
-                  "TCam Video Main Source",
-                  plugin_init,
-                  get_version(),
-                  "Proprietary",
-                  "tcammainsrc",
-                  "theimagingsource.com")

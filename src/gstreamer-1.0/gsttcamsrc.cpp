@@ -16,6 +16,8 @@
 
 #include "gsttcamsrc.h"
 
+#include "gsttcamdeviceprovider.h"
+#include "gsttcammainsrc.h"
 #include "logging.h"
 #include "tcam.h"
 #include "tcamgstbase.h"
@@ -1119,7 +1121,14 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
 
 static gboolean plugin_init(GstPlugin* plugin)
 {
-    return gst_element_register(plugin, "tcamsrc", GST_RANK_NONE, GST_TYPE_TCAM_SRC);
+    GST_DEBUG_CATEGORY_INIT(tcam_src_debug, "tcamsrc", 0, "tcamsrc");
+
+    gst_device_provider_register(
+        plugin, "tcamdeviceprovider", GST_RANK_PRIMARY, TCAM_TYPE_DEVICE_PROVIDER);
+    gst_element_register(plugin, "tcamsrc", GST_RANK_PRIMARY, GST_TYPE_TCAM_SRC);
+    gst_element_register(plugin, "tcammainsrc", GST_RANK_PRIMARY, GST_TYPE_TCAM_MAINSRC);
+
+    return TRUE;
 }
 
 #ifndef PACKAGE
