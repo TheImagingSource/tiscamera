@@ -366,6 +366,13 @@ std::vector<DeviceInfo> tcam::get_v4l2_device_list()
         if (strcmp(udev_device_get_sysattr_value(parent_device, "idVendor"), TCAM_VENDOR_ID_STRING)
             == 0)
         {
+            // S-Video to USB-2.0 converter. // 199e:8002 The Imaging Source Europe GmbH DFG/USB2pro
+            // Name is best option for filtering this device.
+            // Support not viable. Considered legacy product since tiscamera came to be.
+            if (strcmp(udev_device_get_sysattr_value(parent_device, "product"), "DFG/USB2pro") == 0)
+            {
+                continue;
+            }
             tcam_device_info info = {};
             info.type = TCAM_DEVICE_TYPE_V4L2;
             strncpy(info.identifier, needed_path, sizeof(info.identifier));
