@@ -15,6 +15,8 @@
 
 # This file contains all installation paths of tiscamera
 
+find_package(PkgConfig REQUIRED QUIET)
+
 # helper funcion to receive the value of an arbitrary variable
 function(pkg_check_variable _pkg _name)
   string(TOUPPER ${_pkg} _pkg_upper)
