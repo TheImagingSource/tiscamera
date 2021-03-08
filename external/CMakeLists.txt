@@ -78,6 +78,9 @@ if (BUILD_ARAVIS)
 
     set(ARAVIS_GIT_COMMIT_HASH "external" PARENT_SCOPE)
     set(ARAVIS_VERSION "unknown" PARENT_SCOPE)
+    find_package(Aravis_0_8 REQUIRED QUIET)
+    set(aravis_INCLUDE_DIR "${aravis_0_8_INCLUDE_DIR}" CACHE PATH "" )
+    set(aravis_LIBRARIES "${aravis_0_8_LIBRARY}" CACHE FILEPATH "")
 
   endif (TCAM_INTERNAL_ARAVIS)
 
@@ -85,11 +88,6 @@ else (BUILD_ARAVIS)
 
   set(ARAVIS_GIT_COMMIT_HASH "not_configured" PARENT_SCOPE)
   set(ARAVIS_VERSION "not_configured" PARENT_SCOPE)
-  find_package(Aravis_0_8 REQUIRED QUIET)
-  set(aravis_INCLUDE_DIR "${aravis_0_8_INCLUDE_DIR}" CACHE PATH "" )
-  include_directories(${aravis_INCLUDE_DIR} "/home/edt/work/aravis/build/src" "/home/edt/work/aravis/src")
-  set(aravis_LIBRARIES "${aravis_0_8_LIBRARY}" CACHE FILEPATH "")
-  message(${aravis_INCLUDE_DIR})
 
 
 endif (BUILD_ARAVIS)
