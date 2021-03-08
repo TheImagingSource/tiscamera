@@ -21,6 +21,9 @@
 #include "tcamgstbase.h"
 
 #include <algorithm>
+#include <condition_variable>
+#include <atomic>
+#include <thread>
 
 GST_DEBUG_CATEGORY_STATIC(tcam_deviceprovider_debug);
 #define GST_CAT_DEFAULT tcam_deviceprovider_debug
@@ -59,23 +62,46 @@ static GstDevice* tcam_device_new(GstElementFactory* factory,
 
     GstCaps* caps = convert_videoformatsdescription_to_caps(format);
 
-    std::string serial = device.get_serial() + "-" + device.get_device_type_as_string();
-    std::string display_string = "tcam-" + device.get_name_safe() + "-" + serial;
+    std::string serial = device.get_serial();
+    std::string model = device.get_name();
+    std::string type = device.get_device_type_as_string();
+    std::string display_string = "tcam-" + device.get_name_safe() + "-" + serial + "-" + type;
+
+    GstStructure* struc = gst_structure_new("tcam-device-properties",
+                                            "serial",
+                                            G_TYPE_STRING,
+                                            serial.c_str(),
+                                            "model",
+                                            G_TYPE_STRING,
+                                            model.c_str(),
+                                            "type",
+                                            G_TYPE_STRING,
+                                            type.c_str(),
+                                            nullptr);
 
     GstDevice* ret = GST_DEVICE(g_object_new(TCAM_TYPE_DEVICE,
                                              "serial",
                                              serial.c_str(),
                                              "display_name",
                                              display_string.c_str(),
+                                             "model",
+                                             model.c_str(),
+                                             "type",
+                                             type.c_str(),
                                              "device-class",
                                              "Source/Video/Device/tcam",
                                              "caps",
                                              caps,
+                                             "properties",
+                                             struc,
                                              NULL));
 
     gst_caps_unref(caps);
+    gst_structure_free(struc);
 
     TCAM_DEVICE(ret)->serial = g_strdup(serial.c_str());
+    TCAM_DEVICE(ret)->model = g_strdup(model.c_str());
+    TCAM_DEVICE(ret)->type = g_strdup(type.c_str());
     TCAM_DEVICE(ret)->factory = GST_ELEMENT_FACTORY(gst_object_ref(factory));
 
     return ret;

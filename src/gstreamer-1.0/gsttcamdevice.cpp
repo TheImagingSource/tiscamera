@@ -22,7 +22,10 @@ G_DEFINE_TYPE(TcamDevice, tcam_device, GST_TYPE_DEVICE)
 enum
 {
     PROP_SERIAL = 1,
+    PROP_MODEL,
+    PROP_TYPE,
 };
+
 
 static void tcam_device_init(TcamDevice* self) {}
 
@@ -30,7 +33,9 @@ static void tcam_device_finalize(GObject* object)
 {
     TcamDevice* self = TCAM_DEVICE(object);
 
-    //g_free(self->serial);
+    g_free(self->serial);
+    g_free(self->model);
+    g_free(self->type);
 
     G_OBJECT_CLASS(tcam_device_parent_class)->finalize(object);
 }
@@ -71,6 +76,16 @@ static void gst_tcam_device_get_property(GObject* object,
             g_value_set_string(value, self->serial);
             break;
         }
+        case PROP_MODEL:
+        {
+            g_value_set_string(value, self->model);
+            break;
+        }
+        case PROP_TYPE:
+        {
+            g_value_set_string(value, self->type);
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -91,7 +106,17 @@ static void gst_tcam_device_set_property(GObject* object,
     {
         case PROP_SERIAL:
         {
-            self->serial = g_value_get_string(value);
+            self->serial = g_strdup(g_value_get_string(value));
+            break;
+        }
+        case PROP_MODEL:
+        {
+            self->model = g_strdup(g_value_get_string(value));
+            break;
+        }
+        case PROP_TYPE:
+        {
+            self->type = g_strdup(g_value_get_string(value));
             break;
         }
         default:
@@ -122,6 +147,24 @@ static void tcam_device_class_init(TcamDeviceClass* klass)
         g_param_spec_string("serial",
                             "serial-type",
                             "tiscamera unique identifier",
+                            "",
+                            static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
+                                                     | G_PARAM_CONSTRUCT_ONLY)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_MODEL,
+        g_param_spec_string("model",
+                            "Device Model",
+                            "tiscamera device description",
+                            "",
+                            static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
+                                                     | G_PARAM_CONSTRUCT_ONLY)));
+    g_object_class_install_property(
+        gobject_class,
+        PROP_TYPE,
+        g_param_spec_string("type",
+                            "device backend type",
+                            "tiscamera device type",
                             "",
                             static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
                                                      | G_PARAM_CONSTRUCT_ONLY)));
