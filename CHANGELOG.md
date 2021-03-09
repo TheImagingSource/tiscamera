@@ -10,12 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Module configuration string to log and version info
+- clang-format definition, call `make clang-format` for formatting
+- gstreamer resolution ranges now contain a step size
+- GstTcamDeviceProvider, see documentation for usage.
+- Filter for DFG/USB2pro. Device will no longer appear in device listings.
 
 ### Changed
 
 - aravis API version is now 0.8.
   Please use external aravis installations.
 - output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
+- logging now uses spdlog
+- gstreamer buffers are now marked as "live"
+- installation variables are now all defined in CmakeInstall.cmake
+
+### Fixed
+
+- tcambin included tcamautofocus even when camera offered internal auto-focus
+- caps negotiations for unusual caps like 1920x300
+- "device-lost" notifications could take over 3 minutes for aravis cameras.
+  Should now appear within 5 seconds.
 
 ## [0.13.1] - 2021.02.05
 
