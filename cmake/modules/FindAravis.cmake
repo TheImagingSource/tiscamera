@@ -10,8 +10,8 @@
 include(LibFindMacros)
 
 # Use pkg-config to get hints about paths
-libfind_pkg_check_modules(aravis_PKGCONF aravis-0.4)
-libfind_pkg_check_modules(aravis0_6_PKGCONF aravis-0.6)
+# libfind_pkg_check_modules(aravis_PKGCONF aravis-0.4)
+# libfind_pkg_check_modules(aravis0_6_PKGCONF aravis-0.6)
 libfind_pkg_check_modules(aravis0_8_PKGCONF aravis-0.8)
 
 # Include dir
@@ -22,20 +22,20 @@ find_path(aravis_INCLUDE_DIR
 	${aravis_PKGCONF_INCLUDE_DIRS}
 	${aravis0_6_PKGCONF_INCLUDE_DIRS}
 	/usr/local/include
-	/usr/local/include/aravis-0.4
+	# /usr/local/include/aravis-0.4
 	/usr/local/include/aravis-0.8
 	/usr/include
-	/usr/include/aravis-0.4
+	# /usr/include/aravis-0.4
 	/usr/include/aravis-0.8
 )
 
 # Finally the library itself
 find_library(aravis_LIBRARIES
 	NAMES
-	libaravis-0.4
+	# libaravis-0.4
 	libaravis-0.8
 	aravis
-	aravis-0.4
+	# aravis-0.4
 	aravis-0.8
 	libaravis
 	PATHS
