@@ -150,3 +150,29 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
      - TCAM_INSTALL_DESKTOP_FILES
      - /usr/share/applications
      - 
+
+========
+Building
+========
+
+The following build targets are available.
+Call `make <target>` or `ninja <target>` to build.
+
+.. list-table:: Build Targets
+   :header-rows: 1
+
+   * - Target
+     - Description
+   * - all
+     - Default Target. Builds all selected components.
+   * - clean
+     - Remove all build objects. Reverts to state after cmake has been called.
+   * - package
+     - Build the debian package.
+   * - install
+     - Install compiled files into the system.
+   * - uninstall
+     - Remove installed files.
+   * - test
+     - Run unit tests.
+       

@@ -33,6 +33,14 @@ For more information, please refer to :ref:`the GStreamer documentation<reading_
        
 All information concerning a plugin can be queried by executing 'gst-inspect-1.0 elementname'
 
+
+It is recommended to use a GStreamer Device Monitor.
+
+.. toctree::
+   
+   tcam-gstreamer-device-provider.rst
+
+
 We offer the following GStreamer elements:
 
 .. toctree::
@@ -147,7 +155,12 @@ Together they describe a unique format.
 
     This format has no additional format field.
 
+*******************
+General Suggestions
+*******************
 
+Set `sync=false` on your sink element. This will prevent images from arriving later than necessary.
+    
 *********
 Debugging
 *********

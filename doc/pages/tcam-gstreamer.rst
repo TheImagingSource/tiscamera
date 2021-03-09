@@ -116,6 +116,10 @@ The tcamsrc is a source bin that allows access to all source elements supported 
 It is a convenience wrapper and offers no additional properties.
 
 As of tiscamera 0.13.0 the supported source elements include tcammainsrc and tcampimipisrc.
+
+.. todo::
+
+   Add tcampimipisrc doc link
    
 .. _tcamautoexposure:
    
@@ -311,6 +315,10 @@ Closed source optional transformation and interpretation filter.
 Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
 Implements features like HDR.
 Optimized for x64 platforms.
+
+.. todo::
+
+   Add link to tiscamera-dutils documentation
 
 .. _tcambiteater:
 
