@@ -66,7 +66,6 @@ target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
 set_project_warnings(tcam-base)
 set( srcs
   BackendLoader.cpp
-  LibraryHandle.cpp
   DeviceIndex.cpp
   Indexer.cpp
   DeviceInterface.cpp
@@ -86,8 +85,8 @@ if (BUILD_V4L2)
     v4l2/V4l2Device.cpp
     v4l2/V4L2PropertyHandler.cpp
     v4l2/v4l2_utils.cpp
-    # v4l2/v4l2library.cpp
-    v4l2/v4l2_api.cpp)
+    v4l2/v4l2_api.cpp
+    )
 
 endif (BUILD_V4L2)
 
@@ -99,7 +98,7 @@ if (BUILD_ARAVIS)
     aravis/AravisDevice.cpp
     aravis/aravis_utils.cpp
     aravis/aravis_api.cpp
-)
+    )
 
 
 if (NOT TCAM_INTERNAL_ARAVIS)
@@ -112,7 +111,6 @@ endif(NOT TCAM_INTERNAL_ARAVIS)
 endif (BUILD_ARAVIS)
 
 if (BUILD_LIBUSB)
-  # add_subdirectory(libusb)
   set(srcs
     ${srcs}
     libusb/AFU050Device.cpp
@@ -125,7 +123,6 @@ if (BUILD_LIBUSB)
     libusb/UsbHandler.cpp
     libusb/LibusbDevice.cpp
     libusb/libusb_api.cpp
-    # libusb/libusblibrary.cpp
     )
 
   add_definitions(-DHAVE_LIBUSB)
