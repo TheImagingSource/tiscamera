@@ -58,7 +58,7 @@ struct _GstTcamSrc
 
     GstElement* main_src;
     GstElement* pimipi_src;
-    //GstElement* mipi_src;
+    GstElement* tegra_src;
 
     std::string device_serial;
     TCAM_DEVICE_TYPE device_type;

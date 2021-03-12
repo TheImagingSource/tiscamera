@@ -581,6 +581,12 @@ static gboolean open_source_element (GstTcamSrc* self)
             self->device_type = type;
             self->device_serial = vals.first;
         }
+        else if (type == TCAM_DEVICE_TYPE_TEGRA)
+        {
+            self->active_source = self->tegra_src;
+            self->device_type = type;
+            self->device_serial = vals.first;
+        }
         else
         {
             GST_ERROR("Unable to identify device. No Stream possible.");
@@ -746,6 +752,10 @@ static gboolean open_source_element (GstTcamSrc* self)
     {
         self->device_type = TCAM_DEVICE_TYPE_PIMIPI;
     }
+    else if (self->active_source == self->tegra_src)
+    {
+        self->device_type = TCAM_DEVICE_TYPE_TEGRA;
+    }
     else
     {
         self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
@@ -844,6 +854,17 @@ static void gst_tcam_src_init (GstTcamSrc* self)
         gst_object_unref(pimipi_fact);
     }
 
+    auto tegra_fact = gst_element_factory_find("tistegrasrc");
+    if (tegra_fact)
+    {
+        self->tegra_src = gst_element_factory_make("tistegrasrc", "tcamsrc-tegrasrc");
+        if (self->tegra_src != nullptr)
+        {
+            self->source_list = g_slist_append( self->source_list, self->tegra_src );
+        }
+        gst_object_unref(tegra_fact);
+    }
+
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
 
@@ -877,6 +898,11 @@ static void gst_tcam_src_finalize (GObject* object)
     {
         gst_object_unref(self->pimipi_src);
         self->pimipi_src = nullptr;
+    }
+    if (self->tegra_src)
+    {
+        gst_object_unref(self->tegra_src);
+        self->tegra_src = nullptr;
     }
     (&self->device_serial)->std::string::~string();
 

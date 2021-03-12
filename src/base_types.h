@@ -53,6 +53,7 @@ enum TCAM_DEVICE_TYPE
     TCAM_DEVICE_TYPE_LIBUSB,      /**< libusb backends */
     TCAM_DEVICE_TYPE_PIMIPI,      /**< mipi cameras on raspberry pi*/
     TCAM_DEVICE_TYPE_MIPI,        /**< mipi cameras*/
+    TCAM_DEVICE_TYPE_TEGRA,        /**< tegra fpd/mipi cameras*/
 };
 
 
