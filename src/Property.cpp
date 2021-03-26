@@ -375,6 +375,7 @@ bool Property::set_value (const int64_t& value, bool notify)
     }
     if (prop.value.i.min > value || prop.value.i.max < value)
     {
+        tcam_debug("unable to set integer value for %s as it's out of range (%lld < %lld < %lld)", this->get_name().c_str(), prop.value.i.min, value, prop.value.i.max);
         return false;
     }
     if (get_type() == TCAM_PROPERTY_TYPE_INTEGER && !is_read_only())
@@ -399,6 +400,7 @@ bool Property::set_value (const double& value, bool notify)
     }
     if (prop.value.d.min > value || prop.value.d.max < value)
     {
+        tcam_debug("unable to set double value for %s as it's out of range (%lf < %lf < %lf)", this->get_name().c_str(), prop.value.d.min, value, prop.value.d.max);
         return false;
     }
     if (get_type() == TCAM_PROPERTY_TYPE_DOUBLE && !is_read_only())
