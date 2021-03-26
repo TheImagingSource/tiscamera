@@ -854,10 +854,10 @@ static void gst_tcam_src_init (GstTcamSrc* self)
         gst_object_unref(pimipi_fact);
     }
 
-    auto tegra_fact = gst_element_factory_find("tistegrasrc");
+    auto tegra_fact = gst_element_factory_find("tcamtegrasrc");
     if (tegra_fact)
     {
-        self->tegra_src = gst_element_factory_make("tistegrasrc", "tcamsrc-tegrasrc");
+        self->tegra_src = gst_element_factory_make("tcamtegrasrc", "tcamsrc-tegrasrc");
         if (self->tegra_src != nullptr)
         {
             self->source_list = g_slist_append( self->source_list, self->tegra_src );
