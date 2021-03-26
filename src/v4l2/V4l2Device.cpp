@@ -1317,8 +1317,12 @@ void V4l2Device::updateV4L2Property (V4l2Device::property_description& desc)
 
     auto cp = desc.prop->get_struct();
 
-    save_value_of_control(&ctrl, &cp, desc.conversion_factor);
-    tcam_trace("Updated property %s to %d", desc.prop->get_name().c_str(), cp.value.i.value);
+    if (!save_value_of_control(&ctrl, &cp, desc.conversion_factor))
+    {
+        tcam_warning("Could not save %s property value of control in struct", desc.prop->get_name().c_str());
+        return;
+    }
+    tcam_trace("Updated property %s (%d) to %lld", desc.prop->get_name().c_str(), desc.id, cp.value.i.value);
 
     desc.prop->set_struct(cp);
 }
