@@ -642,8 +642,8 @@ static gboolean gst_tcambin_create_elements (GstTcamBin* self)
     // the following elements only support mono or bayer
     // security check to prevent faulty pipelines
 
-    if (contains_bayer( self->data->src_caps.get() )
-        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() )
+    if ((contains_bayer( self->data->src_caps.get() )
+        || tcam_gst_raw_only_has_mono( self->data->src_caps.get() ))
         && self->data->device_type != "pimipi")
     {
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
