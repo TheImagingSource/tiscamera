@@ -27,8 +27,19 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
+    GError* err = NULL;
+
+    GstElement* sample_pipeline = gst_parse_launch("tcambin name=source ! fakesink", &err);
+
+    if (sample_pipeline == NULL)
+    {
+        printf("Unable to create pipeline: %s\n", err->message);
+        g_free(err);
+        return 1;
+    }
+
     /* create a tcambin to retrieve device information */
-    GstElement* source = gst_element_factory_make("tcambin", "source");
+    GstElement* source = gst_bin_get_by_name(GST_BIN(sample_pipeline), "source");
 
     /* retrieve a single linked list of serials of the available devices */
     GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
@@ -47,10 +58,10 @@ int main (int argc, char *argv[])
            connection_type='aravis'
            The identifier is the name given by the backend
            The connection_type identifies the backend that is used.
-                   Currently 'aravis', 'v4l2' and 'unknown' exist
+                   Currently 'aravis', 'v4l2', libusb, tegra, pimipi and 'unknown' exist
         */
         gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
-                                                  device_serial,
+                                                 device_serial,
                                                  &name,
                                                  &identifier,
                                                  &connection_type);
@@ -68,6 +79,7 @@ int main (int argc, char *argv[])
 
     g_slist_free_full(serials, g_free);
     gst_object_unref(source);
+    gst_object_unref(sample_pipeline);
 
     return 0;
 }

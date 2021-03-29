@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-/* This example will show you how to start a live stream from your camera */
+/*
+  This example will show you how to start a live stream from your camera
+  with a specific format
+ */
 
 #include <gst/gst.h>
 

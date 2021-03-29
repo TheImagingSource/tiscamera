@@ -65,6 +65,53 @@ def print_properties(camera):
         print("Could not query Brightness")
 
 
+def set_bool_or_enum(source, name, new_value):
+    """
+    this function basically exists to ensure the example
+    works with all camera types.
+    If you know the property type of the properties you are
+    setting, you can simply call that
+    instead of checking the type.
+
+    some settings may exhibit as bool or enum,
+    depending on the camera you use.
+    """
+    (ret, value,
+     min_value, max_value,
+     default_value, step_size,
+     value_type, flags,
+     category, group) = source.get_tcam_property(name)
+
+    if not ret:
+        print("Could not query property ", name)
+        return False
+
+    if value_type == "boolean":
+        return source.set_tcam_property(source, name, new_value)
+    elif value_type == "enum":
+
+        if new_value:
+            new_val = "On"
+        else:
+            new_val = "Off"
+
+        return source.set_tcam_property(source, name, new_val)
+
+
+def block_until_playing(pipeline):
+
+    while True:
+        # wait 0.1 seconds for something to happen
+        change_return, state, pending = pipeline.get_state(100000000)
+        if change_return == Gst.StateChangeReturn.SUCCESS:
+            return True
+        elif change_return == Gst.StateChangeReturn.FAILURE:
+            print("Failed to change state {} {} {}".format(change_return,
+                                                           state,
+                                                           pending))
+            return False
+
+
 def main():
 
     Gst.init(sys.argv)

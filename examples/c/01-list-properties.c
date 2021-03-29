@@ -20,27 +20,12 @@
 
 #include <stdio.h> /* printf and putchar */
 #include <string.h>
+#include <unistd.h>
 #include "tcamprop.h" /* gobject introspection interface */
 
 
-
-int main (int argc, char *argv[])
+void list_properties (GstElement* source)
 {
-    gst_init(&argc, &argv); // init gstreamer
-
-    const char* serial = NULL; // set this if you do not want the first found device
-
-    /* create a tcambin to retrieve device information */
-    GstElement* source = gst_element_factory_make("tcambin", "source");
-
-    if (serial != NULL)
-    {
-        GValue val = {};
-        g_value_init(&val, G_TYPE_STRING);
-        g_value_set_static_string(&val, serial);
-
-        g_object_set_property(G_OBJECT(source), "serial", &val);
-    }
 
     GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
 
@@ -152,7 +137,88 @@ int main (int argc, char *argv[])
     }
 
     g_slist_free_full(names,g_free);
+}
+
+
+gboolean block_until_playing (GstElement* pipeline)
+{
+    while (TRUE)
+    {
+        GstState state;
+        GstState pending;
+
+        // wait 0.1 seconds for something to happen
+        GstStateChangeReturn ret = gst_element_get_state(pipeline ,&state, &pending, 100000000);
+
+        if (ret == GST_STATE_CHANGE_SUCCESS)
+        {
+            return TRUE;
+        }
+        else if (ret == GST_STATE_CHANGE_FAILURE)
+        {
+            printf("Failed to change state %s %s %s\n",
+                   gst_element_state_change_return_get_name(ret),
+                   gst_element_state_get_name(state),
+                   gst_element_state_get_name(pending));
+
+            return FALSE;
+        }
+    }
+}
+
+
+int main (int argc, char *argv[])
+{
+    gst_init(&argc, &argv); // init gstreamer
+
+    GError* err = NULL;
+
+    // this is a placeholder definition
+    // normally your pipeline would be defined here
+    GstElement* pipeline = gst_parse_launch("tcambin name=source ! fakesink", &err);
+
+    if (pipeline == NULL)
+    {
+        printf("Unable to create pipeline: %s\n", err->message);
+        g_free(err);
+        return 1;
+    }
+
+    /* get the tcambin to retrieve device information */
+    GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
+
+    const char* serial = NULL; // set this if you do not want the first found device
+
+    if (serial != NULL)
+    {
+        GValue val = {};
+        g_value_init(&val, G_TYPE_STRING);
+        g_value_set_static_string(&val, serial);
+
+        g_object_set_property(G_OBJECT(source), "serial", &val);
+    }
+
+    printf("Properties before state PLAYING:\n");
+    list_properties(source);
+
+    // in the READY state the camera will always be initialized
+    // in the PLAYING state additional properties may appear from gstreamer elements
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+    // helper function to ensure we have the right state
+    // alternatively wait for the first image
+    if (!block_until_playing(pipeline))
+    {
+        printf("Unable to start pipeline. \n");
+    }
+
+    printf("Properties during state PLAYING:\n");
+    list_properties(source);
+
+    gst_element_set_state(pipeline, GST_STATE_NULL);
+
     gst_object_unref(source);
+    gst_object_unref(pipeline);
 
     return 0;
 }

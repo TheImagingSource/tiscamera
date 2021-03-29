@@ -31,7 +31,14 @@ def list_devices():
     """
     Print information about all  available devices
     """
-    source = Gst.ElementFactory.make("tcambin")
+
+    sample_pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+
+    if not sample_pipeline:
+        print("Unable to create pipeline")
+        sys.exit(1)
+
+    source = sample_pipeline.get_by_name("source")
 
     serials = source.get_device_serials_backend()
 
