@@ -1273,20 +1273,12 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
                                                    caps_info_string);
             g_free(caps_info_string);
             gst_element_post_message(element, msg);
-
-            break;
-        }
-        case GST_STATE_CHANGE_PLAYING_TO_PLAYING:
-        {
-            GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
-
             if (self->must_apply_state)
             {
                 apply_state(self, self->data->state);
                 self->must_apply_state = FALSE;
             }
             break;
-
         }
         default:
         {
