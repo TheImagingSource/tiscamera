@@ -127,9 +127,9 @@ html_sidebars = {'**': ['globaltoc.html', 'relations.html', 'searchbox.html']}
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'tiscameradoc'
 
-html_logo = "../../../data/images/logo_small.jpg"
+html_logo = "@TCAM_IMAGE_DIR@/logo_small.jpg"
 
-html_favicon = "../../../data/images/logo.jpg"
+html_favicon = "@TCAM_IMAGE_DIR@/logo.jpg"
 
 # -- Options for manual page output ------------------------------------------
 
