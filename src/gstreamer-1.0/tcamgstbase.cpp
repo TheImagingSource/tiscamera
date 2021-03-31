@@ -71,8 +71,46 @@ bool separate_serial_and_type (const std::string& input,
 }
 
 
+typedef struct tcam_src_element_
+{
+    std::string name;
+    // name so because function `g_type_name` exists
+    std::string g_type_name_str;
+    std::vector<TCAM_DEVICE_TYPE> type;
+} tcam_src_element;
 
-GstElement* tcam_gst_find_camera_src (GstElement* element)
+
+std::vector<tcam_src_element> get_possible_sources ()
+{
+    std::vector<tcam_src_element> ret;
+
+    ret.push_back({"tcammainsrc", "GstTcamMainSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB}});
+    ret.push_back({"tcamtegrasrc", "GstTcamTegraSrc", {TCAM_DEVICE_TYPE_TEGRA}});
+    ret.push_back({"tcampimipisrc", "GstTcamPiMipiSrc", {TCAM_DEVICE_TYPE_PIMIPI}});
+    ret.push_back({"tcamsrc", "GstTcamSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB, TCAM_DEVICE_TYPE_TEGRA, TCAM_DEVICE_TYPE_PIMIPI}});
+
+    return ret;
+}
+
+
+std::vector<std::string> get_source_element_factory_names()
+{
+    auto sources = get_possible_sources();
+
+    std::vector<std::string> ret;
+
+    ret.reserve(sources.size());
+
+    for (const auto& s : sources)
+    {
+        ret.push_back(s.g_type_name_str);
+    }
+
+    return ret;
+}
+
+
+GstElement* tcam_gst_find_camera_src_rec (GstElement* element, const std::vector<std::string>& factory_names)
 {
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
 
@@ -88,17 +126,26 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
     GstElement* el = gst_pad_get_parent_element(src_pad);
 
     gst_object_unref(src_pad);
-    GstElement* ret;
-    const char* name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
-    if (g_strcmp0(name, "GstTcamSrc") == 0)
+    std::string name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
+
+    if (std::find(factory_names.begin(), factory_names.end(), name) != factory_names.end())
     {
         return el;
     }
-    ret =  tcam_gst_find_camera_src(el);
+
+    GstElement* ret = tcam_gst_find_camera_src_rec(el, factory_names);
 
     gst_object_unref(el);
 
     return ret;
+}
+
+
+GstElement* tcam_gst_find_camera_src (GstElement* element)
+{
+    std::vector<std::string> factory_names = get_source_element_factory_names();
+
+    return tcam_gst_find_camera_src_rec(element, factory_names);
 }
 
 
