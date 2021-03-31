@@ -256,19 +256,37 @@ static bool tcam_gst_is_fourcc_bayer (const uint32_t fourcc)
     }
     return FALSE;
 }
-//
-//
-//static bool tcam_gst_is_bayer10_fourcc( const uint32_t fourcc )
-//{
-//    if( fourcc == FOURCC_GBRG10
-//        || fourcc == FOURCC_GRBG10
-//        || fourcc == FOURCC_RGGB10
-//        || fourcc == FOURCC_BGGR10 )
-//    {
-//        return TRUE;
-//    }
-//    return FALSE;
-//}
+
+
+static bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
+{
+   if (fourcc == FOURCC_GBRG10
+       || fourcc == FOURCC_GRBG10
+       || fourcc == FOURCC_RGGB10
+       || fourcc == FOURCC_BGGR10)
+   {
+       return TRUE;
+   }
+   return FALSE;
+}
+
+
+static bool tcam_gst_is_bayer10_packed_fourcc (const uint32_t fourcc)
+{
+   if (fourcc == FOURCC_GBRG10_SPACKED
+       || fourcc == FOURCC_GRBG10_SPACKED
+       || fourcc == FOURCC_RGGB10_SPACKED
+       || fourcc == FOURCC_BGGR10_SPACKED
+       || fourcc == FOURCC_GBRG10_MIPI_PACKED
+       || fourcc == FOURCC_GRBG10_MIPI_PACKED
+       || fourcc == FOURCC_RGGB10_MIPI_PACKED
+       || fourcc == FOURCC_BGGR10_MIPI_PACKED)
+   {
+       return TRUE;
+   }
+   return FALSE;
+}
+
 
 static bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
 {
@@ -749,7 +767,10 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         {
             map[60] = fourcc;
         }
-        //#TODO why is here no mention of bayer10?
+        else if (tcam_gst_is_bayer10_fourcc(fourcc) || tcam_gst_is_bayer10_packed_fourcc(fourcc))
+        {
+            map[65] = fourcc;
+        }
         else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
             map[70] = fourcc;

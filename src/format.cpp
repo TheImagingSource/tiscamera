@@ -60,6 +60,16 @@ static const fourcc_names fourcc_name_array [] =
     {FOURCC_GRBG10, "BA10"},
     {FOURCC_RGGB10, "RG10"},
 
+    {FOURCC_GRBG10_MIPI_PACKED,"GR10 Mipi Packed"},
+    {FOURCC_RGGB10_MIPI_PACKED,"RG10 Mipi Packed"},
+    {FOURCC_GBRG10_MIPI_PACKED,"GB10 Mipi Packed"},
+    {FOURCC_BGGR10_MIPI_PACKED,"BG10 Mipi Packed"},
+
+    {FOURCC_GRBG10_SPACKED, "GR10 SPacked"},
+    {FOURCC_RGGB10_SPACKED, "RG10 SPacked"},
+    {FOURCC_GBRG10_SPACKED, "GB10 SPacked"},
+    {FOURCC_BGGR10_SPACKED, "BG10 SPacked"},
+
     {FOURCC_BGGR12, "BG12"},
     {FOURCC_GBRG12, "GB12"},
     {FOURCC_GRBG12, "BA12"},

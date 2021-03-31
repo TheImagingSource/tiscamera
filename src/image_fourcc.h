@@ -88,10 +88,23 @@
 #define FOURCC_GRBG10		    mmioFOURCC('B', 'A', '1', '0') /* 10  GRGR.. BGBG.. */
 #define FOURCC_RGGB10		    mmioFOURCC('R', 'G', '1', '0') /* 10  RGRG.. GBGB.. */
 
-#define FOURCC_GRBG10_SPACKED   mmioFOURCC('G', 'R', 'A', 'p') /* 10  u8, 4 pix, 5 bytes */
-#define FOURCC_RGGB10_SPACKED   mmioFOURCC('R', 'G', 'A', 'p') /* 10   */
-#define FOURCC_GBRG10_SPACKED   mmioFOURCC('G', 'B', 'A', 'p') /* 10   */
-#define FOURCC_BGGR10_SPACKED   mmioFOURCC('B', 'G', 'A', 'p') /* 10   */
+/* layout: 0b 00000000'11111111'22222222'33333333'00112233, the upper bits are the low bits of the according pixel
+ *		e.g: uint16_t* dst; uint8_t* src; =>  dst[0] = src[0] << 2 | src[4] & 0b11
+ */
+#define FOURCC_MONO10_MIPI_PACKED		mmioFOURCC('Y', '1', '0', 'P') // Mono, 10-bit
+#define FOURCC_GRBG10_MIPI_PACKED		mmioFOURCC('G', 'R', 'A', 'P') // Bayer, 10-bit, BG pattern
+#define FOURCC_RGGB10_MIPI_PACKED		mmioFOURCC('R', 'G', 'A', 'P') // Bayer, 10-bit, GB pattern
+#define FOURCC_GBRG10_MIPI_PACKED		mmioFOURCC('G', 'B', 'A', 'P') // Bayer, 10-bit, GR pattern
+#define FOURCC_BGGR10_MIPI_PACKED		mmioFOURCC('B', 'G', 'A', 'P') // Bayer, 10-bit, RG pattern
+
+/* layout: 0b 00000000'00111111'11112222'22222233'33333333
+ *		e.g: uint16_t* dst; uint8_t* src; dst[0] = src[0] | (src[1] & 0b11) << 2
+ */
+#define FOURCC_MONO10_SPACKED	mmioFOURCC('Y', '1', '0', 'p') // Mono, 10-bit
+#define FOURCC_GRBG10_SPACKED	mmioFOURCC('G', 'R', 'A', 'p') // Bayer, 10-bit, BG pattern
+#define FOURCC_RGGB10_SPACKED	mmioFOURCC('R', 'G', 'A', 'p') // Bayer, 10-bit, GB pattern
+#define FOURCC_GBRG10_SPACKED	mmioFOURCC('G', 'B', 'A', 'p') // Bayer, 10-bit, GR pattern
+#define FOURCC_BGGR10_SPACKED	mmioFOURCC('B', 'G', 'A', 'p') // Bayer, 10-bit, RG pattern
 
 #define FOURCC_BGGR12		    mmioFOURCC('B', 'G', '1', '2') /* 12  BGBG.. GRGR.. */
 #define FOURCC_GBRG12		    mmioFOURCC('G', 'B', '1', '2') /* 12  GBGB.. RGRG.. */

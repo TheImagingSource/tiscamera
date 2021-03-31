@@ -111,6 +111,48 @@ static TcamGstMapping tcam_gst_caps_info[] =
     },
 
     {
+        FOURCC_GBRG10_SPACKED,
+        "video/x-bayer, format=(string)gbrg10sp",
+        "video/x-bayer",    "gbrg10sp",
+    },
+    {
+        FOURCC_BGGR10_SPACKED,
+        "video/x-bayer, format=(string)bggr10sp",
+        "video/x-bayer",    "bggr10sp",
+    },
+    {
+        FOURCC_GRBG10_SPACKED,
+        "video/x-bayer, format=(string)grbg10sp",
+        "video/x-bayer",    "grbg10sp",
+    },
+    {
+        FOURCC_RGGB10_SPACKED,
+        "video/x-bayer, format=(string)rggb10sp",
+        "video/x-bayer",    "rggb10sp",
+    },
+
+    {
+        FOURCC_GBRG10_MIPI_PACKED,
+        "video/x-bayer, format=(string)gbrg10m",
+        "video/x-bayer",    "gbrg10m",
+    },
+    {
+        FOURCC_BGGR10_MIPI_PACKED,
+        "video/x-bayer, format=(string)bggr10",
+        "video/x-bayer",    "bggr10m",
+    },
+    {
+        FOURCC_GRBG10_MIPI_PACKED,
+        "video/x-bayer, format=(string)grbg10m",
+        "video/x-bayer",    "grbg10m",
+    },
+    {
+        FOURCC_RGGB10_MIPI_PACKED,
+        "video/x-bayer, format=(string)rggb10m",
+        "video/x-bayer",    "rggb10m",
+    },
+
+    {
         FOURCC_GBRG12,
         "video/x-bayer, format=(string)gbrg12",
         "video/x-bayer",    "gbrg12",
