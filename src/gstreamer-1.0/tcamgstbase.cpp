@@ -727,44 +727,44 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         }
         else if (tcam_gst_is_fourcc_rgb(fourcc))
         {
-            map[1] = fourcc;
+            map[10] = fourcc;
         }
         else if (tcam_gst_is_fourcc_yuv(fourcc))
         {
-            map[2] = fourcc;
+            map[20] = fourcc;
         }
         else if (fourcc == FOURCC_MJPG)
         {
-            map[3] = fourcc;
+            map[30] = fourcc;
         }
         else if (fourcc == FOURCC_Y800)
         {
-            map[4] = fourcc;
+            map[40] = fourcc;
         }
         else if (fourcc == FOURCC_Y16)
         {
-            map[5] = fourcc;
+            map[50] = fourcc;
         }
         else if (tcam_gst_is_bayerpwl_fourcc(fourcc))
         {
-            map[6] = fourcc;
+            map[60] = fourcc;
         }
         //#TODO why is here no mention of bayer10?
         else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
-            map[7] = fourcc;
+            map[70] = fourcc;
         }
         else if (tcam_gst_is_bayer16_fourcc(fourcc))
         {
-            map[8] = fourcc;
+            map[80] = fourcc;
         }
         else if (tcam_gst_is_polarized_bayer(fourcc))
         {
-            map[9] = fourcc;
+            map[90] = fourcc;
         }
         else if (tcam_gst_is_polarized_mono(fourcc))
         {
-            map[10] = fourcc;
+            map[100] = fourcc;
         }
         else
         {
