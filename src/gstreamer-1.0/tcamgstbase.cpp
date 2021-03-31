@@ -488,6 +488,16 @@ bool tcam_gst_is_fourcc_rgb (const unsigned int fourcc)
     return FALSE;
 }
 
+bool tcam_gst_is_bayerpwl_fourcc(const unsigned int fourcc)
+{
+    if (fourcc == FOURCC_PWL_RG12_MIPI
+        || fourcc == FOURCC_PWL_RG12
+        || fourcc == FOURCC_PWL_RG16H12)
+    {
+        return true;
+    }
+    return false;
+}
 
 bool tcam_gst_is_polarized_mono (const unsigned int fourcc)
 {
@@ -691,6 +701,7 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
      * formats like MJPEG
      * GRAY16
      * GRAY8
+     * pwl bayer
      * bayer12/16
      * polarized bayer
      * polarized mono
@@ -734,22 +745,26 @@ static uint32_t find_preferred_format (const std::vector<uint32_t>& vec)
         {
             map[5] = fourcc;
         }
-        //#TODO why is here no mention of bayer10?
-        else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
+        else if (tcam_gst_is_bayerpwl_fourcc(fourcc))
         {
             map[6] = fourcc;
         }
-        else if (tcam_gst_is_bayer16_fourcc(fourcc))
+        //#TODO why is here no mention of bayer10?
+        else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
         {
             map[7] = fourcc;
         }
-        else if (tcam_gst_is_polarized_bayer(fourcc))
+        else if (tcam_gst_is_bayer16_fourcc(fourcc))
         {
             map[8] = fourcc;
         }
-        else if (tcam_gst_is_polarized_mono(fourcc))
+        else if (tcam_gst_is_polarized_bayer(fourcc))
         {
             map[9] = fourcc;
+        }
+        else if (tcam_gst_is_polarized_mono(fourcc))
+        {
+            map[10] = fourcc;
         }
         else
         {
@@ -778,6 +793,7 @@ GstCaps* tcam_gst_find_largest_caps (const GstCaps* incoming)
      *       formats like MJPEG
      *       GRAY8
      *       GRAY16
+     *       pwl bayer
      *       bayer12/16
      *
      * 2. find the largest resolution

@@ -122,6 +122,10 @@ inline int get_bits_per_pixel (uint32_t fcc)
         case FOURCC_POLARIZATION_PACKED8_BAYER_BG:   return 32;
         case FOURCC_POLARIZATION_PACKED16_BAYER_BG:  return 64;
 
+        case FOURCC_PWL_RG12_MIPI:                   return 12;
+        case FOURCC_PWL_RG12:                        return 16;
+        case FOURCC_PWL_RG16H12:                     return 16;
+
         case FOURCC_YGB0:       return 16;
         case FOURCC_YGB1:       return 16;
         case FOURCC_Y16:        return 16;

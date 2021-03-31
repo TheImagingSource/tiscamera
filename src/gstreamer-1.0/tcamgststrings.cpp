@@ -335,6 +335,21 @@ static TcamGstMapping tcam_gst_caps_info[] =
         "video/x-bayer,format=(string)polarized-bggr16p",
         "video/x-bayer", "polarized-bggr16p"
     },
+    {
+        FOURCC_PWL_RG12_MIPI,
+        "video/x-bayer,format=(string)pwl-rggb12m",
+        "video/x-bayer", "pwl-rggb12m"
+    },
+    {
+        FOURCC_PWL_RG12,
+        "video/x-bayer,format=(string)pwl-rggb12",
+        "video/x-bayer", "pwl-rggb12"
+    },
+    {
+        FOURCC_PWL_RG16H12,
+        "video/x-bayer,format=(string)pwl-rggb16H12",
+        "video/x-bayer", "pwl-rggb16H12"
+    },
 };
 
 #ifndef ARRAYSIZE

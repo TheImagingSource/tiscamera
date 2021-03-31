@@ -105,6 +105,10 @@ static const fourcc_names fourcc_name_array [] =
     {FOURCC_POLARIZATION_PACKED8_BAYER_BG, "Polarized BG8 Packed"},
     {FOURCC_POLARIZATION_PACKED16_BAYER_BG, "Polarized BG16 Packed"},
 
+    {FOURCC_PWL_RG12_MIPI, "PWL RGGB 12-bit mipi-packed"},
+    {FOURCC_PWL_RG12, "PWL RGGB 16-bit, lowest 12-bit data"},
+    {FOURCC_PWL_RG16H12, "PWL RGGB 16-bit, highest 12-bit data"},
+
     {FOURCC_I420, "I420"},
     {FOURCC_YV16, "YV16"},
     {FOURCC_YUV8PLANAR, "YUV8 planar"},

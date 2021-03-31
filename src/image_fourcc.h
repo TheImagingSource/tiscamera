@@ -170,6 +170,10 @@
 #define FOURCC_POLARIZATION_PACKED8_BAYER_BG            mmioFOURCC('P', 'P', 'B', '1')  // Polarization result image, packed uint16_t [0;45;90;135] degrees, pixel ^= 64 bit
 #define FOURCC_POLARIZATION_PACKED16_BAYER_BG           mmioFOURCC('P', 'P', 'B', '2')  // Polarization result image, packed uint16_t [0;45;90;135] degrees, pixel ^= 64 bit
 
+// PWL formats:
+#define FOURCC_PWL_RG12_MIPI							mmioFOURCC('P', 'W', 'L', '1')  // PWL format, RGGB 12-bit, MIPI-packed
+#define FOURCC_PWL_RG12									mmioFOURCC('P', 'W', 'L', '2')  // PWL format, RGGB 16-bit, [0,0xXFFF] (X ^= 0 or ignored)
+#define FOURCC_PWL_RG16H12								mmioFOURCC('P', 'W', 'L', '3')  // PWL format, RGGB 16-bit, [0,0xFFFX]
 
 
 #endif // TCAM_IMAGE_FOURCC_H
