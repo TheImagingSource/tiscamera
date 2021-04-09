@@ -347,7 +347,6 @@ class TcamView(QWidget):
 
         self.pipeline = None
         self.pipeline = Gst.parse_launch(pipeline_str.format(serial=self.serial,
-                                                             type=self.dev_type.lower(),
                                                              dutils=self.use_dutils))
 
         self.displaysink = self.pipeline.get_by_name("displaysink")
@@ -372,7 +371,6 @@ class TcamView(QWidget):
         self.pipeline.set_state(Gst.State.READY)
         log.debug("Created pipeline and set to READY")
         log.debug("Pipeline is: {}".format(pipeline_str.format(serial=self.serial,
-                                                               type=self.dev_type.lower(),
                                                                dutils=self.use_dutils)))
 
     def on_sync_message(self, bus, message):

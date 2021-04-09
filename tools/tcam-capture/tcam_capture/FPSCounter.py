@@ -141,7 +141,6 @@ class FPSCounter(object):
         """
 
         frame_count = 0
-        seconds = len(self._delta_queue)
 
         with self._lock:
             self._delta_queue.append(self.frames_in_last_second)

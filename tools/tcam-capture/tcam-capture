@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel,
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QKeySequence
 
-from tcam_capture.TcamDevice import TcamDevice, TcamDeviceIndex
+from tcam_capture.TcamDevice import TcamDeviceIndex
 from tcam_capture.DeviceDialog import DeviceDialog
 from tcam_capture.TcamSignal import TcamSignals
 from tcam_capture.TcamCaptureData import TcamCaptureData

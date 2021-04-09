@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from functools import total_ordering  # used for __ne__, __gt__ etc generation
 from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -23,6 +24,7 @@ gi.require_version("Tcam", "0.1")
 from gi.repository import Tcam, Gst
 
 
+@total_ordering
 class TcamDevice(object):
     """Simple representation of a Tcam Capture Device"""
     def __init__(self, device_type, serial, model):

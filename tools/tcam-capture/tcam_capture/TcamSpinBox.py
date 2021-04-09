@@ -31,7 +31,7 @@ class TcamSpinBox(QSpinBox):
 
     def __init__(self,
                  parent=None):
-        super(QSpinBox, self).__init__(parent)
+        super(TcamSpinBox, self).__init__(parent)
         self.is_active = False
 
         # there is no way to access the internal lineedit
@@ -107,7 +107,7 @@ class TcamDoubleSpinBox(QDoubleSpinBox):
 
     def __init__(self,
                  parent=None):
-        super(QDoubleSpinBox, self).__init__(parent)
+        super(TcamDoubleSpinBox, self).__init__(parent)
         self.is_active = False
 
         # there is no way to access the internal lineedit
