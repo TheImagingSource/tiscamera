@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import argparse
 import subprocess
 import json
@@ -232,9 +231,9 @@ The most commonly used git commands are:
         # self.parser.add_argument("dist-release",
         #                          help="Print simplefied distribution release identifier",
         #                          action="store_true")
-        parser_install = subparser.add_parser("dist-release",
-                                              help="Give distribution release information",
-                                              add_help=False)
+        subparser.add_parser("dist-release",
+                             help="Give distribution release information",
+                             add_help=False)
         self.args = self.parser.parse_args()
 
     def __determine_dependency_file(self):

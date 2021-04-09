@@ -28,10 +28,10 @@ import sys
 import argparse
 from enum import Enum
 from git import Repo
-from subprocess import call, run
 import subprocess
 import re
 from datetime import date
+from functools import total_ordering  # used for __ne__, __gt__ etc generation
 
 
 def string_replace(filename, old_string, new_string):
@@ -152,7 +152,7 @@ def determine_release_type(is_major: bool,
     else:
         return ReleaseType.NONE
 
-
+@total_ordering
 class Version():
     """
     Helper class for version handling
@@ -183,6 +183,14 @@ class Version():
         except AttributeError:
             return NotImplementedError
 
+        return False
+
+    def __eq__(self, other):
+        if (self.major == other.major
+                and self.minor == other.minor
+                and self.patch == other.patch
+                and self.other == other.other):
+            return True
         return False
 
     def __repr__(self):

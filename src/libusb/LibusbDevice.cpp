@@ -20,6 +20,7 @@
 #include "logging.h"
 
 #include <algorithm>
+#include <stdexcept>
 
 tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, const std::string& serial)
     : session_(s)
@@ -45,12 +46,12 @@ tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, libusb_dev
         if (ret < 0)
         {
             SPDLOG_ERROR("Unable to open device.");
-            throw;
+            throw std::runtime_error("Unable to open device. LibUsb returned " + std::to_string(ret));
         }
     }
     else
     {
-        throw;
+        throw std::runtime_error("No libusb_device.");
     }
 }
 

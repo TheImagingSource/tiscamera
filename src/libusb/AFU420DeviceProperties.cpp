@@ -381,7 +381,8 @@ bool AFU420Device::create_ois()
 
     int64_t x_pos = 0;
     int64_t y_pos = 0;
-    get_ois_pos(x_pos, y_pos);
+    // not implemented
+    // get_ois_pos(x_pos, y_pos);
 
     prop = create_empty_property(TCAM_PROPERTY_OIS_POS_X);
     prop.value.i.min = -90;
@@ -534,15 +535,15 @@ bool AFU420Device::update_property(tcam::AFU420Device::property_description& des
         }
         case TCAM_PROPERTY_OIS_POS_X:
         {
-            int64_t x_pos, y_pos;
-            get_ois_pos(x_pos, y_pos);
+            int64_t x_pos = 0;
+            // get_ois_pos(x_pos, y_pos);
             desc.property->set_value(x_pos);
             return true;
         }
         case TCAM_PROPERTY_OIS_POS_Y:
         {
-            int64_t x_pos, y_pos;
-            get_ois_pos(x_pos, y_pos);
+            int64_t y_pos = 0;
+            // get_ois_pos(x_pos, y_pos);
             desc.property->set_value(y_pos);
             return true;
         }
