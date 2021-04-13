@@ -960,7 +960,7 @@ static void gst_tcam_src_get_property (GObject* object,
         }
         case PROP_DEVICE_TYPE:
         {
-            if (self->active_source)
+            if (self->active_source == self->main_src && self->main_src)
             {
                 g_object_get_property(G_OBJECT(self->active_source), "type", value);
             }
