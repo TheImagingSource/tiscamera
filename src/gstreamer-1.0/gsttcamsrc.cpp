@@ -447,7 +447,7 @@ static void apply_element_property (GstTcamSrc* self,
         }
         case PROP_NUM_BUFFERS:
         {
-            if (self->active_source == self->main_src)
+            if (self->active_source == self->main_src || self->active_source == self->tegra_src)
             {
                 g_object_set_property(G_OBJECT(self->active_source), "num-buffers", value);
             }
@@ -479,13 +479,21 @@ static void apply_element_property (GstTcamSrc* self,
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (self->active_source)
+            if (self->active_source == self->main_src || self->active_source == self->pimipi_src)
             {
                 g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
             }
             else
             {
-                self->drop_incomplete_frames = g_value_get_boolean(value);
+                if (self->active_source)
+                {
+                    GST_INFO("Used source element does not support \"drop-incomplete-buffer\"");
+                }
+                else
+                {
+                    self->drop_incomplete_frames = g_value_get_boolean(value);
+                }
+
             }
             break;
         }
@@ -498,7 +506,7 @@ static void apply_element_property (GstTcamSrc* self,
                 {
                     g_object_set_property(G_OBJECT(self->active_source), "state", value);
                 }
-                else if (self->active_source == self->pimipi_src)
+                else if (self->active_source == self->pimipi_src || self->active_source == self->tegra_src)
                 {
                     bool state = load_device_settings(TCAM_PROP(self),
                                                       self->device_serial,
