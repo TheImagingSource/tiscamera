@@ -447,7 +447,7 @@ static void apply_element_property (GstTcamSrc* self,
         }
         case PROP_NUM_BUFFERS:
         {
-            if (self->active_source == self->main_src || self->active_source == self->tegra_src)
+            if (self->active_source && (self->active_source == self->main_src || self->active_source == self->tegra_src))
             {
                 g_object_set_property(G_OBJECT(self->active_source), "num-buffers", value);
             }
@@ -479,7 +479,7 @@ static void apply_element_property (GstTcamSrc* self,
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (self->active_source == self->main_src || self->active_source == self->pimipi_src)
+            if (self->active_source && (self->active_source == self->main_src || self->active_source == self->pimipi_src))
             {
                 g_object_set_property(G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
             }
