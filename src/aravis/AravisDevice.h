@@ -75,6 +75,11 @@ public:
 
     DeviceInfo get_device_description() const override;
 
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
+    {
+        return p_properties;
+    };
+
     std::vector<std::shared_ptr<Property>> getProperties() override;
 
     bool set_property(const Property&) override;
@@ -120,6 +125,8 @@ private:
     ArvCamera* arv_camera;
 
     std::weak_ptr<SinkInterface> external_sink;
+
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
 
     ArvStream* stream;
     ArvGc* genicam;

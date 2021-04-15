@@ -55,6 +55,18 @@ bool CaptureDevice::register_device_lost_callback(tcam_device_lost_callback call
 }
 
 
+std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDevice::get_properties()
+{
+    return impl->get_properties();
+};
+
+
+std::shared_ptr<tcam::property::IPropertyBase> CaptureDevice::get_property(const std::string& name)
+{
+    return impl->get_property(name);
+}
+
+
 std::vector<Property*> CaptureDevice::get_available_properties()
 {
     return impl->get_available_properties();

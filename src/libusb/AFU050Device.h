@@ -92,6 +92,11 @@ public:
 
     DeviceInfo get_device_description() const;
 
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
+    {
+        return p_properties;
+    };
+
     std::vector<std::shared_ptr<Property>> getProperties();
 
     bool set_property(const Property&);
@@ -143,6 +148,8 @@ private:
     std::vector<VideoFormatDescription> available_videoformats;
 
     std::vector<framerate_mapping> framerate_conversions;
+
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
 
     std::shared_ptr<AFU050PropertyHandler> property_handler;
 

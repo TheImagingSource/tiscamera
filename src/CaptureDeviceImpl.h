@@ -96,6 +96,9 @@ public:
 
     // property related:
 
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
+    std::shared_ptr<tcam::property::IPropertyBase> get_property(const std::string& name);
+
     /**
      * @return vector containing all available properties
      */

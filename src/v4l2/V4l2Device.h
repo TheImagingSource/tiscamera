@@ -106,6 +106,11 @@ public:
 
     bool get_property(Property&);
 
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
+    {
+        return p_properties;
+    };
+
     bool set_video_format(const VideoFormat&);
 
     bool validate_video_format(const VideoFormat&) const;
@@ -160,6 +165,7 @@ private:
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
 
     std::thread monitor_v4l2_thread;
     std::atomic<bool> stop_monitor_v4l2_thread { false };

@@ -165,6 +165,23 @@ bool CaptureDeviceImpl::close_device()
 }
 
 
+std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::get_properties()
+{
+    if (!is_device_open())
+    {
+        return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
+    }
+    return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
+
+}
+
+
+std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(const std::string& name)
+{
+    return nullptr;
+}
+
+
 std::vector<Property*> CaptureDeviceImpl::get_available_properties()
 {
     if (!is_device_open())

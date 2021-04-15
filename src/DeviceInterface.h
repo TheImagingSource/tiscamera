@@ -21,6 +21,7 @@
 #include "ImageBuffer.h"
 #include "Properties.h"
 #include "PropertyImpl.h"
+#include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
@@ -56,6 +57,8 @@ public:
     virtual bool set_property(const Property&) override = 0;
 
     virtual bool get_property(Property&) override = 0;
+
+    virtual std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() = 0;
 
     /**
      * @brief Set Format in he actual device
