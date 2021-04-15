@@ -317,10 +317,6 @@ static gboolean gst_tcam_bin_set_tcam_property (TcamProp* iface,
         GstElement* element = GST_ELEMENT(g_value_get_object(&item));
         if (TCAM_IS_PROP(element))
         {
-            if (g_strcmp0(gst_element_get_name(element), "tcambin-dutils") == 0)
-            {
-                GST_INFO("AHA");
-            }
             if (tcam_prop_set_tcam_property(TCAM_PROP(element),
                                             name,
                                             value))
