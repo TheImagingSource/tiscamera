@@ -19,6 +19,7 @@
 
 #include "DeviceInterface.h"
 #include "FormatHandlerInterface.h"
+#include "V4L2PropertyBackend.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 
@@ -34,7 +35,8 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-class V4l2Device : public DeviceInterface
+class V4l2Device : public DeviceInterface, public tcam::property::V4L2PropertyBackend,
+                   public std::enable_shared_from_this<tcam::property::V4L2PropertyBackend>
 {
 
     struct property_description
@@ -202,9 +204,16 @@ private:
 
     int index_control(struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
 
+
+    int new_control(struct v4l2_queryctrl* qctrl);
+    void index_controls();
     void updateV4L2Property(V4l2Device::property_description& desc);
 
     bool changeV4L2Control(const property_description&);
+
+    int write_control(int id, int value);
+
+    int read_control(int id, int64_t& value_out);
 
     // streaming related
 

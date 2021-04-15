@@ -28,6 +28,15 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
+namespace v4l2
+{
+
+uint32_t tcam_property_type_to_v4l2(TCAM_PROPERTY_TYPE type);
+
+TCAM_PROPERTY_TYPE v4l2_property_type_to_tcam(uint32_t type);
+
+} /* namespace v4l2 */
+
 uint32_t convert_v4l2_flags(uint32_t v4l2_flags);
 
 

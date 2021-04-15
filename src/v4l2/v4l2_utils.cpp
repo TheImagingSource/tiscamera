@@ -31,6 +31,73 @@
 using namespace tcam;
 
 
+uint32_t tcam::v4l2::tcam_property_type_to_v4l2(TCAM_PROPERTY_TYPE type)
+{
+    switch (type)
+    {
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            return V4L2_CTRL_TYPE_BOOLEAN;
+        }
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        {
+            return V4L2_CTRL_TYPE_INTEGER;
+        }
+        case TCAM_PROPERTY_TYPE_STRING:
+        {
+            return V4L2_CTRL_TYPE_STRING;
+        }
+        case TCAM_PROPERTY_TYPE_ENUMERATION:
+        {
+            return V4L2_CTRL_TYPE_MENU;
+        }
+        case TCAM_PROPERTY_TYPE_BUTTON:
+        {
+            return V4L2_CTRL_TYPE_BUTTON;
+        }
+        default:
+        {
+            return 0;
+        }
+    }
+
+}
+
+
+TCAM_PROPERTY_TYPE tcam::v4l2::v4l2_property_type_to_tcam(uint32_t type)
+{
+    switch (type)
+    {
+        case V4L2_CTRL_TYPE_BOOLEAN:
+        {
+            return TCAM_PROPERTY_TYPE_BOOLEAN;
+        }
+        case V4L2_CTRL_TYPE_INTEGER:
+        {
+            return TCAM_PROPERTY_TYPE_INTEGER;
+        }
+        case V4L2_CTRL_TYPE_STRING:
+        {
+            return TCAM_PROPERTY_TYPE_STRING;
+        }
+        case V4L2_CTRL_TYPE_INTEGER_MENU:
+        case V4L2_CTRL_TYPE_MENU:
+        {
+            return TCAM_PROPERTY_TYPE_ENUMERATION;
+        }
+        case V4L2_CTRL_TYPE_BUTTON:
+        {
+            return TCAM_PROPERTY_TYPE_BUTTON;
+        }
+        default:
+        {
+            return TCAM_PROPERTY_TYPE_UNKNOWN;
+        }
+    }
+}
+
+
+
 uint32_t tcam::convert_v4l2_flags(uint32_t v4l2_flags)
 {
     uint32_t internal_flags = 0;
