@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Imaging Source Europe GmbH
+ * Copyright 2021 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 
 using namespace tcam;
 using namespace tcam::v4l2;
+
 
 int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
 {
@@ -100,27 +101,28 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, shared_from_this());
+            std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
             break;
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, shared_from_this());
+            std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
             break;
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, shared_from_this(), mapping);
+            std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
             break;
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, shared_from_this());
+            std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
             break;
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, shared_from_this());
+            std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            break;
         }
         case TCAM_PROPERTY_TYPE_STRING:
         default:

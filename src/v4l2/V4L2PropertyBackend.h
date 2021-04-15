@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
+#pragma once
+
+#include <cstdint>
+
 namespace tcam::property
 {
 
 class V4L2PropertyBackend
 {
 public:
-    virtual int write_control(int v4l2_id, int new_value) = 0;
+    explicit V4L2PropertyBackend(int fd);
 
-    virtual int read_control(int v4l2_id, int64_t& new_value) = 0;
+    int write_control(int v4l2_id, int new_value);
+
+    int read_control(int v4l2_id, int64_t& new_value);
+
+private:
+
+    int p_fd;
 };
 
 } // namespace tcam::property

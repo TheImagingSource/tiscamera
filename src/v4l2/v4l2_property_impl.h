@@ -41,7 +41,8 @@ public:
     V4L2PropertyIntegerImpl(const std::string& name, int id);
     V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
                             struct v4l2_ext_control* ctrl,
-                            std::shared_ptr<V4L2PropertyBackend> backend);
+                            std::shared_ptr<V4L2PropertyBackend> backend,
+                            const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
     virtual std::string get_name() const final
     {
@@ -95,7 +96,8 @@ public:
     V4L2PropertyDoubleImpl(const std::string& name, int id);
     V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
                            struct v4l2_ext_control* ctrl,
-                           std::shared_ptr<V4L2PropertyBackend> backend);
+                           std::shared_ptr<V4L2PropertyBackend> backend,
+                           const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
     virtual std::string get_name() const final
     {
@@ -148,7 +150,8 @@ class V4L2PropertyBoolImpl : public IPropertyBool
 public:
     V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
                          struct v4l2_ext_control* ctrl,
-                         std::shared_ptr<V4L2PropertyBackend> backend);
+                         std::shared_ptr<V4L2PropertyBackend> backend,
+                         const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
     virtual std::string get_name() const final
     {
@@ -181,7 +184,8 @@ class V4L2PropertyCommandImpl : public IPropertyCommand
 public:
     V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
                             struct v4l2_ext_control* ctrl,
-                            std::shared_ptr<V4L2PropertyBackend> backend);
+                            std::shared_ptr<V4L2PropertyBackend> backend,
+                            const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
     virtual std::string get_name() const final
     {
@@ -221,11 +225,11 @@ public:
         return p_flags;
     };
 
-    virtual bool set_value_str(const std::string& new_value);
-    virtual bool set_value(int new_value);
+    virtual bool set_value_str(const std::string& new_value) final;
+    virtual bool set_value(int new_value) final;
 
-    virtual std::string get_value_str() const;
-    virtual int get_value() const;
+    virtual std::string get_value_str() const final;
+    virtual int get_value() const final;
 
     virtual std::vector<std::string> get_entries() const final;
 

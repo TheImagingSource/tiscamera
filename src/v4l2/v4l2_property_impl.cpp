@@ -33,7 +33,8 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(const std::string& name, int id
 
 V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
                                                  struct v4l2_ext_control* /*ctrl*/,
-                                                 std::shared_ptr<V4L2PropertyBackend> backend)
+                                                 std::shared_ptr<V4L2PropertyBackend> backend,
+                                                 const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
     p_min = queryctrl->minimum;
     p_max = queryctrl->maximum;
@@ -106,7 +107,8 @@ bool V4L2PropertyIntegerImpl::valid_value(int64_t val)
 
 V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
                                                struct v4l2_ext_control* /*ctrl*/,
-                                               std::shared_ptr<V4L2PropertyBackend> backend)
+                                               std::shared_ptr<V4L2PropertyBackend> backend,
+                                               const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
     p_min = queryctrl->minimum;
     p_max = queryctrl->maximum;
@@ -176,7 +178,8 @@ bool V4L2PropertyDoubleImpl::valid_value(double val)
 
 V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
                                            struct v4l2_ext_control* ctrl,
-                                           std::shared_ptr<V4L2PropertyBackend> backend)
+                                           std::shared_ptr<V4L2PropertyBackend> backend,
+                                           const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
     if (ctrl->value == 0)
     {
@@ -245,7 +248,8 @@ bool V4L2PropertyBoolImpl::set_value(bool new_value)
 
 V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
                                                  struct v4l2_ext_control* /*ctrl*/,
-                                                 std::shared_ptr<V4L2PropertyBackend> backend)
+                                                 std::shared_ptr<V4L2PropertyBackend> backend,
+                                                 const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
 
     p_name = (char*)queryctrl->name;

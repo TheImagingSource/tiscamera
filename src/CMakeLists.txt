@@ -85,6 +85,7 @@ if (BUILD_V4L2)
     v4l2/V4l2Device.cpp
     v4l2/V4l2Device_legacy.cpp
     v4l2/V4L2PropertyHandler.cpp
+    v4l2/V4L2PropertyBackend.cpp
     v4l2/V4L2DeviceProperties.cpp
     v4l2/v4l2_property_impl.cpp
     v4l2/v4l2_genicam_mapping.cpp

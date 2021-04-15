@@ -35,8 +35,7 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-class V4l2Device : public DeviceInterface, public tcam::property::V4L2PropertyBackend,
-                   public std::enable_shared_from_this<tcam::property::V4L2PropertyBackend>
+class V4l2Device : public DeviceInterface
 {
 
     struct property_description
@@ -211,9 +210,7 @@ private:
 
     bool changeV4L2Control(const property_description&);
 
-    int write_control(int id, int value);
-
-    int read_control(int id, int64_t& value_out);
+    std::shared_ptr<tcam::property::V4L2PropertyBackend> p_property_backend;
 
     // streaming related
 

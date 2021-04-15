@@ -793,31 +793,31 @@ bool V4l2Device::extension_unit_is_loaded()
 }
 
 
-int V4l2Device::write_control(int id, int value)
-{
-    struct v4l2_control ctrl = {};
-    ctrl.id = id;
-    ctrl.value = value;
+// int V4l2Device::write_control(int id, int value)
+// {
+//     struct v4l2_control ctrl = {};
+//     ctrl.id = id;
+//     ctrl.value = value;
 
-    return tcam_xioctl(fd, VIDIOC_S_CTRL, &ctrl);
-}
+//     return tcam_xioctl(fd, VIDIOC_S_CTRL, &ctrl);
+// }
 
 
-int V4l2Device::read_control(int id, int64_t& value_out)
-{
-    struct v4l2_control ctrl = {};
-    ctrl.id = id;
+// int V4l2Device::read_control(int id, int64_t& value_out)
+// {
+//     struct v4l2_control ctrl = {};
+//     ctrl.id = id;
 
-    if (tcam_xioctl(this->fd, VIDIOC_G_CTRL, &ctrl) != 0)
-    {
-        // SPDLOG_WARN("Could not retrieve current value for {}. ioctl return '{}'",
-        //              desc.prop->get_name().c_str(),
-        //              strerror(errno));
-        return -1;
-    }
-    value_out = ctrl.value;
-    return 0;
-}
+//     if (tcam_xioctl(this->fd, VIDIOC_G_CTRL, &ctrl) != 0)
+//     {
+//         // SPDLOG_WARN("Could not retrieve current value for {}. ioctl return '{}'",
+//         //              desc.prop->get_name().c_str(),
+//         //              strerror(errno));
+//         return -1;
+//     }
+//     value_out = ctrl.value;
+//     return 0;
+// }
 
 
 void V4l2Device::stream()
