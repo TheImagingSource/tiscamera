@@ -26,13 +26,8 @@
 namespace tcam::property
 {
 
-V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(const std::string& name, int id)
-    : p_name(name), p_v4l2_id(id)
-{
-}
-
 V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
-                                                 struct v4l2_ext_control* /*ctrl*/,
+                                                 struct v4l2_ext_control* ctrl,
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
                                                  const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
@@ -40,7 +35,11 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
     p_max = queryctrl->maximum;
     p_step = queryctrl->step;
 
+    p_default = ctrl->value;
+
     p_name = (char*)queryctrl->name;
+
+    p_v4l2_id = queryctrl->id;
     p_cam = backend;
 }
 
@@ -56,7 +55,7 @@ int64_t V4L2PropertyIntegerImpl::get_value() const
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return false;
+        return -1;
     }
 
     return value;
@@ -106,15 +105,18 @@ bool V4L2PropertyIntegerImpl::valid_value(int64_t val)
 
 
 V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
-                                               struct v4l2_ext_control* /*ctrl*/,
+                                               struct v4l2_ext_control* ctrl,
                                                std::shared_ptr<V4L2PropertyBackend> backend,
                                                const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
     p_min = queryctrl->minimum;
     p_max = queryctrl->maximum;
     p_step = queryctrl->step;
+    p_default = ctrl->value;
 
     p_name = (char*)queryctrl->name;
+    p_v4l2_id = queryctrl->id;
+
     p_cam = backend;
 }
 
@@ -173,9 +175,6 @@ bool V4L2PropertyDoubleImpl::valid_value(double val)
 
 
 
-
-
-
 V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
                                            struct v4l2_ext_control* ctrl,
                                            std::shared_ptr<V4L2PropertyBackend> backend,
@@ -190,14 +189,10 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
         p_default = true;
     }
     p_name = (char*)queryctrl->name;
+    p_v4l2_id = queryctrl->id;
+
     p_cam = backend;
 
-}
-
-
-bool V4L2PropertyBoolImpl::get_default() const
-{
-    return p_default;
 }
 
 
@@ -253,6 +248,8 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
 {
 
     p_name = (char*)queryctrl->name;
+    p_v4l2_id = queryctrl->id;
+
     p_cam = backend;
 }
 
@@ -276,11 +273,12 @@ bool V4L2PropertyCommandImpl::execute()
 
 
 V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
-                                           struct v4l2_ext_control* /*ctrl*/,
+                                           struct v4l2_ext_control* ctrl,
                                            std::shared_ptr<V4L2PropertyBackend> backend,
                                            const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
     p_cam = backend;
+    p_v4l2_id = queryctrl->id;
 
     if (!mapping)
     {
@@ -288,23 +286,13 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
 
         // TODO: implement property query
 
-        // struct v4l2_querymenu qmenu = {};
-        // qmenu.id = queryctrl->id;
-
-        // for (int i = 0; i <= queryctrl->maximum; i++)
-        // {
-        //     qmenu.index = i;
-        //     if (tcam_xioctl(fd, VIDIOC_QUERYMENU, &qmenu))
-        //         continue;
-
-        //     std::string map_string((char*)qmenu.name);
-        //     p_entries.emplace(i, map_string);
-        // }
-
-        if (p_entries.empty())
+        if (auto ptr = p_cam.lock())
         {
-            SPDLOG_DEBUG("Enum {} does not have any entries. Ignoring.", p_name);
-            //   return nullptr;
+            p_entries = ptr->get_menu_entries(p_v4l2_id, queryctrl->maximum);
+        }
+        else
+        {
+            SPDLOG_WARN("Unable to retrieve enum entries during proerty creation.");
         }
     }
     else
@@ -322,6 +310,8 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
             };
         }
     }
+
+    p_default = p_entries.at(ctrl->value);
 }
 
 
@@ -372,9 +362,9 @@ bool V4L2PropertyEnumImpl::set_value(int new_value)
 }
 
 
-std::string V4L2PropertyEnumImpl::get_value_str() const
+std::string V4L2PropertyEnumImpl::get_value() const
 {
-    int value = get_value();
+    int value = get_value_int();
 
     // TODO: additional checks if key exists
 
@@ -382,7 +372,7 @@ std::string V4L2PropertyEnumImpl::get_value_str() const
 }
 
 
-int V4L2PropertyEnumImpl::get_value() const
+int V4L2PropertyEnumImpl::get_value_int() const
 {
     int64_t value = 0;
 

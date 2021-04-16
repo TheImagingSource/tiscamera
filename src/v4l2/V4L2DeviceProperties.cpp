@@ -101,27 +101,27 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
             break;
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
             break;
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
             break;
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
             break;
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
             break;
         }
         case TCAM_PROPERTY_TYPE_STRING:

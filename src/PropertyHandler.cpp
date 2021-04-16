@@ -31,6 +31,19 @@ PropertyHandler::PropertyHandler() {}
 PropertyHandler::~PropertyHandler() {}
 
 
+void PropertyHandler::set_device_properties(std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props)
+{
+    p_device_properties = props;
+}
+
+
+std::vector<std::shared_ptr<tcam::property::IPropertyBase>> PropertyHandler::get()
+{
+    return p_device_properties;
+}
+
+
+
 static bool is_group_master(const Property& p)
 {
     if (p.get_struct().id == p.get_struct().group.property_group)
@@ -237,7 +250,7 @@ void PropertyHandler::generate_properties()
 {
     if (device_properties.empty())
     {
-        SPDLOG_ERROR("No device properties to work with");
+        //SPDLOG_ERROR("No device properties to work with");
         return;
     }
 

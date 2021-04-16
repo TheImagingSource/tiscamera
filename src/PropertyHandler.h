@@ -20,6 +20,8 @@
 #include "Properties.h"
 #include "compiler_defines.h"
 
+#include "PropertyInterfaces.h"
+
 #include <memory>
 #include <vector>
 
@@ -40,6 +42,9 @@ public:
 
     std::vector<std::shared_ptr<Property>> get_properties();
 
+    void set_device_properties(std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props);
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get();
+
     /**
      * Synchronize all properties to hold up to date values
      */
@@ -55,6 +60,9 @@ public:
     bool get_property(Property&);
 
 private:
+
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_device_properties;
+
     std::vector<std::shared_ptr<Property>> device_properties;
     std::vector<std::shared_ptr<Property>> emulated_properties;
 

@@ -86,6 +86,9 @@ bool CaptureDeviceImpl::open_device(const DeviceInfo& device_desc)
 
     property_handler = std::make_shared<PropertyHandler>();
 
+    auto props = device->get_properties();
+    property_handler->set_device_properties(props);
+
     property_handler->set_properties(device->getProperties(), pipeline->getFilterProperties());
 
     return true;
@@ -171,13 +174,23 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::g
     {
         return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
     }
-    return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
+    return property_handler->get();
 
 }
 
 
 std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(const std::string& name)
 {
+    auto props = property_handler->get();
+
+    for (auto& p : props)
+    {
+        if (p->get_name() == name)
+        {
+            return p;
+        }
+    }
+
     return nullptr;
 }
 

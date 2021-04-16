@@ -53,6 +53,8 @@ target_link_libraries(tcamgstbase ${GSTREAMER_VIDEO_LIBRARIES})
 
 add_library(gsttcamsrc SHARED gsttcamsrc.cpp
   gsttcammainsrc.cpp
+  mainsrc_tcamprop_impl.cpp
+  mainsrc_device_state.cpp
   gstmetatcamstatistics.cpp
   gsttcamdeviceprovider.cpp
   gsttcamdevice.cpp)

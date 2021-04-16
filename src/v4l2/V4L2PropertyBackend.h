@@ -17,6 +17,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <map>
 
 namespace tcam::property
 {
@@ -29,6 +31,8 @@ public:
     int write_control(int v4l2_id, int new_value);
 
     int read_control(int v4l2_id, int64_t& new_value);
+
+    std::map<int, std::string> get_menu_entries(int v4l2_id, int max);
 
 private:
 

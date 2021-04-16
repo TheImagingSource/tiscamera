@@ -38,7 +38,7 @@ class V4L2PropertyBackend;
 class V4L2PropertyIntegerImpl : public IPropertyInteger
 {
 public:
-    V4L2PropertyIntegerImpl(const std::string& name, int id);
+
     V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
                             struct v4l2_ext_control* ctrl,
                             std::shared_ptr<V4L2PropertyBackend> backend,
@@ -162,7 +162,7 @@ public:
         return p_flags;
     };
 
-    virtual bool get_default() const final;
+    virtual bool get_default() const final { return p_default; };
     virtual bool get_value() const final;
 
     virtual bool set_value(bool new_value) final;
@@ -228,8 +228,10 @@ public:
     virtual bool set_value_str(const std::string& new_value) final;
     virtual bool set_value(int new_value) final;
 
-    virtual std::string get_value_str() const final;
-    virtual int get_value() const final;
+    virtual std::string get_value() const final;
+    virtual int get_value_int() const final;
+
+    virtual std::string get_default() const final { return p_default; };
 
     virtual std::vector<std::string> get_entries() const final;
 
@@ -242,6 +244,8 @@ private:
 
     std::string p_name;
     PropertyFlags p_flags;
+
+    std::string p_default;
 
     int p_v4l2_id;
 };
