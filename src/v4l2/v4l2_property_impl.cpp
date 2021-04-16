@@ -38,6 +38,13 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
     p_default = ctrl->value;
 
     p_name = (char*)queryctrl->name;
+    if (mapping)
+    {
+        if (!mapping->gen_name.empty())
+        {
+            p_name = mapping->gen_name;
+        }
+    }
 
     p_v4l2_id = queryctrl->id;
     p_cam = backend;
@@ -115,6 +122,15 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
     p_default = ctrl->value;
 
     p_name = (char*)queryctrl->name;
+
+    if (mapping)
+    {
+        if (!mapping->gen_name.empty())
+        {
+            p_name = mapping->gen_name;
+        }
+    }
+
     p_v4l2_id = queryctrl->id;
 
     p_cam = backend;
@@ -189,6 +205,14 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
         p_default = true;
     }
     p_name = (char*)queryctrl->name;
+    if (mapping)
+    {
+        if (!mapping->gen_name.empty())
+        {
+            p_name = mapping->gen_name;
+        }
+    }
+
     p_v4l2_id = queryctrl->id;
 
     p_cam = backend;
@@ -246,8 +270,16 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
                                                  const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-
     p_name = (char*)queryctrl->name;
+
+    if (mapping)
+    {
+        if (!mapping->gen_name.empty())
+        {
+            p_name = mapping->gen_name;
+        }
+    }
+
     p_v4l2_id = queryctrl->id;
 
     p_cam = backend;
@@ -283,8 +315,6 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
     if (!mapping)
     {
         p_name = (char*)queryctrl->name;
-
-        // TODO: implement property query
 
         if (auto ptr = p_cam.lock())
         {
@@ -350,7 +380,14 @@ bool V4L2PropertyEnumImpl::set_value(int new_value)
 
     if (auto ptr = p_cam.lock())
     {
-        ptr->write_control(p_v4l2_id, new_value);
+        if (ptr->write_control(p_v4l2_id, new_value) != 0)
+        {
+            SPDLOG_ERROR("Something went wrong while writing {}", p_name);
+        }
+        else
+        {
+            //SPDLOG_DEBUG("Wrote {} {}", p_name, new_value);
+        }
     }
     else
     {

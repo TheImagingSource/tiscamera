@@ -1158,11 +1158,11 @@ static void init_camera_resources(GstTcamautoexposure* self)
             {
                 self->iris_name = name;
             }
-            else if (g_strcmp0(name, "Exposure Auto") == 0)
+            else if (g_strcmp0(name, "Exposure Auto") == 0 || g_strcmp0(name, "ExposureTimeAuto") == 0)
             {
                 has_auto_exposure = true;
             }
-            else if (g_strcmp0(name, "Gain Auto") == 0)
+            else if (g_strcmp0(name, "Gain Auto") == 0 || g_strcmp0(name, "GainAuto") == 0)
             {
                 has_auto_gain = true;
             }

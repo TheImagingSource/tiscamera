@@ -94,7 +94,10 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
     {
         SPDLOG_DEBUG("Conversion requried for qtrcl->name {}", qctrl->name);
 
-        type = mapping->gen_type;
+        if (mapping->gen_type != TCAM_PROPERTY_TYPE_UNKNOWN)
+        {
+            type = mapping->gen_type;
+        }
     }
 
     switch (type)

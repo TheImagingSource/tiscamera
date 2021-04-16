@@ -8,11 +8,46 @@
 static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_dict
 {
     {
+        0x009a0902, // exposure absolute
+        {
+            "ExposureTime",
+            TCAM_PROPERTY_TYPE_DOUBLE,
+        },
+    },
+    {
         0x199e205, // Gain Auto
         {
             "GainAuto",
             TCAM_PROPERTY_TYPE_ENUMERATION,
         }
+    },
+    {
+        0x199e202, // Auto Shutter
+        {
+            "ExposureAuto",
+            TCAM_PROPERTY_TYPE_ENUMERATION,
+        }
+    },
+    {
+        0x199e201, // Exposure Time (us)
+        {
+            "ExposureTime",
+            TCAM_PROPERTY_TYPE_DOUBLE,
+        }
+    },
+    {
+        0x199e209,
+        {
+            "TriggerSoftware",
+            TCAM_PROPERTY_TYPE_UNKNOWN,
+        },
+    },
+    {
+        0x199e208,
+        {
+            "TriggerMode",
+            TCAM_PROPERTY_TYPE_ENUMERATION,
+        },
     },
 };
 
