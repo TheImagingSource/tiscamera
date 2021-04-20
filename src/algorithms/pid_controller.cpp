@@ -16,7 +16,8 @@
 
 #include "pid_controller.h"
 
-using namespace algorithms::detail;
+
+using namespace auto_alg::detail;
 
 pid_controller::pid_controller(float p, float i, float d, float e_sum_limit)
     : _P(p), _I(i), _D(d), _e_sum_limit(e_sum_limit), _e_sum(0), _e_prev(0), _e_prev_valid(false)
@@ -48,13 +49,9 @@ float pid_controller::step(float e, float fps)
     }
 
     if (_e_sum > _e_sum_limit)
-    {
         _e_sum = _e_sum_limit;
-    }
     if (_e_sum < -_e_sum_limit)
-    {
         _e_sum = -_e_sum_limit;
-    }
 
     return p + i + d;
 }

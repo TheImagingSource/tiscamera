@@ -21,7 +21,6 @@
 #include "auto_exposure.h"
 #include "base_types.h"
 #include "bayer.h"
-#include "biteater.h"
 #include "image_sampling.h"
 #include "roi.h"
 #include "whitebalance.h"

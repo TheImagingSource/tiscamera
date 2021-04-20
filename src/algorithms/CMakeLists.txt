@@ -25,7 +25,7 @@ set(srcs
   whitebalance.cpp
   auto_exposure.cpp
   pid_controller.cpp
-  biteater.cpp
+  img_rect_tools.cpp
   work_pool.cpp
   parallel.cpp)
 

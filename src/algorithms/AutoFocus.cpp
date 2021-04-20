@@ -22,13 +22,13 @@
 
 AutoFocus* autofocus_create(void)
 {
-    return reinterpret_cast<AutoFocus*>(new auto_alg::auto_focus());
+    return reinterpret_cast<AutoFocus*>(new auto_alg::impl::auto_focus());
 }
 
 
 void autofocus_destroy(AutoFocus* focus)
 {
-    delete reinterpret_cast<auto_alg::auto_focus*>(focus);
+    delete reinterpret_cast<auto_alg::impl::auto_focus*>(focus);
 }
 
 
@@ -40,18 +40,18 @@ bool autofocus_run(AutoFocus* focus,
                    img::dim pixel_dim,
                    int& new_focus_vale)
 {
-    return reinterpret_cast<auto_alg::auto_focus*>(focus)->auto_alg_run(
+    return reinterpret_cast<auto_alg::impl::auto_focus*>(focus)->auto_alg_run(
         time_point, img, state, offsets, pixel_dim, new_focus_vale);
 }
 
 
 bool autofocus_is_running(AutoFocus* focus)
 {
-    return reinterpret_cast<auto_alg::auto_focus*>(focus)->is_running();
+    return reinterpret_cast<auto_alg::impl::auto_focus*>(focus)->is_running();
 }
 
 
 void autofocus_end(AutoFocus* focus)
 {
-    reinterpret_cast<auto_alg::auto_focus*>(focus)->reset();
+    reinterpret_cast<auto_alg::impl::auto_focus*>(focus)->reset();
 }

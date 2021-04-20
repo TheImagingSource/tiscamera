@@ -1158,7 +1158,8 @@ static void init_camera_resources(GstTcamautoexposure* self)
             {
                 self->iris_name = name;
             }
-            else if (g_strcmp0(name, "Exposure Auto") == 0 || g_strcmp0(name, "ExposureTimeAuto") == 0)
+            else if (g_strcmp0(name, "Exposure Auto") == 0
+                     || g_strcmp0(name, "ExposureTimeAuto") == 0)
             {
                 has_auto_exposure = true;
             }
@@ -1674,25 +1675,25 @@ static image_buffer retrieve_image_region(GstTcamautoexposure* self, GstBuffer* 
 
 static void new_exposure(GstTcamautoexposure* self, unsigned int brightness)
 {
-    algorithms::property_cont_gain gain = {};
-    gain.is_db_gain = false;
+    auto_alg::property_cont_gain gain = {};
+    gain.is_gain_db = false;
     gain.min = self->gain_min;
     gain.max = self->gain_max;
-    gain.val = self->gain.value;
-    gain.do_auto = self->auto_gain;
+    gain.value = self->gain.value;
+    gain.auto_enabled = self->auto_gain;
 
-    algorithms::property_cont_exposure exposure = {};
+    auto_alg::property_cont_exposure exposure = {};
     exposure.min = self->exposure_min;
     exposure.max = self->exposure_max;
     exposure.val = self->exposure.value;
-    exposure.do_auto = self->auto_exposure;
+    exposure.auto_enabled = self->auto_exposure;
     exposure.granularity = self->exposure.step;
 
-    algorithms::property_cont_iris iris = {};
+    auto_alg::property_cont_iris iris = {};
     if (!self->iris_name.empty())
     {
         iris.camera_fps = self->framerate_numerator / self->framerate_denominator;
-        iris.do_auto = self->auto_iris;
+        iris.auto_enabled = self->auto_iris;
         iris.min = self->iris_min;
         iris.max = self->iris_max;
         iris.val = self->iris.value;
@@ -1700,10 +1701,10 @@ static void new_exposure(GstTcamautoexposure* self, unsigned int brightness)
     }
     else
     {
-        iris.do_auto = false;
+        iris.auto_enabled = false;
     }
 
-    auto res = algorithms::calc_auto_gain_exposure_iris(
+    auto res = auto_alg::impl::calc_auto_gain_exposure_iris(
         brightness, self->brightness_reference, gain, exposure, iris);
 
     if (self->auto_exposure && self->exposure.value != res.exposure)

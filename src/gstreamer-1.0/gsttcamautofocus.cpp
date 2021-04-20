@@ -687,7 +687,7 @@ static void transform_tcam(GstTcamAutoFocus* self, GstBuffer* buf)
         self->params.run_cmd_params.auto_step_divisor = 4;
         self->params.run_cmd_params.focus_device_speed = 500;
         self->params.run_cmd_params.suggest_sweep = false;
-        self->params.run_cmd_params.focus_min_move_wait_in_ms = 500;
+        //self->params.run_cmd_params.focus_min_move_wait_in_ms = 500;
         self->init_focus = FALSE;
     }
     else

@@ -17,7 +17,7 @@
 #pragma once
 
 
-namespace algorithms
+namespace auto_alg
 {
 
 namespace detail
@@ -41,9 +41,6 @@ public:
     float step(float e, float fps);
 
     void reset(void);
-
-}; /* class pid_controller */
-
-} /*namespace detail */
-
-} /* namespace algorithms */
+};
+} // namespace detail
+} // namespace auto_alg

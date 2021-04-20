@@ -19,9 +19,12 @@
 #include "base_types.h"
 #include "img/fcc_to_string.h"
 #include "img/image_transform_base.h"
+#include "img/image_fourcc_func.h"
+#include "img/img_type.h"
 #include "logging.h"
 #include "public_utils.h"
 #include "tcamgststrings.h"
+
 
 #include <algorithm> //std::find
 #include <stddef.h> // NULL
@@ -1596,7 +1599,7 @@ GstCaps* convert_videoformatsdescription_to_caps(
 
                 std::vector<double> fps = desc.get_frame_rates(r);
 
-                std::vector<double> highest_fps = desc.get_framerates({min_width, min_height});
+                std::vector<double> highest_fps = desc.get_framerates({ min_width, min_height });
 
                 if (fps.empty())
                 {
@@ -1622,7 +1625,9 @@ GstCaps* convert_videoformatsdescription_to_caps(
                 gst_util_double_to_fraction(
                     *std::min_element(fps.begin(), fps.end()), &fps_min_num, &fps_min_den);
                 gst_util_double_to_fraction(
-                    *std::max_element(highest_fps.begin(), highest_fps.end()), &fps_max_num, &fps_max_den);
+                    *std::max_element(highest_fps.begin(), highest_fps.end()),
+                    &fps_max_num,
+                    &fps_max_den);
 
                 GValue f = G_VALUE_INIT;
                 g_value_init(&f, GST_TYPE_FRACTION_RANGE);
@@ -1694,11 +1699,10 @@ bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_imag
     image->pData = info.data;
     image->length = info.size;
 
-
     if (caps)
     {
         gst_caps_to_tcam_video_format(caps, &image->format);
-        image->pitch = img::calc_minimum_pitch(image->format.fourcc, image->format.width);
+        image->pitch = img::calc_minimum_pitch(static_cast<img::fourcc>(image->format.fourcc), image->format.width);
     }
 
     gst_buffer_unmap(buffer, &info);
@@ -1709,5 +1713,5 @@ bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_imag
 
 int calc_pitch(int fourcc, int width)
 {
-    return img::calc_minimum_pitch(fourcc, width);
+    return img::calc_minimum_pitch(static_cast<img::fourcc>(fourcc), width);
 }
