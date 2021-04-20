@@ -2,8 +2,11 @@
 #pragma once
 
 
-#include <string>
 #include "base_types.h"
+
+#include <optional>
+#include <string>
+#include <map>
 
 namespace tcam::v4l2
 {
@@ -12,6 +15,7 @@ struct v4l2_genicam_mapping
 {
     std::string gen_name; // empty if name can be kept
     TCAM_PROPERTY_TYPE gen_type; // type that shall be used, TCAM_PROPERTY_TYPE_UNKNOWN if type can stay
+    std::optional<std::map<int, std::string>> gen_enum_entries;
 };
 
 

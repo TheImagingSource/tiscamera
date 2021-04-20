@@ -98,45 +98,49 @@ public:
 
     ~V4l2Device();
 
-    DeviceInfo get_device_description() const;
+    DeviceInfo get_device_description() const override;
 
-    std::vector<std::shared_ptr<Property>> getProperties();
+    std::vector<std::shared_ptr<Property>> getProperties() override;
 
-    bool set_property(const Property&);
+    bool set_property(const Property&) override;
 
-    bool get_property(Property&);
+    bool get_property(Property&) override;
 
+    //override
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return p_properties;
     };
 
-    bool set_video_format(const VideoFormat&);
+    bool set_video_format(const VideoFormat&) override;
 
     bool validate_video_format(const VideoFormat&) const;
 
-    VideoFormat get_active_video_format() const;
+    VideoFormat get_active_video_format() const override;
 
-    std::vector<VideoFormatDescription> get_available_video_formats();
+    std::vector<VideoFormatDescription> get_available_video_formats() override;
 
     bool set_framerate(double framerate);
 
     double get_framerate();
 
-    bool set_sink(std::shared_ptr<SinkInterface>);
+    bool set_sink(std::shared_ptr<SinkInterface>) override;
 
-    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>);
+    bool initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>>) override;
 
-    bool release_buffers();
+    bool release_buffers() override;
 
-    void requeue_buffer(std::shared_ptr<ImageBuffer>);
+    void requeue_buffer(std::shared_ptr<ImageBuffer>) override;
 
-    bool start_stream();
+    bool start_stream() override;
 
-    bool stop_stream();
+    bool stop_stream() override;
+
+    bool is_lost() const;
 
 private:
     std::atomic<bool> is_stream_on { false };
+    std::atomic<bool> is_lost_ { false };
 
     std::thread work_thread;
     std::thread notification_thread;

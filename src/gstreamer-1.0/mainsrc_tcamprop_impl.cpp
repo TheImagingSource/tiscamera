@@ -213,12 +213,12 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (min)
             {
                 g_value_init(min, G_TYPE_STRING);
-                //g_value_set_int(min, prop.value.i.min);
+                g_value_set_string(min, "");
             }
             if (max)
             {
                 g_value_init(max, G_TYPE_STRING);
-                //g_value_set_int(max, (int)prop.value.i.max);
+                g_value_set_string(max, "");
             }
             if (def)
             {
@@ -228,7 +228,7 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (step)
             {
                 g_value_init(step, G_TYPE_STRING);
-                //g_value_set_int(step, prop.value.i.step);
+                g_value_set_string(step, "");
             }
             break;
         }
@@ -290,6 +290,31 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
         // }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
+            if (value)
+            {
+                g_value_init(value, G_TYPE_BOOLEAN);
+                g_value_set_boolean(value, FALSE);
+            }
+            if (min)
+            {
+                g_value_init(min, G_TYPE_BOOLEAN);
+                g_value_set_boolean(min, FALSE);
+            }
+            if (max)
+            {
+                g_value_init(max, G_TYPE_BOOLEAN);
+                g_value_set_boolean(max, TRUE);
+            }
+            if (def)
+            {
+                g_value_init(def, G_TYPE_BOOLEAN);
+                g_value_set_boolean(def, FALSE);
+            }
+            if (step)
+            {
+                g_value_init(step, G_TYPE_BOOLEAN);
+                g_value_set_boolean(step, TRUE);
+            }
             break;
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:

@@ -150,7 +150,7 @@ double V4L2PropertyDoubleImpl::get_value() const
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return -1;
     }
-
+    //SPDLOG_DEBUG("{}: Returning value: {}", p_name, value);
     return value;
 }
 
@@ -233,6 +233,7 @@ bool V4L2PropertyBoolImpl::get_value() const
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return false;
     }
+    //SPDLOG_DEBUG("{}: Returning value: {}", p_name, value);
 
     if (value == 0)
     {
@@ -331,14 +332,27 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
         {
             p_name = mapping->gen_name;
         }
-
-        if (queryctrl->type == V4L2_CTRL_TYPE_BOOLEAN)
+        else
         {
-            p_entries = {
-                {0, "Off"},
-                {1, "Continuous"}
-            };
+            p_name = (char*)queryctrl->name;
         }
+
+        if (mapping->gen_enum_entries)
+        {
+            p_entries = mapping->gen_enum_entries.value();
+        }
+        else
+        {
+            if (auto ptr = p_cam.lock())
+            {
+                p_entries = ptr->get_menu_entries(p_v4l2_id, queryctrl->maximum);
+            }
+            else
+            {
+                SPDLOG_WARN("Unable to retrieve enum entries during proerty creation.");
+            }
+        }
+
     }
 
     p_default = p_entries.at(ctrl->value);
