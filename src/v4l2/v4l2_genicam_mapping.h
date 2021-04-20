@@ -4,9 +4,9 @@
 
 #include "base_types.h"
 
+#include <map>
 #include <optional>
 #include <string>
-#include <map>
 
 namespace tcam::v4l2
 {

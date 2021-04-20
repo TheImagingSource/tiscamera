@@ -109,7 +109,7 @@ public:
     //override
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return p_properties;
+        return m_properties;
     };
 
     bool set_video_format(const VideoFormat&) override;
@@ -169,7 +169,7 @@ private:
 
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
 
     std::thread monitor_v4l2_thread;
     std::atomic<bool> stop_monitor_v4l2_thread { false };
@@ -214,8 +214,10 @@ private:
     int index_control(struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
 
 
-    int new_control(struct v4l2_queryctrl* qctrl);
+    std::shared_ptr<tcam::property::IPropertyBase> new_control(struct v4l2_queryctrl* qctrl);
     void index_controls();
+    void sort_properties(std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties);
+
     void updateV4L2Property(V4l2Device::property_description& desc);
 
     bool changeV4L2Control(const property_description&);

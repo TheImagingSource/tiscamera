@@ -15,13 +15,12 @@
  */
 
 #include "V4l2Device.h"
-
-#include "v4l2_utils.h"
-#include "v4l2_property_impl.h"
-#include "v4l2_genicam_mapping.h"
-
 #include "logging.h"
 #include "utils.h"
+#include "v4l2_genicam_mapping.h"
+#include "v4l2_property_impl.h"
+#include "v4l2_utils.h"
+#include "v4l2_uvc_identifier.h"
 
 #include <linux/videodev2.h>
 #include <unistd.h> // pipe, usleep
@@ -31,17 +30,17 @@ using namespace tcam;
 using namespace tcam::v4l2;
 
 
-int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
+std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
 {
     if (qctrl->flags & V4L2_CTRL_FLAG_DISABLED)
     {
-        return 1;
+        return nullptr;
     }
 
     if (qctrl->type == V4L2_CTRL_TYPE_CTRL_CLASS)
     {
         // ignore unneccesary controls descriptions such as control "groups"
-        return 1;
+        return nullptr;
     }
     struct v4l2_ext_control ext_ctrl = {};
     struct v4l2_ext_controls ctrls = {};
@@ -68,7 +67,7 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
         else if (tcam_xioctl(fd, VIDIOC_G_EXT_CTRLS, &ctrls))
         {
             SPDLOG_ERROR("Errno {} getting ext_ctrl {}", errno, qctrl->name);
-            return -1;
+            return nullptr;
         }
     }
     else
@@ -79,7 +78,7 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
         if (tcam_xioctl(fd, VIDIOC_G_CTRL, &ctrl))
         {
             SPDLOG_ERROR("error {} getting ctrl {}", errno, qctrl->name);
-            return -1;
+            return nullptr;
         }
         ext_ctrl.value = ctrl.value;
     }
@@ -104,38 +103,71 @@ int V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
-            break;
+            return std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
-            break;
+            return std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
-            break;
+            return std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
-            break;
+            return std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            p_properties.push_back(std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping));
-            break;
+            return std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_STRING:
         default:
         {
             SPDLOG_WARN("Unknown v4l2 property type - %d.", qctrl->type);
-            return 1;
+            return nullptr;
         }
     }
 
     return 0;
+}
+
+
+void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties)
+{
+    if (properties.empty())
+    {
+        return;
+    }
+
+    auto preserve_id = [&properties](uint32_t v4l2_id, const std::string& name) {
+
+        auto p = properties.begin();
+        while (p != properties.end())
+        {
+            if (p->first != v4l2_id && (p->second->get_name() == name))
+            {
+                SPDLOG_DEBUG("Found additional interface for {}({}). Hiding", name, v4l2_id);
+                p = properties.erase(p);
+            }
+            p++;
+        }
+
+
+    };
+
+    preserve_id(TCAM_V4L2_EXPOSURE_TIME_US, "ExposureTime");
+    preserve_id(0x0199e202, "ExposureTimeAuto");
+    preserve_id(V4L2_CID_PRIVACY, "TriggerMode");
+    preserve_id(0x199e204, "Gain");
+
+
+    m_properties.reserve(properties.size());
+
+    for( auto it = properties.begin(); it != properties.end(); ++it )
+    {
+        m_properties.push_back(it->second);
+    }
 }
 
 
@@ -161,13 +193,25 @@ void V4l2Device::index_controls()
             "The property extension unit does not exist. Not all properties will be accessible.");
     }
 
+    std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> new_properties;
 
     struct v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
     while (tcam_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
     {
-        new_control(&qctrl);
+        auto prop = new_control(&qctrl);
+
+        if (prop)
+        {
+            new_properties.emplace(qctrl.id, prop);
+            //sort_properties(qctrl.id, prop);
+        }
+
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
+
+    sort_properties(new_properties);
+
+
 }

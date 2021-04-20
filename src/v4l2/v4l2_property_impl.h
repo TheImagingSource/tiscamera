@@ -38,7 +38,6 @@ class V4L2PropertyBackend;
 class V4L2PropertyIntegerImpl : public IPropertyInteger
 {
 public:
-
     V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
                             struct v4l2_ext_control* ctrl,
                             std::shared_ptr<V4L2PropertyBackend> backend,
@@ -46,28 +45,28 @@ public:
 
     virtual std::string get_name() const final
     {
-        return p_name;
+        return m_name;
     };
     virtual PropertyFlags get_flags() const final
     {
-        return p_flags;
+        return m_flags;
     };
 
     virtual int64_t get_min() const final
     {
-        return p_min;
+        return m_min;
     };
     virtual int64_t get_max() const final
     {
-        return p_max;
+        return m_max;
     };
     virtual int64_t get_step() const final
     {
-        return p_step;
+        return m_step;
     };
     virtual int64_t get_default() const final
     {
-        return p_default;
+        return m_default;
     };
     virtual int64_t get_value() const final;
 
@@ -76,17 +75,17 @@ public:
 private:
     bool valid_value(int64_t val);
 
-    std::weak_ptr<V4L2PropertyBackend> p_cam;
+    std::weak_ptr<V4L2PropertyBackend> m_cam;
 
-    std::string p_name;
-    PropertyFlags p_flags;
+    std::string m_name;
+    PropertyFlags m_flags;
 
-    int64_t p_min;
-    int64_t p_max;
-    int64_t p_step;
-    int64_t p_default;
+    int64_t m_min;
+    int64_t m_max;
+    int64_t m_step;
+    int64_t m_default;
 
-    int p_v4l2_id;
+    int m_v4l2_id;
 };
 
 
@@ -101,28 +100,28 @@ public:
 
     virtual std::string get_name() const final
     {
-        return p_name;
+        return m_name;
     };
     virtual PropertyFlags get_flags() const final
     {
-        return p_flags;
+        return m_flags;
     };
 
     virtual double get_min() const final
     {
-        return p_min;
+        return m_min;
     };
     virtual double get_max() const final
     {
-        return p_max;
+        return m_max;
     };
     virtual double get_step() const final
     {
-        return p_step;
+        return m_step;
     };
     virtual double get_default() const final
     {
-        return p_default;
+        return m_default;
     };
     virtual double get_value() const final;
 
@@ -131,17 +130,17 @@ public:
 private:
     bool valid_value(double val);
 
-    std::weak_ptr<V4L2PropertyBackend> p_cam;
+    std::weak_ptr<V4L2PropertyBackend> m_cam;
 
-    std::string p_name;
-    PropertyFlags p_flags;
+    std::string m_name;
+    PropertyFlags m_flags;
 
-    double p_min;
-    double p_max;
-    double p_step;
-    double p_default;
+    double m_min;
+    double m_max;
+    double m_step;
+    double m_default;
 
-    int p_v4l2_id;
+    int m_v4l2_id;
 };
 
 
@@ -155,27 +154,30 @@ public:
 
     virtual std::string get_name() const final
     {
-        return p_name;
+        return m_name;
     };
     virtual PropertyFlags get_flags() const final
     {
-        return p_flags;
+        return m_flags;
     };
 
-    virtual bool get_default() const final { return p_default; };
+    virtual bool get_default() const final
+    {
+        return m_default;
+    };
     virtual bool get_value() const final;
 
     virtual bool set_value(bool new_value) final;
 
 private:
-    std::weak_ptr<V4L2PropertyBackend> p_cam;
+    std::weak_ptr<V4L2PropertyBackend> m_cam;
 
-    std::string p_name;
-    PropertyFlags p_flags;
+    std::string m_name;
+    PropertyFlags m_flags;
 
-    bool p_default;
+    bool m_default;
 
-    int p_v4l2_id;
+    int m_v4l2_id;
 };
 
 
@@ -189,22 +191,22 @@ public:
 
     virtual std::string get_name() const final
     {
-        return p_name;
+        return m_name;
     };
     virtual PropertyFlags get_flags() const final
     {
-        return p_flags;
+        return m_flags;
     };
 
     virtual bool execute() final;
 
 private:
-    std::weak_ptr<V4L2PropertyBackend> p_cam;
+    std::weak_ptr<V4L2PropertyBackend> m_cam;
 
-    std::string p_name;
-    PropertyFlags p_flags;
+    std::string m_name;
+    PropertyFlags m_flags;
 
-    int p_v4l2_id;
+    int m_v4l2_id;
 };
 
 
@@ -218,11 +220,11 @@ public:
 
     virtual std::string get_name() const final
     {
-        return p_name;
+        return m_name;
     };
     virtual PropertyFlags get_flags() const final
     {
-        return p_flags;
+        return m_flags;
     };
 
     virtual bool set_value_str(const std::string& new_value) final;
@@ -231,23 +233,25 @@ public:
     virtual std::string get_value() const final;
     virtual int get_value_int() const final;
 
-    virtual std::string get_default() const final { return p_default; };
+    virtual std::string get_default() const final
+    {
+        return m_default;
+    };
 
     virtual std::vector<std::string> get_entries() const final;
 
 private:
-
     bool valid_value(int value);
 
-    std::map<int, std::string> p_entries;
-    std::weak_ptr<V4L2PropertyBackend> p_cam;
+    std::map<int, std::string> m_entries;
+    std::weak_ptr<V4L2PropertyBackend> m_cam;
 
-    std::string p_name;
-    PropertyFlags p_flags;
+    std::string m_name;
+    PropertyFlags m_flags;
 
-    std::string p_default;
+    std::string m_default;
 
-    int p_v4l2_id;
+    int m_v4l2_id;
 };
 
 

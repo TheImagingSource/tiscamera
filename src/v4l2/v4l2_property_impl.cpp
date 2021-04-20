@@ -16,10 +16,9 @@
 
 #include "v4l2_property_impl.h"
 
-#include "v4l2_genicam_mapping.h"
-
 #include "V4L2PropertyBackend.h"
 #include "logging.h"
+#include "v4l2_genicam_mapping.h"
 
 #include <memory>
 
@@ -31,23 +30,28 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
                                                  const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    p_min = queryctrl->minimum;
-    p_max = queryctrl->maximum;
-    p_step = queryctrl->step;
+    m_min = queryctrl->minimum;
+    m_max = queryctrl->maximum;
+    m_step = queryctrl->step;
 
-    p_default = ctrl->value;
+    if (m_step == 0)
+    {
+        m_step = 1;
+    }
 
-    p_name = (char*)queryctrl->name;
+    m_default = ctrl->value;
+
+    m_name = (char*)queryctrl->name;
     if (mapping)
     {
         if (!mapping->gen_name.empty())
         {
-            p_name = mapping->gen_name;
+            m_name = mapping->gen_name;
         }
     }
 
-    p_v4l2_id = queryctrl->id;
-    p_cam = backend;
+    m_v4l2_id = queryctrl->id;
+    m_cam = backend;
 }
 
 
@@ -55,9 +59,9 @@ int64_t V4L2PropertyIntegerImpl::get_value() const
 {
     int64_t value = 0;
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(p_v4l2_id, value);
+        ptr->read_control(m_v4l2_id, value);
     }
     else
     {
@@ -76,9 +80,9 @@ bool V4L2PropertyIntegerImpl::set_value(int64_t new_value)
         return false;
     }
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(p_v4l2_id, new_value);
+        ptr->write_control(m_v4l2_id, new_value);
     }
     else
     {
@@ -106,34 +110,29 @@ bool V4L2PropertyIntegerImpl::valid_value(int64_t val)
 }
 
 
-
-
-
-
-
 V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
                                                struct v4l2_ext_control* ctrl,
                                                std::shared_ptr<V4L2PropertyBackend> backend,
                                                const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    p_min = queryctrl->minimum;
-    p_max = queryctrl->maximum;
-    p_step = queryctrl->step;
-    p_default = ctrl->value;
+    m_min = queryctrl->minimum;
+    m_max = queryctrl->maximum;
+    m_step = queryctrl->step;
+    m_default = ctrl->value;
 
-    p_name = (char*)queryctrl->name;
+    m_name = (char*)queryctrl->name;
 
     if (mapping)
     {
         if (!mapping->gen_name.empty())
         {
-            p_name = mapping->gen_name;
+            m_name = mapping->gen_name;
         }
     }
 
-    p_v4l2_id = queryctrl->id;
+    m_v4l2_id = queryctrl->id;
 
-    p_cam = backend;
+    m_cam = backend;
 }
 
 
@@ -141,16 +140,16 @@ double V4L2PropertyDoubleImpl::get_value() const
 {
     int64_t value = 0;
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(p_v4l2_id, value);
+        ptr->read_control(m_v4l2_id, value);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return -1;
     }
-    //SPDLOG_DEBUG("{}: Returning value: {}", p_name, value);
+    //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
     return value;
 }
 
@@ -162,9 +161,9 @@ bool V4L2PropertyDoubleImpl::set_value(double new_value)
         return false;
     }
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(p_v4l2_id, new_value);
+        ptr->write_control(m_v4l2_id, new_value);
     }
     else
     {
@@ -174,7 +173,6 @@ bool V4L2PropertyDoubleImpl::set_value(double new_value)
 
     return false;
 }
-
 
 
 bool V4L2PropertyDoubleImpl::valid_value(double val)
@@ -188,9 +186,6 @@ bool V4L2PropertyDoubleImpl::valid_value(double val)
 }
 
 
-
-
-
 V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
                                            struct v4l2_ext_control* ctrl,
                                            std::shared_ptr<V4L2PropertyBackend> backend,
@@ -198,25 +193,24 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
 {
     if (ctrl->value == 0)
     {
-        p_default = false;
+        m_default = false;
     }
     else
     {
-        p_default = true;
+        m_default = true;
     }
-    p_name = (char*)queryctrl->name;
+    m_name = (char*)queryctrl->name;
     if (mapping)
     {
         if (!mapping->gen_name.empty())
         {
-            p_name = mapping->gen_name;
+            m_name = mapping->gen_name;
         }
     }
 
-    p_v4l2_id = queryctrl->id;
+    m_v4l2_id = queryctrl->id;
 
-    p_cam = backend;
-
+    m_cam = backend;
 }
 
 
@@ -224,16 +218,16 @@ bool V4L2PropertyBoolImpl::get_value() const
 {
     int64_t value = 0;
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(p_v4l2_id, value);
+        ptr->read_control(m_v4l2_id, value);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return false;
     }
-    //SPDLOG_DEBUG("{}: Returning value: {}", p_name, value);
+    //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
 
     if (value == 0)
     {
@@ -250,9 +244,9 @@ bool V4L2PropertyBoolImpl::set_value(bool new_value)
         val = 1;
     }
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(p_v4l2_id, val);
+        ptr->write_control(m_v4l2_id, val);
     }
     else
     {
@@ -263,46 +257,41 @@ bool V4L2PropertyBoolImpl::set_value(bool new_value)
 }
 
 
-
-
-
 V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
                                                  struct v4l2_ext_control* /*ctrl*/,
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
                                                  const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    p_name = (char*)queryctrl->name;
+    m_name = (char*)queryctrl->name;
 
     if (mapping)
     {
         if (!mapping->gen_name.empty())
         {
-            p_name = mapping->gen_name;
+            m_name = mapping->gen_name;
         }
     }
 
-    p_v4l2_id = queryctrl->id;
+    m_v4l2_id = queryctrl->id;
 
-    p_cam = backend;
+    m_cam = backend;
 }
 
 
 bool V4L2PropertyCommandImpl::execute()
 {
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(p_v4l2_id, 1);
+        ptr->write_control(m_v4l2_id, 1);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
         return false;
     }
-    return true;}
-
-
-
+    return true;
+}
 
 
 V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
@@ -310,16 +299,16 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
                                            std::shared_ptr<V4L2PropertyBackend> backend,
                                            const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    p_cam = backend;
-    p_v4l2_id = queryctrl->id;
+    m_cam = backend;
+    m_v4l2_id = queryctrl->id;
 
     if (!mapping)
     {
-        p_name = (char*)queryctrl->name;
+        m_name = (char*)queryctrl->name;
 
-        if (auto ptr = p_cam.lock())
+        if (auto ptr = m_cam.lock())
         {
-            p_entries = ptr->get_menu_entries(p_v4l2_id, queryctrl->maximum);
+            m_entries = ptr->get_menu_entries(m_v4l2_id, queryctrl->maximum);
         }
         else
         {
@@ -330,40 +319,39 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
     {
         if (!mapping->gen_name.empty())
         {
-            p_name = mapping->gen_name;
+            m_name = mapping->gen_name;
         }
         else
         {
-            p_name = (char*)queryctrl->name;
+            m_name = (char*)queryctrl->name;
         }
 
         if (mapping->gen_enum_entries)
         {
-            p_entries = mapping->gen_enum_entries.value();
+            m_entries = mapping->gen_enum_entries.value();
         }
         else
         {
-            if (auto ptr = p_cam.lock())
+            if (auto ptr = m_cam.lock())
             {
-                p_entries = ptr->get_menu_entries(p_v4l2_id, queryctrl->maximum);
+                m_entries = ptr->get_menu_entries(m_v4l2_id, queryctrl->maximum);
             }
             else
             {
                 SPDLOG_WARN("Unable to retrieve enum entries during proerty creation.");
             }
         }
-
     }
 
-    p_default = p_entries.at(ctrl->value);
+    m_default = m_entries.at(ctrl->value);
 }
 
 
 bool V4L2PropertyEnumImpl::valid_value(int value)
 {
-    auto it = p_entries.find(value);
+    auto it = m_entries.find(value);
 
-    if (it == p_entries.end())
+    if (it == m_entries.end())
     {
         return false;
     }
@@ -374,7 +362,7 @@ bool V4L2PropertyEnumImpl::valid_value(int value)
 
 bool V4L2PropertyEnumImpl::set_value_str(const std::string& new_value)
 {
-    for (auto it = p_entries.begin(); it != p_entries.end(); ++it)
+    for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
         if (it->second == new_value)
         {
@@ -392,15 +380,15 @@ bool V4L2PropertyEnumImpl::set_value(int new_value)
         return false;
     }
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        if (ptr->write_control(p_v4l2_id, new_value) != 0)
+        if (ptr->write_control(m_v4l2_id, new_value) != 0)
         {
-            SPDLOG_ERROR("Something went wrong while writing {}", p_name);
+            SPDLOG_ERROR("Something went wrong while writing {}", m_name);
         }
         else
         {
-            //SPDLOG_DEBUG("Wrote {} {}", p_name, new_value);
+            //SPDLOG_DEBUG("Wrote {} {}", m_name, new_value);
         }
     }
     else
@@ -419,7 +407,7 @@ std::string V4L2PropertyEnumImpl::get_value() const
 
     // TODO: additional checks if key exists
 
-    return p_entries.at(value);
+    return m_entries.at(value);
 }
 
 
@@ -427,9 +415,9 @@ int V4L2PropertyEnumImpl::get_value_int() const
 {
     int64_t value = 0;
 
-    if (auto ptr = p_cam.lock())
+    if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(p_v4l2_id, value);
+        ptr->read_control(m_v4l2_id, value);
     }
     else
     {
@@ -444,10 +432,7 @@ int V4L2PropertyEnumImpl::get_value_int() const
 std::vector<std::string> V4L2PropertyEnumImpl::get_entries() const
 {
     std::vector<std::string> v;
-    for (auto it = p_entries.begin(); it != p_entries.end(); ++it)
-    {
-        v.push_back(it->second);
-    }
+    for (auto it = m_entries.begin(); it != m_entries.end(); ++it) { v.push_back(it->second); }
     return v;
 }
 

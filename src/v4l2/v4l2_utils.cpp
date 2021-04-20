@@ -60,7 +60,6 @@ uint32_t tcam::v4l2::tcam_property_type_to_v4l2(TCAM_PROPERTY_TYPE type)
             return 0;
         }
     }
-
 }
 
 
@@ -95,7 +94,6 @@ TCAM_PROPERTY_TYPE tcam::v4l2::v4l2_property_type_to_tcam(uint32_t type)
         }
     }
 }
-
 
 
 uint32_t tcam::convert_v4l2_flags(uint32_t v4l2_flags)

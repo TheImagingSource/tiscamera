@@ -16,15 +16,13 @@
 
 #include "V4L2PropertyBackend.h"
 
-#include <linux/videodev2.h>
+#include "logging.h"
 #include "utils.h"
 
-#include "logging.h"
+#include <linux/videodev2.h>
 
 
-tcam::property::V4L2PropertyBackend::V4L2PropertyBackend(int fd)
-    : p_fd(fd)
-{}
+tcam::property::V4L2PropertyBackend::V4L2PropertyBackend(int fd) : p_fd(fd) {}
 
 
 int tcam::property::V4L2PropertyBackend::write_control(int v4l2_id, int new_value)
@@ -45,8 +43,8 @@ int tcam::property::V4L2PropertyBackend::read_control(int v4l2_id, int64_t& new_
     if (tcam_xioctl(p_fd, VIDIOC_G_CTRL, &ctrl) != 0)
     {
         SPDLOG_WARN("Could not retrieve current value. ioctl return '{}'",
-        //              desc.prop->get_name().c_str(),
-                      strerror(errno));
+                    //              desc.prop->get_name().c_str(),
+                    strerror(errno));
         return -1;
     }
     new_value = ctrl.value;
@@ -54,7 +52,8 @@ int tcam::property::V4L2PropertyBackend::read_control(int v4l2_id, int64_t& new_
 }
 
 
-std::map<int, std::string> tcam::property::V4L2PropertyBackend::get_menu_entries(int v4l2_id, int max)
+std::map<int, std::string> tcam::property::V4L2PropertyBackend::get_menu_entries(int v4l2_id,
+                                                                                 int max)
 {
     std::map<int, std::string> entries;
 

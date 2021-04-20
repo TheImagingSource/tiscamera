@@ -17,8 +17,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <map>
+#include <string>
 
 namespace tcam::property
 {
@@ -35,7 +35,6 @@ public:
     std::map<int, std::string> get_menu_entries(int v4l2_id, int max);
 
 private:
-
     int p_fd;
 };
 
