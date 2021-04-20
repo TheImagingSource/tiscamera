@@ -16,10 +16,9 @@
 
 #pragma once
 
-#include "gsttcammainsrc.h"
-
-#include "tcam.h"
 #include "gst_helper.h"
+#include "gsttcammainsrc.h"
+#include "tcam.h"
 
 #include <memory>
 #include <queue>
@@ -62,7 +61,6 @@ struct device_state
         sink = nullptr;
     }
 };
-
 
 
 bool mainsrc_init_camera(GstTcamMainSrc* self);

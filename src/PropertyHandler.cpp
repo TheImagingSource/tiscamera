@@ -31,7 +31,8 @@ PropertyHandler::PropertyHandler() {}
 PropertyHandler::~PropertyHandler() {}
 
 
-void PropertyHandler::set_device_properties(std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props)
+void PropertyHandler::set_device_properties(
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props)
 {
     p_device_properties = props;
 }
@@ -41,7 +42,6 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> PropertyHandler::get
 {
     return p_device_properties;
 }
-
 
 
 static bool is_group_master(const Property& p)

@@ -155,7 +155,7 @@ uint64_t tcam::get_buffer_length(unsigned int width, unsigned int height, uint32
         return 0;
     }
 
-    if (!img::is_known_fcc(fourcc))
+    if (!img::is_known_fcc(static_cast<img::fourcc>(fourcc)))
     {
         SPDLOG_ERROR("Unknown fourcc {:x}", fourcc);
     }

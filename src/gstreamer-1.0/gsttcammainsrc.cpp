@@ -18,14 +18,13 @@
 
 #include "gstmetatcamstatistics.h"
 #include "logging.h"
+#include "mainsrc_device_state.h"
+#include "mainsrc_tcamprop_impl.h"
 #include "tcam.h"
 #include "tcamgstbase.h"
 #include "tcamgstjson.h"
 #include "tcamgststrings.h"
 #include "tcamprop.h"
-
-#include "mainsrc_tcamprop_impl.h"
-#include "mainsrc_device_state.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -458,7 +457,8 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
 
     if (mainsrc_init_camera(self))
     {
-        self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback, self);
+        self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback,
+                                                         self);
         self->device->all_caps.reset(gst_tcam_mainsrc_get_all_camera_caps(self));
         return true;
     }

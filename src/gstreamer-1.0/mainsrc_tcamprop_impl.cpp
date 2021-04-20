@@ -70,7 +70,7 @@ gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name)
         return nullptr;
     }
 
-    auto prop =  self->device->dev->get_property(name);
+    auto prop = self->device->dev->get_property(name);
 
     if (!prop)
     {
@@ -102,7 +102,8 @@ GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
     g_return_val_if_fail(self->device != NULL, NULL);
     g_return_val_if_fail(self->device->dev != NULL, NULL);
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> vec = self->device->dev->get_properties();
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> vec =
+        self->device->dev->get_properties();
 
     for (const auto& v : vec) { ret = g_slist_append(ret, g_strdup(v->get_name().c_str())); }
 
@@ -111,16 +112,16 @@ GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
 
 
 gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
-                                                   const gchar* name,
-                                                   GValue* value,
-                                                   GValue* min,
-                                                   GValue* max,
-                                                   GValue* def,
-                                                   GValue* step,
-                                                   GValue* type,
-                                                   GValue* flags,
-                                                   GValue* category,
-                                                   GValue* group)
+                                            const gchar* name,
+                                            GValue* value,
+                                            GValue* min,
+                                            GValue* max,
+                                            GValue* def,
+                                            GValue* step,
+                                            GValue* type,
+                                            GValue* flags,
+                                            GValue* category,
+                                            GValue* group)
 {
     gboolean ret = TRUE;
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
@@ -157,7 +158,7 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
     {
         g_value_init(group, G_TYPE_STRING);
         g_value_set_string(group, "");
-            //tcam::get_control_reference(prop.group.property_group).name.c_str());
+        //tcam::get_control_reference(prop.group.property_group).name.c_str());
     }
 
     auto prop_type = property->get_type();
@@ -383,18 +384,13 @@ GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name
 
     auto mapping = prop_enum->get_entries();
 
-    for (const auto& m : mapping)
-    {
-        ret = g_slist_append(ret, g_strdup(m.c_str()));
-    }
+    for (const auto& m : mapping) { ret = g_slist_append(ret, g_strdup(m.c_str())); }
 
     return ret;
 }
 
 
-gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface,
-                                            const gchar* name,
-                                            const GValue* value)
+gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, const GValue* value)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
@@ -414,7 +410,8 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface,
                 return FALSE;
             }
 
-            return static_cast<IPropertyInteger*>(prop.get())->set_value((int64_t)g_value_get_int(value));
+            return static_cast<IPropertyInteger*>(prop.get())
+                ->set_value((int64_t)g_value_get_int(value));
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
@@ -454,17 +451,13 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface,
 
             std::string s = g_value_get_string(value);
             return static_cast<IPropertyEnum*>(prop.get())->set_value_str(s);
-
         }
         default:
         {
             return FALSE;
         }
     }
-
-
 }
-
 
 
 GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)

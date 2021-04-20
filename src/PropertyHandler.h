@@ -18,9 +18,8 @@
 #define TCAM_PROPERTYHANDLER_H
 
 #include "Properties.h"
-#include "compiler_defines.h"
-
 #include "PropertyInterfaces.h"
+#include "compiler_defines.h"
 
 #include <memory>
 #include <vector>
@@ -60,7 +59,6 @@ public:
     bool get_property(Property&);
 
 private:
-
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_device_properties;
 
     std::vector<std::shared_ptr<Property>> device_properties;

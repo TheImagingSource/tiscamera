@@ -175,11 +175,11 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::g
         return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
     }
     return property_handler->get();
-
 }
 
 
-std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(const std::string& name)
+std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(
+    const std::string& name)
 {
     auto props = property_handler->get();
 

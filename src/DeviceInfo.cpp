@@ -16,10 +16,9 @@
 
 #include "DeviceInfo.h"
 
+#include <algorithm>
 #include <cstring>
 #include <string>
-
-#include <algorithm>
 
 using namespace tcam;
 
@@ -75,15 +74,15 @@ std::string DeviceInfo::get_name_safe() const
 {
     std::string ret = device.name;
 
-    for(std::string::iterator it = ret.begin(); it != ret.end(); ++it)
+    for (std::string::iterator it = ret.begin(); it != ret.end(); ++it)
     {
-        if(*it == ' ')
+        if (*it == ' ')
         {
             *it = '_';
         }
     }
-    std::transform(ret.begin(), ret.end(), ret.begin(),
-                   [](unsigned char c){ return std::tolower(c); });
+    std::transform(
+        ret.begin(), ret.end(), ret.begin(), [](unsigned char c) { return std::tolower(c); });
     return ret;
 }
 
