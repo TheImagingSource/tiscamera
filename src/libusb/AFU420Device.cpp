@@ -472,7 +472,7 @@ void AFU420Device::create_formats ()
         memcpy(desc.description, fourcc2description(desc.fourcc), sizeof(desc.description));
 
         std::vector<struct framerate_mapping> rf;
-        auto add_res = [&rf] (stream_fmt_data& _fmt, tcam_image_size& size)
+        auto add_res = [&rf, this] (stream_fmt_data& _fmt, tcam_image_size& size)
             {
                 struct tcam_resolution_description res = {};
                 res.type = TCAM_RESOLUTION_TYPE_FIXED;
@@ -481,12 +481,18 @@ void AFU420Device::create_formats ()
                 res.max_size.width = size.width;
                 res.max_size.height = size.height;
 
-                std::vector<double> f = create_steps_for_range(_fmt.fps_min, _fmt.fps_max);
+                double fps_min = 0;
+                double fps_max = 0;
+
+                this->get_frame_rate_range(_fmt.fmt_in, 1, size, fps_min, fps_max);
+
+                std::vector<double> f = create_steps_for_range(fps_min, fps_max);
 
                 framerate_mapping r = { res, f };
                 rf.push_back(r);
             };
 
+        add_res(fmt, fmt.dim_max);
 
         for (auto& f : get_standard_resolutions(fmt.dim_min, fmt.dim_max))
         {
@@ -499,6 +505,8 @@ void AFU420Device::create_formats ()
 
             add_res(fmt, f);
         }
+
+        add_res(fmt, fmt.dim_min);
 
         //tcam_info("Adding fmt to fmt_list");
         VideoFormatDescription format(nullptr, desc, rf);

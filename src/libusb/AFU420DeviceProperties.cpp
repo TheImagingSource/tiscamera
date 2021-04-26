@@ -559,6 +559,12 @@ bool AFU420Device::update_property (tcam::AFU420Device::property_description &de
 
             return true;
         }
+        case TCAM_PROPERTY_HDR:
+        {
+            desc.property->set_value((int64_t)get_hdr());
+
+            return true;
+        }
         default:
         {
             tcam_warning("Property %s does not belong to this device", desc.property->get_name().c_str());
@@ -699,11 +705,11 @@ bool AFU420Device::set_shutter (bool open)
 bool AFU420Device::get_shutter ()
 {
     unsigned short ushValue = 0x0;
-    int ret = control_read(ushValue, BASIC_PC_TO_USB_SHUTTER);
+    int ret = control_read(ushValue, BASIC_USB_TO_PC_SHUTTER);
 
     if (ret < 0)
     {
-        tcam_error("Could not write Shutter flag.");
+        tcam_warning("Could not read Shutter flag (%d).", ret);
         return false;
     }
 
