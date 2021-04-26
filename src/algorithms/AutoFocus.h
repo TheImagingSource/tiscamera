@@ -18,47 +18,47 @@
 #define _AUTOFOCUS_H_
 
 #include "algorithms/auto_alg_params.h"
+#include "compiler_defines.h"
 #include "img/image_transform_base.h"
 
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C"
+VISIBILITY_DEFAULT
+
+namespace tcam::algorithms::focus
 {
-#endif
+/* opaque object */
+struct AutoFocus;
+typedef struct AutoFocus AutoFocus;
 
-    /* opaque object */
-    struct AutoFocus;
-    typedef struct AutoFocus AutoFocus;
+/* @brief Create AutoFocus instance */
+AutoFocus* autofocus_create(void);
 
-    /* @brief Create AutoFocus instance */
-    AutoFocus* autofocus_create(void);
+/* @brief Destroy AutoFocus instance */
+void autofocus_destroy(AutoFocus* focus);
 
-    /* @brief Destroy AutoFocus instance */
-    void autofocus_destroy(AutoFocus* focus);
-
-    /* @param pixel_dim dimension of a single pixel
+/* @param pixel_dim dimension of a single pixel
                         usually 1x1, binning may change that
      */
-    bool autofocus_run(AutoFocus* focus,
-                       uint64_t time_point,
-                       const img::img_descriptor& img,
-                       const auto_alg::auto_focus_params& state,
-                       img::point offsets,
-                       img::dim pixel_dim,
-                       int& new_focus_vale);
+bool autofocus_run(AutoFocus* focus,
+                   uint64_t time_point,
+                   const img::img_descriptor& img,
+                   const auto_alg::auto_focus_params& state,
+                   img::point offsets,
+                   img::dim pixel_dim,
+                   int& new_focus_vale);
 
-    /* @name autofocus_is_running */
-    /* @param focus - AutoFocus that shall be checked */
-    /* @return true if focus is active */
-    bool autofocus_is_running(AutoFocus* focus);
+/* @name autofocus_is_running */
+/* @param focus - AutoFocus that shall be checked */
+/* @return true if focus is active */
+bool autofocus_is_running(AutoFocus* focus);
 
-    /* @name autofocus_end */
-    /* @brief Force stop */
-    void autofocus_end(AutoFocus* focus);
+/* @name autofocus_end */
+/* @brief Force stop */
+void autofocus_end(AutoFocus* focus);
 
-#ifdef __cplusplus
-}
-#endif
+} // namespace tcam::algorithms::focus
+
+VISIBILITY_POP
 
 #endif /* _AUTOFOCUS_H_ */

@@ -18,7 +18,8 @@
 
 #include <string.h> // for memset
 
-
+namespace tcam
+{
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
@@ -285,3 +286,5 @@ unsigned int buffer_brightness_gray16(image_buffer* buf)
     }
     return brightness;
 }
+
+} // namespace tcam

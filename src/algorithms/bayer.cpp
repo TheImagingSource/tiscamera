@@ -16,6 +16,8 @@
 
 #include "bayer.h"
 
+namespace tcam
+{
 
 tBY8Pattern next_pixel(tBY8Pattern pattern)
 {
@@ -98,3 +100,4 @@ unsigned int initial_offset(tBY8Pattern pattern,
     }
     return first_line_offset;
 }
+} // namespace tcam

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+using namespace tcam;
 
 static const uint MAX_STEPS = 20;
 static uint WB_IDENTITY = 64;

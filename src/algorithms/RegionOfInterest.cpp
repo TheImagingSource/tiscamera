@@ -20,6 +20,7 @@
 #include "math.h"
 
 using namespace roi;
+using namespace tcam::algorithms::roi;
 
 RegionOfInterest::RegionOfInterest(const tcam_image_size& min_size,
                                    const tcam_image_size& image_size,

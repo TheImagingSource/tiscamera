@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef TCAM_ALGORITHM_IMAGE_SAMPLING_H
-#define TCAM_ALGORITHM_IMAGE_SAMPLING_H
+#pragma once
 
 #include "bayer.h"
+#include "compiler_defines.h"
 
-#ifdef __cplusplus
-extern "C"
+VISIBILITY_DEFAULT
+
+namespace tcam
 {
-#endif
-
 
 /* number of sample points */
 #define SAMPLING_LINES      30
@@ -31,73 +30,71 @@ extern "C"
 #define SAMPLING_MIN_WIDTH  8
 #define SAMPLING_MIN_HEIGHT 8
 
-    typedef unsigned char byte;
+typedef unsigned char byte;
 
-    typedef struct auto_sample_points
+typedef struct auto_sample_points
+{
+    struct pixel
     {
-        struct pixel
-        {
-            byte r;
-            byte g;
-            byte b;
-        } samples[1500];
+        byte r;
+        byte g;
+        byte b;
+    } samples[1500];
 
-        unsigned int cnt;
-    } auto_sample_points;
+    unsigned int cnt;
+} auto_sample_points;
 
 
-    typedef struct gst_tcam_image_size
-    {
-        unsigned int width;
-        unsigned int height;
-    } gst_tcam_image_size;
+typedef struct gst_tcam_image_size
+{
+    unsigned int width;
+    unsigned int height;
+} gst_tcam_image_size;
 
 
-    typedef struct
-    {
-        byte* image;
-        unsigned int width;
-        unsigned int height;
-        unsigned int rowstride;
-        format color_format;
-        tBY8Pattern pattern;
-    } image_buffer;
+typedef struct
+{
+    byte* image;
+    unsigned int width;
+    unsigned int height;
+    unsigned int rowstride;
+    format color_format;
+    tBY8Pattern pattern;
+} image_buffer;
 
 
-    /**
+/**
  * @name get_sampling_points
  * @param buf - image buffer that shall be analyzed
  * @param points - sample points of the image
  * @param bayer pattern of image
  * @brief analyzes given buffer and fills sample points
 */
-    void get_sampling_points(unsigned char* data,
-                             auto_sample_points* points,
-                             tBY8Pattern pattern,
-                             int width,
-                             int height);
+void get_sampling_points(unsigned char* data,
+                         auto_sample_points* points,
+                         tBY8Pattern pattern,
+                         int width,
+                         int height);
 
-    void get_sampling_points_from_buffer(image_buffer* buf, auto_sample_points* points);
+void get_sampling_points_from_buffer(image_buffer* buf, auto_sample_points* points);
 
-    void get_sampling_points_from_buffer(image_buffer* buf, auto_sample_points* points);
-    /**
+void get_sampling_points_from_buffer(image_buffer* buf, auto_sample_points* points);
+/**
  * @name image_brightness
  * @param buf - image buffer that shall be analyzed
  * @return guint containing the image brightness
  */
-    unsigned int image_brightness_bayer(image_buffer* buf);
+unsigned int image_brightness_bayer(image_buffer* buf);
 
-    /**
+/**
  * @name
  * @param
  * @return
  */
-    unsigned int buffer_brightness_gray(image_buffer* buf);
+unsigned int buffer_brightness_gray(image_buffer* buf);
 
-    unsigned int buffer_brightness_gray16(image_buffer* buf);
+unsigned int buffer_brightness_gray16(image_buffer* buf);
 
-#ifdef __cplusplus
-}
-#endif
+} // namespace tcam
 
-#endif /* TCAM_ALGORITHM_IMAGE_SAMPLING_H */
+VISIBILITY_POP

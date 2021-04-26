@@ -17,6 +17,7 @@
 #pragma once
 
 #include "base_types.h"
+#include "compiler_defines.h"
 #include "roi_base.h"
 #include "roi_change_behavior.h"
 #include "roi_preset.h"
@@ -25,11 +26,10 @@
 #include <string>
 #include <vector>
 
+VISIBILITY_DEFAULT
 
-// #ifdef __cplusplus
-// extern "C"
-// {
-// #endif
+namespace tcam::algorithms::roi
+{
 
 #ifndef byte
 typedef unsigned char byte;
@@ -91,11 +91,6 @@ bool roi_fits_image(const tcam_image_size& size, const roi_area& roi);
 
 byte* extract_roi(byte* image, const tcam_image_size& size, int bytes_per_pixel, const roi_area&);
 
+} // namespace tcam::algorithms::roi
 
-//} /* namespace roi */
-
-// #ifdef __cplusplus
-// //extern "C"
-// }
-
-// #endif
+VISIBILITY_POP

@@ -24,7 +24,8 @@
 
 using namespace roi;
 
-
+namespace tcam::algorithms::roi
+{
 ROI* create_roi(const tcam_image_size* min_size, const tcam_image_size* image_size)
 {
     return reinterpret_cast<ROI*>(new RegionOfInterest(*min_size, *image_size));
@@ -177,3 +178,5 @@ bool roi_fits_image(const tcam_image_size& size, const roi_area& roi)
     }
     return false;
 }
+
+} // namespace tcam::algorithms::roi

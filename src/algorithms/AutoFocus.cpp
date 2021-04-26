@@ -20,6 +20,9 @@
 
 #include <stdbool.h>
 
+namespace tcam::algorithms::focus
+{
+
 AutoFocus* autofocus_create(void)
 {
     return reinterpret_cast<AutoFocus*>(new auto_alg::impl::auto_focus());
@@ -55,3 +58,5 @@ void autofocus_end(AutoFocus* focus)
 {
     reinterpret_cast<auto_alg::impl::auto_focus*>(focus)->reset();
 }
+
+} // namespace tcam::algorithms::focus

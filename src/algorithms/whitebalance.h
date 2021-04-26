@@ -18,9 +18,12 @@
 #define WHITEBALANCE_H
 
 #include "bayer.h"
+#include "compiler_defines.h"
 #include "parallel.h"
 
 #include <memory>
+
+VISIBILITY_DEFAULT
 
 using namespace tcam::algorithms;
 
@@ -64,5 +67,7 @@ void whitebalance_buffer(struct wb_settings* settings, tcam_image_buffer& buffer
 } // namespace algorithms
 
 } // namespace tcam
+
+VISIBILITY_POP
 
 #endif /* WHITEBALANCE_H */
