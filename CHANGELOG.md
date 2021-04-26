@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 'tegra' device type
+- support for tcamtegrasrc
+- PWL format support
+
+### Changed
+
+- Reworked examples to be more applicable to all cameras.
+- property state description is now applied when going PAUSE->PLAYING
+- Device lost handling for v4l2 cameras when waiting for images.
+  Timeout now causes a warning. Device lost will not be triggered!
+
+### Fixed
+
+- Using only the `type` property of tcambin/tcamsrc now works
+- Added missing max resolution for DxK AFU420 cameras
+
 ## [0.13.1] - 2021.02.05
 
 ### Changed
