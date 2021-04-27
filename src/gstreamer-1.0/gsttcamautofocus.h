@@ -53,7 +53,7 @@ extern "C"
         gboolean focus_active;
 
         GstElement* camera_src;
-        AutoFocus* focus;
+        tcam::algorithms::focus::AutoFocus* focus;
 
         gint cur_focus;
 
@@ -62,7 +62,7 @@ extern "C"
         gint roi_width;
         gint roi_height;
 
-        ROI* roi;
+        tcam::algorithms::roi::ROI* roi;
 
         tcam_video_format fmt;
 

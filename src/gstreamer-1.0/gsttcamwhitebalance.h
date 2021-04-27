@@ -82,7 +82,7 @@ extern "C"
     {
         gboolean has_whitebalance;
         gboolean has_auto_whitebalance;
-        rgb_tripel rgb;
+        tcam::rgb_tripel rgb;
         gint max; // highest possible value. usually 255
         gint default_value; // Availalbe for V4l2. Aravis may not.
     };
@@ -102,7 +102,7 @@ extern "C"
         GstBaseTransform base_object;
 
         GstVideoInfo vinfo;
-        tBY8Pattern pattern;
+        tcam::tBY8Pattern pattern;
         guint expected_buffer_size;
 
 
@@ -112,7 +112,7 @@ extern "C"
         guint blue;
 
         /* persistent values */
-        rgb_tripel rgb;
+        tcam::rgb_tripel rgb;
         gboolean auto_wb;
         gboolean auto_enabled;
         gboolean force_hardware_wb;

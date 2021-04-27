@@ -104,8 +104,8 @@ extern "C"
         guint brightness_reference;
 
         GstElement* camera_src;
-        tBY8Pattern pattern;
-        format color_format;
+        tcam::tBY8Pattern pattern;
+        tcam::format color_format;
 
         unsigned int bit_depth;
 
@@ -113,9 +113,9 @@ extern "C"
 
         region image_region;
 
-        ROI* roi;
+        tcam::algorithms::roi::ROI* roi;
 
-        gst_tcam_image_size image_size;
+        tcam::gst_tcam_image_size image_size;
 
         gint framerate_numerator;
         gint framerate_denominator;

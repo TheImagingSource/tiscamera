@@ -32,6 +32,9 @@
 #include <gst/video/video.h>
 #include <stdlib.h>
 
+using namespace tcam;
+using namespace tcam::algorithms::roi;
+
 
 GST_DEBUG_CATEGORY_STATIC(gst_tcamautoexposure_debug_category);
 #define GST_CAT_DEFAULT gst_tcamautoexposure_debug_category
