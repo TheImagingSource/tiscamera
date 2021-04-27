@@ -171,14 +171,24 @@ add_custom_target(generate-version-file
 
 add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base> ${TCAM_VERSION_FILE})
 target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
+target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include")
 
 add_dependencies(tcam-base generate-version-file)
 set_project_warnings(tcam)
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
+# set_target_properties(tcam
+#   PROPERTIES
+#   POSITION_INDEPENDENT_CODE ON
+#   CXX_VISIBILITY_PRESET hidden
+#   )
+
+#target_link_options(tcam PUBLIC "-Wl,--exclude-libs,ALL")
+
 # target_link_libraries(tcam dl)
-target_link_libraries(tcam spdlog)
+target_link_libraries(tcam PRIVATE spdlog)
+target_link_libraries(tcam PRIVATE tcam-algorithms)
 
 
 # add_dependencies(tcam-base version-header)
@@ -195,8 +205,8 @@ if (BUILD_V4L2)
   find_package(libusb-1.0 REQUIRED QUIET)
   target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
 
-  target_link_libraries(tcam ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
-  target_link_libraries(tcam tcam-dfk73)
+  target_link_libraries(tcam PRIVATE ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
+  target_link_libraries(tcam PRIVATE tcam-dfk73)
 
 endif (BUILD_V4L2)
 
@@ -224,15 +234,15 @@ if (BUILD_ARAVIS)
     target_include_directories(tcam SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
     target_include_directories(tcam PRIVATE SYSTEM "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
-    target_link_libraries(tcam "${ARAVIS_LIB}")
-    target_link_libraries(tcam "${LIBXML2_LIBRARIES}")
-    target_link_libraries(tcam "${GIO_LIBRARIES}")
-    target_link_libraries(tcam "${PCAP_LIBRARIES}")
+    target_link_libraries(tcam PRIVATE "${ARAVIS_LIB}")
+    target_link_libraries(tcam PRIVATE "${LIBXML2_LIBRARIES}")
+    target_link_libraries(tcam PRIVATE "${GIO_LIBRARIES}")
+    target_link_libraries(tcam PRIVATE "${PCAP_LIBRARIES}")
 
   else (TCAM_INTERNAL_ARAVIS)
 
     target_include_directories(tcam PRIVATE SYSTEM ${aravis_INCLUDE_DIR})
-    target_link_libraries(tcam ${aravis_LIBRARIES})
+    target_link_libraries(tcam PRIVATE ${aravis_LIBRARIES})
 
   endif (TCAM_INTERNAL_ARAVIS)
 
@@ -240,7 +250,7 @@ if (BUILD_ARAVIS)
 
     find_package(libusb-1.0 REQUIRED QUIET)
     target_include_directories(tcam PRIVATE "${LIBUSB_1_INCLUDE_DIRS}")
-    target_link_libraries(tcam "${LIBUSB_1_LIBRARIES}")
+    target_link_libraries(tcam PRIVATE "${LIBUSB_1_LIBRARIES}")
 
   endif (TCAM_ARAVIS_USB_VISION)
 
@@ -249,7 +259,7 @@ endif (BUILD_ARAVIS)
 
 if (BUILD_LIBUSB)
   target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
-  target_link_libraries(tcam ${LIBUSB_1_LIBRARIES})
+  target_link_libraries(tcam PRIVATE ${LIBUSB_1_LIBRARIES})
 
 endif (BUILD_LIBUSB)
 
