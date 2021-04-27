@@ -90,7 +90,7 @@ bool V4L2PropertyIntegerImpl::set_value(int64_t new_value)
         return false;
     }
 
-    return false;
+    return true;
 }
 
 
@@ -385,6 +385,7 @@ bool V4L2PropertyEnumImpl::set_value(int new_value)
         if (ptr->write_control(m_v4l2_id, new_value) != 0)
         {
             SPDLOG_ERROR("Something went wrong while writing {}", m_name);
+            return false;
         }
         else
         {
