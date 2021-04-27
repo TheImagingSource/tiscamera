@@ -52,6 +52,7 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
 
     m_v4l2_id = queryctrl->id;
     m_cam = backend;
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
 
@@ -133,6 +134,7 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
     m_v4l2_id = queryctrl->id;
 
     m_cam = backend;
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
 
@@ -211,6 +213,7 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
     m_v4l2_id = queryctrl->id;
 
     m_cam = backend;
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
 
@@ -275,6 +278,7 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
     m_v4l2_id = queryctrl->id;
 
     m_cam = backend;
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
 
@@ -342,7 +346,7 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
             }
         }
     }
-
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
     m_default = m_entries.at(ctrl->value);
 }
 
