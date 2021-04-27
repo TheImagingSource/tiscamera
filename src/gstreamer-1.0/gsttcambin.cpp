@@ -630,7 +630,8 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
          || tcam_gst_raw_only_has_mono(self->data->src_caps.get()))
         && self->data->device_type != "pimipi")
     {
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr
+            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "ExposureAuto") == nullptr)
         {
             if (!create_and_add_element(
                     &self->exposure, "tcamautoexposure", "tcambin-exposure", GST_BIN(self)))
@@ -642,7 +643,8 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
 
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
             && (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr
-                || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus Auto") == nullptr))
+                && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus Auto") == nullptr
+                && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "FocusAuto") == nullptr))
         {
             if (!create_and_add_element(
                     &self->focus, "tcamautofocus", "tcambin-focus", GST_BIN(self)))
@@ -659,7 +661,9 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
     if (contains_bayer(self->data->src_caps.get()))
     {
         // use this to see if the device already has the feature
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr
+            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "BalanceWhiteAuto")
+                   == nullptr)
         {
             if (!create_and_add_element(
                     &self->whitebalance, "tcamwhitebalance", "tcambin-whitebalance", GST_BIN(self)))
@@ -868,7 +872,8 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     if (gst_caps_are_bayer_only(self->data->src_caps.get())
         || tcam_gst_raw_only_has_mono(self->data->src_caps.get()))
     {
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr)
+        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr
+            || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "ExposureAuto") == nullptr)
         {
             if (!link_elements(self->exposure,
                                &previous_element,
@@ -882,7 +887,8 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         }
 
         if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr)
+            && (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr
+                || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "FocusAuto") == nullptr))
         {
             if (!link_elements(self->focus,
                                &previous_element,
