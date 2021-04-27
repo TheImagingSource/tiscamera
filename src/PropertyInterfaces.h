@@ -16,74 +16,19 @@
 
 #pragma once
 
+#include "PropertyCategory.h"
+#include "PropertyFlags.h"
 #include "base_types.h"
+#include "visibility.h"
 
+#include <algorithm>
+#include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace tcam::property
 {
-
-enum class Visibility
-{
-    Beginner = 0,
-    Expert,
-    Guru,
-    Invisible,
-};
-
-class Category
-{
-    Visibility p_visibility = tcam::property::Visibility::Beginner;
-    std::string p_name;
-};
-
-
-enum class PropertyFlags
-{
-    None = 0,
-    Implemented = 1,
-    Available = 2,
-    Locked = 3,
-    // additional flags like 'External' to indicate library and not camera internal properties?
-};
-
-
-inline PropertyFlags operator|(PropertyFlags a, PropertyFlags b)
-{
-    return static_cast<PropertyFlags>(static_cast<int>(a) | static_cast<int>(b));
-}
-
-inline PropertyFlags operator~(PropertyFlags a)
-{
-    return static_cast<PropertyFlags>(~static_cast<int>(a));
-}
-
-inline PropertyFlags operator&(PropertyFlags a, PropertyFlags b)
-{
-    return static_cast<PropertyFlags>(static_cast<int>(a) & static_cast<int>(b));
-}
-
-inline PropertyFlags operator^(PropertyFlags a, PropertyFlags b)
-{
-    return static_cast<PropertyFlags>(static_cast<int>(a) ^ static_cast<int>(b));
-}
-
-inline PropertyFlags& operator|=(PropertyFlags& a, PropertyFlags b)
-{
-    return (PropertyFlags&)((int&)a |= (int)b);
-}
-
-inline PropertyFlags& operator&=(PropertyFlags& a, PropertyFlags b)
-{
-    return (PropertyFlags&)((int&)a &= (int)b);
-}
-
-inline PropertyFlags& operator^=(PropertyFlags& a, PropertyFlags b)
-{
-    return (PropertyFlags&)((int&)a ^= (int)b);
-}
-
 
 class IPropertyBase
 {
