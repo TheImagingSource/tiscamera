@@ -3,7 +3,7 @@
 
 #include "auto_alg_pass_itf.h"
 
-#include "algorithms/auto_alg.h"
+#include "auto_alg.h"
 #include "auto_wb_temperature.h"
 #include "auto_wb_temperature_sensor_data.h"
 
@@ -16,7 +16,7 @@
 #include "auto_exposure.h"
 
 #include "img/interop_private.h"
-#include "img_rect_tools.h"
+#include "algorithms/img_rect_tools.h"
 
 #include <algorithm>
 #include <cstring>
@@ -151,12 +151,12 @@ static int		calc_auto_reference( const auto_alg::auto_pass_params& params, auto_
                                                                          state.auto_ref.current_reference, state.auto_ref.calculated_reference );
         return state.auto_ref.current_reference * params.exposure_reference.val / 128;
     }
- 
+
     state.auto_ref.current_reference = params.exposure_reference.val;
     return params.exposure_reference.val;
 }
 
-static auto_alg::impl::gain_exposure_iris_values		auto_alg_for_brightness_adjust( auto_alg::auto_pass_state& state, 
+static auto_alg::impl::gain_exposure_iris_values		auto_alg_for_brightness_adjust( auto_alg::auto_pass_state& state,
                                                                                         const auto_alg::auto_pass_params& exp,
                                                                                         const auto_alg::impl::resulting_brightness& brightness_params )
 {
@@ -198,7 +198,7 @@ static auto auto_whitebalance_temperature( auto_alg::auto_pass_state& state,
     const auto_alg::whitebalance_values& wb
 ) -> auto_whitebalance_temperature_result
 {
-	// this construct makes that we can use the already passed in struct for software applied wb devices and only need to make a copy of the array 
+	// this construct makes that we can use the already passed in struct for software applied wb devices and only need to make a copy of the array
     // for hardware applied wb devices
 	const auto_alg::impl::auto_sample_points* p_tmp_points = nullptr;
 	if( !wb.is_software_whitebalance )
@@ -256,7 +256,7 @@ static auto auto_whitebalance_temperature( auto_alg::auto_pass_state& state,
 }
 
 static auto_alg::wb_results     exec_auto_whitebalance_steps_on_pixels( auto_alg::auto_pass_state& state,
-    const auto_alg::impl::auto_sample_points& points, 
+    const auto_alg::impl::auto_sample_points& points,
     const auto_alg::whitebalance_values& wb
 )
 {
@@ -293,9 +293,9 @@ static auto_alg::wb_results     exec_auto_whitebalance_steps_on_pixels( auto_alg
 		}
         param_changed = rval.channels.r != wb.channels.r || rval.channels.g != wb.channels.g || rval.channels.b != wb.channels.b;
     }
-    
+
     rval.wb_changed = param_changed || wb.one_push_enabled != rval.one_push_still_running;
-	
+
     return rval;
 }
 
@@ -569,4 +569,3 @@ void auto_alg::deallocate_auto_pass_state( auto_pass_state* context )
 {
     delete context;
 }
-

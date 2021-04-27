@@ -18,13 +18,12 @@
 
 #include "base_types.h"
 #include "img/fcc_to_string.h"
-#include "img/image_transform_base.h"
 #include "img/image_fourcc_func.h"
+#include "img/image_transform_base.h"
 #include "img/img_type.h"
 #include "logging.h"
 #include "public_utils.h"
 #include "tcamgststrings.h"
-
 
 #include <algorithm> //std::find
 #include <stddef.h> // NULL
@@ -285,8 +284,10 @@ static bool tcam_gst_is_bayer16_fourcc(const uint32_t fourcc)
 
 static bool tcam_gst_is_fourcc_yuv(const uint32_t fourcc)
 {
-    if (fourcc == FOURCC_YUY2 || fourcc == FOURCC_UYVY || fourcc == FOURCC_I420
-        || fourcc == FOURCC_YV16 || fourcc == FOURCC_IYU1 || fourcc == FOURCC_IYU2
+    if (fourcc == FOURCC_YUY2 || fourcc == FOURCC_UYVY
+        //|| fourcc == FOURCC_I420
+        //|| fourcc == FOURCC_YV16
+        || fourcc == FOURCC_IYU1 || fourcc == FOURCC_IYU2
         || fourcc == FOURCC_Y411 || fourcc == FOURCC_NV12)
     {
         return true;

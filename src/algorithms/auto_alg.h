@@ -2,7 +2,7 @@
 #pragma  once
 
 #include <algorithms/auto_alg_params.h>
-#include <img/image_transform_data_structs.h>
+
 #include "auto_sample_image.h"
 #include "image_sampling_float.h"
 
@@ -18,8 +18,8 @@ namespace auto_alg::impl
     auto_whitebalance_result	auto_whitebalance_cam( const auto_sample_points& data, const wb_channel_factors& wb );
     auto_whitebalance_result	auto_whitebalance_soft( const image_sampling_points_rgbf& data, const wb_channel_factors& wb );
 
-    pixel			apply_color_matrix_c( const img::color_matrix& clr, const pixel& rgb );
-    RGBf			apply_color_matrix_c( const img::color_matrix& clr, const RGBf& rgb );
+    pixel			apply_color_matrix_c( const color_matrix& clr, const pixel& rgb );
+    RGBf			apply_color_matrix_c( const color_matrix& clr, const RGBf& rgb );
 
     RGBf			clip_RGBf_pixel_to_range( const RGBf& rgb ) noexcept;
 

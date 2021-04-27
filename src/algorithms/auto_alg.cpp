@@ -31,7 +31,7 @@ auto_alg::impl::pixel auto_alg::impl::apply_color_matrix_c( const img::color_mat
     return auto_alg::impl::pixel{ b, g, r };
 }
 
-auto_alg::impl::RGBf  auto_alg::impl::apply_color_matrix_c( const img::color_matrix& clr, const RGBf& rgb )
+auto_alg::impl::RGBf  auto_alg::impl::apply_color_matrix_c( const color_matrix& clr, const RGBf& rgb )
 {
     float r_tmp = (rgb.r * clr.r_rfac + rgb.g * clr.r_gfac + rgb.b * clr.r_bfac) / 64.f;
     float g_tmp = (rgb.r * clr.g_rfac + rgb.g * clr.g_gfac + rgb.b * clr.g_bfac) / 64.f;
