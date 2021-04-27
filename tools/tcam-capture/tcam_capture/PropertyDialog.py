@@ -214,18 +214,20 @@ class PropertyDialog(QWidget):
                         flags, category, group)
 
             try:
+                if category not in self.tab_dict:
+                    self.tab_dict[category] = PropertyTree(self.data, self)
                 self.tab_dict[category].add_property(prop)
-            except KeyError as e:
+            except KeyError:
                 self.tab_dict["Unknown"].add_property(prop)
 
         self.setLayout(self.layout)
 
         # the order of these entries is equivalent to the tab order
         # in the application
-        tab_list = ["Exposure", "Image", "Color",
-                    "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
+        # tab_list = ["Exposure", "Image", "Color",
+        #             "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
 
-        for t in tab_list:
+        for t in self.tab_dict.keys():
             self.__add_tab(t)
 
         self.worker = PropertyWorker(self.data.tcam,
@@ -256,21 +258,21 @@ class PropertyDialog(QWidget):
 
             # the order of these entries is equivalent to the tab order
             # in the application
-            tab_list = ["Exposure", "Image", "Color",
-                        "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
+            # tab_list = ["Exposure", "Image", "Color",
+            #             "Lens", "Special", "WDR", "Partial Scan", "Unknown"]
 
             # we want the tabs in a certain sequence
             # since we do not know which of these
             # already exist we have to manually count all
             # visible tabs before us to get the correct index
-            our_index = tab_list.index(name)
+            # our_index = tab_list.index(name)
             pos = 0
-            for t in range(our_index):
+            # for t in range(our_index):
 
-                if tab_list[t] in self.visible_tabs:
-                    pos += 1
+            #     if tab_list[t] in self.visible_tabs:
+            #         pos += 1
 
-            log.debug(pos)
+            # log.debug(pos)
             self.tabs.insertTab(pos, area, name)
 
             area.setVisible(True)
