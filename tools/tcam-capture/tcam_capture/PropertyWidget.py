@@ -21,6 +21,10 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from . import TcamCaptureData, TcamSlider, TcamSpinBox
 import logging
 
+import ctypes
+
+c_uint8 = ctypes.c_uint8
+
 log = logging.getLogger(__name__)
 
 
@@ -38,6 +42,23 @@ class Prop(object):
         self.flags = flags
         self.category = category
         self.group = group
+
+
+class FlagFields(ctypes.LittleEndianStructure):
+    _fields_ = [
+        ("None", c_uint8, 1),  # asByte & 1
+        ("Implemented", c_uint8, 1),  # asByte & 2
+        ("Available", c_uint8, 1),  # asByte & 4
+        ("Locked", c_uint8, 1),  # asByte & 8
+    ]
+
+
+class Flags(ctypes.Union):
+    _anonymous_ = ("bit",)
+    _fields_ = [
+        ("bit",    FlagFields),
+        ("asByte", c_uint8)
+    ]
 
 
 class PropertyWidget(QWidget):
@@ -207,6 +228,19 @@ class PropertyWidget(QWidget):
                 self.combo.currentIndexChanged['QString'].connect(self.set_property)
                 self.layout.addWidget(self.combo)
 
+    def is_locked(self):
+        """
+        Checks flags if property is locked
+        Return True if locked, else False
+        """
+        flags = Flags()
+        flags.asByte = self.prop.flags
+
+        if (flags.Locked):
+            log.info("{} is locked.".format(self.prop.name))
+            return True
+        return False
+
     def button_clicked(self):
         log.debug("button clicked")
         self.signals.change_property.emit(self.tcam, self.prop.name,
@@ -248,6 +282,7 @@ class PropertyWidget(QWidget):
     def update_box_value(self, box, value):
         box.blockSignals(True)
         box.setValue(value)
+        box.setDisabled(self.is_locked())
         box.blockSignals(False)
 
     def update_box_range(self, box, minval, maxval):
@@ -264,7 +299,7 @@ class PropertyWidget(QWidget):
                 slider.setValue(int(value * 100))
             else:
                 slider.setValue(value)
-
+            slider.setDisabled(self.is_locked())
         except OverflowError:
             log.info("The slider for '{}' had a value outside of the integer "
                      "range. That should no happen.".format(self.prop.name))
@@ -298,6 +333,7 @@ class PropertyWidget(QWidget):
             emit_value_changed = True
 
         self.prop = prop
+
         if self.prop.valuetype == "integer":
             if type(self.value_box) is TcamSpinBox.TcamSpinBox:
                 if self.value_box.active():
@@ -323,12 +359,13 @@ class PropertyWidget(QWidget):
             self.update_box_value(self.value_box, self.prop.value)
 
         elif self.prop.valuetype == "button":
-            pass
+            self.checkbox.setDisabled(self.is_locked())
 
         elif self.prop.valuetype == "boolean":
 
             self.toggle.blockSignals(True)
             self.toggle.setChecked(self.prop.value)
+            self.toggle.setDisabled(self.is_locked())
             self.toggle.blockSignals(False)
 
         elif self.prop.valuetype == "string":
@@ -336,6 +373,7 @@ class PropertyWidget(QWidget):
         elif self.prop.valuetype == "enum":
             self.combo.blockSignals(True)
             self.combo.setCurrentText(prop.value)
+            self.combo.setDisabled(self.is_locked())
             self.combo.blockSignals(False)
 
         if emit_value_changed:
