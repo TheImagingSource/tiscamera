@@ -46,7 +46,7 @@ class Prop(object):
 
 class FlagFields(ctypes.LittleEndianStructure):
     _fields_ = [
-        ("None", c_uint8, 1),  # asByte & 1
+        # ("None", c_uint8, 1),  # asByte & 1
         ("Implemented", c_uint8, 1),  # asByte & 2
         ("Available", c_uint8, 1),  # asByte & 4
         ("Locked", c_uint8, 1),  # asByte & 8
