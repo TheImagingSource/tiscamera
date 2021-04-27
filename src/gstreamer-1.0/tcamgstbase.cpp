@@ -1526,11 +1526,11 @@ GstCaps* convert_videoformatsdescription_to_caps(
 
         for (const auto& r : res)
         {
-            int min_width = r.min_size.width;
-            int min_height = r.min_size.height;
+            uint32_t min_width = r.min_size.width;
+            uint32_t min_height = r.min_size.height;
 
-            int max_width = r.max_size.width;
-            int max_height = r.max_size.height;
+            uint32_t max_width = r.max_size.width;
+            uint32_t max_height = r.max_size.height;
 
             if (r.type == TCAM_RESOLUTION_TYPE_RANGE)
             {
