@@ -95,6 +95,12 @@ public:
     virtual PropertyFlags get_flags() const = 0;
 };
 
+
+std::shared_ptr<tcam::property::IPropertyBase> find_property(
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
+    const std::string_view& name);
+
+
 class IPropertyInteger : public IPropertyBase
 {
 public:

@@ -51,6 +51,7 @@ set(base
   Properties.cpp
   Property.cpp
   PropertyGeneration.cpp
+  PropertyInterfaces.cpp
   utils.cpp
   VideoFormat.cpp
   VideoFormatDescription.cpp
