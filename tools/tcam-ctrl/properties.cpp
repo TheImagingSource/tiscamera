@@ -93,7 +93,7 @@ void print_properties(const std::string& serial)
         const char* t = g_value_get_string(&type);
         if (strcmp(t, "integer") == 0)
         {
-            std::cout << std::setw(name_width) << name << "(int)" << std::right
+            std::cout << std::fixed << std::setw(name_width) << name << "(int)" << std::right
                       << " min=" << g_value_get_int(&min) << " max=" << g_value_get_int(&max)
                       << " step=" << g_value_get_int(&step_size)
                       << " default=" << g_value_get_int(&default_value)
@@ -103,7 +103,7 @@ void print_properties(const std::string& serial)
         }
         else if (strcmp(t, "double") == 0)
         {
-            std::cout << std::setw(name_width) << name << "(double)" << std::right
+            std::cout << std::fixed << std::setw(name_width) << name << "(double)" << std::right
                       << " min=" << g_value_get_double(&min) << " max=" << g_value_get_double(&max)
                       << " step=" << g_value_get_double(&step_size)
                       << " default=" << g_value_get_double(&default_value)
