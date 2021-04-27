@@ -17,6 +17,7 @@
 #include "CaptureDeviceImpl.h"
 
 #include "DeviceIndex.h"
+#include "SoftwareProperties.h"
 #include "logging.h"
 #include "utils.h"
 
@@ -174,14 +175,14 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::g
     {
         return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
     }
-    return property_handler->get();
+    return pipeline->get_properties();
 }
 
 
 std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(
     const std::string& name)
 {
-    auto props = property_handler->get();
+    auto props = pipeline->get_properties();
 
     for (auto& p : props)
     {

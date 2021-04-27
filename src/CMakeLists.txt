@@ -52,6 +52,10 @@ set(base
   Property.cpp
   PropertyGeneration.cpp
   PropertyInterfaces.cpp
+  SoftwarePropertiesBase.cpp
+  SoftwareProperties.cpp
+  SoftwarePropertyBackend.cpp
+  SoftwarePropertiesImpl.cpp
   utils.cpp
   VideoFormat.cpp
   VideoFormatDescription.cpp
@@ -73,6 +77,7 @@ set( srcs
   CaptureDevice.cpp
   CaptureDeviceImpl.cpp
   PipelineManager.cpp
+  PropertyFilter.cpp
   ImageSource.cpp
   PropertyHandler.cpp
   public_utils.cpp

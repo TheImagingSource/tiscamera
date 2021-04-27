@@ -36,6 +36,11 @@ PipelineManager::~PipelineManager()
         stop_playing();
     }
 
+    if (m_pipeline_thread.joinable())
+    {
+        m_pipeline_thread.join();
+    }
+
     available_filter.clear();
     filter_pipeline.clear();
     filter_properties.clear();
@@ -132,15 +137,7 @@ bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
 
     source->setDevice(device);
 
-    for (const auto& f : available_filter)
-    {
-        auto p = f->getFilterProperties();
-
-        if (!p.empty())
-        {
-            filter_properties.insert(filter_properties.end(), p.begin(), p.end());
-        }
-    }
+    property_filter = std::make_shared<tcam::stream::filter::PropertyFilter>(device->get_properties());
 
     available_output_formats = available_input_formats;
 
@@ -183,7 +180,7 @@ std::shared_ptr<SinkInterface> PipelineManager::getSink()
 
 void PipelineManager::distributeProperties()
 {
-    for (auto& f : available_filter) { f->setDeviceProperties(device_properties); }
+    //for (auto& f : available_filter) { f->setDeviceProperties(device_properties); }
 }
 
 
@@ -463,7 +460,7 @@ bool PipelineManager::create_pipeline()
     SPDLOG_INFO("Pipeline creation successful.");
 
     std::string ppl = "source -> ";
-
+    property_filter->setVideoFormat(output_format, output_format);
     for (const auto& f : filter_pipeline)
     {
         ppl += f->getDescription().name;
@@ -491,7 +488,10 @@ bool PipelineManager::start_playing()
         goto error;
     }
 
+    property_filter->setStatus(TCAM_PIPELINE_PLAYING);
     status = TCAM_PIPELINE_PLAYING;
+
+    m_pipeline_thread = std::thread(&PipelineManager::run_pipeline, this);
 
     return true;
 
@@ -504,6 +504,7 @@ error:
 bool PipelineManager::stop_playing()
 {
     status = TCAM_PIPELINE_STOPPED;
+    m_cv.notify_all();
 
     if (!set_source_status(TCAM_PIPELINE_STOPPED))
     {
@@ -522,6 +523,7 @@ bool PipelineManager::stop_playing()
     }
 
     set_sink_status(TCAM_PIPELINE_STOPPED);
+    property_filter->setStatus(TCAM_PIPELINE_STOPPED);
 
     //destroyPipeline();
 
@@ -536,39 +538,11 @@ void PipelineManager::push_image(std::shared_ptr<ImageBuffer> buffer)
         return;
     }
 
-    auto& current_buffer = buffer;
+    std::scoped_lock lock (m_mtx);
 
-    // for (auto& f : filter_pipeline)
-    // {
-    //     if (f->getDescription().type == FILTER_TYPE_INTERPRET)
-    //     {
-    //         f->apply(current_buffer);
-    //     }
-    //     else if (f->getDescription().type == FILTER_TYPE_CONVERSION)
-    //     {
-    //         auto next_buffer = pipeline_buffer.at(current_ppl_buffer);
+    m_entry_queue.push(buffer);
 
-    //         next_buffer->set_statistics(current_buffer->get_statistics());
-
-    //         f->transform(*current_buffer, *next_buffer);
-
-    //         current_buffer = next_buffer;
-
-    //         current_ppl_buffer++;
-    //         if (current_ppl_buffer == pipeline_buffer.size())
-    //             current_ppl_buffer = 0;
-    //     }
-    // }
-
-
-    if (sink != nullptr)
-    {
-        sink->push_image(current_buffer);
-    }
-    else
-    {
-        SPDLOG_ERROR("Sink is NULL");
-    }
+    m_cv.notify_all();
 }
 
 
@@ -605,4 +579,54 @@ bool PipelineManager::should_incomplete_frames_be_dropped() const
 
     SPDLOG_ERROR("No shource to ask if incomplete frames should be dropped.");
     return true;
+}
+
+
+std::vector<std::shared_ptr<tcam::property::IPropertyBase>> PipelineManager::get_properties()
+{
+    return property_filter->getProperties();
+}
+
+
+void PipelineManager::run_pipeline()
+{
+    while (status == TCAM_PIPELINE_PLAYING)
+    {
+        std::unique_lock lock(m_mtx);
+
+    pl_wait_again:
+        while (status == TCAM_PIPELINE_PLAYING && m_entry_queue.empty())
+        {
+            m_cv.wait(lock);
+        }
+
+        if (status != TCAM_PIPELINE_PLAYING)
+        {
+            SPDLOG_INFO("Pipeline not in playing. Stopping pipeline thread.");
+            return;
+        }
+
+        if (m_entry_queue.empty())
+        {
+            SPDLOG_ERROR("Buffer queue is empty. Returning to waiting position.");
+
+            goto pl_wait_again;
+        }
+
+        // SPDLOG_DEBUG("Working on new image");
+        auto& current_buffer = m_entry_queue.front();
+        m_entry_queue.pop(); // remove buffer from queue
+
+        property_filter->apply(current_buffer);
+
+        if (sink != nullptr)
+        {
+            sink->push_image(current_buffer);
+        }
+        else
+        {
+            SPDLOG_ERROR("Sink is NULL");
+        }
+    }
+
 }

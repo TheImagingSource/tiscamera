@@ -20,9 +20,14 @@
 #include "FilterBase.h"
 #include "ImageSink.h"
 #include "ImageSource.h"
+#include "PropertyFilter.h"
 #include "base_types.h"
 #include "compiler_defines.h"
 
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <queue>
 #include <memory>
 
 VISIBILITY_INTERNAL
@@ -55,6 +60,8 @@ public:
      * @return vector containing all filter properties; empty on error
      */
     std::vector<std::shared_ptr<Property>> getFilterProperties();
+
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
 
     bool set_status(TCAM_PIPELINE_STATUS) override;
 
@@ -124,7 +131,16 @@ private:
      * @brief Additional buffer used for internal image copies
      */
     std::vector<std::shared_ptr<ImageBuffer>> pipeline_buffer;
+
+
+    std::shared_ptr<tcam::stream::filter::PropertyFilter> property_filter;
+
     unsigned int current_ppl_buffer;
+
+    std::thread m_pipeline_thread;
+    std::mutex m_mtx;
+    std::condition_variable m_cv;
+    std::queue<std::shared_ptr<tcam::ImageBuffer>> m_entry_queue;
 
     void distributeProperties();
 
@@ -147,6 +163,8 @@ private:
     bool start_playing();
 
     bool stop_playing();
+
+    void run_pipeline();
 };
 
 } /* namespace tcam */

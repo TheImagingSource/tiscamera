@@ -19,6 +19,7 @@
 
 #include "ImageBuffer.h"
 #include "Properties.h"
+#include "PropertyInterfaces.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"
 
@@ -66,9 +67,7 @@ public:
     virtual bool setVideoFormat(const VideoFormat& in, const VideoFormat& out) = 0;
     virtual void getVideoFormat(VideoFormat& in, VideoFormat& out) const = 0;
 
-    virtual void setDeviceProperties(std::vector<std::shared_ptr<Property>>) = 0;
-
-    virtual std::vector<std::shared_ptr<Property>> getFilterProperties() = 0;
+    virtual std::vector<std::shared_ptr<tcam::property::IPropertyBase>> getProperties() = 0;
 };
 
 extern "C"
