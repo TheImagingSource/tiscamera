@@ -141,13 +141,28 @@ void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::proper
     }
 
     auto preserve_id = [&properties](uint32_t v4l2_id, const std::string& name) {
+        int count = 0;
+        for (const auto p : properties)
+        {
+            if (p.second->get_name() == name)
+            {
+                count++;
+            }
+        }
+
+        // this means there is only one interface provider
+        // nothing to remove
+        if (count <= 1)
+        {
+            return;
+        }
 
         auto p = properties.begin();
         while (p != properties.end())
         {
             if (p->first != v4l2_id && (p->second->get_name() == name))
             {
-                SPDLOG_DEBUG("Found additional interface for {}({}). Hiding", name, v4l2_id);
+                SPDLOG_DEBUG("Found additional interface for {}({:x}). Hiding", name, v4l2_id);
                 p = properties.erase(p);
             }
             p++;
