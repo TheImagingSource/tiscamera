@@ -25,6 +25,7 @@
 
 #else
 
+#define VISIBILITY_DEFAULT
 #define VISIBILITY_INTERNAL
 #define VISIBILITY_POP
 
