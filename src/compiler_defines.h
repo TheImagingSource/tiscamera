@@ -19,6 +19,7 @@
 
 #if defined(__GNUC__)
 
+#define VISIBILITY_DEFAULT  _Pragma("GCC visibility push (default)")
 #define VISIBILITY_INTERNAL _Pragma("GCC visibility push (internal)")
 #define VISIBILITY_POP      _Pragma("GCC visibility pop")
 
