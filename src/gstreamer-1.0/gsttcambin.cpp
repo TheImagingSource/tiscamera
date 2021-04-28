@@ -1001,10 +1001,11 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     // always can be passed through
     GstCaps* all_caps = gst_caps_copy(incoming_caps);
 
-    // we have three scenarios:
+    // we have four scenarios:
     // 1. camera has video/x-raw,format=GRAY8 = passed through
     // 2. camera has video/x-bayer => bayer may be passed through or converted => bayer2rgb
-    // 2. camera has video/x-raw,format=SOMETHING => passed through
+    // 3. camera has video/x-raw,format=SOMETHING => passed through
+    // 4. camera has video/x-raw((memory:NVMM)) => filter as we cannot handle the memory type
 
     // this boils down to:
     // if camera is mono,jpeg,yuv => pass through and be done
@@ -1014,6 +1015,21 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
     for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
     {
+
+        // nvmm is described not in the gst_caps name
+        // but as a GstCapsFeatures object
+        // iterate over them, if existent to skip memory types we do not handle.
+        GstCapsFeatures* features = gst_caps_get_features(all_caps, i);
+
+        if (features)
+        {
+            if (gst_caps_features_contains (features, "memory:NVMM"))
+            {
+                //GST_INFO("Contains NVMM. Skipping");
+                continue;
+            }
+        }
+
         GstStructure* struc = gst_caps_get_structure(all_caps, i);
 
         if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
