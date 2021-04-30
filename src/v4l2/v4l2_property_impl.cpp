@@ -56,58 +56,52 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
 }
 
 
-int64_t V4L2PropertyIntegerImpl::get_value() const
+outcome::result<int64_t> V4L2PropertyIntegerImpl::get_value() const
 {
-    int64_t value = 0;
-
     if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(m_v4l2_id, value);
+        return ptr->read_control(m_v4l2_id);
+
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return value;
 }
 
 
-bool V4L2PropertyIntegerImpl::set_value(int64_t new_value)
+outcome::result<void> V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 {
-    if (!valid_value(new_value))
-    {
-        return false;
-    }
+    OUTCOME_TRY(valid_value(new_value));
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(m_v4l2_id, new_value);
+        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
 
-    return true;
+    return outcome::success();
 }
 
 
-bool V4L2PropertyIntegerImpl::valid_value(int64_t val)
+outcome::result<void> V4L2PropertyIntegerImpl::valid_value(int64_t val)
 {
     if (val % get_step() != 0)
     {
-        return false;
+        return tcam::status::PropertyValueDoesNotExist;
     }
 
     if (get_min() > val || val > get_max())
     {
-        return false;
+        return tcam::status::PropertyOutOfBounds;
     }
 
-    return true;
+    return outcome::success();
 }
 
 
@@ -138,53 +132,55 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
 }
 
 
-double V4L2PropertyDoubleImpl::get_value() const
+outcome::result<double> V4L2PropertyDoubleImpl::get_value() const
 {
-    int64_t value = 0;
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(m_v4l2_id, value);
+        auto ret = ptr->read_control(m_v4l2_id);
+        if (ret)
+        {
+            return ret.value();
+        }
+        return ret.as_failure();
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
-    //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
-    return value;
 }
 
 
-bool V4L2PropertyDoubleImpl::set_value(double new_value)
+outcome::result<void> V4L2PropertyDoubleImpl::set_value(double new_value)
 {
-    if (!valid_value(new_value))
-    {
-        return false;
-    }
+    OUTCOME_TRY(valid_value(new_value));
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(m_v4l2_id, new_value);
+        auto r = ptr->write_control(m_v4l2_id, new_value);
+        if (!r)
+        {
+            return r.as_failure();
+        }
+        return outcome::success();
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return false;
 }
 
 
-bool V4L2PropertyDoubleImpl::valid_value(double val)
+outcome::result<void> V4L2PropertyDoubleImpl::valid_value(double val)
 {
     if (get_min() > val || val > get_max())
     {
-        return false;
+        return tcam::status::PropertyOutOfBounds;
     }
 
-    return true;
+    return outcome::success();
 }
 
 
@@ -217,18 +213,22 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
 }
 
 
-bool V4L2PropertyBoolImpl::get_value() const
+outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
 {
     int64_t value = 0;
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(m_v4l2_id, value);
+        auto ret = ptr->read_control(m_v4l2_id);
+        if (ret)
+        {
+            return ret.value();
+        }
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
     //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
 
@@ -239,7 +239,7 @@ bool V4L2PropertyBoolImpl::get_value() const
     return true;
 }
 
-bool V4L2PropertyBoolImpl::set_value(bool new_value)
+outcome::result<void> V4L2PropertyBoolImpl::set_value(bool new_value)
 {
     int64_t val = 0;
     if (new_value)
@@ -249,14 +249,18 @@ bool V4L2PropertyBoolImpl::set_value(bool new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(m_v4l2_id, val);
+        auto ret = ptr->write_control(m_v4l2_id, val);
+        if (!ret)
+        {
+            return ret.as_failure();
+        }
+        return outcome::success();
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-    return true;
 }
 
 
@@ -282,19 +286,23 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
 }
 
 
-bool V4L2PropertyCommandImpl::execute()
+outcome::result<void> V4L2PropertyCommandImpl::execute()
 {
 
     if (auto ptr = m_cam.lock())
     {
-        ptr->write_control(m_v4l2_id, 1);
+        auto ret = ptr->write_control(m_v4l2_id, 1);
+        if (!ret)
+        {
+            return ret.as_failure();
+        }
+        return outcome::success();
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-    return true;
 }
 
 
@@ -351,64 +359,56 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
 }
 
 
-bool V4L2PropertyEnumImpl::valid_value(int value)
+outcome::result<void> V4L2PropertyEnumImpl::valid_value(int value)
 {
     auto it = m_entries.find(value);
 
     if (it == m_entries.end())
     {
-        return false;
+        return tcam::status::PropertyValueDoesNotExist;
     }
 
-    return true;
+    return outcome::success();
 }
 
 
-bool V4L2PropertyEnumImpl::set_value_str(const std::string& new_value)
+outcome::result<void> V4L2PropertyEnumImpl::set_value_str(const std::string& new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
         if (it->second == new_value)
         {
-            return set_value(it->first);
+            OUTCOME_TRY(set_value(it->first));
+            return outcome::success();
         }
     }
-    return false;
+    return tcam::status::PropertyDoesNotExist;
 }
 
 
-bool V4L2PropertyEnumImpl::set_value(int new_value)
+outcome::result<void> V4L2PropertyEnumImpl::set_value(int64_t new_value)
 {
     if (!valid_value(new_value))
     {
-        return false;
+        return tcam::status::PropertyValueDoesNotExist; //false;
     }
 
     if (auto ptr = m_cam.lock())
     {
-        if (ptr->write_control(m_v4l2_id, new_value) != 0)
-        {
-            SPDLOG_ERROR("Something went wrong while writing {}", m_name);
-            return false;
-        }
-        else
-        {
-            //SPDLOG_DEBUG("Wrote {} {}", m_name, new_value);
-        }
+        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
+        return outcome::success();
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return false;
 }
 
 
-std::string V4L2PropertyEnumImpl::get_value() const
+outcome::result<std::string> V4L2PropertyEnumImpl::get_value() const
 {
-    int value = get_value_int();
+    OUTCOME_TRY(int value, get_value_int());
 
     // TODO: additional checks if key exists
 
@@ -416,21 +416,17 @@ std::string V4L2PropertyEnumImpl::get_value() const
 }
 
 
-int V4L2PropertyEnumImpl::get_value_int() const
+outcome::result<int64_t> V4L2PropertyEnumImpl::get_value_int() const
 {
-    int64_t value = 0;
-
     if (auto ptr = m_cam.lock())
     {
-        ptr->read_control(m_v4l2_id, value);
+        return ptr->read_control(m_v4l2_id);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return value;
 }
 
 

@@ -107,25 +107,41 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
     if (auto_pass_ret.exposure_changed)
     {
         m_auto_params.exposure.val = auto_pass_ret.exposure_value;
-        m_dev_exposure->set_value(auto_pass_ret.exposure_value);
+        auto set_exp = m_dev_exposure->set_value(auto_pass_ret.exposure_value);
+        if (!set_exp)
+        {
+            SPDLOG_ERROR("Unable to set exposure: {}", set_exp.error().message());
+        }
     }
 
     if (auto_pass_ret.gain_changed)
     {
         m_auto_params.gain.value = auto_pass_ret.gain_value;
-        m_dev_gain->set_value(auto_pass_ret.gain_value);
+        auto set_gain = m_dev_gain->set_value(auto_pass_ret.gain_value);
+        if (!set_gain)
+        {
+            SPDLOG_ERROR("Unable to set gain: {}", set_gain.error().message());
+        }
     }
 
     if (auto_pass_ret.iris_changed)
     {
         m_auto_params.iris.val = auto_pass_ret.iris_value;
-        m_dev_iris->set_value(auto_pass_ret.iris_value);
+        auto set_iris = m_dev_iris->set_value(auto_pass_ret.iris_value);
+        if (!set_iris)
+        {
+            SPDLOG_ERROR("Unable to set iris: {}", set_iris.error().message());
+        }
     }
 
     if (auto_pass_ret.focus_changed)
     {
         m_auto_params.focus_onepush_params.device_focus_val = auto_pass_ret.focus_value;
-        m_dev_focus->set_value(auto_pass_ret.focus_value);
+        auto set_foc = m_dev_focus->set_value(auto_pass_ret.focus_value);
+        if (!set_foc)
+        {
+            SPDLOG_ERROR("Unable to set focus: {}", set_foc.error().message());
+        }
     }
 }
 
@@ -187,11 +203,11 @@ void tcam::property::SoftwareProperties::generate_public_properties()
             m_properties.push_back(p);
         }
     }
-
 }
 
 
-int tcam::property::SoftwareProperties::get_int(emulated::software_prop prop_id)
+outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
+    emulated::software_prop prop_id)
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -234,7 +250,8 @@ int tcam::property::SoftwareProperties::get_int(emulated::software_prop prop_id)
     }
 }
 
-bool tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id, int new_val)
+outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id,
+                                                                  int64_t new_val)
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -247,7 +264,7 @@ bool tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id
             SPDLOG_DEBUG("exposureauto is now {}", m_auto_params.exposure.auto_enabled);
 
             set_locked(emulated::software_prop::ExposureTime, new_val);
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::ExposureAutoUpperLimitAuto:
         {
@@ -259,35 +276,34 @@ bool tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id
             }
             set_locked(emulated::software_prop::ExposureAutoUpperLimit, new_val);
 
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::ExposureAutoReference:
         {
             m_auto_params.exposure_reference.val = new_val;
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::GainAuto:
         {
             m_auto_params.gain.auto_enabled = new_val;
             set_locked(emulated::software_prop::Gain, new_val);
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::Iris:
         {
             if (m_auto_params.iris.auto_enabled)
             {
-                return false;
+                return tcam::status::PropertyIsLocked;
             }
             m_auto_params.iris.val = new_val;
-            m_dev_iris->set_value(new_val);
-            return true;
+            return m_dev_iris->set_value(new_val);
         }
         case emulated::software_prop::IrisAuto:
         {
             m_auto_params.iris.auto_enabled = new_val;
             set_locked(emulated::software_prop::Iris, new_val);
 
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::Focus:
         {
@@ -296,23 +312,25 @@ bool tcam::property::SoftwareProperties::set_int(emulated::software_prop prop_id
             //     return false;
             // }
             m_auto_params.focus_onepush_params.device_focus_val = new_val;
-            m_dev_focus->set_value(new_val);
-            return true;
+            return m_dev_focus->set_value(new_val);
         }
         case emulated::software_prop::FocusAuto:
         {
             m_auto_params.focus_onepush_params.is_run_cmd = new_val;
 
-            return true;
+            return outcome::success();
         }
         default:
+        {
             SPDLOG_WARN("Not implemented");
-            return false;
+            return tcam::status::NotImplemented;
+        }
     }
 }
 
 
-double tcam::property::SoftwareProperties::get_double(emulated::software_prop prop_id)
+outcome::result<double> tcam::property::SoftwareProperties::get_double(
+    emulated::software_prop prop_id)
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -359,7 +377,9 @@ double tcam::property::SoftwareProperties::get_double(emulated::software_prop pr
 }
 
 
-bool tcam::property::SoftwareProperties::set_double(emulated::software_prop prop_id, double new_val)
+outcome::result<void> tcam::property::SoftwareProperties::set_double(
+    emulated::software_prop prop_id,
+    double new_val)
 {
     std::scoped_lock lock(m_property_mtx);
 
@@ -369,7 +389,7 @@ bool tcam::property::SoftwareProperties::set_double(emulated::software_prop prop
         {
             if (m_auto_params.exposure.auto_enabled)
             {
-                return false;
+                return tcam::status::PropertyIsLocked;
             }
             m_auto_params.exposure.val = new_val;
             return m_dev_exposure->set_value(new_val);
@@ -377,7 +397,7 @@ bool tcam::property::SoftwareProperties::set_double(emulated::software_prop prop
         case emulated::software_prop::ExposureAutoLowerLimit:
         {
             m_auto_params.exposure.min = new_val;
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::ExposureAutoUpperLimit:
         {
@@ -388,15 +408,15 @@ bool tcam::property::SoftwareProperties::set_double(emulated::software_prop prop
             else
             {
                 SPDLOG_WARN("ExposureAutoUpperLimitAuto is still active.");
-                return false;
+                return tcam::status::PropertyIsLocked;
             }
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::Gain:
         {
             if (m_auto_params.gain.auto_enabled)
             {
-                return false;
+                return tcam::status::PropertyIsLocked;
             }
             m_auto_params.gain.value = new_val;
             return m_dev_gain->set_value(new_val);
@@ -404,18 +424,18 @@ bool tcam::property::SoftwareProperties::set_double(emulated::software_prop prop
         case emulated::software_prop::GainAutoLowerLimit:
         {
             m_auto_params.gain.min = new_val;
-            return true;
+            return outcome::success();
         }
         case emulated::software_prop::GainAutoUpperLimit:
         {
             m_auto_params.gain.max = new_val;
-            return true;
+            return outcome::success();
         }
         default:
         {
             SPDLOG_WARN("not implemented {} {}", find_property_name(prop_id), prop_id);
 
-            return false;
+            return tcam::status::NotImplemented;
         }
     }
 }
@@ -443,10 +463,20 @@ void tcam::property::SoftwareProperties::generate_exposure()
 
     m_dev_exposure = std::static_pointer_cast<tcam::property::IPropertyFloat>(exp_base);
 
-    m_auto_params.exposure.granularity = m_dev_exposure->get_step();;
+    m_auto_params.exposure.granularity = m_dev_exposure->get_step();
+    ;
     m_auto_params.exposure.min = m_dev_exposure->get_min();
     m_auto_params.exposure.max = m_dev_exposure->get_max();
-    m_auto_params.exposure.val = m_dev_exposure->get_value();
+
+    auto exp_val = m_dev_exposure->get_value();
+    if (exp_val)
+    {
+        m_auto_params.exposure.val = exp_val.value();
+    }
+    else
+    {
+        SPDLOG_ERROR("Unable to retrieve ExposureTime value: {}", exp_val.error().message());
+    }
 
     m_auto_params.exposure.auto_enabled = true;
 
@@ -465,7 +495,6 @@ void tcam::property::SoftwareProperties::generate_exposure()
 
     set_locked(emulated::software_prop::ExposureTime, true);
     set_locked(emulated::software_prop::ExposureAutoUpperLimit, true);
-
 }
 
 
@@ -484,7 +513,15 @@ void tcam::property::SoftwareProperties::generate_gain()
     m_auto_params.gain.auto_enabled = true;
     m_auto_params.gain.min = m_dev_gain->get_min();
     m_auto_params.gain.max = m_dev_gain->get_max();
-    m_auto_params.gain.value = m_dev_gain->get_value();
+    auto gain_val = m_dev_gain->get_value();
+    if (gain_val)
+    {
+        m_auto_params.gain.value = gain_val.value();
+    }
+    else
+    {
+        SPDLOG_ERROR("Unable to retrieve Gain: {}", gain_val.error().message());
+    }
 
     enable_property_double(sp::Gain, m_dev_gain);
     enable_property(sp::GainAuto);
@@ -492,7 +529,6 @@ void tcam::property::SoftwareProperties::generate_gain()
     enable_property_double(sp::GainAutoUpperLimit, m_dev_gain);
 
     set_locked(emulated::software_prop::Gain, true);
-
 }
 
 
@@ -510,7 +546,16 @@ void tcam::property::SoftwareProperties::generate_iris()
 
     m_auto_params.iris.min = m_dev_iris->get_min();
     m_auto_params.iris.max = m_dev_iris->get_max();
-    m_auto_params.iris.val = m_dev_iris->get_value();
+
+    auto iris_val = m_dev_iris->get_value();
+    if (iris_val)
+    {
+        m_auto_params.iris.val = iris_val.value();
+    }
+    else
+    {
+        SPDLOG_ERROR("Unable to retrieve Iris value: {}", iris_val.error().message());
+    }
     // TODO: granularity/step
 
     enable_property(sp::IrisAuto);
@@ -564,7 +609,6 @@ void SoftwareProperties::set_locked(emulated::software_prop prop_id, bool is_loc
             break;
         }
     }
-
 }
 
 
@@ -597,7 +641,11 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
 
             m_properties.push_back(
                 std::make_shared<emulated::SoftwarePropertyEnumImpl>(desc, m_backend));
-            set_int(prop_id, desc->default_value_);
+            auto res = set_int(prop_id, desc->default_value_);
+            if (!res)
+            {
+                SPDLOG_ERROR("Error while setting enum value: {}", res.error().message());
+            }
 
             break;
         }

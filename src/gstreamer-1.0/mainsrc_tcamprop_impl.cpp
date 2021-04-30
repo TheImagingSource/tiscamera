@@ -178,7 +178,15 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (value)
             {
                 g_value_init(value, G_TYPE_INT);
-                g_value_set_int(value, prop_int->get_value());
+                auto int_val = prop_int->get_value();
+                if (int_val)
+                {
+                    g_value_set_int(value, int_val.value());
+                }
+                else
+                {
+                    GST_ERROR("Unable to retrieve value: %s", int_val.error().message().c_str());
+                }
             }
             if (min)
             {
@@ -209,7 +217,15 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (value)
             {
                 g_value_init(value, G_TYPE_STRING);
-                g_value_set_string(value, prop_enum->get_value().c_str());
+                auto ret_enum = prop_enum->get_value();
+                if (ret_enum)
+                {
+                    g_value_set_string(value, ret_enum.value().c_str());
+                }
+                else
+                {
+                    g_value_set_string(value, "");
+                }
             }
             if (min)
             {
@@ -239,7 +255,16 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (value)
             {
                 g_value_init(value, G_TYPE_DOUBLE);
-                g_value_set_double(value, prop_float->get_value());
+                auto prop_d = prop_float->get_value();
+                if (prop_d)
+                {
+                    g_value_set_double(value, prop_d.value());
+                }
+                else
+                {
+                    GST_ERROR(
+                        "Unable to set property %s: %s", name, prop_d.error().message().c_str());
+                }
             }
             if (min)
             {
@@ -324,7 +349,17 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (value)
             {
                 g_value_init(value, G_TYPE_BOOLEAN);
-                g_value_set_boolean(value, prop_bool->get_value());
+                auto prop_b = prop_bool->get_value();
+                if (prop_b)
+                {
+                    g_value_set_boolean(value, prop_b.value());
+                }
+                else
+                {
+                    GST_ERROR("Unable to retrieve bool value for %s: %s",
+                              name,
+                              prop_b.error().message().c_str());
+                }
             }
             if (min)
             {
@@ -410,8 +445,17 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 return FALSE;
             }
 
-            return static_cast<IPropertyInteger*>(prop.get())
-                ->set_value((int64_t)g_value_get_int(value));
+            auto success = static_cast<IPropertyInteger*>(prop.get())
+                               ->set_value((int64_t)g_value_get_int(value));
+            if (success)
+            {
+                return TRUE;
+            }
+            else
+            {
+                GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
+                return FALSE;
+            }
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
@@ -419,7 +463,18 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
             {
                 return FALSE;
             }
-            return static_cast<IPropertyFloat*>(prop.get())->set_value(g_value_get_double(value));
+
+            auto success = static_cast<IPropertyFloat*>(prop.get())->set_value(g_value_get_double(value));
+
+            if (success)
+            {
+                return TRUE;
+            }
+            else
+            {
+                GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
+                return FALSE;
+            }
         }
         // case TCAM_PROPERTY_TYPE_STRING:
         // {
@@ -436,11 +491,32 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
             {
                 return FALSE;
             }
-            return static_cast<IPropertyBool*>(prop.get())->set_value(g_value_get_boolean(value));
+
+            auto success = static_cast<IPropertyBool*>(prop.get())->set_value(g_value_get_boolean(value));
+            if (success)
+            {
+                return TRUE;
+            }
+            else
+            {
+                GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
+                return FALSE;
+            }
+
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            return static_cast<IPropertyCommand*>(prop.get())->execute();
+            auto success = static_cast<IPropertyCommand*>(prop.get())->execute();
+            if (success)
+            {
+                return TRUE;
+            }
+            else
+            {
+                GST_ERROR("Unable to execute property %s: %s", name, success.error().message().c_str());
+                return FALSE;
+            }
+
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
@@ -450,7 +526,17 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
             }
 
             std::string s = g_value_get_string(value);
-            return static_cast<IPropertyEnum*>(prop.get())->set_value_str(s);
+            auto success = static_cast<IPropertyEnum*>(prop.get())->set_value_str(s);
+            if (success)
+            {
+                return TRUE;
+            }
+            else
+            {
+                GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
+                return FALSE;
+            }
+
         }
         default:
         {

@@ -42,48 +42,47 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
-int64_t SoftwarePropertyIntegerImpl::get_value() const
+outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
 {
     int64_t value = 0;
 
     if (auto ptr = m_cam.lock())
     {
-        value = ptr->get_int(m_id);
+        return ptr->get_int(m_id);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
 
     return value;
 }
 
 
-bool SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
+outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
 {
-    if (!valid_value(new_value))
-    {
-        return false;
-    }
+    OUTCOME_TRY(valid_value(new_value));
 
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_int(m_id, new_value);
+        if (ptr->set_int(m_id, new_value))
+        {
+            return tcam::status::Success;
+        }
+        return tcam::status::UndefinedError;
     }
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return true;
 }
 
-bool SoftwarePropertyIntegerImpl::valid_value(int64_t val)
+outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
 {
     SPDLOG_WARN("Not implemented valid_value. {} {}", m_name, val);
-    return true;
+    return outcome::success();
 }
 
 
@@ -124,29 +123,22 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
 }
 
 
-double SoftwarePropertyDoubleImpl::get_value() const
+outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
 {
-    int64_t value = 0;
-
     if (auto ptr = m_cam.lock())
     {
-        value = ptr->get_double(m_id);
+        return ptr->get_double(m_id);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
-    //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
-    return value;
 }
 
-bool SoftwarePropertyDoubleImpl::set_value(double new_value)
+outcome::result<void> SoftwarePropertyDoubleImpl::set_value(double new_value)
 {
-    if (!valid_value(new_value))
-    {
-        return false;
-    }
+    OUTCOME_TRY(valid_value(new_value));
 
     if (auto ptr = m_cam.lock())
     {
@@ -155,21 +147,19 @@ bool SoftwarePropertyDoubleImpl::set_value(double new_value)
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return false;
 }
 
 
-bool SoftwarePropertyDoubleImpl::valid_value(double val)
+outcome::result<void> SoftwarePropertyDoubleImpl::valid_value(double val)
 {
     if (get_min() > val || val > get_max())
     {
-        return false;
+        return tcam::status::PropertyOutOfBounds;
     }
 
-    return true;
+    return tcam::status::Success;
 }
 
 
@@ -186,17 +176,17 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const struct software_prop_de
 
 }
 
-bool SoftwarePropertyBoolImpl::get_value() const
+outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
 {
     SPDLOG_WARN("Not implemented. {}", m_name);
     return false;
 }
 
-bool SoftwarePropertyBoolImpl::set_value(bool new_value)
+outcome::result<void> SoftwarePropertyBoolImpl::set_value(bool new_value)
 {
     SPDLOG_WARN("Not implemented set_value. {} {}", m_name, new_value);
 
-    return false;
+    return tcam::status::NotImplemented;
 }
 
 
@@ -213,10 +203,10 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 }
 
 
-bool SoftwarePropertyCommandImpl::execute()
+outcome::result<void> SoftwarePropertyCommandImpl::execute()
 {
     SPDLOG_WARN("Not implemented. {}", m_name);
-    return false;
+    return tcam::status::NotImplemented;
 }
 
 
@@ -235,7 +225,7 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const struct software_prop_de
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
-bool SoftwarePropertyEnumImpl::set_value_str(const std::string& new_value)
+outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string& new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
@@ -244,14 +234,14 @@ bool SoftwarePropertyEnumImpl::set_value_str(const std::string& new_value)
             return set_value(it->first);
         }
     }
-    return false;
+    return tcam::status::PropertyValueDoesNotExist;
 }
 
-bool SoftwarePropertyEnumImpl::set_value(int new_value)
+outcome::result<void> SoftwarePropertyEnumImpl::set_value(int64_t new_value)
 {
     if (!valid_value(new_value))
     {
-        return false;
+        return tcam::status::PropertyValueDoesNotExist;
     }
 
     if (auto ptr = m_cam.lock())
@@ -259,7 +249,7 @@ bool SoftwarePropertyEnumImpl::set_value(int new_value)
         if (!ptr->set_int(m_id, new_value))
         {
             SPDLOG_ERROR("Something went wrong while writing {}", m_name);
-            return false;
+            return tcam::status::ResourceNotLockable;
         }
         else
         {
@@ -269,36 +259,32 @@ bool SoftwarePropertyEnumImpl::set_value(int new_value)
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
-        return false;
+        return tcam::status::ResourceNotLockable;
     }
 
-    return true;
+    return tcam::status::Success;
 }
 
-std::string SoftwarePropertyEnumImpl::get_value() const
+outcome::result<std::string> SoftwarePropertyEnumImpl::get_value() const
 {
-    int value = get_value_int();
+    OUTCOME_TRY(auto value, get_value_int());
 
     // TODO: additional checks if key exists
 
     return m_entries.at(value);
 }
 
-int SoftwarePropertyEnumImpl::get_value_int() const
+outcome::result<int64_t> SoftwarePropertyEnumImpl::get_value_int() const
 {
-    int64_t value = 0;
-
     if (auto ptr = m_cam.lock())
     {
-        value = ptr->get_int(m_id);
+        return ptr->get_int(m_id);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
-        return -1;
+        return tcam::status::ResourceNotLockable;
     }
-
-    return value;
 }
 
 std::vector<std::string> SoftwarePropertyEnumImpl::get_entries() const

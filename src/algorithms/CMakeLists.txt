@@ -84,6 +84,7 @@ set_project_warnings(tcam-algorithms)
 
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src")
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
+target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/external")
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_BINARY_DIR}")
 
 set_property(TARGET tcam-algorithms PROPERTY VERSION ${TCAM_VERSION})

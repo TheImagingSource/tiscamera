@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 
+#include "error.h"
 
 namespace tcam::v4l2
 {
@@ -68,12 +69,12 @@ public:
     {
         return m_default;
     };
-    virtual int64_t get_value() const final;
+    virtual outcome::result<int64_t> get_value() const final;
 
-    virtual bool set_value(int64_t new_value) final;
+    virtual outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-    bool valid_value(int64_t val);
+    outcome::result<void> valid_value(int64_t val);
 
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
@@ -123,12 +124,12 @@ public:
     {
         return m_default;
     };
-    virtual double get_value() const final;
+    virtual outcome::result<double> get_value() const final;
 
-    virtual bool set_value(double new_value) final;
+    virtual outcome::result<void> set_value(double new_value) final;
 
 private:
-    bool valid_value(double val);
+    outcome::result<void> valid_value(double val);
 
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
@@ -165,9 +166,9 @@ public:
     {
         return m_default;
     };
-    virtual bool get_value() const final;
+    virtual outcome::result<bool> get_value() const final;
 
-    virtual bool set_value(bool new_value) final;
+    virtual outcome::result<void> set_value(bool new_value) final;
 
 private:
     std::weak_ptr<V4L2PropertyBackend> m_cam;
@@ -198,7 +199,7 @@ public:
         return m_flags;
     };
 
-    virtual bool execute() final;
+    virtual outcome::result<void> execute() final;
 
 private:
     std::weak_ptr<V4L2PropertyBackend> m_cam;
@@ -227,11 +228,11 @@ public:
         return m_flags;
     };
 
-    virtual bool set_value_str(const std::string& new_value) final;
-    virtual bool set_value(int new_value) final;
+    virtual outcome::result<void> set_value_str(const std::string& new_value) final;
+    virtual outcome::result<void> set_value(int64_t new_value) final;
 
-    virtual std::string get_value() const final;
-    virtual int get_value_int() const final;
+    virtual outcome::result<std::string> get_value() const final;
+    virtual outcome::result<int64_t> get_value_int() const final;
 
     virtual std::string get_default() const final
     {
@@ -241,7 +242,7 @@ public:
     virtual std::vector<std::string> get_entries() const final;
 
 private:
-    bool valid_value(int value);
+    outcome::result<void> valid_value(int value);
 
     std::map<int, std::string> m_entries;
     std::weak_ptr<V4L2PropertyBackend> m_cam;

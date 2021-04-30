@@ -20,6 +20,7 @@
 #include "PropertyFlags.h"
 #include "base_types.h"
 #include "visibility.h"
+#include "error.h"
 
 #include <algorithm>
 #include <memory>
@@ -61,9 +62,9 @@ public:
     virtual int64_t get_max() const = 0;
     virtual int64_t get_step() const = 0;
     virtual int64_t get_default() const = 0;
-    virtual int64_t get_value() const = 0;
 
-    virtual bool set_value(int64_t new_value) = 0;
+    virtual outcome::result<int64_t> get_value() const = 0;
+    virtual outcome::result<void> set_value(int64_t new_value) = 0;
 };
 
 class IPropertyFloat : public IPropertyBase
@@ -81,9 +82,9 @@ public:
     virtual double get_max() const = 0;
     virtual double get_step() const = 0;
     virtual double get_default() const = 0;
-    virtual double get_value() const = 0;
 
-    virtual bool set_value(double new_value) = 0;
+    virtual outcome::result<double> get_value() const = 0;
+    virtual outcome::result<void> set_value(double new_value) = 0;
 };
 
 class IPropertyBool : public IPropertyBase
@@ -98,9 +99,9 @@ public:
     virtual PropertyFlags get_flags() const override = 0;
 
     virtual bool get_default() const = 0;
-    virtual bool get_value() const = 0;
 
-    virtual bool set_value(bool new_value) = 0;
+    virtual outcome::result<bool> get_value() const = 0;
+    virtual outcome::result<void> set_value(bool new_value) = 0;
 };
 
 
@@ -115,7 +116,7 @@ public:
     virtual std::string get_name() const override = 0;
     virtual PropertyFlags get_flags() const override = 0;
 
-    virtual bool execute() = 0;
+    virtual outcome::result<void> execute() = 0;
 };
 
 
@@ -130,11 +131,11 @@ public:
     virtual std::string get_name() const override = 0;
     virtual PropertyFlags get_flags() const override = 0;
 
-    virtual bool set_value_str(const std::string& new_value) = 0;
-    virtual bool set_value(int new_value) = 0;
+    virtual outcome::result<void> set_value_str(const std::string& new_value) = 0;
+    virtual outcome::result<void> set_value(int64_t new_value) = 0;
 
-    virtual std::string get_value() const = 0;
-    virtual int get_value_int() const = 0;
+    virtual outcome::result<std::string> get_value() const = 0;
+    virtual outcome::result<int64_t> get_value_int() const = 0;
 
     virtual std::string get_default() const = 0;
 

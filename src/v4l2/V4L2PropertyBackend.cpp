@@ -25,30 +25,67 @@
 tcam::property::V4L2PropertyBackend::V4L2PropertyBackend(int fd) : p_fd(fd) {}
 
 
-int tcam::property::V4L2PropertyBackend::write_control(int v4l2_id, int new_value)
+outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, struct v4l2_control* ctrl)
+{
+    auto ret = tcam::tcam_xioctl(fd, request, ctrl);
+
+    if (ret >= 0)
+    {
+        return ctrl->value;
+    }
+
+    std::string action = "GET";
+    if (request == VIDIOC_S_CTRL)
+    {
+        action = "SET";
+    }
+
+    SPDLOG_ERROR("ioctl returned {} reported error while {} ({}): {}", ret, action, errno, strerror(errno));
+    switch (errno)
+    {
+        case EBUSY:
+        {
+            return tcam::status::DeviceBlocked;
+        }
+        case EINTR:
+        {
+            return tcam::status::PropertyValueDoesNotExist;
+        }
+        case ERANGE:
+        {
+            return tcam::status::PropertyOutOfBounds;
+        }
+        case ETIMEDOUT:
+        {
+            return tcam::status::Timeout;
+        }
+        default:
+        {
+            return tcam::status::UndefinedError;
+        }
+    }
+
+}
+
+
+outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int v4l2_id, int new_value)
 {
     struct v4l2_control ctrl = {};
     ctrl.id = v4l2_id;
     ctrl.value = new_value;
 
-    return tcam_xioctl(p_fd, VIDIOC_S_CTRL, &ctrl);
+    SPDLOG_INFO("Writing {} {:x} {}", p_fd, v4l2_id, ctrl.value);
+
+    return v4l2_control_ioctl(p_fd, VIDIOC_S_CTRL, &ctrl);
 }
 
 
-int tcam::property::V4L2PropertyBackend::read_control(int v4l2_id, int64_t& new_value)
+outcome::result<int64_t> tcam::property::V4L2PropertyBackend::read_control(int v4l2_id)
 {
     struct v4l2_control ctrl = {};
     ctrl.id = v4l2_id;
 
-    if (tcam_xioctl(p_fd, VIDIOC_G_CTRL, &ctrl) != 0)
-    {
-        SPDLOG_WARN("Could not retrieve current value. ioctl return '{}'",
-                    //              desc.prop->get_name().c_str(),
-                    strerror(errno));
-        return -1;
-    }
-    new_value = ctrl.value;
-    return 0;
+    return v4l2_control_ioctl(p_fd, VIDIOC_G_CTRL, &ctrl);
 }
 
 
@@ -64,7 +101,9 @@ std::map<int, std::string> tcam::property::V4L2PropertyBackend::get_menu_entries
     {
         qmenu.index = i;
         if (tcam_xioctl(p_fd, VIDIOC_QUERYMENU, &qmenu))
+        {
             continue;
+        }
 
         std::string map_string((char*)qmenu.name);
         entries.emplace(i, map_string);

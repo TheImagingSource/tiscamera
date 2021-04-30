@@ -39,11 +39,11 @@ public:
     void auto_pass( const img::img_descriptor& image);
 
 
-    int get_int(emulated::software_prop prop_id);
-    bool set_int(emulated::software_prop prop_id, int new_val);
+    outcome::result<int64_t> get_int(emulated::software_prop prop_id);
+    outcome::result<void> set_int(emulated::software_prop prop_id, int64_t new_val);
 
-    double get_double(emulated::software_prop);
-    bool set_double(emulated::software_prop, double);
+    outcome::result<double> get_double(emulated::software_prop);
+    outcome::result<void> set_double(emulated::software_prop, double);
 
 
     void update_to_new_format(const tcam::VideoFormat& new_format);
