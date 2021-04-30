@@ -48,6 +48,7 @@ include_directories(${GObject_INCLUDE_DIR})
 add_executable(test-gstreamer-1.0 ${test_gst_src})
 
 target_include_directories(test-gstreamer-1.0 PRIVATE ${TCAM_SOURCE_DIR}/tests/include)
+target_include_directories(test-gstreamer-1.0 PRIVATE ${TCAM_SOURCE_DIR}/external)
 
 
 target_link_libraries(test-gstreamer-1.0 tcam)
@@ -66,6 +67,7 @@ add_executable(find-input-caps-verification find_input_caps_verification.cpp)
 add_tis_test(find-input-caps-verification)
 
 target_include_directories(find-input-caps-verification PRIVATE ${TCAM_SOURCE_DIR}/tests/include)
+target_include_directories(find-input-caps-verification PRIVATE ${TCAM_SOURCE_DIR}/external)
 
 target_link_libraries(find-input-caps-verification tcam)
 target_link_libraries(find-input-caps-verification tcamgstbase)
