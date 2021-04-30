@@ -28,6 +28,7 @@ find_package(GObjectIntrospection REQUIRED QUIET)
 
 add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
 target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
+target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include/")
 set_project_warnings(tcamgstbase)
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
@@ -82,6 +83,8 @@ foreach (t IN ITEMS ${PLUGINS})
   target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/external/)
   target_include_directories(${t} PRIVATE ${INTROSPECTION_INCLUDE_DIR})
   target_include_directories(${t} PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
+  target_include_directories(${t} PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include/")
+
 
   target_link_libraries(${t} tcam)
   target_link_libraries(${t} tcamprop)
