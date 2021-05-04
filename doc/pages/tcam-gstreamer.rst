@@ -107,6 +107,28 @@ This implies tiscamera was compiled with gstreamer >= 1.10.
    GstStructure* struc = gst_message_parse_error_details(message);
    const char* lost_serial = gst_structure_get_string(struc, "serial");
 
+.. _tcampimipisrc:
+
+tcampimipisrc
+#############
+
+Closed source GStreamer Source for FPD/MiPi Cameras on RaspberryPi.
+
+You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`_.
+
+Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcampimipisrc/>`_.
+
+.. _tcamtegrasrc:
+
+tcamtegrasrc
+############
+
+Closed source GStreamer Source for FPD/MiPi Cameras on NVidia Jetson systems.
+
+You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`_.
+
+Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcamtegrasrc/>`_.
+                
 .. _tcamsrc:
    
 tcamsrc
@@ -115,8 +137,9 @@ tcamsrc
 The tcamsrc is a source bin that allows access to all source elements supported by tiscamera.
 It is a convenience wrapper and offers no additional properties.
 
-As of tiscamera 0.13.0 the supported source elements include tcammainsrc and tcampimipisrc.
-   
+| As of tiscamera 0.13.0 supported elements include tcammainsrc and tcampimipisrc.
+| tiscamera 0.14.0 added support for tcamtegrasrc.
+
 .. _tcamautoexposure:
    
 tcamautoexposure
@@ -310,7 +333,7 @@ tcamdutils
 Closed source optional transformation and interpretation filter.
 Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
 Implements features like HDR.
-Optimized for x64 platforms.
+For more information read the `online documentation <https://www.theimagingsource.com/documentation/tiscameradutils/>`_
 
 .. _tcambiteater:
 
