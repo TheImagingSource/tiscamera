@@ -552,6 +552,7 @@ void tcam::property::SoftwareProperties::generate_iris()
     }
     // TODO: granularity/step
 
+    enable_property_int(sp::Iris, m_dev_iris);
     enable_property(sp::IrisAuto);
 }
 
