@@ -52,6 +52,7 @@ set(base
   Property.cpp
   PropertyGeneration.cpp
   PropertyInterfaces.cpp
+  PropertyCategory.cpp
   SoftwarePropertiesBase.cpp
   SoftwareProperties.cpp
   SoftwarePropertyBackend.cpp

@@ -69,4 +69,7 @@ private:
     std::vector<std::shared_ptr<Category>> m_children;
 };
 
+std::string get_display_category(std::string_view property);
+std::string get_display_group(std::string_view property);
+
 } // namespace tcam::property
