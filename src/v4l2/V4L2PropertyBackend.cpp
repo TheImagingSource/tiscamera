@@ -74,8 +74,6 @@ outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int 
     ctrl.id = v4l2_id;
     ctrl.value = new_value;
 
-    SPDLOG_INFO("Writing {} {:x} {}", p_fd, v4l2_id, ctrl.value);
-
     return v4l2_control_ioctl(p_fd, VIDIOC_S_CTRL, &ctrl);
 }
 

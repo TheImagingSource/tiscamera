@@ -927,17 +927,26 @@ bool V4l2Device::get_frame()
        field is ignored and the planes pointer is used instead.
      */
 
+    // on initial startup all buffers are received once, but empty
+    // this causes unneccessary error messages
+    // filter those messages until we receive one valid image
+    static bool already_received_valid_image;
+
     if (active_video_format.get_fourcc() != FOURCC_MJPG)
     {
         if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
         {
-            SPDLOG_ERROR("Buffer has wrong size. Got: {} Expected: {} Dropping...",
-                         buf.bytesused,
-                         this->active_video_format.get_required_buffer_size());
+            if (already_received_valid_image)
+            {
+                SPDLOG_ERROR("Buffer has wrong size. Got: {} Expected: {} Dropping...",
+                             buf.bytesused,
+                             this->active_video_format.get_required_buffer_size());
+            }
             requeue_buffer(buffers.at(buf.index).buffer);
             return true;
         }
     }
+    already_received_valid_image = true;
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
     statistics.capture_time_ns =
@@ -985,7 +994,7 @@ void V4l2Device::init_userptr_buffers()
         }
         else
         {
-            SPDLOG_ERROR("VIDIOC_REQBUFS");
+            SPDLOG_ERROR("VIDIOC_REQBUFS {}", strerror(errno));
         }
     }
 
@@ -999,8 +1008,7 @@ void V4l2Device::init_userptr_buffers()
         buf.m.userptr = (unsigned long)buffers.at(i).buffer->get_data();
         buf.length = buffers.at(i).buffer->get_buffer_size();
 
-        SPDLOG_DEBUG(
-            "Queueing buffer({}) with length {}", buffers.at(i).buffer->get_data(), buf.length);
+        SPDLOG_TRACE("Queueing buffer({:x}) with length {}", buffers.at(i).buffer->get_data(), buf.length);
 
         if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
         {
@@ -1009,7 +1017,7 @@ void V4l2Device::init_userptr_buffers()
         }
         else
         {
-            SPDLOG_DEBUG("Successfully queued v4l2_buffer");
+            SPDLOG_TRACE("Successfully queued v4l2_buffer");
             buffers.at(i).is_queued = true;
         }
     }
