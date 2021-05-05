@@ -177,7 +177,7 @@ outcome::result<void> SoftwarePropertyDoubleImpl::valid_value(double val)
         return tcam::status::PropertyOutOfBounds;
     }
 
-    return tcam::status::Success;
+    return outcome::success();
 }
 
 
