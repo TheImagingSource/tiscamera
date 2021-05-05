@@ -18,25 +18,23 @@ namespace
 {
 
 static emulated::software_prop_desc prop_list[] = {
-    { sp::ExposureTime, "ExposureTime", "Exposure", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::ExposureAuto, "ExposureAuto", "Exposure", "Exposure", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
-    { sp::ExposureAutoLowerLimit, "ExposureAutoLowerLimit", "Exposure", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::ExposureAutoUpperLimit, "ExposureAutoUpperLimit", "Exposure", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::ExposureAutoUpperLimitAuto,
-      "ExposureAutoUpperLimitAuto", "Exposure", "Exposure",
-      { { { 0, "Off" }, { 1, "On" } } }, 1 },
-    { sp::ExposureAutoReference, "ExposureAutoReference", "Exposure", "Exposure", tcam_value_int{0, 255, 1, 128, 128}},
+    { sp::ExposureTime, "ExposureTime", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::ExposureAuto, "ExposureAuto", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
+    { sp::ExposureAutoLowerLimit, "ExposureAutoLowerLimit", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::ExposureAutoUpperLimit, "ExposureAutoUpperLimit", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::ExposureAutoUpperLimitAuto, "ExposureAutoUpperLimitAuto", { { { 0, "Off" }, { 1, "On" } } }, 1 },
+    { sp::ExposureAutoReference, "ExposureAutoReference", tcam_value_int { 0, 255, 1, 128, 128 } },
 
-    { sp::Gain, "Gain", "Gain", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::GainAuto, "GainAuto", "Gain", "Exposure", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
-    { sp::GainAutoLowerLimit, "GainAutoLowerLimit", "Gain", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::GainAutoUpperLimit, "GainAutoUpperLimit", "Gain", "Exposure", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::Gain, "Gain", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::GainAuto, "GainAuto", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
+    { sp::GainAutoLowerLimit, "GainAutoLowerLimit", TCAM_PROPERTY_TYPE_DOUBLE },
+    { sp::GainAutoUpperLimit, "GainAutoUpperLimit", TCAM_PROPERTY_TYPE_DOUBLE },
 
-    { sp::Iris, "Iris", "Iris", "Lens", TCAM_PROPERTY_TYPE_INTEGER },
-    { sp::IrisAuto, "IrisAuto", "Iris", "Lens", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
+    { sp::Iris, "Iris", TCAM_PROPERTY_TYPE_INTEGER },
+    { sp::IrisAuto, "IrisAuto", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
 
-    { sp::Focus, "Focus", "Focus", "Lens", TCAM_PROPERTY_TYPE_INTEGER },
-    { sp::FocusAuto, "FocusAuto", "Focus", "Lens", { { { 0, "Off" }, { 1, "Once" } } }, 0 },
+    { sp::Focus, "Focus", TCAM_PROPERTY_TYPE_INTEGER },
+    { sp::FocusAuto, "FocusAuto", { { { 0, "Off" }, { 1, "Once" } } }, 0 },
 };
 
 

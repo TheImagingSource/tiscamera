@@ -55,23 +55,23 @@ const std::string_view find_property_name(software_prop id);
 
 struct software_prop_desc
 {
-    software_prop_desc(software_prop id, std::string_view n, std::string_view g, std::string_view c, TCAM_PROPERTY_TYPE t)
-        : id_(id), name_(n), group_(g), category_(c), type_(t), range_d_(), range_i_(), entries_()
+    software_prop_desc(software_prop id, std::string_view n, TCAM_PROPERTY_TYPE t)
+        : id_(id), name_(n), type_(t), range_d_(), range_i_(), entries_()
     {
     }
-    software_prop_desc(software_prop id, std::string_view n, std::string_view g, std::string_view c, tcam_value_int r)
-        : software_prop_desc(id, n, g, c, TCAM_PROPERTY_TYPE_INTEGER)
+    software_prop_desc(software_prop id, std::string_view n, tcam_value_int r)
+        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_INTEGER)
     {
         range_i_ = r;
     }
-    software_prop_desc(software_prop id, std::string_view n, std::string_view g, std::string_view c, tcam_value_double r)
-        : software_prop_desc(id, n, g, c, TCAM_PROPERTY_TYPE_DOUBLE)
+    software_prop_desc(software_prop id, std::string_view n, tcam_value_double r)
+        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_DOUBLE)
     {
         range_d_ = r;
     }
 
-    software_prop_desc(software_prop id, std::string_view n, std::string_view g, std::string_view c, const std::map<int, std::string>& e, int default_val)
-        : software_prop_desc(id, n, g, c, TCAM_PROPERTY_TYPE_ENUMERATION)
+    software_prop_desc(software_prop id, std::string_view n, const std::map<int, std::string>& e, int default_val)
+        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_ENUMERATION)
     {
         //range_ = {};
         entries_ = e;
@@ -80,8 +80,6 @@ struct software_prop_desc
 
     software_prop id_;
     std::string_view name_;
-    std::string_view group_;
-    std::string_view category_;
     TCAM_PROPERTY_TYPE type_;
     tcam_value_double range_d_;
     tcam_value_int range_i_;
