@@ -237,7 +237,7 @@ class PropertyWidget(QWidget):
         flags.asByte = self.prop.flags
 
         if (flags.Locked):
-            log.info("{} is locked.".format(self.prop.name))
+            # log.info("{} is locked.".format(self.prop.name))
             return True
         return False
 
