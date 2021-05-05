@@ -109,16 +109,19 @@ if (BUILD_ARAVIS)
   set(srcs
     ${srcs}
     aravis/AravisDevice.cpp
+    aravis/AravisPropertyBackend.cpp
+    aravis/AravisDeviceProperties.cpp
+    aravis/aravis_property_impl.cpp
     aravis/aravis_utils.cpp
     aravis/aravis_api.cpp
     )
 
 
-if (NOT TCAM_INTERNAL_ARAVIS)
+  if (NOT TCAM_INTERNAL_ARAVIS)
 
-  find_package(Aravis REQUIRED QUIET)
+    find_package(Aravis REQUIRED QUIET)
 
-endif(NOT TCAM_INTERNAL_ARAVIS)
+  endif(NOT TCAM_INTERNAL_ARAVIS)
 
 
 endif (BUILD_ARAVIS)

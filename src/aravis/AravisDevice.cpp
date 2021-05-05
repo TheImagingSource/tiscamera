@@ -16,6 +16,7 @@
 
 #include "AravisDevice.h"
 
+#include "AravisPropertyBackend.h"
 #include "aravis_utils.h"
 #include "internal.h"
 #include "utils.h"
@@ -175,6 +176,8 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : handler(nullptr), st
 
     handler = std::make_shared<AravisPropertyHandler>(this);
     format_handler = std::make_shared<AravisFormatHandler>(this);
+
+    m_backend = std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera));
 
     index_genicam();
     determine_active_video_format();
@@ -1088,6 +1091,7 @@ void AravisDevice::index_genicam()
     genicam = arv_device_get_genicam(arv_camera_get_device(this->arv_camera));
 
     iterate_genicam("Root");
+    index_properties("Root");
     index_genicam_format(NULL);
 }
 
@@ -1213,18 +1217,18 @@ void AravisDevice::iterate_genicam(const char* feature)
         }
         else
         {
-            property_mapping m;
+            // property_mapping m; //
 
-            m.arv_ident = feature;
-            m.prop = create_property(arv_camera, node, handler);
+            // m.arv_ident = feature;
+            // m.prop = create_property(arv_camera, node, handler);
 
-            if (m.prop == nullptr)
-            {
-                SPDLOG_ERROR("Property '{}' is null", m.arv_ident.c_str());
-                return;
-            }
+            // if (m.prop == nullptr)
+            // {
+            //     SPDLOG_ERROR("Property '{}' is null", m.arv_ident.c_str());
+            //     return;
+            // }
 
-            handler->properties.push_back(m);
+            // handler->properties.push_back(m);
         }
     }
 }

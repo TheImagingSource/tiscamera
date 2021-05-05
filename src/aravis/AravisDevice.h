@@ -28,6 +28,11 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
+namespace property
+{
+    class AravisPropertyBackend;
+}
+
 class AravisDevice : public DeviceInterface
 {
     struct property_mapping
@@ -77,7 +82,7 @@ public:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return p_properties;
+        return m_properties;
     };
 
     std::vector<std::shared_ptr<Property>> getProperties() override;
@@ -126,7 +131,8 @@ private:
 
     std::weak_ptr<SinkInterface> external_sink;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+    std::shared_ptr<tcam::property::AravisPropertyBackend> m_backend;
 
     ArvStream* stream;
     ArvGc* genicam;
@@ -167,6 +173,8 @@ private:
     void index_genicam();
     void iterate_genicam(const char* feature);
     void index_genicam_format(ArvGcNode* /* node */);
+
+    void index_properties(const char* name);
 
 }; /* class GigeCapture */
 
