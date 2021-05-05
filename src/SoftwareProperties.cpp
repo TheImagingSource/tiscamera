@@ -150,7 +150,7 @@ void tcam::property::SoftwareProperties::generate_public_properties()
 {
     m_auto_params = {};
 
-    auto iter_exp = find_property(m_device_properties, "ExposureTimeAuto");
+    auto iter_exp = find_property(m_device_properties, "ExposureAuto");
 
     if (!iter_exp)
     {
