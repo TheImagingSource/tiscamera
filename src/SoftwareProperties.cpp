@@ -177,7 +177,7 @@ void tcam::property::SoftwareProperties::generate_public_properties()
 
     if (iter_focus && !iter_focus_auto)
     {
-        //generate_focus();
+        generate_focus();
     }
 
     auto iter_wb = find_property(m_device_properties, "BalanceWhiteAuto");
@@ -307,10 +307,6 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         }
         case emulated::software_prop::Focus:
         {
-            // if (m_focus.auto_enabled)
-            // {
-            //     return false;
-            // }
             m_auto_params.focus_onepush_params.device_focus_val = new_val;
             return m_dev_focus->set_value(new_val);
         }
@@ -562,6 +558,27 @@ void tcam::property::SoftwareProperties::generate_iris()
 }
 
 
+void SoftwareProperties::generate_focus()
+{
+    auto base = tcam::property::find_property(m_device_properties, "Focus");
+
+    if (!base)
+    {
+        SPDLOG_ERROR("Unable to identify focus interface.");
+        return;
+    };
+
+    m_dev_focus = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base);
+
+    m_auto_params.focus_onepush_params.enable_focus = true;
+    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min = m_dev_focus->get_min();
+    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_max = m_dev_focus->get_max();
+
+    enable_property(sp::FocusAuto);
+    enable_property_int(sp::Focus, m_dev_focus);
+}
+
+
 void SoftwareProperties::set_locked(emulated::software_prop prop_id, bool is_locked)
 {
     auto name = find_property_name(prop_id);
@@ -673,6 +690,32 @@ void tcam::property::SoftwareProperties::enable_property_double(sp prop_id, std:
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
             m_properties.push_back(std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, prop, m_backend));
+            break;
+        }
+        default:
+        {
+            SPDLOG_WARN("Not implemented. {}", desc->name_);
+            break;
+        }
+    }
+}
+
+
+void tcam::property::SoftwareProperties::enable_property_int(sp prop_id, std::shared_ptr<IPropertyInteger> prop)
+{
+    auto desc = find_property_desc(prop_id);
+
+    if (!desc)
+    {
+        SPDLOG_INFO("No desc found {}", prop_id);
+        return;
+    }
+
+    switch (desc->type_)
+    {
+        case TCAM_PROPERTY_TYPE_INTEGER:
+        {
+            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyIntegerImpl>(desc, prop, m_backend));
             break;
         }
         default:

@@ -56,6 +56,7 @@ private:
     void generate_exposure();
     void generate_gain();
     void generate_iris();
+    void generate_focus();
 
     void set_locked(emulated::software_prop prop_id, bool is_locked);
 
@@ -63,6 +64,9 @@ private:
 
     void enable_property_double(emulated::software_prop prop_name,
                                 std::shared_ptr<IPropertyFloat> prop);
+
+    void enable_property_int(emulated::software_prop prop_id,
+                             std::shared_ptr<IPropertyInteger> prop);
 
     // properties the actual camera has
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_device_properties;
