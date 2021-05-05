@@ -22,6 +22,10 @@ static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_di
         },
     },
     {
+        0x009a0910, // privacy aka trigger
+        { "TriggerMode", TCAM_PROPERTY_TYPE_ENUMERATION, { { { 0, "Off" }, { 1, "On" } } } },
+    },
+    {
         0x199e204,
         {
             "Gain",
@@ -68,6 +72,8 @@ static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_di
       { "", TCAM_PROPERTY_TYPE_DOUBLE, {} } },
     { 0x00980902, // Saturation
       { "", TCAM_PROPERTY_TYPE_DOUBLE, {} } },
+    { 0x0199e927, {"OffsetX", TCAM_PROPERTY_TYPE_UNKNOWN, {}}},
+    { 0x0199e928, {"OffsetY", TCAM_PROPERTY_TYPE_UNKNOWN, {}}},
     { 0x0199e210, { "TriggerDelay", TCAM_PROPERTY_TYPE_UNKNOWN, {} } },
     { 0x0199e211, { "StrobeEnable", TCAM_PROPERTY_TYPE_UNKNOWN, {} } },
     { 0x0199e212, { "StrobePolarity", TCAM_PROPERTY_TYPE_UNKNOWN, {} } },
