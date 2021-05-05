@@ -121,6 +121,22 @@ static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_di
         { "BalanceWhiteTemperature", TCAM_PROPERTY_TYPE_UNKNOWN, {} },
     },
     {
+        0x0199e251,
+        {
+            "ReverseY",
+            TCAM_PROPERTY_TYPE_UNKNOWN,
+            {},
+        },
+    },
+    {
+        0x0199e252,
+        {
+            "ReverseX",
+            TCAM_PROPERTY_TYPE_UNKNOWN,
+            {},
+        },
+    },
+    {
         0x0199e258,
         { "AutoFunctionsROIPreset", TCAM_PROPERTY_TYPE_UNKNOWN, {} },
     },
