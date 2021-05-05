@@ -16,8 +16,21 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace tcam::property
 {
+
+
+enum class AccessMode : uint8_t
+{
+    RW,
+    RO,
+    WO,
+    NoAccess,
+};
+
+
 
 enum class PropertyFlags
 {
