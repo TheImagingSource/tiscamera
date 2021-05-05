@@ -18,6 +18,8 @@
 #ifndef TCAM_BACKEND_AFU050_DEFINITIONS_H
 #define TCAM_BACKEND_AFU050_DEFINITIONS_H
 
+#include <cstdint>
+
 enum
 {
     PU_CONTROL_UNDEFINE = 0x00,
@@ -72,5 +74,11 @@ enum CONTROL_CMD
     GET_DEF = 0x87
 };
 
+
+struct control_definition
+{
+    VC_UNIT unit;
+    uint8_t control;
+};
 
 #endif /* TCAM_BACKEND_AFU050_DEFINITIONS_H */

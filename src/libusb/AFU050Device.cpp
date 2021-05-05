@@ -15,6 +15,8 @@
  */
 
 #include "AFU050Device.h"
+#include "AFU050DeviceBackend.h"
+#include "AFU050PropertyImpl.h"
 
 #include "UsbHandler.h"
 #include "UsbSession.h"
@@ -53,6 +55,8 @@ tcam::AFU050Device::AFU050Device(const DeviceInfo& info)
                      1);
     }
     property_handler = std::make_shared<AFU050PropertyHandler>(this);
+
+    m_backend = std::make_shared<tcam::property::AFU050DeviceBackend>(this);
 
     create_properties();
     create_formats();
@@ -128,22 +132,22 @@ void AFU050Device::create_formats()
 
 void AFU050Device::create_properties()
 {
-    add_int(TCAM_PROPERTY_EXPOSURE, VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
-    add_bool(TCAM_PROPERTY_EXPOSURE_AUTO, VC_UNIT_EXTENSION_UNIT, XU_AUTO_EXPOSURE);
+    add_double("ExposureTime", VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
+    add_enum("ExposureAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_EXPOSURE, {{{0, "Off"}, {1, "On"}}});
 
-    add_int(TCAM_PROPERTY_GAIN, VC_UNIT_PROCESSING_UNIT, PU_GAIN_CONTROL);
-    add_bool(TCAM_PROPERTY_GAIN_AUTO, VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN);
+    add_double("Gain", VC_UNIT_PROCESSING_UNIT, PU_GAIN_CONTROL);
+    add_enum("GainAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN, {{{0, "Off"}, {1, "On"}}});
 
-    add_bool(TCAM_PROPERTY_FOCUS_ONE_PUSH, VC_UNIT_EXTENSION_UNIT, XU_FOCUS_ONE_PUSH);
+    add_enum("FocusAuto", VC_UNIT_EXTENSION_UNIT, XU_FOCUS_ONE_PUSH, {{{0, "Off"}, {1, "Once"}}});
 
-    add_int(TCAM_PROPERTY_WB_RED, VC_UNIT_EXTENSION_UNIT, XU_GAIN_R_CONTROL);
-    add_int(TCAM_PROPERTY_WB_GREEN, VC_UNIT_EXTENSION_UNIT, XU_GAIN_G_CONTROL);
-    add_int(TCAM_PROPERTY_WB_BLUE, VC_UNIT_EXTENSION_UNIT, XU_GAIN_B_CONTROL);
-    add_bool(TCAM_PROPERTY_WB_AUTO, VC_UNIT_EXTENSION_UNIT, XU_AUTO_WHITE_BALANCE);
+    add_int("BalanceWhiteRed", VC_UNIT_EXTENSION_UNIT, XU_GAIN_R_CONTROL);
+    add_int("BalanceWhiteGreen", VC_UNIT_EXTENSION_UNIT, XU_GAIN_G_CONTROL);
+    add_int("BalanceWhiteBlue", VC_UNIT_EXTENSION_UNIT, XU_GAIN_B_CONTROL);
+    add_enum("BalanceWhiteAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_WHITE_BALANCE, {{{0, "Off"}, {1, "Continuous"}}});
 
-    add_int(TCAM_PROPERTY_SATURATION, VC_UNIT_PROCESSING_UNIT, PU_SATURATION_CONTROL);
-    add_int(TCAM_PROPERTY_CONTRAST, VC_UNIT_PROCESSING_UNIT, PU_CONTRAST_CONTROL);
-    add_int(TCAM_PROPERTY_SHARPNESS, VC_UNIT_PROCESSING_UNIT, PU_SHARPNESS_CONTROL);
+    add_double("Saturation", VC_UNIT_PROCESSING_UNIT, PU_SATURATION_CONTROL);
+    add_int("Contrast", VC_UNIT_PROCESSING_UNIT, PU_CONTRAST_CONTROL);
+    add_int("Sharpness", VC_UNIT_PROCESSING_UNIT, PU_SHARPNESS_CONTROL);
 
     // add_int(TCAM_PROPERTY_FOCUS_X, VC_UNIT_EXTENSION_UNIT, PU_);
     // add_int(TCAM_PROPERTY_FOCUS_Y, VC_UNIT_EXTENSION_UNIT, PU_);
@@ -512,40 +516,57 @@ bool tcam::AFU050Device::stop_stream()
 }
 
 
-void AFU050Device::add_int(const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop)
+void AFU050Device::add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop)
 {
-    if (id == TCAM_PROPERTY_INVALID || unit == VC_UNIT_HEADER || prop == 0)
+    if (unit == VC_UNIT_HEADER || prop == 0)
     {
         return;
     }
 
-    SPDLOG_DEBUG("adding int {} {} {}", id, unit, prop);
+    SPDLOG_DEBUG("adding int {} {} {}", name, unit, prop);
 
-    struct tcam_device_property p = tcam::create_empty_property(id);
-    p.value.i.value = get_int_value(unit, prop, GET_CUR);
-    p.value.i.default_value = get_int_value(unit, prop, GET_DEF);
-    p.value.i.min = get_int_value(unit, prop, GET_MIN);
-    p.value.i.max = get_int_value(unit, prop, GET_MAX);
-    p.value.i.step = get_int_value(unit, prop, GET_RES);
-    std::shared_ptr<Property> property =
-        std::make_shared<PropertyInteger>(this->property_handler, p, Property::INTEGER);
-    this->property_handler->properties.push_back({ unit, prop, property });
+    control_definition cd = {unit, prop};
+
+    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyIntegerImpl>(name,
+                                                                                       cd,
+                                                                                       m_backend));
 }
 
 
-void AFU050Device::add_bool(TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop)
+void AFU050Device::add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop)
 {
-    if (id == TCAM_PROPERTY_INVALID || unit == VC_UNIT_HEADER || prop == 0)
+    if (unit == VC_UNIT_HEADER || prop == 0)
     {
         return;
     }
 
-    struct tcam_device_property p = tcam::create_empty_property(id);
-    p.value.i.value = get_bool_value(unit, prop, GET_CUR);
-    p.value.i.default_value = get_bool_value(unit, prop, GET_DEF);
-    std::shared_ptr<Property> property =
-        std::make_shared<PropertyBoolean>(this->property_handler, p, Property::INTEGER);
-    this->property_handler->properties.push_back({ unit, prop, property });
+    SPDLOG_DEBUG("adding double {} {} {}", name, unit, prop);
+
+    control_definition cd = {unit, prop};
+
+    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyDoubleImpl>(name,
+                                                                                      cd,
+                                                                                      m_backend));
+}
+
+
+void AFU050Device::add_enum(const std::string& name,
+                            const VC_UNIT unit, const unsigned char prop,
+                            std::map<int, std::string> entries)
+{
+    if (unit == VC_UNIT_HEADER || prop == 0)
+    {
+        return;
+    }
+
+    SPDLOG_DEBUG("adding enum {} {} {}", name, unit, prop);
+
+    control_definition cd = {unit, prop};
+
+    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyEnumImpl>(name,
+                                                                                    cd,
+                                                                                    entries,
+                                                                                    m_backend));
 }
 
 

@@ -130,6 +130,8 @@ if (BUILD_LIBUSB)
   set(srcs
     ${srcs}
     libusb/AFU050Device.cpp
+    libusb/AFU050DeviceBackend.cpp
+    libusb/AFU050PropertyImpl.cpp
     libusb/AFU050PropertyHandler.cpp
     libusb/AFU420Device.cpp
     libusb/AFU420DeviceProperties.cpp

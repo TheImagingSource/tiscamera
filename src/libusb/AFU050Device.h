@@ -35,6 +35,11 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
+namespace property
+{
+class AFU050DeviceBackend;
+}
+
 class AFU050Device : public DeviceInterface
 {
     typedef enum
@@ -94,7 +99,7 @@ public:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return p_properties;
+        return m_properties;
     };
 
     std::vector<std::shared_ptr<Property>> getProperties();
@@ -127,6 +132,14 @@ public:
 
     bool stop_stream();
 
+    bool set_control(int unit, int ctrl, int len, unsigned char* value);
+
+    bool get_control(int unit,
+                     int ctrl,
+                     int len,
+                     unsigned char* value,
+                     enum CONTROL_CMD cmd = GET_CUR);
+
 private:
     std::unique_ptr<LibusbDevice> usb_device_;
 
@@ -149,7 +162,9 @@ private:
 
     std::vector<framerate_mapping> framerate_conversions;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+
+    std::shared_ptr<tcam::property::AFU050DeviceBackend> m_backend;
 
     std::shared_ptr<AFU050PropertyHandler> property_handler;
 
@@ -205,19 +220,11 @@ private:
 
     void monitor_device();
 
-    void add_int(const TCAM_PROPERTY_ID id, const VC_UNIT unit, const unsigned char prop);
-
-    void add_bool(TCAM_PROPERTY_ID id, VC_UNIT unit, unsigned char prop);
+    void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
+    void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop);
+    void add_enum(const std::string& name, const VC_UNIT unit, const unsigned char prop, std::map<int, std::string> entries);
 
     bool update_property(property_description& desc);
-
-    bool set_control(int unit, int ctrl, int len, unsigned char* value);
-
-    bool get_control(int unit,
-                     int ctrl,
-                     int len,
-                     unsigned char* value,
-                     enum CONTROL_CMD cmd = GET_CUR);
 
     int set_video_format(uint8_t format_index, uint8_t frame_index, uint32_t frame_interval);
 
