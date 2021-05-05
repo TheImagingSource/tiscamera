@@ -17,6 +17,7 @@
 #include "mainsrc_tcamprop_impl.h"
 
 #include "mainsrc_device_state.h"
+#include "PropertyCategory.h"
 
 using namespace tcam::property;
 
@@ -151,21 +152,18 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
     {
         g_value_init(category, G_TYPE_STRING);
 
-        g_value_set_string(category, "Unknown");
-        //tcam::category2string(prop.group.property_category).c_str());
+        g_value_set_string(category, tcam::property::get_display_category(property->get_name()).c_str());
     }
     if (group)
     {
         g_value_init(group, G_TYPE_STRING);
-        g_value_set_string(group, "");
-        //tcam::get_control_reference(prop.group.property_group).name.c_str());
+        g_value_set_string(group, tcam::property::get_display_group(property->get_name()).c_str());
     }
 
     auto prop_type = property->get_type();
 
     if (type)
     {
-        // g_value_set_gtype (type, G_TYPE_INT);
         g_value_init(type, G_TYPE_STRING);
         g_value_set_string(type, prop_type_to_string(prop_type));
     }
