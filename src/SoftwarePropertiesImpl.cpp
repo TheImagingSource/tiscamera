@@ -25,6 +25,24 @@ namespace tcam::property::emulated
 
 SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     const struct software_prop_desc* desc,
+    std::shared_ptr<IPropertyInteger> prop,
+    std::shared_ptr<SoftwarePropertyBackend> backend)
+    : m_cam(backend)
+{
+    m_id = desc->id_;
+
+    m_name = desc->name_;
+
+    m_min = prop->get_min();
+    m_max = prop->get_max();
+    m_step = prop->get_step();
+    m_default = prop->get_default();
+
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+}
+
+SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
+    const struct software_prop_desc* desc,
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {

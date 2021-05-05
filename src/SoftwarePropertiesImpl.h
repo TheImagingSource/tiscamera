@@ -34,6 +34,11 @@ class SoftwarePropertyBackend;
 class SoftwarePropertyIntegerImpl : public IPropertyInteger
 {
 public:
+    SoftwarePropertyIntegerImpl(
+        const struct software_prop_desc* desc,
+        std::shared_ptr<IPropertyInteger> prop,
+        std::shared_ptr<SoftwarePropertyBackend> backend);
+
     SoftwarePropertyIntegerImpl(const struct software_prop_desc* desc,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
