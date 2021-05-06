@@ -998,8 +998,30 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
     gst_helper::gst_unique_ptr<GstPad> in_pad = gst_helper::get_static_pad( self->src, "src" );
     GstCaps* incoming_caps = gst_pad_query_caps( in_pad.get(), NULL);
 
-    // always can be passed through
-    GstCaps* all_caps = gst_caps_copy(incoming_caps);
+
+    GstCaps* all_caps = gst_caps_new_empty();
+
+    for (guint i = 0; i < gst_caps_get_size(incoming_caps); ++i)
+    {
+        // nvmm is described not in the gst_caps name
+        // but as a GstCapsFeatures object
+        // iterate over them, if existent to skip memory types we do not handle.
+        GstCapsFeatures* features = gst_caps_get_features(incoming_caps, i);
+
+        if (features)
+        {
+            if (gst_caps_features_contains (features, "memory:NVMM"))
+            {
+                //GST_INFO("Contains NVMM. Skipping");
+                continue;
+            }
+        }
+
+        GstCaps* tmp = gst_caps_copy_nth(incoming_caps, i);
+
+        // append does not copy but transferres
+        gst_caps_append(all_caps, tmp);
+    }
 
     // we have four scenarios:
     // 1. camera has video/x-raw,format=GRAY8 = passed through
@@ -1015,21 +1037,6 @@ static GstCaps* generate_all_caps (GstTcamBin* self)
 
     for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
     {
-
-        // nvmm is described not in the gst_caps name
-        // but as a GstCapsFeatures object
-        // iterate over them, if existent to skip memory types we do not handle.
-        GstCapsFeatures* features = gst_caps_get_features(all_caps, i);
-
-        if (features)
-        {
-            if (gst_caps_features_contains (features, "memory:NVMM"))
-            {
-                //GST_INFO("Contains NVMM. Skipping");
-                continue;
-            }
-        }
-
         GstStructure* struc = gst_caps_get_structure(all_caps, i);
 
         if (gst_structure_get_field_type (struc, "format") == G_TYPE_STRING)
