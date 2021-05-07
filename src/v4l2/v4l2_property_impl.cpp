@@ -215,8 +215,6 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
 
 outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
 {
-    int64_t value = 0;
-
     if (auto ptr = m_cam.lock())
     {
         auto ret = ptr->read_control(m_v4l2_id);
@@ -230,13 +228,6 @@ outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
         SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
         return tcam::status::ResourceNotLockable;
     }
-    //SPDLOG_DEBUG("{}: Returning value: {}", m_name, value);
-
-    if (value == 0)
-    {
-        return false;
-    }
-    return true;
 }
 
 outcome::result<void> V4L2PropertyBoolImpl::set_value(bool new_value)
@@ -324,7 +315,7 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
         }
         else
         {
-            SPDLOG_WARN("Unable to retrieve enum entries during proerty creation.");
+            SPDLOG_WARN("Unable to retrieve enum entries during property creation.");
         }
     }
     else
@@ -350,7 +341,7 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
             }
             else
             {
-                SPDLOG_WARN("Unable to retrieve enum entries during proerty creation.");
+                SPDLOG_WARN("Unable to retrieve enum entries during property creation.");
             }
         }
     }
@@ -390,7 +381,7 @@ outcome::result<void> V4L2PropertyEnumImpl::set_value(int64_t new_value)
 {
     if (!valid_value(new_value))
     {
-        return tcam::status::PropertyValueDoesNotExist; //false;
+        return tcam::status::PropertyValueDoesNotExist;
     }
 
     if (auto ptr = m_cam.lock())
