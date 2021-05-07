@@ -51,31 +51,6 @@ class AFU420DeviceBackend;
 class AFU420Device : public DeviceInterface
 {
 
-
-    struct property_description
-    {
-        std::shared_ptr<Property> property;
-    };
-
-    class AFU420PropertyHandler : public PropertyImpl
-    {
-        friend class AFU420Device;
-
-    public:
-        AFU420PropertyHandler(AFU420Device*);
-
-
-        std::vector<std::shared_ptr<Property>> create_property_vector();
-
-        bool set_property(const Property&);
-        bool get_property(Property&);
-
-    protected:
-        std::vector<struct property_description> properties;
-
-        AFU420Device* device;
-    };
-
     class AFU420FormatHandler : public FormatHandlerInterface
     {
         friend class AFU420Device;
@@ -105,12 +80,6 @@ public:
     {
         return m_properties;
     };
-
-    std::vector<std::shared_ptr<Property>> getProperties();
-
-    bool set_property(const Property&);
-
-    bool get_property(Property&);
 
     bool set_video_format(const VideoFormat&);
 
@@ -258,8 +227,6 @@ private:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
     std::shared_ptr<tcam::property::AFU420DeviceBackend> m_backend;
-
-    std::shared_ptr<AFU420PropertyHandler> property_handler;
 
     std::shared_ptr<AFU420FormatHandler> format_handler;
 

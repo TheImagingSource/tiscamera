@@ -19,7 +19,6 @@
 
 #include "DeviceIndex.h"
 #include "DeviceInfo.h"
-#include "Properties.h"
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
@@ -76,43 +75,6 @@ public:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
     std::shared_ptr<tcam::property::IPropertyBase> get_property(const std::string& name);
 
-    /**
-     * @return vector containing all available properties
-     */
-    std::vector<Property*> get_available_properties();
-
-
-    Property* get_property(TCAM_PROPERTY_ID id);
-    Property* get_property_by_name(const std::string& name);
-
-
-    /**
-     *
-     */
-    template<class TProperty> TProperty* find_property(TCAM_PROPERTY_ID id)
-    {
-        for (auto p : get_available_properties())
-        {
-            if (p->get_ID() == id)
-            {
-
-                if (get_reference_property_type(id) != TProperty::type)
-                {
-                    // TODO replace with static_assert
-                    return nullptr;
-                }
-
-                return (TProperty*)p;
-            }
-        }
-        return nullptr;
-    }
-
-
-    bool set_property(TCAM_PROPERTY_ID, const int64_t& value);
-    bool set_property(TCAM_PROPERTY_ID, const double& value);
-    bool set_property(TCAM_PROPERTY_ID, const bool& value);
-    bool set_property(TCAM_PROPERTY_ID, const std::string& value);
 
     // videoformat related:
 

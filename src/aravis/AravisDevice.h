@@ -35,29 +35,6 @@ namespace property
 
 class AravisDevice : public DeviceInterface
 {
-    struct property_mapping
-    {
-        std::shared_ptr<Property> prop;
-        std::string arv_ident;
-    };
-
-    class AravisPropertyHandler : public PropertyImpl
-    {
-        friend class AravisDevice;
-
-    public:
-        AravisPropertyHandler(AravisDevice*);
-
-        bool get_property(Property&);
-        bool set_property(const Property&);
-
-    protected:
-        std::vector<property_mapping> properties;
-        std::vector<property_mapping> special_properties;
-
-
-        AravisDevice* device;
-    };
 
     class AravisFormatHandler : public FormatHandlerInterface
     {
@@ -84,14 +61,6 @@ public:
     {
         return m_properties;
     };
-
-    std::vector<std::shared_ptr<Property>> getProperties() override;
-
-    bool set_property(const Property&) override;
-
-    bool get_property(Property&) override;
-
-    void update_property(struct property_mapping& mapping);
 
     bool set_video_format(const VideoFormat&) override;
 
@@ -122,8 +91,6 @@ private:
     static void callback(ArvStream* stream, void* user_data);
 
     static void device_lost(ArvGvDevice* device, void* user_data);
-
-    std::shared_ptr<AravisPropertyHandler> handler;
 
     std::shared_ptr<AravisFormatHandler> format_handler;
 

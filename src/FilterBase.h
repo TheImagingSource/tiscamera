@@ -18,7 +18,6 @@
 #define TCAM_FILTERBASE_H
 
 #include "ImageBuffer.h"
-#include "Properties.h"
 #include "PropertyInterfaces.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"

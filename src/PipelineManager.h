@@ -55,12 +55,6 @@ public:
 
     VideoFormat getVideoFormat() const override;
 
-    /**
-     *
-     * @return vector containing all filter properties; empty on error
-     */
-    std::vector<std::shared_ptr<Property>> getFilterProperties();
-
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
 
     bool set_status(TCAM_PIPELINE_STATUS) override;
@@ -111,11 +105,6 @@ private:
 
     std::shared_ptr<ImageSource> source;
     std::shared_ptr<SinkInterface> sink;
-
-    // @brief device properties
-    std::vector<std::shared_ptr<Property>> device_properties;
-
-    std::vector<std::shared_ptr<Property>> filter_properties;
 
     /**
      * @brief collection of found filter

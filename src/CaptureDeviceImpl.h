@@ -19,10 +19,6 @@
 
 #include "DeviceIndex.h"
 #include "DeviceInfo.h"
-#include "DeviceInterface.h"
-#include "PipelineManager.h"
-#include "Properties.h"
-#include "PropertyHandler.h"
 #include "internal.h"
 
 #include <memory>
@@ -33,6 +29,9 @@ VISIBILITY_INTERNAL
 
 namespace tcam
 {
+
+class PipelineManager;
+class DeviceInterface;
 
 class CaptureDeviceImpl
 {
@@ -99,11 +98,6 @@ public:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties();
     std::shared_ptr<tcam::property::IPropertyBase> get_property(const std::string& name);
 
-    /**
-     * @return vector containing all available properties
-     */
-    std::vector<Property*> get_available_properties();
-
     // videoformat related:
 
 
@@ -153,10 +147,8 @@ private:
 
     std::vector<device_lost_cb_data> device_lost_callback_data_;
     // both need to be shared_ptr and not unique_ptr
-    // the property handler is used for callbacks of properties
     // the pipeline is used for callbacks of ImageSource instances
     std::shared_ptr<PipelineManager> pipeline;
-    std::shared_ptr<PropertyHandler> property_handler;
 
     DeviceInfo open_device_info;
     VideoFormat active_format;

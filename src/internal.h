@@ -29,14 +29,12 @@
 #include "DeviceInterface.h"
 #include "FilterBase.h"
 #include "PipelineManager.h"
-#include "Properties.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"
 #include "format.h"
 #include "include/img/image_transform_base.h"
 #include "logging.h"
-#include "standard_properties.h"
 #include "utils.h"
 
 #endif /* TCAM_INTERNAL_H */

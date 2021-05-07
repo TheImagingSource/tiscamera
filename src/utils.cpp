@@ -217,41 +217,6 @@ tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
 }
 
 
-std::shared_ptr<Property> tcam::find_property(std::vector<std::shared_ptr<Property>>& properties,
-                                              TCAM_PROPERTY_ID property_id)
-{
-    for (auto& p : properties)
-    {
-        if (p->get_ID() == property_id)
-        {
-            return p;
-        }
-    }
-
-    return nullptr;
-}
-
-
-std::shared_ptr<Property> tcam::find_property(std::vector<std::shared_ptr<Property>>& properties,
-                                              const std::string& property_name)
-{
-
-    auto f = [&property_name](const std::shared_ptr<Property>& p) {
-        if (p->get_name().compare(property_name) == 0)
-            return true;
-        return false;
-    };
-
-    auto iter = std::find_if(properties.begin(), properties.end(), f);
-
-    if (iter != properties.end())
-    {
-        return *iter;
-    }
-
-    return nullptr;
-}
-
 
 bool tcam::compare_double(double val1, double val2)
 {
@@ -343,44 +308,6 @@ std::map<std::string, int> create_binning_entry_map(int min, int max)
     return map;
 }
 
-
-std::shared_ptr<Property> tcam::create_binning_property(TCAM_PROPERTY_ID id,
-                                                        std::shared_ptr<PropertyImpl> handler,
-                                                        int min,
-                                                        int max,
-                                                        int value,
-                                                        int default_value)
-{
-
-    if (id != TCAM_PROPERTY_BINNING_HORIZONTAL && id != TCAM_PROPERTY_BINNING_VERTICAL
-        && id != TCAM_PROPERTY_BINNING)
-    {
-        return nullptr;
-    }
-
-    tcam_device_property prop = {};
-    prop.id = id;
-    if (id == TCAM_PROPERTY_BINNING)
-    {
-        strncpy(prop.name, "Binning", sizeof(prop.name));
-    }
-    else if (id == TCAM_PROPERTY_BINNING_HORIZONTAL)
-    {
-        strncpy(prop.name, "Binning Horizontal", sizeof(prop.name));
-    }
-    else if (id == TCAM_PROPERTY_BINNING_VERTICAL)
-    {
-        strncpy(prop.name, "Binning Vertical", sizeof(prop.name));
-    }
-    prop.type = TCAM_PROPERTY_TYPE_ENUMERATION;
-
-    prop.value.i.value = value;
-    prop.value.i.default_value = default_value;
-
-    auto map = create_binning_entry_map(min, max);
-
-    return std::make_shared<PropertyEnumeration>(handler, prop, map, Property::ENUM);
-}
 
 
 double tcam::map_value_ranges(double input_start,

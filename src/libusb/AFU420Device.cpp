@@ -65,8 +65,6 @@ tcam::AFU420Device::AFU420Device(const DeviceInfo& info)
     // properties rely on this information
     check_for_optics();
 
-    property_handler = std::make_shared<AFU420PropertyHandler>(this);
-
     m_backend = std::make_shared<tcam::property::AFU420DeviceBackend>(this);
 
     // set_hdr(16);
@@ -538,24 +536,6 @@ void AFU420Device::create_formats()
     }
     // set list with actual framerates
     stream_format_list_ = fmt_list;
-}
-
-
-std::vector<std::shared_ptr<Property>> tcam::AFU420Device::getProperties()
-{
-    return property_handler->create_property_vector();
-}
-
-
-bool tcam::AFU420Device::set_property(const Property& p)
-{
-    return property_handler->set_property(p);
-}
-
-
-bool tcam::AFU420Device::get_property(Property& p)
-{
-    return property_handler->get_property(p);
 }
 
 

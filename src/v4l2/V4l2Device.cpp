@@ -73,7 +73,6 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
     }
     monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
-    property_handler = std::make_shared<V4L2PropertyHandler>(this);
     format_handler = std::make_shared<V4L2FormatHandler>(this);
 
     determine_active_video_format();
@@ -134,26 +133,6 @@ V4l2Device::~V4l2Device()
 DeviceInfo V4l2Device::get_device_description() const
 {
     return device;
-}
-
-
-std::vector<std::shared_ptr<Property>> V4l2Device::getProperties()
-{
-    return property_handler->create_property_vector();
-}
-
-
-bool V4l2Device::set_property(const Property& new_property)
-{
-    SPDLOG_INFO("Setting property \"{}\"", new_property.get_name().c_str());
-
-    return property_handler->set_property(new_property);
-}
-
-
-bool V4l2Device::get_property(Property& p)
-{
-    return property_handler->get_property(p);
 }
 
 
@@ -486,13 +465,20 @@ void V4l2Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 
 void V4l2Device::update_stream_timeout()
 {
-    for (const auto& p : property_handler->properties)
+    for (const auto& p : m_properties)
     {
-        if (p.prop->get_name() == "Exposure Time (us)" || p.prop->get_name() == "ExposureTime"
-            || p.prop->get_name() == "Exposure Time" || // uses µs
-            p.prop->get_name() == "Exposure")
+        if (p->get_name() == "ExposureTime")
         {
-            stream_timeout_sec_ = (p.prop->get_struct().value.i.value / 1000000) + 2;
+            auto val =std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(p)->get_value();
+
+            if (val)
+            {
+                stream_timeout_sec_ = (val.value() / 1000000) + 2;
+            }
+            else
+            {
+                // TODO: implement error handling
+            }
             break;
         }
     }
@@ -888,11 +874,19 @@ void V4l2Device::stream()
 
 bool V4l2Device::is_trigger_mode_enabled()
 {
-    for (auto& p : this->property_handler->properties)
+    for (auto& p : m_properties)
     {
-        if (p.prop->get_ID() == TCAM_PROPERTY_TRIGGER_MODE)
+        if (p->get_name() == "TriggerMode")
         {
-            return static_cast<const PropertyBoolean*>(p.prop.get())->get_value();
+            auto val =std::dynamic_pointer_cast<tcam::property::IPropertyEnum>(p)->get_value();
+            if (val)
+            {
+                if (val.value() == "On")
+                {
+                    return true;
+                }
+                return false;
+            }
         }
     }
     return false;

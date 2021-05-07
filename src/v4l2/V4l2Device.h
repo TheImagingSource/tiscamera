@@ -38,46 +38,6 @@ namespace tcam
 class V4l2Device : public DeviceInterface
 {
 
-    struct property_description
-    {
-        int id; // v4l2 identification
-        double conversion_factor;
-        bool mapped;
-        std::shared_ptr<Property> prop;
-    };
-    static const int EMULATED_PROPERTY = -1;
-
-    class V4L2PropertyHandler : public PropertyImpl
-    {
-        friend class V4l2Device;
-
-    public:
-        V4L2PropertyHandler(V4l2Device*);
-
-
-        std::vector<std::shared_ptr<Property>> create_property_vector();
-
-        bool set_property(const Property&);
-        bool get_property(Property&);
-
-    protected:
-        static const int EMULATED_PROPERTY = -1;
-
-        std::vector<property_description> properties;
-        std::vector<property_description> special_properties;
-
-        struct mapping
-        {
-            std::weak_ptr<Property> std_prop;
-            std::weak_ptr<Property> internal_prop;
-            std::map<bool, std::string> bool_map;
-        };
-
-        std::vector<mapping> mappings;
-
-        V4l2Device* device;
-    };
-
     class V4L2FormatHandler : public FormatHandlerInterface
     {
         friend class V4l2Device;
@@ -100,13 +60,6 @@ public:
 
     DeviceInfo get_device_description() const override;
 
-    std::vector<std::shared_ptr<Property>> getProperties() override;
-
-    bool set_property(const Property&) override;
-
-    bool get_property(Property&) override;
-
-    //override
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return m_properties;
@@ -165,8 +118,6 @@ private:
 
     std::vector<framerate_conv> framerate_conversions;
 
-    std::shared_ptr<V4L2PropertyHandler> property_handler;
-
     std::shared_ptr<V4L2FormatHandler> format_handler;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
@@ -194,33 +145,11 @@ private:
 
     void determine_active_video_format();
 
-    void create_emulated_properties();
-
-    void sort_properties();
-
-    std::shared_ptr<Property> apply_conversion_factor(std::shared_ptr<Property> prop,
-                                                      const double factor);
-
-    void create_conversion_factors();
-
     bool extension_unit_is_loaded();
-
-    void index_all_controls(std::shared_ptr<PropertyImpl> impl);
-    void create_special_property(int fd,
-                                 struct v4l2_queryctrl* queryctrl,
-                                 struct v4l2_ext_control* ctrl,
-                                 std::shared_ptr<PropertyImpl> impl);
-
-    int index_control(struct v4l2_queryctrl* qctrl, std::shared_ptr<PropertyImpl> impl);
-
 
     std::shared_ptr<tcam::property::IPropertyBase> new_control(struct v4l2_queryctrl* qctrl);
     void index_controls();
     void sort_properties(std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties);
-
-    void updateV4L2Property(V4l2Device::property_description& desc);
-
-    bool changeV4L2Control(const property_description&);
 
     std::shared_ptr<tcam::property::V4L2PropertyBackend> p_property_backend;
 

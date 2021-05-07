@@ -16,6 +16,9 @@
 
 #include "CaptureDeviceImpl.h"
 
+#include "DeviceInterface.h"
+#include "PipelineManager.h"
+
 #include "DeviceIndex.h"
 #include "SoftwareProperties.h"
 #include "logging.h"
@@ -36,13 +39,13 @@ struct bad_device : std::exception
 
 
 CaptureDeviceImpl::CaptureDeviceImpl()
-    : pipeline(nullptr), property_handler(nullptr), device(nullptr), index_()
+    : pipeline(nullptr), device(nullptr), index_()
 {
 }
 
 
 CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& _device)
-    : pipeline(nullptr), property_handler(nullptr), device(nullptr), index_()
+    : pipeline(nullptr), device(nullptr), index_()
 {
     if (!open_device(_device))
     {
@@ -85,12 +88,7 @@ bool CaptureDeviceImpl::open_device(const DeviceInfo& device_desc)
     pipeline = std::make_shared<PipelineManager>();
     pipeline->setSource(device);
 
-    property_handler = std::make_shared<PropertyHandler>();
-
     auto props = device->get_properties();
-    property_handler->set_device_properties(props);
-
-    property_handler->set_properties(device->getProperties(), pipeline->getFilterProperties());
 
     return true;
 }
@@ -161,7 +159,6 @@ bool CaptureDeviceImpl::close_device()
 
     open_device_info = DeviceInfo();
     device.reset();
-    property_handler = nullptr;
 
     SPDLOG_INFO("Closed device {}.", name.c_str());
 
@@ -193,21 +190,6 @@ std::shared_ptr<tcam::property::IPropertyBase> CaptureDeviceImpl::get_property(
     }
 
     return nullptr;
-}
-
-
-std::vector<Property*> CaptureDeviceImpl::get_available_properties()
-{
-    if (!is_device_open())
-    {
-        return std::vector<Property*>();
-    }
-
-    std::vector<Property*> props;
-
-    for (const auto& p : property_handler->get_properties()) { props.push_back(&*p); }
-
-    return props;
 }
 
 

@@ -54,7 +54,6 @@ tcam::AFU050Device::AFU050Device(const DeviceInfo& info)
                      "Please check device permissions!",
                      1);
     }
-    property_handler = std::make_shared<AFU050PropertyHandler>(this);
 
     m_backend = std::make_shared<tcam::property::AFU050DeviceBackend>(this);
 
@@ -151,24 +150,6 @@ void AFU050Device::create_properties()
 
     // add_int(TCAM_PROPERTY_FOCUS_X, VC_UNIT_EXTENSION_UNIT, PU_);
     // add_int(TCAM_PROPERTY_FOCUS_Y, VC_UNIT_EXTENSION_UNIT, PU_);
-}
-
-
-std::vector<std::shared_ptr<Property>> tcam::AFU050Device::getProperties()
-{
-    return property_handler->create_property_vector();
-}
-
-
-bool tcam::AFU050Device::set_property(const Property& p)
-{
-    return property_handler->set_property(p);
-}
-
-
-bool tcam::AFU050Device::get_property(Property& p)
-{
-    return property_handler->get_property(p);
 }
 
 
@@ -567,26 +548,6 @@ void AFU050Device::add_enum(const std::string& name,
                                                                                     cd,
                                                                                     entries,
                                                                                     m_backend));
-}
-
-
-bool AFU050Device::update_property(property_description& desc)
-{
-    if (desc.prop->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-    {
-        (std::static_pointer_cast<PropertyInteger>(desc.prop))
-            ->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
-    }
-    else if (desc.prop->get_type() == TCAM_PROPERTY_TYPE_BOOLEAN)
-    {
-        (std::static_pointer_cast<PropertyBoolean>(desc.prop))
-            ->set_value(get_int_value(desc.unit, desc.id, GET_CUR));
-    }
-    else
-    {
-        return false;
-    }
-    return true;
 }
 
 

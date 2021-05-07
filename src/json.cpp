@@ -27,9 +27,10 @@ using json = nlohmann::json;
 // std::string
 
 
-bool property_to_json(tcam::Property* prop, json& parent)
+bool property_to_json(std::shared_ptr<tcam::property::IPropertyBase> prop, json& parent)
 {
-    parent.push_back(json::object_t::value_type(prop->get_name(), prop->to_string()));
+    // TODO:
+    //parent.push_back(json::object_t::value_type(prop->get_name(), prop->to_string()));
 
     return true;
 }
@@ -37,7 +38,7 @@ bool property_to_json(tcam::Property* prop, json& parent)
 
 std::string tcam::create_json_state(std::shared_ptr<CaptureDevice> dev)
 {
-    auto props = dev->get_available_properties();
+    auto props = dev->get_properties();
 
 
     json j;
@@ -173,7 +174,7 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state(std::shared_ptr<
         props = j;
     }
 
-    auto dev_props = dev->get_available_properties();
+    auto dev_props = dev->get_properties();
 
     /*
       the order is alphabetical i.e. not in the same order the input data is
@@ -185,17 +186,18 @@ std::pair<bool, std::vector<std::string>> tcam::load_json_state(std::shared_ptr<
      */
     for (auto iter = props.rbegin(); iter != props.rend(); iter++)
     {
-        auto p = dev->get_property_by_name(iter.key());
+        auto p = dev->get_property(iter.key());
 
         if (p)
         {
-            bool value_ret = p->from_string(iter.value().dump());
+            // TODO:
+            // bool value_ret = p->from_string(iter.value().dump());
 
-            if (!value_ret)
-            {
-                msgs.push_back("Unabe to apply '" + iter.value().dump() + "' to '" + iter.key()
-                               + "'. Ignoring.");
-            }
+            // if (!value_ret)
+            // {
+            //     msgs.push_back("Unabe to apply '" + iter.value().dump() + "' to '" + iter.key()
+            //                    + "'. Ignoring.");
+            // }
         }
         else
         {

@@ -17,7 +17,6 @@
 #ifndef TCAM_UTILS_H
 #define TCAM_UTILS_H
 
-#include "Property.h"
 #include "base_types.h"
 #include "compiler_defines.h"
 
@@ -118,25 +117,6 @@ bool is_buffer_complete(const struct tcam_image_buffer* buffer);
 tcam_image_size calculate_auto_center(const tcam_image_size& sensor, const tcam_image_size& image);
 
 
-/**
- * @brief Find property with name
- * @param properties  - vector that shall be searched
- * @param property_id - id of the property
- * @return shared_ptr of the Property; nullptr if not found
- */
-std::shared_ptr<Property> find_property(std::vector<std::shared_ptr<Property>>& properties,
-                                        TCAM_PROPERTY_ID property_id);
-
-
-/**
- * @brief Find property with name
- * @param properties    - vector that shall be searched
- * @param property_name - string of the property name
- * @return shared_ptr of the Property; nullptr if not found
- */
-std::shared_ptr<Property> find_property(std::vector<std::shared_ptr<Property>>& properties,
-                                        const std::string& property_name);
-
 bool compare_double(double val1, double val2);
 
 
@@ -166,21 +146,6 @@ unsigned int get_pid_from_lockfile(const std::string& filename);
 
 bool is_process_running(unsigned int pid);
 
-
-/**
- * @para id - must be TCAM_PROPERTY_BINNING_HORIZONTAL, TCAM_PROPERTY_BINNING_VERTICAL
- *            or TCAM_PROPERTY_BINNING
- * @param handler - PropertyImpl the property shall use, can be nullptr
- *
- * @return shared_ptr<Property> containing a PropertyEnumeration that contains
- *         binning values that double in step size e.g. 1, 2, 4, 8, 16
- */
-std::shared_ptr<Property> create_binning_property(TCAM_PROPERTY_ID id,
-                                                  std::shared_ptr<PropertyImpl> handler,
-                                                  int min,
-                                                  int max,
-                                                  int value,
-                                                  int default_value);
 
 /**
  * @brief map value from the input range to value in the output range

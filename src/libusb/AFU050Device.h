@@ -27,6 +27,7 @@
 #include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
 #include <memory>
+#include <map>
 #include <mutex> // std::mutex, std::unique_lock
 #include <thread>
 
@@ -48,33 +49,6 @@ class AFU050Device : public DeviceInterface
         FMT1920x1080 = 2,
         FMT1280x960 = 3
     } AFU050_VIDEO_FORMAT;
-
-
-    struct property_description
-    {
-        VC_UNIT unit;
-        int id; // v4l2 identification
-        std::shared_ptr<Property> prop;
-    };
-
-    class AFU050PropertyHandler : public PropertyImpl
-    {
-        friend class AFU050Device;
-
-    public:
-        AFU050PropertyHandler(AFU050Device*);
-
-
-        std::vector<std::shared_ptr<Property>> create_property_vector();
-
-        bool set_property(const Property&);
-        bool get_property(Property&);
-
-    protected:
-        std::vector<property_description> properties;
-
-        AFU050Device* device;
-    };
 
     class AFU050FormatHandler : public FormatHandlerInterface
     {
@@ -101,12 +75,6 @@ public:
     {
         return m_properties;
     };
-
-    std::vector<std::shared_ptr<Property>> getProperties();
-
-    bool set_property(const Property&);
-
-    bool get_property(Property&);
 
     bool set_video_format(const VideoFormat&);
 
@@ -166,8 +134,6 @@ private:
 
     std::shared_ptr<tcam::property::AFU050DeviceBackend> m_backend;
 
-    std::shared_ptr<AFU050PropertyHandler> property_handler;
-
     std::shared_ptr<AFU050FormatHandler> format_handler;
 
     unsigned char lost_countdown;
@@ -223,8 +189,6 @@ private:
     void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
     void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop);
     void add_enum(const std::string& name, const VC_UNIT unit, const unsigned char prop, std::map<int, std::string> entries);
-
-    bool update_property(property_description& desc);
 
     int set_video_format(uint8_t format_index, uint8_t frame_index, uint32_t frame_interval);
 

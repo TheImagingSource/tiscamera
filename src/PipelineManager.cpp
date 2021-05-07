@@ -43,13 +43,7 @@ PipelineManager::~PipelineManager()
 
     available_filter.clear();
     filter_pipeline.clear();
-    filter_properties.clear();
-}
 
-
-std::vector<std::shared_ptr<Property>> PipelineManager::getFilterProperties()
-{
-    return filter_properties;
 }
 
 
@@ -125,7 +119,6 @@ bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
         return false;
     }
 
-    device_properties = device->getProperties();
     available_input_formats = device->get_available_video_formats();
 
     SPDLOG_DEBUG("Received {} formats.", available_input_formats.size());

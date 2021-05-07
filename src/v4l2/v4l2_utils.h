@@ -18,7 +18,6 @@
 #define TCAM_V4L2_UTILS_H
 
 #include "DeviceInfo.h"
-#include "Properties.h"
 #include "compiler_defines.h"
 
 #include <linux/videodev2.h>
@@ -41,21 +40,6 @@ uint32_t convert_v4l2_flags(uint32_t v4l2_flags);
 
 
 TCAM_PROPERTY_ID find_v4l2_mapping(int v4l2_id);
-
-/**
- * @brief Create Property and return shared_ptr to base class
- *
- * @param fd - file descriptor for responsible device
- * @param queryctrl
- * @param ctrl
- * @param impl - shared_ptr of the responsible implementation
- *
- * @return shared_ptr to newly created Property; nullptr on failure
- */
-std::shared_ptr<Property> create_property(int fd,
-                                          struct v4l2_queryctrl* queryctrl,
-                                          struct v4l2_ext_control* ctrl,
-                                          std::shared_ptr<PropertyImpl> impl);
 
 
 /**

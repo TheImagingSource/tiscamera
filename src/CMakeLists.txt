@@ -48,9 +48,6 @@ set(base
   logging.cpp
   DeviceInfo.cpp
   ImageBuffer.cpp
-  Properties.cpp
-  Property.cpp
-  PropertyGeneration.cpp
   PropertyInterfaces.cpp
   PropertyCategory.cpp
   SoftwarePropertiesBase.cpp
@@ -81,7 +78,6 @@ set( srcs
   PipelineManager.cpp
   PropertyFilter.cpp
   ImageSource.cpp
-  PropertyHandler.cpp
   public_utils.cpp
 )
 
@@ -91,8 +87,6 @@ if (BUILD_V4L2)
   set(srcs
     ${srcs}
     v4l2/V4l2Device.cpp
-    v4l2/V4l2Device_legacy.cpp
-    v4l2/V4L2PropertyHandler.cpp
     v4l2/V4L2PropertyBackend.cpp
     v4l2/V4L2DeviceProperties.cpp
     v4l2/v4l2_property_impl.cpp
@@ -132,12 +126,10 @@ if (BUILD_LIBUSB)
     libusb/AFU050Device.cpp
     libusb/AFU050DeviceBackend.cpp
     libusb/AFU050PropertyImpl.cpp
-    libusb/AFU050PropertyHandler.cpp
     libusb/AFU420Device.cpp
     libusb/AFU420PropertyImpl.cpp
     libusb/AFU420DeviceBackend.cpp
     libusb/AFU420DeviceProperties.cpp
-    libusb/AFU420PropertyHandler.cpp
     libusb/libusb_utils.cpp
     libusb/UsbSession.cpp
     libusb/UsbHandler.cpp

@@ -19,8 +19,7 @@
 
 #include "DeviceInfo.h"
 #include "ImageBuffer.h"
-#include "Properties.h"
-#include "PropertyImpl.h"
+
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
@@ -38,7 +37,7 @@ namespace tcam
 // forward declaration
 class BackendLoader;
 
-class DeviceInterface : public PropertyImpl
+class DeviceInterface
 {
 
 public:
@@ -48,15 +47,6 @@ public:
      * @return the DeviceInfo describing the device
      */
     virtual DeviceInfo get_device_description() const = 0;
-
-    /**
-     * @brief Returns all device properties
-     */
-    virtual std::vector<std::shared_ptr<Property>> getProperties() = 0;
-
-    virtual bool set_property(const Property&) override = 0;
-
-    virtual bool get_property(Property&) override = 0;
 
     virtual std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() = 0;
 

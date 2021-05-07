@@ -27,7 +27,6 @@
 #include "DeviceInfo.h"
 #include "ImageBuffer.h"
 #include "ImageSink.h"
-#include "Properties.h"
 #include "base_types.h"
 #include "json.h"
 #include "public_utils.h"

@@ -25,6 +25,7 @@
 #include "public_utils.h"
 #include "tcamgststrings.h"
 
+#include <map>
 #include <algorithm> //std::find
 #include <stddef.h> // NULL
 #include <string.h> // strcmp

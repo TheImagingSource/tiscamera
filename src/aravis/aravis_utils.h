@@ -18,7 +18,6 @@
 #define TCAM_ARAVIS_UTILS_H
 
 #include "DeviceInfo.h"
-#include "Properties.h"
 #include "arv.h"
 #include "compiler_defines.h"
 
@@ -26,10 +25,6 @@ VISIBILITY_DEFAULT
 
 namespace tcam
 {
-
-std::shared_ptr<Property> create_property(ArvCamera* camera,
-                                          ArvGcNode* node,
-                                          std::shared_ptr<PropertyImpl> impl);
 
 
 uint32_t aravis2fourcc(uint32_t aravis);
