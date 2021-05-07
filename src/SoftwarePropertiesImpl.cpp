@@ -99,7 +99,15 @@ outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
 
 outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
 {
-    SPDLOG_WARN("Not implemented valid_value. {} {}", m_name, val);
+    if (m_max > val || m_min < val)
+    {
+        return tcam::status::PropertyOutOfBounds;
+    }
+    if (val % m_step != 0)
+    {
+        return tcam::status::PropertyValueDoesNotExist;
+    }
+
     return outcome::success();
 }
 
