@@ -17,46 +17,12 @@
 #include "public_utils.h"
 
 #include "format.h"
-#include "standard_properties.h"
 #include "utils.h"
 
 #include <algorithm>
 #include <cctype>
 
 using namespace tcam;
-
-
-std::string tcam::category2string(TCAM_PROPERTY_CATEGORY category)
-{
-    switch (category)
-    {
-        case TCAM_PROPERTY_CATEGORY_COLOR:
-            return "Color";
-        case TCAM_PROPERTY_CATEGORY_EXPOSURE:
-            return "Exposure";
-        case TCAM_PROPERTY_CATEGORY_IMAGE:
-            return "Image";
-        case TCAM_PROPERTY_CATEGORY_LENS:
-            return "Lens";
-        case TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN:
-            return "Partial Scan";
-        case TCAM_PROPERTY_CATEGORY_SPECIAL:
-            return "Special";
-        case TCAM_PROPERTY_CATEGORY_UNKNOWN:
-            return "Unknown";
-        case TCAM_PROPERTY_CATEGORY_AUTO_ROI:
-            return "Auto ROI";
-        case TCAM_PROPERTY_CATEGORY_WDR:
-            return "WDR";
-        default:
-            return "";
-    }
-}
-
-std::string tcam::property_id_to_string(TCAM_PROPERTY_ID id)
-{
-    return property_id2string(id);
-}
 
 
 std::string tcam::property_type_to_string(TCAM_PROPERTY_TYPE type)

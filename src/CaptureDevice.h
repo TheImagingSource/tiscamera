@@ -23,7 +23,6 @@
 #include "SinkInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
-#include "standard_properties.h"
 
 #include <memory>
 #include <string>

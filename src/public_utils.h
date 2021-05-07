@@ -27,10 +27,6 @@
 namespace tcam
 {
 
-std::string category2string(TCAM_PROPERTY_CATEGORY);
-
-std::string property_id_to_string(TCAM_PROPERTY_ID);
-
 std::string property_type_to_string(TCAM_PROPERTY_TYPE);
 
 

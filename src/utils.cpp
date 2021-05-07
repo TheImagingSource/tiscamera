@@ -240,16 +240,6 @@ bool tcam::in_range(const tcam_image_size& minimum,
 }
 
 
-TCAM_PROPERTY_ID tcam::generate_unique_property_id()
-{
-    static unsigned int id_to_use;
-    static unsigned int id_prefix = 0x199f0000;
-
-    TCAM_PROPERTY_ID new_id = id_prefix ^ id_to_use;
-    id_to_use++;
-    return new_id;
-}
-
 
 unsigned int tcam::get_pid_from_lockfile(const std::string& filename)
 {
@@ -297,17 +287,6 @@ bool tcam::is_process_running(unsigned int pid)
     }
     return is_running;
 }
-
-
-std::map<std::string, int> create_binning_entry_map(int min, int max)
-{
-    std::map<std::string, int> map;
-
-    for (int i = min; i <= max; i += i) { map.emplace(std::to_string(i), i); }
-
-    return map;
-}
-
 
 
 double tcam::map_value_ranges(double input_start,

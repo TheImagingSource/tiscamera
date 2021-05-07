@@ -16,7 +16,6 @@
 
 #include "AFU420Device.h"
 #include "logging.h"
-#include "standard_properties.h"
 #include "utils.h"
 
 #include "AFU420PropertyImpl.h"

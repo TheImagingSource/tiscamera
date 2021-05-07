@@ -18,7 +18,6 @@
 
 #include "logging.h"
 #include "utils.h"
-#include "v4l2_property_mapping.h"
 
 #if HAVE_UDEV
 #include <libudev.h>

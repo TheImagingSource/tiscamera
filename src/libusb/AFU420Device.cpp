@@ -25,7 +25,6 @@
 #include "img/image_transform_base.h"
 #include "logging.h"
 #include "public_utils.h"
-#include "standard_properties.h"
 #include "utils.h"
 
 #include <algorithm>

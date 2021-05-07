@@ -136,12 +136,6 @@ bool are_equal(const struct tcam_video_format_description& res1,
 bool is_smaller(const tcam_image_size& s1, const tcam_image_size& s2);
 
 
-/**
- * @brief generate new property ids
- * @return new unique property id
- */
-TCAM_PROPERTY_ID generate_unique_property_id();
-
 unsigned int get_pid_from_lockfile(const std::string& filename);
 
 bool is_process_running(unsigned int pid);

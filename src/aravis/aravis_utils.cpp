@@ -19,7 +19,6 @@
 #include "img/image_fourcc.h"
 #include "internal.h"
 #include "logging.h"
-#include "standard_properties.h"
 
 #include <algorithm>
 #include <vector>

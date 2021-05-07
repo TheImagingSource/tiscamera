@@ -20,7 +20,6 @@
 #include "v4l2_genicam_mapping.h"
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
-#include "v4l2_uvc_identifier.h"
 
 #include <linux/videodev2.h>
 #include <unistd.h> // pipe, usleep
@@ -171,7 +170,7 @@ void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::proper
 
     };
 
-    preserve_id(TCAM_V4L2_EXPOSURE_TIME_US, "ExposureTime");
+    preserve_id(0x199e201, "ExposureTime");
     preserve_id(0x0199e202, "ExposureTimeAuto");
     preserve_id(V4L2_CID_PRIVACY, "TriggerMode");
     preserve_id(0x199e204, "Gain");

@@ -23,7 +23,6 @@
 */
 
 #include "include/img/image_fourcc.h"
-#include "property_identifications.h"
 
 #include <cstring>
 #include <stdbool.h>
@@ -282,75 +281,6 @@ struct tcam_value_bool
 {
     bool value;
     bool default_value;
-};
-
-
-/**
- * Categorization of properties works by
- * assigning every property a category and group.
- * A group is defined by the property id of the leading member
- * e.g. TCAM_PROPERTY_EXPOSURE_AUTO is a member of the group TCAM_PROPERTY_EXPOSURE.
- * The resulting tree structure allows for a
- */
-
-/**
- * @enum TCAM_PROPERTY_CATEGORY
- * available property categories
- */
-enum TCAM_PROPERTY_CATEGORY
-{
-    TCAM_PROPERTY_CATEGORY_UNKNOWN = 0,
-    TCAM_PROPERTY_CATEGORY_EXPOSURE,
-    TCAM_PROPERTY_CATEGORY_COLOR,
-    TCAM_PROPERTY_CATEGORY_COLOR_MATRIX,
-    TCAM_PROPERTY_CATEGORY_LENS,
-    TCAM_PROPERTY_CATEGORY_SPECIAL,
-    TCAM_PROPERTY_CATEGORY_PARTIAL_SCAN,
-    TCAM_PROPERTY_CATEGORY_IMAGE,
-    TCAM_PROPERTY_CATEGORY_AUTO_ROI,
-    TCAM_PROPERTY_CATEGORY_WDR,
-};
-
-
-/**
- * @struct tcam_property_group
- * grouping description for properties
- */
-struct tcam_property_group
-{
-    enum TCAM_PROPERTY_CATEGORY property_category; /**< category of the property */
-    TCAM_PROPERTY_ID property_group; /**< group of the property
-                                                      if property_group and tcam_device_property.id
-                                                      are identical the property should be considered
-                                                      the group master */
-    unsigned int property_order; /**< order number of the property
-                                                      the lower to number the higher up it should
-                                                      be displayed in an dialog */
-};
-
-
-/**
- * @struct tcam_device_property
- * @brief unified property description
- */
-struct tcam_device_property
-{
-    TCAM_PROPERTY_ID id; /**< unique identifier */
-    char name[64]; /**< string identifier */
-
-    struct tcam_property_group group; /**< grouping; if you simply want to
-                                          iterate properties you can ignore this */
-
-    enum TCAM_PROPERTY_TYPE type; /**< type the property has */
-    union
-    {
-        struct tcam_value_int i;
-        struct tcam_value_double d;
-        struct tcam_value_string s;
-        struct tcam_value_bool b;
-    } value; /**< actual value settings */
-
-    uint32_t flags; /**< bit flags */
 };
 
 

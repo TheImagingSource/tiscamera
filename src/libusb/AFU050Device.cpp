@@ -24,7 +24,6 @@
 #include "format.h"
 #include "img/fcc_to_string.h"
 #include "logging.h"
-#include "standard_properties.h"
 
 #include <algorithm>
 #include <cstring>
