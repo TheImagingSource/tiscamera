@@ -42,6 +42,12 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
+namespace property
+{
+class AFU420DeviceBackend;
+}
+
+
 class AFU420Device : public DeviceInterface
 {
 
@@ -97,7 +103,7 @@ public:
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
-        return p_properties;
+        return m_properties;
     };
 
     std::vector<std::shared_ptr<Property>> getProperties();
@@ -250,7 +256,8 @@ private:
 
     std::vector<framerate_mapping> framerate_conversions;
 
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> p_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+    std::shared_ptr<tcam::property::AFU420DeviceBackend> m_backend;
 
     std::shared_ptr<AFU420PropertyHandler> property_handler;
 
@@ -424,14 +431,6 @@ private:
 
     bool has_optics_;
     void check_for_optics();
-    bool has_optics()
-    {
-        return has_optics_;
-    }
-    bool has_ois_unit()
-    {
-        return has_optics_;
-    };
 
     bool create_exposure();
     bool create_gain();
@@ -445,13 +444,30 @@ private:
     bool create_binning();
     bool create_ois();
 
+    friend class property::AFU420DeviceBackend;
+
+protected:
+
+    bool has_optics()
+    {
+        return has_optics_;
+    }
+    bool has_ois_unit()
+    {
+        return has_optics_;
+    };
+
     int64_t get_exposure();
     bool set_exposure(int64_t exposure_in_us);
     int64_t get_gain();
     bool set_gain(int64_t gain);
     int64_t get_focus();
     bool set_focus(int64_t focus);
-    bool get_shutter();
+
+    // can not be read from device
+    bool m_shutter = true;
+
+    bool get_shutter() { return m_shutter; };
     bool set_shutter(bool open);
 
     int64_t get_hdr();
@@ -463,11 +479,22 @@ private:
     int64_t get_strobe(strobe_parameter param);
     bool set_strobe(strobe_parameter param, int64_t);
 
+    int m_ois_pos_x = 0;
+    int m_ois_pos_y = 0;
+
     int64_t get_ois_mode();
     bool set_ois_mode(int64_t mode);
 
     bool get_ois_pos(int64_t& x_pos, int64_t& y_pos);
     bool set_ois_pos(const int64_t& x_pos, const int64_t& y_pos);
+
+    tcam_image_size m_binning = {1, 1};
+    tcam_image_size m_offset = {0, 0};
+    bool m_offset_auto = true;
+
+    tcam_image_size calculate_auto_offset(uint32_t fourcc, tcam_image_size size) const;
+
+private:
 
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);

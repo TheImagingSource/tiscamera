@@ -134,6 +134,8 @@ if (BUILD_LIBUSB)
     libusb/AFU050PropertyImpl.cpp
     libusb/AFU050PropertyHandler.cpp
     libusb/AFU420Device.cpp
+    libusb/AFU420PropertyImpl.cpp
+    libusb/AFU420DeviceBackend.cpp
     libusb/AFU420DeviceProperties.cpp
     libusb/AFU420PropertyHandler.cpp
     libusb/libusb_utils.cpp

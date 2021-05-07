@@ -81,4 +81,35 @@
 #define BASIC_USB_TO_PC_SHUTTER          0xEE
 #define BASIC_USB_TO_PC_TEST_PATTERN     0xEF
 
+namespace tcam::afu420
+{
+
+enum class AFU420Property
+{
+    ExposureTime,
+    Gain,
+    Shutter,
+    Focus,
+    HDR,
+    WB_Red,
+    WB_Green,
+    WB_Blue,
+    StrobeDelay,
+    StrobeDuration,
+    StrobeDelaySecond,
+    StrobeDurationSecond,
+    StrobePolarity,
+    StrobeMode,
+    OffsetX,
+    OffsetY,
+    OffsetAuto,
+    BinningHorizontal,
+    BinningVertical,
+    OISMode,
+    OISPosX,
+    OISPosY,
+};
+
+}
+
 #endif

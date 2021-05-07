@@ -15,6 +15,8 @@
  */
 
 #include "AFU420Device.h"
+#include "AFU420DeviceBackend.h"
+
 
 #include "UsbHandler.h"
 #include "UsbSession.h"
@@ -64,6 +66,8 @@ tcam::AFU420Device::AFU420Device(const DeviceInfo& info)
     check_for_optics();
 
     property_handler = std::make_shared<AFU420PropertyHandler>(this);
+
+    m_backend = std::make_shared<tcam::property::AFU420DeviceBackend>(this);
 
     // set_hdr(16);
     set_ois_pos(0, 0);
@@ -334,7 +338,7 @@ struct AFU420Device::sResolutionConf AFU420Device::CreateResolutionConf(
     // both start values have to be a multiple of 4 (startX maybe %12?)
     if (roi_start.width % 4 || roi_start.height % 4)
     {
-        SPDLOG_ERROR("Invalid roi start.");
+        SPDLOG_ERROR("Invalid roi start. {} {}", roi_start.width, roi_start.height);
         return res_conf;
     }
 
@@ -511,6 +515,8 @@ void AFU420Device::create_formats()
             rf.push_back(r);
         };
 
+        get_frame_rate_range(fmt.id, 0, fmt.dim_min, fmt.fps_min, fmt.fps_max);
+        add_res(fmt, fmt.dim_min);
 
         for (auto& f : get_standard_resolutions(fmt.dim_min, fmt.dim_max))
         {
@@ -524,6 +530,8 @@ void AFU420Device::create_formats()
             add_res(fmt, f);
         }
 
+        get_frame_rate_range(fmt.id, 0, fmt.dim_max, fmt.fps_min, fmt.fps_max);
+        add_res(fmt, fmt.dim_max);
         //SPDLOG_INFO("Adding fmt to fmt_list");
         VideoFormatDescription format(nullptr, desc, rf);
         available_videoformats.push_back(format);
@@ -551,72 +559,46 @@ bool tcam::AFU420Device::get_property(Property& p)
 }
 
 
-AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf(
-    const VideoFormat& format)
+tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc, tcam_image_size size) const
 {
+    tcam_image_size max = {};
 
-
-    auto find_property = [this](TCAM_PROPERTY_ID id) -> std::shared_ptr<tcam::Property> {
-        for (auto& p : this->property_handler->properties)
-        {
-            if (p.property->get_ID() == id)
-            {
-                return p.property;
-            }
-        }
-        SPDLOG_ERROR("Invalid property");
-        return nullptr;
-    };
-
-    auto binning_hor = find_property(TCAM_PROPERTY_BINNING_HORIZONTAL);
-    auto binning_ver = find_property(TCAM_PROPERTY_BINNING_VERTICAL);
-    auto offset_hor = find_property(TCAM_PROPERTY_OFFSET_Y);
-    auto offset_ver = find_property(TCAM_PROPERTY_OFFSET_X);
-    auto offset_auto = find_property(TCAM_PROPERTY_OFFSET_AUTO);
-
-    tcam_image_size offset = { 0, 0 };
-
-    if (offset_auto->get_struct().value.b.value)
+    int bpp = img::get_bits_per_pixel(fourcc);
+    if (bpp == 8)
     {
-        tcam_image_size max = {};
-
-        int bpp = img::get_bits_per_pixel(format.get_fourcc());
-        if (bpp == 8)
-        {
-            max = max_sensor_dim_;
-        }
-        else
-        {
-            max = max_sensor_dim_by12;
-        }
-
-        offset = calculate_auto_center(max, format.get_size());
+        max = max_sensor_dim_;
     }
     else
     {
-        if (offset_hor)
-        {
-            offset.width = offset_hor->get_struct().value.i.value;
-        }
-
-        if (offset_ver)
-        {
-            offset.height = offset_ver->get_struct().value.i.value;
-        }
+        max = max_sensor_dim_by12;
     }
-    tcam_image_size binning = { 0, 0 };
 
-    if (binning_hor)
+    return calculate_auto_center(max, size);
+}
+
+
+AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf(
+    const VideoFormat& format)
+{
+    tcam_image_size offset = { 0, 0 };
+
+    if (m_offset_auto)
     {
-        binning.width = binning_hor->get_struct().value.i.value;
+        if (format.get_size() == max_sensor_dim_ || format.get_size() == max_sensor_dim_by12)
+        {
+            offset = {0, 0};
+        }
+        else
+        {
+            offset = calculate_auto_offset(format.get_fourcc(), format.get_size());
+        }
     }
-
-    if (binning_ver)
+    else
     {
-        binning.height = binning_ver->get_struct().value.i.value;
+        offset = m_offset;
     }
 
-    auto conf = CreateResolutionConf(offset, format.get_size(), binning);
+    auto conf = CreateResolutionConf(offset, format.get_size(), m_binning);
 
     return conf;
 }
@@ -641,7 +623,7 @@ bool tcam::AFU420Device::set_video_format(const VideoFormat& format)
     }
     else
     {
-        SPDLOG_DEBUG("Set bit depth. {}", ret);
+        SPDLOG_DEBUG("Set bit depth to {}", image_bit_depth_);
     }
 
     auto conf = videoformat_to_resolution_conf(format);
@@ -713,7 +695,7 @@ bool tcam::AFU420Device::set_sink(std::shared_ptr<SinkInterface> s)
 
 bool tcam::AFU420Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> buffs)
 {
-    SPDLOG_INFO("Received {} buffer from external allocator.", buffs.size());
+    SPDLOG_TRACE("Received {} buffer from external allocator.", buffs.size());
 
     buffers.reserve(buffs.size());
 
@@ -767,7 +749,7 @@ void AFU420Device::push_buffer()
         //           active_video_format.get_required_buffer_size());
         statistics.frame_count++;
         current_buffer_->set_statistics(statistics);
-        SPDLOG_DEBUG("push image");
+        SPDLOG_TRACE("push image");
         ptr->push_image(current_buffer_);
         current_buffer_ = nullptr;
         transfered_size_ = 0;
@@ -947,7 +929,7 @@ void tcam::AFU420Device::transfer_callback(struct libusb_transfer* xfr)
     bool is_complete_image = offset_ >= usbbulk_image_size_;
     if (is_complete_image || is_trailer)
     {
-        SPDLOG_DEBUG("image complete");
+        SPDLOG_TRACE("image complete");
         push_buffer();
         have_header = false;
     }
