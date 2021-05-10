@@ -99,7 +99,7 @@ outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
 
 outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
 {
-    if (m_max > val || m_min < val)
+    if (m_max < val || m_min > val)
     {
         return tcam::status::PropertyOutOfBounds;
     }
