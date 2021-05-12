@@ -128,9 +128,7 @@ html_sidebars = {'**': ['globaltoc.html', 'relations.html', 'searchbox.html']}
 htmlhelp_basename = 'tiscameradoc'
 
 html_logo = "@TCAM_IMAGE_DIR@/tiscamera_logo.png"
-# html_logo = "@TCAM_IMAGE_DIR@/tiscamera.tif"
-
-html_favicon = "@TCAM_IMAGE_DIR@/tiscamera_logo.png"
+html_favicon = "@TCAM_IMAGE_DIR@/tiscamera_favicon_32x32.ico"
 
 # -- Options for manual page output ------------------------------------------
 
