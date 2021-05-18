@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - property state description is now applied when going PAUSE->PLAYING
 - Device lost handling for v4l2 cameras when waiting for images.
   Timeout now causes a warning. Device lost will not be triggered!
+- examples now have a default gstreamer log level of WARNING
+- tcambin writes a warning message to the GstBus when a version
+  incompatability with tcamdutils is detected
+- New project logo
 
 ### Fixed
 
