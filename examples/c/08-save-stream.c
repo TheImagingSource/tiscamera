@@ -24,6 +24,15 @@
 
 int main (int argc, char *argv[])
 {
+    /* this line sets the gstreamer default logging level
+       it can be removed in normal applications
+       gstreamer logging can contain verry useful information
+       when debugging your application
+       # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+       for further details
+    */
+    gst_debug_set_default_threshold(GST_LEVEL_WARNING);
+
     gst_init(&argc, &argv); // init gstreamer
 
     const char* serial = NULL; // the serial number of the camera we want to use

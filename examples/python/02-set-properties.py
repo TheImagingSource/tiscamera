@@ -115,6 +115,15 @@ def block_until_playing(pipeline):
 def main():
 
     Gst.init(sys.argv)
+
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+
     # Set this to a serial string for a specific camera
     serial = None
 

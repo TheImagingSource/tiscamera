@@ -97,6 +97,14 @@ def block_until_playing(pipeline):
 def main():
     Gst.init(sys.argv)  # init gstreamer
 
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+
     pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
 
     if not pipeline:
