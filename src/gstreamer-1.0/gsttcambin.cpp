@@ -1148,6 +1148,30 @@ static GstStateChangeReturn gst_tcam_bin_change_state (GstElement* element,
         {
             GST_INFO("NULL_TO_READY");
 
+            // post message about dutils version missmatch
+            // this only happens when we have found tcamdutils
+            // but the previous version check failed
+            // user can manually set use_dutils to true
+            // which overwrites this message
+            if (self->has_dutils && !self->use_dutils)
+            {
+                std::string dutils_warning = "tcamdutils version mismatch! "
+                    "tcamdutils and tiscamera require identical major.minor version. "
+                    "Overwrite at own risk by explicitly setting 'tcambin use-dutils=true'. "
+                    "Found '" + get_plugin_version("tcamdutils")
+                    + "' Required: '" + get_version_major() + "." + get_version_minor() + "'";
+
+                GST_WARNING(dutils_warning.c_str());
+
+                GError *err = g_error_new (g_quark_from_string("tcamdutils version missmatch"),
+                                           1, "%s", GST_ELEMENT_NAME(element));
+
+                GstMessage* msg = gst_message_new_warning(GST_OBJECT(element), err, dutils_warning.c_str());
+                g_clear_error(&err);
+                gst_element_post_message(GST_ELEMENT(self), msg);
+
+            }
+
             if (self->src == nullptr)
             {
                 gst_tcambin_create_source(self);
@@ -1517,8 +1541,10 @@ static bool verify_tcamdutils_version ()
     // everything else is potential bugfix
     if (dutils_version.find(tcam_version) == std::string::npos)
     {
-        GST_WARNING("Version missmatch for tcamdutils. Auto usage disabled. Found '%s' Required: '%s'",
-                    dutils_version.c_str(), tcam_version.c_str());
+        // do not post any messages here
+        // element is not yet fully initialized
+        // messages will _not_ be correctly propagated
+
         return false;
     }
 

@@ -114,9 +114,9 @@ tcampimipisrc
 
 Closed source GStreamer Source for FPD/MiPi Cameras on RaspberryPi.
 
-You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`_.
+You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`__.
 
-Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcampimipisrc/>`_.
+Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcampimipisrc/>`__.
 
 .. _tcamtegrasrc:
 
@@ -125,9 +125,9 @@ tcamtegrasrc
 
 Closed source GStreamer Source for FPD/MiPi Cameras on NVidia Jetson systems.
 
-You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`_.
+You can find a Debian package `in our download section <https://www.theimagingsource.com/support/downloads-for-linux/>`__.
 
-Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcamtegrasrc/>`_.
+Further information can be found `in the online documentation <https://www.theimagingsource.com/documentation/tcamtegrasrc/>`__.
                 
 .. _tcamsrc:
    
@@ -333,7 +333,14 @@ tcamdutils
 Closed source optional transformation and interpretation filter.
 Allows the transformation of bayer 12-bit and 16-bit formats to BGRx 64-Bit.
 Implements features like HDR.
-For more information read the `online documentation <https://www.theimagingsource.com/documentation/tiscameradutils/>`_
+For more information read `the documentation <https://www.theimagingsource.com/documentation/tiscameradutils/>`_
+
+.. note::
+   When using tiscamera-dutils with tcambin a version check is undertaken.
+   tiscamera and tiscamera-dutils are version locked, meaning their major.minor version have to match.
+   If a mismatch is detected, tcambin will disable the usage of the tcamdutils element and
+   notify you with a GStreamer warning log message and a GstBus message.
+   This can be overwritten by manually setting `use-dutils` to `true`.
 
 .. _tcambiteater:
 
@@ -355,6 +362,13 @@ can not be expected. To ensure identical behavior whether or not tcamdutils are 
 The offered caps are the sum of unfiltered camera caps and caps that will be available through conversion elements like `bayer2rgb`.
 
 The format that can always be expected to work is `BGRx`. All other formats depend on the used device.
+
+.. note::
+   When using tiscamera-dutils with tcambin a version check is undertaken.
+   tiscamera and tiscamera-dutils are version locked, meaning their major.minor version have to match.
+   If a mismatch is detected, tcambin will disable the usage of the tcamdutils element and
+   notify you with a GStreamer warning log message and a GstBus message.
+   This can be overwritten by manually setting `use-dutils` to `true`.
 
 .. list-table:: TcamSrc properties
    :header-rows: 1
