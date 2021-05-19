@@ -30,7 +30,7 @@ outcome::result<int64_t> AravisPropertyBackend::get_int(const std::string& name)
     int i = arv_device_get_integer_feature_value(p_device, name.c_str(), &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve integer: {}", err->message);
+        SPDLOG_ERROR("Unable to retrieve integer {}: {}", name, err->message);
         g_clear_error(&err);
     }
 
@@ -43,7 +43,7 @@ outcome::result<void> AravisPropertyBackend::set_int(const std::string& name, in
     arv_device_set_integer_feature_value(p_device, name.c_str(), new_value, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to set integer: {}", err->message);
+        SPDLOG_ERROR("Unable to set integer {}: {}", name, err->message);
         g_clear_error(&err);
     }
     return outcome::success();
@@ -55,7 +55,7 @@ outcome::result<double> AravisPropertyBackend::get_double(const std::string& nam
     double d = arv_device_get_float_feature_value(p_device, name.c_str(), &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve float: {}", err->message);
+        SPDLOG_ERROR("Unable to retrieve float {}: {}", name, err->message);
         g_clear_error(&err);
     }
 
@@ -68,8 +68,9 @@ outcome::result<void> AravisPropertyBackend::set_double(const std::string& name,
     arv_device_set_float_feature_value(p_device, name.c_str(), new_value, &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to set float: {}", err->message);
+        SPDLOG_ERROR("Unable to set float {}: {}", name, err->message);
         g_clear_error(&err);
+        return tcam::status::UndefinedError;
     }
     return outcome::success();
 }
@@ -132,6 +133,7 @@ outcome::result<std::string> AravisPropertyBackend::get_enum(const std::string& 
     {
         SPDLOG_ERROR("Unable to retrieve enum/string: {}", err->message);
         g_clear_error(&err);
+        return tcam::status::PropertyValueDoesNotExist;
     }
 
     return ret;
