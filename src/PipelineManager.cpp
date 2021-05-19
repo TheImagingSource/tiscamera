@@ -20,6 +20,7 @@
 #include "internal.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <ctime>
 #include <utils.h>
@@ -590,7 +591,7 @@ void PipelineManager::run_pipeline()
     pl_wait_again:
         while (status == TCAM_PIPELINE_PLAYING && m_entry_queue.empty())
         {
-            m_cv.wait(lock);
+            m_cv.wait_for(lock, std::chrono::milliseconds(500));
         }
 
         if (status != TCAM_PIPELINE_PLAYING)
