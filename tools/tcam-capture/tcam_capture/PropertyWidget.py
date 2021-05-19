@@ -50,6 +50,7 @@ class FlagFields(ctypes.LittleEndianStructure):
         ("Implemented", c_uint8, 1),  # asByte & 2
         ("Available", c_uint8, 1),  # asByte & 4
         ("Locked", c_uint8, 1),  # asByte & 8
+        ("External", c_uint8, 1),  # asByte & 8
     ]
 
 

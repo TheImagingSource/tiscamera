@@ -35,9 +35,10 @@ enum class AccessMode : uint8_t
 enum class PropertyFlags
 {
     None = 0x0,
-    Implemented = 1,
-    Available = 2,
-    Locked = 4,
+    Implemented = 0x1,
+    Available = 0x2,
+    Locked = 0x4,
+    External = 0x8,
     // additional flags like 'External' to indicate library and not camera internal properties?
 };
 

@@ -38,6 +38,8 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     m_step = prop->get_step();
     m_default = prop->get_default();
 
+    // do not add external flag
+    // this is a wrapper around an existing property
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
@@ -57,7 +59,7 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
         m_step = desc->range_i_.step;
         m_default = desc->range_i_.default_value;
     }
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
 outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
@@ -124,6 +126,8 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     m_step = prop->get_step();
     m_default = prop->get_default();
 
+    // do not add external flag
+    // this is a wrapper around an existing property
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
@@ -143,7 +147,7 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
         m_step = desc->range_d_.step;
         m_default = desc->range_d_.default_value;
 
-        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
         //m_value = 500.0;
     }
 }
@@ -198,7 +202,7 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const struct software_prop_de
         m_id = desc->id_;
         m_name = desc->name_;
     }
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 
 }
 
@@ -248,7 +252,7 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const struct software_prop_de
 
         m_default = m_entries[desc->default_value_];
     }
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
 outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string& new_value)
