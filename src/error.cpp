@@ -87,9 +87,12 @@ constexpr status_code_entry to_entry (int in) noexcept
         }
         case tcam::status::NotImplemented:
         {
-            return { "Not implemented", std::errc::not_supported };
+            return { "Not implemented", std::errc::bad_message };
         }
-
+        case tcam::status::NotSupported:
+        {
+            return { "Not supported", std::errc::not_supported};
+        }
         default:
             return {};
     };

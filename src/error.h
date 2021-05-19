@@ -41,6 +41,7 @@ enum class status: int
     Timeout,
     UndefinedError,
     NotImplemented,
+    NotSupported,
 };
 
 std::error_code make_error_code(tcam::status e);
