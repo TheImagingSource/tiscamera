@@ -33,7 +33,8 @@ class AravisPropertyIntegerImpl : public IPropertyInteger
 {
 
 public:
-    AravisPropertyIntegerImpl(ArvCamera* camera,
+    AravisPropertyIntegerImpl(const std::string& name,
+                              ArvCamera* camera,
                               ArvGcNode* node,
                               std::shared_ptr<AravisPropertyBackend>);
 
@@ -68,7 +69,12 @@ private:
 
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
+    // display name
     std::string m_name;
+    // some legacy cameras have incorrect
+    // property names. those incorrect names are
+    // still used for camera interactions
+    std::string m_actual_name;
 
     int64_t m_min;
     int64_t m_max;
@@ -83,7 +89,8 @@ class AravisPropertyDoubleImpl : public IPropertyFloat
 {
 
 public:
-    AravisPropertyDoubleImpl(ArvCamera* camera,
+    AravisPropertyDoubleImpl(const std::string& name,
+                             ArvCamera* camera,
                              ArvGcNode* node,
                              std::shared_ptr<AravisPropertyBackend>);
 
@@ -118,7 +125,12 @@ private:
 
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
+    // display name
     std::string m_name;
+    // some legacy cameras have incorrect
+    // property names. those incorrect names are
+    // still used for camera interactions
+    std::string m_actual_name;
 
     double m_min;
     double m_max;
@@ -132,7 +144,8 @@ private:
 class AravisPropertyBoolImpl : public IPropertyBool
 {
 public:
-    AravisPropertyBoolImpl(ArvCamera* camera,
+    AravisPropertyBoolImpl(const std::string& name,
+                           ArvCamera* camera,
                            ArvGcNode* node,
                            std::shared_ptr<AravisPropertyBackend> backend);
 
@@ -153,7 +166,12 @@ public:
 private:
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
+    // display name
     std::string m_name;
+    // some legacy cameras have incorrect
+    // property names. those incorrect names are
+    // still used for camera interactions
+    std::string m_actual_name;
 
     bool m_default;
     ArvGcNode* p_node;
@@ -163,7 +181,9 @@ private:
 class AravisPropertyCommandImpl : public IPropertyCommand
 {
 public:
-    AravisPropertyCommandImpl(ArvGcNode* node, std::shared_ptr<AravisPropertyBackend> backend);
+    AravisPropertyCommandImpl(const std::string& name,
+                              ArvGcNode* node,
+                              std::shared_ptr<AravisPropertyBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -176,7 +196,12 @@ public:
 private:
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
+    // display name
     std::string m_name;
+    // some legacy cameras have incorrect
+    // property names. those incorrect names are
+    // still used for camera interactions
+    std::string m_actual_name;
 
     ArvGcNode* p_node;
 };
@@ -185,7 +210,8 @@ private:
 class AravisPropertyEnumImpl : public IPropertyEnum
 {
 public:
-    AravisPropertyEnumImpl(ArvCamera* camera,
+    AravisPropertyEnumImpl(const std::string& name,
+                           ArvCamera* camera,
                            ArvGcNode* node,
                            std::shared_ptr<AravisPropertyBackend> backend);
 
@@ -214,7 +240,12 @@ private:
     //std::map<int, std::string> m_entries;
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
+    // display name
     std::string m_name;
+    // some legacy cameras have incorrect
+    // property names. those incorrect names are
+    // still used for camera interactions
+    std::string m_actual_name;
 
     std::string m_default;
 

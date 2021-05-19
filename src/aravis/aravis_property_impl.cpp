@@ -147,16 +147,17 @@ namespace tcam::property
 {
 
 
-AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(ArvCamera* camera,
+AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
+                                                     ArvCamera* camera,
                                                      ArvGcNode* node,
                                                      std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), p_node(node)
+    : m_cam(backend), m_name(name), p_node(node)
 {
     GError* err = nullptr;
-    m_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
 
     m_default =
-        arv_device_get_integer_feature_value(arv_camera_get_device(camera), m_name.c_str(), &err);
+        arv_device_get_integer_feature_value(arv_camera_get_device(camera), m_actual_name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis int: {}", err->message);
@@ -166,7 +167,7 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(ArvCamera* camera,
     m_step = 1;
 
     arv_device_get_integer_feature_bounds(
-        arv_camera_get_device(camera), m_name.c_str(), &m_min, &m_max, &err);
+        arv_camera_get_device(camera), m_actual_name.c_str(), &m_min, &m_max, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis int bounds: {}", err->message);
@@ -187,7 +188,7 @@ outcome::result<int64_t> AravisPropertyIntegerImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret = ptr->get_int(m_name);
+        auto ret = ptr->get_int(m_actual_name);
         if (ret)
         {
             return ret.value();
@@ -207,7 +208,7 @@ outcome::result<void> AravisPropertyIntegerImpl::set_value(int64_t new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        auto r = ptr->set_int(m_name, new_value);
+        auto r = ptr->set_int(m_actual_name, new_value);
         if (!r)
         {
             return r.as_failure();
@@ -241,16 +242,17 @@ outcome::result<void> AravisPropertyIntegerImpl::valid_value(int64_t val) const
 
 
 
-AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(ArvCamera* camera,
+AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
+                                                   ArvCamera* camera,
                                                    ArvGcNode* node,
                                                    std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), p_node(node)
+    : m_cam(backend), m_name(name), p_node(node)
 {
     GError* err = nullptr;
-    m_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
 
     m_default =
-        arv_device_get_float_feature_value(arv_camera_get_device(camera), m_name.c_str(), &err);
+        arv_device_get_float_feature_value(arv_camera_get_device(camera), m_actual_name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis float: {}", err->message);
@@ -260,7 +262,7 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(ArvCamera* camera,
     m_step = 0.01;
 
     arv_device_get_float_feature_bounds(
-        arv_camera_get_device(camera), m_name.c_str(), &m_min, &m_max, &err);
+        arv_camera_get_device(camera), m_actual_name.c_str(), &m_min, &m_max, &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis float bounds: {}", err->message);
@@ -283,7 +285,7 @@ outcome::result<void> AravisPropertyDoubleImpl::set_value(double new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        auto r = ptr->set_double(m_name, new_value);
+        auto r = ptr->set_double(m_actual_name, new_value);
         if (!r)
         {
             return r.as_failure();
@@ -302,7 +304,7 @@ outcome::result<double> AravisPropertyDoubleImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret = ptr->get_double(m_name);
+        auto ret = ptr->get_double(m_actual_name);
         if (ret)
         {
             return ret.value();
@@ -334,16 +336,16 @@ outcome::result<void> AravisPropertyDoubleImpl::valid_value(double value) const
 
 
 
-AravisPropertyBoolImpl::AravisPropertyBoolImpl(ArvCamera* camera,
+AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
+                                               ArvCamera* camera,
                                                ArvGcNode* node,
                                                std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), p_node(node)
+    : m_cam(backend), m_name(name), p_node(node)
 {
     GError* err = nullptr;
-    m_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-
-    m_default =
-        arv_device_get_boolean_feature_value(arv_camera_get_device(camera), m_name.c_str(), &err);
+    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    m_default = arv_device_get_boolean_feature_value(arv_camera_get_device(camera),
+                                                     m_actual_name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve aravis bool: {}", err->message);
@@ -365,8 +367,8 @@ outcome::result<bool> AravisPropertyBoolImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->get_bool(m_name);
-        auto ret = ptr->get_bool(m_name);
+        return ptr->get_bool(m_actual_name);
+        auto ret = ptr->get_bool(m_actual_name);
         if (ret)
         {
             return ret.value();
@@ -385,7 +387,7 @@ outcome::result<void> AravisPropertyBoolImpl::set_value(bool new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret = ptr->set_bool(m_name, new_value);
+        auto ret = ptr->set_bool(m_actual_name, new_value);
         if (!ret)
         {
             return ret.as_failure();
@@ -406,12 +408,12 @@ outcome::result<void> AravisPropertyBoolImpl::set_value(bool new_value)
 
 
 
-AravisPropertyCommandImpl::AravisPropertyCommandImpl(ArvGcNode* node,
+AravisPropertyCommandImpl::AravisPropertyCommandImpl(const std::string& name,
+                                                     ArvGcNode* node,
                                                      std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), p_node(node)
+    : m_cam(backend), m_name(name), p_node(node)
 {
-    m_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
-
+    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
 }
 
 
@@ -425,7 +427,7 @@ outcome::result<void> AravisPropertyCommandImpl::execute()
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->execute(m_name);
+        return ptr->execute(m_actual_name);
     }
     else
     {
@@ -442,17 +444,18 @@ outcome::result<void> AravisPropertyCommandImpl::execute()
 
 
 
-AravisPropertyEnumImpl::AravisPropertyEnumImpl(ArvCamera* camera,
+AravisPropertyEnumImpl::AravisPropertyEnumImpl(const std::string& name,
+                                               ArvCamera* camera,
                                                ArvGcNode* node,
                                                std::shared_ptr<AravisPropertyBackend> backend)
-    : m_cam(backend), p_node(node)
+    : m_cam(backend), m_name(name), p_node(node)
 {
-    m_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
 
-    GError* err = nullptr;
     unsigned int n_entries = 0;
-    const char** entries = arv_camera_dup_available_enumerations_as_strings(camera, m_name.c_str(), &n_entries, &err);
+    GError* err = nullptr;
 
+    const char** entries = arv_camera_dup_available_enumerations_as_strings(camera, m_actual_name.c_str(), &n_entries, &err);
     if (err)
     {
         SPDLOG_ERROR("Error while retrieving enum values: {}", err->message);
@@ -465,19 +468,21 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(ArvCamera* camera,
         for (unsigned int i = 0; i < n_entries; ++i)
         {
             m_entries.push_back(entries[i]);
-
         }
 
     }
 
-    m_default = arv_device_get_string_feature_value(arv_camera_get_device(camera), m_name.c_str(), &err);
+    const char* def_ret = arv_device_get_string_feature_value(arv_camera_get_device(camera), m_actual_name.c_str(), &err);
 
     if (err)
     {
         SPDLOG_ERROR("Error while retrieving current enum value: {}", err->message);
-
+        m_default = "";
     }
-
+    else
+    {
+        m_default = def_ret;
+    }
 }
 
 
@@ -491,7 +496,7 @@ outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string& n
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_enum(m_name, new_value);
+        return ptr->set_enum(m_actual_name, new_value);
     }
     else
     {
@@ -511,7 +516,7 @@ outcome::result<std::string> AravisPropertyEnumImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->get_enum(m_name);
+        return ptr->get_enum(m_actual_name);
     }
     else
     {

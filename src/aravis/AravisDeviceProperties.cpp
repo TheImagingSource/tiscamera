@@ -17,6 +17,34 @@
 #include "AravisDevice.h"
 #include "aravis_property_impl.h"
 #include "logging.h"
+#include "error.h"
+
+#include <map>
+
+
+namespace {
+
+
+std::map<std::string, std::string> name_table =
+{
+    {"OffsetAutoCenter", "OffsetAuto"},
+    {"IRCutFilterEnableElement", "IRCutFilterEnable"},
+};
+
+outcome::result<std::string> find_conversion_name(const std::string& name)
+{
+    for (const auto& entry : name_table)
+    {
+        if (entry.first == name)
+        {
+            return entry.second;
+        }
+    }
+    return tcam::status::PropertyDoesNotExist;
+}
+
+}
+
 
 namespace tcam
 {
@@ -139,31 +167,39 @@ void AravisDevice::index_properties(const char* name)
         return;
     }
 
+    std::string prop_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+    auto conv_name = find_conversion_name(prop_name);
+
+    if (conv_name)
+    {
+        prop_name = conv_name.value();
+    }
+
     if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Float") == 0)
      {
         m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyDoubleImpl>(arv_camera, node, m_backend));
+            std::make_shared<tcam::property::AravisPropertyDoubleImpl>(prop_name, arv_camera, node, m_backend));
 
      }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Integer") == 0)
     {
         m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyIntegerImpl>(arv_camera, node, m_backend));
+            std::make_shared<tcam::property::AravisPropertyIntegerImpl>(prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Boolean") == 0)
     {
         m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyBoolImpl>(arv_camera, node, m_backend));
+            std::make_shared<tcam::property::AravisPropertyBoolImpl>(prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Command") == 0)
     {
         m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyCommandImpl>(node, m_backend));
+            std::make_shared<tcam::property::AravisPropertyCommandImpl>(prop_name, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Enumeration") == 0)
     {
         m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyEnumImpl>(arv_camera, node, m_backend));
+            std::make_shared<tcam::property::AravisPropertyEnumImpl>(prop_name, arv_camera, node, m_backend));
     }
     //m_properties.push_back();
 }
