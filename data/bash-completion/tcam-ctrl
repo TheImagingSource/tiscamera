@@ -14,7 +14,6 @@ _tcam-ctrl () {
         "-p"
         "-l"
         "-c"
-        "-s"
         "-h"
         "--help"
         "--version"
@@ -31,8 +30,9 @@ _tcam-ctrl () {
 
     if [[ -n $command ]]; then
         case $command in
-            list|properties|formats|caps|-c)
-                COMPREPLY=( $( compgen -W "$( tcam-ctrl -l | awk -print 'NF>1{print $4}' )" -- "$cur" ) )
+            list|properties|formats|caps|-c|-p)
+                # COMPREPLY=( $( compgen -W "$( tcam-ctrl -- | awk -print 'NF>1{print $5}' )" -- "$cur" ) )
+                COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
                 return 0
             ;;
         esac
