@@ -19,7 +19,7 @@ find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
-add_executable(tcam-ctrl main.cpp general.cpp properties.cpp formats.cpp)
+add_executable(tcam-ctrl main.cpp general.cpp properties.cpp formats.cpp system.cpp)
 set_project_warnings(tcam-ctrl)
 
 target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_INCLUDE_DIRS})

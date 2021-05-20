@@ -17,6 +17,7 @@
 #include "formats.h"
 #include "general.h"
 #include "properties.h"
+#include "system.h"
 
 #include <CLI11/CLI11.hpp>
 #include <gst/gst.h>
@@ -126,6 +127,25 @@ void print_devices(size_t /*t*/)
     gst_object_unref(source);
 }
 
+void print_serials_long(size_t)
+{
+    GstElement* source = gst_element_factory_make("tcamsrc", "source");
+
+    GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
+
+    std::string out;
+
+    for (GSList* elem = serials; elem; elem = elem->next)
+    {
+        out += (gchar*)elem->data;
+        out += " ";
+    }
+
+    printf("%s\n", out.c_str());
+
+    g_slist_free(serials);
+    gst_object_unref(source);
+}
 
 int main(int argc, char* argv[])
 {
@@ -137,6 +157,12 @@ int main(int argc, char* argv[])
     auto show_version =
         app.add_flag_function("--version", print_version, "list used library versions");
     auto list_devices = app.add_flag_function("-l,--list", print_devices, "list capture devices");
+    app.add_flag_function("--list-serial-long", print_serials_long, "list capture devices");
+    app.add_flag_callback("--packages", tcam::tools::print_packages, "list installed TIS packages");
+    app.add_flag_callback("--system-info", tcam::tools::print_system_info_general, "list general system information");
+    app.add_flag_callback("--gige-info", tcam::tools::print_system_info_gige, "list network system information");
+    app.add_flag_callback("--usb-info", tcam::tools::print_system_info_usb, "list usb system information");
+    app.add_flag_callback("--all-info", tcam::tools::print_system_info, "list all system information");
 
     std::string serial;
 
