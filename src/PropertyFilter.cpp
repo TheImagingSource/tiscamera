@@ -2,6 +2,7 @@
 #include "PropertyFilter.h"
 
 #include "algorithms/tcam-algorithm.h"
+#include "img/image_fourcc_func.h"
 
 #include "logging.h"
 
@@ -10,9 +11,27 @@
 namespace tcam::stream::filter
 {
 
-PropertyFilter::PropertyFilter(const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props)
-    : m_impl(std::make_shared<tcam::property::SoftwareProperties>(props))
-{}
+PropertyFilter::PropertyFilter(const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props,
+                               const std::vector<VideoFormatDescription>& device_formats)
+{
+    bool has_bayer = false;
+    for (const auto& format : device_formats)
+    {
+        auto fcc = (img::fourcc)format.get_fourcc();
+        if ( img::is_by8_fcc( fcc )
+             || img::is_by10_packed_fcc( fcc )
+             ||	img::is_by12_packed_fcc( fcc )
+             || img::is_by16_fcc( fcc )
+             || img::is_by12_fcc( fcc )
+             || img::is_by10_fcc( fcc )
+             || img::is_byfloat_fcc( fcc ))
+        {
+            has_bayer = true;
+            break;
+        }
+    }
+    m_impl = std::make_shared<tcam::property::SoftwareProperties>(props, has_bayer);
+}
 
 
 bool PropertyFilter::apply(std::shared_ptr<ImageBuffer> buffer)

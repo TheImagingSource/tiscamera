@@ -16,7 +16,8 @@ class PropertyFilter : public FilterBase
 {
 public:
     explicit PropertyFilter(
-        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props);
+        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props,
+        const std::vector<VideoFormatDescription>& device_formats);
 
     virtual struct FilterDescription getDescription() const final
     {

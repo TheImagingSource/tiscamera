@@ -131,7 +131,7 @@ bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
 
     source->setDevice(device);
 
-    property_filter = std::make_shared<tcam::stream::filter::PropertyFilter>(device->get_properties());
+    property_filter = std::make_shared<tcam::stream::filter::PropertyFilter>(device->get_properties(), available_input_formats);
 
     available_output_formats = available_input_formats;
 
