@@ -324,7 +324,7 @@
         },
         {
             "id": "0x199e236",
-	        "name": "Trigger Expposure Mode",
+	        "name": "Trigger Exposure Mode",
 		    "selector": "0x43",
 		    "uvc_type": "boolean",
 		    "v4l2_type": "menu",
