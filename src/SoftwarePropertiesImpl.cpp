@@ -276,23 +276,13 @@ outcome::result<void> SoftwarePropertyEnumImpl::set_value(int64_t new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        if (!ptr->set_int(m_id, new_value))
-        {
-            SPDLOG_ERROR("Something went wrong while writing {}", m_name);
-            return tcam::status::ResourceNotLockable;
-        }
-        else
-        {
-            //SPDLOG_DEBUG("Wrote {} {}", m_name, new_value);
-        }
+        return ptr->set_int(m_id, new_value);
     }
     else
     {
         SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
         return tcam::status::ResourceNotLockable;
     }
-
-    return tcam::status::Success;
 }
 
 outcome::result<std::string> SoftwarePropertyEnumImpl::get_value() const

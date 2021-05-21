@@ -58,12 +58,12 @@ namespace tcam::property
 {
 
 SoftwareProperties::SoftwareProperties(
-    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties)
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties, bool has_bayer)
     : m_device_properties(dev_properties)
 {
     m_backend = std::make_shared<emulated::SoftwarePropertyBackend>(this);
     p_state = auto_alg::make_state_ptr();
-    generate_public_properties();
+    generate_public_properties(has_bayer);
 }
 
 
@@ -100,7 +100,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
     frame_counter++;
     tmp_params.time_point = time_now_in_us();
 
-    auto auto_pass_ret = auto_alg::auto_pass( *p_state, image, tmp_params );
+    auto auto_pass_ret = auto_alg::auto_pass(*p_state, image, tmp_params);
 
     if (auto_pass_ret.exposure_changed)
     {
@@ -144,7 +144,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 }
 
 
-void tcam::property::SoftwareProperties::generate_public_properties()
+void tcam::property::SoftwareProperties::generate_public_properties(bool has_bayer)
 {
     m_auto_params = {};
 
@@ -258,8 +258,6 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         case emulated::software_prop::ExposureAuto:
         {
             m_auto_params.exposure.auto_enabled = new_val;
-
-            SPDLOG_DEBUG("exposureauto is now {}", m_auto_params.exposure.auto_enabled);
 
             set_locked(emulated::software_prop::ExposureTime, new_val);
             return outcome::success();
@@ -600,9 +598,9 @@ void SoftwareProperties::set_locked(emulated::software_prop prop_id, bool is_loc
         flags &= PropertyFlags::Locked;
     }
 
-    SPDLOG_INFO("{} now has flags: {:x}", prop_base->get_name(), flags);
+    // SPDLOG_INFO("{} now has flags: {:x}", prop_base->get_name(), flags);
 
-    switch(prop_base->get_type())
+    switch (prop_base->get_type())
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {

@@ -29,7 +29,7 @@ class SoftwareProperties
 {
 public:
     explicit SoftwareProperties(
-        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties);
+        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties, bool has_bayer);
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties()
     {
@@ -51,7 +51,7 @@ public:
 private:
 
     // encapsulation for internal property generation
-    void generate_public_properties();
+    void generate_public_properties(bool has_bayer);
 
     void generate_exposure();
     void generate_gain();
