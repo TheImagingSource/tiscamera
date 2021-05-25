@@ -1252,6 +1252,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             g_free(caps_info_string);
             gst_element_post_message(element, msg);
 
+            ret = GST_STATE_CHANGE_NO_PREROLL;
             break;
         }
         case GST_STATE_CHANGE_PLAYING_TO_PLAYING:
@@ -1285,6 +1286,11 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
     switch (trans)
     {
+        case GST_STATE_CHANGE_PLAYING_TO_PAUSED:
+        {
+            ret = GST_STATE_CHANGE_NO_PREROLL;
+            break;
+        }
         case GST_STATE_CHANGE_PAUSED_TO_READY:
         {
             self->target_set = FALSE;
