@@ -93,20 +93,18 @@ if (BUILD_DOCUMENTATION)
       add_deps("documentation")
 endif (BUILD_DOCUMENTATION)
 
-#message("${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}")
 
-set(DEB_DEPENDENCY_CMD ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES})
-
-# execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}
-execute_process(COMMAND ${DEB_DEPENDENCY_CMD}
+execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}
   WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
   OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_DEPENDS
-  RESULT_VARIABLE BLA)
+  RESULT_VARIABLE return_value)
 
-execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager dist-release
-  WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
-  OUTPUT_VARIABLE TCAM_DISTRIBUTION_DESCRIPTION
-  RESULT_VARIABLE BLA)
+if (return_value EQUAL "1")
+
+  message(WARNING "Unable to parse dependencies. You will not be able to generate packages without errors.")
+
+endif()
+
 
 ### required for tcam-capture
 

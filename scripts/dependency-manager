@@ -19,6 +19,7 @@ import subprocess
 import json
 import os
 import re
+import sys
 
 
 def convert_to_str(input_list, seperator):
@@ -159,8 +160,7 @@ class DependencyManager(object):
         try:
             self.__load_dependencies(dependency_file)
         except (TypeError, RuntimeError) as e:
-            print("Aborted loading dependencies. Reason: {}".format(e))
-            return
+            raise RuntimeError("Aborted loading dependencies. Reason: {}".format(e))
 
         if self.args.command == "install":
             self.install()
@@ -358,5 +358,8 @@ The most commonly used git commands are:
 
 
 if __name__ == "__main__":
-
-    DependencyManager()
+    try:
+        DependencyManager()
+    except RuntimeError as e:
+        print("{}".format(e))
+        sys.exit(1)
