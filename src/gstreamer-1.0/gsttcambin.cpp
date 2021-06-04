@@ -1276,12 +1276,12 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
     }
 
     gst_element_set_locked_state(element, TRUE);
-    ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
+    auto tmp_ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
     gst_element_set_locked_state(element, FALSE);
 
-    if (ret == GST_STATE_CHANGE_FAILURE)
+    if (tmp_ret == GST_STATE_CHANGE_FAILURE)
     {
-        return ret;
+        return tmp_ret;
     }
 
     switch (trans)
