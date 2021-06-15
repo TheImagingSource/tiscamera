@@ -5,60 +5,118 @@
 
 #include <unistd.h> /* usleep */
 
+static gboolean g_print_device_caps = FALSE;
+
+static gboolean
+print_caps_field (GQuark field, const GValue * value, gpointer unused )
+{
+    gchar *str = gst_value_serialize (value);
+
+    g_print (", %s=%s", g_quark_to_string (field), str);
+    g_free (str);
+    return TRUE;
+}
+
+static void
+print_caps( GstCaps * caps )
+{
+    if( caps == NULL )
+        return;
+    
+    int size = gst_caps_get_size (caps);
+
+    g_print( "\t caps: %d\n", size);
+    for (int i = 0; i < size; ++i) {
+        GstStructure *s = gst_caps_get_structure (caps, i);
+
+        g_print ("\t       %s", gst_structure_get_name (s));
+        gst_structure_foreach (s, print_caps_field, NULL);
+        g_print ("\n");
+    }
+}
+
+static void 
+print_device (GstDevice * device, gboolean add_message )
+{
+    gchar *name = gst_device_get_display_name (device);
+    if( add_message )
+        g_print("Device added:\n\t name: %s\n", name);
+    else
+        g_print("Device removed:\n\t name: %s\n", name);
+    g_free (name);
+
+    if( !add_message ) {
+        return;
+    }
+
+    GstStructure* props = gst_device_get_properties( device );
+
+    const char* serial = gst_structure_get_string ( props, "serial" );
+    if( serial ) {
+        g_print ("\t serial: %s\n", serial );
+    }
+    const char* model = gst_structure_get_string ( props, "model" );
+    if( model ) {
+        g_print ("\t model: %s\n", model );
+    }
+
+    gst_structure_free( props );
+
+    if( g_print_device_caps ) {
+        GstCaps *caps = gst_device_get_caps(device);
+        print_caps ( caps );
+        gst_caps_unref ( caps );
+    }
+
+    g_print ("\n");
+}
+
 
 static gboolean
 my_bus_func (GstBus * bus, GstMessage * message, gpointer user_data)
 {
     GstDevice *device;
-    gchar *name;
 
     switch (GST_MESSAGE_TYPE (message))
     {
         case GST_MESSAGE_DEVICE_ADDED:
             gst_message_parse_device_added (message, &device);
-            name = gst_device_get_display_name (device);
-            g_print("Device added: %s\n", name);
-            g_free (name);
-            GstCaps* caps = gst_device_get_caps(device);
-            g_print("\t caps: %s\n", gst_caps_to_string(caps));
+
+            print_device (device, TRUE);
+
             gst_object_unref (device);
             break;
         case GST_MESSAGE_DEVICE_REMOVED:
             gst_message_parse_device_removed (message, &device);
-            name = gst_device_get_display_name (device);
-            g_print("Device removed: %s\n", name);
-            g_free (name);
+
+            print_device (device, FALSE);
+            
             gst_object_unref (device);
             break;
         default:
             break;
     }
 
-    return G_SOURCE_CONTINUE;
+    return TRUE;
 }
 
 
-GstDeviceMonitor *
+static GstDeviceMonitor *
 setup_raw_video_source_device_monitor (void)
 {
-    GstDeviceMonitor *monitor;
-    GstBus *bus;
-    GstCaps *caps;
+    GstDeviceMonitor *monitor = gst_device_monitor_new ();
 
-    monitor = gst_device_monitor_new ();
-
-    bus = gst_device_monitor_get_bus (monitor);
+    GstBus *bus = gst_device_monitor_get_bus (monitor);
     gst_bus_add_watch (bus, my_bus_func, NULL);
     gst_object_unref (bus);
 
-//    caps = gst_caps_new_empty_simple ("ANY");
     gst_device_monitor_add_filter (monitor, "Video/Source/tcam", NULL);
-    //gst_caps_unref (caps);
 
     gst_device_monitor_start (monitor);
 
     return monitor;
 }
+
 static GMainLoop* loop;
 
 
@@ -66,22 +124,17 @@ int main (int argc, char *argv[])
 {
     gst_init(&argc, &argv); // init gstreamer
 
-    const char* serial = NULL; // set this if you do not want the first found device
+    loop = g_main_loop_new (NULL, FALSE);
 
-    GError* err = NULL;
-
-    //GstElement* pipeline = gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
     GstDeviceMonitor* monitor = setup_raw_video_source_device_monitor();
 
-    loop = g_main_loop_new (NULL, FALSE);
     g_main_loop_run (loop);
 
-    g_main_loop_unref(loop);
+    gst_device_monitor_stop (monitor);
 
-    /* while (1) */
-    /* { */
-    /*     sleep(1); */
-    /* } */
+    g_main_loop_unref (loop);
+
+    gst_object_unref (monitor);
 
     return 0;
 }
