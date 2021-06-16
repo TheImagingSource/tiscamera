@@ -27,7 +27,7 @@ std::string exec(const std::string& cmd)
         // std::cout << "Reading..." << std::endl;
         result += buffer.data();
     }
-    auto returnCode = pclose(pipe);
+    /*auto returnCode =*/ pclose(pipe);
 
     // std::cout << result << std::endl;
     // std::cout << returnCode << std::endl;

@@ -45,7 +45,7 @@ bool PropertyFilter::apply(std::shared_ptr<ImageBuffer> buffer)
     // TODO: generate from VideoFormat
     img::img_type src_type = {bs.format.fourcc, dim, (int)bs.length};
 
-    img::img_descriptor src = img::make_img_desc_raw( src_type, img::img_plane{ buffer->get_data(), bs.pitch } );
+    img::img_descriptor src = img::make_img_desc_raw( src_type, img::img_plane{ buffer->get_data(), (int)bs.pitch } );
 
     m_impl->auto_pass(src);
 

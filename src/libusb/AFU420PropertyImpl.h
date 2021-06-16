@@ -166,9 +166,9 @@ public:
 
 private:
 
+    std::string m_name;
     std::weak_ptr<tcam::property::AFU420DeviceBackend> m_cam;
 
-    std::string m_name;
     tcam::property::PropertyFlags m_flags;
     bool m_default;
     // needed only for write only properties

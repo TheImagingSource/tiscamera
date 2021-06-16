@@ -144,7 +144,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 }
 
 
-void tcam::property::SoftwareProperties::generate_public_properties(bool has_bayer)
+void tcam::property::SoftwareProperties::generate_public_properties(bool /*has_bayer*/)
 {
     m_auto_params = {};
 

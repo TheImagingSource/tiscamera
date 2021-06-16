@@ -27,7 +27,9 @@ enum
 };
 
 
-static void tcam_device_init(TcamDevice* self) {}
+static void tcam_device_init(TcamDevice* /*self*/)
+{
+}
 
 static void tcam_device_finalize(GObject* object)
 {

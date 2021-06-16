@@ -222,6 +222,7 @@ outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
         {
             return ret.value();
         }
+        return ret.error();
     }
     else
     {
