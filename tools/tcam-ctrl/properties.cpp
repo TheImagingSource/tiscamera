@@ -54,6 +54,7 @@ void print_properties(const std::string& serial)
     g_value_set_static_string(&val, serial.c_str());
 
     g_object_set_property(G_OBJECT(source), "serial", &val);
+    gst_element_set_state(source, GST_STATE_READY);
 
     GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
 
