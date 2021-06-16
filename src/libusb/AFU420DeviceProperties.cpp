@@ -486,6 +486,7 @@ bool AFU420Device::set_shutter(bool open)
 }
 
 
+
 // bool AFU420Device::get_shutter()
 // {
 //     unsigned short ushValue = 0x0;
@@ -496,6 +497,7 @@ bool AFU420Device::set_shutter(bool open)
 //         SPDLOG_WARN("Could not read Shutter flag.");
 //         return false;
 //     }
+
 
 //     if (ushValue == 0xFFFF)
 //     {

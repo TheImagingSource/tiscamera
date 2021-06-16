@@ -31,7 +31,14 @@ def list_devices():
     """
     Print information about all  available devices
     """
-    source = Gst.ElementFactory.make("tcambin")
+
+    sample_pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+
+    if not sample_pipeline:
+        print("Unable to create pipeline")
+        sys.exit(1)
+
+    source = sample_pipeline.get_by_name("source")
 
     serials = source.get_device_serials_backend()
 
@@ -60,4 +67,13 @@ def list_devices():
 if __name__ == "__main__":
 
     Gst.init(sys.argv)  # init gstreamer
+
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+
     list_devices()

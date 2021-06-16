@@ -31,6 +31,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "device-lost" notifications could take over 3 minutes for aravis cameras.
   Should now appear within 5 seconds.
 
+## [0.14.0] - 2021.
+
+### Added
+
+- 'tegra' device type
+- support for tcamtegrasrc
+- PWL format support
+
+### Changed
+
+- Reworked examples to be more applicable to all cameras.
+- property state description is now applied when going PAUSE->PLAYING
+- Device lost handling for v4l2 cameras when waiting for images.
+  Timeout now causes a warning. Device lost will not be triggered!
+- examples now have a default gstreamer log level of WARNING
+- tcambin writes a warning message to the GstBus when a version
+  incompatability with tcamdutils is detected
+- New project logo
+
+### Fixed
+
+- Using only the `type` property of tcambin/tcamsrc now works
+- Added missing max resolution for DxK AFU420 cameras
+
 ## [0.13.1] - 2021.02.05
 
 ### Changed

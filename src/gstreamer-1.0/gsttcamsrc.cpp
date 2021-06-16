@@ -427,7 +427,7 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_CAM_BUFFERS:
         {
-            if (self->active_source == self->main_src)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "camera-buffers"))
             {
                 g_object_set_property(G_OBJECT(self->active_source), "camera-buffers", value);
             }
@@ -447,7 +447,7 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_NUM_BUFFERS:
         {
-            if (self->active_source == self->main_src)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "num-buffers"))
             {
                 g_object_set_property(G_OBJECT(self->active_source), "num-buffers", value);
             }
@@ -467,7 +467,7 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_DO_TIMESTAMP:
         {
-            if (self->active_source)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "do-timestamp"))
             {
                 g_object_set_property(G_OBJECT(self->active_source), "do-timestamp", value);
             }
@@ -479,14 +479,22 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (self->active_source)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "drop-incomplete-buffer"))
             {
                 g_object_set_property(
                     G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
             }
             else
             {
-                self->drop_incomplete_frames = g_value_get_boolean(value);
+                if (self->active_source)
+                {
+                    GST_INFO("Used source element does not support \"drop-incomplete-buffer\"");
+                }
+                else
+                {
+                    self->drop_incomplete_frames = g_value_get_boolean(value);
+                }
+
             }
             break;
         }
@@ -499,7 +507,7 @@ static void apply_element_property(GstTcamSrc* self,
                 {
                     g_object_set_property(G_OBJECT(self->active_source), "state", value);
                 }
-                else if (self->active_source == self->pimipi_src)
+                else
                 {
                     bool state = load_device_settings(
                         TCAM_PROP(self), self->device_serial, g_value_get_string(value));
@@ -577,6 +585,12 @@ static gboolean open_source_element(GstTcamSrc* self)
         else if (type == TCAM_DEVICE_TYPE_PIMIPI)
         {
             self->active_source = self->pimipi_src;
+            self->device_type = type;
+            self->device_serial = vals.first;
+        }
+        else if (type == TCAM_DEVICE_TYPE_TEGRA)
+        {
+            self->active_source = self->tegra_src;
             self->device_type = type;
             self->device_serial = vals.first;
         }
@@ -746,6 +760,10 @@ static gboolean open_source_element(GstTcamSrc* self)
     {
         self->device_type = TCAM_DEVICE_TYPE_PIMIPI;
     }
+    else if (self->active_source == self->tegra_src)
+    {
+        self->device_type = TCAM_DEVICE_TYPE_TEGRA;
+    }
     else
     {
         self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
@@ -845,6 +863,17 @@ static void gst_tcam_src_init(GstTcamSrc* self)
         gst_object_unref(pimipi_fact);
     }
 
+    auto tegra_fact = gst_element_factory_find("tcamtegrasrc");
+    if (tegra_fact)
+    {
+        self->tegra_src = gst_element_factory_make("tcamtegrasrc", "tcamsrc-tegrasrc");
+        if (self->tegra_src != nullptr)
+        {
+            self->source_list = g_slist_append( self->source_list, self->tegra_src );
+        }
+        gst_object_unref(tegra_fact);
+    }
+
     self->pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), self->pad);
 
@@ -877,6 +906,11 @@ static void gst_tcam_src_finalize(GObject* object)
     {
         gst_object_unref(self->pimipi_src);
         self->pimipi_src = nullptr;
+    }
+    if (self->tegra_src)
+    {
+        gst_object_unref(self->tegra_src);
+        self->tegra_src = nullptr;
     }
     (&self->device_serial)->std::string::~string();
 
@@ -925,7 +959,7 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_DEVICE_TYPE:
         {
-            if (self->active_source)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "type"))
             {
                 g_object_get_property(G_OBJECT(self->active_source), "type", value);
             }
@@ -940,7 +974,7 @@ static void gst_tcam_src_get_property(GObject* object,
         {
             if (self->active_source)
             {
-                if (self->active_source == self->main_src)
+                if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "camera-buffers"))
                 {
                     g_object_get_property(G_OBJECT(self->active_source), "camera-buffers", value);
                 }
@@ -959,7 +993,7 @@ static void gst_tcam_src_get_property(GObject* object,
         {
             if (self->active_source)
             {
-                if (self->active_source == self->main_src)
+                if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "num-buffers"))
                 {
                     g_object_get_property(G_OBJECT(self->active_source), "num-buffers", value);
                 }
@@ -976,7 +1010,7 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_DO_TIMESTAMP:
         {
-            if (self->active_source)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "do-timestamp"))
             {
                 g_object_get_property(G_OBJECT(self->active_source), "do-timestamp", value);
             }
@@ -988,7 +1022,7 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (self->active_source)
+            if (self->active_source && g_object_class_find_property(G_OBJECT_GET_CLASS(self->active_source), "drop-incomplete-buffer"))
             {
                 g_object_get_property(
                     G_OBJECT(self->active_source), "drop-incomplete-buffer", value);
@@ -1001,16 +1035,18 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_STATE:
         {
-
-            if (self->active_source == self->main_src)
+            if (self->active_source)
             {
-                g_object_get_property(G_OBJECT(self->active_source), "state", value);
-            }
-            else if (self->active_source == self->pimipi_src)
-            {
-                std::string tmp =
-                    create_device_settings(self->device_serial, TCAM_PROP(self)).c_str();
-                g_value_set_string(value, tmp.c_str());
+                if (self->active_source == self->main_src)
+                {
+                    g_object_get_property(G_OBJECT(self->active_source), "state", value);
+                }
+                else
+                {
+                    std::string tmp = create_device_settings(self->device_serial,
+                                                             TCAM_PROP(self)).c_str();
+                    g_value_set_string(value, tmp.c_str());
+                }
             }
             else
             {

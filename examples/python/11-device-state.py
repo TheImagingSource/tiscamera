@@ -27,9 +27,38 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Tcam, Gst
 
 
+def block_until_playing(pipeline):
+
+    while True:
+        # wait 0.1 seconds for something to happen
+        change_return, state, pending = pipeline.get_state(100000000)
+        if change_return == Gst.StateChangeReturn.SUCCESS:
+            return True
+        elif change_return == Gst.StateChangeReturn.FAILURE:
+            print("Failed to change state {} {} {}".format(change_return,
+                                                           state,
+                                                           pending))
+            return False
+
+
 def main():
 
     Gst.init(sys.argv)
+
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+
+    pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+
+    if not pipeline:
+        print("Unable to create pipeline")
+        return 1
+
     # Set this to a serial string for a specific camera
     serial = None
 
@@ -40,7 +69,11 @@ def main():
         camera.set_property("serial", serial)
 
     # in the READY state the camera will always be initialized
-    camera.set_state(Gst.State.READY)
+    # in the PLAYING state additional properties may appear from gstreamer elements
+    pipeline.set_state(Gst.State.PLAYING)
+
+    if not block_until_playing(pipeline):
+        print("Unable to start pipeline")
 
     # Print properties for a before/after comparison
     state = camera.get_property("state")
@@ -51,8 +84,12 @@ def main():
     # not part of this example
     camera.set_property("state", state)
 
+    # Print properties for a before/after comparison
+    state = camera.get_property("state")
+    print("State of device is:\n{}".format(state))
+
     # cleanup, reset state
-    camera.set_state(Gst.State.NULL)
+    pipeline.set_state(Gst.State.NULL)
 
 
 if __name__ == "__main__":

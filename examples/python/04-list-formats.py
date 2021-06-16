@@ -36,7 +36,15 @@ def print_formats(source):
 
         structure = caps.get_structure(x)
 
+        # video/x-raw, video/x-bayer, etc.
         name = structure.get_name()
+
+        # this is only required when dealing
+        # with FPD/MiPi cameras on tegra systems
+        features = caps.get_features(x)
+        if features:
+            if features.contains("memory:NVMM"):
+                print("NVMM ")
 
         try:
             fmt = structure.get_value("format")
@@ -78,9 +86,10 @@ def print_formats(source):
         # the type Gst.IntRange
         # may not be available and thus cause a TypeError
         # in such a case we query the string description
-        # of the Gst.Structure and extract the framerates
+        # of the Gst.Structure and extract the width/height
         try:
-            if structure.to_string().find("[") != -1:
+            if (structure.to_string().find("width=[") != -1
+                    or structure.to_string().find("height=[") != -1):
                 raise TypeError
 
             width = structure.get_value("width")
@@ -145,7 +154,7 @@ def print_formats(source):
                 fps_max_den = v[3]
                 # framerates are fractions thus one framerate euqals two values
                 print("{}/ {} <=> {}/{}".format(fps_min_num, fps_min_den,
-                                                fps_max_num, fps_max_den, end=""))
+                                                fps_max_num, fps_max_den), end="")
 
             # printf line break
             print("")
@@ -177,6 +186,14 @@ def main():
 
     """
     Gst.init(sys.argv)  # init gstreamer
+
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
     source = Gst.ElementFactory.make("tcambin")
 

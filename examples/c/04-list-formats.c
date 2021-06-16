@@ -25,6 +25,15 @@
 
 int main (int argc, char *argv[])
 {
+    /* this line sets the gstreamer default logging level
+       it can be removed in normal applications
+       gstreamer logging can contain verry useful information
+       when debugging your application
+       # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+       for further details
+    */
+    gst_debug_set_default_threshold(GST_LEVEL_WARNING);
+
     gst_init(&argc, &argv); // init gstreamer
 
     // set this if you do not want the first found device
@@ -60,6 +69,20 @@ int main (int argc, char *argv[])
         */
 
         const char* name = gst_structure_get_name(structure);
+
+        // this is only required when dealing
+        // with FPD/MiPi cameras on tegra systems
+        // must not be freed
+        GstCapsFeatures* features = gst_caps_get_features(caps, i);
+
+        if (features)
+        {
+            if (gst_caps_features_contains(features, "memory:NVMM"))
+            {
+                // do something with this information
+                printf("NVMM ");
+            }
+        }
 
         if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {

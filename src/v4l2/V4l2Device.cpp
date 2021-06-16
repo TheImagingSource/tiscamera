@@ -783,7 +783,7 @@ bool V4l2Device::extension_unit_is_loaded()
 
 void V4l2Device::stream()
 {
-    int lost_countdown = 0;
+    int lost_countdown = lost_countdown_default;
     // period elapsed for current image
     int waited_seconds = 0;
     // maximum_waiting period
@@ -864,9 +864,8 @@ void V4l2Device::stream()
         }
         if (lost_countdown <= 0)
         {
-            this->is_stream_on = false;
-            this->notification_thread = std::thread(&V4l2Device::notify_device_lost_func, this);
-            return;
+            SPDLOG_WARN("Did not receive image for long time.");
+            lost_countdown = lost_countdown_default;
         }
     }
 }

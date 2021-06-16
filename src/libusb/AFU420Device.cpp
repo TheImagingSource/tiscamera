@@ -498,22 +498,28 @@ void AFU420Device::create_formats()
         memcpy(desc.description, img::fcc_to_string(desc.fourcc).c_str(), sizeof(desc.description));
 
         std::vector<struct framerate_mapping> rf;
-        auto add_res = [&rf](stream_fmt_data& _fmt, tcam_image_size& size) {
-            struct tcam_resolution_description res = {};
-            res.type = TCAM_RESOLUTION_TYPE_FIXED;
-            res.min_size.width = size.width;
-            res.min_size.height = size.height;
-            res.max_size.width = size.width;
-            res.max_size.height = size.height;
 
-            std::vector<double> f = create_steps_for_range(_fmt.fps_min, _fmt.fps_max);
+        auto add_res = [&rf, this] (stream_fmt_data& _fmt, tcam_image_size& size)
+            {
+                struct tcam_resolution_description res = {};
+                res.type = TCAM_RESOLUTION_TYPE_FIXED;
+                res.min_size.width = size.width;
+                res.min_size.height = size.height;
+                res.max_size.width = size.width;
+                res.max_size.height = size.height;
 
-            framerate_mapping r = { res, f };
-            rf.push_back(r);
-        };
+                double fps_min = 0;
+                double fps_max = 0;
 
-        get_frame_rate_range(fmt.id, 0, fmt.dim_min, fmt.fps_min, fmt.fps_max);
-        add_res(fmt, fmt.dim_min);
+                this->get_frame_rate_range(_fmt.fmt_in, 1, size, fps_min, fps_max);
+
+                std::vector<double> f = create_steps_for_range(fps_min, fps_max);
+
+                framerate_mapping r = { res, f };
+                rf.push_back(r);
+            };
+
+        add_res(fmt, fmt.dim_max);
 
         for (auto& f : get_standard_resolutions(fmt.dim_min, fmt.dim_max))
         {
@@ -527,9 +533,8 @@ void AFU420Device::create_formats()
             add_res(fmt, f);
         }
 
-        get_frame_rate_range(fmt.id, 0, fmt.dim_max, fmt.fps_min, fmt.fps_max);
-        add_res(fmt, fmt.dim_max);
-        //SPDLOG_INFO("Adding fmt to fmt_list");
+        add_res(fmt, fmt.dim_min);
+
         VideoFormatDescription format(nullptr, desc, rf);
         available_videoformats.push_back(format);
     }

@@ -21,54 +21,56 @@
 #include <stdio.h> /* printf and putchar */
 #include "tcamprop.h" /* gobject introspection interface */
 
+
+void print_enum_or_bool(GstElement* source, const char* name)
+{
+    GValue value = {};
+
+    GValue type = {};
+    /* We are only interested in the value, this  */
+    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
+                                               name,
+                                               &value,
+                                               NULL, NULL, NULL, NULL,
+                                               &type, NULL, NULL, NULL);
+
+    if (!ret)
+    {
+        printf("Could not query %s\n", name);
+        return;
+    }
+
+    const char* t = g_value_get_string(&type);
+
+    // exposure auto is a bool
+    if (strcmp(t, "boolean") == 0)
+    {
+        printf("%s has value: %s\n", name,
+               g_value_get_boolean(&value) ? "true" : "false");
+
+    }
+    else if (strcmp(t, "enum") == 0)
+    {
+        printf("%s has value: %s\n", name, g_value_get_string(&value));
+    }
+    g_value_unset(&value);
+    g_value_unset(&type);
+}
+
+
 void print_properties (GstElement* source)
 {
 
-    GValue exp_auto_value = G_VALUE_INIT;
-
-    /* We are only interested in the value, this  */
-    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                               "Exposure Auto",
-                                               &exp_auto_value,
-                                               NULL, NULL, NULL, NULL,
-                                               NULL, NULL, NULL, NULL);
-
-    if (ret)
-    {
-        printf("Exposure Auto has value: %s\n",
-               g_value_get_boolean(&exp_auto_value) ? "true" : "false");
-        g_value_unset( &exp_auto_value );
-    }
-    else
-    {
-        printf("Could not query Exposure Auto\n");
-    }
-
-    GValue gain_auto_value = G_VALUE_INIT;
-
-    ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                      "Gain Auto",
-                                      &gain_auto_value,
-                                      NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL);
-    if (ret)
-    {
-        printf("Gain Auto has value: %s\n",
-               g_value_get_boolean(&gain_auto_value) ? "true" : "false");
-        g_value_unset( &gain_auto_value );
-    }
-    else
-    {
-        printf("Could not query Gain Auto\n");
-    }
+    print_enum_or_bool(source, "Exposure Auto");
+    print_enum_or_bool(source, "Gain Auto");
 
     GValue brightness_value = G_VALUE_INIT;
 
-    ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                      "Brightness",
-                                      &brightness_value,
-                                      NULL, NULL, NULL, NULL,
-                                      NULL, NULL, NULL, NULL);
+    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
+                                               "Brightness",
+                                               &brightness_value,
+                                               NULL, NULL, NULL, NULL,
+                                               NULL, NULL, NULL, NULL);
 
     if (ret)
     {
@@ -83,12 +85,131 @@ void print_properties (GstElement* source)
 }
 
 
+gboolean set_bool_or_enum(GstElement* source,
+                          const char* name,
+                          gboolean new_value)
+{
+    // this function basically exists to ensure the example
+    // works with all camera types.
+    // If you know the property type of the properties you are
+    // setting, you can simply call that
+    // instead of checking the type.
+
+    // some settings may exhibit as bool or enum,
+    // depending on the camera you use.
+
+    GValue type = {};
+
+    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
+                                               name,
+                                               NULL,
+                                               NULL, NULL, NULL, NULL,
+                                               &type, NULL, NULL, NULL);
+
+    if (!ret)
+    {
+        printf("Could not query property %s\n", name);
+        return FALSE;
+    }
+
+    const char* t = g_value_get_string(&type);
+
+    // exposure auto is a bool
+    if (strcmp(t, "boolean") == 0)
+    {
+        GValue set_auto = G_VALUE_INIT;
+        g_value_init(&set_auto, G_TYPE_BOOLEAN);
+
+        g_value_set_boolean(&set_auto, FALSE);
+
+        // actual set
+        ret = tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                          name, &set_auto);
+        g_value_unset( &set_auto );
+
+    }
+    else if (strcmp(t, "enum") == 0)
+    {
+        GValue set_auto = G_VALUE_INIT;
+        g_value_init(&set_auto, G_TYPE_STRING);
+
+        if (new_value)
+        {
+            g_value_set_string(&set_auto, "On");
+        }
+        else
+        {
+            g_value_set_string(&set_auto, "Off");
+        }
+
+        // actual set
+        ret = tcam_prop_set_tcam_property(TCAM_PROP(source),
+                                          name, &set_auto);
+        g_value_unset( &set_auto );
+
+    }
+    g_value_unset( &type );
+
+    return ret;
+
+}
+
+
+gboolean block_until_playing (GstElement* pipeline)
+{
+    while (TRUE)
+    {
+        GstState state;
+        GstState pending;
+
+        // wait 0.1 seconds for something to happen
+        GstStateChangeReturn ret = gst_element_get_state(pipeline ,&state, &pending, 100000000);
+
+        if (ret == GST_STATE_CHANGE_SUCCESS)
+        {
+            return TRUE;
+        }
+        else if (ret == GST_STATE_CHANGE_FAILURE)
+        {
+            printf("Failed to change state %s %s %s\n",
+                   gst_element_state_change_return_get_name(ret),
+                   gst_element_state_get_name(state),
+                   gst_element_state_get_name(pending));
+
+            return FALSE;
+        }
+    }
+}
+
+
 int main (int argc, char *argv[])
 {
+    /* this line sets the gstreamer default logging level
+       it can be removed in normal applications
+       gstreamer logging can contain verry useful information
+       when debugging your application
+       # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+       for further details
+    */
+    gst_debug_set_default_threshold(GST_LEVEL_WARNING);
+
     gst_init(&argc, &argv); // init gstreamer
 
+    GError* err = NULL;
+
+    // this is a placeholder definition
+    // normally your pipeline would be defined here
+    GstElement* pipeline = gst_parse_launch("tcambin name=source  ! fakesink", &err);
+
+    if (pipeline == NULL)
+    {
+        printf("Unable to create pipeline: %s\n", err->message);
+        g_free(err);
+        return 1;
+    }
+
     /* create a tcambin to retrieve device information */
-    GstElement* source = gst_element_factory_make("tcambin", "source");
+    GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
 
     const char* serial = NULL;
 
@@ -101,9 +222,13 @@ int main (int argc, char *argv[])
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
 
-    /* in the READY state the camera will always be initialized */
-    gst_element_set_state(source, GST_STATE_READY);
-
+    // helper function to ensure we have the right state
+    // alternatively wait for the first image
+    // then everything is guaranteed to be initialized
+    if (!block_until_playing(pipeline))
+    {
+        printf("Unable to start pipeline. \n");
+    }
     /* Device is now in a state for interactions */
 
     /*
@@ -115,18 +240,9 @@ int main (int argc, char *argv[])
       We set the properties to other values
      */
 
-    GValue set_auto = G_VALUE_INIT;
-    g_value_init(&set_auto, G_TYPE_BOOLEAN);
+    set_bool_or_enum(source, "Exposure Auto", FALSE);
+    set_bool_or_enum(source, "Gain Auto", FALSE);
 
-    g_value_set_boolean(&set_auto, FALSE);
-
-    tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                "Exposure Auto", &set_auto);
-    /* reuse set_auto. Auto Exposure and Auto Gain have the same type */
-    tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                "Gain Auto", &set_auto);
-
-    g_value_unset( &set_auto );
 
     GValue set_brightness = G_VALUE_INIT;
     g_value_init(&set_brightness, G_TYPE_INT);

@@ -310,10 +310,6 @@ static gboolean gst_tcam_bin_set_tcam_property(TcamProp* iface,
         GstElement* element = GST_ELEMENT(g_value_get_object(&item));
         if (TCAM_IS_PROP(element))
         {
-            if (g_strcmp0(gst_element_get_name(element), "tcambin-dutils") == 0)
-            {
-                GST_INFO("AHA");
-            }
             if (tcam_prop_set_tcam_property(TCAM_PROP(element), name, value))
             {
                 ret = true;
@@ -984,13 +980,36 @@ static GstCaps* generate_all_caps(GstTcamBin* self)
     gst_helper::gst_unique_ptr<GstPad> in_pad = gst_helper::get_static_pad(self->src, "src");
     GstCaps* incoming_caps = gst_pad_query_caps(in_pad.get(), NULL);
 
-    // always can be passed through
-    GstCaps* all_caps = gst_caps_copy(incoming_caps);
 
-    // we have three scenarios:
+    GstCaps* all_caps = gst_caps_new_empty();
+
+    for (guint i = 0; i < gst_caps_get_size(incoming_caps); ++i)
+    {
+        // nvmm is described not in the gst_caps name
+        // but as a GstCapsFeatures object
+        // iterate over them, if existent to skip memory types we do not handle.
+        GstCapsFeatures* features = gst_caps_get_features(incoming_caps, i);
+
+        if (features)
+        {
+            if (gst_caps_features_contains (features, "memory:NVMM"))
+            {
+                //GST_INFO("Contains NVMM. Skipping");
+                continue;
+            }
+        }
+
+        GstCaps* tmp = gst_caps_copy_nth(incoming_caps, i);
+
+        // append does not copy but transferres
+        gst_caps_append(all_caps, tmp);
+    }
+
+    // we have four scenarios:
     // 1. camera has video/x-raw,format=GRAY8 = passed through
     // 2. camera has video/x-bayer => bayer may be passed through or converted => bayer2rgb
-    // 2. camera has video/x-raw,format=SOMETHING => passed through
+    // 3. camera has video/x-raw,format=SOMETHING => passed through
+    // 4. camera has video/x-raw((memory:NVMM)) => filter as we cannot handle the memory type
 
     // this boils down to:
     // if camera is mono,jpeg,yuv => pass through and be done
@@ -1106,6 +1125,30 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
             GST_INFO("NULL_TO_READY");
+
+            // post message about dutils version missmatch
+            // this only happens when we have found tcamdutils
+            // but the previous version check failed
+            // user can manually set use_dutils to true
+            // which overwrites this message
+            if (self->has_dutils && !self->toggles.use_dutils)
+            {
+                std::string dutils_warning = "tcamdutils version mismatch! "
+                    "tcamdutils and tiscamera require identical major.minor version. "
+                    "Overwrite at own risk by explicitly setting 'tcambin use-dutils=true'. "
+                    "Found '" + get_plugin_version("tcamdutils")
+                    + "' Required: '" + get_version_major() + "." + get_version_minor() + "'";
+
+                GST_WARNING(dutils_warning.c_str());
+
+                GError *err = g_error_new (g_quark_from_string("tcamdutils version missmatch"),
+                                           1, "%s", GST_ELEMENT_NAME(element));
+
+                GstMessage* msg = gst_message_new_warning(GST_OBJECT(element), err, dutils_warning.c_str());
+                g_clear_error(&err);
+                gst_element_post_message(GST_ELEMENT(self), msg);
+
+            }
 
             if (self->src == nullptr)
             {
@@ -1252,18 +1295,13 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             g_free(caps_info_string);
             gst_element_post_message(element, msg);
 
-            ret = GST_STATE_CHANGE_NO_PREROLL;
-            break;
-        }
-        case GST_STATE_CHANGE_PLAYING_TO_PLAYING:
-        {
-            GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
-
             if (self->must_apply_state)
             {
                 apply_state(self, self->data->state);
                 self->must_apply_state = FALSE;
             }
+
+            ret = GST_STATE_CHANGE_NO_PREROLL;
             break;
         }
         default:
@@ -1492,10 +1530,10 @@ static bool verify_tcamdutils_version()
     // everything else is potential bugfix
     if (dutils_version.find(tcam_version) == std::string::npos)
     {
-        GST_WARNING(
-            "Version missmatch for tcamdutils. Auto usage disabled. Found '%s' Required: '%s'",
-            dutils_version.c_str(),
-            tcam_version.c_str());
+        // do not post any messages here
+        // element is not yet fully initialized
+        // messages will _not_ be correctly propagated
+
         return false;
     }
 

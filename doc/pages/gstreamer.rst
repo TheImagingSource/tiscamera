@@ -155,12 +155,53 @@ Together they describe a unique format.
 
     This format has no additional format field.
 
+
+Different Memory
+----------------
+
+.. note::
+
+   This is only required when dealing with tegra systems.
+   Common pipelines that use the tcambin and/or tcamdutils and other platforms do not require this.
+
+Custom memory types are described as ``video/x-raw(memory:NVMM)`` or similar.
+This additional information are not part of the GstStructure that contains all caps information but are instead stored as GstCapsFeatures.
+
+.. tabs::
+
+   .. code-tab:: c
+
+      GstCaps* caps = gst_caps_from_string("video/x-raw(memory:NVMM),format=BGRx");
+      for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
+      {
+          // must not be freed
+          GstCapsFeatures* features = gst_caps_get_features(all_caps, i);
+
+          if (features)
+          {
+              if (gst_caps_features_contains(features, "memory:NVMM"))
+              {
+                  // do something with this information
+              }
+          }
+      }
+
+   .. code-tab:: python
+
+      caps = Gst.Caps.from_string("video/x-raw(memory:NVMM),format=BGRx")
+      for x in range(caps.get_size()):
+
+          features = caps.get_features(x)
+          if features:
+              if features.contains("memory:NVMM"):
+                  # do something with this information
+
 *******************
 General Suggestions
 *******************
 
 Set `sync=false` on your sink element. This will prevent images from arriving later than necessary.
-    
+
 *********
 Debugging
 *********

@@ -72,7 +72,46 @@ bool separate_serial_and_type(const std::string& input, std::string& serial, std
 }
 
 
-GstElement* tcam_gst_find_camera_src(GstElement* element)
+typedef struct tcam_src_element_
+{
+    std::string name;
+    // name so because function `g_type_name` exists
+    std::string g_type_name_str;
+    std::vector<TCAM_DEVICE_TYPE> type;
+} tcam_src_element;
+
+
+std::vector<tcam_src_element> get_possible_sources ()
+{
+    std::vector<tcam_src_element> ret;
+
+    ret.push_back({"tcammainsrc", "GstTcamMainSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB}});
+    ret.push_back({"tcamtegrasrc", "GstTcamTegraSrc", {TCAM_DEVICE_TYPE_TEGRA}});
+    ret.push_back({"tcampimipisrc", "GstTcamPiMipiSrc", {TCAM_DEVICE_TYPE_PIMIPI}});
+    ret.push_back({"tcamsrc", "GstTcamSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB, TCAM_DEVICE_TYPE_TEGRA, TCAM_DEVICE_TYPE_PIMIPI}});
+
+    return ret;
+}
+
+
+std::vector<std::string> get_source_element_factory_names()
+{
+    auto sources = get_possible_sources();
+
+    std::vector<std::string> ret;
+
+    ret.reserve(sources.size());
+
+    for (const auto& s : sources)
+    {
+        ret.push_back(s.g_type_name_str);
+    }
+
+    return ret;
+}
+
+
+GstElement* tcam_gst_find_camera_src_rec (GstElement* element, const std::vector<std::string>& factory_names)
 {
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
 
@@ -88,14 +127,15 @@ GstElement* tcam_gst_find_camera_src(GstElement* element)
     GstElement* el = gst_pad_get_parent_element(src_pad);
 
     gst_object_unref(src_pad);
-    GstElement* ret;
-    const char* name =
-        g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
-    if (g_strcmp0(name, "GstTcamSrc") == 0)
+
+    std::string name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
+
+    if (std::find(factory_names.begin(), factory_names.end(), name) != factory_names.end())
     {
         return el;
     }
-    ret = tcam_gst_find_camera_src(el);
+
+    GstElement* ret = tcam_gst_find_camera_src_rec(el, factory_names);
 
     gst_object_unref(el);
 
@@ -103,7 +143,15 @@ GstElement* tcam_gst_find_camera_src(GstElement* element)
 }
 
 
-std::string get_plugin_version(const char* plugin_name)
+GstElement* tcam_gst_find_camera_src (GstElement* element)
+{
+    std::vector<std::string> factory_names = get_source_element_factory_names();
+
+    return tcam_gst_find_camera_src_rec(element, factory_names);
+}
+
+
+std::string get_plugin_version (const char* plugin_name)
 {
     GstPlugin* plugin = gst_plugin_load_by_name(plugin_name);
     if (plugin == nullptr)
@@ -251,6 +299,49 @@ static bool tcam_gst_is_fourcc_bayer(const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG8 || fourcc == FOURCC_GRBG8 || fourcc == FOURCC_RGGB8
         || fourcc == FOURCC_BGGR8)
+    {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+
+static bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
+{
+   if (fourcc == FOURCC_GBRG10
+       || fourcc == FOURCC_GRBG10
+       || fourcc == FOURCC_RGGB10
+       || fourcc == FOURCC_BGGR10)
+   {
+       return TRUE;
+   }
+   return FALSE;
+}
+
+
+static bool tcam_gst_is_bayer10_packed_fourcc (const uint32_t fourcc)
+{
+   if (fourcc == FOURCC_GBRG10_SPACKED
+       || fourcc == FOURCC_GRBG10_SPACKED
+       || fourcc == FOURCC_RGGB10_SPACKED
+       || fourcc == FOURCC_BGGR10_SPACKED
+       || fourcc == FOURCC_GBRG10_MIPI_PACKED
+       || fourcc == FOURCC_GRBG10_MIPI_PACKED
+       || fourcc == FOURCC_RGGB10_MIPI_PACKED
+       || fourcc == FOURCC_BGGR10_MIPI_PACKED)
+   {
+       return TRUE;
+   }
+   return FALSE;
+}
+
+
+static bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
+{
+    if (fourcc == FOURCC_GBRG12
+        || fourcc == FOURCC_GRBG12
+        || fourcc == FOURCC_RGGB12
+        || fourcc == FOURCC_BGGR12)
     {
         return TRUE;
     }
@@ -429,6 +520,16 @@ bool tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
     return FALSE;
 }
 
+bool tcam_gst_is_bayerpwl_fourcc(const unsigned int fourcc)
+{
+    if (fourcc == FOURCC_PWL_RG12_MIPI
+        || fourcc == FOURCC_PWL_RG12
+        || fourcc == FOURCC_PWL_RG16H12)
+    {
+        return true;
+    }
+    return false;
+}
 
 bool tcam_gst_is_polarized_mono(const unsigned int fourcc)
 {
@@ -631,6 +732,7 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
      * formats like MJPEG
      * GRAY16
      * GRAY8
+     * pwl bayer
      * bayer12/16
      * polarized bayer
      * polarized mono
@@ -656,40 +758,47 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
         }
         else if (tcam_gst_is_fourcc_rgb(fourcc))
         {
-            map[1] = fourcc;
+            map[10] = fourcc;
         }
         else if (tcam_gst_is_fourcc_yuv(fourcc))
         {
-            map[2] = fourcc;
+            map[20] = fourcc;
         }
         else if (fourcc == FOURCC_MJPG)
         {
-            map[3] = fourcc;
+            map[30] = fourcc;
         }
         else if (fourcc == FOURCC_Y800)
         {
-            map[4] = fourcc;
+            map[40] = fourcc;
         }
         else if (fourcc == FOURCC_Y16)
         {
-            map[5] = fourcc;
+            map[50] = fourcc;
         }
-        //#TODO why is here no mention of bayer10?
-        else if (tcam_gst_is_bayer12_packed_fourcc(fourcc))
+        else if (tcam_gst_is_bayerpwl_fourcc(fourcc))
         {
-            map[6] = fourcc;
+            map[60] = fourcc;
+        }
+        else if (tcam_gst_is_bayer10_fourcc(fourcc) || tcam_gst_is_bayer10_packed_fourcc(fourcc))
+        {
+            map[65] = fourcc;
+        }
+        else if (tcam_gst_is_bayer12_fourcc(fourcc) || tcam_gst_is_bayer12_packed_fourcc(fourcc))
+        {
+            map[70] = fourcc;
         }
         else if (tcam_gst_is_bayer16_fourcc(fourcc))
         {
-            map[7] = fourcc;
+            map[80] = fourcc;
         }
         else if (tcam_gst_is_polarized_bayer(fourcc))
         {
-            map[8] = fourcc;
+            map[90] = fourcc;
         }
         else if (tcam_gst_is_polarized_mono(fourcc))
         {
-            map[9] = fourcc;
+            map[100] = fourcc;
         }
         else
         {
@@ -720,6 +829,7 @@ GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming)
      *       formats like MJPEG
      *       GRAY8
      *       GRAY16
+     *       pwl bayer
      *       bayer12/16
      *
      * 2. find the largest resolution

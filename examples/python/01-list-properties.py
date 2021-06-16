@@ -27,19 +27,7 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Tcam, Gst
 
 
-def main():
-    Gst.init(sys.argv)  # init gstreamer
-
-    # set this to a specific camera serial if you
-    # do not want to use the default camera
-    serial = None
-
-    # we create a source element to retrieve a property list through it
-    camera = Gst.ElementFactory.make("tcambin")
-
-    # serial is defined, thus make the source open that device
-    if serial is not None:
-        camera.set_property("serial", serial)
+def list_properties(camera):
 
     property_names = camera.get_tcam_property_names()
 
@@ -92,5 +80,67 @@ def main():
             print("This should not happen.")
 
 
+def block_until_playing(pipeline):
+
+    while True:
+        # wait 0.1 seconds for something to happen
+        change_return, state, pending = pipeline.get_state(100000000)
+        if change_return == Gst.StateChangeReturn.SUCCESS:
+            return True
+        elif change_return == Gst.StateChangeReturn.FAILURE:
+            print("Failed to change state {} {} {}".format(change_return,
+                                                           state,
+                                                           pending))
+            return False
+
+
+def main():
+    Gst.init(sys.argv)  # init gstreamer
+
+    # this line sets the gstreamer default logging level
+    # it can be removed in normal applications
+    # gstreamer logging can contain verry useful information
+    # when debugging your application
+    # see https://gstreamer.freedesktop.org/documentation/tutorials/basic/debugging-tools.html
+    # for further details
+    Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
+
+    pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+
+    if not pipeline:
+        print("Unable to create pipeline")
+        return 1
+
+    # set this to a specific camera serial if you
+    # do not want to use the default camera
+    serial = None
+
+    # get the tcambin to retrieve a property list through it
+    source = pipeline.get_by_name("source")
+
+    # serial is defined, thus make the source open that device
+    if serial is not None:
+        source.set_property("serial", serial)
+
+    print("Properties before state PLAYING:")
+    list_properties(source)
+
+    # in the READY state the camera will always be initialized
+    # in the PLAYING sta1te additional properties may appear from gstreamer elements
+    pipeline.set_state(Gst.State.PLAYING)
+
+    # helper function to ensure we have the right state
+    # alternatively wait for the first image
+    if not block_until_playing(pipeline):
+        print("Unable to start pipeline")
+
+    print("Properties during state PLAYING:")
+    list_properties(source)
+
+    pipeline.set_state(Gst.State.NULL)
+
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
