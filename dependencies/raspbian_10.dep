@@ -1,1 +1,241 @@
-debian_testing.dep
+{
+    "dependencies": [
+        {
+            "name": "git",
+            "version": ">= 1:2.7.4",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "g++",
+            "version": ">= 4:5.3.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "cmake",
+            "version": ">= 3.2",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "pkg-config",
+            "version": ">= 0.29.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+
+        {
+            "name": "libgstreamer1.0-dev",
+            "version": ">= 1.8.3-1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgstreamer-plugins-base1.0-dev",
+            "version": ">= 1.8.3-1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libglib2.0-dev",
+            "version": ">= 2.48.2",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgirepository1.0-dev",
+            "version": ">= 1.46.0",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libusb-1.0-0-dev",
+            "version": ">= 2:1.0.20.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "libzip-dev",
+            "version": ">= 1.0.1",
+            "phase": "compilation",
+            "modules": ["base"]
+        },
+        {
+            "name": "python3-setuptools",
+            "version": ">= 20.7.0-1",
+            "phase": "compilation",
+            "modules": ["tools-aravis"]
+        },
+
+        {
+            "name": "libzip4",
+            "version": ">= 1.0.1",
+            "phase": "runtime",
+            "modules": ["base", "aravis"]
+        },
+        {
+            "name": "libglib2.0-0",
+            "version": ">= 2.48.2",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgirepository-1.0-1",
+            "version": ">= 1.46.0",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+        {
+            "name": "libusb-1.0-0",
+            "version": ">= 2:1.0.20",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+
+        {
+            "name": "libuuid1",
+            "version": ">= 2.27",
+            "phase": "runtime",
+            "modules": ["v4l2"]
+        },
+        {
+            "name": "uuid-dev",
+            "version": ">= 2.27",
+            "phase": "compilation",
+            "modules": ["v4l2"]
+        },
+
+        {
+            "name": "libudev-dev",
+            "version": ">= 229",
+            "phase": "compilation",
+            "modules": ["v4l2", "libusb"]
+        },
+        {
+            "name": "libudev1",
+            "version": ">= 229",
+            "phase": "runtime",
+            "modules": ["v4l2", "libusb"]
+        },
+
+        {
+            "name": "python3-sphinx",
+            "version": ">= 1.3.6",
+            "phase": "compilation",
+            "modules": ["documentation"]
+        },
+        {
+            "name": "libc6",
+            "version": ">= 2.28",
+            "phase": "runtime",
+            "modules": ["base"]
+        },
+        {
+            "name": "libgstreamer1.0-0",
+            "version": ">= 1.8.3",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-base",
+            "version": ">= 1.8.0",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-good",
+            "version": ">= 1.8.0",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-bad",
+            "version": ">= 1.8.0",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+        {
+            "name": "gstreamer1.0-plugins-ugly",
+            "version": ">= 1.8.3",
+            "phase": "runtime",
+            "modules": ["gstreamer"]
+        },
+
+        {
+            "name": "libxml2-dev",
+            "version": ">= 2.9.3",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "libtool",
+            "version": ">= 2.4.6",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "autoconf",
+            "version": ">= 2.69-9",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "intltool",
+            "version": ">= 0.51.0",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "gtk-doc-tools",
+            "version": ">= 1.25",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "libpcap-dev",
+            "version": ">= 1.7.4-2",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "libxml2",
+            "version": ">= 2.9.3",
+            "phase": "runtime",
+            "modules": ["aravis"]
+        },
+        {
+            "name": "libpcap0.8",
+            "version": ">= 1.7.4-2",
+            "phase": "runtime",
+            "modules": ["aravis"]
+        },
+
+        {
+            "name": "python3-pyqt5",
+            "version": ">= 5.5.1",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
+        },
+        {
+            "name": "python3-gi",
+            "version": ">= 3.20.0",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
+        },
+        {
+            "name": "python3-gst-1.0",
+            "version": ">= 1.14.0",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
+        },
+        {
+            "name": "python3",
+            "version": ">= 3.7.0",
+            "phase": "runtime",
+            "modules": ["gui", "gige", "tools"]
+        }
+
+    ]
+
+}
