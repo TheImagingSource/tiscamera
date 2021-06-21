@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - gstreamer buffers are now marked as "live"
 - installation variables are now all defined in CmakeInstall.cmake
 - usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
+- tcambin property `use-dutils` must now be set during GST_STATE_NULL to take affect.
 
 ### Fixed
 

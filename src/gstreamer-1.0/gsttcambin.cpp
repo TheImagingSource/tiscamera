@@ -1471,19 +1471,6 @@ static void gst_tcambin_set_property(GObject* object,
         {
             self->toggles.use_dutils = g_value_get_boolean(value);
 
-            GstState state;
-
-            GstStateChangeReturn ret =
-                gst_element_get_state(GST_ELEMENT(self), &state, nullptr, 1000000000);
-
-            // only change elements when we are in a clear state
-            // and that state is not higher than READY
-            if ((ret = GST_STATE_CHANGE_SUCCESS)
-                && (state == GST_STATE_NULL || state == GST_STATE_READY))
-            {
-                gst_tcambin_clear_elements(self);
-                gst_tcambin_create_elements(self);
-            }
             break;
         }
         case PROP_STATE:
