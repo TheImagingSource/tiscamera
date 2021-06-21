@@ -109,10 +109,8 @@ static gchar* gst_tcam_src_get_property_type(TcamProp* iface, const gchar* name)
 
     if (!self->active_source)
     {
-        if (!open_source_element(self))
-        {
-            return FALSE;
-        }
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
     }
 
     ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->active_source), name);
@@ -135,10 +133,8 @@ static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
 
     if (!self->active_source)
     {
-        if (!open_source_element(self))
-        {
-            return FALSE;
-        }
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
     }
 
     return tcam_prop_get_tcam_property_names(TCAM_PROP(self->active_source));
@@ -161,10 +157,8 @@ static gboolean gst_tcam_src_get_tcam_property(TcamProp* iface,
 
     if (!self->active_source)
     {
-        if (!open_source_element(self))
-        {
-            return FALSE;
-        }
+        GST_WARNING("Source must be in state READY or higher.");
+        return FALSE;
     }
 
     return tcam_prop_get_tcam_property(TCAM_PROP(self->active_source),
@@ -187,10 +181,8 @@ static GSList* gst_tcam_src_get_menu_entries(TcamProp* iface, const char* menu_n
 
     if (!self->active_source)
     {
-        if (!open_source_element(self))
-        {
-            return FALSE;
-        }
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
     }
 
     return tcam_prop_get_tcam_menu_entries(TCAM_PROP(self->active_source), menu_name);
@@ -205,10 +197,8 @@ static gboolean gst_tcam_src_set_tcam_property(TcamProp* iface,
 
     if (!self->active_source)
     {
-        if (!open_source_element(self))
-        {
-            return FALSE;
-        }
+        GST_WARNING("Source must be in state READY or higher.");
+        return FALSE;
     }
 
     return tcam_prop_set_tcam_property(TCAM_PROP(self->active_source), name, value);
@@ -394,15 +384,6 @@ static void apply_element_property(GstTcamSrc* self,
                 }
 
                 GST_INFO("Set camera serial to %s", self->device_serial.c_str());
-
-                if (!self->device_serial.empty())
-                {
-                    // TODO
-                }
-                else
-                {
-                    GST_DEBUG("Successfully opened device");
-                }
             }
             break;
         }

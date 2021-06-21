@@ -127,9 +127,10 @@ static gchar* gst_tcam_bin_get_property_type(TcamProp* iface, const gchar* name)
 
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (!self->elements_created)
+    if (!self->src)
     {
-        gst_tcambin_create_elements(GST_TCAMBIN(self));
+        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        return nullptr;
     }
 
     GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
@@ -168,9 +169,10 @@ static GSList* gst_tcam_bin_get_property_names(TcamProp* iface)
     GSList* ret = NULL;
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (!self->elements_created)
+    if (!self->src)
     {
-        gst_tcambin_create_elements(GST_TCAMBIN(self));
+        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        return nullptr;
     }
 
     GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
@@ -207,9 +209,10 @@ static gboolean gst_tcam_bin_get_tcam_property(TcamProp* iface,
 {
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (!self->elements_created)
+    if (!self->src)
     {
-        gst_tcambin_create_elements(self);
+        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        return FALSE;
     }
 
     gboolean ret = false;
@@ -260,9 +263,10 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries(TcamProp* iface, const gchar* 
 {
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (!self->elements_created)
+    if (!self->src)
     {
-        gst_tcambin_create_elements(GST_TCAMBIN(self));
+        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        return nullptr;
     }
 
     GSList* ret;
@@ -295,9 +299,10 @@ static gboolean gst_tcam_bin_set_tcam_property(TcamProp* iface,
 {
     GstTcamBin* self = GST_TCAMBIN(iface);
 
-    if (!self->elements_created)
+    if (!self->src)
     {
-        gst_tcambin_create_elements(self);
+        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        return FALSE;
     }
 
     gboolean ret = false;

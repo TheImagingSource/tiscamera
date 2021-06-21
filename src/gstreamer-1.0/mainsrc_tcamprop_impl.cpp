@@ -57,17 +57,13 @@ gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
-    if (!self->device || !self->device->dev)
-    {
-        return nullptr;
-    }
-
     //     g_return_val_if_fail (self->device != NULL, NULL);
     // prefer this so that no gobject error appear
     // this method is also used to check for property existence
     // so unneccessary errors should be avoided
-    if (self->device->dev == nullptr)
+    if (!self->device || !self->device->dev)
     {
+        GST_WARNING("Source must be in state READY or higher.");
         return nullptr;
     }
 
@@ -100,8 +96,11 @@ GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
     GSList* ret = NULL;
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
-    g_return_val_if_fail(self->device != NULL, NULL);
-    g_return_val_if_fail(self->device->dev != NULL, NULL);
+    if (!self->device || !self->device->dev)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
+    }
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> vec =
         self->device->dev->get_properties();
@@ -127,8 +126,11 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
     gboolean ret = TRUE;
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
-    g_return_val_if_fail(self->device != NULL, FALSE);
-    g_return_val_if_fail(self->device->dev != NULL, FALSE);
+    if (!self->device || !self->device->dev)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return FALSE;
+    }
 
     auto property = self->device->dev->get_property(name);
 
@@ -137,10 +139,6 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
         GST_DEBUG_OBJECT(GST_TCAM_MAINSRC(iface), "no property with name: '%s'", name);
         return FALSE;
     }
-
-    //property->update();
-
-    //struct tcam_device_property prop = property->get_struct();
 
     if (flags)
     {
@@ -286,7 +284,8 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             }
             break;
         }
-        case TCAM_PROPERTY_TYPE_STRING:
+        // not used
+        //case TCAM_PROPERTY_TYPE_STRING:
         // {
         //     if (value)
         //     {
@@ -401,6 +400,12 @@ GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name
 
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
+    if (!self->device || !self->device->dev)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
+    }
+
     auto property = self->device->dev->get_property(menu_name);
 
     if (property == nullptr)
@@ -426,6 +431,12 @@ GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name
 gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, const GValue* value)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
+
+    if (!self->device || !self->device->dev)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return FALSE;
+    }
 
     auto prop = self->device->dev->get_property(name);
 
@@ -549,6 +560,12 @@ GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)
 
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
+    if (!s->device)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
+    }
+
     std::vector<tcam::DeviceInfo> devices = s->device->index_.get_device_list();
 
     GSList* ret = NULL;
@@ -565,6 +582,12 @@ GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)
 GSList* gst_tcam_mainsrc_get_device_serials_backend(TcamProp* self)
 {
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
+
+    if (!s->device)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return nullptr;
+    }
 
     std::vector<tcam::DeviceInfo> devices = s->device->index_.get_device_list();
 
@@ -587,6 +610,12 @@ gboolean gst_tcam_mainsrc_get_device_info(TcamProp* self,
                                           char** connection_type)
 {
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
+
+    if (!s->device)
+    {
+        GST_WARNING("Source must be in state READY or higher.");
+        return FALSE;
+    }
 
     std::vector<tcam::DeviceInfo> devices = s->device->index_.get_device_list();
 

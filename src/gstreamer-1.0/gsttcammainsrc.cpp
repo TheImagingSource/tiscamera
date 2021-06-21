@@ -318,10 +318,12 @@ static GstCaps* gst_tcam_mainsrc_get_caps(GstBaseSrc* src, GstCaps* filter __att
 
     if (self->device->all_caps == NULL)
     {
-        if (!gst_tcam_mainsrc_init_camera(self))
-        {
-            return nullptr;
-        }
+        GST_WARNING("Device not initialized. Must be at least READY state.");
+        return nullptr;
+        // if (!gst_tcam_mainsrc_init_camera(self))
+        // {
+        //     return nullptr;
+        // }
     }
 
     caps = gst_caps_copy(self->device->all_caps.get());
@@ -536,7 +538,6 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
 
             if (self->device->dev == nullptr)
             {
-                GST_INFO("must initialize device");
                 if (!gst_tcam_mainsrc_init_camera(self))
                 {
                     GST_INFO("FAILURE to initialize device. Aborting...");
@@ -965,24 +966,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
                     self->device_serial = g_value_get_string(value);
                 }
 
-                GST_INFO("Set camera name to %s", self->device_serial.c_str());
-
-                if (self->device->dev)
-                {
-                    gst_tcam_mainsrc_close_camera(self);
-                }
-                if (!self->device_serial.empty())
-                {
-                    if (!gst_tcam_mainsrc_init_camera(self))
-                    {
-                        GST_ERROR("Error while initializing camera.");
-                        gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
-                    }
-                }
-                else
-                {
-                    GST_DEBUG("Successfully opened device");
-                }
+                GST_INFO("Set camera serial to %s", self->device_serial.c_str());
             }
             break;
         }
