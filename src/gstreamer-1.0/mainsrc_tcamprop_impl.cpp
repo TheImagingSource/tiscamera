@@ -376,6 +376,7 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
             if (step)
             {
                 g_value_init(step, G_TYPE_BOOLEAN);
+                g_value_set_boolean(step, TRUE);
             }
             break;
         }
