@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - gstreamer resolution ranges now contain a step size
 - GstTcamDeviceProvider, see documentation for usage.
 - Filter for DFG/USB2pro. Device will no longer appear in device listings.
+- `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
 
 ### Changed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - logging now uses spdlog
 - gstreamer buffers are now marked as "live"
 - installation variables are now all defined in CmakeInstall.cmake
+- usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
 
 ### Fixed
 
