@@ -18,7 +18,7 @@ static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_di
     { 0x00980910, { "", TCAM_PROPERTY_TYPE_DOUBLE, {} } },
     // exposure_auto
     { 0x009a0901, { "ExposureAuto", TCAM_PROPERTY_TYPE_ENUMERATION,
-                    { { { 1, "Off" }, { 3, "On" } } } } },
+                    { { { 1, "Off" }, { 3, "Continuous" } } } } },
     // exposure absolute
     { 0x009a0902, { "ExposureTime", TCAM_PROPERTY_TYPE_DOUBLE, {}, }, },
     { 0x0098090c, { "BalanceWhiteAuto", TCAM_PROPERTY_TYPE_ENUMERATION,
