@@ -14,6 +14,8 @@
 # limitations under the License.
 
 
+add_subdirectory(lib/dutils_image)
+
 
 # helper funcion to receive the value of an arbitrary variable
 function(pkg_check_variable _pkg _name)
@@ -32,7 +34,6 @@ endfunction()
 
 
 add_subdirectory(gobject)
-
 
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)

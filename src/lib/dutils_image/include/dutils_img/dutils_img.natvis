@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="img::dim">
+        <DisplayString>({cx}x{cy})</DisplayString>
+    </Type>
+    <Type Name="img::img_type">
+        <DisplayString Condition="(type == 876758866)">BGRA32 ({dim.cx}, {dim.cy})  ({buffer_length} Bytes)</DisplayString>
+        <DisplayString Condition="(type == 859981650)">BGR24 ({dim.cx}, {dim.cy})  ({buffer_length} Bytes)</DisplayString>
+        <DisplayString>{(img::fourcc)type} ({dim.cx}x{dim.cy})  ({buffer_length} Bytes)</DisplayString>
+        <Expand>
+            <Item Name="[fourcc]">(img::fourcc)type</Item>
+            <Item Name="[dim]">dim</Item>
+            <Item Name="[length]">buffer_length</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="img::img_plane">
+        <DisplayString Condition="(plane_ptr == 0)">Empty plane</DisplayString>
+        <DisplayString>{plane_ptr}, {pitch}</DisplayString>
+        <Expand>
+            <Item Name="[ptr]">(uint8_t*)plane_ptr</Item>
+            <Item Name="[pitch in Bytes]">pitch</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="img::img_descriptor">
+        <DisplayString Condition="(type == 876758866)">BGRA32 ({dim.cx}, {dim.cy}) ({data_length} Bytes)</DisplayString>
+        <DisplayString Condition="(type == 859981650)">BGR24 ({dim.cx}, {dim.cy}) ({data_length} Bytes)</DisplayString>
+        <DisplayString>{(img::fourcc)type} ({dim.cx}x{dim.cy})  ({data_length} Bytes)</DisplayString>
+        <Expand>
+            <Item Name="[fourcc]">(img::fourcc)type</Item>
+            <Item Name="[dim]">dim</Item>
+            <Item Name="[data_length]">data_length</Item>
+            <Item Name="[data_ptr]">(uint8_t*)data_.planes[0].plane_ptr</Item>
+            <Item Name="[bytes_per_line]">data_.planes[0].pitch</Item>
+            <ArrayItems Condition="data_.planes[3].plane_ptr != 0">
+                <Rank>1</Rank>
+                <Size>4</Size>
+                <ValuePointer>data_.planes</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="data_.planes[3].plane_ptr == 0 &amp;&amp; data_.planes[2].plane_ptr != 0">
+                <Rank>1</Rank>
+                <Size>3</Size>
+                <ValuePointer>data_.planes</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="data_.planes[2].plane_ptr == 0 &amp;&amp; data_.planes[1].plane_ptr != 0">
+                <Rank>1</Rank>
+                <Size>2</Size>
+                <ValuePointer>data_.planes</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+</AutoVisualizer>

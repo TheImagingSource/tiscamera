@@ -13,6 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+find_package(GStreamer REQUIRED QUIET)
+find_package(GLIB2     REQUIRED QUIET)
+find_package(GObject   REQUIRED QUIET)
+find_package(GObjectIntrospection REQUIRED QUIET)
+
+add_subdirectory( tcamconvert )
+
 set(PLUGINS
   gsttcamsrc
   gsttcamwhitebalance
@@ -21,10 +29,6 @@ set(PLUGINS
   gsttcambin
   )
 
-find_package(GStreamer REQUIRED QUIET)
-find_package(GLIB2     REQUIRED QUIET)
-find_package(GObject   REQUIRED QUIET)
-find_package(GObjectIntrospection REQUIRED QUIET)
 
 add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
 target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
