@@ -5,7 +5,7 @@ add_library( dutils_img_filter_sse41 STATIC
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc16_ssse3_v0.cpp"
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc8_ssse3_v0.cpp"
 
-#	"transform/fcc8_fcc16/transform_fcc8_fcc16_sse4_v0.cpp"
+	"transform/fcc8_fcc16/transform_fcc8_fcc16_sse4_v0.cpp"
 
 #	"filter/whitebalance/wb_apply.h"
 #	"filter/whitebalance/wb_apply_sse41.cpp"

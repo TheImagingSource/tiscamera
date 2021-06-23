@@ -177,3 +177,15 @@ img::fourcc    img_lib::gst::gst_caps_string_to_fourcc( std::string_view format_
     }
     return img::fourcc::FCC_NULL;
 }
+
+img_lib::gst::gst_caps_descr img_lib::gst::fourcc_to_gst_caps_descr(img::fourcc fourcc)
+{
+    for (const auto& info : tcam_gst_caps_info)
+    {
+        if (fourcc == info.fourcc)
+        {
+            return { info.gst_format_type, info.gst_format_string };
+        }
+    }
+    return { nullptr, nullptr };
+}

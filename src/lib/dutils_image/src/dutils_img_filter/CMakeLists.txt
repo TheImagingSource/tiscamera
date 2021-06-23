@@ -4,9 +4,9 @@ add_library( dutils_img_filter_c STATIC
 	"dutils_img_base.h"
 
 	"transform/transform_base.h"
-#	"transform/fcc8_fcc16/transform_fcc8_fcc16.h"
-#	"transform/fcc8_fcc16/transform_fcc8_fcc16_internal.h"
-#	"transform/fcc8_fcc16/transform_fcc8_fcc16_c.cpp"
+	"transform/fcc8_fcc16/transform_fcc8_fcc16.h"
+	"transform/fcc8_fcc16/transform_fcc8_fcc16_internal.h"
+	"transform/fcc8_fcc16/transform_fcc8_fcc16_c.cpp"
 
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc_internal.h"
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc16_internal_loop.h"
