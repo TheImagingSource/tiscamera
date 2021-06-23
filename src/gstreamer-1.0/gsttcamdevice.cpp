@@ -16,6 +16,8 @@
 
 #include "gsttcamdevice.h"
 
+#include <string>
+
 G_DEFINE_TYPE(TcamDevice, tcam_device, GST_TYPE_DEVICE)
 
 
@@ -33,12 +35,6 @@ static void tcam_device_init(TcamDevice* /*self*/)
 
 static void tcam_device_finalize(GObject* object)
 {
-    TcamDevice* self = TCAM_DEVICE(object);
-
-    g_free(self->serial);
-    g_free(self->model);
-    g_free(self->type);
-
     G_OBJECT_CLASS(tcam_device_parent_class)->finalize(object);
 }
 
@@ -58,75 +54,18 @@ static GstElement* tcam_device_create_element(GstDevice* device, const gchar* na
 
     ret = gst_element_factory_create(self->factory, name);
 
-    gst_util_set_object_arg(G_OBJECT(ret), "serial", self->serial);
+    GstStructure* props = gst_device_get_properties(device);
+
+    std::string serial = gst_structure_get_string(props, "serial");
+    std::string type = gst_structure_get_string(props, "type");
+
+    gst_structure_free(props);
+
+    std::string serial_str = serial + "-" + type;
+
+    gst_util_set_object_arg(G_OBJECT(ret), "serial", serial_str.c_str());
 
     return ret;
-}
-
-
-static void gst_tcam_device_get_property(GObject* object,
-                                         guint prop_id,
-                                         GValue* value,
-                                         GParamSpec* pspec)
-{
-    TcamDevice* self = TCAM_DEVICE(object);
-
-    switch (prop_id)
-    {
-        case PROP_SERIAL:
-        {
-            g_value_set_string(value, self->serial);
-            break;
-        }
-        case PROP_MODEL:
-        {
-            g_value_set_string(value, self->model);
-            break;
-        }
-        case PROP_TYPE:
-        {
-            g_value_set_string(value, self->type);
-            break;
-        }
-        default:
-        {
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-            break;
-        }
-    }
-}
-
-
-static void gst_tcam_device_set_property(GObject* object,
-                                         guint prop_id,
-                                         const GValue* value,
-                                         GParamSpec* pspec)
-{
-    TcamDevice* self = TCAM_DEVICE(object);
-
-    switch (prop_id)
-    {
-        case PROP_SERIAL:
-        {
-            self->serial = g_strdup(g_value_get_string(value));
-            break;
-        }
-        case PROP_MODEL:
-        {
-            self->model = g_strdup(g_value_get_string(value));
-            break;
-        }
-        case PROP_TYPE:
-        {
-            self->type = g_strdup(g_value_get_string(value));
-            break;
-        }
-        default:
-        {
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-            break;
-        }
-    }
 }
 
 
@@ -138,36 +77,6 @@ static void tcam_device_class_init(TcamDeviceClass* klass)
     gobject_class->finalize = tcam_device_finalize;
     gobject_class->dispose = tcam_device_dispose;
 
-    gobject_class->get_property = gst_tcam_device_get_property;
-    gobject_class->set_property = gst_tcam_device_set_property;
-
     gst_device_class->create_element = tcam_device_create_element;
 
-    g_object_class_install_property(
-        gobject_class,
-        PROP_SERIAL,
-        g_param_spec_string("serial",
-                            "serial-type",
-                            "tiscamera unique identifier",
-                            "",
-                            static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
-                                                     | G_PARAM_CONSTRUCT_ONLY)));
-    g_object_class_install_property(
-        gobject_class,
-        PROP_MODEL,
-        g_param_spec_string("model",
-                            "Device Model",
-                            "tiscamera device description",
-                            "",
-                            static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
-                                                     | G_PARAM_CONSTRUCT_ONLY)));
-    g_object_class_install_property(
-        gobject_class,
-        PROP_TYPE,
-        g_param_spec_string("type",
-                            "device backend type",
-                            "tiscamera device type",
-                            "",
-                            static_cast<GParamFlags>(G_PARAM_STATIC_STRINGS | G_PARAM_READWRITE
-                                                     | G_PARAM_CONSTRUCT_ONLY)));
 }
