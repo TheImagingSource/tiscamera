@@ -33,6 +33,8 @@
 
 #include <dutils_img_lib/dutils_gst_interop.h>
 
+#include <algorithm>
+
 
 namespace gst_helper
 {
@@ -154,166 +156,129 @@ static GstCaps*    generate_caps_struct( const std::vector<img::fourcc>& fcc_lis
     return caps;
 }
 
-static std::vector<img::fourcc>   tcamconvert_get_all_input_fccs()
+namespace
 {
-    return
+    using fcc_array = std::array<img::fourcc, 8>;
+
+struct transform_path
+{
+    fcc_array src_fcc;
+    fcc_array dst_fcc;
+};
+
+
+    using namespace img;
+static const constexpr transform_path transform_entries[] =
+{ 
     {
-        img::fourcc::MONO8,
-        img::fourcc::GRBG8,
-        img::fourcc::RGGB8,
-        img::fourcc::GBRG8,
-        img::fourcc::BGGR8,
+        { fourcc::MONO10, fourcc::MONO10_MIPI_PACKED, fourcc::MONO10_SPACKED, fourcc::MONO12, fourcc::MONO12_MIPI_PACKED, fourcc::MONO12_SPACKED, fourcc::MONO12_PACKED },
+        { fourcc::MONO8, fourcc::MONO16 }
+    },
+    {
+        { fourcc::BGGR10, fourcc::BGGR10_SPACKED, fourcc::BGGR10_MIPI_PACKED, fourcc::BGGR12, fourcc::BGGR12_PACKED, fourcc::BGGR12_SPACKED, fourcc::BGGR12_MIPI_PACKED, },
+        { fourcc::BGGR8, fourcc::BGGR16 }
+    },
+    {
+        { fourcc::GBRG10, fourcc::GBRG10_SPACKED, fourcc::GBRG10_MIPI_PACKED, fourcc::GBRG12, fourcc::GBRG12_PACKED, fourcc::GBRG12_SPACKED, fourcc::GBRG12_MIPI_PACKED, },
+        { fourcc::GBRG8, fourcc::GBRG16 }
+    },
+    {
+        { fourcc::RGGB10, fourcc::RGGB10_SPACKED, fourcc::RGGB10_MIPI_PACKED, fourcc::RGGB12, fourcc::RGGB12_PACKED, fourcc::RGGB12_SPACKED, fourcc::RGGB12_MIPI_PACKED, },
+        { fourcc::RGGB8, fourcc::RGGB16 }
+    },
+    {
+        { fourcc::GRBG10, fourcc::GRBG10_SPACKED, fourcc::GRBG10_MIPI_PACKED, fourcc::GRBG12, fourcc::GRBG12_PACKED, fourcc::GRBG12_SPACKED, fourcc::GRBG12_MIPI_PACKED, },
+        { fourcc::GRBG8, fourcc::GRBG16 }
+    }
+};
 
-        img::fourcc::MONO10,
-        img::fourcc::GRBG10,
-        img::fourcc::RGGB10,
-        img::fourcc::GBRG10,
-        img::fourcc::BGGR10,
 
-        img::fourcc::MONO10_SPACKED,
-        img::fourcc::GRBG10_SPACKED,
-        img::fourcc::RGGB10_SPACKED,
-        img::fourcc::GBRG10_SPACKED,
-        img::fourcc::BGGR10_SPACKED,
-
-        img::fourcc::MONO10_MIPI_PACKED,
-        img::fourcc::GRBG10_MIPI_PACKED,
-        img::fourcc::RGGB10_MIPI_PACKED,
-        img::fourcc::GBRG10_MIPI_PACKED,
-        img::fourcc::BGGR10_MIPI_PACKED,
-
-        img::fourcc::MONO12,
-        img::fourcc::GRBG12,
-        img::fourcc::RGGB12,
-        img::fourcc::GBRG12,
-        img::fourcc::BGGR12,
-
-        img::fourcc::MONO12_PACKED,
-        img::fourcc::GRBG12_PACKED,
-        img::fourcc::RGGB12_PACKED,
-        img::fourcc::GBRG12_PACKED,
-        img::fourcc::BGGR12_PACKED,
-
-        img::fourcc::MONO12_SPACKED,
-        img::fourcc::GRBG12_SPACKED,
-        img::fourcc::RGGB12_SPACKED,
-        img::fourcc::GBRG12_SPACKED,
-        img::fourcc::BGGR12_SPACKED,
-
-        img::fourcc::MONO12_MIPI_PACKED,
-        img::fourcc::GRBG12_MIPI_PACKED,
-        img::fourcc::RGGB12_MIPI_PACKED,
-        img::fourcc::GBRG12_MIPI_PACKED,
-        img::fourcc::BGGR12_MIPI_PACKED,
-    };
+void remove_duplicates(std::vector<img::fourcc>& vec)
+{
+    auto f = std::unique(vec.begin(), vec.end());
+    vec.erase(f, vec.end());
 }
 
-static std::vector<img::fourcc>   tcamconvert_get_all_output_fccs()
+void    append( std::vector<img::fourcc>& vec, const fcc_array& arr )
 {
-    return {
-        img::fourcc::GRBG8, img::fourcc::RGGB8, img::fourcc::GBRG8, img::fourcc::BGGR8,
-        img::fourcc::GRBG16, img::fourcc::RGGB16, img::fourcc::GBRG16, img::fourcc::BGGR16,
-        img::fourcc::MONO8, img::fourcc::MONO16
-    };
+    for (auto fcc : arr)
+    {
+        if (fcc == img::fourcc::FCC_NULL)
+        {
+            return;
+        }
+        vec.push_back(fcc);
+    }
+}
+
+}
+
+static std::vector<img::fourcc> tcamconvert_get_all_input_fccs()
+{
+    std::vector<img::fourcc> rval;
+    for (auto e : transform_entries)
+    {
+        append( rval, e.src_fcc );
+    }
+    remove_duplicates(rval);
+    return rval;
+}
+
+
+static std::vector<img::fourcc> tcamconvert_get_all_output_fccs()
+{
+    std::vector<img::fourcc> rval;
+    for (auto e : transform_entries)
+    {
+        append(rval, e.dst_fcc);
+    }
+    remove_duplicates(rval);
+    return rval;
 }
 
 static std::vector<img::fourcc>   tcamconvert_get_supported_input_fccs( img::fourcc dst_fcc )
 {
-    switch( dst_fcc )
+    using namespace img;
+
+    std::vector<img::fourcc> rval;
+    for (auto e : transform_entries)
     {
-    case img::fourcc::BGGR8:  return { img::fourcc::BGGR10_SPACKED, img::fourcc::BGGR10_MIPI_PACKED, img::fourcc::BGGR12_PACKED, img::fourcc::BGGR12_SPACKED, img::fourcc::BGGR12_MIPI_PACKED, };
-    case img::fourcc::GBRG8:  return { img::fourcc::GBRG10_SPACKED, img::fourcc::GBRG10_MIPI_PACKED, img::fourcc::GBRG12_PACKED, img::fourcc::GBRG12_SPACKED, img::fourcc::GBRG12_MIPI_PACKED, };
-    case img::fourcc::RGGB8:  return { img::fourcc::RGGB10_SPACKED, img::fourcc::RGGB10_MIPI_PACKED, img::fourcc::RGGB12_PACKED, img::fourcc::RGGB12_SPACKED, img::fourcc::RGGB12_MIPI_PACKED, };
-    case img::fourcc::GRBG8:  return { img::fourcc::GRBG10_SPACKED, img::fourcc::GRBG10_MIPI_PACKED, img::fourcc::GRBG12_PACKED, img::fourcc::GRBG12_SPACKED, img::fourcc::GRBG12_MIPI_PACKED, };
-
-    case img::fourcc::BGGR16: return { img::fourcc::BGGR10_SPACKED, img::fourcc::BGGR10_MIPI_PACKED, img::fourcc::BGGR12_PACKED, img::fourcc::BGGR12_SPACKED, img::fourcc::BGGR12_MIPI_PACKED, };
-    case img::fourcc::GBRG16: return { img::fourcc::GBRG10_SPACKED, img::fourcc::GBRG10_MIPI_PACKED, img::fourcc::GBRG12_PACKED, img::fourcc::GBRG12_SPACKED, img::fourcc::GBRG12_MIPI_PACKED, };
-    case img::fourcc::RGGB16: return { img::fourcc::RGGB10_SPACKED, img::fourcc::RGGB10_MIPI_PACKED, img::fourcc::RGGB12_PACKED, img::fourcc::RGGB12_SPACKED, img::fourcc::RGGB12_MIPI_PACKED, };
-    case img::fourcc::GRBG16: return { img::fourcc::GRBG10_SPACKED, img::fourcc::GRBG10_MIPI_PACKED, img::fourcc::GRBG12_PACKED, img::fourcc::GRBG12_SPACKED, img::fourcc::GRBG12_MIPI_PACKED, };
-
-    case img::fourcc::MONO8: return { img::fourcc::MONO10_MIPI_PACKED, img::fourcc::MONO12_PACKED, img::fourcc::MONO12_SPACKED, img::fourcc::MONO12_MIPI_PACKED, };
-    case img::fourcc::MONO16: return { img::fourcc::MONO10_MIPI_PACKED, img::fourcc::MONO12_PACKED, img::fourcc::MONO12_SPACKED, img::fourcc::MONO12_MIPI_PACKED, };
-    default:
-        return {};
+        for (auto fcc : e.dst_fcc)
+        {
+            if( fcc == dst_fcc ) {
+                append(rval, e.src_fcc);
+            }
+        }
     }
+
+    remove_duplicates(rval);
+
+    return rval;
 }
 
 static std::vector<img::fourcc>   tcamconvert_get_supported_output_fccs( img::fourcc src_fcc )
 {
-    switch( src_fcc )
+    std::vector<img::fourcc> rval;
+    for (auto e : transform_entries)
     {
-    case img::fourcc::MONO10:
-    case img::fourcc::MONO10_MIPI_PACKED:
-    case img::fourcc::MONO12:
-    case img::fourcc::MONO12_PACKED:
-    case img::fourcc::MONO12_SPACKED:
-    case img::fourcc::MONO12_MIPI_PACKED:
-        return { img::fourcc::MONO8, img::fourcc::MONO16 };
-    default:
-        break;
+        for (auto fcc : e.src_fcc)
+        {
+            if (fcc == src_fcc)
+            {
+                append(rval, e.dst_fcc);
+            }
+        }
     }
 
-    using namespace img::by_transform;
-    auto pattern = img::by_transform::convert_bayer_fcc_to_pattern( src_fcc );
-    switch( pattern )
-    {
-    case by_pattern::BG:    return { img::fourcc::BGGR8, img::fourcc::BGGR16 };
-    case by_pattern::GB:    return { img::fourcc::GBRG8, img::fourcc::GBRG16 };
-    case by_pattern::RG:    return { img::fourcc::RGGB8, img::fourcc::RGGB16 };
-    case by_pattern::GR:    return { img::fourcc::GRBG8, img::fourcc::GRBG16 };
-    default:
-        return {};
-    }
-}
+    remove_duplicates(rval);
 
-static void gst_tcamconvert_class_init (GstTCamConvertClass* klass)
-{
-    GObjectClass* gobject_class = (GObjectClass*) klass;
-    GstElementClass* gstelement_class = (GstElementClass*) klass;
-
-    gobject_class->set_property = gst_tcamconvert_set_property;
-    gobject_class->get_property = gst_tcamconvert_get_property;
-    gobject_class->finalize = gst_tcamconvert_finalize;
-
-
-    gst_element_class_set_static_metadata(gstelement_class,
-                                          "BY10/12/16 -> BY8 or BY16",
-                                          "Filter/Converter/Video",
-                                          "Converts Bayer 10/12/16 to Bayer8 or Bayer16 images",
-                                          "The Imaging Source <support@theimagingsource.com>");
-
-
-    GstCaps* src_caps = generate_caps_struct( tcamconvert_get_all_output_fccs() );
-
-
-    gst_element_class_add_pad_template(gstelement_class,
-                                       gst_pad_template_new("src",
-                                                             GST_PAD_SRC, GST_PAD_ALWAYS,
-                                                             src_caps ));
-
-    
-    GstCaps* sink_caps = generate_caps_struct( tcamconvert_get_all_input_fccs() );
-
-    gst_element_class_add_pad_template(gstelement_class,
-                                       gst_pad_template_new("sink",
-                                                            GST_PAD_SINK, GST_PAD_ALWAYS,
-                                                            sink_caps));
-
-    GST_BASE_TRANSFORM_CLASS(klass)->transform_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_size);
-    GST_BASE_TRANSFORM_CLASS(klass)->transform_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_caps);
-    GST_BASE_TRANSFORM_CLASS(klass)->get_unit_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_get_unit_size);
-    GST_BASE_TRANSFORM_CLASS(klass)->set_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_set_caps);
-    GST_BASE_TRANSFORM_CLASS(klass)->transform = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform);
-
-    GST_DEBUG_CATEGORY_INIT(gst_tcamconvert_debug_category,
-                            "tcamconvert", 0,
-                            "tcamconvert element");
+    return rval;
 }
 
 static void gst_tcamconvert_init( GstTCamConvert* self )
 {
-    //self->src_type = {};
-    //self->dst_type = {};
+    self->src_type = {};
+    self->dst_type = {};
 
     gst_base_transform_set_in_place( GST_BASE_TRANSFORM( self ), FALSE );
 }
@@ -346,8 +311,6 @@ static void gst_tcamconvert_get_property (GObject* object __attribute__((unused)
     }
 }
 
-
-
 static img::img_type caps_to_img_type( const GstCaps* caps )
 {
     GstStructure* structure = gst_caps_get_structure( caps, 0 );
@@ -371,12 +334,11 @@ static gboolean gst_tcamconvert_set_caps( GstBaseTransform* base, GstCaps* incap
     }
 
     auto src = caps_to_img_type(incaps);
-    auto dst = caps_to_img_type(outcaps);
-
     if (src.type == 0)
     {
         return FALSE;
     }
+    auto dst = caps_to_img_type(outcaps);
     if (dst.type == 0)
     {
         return FALSE;
@@ -499,7 +461,6 @@ static GstCaps* gst_tcamconvert_transform_caps( GstBaseTransform* /*base*/, GstP
     };
 
     GstCaps* res_caps = transform_caps( caps, direction );
-
     if( filter )
     {
         GstCaps* tmp_caps = res_caps;
@@ -515,7 +476,6 @@ static GstCaps* gst_tcamconvert_transform_caps( GstBaseTransform* /*base*/, GstP
 
     return res_caps;
 }
-
 
 static gboolean gst_tcamconvert_get_unit_size( GstBaseTransform* trans, GstCaps* caps, gsize* size )
 {
@@ -560,7 +520,6 @@ static int         get_mapped_stride( GstBuffer* buffer_ ) noexcept
     }
     return 0;
 }
-
 
 static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
                                                  GstBuffer* inbuf,
@@ -626,6 +585,65 @@ static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
     gst_buffer_unmap(inbuf, &map_in);
 
     return GST_FLOW_OK;
+}
+
+static GstFlowReturn gst_tcamconvert_transform_ip(GstBaseTransform* base, GstBuffer* inbuf)
+{
+    //auto self = GST_TCAMCONVERT(base);
+    //GstMapInfo map_in;
+    //if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READ))
+    //{
+    //    GST_ERROR("Input buffer could not be mapped");
+    //    return GST_FLOW_OK;
+    //}
+    //gst_buffer_unmap(inbuf, &map_in);
+
+    printf( "blub\n" );
+
+    return GST_FLOW_OK;
+}
+
+
+static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
+{
+    GObjectClass* gobject_class = (GObjectClass*)klass;
+    GstElementClass* gstelement_class = (GstElementClass*)klass;
+    GstBaseTransformClass* gst_base_transform_class = GST_BASE_TRANSFORM_CLASS(klass);
+
+    gobject_class->set_property = gst_tcamconvert_set_property;
+    gobject_class->get_property = gst_tcamconvert_get_property;
+    gobject_class->finalize = gst_tcamconvert_finalize;
+
+
+    gst_element_class_set_static_metadata(
+        gstelement_class,
+        "The Imaging Source TCamConvert gstreamer element",
+        "Filter/Converter/Video",
+        "Converts Mono/Bayer-10/12/16 bit formats to Mono/Bayer-8/16 bit images",
+        "The Imaging Source <support@theimagingsource.com>");
+
+
+    GstCaps* src_caps = generate_caps_struct(tcamconvert_get_all_output_fccs());
+
+
+    gst_element_class_add_pad_template(
+        gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps));
+
+
+    GstCaps* sink_caps = generate_caps_struct(tcamconvert_get_all_input_fccs());
+
+    gst_element_class_add_pad_template(
+        gstelement_class, gst_pad_template_new("sink", GST_PAD_SINK, GST_PAD_ALWAYS, sink_caps));
+
+    gst_base_transform_class->transform_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_size);
+    gst_base_transform_class->transform_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_caps);
+    gst_base_transform_class->get_unit_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_get_unit_size);
+    gst_base_transform_class->set_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_set_caps);
+    gst_base_transform_class->transform = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform);
+    gst_base_transform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_ip);
+
+    GST_DEBUG_CATEGORY_INIT(
+        gst_tcamconvert_debug_category, "tcamconvert", 0, "tcamconvert element");
 }
 
 
