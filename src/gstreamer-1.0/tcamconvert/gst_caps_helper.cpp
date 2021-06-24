@@ -41,13 +41,12 @@ img::fourcc gst_helper::get_gst_struct_fcc( const GstStructure* structure )
     return img_lib::gst::gst_caps_string_to_fourcc( gst_structure_get_name( structure ), format == nullptr ? "" : format );
 }
 
-std::optional<img::img_type> gst_helper::get_gst_struct_image_type( const GstStructure* structure )
+img::img_type       gst_helper::get_gst_struct_image_type( const GstStructure* structure )
 {
     auto dim_opt = get_gst_struct_image_dim( structure );
     if( !dim_opt ) {
         return {};
     }
-
     img::fourcc fcc = get_gst_struct_fcc( structure );
     if( fcc == img::fourcc::FCC_NULL ) {
         return {};

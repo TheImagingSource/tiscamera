@@ -7,10 +7,10 @@
 
 namespace gst_helper
 {
-    std::optional<img::dim> get_gst_struct_image_dim( const GstStructure* structure );
+    std::optional<img::dim>         get_gst_struct_image_dim( const GstStructure* structure );
     img::fourcc                     get_gst_struct_fcc( const GstStructure* structure );
 
-    std::optional<img::img_type>    get_gst_struct_image_type( const GstStructure* structure );
+    img::img_type                   get_gst_struct_image_type( const GstStructure* structure );
     std::optional<double>           get_gst_struct_framerate( const GstStructure* structure );
 
     inline void    set_gst_struct_framerate( GstStructure* structure, double framerate ) noexcept

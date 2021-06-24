@@ -39,8 +39,7 @@ typedef struct GstTCamConvert
 {
     GstBaseTransform base;
 
-    img::img_type   src_type;
-    img::img_type   dst_type;
+    struct GstTCamConvert_context* context_;
 
 } GstTCamConvert;
 

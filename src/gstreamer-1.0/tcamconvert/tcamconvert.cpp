@@ -29,7 +29,6 @@
 
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
-//#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
 
 #include <dutils_img/dutils_cpu_features.h>
 #include <dutils_img/fcc_to_string.h>
@@ -37,6 +36,14 @@
 #include <dutils_img_lib/dutils_gst_interop.h>
 
 #include <algorithm>
+
+struct GstTCamConvert_context
+{
+    img::img_type src_type;
+    img::img_type dst_type;
+
+    img_filter::transform_function_type transform_func_ = nullptr;
+};
 
 
 namespace gst_helper
@@ -80,16 +87,15 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcamconvert_debug_category);
 #define gst_tcamconvert_parent_class parent_class
 G_DEFINE_TYPE(GstTCamConvert, gst_tcamconvert, GST_TYPE_BASE_TRANSFORM)
 
+#include <map>
+
 static GstCaps*    generate_caps_struct( const std::vector<img::fourcc>& fcc_list )
 {
     GstCaps* caps = gst_caps_new_empty();   // this is returned and the caller must take ownership
 
+    std::map<std::string,std::vector<const char*>>   simple_map;
 
-    GValue format_list = {};
-    g_value_init( &format_list, GST_TYPE_LIST );
-    //gst_value_array_init( &format_list, 20 );
-
-    for (const auto fcc : fcc_list)
+    for( const auto fcc : fcc_list )
     {
         auto [prefix,format] = img_lib::gst::fourcc_to_gst_caps_descr(fcc);
         if ( !prefix )
@@ -98,60 +104,40 @@ static GstCaps*    generate_caps_struct( const std::vector<img::fourcc>& fcc_lis
             continue;
         }
 
-        GValue tmp = {};
-        g_value_init(&tmp, G_TYPE_STRING);
-        g_value_set_string(&tmp, format);
-        gst_value_list_append_and_take_value(&format_list, &tmp);
+        simple_map[prefix].push_back( format );
     }
 
-    GstStructure* str = gst_structure_new("video/x-bayer", nullptr, nullptr );
-    gst_structure_set_value( str, "format", &format_list );
-
-    g_value_unset( &format_list );
-
-    gst_caps_append_structure( caps, str );
-
-    return caps;
-
-#if 0
-
-    for( const auto fcc : fcc_list )
+    for( auto&& [struct_type, format_string_list] : simple_map )
     {
-        std::string caps_string = img_lib::gst::fourcc_to_gst_caps_string( fcc );
-        if( caps_string.empty() )
+        GValue format_list = {};
+        g_value_init(&format_list, GST_TYPE_LIST);
+        for( auto&& format : format_string_list )
         {
-            //GST_WARN( "Format has empty caps string. Ignoring %s", img::fcc_to_string( fcc ).c_str() );
-            continue;
+            GValue tmp = {};
+            g_value_init( &tmp, G_TYPE_STRING );
+            g_value_set_string( &tmp, format );
+            gst_value_list_append_and_take_value( &format_list, &tmp );
         }
 
-        GstStructure* structure = gst_structure_from_string( caps_string.c_str(), NULL );
+        GstStructure* structure = gst_structure_new_empty( struct_type.c_str() );
+        gst_structure_take_value(structure, "format", &format_list);
 
-        int min_cx = 1;
-        // This does not seem to work, so we are currently skipping this
-        //if( img::get_bits_per_pixel( fcc ) == 10 )
-        //{
-        //    min_cx = 4;
-        //}
-        //else if( img::get_bits_per_pixel( fcc ) == 12 )
-        //{
-        //    min_cx = 2;
-        //}
+        GValue gvalue_width = G_VALUE_INIT;
+        g_value_init( &gvalue_width, GST_TYPE_INT_RANGE );
+        gst_value_set_int_range_step( &gvalue_width, 1, std::numeric_limits<gint>::max(), 1 );
 
-        //GValue gvalue_width = G_VALUE_INIT;
-        //g_value_init( &gvalue_width, GST_TYPE_INT_RANGE );
-        //gst_value_set_int_range_step( &gvalue_width, min_cx, std::numeric_limits<gint>::max(), min_cx );
+        GValue gvalue_height = G_VALUE_INIT;
+        g_value_init( &gvalue_height, GST_TYPE_INT_RANGE );
+        gst_value_set_int_range_step( &gvalue_height, 1, std::numeric_limits<gint>::max(), 1 );
 
-        //GValue gvalue_height = G_VALUE_INIT;
-        //g_value_init( &gvalue_height, GST_TYPE_INT_RANGE );
-        //gst_value_set_int_range_step( &gvalue_height, 1, std::numeric_limits<gint>::max(), 1 );
-
-        //gst_structure_take_value( structure, "width", &gvalue_width );          // takes ownership of gvalue_width
-        //gst_structure_take_value( structure, "height", &gvalue_height );        // takes ownership of gvalue_height
+        gst_structure_take_value( structure, "width", &gvalue_width );
+        gst_structure_take_value( structure, "height", &gvalue_height );
         //gst_structure_take_value( structure, "framerate", &gvalue_fps_range );  // takes ownership of gvalue_fps_range
-        gst_caps_append_structure( caps, structure );                           // takes ownership of structure
+
+        gst_caps_append_structure(caps, structure);
     }
+
     return caps;
-#endif
 }
 
 namespace
@@ -206,13 +192,6 @@ static const constexpr transform_path transform_entries[] =
         { fourcc::GRBG8, fourcc::GRBG16, fourcc::GRBG10, fourcc::GRBG10_SPACKED, fourcc::GRBG10_MIPI_PACKED, fourcc::GRBG12, fourcc::GRBG12_PACKED, fourcc::GRBG12_SPACKED, fourcc::GRBG12_MIPI_PACKED, },
         { fourcc::GRBG8, fourcc::GRBG16 }
     },
-    //{ { fourcc::GRBG10 }, { fourcc::GRBG10 } },
-    //{ { fourcc::GRBG10_SPACKED }, { fourcc::GRBG10_SPACKED } },
-    //{ { fourcc::GRBG10_MIPI_PACKED }, { fourcc::GRBG10_MIPI_PACKED } },
-    //{ { fourcc::GRBG12 }, { fourcc::GRBG12 } },
-    //{ { fourcc::GRBG12_PACKED }, { fourcc::GRBG12_PACKED } },
-    //{ { fourcc::GRBG12_SPACKED }, { fourcc::GRBG12_SPACKED } },
-    //{ { fourcc::GRBG12_MIPI_PACKED }, { fourcc::GRBG12_MIPI_PACKED } },
 };
 
 
@@ -265,7 +244,6 @@ static std::vector<img::fourcc>   tcamconvert_get_supported_input_fccs( img::fou
             append(rval, e.src_fcc);
         }
     }
-
     remove_duplicates(rval);
 
     return rval;
@@ -281,18 +259,9 @@ static std::vector<img::fourcc>   tcamconvert_get_supported_output_fccs( img::fo
             append(rval, e.dst_fcc);
         }
     }
-
     remove_duplicates(rval);
 
     return rval;
-}
-
-static void gst_tcamconvert_init( GstTCamConvert* self )
-{
-    self->src_type = {};
-    self->dst_type = {};
-
-    gst_base_transform_set_in_place( GST_BASE_TRANSFORM( self ), FALSE );
 }
 
 /* No properties are implemented, so only a warning is produced */
@@ -327,16 +296,44 @@ static img::img_type caps_to_img_type( const GstCaps* caps )
 {
     GstStructure* structure = gst_caps_get_structure( caps, 0 );
 
-    auto dim_opt = gst_helper::get_gst_struct_image_dim( structure );
-    if( !dim_opt ) {
-        return {};
-    }
-    const auto fcc = gst_helper::get_gst_struct_fcc( structure );
-    if( fcc == img::fourcc::FCC_NULL ) {
-        return {};
-    }
-    return img::make_img_type( fcc, dim_opt.value() );
+    return gst_helper::get_gst_struct_image_type( structure );
 }
+
+
+static auto find_func(img::img_type dst_type, img::img_type src_type)
+    -> img_filter::transform_function_type
+{
+    using func_type =
+        img_filter::transform_function_type (*)(const img::img_type&, const img::img_type&);
+
+    static func_type func_list[] = {
+#if defined DUTILS_ARCH_ARM
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_neon_v0,
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_neon_v0,
+        img_filter::transform::get_transform_fcc8_to_fcc16_neon,
+        img_filter::transform::get_transform_fcc16_to_fcc8_neon,
+#else
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_ssse3,
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_ssse3,
+        img_filter::transform::get_transform_fcc8_to_fcc16_sse41,
+        img_filter::transform::get_transform_fcc16_to_fcc8_sse41,
+#endif
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_c,
+        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_c,
+        img_filter::transform::get_transform_fcc8_to_fcc16_c,
+        img_filter::transform::get_transform_fcc16_to_fcc8_c,
+    };
+
+    for (auto func : func_list)
+    {
+        if (auto res = func(dst_type, src_type); res)
+        {
+            return res;
+        }
+    }
+    return nullptr;
+}
+
 
 static gboolean gst_tcamconvert_set_caps( GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps )
 {
@@ -346,26 +343,23 @@ static gboolean gst_tcamconvert_set_caps( GstBaseTransform* base, GstCaps* incap
     }
 
     auto src = caps_to_img_type(incaps);
-    if (src.type == 0)
+    if (src.empty())
     {
         return FALSE;
     }
     auto dst = caps_to_img_type(outcaps);
-    if (dst.type == 0)
+    if (dst.empty())
     {
         return FALSE;
     }
 
-    self->dst_type = dst;
-    self->src_type = src;
+    self->context_->dst_type = dst;
+    self->context_->src_type = src;
+    self->context_->transform_func_ = find_func( dst, src );
 
     return TRUE;
 }
 
-static void gst_tcamconvert_finalize( GObject* object )
-{
-    G_OBJECT_CLASS( gst_tcamconvert_parent_class )->finalize( object );
-}
 
 static void create_fmt( GstCaps* res_caps, const GstStructure* structure, const std::string& fmt, GstPadDirection direction )
 {
@@ -533,36 +527,6 @@ static int         get_mapped_stride( GstBuffer* buffer_ ) noexcept
     return 0;
 }
 
-static auto find_func( img::img_type dst_type, img::img_type src_type ) -> img_filter::transform_function_type
-{
-    using func_type = img_filter::transform_function_type (*)( const img::img_type&, const img::img_type& );
-
-    static func_type func_list[] = {
-#if defined DUTILS_ARCH_ARM
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_neon_v0,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_neon_v0,
-        img_filter::transform::get_transform_fcc8_to_fcc16_neon,
-        img_filter::transform::get_transform_fcc16_to_fcc8_neon,
-#else
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_ssse3,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_ssse3,
-        img_filter::transform::get_transform_fcc8_to_fcc16_sse41,
-        img_filter::transform::get_transform_fcc16_to_fcc8_sse41,
-#endif
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_c,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_c,
-        img_filter::transform::get_transform_fcc8_to_fcc16_c,
-        img_filter::transform::get_transform_fcc16_to_fcc8_c,
-    };
-
-    for( auto func : func_list ) {
-        if( auto res = func( dst_type, src_type ); res ) {
-            return res;
-        }
-    }
-    return nullptr;
-}
-
 static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
                                                  GstBuffer* inbuf,
                                                  GstBuffer* outbuf)
@@ -587,14 +551,14 @@ static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
 
     img::img_descriptor src = {};
     if( int gst_meta_stride = get_mapped_stride( inbuf ); gst_meta_stride ) {
-        src = img::make_img_desc_raw( self->src_type, img::img_plane{ map_in.data, gst_meta_stride } );
+        src = img::make_img_desc_raw( self->context_->src_type, img::img_plane{ map_in.data, gst_meta_stride } );
     } else {
-        src = img::make_img_desc_from_linear_memory( self->src_type, map_in.data );
+        src = img::make_img_desc_from_linear_memory( self->context_->src_type, map_in.data );
     }
-    auto dst = img::make_img_desc_from_linear_memory( self->dst_type, map_out.data );
+    auto dst = img::make_img_desc_from_linear_memory( self->context_->dst_type, map_out.data );
 
 
-    auto func = find_func( self->dst_type, self->src_type );
+    auto func = self->context_->transform_func_;
     if( func == nullptr )
     {
         GST_ERROR_OBJECT(  self, "Failed to find conversion from %s to %s", img::fcc_to_string( src.type ).c_str(), img::fcc_to_string( dst.type ).c_str() );
@@ -627,6 +591,18 @@ static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransf
     return GST_FLOW_OK;
 }
 
+static void gst_tcamconvert_init(GstTCamConvert* self)
+{
+    self->context_ = new GstTCamConvert_context;
+
+    gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), FALSE);
+}
+
+static void gst_tcamconvert_finalize(GObject* object)
+{
+    delete GST_TCAMCONVERT( object )->context_;
+    G_OBJECT_CLASS(gst_tcamconvert_parent_class)->finalize(object);
+}
 
 static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
 {
