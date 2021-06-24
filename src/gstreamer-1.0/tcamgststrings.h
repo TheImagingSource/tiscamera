@@ -17,10 +17,8 @@
 #ifndef TCAM_GST_STRINGS_H
 #define TCAM_GST_STRINGS_H
 
-#include "base_types.h"
-
 #include <cstring>
-#include <stdint.h>
+#include <cstdint>
 
 
 const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <dutils_img/image_fourcc_enum.h>
 #include "tcamgststrings.h"
 
 typedef struct
