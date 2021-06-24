@@ -92,19 +92,18 @@ public:
     bool is_lost() const;
 
 private:
-    std::atomic<bool> is_stream_on { false };
-    std::atomic<bool> is_lost_ { false };
+    std::atomic<bool> m_is_stream_on { false };
+    std::atomic<bool> m_is_lost { false };
 
-    std::thread work_thread;
-    std::thread notification_thread;
+    std::thread m_work_thread;
+    std::thread m_notification_thread;
 
-    int fd = -1;
+    int m_fd = -1;
 
-    VideoFormat active_video_format;
+    VideoFormat m_active_video_format;
 
-    std::vector<VideoFormatDescription> available_videoformats;
+    std::vector<VideoFormatDescription> m_available_videoformats;
     bool emulate_bayer = false;
-    uint32_t emulated_fourcc = 0;
 
     // v4l2 uses fractions
     // to assure correct handling we store the values received by v4l2
@@ -118,12 +117,12 @@ private:
 
     std::vector<framerate_conv> framerate_conversions;
 
-    std::shared_ptr<V4L2FormatHandler> format_handler;
+    std::shared_ptr<V4L2FormatHandler> m_format_handler;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
 
-    std::thread monitor_v4l2_thread;
-    std::atomic<bool> stop_monitor_v4l2_thread { false };
+    std::thread m_monitor_v4l2_thread;
+    std::atomic<bool> m_stop_monitor_v4l2_thread { false };
     int udev_monitor_pipe[2] = { 0, 0 };
 
     void monitor_v4l2_thread_func();
@@ -155,7 +154,7 @@ private:
 
     // streaming related
 
-    struct tcam_stream_statistics statistics = {};
+    struct tcam_stream_statistics m_statistics = {};
 
     struct buffer_info
     {
@@ -163,12 +162,12 @@ private:
         bool is_queued;
     };
 
-    std::atomic<int> stream_timeout_sec_ { 10 };
+    std::atomic<int> m_stream_timeout_sec { 10 };
 
     // std::vector<std::shared_ptr<ImageBuffer>> buffers;
-    std::vector<buffer_info> buffers;
+    std::vector<buffer_info> m_buffers;
 
-    std::weak_ptr<SinkInterface> listener;
+    std::weak_ptr<SinkInterface> m_listener;
 
     void stream();
 

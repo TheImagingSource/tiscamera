@@ -56,7 +56,7 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 {
     device = device_desc;
 
-    if ((fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
+    if ((m_fd = open(device.get_info().identifier, O_RDWR /* required */ | O_NONBLOCK, 0)) == -1)
     {
         SPDLOG_ERROR("Unable to open device \'{}\'. Reported error: {}({})",
                      device.get_info().identifier,
@@ -71,13 +71,13 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
         SPDLOG_ERROR("Unable to create udev monitor pipe");
         throw std::runtime_error("Failed opening device.");
     }
-    monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
+    m_monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
-    format_handler = std::make_shared<V4L2FormatHandler>(this);
+    m_format_handler = std::make_shared<V4L2FormatHandler>(this);
 
     determine_active_video_format();
 
-    p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(fd);
+    p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(m_fd);
     //this->index_all_controls(property_handler);
     this->index_controls();
     this->index_formats();
@@ -86,14 +86,14 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
 V4l2Device::~V4l2Device()
 {
-    if (is_stream_on)
+    if (m_is_stream_on)
     {
         stop_stream();
     }
 
-    this->is_stream_on = false;
+    this->m_is_stream_on = false;
 
-    this->stop_monitor_v4l2_thread = true;
+    this->m_stop_monitor_v4l2_thread = true;
 
     // signal the udev monitor to exit it's poll/select
     ssize_t write_ret = write(udev_monitor_pipe[1], "q", 1);
@@ -107,25 +107,25 @@ V4l2Device::~V4l2Device()
     // close write pipe fd
     close(udev_monitor_pipe[1]);
 
-    if (monitor_v4l2_thread.joinable())
+    if (m_monitor_v4l2_thread.joinable())
     {
-        monitor_v4l2_thread.join();
+        m_monitor_v4l2_thread.join();
     }
 
-    if (this->fd != -1)
+    if (this->m_fd != -1)
     {
-        close(fd);
-        fd = -1;
+        close(m_fd);
+        m_fd = -1;
     }
 
-    if (work_thread.joinable())
+    if (m_work_thread.joinable())
     {
-        work_thread.join();
+        m_work_thread.join();
     }
 
-    if (notification_thread.joinable()) // join this just in case stop_stream was not called
+    if (m_notification_thread.joinable()) // join this just in case stop_stream was not called
     {
-        notification_thread.join();
+        m_notification_thread.join();
     }
 }
 
@@ -138,7 +138,7 @@ DeviceInfo V4l2Device::get_device_description() const
 
 bool V4l2Device::set_video_format(const VideoFormat& new_format)
 {
-    if (is_stream_on == true)
+    if (m_is_stream_on == true)
     {
         SPDLOG_ERROR("Device is streaming.");
         return false;
@@ -155,7 +155,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_USERPTR;
 
-    if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req))
+    if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
     {
         SPDLOG_ERROR("Error while calling VIDIOC_REQBUFS to empty buffer queue. {}",
                      strerror(errno));
@@ -166,8 +166,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     // use greyscale for camera interaction
     if (emulate_bayer)
     {
-        emulated_fourcc = fourcc;
-        fourcc = FOURCC_Y800;
+        fourcc = V4L2_PIX_FMT_GREY;
     }
 
     if (fourcc == FOURCC_Y800)
@@ -187,7 +186,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     fmt.fmt.pix.pixelformat = fourcc;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
-    int ret = tcam_xioctl(this->fd, VIDIOC_S_FMT, &fmt);
+    int ret = tcam_xioctl(this->m_fd, VIDIOC_S_FMT, &fmt);
 
     if (ret < 0)
     {
@@ -206,7 +205,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     /* validation */
 
     determine_active_video_format();
-    SPDLOG_DEBUG("Active format is: '{}'", active_video_format.to_string().c_str());
+    SPDLOG_DEBUG("Active format is: '{}'", m_active_video_format.to_string().c_str());
 
     return true;
 }
@@ -220,20 +219,20 @@ bool V4l2Device::validate_video_format(const VideoFormat& format __attribute__((
 
 VideoFormat V4l2Device::get_active_video_format() const
 {
-    return active_video_format;
+    return m_active_video_format;
 }
 
 
 std::vector<VideoFormatDescription> V4l2Device::get_available_video_formats()
 {
-    SPDLOG_DEBUG("Returning {} formats.", available_videoformats.size());
-    return available_videoformats;
+    SPDLOG_DEBUG("Returning {} formats.", m_available_videoformats.size());
+    return m_available_videoformats;
 }
 
 
 bool V4l2Device::set_framerate(double framerate)
 {
-    if (is_stream_on == true)
+    if (m_is_stream_on == true)
     {
         SPDLOG_ERROR("Device is streaming.");
         return false;
@@ -284,7 +283,7 @@ bool V4l2Device::set_framerate(double framerate)
         frmival.width = fmt.get_size().width;
         frmival.height = fmt.get_size().height;
 
-        for (frmival.index = 0; tcam_xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
+        for (frmival.index = 0; tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
              frmival.index++)
         {
             SPDLOG_DEBUG("F: {} {}x{} @ {}/{}",
@@ -324,7 +323,7 @@ bool V4l2Device::set_framerate(double framerate)
                      parm.parm.capture.timeperframe.numerator,
                      fi_index);
 
-        ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
+        ret = tcam_xioctl(m_fd, VIDIOC_S_PARM, &parm);
         if (ret < 0)
         {
             SPDLOG_ERROR("Failed to set frame rate");
@@ -332,7 +331,7 @@ bool V4l2Device::set_framerate(double framerate)
         }
 
         errno = 0;
-        ret = dfk73_v4l2_set_framerate_index(this->fd, fi_index);
+        ret = dfk73_v4l2_set_framerate_index(this->m_fd, fi_index);
 
         if (ret != 0)
         {
@@ -349,7 +348,7 @@ bool V4l2Device::set_framerate(double framerate)
                      parm.parm.capture.timeperframe.denominator,
                      parm.parm.capture.timeperframe.numerator);
 
-        int ret = tcam_xioctl(fd, VIDIOC_S_PARM, &parm);
+        int ret = tcam_xioctl(m_fd, VIDIOC_S_PARM, &parm);
 
         if (ret < 0)
         {
@@ -370,7 +369,7 @@ double V4l2Device::get_framerate()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    int ret = tcam_xioctl(fd, VIDIOC_G_PARM, &parm);
+    int ret = tcam_xioctl(m_fd, VIDIOC_G_PARM, &parm);
 
     if (ret < 0)
     {
@@ -389,12 +388,12 @@ double V4l2Device::get_framerate()
 
 bool V4l2Device::set_sink(std::shared_ptr<SinkInterface> sink)
 {
-    if (is_stream_on)
+    if (m_is_stream_on)
     {
         return false;
     }
 
-    this->listener = sink;
+    this->m_listener = sink;
 
     return true;
 }
@@ -402,20 +401,20 @@ bool V4l2Device::set_sink(std::shared_ptr<SinkInterface> sink)
 
 bool V4l2Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
 {
-    if (is_stream_on)
+    if (m_is_stream_on)
     {
         SPDLOG_ERROR("Stream running.");
         return false;
     }
 
-    this->buffers.clear();
-    this->buffers.reserve(b.size());
+    this->m_buffers.clear();
+    this->m_buffers.reserve(b.size());
 
     for (unsigned int i = 0; i < b.size(); ++i)
     {
         buffer_info info = { b.at(i), false };
 
-        this->buffers.push_back(info);
+        this->m_buffers.push_back(info);
     }
 
     return true;
@@ -424,22 +423,22 @@ bool V4l2Device::initialize_buffers(std::vector<std::shared_ptr<ImageBuffer>> b)
 
 bool V4l2Device::release_buffers()
 {
-    if (is_stream_on)
+    if (m_is_stream_on)
     {
         return false;
     }
 
-    buffers.clear();
+    m_buffers.clear();
     return true;
 }
 
 
 void V4l2Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 {
-    for (unsigned int i = 0; i < buffers.size(); ++i)
+    for (unsigned int i = 0; i < m_buffers.size(); ++i)
     {
 
-        auto& b = buffers.at(i);
+        auto& b = m_buffers.at(i);
         if (!b.is_queued && b.buffer == buffer)
         {
             struct v4l2_buffer buf = {};
@@ -451,7 +450,7 @@ void V4l2Device::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
             buf.length = b.buffer->get_buffer_size();
 
             // requeue buffer
-            int ret = tcam_xioctl(fd, VIDIOC_QBUF, &buf);
+            int ret = tcam_xioctl(m_fd, VIDIOC_QBUF, &buf);
             if (ret == -1)
             {
                 SPDLOG_ERROR("Could not requeue buffer");
@@ -473,7 +472,7 @@ void V4l2Device::update_stream_timeout()
 
             if (val)
             {
-                stream_timeout_sec_ = (val.value() / 1000000) + 2;
+                m_stream_timeout_sec = (val.value() / 1000000) + 2;
             }
             else
             {
@@ -482,7 +481,7 @@ void V4l2Device::update_stream_timeout()
             break;
         }
     }
-    SPDLOG_DEBUG("Setting stream timeout to {}", stream_timeout_sec_.load());
+    SPDLOG_DEBUG("Setting stream timeout to {}", m_stream_timeout_sec.load());
 }
 
 
@@ -491,21 +490,21 @@ bool V4l2Device::start_stream()
     init_userptr_buffers();
 
     v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == tcam_xioctl(fd, VIDIOC_STREAMON, &type))
+    if (-1 == tcam_xioctl(m_fd, VIDIOC_STREAMON, &type))
     {
         SPDLOG_ERROR("Unable to set ioctl VIDIOC_STREAMON {}", errno);
         return false;
     }
 
-    statistics = {};
+    m_statistics = {};
 
-    is_stream_on = true;
+    m_is_stream_on = true;
 
     update_stream_timeout();
 
     SPDLOG_INFO("Starting stream in work thread.");
 
-    this->work_thread = std::thread(&V4l2Device::stream, this);
+    this->m_work_thread = std::thread(&V4l2Device::stream, this);
 
     return true;
 }
@@ -516,10 +515,10 @@ bool V4l2Device::stop_stream()
     SPDLOG_DEBUG("Stopping stream");
     int ret = 0;
 
-    if (is_stream_on)
+    if (m_is_stream_on)
     {
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        ret = tcam_xioctl(fd, VIDIOC_STREAMOFF, &type);
+        ret = tcam_xioctl(m_fd, VIDIOC_STREAMOFF, &type);
 
         if (ret < 0)
         {
@@ -527,16 +526,16 @@ bool V4l2Device::stop_stream()
         }
     }
 
-    is_stream_on = false;
+    m_is_stream_on = false;
 
-    if (work_thread.joinable())
+    if (m_work_thread.joinable())
     {
-        work_thread.join();
+        m_work_thread.join();
     }
 
-    if (notification_thread.joinable())
+    if (m_notification_thread.joinable())
     { // wait for possible device lost notification to end
-        notification_thread.join();
+        m_notification_thread.join();
     }
 
     SPDLOG_DEBUG("Stopped stream");
@@ -616,7 +615,7 @@ void V4l2Device::index_formats()
 
     fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    for (fmtdesc.index = 0; !tcam_xioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index++)
+    for (fmtdesc.index = 0; !tcam_xioctl(m_fd, VIDIOC_ENUM_FMT, &fmtdesc); fmtdesc.index++)
     {
         struct tcam_video_format_description desc = {};
 
@@ -630,7 +629,7 @@ void V4l2Device::index_formats()
 
         std::vector<struct framerate_mapping> rf;
 
-        for (frms.index = 0; !tcam_xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
+        for (frms.index = 0; !tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
             {
@@ -665,9 +664,9 @@ void V4l2Device::index_formats()
             desc.fourcc = FOURCC_Y800;
         }
 
-        // VideoFormatDescription format(format_handler, desc, rf);
+        // VideoFormatDescription format(m_format_handler, desc, rf);
         VideoFormatDescription format(nullptr, desc, rf);
-        this->available_videoformats.push_back(format);
+        this->m_available_videoformats.push_back(format);
 
         SPDLOG_DEBUG("Found format: {}", img::fcc_to_string(format.get_fourcc()));
     }
@@ -684,7 +683,7 @@ std::vector<double> V4l2Device::index_framerates(const struct v4l2_frmsizeenum& 
 
     std::vector<double> f;
 
-    for (frmival.index = 0; tcam_xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
+    for (frmival.index = 0; tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0;
          frmival.index++)
     {
         if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE)
@@ -720,7 +719,7 @@ void V4l2Device::determine_active_video_format()
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    int ret = tcam_xioctl(this->fd, VIDIOC_G_FMT, &fmt);
+    int ret = tcam_xioctl(this->m_fd, VIDIOC_G_FMT, &fmt);
 
     if (ret < 0)
     {
@@ -733,7 +732,7 @@ void V4l2Device::determine_active_video_format()
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    ret = tcam_xioctl(fd, VIDIOC_G_PARM, &parm);
+    ret = tcam_xioctl(m_fd, VIDIOC_G_PARM, &parm);
 
     if (ret < 0)
     {
@@ -755,7 +754,7 @@ void V4l2Device::determine_active_video_format()
 
     format.framerate = get_framerate();
 
-    this->active_video_format = VideoFormat(format);
+    this->m_active_video_format = VideoFormat(format);
 }
 
 
@@ -769,7 +768,7 @@ bool V4l2Device::extension_unit_is_loaded()
     struct v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
-    while (tcam_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
+    while (tcam_xioctl(this->m_fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
     {
         if (((qctrl.id >> 12) ^ 0x199e) == 0)
         {
@@ -787,18 +786,18 @@ void V4l2Device::stream()
     // period elapsed for current image
     int waited_seconds = 0;
     // maximum_waiting period
-    // do not compare waited_seconds with stream_timeout_sec_ directly
-    // stream_timeout_sec_ may be set to low values while we are
+    // do not compare waited_seconds with m_stream_timeout_sec directly
+    // m_stream_timeout_sec may be set to low values while we are
     // still waiting for a long exposure image
     // still 'step in between' prevents such errors
-    int waiting_period = stream_timeout_sec_;
+    int waiting_period = m_stream_timeout_sec;
 
-    while (this->is_stream_on)
+    while (this->m_is_stream_on)
     {
         fd_set fds;
 
         FD_ZERO(&fds);
-        FD_SET(fd, &fds);
+        FD_SET(m_fd, &fds);
 
         int select_timeout = 2;
 
@@ -808,7 +807,7 @@ void V4l2Device::stream()
         tv.tv_usec = 0;
 
         /* Wait until device gives go */
-        int ret = select(fd + 1, &fds, NULL, NULL, &tv);
+        int ret = select(m_fd + 1, &fds, NULL, NULL, &tv);
         if (ret == -1)
         {
             if (errno == EINTR)
@@ -825,7 +824,7 @@ void V4l2Device::stream()
 
         // before we recheck any variables,
         // just quit the loop because stop was requested
-        if (!is_stream_on)
+        if (!m_is_stream_on)
         {
             return;
         }
@@ -844,7 +843,7 @@ void V4l2Device::stream()
             else
             {
                 SPDLOG_ERROR("Timeout while waiting for new image buffer.");
-                statistics.frames_dropped++;
+                m_statistics.frames_dropped++;
                 waited_seconds = 0;
                 lost_countdown--;
             }
@@ -860,7 +859,7 @@ void V4l2Device::stream()
             {
                 lost_countdown--;
             }
-            waiting_period = stream_timeout_sec_;
+            waiting_period = m_stream_timeout_sec;
         }
         if (lost_countdown <= 0)
         {
@@ -899,7 +898,7 @@ bool V4l2Device::get_frame()
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_USERPTR;
 
-    int ret = tcam_xioctl(fd, VIDIOC_DQBUF, &buf);
+    int ret = tcam_xioctl(m_fd, VIDIOC_DQBUF, &buf);
 
     if (ret == -1)
     {
@@ -907,7 +906,7 @@ bool V4l2Device::get_frame()
         return false;
     }
 
-    buffers.at(buf.index).is_queued = false;
+    m_buffers.at(buf.index).is_queued = false;
 
     // buf.bytesused
     /* The number of bytes occupied by the data in the buffer. It depends on
@@ -925,37 +924,37 @@ bool V4l2Device::get_frame()
     // filter those messages until we receive one valid image
     static bool already_received_valid_image;
 
-    if (active_video_format.get_fourcc() != FOURCC_MJPG)
+    if (m_active_video_format.get_fourcc() != FOURCC_MJPG)
     {
-        if (buf.bytesused != (this->active_video_format.get_required_buffer_size()))
+        if (buf.bytesused != (this->m_active_video_format.get_required_buffer_size()))
         {
             if (already_received_valid_image)
             {
                 SPDLOG_ERROR("Buffer has wrong size. Got: {} Expected: {} Dropping...",
                              buf.bytesused,
-                             this->active_video_format.get_required_buffer_size());
+                             this->m_active_video_format.get_required_buffer_size());
             }
-            requeue_buffer(buffers.at(buf.index).buffer);
+            requeue_buffer(m_buffers.at(buf.index).buffer);
             return true;
         }
     }
     already_received_valid_image = true;
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
-    statistics.capture_time_ns =
+    m_statistics.capture_time_ns =
         ((long long)buf.timestamp.tv_sec * 1000 * 1000 * 1000) + (buf.timestamp.tv_usec * 1000);
-    statistics.frame_count++;
-    buffers.at(buf.index).buffer->set_statistics(statistics);
+    m_statistics.frame_count++;
+    m_buffers.at(buf.index).buffer->set_statistics(m_statistics);
 
-    auto desc = buffers.at(buf.index).buffer->getImageBuffer();
+    auto desc = m_buffers.at(buf.index).buffer->getImageBuffer();
     desc.length = buf.bytesused;
-    buffers.at(buf.index).buffer->set_image_buffer(desc);
+    m_buffers.at(buf.index).buffer->set_image_buffer(desc);
 
     SPDLOG_TRACE("pushing new buffer");
 
-    if (auto ptr = listener.lock())
+    if (auto ptr = m_listener.lock())
     {
-        ptr->push_image(buffers.at(buf.index).buffer);
+        ptr->push_image(m_buffers.at(buf.index).buffer);
     }
     else
     {
@@ -970,15 +969,15 @@ bool V4l2Device::get_frame()
 void V4l2Device::init_userptr_buffers()
 {
 
-    SPDLOG_DEBUG("Will use {} buffers", buffers.size());
+    SPDLOG_DEBUG("Will use {} buffers", m_buffers.size());
 
     struct v4l2_requestbuffers req = {};
 
-    req.count = buffers.size();
+    req.count = m_buffers.size();
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_USERPTR;
 
-    if (-1 == tcam_xioctl(fd, VIDIOC_REQBUFS, &req))
+    if (-1 == tcam_xioctl(m_fd, VIDIOC_REQBUFS, &req))
     {
         if (EINVAL == errno)
         {
@@ -991,19 +990,19 @@ void V4l2Device::init_userptr_buffers()
         }
     }
 
-    for (unsigned int i = 0; i < buffers.size(); ++i)
+    for (unsigned int i = 0; i < m_buffers.size(); ++i)
     {
         struct v4l2_buffer buf = {};
 
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_USERPTR;
         buf.index = i;
-        buf.m.userptr = (unsigned long)buffers.at(i).buffer->get_data();
-        buf.length = buffers.at(i).buffer->get_buffer_size();
+        buf.m.userptr = (unsigned long)m_buffers.at(i).buffer->get_data();
+        buf.length = m_buffers.at(i).buffer->get_buffer_size();
 
-        SPDLOG_TRACE("Queueing buffer({:x}) with length {}", buffers.at(i).buffer->get_data(), buf.length);
+        SPDLOG_TRACE("Queueing buffer({:x}) with length {}", m_buffers.at(i).buffer->get_data(), buf.length);
 
-        if (-1 == tcam_xioctl(fd, VIDIOC_QBUF, &buf))
+        if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {
             SPDLOG_ERROR("Unable to queue v4l2_buffer 'VIDIOC_QBUF' {}", strerror(errno));
             return;
@@ -1011,7 +1010,7 @@ void V4l2Device::init_userptr_buffers()
         else
         {
             SPDLOG_TRACE("Successfully queued v4l2_buffer");
-            buffers.at(i).is_queued = true;
+            m_buffers.at(i).is_queued = true;
         }
     }
 }
@@ -1020,7 +1019,7 @@ void V4l2Device::init_userptr_buffers()
 tcam_image_size V4l2Device::get_sensor_size() const
 {
     tcam_image_size size = {};
-    for (const auto& f : available_videoformats)
+    for (const auto& f : m_available_videoformats)
     {
         for (const auto& r : f.get_resolutions())
         {
@@ -1061,7 +1060,7 @@ void V4l2Device::monitor_v4l2_thread_func()
     /* This section will run continuously, calling usleep() at
        the end of each pass. This is to demonstrate how to use
        a udev_monitor in a non-blocking way. */
-    while (!stop_monitor_v4l2_thread)
+    while (!m_stop_monitor_v4l2_thread)
     {
         /* Set up the call to select(). In this case, select() will
            only operate on a single file descriptor, the one
