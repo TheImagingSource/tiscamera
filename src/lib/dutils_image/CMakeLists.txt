@@ -13,3 +13,4 @@ add_library( dutils::dutils_img ALIAS dutils_img )
 
 add_subdirectory( src/dutils_img_base )
 add_subdirectory( src/dutils_img_filter )
+add_subdirectory( src/dutils_img_pipe )
