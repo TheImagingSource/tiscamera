@@ -79,7 +79,6 @@ bool PipelineManager::set_status(TCAM_PIPELINE_STATUS s)
         if (create_pipeline())
         {
             start_playing();
-            SPDLOG_INFO("All pipeline elements set to PLAYING.");
         }
         else
         {
@@ -121,8 +120,6 @@ bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
     }
 
     available_input_formats = device->get_available_video_formats();
-
-    SPDLOG_DEBUG("Received {} formats.", available_input_formats.size());
 
     distributeProperties();
 
@@ -202,9 +199,6 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc()
 
     for (const auto& v : available_input_formats)
     {
-        SPDLOG_DEBUG(
-            "Found device fourcc '{}' - {:x}", img::fcc_to_string(v.get_fourcc()), v.get_fourcc());
-
         device_fourcc.push_back(v.get_fourcc());
     }
     return device_fourcc;
@@ -268,10 +262,6 @@ bool PipelineManager::validate_pipeline()
                      in_format.to_string().c_str(),
                      input_format.to_string().c_str());
         return false;
-    }
-    else
-    {
-        SPDLOG_DEBUG("Starting pipeline with format: '{}'", in_format.to_string().c_str());
     }
 
     VideoFormat in;
@@ -584,32 +574,35 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> PipelineManager::get
 
 void PipelineManager::run_pipeline()
 {
-    while (status == TCAM_PIPELINE_PLAYING)
+    while (true)
     {
-        std::unique_lock lock(m_mtx);
+        std::shared_ptr<tcam::ImageBuffer> current_buffer;
 
-    pl_wait_again:
-        while (status == TCAM_PIPELINE_PLAYING && m_entry_queue.empty())
         {
-            m_cv.wait_for(lock, std::chrono::milliseconds(500));
+            std::unique_lock lock(m_mtx);
+
+            while (status == TCAM_PIPELINE_PLAYING && m_entry_queue.empty())
+            {
+                m_cv.wait_for(lock, std::chrono::milliseconds(500));
+            }
+
+            if (status != TCAM_PIPELINE_PLAYING)
+            {
+                SPDLOG_INFO("Pipeline not in playing. Stopping pipeline thread.");
+                return;
+            }
+
+            if (m_entry_queue.empty())
+            {
+                SPDLOG_ERROR("Buffer queue is empty. Returning to waiting position.");
+
+                continue;
+            }
+
+            // SPDLOG_DEBUG("Working on new image");
+            current_buffer = m_entry_queue.front();
+            m_entry_queue.pop(); // remove buffer from queue
         }
-
-        if (status != TCAM_PIPELINE_PLAYING)
-        {
-            SPDLOG_INFO("Pipeline not in playing. Stopping pipeline thread.");
-            return;
-        }
-
-        if (m_entry_queue.empty())
-        {
-            SPDLOG_ERROR("Buffer queue is empty. Returning to waiting position.");
-
-            goto pl_wait_again;
-        }
-
-        // SPDLOG_DEBUG("Working on new image");
-        auto& current_buffer = m_entry_queue.front();
-        m_entry_queue.pop(); // remove buffer from queue
 
         property_filter->apply(current_buffer);
 

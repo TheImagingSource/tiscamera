@@ -101,7 +101,7 @@ private:
     std::vector<VideoFormatDescription> available_input_formats;
     std::vector<VideoFormatDescription> available_output_formats;
 
-    TCAM_PIPELINE_STATUS status;
+    std::atomic<TCAM_PIPELINE_STATUS> status;
 
     std::shared_ptr<ImageSource> source;
     std::shared_ptr<SinkInterface> sink;
