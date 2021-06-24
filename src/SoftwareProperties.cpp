@@ -3,7 +3,7 @@
 #include "SoftwareProperties.h"
 
 #include "SoftwarePropertiesImpl.h"
-#include "algorithms/tcam-algorithm.h"
+//#include "algorithms/tcam-algorithm.h"
 #include "logging.h"
 
 #include <algorithm>

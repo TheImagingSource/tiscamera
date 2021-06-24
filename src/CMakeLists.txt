@@ -65,6 +65,14 @@ set(base
 
 add_library(tcam-base OBJECT ${base})
 
+target_link_libraries( tcam-base 
+PUBLIC
+    dutils::dutils_img
+    spdlog::spdlog
+PRIVATE
+    dutils::dutils_img_auto
+)
+
 target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include")
 target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
@@ -196,8 +204,12 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 #target_link_options(tcam PUBLIC "-Wl,--exclude-libs,ALL")
 
 # target_link_libraries(tcam dl)
-target_link_libraries(tcam PRIVATE spdlog)
-target_link_libraries(tcam PRIVATE tcam-algorithms)
+target_link_libraries(tcam 
+PRIVATE 
+spdlog 
+tcam-algorithms
+dutils::dutils_img
+)
 
 
 # add_dependencies(tcam-base version-header)

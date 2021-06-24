@@ -17,7 +17,6 @@
 #include "roi.h"
 
 #include "RegionOfInterest.h"
-#include "img/image_transform_base.h"
 
 #include <cstdlib>
 #include <math.h>

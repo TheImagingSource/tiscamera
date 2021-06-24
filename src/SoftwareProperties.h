@@ -5,8 +5,8 @@
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
 #include "SoftwarePropertyBackend.h"
-#include "algorithms/auto_alg_params.h"
-#include "algorithms/auto_alg_pass.h"
+//#include "algorithms/auto_alg_params.h"
+#include <dutils_img_pipe/auto_alg_pass.h>
 #include "compiler_defines.h"
 
 #include "VideoFormat.h"

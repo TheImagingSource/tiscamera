@@ -16,9 +16,9 @@
 
 #include "whitebalance.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+
 
 using namespace tcam;
 
@@ -485,8 +485,7 @@ static void wb_image_c(struct tcam::algorithms::whitebalance::wb_settings* setti
     //image.pData = settings->data;
     //image.
 
-
-    settings->para->queue_and_wait(&cb, buffer, buffer, 0);
+    cb.call( buffer, buffer );
 }
 
 
@@ -503,11 +502,6 @@ void tcam::algorithms::whitebalance::whitebalance_buffer(struct wb_settings* set
     if (settings == NULL)
     {
         return;
-    }
-
-    if (settings->para == nullptr)
-    {
-        settings->para = std::make_shared<parallel::parallel_state>();
     }
 
     rgb_tripel rgb = settings->rgb;

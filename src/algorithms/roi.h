@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "base_types.h"
-#include "compiler_defines.h"
+#include "../base_types.h"
+#include "../compiler_defines.h"
 #include "roi_base.h"
 #include "roi_change_behavior.h"
 #include "roi_preset.h"
@@ -30,11 +30,6 @@ VISIBILITY_DEFAULT
 
 namespace tcam::algorithms::roi
 {
-
-#ifndef byte
-typedef unsigned char byte;
-#endif
-
 /**
  * The following are a c wrapper around the RegionOfinterest class
  */

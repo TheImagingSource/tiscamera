@@ -32,6 +32,11 @@ add_library( dutils_img_filter_c STATIC
 #	"transform/mono_to_bgr/transform_mono_to_bgr.h"
 #	"transform/mono_to_bgr/transform_mono_to_bgr_internal.h"
 #	"transform/mono_to_bgr/transform_mono_to_bgr_c.cpp"
+
+	"transform/pwl/transform_pwl_to_bayerfloat_internal.h"
+	"transform/pwl/transform_pwl_to_bayerfloat_internal.cpp"
+	"transform/pwl/transform_pwl_functions.h"
+	"transform/pwl/transform_pwl_to_bayerfloat_c.cpp"
 )
 
 target_link_libraries( dutils_img_filter_c

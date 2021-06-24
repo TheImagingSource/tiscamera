@@ -16,8 +16,7 @@
 
 #include "format.h"
 
-#include "img/fcc_to_string.h"
-#include "img/image_fourcc.h"
+#include <dutils_img/fcc_to_string.h>
 #include "logging.h"
 
 #include <cstring>

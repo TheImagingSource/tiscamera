@@ -22,7 +22,7 @@
  * @{
 */
 
-#include "include/img/image_fourcc.h"
+#include <dutils_img/image_fourcc.h>
 
 #include <cstring>
 #include <stdbool.h>

@@ -18,7 +18,7 @@
 
 #include "dfk73.h"
 #include "format.h"
-#include "img/fcc_to_string.h"
+#include <dutils_img/fcc_to_string.h>
 #include "logging.h"
 #include "utils.h"
 #include "v4l2_property_impl.h"

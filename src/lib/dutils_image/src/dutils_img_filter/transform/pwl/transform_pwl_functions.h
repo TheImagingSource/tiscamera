@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "transform_base.h"
-#include <img/image_transform_data_structs.h>
+#include "../transform_base.h"
+#include <dutils_img/image_transform_data_structs.h>
 
 namespace img_filter
 {
@@ -58,9 +58,9 @@ namespace pwl
     transform_func_type      get_transform_fccfloat_to_fcc8_avx2_v0(img::img_type dst, img::img_type src);
     transform_func_type      get_transform_fccfloat_to_fcc8_neon_v0(img::img_type dst, img::img_type src);
 
-    static float       calc_pwl12_pixel_to_float( const void* /* line_start */, int /* pixel_offset */) noexcept { return 0; }
-    static float       calc_pwl12_mipi_pixel_to_float( const void* /* line_start */, int /* pixel_offset */ ) noexcept { return 0; }
-    static float       calc_pwl16H12_pixel_to_float( const void* /* line_start */, int /* pixel_offset */ ) noexcept { return 0; }
+    float       calc_pwl12_pixel_to_float( const void* line_start, int pixel_offset ) noexcept;
+    float       calc_pwl12_mipi_pixel_to_float( const void* line_start, int pixel_offset ) noexcept;
+    float       calc_pwl16H12_pixel_to_float( const void* line_start, int pixel_offset ) noexcept;
 }
 }
 }

@@ -28,30 +28,37 @@ set(PLUGINS
 
 
 add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
-target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
-target_include_directories(tcamgstbase PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include/")
+
 set_project_warnings(tcamgstbase)
+
+
+
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
 target_include_directories(tcamgstbase PRIVATE ${GLIB2_INCLUDE_DIR})
 target_include_directories(tcamgstbase PRIVATE ${GObject_INCLUDE_DIR})
 target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/src)
-target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/src/algorithms/)
-target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/src/gobject)
+#target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/src/algorithms/)
+#target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/src/gobject)
 target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/external/json)
 target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/external/)
 target_include_directories(tcamgstbase PRIVATE ${INTROSPECTION_INCLUDE_DIR})
 
-target_link_libraries(tcamgstbase tcam)
-target_link_libraries(tcamgstbase tcamprop)
-target_link_libraries(tcamgstbase tcam-algorithms)
-target_link_libraries(tcamgstbase ${GOBJECT_LIBRARIES})
-target_link_libraries(tcamgstbase ${GLIB2_LIBRARIES})
-target_link_libraries(tcamgstbase ${GSTREAMER_LIBRARIES})
-target_link_libraries(tcamgstbase ${GSTREAMER_BASE_LIBRARIES})
-target_link_libraries(tcamgstbase ${GSTREAMER_VIDEO_LIBRARIES})
-
+target_link_libraries(tcamgstbase 
+PRIVATE
+	${GOBJECT_LIBRARIES}
+	${GLIB2_LIBRARIES}
+	${GSTREAMER_LIBRARIES}
+	${GSTREAMER_BASE_LIBRARIES}
+	${GSTREAMER_VIDEO_LIBRARIES}
+PUBLIC
+	tcam
+	tcamprop
+	tcam-algorithms
+	dutils::dutils_img
+	spdlog::spdlog
+)
 
 add_library(gsttcamsrc SHARED gsttcamsrc.cpp
   gsttcammainsrc.cpp
@@ -78,13 +85,7 @@ foreach (t IN ITEMS ${PLUGINS})
   target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/external/json)
   target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/external/)
   target_include_directories(${t} PRIVATE ${INTROSPECTION_INCLUDE_DIR})
-  target_include_directories(${t} PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
-  target_include_directories(${t} PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include/")
-
-
-  target_link_libraries(${t} tcam)
-  target_link_libraries(${t} tcamprop)
-  target_link_libraries(${t} tcam-algorithms)
+  
   target_link_libraries(${t} tcamgstbase)
   target_link_libraries(${t} ${GOBJECT_LIBRARIES})
   target_link_libraries(${t} ${GLIB2_LIBRARIES})

@@ -1,8 +1,7 @@
 
 #include "PropertyFilter.h"
 
-#include "algorithms/tcam-algorithm.h"
-#include "img/image_fourcc_func.h"
+#include <dutils_img/image_fourcc_func.h>
 
 #include "logging.h"
 

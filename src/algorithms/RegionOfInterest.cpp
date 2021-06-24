@@ -16,8 +16,8 @@
 
 #include "RegionOfInterest.h"
 
-#include "img/image_transform_base.h"
-#include "math.h"
+#include <math.h>
+#include <dutils_img/image_fourcc_func.h>
 
 using namespace roi;
 using namespace tcam::algorithms::roi;

@@ -17,7 +17,7 @@
 #pragma once
 
 #include "bayer.h"
-#include "compiler_defines.h"
+#include "../compiler_defines.h"
 
 VISIBILITY_DEFAULT
 

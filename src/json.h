@@ -18,9 +18,9 @@
 #define TCAM_JSON_H
 
 #include <string>
-#include <tcam.h>
 #include <utility>
 #include <vector>
+#include "tcam.h"
 
 namespace tcam
 {

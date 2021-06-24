@@ -33,7 +33,7 @@
 #include "VideoFormatDescription.h"
 #include "base_types.h"
 #include "format.h"
-#include "include/img/image_transform_base.h"
+#include <dutils_img/image_transform_base.h>
 #include "logging.h"
 #include "utils.h"
 

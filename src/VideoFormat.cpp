@@ -17,7 +17,7 @@
 #include "VideoFormat.h"
 
 #include "format.h"
-#include "img/fcc_to_string.h"
+#include <dutils_img/fcc_to_string.h>
 #include "logging.h"
 #include "utils.h"
 

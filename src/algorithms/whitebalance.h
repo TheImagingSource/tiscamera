@@ -18,14 +18,13 @@
 #define WHITEBALANCE_H
 
 #include "bayer.h"
-#include "compiler_defines.h"
-#include "parallel.h"
+#include "../compiler_defines.h"
+//#include "parallel.h"
+#include "../base_types.h"
 
 #include <memory>
 
 VISIBILITY_DEFAULT
-
-using namespace tcam::algorithms;
 
 namespace tcam
 {
@@ -45,11 +44,11 @@ struct wb_settings
     rgb_tripel user_values;
     tBY8Pattern pattern;
 
-    std::shared_ptr<parallel::parallel_state> para;
+    //std::shared_ptr<parallel::parallel_state> para;
 };
 
 
-struct para_wb_callback : parallel::func_caller
+struct para_wb_callback //: parallel::func_caller
 {
     wb_settings* settings;
 

@@ -16,13 +16,11 @@
 
 #pragma once
 
-#include "base_types.h"
+#include "../base_types.h"
 #include "roi.h"
 #include "roi_base.h"
 #include "roi_change_behavior.h"
 #include "roi_preset.h"
-
-#include <thread>
 
 namespace roi
 {

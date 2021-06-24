@@ -17,8 +17,6 @@
 #ifndef TCAM_ALGORITHM_H
 #define TCAM_ALGORITHM_H
 
-#include "AutoFocus.h"
-#include "auto_exposure.h"
 #include "base_types.h"
 #include "bayer.h"
 #include "image_sampling.h"
