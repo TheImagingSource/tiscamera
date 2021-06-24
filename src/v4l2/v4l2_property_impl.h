@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 
+#include "v4l2_genicam_conversion.h"
 #include "error.h"
 
 namespace tcam::v4l2
@@ -130,8 +131,27 @@ public:
 
 private:
     outcome::result<void> valid_value(double val);
+    inline double conv_double (int64_t value) const
+    {
+        if (m_converter)
+        {
+            return m_converter->to_double(value);
+        }
+        return value;
+    }
+
+    inline int64_t conv_int (double value) const
+    {
+        if (m_converter)
+        {
+            return m_converter->to_int(value);
+        }
+        return value;
+    }
 
     std::weak_ptr<V4L2PropertyBackend> m_cam;
+
+    std::shared_ptr<tcam::v4l2::ConverterIntToDouble> m_converter;
 
     std::string m_name;
     PropertyFlags m_flags;

@@ -56,16 +56,12 @@ static GstDevice* tcam_device_new(GstElementFactory* factory,
 {
     GST_INFO("Creating new device");
 
-    auto dev = tcam::open_device(device.get_serial(), device.get_device_type());
-
-    std::vector<tcam::VideoFormatDescription> format = dev->get_available_video_formats();
-
-    GstCaps* caps = convert_videoformatsdescription_to_caps(format);
+    GstCaps* caps = gst_caps_new_any();
 
     std::string serial = device.get_serial();
     std::string model = device.get_name();
     std::string type = device.get_device_type_as_string();
-    std::string display_string = "tcam-" + device.get_name_safe() + "-" + serial + "-" + type;
+    std::string display_string = device.get_name() + " (" + serial + "-" + type + ")";
 
     GstStructure* struc = gst_structure_new("tcam-device-properties",
                                             "serial",
@@ -80,14 +76,8 @@ static GstDevice* tcam_device_new(GstElementFactory* factory,
                                             nullptr);
 
     GstDevice* ret = GST_DEVICE(g_object_new(TCAM_TYPE_DEVICE,
-                                             "serial",
-                                             serial.c_str(),
                                              "display_name",
                                              display_string.c_str(),
-                                             "model",
-                                             model.c_str(),
-                                             "type",
-                                             type.c_str(),
                                              "device-class",
                                              "Source/Video/Device/tcam",
                                              "caps",
@@ -99,9 +89,6 @@ static GstDevice* tcam_device_new(GstElementFactory* factory,
     gst_caps_unref(caps);
     gst_structure_free(struc);
 
-    TCAM_DEVICE(ret)->serial = g_strdup(serial.c_str());
-    TCAM_DEVICE(ret)->model = g_strdup(model.c_str());
-    TCAM_DEVICE(ret)->type = g_strdup(type.c_str());
     TCAM_DEVICE(ret)->factory = GST_ELEMENT_FACTORY(gst_object_ref(factory));
 
     return ret;

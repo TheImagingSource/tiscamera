@@ -23,9 +23,6 @@ add_subdirectory( tcamconvert )
 
 set(PLUGINS
   gsttcamsrc
-  gsttcamwhitebalance
-  gsttcamautoexposure
-  gsttcamautofocus
   gsttcambin
   )
 
@@ -64,11 +61,6 @@ add_library(gsttcamsrc SHARED gsttcamsrc.cpp
   gsttcamdeviceprovider.cpp
   gsttcamdevice.cpp)
 
-add_library(gsttcamwhitebalance SHARED gsttcamwhitebalance.cpp)
-
-add_library(gsttcamautoexposure SHARED gsttcamautoexposure.cpp)
-
-add_library(gsttcamautofocus SHARED gsttcamautofocus.cpp)
 
 add_library(gsttcambin SHARED gsttcambin.cpp)
 

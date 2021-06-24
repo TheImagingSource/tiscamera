@@ -33,9 +33,6 @@ struct _TcamDeviceClass
 struct _TcamDevice
 {
     GstDevice parent;
-    gchar* serial;
-    gchar* model;
-    gchar* type;
     GstCaps* caps;
     GstElementFactory* factory;
 };

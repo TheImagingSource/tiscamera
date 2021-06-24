@@ -63,7 +63,7 @@ std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4
             SPDLOG_INFO("Encountered write only control.");
         }
 
-        else if (tcam_xioctl(fd, VIDIOC_G_EXT_CTRLS, &ctrls))
+        else if (tcam_xioctl(m_fd, VIDIOC_G_EXT_CTRLS, &ctrls))
         {
             SPDLOG_ERROR("Errno {} getting ext_ctrl {}", errno, qctrl->name);
             return nullptr;
@@ -74,7 +74,7 @@ std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4
         struct v4l2_control ctrl = {};
 
         ctrl.id = qctrl->id;
-        if (tcam_xioctl(fd, VIDIOC_G_CTRL, &ctrl))
+        if (tcam_xioctl(m_fd, VIDIOC_G_CTRL, &ctrl))
         {
             SPDLOG_ERROR("error {} getting ctrl {}", errno, qctrl->name);
             return nullptr;
@@ -212,7 +212,7 @@ void V4l2Device::index_controls()
     struct v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
 
-    while (tcam_xioctl(this->fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
+    while (tcam_xioctl(this->m_fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
     {
         auto prop = new_control(&qctrl);
 

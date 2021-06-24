@@ -95,41 +95,6 @@ TCAM_PROPERTY_TYPE tcam::v4l2::v4l2_property_type_to_tcam(uint32_t type)
 }
 
 
-uint32_t tcam::convert_v4l2_flags(uint32_t v4l2_flags)
-{
-    uint32_t internal_flags = 0;
-
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_DISABLED))
-    {
-        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_DISABLED);
-    }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_GRABBED))
-    {
-        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_GRABBED);
-    }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_READ_ONLY))
-    {
-        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_READ_ONLY);
-    }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_UPDATE)) {}
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_INACTIVE))
-    {
-        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_INACTIVE);
-    }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_SLIDER)) {}
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_WRITE_ONLY))
-    {
-        internal_flags = set_bit(internal_flags, TCAM_PROPERTY_FLAG_WRITE_ONLY);
-    }
-    if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_VOLATILE)) {}
-    // if (is_bit_set(v4l2_flags, V4L2_CTRL_FLAG_HAS_PAYLOAD))
-    // {}
-
-    return internal_flags;
-}
-
-
-
 std::vector<DeviceInfo> tcam::get_v4l2_device_list()
 {
     std::vector<DeviceInfo> device_list;

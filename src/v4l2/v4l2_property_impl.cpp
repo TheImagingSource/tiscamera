@@ -110,12 +110,8 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
                                                std::shared_ptr<V4L2PropertyBackend> backend,
                                                const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    m_min = queryctrl->minimum;
-    m_max = queryctrl->maximum;
-    m_step = queryctrl->step;
-    m_default = ctrl->value;
-
     m_name = (char*)queryctrl->name;
+    m_v4l2_id = queryctrl->id;
 
     if (mapping)
     {
@@ -123,9 +119,18 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
         {
             m_name = mapping->gen_name;
         }
+        if (mapping->conversion_type == tcam::v4l2::MappingType::IntToDouble)
+        {
+            m_converter = tcam::v4l2::find_int_to_double(m_v4l2_id);
+        }
     }
 
-    m_v4l2_id = queryctrl->id;
+
+
+    m_min = conv_double(queryctrl->minimum);
+    m_max = conv_double(queryctrl->maximum);
+    m_step = conv_double(queryctrl->step);
+    m_default = conv_double(ctrl->value);
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
@@ -140,7 +145,7 @@ outcome::result<double> V4L2PropertyDoubleImpl::get_value() const
         auto ret = ptr->read_control(m_v4l2_id);
         if (ret)
         {
-            return ret.value();
+            return conv_double(ret.value());
         }
         return ret.as_failure();
     }
@@ -158,7 +163,7 @@ outcome::result<void> V4L2PropertyDoubleImpl::set_value(double new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        auto r = ptr->write_control(m_v4l2_id, new_value);
+        auto r = ptr->write_control(m_v4l2_id, conv_int(new_value));
         if (!r)
         {
             return r.as_failure();
@@ -330,9 +335,15 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
             m_name = (char*)queryctrl->name;
         }
 
-        if (mapping->gen_enum_entries)
+        //if (mapping->gen_enum_entries)
+        if (mapping->conversion_type == tcam::v4l2::MappingType::IntToEnum)
         {
-            m_entries = mapping->gen_enum_entries.value();
+            auto res = tcam::v4l2::find_menu_entries(m_v4l2_id);
+            if (res)
+            {
+                m_entries = res.value();
+            }
+                //mapping->gen_conversion.value().conversion.menu_entries;
         }
         else
         {

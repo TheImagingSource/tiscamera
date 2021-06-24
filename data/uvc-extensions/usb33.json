@@ -29,15 +29,6 @@
 		    "offset_bits": 0
         },
         {
-            "id": "0x199e204",
-		    "name": "Gain (dB/100)",
-		    "selector": "0x18",
-		    "uvc_type": "unsigned",
-		    "v4l2_type": "integer",
-		    "size_bits": 32,
-		    "offset_bits": 0
-        },
-        {
             "id": "0x199e205",
 		    "name": "Gain Auto",
 		    "selector": "0x02",
