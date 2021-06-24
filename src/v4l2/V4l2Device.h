@@ -154,6 +154,11 @@ private:
 
     // streaming related
 
+    // on initial startup all buffers are received once, but empty
+    // this causes unneccessary error messages
+    // filter those messages until we receive one valid image
+    bool m_already_received_valid_image = false;
+
     struct tcam_stream_statistics m_statistics = {};
 
     struct buffer_info

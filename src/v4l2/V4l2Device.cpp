@@ -782,6 +782,7 @@ bool V4l2Device::extension_unit_is_loaded()
 
 void V4l2Device::stream()
 {
+    m_already_received_valid_image = false;
     int lost_countdown = lost_countdown_default;
     // period elapsed for current image
     int waited_seconds = 0;
@@ -919,16 +920,11 @@ bool V4l2Device::get_frame()
        field is ignored and the planes pointer is used instead.
      */
 
-    // on initial startup all buffers are received once, but empty
-    // this causes unneccessary error messages
-    // filter those messages until we receive one valid image
-    static bool already_received_valid_image;
-
     if (m_active_video_format.get_fourcc() != FOURCC_MJPG)
     {
         if (buf.bytesused != (this->m_active_video_format.get_required_buffer_size()))
         {
-            if (already_received_valid_image)
+            if (m_already_received_valid_image)
             {
                 SPDLOG_ERROR("Buffer has wrong size. Got: {} Expected: {} Dropping...",
                              buf.bytesused,
@@ -938,7 +934,7 @@ bool V4l2Device::get_frame()
             return true;
         }
     }
-    already_received_valid_image = true;
+    m_already_received_valid_image = true;
     // v4l2 timestamps contain seconds and microseconds
     // here they are converted to nanoseconds
     m_statistics.capture_time_ns =
