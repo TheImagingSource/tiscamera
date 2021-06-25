@@ -16,13 +16,13 @@
 
 /* This example will show you how to save a videostream into a file */
 
+#include <gst/gst.h>
 #include <stdio.h>
 #include <string.h>
-#include <gst/gst.h>
 #include <tcamprop.h>
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -40,17 +40,19 @@ int main (int argc, char *argv[])
     GError* err = NULL;
 
 
-    GstElement* pipeline = gst_parse_launch("tcambin name=bin"
-                                            " ! video/x-raw,format=BGRx,width=640,height=480,framerate=30/1"
-                                            " ! tee name=t"
-                                            " ! queue"
-                                            " ! videoconvert"
-                                            " ! ximagesink"
-                                            " t."
-                                            " ! queue"
-                                            " ! videoconvert"
-                                            " ! avimux"
-                                            " ! filesink name=fsink", &err);
+    GstElement* pipeline =
+        gst_parse_launch("tcambin name=bin"
+                         " ! video/x-raw,format=BGRx,width=640,height=480,framerate=30/1"
+                         " ! tee name=t"
+                         " ! queue"
+                         " ! videoconvert"
+                         " ! ximagesink"
+                         " t."
+                         " ! queue"
+                         " ! videoconvert"
+                         " ! avimux"
+                         " ! filesink name=fsink",
+                         &err);
     /*
       to save a video without live view reduce the pipeline to the following:
 
@@ -87,7 +89,7 @@ int main (int argc, char *argv[])
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
-    gst_object_unref( fsink );
+    gst_object_unref(fsink);
 
     /* the pipeline automatically handles all elements that have been added to it.
        thus they do not have to be cleaned up manually */

@@ -16,14 +16,13 @@
 
 /* This example will show you how to start a live stream from your camera */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
-
 #include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
-int main (int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -40,7 +39,8 @@ int main (int argc, char *argv[])
 
     GError* err = NULL;
 
-    GstElement* pipeline = gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
+    GstElement* pipeline =
+        gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
 
     /* test for error */
     if (pipeline == NULL)
@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
 
-        gst_object_unref( source );
+        gst_object_unref(source);
     }
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
-    gst_object_unref( pipeline );
+    gst_object_unref(pipeline);
 
     return 0;
 }

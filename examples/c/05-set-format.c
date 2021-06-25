@@ -19,14 +19,13 @@
   with a specific format
  */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
-
 #include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
-int main (int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -42,7 +41,8 @@ int main (int argc, char *argv[])
     const char* serial = NULL; // set this if you do not want the first found device
 
     GError* err = NULL;
-    const char* pipeline_desc = "tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink";
+    const char* pipeline_desc =
+        "tcambin name=source ! capsfilter name=filter ! videoconvert ! ximagesink";
 
     GstElement* pipeline = gst_parse_launch(pipeline_desc, &err);
 
@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
 
-        gst_object_unref( source );
+        gst_object_unref(source);
     }
 
 
@@ -70,13 +70,22 @@ int main (int argc, char *argv[])
 
     GstStructure* structure = gst_structure_from_string("video/x-raw", NULL);
     gst_structure_set(structure,
-                      "format", G_TYPE_STRING, "BGRx",
-                      "width", G_TYPE_INT, 640,
-                      "height", G_TYPE_INT, 480,
-                      "framerate", GST_TYPE_FRACTION, 30, 1,
+                      "format",
+                      G_TYPE_STRING,
+                      "BGRx",
+                      "width",
+                      G_TYPE_INT,
+                      640,
+                      "height",
+                      G_TYPE_INT,
+                      480,
+                      "framerate",
+                      GST_TYPE_FRACTION,
+                      30,
+                      1,
                       NULL);
 
-    gst_caps_append_structure (caps, structure);
+    gst_caps_append_structure(caps, structure);
 
     GstElement* capsfilter = gst_bin_get_by_name(GST_BIN(pipeline), "filter");
 
@@ -109,7 +118,7 @@ int main (int argc, char *argv[])
 
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
-    gst_object_unref( pipeline );
+    gst_object_unref(pipeline);
 
     return 0;
 }

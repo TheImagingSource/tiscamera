@@ -16,14 +16,13 @@
 
 /* This example will show you how to list information about the available devices */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
-
 #include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
-int main (int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -69,20 +68,16 @@ int main (int argc, char *argv[])
            The connection_type identifies the backend that is used.
                    Currently 'aravis', 'v4l2', libusb, tegra, pimipi and 'unknown' exist
         */
-        gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
-                                                 device_serial,
-                                                 &name,
-                                                 &identifier,
-                                                 &connection_type);
+        gboolean ret = tcam_prop_get_device_info(
+            TCAM_PROP(source), device_serial, &name, &identifier, &connection_type);
 
         if (ret) // get_device_info was successful
         {
-            printf("Model: %s Serial: %s Type: %s\n",
-                   name, (gchar*)elem->data, connection_type);
+            printf("Model: %s Serial: %s Type: %s\n", name, (gchar*)elem->data, connection_type);
 
-            g_free( name );
-            g_free( identifier );
-            g_free( connection_type );
+            g_free(name);
+            g_free(identifier);
+            g_free(connection_type);
         }
     }
 

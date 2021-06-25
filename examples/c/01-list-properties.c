@@ -16,20 +16,20 @@
 
 /* This example will show you how to list the available properties */
 
-#include <gst/gst.h>
+#include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 #include <string.h>
 #include <unistd.h>
-#include "tcamprop.h" /* gobject introspection interface */
 
 
-void list_properties (GstElement* source)
+void list_properties(GstElement* source)
 {
 
     GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
 
-    for ( GSList* cur = names; cur != NULL; cur = cur->next )
+    for (GSList* cur = names; cur != NULL; cur = cur->next)
     {
         const char* name = (char*)cur->data;
 
@@ -66,26 +66,34 @@ void list_properties (GstElement* source)
         {
             printf("%s(integer) min: %d max: %d step: %d value: %d default: %d  grouping %s %s\n",
                    name,
-                   g_value_get_int(&min), g_value_get_int(&max),
+                   g_value_get_int(&min),
+                   g_value_get_int(&max),
                    g_value_get_int(&step_size),
-                   g_value_get_int(&value), g_value_get_int(&default_value),
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_int(&value),
+                   g_value_get_int(&default_value),
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else if (strcmp(t, "double") == 0)
         {
             printf("%s(double) min: %f max: %f step: %f value: %f default: %f  grouping %s %s\n",
                    name,
-                   g_value_get_double(&min), g_value_get_double(&max),
+                   g_value_get_double(&min),
+                   g_value_get_double(&max),
                    g_value_get_double(&step_size),
-                   g_value_get_double(&value), g_value_get_double(&default_value),
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_double(&value),
+                   g_value_get_double(&default_value),
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else if (strcmp(t, "string") == 0)
         {
             printf("%s(string) value: %s default: %s  grouping %s %s\n",
                    name,
-                   g_value_get_string(&value), g_value_get_string(&default_value),
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_string(&value),
+                   g_value_get_string(&default_value),
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else if (strcmp(t, "enum") == 0)
         {
@@ -99,48 +107,55 @@ void list_properties (GstElement* source)
 
             printf("%s(enum) value: %s default: %s  grouping %s %s\n",
                    name,
-                   g_value_get_string(&value), g_value_get_string(&default_value),
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_string(&value),
+                   g_value_get_string(&default_value),
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
             printf("Entries: \n");
             for (unsigned int x = 0; x < g_slist_length(entries); ++x)
             {
-                printf("\t %s\n", (char*) g_slist_nth(entries, x)->data);
+                printf("\t %s\n", (char*)g_slist_nth(entries, x)->data);
             }
 
-            g_slist_free_full( entries, g_free );
+            g_slist_free_full(entries, g_free);
         }
         else if (strcmp(t, "boolean") == 0)
         {
             printf("%s(boolean) value: %s default: %s  grouping %s %s\n",
                    name,
-                   g_value_get_boolean(&value) ? "true" : "false", g_value_get_boolean(&default_value) ? "true" : "false",
-                   g_value_get_string(&category), g_value_get_string(&group));
+                   g_value_get_boolean(&value) ? "true" : "false",
+                   g_value_get_boolean(&default_value) ? "true" : "false",
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else if (strcmp(t, "button") == 0)
         {
-            printf("%s(button) grouping %s %s\n", name, g_value_get_string(&category), g_value_get_string(&group));
+            printf("%s(button) grouping %s %s\n",
+                   name,
+                   g_value_get_string(&category),
+                   g_value_get_string(&group));
         }
         else
         {
             printf("Property '%s' has type '%s' .\n", name, t);
         }
 
-        g_value_unset( &value );
-        g_value_unset( &min );
-        g_value_unset( &max );
-        g_value_unset( &default_value );
-        g_value_unset( &step_size );
-        g_value_unset( &type );
-        g_value_unset( &flags );
-        g_value_unset( &category );
-        g_value_unset( &group );
+        g_value_unset(&value);
+        g_value_unset(&min);
+        g_value_unset(&max);
+        g_value_unset(&default_value);
+        g_value_unset(&step_size);
+        g_value_unset(&type);
+        g_value_unset(&flags);
+        g_value_unset(&category);
+        g_value_unset(&group);
     }
 
-    g_slist_free_full(names,g_free);
+    g_slist_free_full(names, g_free);
 }
 
 
-gboolean block_until_playing (GstElement* pipeline)
+gboolean block_until_playing(GstElement* pipeline)
 {
     while (TRUE)
     {
@@ -148,7 +163,7 @@ gboolean block_until_playing (GstElement* pipeline)
         GstState pending;
 
         // wait 0.1 seconds for something to happen
-        GstStateChangeReturn ret = gst_element_get_state(pipeline ,&state, &pending, 100000000);
+        GstStateChangeReturn ret = gst_element_get_state(pipeline, &state, &pending, 100000000);
 
         if (ret == GST_STATE_CHANGE_SUCCESS)
         {
@@ -167,7 +182,7 @@ gboolean block_until_playing (GstElement* pipeline)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications

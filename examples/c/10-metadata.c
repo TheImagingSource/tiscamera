@@ -17,20 +17,18 @@
 /* This example will show you how to receive data from gstreamer in your application
    and how to get the actual iamge data */
 
-#include <stdio.h>
-#include <string.h>
-#include <gst/gst.h>
-#include <gst/video/video.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <tcamprop.h>
-
 #include "gstmetatcamstatistics.h"
 
+#include <gst/gst.h>
+#include <gst/video/video.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tcamprop.h>
+#include <unistd.h>
 
-static gboolean meta_struc_print (GQuark field_id,
-                           const GValue* value,
-                           gpointer user_data)
+
+static gboolean meta_struc_print(GQuark field_id, const GValue* value, gpointer user_data)
 {
     // GQuark is a gobject internal ID for strings
     // we call the function g_quark_to_string to get the name of the field
@@ -73,13 +71,13 @@ static gboolean meta_struc_print (GQuark field_id,
   This function will be called in a separate thread when our appsink
   says there is data for us. user_data has to be defined when calling g_signal_connect.
  */
-static GstFlowReturn callback (GstElement* sink, void* user_data)
+static GstFlowReturn callback(GstElement* sink, void* user_data)
 {
     printf("new sample\n");
 
     GstSample* sample = NULL;
     /* Retrieve the buffer */
-    g_signal_emit_by_name (sink, "pull-sample", &sample, NULL);
+    g_signal_emit_by_name(sink, "pull-sample", &sample, NULL);
 
     if (sample)
     {
@@ -120,13 +118,13 @@ static GstFlowReturn callback (GstElement* sink, void* user_data)
         */
 
         // delete our reference so that gstreamer can handle the sample
-        gst_sample_unref (sample);
+        gst_sample_unref(sample);
     }
     return GST_FLOW_OK;
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -157,15 +155,15 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    if( serial != NULL )
+    if (serial != NULL)
     {
-        GstElement* source = gst_bin_get_by_name( GST_BIN( pipeline ), "source" );
+        GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
         GValue val = {};
-        g_value_init( &val, G_TYPE_STRING );
-        g_value_set_static_string( &val, serial );
+        g_value_init(&val, G_TYPE_STRING);
+        g_value_set_static_string(&val, serial);
 
-        g_object_set_property( G_OBJECT( source ), "serial", &val );
-        gst_object_unref( source );
+        g_object_set_property(G_OBJECT(source), "serial", &val);
+        gst_object_unref(source);
     }
 
     /* retrieve the appsink from the pipeline */

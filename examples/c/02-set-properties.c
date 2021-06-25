@@ -16,10 +16,10 @@
 
 /* This example will show you how to set properties for a certain camera */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
 #include "tcamprop.h" /* gobject introspection interface */
+
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
 
 void print_enum_or_bool(GstElement* source, const char* name)
@@ -28,11 +28,8 @@ void print_enum_or_bool(GstElement* source, const char* name)
 
     GValue type = {};
     /* We are only interested in the value, this  */
-    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                               name,
-                                               &value,
-                                               NULL, NULL, NULL, NULL,
-                                               &type, NULL, NULL, NULL);
+    gboolean ret = tcam_prop_get_tcam_property(
+        TCAM_PROP(source), name, &value, NULL, NULL, NULL, NULL, &type, NULL, NULL, NULL);
 
     if (!ret)
     {
@@ -45,9 +42,7 @@ void print_enum_or_bool(GstElement* source, const char* name)
     // exposure auto is a bool
     if (strcmp(t, "boolean") == 0)
     {
-        printf("%s has value: %s\n", name,
-               g_value_get_boolean(&value) ? "true" : "false");
-
+        printf("%s has value: %s\n", name, g_value_get_boolean(&value) ? "true" : "false");
     }
     else if (strcmp(t, "enum") == 0)
     {
@@ -58,7 +53,7 @@ void print_enum_or_bool(GstElement* source, const char* name)
 }
 
 
-void print_properties (GstElement* source)
+void print_properties(GstElement* source)
 {
 
     print_enum_or_bool(source, "Exposure Auto");
@@ -69,13 +64,18 @@ void print_properties (GstElement* source)
     gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
                                                "Brightness",
                                                &brightness_value,
-                                               NULL, NULL, NULL, NULL,
-                                               NULL, NULL, NULL, NULL);
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL);
 
     if (ret)
     {
-        printf("Brightness has value: %d\n",
-               g_value_get_int(&brightness_value));
+        printf("Brightness has value: %d\n", g_value_get_int(&brightness_value));
         g_value_unset(&brightness_value);
     }
     else
@@ -85,9 +85,7 @@ void print_properties (GstElement* source)
 }
 
 
-gboolean set_bool_or_enum(GstElement* source,
-                          const char* name,
-                          gboolean new_value)
+gboolean set_bool_or_enum(GstElement* source, const char* name, gboolean new_value)
 {
     // this function basically exists to ensure the example
     // works with all camera types.
@@ -100,11 +98,8 @@ gboolean set_bool_or_enum(GstElement* source,
 
     GValue type = {};
 
-    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                               name,
-                                               NULL,
-                                               NULL, NULL, NULL, NULL,
-                                               &type, NULL, NULL, NULL);
+    gboolean ret = tcam_prop_get_tcam_property(
+        TCAM_PROP(source), name, NULL, NULL, NULL, NULL, NULL, &type, NULL, NULL, NULL);
 
     if (!ret)
     {
@@ -123,10 +118,8 @@ gboolean set_bool_or_enum(GstElement* source,
         g_value_set_boolean(&set_auto, FALSE);
 
         // actual set
-        ret = tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                          name, &set_auto);
-        g_value_unset( &set_auto );
-
+        ret = tcam_prop_set_tcam_property(TCAM_PROP(source), name, &set_auto);
+        g_value_unset(&set_auto);
     }
     else if (strcmp(t, "enum") == 0)
     {
@@ -143,19 +136,16 @@ gboolean set_bool_or_enum(GstElement* source,
         }
 
         // actual set
-        ret = tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                          name, &set_auto);
-        g_value_unset( &set_auto );
-
+        ret = tcam_prop_set_tcam_property(TCAM_PROP(source), name, &set_auto);
+        g_value_unset(&set_auto);
     }
-    g_value_unset( &type );
+    g_value_unset(&type);
 
     return ret;
-
 }
 
 
-gboolean block_until_playing (GstElement* pipeline)
+gboolean block_until_playing(GstElement* pipeline)
 {
     while (TRUE)
     {
@@ -163,7 +153,7 @@ gboolean block_until_playing (GstElement* pipeline)
         GstState pending;
 
         // wait 0.1 seconds for something to happen
-        GstStateChangeReturn ret = gst_element_get_state(pipeline ,&state, &pending, 100000000);
+        GstStateChangeReturn ret = gst_element_get_state(pipeline, &state, &pending, 100000000);
 
         if (ret == GST_STATE_CHANGE_SUCCESS)
         {
@@ -182,7 +172,7 @@ gboolean block_until_playing (GstElement* pipeline)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -249,8 +239,7 @@ int main (int argc, char *argv[])
 
     g_value_set_int(&set_brightness, 200);
 
-    tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                "Brightness", &set_brightness);
+    tcam_prop_set_tcam_property(TCAM_PROP(source), "Brightness", &set_brightness);
 
     g_value_unset(&set_brightness);
 

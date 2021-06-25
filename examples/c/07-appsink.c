@@ -20,13 +20,13 @@
   and how to get the actual image data
 */
 
-#include <stdio.h>
-#include <string.h>
 #include <gst/gst.h>
 #include <gst/video/video.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tcamprop.h>
+#include <unistd.h>
 
 
 /*
@@ -35,7 +35,7 @@
   when calling g_signal_connect. It can be used to pass objects etc.
   from your other function to the callback.
 */
-static GstFlowReturn callback (GstElement* sink, void* user_data)
+static GstFlowReturn callback(GstElement* sink, void* user_data)
 {
     GstSample* sample = NULL;
     /* Retrieve the buffer */
@@ -65,8 +65,8 @@ static GstFlowReturn callback (GstElement* sink, void* user_data)
 
             /* Get the pixel value of the center pixel */
             int stride = video_info->finfo->bits / 8;
-            unsigned int pixel_offset = video_info->width / 2 * stride +
-                video_info->width * video_info->height / 2 * stride;
+            unsigned int pixel_offset = video_info->width / 2 * stride
+                                        + video_info->width * video_info->height / 2 * stride;
 
             // this is only one pixel
             // when dealing with formats like BGRx
@@ -83,19 +83,20 @@ static GstFlowReturn callback (GstElement* sink, void* user_data)
 
         GstClockTime timestamp = GST_BUFFER_PTS(buffer);
         g_print("Captured frame %d, Pixel Value=%03d Timestamp=%" GST_TIME_FORMAT "            \r",
-                framecount, pixel_data,
+                framecount,
+                pixel_data,
                 GST_TIME_ARGS(timestamp));
         framecount++;
 
 
         // delete our reference so that gstreamer can handle the sample
-        gst_sample_unref (sample);
+        gst_sample_unref(sample);
     }
     return GST_FLOW_OK;
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -122,16 +123,16 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    if( serial != NULL )
+    if (serial != NULL)
     {
-        GstElement* source = gst_bin_get_by_name( GST_BIN( pipeline ), "source" );
+        GstElement* source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
 
         GValue val = {};
-        g_value_init( &val, G_TYPE_STRING );
-        g_value_set_static_string( &val, serial );
+        g_value_init(&val, G_TYPE_STRING);
+        g_value_set_static_string(&val, serial);
 
-        g_object_set_property( G_OBJECT( source ), "serial", &val );
-        gst_object_unref( source );
+        g_object_set_property(G_OBJECT(source), "serial", &val);
+        gst_object_unref(source);
     }
 
     /* retrieve the appsink from the pipeline */

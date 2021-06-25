@@ -23,7 +23,7 @@ endfunction()
 # helper function to find all c/cpp files
 # has to be called from project root  to find all files
 function(get_all_cpp_files file_list IGNORE_PREFIX_LIST)
-  file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.h)
+  file(GLOB_RECURSE ALL_SOURCE_FILES *.cpp *.c *.h)
   foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
     set(PREFIX_FOUND -1)
     foreach(PREFIX ${IGNORE_PREFIX_LIST})
