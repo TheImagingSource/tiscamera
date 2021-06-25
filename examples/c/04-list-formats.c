@@ -16,14 +16,13 @@
 
 /* This example will show you how to list the formats your device offers */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
-
 #include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
-int main (int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -89,7 +88,6 @@ int main (int argc, char *argv[])
             const char* format = gst_structure_get_string(structure, "format");
 
             printf("%s %s - ", name, format);
-
         }
         else if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
         {
@@ -106,13 +104,11 @@ int main (int argc, char *argv[])
 
 
             printf("} - ");
-
         }
         else
         {
             printf("format handling not implemented for unexpected type: %s\n",
-                   G_VALUE_TYPE_NAME(gst_structure_get_field_type(structure,
-                                                                  "format")));
+                   G_VALUE_TYPE_NAME(gst_structure_get_field_type(structure, "format")));
             continue;
         }
 
@@ -120,10 +116,10 @@ int main (int argc, char *argv[])
 
         if (width_type == GST_TYPE_INT_RANGE)
         {
-            int width_min = gst_value_get_int_range_min(gst_structure_get_value(structure,
-                                                                                "width"));
-            int width_max = gst_value_get_int_range_max(gst_structure_get_value(structure,
-                                                                                "width"));
+            int width_min =
+                gst_value_get_int_range_min(gst_structure_get_value(structure, "width"));
+            int width_max =
+                gst_value_get_int_range_max(gst_structure_get_value(structure, "width"));
 
 
             printf("width: [%d-%d]", width_min, width_max);
@@ -148,10 +144,10 @@ int main (int argc, char *argv[])
 
         if (height_type == GST_TYPE_INT_RANGE)
         {
-            int height_min = gst_value_get_int_range_min(gst_structure_get_value(structure,
-                                                                                 "height"));
-            int height_max = gst_value_get_int_range_max(gst_structure_get_value(structure,
-                                                                                 "height"));
+            int height_min =
+                gst_value_get_int_range_min(gst_structure_get_value(structure, "height"));
+            int height_max =
+                gst_value_get_int_range_max(gst_structure_get_value(structure, "height"));
 
 
             printf("height: [%d-%d]", height_min, height_max);
@@ -178,7 +174,7 @@ int main (int argc, char *argv[])
         {
             for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
             {
-                const GValue* val  = gst_value_list_get_value(framerate, x);
+                const GValue* val = gst_value_list_get_value(framerate, x);
 
                 if (G_VALUE_TYPE(val) == GST_TYPE_FRACTION)
                 {
@@ -189,7 +185,8 @@ int main (int argc, char *argv[])
                 }
                 else
                 {
-                    printf("Handling of framerate handling not implemented for non fraction types.\n");
+                    printf(
+                        "Handling of framerate handling not implemented for non fraction types.\n");
                     break;
                 }
             }

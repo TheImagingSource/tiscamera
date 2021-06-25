@@ -16,13 +16,13 @@
 
 /* This example will show you how to trigger images */
 
-#include <unistd.h> /* sleep  */
-#include <stdio.h>  /* printf */
 #include <gst/gst.h>
+#include <stdio.h> /* printf */
 #include <tcamprop.h>
+#include <unistd.h> /* sleep  */
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
@@ -39,7 +39,8 @@ int main (int argc, char *argv[])
 
     GError* err = NULL;
 
-    GstElement* pipeline = gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
+    GstElement* pipeline =
+        gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
 
     /* test for error */
     if (pipeline == NULL)
@@ -76,8 +77,8 @@ int main (int argc, char *argv[])
 
     // Check for the type of trigger
     // Depending on the camera model trigger may be a bool or an enum
-    const gchar* trigger_mode_type =  tcam_prop_get_tcam_property_type(TCAM_PROP(source),
-                                                                       "Trigger Mode");
+    const gchar* trigger_mode_type =
+        tcam_prop_get_tcam_property_type(TCAM_PROP(source), "Trigger Mode");
 
     if (!trigger_mode_type)
     {
@@ -115,7 +116,8 @@ int main (int argc, char *argv[])
             break;
         }
 
-        gboolean r = tcam_prop_set_tcam_property(TCAM_PROP(source), "Software Trigger", &trigger_val);
+        gboolean r =
+            tcam_prop_set_tcam_property(TCAM_PROP(source), "Software Trigger", &trigger_val);
         if (!r)
         {
             printf("!!! Could not trigger. !!!\n");

@@ -16,14 +16,13 @@
 
 /* This example will show you how to get/set the JSON property description for a certain camera */
 
-#include <gst/gst.h>
-
-#include <stdio.h> /* printf and putchar */
 #include "tcamprop.h" /* gobject introspection interface */
 
+#include <gst/gst.h>
+#include <stdio.h> /* printf and putchar */
 
 
-gboolean block_until_playing (GstElement* pipeline)
+gboolean block_until_playing(GstElement* pipeline)
 {
     while (TRUE)
     {
@@ -31,7 +30,7 @@ gboolean block_until_playing (GstElement* pipeline)
         GstState pending;
 
         // wait 0.1 seconds for something to happen
-        GstStateChangeReturn ret = gst_element_get_state(pipeline ,&state, &pending, 100000000);
+        GstStateChangeReturn ret = gst_element_get_state(pipeline, &state, &pending, 100000000);
 
         if (ret == GST_STATE_CHANGE_SUCCESS)
         {
@@ -50,7 +49,7 @@ gboolean block_until_playing (GstElement* pipeline)
 }
 
 
-int main (int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
        it can be removed in normal applications
