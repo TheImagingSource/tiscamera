@@ -21,6 +21,8 @@ include_directories("${TCAM_SOURCE_DIR}/src")
 include_directories("${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
 include_directories("${TCAM_SOURCE_DIR}/src/gobject")
 
+link_libraries( dutils::dutils_img )
+
 add_subdirectory(integration)
 add_subdirectory(unit)
 

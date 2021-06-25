@@ -53,6 +53,7 @@ endif (TCAM_INTERNAL_ARAVIS)
 target_link_libraries(gige-daemon "${LIBXML2_LIBRARIES}")
 target_link_libraries(gige-daemon "${GIO_LIBRARIES}")
 target_link_libraries(gige-daemon "${PCAP_LIBRARIES}")
+target_link_libraries(gige-daemon dutils::dutils_img)
 
 install(TARGETS gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}
