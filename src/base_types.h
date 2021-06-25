@@ -53,12 +53,12 @@ enum TCAM_PIPELINE_STATUS
 enum TCAM_DEVICE_TYPE
 {
     TCAM_DEVICE_TYPE_UNKNOWN = 0, /**< Unknown device type*/
-    TCAM_DEVICE_TYPE_V4L2,        /**< device that uses the v4l2 API */
-    TCAM_DEVICE_TYPE_ARAVIS,      /**< currently through aravis */
-    TCAM_DEVICE_TYPE_LIBUSB,      /**< libusb backends */
-    TCAM_DEVICE_TYPE_PIMIPI,      /**< mipi cameras on raspberry pi*/
-    TCAM_DEVICE_TYPE_MIPI,        /**< mipi cameras*/
-    TCAM_DEVICE_TYPE_TEGRA,        /**< tegra fpd/mipi cameras*/
+    TCAM_DEVICE_TYPE_V4L2, /**< device that uses the v4l2 API */
+    TCAM_DEVICE_TYPE_ARAVIS, /**< currently through aravis */
+    TCAM_DEVICE_TYPE_LIBUSB, /**< libusb backends */
+    TCAM_DEVICE_TYPE_PIMIPI, /**< mipi cameras on raspberry pi*/
+    TCAM_DEVICE_TYPE_MIPI, /**< mipi cameras*/
+    TCAM_DEVICE_TYPE_TEGRA, /**< tegra fpd/mipi cameras*/
 };
 
 

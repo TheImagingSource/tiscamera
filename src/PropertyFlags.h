@@ -31,7 +31,6 @@ enum class AccessMode : uint8_t
 };
 
 
-
 enum class PropertyFlags
 {
     None = 0x0,

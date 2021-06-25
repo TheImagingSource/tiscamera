@@ -22,29 +22,27 @@ namespace
 class ConverterGamma : public tcam::v4l2::ConverterIntToDouble
 {
 public:
-
-    virtual double to_double (int64_t value) final
+    virtual double to_double(int64_t value) final
     {
         return value / m_conversion_factor;
     };
 
-    virtual int64_t to_int (double value) final
+    virtual int64_t to_int(double value) final
     {
         return value * m_conversion_factor;
     };
 
 private:
-
     double m_conversion_factor = 100;
 };
 
-}
+} // namespace
 
 
 namespace tcam::v4l2
 {
 
-std::shared_ptr<ConverterIntToDouble> find_int_to_double (uint32_t v4l2_id)
+std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id)
 {
     switch (v4l2_id)
     {
@@ -60,7 +58,7 @@ std::shared_ptr<ConverterIntToDouble> find_int_to_double (uint32_t v4l2_id)
 }
 
 
-std::shared_ptr<ConverterScale> find_scale (uint32_t v4l2_id)
+std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id)
 {
     switch (v4l2_id)
     {
@@ -72,25 +70,25 @@ std::shared_ptr<ConverterScale> find_scale (uint32_t v4l2_id)
 }
 
 
-outcome::result<std::map<int, std::string>> find_menu_entries (uint32_t v4l2_id)
+outcome::result<std::map<int, std::string>> find_menu_entries(uint32_t v4l2_id)
 {
     switch (v4l2_id)
     {
         case 0x009a0901: // exposure auto
         {
-            return std::map<int,std::string>{ { 1, "Off" }, { 3, "Continuous" } };
+            return std::map<int, std::string> { { 1, "Off" }, { 3, "Continuous" } };
         }
         case 0x0098090c: // white balance
         case 0x199e202: // auto shutter
         case 0x199e205: // gain auto
         {
-            return std::map<int,std::string>{ { 0, "Off" }, { 1, "Continuous" } };
+            return std::map<int, std::string> { { 0, "Off" }, { 1, "Continuous" } };
         }
         case 0x009a0910: // TriggerMode
         case 0x199e208: // TriggerMode
         case 0x0199e254: // ExposureAutoUpperLimitAuto
         {
-            return std::map<int,std::string>{ { 0, "Off" }, { 1, "On" } };
+            return std::map<int, std::string> { { 0, "Off" }, { 1, "On" } };
         }
         default:
         {
@@ -100,4 +98,4 @@ outcome::result<std::map<int, std::string>> find_menu_entries (uint32_t v4l2_id)
 }
 
 
-}
+} // namespace tcam::v4l2

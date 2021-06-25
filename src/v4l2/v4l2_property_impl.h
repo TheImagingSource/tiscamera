@@ -17,14 +17,13 @@
 #pragma once
 
 #include "PropertyInterfaces.h"
+#include "error.h"
+#include "v4l2_genicam_conversion.h"
 
 #include <linux/videodev2.h>
 #include <map>
 #include <memory>
 #include <string>
-
-#include "v4l2_genicam_conversion.h"
-#include "error.h"
 
 namespace tcam::v4l2
 {
@@ -131,7 +130,7 @@ public:
 
 private:
     outcome::result<void> valid_value(double val);
-    inline double conv_double (int64_t value) const
+    inline double conv_double(int64_t value) const
     {
         if (m_converter)
         {
@@ -140,7 +139,7 @@ private:
         return value;
     }
 
-    inline int64_t conv_int (double value) const
+    inline int64_t conv_int(double value) const
     {
         if (m_converter)
         {

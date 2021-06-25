@@ -3,7 +3,6 @@
 
 #include "algorithms/tcam-algorithm.h"
 #include "img/image_fourcc_func.h"
-
 #include "logging.h"
 
 #include <chrono>
@@ -11,20 +10,17 @@
 namespace tcam::stream::filter
 {
 
-PropertyFilter::PropertyFilter(const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props,
-                               const std::vector<VideoFormatDescription>& device_formats)
+PropertyFilter::PropertyFilter(
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& props,
+    const std::vector<VideoFormatDescription>& device_formats)
 {
     bool has_bayer = false;
     for (const auto& format : device_formats)
     {
         auto fcc = (img::fourcc)format.get_fourcc();
-        if ( img::is_by8_fcc( fcc )
-             || img::is_by10_packed_fcc( fcc )
-             ||	img::is_by12_packed_fcc( fcc )
-             || img::is_by16_fcc( fcc )
-             || img::is_by12_fcc( fcc )
-             || img::is_by10_fcc( fcc )
-             || img::is_byfloat_fcc( fcc ))
+        if (img::is_by8_fcc(fcc) || img::is_by10_packed_fcc(fcc) || img::is_by12_packed_fcc(fcc)
+            || img::is_by16_fcc(fcc) || img::is_by12_fcc(fcc) || img::is_by10_fcc(fcc)
+            || img::is_byfloat_fcc(fcc))
         {
             has_bayer = true;
             break;
@@ -43,9 +39,10 @@ bool PropertyFilter::apply(std::shared_ptr<ImageBuffer> buffer)
     dim.cy = m_format.get_size().height;
 
     // TODO: generate from VideoFormat
-    img::img_type src_type = {bs.format.fourcc, dim, (int)bs.length};
+    img::img_type src_type = { bs.format.fourcc, dim, (int)bs.length };
 
-    img::img_descriptor src = img::make_img_desc_raw( src_type, img::img_plane{ buffer->get_data(), (int)bs.pitch } );
+    img::img_descriptor src =
+        img::make_img_desc_raw(src_type, img::img_plane { buffer->get_data(), (int)bs.pitch });
 
     m_impl->auto_pass(src);
 

@@ -15,11 +15,10 @@
  */
 
 #include "AFU420Device.h"
+#include "AFU420DeviceBackend.h"
+#include "AFU420PropertyImpl.h"
 #include "logging.h"
 #include "utils.h"
-
-#include "AFU420PropertyImpl.h"
-#include "AFU420DeviceBackend.h"
 
 #include <cmath>
 
@@ -35,9 +34,8 @@ bool AFU420Device::create_exposure()
     d.value = 100.0;
     d.default_value = 100.0;
 
-    auto exp = std::make_shared<AFU420PropertyDoubleImpl>("ExposureTime", d,
-                                                          tcam::afu420::AFU420Property::ExposureTime,
-                                                          m_backend);
+    auto exp = std::make_shared<AFU420PropertyDoubleImpl>(
+        "ExposureTime", d, tcam::afu420::AFU420Property::ExposureTime, m_backend);
 
     set_exposure(100.0);
 
@@ -67,7 +65,8 @@ bool AFU420Device::create_gain()
     }
     d.default_value = 292.0;
 
-    auto exp = std::make_shared<AFU420PropertyDoubleImpl>("Gain", d, tcam::afu420::AFU420Property::Gain, m_backend);
+    auto exp = std::make_shared<AFU420PropertyDoubleImpl>(
+        "Gain", d, tcam::afu420::AFU420Property::Gain, m_backend);
 
     m_properties.push_back(exp);
 
@@ -85,7 +84,8 @@ bool AFU420Device::create_focus()
     i.step = 1;
     i.default_value = value;
 
-    auto exp = std::make_shared<AFU420PropertyIntegerImpl>("Focus", i, tcam::afu420::AFU420Property::Focus, m_backend);
+    auto exp = std::make_shared<AFU420PropertyIntegerImpl>(
+        "Focus", i, tcam::afu420::AFU420Property::Focus, m_backend);
 
     m_properties.push_back(exp);
 
@@ -96,8 +96,8 @@ bool AFU420Device::create_focus()
 bool AFU420Device::create_shutter()
 {
     set_shutter(m_shutter);
-    m_properties.push_back(std::make_shared<AFU420PropertyBoolImpl>("Shutter", m_shutter,
-                                                                    tcam::afu420::AFU420Property::Shutter, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyBoolImpl>(
+        "Shutter", m_shutter, tcam::afu420::AFU420Property::Shutter, m_backend));
 
     return true;
 }
@@ -117,7 +117,8 @@ bool AFU420Device::create_hdr()
     i.value = 1;
     i.default_value = 1;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("HDR", i, tcam::afu420::AFU420Property::HDR, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "HDR", i, tcam::afu420::AFU420Property::HDR, m_backend));
 
     return true;
 }
@@ -157,8 +158,8 @@ bool AFU420Device::create_color_gain()
     ir.value = camera_to_color_gain(value);
     ir.default_value = 64;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("BalanceWhiteComponentRed",
-                                                                       ir, tcam::afu420::AFU420Property::WB_Red, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "BalanceWhiteComponentRed", ir, tcam::afu420::AFU420Property::WB_Red, m_backend));
 
 
     /// gain green
@@ -174,8 +175,8 @@ bool AFU420Device::create_color_gain()
     ig.value = camera_to_color_gain(value);
     ig.default_value = 64;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("BalanceWhiteComponentGreen",
-                                              ig, tcam::afu420::AFU420Property::WB_Green, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "BalanceWhiteComponentGreen", ig, tcam::afu420::AFU420Property::WB_Green, m_backend));
 
     /// gain blue
 
@@ -190,9 +191,8 @@ bool AFU420Device::create_color_gain()
     ib.value = camera_to_color_gain(value);
     ib.default_value = 64;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("BalanceWhiteComponentBlue",
-                                                                       ib, tcam::afu420::AFU420Property::WB_Green,
-                                                                       m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "BalanceWhiteComponentBlue", ib, tcam::afu420::AFU420Property::WB_Green, m_backend));
 
     return true;
 }
@@ -212,9 +212,8 @@ bool AFU420Device::create_strobe()
     i_sde.value = get_strobe(strobe_parameter::first_strobe_delay);
     i_sde.default_value = i_sde.value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("StrobeDelay", i_sde,
-                                                                       tcam::afu420::AFU420Property::StrobeDelay,
-                                                                       m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "StrobeDelay", i_sde, tcam::afu420::AFU420Property::StrobeDelay, m_backend));
 
     tcam_value_int i_sdu = {};
     i_sdu.min = 10;
@@ -223,9 +222,8 @@ bool AFU420Device::create_strobe()
     i_sdu.value = get_strobe(strobe_parameter::first_strobe_duration);
     i_sdu.default_value = i_sdu.value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("StrobeDuration", i_sdu,
-                                                                       tcam::afu420::AFU420Property::StrobeDuration,
-                                                                       m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "StrobeDuration", i_sdu, tcam::afu420::AFU420Property::StrobeDuration, m_backend));
 
 
     tcam_value_int i_sd = {};
@@ -235,9 +233,8 @@ bool AFU420Device::create_strobe()
     i_sd.value = get_strobe(strobe_parameter::second_strobe_delay);
     i_sd.default_value = i_sd.value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("StrobeDelaySecond", i_sd,
-                                                                       tcam::afu420::AFU420Property::StrobeDelaySecond,
-                                                                       m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "StrobeDelaySecond", i_sd, tcam::afu420::AFU420Property::StrobeDelaySecond, m_backend));
 
     tcam_value_int i_sds = {};
     i_sds.min = 10;
@@ -246,24 +243,27 @@ bool AFU420Device::create_strobe()
     i_sds.value = get_strobe(strobe_parameter::second_strobe_duration);
     i_sds.default_value = i_sds.value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("StrobeDurationSecond", i_sds,
-                                                                       tcam::afu420::AFU420Property::StrobeDurationSecond,
-                                                                       m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "StrobeDurationSecond",
+        i_sds,
+        tcam::afu420::AFU420Property::StrobeDurationSecond,
+        m_backend));
 
 
-    std::map<int, std::string> polarity_entries = {{{0, "ActiveLow"}, {1, "ActiveHigh"}}};
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("StrobePolarity", tcam::afu420::AFU420Property::StrobePolarity,
-                                                                    polarity_entries,
-                                                                    m_backend));
+    std::map<int, std::string> polarity_entries = { { { 0, "ActiveLow" }, { 1, "ActiveHigh" } } };
+    m_properties.push_back(
+        std::make_shared<AFU420PropertyEnumImpl>("StrobePolarity",
+                                                 tcam::afu420::AFU420Property::StrobePolarity,
+                                                 polarity_entries,
+                                                 m_backend));
 
 
     std::map<int, std::string> mode_map;
     mode_map.emplace(1, "Single Strobe");
     mode_map.emplace(2, "Double Strobe");
 
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("StrobeMode", tcam::afu420::AFU420Property::StrobeMode,
-                                                                    mode_map,
-                                                                    m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>(
+        "StrobeMode", tcam::afu420::AFU420Property::StrobeMode, mode_map, m_backend));
 
     return true;
 }
@@ -277,7 +277,8 @@ bool AFU420Device::create_offsets()
     i_ox.max = 7463; //m_uPixelMaxX - m_uPixelMinX;
     i_ox.step = 12;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("OffsetX", i_ox, tcam::afu420::AFU420Property::OffsetX, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "OffsetX", i_ox, tcam::afu420::AFU420Property::OffsetX, m_backend));
 
     tcam_value_int i_oy = {};
 
@@ -285,12 +286,12 @@ bool AFU420Device::create_offsets()
     i_oy.max = 5115; //m_uPixelMaxY - m_uPixelMinY;
     i_oy.step = 4;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>("OffsetY", i_oy, tcam::afu420::AFU420Property::OffsetY, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
+        "OffsetY", i_oy, tcam::afu420::AFU420Property::OffsetY, m_backend));
 
-    std::map<int, std::string> offset_entries = {{{0, "Off"}, {1, "On"}}};
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("OffsetAuto", tcam::afu420::AFU420Property::OffsetAuto,
-                                                                    offset_entries,
-                                                                    m_backend));
+    std::map<int, std::string> offset_entries = { { { 0, "Off" }, { 1, "On" } } };
+    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>(
+        "OffsetAuto", tcam::afu420::AFU420Property::OffsetAuto, offset_entries, m_backend));
 
     return true;
 }
@@ -298,17 +299,21 @@ bool AFU420Device::create_offsets()
 
 bool AFU420Device::create_binning()
 {
-    std::map<int, std::string> binning_entries = {{{1, "X1"}, {2, "X2"}, {4, "X4"}, {8, "X8"}}};
+    std::map<int, std::string> binning_entries = {
+        { { 1, "X1" }, { 2, "X2" }, { 4, "X4" }, { 8, "X8" } }
+    };
 
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("BinningHorizontal",
-                                                                    tcam::afu420::AFU420Property::BinningHorizontal,
-                                                                    binning_entries,
-                                                                    m_backend));
+    m_properties.push_back(
+        std::make_shared<AFU420PropertyEnumImpl>("BinningHorizontal",
+                                                 tcam::afu420::AFU420Property::BinningHorizontal,
+                                                 binning_entries,
+                                                 m_backend));
 
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("BinningVertical",
-                                                                    tcam::afu420::AFU420Property::BinningVertical,
-                                                                    binning_entries,
-                                                                    m_backend));
+    m_properties.push_back(
+        std::make_shared<AFU420PropertyEnumImpl>("BinningVertical",
+                                                 tcam::afu420::AFU420Property::BinningVertical,
+                                                 binning_entries,
+                                                 m_backend));
     return true;
 }
 
@@ -323,10 +328,8 @@ bool AFU420Device::create_ois()
     map2.emplace(5, "ON Circle Mode");
     map2.emplace(6, "OFF");
 
-    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>("OISMode",
-                                                                    tcam::afu420::AFU420Property::OISMode,
-                                                                    map2,
-                                                                    m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyEnumImpl>(
+        "OISMode", tcam::afu420::AFU420Property::OISMode, map2, m_backend));
 
 
     int64_t x_pos = 0;
@@ -342,7 +345,8 @@ bool AFU420Device::create_ois()
     pos_x.value = x_pos;
     pos_x.default_value = 0;
 
-    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>("OISPosX", pos_x, tcam::afu420::AFU420Property::OISPosX, m_backend));
+    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>(
+        "OISPosX", pos_x, tcam::afu420::AFU420Property::OISPosX, m_backend));
 
     tcam_value_int pos_y = {};
 
@@ -352,7 +356,8 @@ bool AFU420Device::create_ois()
     pos_y.value = y_pos;
     pos_y.default_value = 0;
 
-    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>("OISPosY", pos_y, tcam::afu420::AFU420Property::OISPosY, m_backend));
+    m_properties.push_back(std::make_shared<tcam::property::AFU420PropertyIntegerImpl>(
+        "OISPosY", pos_y, tcam::afu420::AFU420Property::OISPosY, m_backend));
 
     return true;
 }
@@ -484,7 +489,6 @@ bool AFU420Device::set_shutter(bool open)
     }
     return true;
 }
-
 
 
 // bool AFU420Device::get_shutter()

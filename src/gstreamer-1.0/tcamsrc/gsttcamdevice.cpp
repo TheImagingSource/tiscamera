@@ -29,9 +29,7 @@ enum
 };
 
 
-static void tcam_device_init(TcamDevice* /*self*/)
-{
-}
+static void tcam_device_init(TcamDevice* /*self*/) {}
 
 static void tcam_device_finalize(GObject* object)
 {
@@ -78,5 +76,4 @@ static void tcam_device_class_init(TcamDeviceClass* klass)
     gobject_class->dispose = tcam_device_dispose;
 
     gst_device_class->create_element = tcam_device_create_element;
-
 }

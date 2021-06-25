@@ -25,8 +25,8 @@
 #include "public_utils.h"
 #include "tcamgststrings.h"
 
-#include <map>
 #include <algorithm> //std::find
+#include <map>
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
 
@@ -81,14 +81,22 @@ typedef struct tcam_src_element_
 } tcam_src_element;
 
 
-std::vector<tcam_src_element> get_possible_sources ()
+std::vector<tcam_src_element> get_possible_sources()
 {
     std::vector<tcam_src_element> ret;
 
-    ret.push_back({"tcammainsrc", "GstTcamMainSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB}});
-    ret.push_back({"tcamtegrasrc", "GstTcamTegraSrc", {TCAM_DEVICE_TYPE_TEGRA}});
-    ret.push_back({"tcampimipisrc", "GstTcamPiMipiSrc", {TCAM_DEVICE_TYPE_PIMIPI}});
-    ret.push_back({"tcamsrc", "GstTcamSrc", {TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB, TCAM_DEVICE_TYPE_TEGRA, TCAM_DEVICE_TYPE_PIMIPI}});
+    ret.push_back({ "tcammainsrc",
+                    "GstTcamMainSrc",
+                    { TCAM_DEVICE_TYPE_V4L2, TCAM_DEVICE_TYPE_ARAVIS, TCAM_DEVICE_TYPE_LIBUSB } });
+    ret.push_back({ "tcamtegrasrc", "GstTcamTegraSrc", { TCAM_DEVICE_TYPE_TEGRA } });
+    ret.push_back({ "tcampimipisrc", "GstTcamPiMipiSrc", { TCAM_DEVICE_TYPE_PIMIPI } });
+    ret.push_back({ "tcamsrc",
+                    "GstTcamSrc",
+                    { TCAM_DEVICE_TYPE_V4L2,
+                      TCAM_DEVICE_TYPE_ARAVIS,
+                      TCAM_DEVICE_TYPE_LIBUSB,
+                      TCAM_DEVICE_TYPE_TEGRA,
+                      TCAM_DEVICE_TYPE_PIMIPI } });
 
     return ret;
 }
@@ -102,16 +110,14 @@ std::vector<std::string> get_source_element_factory_names()
 
     ret.reserve(sources.size());
 
-    for (const auto& s : sources)
-    {
-        ret.push_back(s.g_type_name_str);
-    }
+    for (const auto& s : sources) { ret.push_back(s.g_type_name_str); }
 
     return ret;
 }
 
 
-GstElement* tcam_gst_find_camera_src_rec (GstElement* element, const std::vector<std::string>& factory_names)
+GstElement* tcam_gst_find_camera_src_rec(GstElement* element,
+                                         const std::vector<std::string>& factory_names)
 {
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
 
@@ -143,7 +149,7 @@ GstElement* tcam_gst_find_camera_src_rec (GstElement* element, const std::vector
 }
 
 
-GstElement* tcam_gst_find_camera_src (GstElement* element)
+GstElement* tcam_gst_find_camera_src(GstElement* element)
 {
     std::vector<std::string> factory_names = get_source_element_factory_names();
 
@@ -151,7 +157,7 @@ GstElement* tcam_gst_find_camera_src (GstElement* element)
 }
 
 
-std::string get_plugin_version (const char* plugin_name)
+std::string get_plugin_version(const char* plugin_name)
 {
     GstPlugin* plugin = gst_plugin_load_by_name(plugin_name);
     if (plugin == nullptr)
@@ -306,7 +312,7 @@ static bool tcam_gst_is_fourcc_bayer(const uint32_t fourcc)
 }
 
 
-static bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer10_fourcc(const uint32_t fourcc)
 {
    if (fourcc == FOURCC_GBRG10
        || fourcc == FOURCC_GRBG10
@@ -319,7 +325,7 @@ static bool tcam_gst_is_bayer10_fourcc (const uint32_t fourcc)
 }
 
 
-static bool tcam_gst_is_bayer10_packed_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer10_packed_fourcc(const uint32_t fourcc)
 {
    if (fourcc == FOURCC_GBRG10_SPACKED
        || fourcc == FOURCC_GRBG10_SPACKED
@@ -336,7 +342,7 @@ static bool tcam_gst_is_bayer10_packed_fourcc (const uint32_t fourcc)
 }
 
 
-static bool tcam_gst_is_bayer12_fourcc (const uint32_t fourcc)
+static bool tcam_gst_is_bayer12_fourcc(const uint32_t fourcc)
 {
     if (fourcc == FOURCC_GBRG12
         || fourcc == FOURCC_GRBG12
@@ -1814,7 +1820,8 @@ bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_imag
     if (caps)
     {
         gst_caps_to_tcam_video_format(caps, &image->format);
-        image->pitch = img::calc_minimum_pitch(static_cast<img::fourcc>(image->format.fourcc), image->format.width);
+        image->pitch = img::calc_minimum_pitch(static_cast<img::fourcc>(image->format.fourcc),
+                                               image->format.width);
     }
 
     gst_buffer_unmap(buffer, &info);

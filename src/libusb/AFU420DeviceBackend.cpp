@@ -17,7 +17,6 @@
 #include "AFU420DeviceBackend.h"
 
 #include "AFU420Device.h"
-
 #include "utils.h"
 
 using namespace tcam::afu420;
@@ -32,7 +31,6 @@ static int camera_to_color_gain(double value)
 {
     return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
 }
-
 
 
 outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Property id)
@@ -54,7 +52,6 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
         case tcam::afu420::AFU420Property::HDR:
         {
             return p_device->get_hdr();
-
         }
         case tcam::afu420::AFU420Property::WB_Red:
         {
@@ -137,7 +134,8 @@ outcome::result<int64_t> AFU420DeviceBackend::get_int(tcam::afu420::AFU420Proper
 }
 
 
-outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property id, int64_t new_value)
+outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property id,
+                                                   int64_t new_value)
 {
     switch (id)
     {
@@ -156,7 +154,6 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
                 return outcome::success();
             }
             return tcam::status::UndefinedError;
-
         }
         case tcam::afu420::AFU420Property::Focus:
         {
@@ -184,7 +181,8 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         }
         case tcam::afu420::AFU420Property::WB_Green:
         {
-            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1, new_value))
+            if (p_device->set_color_gain_factor(AFU420Device::color_gain::ColorGainGreen1,
+                                                new_value))
             {
                 return outcome::success();
             }
@@ -216,7 +214,8 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         }
         case tcam::afu420::AFU420Property::StrobeDuration:
         {
-            if (p_device->set_strobe(AFU420Device::strobe_parameter::first_strobe_duration, new_value))
+            if (p_device->set_strobe(AFU420Device::strobe_parameter::first_strobe_duration,
+                                     new_value))
             {
                 return outcome::success();
             }
@@ -224,7 +223,8 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         }
         case tcam::afu420::AFU420Property::StrobeDelaySecond:
         {
-            if (p_device->set_strobe(AFU420Device::strobe_parameter::second_strobe_delay, new_value))
+            if (p_device->set_strobe(AFU420Device::strobe_parameter::second_strobe_delay,
+                                     new_value))
             {
                 return outcome::success();
             }
@@ -232,7 +232,8 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
         }
         case tcam::afu420::AFU420Property::StrobeDurationSecond:
         {
-            if (p_device->set_strobe(AFU420Device::strobe_parameter::second_strobe_duration, new_value))
+            if (p_device->set_strobe(AFU420Device::strobe_parameter::second_strobe_duration,
+                                     new_value))
             {
                 return outcome::success();
             }
@@ -263,7 +264,6 @@ outcome::result<void> AFU420DeviceBackend::set_int(tcam::afu420::AFU420Property 
                 return outcome::success();
             }
             return tcam::status::UndefinedError;
-
         }
         case tcam::afu420::AFU420Property::OISPosY:
         {
@@ -341,7 +341,6 @@ outcome::result<void> AFU420DeviceBackend::set_bool(tcam::afu420::AFU420Property
             return tcam::status::PropertyDoesNotExist;
         }
     }
-
 }
 
 

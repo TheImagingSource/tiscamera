@@ -16,10 +16,9 @@
 
 #include "CaptureDeviceImpl.h"
 
+#include "DeviceIndex.h"
 #include "DeviceInterface.h"
 #include "PipelineManager.h"
-
-#include "DeviceIndex.h"
 #include "SoftwareProperties.h"
 #include "logging.h"
 #include "utils.h"
@@ -38,10 +37,7 @@ struct bad_device : std::exception
 };
 
 
-CaptureDeviceImpl::CaptureDeviceImpl()
-    : pipeline(nullptr), device(nullptr), index_()
-{
-}
+CaptureDeviceImpl::CaptureDeviceImpl() : pipeline(nullptr), device(nullptr), index_() {}
 
 
 CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& _device)

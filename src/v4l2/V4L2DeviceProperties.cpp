@@ -102,23 +102,28 @@ std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            return std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(
+                qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            return std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(
+                qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            return std::make_shared<tcam::property::V4L2PropertyEnumImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<tcam::property::V4L2PropertyEnumImpl>(
+                qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            return std::make_shared<tcam::property::V4L2PropertyCommandImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<tcam::property::V4L2PropertyCommandImpl>(
+                qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            return std::make_shared<tcam::property::V4L2PropertyBoolImpl>(qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<tcam::property::V4L2PropertyBoolImpl>(
+                qctrl, &ext_ctrl, p_property_backend, mapping);
         }
         case TCAM_PROPERTY_TYPE_STRING:
         default:
@@ -132,7 +137,8 @@ std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4
 }
 
 
-void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties)
+void V4l2Device::sort_properties(
+    std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties)
 {
     if (properties.empty())
     {
@@ -166,8 +172,6 @@ void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::proper
             }
             p++;
         }
-
-
     };
 
     preserve_id(0x199e201, "ExposureTime");
@@ -178,7 +182,7 @@ void V4l2Device::sort_properties(std::map<uint32_t, std::shared_ptr<tcam::proper
 
     m_properties.reserve(properties.size());
 
-    for( auto it = properties.begin(); it != properties.end(); ++it )
+    for (auto it = properties.begin(); it != properties.end(); ++it)
     {
         m_properties.push_back(it->second);
     }

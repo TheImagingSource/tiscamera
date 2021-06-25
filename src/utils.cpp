@@ -217,7 +217,6 @@ tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
 }
 
 
-
 bool tcam::compare_double(double val1, double val2)
 {
     return std::fabs(val1 - val2) < std::numeric_limits<double>::epsilon();
@@ -238,7 +237,6 @@ bool tcam::in_range(const tcam_image_size& minimum,
     }
     return true;
 }
-
 
 
 unsigned int tcam::get_pid_from_lockfile(const std::string& filename)

@@ -258,7 +258,10 @@ bool load_device_settings(TcamProp* tcam, const std::string& serial, const std::
 
         if (!ret)
         {
-            SPDLOG_ERROR("Setting '{}' to '{}' caused an error",
+            // iter.value().dump() will add "" around a string
+            // this is to signify that it is in fact, a string
+            //
+            SPDLOG_ERROR("Setting '{}' to {} caused an error",
                          iter.key().c_str(),
                          iter.value().dump().c_str());
         }

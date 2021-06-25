@@ -15,9 +15,9 @@
  */
 
 #include "AFU050Device.h"
+
 #include "AFU050DeviceBackend.h"
 #include "AFU050PropertyImpl.h"
-
 #include "UsbHandler.h"
 #include "UsbSession.h"
 #include "afu050_definitions.h"
@@ -131,17 +131,26 @@ void AFU050Device::create_formats()
 void AFU050Device::create_properties()
 {
     add_double("ExposureTime", VC_UNIT_INPUT_TERMINAL, CT_EXPOSURE_TIME_ABSOLUTE_CONTROL);
-    add_enum("ExposureAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_EXPOSURE, {{{0, "Off"}, {1, "On"}}});
+    add_enum("ExposureAuto",
+             VC_UNIT_EXTENSION_UNIT,
+             XU_AUTO_EXPOSURE,
+             { { { 0, "Off" }, { 1, "On" } } });
 
     add_double("Gain", VC_UNIT_PROCESSING_UNIT, PU_GAIN_CONTROL);
-    add_enum("GainAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN, {{{0, "Off"}, {1, "On"}}});
+    add_enum("GainAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_GAIN, { { { 0, "Off" }, { 1, "On" } } });
 
-    add_enum("FocusAuto", VC_UNIT_EXTENSION_UNIT, XU_FOCUS_ONE_PUSH, {{{0, "Off"}, {1, "Once"}}});
+    add_enum("FocusAuto",
+             VC_UNIT_EXTENSION_UNIT,
+             XU_FOCUS_ONE_PUSH,
+             { { { 0, "Off" }, { 1, "Once" } } });
 
     add_int("BalanceWhiteRed", VC_UNIT_EXTENSION_UNIT, XU_GAIN_R_CONTROL);
     add_int("BalanceWhiteGreen", VC_UNIT_EXTENSION_UNIT, XU_GAIN_G_CONTROL);
     add_int("BalanceWhiteBlue", VC_UNIT_EXTENSION_UNIT, XU_GAIN_B_CONTROL);
-    add_enum("BalanceWhiteAuto", VC_UNIT_EXTENSION_UNIT, XU_AUTO_WHITE_BALANCE, {{{0, "Off"}, {1, "Continuous"}}});
+    add_enum("BalanceWhiteAuto",
+             VC_UNIT_EXTENSION_UNIT,
+             XU_AUTO_WHITE_BALANCE,
+             { { { 0, "Off" }, { 1, "Continuous" } } });
 
     add_double("Saturation", VC_UNIT_PROCESSING_UNIT, PU_SATURATION_CONTROL);
     add_int("Contrast", VC_UNIT_PROCESSING_UNIT, PU_CONTRAST_CONTROL);
@@ -505,11 +514,10 @@ void AFU050Device::add_int(const std::string& name, const VC_UNIT unit, const un
 
     SPDLOG_DEBUG("adding int {} {} {}", name, unit, prop);
 
-    control_definition cd = {unit, prop};
+    control_definition cd = { unit, prop };
 
-    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyIntegerImpl>(name,
-                                                                                       cd,
-                                                                                       m_backend));
+    m_properties.push_back(
+        std::make_shared<tcam::property::AFU050PropertyIntegerImpl>(name, cd, m_backend));
 }
 
 
@@ -522,16 +530,16 @@ void AFU050Device::add_double(const std::string& name, const VC_UNIT unit, const
 
     SPDLOG_DEBUG("adding double {} {} {}", name, unit, prop);
 
-    control_definition cd = {unit, prop};
+    control_definition cd = { unit, prop };
 
-    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyDoubleImpl>(name,
-                                                                                      cd,
-                                                                                      m_backend));
+    m_properties.push_back(
+        std::make_shared<tcam::property::AFU050PropertyDoubleImpl>(name, cd, m_backend));
 }
 
 
 void AFU050Device::add_enum(const std::string& name,
-                            const VC_UNIT unit, const unsigned char prop,
+                            const VC_UNIT unit,
+                            const unsigned char prop,
                             std::map<int, std::string> entries)
 {
     if (unit == VC_UNIT_HEADER || prop == 0)
@@ -541,12 +549,10 @@ void AFU050Device::add_enum(const std::string& name,
 
     SPDLOG_DEBUG("adding enum {} {} {}", name, unit, prop);
 
-    control_definition cd = {unit, prop};
+    control_definition cd = { unit, prop };
 
-    m_properties.push_back(std::make_shared<tcam::property::AFU050PropertyEnumImpl>(name,
-                                                                                    cd,
-                                                                                    entries,
-                                                                                    m_backend));
+    m_properties.push_back(
+        std::make_shared<tcam::property::AFU050PropertyEnumImpl>(name, cd, entries, m_backend));
 }
 
 

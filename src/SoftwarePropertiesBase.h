@@ -70,7 +70,10 @@ struct software_prop_desc
         range_d_ = r;
     }
 
-    software_prop_desc(software_prop id, std::string_view n, const std::map<int, std::string>& e, int default_val)
+    software_prop_desc(software_prop id,
+                       std::string_view n,
+                       const std::map<int, std::string>& e,
+                       int default_val)
         : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_ENUMERATION)
     {
         //range_ = {};

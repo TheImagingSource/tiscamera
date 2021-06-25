@@ -3,11 +3,11 @@
 #pragma once
 
 #include "PropertyInterfaces.h"
-
-#include "ep_defines_rx.h"
 #include "compiler_defines.h"
-#include <memory>
+#include "ep_defines_rx.h"
+
 #include <map>
+#include <memory>
 
 VISIBILITY_INTERNAL
 
@@ -19,11 +19,10 @@ class AFU420DeviceBackend;
 class AFU420PropertyIntegerImpl : public IPropertyInteger
 {
 public:
-
-    AFU420PropertyIntegerImpl (const std::string& name,
-                               tcam_value_int i,
-                               tcam::afu420::AFU420Property id,
-                               std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
+    AFU420PropertyIntegerImpl(const std::string& name,
+                              tcam_value_int i,
+                              tcam::afu420::AFU420Property id,
+                              std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -59,7 +58,6 @@ public:
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-
     outcome::result<void> valid_value(int64_t val);
 
     std::weak_ptr<tcam::property::AFU420DeviceBackend> m_cam;
@@ -78,11 +76,10 @@ private:
 class AFU420PropertyDoubleImpl : public IPropertyFloat
 {
 public:
-
-    AFU420PropertyDoubleImpl (const std::string& name,
-                              tcam_value_double d,
-                              tcam::afu420::AFU420Property id,
-                              std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
+    AFU420PropertyDoubleImpl(const std::string& name,
+                             tcam_value_double d,
+                             tcam::afu420::AFU420Property id,
+                             std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -118,7 +115,6 @@ public:
     virtual outcome::result<void> set_value(double new_value) final;
 
 private:
-
     outcome::result<void> valid_value(double val);
 
     std::weak_ptr<tcam::property::AFU420DeviceBackend> m_cam;
@@ -136,11 +132,10 @@ private:
 class AFU420PropertyBoolImpl : public IPropertyBool
 {
 public:
-
-    AFU420PropertyBoolImpl (const std::string& name,
-                            bool default_value,
-                            tcam::afu420::AFU420Property id,
-                            std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
+    AFU420PropertyBoolImpl(const std::string& name,
+                           bool default_value,
+                           tcam::afu420::AFU420Property id,
+                           std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -165,7 +160,6 @@ public:
     virtual outcome::result<void> set_value(bool new_value) final;
 
 private:
-
     std::string m_name;
     std::weak_ptr<tcam::property::AFU420DeviceBackend> m_cam;
 
@@ -175,7 +169,6 @@ private:
     bool m_value;
     tcam::afu420::AFU420Property m_id;
 };
-
 
 
 class AFU420PropertyEnumImpl : public IPropertyEnum
@@ -227,7 +220,6 @@ private:
 };
 
 
-
-}
+} // namespace tcam::property
 
 VISIBILITY_POP

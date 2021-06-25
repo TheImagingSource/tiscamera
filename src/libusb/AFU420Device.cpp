@@ -15,9 +15,8 @@
  */
 
 #include "AFU420Device.h"
+
 #include "AFU420DeviceBackend.h"
-
-
 #include "UsbHandler.h"
 #include "UsbSession.h"
 #include "format.h"
@@ -499,25 +498,24 @@ void AFU420Device::create_formats()
 
         std::vector<struct framerate_mapping> rf;
 
-        auto add_res = [&rf, this] (stream_fmt_data& _fmt, tcam_image_size& size)
-            {
-                struct tcam_resolution_description res = {};
-                res.type = TCAM_RESOLUTION_TYPE_FIXED;
-                res.min_size.width = size.width;
-                res.min_size.height = size.height;
-                res.max_size.width = size.width;
-                res.max_size.height = size.height;
+        auto add_res = [&rf, this](stream_fmt_data& _fmt, tcam_image_size& size) {
+            struct tcam_resolution_description res = {};
+            res.type = TCAM_RESOLUTION_TYPE_FIXED;
+            res.min_size.width = size.width;
+            res.min_size.height = size.height;
+            res.max_size.width = size.width;
+            res.max_size.height = size.height;
 
-                double fps_min = 0;
-                double fps_max = 0;
+            double fps_min = 0;
+            double fps_max = 0;
 
-                this->get_frame_rate_range(_fmt.fmt_in, 1, size, fps_min, fps_max);
+            this->get_frame_rate_range(_fmt.fmt_in, 1, size, fps_min, fps_max);
 
-                std::vector<double> f = create_steps_for_range(fps_min, fps_max);
+            std::vector<double> f = create_steps_for_range(fps_min, fps_max);
 
-                framerate_mapping r = { res, f };
-                rf.push_back(r);
-            };
+            framerate_mapping r = { res, f };
+            rf.push_back(r);
+        };
 
         add_res(fmt, fmt.dim_max);
 
@@ -543,7 +541,8 @@ void AFU420Device::create_formats()
 }
 
 
-tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc, tcam_image_size size) const
+tcam_image_size tcam::AFU420Device::calculate_auto_offset(uint32_t fourcc,
+                                                          tcam_image_size size) const
 {
     tcam_image_size max = {};
 
@@ -570,7 +569,7 @@ AFU420Device::sResolutionConf tcam::AFU420Device::videoformat_to_resolution_conf
     {
         if (format.get_size() == max_sensor_dim_ || format.get_size() == max_sensor_dim_by12)
         {
-            offset = {0, 0};
+            offset = { 0, 0 };
         }
         else
         {

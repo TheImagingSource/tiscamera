@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "error.h"
-
 #include "ep_defines_rx.h"
+#include "error.h"
 
 namespace tcam
 {
@@ -41,4 +40,4 @@ private:
     AFU420Device* p_device;
 };
 
-}
+} // namespace tcam::property

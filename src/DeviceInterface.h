@@ -19,7 +19,6 @@
 
 #include "DeviceInfo.h"
 #include "ImageBuffer.h"
-
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"
 #include "VideoFormat.h"
