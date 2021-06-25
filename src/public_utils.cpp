@@ -16,7 +16,6 @@
 
 #include "public_utils.h"
 
-#include "format.h"
 #include "utils.h"
 
 #include <algorithm>

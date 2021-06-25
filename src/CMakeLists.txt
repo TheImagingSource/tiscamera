@@ -43,7 +43,7 @@ endif (BUILD_GST_1_0)
 if (TCAM_ENABLE_BASE_LIBRARIES)
 
 set(base
-  format.cpp
+  
   logging.cpp
   DeviceInfo.cpp
   ImageBuffer.cpp
@@ -57,7 +57,7 @@ set(base
   VideoFormat.cpp
   VideoFormatDescription.cpp
   ImageSink.cpp
-  json.cpp
+  
   error.cpp
   )
 

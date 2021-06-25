@@ -28,7 +28,6 @@
 #include "ImageBuffer.h"
 #include "ImageSink.h"
 #include "base_types.h"
-#include "json.h"
 #include "public_utils.h"
 #include "version.h"
 

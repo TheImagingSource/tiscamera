@@ -19,7 +19,6 @@
 #include "AFU420DeviceBackend.h"
 #include "UsbHandler.h"
 #include "UsbSession.h"
-#include "format.h"
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img/image_fourcc_func.h>
 #include "logging.h"

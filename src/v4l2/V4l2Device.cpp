@@ -17,7 +17,6 @@
 #include "V4l2Device.h"
 
 #include "dfk73.h"
-#include "format.h"
 #include <dutils_img/fcc_to_string.h>
 #include "logging.h"
 #include "utils.h"
