@@ -18,7 +18,7 @@
 #define TCAM_GSTTCAMBASE_H
 
 #include "gst_helper.h"
-#include "tcam.h"
+#include "../tcam.h"
 
 #include <gst/gst.h>
 #include <stdint.h>

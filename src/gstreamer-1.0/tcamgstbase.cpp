@@ -16,11 +16,11 @@
 
 #include "tcamgstbase.h"
 
-#include "base_types.h"
+#include "../base_types.h"
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img/image_fourcc_func.h>
-#include "logging.h"
-#include "public_utils.h"
+#include "../logging.h"
+#include "../public_utils.h"
 #include "tcamgststrings.h"
 
 #include <algorithm> //std::find
