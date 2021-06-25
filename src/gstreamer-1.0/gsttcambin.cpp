@@ -20,13 +20,15 @@
 #include "gst_helper.h"
 #include "tcamgstbase.h"
 #include "tcamgstjson.h"
-#include "tcamprop.h"
+#include "../gobject/tcamprop.h"
 
 #include <cstring>
 #include <glib-object.h>
 #include <string>
 #include <unistd.h>
 #include <vector>
+
+#include "../version.h"
 
 struct tcambin_data
 {

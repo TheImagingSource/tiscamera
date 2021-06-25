@@ -16,6 +16,8 @@
 
 #include "tcamgstbase.h"
 
+#include "../tcam.h"
+
 #include "../base_types.h"
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img/image_fourcc_func.h>
@@ -1767,68 +1769,4 @@ GstCaps* convert_videoformatsdescription_to_caps(
     }
 
     return caps;
-}
-
-bool gst_caps_to_tcam_video_format(GstCaps* caps, struct tcam_video_format* format)
-{
-    if (!caps || !gst_caps_is_fixed(caps) || !format)
-    {
-        return false;
-    }
-
-    *format = {};
-
-    GstStructure* struc = gst_caps_get_structure(caps, 0);
-
-    format->fourcc = tcam_fourcc_from_gst_1_0_caps_string(
-        gst_structure_get_name(struc), gst_structure_get_string(struc, "format"));
-
-    gint tmp_w, tmp_h;
-    gst_structure_get_int(struc, "width", &tmp_w);
-    gst_structure_get_int(struc, "height", &tmp_h);
-    format->width = tmp_w < 0 ? 0 : tmp_w;
-    format->height = tmp_h < 0 ? 0 : tmp_h;
-
-    int num;
-    int den;
-    gst_structure_get_fraction(struc, "framerate", &num, &den);
-
-    format->framerate = den / num;
-
-    return true;
-}
-
-
-bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_image_buffer* image)
-{
-    if (!buffer || !image)
-    {
-        return false;
-    }
-
-    *image = {};
-
-    GstMapInfo info;
-
-    gst_buffer_map(buffer, &info, GST_MAP_READ);
-
-    image->pData = info.data;
-    image->length = info.size;
-
-    if (caps)
-    {
-        gst_caps_to_tcam_video_format(caps, &image->format);
-        image->pitch = img::calc_minimum_pitch(static_cast<img::fourcc>(image->format.fourcc),
-                                               image->format.width);
-    }
-
-    gst_buffer_unmap(buffer, &info);
-
-    return true;
-}
-
-
-int calc_pitch(int fourcc, int width)
-{
-    return img::calc_minimum_pitch(static_cast<img::fourcc>(fourcc), width);
 }

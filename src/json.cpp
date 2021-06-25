@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+#include "tcam.h"
+
+#include "json.h"
 
 #include "logging.h"
 
 #include <iostream>
-#include <json.h>
 #include <json/json.hpp>
 
 
@@ -37,7 +39,7 @@ static bool property_to_json(std::shared_ptr<tcam::property::IPropertyBase> /*pr
 }
 
 
-std::string tcam::create_json_state(std::shared_ptr<CaptureDevice> dev)
+std::string tcam::create_json_state( const std::shared_ptr<CaptureDevice>& dev)
 {
     auto props = dev->get_properties();
 
@@ -73,7 +75,7 @@ std::string tcam::create_json_state(std::shared_ptr<CaptureDevice> dev)
 }
 
 
-bool serial_matches(json j, const std::string& serial)
+static bool serial_matches(json j, const std::string& serial)
 {
     std::string serial_str;
     try
@@ -98,7 +100,7 @@ bool serial_matches(json j, const std::string& serial)
 }
 
 
-bool version_matches(json j, const std::string& wanted_version = tcam::JSON_FILE_VERSION_CURRENT)
+static bool version_matches(json j, const std::string& wanted_version = tcam::JSON_FILE_VERSION_CURRENT)
 {
     std::string version;
     try
@@ -126,7 +128,7 @@ bool version_matches(json j, const std::string& wanted_version = tcam::JSON_FILE
 }
 
 
-std::pair<bool, std::vector<std::string>> tcam::load_json_state(std::shared_ptr<CaptureDevice> dev,
+std::pair<bool, std::vector<std::string>> tcam::load_json_state( const std::shared_ptr<CaptureDevice>& dev,
                                                                 const std::string& state)
 {
     json j;

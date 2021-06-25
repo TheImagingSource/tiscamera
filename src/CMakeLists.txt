@@ -15,6 +15,7 @@
 
 
 add_subdirectory(lib/dutils_image)
+add_subdirectory(gobject)
 
 
 # helper funcion to receive the value of an arbitrary variable
@@ -33,8 +34,7 @@ function(pkg_check_variable _pkg _name)
 endfunction()
 
 
-add_subdirectory(gobject)
-add_subdirectory(algorithms)
+#add_subdirectory(algorithms)
 
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
@@ -70,6 +70,9 @@ PUBLIC
 PRIVATE
     dutils::dutils_img_auto
 )
+    
+target_include_directories( tcam-base PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
+
 
 target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 set_project_warnings(tcam-base)
@@ -148,8 +151,6 @@ if (BUILD_LIBUSB)
 
 endif (BUILD_LIBUSB)
 
-include_directories(SYSTEM "${TCAM_SOURCE_DIR}/external/")
-
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
 
@@ -182,14 +183,16 @@ add_custom_target(generate-version-file
   DEPENDS ${TCAM_VERSION_FILE})
 
 
-add_library(tcam SHARED ${srcs} $<TARGET_OBJECTS:tcam-base> ${TCAM_VERSION_FILE})
-target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
-target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include")
-
 add_dependencies(tcam-base generate-version-file)
+
+add_library(tcam SHARED ${srcs} ${TCAM_VERSION_FILE})
+
 set_project_warnings(tcam)
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
+
+target_include_directories( tcam PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
+
 
 # set_target_properties(tcam
 #   PROPERTIES
@@ -197,18 +200,14 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 #   CXX_VISIBILITY_PRESET hidden
 #   )
 
-#target_link_options(tcam PUBLIC "-Wl,--exclude-libs,ALL")
-
-# target_link_libraries(tcam dl)
 target_link_libraries(tcam 
+PUBLIC
+    spdlog::spdlog
+    tcam-base
 PRIVATE 
-spdlog 
-tcam-algorithms
-dutils::dutils_img
+#    tcam-algorithms
 )
 
-
-# add_dependencies(tcam-base version-header)
 
 if (BUILD_V4L2)
 

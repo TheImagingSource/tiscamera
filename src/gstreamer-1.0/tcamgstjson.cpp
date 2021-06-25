@@ -16,10 +16,8 @@
 
 #include "tcamgstjson.h"
 
-#include "../tcam.h"
+#include "../json.h"
 
-//#include <fstream>
-//#include <iostream>
 #include <json/json.hpp>
 
 #include "../logging.h"

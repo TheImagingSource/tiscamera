@@ -13,22 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# set(srcs
-#   roi.cpp
-#   roi_preset.cpp
-#   roi_change_behavior.cpp
-#   RegionOfInterest.cpp
-#   AutoFocus.cpp
-#   auto_focus.cpp
-#   image_sampling.cpp
-#   bayer.cpp
-#   whitebalance.cpp
-#   auto_exposure.cpp
-#   pid_controller.cpp
-#   img_rect_tools.cpp
-#   work_pool.cpp
-#   parallel.cpp)
-
 set(srcs
   bayer.cpp
   image_sampling.h
@@ -52,13 +36,12 @@ set(srcs
   tcam-algorithm.h
   )
 
-add_library(tcam-algorithms SHARED ${srcs} $<TARGET_OBJECTS:tcam-base>)
+add_library(tcam-algorithms SHARED ${srcs})
 set_project_warnings(tcam-algorithms)
 
-target_link_libraries(tcam-algorithms PRIVATE dutils::dutils_img_auto dutils::dutils_img )
+target_link_libraries(tcam-algorithms PRIVATE dutils::dutils_img_auto dutils::dutils_img tcam-base )
 
 target_include_directories(tcam-algorithms PRIVATE "${TCAM_SOURCE_DIR}/external")
-#target_include_directories(tcam-algorithms PRIVATE "${TCAM_BINARY_DIR}")
 
 set_property(TARGET tcam-algorithms PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam-algorithms PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})

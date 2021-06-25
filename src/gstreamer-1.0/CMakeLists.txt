@@ -24,6 +24,7 @@ add_subdirectory( tcamconvert )
 set(PLUGINS
   gsttcamsrc
   gsttcambin
+  tcamconvert
   )
 
 
@@ -33,13 +34,16 @@ set_project_warnings(tcamgstbase)
 
 
 
-target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
-target_include_directories(tcamgstbase PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
-target_include_directories(tcamgstbase PRIVATE ${GLIB2_INCLUDE_DIR})
-target_include_directories(tcamgstbase PRIVATE ${GObject_INCLUDE_DIR})
-target_include_directories(tcamgstbase PRIVATE ${TCAM_SOURCE_DIR}/external/)
-target_include_directories(tcamgstbase PRIVATE ${INTROSPECTION_INCLUDE_DIR})
+target_include_directories(tcamgstbase 
+PUBLIC 
+	${GLIB2_INCLUDE_DIR}
+	${GObject_INCLUDE_DIR}
+	${INTROSPECTION_INCLUDE_DIR}
+	${GSTREAMER_INCLUDE_DIRS}
+	${GSTREAMER_BASE_INCLUDE_DIRS}
+	${GSTREAMER_VIDEO_INCLUDE_DIRS}
+	${TCAM_SOURCE_DIR}/external/
+)
 
 target_link_libraries(tcamgstbase 
 PRIVATE
@@ -51,48 +55,42 @@ PRIVATE
 PUBLIC
 	tcam
 	tcamprop
-	tcam-algorithms
+#	tcam-algorithms
 	dutils::dutils_img
 	spdlog::spdlog
 )
 
-add_library(gsttcamsrc SHARED tcamsrc/gsttcamsrc.cpp
-  tcamsrc/gsttcammainsrc.cpp
-  tcamsrc/mainsrc_tcamprop_impl.cpp
-  tcamsrc/mainsrc_device_state.cpp
-  gstmetatcamstatistics.cpp
-  tcamsrc/gsttcamdeviceprovider.cpp
-  tcamsrc/gsttcamdevice.cpp)
+add_library(gsttcamsrc SHARED
+	tcamsrc/gsttcamsrc.cpp
+	tcamsrc/gsttcammainsrc.cpp
+	tcamsrc/mainsrc_tcamprop_impl.cpp
+	tcamsrc/mainsrc_device_state.cpp
+	tcamsrc/gsttcamdeviceprovider.cpp
+	tcamsrc/gsttcamdevice.cpp
+	gstmetatcamstatistics.cpp
+)
 
 
 add_library(gsttcambin SHARED gsttcambin.cpp)
 
-foreach (t IN ITEMS ${PLUGINS})
+target_include_directories( gsttcambin
+PRIVATE
+)
 
+target_link_libraries( gsttcambin
+PRIVATE
+	tcamgstbase
+)
 
-  target_include_directories(${t} PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-  target_include_directories(${t} PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
-  target_include_directories(${t} PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
-  target_include_directories(${t} PRIVATE ${GLIB2_INCLUDE_DIR})
-  target_include_directories(${t} PRIVATE ${GObject_INCLUDE_DIR})
-  target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/src)
-  target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/src/algorithms/)
-  target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/src/gobject)
-  target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/external/json)
-  target_include_directories(${t} PRIVATE ${TCAM_SOURCE_DIR}/external/)
-  target_include_directories(${t} PRIVATE ${INTROSPECTION_INCLUDE_DIR})
-  
-  target_link_libraries(${t} tcamgstbase)
-  target_link_libraries(${t} ${GOBJECT_LIBRARIES})
-  target_link_libraries(${t} ${GLIB2_LIBRARIES})
+set_project_warnings(gsttcambin)
 
-  target_link_libraries(${t} ${GSTREAMER_LIBRARIES})
-  target_link_libraries(${t} ${GSTREAMER_BASE_LIBRARIES})
-  target_link_libraries(${t} ${GSTREAMER_VIDEO_LIBRARIES})
+target_link_libraries( gsttcamsrc
+PRIVATE
+	tcamgstbase
+)
 
-  set_project_warnings(${t})
+set_project_warnings(gsttcamsrc)
 
-endforeach (t)
 
 install(TARGETS tcamgstbase
   LIBRARY

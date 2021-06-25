@@ -29,7 +29,7 @@ enum class Visibility
 };
 
 
-inline const std::string_view visibility_to_string(const Visibility& type)
+inline const std::string_view visibility_to_string( Visibility type )
 {
     switch (type)
     {

@@ -32,13 +32,13 @@ class VideoFormat
 {
 
 public:
-    VideoFormat();
+    VideoFormat() = default;
 
     explicit VideoFormat(const struct tcam_video_format&);
 
-    VideoFormat(const VideoFormat&);
+    VideoFormat(const VideoFormat&) = default;
 
-    VideoFormat& operator=(const VideoFormat&);
+    VideoFormat& operator=(const VideoFormat&) = default;
 
     bool operator==(const VideoFormat&) const;
 
@@ -56,6 +56,7 @@ public:
      * @return uint32 containing the fourcc
      */
     uint32_t get_fourcc() const;
+    std::string get_fourcc_string() const;
 
     void set_fourcc(uint32_t);
 
@@ -66,7 +67,7 @@ public:
 
     void set_framerate(double);
 
-    struct tcam_image_size get_size() const;
+    tcam_image_size get_size() const;
 
     void set_size(unsigned int width, unsigned int height);
 
@@ -85,7 +86,7 @@ public:
     uint32_t get_pitch_size() const;
 
 private:
-    struct tcam_video_format format;
+    tcam_video_format format = {};
 };
 
 
