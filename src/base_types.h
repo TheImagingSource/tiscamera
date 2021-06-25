@@ -22,10 +22,8 @@
  * @{
 */
 
-//#include <dutils_img/image_fourcc.h>
-
 #include <cstring>
-#include <stdint.h>
+#include <cstdint>
 
 /**
 * @name TCAM_PIPELINE_STATUS

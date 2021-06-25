@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#include <dutils_img/image_fourcc_enum.h>
 #include "tcamgststrings.h"
 
-typedef struct
+#include <dutils_img/image_fourcc.h>
+
+#include <cstring>
+
+struct TcamGstMapping
 {
     uint32_t fourcc;
     const char* gst_1_0_caps_string;
     const char* gst_1_0_name;
     const char* gst_format;
-} TcamGstMapping;
+};
 
-
-static TcamGstMapping tcam_gst_caps_info[] = {
+static const TcamGstMapping tcam_gst_caps_info[] = {
     {
         FOURCC_BGRA32,
         "video/x-raw, format=(string)BGRx",
@@ -419,33 +421,6 @@ const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
     }
     return NULL;
 }
-
-
-const char* tcam_fourcc_to_gst_1_0_caps_name(uint32_t fourcc)
-{
-    for (unsigned int i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
-    {
-        if (fourcc == tcam_gst_caps_info[i].fourcc)
-        {
-            return tcam_gst_caps_info[i].gst_1_0_name;
-        }
-    }
-    return NULL;
-}
-
-
-const char* tcam_fourcc_to_gst_1_0_caps_format(uint32_t fourcc)
-{
-    for (unsigned int i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
-    {
-        if (fourcc == tcam_gst_caps_info[i].fourcc)
-        {
-            return tcam_gst_caps_info[i].gst_format;
-        }
-    }
-    return NULL;
-}
-
 
 uint32_t tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format)
 {

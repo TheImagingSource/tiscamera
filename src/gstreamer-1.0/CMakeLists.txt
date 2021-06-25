@@ -27,7 +27,7 @@ set(PLUGINS
   )
 
 
-add_library(tcamgstbase SHARED tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
+add_library(tcamgstbase STATIC tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
 
 set_project_warnings(tcamgstbase)
 
@@ -91,10 +91,10 @@ PRIVATE
 set_project_warnings(gsttcamsrc)
 
 
-install(TARGETS tcamgstbase
-  LIBRARY
-  DESTINATION "${TCAM_INSTALL_LIB}"
-  COMPONENT tcam-gstreamer-1)
+#install(TARGETS tcamgstbase
+#  LIBRARY
+#  DESTINATION "${TCAM_INSTALL_LIB}"
+#  COMPONENT tcam-gstreamer-1)
 
 install(TARGETS ${PLUGINS}
   DESTINATION ${TCAM_INSTALL_GST_1_0}

@@ -19,15 +19,8 @@
 #include "utils.h"
 
 #include <algorithm>
-#include <cctype>
 
 using namespace tcam;
-
-
-std::string tcam::property_type_to_string(TCAM_PROPERTY_TYPE type)
-{
-    return propertyType2String(type);
-}
 
 
 std::vector<TCAM_DEVICE_TYPE> tcam::get_device_type_list()
@@ -97,62 +90,11 @@ TCAM_DEVICE_TYPE tcam::tcam_device_from_string(const std::string& input)
     return TCAM_DEVICE_TYPE_UNKNOWN;
 }
 
-
-uint64_t tcam::get_image_size(uint32_t fourcc, unsigned int width, unsigned int height)
+std::vector<tcam_image_size> tcam::get_standard_resolutions(
+    const tcam_image_size& min,
+    const tcam_image_size& max)
 {
-    return get_buffer_length(width, height, fourcc);
-}
-
-
-struct tcam_image_buffer* tcam::allocate_image_buffers(const struct tcam_video_format* format,
-                                                       size_t n_buffers)
-{
-    struct tcam_image_buffer* ptr = nullptr;
-
-    if (format != nullptr && n_buffers > 0)
-    {
-        // allocate buffer array
-        ptr = (struct tcam_image_buffer*)malloc(sizeof(struct tcam_image_buffer) * n_buffers);
-
-        unsigned int length = 0;
-        // allocate the actual image data fields
-        for (unsigned int i = 0; i < n_buffers; ++i)
-        {
-            struct tcam_image_buffer* tmp = &ptr[i];
-
-            tmp->pData = (unsigned char*)malloc(tcam_get_required_buffer_size(format));
-
-            // fill the rest
-            tmp->length = length;
-            tmp->format = *format;
-            tmp->pitch = get_pitch_length(format->width, format->fourcc);
-        }
-    }
-
-    return ptr;
-}
-
-
-void tcam::free_image_buffers(struct tcam_image_buffer* ptr, size_t n_buffer)
-{
-    if (ptr == nullptr || n_buffer < 1)
-        return;
-
-    free(ptr);
-}
-
-
-bool tcam::is_image_buffer_complete(const struct tcam_image_buffer* buffer)
-{
-    return is_buffer_complete(buffer);
-}
-
-
-std::vector<struct tcam_image_size> tcam::get_standard_resolutions(
-    const struct tcam_image_size& min,
-    const struct tcam_image_size& max)
-{
-    static const std::vector<struct tcam_image_size> resolutions = {
+    static const tcam_image_size resolutions[] = {
         { 128, 96 },    { 320, 240 },   { 360, 280 },   { 544, 480 },   { 640, 480 },
         { 352, 288 },   { 576, 480 },   { 720, 480 },   { 960, 720 },   { 1280, 720 },
         { 1440, 1080 }, { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2048, 1536 },
@@ -160,7 +102,7 @@ std::vector<struct tcam_image_size> tcam::get_standard_resolutions(
     };
 
     std::vector<struct tcam_image_size> ret;
-
+    ret.reserve( std::size_t( resolutions ) );
     for (const auto& r : resolutions)
     {
         if ((min < r) && (r < max))

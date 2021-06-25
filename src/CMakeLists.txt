@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-add_subdirectory(lib/dutils_image)
+add_subdirectory(lib/dutils_image EXCLUDE_FROM_ALL)
 add_subdirectory(gobject)
 
 

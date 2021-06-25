@@ -29,51 +29,10 @@ VISIBILITY_INTERNAL
 namespace tcam
 {
 
-std::string propertyType2String(TCAM_PROPERTY_TYPE);
-
-
 std::vector<std::string> split_string(const std::string& to_split, const std::string& delim);
 
 
-/**
- * @brief Check id bit is set.
- * @param value    - bitfield that shall be checked
- * @param bitindex - index that shall be checked
- * @return true if bit is 1
- */
-inline bool is_bit_set(unsigned int value, unsigned int bitindex)
-{
-    return (value & (1 << bitindex)) != 0;
-}
-
-
-/**
- * @brief Set bit
- * @param value    - bitfield that shall be manipulated
- * @param bitindex - index of the bit that shall be set
- * @return the manipulated bitfield
- */
-inline unsigned int set_bit(unsigned int value, unsigned int bitindex)
-{
-    return (value |= (1 << bitindex));
-}
-
-
-/**
- * @brief Unset bit
- * @param value    - bitfield that shall be manipulated
- * @param bitindex - index of the bit that shall be unset
- * @return the manipulated bitfield
- */
-inline unsigned int unset_bit(unsigned int value, unsigned int bitindex)
-{
-    return (value &= ~(1 << bitindex));
-}
-
-
 int tcam_xioctl(int fd, unsigned int request, void* arg);
-
-unsigned int tcam_get_required_buffer_size(const struct tcam_video_format* format);
 
 
 /**
@@ -83,30 +42,6 @@ unsigned int tcam_get_required_buffer_size(const struct tcam_video_format* forma
  * @return vector containing all step from min to max; empty on error
  */
 std::vector<double> create_steps_for_range(double min, double max);
-
-/**
- * @brief Calculate required image size
- * @param width  - width of the image
- * @param height - height of the image
- * @param fourcc - format description
- * @return required buffer size in byte
- */
-uint64_t get_buffer_length(unsigned int width, unsigned int height, uint32_t fourcc);
-
-/**
- * Description for get_pitch_length.
- * @param width  - pixel width
- * @param fourcc - pixel format
- * @return row length of image in byte
- */
-uint32_t get_pitch_length(unsigned int width, uint32_t fourcc);
-
-/**
- * Check if buffer has correct length
- * @param buffer that shall be checked
- * @return true if buffer has correct length
- */
-bool is_buffer_complete(const struct tcam_image_buffer* buffer);
 
 /**
  * @name calculate_auto_center
@@ -120,21 +55,9 @@ tcam_image_size calculate_auto_center(const tcam_image_size& sensor, const tcam_
 bool compare_double(double val1, double val2);
 
 
-bool are_equal(const tcam_image_size& s1, const tcam_image_size& s2);
-
 bool in_range(const tcam_image_size& minimum,
               const tcam_image_size& maximum,
               const tcam_image_size& value);
-
-bool are_equal(const struct tcam_resolution_description& res1,
-               const struct tcam_resolution_description& res2);
-
-
-bool are_equal(const struct tcam_video_format_description& res1,
-               const struct tcam_video_format_description& res2);
-
-bool is_smaller(const tcam_image_size& s1, const tcam_image_size& s2);
-
 
 unsigned int get_pid_from_lockfile(const std::string& filename);
 

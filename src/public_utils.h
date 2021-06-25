@@ -19,16 +19,12 @@
 
 #include "base_types.h"
 
-#include <stddef.h> /* size_t */
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 namespace tcam
 {
-
-std::string property_type_to_string(TCAM_PROPERTY_TYPE);
-
 
 std::vector<TCAM_DEVICE_TYPE> get_device_type_list();
 
@@ -41,36 +37,8 @@ std::string tcam_device_type_to_string(TCAM_DEVICE_TYPE type);
 
 TCAM_DEVICE_TYPE tcam_device_from_string(const std::string& str);
 
-
-uint64_t get_image_size(uint32_t fourcc, unsigned int width, unsigned int height);
-
-/**
- * @param format - format description that shall be used
- * @param n_buffers - number of buffers that shall be allocated
- * @return pointer to the first image buffer
- */
-struct tcam_image_buffer* allocate_image_buffers(const struct tcam_video_format* format,
-                                                 size_t n_buffers);
-
-/**
- * @param ptr - pointer to the first buffer that shall be freed
- * @param n_buffers - number of buffers that shall be freed
- */
-void free_image_buffers(struct tcam_image_buffer* ptr, size_t n_buffer);
-
-
-/**
- * Check if buffer has correct length
- * @param buffer that shall be checked
- * @return true if buffer has correct length or is large enough for the image
- */
-bool is_image_buffer_complete(const struct tcam_image_buffer* buffer);
-
-/**
- *
- */
-std::vector<struct tcam_image_size> get_standard_resolutions(const struct tcam_image_size& min,
-                                                             const struct tcam_image_size& max);
+std::vector<tcam_image_size> get_standard_resolutions(const tcam_image_size& min,
+                                                             const tcam_image_size& max);
 
 } /* namespace tcam */
 
