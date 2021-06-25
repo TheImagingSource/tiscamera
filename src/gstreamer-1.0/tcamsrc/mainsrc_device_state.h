@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "gst_helper.h"
 #include "gsttcammainsrc.h"
-#include "tcam.h"
+#include "../gst_helper.h"
+#include "../../tcam.h"
 
 #include <memory>
 #include <queue>

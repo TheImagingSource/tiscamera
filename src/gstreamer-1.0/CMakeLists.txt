@@ -24,7 +24,6 @@ add_subdirectory( tcamconvert )
 set(PLUGINS
   gsttcamsrc
   gsttcambin
-  tcamconvert
   )
 
 

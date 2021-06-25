@@ -16,7 +16,7 @@
 
 #include "mainsrc_tcamprop_impl.h"
 
-#include "PropertyCategory.h"
+#include "../../PropertyCategory.h"
 #include "mainsrc_device_state.h"
 
 using namespace tcam::property;

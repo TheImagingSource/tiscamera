@@ -16,14 +16,15 @@
 
 #include "gsttcamsrc.h"
 
+#include "../../tcam.h"
+
 #include "gsttcamdeviceprovider.h"
 #include "gsttcammainsrc.h"
-#include "logging.h"
-#include "tcam.h"
-#include "tcamgstbase.h"
-#include "tcamgstjson.h"
-#include "tcamgststrings.h"
-#include "tcamprop.h"
+#include "../../logging.h"
+#include "../tcamgstbase.h"
+#include "../tcamgstjson.h"
+#include "../tcamgststrings.h"
+#include "../../gobject/tcamprop.h"
 
 #include <algorithm>
 #include <assert.h>
