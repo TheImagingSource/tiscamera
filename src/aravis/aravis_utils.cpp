@@ -16,7 +16,7 @@
 
 #include "aravis_utils.h"
 
-#include "img/image_fourcc.h"
+#include <dutils_img/image_fourcc.h>
 #include "internal.h"
 #include "logging.h"
 
