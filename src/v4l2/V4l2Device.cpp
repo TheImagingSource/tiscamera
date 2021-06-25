@@ -468,7 +468,7 @@ void V4l2Device::update_stream_timeout()
     {
         if (p->get_name() == "ExposureTime")
         {
-            auto val =std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(p)->get_value();
+            auto val = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(p)->get_value();
 
             if (val)
             {
@@ -877,7 +877,7 @@ bool V4l2Device::is_trigger_mode_enabled()
     {
         if (p->get_name() == "TriggerMode")
         {
-            auto val =std::dynamic_pointer_cast<tcam::property::IPropertyEnum>(p)->get_value();
+            auto val = std::dynamic_pointer_cast<tcam::property::IPropertyEnum>(p)->get_value();
             if (val)
             {
                 if (val.value() == "On")
@@ -996,7 +996,8 @@ void V4l2Device::init_userptr_buffers()
         buf.m.userptr = (unsigned long)m_buffers.at(i).buffer->get_data();
         buf.length = m_buffers.at(i).buffer->get_buffer_size();
 
-        SPDLOG_TRACE("Queueing buffer({:x}) with length {}", m_buffers.at(i).buffer->get_data(), buf.length);
+        SPDLOG_TRACE(
+            "Queueing buffer({:x}) with length {}", m_buffers.at(i).buffer->get_data(), buf.length);
 
         if (-1 == tcam_xioctl(m_fd, VIDIOC_QBUF, &buf))
         {

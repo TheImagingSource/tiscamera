@@ -16,16 +16,15 @@
 
 #pragma once
 
-#include <system_error>
-
 #include <outcome/outcome.hpp>
+#include <system_error>
 
 namespace outcome = OUTCOME_V2_NAMESPACE;
 
 namespace tcam
 {
 
-enum class status: int
+enum class status : int
 {
     Success = 0,
     DeviceCouldNotBeOpened,
@@ -52,6 +51,7 @@ std::error_category& error_category();
 
 namespace std
 {
-template<>
-struct is_error_code_enum<tcam::status> : true_type {};
-}
+template<> struct is_error_code_enum<tcam::status> : true_type
+{
+};
+} // namespace std

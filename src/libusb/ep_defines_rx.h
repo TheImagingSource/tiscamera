@@ -110,6 +110,6 @@ enum class AFU420Property
     OISPosY,
 };
 
-}
+} // namespace tcam::afu420
 
 #endif

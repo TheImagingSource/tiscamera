@@ -24,11 +24,11 @@
 #include "base_types.h"
 #include "compiler_defines.h"
 
-#include <mutex>
 #include <condition_variable>
-#include <thread>
-#include <queue>
 #include <memory>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 VISIBILITY_INTERNAL
 

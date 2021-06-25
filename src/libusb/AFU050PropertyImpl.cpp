@@ -2,7 +2,6 @@
 #include "AFU050PropertyImpl.h"
 
 #include "AFU050DeviceBackend.h"
-
 #include "logging.h"
 
 namespace tcam::property
@@ -127,7 +126,7 @@ outcome::result<double> AFU050PropertyDoubleImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret =  ptr->get_int(m_ctrl);
+        auto ret = ptr->get_int(m_ctrl);
 
         if (ret)
         {
@@ -167,12 +166,11 @@ outcome::result<void> AFU050PropertyDoubleImpl::valid_value(double value)
 }
 
 
-
 AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
-                                           control_definition ctrl,
-                                           std::map<int, std::string> entries,
-                                           std::shared_ptr<AFU050DeviceBackend> backend)
-    : m_entries(entries),m_cam(backend), m_name(name), m_ctrl(ctrl)
+                                               control_definition ctrl,
+                                               std::map<int, std::string> entries,
+                                               std::shared_ptr<AFU050DeviceBackend> backend)
+    : m_entries(entries), m_cam(backend), m_name(name), m_ctrl(ctrl)
 {
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 
@@ -274,5 +272,4 @@ bool AFU050PropertyEnumImpl::valid_value(int value)
 }
 
 
-
-}
+} // namespace tcam::property

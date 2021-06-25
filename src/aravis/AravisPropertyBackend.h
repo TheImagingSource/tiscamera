@@ -26,28 +26,26 @@ namespace tcam::property
 class AravisPropertyBackend
 {
 
-    public:
+public:
+    AravisPropertyBackend(_ArvDevice*);
 
-        AravisPropertyBackend(_ArvDevice*);
+    outcome::result<int64_t> get_int(const std::string& name);
+    outcome::result<void> set_int(const std::string& name, int64_t new_value);
 
-        outcome::result<int64_t> get_int(const std::string& name);
-        outcome::result<void> set_int(const std::string& name, int64_t new_value);
-    
-        outcome::result<double> get_double(const std::string& name);
-        outcome::result<void> set_double(const std::string& name, double new_value);
-    
-        outcome::result<bool> get_bool(const std::string& name);
-        outcome::result<void> set_bool(const std::string& name, bool new_value);
-    
-        outcome::result<void> execute(const std::string& name);
-    
-        outcome::result<std::string> get_enum(const std::string& name);
-        outcome::result<void> set_enum(const std::string& name, const std::string& value);
-    
+    outcome::result<double> get_double(const std::string& name);
+    outcome::result<void> set_double(const std::string& name, double new_value);
 
-    private:    
+    outcome::result<bool> get_bool(const std::string& name);
+    outcome::result<void> set_bool(const std::string& name, bool new_value);
+
+    outcome::result<void> execute(const std::string& name);
+
+    outcome::result<std::string> get_enum(const std::string& name);
+    outcome::result<void> set_enum(const std::string& name, const std::string& value);
+
+
+private:
     _ArvDevice* p_device;
-
 };
 
-}
+} // namespace tcam::property

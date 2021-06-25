@@ -16,19 +16,19 @@
 
 #include "AravisDevice.h"
 #include "aravis_property_impl.h"
-#include "logging.h"
 #include "error.h"
+#include "logging.h"
 
 #include <map>
 
 
-namespace {
-
-
-std::map<std::string, std::string> name_table =
+namespace
 {
-    {"OffsetAutoCenter", "OffsetAuto"},
-    {"IRCutFilterEnableElement", "IRCutFilterEnable"},
+
+
+std::map<std::string, std::string> name_table = {
+    { "OffsetAutoCenter", "OffsetAuto" },
+    { "IRCutFilterEnableElement", "IRCutFilterEnable" },
 };
 
 outcome::result<std::string> find_conversion_name(const std::string& name)
@@ -43,7 +43,7 @@ outcome::result<std::string> find_conversion_name(const std::string& name)
     return tcam::status::PropertyDoesNotExist;
 }
 
-}
+} // namespace
 
 
 namespace tcam
@@ -65,8 +65,7 @@ void AravisDevice::index_properties(const char* name)
 
             std::string node_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
 
-            if (node_name == "DeviceControl"
-                || node_name == "TransportLayerControl"
+            if (node_name == "DeviceControl" || node_name == "TransportLayerControl"
                 || node_name == "ImageFormatControl")
             {
                 return;
@@ -82,85 +81,85 @@ void AravisDevice::index_properties(const char* name)
         }
     }
 
-    static std::vector<std::string> private_settings = {
-        "TLParamsLocked",
-        "GevSCPSDoNotFragment",
-        "GevTimestampTickFrequency",
-        "GevTimeSCPD",
-        "GevSCPD",
-        "PayloadSize",
-        "PayloadPerFrame",
-        "PayloadPerPacket",
-        "TotalPacketSize",
-        "PacketsPerFrame",
-        "PacketTimeUS",
-        "GevSCPSPacketSize",
-        "GevSCPSFireTestPacket",
-        "DeviceVendorName",
-        "DeviceType",
-        "DeviceModelType",
-        "DeviceVersion",
-        "DeviceSerialNumber",
-        "DeviceUserID",
-        "DeviceSFNCVersionMajor",
-        "DeviceSFNCVersionMinor",
-        "DeviceTLType",
-        "DeviceTLTypeMajor",
-        "DeviceTLTypeMinor",
-        "DeviceTLTypeSubMinor",
-        "DeviceLinkSelector",
-        "WidthMax",
-        "HeightMax",
-        "ChunkModeActive",
-        "ChunkImage",
-        "ChunkBlockId",
-        "ActionDeviceKey",
-        "ActionSelector",
-        "ActionGroupMask",
-        "ActionGroupKey",
-        "UserSetSelector",
-        "UserSetLoad",
-        "UserSetSave",
-        "UserSetDefault",
-        "DeviceScanType",
-        "StringReg",
-        "DeviceModelName",
-        "DeviceSFNCVersionSubMinor",
-        "MaskedIntReg",
-        "DeviceTLVersionMajor",
-        "MaskedIntReg",
-        "DeviceTLVersionMinor",
-        "DeviceTLVersionSubMinor",
-        "DeviceLinkHeartbeatTimeout",
-        "DeviceStreamChannelCount",
-        "DeviceStreamChannelSelector",
-        "DeviceStreamChannelType",
-        "DeviceStreamChannelLink",
-        "DeviceStreamChannelEndianness",
-        "DeviceStreamChannelPacketSize",
-        "DeviceEventChannelCount",
-        "DeviceTemperatureConverter",
-        "IMX174HardwareWDRShutterMode",
-        "IMX174HardwareWDREnable",
-        "IMX174WDRShutter2",
-        "ChunkIMX174FrameSet",
-        "ChunkIMX174FrameId",
-        "SensorPixelHeight",
-        "SensorPixelWidth",
-        "AcquisitionStart",
-        "AcquisitionStop",
-        "AcquisitionMode",
-        // "Binning",
-        "SensorWidth",
-        "SensorHeight",
-        "Width",
-        "Height",
-        "FPS",
-        "AcquisitionFrameRate",
-        "PixelFormat"
-    };
+    static std::vector<std::string> private_settings = { "TLParamsLocked",
+                                                         "GevSCPSDoNotFragment",
+                                                         "GevTimestampTickFrequency",
+                                                         "GevTimeSCPD",
+                                                         "GevSCPD",
+                                                         "PayloadSize",
+                                                         "PayloadPerFrame",
+                                                         "PayloadPerPacket",
+                                                         "TotalPacketSize",
+                                                         "PacketsPerFrame",
+                                                         "PacketTimeUS",
+                                                         "GevSCPSPacketSize",
+                                                         "GevSCPSFireTestPacket",
+                                                         "DeviceVendorName",
+                                                         "DeviceType",
+                                                         "DeviceModelType",
+                                                         "DeviceVersion",
+                                                         "DeviceSerialNumber",
+                                                         "DeviceUserID",
+                                                         "DeviceSFNCVersionMajor",
+                                                         "DeviceSFNCVersionMinor",
+                                                         "DeviceTLType",
+                                                         "DeviceTLTypeMajor",
+                                                         "DeviceTLTypeMinor",
+                                                         "DeviceTLTypeSubMinor",
+                                                         "DeviceLinkSelector",
+                                                         "WidthMax",
+                                                         "HeightMax",
+                                                         "ChunkModeActive",
+                                                         "ChunkImage",
+                                                         "ChunkBlockId",
+                                                         "ActionDeviceKey",
+                                                         "ActionSelector",
+                                                         "ActionGroupMask",
+                                                         "ActionGroupKey",
+                                                         "UserSetSelector",
+                                                         "UserSetLoad",
+                                                         "UserSetSave",
+                                                         "UserSetDefault",
+                                                         "DeviceScanType",
+                                                         "StringReg",
+                                                         "DeviceModelName",
+                                                         "DeviceSFNCVersionSubMinor",
+                                                         "MaskedIntReg",
+                                                         "DeviceTLVersionMajor",
+                                                         "MaskedIntReg",
+                                                         "DeviceTLVersionMinor",
+                                                         "DeviceTLVersionSubMinor",
+                                                         "DeviceLinkHeartbeatTimeout",
+                                                         "DeviceStreamChannelCount",
+                                                         "DeviceStreamChannelSelector",
+                                                         "DeviceStreamChannelType",
+                                                         "DeviceStreamChannelLink",
+                                                         "DeviceStreamChannelEndianness",
+                                                         "DeviceStreamChannelPacketSize",
+                                                         "DeviceEventChannelCount",
+                                                         "DeviceTemperatureConverter",
+                                                         "IMX174HardwareWDRShutterMode",
+                                                         "IMX174HardwareWDREnable",
+                                                         "IMX174WDRShutter2",
+                                                         "ChunkIMX174FrameSet",
+                                                         "ChunkIMX174FrameId",
+                                                         "SensorPixelHeight",
+                                                         "SensorPixelWidth",
+                                                         "AcquisitionStart",
+                                                         "AcquisitionStop",
+                                                         "AcquisitionMode",
+                                                         // "Binning",
+                                                         "SensorWidth",
+                                                         "SensorHeight",
+                                                         "Width",
+                                                         "Height",
+                                                         "FPS",
+                                                         "AcquisitionFrameRate",
+                                                         "PixelFormat" };
 
-    if (std::find(private_settings.begin(), private_settings.end(), arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)))
+    if (std::find(private_settings.begin(),
+                  private_settings.end(),
+                  arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)))
         != private_settings.end())
     {
         //SPDLOG_INFO("Private setting {}", arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)));
@@ -176,30 +175,29 @@ void AravisDevice::index_properties(const char* name)
     }
 
     if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Float") == 0)
-     {
-        m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyDoubleImpl>(prop_name, arv_camera, node, m_backend));
-
-     }
+    {
+        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyDoubleImpl>(
+            prop_name, arv_camera, node, m_backend));
+    }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Integer") == 0)
     {
-        m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyIntegerImpl>(prop_name, arv_camera, node, m_backend));
+        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyIntegerImpl>(
+            prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Boolean") == 0)
     {
-        m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyBoolImpl>(prop_name, arv_camera, node, m_backend));
+        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyBoolImpl>(
+            prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Command") == 0)
     {
-        m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyCommandImpl>(prop_name, node, m_backend));
+        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyCommandImpl>(
+            prop_name, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Enumeration") == 0)
     {
-        m_properties.push_back(
-            std::make_shared<tcam::property::AravisPropertyEnumImpl>(prop_name, arv_camera, node, m_backend));
+        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyEnumImpl>(
+            prop_name, arv_camera, node, m_backend));
     }
     //m_properties.push_back();
 }

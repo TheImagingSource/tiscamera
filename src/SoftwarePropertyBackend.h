@@ -3,7 +3,6 @@
 #pragma once
 
 #include "SoftwarePropertiesBase.h"
-
 #include "error.h"
 
 namespace tcam::property

@@ -26,8 +26,8 @@
 
 #include <condition_variable> // std::condition_variable
 #include <libusb-1.0/libusb.h>
-#include <memory>
 #include <map>
+#include <memory>
 #include <mutex> // std::mutex, std::unique_lock
 #include <thread>
 
@@ -188,7 +188,10 @@ private:
 
     void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
     void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop);
-    void add_enum(const std::string& name, const VC_UNIT unit, const unsigned char prop, std::map<int, std::string> entries);
+    void add_enum(const std::string& name,
+                  const VC_UNIT unit,
+                  const unsigned char prop,
+                  std::map<int, std::string> entries);
 
     int set_video_format(uint8_t format_index, uint8_t frame_index, uint32_t frame_interval);
 

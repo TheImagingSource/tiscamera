@@ -27,7 +27,8 @@ using json = nlohmann::json;
 // std::string
 
 
-static bool property_to_json(std::shared_ptr<tcam::property::IPropertyBase> /*prop*/, json& /*parent*/)
+static bool property_to_json(std::shared_ptr<tcam::property::IPropertyBase> /*prop*/,
+                             json& /*parent*/)
 {
     // TODO:
     //parent.push_back(json::object_t::value_type(prop->get_name(), prop->to_string()));

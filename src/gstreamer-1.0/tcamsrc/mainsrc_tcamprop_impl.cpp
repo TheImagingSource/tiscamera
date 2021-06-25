@@ -16,8 +16,8 @@
 
 #include "mainsrc_tcamprop_impl.h"
 
-#include "mainsrc_device_state.h"
 #include "PropertyCategory.h"
+#include "mainsrc_device_state.h"
 
 using namespace tcam::property;
 
@@ -150,7 +150,8 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
     {
         g_value_init(category, G_TYPE_STRING);
 
-        g_value_set_string(category, tcam::property::get_display_category(property->get_name()).c_str());
+        g_value_set_string(category,
+                           tcam::property::get_display_category(property->get_name()).c_str());
     }
     if (group)
     {
@@ -512,7 +513,6 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
                 return FALSE;
             }
-
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
@@ -526,7 +526,6 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 GST_ERROR("Unable to execute property %s: %s", name, success.error().message().c_str());
                 return FALSE;
             }
-
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
@@ -546,7 +545,6 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 GST_ERROR("Unable to set property %s: %s", name, success.error().message().c_str());
                 return FALSE;
             }
-
         }
         default:
         {

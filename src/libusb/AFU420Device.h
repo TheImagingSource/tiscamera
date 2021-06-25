@@ -414,7 +414,6 @@ private:
     friend class property::AFU420DeviceBackend;
 
 protected:
-
     bool has_optics()
     {
         return has_optics_;
@@ -434,7 +433,10 @@ protected:
     // can not be read from device
     bool m_shutter = true;
 
-    bool get_shutter() { return m_shutter; };
+    bool get_shutter()
+    {
+        return m_shutter;
+    };
     bool set_shutter(bool open);
 
     int64_t get_hdr();
@@ -455,14 +457,13 @@ protected:
     bool get_ois_pos(int64_t& x_pos, int64_t& y_pos);
     bool set_ois_pos(const int64_t& x_pos, const int64_t& y_pos);
 
-    tcam_image_size m_binning = {1, 1};
-    tcam_image_size m_offset = {0, 0};
+    tcam_image_size m_binning = { 1, 1 };
+    tcam_image_size m_offset = { 0, 0 };
     bool m_offset_auto = true;
 
     tcam_image_size calculate_auto_offset(uint32_t fourcc, tcam_image_size size) const;
 
 private:
-
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex = 0);
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint8_t data);
     int control_write(unsigned char ucRequest, uint16_t ushValue, uint16_t ushIndex, uint16_t data);

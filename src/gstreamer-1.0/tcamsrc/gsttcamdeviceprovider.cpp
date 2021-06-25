@@ -17,12 +17,11 @@
 #include "gsttcamdeviceprovider.h"
 
 #include "gsttcamdevice.h"
-
 #include "tcamgstbase.h"
 
 #include <algorithm>
-#include <condition_variable>
 #include <atomic>
+#include <condition_variable>
 #include <thread>
 
 GST_DEBUG_CATEGORY_STATIC(tcam_deviceprovider_debug);
@@ -51,8 +50,7 @@ struct provider_state
 };
 
 
-static GstDevice* tcam_device_new(GstElementFactory* factory,
-                                  const tcam::DeviceInfo& device)
+static GstDevice* tcam_device_new(GstElementFactory* factory, const tcam::DeviceInfo& device)
 {
     GST_INFO("Creating new device");
 
@@ -102,8 +100,7 @@ static void update_device_list(TcamDeviceProvider* self)
         std::vector<device> to_remove;
         for (const auto& d : self->state->known_devices)
         {
-            auto iter = std::find_if(new_list.begin(), new_list.end(), [&d](const auto& new_d)
-            {
+            auto iter = std::find_if(new_list.begin(), new_list.end(), [&d](const auto& new_d) {
                 if (new_d.get_serial() == d.device.get_serial()
                     && new_d.get_device_type() == d.device.get_device_type())
                 {
@@ -136,8 +133,7 @@ static void update_device_list(TcamDeviceProvider* self)
         }
     };
 
-    auto check_new_devices = [self](const std::vector<tcam::DeviceInfo>& new_list)
-    {
+    auto check_new_devices = [self](const std::vector<tcam::DeviceInfo>& new_list) {
         std::vector<device> new_devices;
 
         for (const auto& d : new_list)
@@ -166,9 +162,8 @@ static void update_device_list(TcamDeviceProvider* self)
             }
         }
 
-        self->state->known_devices.insert(self->state->known_devices.end(),
-                                          new_devices.begin(),
-                                          new_devices.end());
+        self->state->known_devices.insert(
+            self->state->known_devices.end(), new_devices.begin(), new_devices.end());
     };
 
     std::unique_lock lck(self->state->_mtx);
@@ -185,7 +180,6 @@ static void update_device_list(TcamDeviceProvider* self)
         self->state->cv.wait_for(lck, 2 * sec);
     }
     GST_DEBUG("update thread stopping....");
-
 }
 
 
@@ -214,9 +208,7 @@ static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
             d.device.get_serial() + "-" + d.device.get_device_type_as_string();
         GST_DEBUG("Appending: %s", long_serial.c_str());
 
-        ret = g_list_append(ret,
-                            tcam_device_new(self->factory,
-                                            d.device));
+        ret = g_list_append(ret, tcam_device_new(self->factory, d.device));
     }
 
     return ret;

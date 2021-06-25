@@ -9,8 +9,6 @@
 #include <dutils_img_pipe/auto_alg_pass.h>
 #include "compiler_defines.h"
 
-#include "VideoFormat.h"
-
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -29,14 +27,15 @@ class SoftwareProperties
 {
 public:
     explicit SoftwareProperties(
-        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties, bool has_bayer);
+        const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
+        bool has_bayer);
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties()
     {
         return m_properties;
     };
 
-    void auto_pass( const img::img_descriptor& image);
+    void auto_pass(const img::img_descriptor& image);
 
 
     outcome::result<int64_t> get_int(emulated::software_prop prop_id);
@@ -49,7 +48,6 @@ public:
     void update_to_new_format(const tcam::VideoFormat& new_format);
 
 private:
-
     // encapsulation for internal property generation
     void generate_public_properties(bool has_bayer);
 

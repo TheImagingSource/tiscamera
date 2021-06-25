@@ -75,4 +75,4 @@ const std::string_view find_property_name(sp id)
     }
 }
 
-}
+} // namespace tcam::property::emulated

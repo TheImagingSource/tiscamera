@@ -129,7 +129,11 @@ static gchar* gst_tcam_bin_get_property_type(TcamProp* iface, const gchar* name)
 
     if (!self->src)
     {
-        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        GST_ELEMENT_ERROR(self,
+                          RESOURCE,
+                          FAILED,
+                          ("Elements are not initialized."),
+                          ("Set pipeline to state READY or higher."));
         return nullptr;
     }
 
@@ -171,7 +175,11 @@ static GSList* gst_tcam_bin_get_property_names(TcamProp* iface)
 
     if (!self->src)
     {
-        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        GST_ELEMENT_ERROR(self,
+                          RESOURCE,
+                          FAILED,
+                          ("Elements are not initialized."),
+                          ("Set pipeline to state READY or higher."));
         return nullptr;
     }
 
@@ -211,7 +219,11 @@ static gboolean gst_tcam_bin_get_tcam_property(TcamProp* iface,
 
     if (!self->src)
     {
-        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        GST_ELEMENT_ERROR(self,
+                          RESOURCE,
+                          FAILED,
+                          ("Elements are not initialized."),
+                          ("Set pipeline to state READY or higher."));
         return FALSE;
     }
 
@@ -265,7 +277,11 @@ static GSList* gst_tcam_bin_get_tcam_menu_entries(TcamProp* iface, const gchar* 
 
     if (!self->src)
     {
-        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        GST_ELEMENT_ERROR(self,
+                          RESOURCE,
+                          FAILED,
+                          ("Elements are not initialized."),
+                          ("Set pipeline to state READY or higher."));
         return nullptr;
     }
 
@@ -301,7 +317,11 @@ static gboolean gst_tcam_bin_set_tcam_property(TcamProp* iface,
 
     if (!self->src)
     {
-        GST_ELEMENT_ERROR(self, RESOURCE, FAILED, ("Elements are not initialized."), ("Set pipeline to state READY or higher."));
+        GST_ELEMENT_ERROR(self,
+                          RESOURCE,
+                          FAILED,
+                          ("Elements are not initialized."),
+                          ("Set pipeline to state READY or higher."));
         return FALSE;
     }
 
@@ -997,7 +1017,7 @@ static GstCaps* generate_all_caps(GstTcamBin* self)
 
         if (features)
         {
-            if (gst_caps_features_contains (features, "memory:NVMM"))
+            if (gst_caps_features_contains(features, "memory:NVMM"))
             {
                 //GST_INFO("Contains NVMM. Skipping");
                 continue;
@@ -1138,21 +1158,25 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             // which overwrites this message
             if (self->has_dutils && !self->toggles.use_dutils)
             {
-                std::string dutils_warning = "tcamdutils version mismatch! "
+                std::string dutils_warning =
+                    "tcamdutils version mismatch! "
                     "tcamdutils and tiscamera require identical major.minor version. "
                     "Overwrite at own risk by explicitly setting 'tcambin use-dutils=true'. "
-                    "Found '" + get_plugin_version("tcamdutils")
-                    + "' Required: '" + get_version_major() + "." + get_version_minor() + "'";
+                    "Found '"
+                    + get_plugin_version("tcamdutils") + "' Required: '" + get_version_major() + "."
+                    + get_version_minor() + "'";
 
-                GST_WARNING( "%s", dutils_warning.c_str());
+                GST_WARNING("%s", dutils_warning.c_str());
 
-                GError *err = g_error_new (g_quark_from_string("tcamdutils version missmatch"),
-                                           1, "%s", GST_ELEMENT_NAME(element));
+                GError* err = g_error_new(g_quark_from_string("tcamdutils version missmatch"),
+                                          1,
+                                          "%s",
+                                          GST_ELEMENT_NAME(element));
 
-                GstMessage* msg = gst_message_new_warning(GST_OBJECT(element), err, dutils_warning.c_str());
+                GstMessage* msg =
+                    gst_message_new_warning(GST_OBJECT(element), err, dutils_warning.c_str());
                 g_clear_error(&err);
                 gst_element_post_message(GST_ELEMENT(self), msg);
-
             }
 
             if (self->src == nullptr)

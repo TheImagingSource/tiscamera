@@ -19,8 +19,8 @@
 #include "PropertyCategory.h"
 #include "PropertyFlags.h"
 #include "base_types.h"
-#include "visibility.h"
 #include "error.h"
+#include "visibility.h"
 
 #include <algorithm>
 #include <memory>

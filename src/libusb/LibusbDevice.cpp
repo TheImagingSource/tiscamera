@@ -46,7 +46,8 @@ tcam::LibusbDevice::LibusbDevice(std::shared_ptr<tcam::UsbSession> s, libusb_dev
         if (ret < 0)
         {
             SPDLOG_ERROR("Unable to open device.");
-            throw std::runtime_error("Unable to open device. LibUsb returned " + std::to_string(ret));
+            throw std::runtime_error("Unable to open device. LibUsb returned "
+                                     + std::to_string(ret));
         }
     }
     else

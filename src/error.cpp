@@ -25,7 +25,7 @@ struct status_code_entry
     std::errc code = static_cast<std::errc>(0);
 };
 
-constexpr status_code_entry to_entry (int in) noexcept
+constexpr status_code_entry to_entry(int in) noexcept
 {
     using namespace tcam;
 
@@ -91,7 +91,7 @@ constexpr status_code_entry to_entry (int in) noexcept
         }
         case tcam::status::NotSupported:
         {
-            return { "Not supported", std::errc::not_supported};
+            return { "Not supported", std::errc::not_supported };
         }
         default:
             return {};
@@ -103,7 +103,6 @@ class tcam_error_category : public std::error_category
 {
 
 public:
-
     const char* name() const noexcept final
     {
         return "Tiscamera Error";
@@ -112,32 +111,32 @@ public:
     std::string message(int err) const final
     {
         auto str = to_entry(err).desc;
-        if (str == nullptr) {
+        if (str == nullptr)
+        {
             return "Unknown Error";
         }
         return str;
     }
 
-    std::error_condition    default_error_condition( int err ) const noexcept final
+    std::error_condition default_error_condition(int err) const noexcept final
     {
-        if( err == 0 )
-        {    // 0 ^= success so use the default ctor of error_condition to build a efficient success value
+        if (err == 0)
+        { // 0 ^= success so use the default ctor of error_condition to build a efficient success value
             return {};
         }
 
         auto str = to_entry(err);
         if (str.desc == nullptr)
         { // when desc is empty, we just copy our category into the condition
-            return std::error_condition( err, *this );
+            return std::error_condition(err, *this);
         }
-        return str.code;     // if we have a map, use that
+        return str.code; // if we have a map, use that
     }
 };
 
-static tcam_error_category    error_cat_;
+static tcam_error_category error_cat_;
 
 } /* namespace */
-
 
 
 std::error_category& tcam::error_category()
@@ -145,7 +144,7 @@ std::error_category& tcam::error_category()
     return error_cat_;
 }
 
-std::error_code tcam::make_error_code( tcam::status e )
+std::error_code tcam::make_error_code(tcam::status e)
 {
     return { static_cast<int>(e), error_cat_ };
 }

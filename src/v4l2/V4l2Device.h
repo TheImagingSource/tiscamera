@@ -148,7 +148,8 @@ private:
 
     std::shared_ptr<tcam::property::IPropertyBase> new_control(struct v4l2_queryctrl* qctrl);
     void index_controls();
-    void sort_properties(std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties);
+    void sort_properties(
+        std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties);
 
     std::shared_ptr<tcam::property::V4L2PropertyBackend> p_property_backend;
 

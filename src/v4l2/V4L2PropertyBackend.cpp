@@ -40,7 +40,8 @@ outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, struct
         action = "SET";
     }
 
-    SPDLOG_ERROR("ioctl returned {} reported error while {} ({}): {}", ret, action, errno, strerror(errno));
+    SPDLOG_ERROR(
+        "ioctl returned {} reported error while {} ({}): {}", ret, action, errno, strerror(errno));
     switch (errno)
     {
         case EBUSY:
@@ -64,11 +65,11 @@ outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, struct
             return tcam::status::UndefinedError;
         }
     }
-
 }
 
 
-outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int v4l2_id, int new_value)
+outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int v4l2_id,
+                                                                            int new_value)
 {
     struct v4l2_control ctrl = {};
     ctrl.id = v4l2_id;

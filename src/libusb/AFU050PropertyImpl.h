@@ -3,11 +3,10 @@
 #pragma once
 
 #include "PropertyInterfaces.h"
-
 #include "afu050_definitions.h"
 
-#include <memory>
 #include <map>
+#include <memory>
 
 namespace tcam::property
 {
@@ -17,10 +16,9 @@ class AFU050DeviceBackend;
 class AFU050PropertyIntegerImpl : public IPropertyInteger
 {
 public:
-
-    AFU050PropertyIntegerImpl (const std::string& name,
-                               control_definition ctrl,
-                               std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
+    AFU050PropertyIntegerImpl(const std::string& name,
+                              control_definition ctrl,
+                              std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -56,7 +54,6 @@ public:
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-
     outcome::result<void> valid_value(int64_t val);
 
     std::weak_ptr<tcam::property::AFU050DeviceBackend> m_cam;
@@ -75,10 +72,9 @@ private:
 class AFU050PropertyDoubleImpl : public IPropertyFloat
 {
 public:
-
-    AFU050PropertyDoubleImpl (const std::string& name,
-                              control_definition ctrl,
-                              std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
+    AFU050PropertyDoubleImpl(const std::string& name,
+                             control_definition ctrl,
+                             std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
 
     virtual std::string get_name() const final
     {
@@ -114,7 +110,6 @@ public:
     virtual outcome::result<void> set_value(double new_value) final;
 
 private:
-
     outcome::result<void> valid_value(double val);
 
     std::weak_ptr<tcam::property::AFU050DeviceBackend> m_cam;
@@ -128,7 +123,6 @@ private:
 
     control_definition m_ctrl;
 };
-
 
 
 class AFU050PropertyEnumImpl : public IPropertyEnum
@@ -180,5 +174,4 @@ private:
 };
 
 
-
-}
+} // namespace tcam::property

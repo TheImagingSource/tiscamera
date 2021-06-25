@@ -7,8 +7,8 @@
 #include "logging.h"
 
 #include <algorithm>
-#include <map>
 #include <chrono>
+#include <map>
 
 using namespace tcam::property;
 
@@ -672,7 +672,8 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
 }
 
 
-void tcam::property::SoftwareProperties::enable_property_double(sp prop_id, std::shared_ptr<IPropertyFloat> prop)
+void tcam::property::SoftwareProperties::enable_property_double(sp prop_id,
+                                                                std::shared_ptr<IPropertyFloat> prop)
 {
     auto desc = find_property_desc(prop_id);
 
@@ -698,7 +699,8 @@ void tcam::property::SoftwareProperties::enable_property_double(sp prop_id, std:
 }
 
 
-void tcam::property::SoftwareProperties::enable_property_int(sp prop_id, std::shared_ptr<IPropertyInteger> prop)
+void tcam::property::SoftwareProperties::enable_property_int(sp prop_id,
+                                                             std::shared_ptr<IPropertyInteger> prop)
 {
     auto desc = find_property_desc(prop_id);
 

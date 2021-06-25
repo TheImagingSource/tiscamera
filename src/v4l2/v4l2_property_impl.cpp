@@ -61,7 +61,6 @@ outcome::result<int64_t> V4L2PropertyIntegerImpl::get_value() const
     if (auto ptr = m_cam.lock())
     {
         return ptr->read_control(m_v4l2_id);
-
     }
     else
     {
@@ -124,7 +123,6 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
             m_converter = tcam::v4l2::find_int_to_double(m_v4l2_id);
         }
     }
-
 
 
     m_min = conv_double(queryctrl->minimum);
@@ -343,7 +341,7 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
             {
                 m_entries = res.value();
             }
-                //mapping->gen_conversion.value().conversion.menu_entries;
+            //mapping->gen_conversion.value().conversion.menu_entries;
         }
         else
         {

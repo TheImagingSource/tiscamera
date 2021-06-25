@@ -17,10 +17,9 @@
 #pragma once
 
 #include <cstdint>
+#include <error.h>
 #include <map>
 #include <string>
-
-#include <error.h>
 
 namespace tcam::property
 {

@@ -43,7 +43,6 @@ PipelineManager::~PipelineManager()
 
     available_filter.clear();
     filter_pipeline.clear();
-
 }
 
 
@@ -127,7 +126,8 @@ bool PipelineManager::setSource(std::shared_ptr<DeviceInterface> device)
 
     source->setDevice(device);
 
-    property_filter = std::make_shared<tcam::stream::filter::PropertyFilter>(device->get_properties(), available_input_formats);
+    property_filter = std::make_shared<tcam::stream::filter::PropertyFilter>(
+        device->get_properties(), available_input_formats);
 
     available_output_formats = available_input_formats;
 
@@ -196,10 +196,7 @@ std::vector<uint32_t> PipelineManager::getDeviceFourcc()
     // for easy usage we create a vector<fourcc> for avail. inputs
     std::vector<uint32_t> device_fourcc;
 
-    for (const auto& v : available_input_formats)
-    {
-        device_fourcc.push_back(v.get_fourcc());
-    }
+    for (const auto& v : available_input_formats) { device_fourcc.push_back(v.get_fourcc()); }
     return device_fourcc;
 }
 
@@ -521,7 +518,7 @@ void PipelineManager::push_image(std::shared_ptr<ImageBuffer> buffer)
         return;
     }
 
-    std::scoped_lock lock (m_mtx);
+    std::scoped_lock lock(m_mtx);
 
     m_entry_queue.push(buffer);
 
@@ -614,5 +611,4 @@ void PipelineManager::run_pipeline()
             SPDLOG_ERROR("Sink is NULL");
         }
     }
-
 }

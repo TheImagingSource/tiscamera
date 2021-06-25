@@ -56,13 +56,13 @@ PUBLIC
 	spdlog::spdlog
 )
 
-add_library(gsttcamsrc SHARED gsttcamsrc.cpp
-  gsttcammainsrc.cpp
-  mainsrc_tcamprop_impl.cpp
-  mainsrc_device_state.cpp
+add_library(gsttcamsrc SHARED tcamsrc/gsttcamsrc.cpp
+  tcamsrc/gsttcammainsrc.cpp
+  tcamsrc/mainsrc_tcamprop_impl.cpp
+  tcamsrc/mainsrc_device_state.cpp
   gstmetatcamstatistics.cpp
-  gsttcamdeviceprovider.cpp
-  gsttcamdevice.cpp)
+  tcamsrc/gsttcamdeviceprovider.cpp
+  tcamsrc/gsttcamdevice.cpp)
 
 
 add_library(gsttcambin SHARED gsttcambin.cpp)

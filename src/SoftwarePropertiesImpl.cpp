@@ -203,7 +203,6 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const struct software_prop_de
         m_name = desc->name_;
     }
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
-
 }
 
 outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const

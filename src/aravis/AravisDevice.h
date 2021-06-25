@@ -30,7 +30,7 @@ namespace tcam
 
 namespace property
 {
-    class AravisPropertyBackend;
+class AravisPropertyBackend;
 }
 
 class AravisDevice : public DeviceInterface

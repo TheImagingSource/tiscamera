@@ -30,7 +30,6 @@
 using namespace tcam;
 
 
-
 AravisDevice::AravisFormatHandler::AravisFormatHandler(AravisDevice* dev) : device(dev) {}
 
 

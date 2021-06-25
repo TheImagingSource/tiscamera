@@ -80,86 +80,102 @@ static TcamGstMapping tcam_gst_caps_info[] = {
     {
         FOURCC_BGGR8,
         "video/x-bayer, format=(string)bggr",
-        "video/x-bayer",    "bggr",
+        "video/x-bayer",
+        "bggr",
     },
 
     {
         FOURCC_GBRG10,
         "video/x-bayer, format=(string)gbrg10",
-        "video/x-bayer",    "gbrg10",
+        "video/x-bayer",
+        "gbrg10",
     },
     {
         FOURCC_BGGR10,
         "video/x-bayer, format=(string)bggr10",
-        "video/x-bayer",    "bggr10",
+        "video/x-bayer",
+        "bggr10",
     },
     {
         FOURCC_GRBG10,
         "video/x-bayer, format=(string)grbg10",
-        "video/x-bayer",    "grbg10",
+        "video/x-bayer",
+        "grbg10",
     },
     {
         FOURCC_RGGB10,
         "video/x-bayer, format=(string)rggb10",
-        "video/x-bayer",    "rggb10",
+        "video/x-bayer",
+        "rggb10",
     },
 
     {
         FOURCC_GBRG10_SPACKED,
         "video/x-bayer, format=(string)gbrg10sp",
-        "video/x-bayer",    "gbrg10sp",
+        "video/x-bayer",
+        "gbrg10sp",
     },
     {
         FOURCC_BGGR10_SPACKED,
         "video/x-bayer, format=(string)bggr10sp",
-        "video/x-bayer",    "bggr10sp",
+        "video/x-bayer",
+        "bggr10sp",
     },
     {
         FOURCC_GRBG10_SPACKED,
         "video/x-bayer, format=(string)grbg10sp",
-        "video/x-bayer",    "grbg10sp",
+        "video/x-bayer",
+        "grbg10sp",
     },
     {
         FOURCC_RGGB10_SPACKED,
         "video/x-bayer, format=(string)rggb10sp",
-        "video/x-bayer",    "rggb10sp",
+        "video/x-bayer",
+        "rggb10sp",
     },
 
     {
         FOURCC_GBRG10_MIPI_PACKED,
         "video/x-bayer, format=(string)gbrg10m",
-        "video/x-bayer",    "gbrg10m",
+        "video/x-bayer",
+        "gbrg10m",
     },
     {
         FOURCC_BGGR10_MIPI_PACKED,
         "video/x-bayer, format=(string)bggr10",
-        "video/x-bayer",    "bggr10m",
+        "video/x-bayer",
+        "bggr10m",
     },
     {
         FOURCC_GRBG10_MIPI_PACKED,
         "video/x-bayer, format=(string)grbg10m",
-        "video/x-bayer",    "grbg10m",
+        "video/x-bayer",
+        "grbg10m",
     },
     {
         FOURCC_RGGB10_MIPI_PACKED,
         "video/x-bayer, format=(string)rggb10m",
-        "video/x-bayer",    "rggb10m",
+        "video/x-bayer",
+        "rggb10m",
     },
 
     {
         FOURCC_GBRG12,
         "video/x-bayer, format=(string)gbrg12",
-        "video/x-bayer",    "gbrg12",
+        "video/x-bayer",
+        "gbrg12",
     },
     {
         FOURCC_BGGR12,
         "video/x-bayer, format=(string)bggr12",
-        "video/x-bayer",    "bggr12",
+        "video/x-bayer",
+        "bggr12",
     },
     {
         FOURCC_GRBG12,
         "video/x-bayer, format=(string)grbg12",
-        "video/x-bayer",    "grbg12",
+        "video/x-bayer",
+        "grbg12",
     },
     {
         FOURCC_GBRG12_PACKED,
@@ -355,10 +371,7 @@ static TcamGstMapping tcam_gst_caps_info[] = {
       "video/tis,format=(string)ADI_GRAY16_LE",
       "video/tis",
       "ADI_GRAY16_LE" },
-    { FOURCC_POLARIZATION_ADI_RGB8,
-      "video/tis,format=(string)ADI_RGB8",
-      "video/tis",
-      "ADI_RGB8" },
+    { FOURCC_POLARIZATION_ADI_RGB8, "video/tis,format=(string)ADI_RGB8", "video/tis", "ADI_RGB8" },
     { FOURCC_POLARIZATION_ADI_RGB16,
       "video/tis,format=(string)ADI_RGB16",
       "video/tis",
@@ -379,21 +392,15 @@ static TcamGstMapping tcam_gst_caps_info[] = {
       "video/x-bayer,format=(string)polarized-bggr16p",
       "video/x-bayer",
       "polarized-bggr16p" },
-    {
-        FOURCC_PWL_RG12_MIPI,
-        "video/x-bayer,format=(string)pwl-rggb12m",
-        "video/x-bayer", "pwl-rggb12m"
-    },
-    {
-        FOURCC_PWL_RG12,
-        "video/x-bayer,format=(string)pwl-rggb12",
-        "video/x-bayer", "pwl-rggb12"
-    },
-    {
-        FOURCC_PWL_RG16H12,
-        "video/x-bayer,format=(string)pwl-rggb16H12",
-        "video/x-bayer", "pwl-rggb16H12"
-    },
+    { FOURCC_PWL_RG12_MIPI,
+      "video/x-bayer,format=(string)pwl-rggb12m",
+      "video/x-bayer",
+      "pwl-rggb12m" },
+    { FOURCC_PWL_RG12, "video/x-bayer,format=(string)pwl-rggb12", "video/x-bayer", "pwl-rggb12" },
+    { FOURCC_PWL_RG16H12,
+      "video/x-bayer,format=(string)pwl-rggb16H12",
+      "video/x-bayer",
+      "pwl-rggb16H12" },
 };
 
 #ifndef ARRAYSIZE

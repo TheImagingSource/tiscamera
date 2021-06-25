@@ -16,32 +16,29 @@
 
 #pragma once
 
-#include <cstdint>
-
-#include <memory>
-#include <map>
-#include <string>
-
 #include "error.h"
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
 
 namespace tcam::v4l2
 {
-
 
 
 class ConverterIntToDouble
 {
 public:
     virtual ~ConverterIntToDouble() = default;
-    virtual double to_double (int64_t) = 0;
-    virtual int64_t to_int (double) = 0;
+    virtual double to_double(int64_t) = 0;
+    virtual int64_t to_int(double) = 0;
 };
 
 
 class ConverterScale
 {
 public:
-
     virtual ~ConverterScale() = default;
     virtual double to_device(double) = 0;
     virtual double from_device(double) = 0;
@@ -57,10 +54,10 @@ enum class MappingType
 };
 
 
-std::shared_ptr<ConverterIntToDouble> find_int_to_double (uint32_t v4l2_id);
+std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id);
 
-std::shared_ptr<ConverterScale> find_scale (uint32_t v4l2_id);
+std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id);
 
-outcome::result<std::map<int, std::string>> find_menu_entries (uint32_t v4l2_id);
+outcome::result<std::map<int, std::string>> find_menu_entries(uint32_t v4l2_id);
 
-}
+} // namespace tcam::v4l2
