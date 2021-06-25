@@ -19,11 +19,10 @@ add_library( dutils_img_filter_neon STATIC
 
 target_link_libraries( dutils_img_filter_neon
 PUBLIC
-#	dutils_img::project_options
-PRIVATE
-#	dutils_img::project_warnings
-PUBLIC
 	dutils::dutils_img_filter_c
+PRIVATE
+	dutils::project_options
+	dutils::project_warnings
 )
 
 if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64" )

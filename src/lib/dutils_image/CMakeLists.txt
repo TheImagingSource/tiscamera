@@ -11,6 +11,17 @@ INTERFACE
 
 add_library( dutils::dutils_img ALIAS dutils_img )
 
+add_library( dutils_project_warnings INTERFACE )
+set_project_warnings( dutils_project_warnings )
+add_library( dutils::project_warnings ALIAS dutils_project_warnings )
+
+
+add_library( dutils_project_options INTERFACE )
+#set_target_properties( dutils_project_options PROPERTIES VISIBILITY_PRESET hidden )
+target_compile_options( dutils_project_options INTERFACE -fvisibility=hidden -ffast-math )
+add_library( dutils::project_options ALIAS dutils_project_options )
+
+
 add_subdirectory( src/dutils_img_base )
 add_subdirectory( src/dutils_img_filter )
 add_subdirectory( src/dutils_img_pipe )

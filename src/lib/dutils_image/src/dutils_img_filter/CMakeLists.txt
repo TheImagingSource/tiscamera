@@ -40,10 +40,9 @@ add_library( dutils_img_filter_c STATIC
 )
 
 target_link_libraries( dutils_img_filter_c
-PUBLIC
-#	dutils_img::project_options
 PRIVATE
-#	dutils_img::project_warnings
+	dutils::project_warnings
+	dutils::project_options
 PUBLIC
 	dutils::dutils_img
 )

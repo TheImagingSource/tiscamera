@@ -18,9 +18,9 @@ add_library( dutils_img_base STATIC
 target_link_libraries( dutils_img_base 
 PUBLIC 
 	dutils::dutils_img
-#	dutils_img::project_options
 PRIVATE
-#	dutils_img::project_warnings
+	dutils::project_options
+	dutils::project_warnings
 )
 
 add_library( dutils::dutils_img_base ALIAS dutils_img_base )
