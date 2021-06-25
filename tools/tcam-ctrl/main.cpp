@@ -24,8 +24,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
-#include <tcam.h>
-#include <tcamprop.h>
+#include "../../src/gobject/tcamprop.h"
 #include <unistd.h>
 
 using namespace tcam;

@@ -17,13 +17,11 @@
 #ifndef FORMATS_H
 #define FORMATS_H
 
-#include "tcam.h"
+#include "../../src/tcam.h"
 
 #include <memory>
 #include <string>
 #include <vector>
-
-using namespace tcam;
 
 
 /**
@@ -37,7 +35,7 @@ void list_gstreamer_1_0_formats(const std::string& serial);
  * @brief print function for VideoFormat
  * @param format - VideoFormat that shall be printed
  */
-void print_active_format(const VideoFormat& format);
+void print_active_format(const tcam::VideoFormat& format);
 
 
 #endif /* FORMATS_H */

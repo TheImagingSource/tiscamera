@@ -17,9 +17,9 @@
 #include "properties.h"
 
 #include "general.h"
-#include "tcam.h"
-#include "tcamprop.h"
-#include "utils.h"
+#include "../../src/tcam.h"
+#include "../../src/gobject/tcamprop.h"
+#include "../../src/utils.h"
 
 #include <gst/gst.h>
 #include <iomanip>
