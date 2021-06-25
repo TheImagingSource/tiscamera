@@ -18,8 +18,6 @@
 
 #include <dutils_img/fcc_to_string.h>
 #include "general.h"
-#include "../../src/gstreamer-1.0/tcamgstbase.h" // videoformatsdescription_to_gst_caps_string
-#include "../../src/gstreamer-1.0/tcamgststrings.h"
 
 #include <gst/gst.h> // gst_init
 #include <iomanip>

@@ -34,15 +34,13 @@ endfunction()
 
 
 add_subdirectory(gobject)
+add_subdirectory(algorithms)
 
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
 if (TCAM_ENABLE_BASE_LIBRARIES)
-
-add_subdirectory(algorithms)
-
 
 set(base
   format.cpp
@@ -63,7 +61,7 @@ set(base
   error.cpp
   )
 
-add_library(tcam-base OBJECT ${base})
+add_library(tcam-base STATIC ${base})
 
 target_link_libraries( tcam-base 
 PUBLIC
@@ -74,8 +72,6 @@ PRIVATE
 )
 
 target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
-target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/external/spdlog/include")
-target_include_directories(tcam-base PRIVATE "${TCAM_SOURCE_DIR}/src/include/")
 set_project_warnings(tcam-base)
 set( srcs
   BackendLoader.cpp
