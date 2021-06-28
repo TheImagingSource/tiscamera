@@ -16,10 +16,10 @@
 
 #include "properties.h"
 
-#include "general.h"
-#include "../../src/tcam.h"
 #include "../../src/gobject/tcamprop.h"
+#include "../../src/tcam.h"
 #include "../../src/utils.h"
+#include "general.h"
 
 #include <gst/gst.h>
 #include <iomanip>

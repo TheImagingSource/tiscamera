@@ -5,11 +5,10 @@
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
 #include "SoftwarePropertyBackend.h"
+#include "VideoFormat.h"
+#include "compiler_defines.h"
 
 #include <dutils_img_pipe/auto_alg_pass.h>
-#include "compiler_defines.h"
-#include "VideoFormat.h"
-
 #include <memory>
 #include <mutex>
 #include <vector>

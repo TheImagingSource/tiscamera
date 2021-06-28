@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "../../src/gobject/tcamprop.h"
 #include "formats.h"
 #include "general.h"
 #include "properties.h"
@@ -24,7 +25,6 @@
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
-#include "../../src/gobject/tcamprop.h"
 #include <unistd.h>
 
 using namespace tcam;
@@ -158,10 +158,14 @@ int main(int argc, char* argv[])
     auto list_devices = app.add_flag_function("-l,--list", print_devices, "list capture devices");
     app.add_flag_function("--list-serial-long", print_serials_long, "list capture devices");
     app.add_flag_callback("--packages", tcam::tools::print_packages, "list installed TIS packages");
-    app.add_flag_callback("--system-info", tcam::tools::print_system_info_general, "list general system information");
-    app.add_flag_callback("--gige-info", tcam::tools::print_system_info_gige, "list network system information");
-    app.add_flag_callback("--usb-info", tcam::tools::print_system_info_usb, "list usb system information");
-    app.add_flag_callback("--all-info", tcam::tools::print_system_info, "list all system information");
+    app.add_flag_callback(
+        "--system-info", tcam::tools::print_system_info_general, "list general system information");
+    app.add_flag_callback(
+        "--gige-info", tcam::tools::print_system_info_gige, "list network system information");
+    app.add_flag_callback(
+        "--usb-info", tcam::tools::print_system_info_usb, "list usb system information");
+    app.add_flag_callback(
+        "--all-info", tcam::tools::print_system_info, "list all system information");
 
     std::string serial;
 

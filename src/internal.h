@@ -32,8 +32,9 @@
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"
-#include <dutils_img/image_transform_base.h>
 #include "logging.h"
 #include "utils.h"
+
+#include <dutils_img/image_transform_base.h>
 
 #endif /* TCAM_INTERNAL_H */

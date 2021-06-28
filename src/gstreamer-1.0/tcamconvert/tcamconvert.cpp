@@ -17,25 +17,20 @@
 #include "tcamconvert.h"
 
 #include <gst/video/gstvideometa.h>
-
 #include <vector>
 
 //#include <gst_helper/gvalue_helper.h>
 //#include <gst_helper/gst_caps_helper.h>
-#include <gst_caps_helper.h>
-
-#include <dutils_img/image_transform_base.h>
-#include <dutils_img/image_bayer_pattern.h>
-
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
 
+#include <algorithm>
 #include <dutils_img/dutils_cpu_features.h>
 #include <dutils_img/fcc_to_string.h>
-
+#include <dutils_img/image_bayer_pattern.h>
+#include <dutils_img/image_transform_base.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
-
-#include <algorithm>
+#include <gst_caps_helper.h>
 
 struct GstTCamConvert_context
 {
@@ -74,7 +69,7 @@ inline std::vector<std::string> gst_string_list_to_vector(const GValue* gst_list
     }
     return ret;
 }
-}
+} // namespace gst_helper
 
 enum
 {
@@ -89,49 +84,49 @@ G_DEFINE_TYPE(GstTCamConvert, gst_tcamconvert, GST_TYPE_BASE_TRANSFORM)
 
 #include <map>
 
-static GstCaps*    generate_caps_struct( const std::vector<img::fourcc>& fcc_list )
+static GstCaps* generate_caps_struct(const std::vector<img::fourcc>& fcc_list)
 {
-    GstCaps* caps = gst_caps_new_empty();   // this is returned and the caller must take ownership
+    GstCaps* caps = gst_caps_new_empty(); // this is returned and the caller must take ownership
 
-    std::map<std::string,std::vector<const char*>>   simple_map;
+    std::map<std::string, std::vector<const char*>> simple_map;
 
-    for( const auto fcc : fcc_list )
+    for (const auto fcc : fcc_list)
     {
-        auto [prefix,format] = img_lib::gst::fourcc_to_gst_caps_descr(fcc);
-        if ( !prefix )
+        auto [prefix, format] = img_lib::gst::fourcc_to_gst_caps_descr(fcc);
+        if (!prefix)
         {
             //GST_WARN( "Format has empty caps string. Ignoring %s", img::fcc_to_string( fcc ).c_str() );
             continue;
         }
 
-        simple_map[prefix].push_back( format );
+        simple_map[prefix].push_back(format);
     }
 
-    for( auto&& [struct_type, format_string_list] : simple_map )
+    for (auto&& [struct_type, format_string_list] : simple_map)
     {
         GValue format_list = {};
         g_value_init(&format_list, GST_TYPE_LIST);
-        for( auto&& format : format_string_list )
+        for (auto&& format : format_string_list)
         {
             GValue tmp = {};
-            g_value_init( &tmp, G_TYPE_STRING );
-            g_value_set_string( &tmp, format );
-            gst_value_list_append_and_take_value( &format_list, &tmp );
+            g_value_init(&tmp, G_TYPE_STRING);
+            g_value_set_string(&tmp, format);
+            gst_value_list_append_and_take_value(&format_list, &tmp);
         }
 
-        GstStructure* structure = gst_structure_new_empty( struct_type.c_str() );
+        GstStructure* structure = gst_structure_new_empty(struct_type.c_str());
         gst_structure_take_value(structure, "format", &format_list);
 
         GValue gvalue_width = G_VALUE_INIT;
-        g_value_init( &gvalue_width, GST_TYPE_INT_RANGE );
-        gst_value_set_int_range_step( &gvalue_width, 1, std::numeric_limits<gint>::max(), 1 );
+        g_value_init(&gvalue_width, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range_step(&gvalue_width, 1, std::numeric_limits<gint>::max(), 1);
 
         GValue gvalue_height = G_VALUE_INIT;
-        g_value_init( &gvalue_height, GST_TYPE_INT_RANGE );
-        gst_value_set_int_range_step( &gvalue_height, 1, std::numeric_limits<gint>::max(), 1 );
+        g_value_init(&gvalue_height, GST_TYPE_INT_RANGE);
+        gst_value_set_int_range_step(&gvalue_height, 1, std::numeric_limits<gint>::max(), 1);
 
-        gst_structure_take_value( structure, "width", &gvalue_width );
-        gst_structure_take_value( structure, "height", &gvalue_height );
+        gst_structure_take_value(structure, "width", &gvalue_width);
+        gst_structure_take_value(structure, "height", &gvalue_height);
         //gst_structure_take_value( structure, "framerate", &gvalue_fps_range );  // takes ownership of gvalue_fps_range
 
         gst_caps_append_structure(caps, structure);
@@ -142,25 +137,33 @@ static GstCaps*    generate_caps_struct( const std::vector<img::fourcc>& fcc_lis
 
 namespace
 {
-    using fcc_array = std::array<img::fourcc, 16>;
+using fcc_array = std::array<img::fourcc, 16>;
 
-    
-    struct fcc_array2 
+
+struct fcc_array2
+{
+    template<typename... fccs>
+    constexpr fcc_array2(fccs... fcc_list) : data_ { fcc_list... }, count { sizeof...(fcc_list) }
     {
-        template<typename ... fccs>
-        constexpr fcc_array2( fccs ... fcc_list ) : data_{ fcc_list... }, count{ sizeof...( fcc_list ) } {}
+    }
 
-        fcc_array   data_;
-        int         count = 0;
+    fcc_array data_;
+    int count = 0;
 
-        constexpr auto begin() const noexcept  { return data_.begin();  }
-        constexpr auto end() const noexcept  { return data_.begin() + count;  }
+    constexpr auto begin() const noexcept
+    {
+        return data_.begin();
+    }
+    constexpr auto end() const noexcept
+    {
+        return data_.begin() + count;
+    }
 
-        bool has_fcc(img::fourcc fcc) const noexcept
-        {
-            return std::any_of(begin(), end(), [fcc](auto v) { return v == fcc; } );
-        }
-    };
+    bool has_fcc(img::fourcc fcc) const noexcept
+    {
+        return std::any_of(begin(), end(), [fcc](auto v) { return v == fcc; });
+    }
+};
 
 struct transform_path
 {
@@ -170,28 +173,65 @@ struct transform_path
 
 using namespace img;
 
-static const constexpr transform_path transform_entries[] =
-{ 
-    {
-        { fourcc::MONO8, fourcc::MONO16, fourcc::MONO10, fourcc::MONO10_MIPI_PACKED, fourcc::MONO10_SPACKED, fourcc::MONO12, fourcc::MONO12_MIPI_PACKED, fourcc::MONO12_SPACKED, fourcc::MONO12_PACKED },
-        { fourcc::MONO8, fourcc::MONO16 }
-    },
-    {
-        { fourcc::BGGR8, fourcc::BGGR16, fourcc::BGGR10, fourcc::BGGR10_SPACKED, fourcc::BGGR10_MIPI_PACKED, fourcc::BGGR12, fourcc::BGGR12_PACKED, fourcc::BGGR12_SPACKED, fourcc::BGGR12_MIPI_PACKED, },
-        { fourcc::BGGR8, fourcc::BGGR16 }
-    },
-    {
-        { fourcc::GBRG8, fourcc::GBRG16, fourcc::GBRG10, fourcc::GBRG10_SPACKED, fourcc::GBRG10_MIPI_PACKED, fourcc::GBRG12, fourcc::GBRG12_PACKED, fourcc::GBRG12_SPACKED, fourcc::GBRG12_MIPI_PACKED, },
-        { fourcc::GBRG8, fourcc::GBRG16 }
-    },
-    {
-        { fourcc::RGGB8, fourcc::RGGB16, fourcc::RGGB10, fourcc::RGGB10_SPACKED, fourcc::RGGB10_MIPI_PACKED, fourcc::RGGB12, fourcc::RGGB12_PACKED, fourcc::RGGB12_SPACKED, fourcc::RGGB12_MIPI_PACKED, },
-        { fourcc::RGGB8, fourcc::RGGB16 }
-    },
-    {
-        { fourcc::GRBG8, fourcc::GRBG16, fourcc::GRBG10, fourcc::GRBG10_SPACKED, fourcc::GRBG10_MIPI_PACKED, fourcc::GRBG12, fourcc::GRBG12_PACKED, fourcc::GRBG12_SPACKED, fourcc::GRBG12_MIPI_PACKED, },
-        { fourcc::GRBG8, fourcc::GRBG16 }
-    },
+static const constexpr transform_path transform_entries[] = {
+    { { fourcc::MONO8,
+        fourcc::MONO16,
+        fourcc::MONO10,
+        fourcc::MONO10_MIPI_PACKED,
+        fourcc::MONO10_SPACKED,
+        fourcc::MONO12,
+        fourcc::MONO12_MIPI_PACKED,
+        fourcc::MONO12_SPACKED,
+        fourcc::MONO12_PACKED },
+      { fourcc::MONO8, fourcc::MONO16 } },
+    { {
+          fourcc::BGGR8,
+          fourcc::BGGR16,
+          fourcc::BGGR10,
+          fourcc::BGGR10_SPACKED,
+          fourcc::BGGR10_MIPI_PACKED,
+          fourcc::BGGR12,
+          fourcc::BGGR12_PACKED,
+          fourcc::BGGR12_SPACKED,
+          fourcc::BGGR12_MIPI_PACKED,
+      },
+      { fourcc::BGGR8, fourcc::BGGR16 } },
+    { {
+          fourcc::GBRG8,
+          fourcc::GBRG16,
+          fourcc::GBRG10,
+          fourcc::GBRG10_SPACKED,
+          fourcc::GBRG10_MIPI_PACKED,
+          fourcc::GBRG12,
+          fourcc::GBRG12_PACKED,
+          fourcc::GBRG12_SPACKED,
+          fourcc::GBRG12_MIPI_PACKED,
+      },
+      { fourcc::GBRG8, fourcc::GBRG16 } },
+    { {
+          fourcc::RGGB8,
+          fourcc::RGGB16,
+          fourcc::RGGB10,
+          fourcc::RGGB10_SPACKED,
+          fourcc::RGGB10_MIPI_PACKED,
+          fourcc::RGGB12,
+          fourcc::RGGB12_PACKED,
+          fourcc::RGGB12_SPACKED,
+          fourcc::RGGB12_MIPI_PACKED,
+      },
+      { fourcc::RGGB8, fourcc::RGGB16 } },
+    { {
+          fourcc::GRBG8,
+          fourcc::GRBG16,
+          fourcc::GRBG10,
+          fourcc::GRBG10_SPACKED,
+          fourcc::GRBG10_MIPI_PACKED,
+          fourcc::GRBG12,
+          fourcc::GRBG12_PACKED,
+          fourcc::GRBG12_SPACKED,
+          fourcc::GRBG12_MIPI_PACKED,
+      },
+      { fourcc::GRBG8, fourcc::GRBG16 } },
 };
 
 
@@ -201,23 +241,17 @@ void remove_duplicates(std::vector<img::fourcc>& vec)
     vec.erase(f, vec.end());
 }
 
-void    append( std::vector<img::fourcc>& vec, const fcc_array2& arr )
+void append(std::vector<img::fourcc>& vec, const fcc_array2& arr)
 {
-    for (auto fcc : arr)
-    {
-        vec.push_back(fcc);
-    }
+    for (auto fcc : arr) { vec.push_back(fcc); }
 }
 
-}
+} // namespace
 
 static std::vector<img::fourcc> tcamconvert_get_all_input_fccs()
 {
     std::vector<img::fourcc> rval;
-    for (auto e : transform_entries)
-    {
-        append( rval, e.src_fcc );
-    }
+    for (auto e : transform_entries) { append(rval, e.src_fcc); }
     remove_duplicates(rval);
     return rval;
 }
@@ -226,15 +260,12 @@ static std::vector<img::fourcc> tcamconvert_get_all_input_fccs()
 static std::vector<img::fourcc> tcamconvert_get_all_output_fccs()
 {
     std::vector<img::fourcc> rval;
-    for (auto e : transform_entries)
-    {
-        append(rval, e.dst_fcc);
-    }
+    for (auto e : transform_entries) { append(rval, e.dst_fcc); }
     remove_duplicates(rval);
     return rval;
 }
 
-static std::vector<img::fourcc>   tcamconvert_get_supported_input_fccs( img::fourcc dst_fcc )
+static std::vector<img::fourcc> tcamconvert_get_supported_input_fccs(img::fourcc dst_fcc)
 {
     std::vector<img::fourcc> rval;
     for (auto e : transform_entries)
@@ -249,7 +280,7 @@ static std::vector<img::fourcc>   tcamconvert_get_supported_input_fccs( img::fou
     return rval;
 }
 
-static std::vector<img::fourcc>   tcamconvert_get_supported_output_fccs( img::fourcc src_fcc )
+static std::vector<img::fourcc> tcamconvert_get_supported_output_fccs(img::fourcc src_fcc)
 {
     std::vector<img::fourcc> rval;
     for (auto e : transform_entries)
@@ -265,38 +296,38 @@ static std::vector<img::fourcc>   tcamconvert_get_supported_output_fccs( img::fo
 }
 
 /* No properties are implemented, so only a warning is produced */
-static void gst_tcamconvert_set_property (GObject* object __attribute__((unused)),
-                                           guint prop_id,
-                                           const GValue* value __attribute__((unused)),
-                                           GParamSpec* pspec)
+static void gst_tcamconvert_set_property(GObject* object __attribute__((unused)),
+                                         guint prop_id,
+                                         const GValue* value __attribute__((unused)),
+                                         GParamSpec* pspec)
 {
     switch (prop_id)
     {
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-        break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+            break;
     }
 }
 
-static void gst_tcamconvert_get_property (GObject* object __attribute__((unused)),
-                                           guint prop_id,
-                                           GValue* value __attribute__((unused)),
-                                           GParamSpec* pspec)
+static void gst_tcamconvert_get_property(GObject* object __attribute__((unused)),
+                                         guint prop_id,
+                                         GValue* value __attribute__((unused)),
+                                         GParamSpec* pspec)
 {
 
     switch (prop_id)
     {
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-        break;
+        default:
+            G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+            break;
     }
 }
 
-static img::img_type caps_to_img_type( const GstCaps* caps )
+static img::img_type caps_to_img_type(const GstCaps* caps)
 {
-    GstStructure* structure = gst_caps_get_structure( caps, 0 );
+    GstStructure* structure = gst_caps_get_structure(caps, 0);
 
-    return gst_helper::get_gst_struct_image_type( structure );
+    return gst_helper::get_gst_struct_image_type(structure);
 }
 
 
@@ -335,10 +366,11 @@ static auto find_func(img::img_type dst_type, img::img_type src_type)
 }
 
 
-static gboolean gst_tcamconvert_set_caps( GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps )
+static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps)
 {
-    GstTCamConvert* self = GST_TCAMCONVERT( base );
-    if( !self ) {
+    GstTCamConvert* self = GST_TCAMCONVERT(base);
+    if (!self)
+    {
         return FALSE;
     }
 
@@ -355,154 +387,171 @@ static gboolean gst_tcamconvert_set_caps( GstBaseTransform* base, GstCaps* incap
 
     self->context_->dst_type = dst;
     self->context_->src_type = src;
-    self->context_->transform_func_ = find_func( dst, src );
+    self->context_->transform_func_ = find_func(dst, src);
 
     return TRUE;
 }
 
 
-static void create_fmt( GstCaps* res_caps, const GstStructure* structure, const std::string& fmt, GstPadDirection direction )
+static void create_fmt(GstCaps* res_caps,
+                       const GstStructure* structure,
+                       const std::string& fmt,
+                       GstPadDirection direction)
 {
-    const GValue* w = gst_structure_get_value( structure, "width" );
-    const GValue* h = gst_structure_get_value( structure, "height" );
-    const GValue* frt = gst_structure_get_value( structure, "framerate" );
+    const GValue* w = gst_structure_get_value(structure, "width");
+    const GValue* h = gst_structure_get_value(structure, "height");
+    const GValue* frt = gst_structure_get_value(structure, "framerate");
 
-    const img::fourcc fourcc = img_lib::gst::gst_caps_string_to_fourcc( gst_structure_get_name( structure ), fmt );
+    const img::fourcc fourcc =
+        img_lib::gst::gst_caps_string_to_fourcc(gst_structure_get_name(structure), fmt);
 
     std::vector<img::fourcc> vec;
-    if( direction == GST_PAD_SRC )
+    if (direction == GST_PAD_SRC)
     {
-        vec = tcamconvert_get_supported_input_fccs( fourcc );
+        vec = tcamconvert_get_supported_input_fccs(fourcc);
     }
     else
     {
-        vec = tcamconvert_get_supported_output_fccs( fourcc );
+        vec = tcamconvert_get_supported_output_fccs(fourcc);
     }
 
-    for( const auto& fcc : vec )
+    for (const auto& fcc : vec)
     {
-        std::string cur_caps_str = img_lib::gst::fourcc_to_gst_caps_string( fcc );
-        if( cur_caps_str.empty() )
+        std::string cur_caps_str = img_lib::gst::fourcc_to_gst_caps_string(fcc);
+        if (cur_caps_str.empty())
         {
             continue;
         }
-        GstCaps* caps_to_add = gst_caps_from_string( cur_caps_str.c_str() );
-        if( caps_to_add == nullptr ) {
+        GstCaps* caps_to_add = gst_caps_from_string(cur_caps_str.c_str());
+        if (caps_to_add == nullptr)
+        {
             continue;
         }
 
-        if( w && h )
+        if (w && h)
         {
             // NOTE: we copy this to encompass value ranges
 
             GValue width = G_VALUE_INIT;
             GValue height = G_VALUE_INIT;
-            g_value_init( &width, G_VALUE_TYPE( w ) );
-            g_value_init( &height, G_VALUE_TYPE( h ) );
+            g_value_init(&width, G_VALUE_TYPE(w));
+            g_value_init(&height, G_VALUE_TYPE(h));
 
-            g_value_copy( w, &width );
-            g_value_copy( h, &height );
+            g_value_copy(w, &width);
+            g_value_copy(h, &height);
 
-            gst_caps_set_value( caps_to_add, "width", &width );
-            gst_caps_set_value( caps_to_add, "height", &height );
+            gst_caps_set_value(caps_to_add, "width", &width);
+            gst_caps_set_value(caps_to_add, "height", &height);
 
-            g_value_unset( &width );
-            g_value_unset( &height );
+            g_value_unset(&width);
+            g_value_unset(&height);
         }
-        if( frt ) {
-            gst_caps_set_value( caps_to_add, "framerate", frt );
+        if (frt)
+        {
+            gst_caps_set_value(caps_to_add, "framerate", frt);
         }
-        gst_caps_append( res_caps, caps_to_add );
+        gst_caps_append(res_caps, caps_to_add);
     }
 }
 
-static GstCaps* transform_caps( GstCaps* caps, GstPadDirection direction )
+static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
 {
     GstCaps* res_caps = gst_caps_new_empty();
 
-    unsigned int caps_count = gst_caps_get_size( caps );
-    for( unsigned int i = 0; i < caps_count; i++ )
+    unsigned int caps_count = gst_caps_get_size(caps);
+    for (unsigned int i = 0; i < caps_count; i++)
     {
-        GstStructure* structure = gst_caps_get_structure( caps, i );
+        GstStructure* structure = gst_caps_get_structure(caps, i);
 
         std::vector<std::string> fmt_vec;
 
-        if( gst_structure_get_field_type( structure, "format" ) == GST_TYPE_LIST )
+        if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
         {
-            fmt_vec = gst_helper::gst_string_list_to_vector( gst_structure_get_value( structure, "format" ) );
+            fmt_vec =
+                gst_helper::gst_string_list_to_vector(gst_structure_get_value(structure, "format"));
         }
-        else if( gst_structure_get_field_type( structure, "format" ) == G_TYPE_STRING )
+        else if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {
-            fmt_vec.push_back( gst_structure_get_string( structure, "format" ) );
+            fmt_vec.push_back(gst_structure_get_string(structure, "format"));
         }
 
-        if( fmt_vec.empty() )
+        if (fmt_vec.empty())
         {
-            GST_ERROR( "No format given." );
+            GST_ERROR("No format given.");
             continue;
         }
 
         // for every entry in fmt_vec create a GstCaps that is appended to res_caps
-        for( auto&& fcc_string : fmt_vec )
+        for (auto&& fcc_string : fmt_vec)
         {
-            create_fmt( res_caps, structure, fcc_string, direction );
+            create_fmt(res_caps, structure, fcc_string, direction);
         }
     }
 
-    res_caps = gst_caps_simplify( res_caps );
-    
-    if( direction == GST_PAD_SRC ) {
-        GST_DEBUG( "Returning INPUT: %s", gst_helper::caps_to_string( res_caps ).c_str() );
-    } else {
-        GST_DEBUG( "Returning OUTPUT: %s", gst_helper::caps_to_string( res_caps ).c_str() );
+    res_caps = gst_caps_simplify(res_caps);
+
+    if (direction == GST_PAD_SRC)
+    {
+        GST_DEBUG("Returning INPUT: %s", gst_helper::caps_to_string(res_caps).c_str());
+    }
+    else
+    {
+        GST_DEBUG("Returning OUTPUT: %s", gst_helper::caps_to_string(res_caps).c_str());
     }
     return res_caps;
 }
 
-static GstCaps* gst_tcamconvert_transform_caps( GstBaseTransform* /*base*/, GstPadDirection direction, GstCaps* caps, GstCaps* filter )
+static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* /*base*/,
+                                               GstPadDirection direction,
+                                               GstCaps* caps,
+                                               GstCaps* filter)
 {
-    auto dir_to_string = []( GstPadDirection dir )
-    {
+    auto dir_to_string = [](GstPadDirection dir) {
         return dir == GST_PAD_SRC ? "GST_PAD_SRC" : "GST_PAD_SINK";
     };
 
-    GstCaps* res_caps = transform_caps( caps, direction );
-    if( filter )
+    GstCaps* res_caps = transform_caps(caps, direction);
+    if (filter)
     {
         GstCaps* tmp_caps = res_caps;
-        res_caps = gst_caps_intersect_full( filter,
-            tmp_caps,
-            GST_CAPS_INTERSECT_FIRST );
-        gst_caps_unref( tmp_caps );
+        res_caps = gst_caps_intersect_full(filter, tmp_caps, GST_CAPS_INTERSECT_FIRST);
+        gst_caps_unref(tmp_caps);
     }
 
-    GST_DEBUG( "dir=%s transformed %s into %s", dir_to_string( direction ),
-               gst_helper::caps_to_string( caps ).c_str(),
-               gst_helper::caps_to_string( res_caps ).c_str() );
+    GST_DEBUG("dir=%s transformed %s into %s",
+              dir_to_string(direction),
+              gst_helper::caps_to_string(caps).c_str(),
+              gst_helper::caps_to_string(res_caps).c_str());
 
     return res_caps;
 }
 
-static gboolean gst_tcamconvert_get_unit_size( GstBaseTransform* trans, GstCaps* caps, gsize* size )
+static gboolean gst_tcamconvert_get_unit_size(GstBaseTransform* trans, GstCaps* caps, gsize* size)
 {
-    GstStructure* structure = gst_caps_get_structure( caps, 0 );
-    auto dim_opt = gst_helper::get_gst_struct_image_dim( structure );
-    if( !dim_opt )
+    GstStructure* structure = gst_caps_get_structure(caps, 0);
+    auto dim_opt = gst_helper::get_gst_struct_image_dim(structure);
+    if (!dim_opt)
     {
-        GST_ELEMENT_ERROR( trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, some required field missing") );
+        GST_ELEMENT_ERROR(
+            trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, some required field missing"));
         return FALSE;
     }
 
-    const auto fcc = gst_helper::get_gst_struct_fcc( structure );
-    if( fcc == img::fourcc::FCC_NULL )
+    const auto fcc = gst_helper::get_gst_struct_fcc(structure);
+    if (fcc == img::fourcc::FCC_NULL)
     {
-        GST_ELEMENT_ERROR( trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, format missing or unknown") );
+        GST_ELEMENT_ERROR(
+            trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, format missing or unknown"));
         return FALSE;
     }
-    size_t img_size = img::calc_minimum_img_size( fcc, dim_opt.value() );
-    if( img_size == 0 )
+    size_t img_size = img::calc_minimum_img_size(fcc, dim_opt.value());
+    if (img_size == 0)
     {
-        GST_ELEMENT_ERROR( trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, unable to compute image size from format and dim") );
+        GST_ELEMENT_ERROR(trans,
+                          CORE,
+                          NEGOTIATION,
+                          (NULL),
+                          ("Incomplete caps, unable to compute image size from format and dim"));
         return FALSE;
     }
 
@@ -511,25 +560,29 @@ static gboolean gst_tcamconvert_get_unit_size( GstBaseTransform* trans, GstCaps*
 }
 
 static gboolean gst_tcamconvert_transform_size(GstBaseTransform* trans,
-                              GstPadDirection /*direction*/,
-                              GstCaps* /*caps*/, gsize /*size*/,
-                              GstCaps* othercaps, gsize* othersize)
+                                               GstPadDirection /*direction*/,
+                                               GstCaps* /*caps*/,
+                                               gsize /*size*/,
+                                               GstCaps* othercaps,
+                                               gsize* othersize)
 {
-    return gst_tcamconvert_get_unit_size( trans, othercaps, othersize );
+    return gst_tcamconvert_get_unit_size(trans, othercaps, othersize);
 }
 
-static int         get_mapped_stride( GstBuffer* buffer_ ) noexcept
+static int get_mapped_stride(GstBuffer* buffer_) noexcept
 {
-    auto video_meta_ptr = reinterpret_cast<GstVideoMeta*>(gst_buffer_get_meta( buffer_, gst_video_meta_api_get_type() ));
-    if( video_meta_ptr != nullptr && video_meta_ptr->stride[0] != 0 ) {
+    auto video_meta_ptr = reinterpret_cast<GstVideoMeta*>(
+        gst_buffer_get_meta(buffer_, gst_video_meta_api_get_type()));
+    if (video_meta_ptr != nullptr && video_meta_ptr->stride[0] != 0)
+    {
         return video_meta_ptr->stride[0];
     }
     return 0;
 }
 
-static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
-                                                 GstBuffer* inbuf,
-                                                 GstBuffer* outbuf)
+static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
+                                               GstBuffer* inbuf,
+                                               GstBuffer* outbuf)
 {
     auto self = GST_TCAMCONVERT(base);
 
@@ -541,31 +594,38 @@ static GstFlowReturn gst_tcamconvert_transform (GstBaseTransform* base,
     }
 
     GstMapInfo map_out;
-    if( !gst_buffer_map( outbuf, &map_out, GST_MAP_WRITE ) || map_out.data == nullptr )
+    if (!gst_buffer_map(outbuf, &map_out, GST_MAP_WRITE) || map_out.data == nullptr)
     {
-        gst_buffer_unmap( inbuf, &map_in );
+        gst_buffer_unmap(inbuf, &map_in);
 
         GST_ERROR("Output buffer could not be mapped");
         return GST_FLOW_OK;
     }
 
     img::img_descriptor src = {};
-    if( int gst_meta_stride = get_mapped_stride( inbuf ); gst_meta_stride ) {
-        src = img::make_img_desc_raw( self->context_->src_type, img::img_plane{ map_in.data, gst_meta_stride } );
-    } else {
-        src = img::make_img_desc_from_linear_memory( self->context_->src_type, map_in.data );
-    }
-    auto dst = img::make_img_desc_from_linear_memory( self->context_->dst_type, map_out.data );
-
-
-    auto func = self->context_->transform_func_;
-    if( func == nullptr )
+    if (int gst_meta_stride = get_mapped_stride(inbuf); gst_meta_stride)
     {
-        GST_ERROR_OBJECT(  self, "Failed to find conversion from %s to %s", img::fcc_to_string( src.type ).c_str(), img::fcc_to_string( dst.type ).c_str() );
+        src = img::make_img_desc_raw(self->context_->src_type,
+                                     img::img_plane { map_in.data, gst_meta_stride });
     }
     else
     {
-        func( dst, src );
+        src = img::make_img_desc_from_linear_memory(self->context_->src_type, map_in.data);
+    }
+    auto dst = img::make_img_desc_from_linear_memory(self->context_->dst_type, map_out.data);
+
+
+    auto func = self->context_->transform_func_;
+    if (func == nullptr)
+    {
+        GST_ERROR_OBJECT(self,
+                         "Failed to find conversion from %s to %s",
+                         img::fcc_to_string(src.type).c_str(),
+                         img::fcc_to_string(dst.type).c_str());
+    }
+    else
+    {
+        func(dst, src);
     }
 
     gst_buffer_unmap(outbuf, &map_out);
@@ -600,7 +660,7 @@ static void gst_tcamconvert_init(GstTCamConvert* self)
 
 static void gst_tcamconvert_finalize(GObject* object)
 {
-    delete GST_TCAMCONVERT( object )->context_;
+    delete GST_TCAMCONVERT(object)->context_;
     G_OBJECT_CLASS(gst_tcamconvert_parent_class)->finalize(object);
 }
 
@@ -642,17 +702,17 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
     gst_base_transform_class->transform = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform);
     gst_base_transform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_ip);
 
-    gst_base_transform_class->passthrough_on_same_caps = TRUE;  // Mark this transform element as 'calling tranform_ip when src and sink caps are the same
+    gst_base_transform_class->passthrough_on_same_caps =
+        TRUE; // Mark this transform element as 'calling tranform_ip when src and sink caps are the same
 
     GST_DEBUG_CATEGORY_INIT(
         gst_tcamconvert_debug_category, "tcamconvert", 0, "tcamconvert element");
 }
 
 
-static gboolean plugin_init (GstPlugin* plugin)
+static gboolean plugin_init(GstPlugin* plugin)
 {
-    return gst_element_register(plugin,
-                                "tcamconvert", GST_RANK_NONE, GST_TYPE_TCAMCONVERT);
+    return gst_element_register(plugin, "tcamconvert", GST_RANK_NONE, GST_TYPE_TCAMCONVERT);
 }
 
 #ifndef VERSION
@@ -676,4 +736,5 @@ GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
                   plugin_init,
                   VERSION,
                   "Proprietary",
-                  PACKAGE_NAME, GST_PACKAGE_ORIGIN)
+                  PACKAGE_NAME,
+                  GST_PACKAGE_ORIGIN)

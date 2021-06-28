@@ -157,7 +157,7 @@ GstCaps* find_input_caps(GstCaps* available_caps,
 
 namespace tcam
 {
-    class VideoFormatDescription;
+class VideoFormatDescription;
 }
 
 GstCaps* convert_videoformatsdescription_to_caps(

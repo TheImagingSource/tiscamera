@@ -230,6 +230,4 @@ void V4l2Device::index_controls()
     }
 
     sort_properties(new_properties);
-
-
 }

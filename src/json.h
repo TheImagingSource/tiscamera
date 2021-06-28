@@ -19,7 +19,7 @@
 
 namespace tcam
 {
-    static const char* JSON_FILE_VERSION_CURRENT __attribute__((unused)) = "v0.1";
+static const char* JSON_FILE_VERSION_CURRENT __attribute__((unused)) = "v0.1";
 } // namespace tcam
 
 

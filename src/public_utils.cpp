@@ -90,9 +90,8 @@ TCAM_DEVICE_TYPE tcam::tcam_device_from_string(const std::string& input)
     return TCAM_DEVICE_TYPE_UNKNOWN;
 }
 
-std::vector<tcam_image_size> tcam::get_standard_resolutions(
-    const tcam_image_size& min,
-    const tcam_image_size& max)
+std::vector<tcam_image_size> tcam::get_standard_resolutions(const tcam_image_size& min,
+                                                            const tcam_image_size& max)
 {
     static const tcam_image_size resolutions[] = {
         { 128, 96 },    { 320, 240 },   { 360, 280 },   { 544, 480 },   { 640, 480 },
@@ -102,7 +101,7 @@ std::vector<tcam_image_size> tcam::get_standard_resolutions(
     };
 
     std::vector<struct tcam_image_size> ret;
-    ret.reserve( std::size_t( resolutions ) );
+    ret.reserve(std::size_t(resolutions));
     for (const auto& r : resolutions)
     {
         if ((min < r) && (r < max))

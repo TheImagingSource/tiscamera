@@ -16,15 +16,14 @@
 
 #include "gsttcamsrc.h"
 
-#include "../../tcam.h"
-
-#include "gsttcamdeviceprovider.h"
-#include "gsttcammainsrc.h"
+#include "../../gobject/tcamprop.h"
 #include "../../logging.h"
+#include "../../tcam.h"
 #include "../tcamgstbase.h"
 #include "../tcamgstjson.h"
 #include "../tcamgststrings.h"
-#include "../../gobject/tcamprop.h"
+#include "gsttcamdeviceprovider.h"
+#include "gsttcammainsrc.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -1041,8 +1040,8 @@ static void gst_tcam_src_get_property(GObject* object,
                 }
                 else
                 {
-                    std::string tmp = create_device_settings(self->device_serial,
-                                                             TCAM_PROP(self)).c_str();
+                    std::string tmp =
+                        create_device_settings(self->device_serial, TCAM_PROP(self)).c_str();
                     g_value_set_string(value, tmp.c_str());
                 }
             }

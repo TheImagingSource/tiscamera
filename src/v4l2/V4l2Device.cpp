@@ -17,7 +17,6 @@
 #include "V4l2Device.h"
 
 #include "dfk73.h"
-#include <dutils_img/fcc_to_string.h>
 #include "logging.h"
 #include "utils.h"
 #include "v4l2_property_impl.h"
@@ -25,6 +24,7 @@
 
 #include <algorithm>
 #include <cstring> /* memcpy*/
+#include <dutils_img/fcc_to_string.h>
 #include <errno.h>
 #include <fcntl.h> /* O_RDWR O_NONBLOCK */
 #include <libudev.h>

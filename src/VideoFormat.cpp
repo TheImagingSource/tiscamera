@@ -16,11 +16,10 @@
 
 #include "VideoFormat.h"
 
-#include <dutils_img/fcc_to_string.h>   // img::fcc_to_string
-#include <dutils_img/image_fourcc_func.h>
-
 #include <cstdlib>
 #include <cstring>
+#include <dutils_img/fcc_to_string.h> // img::fcc_to_string
+#include <dutils_img/image_fourcc_func.h>
 
 using namespace tcam;
 
@@ -102,16 +101,17 @@ std::string VideoFormat::to_string() const
 
 uint64_t VideoFormat::get_required_buffer_size() const
 {
-    return img::calc_minimum_img_size( (img::fourcc)format.fourcc, { (int)format.width, (int)format.height } );
+    return img::calc_minimum_img_size((img::fourcc)format.fourcc,
+                                      { (int)format.width, (int)format.height });
 }
 
 
 uint32_t VideoFormat::get_pitch_size() const
 {
-    return img::calc_minimum_pitch( (img::fourcc)format.fourcc, format.width );
+    return img::calc_minimum_pitch((img::fourcc)format.fourcc, format.width);
 }
 
 std::string VideoFormat::get_fourcc_string() const
 {
-    return img::fcc_to_string( get_fourcc() );
+    return img::fcc_to_string(get_fourcc());
 }

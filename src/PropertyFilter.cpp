@@ -1,11 +1,10 @@
 
 #include "PropertyFilter.h"
 
-#include <dutils_img/image_fourcc_func.h>
-
 #include "logging.h"
 
 #include <chrono>
+#include <dutils_img/image_fourcc_func.h>
 
 namespace tcam::stream::filter
 {

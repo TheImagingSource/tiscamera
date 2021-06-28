@@ -16,15 +16,15 @@
 
 #include "gsttcammainsrc.h"
 
-#include "gstmetatcamstatistics.h"
+#include "../../gobject/tcamprop.h"
 #include "../../logging.h"
-#include "mainsrc_device_state.h"
-#include "mainsrc_tcamprop_impl.h"
 #include "../../tcam.h"
 #include "../tcamgstbase.h"
 #include "../tcamgstjson.h"
 #include "../tcamgststrings.h"
-#include "../../gobject/tcamprop.h"
+#include "gstmetatcamstatistics.h"
+#include "mainsrc_device_state.h"
+#include "mainsrc_tcamprop_impl.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -791,24 +791,23 @@ wait_again:
                 damaged = "false";
             }
 
-            auto test = fmt::format( 
-                "Added meta info: \n"
-                "gst frame_count: {}\n"
-                "backend frame_count {}\n"
-                "frames_dropped {}\n"
-                "capture_time_ns: {}\n"
-                "camera_time_ns: {}\n"
-                "framerate: {}\n"
-                "is_damaged: {}\n",
-                gst_frame_count,
-                stat.frame_count,
-                stat.frames_dropped,
-                stat.capture_time_ns,
-                stat.camera_time_ns,
-                stat.framerate,
-                damaged);
+            auto test = fmt::format("Added meta info: \n"
+                                    "gst frame_count: {}\n"
+                                    "backend frame_count {}\n"
+                                    "frames_dropped {}\n"
+                                    "capture_time_ns: {}\n"
+                                    "camera_time_ns: {}\n"
+                                    "framerate: {}\n"
+                                    "is_damaged: {}\n",
+                                    gst_frame_count,
+                                    stat.frame_count,
+                                    stat.frames_dropped,
+                                    stat.capture_time_ns,
+                                    stat.camera_time_ns,
+                                    stat.framerate,
+                                    damaged);
 
-            GST_TRACE( "%s", test.c_str() );
+            GST_TRACE("%s", test.c_str());
         }
 
     } // end meta data

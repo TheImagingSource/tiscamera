@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "gsttcammainsrc.h"
 #include "../../gobject/tcamprop.h"
+#include "gsttcammainsrc.h"
 
 
 gboolean get_property_by_name(GstTcamMainSrc* self,

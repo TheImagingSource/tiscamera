@@ -17,10 +17,9 @@
 #include "tcamgstjson.h"
 
 #include "../json.h"
+#include "../logging.h"
 
 #include <json/json.hpp>
-
-#include "../logging.h"
 
 // for convenience
 using json = nlohmann::json;

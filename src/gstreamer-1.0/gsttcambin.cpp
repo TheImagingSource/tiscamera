@@ -17,18 +17,17 @@
 #include "gsttcambin.h"
 // #include <girepository.h>
 
+#include "../gobject/tcamprop.h"
+#include "../version.h"
 #include "gst_helper.h"
 #include "tcamgstbase.h"
 #include "tcamgstjson.h"
-#include "../gobject/tcamprop.h"
 
 #include <cstring>
 #include <glib-object.h>
 #include <string>
 #include <unistd.h>
 #include <vector>
-
-#include "../version.h"
 
 struct tcambin_data
 {

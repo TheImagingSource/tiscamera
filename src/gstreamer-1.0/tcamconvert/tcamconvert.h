@@ -17,40 +17,42 @@
 #ifndef TCAMCONVERT_H_INC_
 #define TCAMCONVERT_H_INC_
 
-#include <gst/gst.h>
-#include <gst/base/gstbasetransform.h>
 #include <dutils_img/image_transform_base.h>
+#include <gst/base/gstbasetransform.h>
+#include <gst/gst.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    
 
-G_BEGIN_DECLS
 
-#define GST_TYPE_TCAMCONVERT            (gst_tcamconvert_get_type())
-#define GST_TCAMCONVERT(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAMCONVERT, GstTCamConvert))
-#define GST_TCAMCONVERT_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAMCONVERT, GstTCamConvertClass))
-#define GST_IS_TCAMCONVERT(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMCONVERT))
-#define GST_IS_TCAMCONVERT_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMCONVERT))
+    G_BEGIN_DECLS
 
-typedef struct GstTCamConvert
-{
-    GstBaseTransform base;
+#define GST_TYPE_TCAMCONVERT (gst_tcamconvert_get_type())
+#define GST_TCAMCONVERT(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAMCONVERT, GstTCamConvert))
+#define GST_TCAMCONVERT_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_TCAMCONVERT, GstTCamConvertClass))
+#define GST_IS_TCAMCONVERT(obj)       (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMCONVERT))
+#define GST_IS_TCAMCONVERT_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMCONVERT))
 
-    struct GstTCamConvert_context* context_;
+    typedef struct GstTCamConvert
+    {
+        GstBaseTransform base;
 
-} GstTCamConvert;
+        struct GstTCamConvert_context* context_;
 
-typedef struct GstTCamConvertClass
-{
-    GstBaseTransformClass base_class;
-} GstTCamConvertClass;
+    } GstTCamConvert;
 
-GType       gst_tcamconvert_get_type (void);
+    typedef struct GstTCamConvertClass
+    {
+        GstBaseTransformClass base_class;
+    } GstTCamConvertClass;
 
-G_END_DECLS
+    GType gst_tcamconvert_get_type(void);
+
+    G_END_DECLS
 
 #ifdef __cplusplus
 }

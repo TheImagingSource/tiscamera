@@ -38,7 +38,7 @@ std::string tcam_device_type_to_string(TCAM_DEVICE_TYPE type);
 TCAM_DEVICE_TYPE tcam_device_from_string(const std::string& str);
 
 std::vector<tcam_image_size> get_standard_resolutions(const tcam_image_size& min,
-                                                             const tcam_image_size& max);
+                                                      const tcam_image_size& max);
 
 } /* namespace tcam */
 

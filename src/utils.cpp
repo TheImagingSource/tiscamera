@@ -23,13 +23,12 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <dutils_img/image_transform_base.h>
 #include <errno.h>
 #include <fstream>
 #include <limits>
 #include <signal.h> // kill
 #include <sys/ioctl.h>
-
-#include <dutils_img/image_transform_base.h>
 
 using namespace tcam;
 
@@ -44,7 +43,7 @@ std::vector<std::string> tcam::split_string(const std::string& to_split, const s
     {
         end = to_split.find_first_of(delim, beg);
 
-        vec.push_back( to_split.substr( beg, end - beg ) );
+        vec.push_back(to_split.substr(beg, end - beg));
 
         beg = end + delim.size();
     }

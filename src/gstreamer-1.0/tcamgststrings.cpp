@@ -16,9 +16,8 @@
 
 #include "tcamgststrings.h"
 
-#include <dutils_img/image_fourcc.h>
-
 #include <cstring>
+#include <dutils_img/image_fourcc.h>
 
 struct TcamGstMapping
 {

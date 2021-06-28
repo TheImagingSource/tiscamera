@@ -22,8 +22,8 @@
  * @{
 */
 
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 
 /**
 * @name TCAM_PIPELINE_STATUS
