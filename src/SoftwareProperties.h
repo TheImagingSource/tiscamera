@@ -6,10 +6,9 @@
 #include "SoftwarePropertiesBase.h"
 #include "SoftwarePropertyBackend.h"
 #include "VideoFormat.h"
-#include "algorithms/auto_alg_params.h"
-#include "algorithms/auto_alg_pass.h"
 #include "compiler_defines.h"
 
+#include <dutils_img_pipe/auto_alg_pass.h>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -34,7 +33,7 @@ public:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties()
     {
         return m_properties;
-    };
+    }
 
     void auto_pass(const img::img_descriptor& image);
 
@@ -79,7 +78,7 @@ private:
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_exposure = nullptr;
     bool m_exposure_upper_auto = true;
-    double m_exposure_auto_upper_limit;
+    double m_exposure_auto_upper_limit = 0;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_gain = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;

@@ -148,7 +148,8 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
 
     format_handler = std::make_shared<AravisFormatHandler>(this);
 
-    m_backend = std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera));
+    m_backend =
+        std::make_shared<tcam::property::AravisPropertyBackend>(arv_camera_get_device(arv_camera));
 
     index_genicam();
     determine_active_video_format();

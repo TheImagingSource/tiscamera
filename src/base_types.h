@@ -22,16 +22,8 @@
  * @{
 */
 
-#include "include/img/image_fourcc.h"
-
+#include <cstdint>
 #include <cstring>
-#include <stdbool.h>
-#include <stdint.h>
-
-#ifndef byte
-typedef uint8_t byte;
-#endif
-
 
 /**
 * @name TCAM_PIPELINE_STATUS

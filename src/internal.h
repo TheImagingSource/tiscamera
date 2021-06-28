@@ -20,7 +20,7 @@
  * !!! This header is for internal usage only !!!
  *
  * Do not depend on this header or the APIs referenced to be stable
- * unless you want to change library behaviour
+ * unless you want to change library behavior
  */
 
 #ifndef TCAM_INTERNAL_H
@@ -32,9 +32,9 @@
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
 #include "base_types.h"
-#include "format.h"
-#include "include/img/image_transform_base.h"
 #include "logging.h"
 #include "utils.h"
+
+#include <dutils_img/image_transform_base.h>
 
 #endif /* TCAM_INTERNAL_H */

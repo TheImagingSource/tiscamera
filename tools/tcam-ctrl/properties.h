@@ -19,10 +19,7 @@
 
 #include <memory>
 #include <string>
-#include <tcam.h>
 #include <vector>
-
-using namespace tcam;
 
 /**
  * @brief print function for properties

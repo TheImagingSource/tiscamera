@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "tcamprop.h"
+#include "../gobject/tcamprop.h"
 
 #include <string>
 

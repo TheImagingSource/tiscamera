@@ -17,7 +17,7 @@
 #ifndef TCAM_GSTTCAMSRC_H
 #define TCAM_GSTTCAMSRC_H
 
-#include "tcam.h"
+#include "../../tcam.h"
 
 #include <girepository.h>
 #include <gst/gst.h>

@@ -16,7 +16,6 @@
 
 #include "PipelineManager.h"
 
-#include "img/fcc_to_string.h"
 #include "internal.h"
 
 #include <algorithm>

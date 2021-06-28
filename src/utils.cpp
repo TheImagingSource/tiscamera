@@ -16,11 +16,14 @@
 
 #include "utils.h"
 
-#include "internal.h"
+//#include "internal.h"
+
+#include "logging.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <dutils_img/image_transform_base.h>
 #include <errno.h>
 #include <fstream>
 #include <limits>
@@ -28,30 +31,6 @@
 #include <sys/ioctl.h>
 
 using namespace tcam;
-
-std::string tcam::propertyType2String(TCAM_PROPERTY_TYPE type)
-{
-    switch (type)
-    {
-        case TCAM_PROPERTY_TYPE_BOOLEAN:
-            return "boolean";
-        case TCAM_PROPERTY_TYPE_INTEGER:
-            return "integer";
-        case TCAM_PROPERTY_TYPE_DOUBLE:
-            return "double";
-        case TCAM_PROPERTY_TYPE_STRING:
-            return "string";
-        case TCAM_PROPERTY_TYPE_ENUMERATION:
-            return "enum";
-        case TCAM_PROPERTY_TYPE_BUTTON:
-            return "button";
-        case TCAM_PROPERTY_TYPE_UNKNOWN:
-            return "unknown";
-        default:
-            return "<UNKNOWN ENUM ENTRY>";
-    }
-}
-
 
 std::vector<std::string> tcam::split_string(const std::string& to_split, const std::string& delim)
 {
@@ -64,9 +43,7 @@ std::vector<std::string> tcam::split_string(const std::string& to_split, const s
     {
         end = to_split.find_first_of(delim, beg);
 
-        std::string s = to_split.substr(beg, end - beg);
-
-        vec.push_back(s);
+        vec.push_back(to_split.substr(beg, end - beg));
 
         beg = end + delim.size();
     }
@@ -146,59 +123,6 @@ std::vector<double> tcam::create_steps_for_range(double min, double max)
     }
     return vec;
 }
-
-
-uint64_t tcam::get_buffer_length(unsigned int width, unsigned int height, uint32_t fourcc)
-{
-    if (width == 0 || height == 0 || fourcc == 0)
-    {
-        return 0;
-    }
-
-    if (!img::is_known_fcc(static_cast<img::fourcc>(fourcc)))
-    {
-        SPDLOG_ERROR("Unknown fourcc {:x}", fourcc);
-    }
-
-    uint64_t size = width * height * ((double)img::get_bits_per_pixel(fourcc) / 8);
-
-    return size;
-}
-
-
-unsigned int tcam::tcam_get_required_buffer_size(const struct tcam_video_format* format)
-{
-    if (format == nullptr)
-    {
-        return 0;
-    }
-
-    return get_buffer_length(format->width, format->height, format->fourcc);
-}
-
-uint32_t tcam::get_pitch_length(unsigned int width, uint32_t fourcc)
-{
-    if (width == 0 || fourcc == 0)
-    {
-        return 0;
-    }
-
-    return width * (img::get_bits_per_pixel(fourcc) / 8);
-}
-
-
-bool tcam::is_buffer_complete(const struct tcam_image_buffer* buffer)
-{
-    auto size =
-        tcam::get_buffer_length(buffer->format.width, buffer->format.height, buffer->format.fourcc);
-
-    if (size != buffer->length)
-    {
-        return false;
-    }
-    return true;
-}
-
 
 tcam_image_size tcam::calculate_auto_center(const tcam_image_size& sensor,
                                             const tcam_image_size& image)

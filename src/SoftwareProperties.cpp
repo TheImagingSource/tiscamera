@@ -3,7 +3,7 @@
 #include "SoftwareProperties.h"
 
 #include "SoftwarePropertiesImpl.h"
-#include "algorithms/tcam-algorithm.h"
+//#include "algorithms/tcam-algorithm.h"
 #include "logging.h"
 
 #include <algorithm>
@@ -22,7 +22,10 @@ static emulated::software_prop_desc prop_list[] = {
     { sp::ExposureAuto, "ExposureAuto", { { { 0, "Off" }, { 1, "Continuous" } } }, 1 },
     { sp::ExposureAutoLowerLimit, "ExposureAutoLowerLimit", TCAM_PROPERTY_TYPE_DOUBLE },
     { sp::ExposureAutoUpperLimit, "ExposureAutoUpperLimit", TCAM_PROPERTY_TYPE_DOUBLE },
-    { sp::ExposureAutoUpperLimitAuto, "ExposureAutoUpperLimitAuto", { { { 0, "Off" }, { 1, "On" } } }, 1 },
+    { sp::ExposureAutoUpperLimitAuto,
+      "ExposureAutoUpperLimitAuto",
+      { { { 0, "Off" }, { 1, "On" } } },
+      1 },
     { sp::ExposureAutoReference, "ExposureAutoReference", tcam_value_int { 0, 255, 1, 128, 128 } },
 
     { sp::Gain, "Gain", TCAM_PROPERTY_TYPE_DOUBLE },
@@ -58,7 +61,8 @@ namespace tcam::property
 {
 
 SoftwareProperties::SoftwareProperties(
-    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties, bool has_bayer)
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
+    bool has_bayer)
     : m_device_properties(dev_properties)
 {
     m_backend = std::make_shared<emulated::SoftwarePropertyBackend>(this);
@@ -69,7 +73,9 @@ SoftwareProperties::SoftwareProperties(
 
 static uint64_t time_now_in_us() noexcept
 {
-    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+               std::chrono::high_resolution_clock::now().time_since_epoch())
+        .count();
 }
 
 
@@ -672,8 +678,9 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
 }
 
 
-void tcam::property::SoftwareProperties::enable_property_double(sp prop_id,
-                                                                std::shared_ptr<IPropertyFloat> prop)
+void tcam::property::SoftwareProperties::enable_property_double(
+    sp prop_id,
+    std::shared_ptr<IPropertyFloat> prop)
 {
     auto desc = find_property_desc(prop_id);
 
@@ -687,7 +694,8 @@ void tcam::property::SoftwareProperties::enable_property_double(sp prop_id,
     {
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, prop, m_backend));
+            m_properties.push_back(
+                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, prop, m_backend));
             break;
         }
         default:
@@ -714,7 +722,8 @@ void tcam::property::SoftwareProperties::enable_property_int(sp prop_id,
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyIntegerImpl>(desc, prop, m_backend));
+            m_properties.push_back(
+                std::make_shared<emulated::SoftwarePropertyIntegerImpl>(desc, prop, m_backend));
             break;
         }
         default:

@@ -19,9 +19,8 @@
 #include "AFU420DeviceBackend.h"
 #include "UsbHandler.h"
 #include "UsbSession.h"
-#include "format.h"
-#include "img/fcc_to_string.h"
-#include "img/image_transform_base.h"
+#include <dutils_img/fcc_to_string.h>
+#include <dutils_img/image_fourcc_func.h>
 #include "logging.h"
 #include "public_utils.h"
 #include "utils.h"
@@ -745,7 +744,7 @@ void AFU420Device::push_buffer()
 }
 
 
-static uint16_t bytes_to_uint16(byte lo, byte hi)
+static uint16_t bytes_to_uint16(uint8_t lo, uint8_t hi)
 {
     return uint16_t(lo) | (uint16_t(hi) << 8);
 }
@@ -772,7 +771,7 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header(unsigned 
 
     if (image_bit_depth_ == 12)
     {
-        byte hdr_12bit[4] = { 0x0a, 0xaa, 0x55, 0x00 };
+        uint8_t hdr_12bit[4] = { 0x0a, 0xaa, 0x55, 0x00 };
         int d = memcmp(data, hdr_12bit, 4);
         if (d != 0)
         {
@@ -781,7 +780,7 @@ struct AFU420Device::header_res AFU420Device::check_and_eat_img_header(unsigned 
     }
     else // this should work for 8 and 10 bit
     {
-        byte hdr_8bit[4] = { 0x0a, 0xaa, 0x00, 0xa5 };
+        uint8_t hdr_8bit[4] = { 0x0a, 0xaa, 0x00, 0xa5 };
         int d = memcmp(data, hdr_8bit, 4);
         if (d != 0)
         {

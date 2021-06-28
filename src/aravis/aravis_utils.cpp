@@ -16,11 +16,11 @@
 
 #include "aravis_utils.h"
 
-#include "img/image_fourcc.h"
 #include "internal.h"
 #include "logging.h"
 
 #include <algorithm>
+#include <dutils_img/image_fourcc.h>
 #include <vector>
 
 // gige-daemon communication

@@ -16,16 +16,15 @@
 
 #include "tcamgstbase.h"
 
-#include "base_types.h"
-#include "img/fcc_to_string.h"
-#include "img/image_fourcc_func.h"
-#include "img/image_transform_base.h"
-#include "img/img_type.h"
-#include "logging.h"
-#include "public_utils.h"
+#include "../base_types.h"
+#include "../logging.h"
+#include "../public_utils.h"
+#include "../tcam.h"
 #include "tcamgststrings.h"
 
 #include <algorithm> //std::find
+#include <dutils_img/fcc_to_string.h>
+#include <dutils_img/image_fourcc_func.h>
 #include <map>
 #include <stddef.h> // NULL
 #include <string.h> // strcmp
@@ -134,7 +133,8 @@ GstElement* tcam_gst_find_camera_src_rec(GstElement* element,
 
     gst_object_unref(src_pad);
 
-    std::string name = g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
+    std::string name =
+        g_type_name(gst_element_factory_get_element_type(gst_element_get_factory(el)));
 
     if (std::find(factory_names.begin(), factory_names.end(), name) != factory_names.end())
     {
@@ -314,39 +314,31 @@ static bool tcam_gst_is_fourcc_bayer(const uint32_t fourcc)
 
 static bool tcam_gst_is_bayer10_fourcc(const uint32_t fourcc)
 {
-   if (fourcc == FOURCC_GBRG10
-       || fourcc == FOURCC_GRBG10
-       || fourcc == FOURCC_RGGB10
-       || fourcc == FOURCC_BGGR10)
-   {
-       return TRUE;
-   }
-   return FALSE;
+    if (fourcc == FOURCC_GBRG10 || fourcc == FOURCC_GRBG10 || fourcc == FOURCC_RGGB10
+        || fourcc == FOURCC_BGGR10)
+    {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 
 static bool tcam_gst_is_bayer10_packed_fourcc(const uint32_t fourcc)
 {
-   if (fourcc == FOURCC_GBRG10_SPACKED
-       || fourcc == FOURCC_GRBG10_SPACKED
-       || fourcc == FOURCC_RGGB10_SPACKED
-       || fourcc == FOURCC_BGGR10_SPACKED
-       || fourcc == FOURCC_GBRG10_MIPI_PACKED
-       || fourcc == FOURCC_GRBG10_MIPI_PACKED
-       || fourcc == FOURCC_RGGB10_MIPI_PACKED
-       || fourcc == FOURCC_BGGR10_MIPI_PACKED)
-   {
-       return TRUE;
-   }
-   return FALSE;
+    if (fourcc == FOURCC_GBRG10_SPACKED || fourcc == FOURCC_GRBG10_SPACKED
+        || fourcc == FOURCC_RGGB10_SPACKED || fourcc == FOURCC_BGGR10_SPACKED
+        || fourcc == FOURCC_GBRG10_MIPI_PACKED || fourcc == FOURCC_GRBG10_MIPI_PACKED
+        || fourcc == FOURCC_RGGB10_MIPI_PACKED || fourcc == FOURCC_BGGR10_MIPI_PACKED)
+    {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 
 static bool tcam_gst_is_bayer12_fourcc(const uint32_t fourcc)
 {
-    if (fourcc == FOURCC_GBRG12
-        || fourcc == FOURCC_GRBG12
-        || fourcc == FOURCC_RGGB12
+    if (fourcc == FOURCC_GBRG12 || fourcc == FOURCC_GRBG12 || fourcc == FOURCC_RGGB12
         || fourcc == FOURCC_BGGR12)
     {
         return TRUE;
@@ -382,11 +374,12 @@ static bool tcam_gst_is_bayer16_fourcc(const uint32_t fourcc)
 
 static bool tcam_gst_is_fourcc_yuv(const uint32_t fourcc)
 {
-    if (fourcc == FOURCC_YUY2 || fourcc == FOURCC_UYVY
+    if (fourcc == FOURCC_YUY2
+        || fourcc == FOURCC_UYVY
         //|| fourcc == FOURCC_I420
         //|| fourcc == FOURCC_YV16
-        || fourcc == FOURCC_IYU1 || fourcc == FOURCC_IYU2
-        || fourcc == FOURCC_Y411 || fourcc == FOURCC_NV12)
+        || fourcc == FOURCC_IYU1 || fourcc == FOURCC_IYU2 || fourcc == FOURCC_Y411
+        || fourcc == FOURCC_NV12)
     {
         return true;
     }
@@ -528,9 +521,7 @@ bool tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
 
 bool tcam_gst_is_bayerpwl_fourcc(const unsigned int fourcc)
 {
-    if (fourcc == FOURCC_PWL_RG12_MIPI
-        || fourcc == FOURCC_PWL_RG12
-        || fourcc == FOURCC_PWL_RG16H12)
+    if (fourcc == FOURCC_PWL_RG12_MIPI || fourcc == FOURCC_PWL_RG12 || fourcc == FOURCC_PWL_RG16H12)
     {
         return true;
     }
@@ -1769,68 +1760,4 @@ GstCaps* convert_videoformatsdescription_to_caps(
     }
 
     return caps;
-}
-
-bool gst_caps_to_tcam_video_format(GstCaps* caps, struct tcam_video_format* format)
-{
-    if (!caps || !gst_caps_is_fixed(caps) || !format)
-    {
-        return false;
-    }
-
-    *format = {};
-
-    GstStructure* struc = gst_caps_get_structure(caps, 0);
-
-    format->fourcc = tcam_fourcc_from_gst_1_0_caps_string(
-        gst_structure_get_name(struc), gst_structure_get_string(struc, "format"));
-
-    gint tmp_w, tmp_h;
-    gst_structure_get_int(struc, "width", &tmp_w);
-    gst_structure_get_int(struc, "height", &tmp_h);
-    format->width = tmp_w < 0 ? 0 : tmp_w;
-    format->height = tmp_h < 0 ? 0 : tmp_h;
-
-    int num;
-    int den;
-    gst_structure_get_fraction(struc, "framerate", &num, &den);
-
-    format->framerate = den / num;
-
-    return true;
-}
-
-
-bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_image_buffer* image)
-{
-    if (!buffer || !image)
-    {
-        return false;
-    }
-
-    *image = {};
-
-    GstMapInfo info;
-
-    gst_buffer_map(buffer, &info, GST_MAP_READ);
-
-    image->pData = info.data;
-    image->length = info.size;
-
-    if (caps)
-    {
-        gst_caps_to_tcam_video_format(caps, &image->format);
-        image->pitch = img::calc_minimum_pitch(static_cast<img::fourcc>(image->format.fourcc),
-                                               image->format.width);
-    }
-
-    gst_buffer_unmap(buffer, &info);
-
-    return true;
-}
-
-
-int calc_pitch(int fourcc, int width)
-{
-    return img::calc_minimum_pitch(static_cast<img::fourcc>(fourcc), width);
 }

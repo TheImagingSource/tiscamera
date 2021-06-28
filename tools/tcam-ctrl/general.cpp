@@ -16,8 +16,7 @@
 
 #include "general.h"
 
-#include "tcamprop.h"
-
+#include "../../src/gobject/tcamprop.h"
 
 bool is_valid_device_serial(GstElement* source, const std::string& serial)
 {

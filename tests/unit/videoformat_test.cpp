@@ -17,6 +17,8 @@
 #include "catch.hpp"
 #include "tcam.h"
 
+#include <dutils_img/image_fourcc.h>
+
 TEST_CASE("VideoFormat Tests")
 {
     struct tcam_video_format format_struct = { FOURCC_Y800, 0, 0, 640, 480, 30.0 };

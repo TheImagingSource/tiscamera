@@ -16,8 +16,9 @@
 
 #include "gsttcamdeviceprovider.h"
 
+#include "../../tcam.h"
+#include "../tcamgstbase.h"
 #include "gsttcamdevice.h"
-#include "tcamgstbase.h"
 
 #include <algorithm>
 #include <atomic>

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "tcam.h"
-
 #include <gst/gst.h>
 
 

@@ -16,41 +16,18 @@
 
 #include "VideoFormat.h"
 
-#include "format.h"
-#include "img/fcc_to_string.h"
-#include "logging.h"
-#include "utils.h"
-
 #include <cstdlib>
 #include <cstring>
-#include <iomanip> // setprecision
-#include <sstream>
+#include <dutils_img/fcc_to_string.h> // img::fcc_to_string
+#include <dutils_img/image_fourcc_func.h>
 
 using namespace tcam;
 
 
-VideoFormat::VideoFormat() : format() {}
-
-
-VideoFormat::VideoFormat(const struct tcam_video_format& new_format)
+VideoFormat::VideoFormat(const tcam_video_format& new_format)
 {
-    memcpy(&format, &new_format, sizeof(format));
+    format = new_format;
 }
-
-
-VideoFormat::VideoFormat(const VideoFormat& other)
-{
-    memcpy(&format, &other.format, sizeof(format));
-}
-
-
-VideoFormat& VideoFormat::operator=(const VideoFormat& other)
-{
-    memcpy(&format, &other.format, sizeof(format));
-
-    return *this;
-}
-
 
 bool VideoFormat::operator==(const VideoFormat& other) const
 {
@@ -66,17 +43,15 @@ bool VideoFormat::operator!=(const VideoFormat& other) const
 }
 
 
-struct tcam_video_format VideoFormat::get_struct() const
+tcam_video_format VideoFormat::get_struct() const
 {
     return format;
 }
-
 
 uint32_t VideoFormat::get_fourcc() const
 {
     return format.fourcc;
 }
-
 
 void VideoFormat::set_fourcc(uint32_t fourcc)
 {
@@ -96,7 +71,7 @@ void VideoFormat::set_framerate(double framerate)
 }
 
 
-struct tcam_image_size VideoFormat::get_size() const
+tcam_image_size VideoFormat::get_size() const
 {
     tcam_image_size s = { format.width, format.height };
     return s;
@@ -115,7 +90,7 @@ std::string VideoFormat::to_string() const
     std::string s;
 
     s = "format=";
-    s += img::fcc_to_string(format.fourcc);
+    s += get_fourcc_string();
     s += ",";
     s += "width=" + std::to_string(format.width) + ",";
     s += "height=" + std::to_string(format.height) + ",";
@@ -124,61 +99,19 @@ std::string VideoFormat::to_string() const
     return s;
 }
 
-
-// bool VideoFormat::from_string (const std::string& desc)
-// {
-//     tcam_video_format f = {};
-
-//     auto vec = split_string(desc, ",");
-
-//     for (auto v : vec)
-//     {
-//         auto val = split_string(v, "=");
-
-//         if (val.size() != 2)
-//         {
-//             SPDLOG_ERROR("Received faulty VideoFormat String \"{}\"", v.c_str());
-//             return false;
-//         }
-
-//         if (val[0].compare("format") == 0)
-//         {
-//             SPDLOG_ERROR("format is  \"{}\"", val[1].c_str());
-
-//             f.fourcc  = description2fourcc(val[1].c_str());
-//         }
-//         else if (val[0].compare("width") == 0)
-//         {
-//             f.width = stoi(val[1]);
-//         }
-//         else if (val[0].compare("height") == 0)
-//         {
-//             f.height = stoi(val[1]);
-//         }
-//         else if (val[0].compare("framerate") == 0)
-//         {
-//             f.framerate = stod(val[1]);
-//         }
-//         else
-//         {
-//             SPDLOG_ERROR("Unknown descriptor in VideoFormat String \"{}\"", val[0].c_str());
-//             return false;
-//         }
-//     }
-
-//     this->format = f;
-
-//     return true;
-// }
-
-
 uint64_t VideoFormat::get_required_buffer_size() const
 {
-    return get_buffer_length(format.width, format.height, format.fourcc);
+    return img::calc_minimum_img_size((img::fourcc)format.fourcc,
+                                      { (int)format.width, (int)format.height });
 }
 
 
 uint32_t VideoFormat::get_pitch_size() const
 {
-    return get_pitch_length(format.width, format.fourcc);
+    return img::calc_minimum_pitch((img::fourcc)format.fourcc, format.width);
+}
+
+std::string VideoFormat::get_fourcc_string() const
+{
+    return img::fcc_to_string(get_fourcc());
 }

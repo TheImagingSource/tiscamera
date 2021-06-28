@@ -16,12 +16,10 @@
 
 #include "tcamgstjson.h"
 
-#include "tcam.h"
+#include "../json.h"
+#include "../logging.h"
 
-#include <fstream>
-#include <iostream>
-#include <json.hpp>
-#include <logging.h>
+#include <json/json.hpp>
 
 // for convenience
 using json = nlohmann::json;

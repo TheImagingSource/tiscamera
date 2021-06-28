@@ -16,19 +16,18 @@
 
 #include "gsttcammainsrc.h"
 
+#include "../../gobject/tcamprop.h"
+#include "../../logging.h"
+#include "../../tcam.h"
+#include "../tcamgstbase.h"
+#include "../tcamgstjson.h"
+#include "../tcamgststrings.h"
 #include "gstmetatcamstatistics.h"
-#include "logging.h"
 #include "mainsrc_device_state.h"
 #include "mainsrc_tcamprop_impl.h"
-#include "tcam.h"
-#include "tcamgstbase.h"
-#include "tcamgstjson.h"
-#include "tcamgststrings.h"
-#include "tcamprop.h"
 
 #include <algorithm>
 #include <assert.h>
-#include <queue>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,7 +102,7 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
     std::vector<tcam::VideoFormatDescription> format =
         self->device->dev->get_available_video_formats();
 
-    GST_DEBUG("Found %lu pixel formats", format.size());
+    GST_DEBUG("Found %d pixel formats", (int)format.size());
 
     GstCaps* caps = convert_videoformatsdescription_to_caps(format);
 
@@ -792,21 +791,23 @@ wait_again:
                 damaged = "false";
             }
 
-            GST_TRACE("Added meta info: \n"
-                      "gst frame_count: %lu\n"
-                      "backend frame_count %lu\n"
-                      "frames_dropped %lu\n"
-                      "capture_time_ns:%lu\n"
-                      "camera_time_ns: %lu\n"
-                      "framerate: %f\n"
-                      "is_damaged: %s\n",
-                      gst_frame_count,
-                      stat.frame_count,
-                      stat.frames_dropped,
-                      stat.capture_time_ns,
-                      stat.camera_time_ns,
-                      stat.framerate,
-                      damaged);
+            auto test = fmt::format("Added meta info: \n"
+                                    "gst frame_count: {}\n"
+                                    "backend frame_count {}\n"
+                                    "frames_dropped {}\n"
+                                    "capture_time_ns: {}\n"
+                                    "camera_time_ns: {}\n"
+                                    "framerate: {}\n"
+                                    "is_damaged: {}\n",
+                                    gst_frame_count,
+                                    stat.frame_count,
+                                    stat.frames_dropped,
+                                    stat.capture_time_ns,
+                                    stat.camera_time_ns,
+                                    stat.framerate,
+                                    damaged);
+
+            GST_TRACE("%s", test.c_str());
         }
 
     } // end meta data

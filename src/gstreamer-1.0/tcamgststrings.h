@@ -17,25 +17,9 @@
 #ifndef TCAM_GST_STRINGS_H
 #define TCAM_GST_STRINGS_H
 
-#include "base_types.h"
-
-#include <cstring>
-#include <stdint.h>
-
+#include <cstdint>
 
 const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc);
-
-
-const char* tcam_fourcc_to_gst_1_0_caps_name(uint32_t fourcc);
-
-
-/**
- * returns the string the the 'format' field.
- * e.g. video/x-raw,format=BGRx will return BGRx
- */
-const char* tcam_fourcc_to_gst_1_0_caps_format(uint32_t fourcc);
-
-
 uint32_t tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format);
 
 

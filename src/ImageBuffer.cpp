@@ -98,11 +98,8 @@ struct tcam_stream_statistics ImageBuffer::get_statistics() const
 bool ImageBuffer::set_statistics(const struct tcam_stream_statistics& stats)
 {
     buffer.statistics = stats;
-    ;
-
     return true;
 }
-
 
 bool ImageBuffer::set_data(const unsigned char* data, size_t size, unsigned int offset)
 {
@@ -151,13 +148,6 @@ bool ImageBuffer::is_locked() const
     }
     return true;
 }
-
-
-bool ImageBuffer::is_complete() const
-{
-    return tcam::is_buffer_complete(&this->buffer);
-}
-
 
 void ImageBuffer::set_user_data(void* data)
 {

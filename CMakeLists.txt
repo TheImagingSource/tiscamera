@@ -69,6 +69,9 @@ include(CMakeOptions.cmake)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -pthread -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
 
+add_compile_options( -Wno-psabi )   # disable ABI change message of g++8
+
+
 include(CMakeInstall.cmake)
 
 include("clang-format")

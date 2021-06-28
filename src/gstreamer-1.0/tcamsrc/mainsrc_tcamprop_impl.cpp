@@ -16,7 +16,7 @@
 
 #include "mainsrc_tcamprop_impl.h"
 
-#include "PropertyCategory.h"
+#include "../../PropertyCategory.h"
 #include "mainsrc_device_state.h"
 
 using namespace tcam::property;
@@ -475,7 +475,8 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 return FALSE;
             }
 
-            auto success = static_cast<IPropertyFloat*>(prop.get())->set_value(g_value_get_double(value));
+            auto success =
+                static_cast<IPropertyFloat*>(prop.get())->set_value(g_value_get_double(value));
 
             if (success)
             {
@@ -503,7 +504,8 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
                 return FALSE;
             }
 
-            auto success = static_cast<IPropertyBool*>(prop.get())->set_value(g_value_get_boolean(value));
+            auto success =
+                static_cast<IPropertyBool*>(prop.get())->set_value(g_value_get_boolean(value));
             if (success)
             {
                 return TRUE;
@@ -523,7 +525,8 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
             }
             else
             {
-                GST_ERROR("Unable to execute property %s: %s", name, success.error().message().c_str());
+                GST_ERROR(
+                    "Unable to execute property %s: %s", name, success.error().message().c_str());
                 return FALSE;
             }
         }

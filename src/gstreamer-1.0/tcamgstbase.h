@@ -18,7 +18,6 @@
 #define TCAM_GSTTCAMBASE_H
 
 #include "gst_helper.h"
-#include "tcam.h"
 
 #include <gst/gst.h>
 #include <stdint.h>
@@ -156,17 +155,13 @@ GstCaps* find_input_caps(GstCaps* available_caps,
                          struct input_caps_required_modules& modules,
                          struct input_caps_toggles toggles);
 
+namespace tcam
+{
+class VideoFormatDescription;
+}
 
 GstCaps* convert_videoformatsdescription_to_caps(
     const std::vector<tcam::VideoFormatDescription>& descriptions);
-
-
-bool gst_caps_to_tcam_video_format(GstCaps* caps, struct tcam_video_format* format);
-
-bool gst_buffer_to_tcam_image_buffer(GstBuffer* buffer, GstCaps* caps, tcam_image_buffer* image);
-
-
-int calc_pitch(int fourcc, int width);
 
 namespace tcam_helper
 {

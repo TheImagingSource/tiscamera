@@ -17,7 +17,7 @@
 #ifndef TCAM_GSTTCAMMAINSRC_H
 #define TCAM_GSTTCAMMAINSRC_H
 
-#include "tcam.h"
+#include "../../tcam.h"
 
 #include <atomic>
 #include <condition_variable>

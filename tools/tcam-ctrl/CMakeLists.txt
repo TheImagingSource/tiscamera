@@ -27,22 +27,21 @@ target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
 target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
 target_include_directories(tcam-ctrl PRIVATE ${GLIB2_INCLUDE_DIR})
 target_include_directories(tcam-ctrl PRIVATE ${GObject_INCLUDE_DIR})
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}")
 target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/external")
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gobject")
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/gstreamer-1.0")
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src")
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/src/include/img")
 
-target_link_libraries(tcam-ctrl tcam)
-target_link_libraries(tcam-ctrl tcamgstbase)
 
-target_link_libraries(tcam-ctrl ${GSTREAMER_LIBRARIES})
-target_link_libraries(tcam-ctrl ${GSTREAMER_BASE_LIBRARIES})
-target_link_libraries(tcam-ctrl ${GSTREAMER_VIDEO_LIBRARIES})
-target_link_libraries(tcam-ctrl ${GOBJECT_LIBRARIES})
-target_link_libraries(tcam-ctrl ${GLIB2_LIBRARIES})
+target_link_libraries( tcam-ctrl
+PRIVATE
+	dutils::dutils_img
+	tcamgstbase
+	tcam
+
+	${GSTREAMER_LIBRARIES}
+	${GSTREAMER_BASE_LIBRARIES}
+	${GSTREAMER_VIDEO_LIBRARIES}
+	${GOBJECT_LIBRARIES}
+	${GLIB2_LIBRARIES}
+)
 
 install(TARGETS tcam-ctrl
   DESTINATION ${TCAM_INSTALL_BIN}

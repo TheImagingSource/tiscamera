@@ -85,8 +85,6 @@ public:
 
     bool is_locked() const;
 
-    bool is_complete() const;
-
     void set_user_data(void* data);
 
     void* get_user_data();
@@ -96,7 +94,7 @@ public:
 
 private:
     const bool is_own_memory;
-    struct tcam_image_buffer buffer;
+    tcam_image_buffer buffer;
 };
 
 
