@@ -20,13 +20,12 @@ add_library(tcamconvert SHARED
 
 	gst_caps_helper.h
 	gst_caps_helper.cpp
+	
+	tcamprop_impl.cpp
+	property_handler_base.h
 )
 
 target_include_directories( tcamconvert 
-PRIVATE 
-	"${TCAM_SOURCE_DIR}/src/include/"
-	"${TCAM_SOURCE_DIR}/src/lib/dutils_image/include/"
-	
 PRIVATE
 	${GSTREAMER_INCLUDE_DIRS}
 	${GSTREAMER_BASE_INCLUDE_DIRS}
@@ -34,6 +33,8 @@ PRIVATE
 	${GLIB2_INCLUDE_DIR}
 	${GObject_INCLUDE_DIR}
 	${INTROSPECTION_INCLUDE_DIR}
+
+	${TCAM_SOURCE_DIR}/external
 )
 set_project_warnings(tcamconvert)
 
@@ -51,7 +52,6 @@ PRIVATE
 	${GSTREAMER_VIDEO_LIBRARIES}
 
 	dutils::dutils_img_base
-#	dutils::dutils_img_filter_c
 	dutils::dutils_img_filter_optimized
 )
 

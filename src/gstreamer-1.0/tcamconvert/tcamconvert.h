@@ -17,7 +17,6 @@
 #ifndef TCAMCONVERT_H_INC_
 #define TCAMCONVERT_H_INC_
 
-#include <dutils_img/image_transform_base.h>
 #include <gst/base/gstbasetransform.h>
 #include <gst/gst.h>
 

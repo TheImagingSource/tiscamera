@@ -23,17 +23,17 @@
 
 #include <algorithm>
 #include <dutils_img/dutils_cpu_features.h>
+#include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
-#include <dutils_img/image_bayer_pattern.h>
-#include <dutils_img/image_transform_base.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <gst/video/gstvideometa.h>
+#include <map>
 #include <vector>
 
 struct GstTCamConvert_context
 {
-    img::img_type src_type;
-    img::img_type dst_type;
+    img::img_type src_type_;
+    img::img_type dst_type_;
 
     img_filter::transform_function_type transform_func_ = nullptr;
 };
@@ -80,8 +80,6 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcamconvert_debug_category);
 #define gst_tcamconvert_parent_class parent_class
 G_DEFINE_TYPE(GstTCamConvert, gst_tcamconvert, GST_TYPE_BASE_TRANSFORM)
 
-#include <map>
-
 static GstCaps* generate_caps_struct(const std::vector<img::fourcc>& fcc_list)
 {
     GstCaps* caps = gst_caps_new_empty(); // this is returned and the caller must take ownership
@@ -125,7 +123,7 @@ static GstCaps* generate_caps_struct(const std::vector<img::fourcc>& fcc_list)
 
         gst_structure_take_value(structure, "width", &gvalue_width);
         gst_structure_take_value(structure, "height", &gvalue_height);
-        //gst_structure_take_value( structure, "framerate", &gvalue_fps_range );  // takes ownership of gvalue_fps_range
+        //gst_structure_take_value( structure, "framerate", &gvalue_fps_range );
 
         gst_caps_append_structure(caps, structure);
     }
@@ -321,13 +319,6 @@ static void gst_tcamconvert_get_property(GObject* object __attribute__((unused))
     }
 }
 
-static img::img_type caps_to_img_type(const GstCaps* caps)
-{
-    GstStructure* structure = gst_caps_get_structure(caps, 0);
-
-    return gst_helper::get_gst_struct_image_type(structure);
-}
-
 
 static auto find_func(img::img_type dst_type, img::img_type src_type)
     -> img_filter::transform_function_type
@@ -363,9 +354,14 @@ static auto find_func(img::img_type dst_type, img::img_type src_type)
     return nullptr;
 }
 
-
 static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps)
 {
+    auto caps_to_img_type = [](const GstCaps* caps) -> img::img_type {
+        GstStructure* structure = gst_caps_get_structure(caps, 0);
+
+        return gst_helper::get_gst_struct_image_type(structure);
+    };
+
     GstTCamConvert* self = GST_TCAMCONVERT(base);
     if (!self)
     {
@@ -383,8 +379,8 @@ static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps
         return FALSE;
     }
 
-    self->context_->dst_type = dst;
-    self->context_->src_type = src;
+    self->context_->dst_type_ = dst;
+    self->context_->src_type_ = src;
     self->context_->transform_func_ = find_func(dst, src);
 
     return TRUE;
@@ -527,22 +523,18 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* /*base*/,
 static gboolean gst_tcamconvert_get_unit_size(GstBaseTransform* trans, GstCaps* caps, gsize* size)
 {
     GstStructure* structure = gst_caps_get_structure(caps, 0);
-    auto dim_opt = gst_helper::get_gst_struct_image_dim(structure);
-    if (!dim_opt)
-    {
-        GST_ELEMENT_ERROR(
-            trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, some required field missing"));
-        return FALSE;
-    }
 
-    const auto fcc = gst_helper::get_gst_struct_fcc(structure);
-    if (fcc == img::fourcc::FCC_NULL)
+    auto type = gst_helper::get_gst_struct_image_type(structure);
+    if (type.empty())
     {
-        GST_ELEMENT_ERROR(
-            trans, CORE, NEGOTIATION, (NULL), ("Incomplete caps, format missing or unknown"));
+        GST_ELEMENT_ERROR(trans,
+                          CORE,
+                          NEGOTIATION,
+                          (NULL),
+                          ("Incomplete caps, format/dimensions missing or unknown"));
         return FALSE;
     }
-    size_t img_size = img::calc_minimum_img_size(fcc, dim_opt.value());
+    size_t img_size = img::calc_minimum_img_size(type.fourcc_type(), type.dim);
     if (img_size == 0)
     {
         GST_ELEMENT_ERROR(trans,
@@ -584,6 +576,17 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
 {
     auto self = GST_TCAMCONVERT(base);
 
+    auto func = self->context_->transform_func_;
+    if (func == nullptr)
+    {
+        GST_ERROR_OBJECT(self,
+                         "Failed to find conversion from %s to %s",
+                         img::fcc_to_string(self->context_->src_type_.type).c_str(),
+                         img::fcc_to_string(self->context_->dst_type_.type).c_str());
+
+        return GST_FLOW_ERROR;
+    }
+
     GstMapInfo map_in;
     if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READ))
     {
@@ -603,28 +606,17 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
     img::img_descriptor src = {};
     if (int gst_meta_stride = get_mapped_stride(inbuf); gst_meta_stride)
     {
-        src = img::make_img_desc_raw(self->context_->src_type,
+        src = img::make_img_desc_raw(self->context_->src_type_,
                                      img::img_plane { map_in.data, gst_meta_stride });
     }
     else
     {
-        src = img::make_img_desc_from_linear_memory(self->context_->src_type, map_in.data);
+        src = img::make_img_desc_from_linear_memory(self->context_->src_type_, map_in.data);
     }
-    auto dst = img::make_img_desc_from_linear_memory(self->context_->dst_type, map_out.data);
 
+    auto dst = img::make_img_desc_from_linear_memory(self->context_->dst_type_, map_out.data);
 
-    auto func = self->context_->transform_func_;
-    if (func == nullptr)
-    {
-        GST_ERROR_OBJECT(self,
-                         "Failed to find conversion from %s to %s",
-                         img::fcc_to_string(src.type).c_str(),
-                         img::fcc_to_string(dst.type).c_str());
-    }
-    else
-    {
-        func(dst, src);
-    }
+    func(dst, src);
 
     gst_buffer_unmap(outbuf, &map_out);
     gst_buffer_unmap(inbuf, &map_in);
