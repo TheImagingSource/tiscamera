@@ -101,7 +101,7 @@ std::vector<tcam_image_size> tcam::get_standard_resolutions(const tcam_image_siz
     };
 
     std::vector<struct tcam_image_size> ret;
-    ret.reserve(std::size_t(resolutions));
+    ret.reserve(std::size(resolutions));
     for (const auto& r : resolutions)
     {
         if ((min < r) && (r < max))
