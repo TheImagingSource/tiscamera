@@ -33,7 +33,7 @@ set(NETWORK_SOURCES
 
 add_library(tcam-network SHARED ${NETWORK_SOURCES})
 target_include_directories(tcam-network PUBLIC ${LIBZIP_INCLUDE_DIR})
-target_link_libraries(tcam-network ${LIBZIP_LIBRARY} pugixml::pugixml)
+target_link_libraries(tcam-network ${LIBZIP_LIBRARY} pugixml::pugixml pthread)
 set_project_warnings(tcam-network)
 
 set_property(TARGET tcam-network PROPERTY VERSION ${TCAM_VERSION})
