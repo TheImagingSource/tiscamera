@@ -54,7 +54,6 @@ PRIVATE
 PUBLIC
 	tcam
 	tcamprop
-#	tcam-algorithms
 	dutils::dutils_img
 	spdlog::spdlog
 )
@@ -68,33 +67,21 @@ add_library(gsttcamsrc SHARED
 	tcamsrc/gsttcamdevice.cpp
 	gstmetatcamstatistics.cpp
 )
-
-
-add_library(gsttcambin SHARED gsttcambin.cpp)
-
-target_include_directories( gsttcambin
+target_link_libraries( gsttcamsrc
 PRIVATE
+	tcamgstbase
+)
+set_project_warnings(gsttcamsrc)
+
+add_library(gsttcambin SHARED 
+	gsttcambin.cpp
 )
 
 target_link_libraries( gsttcambin
 PRIVATE
 	tcamgstbase
 )
-
 set_project_warnings(gsttcambin)
-
-target_link_libraries( gsttcamsrc
-PRIVATE
-	tcamgstbase
-)
-
-set_project_warnings(gsttcamsrc)
-
-
-#install(TARGETS tcamgstbase
-#  LIBRARY
-#  DESTINATION "${TCAM_INSTALL_LIB}"
-#  COMPONENT tcam-gstreamer-1)
 
 install(TARGETS ${PLUGINS}
   DESTINATION ${TCAM_INSTALL_GST_1_0}

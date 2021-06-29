@@ -15,7 +15,7 @@
 
 
 #Specify the version being used aswell as the language
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.10)
 
 #Name your project here
 project(tcam)
@@ -26,26 +26,16 @@ include(version.cmake)
 
 set(TCAM_VERSION "${TCAM_VERSION_MAJOR}.${TCAM_VERSION_MINOR}.${TCAM_VERSION_PATCH}${TCAM_VERSION_MODIFIER}" CACHE STRING "Version number")
 
+
 set(TCAM_ORIGIN "https://github.com/TheImagingSource/tiscamera")
 
-include("CompilerWarnings")
-include("git-helper")
+include("cmake/CompilerWarnings.cmake")
+include("cmake/git-helper.cmake")
 
-git_commit_hash(GIT_COMMIT_HASH)
-git_commit_count(GIT_COMMIT_COUNT)
-git_branch(GIT_BRANCH)
-git_commit_tag(GIT_TAG)
+set(default_build_type "Release")   # Override the default build type to be 'Release' and not 'RelWithDebInfo'
+include("cmake/StandardProjectSettings.cmake")
 
-set(default_build_type "Release")
-
-if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-    STRING "Choose the type of build." FORCE)
-
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
+find_git_settings() # exports GIT_COMMIT_COUNT, GIT_TAG, ...
 
 set(TCAM_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(TCAM_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
@@ -53,29 +43,29 @@ set(TCAM_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${TCAM_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TCAM_BINARY_DIR}/lib)
 
+if( GIT_IS_REPOSITORY )
+    message(STATUS "TCAM_VERSION: ${TCAM_VERSION}, Git: commit#=${GIT_COMMIT_COUNT}, branch=${GIT_BRANCH}" )
+else()
+    message(STATUS "TCAM_VERSION: ${TCAM_VERSION}, Git: No repo found" )
+endif()
 
 # assure config.h is found
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+#include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "Common prefix for all installed files." FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # All option for configuration come from here
 include(CMakeOptions.cmake)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -pedantic -pthread -fPIC")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -pthread -fPIC")
-
 add_compile_options( -Wno-psabi )   # disable ABI change message of g++8
-
+add_compile_options( -Wall -Wextra -pedantic -pthread )
+set( CMAKE_CXX_STANDARD 17 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 include(CMakeInstall.cmake)
 
 include("clang-format")
-
 
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 

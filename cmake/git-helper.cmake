@@ -24,16 +24,17 @@
 function (git_is_repository is_repo)
 
   execute_process(
-    COMMAND git rev-parse --git-dir 2> /dev/null
+    COMMAND git rev-parse --git-dir
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE ROOT_DIR
+    OUTPUT_VARIABLE FUNC_ROOT_DIR
+    ERROR_QUIET
     )
 
-  if (ROOT_DIR)
+  if (FUNC_ROOT_DIR)
     set(${is_repo} TRUE PARENT_SCOPE)
   else ()
     set(${is_repo} FALSE PARENT_SCOPE)
-  endif (ROOT_DIR)
+  endif (FUNC_ROOT_DIR)
 
 endfunction (git_is_repository)
 
@@ -46,6 +47,7 @@ function (git_commit_hash return_value)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
     )
 
   if (GIT_COMMIT_HASH)
@@ -63,6 +65,7 @@ function (git_commit_count return_value)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_COUNT
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
     )
 
   if (GIT_COMMIT_COUNT)
@@ -80,6 +83,7 @@ function (git_commit_tag return_value)
     OUTPUT_VARIABLE GIT_TAG
     ERROR_VARIABLE GIT_TAG_ERROR
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
     )
 
   if (GIT_TAG)
@@ -92,12 +96,12 @@ endfunction (git_commit_tag)
 # fills the given argument with the name of the current branch
 #
 function (git_branch return_value)
-
   execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
     )
 
   if (GIT_BRANCH)
@@ -107,6 +111,7 @@ function (git_branch return_value)
 endfunction (git_branch)
 
 # defines the following variables in the parent scope
+# GIT_REPO_PRESENT
 # GIT_COMMIT_HASH
 # GIT_COMMIT_COUNT
 # GIT_TAG
@@ -116,25 +121,29 @@ endfunction (git_branch)
 # the project not exist within a git repo
 #
 function (find_git_settings)
+    git_is_repository( repo_present )
+    if( repo_present )
+        set(GIT_REPO_PRESENT ${repo_present} PARENT_SCOPE)
 
-  git_commit_hash(hash)
-  if (hash)
-    set(GIT_COMMIT_HASH "${hash}" PARENT_SCOPE)
-  endif (hash)
+        git_commit_hash(hash)
+        if (hash)
+            set(GIT_COMMIT_HASH "${hash}" PARENT_SCOPE)
+        endif (hash)
 
-  git_commit_count(count)
-  if (count)
-    set(GIT_COMMIT_COUNT "${count}" PARENT_SCOPE)
-  endif (count)
+        git_commit_count(count)
+        if (count)
+            set(GIT_COMMIT_COUNT "${count}" PARENT_SCOPE)
+        endif (count)
 
-  git_commit_tag(tag)
-  if (tag)
-    set(GIT_TAG "${tag}" PARENT_SCOPE)
-  endif (tag)
+        git_commit_tag(tag)
+        if (tag)
+        set(GIT_TAG "${tag}" PARENT_SCOPE)
+        endif (tag)
 
-  git_branch(branch)
-  if (branch)
-    set(GIT_BRANCH "${branch}" PARENT_SCOPE)
-  endif (branch)
-
+        git_branch(branch)
+        if (branch)
+            set(GIT_BRANCH "${branch}" PARENT_SCOPE)
+        endif (branch)
+        
+    endif( repo_present )
 endfunction ()

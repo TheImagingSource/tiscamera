@@ -13,28 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include( ${TCAM_SOURCE_DIR}/cmake/pkg-helper.cmake )
 
 add_subdirectory(lib/dutils_image EXCLUDE_FROM_ALL)
 add_subdirectory(gobject)
-
-
-# helper funcion to receive the value of an arbitrary variable
-function(pkg_check_variable _pkg _name)
-  string(TOUPPER ${_pkg} _pkg_upper)
-  string(TOUPPER ${_name} _name_upper)
-  string(REPLACE "-" "_" _pkg_upper ${_pkg_upper})
-  string(REPLACE "-" "_" _name_upper ${_name_upper})
-  set(_output_name "${_pkg_upper}_${_name_upper}")
-
-  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=${_name} ${_pkg}
-    OUTPUT_VARIABLE _pkg_result
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  set("${_output_name}" "${_pkg_result}" CACHE STRING "pkg-config variable ${_name} of ${_pkg}")
-endfunction()
-
-
-#add_subdirectory(algorithms)
 
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
@@ -42,8 +24,7 @@ endif (BUILD_GST_1_0)
 
 if (TCAM_ENABLE_BASE_LIBRARIES)
 
-set(base
-  
+add_library(tcam-base STATIC 
   logging.cpp
   DeviceInfo.cpp
   ImageBuffer.cpp
@@ -59,9 +40,7 @@ set(base
   ImageSink.cpp
   
   error.cpp
-  )
-
-add_library(tcam-base STATIC ${base})
+)
 
 target_link_libraries( tcam-base 
 PUBLIC
@@ -196,7 +175,6 @@ target_include_directories( tcam PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
 
 # set_target_properties(tcam
 #   PROPERTIES
-#   POSITION_INDEPENDENT_CODE ON
 #   CXX_VISIBILITY_PRESET hidden
 #   )
 
@@ -205,7 +183,6 @@ PUBLIC
     spdlog::spdlog
     tcam-base
 PRIVATE 
-#    tcam-algorithms
 )
 
 
