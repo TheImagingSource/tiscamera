@@ -16,13 +16,9 @@
 
 #include "tcamconvert.h"
 
-#include <gst/video/gstvideometa.h>
-#include <vector>
-
-//#include <gst_helper/gvalue_helper.h>
-//#include <gst_helper/gst_caps_helper.h>
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
+#include "../../version.h"
 
 #include <algorithm>
 #include <dutils_img/dutils_cpu_features.h>
@@ -30,7 +26,9 @@
 #include <dutils_img/image_bayer_pattern.h>
 #include <dutils_img/image_transform_base.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
+#include <gst/video/gstvideometa.h>
 #include <gst_caps_helper.h>
+#include <vector>
 
 struct GstTCamConvert_context
 {
@@ -783,9 +781,6 @@ static gboolean plugin_init(GstPlugin* plugin)
     return gst_element_register(plugin, "tcamconvert", GST_RANK_NONE, GST_TYPE_TCAMCONVERT);
 }
 
-#ifndef VERSION
-#define VERSION "0.0.1"
-#endif
 #ifndef PACKAGE
 #define PACKAGE "tcamconvert"
 #endif
@@ -802,7 +797,7 @@ GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
                   tcamconvert,
                   "The Imaging Source tcamconvert plugin",
                   plugin_init,
-                  VERSION,
+                  get_version(),
                   "Proprietary",
                   PACKAGE_NAME,
                   GST_PACKAGE_ORIGIN)

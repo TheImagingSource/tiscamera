@@ -43,7 +43,7 @@ target_link_libraries( tcamconvert
 PRIVATE
 	spdlog::spdlog
 	tcamprop
-
+    tcam
 	${GOBJECT_LIBRARIES}
 	${GLIB2_LIBRARIES}
 	${GSTREAMER_LIBRARIES}
