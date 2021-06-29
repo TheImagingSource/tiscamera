@@ -19,6 +19,7 @@
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
 #include "../../version.h"
+#include "gst_caps_helper.h"
 
 #include <algorithm>
 #include <dutils_img/dutils_cpu_features.h>
@@ -27,7 +28,6 @@
 #include <dutils_img/image_transform_base.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <gst/video/gstvideometa.h>
-#include <gst_caps_helper.h>
 #include <vector>
 
 struct GstTCamConvert_context

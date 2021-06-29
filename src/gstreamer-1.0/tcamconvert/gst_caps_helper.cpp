@@ -29,7 +29,7 @@ img::fourcc gst_helper::get_gst_struct_fcc(const GstStructure* structure)
     }
     else if (type == GST_TYPE_LIST)
     {
-        //GST_ERROR( "format is a list not a single entry" );
+        GST_WARNING( "format is a list not a single entry" );
         return img::fourcc::FCC_NULL;
     }
     else
