@@ -111,7 +111,6 @@ nbproject
 
 .dir-locals.el
 
-cmake/*
 .gdb_history
 
 CMakeCache.txt
