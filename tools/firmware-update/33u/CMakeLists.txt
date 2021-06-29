@@ -16,8 +16,8 @@
 # find_package(libusb-1.0 REQUIRED)
 # include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
-include_directories("${TCAM_SOURCE_DIR}/tools/firmware-update")
-include_directories("${TCAM_SOURCE_DIR}/external/PugiXml")
+#include_directories("${TCAM_SOURCE_DIR}/tools/firmware-update")
+#include_directories("${TCAM_SOURCE_DIR}/external/PugiXml")
 
 set(files
   Archive.cpp
@@ -63,6 +63,10 @@ set(files
 
 add_library(33update OBJECT ${files})
 
-# target_link_libraries(33update ${pugixml_obj})
-
-# target_link_libraries(33updqate ${LIBUSB_1_LIBRARIES})
+target_include_directories( 33update 
+PRIVATE "${TCAM_SOURCE_DIR}/external/PugiXml"
+)
+target_link_libraries( 33update
+PRIVATE
+    spdlog::spdlog
+)

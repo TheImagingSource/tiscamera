@@ -17,8 +17,8 @@
 #pragma once
 
 #include "IUsbDevice.h"
-#include "UsbCamera.h"
-#include "UsbSession.h"
+#include "../UsbCamera.h"
+#include "../UsbSession.h"
 
 #include <cstdint>
 #include <memory>

@@ -17,7 +17,7 @@
 #ifndef _CONSOLE_MANAGER_H_
 #define _CONSOLE_MANAGER_H_
 
-#include "Camera.h"
+#include "../../src/tcam-network/Camera.h"
 
 #include <iomanip>
 #include <iostream>

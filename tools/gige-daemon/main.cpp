@@ -18,7 +18,6 @@
 #include "CameraListHolder.h"
 #include "DaemonClass.h"
 #include "gige-daemon.h"
-#include "tcam-semaphores.h"
 
 #include <csignal>
 #include <cstring>

@@ -15,7 +15,7 @@
 
 
 add_executable(camera-ip-conf main.cpp ConsoleManager.cpp)
-target_include_directories(camera-ip-conf PRIVATE ${TCAM_SOURCE_DIR}/src/tcam-network)
+#target_include_directories(camera-ip-conf PRIVATE ${TCAM_SOURCE_DIR}/src/tcam-network)
 
 target_link_libraries(camera-ip-conf tcam-network)
 

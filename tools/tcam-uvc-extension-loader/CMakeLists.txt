@@ -14,10 +14,12 @@
 # limitations under the License.
 
 
-include_directories("${TCAM_SOURCE_DIR}/external/CLI11")
-include_directories("${TCAM_SOURCE_DIR}/src/v4l2")
 
 add_executable(tcam-uvc-extension-loader main.cpp)
+
+target_include_directories(tcam-uvc-extension-loader PRIVATE "${TCAM_SOURCE_DIR}/external/CLI11")
+target_include_directories(tcam-uvc-extension-loader PRIVATE "${TCAM_SOURCE_DIR}/src/v4l2")
+
 
 target_link_libraries(tcam-uvc-extension-loader tcam-uvc-extension)
 set_project_warnings(tcam-uvc-extension-loader)

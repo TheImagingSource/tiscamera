@@ -23,16 +23,6 @@ set_project_warnings(gige-daemon)
 target_include_directories(gige-daemon PRIVATE "${GIO_INCLUDE_DIR}")
 target_include_directories(gige-daemon PRIVATE ${GOBJECT_INCLUDE_DIR})
 target_include_directories(gige-daemon PRIVATE ${GLIB2_INCLUDE_DIR})
-target_include_directories(gige-daemon PRIVATE "${TCAM_BINARY_DIR}")
-target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src")
-target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/external")
-target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src/aravis")
-target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src")
-target_include_directories(gige-daemon PRIVATE "${TCAM_SOURCE_DIR}/src/tcam-network")
-
-TARGET_LINK_LIBRARIES(gige-daemon tcam)
-TARGET_LINK_LIBRARIES(gige-daemon tcam-network)
-TARGET_LINK_LIBRARIES(gige-daemon "dl")
 
 if (TCAM_INTERNAL_ARAVIS)
   # we require two includes
@@ -40,20 +30,26 @@ if (TCAM_INTERNAL_ARAVIS)
   target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
   target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
-  target_link_libraries(gige-daemon "${ARAVIS_LIB}")
+  target_link_libraries(gige-daemon PRIVATE "${ARAVIS_LIB}")
 
 else (TCAM_INTERNAL_ARAVIS)
 
   target_include_directories(gige-daemon PRIVATE "${aravis_INCLUDE_DIR}")
 
-  target_link_libraries(gige-daemon "${aravis_LIBRARIES}")
+  target_link_libraries(gige-daemon PRIVATE "${aravis_LIBRARIES}")
 
 endif (TCAM_INTERNAL_ARAVIS)
 
-target_link_libraries(gige-daemon "${LIBXML2_LIBRARIES}")
-target_link_libraries(gige-daemon "${GIO_LIBRARIES}")
-target_link_libraries(gige-daemon "${PCAP_LIBRARIES}")
-target_link_libraries(gige-daemon dutils::dutils_img)
+target_link_libraries(gige-daemon
+PRIVATE
+    "${LIBXML2_LIBRARIES}"
+    "${GIO_LIBRARIES}"
+    "${PCAP_LIBRARIES}"
+    tcam
+    tcam-network
+    dl
+    outcome::outcome
+)
 
 install(TARGETS gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}

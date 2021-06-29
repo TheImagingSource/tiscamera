@@ -16,9 +16,9 @@
 
 #include "ConsoleManager.h"
 
-#include "Camera.h"
-#include "CameraDiscovery.h"
-#include "utils.h"
+#include "../../src/tcam-network/Camera.h"
+#include "../../src/tcam-network/CameraDiscovery.h"
+//#include "utils.h"
 
 #include <algorithm>
 #include <exception>

@@ -17,7 +17,7 @@
 #include "LibUsbShowEnumerator.h"
 
 #include "LibUsbShowDevice.h"
-#include "UsbHandler.h"
+#include "../UsbHandler.h"
 
 #include <algorithm>
 #include <iterator>

@@ -46,6 +46,7 @@ target_link_libraries( tcam-base
 PUBLIC
     dutils::dutils_img
     spdlog::spdlog
+    outcome::outcome
 PRIVATE
     dutils::dutils_img_auto
 )
@@ -187,7 +188,8 @@ target_link_libraries(tcam
 PUBLIC
     spdlog::spdlog
     tcam-base
-PRIVATE 
+PRIVATE
+    outcome::outcome
 )
 
 

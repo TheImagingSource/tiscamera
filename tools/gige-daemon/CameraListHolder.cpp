@@ -16,10 +16,10 @@
 
 #include "CameraListHolder.h"
 
-#include "CameraDiscovery.h"
-#include "aravis_utils.h"
+#include "../../src/aravis/aravis_utils.h"
+#include "../../src/tcam-network/CameraDiscovery.h"
+#include "../../src/tcam-semaphores.h"
 #include "gige-daemon.h"
-#include "tcam-semaphores.h"
 
 #include <cstring>
 #include <sstream>

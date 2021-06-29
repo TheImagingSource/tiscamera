@@ -15,8 +15,8 @@
  */
 
 
-#include "tcam-semaphores.h"
-#include "tcam.h"
+#include "../../src/tcam-semaphores.h"
+#include "../../src/tcam.h"
 
 #include <condition_variable>
 #include <mutex>

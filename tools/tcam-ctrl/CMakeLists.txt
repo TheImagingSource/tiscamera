@@ -27,12 +27,10 @@ target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
 target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
 target_include_directories(tcam-ctrl PRIVATE ${GLIB2_INCLUDE_DIR})
 target_include_directories(tcam-ctrl PRIVATE ${GObject_INCLUDE_DIR})
-target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/external")
 
 
 target_link_libraries( tcam-ctrl
 PRIVATE
-	dutils::dutils_img
 	tcamgstbase
 	tcam
 

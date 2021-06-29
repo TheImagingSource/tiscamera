@@ -17,7 +17,7 @@
 #pragma once
 
 #include "IDevicePort.h"
-#include "pugi.h"
+#include <pugi.h>
 
 #include <string>
 
