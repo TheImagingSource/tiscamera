@@ -651,6 +651,72 @@ static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransf
     return GST_FLOW_OK;
 }
 
+
+/**
+ * Helper function for copy_metadata
+ * basically a functional copy from:
+ * https://cgit.freedesktop.org/gstreamer/gstreamer/tree/libs/gst/base/gstadapter.c
+ */
+static gboolean foreach_metadata(GstBuffer* inbuf, GstMeta** meta, gpointer user_data)
+{
+    GstBuffer* outbuf = static_cast<GstBuffer*>(user_data);
+
+    const GstMetaInfo* info = (*meta)->info;
+
+    //auto klass = GST_BASE_TRANSFORM_GET_CLASS( trans );
+
+    bool copy = false;
+    if (GST_META_FLAG_IS_SET(*meta, GST_META_FLAG_POOLED)
+        || gst_meta_api_type_has_tag(info->api, _gst_meta_tag_memory))
+    {
+        copy = false;
+    }
+    else
+    {
+        copy = true;
+    }
+
+    if (copy)
+    {
+        // ignore narrowing warning for -1
+        // gstreamer documentation says it has to be -1 for off
+#pragma GCC diagnostic ignored "-Wnarrowing"
+        GstMetaTransformCopy copy_data = { FALSE, 0, -1 };
+#pragma GCC diagnostic push "-Wnarrowing"
+
+        info->transform_func(outbuf, *meta, inbuf, _gst_meta_transform_copy, &copy_data);
+    }
+    return TRUE;
+}
+
+
+static gboolean gst_tcamconvert_copy_metadata(GstBaseTransform* base,
+                                              GstBuffer* inbuf,
+                                              GstBuffer* outbuf)
+{
+    /* now copy the metadata */
+    GST_DEBUG_OBJECT(base, "copying metadata");
+
+    /* this should not happen, buffers allocated from a pool or with
+     * new_allocate should always be writable. */
+    if (!gst_buffer_is_writable(outbuf))
+    {
+        GST_WARNING_OBJECT(base, "buffer %p not writable", (void*)outbuf);
+        return FALSE;
+    }
+
+    /* when we get here, the metadata should be writable */
+    gst_buffer_copy_into(outbuf,
+                         inbuf,
+                         (GstBufferCopyFlags)(GST_BUFFER_COPY_FLAGS | GST_BUFFER_COPY_TIMESTAMPS),
+                         0,
+                         -1);
+
+    gst_buffer_foreach_meta(inbuf, foreach_metadata, outbuf);
+
+    return TRUE;
+}
+
 static void gst_tcamconvert_init(GstTCamConvert* self)
 {
     self->context_ = new GstTCamConvert_context;
@@ -701,6 +767,8 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
     gst_base_transform_class->set_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_set_caps);
     gst_base_transform_class->transform = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform);
     gst_base_transform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_ip);
+    GST_BASE_TRANSFORM_CLASS(klass)->copy_metadata =
+        GST_DEBUG_FUNCPTR(gst_tcamconvert_copy_metadata);
 
     gst_base_transform_class->passthrough_on_same_caps =
         TRUE; // Mark this transform element as 'calling tranform_ip when src and sink caps are the same
