@@ -61,7 +61,7 @@ set(files
   # "${TCAM_SOURCE_DIR}/dependencies/PugiXml/pugixml.cpp"
   )
 
-add_library(33update OBJECT ${files})
+add_library(33update STATIC ${files})
 
 target_include_directories( 33update 
 PRIVATE "${TCAM_SOURCE_DIR}/external/PugiXml"
