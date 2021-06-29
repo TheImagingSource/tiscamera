@@ -18,8 +18,8 @@
 
 #include "AravisPropertyBackend.h"
 #include "aravis_utils.h"
-#include "internal.h"
-#include "utils.h"
+#include "../internal.h"
+#include "../utils.h"
 
 #include <algorithm>
 #include <cmath>

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "../logging.h"
+#include "../utils.h"
 #include "AFU420Device.h"
 #include "AFU420DeviceBackend.h"
 #include "AFU420PropertyImpl.h"
-#include "logging.h"
-#include "utils.h"
 
 #include <cmath>
 

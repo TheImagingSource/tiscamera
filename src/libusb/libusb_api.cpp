@@ -16,11 +16,11 @@
 
 #include "libusb_api.h"
 
+#include "../logging.h"
 #include "AFU050Device.h"
 #include "AFU420Device.h"
 #include "UsbHandler.h"
 #include "libusb_utils.h"
-#include "logging.h"
 
 #include <cstring>
 

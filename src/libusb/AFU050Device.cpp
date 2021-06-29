@@ -16,16 +16,16 @@
 
 #include "AFU050Device.h"
 
+#include "../logging.h"
 #include "AFU050DeviceBackend.h"
 #include "AFU050PropertyImpl.h"
 #include "UsbHandler.h"
 #include "UsbSession.h"
 #include "afu050_definitions.h"
-#include <dutils_img/fcc_to_string.h>
-#include "logging.h"
 
 #include <algorithm>
 #include <cstring>
+#include <dutils_img/fcc_to_string.h>
 #include <fstream>
 #include <unistd.h>
 

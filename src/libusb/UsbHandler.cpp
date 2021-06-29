@@ -17,7 +17,7 @@
 #include "UsbHandler.h"
 
 #include "LibusbDevice.h"
-#include "logging.h"
+#include "../logging.h"
 
 #include <cstdio>
 #include <cstring>

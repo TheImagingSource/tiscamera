@@ -17,11 +17,9 @@
 #pragma once
 
 
-#include "base_types.h"
+#include "../base_types.h"
 #include "v4l2_genicam_conversion.h"
 
-#include <map>
-#include <optional>
 #include <string>
 
 namespace tcam::v4l2

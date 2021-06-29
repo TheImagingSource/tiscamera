@@ -2,8 +2,8 @@
 
 #pragma once
 
+#include "../error.h"
 #include "afu050_definitions.h"
-#include "error.h"
 
 namespace tcam
 {

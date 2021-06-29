@@ -1,7 +1,5 @@
 
 
-# include_directories("${TCAM_SOURCE_DIR}/src")
-
 if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 # dfk73 special case
 

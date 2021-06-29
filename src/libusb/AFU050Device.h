@@ -17,11 +17,11 @@
 #ifndef TCAM_AFU050DEVICE_H
 #define TCAM_AFU050DEVICE_H
 
-#include "DeviceInterface.h"
-#include "FormatHandlerInterface.h"
+#include "../DeviceInterface.h"
+#include "../FormatHandlerInterface.h"
+#include "../VideoFormat.h"
+#include "../VideoFormatDescription.h"
 #include "LibusbDevice.h"
-#include "VideoFormat.h"
-#include "VideoFormatDescription.h"
 #include "afu050_definitions.h"
 
 #include <condition_variable> // std::condition_variable

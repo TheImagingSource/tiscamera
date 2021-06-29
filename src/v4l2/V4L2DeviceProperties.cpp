@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "../logging.h"
+#include "../utils.h"
 #include "V4l2Device.h"
-#include "logging.h"
-#include "utils.h"
 #include "v4l2_genicam_mapping.h"
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"

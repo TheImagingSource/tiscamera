@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "PropertyInterfaces.h"
-#include "error.h"
+#include "../PropertyInterfaces.h"
+#include "../error.h"
 #include "v4l2_genicam_conversion.h"
 
 #include <linux/videodev2.h>

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "PropertyInterfaces.h"
+#include "../PropertyInterfaces.h"
 #include "afu050_definitions.h"
 
 #include <map>

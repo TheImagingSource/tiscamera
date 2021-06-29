@@ -16,8 +16,8 @@
 
 #include "AravisPropertyBackend.h"
 
-#include "arv.h"
-#include "logging.h"
+#include <arv.h>
+#include "../logging.h"
 
 namespace tcam::property
 {

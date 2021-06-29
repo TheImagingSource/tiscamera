@@ -16,9 +16,10 @@
 
 #pragma once
 
-#include "PropertyInterfaces.h"
-#include "arv.h"
-#include "compiler_defines.h"
+#include "../PropertyInterfaces.h"
+#include "../compiler_defines.h"
+
+#include <arv.h>
 
 VISIBILITY_INTERNAL
 

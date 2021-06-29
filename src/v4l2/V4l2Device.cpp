@@ -16,9 +16,9 @@
 
 #include "V4l2Device.h"
 
+#include "../logging.h"
+#include "../utils.h"
 #include "dfk73.h"
-#include "logging.h"
-#include "utils.h"
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
 

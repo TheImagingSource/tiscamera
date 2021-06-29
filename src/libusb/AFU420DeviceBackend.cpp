@@ -16,8 +16,8 @@
 
 #include "AFU420DeviceBackend.h"
 
+#include "../utils.h"
 #include "AFU420Device.h"
-#include "utils.h"
 
 using namespace tcam::afu420;
 

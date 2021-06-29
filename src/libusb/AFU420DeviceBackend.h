@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "../error.h"
 #include "ep_defines_rx.h"
-#include "error.h"
 
 namespace tcam
 {

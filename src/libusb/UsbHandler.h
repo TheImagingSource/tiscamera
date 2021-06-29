@@ -17,7 +17,7 @@
 #ifndef TCAM_USBHANDLER_H
 #define TCAM_USBHANDLER_H
 
-#include "DeviceInfo.h"
+#include "../DeviceInfo.h"
 #include "LibusbDevice.h"
 #include "UsbSession.h"
 

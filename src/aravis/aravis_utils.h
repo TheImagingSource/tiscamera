@@ -17,9 +17,10 @@
 #ifndef TCAM_ARAVIS_UTILS_H
 #define TCAM_ARAVIS_UTILS_H
 
-#include "DeviceInfo.h"
-#include "arv.h"
-#include "compiler_defines.h"
+#include "../DeviceInfo.h"
+#include "../compiler_defines.h"
+
+#include <arv.h>
 
 VISIBILITY_DEFAULT
 

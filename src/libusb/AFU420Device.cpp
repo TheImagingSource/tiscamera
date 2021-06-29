@@ -16,17 +16,17 @@
 
 #include "AFU420Device.h"
 
+#include "../logging.h"
+#include "../public_utils.h"
+#include "../utils.h"
 #include "AFU420DeviceBackend.h"
 #include "UsbHandler.h"
 #include "UsbSession.h"
-#include <dutils_img/fcc_to_string.h>
-#include <dutils_img/image_fourcc_func.h>
-#include "logging.h"
-#include "public_utils.h"
-#include "utils.h"
 
 #include <algorithm>
 #include <cstring>
+#include <dutils_img/fcc_to_string.h>
+#include <dutils_img/image_fourcc_func.h>
 #include <fstream>
 #include <ostream>
 #include <unistd.h>

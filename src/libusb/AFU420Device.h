@@ -17,14 +17,12 @@
 #ifndef TCAM_AFU420DEVICE_H
 #define TCAM_AFU420DEVICE_H
 
-#include "DeviceInterface.h"
-#include "FormatHandlerInterface.h"
+#include "../DeviceInterface.h"
+#include "../FormatHandlerInterface.h"
+#include "../VideoFormat.h"
+#include "../VideoFormatDescription.h"
 #include "LibusbDevice.h"
 #include "UsbSession.h"
-#include "VideoFormat.h"
-#include "VideoFormatDescription.h"
-//#include "afu420_definitions.h"
-
 #include "ep_defines_r42.h"
 #include "ep_defines_rx.h"
 #include "struct_defines_rx.h"

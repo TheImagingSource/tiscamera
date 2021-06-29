@@ -170,7 +170,12 @@ set_project_warnings(tcam)
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
-target_include_directories( tcam PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
+target_include_directories( tcam 
+PRIVATE SYSTEM 
+    "${TCAM_SOURCE_DIR}/external/"
+PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}      # For version.h, version.cpp is generated an build in ${CMAKE_CURRENT_BINARY_DIR}, so we have to bend includes to that directory
+)
 
 
 # set_target_properties(tcam

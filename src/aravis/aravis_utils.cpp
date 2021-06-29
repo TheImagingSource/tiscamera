@@ -16,8 +16,8 @@
 
 #include "aravis_utils.h"
 
-#include "internal.h"
-#include "logging.h"
+#include "../internal.h"
+#include "../logging.h"
 
 #include <algorithm>
 #include <dutils_img/image_fourcc.h>
@@ -25,8 +25,8 @@
 
 // gige-daemon communication
 
-#include "gige-daemon.h"
-#include "tcam-semaphores.h"
+#include "../gige-daemon/gige-daemon.h"
+#include "../tcam-semaphores.h"
 
 #include <sys/ipc.h>
 #include <sys/msg.h>

@@ -17,12 +17,12 @@
 #include "PipelineManager.h"
 
 #include "internal.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <ctime>
-#include <utils.h>
 
 using namespace tcam;
 

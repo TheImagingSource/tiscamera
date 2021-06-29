@@ -1,8 +1,8 @@
 
 #include "AFU420PropertyImpl.h"
 
+#include "../logging.h"
 #include "AFU420DeviceBackend.h"
-#include "logging.h"
 
 namespace tcam::property
 {

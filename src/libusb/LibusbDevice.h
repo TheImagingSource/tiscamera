@@ -17,9 +17,9 @@
 #ifndef TCAM_LIBUSBDEVICE_H
 #define TCAM_LIBUSBDEVICE_H
 
+#include "../base_types.h"
+#include "../logging.h"
 #include "UsbSession.h"
-#include "base_types.h"
-#include "logging.h"
 
 #include <memory>
 #include <vector>

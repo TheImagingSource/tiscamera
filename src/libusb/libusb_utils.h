@@ -2,7 +2,7 @@
 #ifndef TCAM_LIBUSB_UTILS_H
 #define TCAM_LIBUSB_UTILS_H
 
-#include "DeviceInfo.h"
+#include "../DeviceInfo.h"
 
 #include <vector>
 

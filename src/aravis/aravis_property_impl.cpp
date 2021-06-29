@@ -17,8 +17,7 @@
 #include "aravis_property_impl.h"
 
 #include "AravisPropertyBackend.h"
-#include "arv.h"
-#include "logging.h"
+#include "../logging.h"
 
 namespace
 {

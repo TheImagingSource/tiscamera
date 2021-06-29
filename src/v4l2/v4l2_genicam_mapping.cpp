@@ -16,11 +16,8 @@
 
 #include "v4l2_genicam_mapping.h"
 
-#include <map>
-
 //{ , { "", TCAM_PROPERTY_TYPE_UNKNOWN, {}, }, },
 
-//static const std::map<int, struct tcam::v4l2::v4l2_genicam_mapping> v4l2_conv_dict {
 static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     // brightness
     {

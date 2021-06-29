@@ -16,8 +16,9 @@
 
 #pragma once
 
+#include "../error.h"
+
 #include <cstdint>
-#include <error.h>
 #include <map>
 #include <string>
 

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "error.h"
+#include "../error.h"
 
 struct _ArvDevice;
 

@@ -17,11 +17,11 @@
 #ifndef TCAM_V4L2DEVICE_H
 #define TCAM_V4L2DEVICE_H
 
-#include "DeviceInterface.h"
-#include "FormatHandlerInterface.h"
+#include "../DeviceInterface.h"
+#include "../FormatHandlerInterface.h"
+#include "../VideoFormat.h"
+#include "../VideoFormatDescription.h"
 #include "V4L2PropertyBackend.h"
-#include "VideoFormat.h"
-#include "VideoFormatDescription.h"
 
 #include <atomic>
 #include <condition_variable> // std::condition_variable

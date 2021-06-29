@@ -16,8 +16,8 @@
 
 #include "V4L2PropertyBackend.h"
 
-#include "logging.h"
-#include "utils.h"
+#include "../logging.h"
+#include "../utils.h"
 
 #include <linux/videodev2.h>
 

@@ -17,8 +17,8 @@
 #ifndef TCAM_V4L2_UTILS_H
 #define TCAM_V4L2_UTILS_H
 
-#include "DeviceInfo.h"
-#include "compiler_defines.h"
+#include "../DeviceInfo.h"
+#include "../compiler_defines.h"
 
 #include <linux/videodev2.h>
 

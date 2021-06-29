@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "PropertyInterfaces.h"
-#include "compiler_defines.h"
+#include "../PropertyInterfaces.h"
+#include "../compiler_defines.h"
 #include "ep_defines_rx.h"
 
 #include <map>

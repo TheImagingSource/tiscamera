@@ -49,11 +49,6 @@ else()
     message(STATUS "TCAM_VERSION: ${TCAM_VERSION}, Git: No repo found" )
 endif()
 
-# assure config.h is found
-#include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 # All option for configuration come from here
 include(CMakeOptions.cmake)
 

@@ -1,15 +1,16 @@
 
 #include "AFU050PropertyImpl.h"
 
+#include "../logging.h"
 #include "AFU050DeviceBackend.h"
-#include "logging.h"
 
 namespace tcam::property
 {
 
-AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(const std::string& name,
-                                                     control_definition ctrl,
-                                                     std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
+AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
+    const std::string& name,
+    control_definition ctrl,
+    std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
     : m_cam(cam), m_name(name), m_ctrl(ctrl)
 {
     if (auto ptr = m_cam.lock())
@@ -82,13 +83,10 @@ outcome::result<void> AFU050PropertyIntegerImpl::valid_value(int64_t value)
 }
 
 
-
-
-
-
-AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(const std::string& name,
-                                                   control_definition ctrl,
-                                                   std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
+AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
+    const std::string& name,
+    control_definition ctrl,
+    std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
     : m_cam(cam), m_name(name), m_ctrl(ctrl)
 {
     if (auto ptr = m_cam.lock())

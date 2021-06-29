@@ -16,8 +16,8 @@
 
 #include "v4l2_utils.h"
 
-#include "logging.h"
-#include "utils.h"
+#include "../logging.h"
+#include "../utils.h"
 
 #if HAVE_UDEV
 #include <libudev.h>

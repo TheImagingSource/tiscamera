@@ -17,8 +17,8 @@
 #ifndef TCAM_ARAVISDEVICE_H
 #define TCAM_ARAVISDEVICE_H
 
-#include "DeviceInterface.h"
-#include "FormatHandlerInterface.h"
+#include "../DeviceInterface.h"
+#include "../FormatHandlerInterface.h"
 
 #include <arv.h>
 #include <atomic>

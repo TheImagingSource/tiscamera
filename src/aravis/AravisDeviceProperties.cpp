@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
+#include "../error.h"
+#include "../logging.h"
 #include "AravisDevice.h"
 #include "aravis_property_impl.h"
-#include "error.h"
-#include "logging.h"
-
-#include <map>
-
 
 namespace
 {
 
 
-std::map<std::string, std::string> name_table = {
+static const std::pair<std::string_view, std::string_view> name_table[] = {
     { "OffsetAutoCenter", "OffsetAuto" },
     { "IRCutFilterEnableElement", "IRCutFilterEnable" },
 };
@@ -37,7 +34,7 @@ outcome::result<std::string> find_conversion_name(const std::string& name)
     {
         if (entry.first == name)
         {
-            return entry.second;
+            return std::string(entry.second);
         }
     }
     return tcam::status::PropertyDoesNotExist;
