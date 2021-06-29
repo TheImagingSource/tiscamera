@@ -18,3 +18,7 @@ set(pugi_files
   pugixml.cpp)
 
 add_library(pugixml_obj OBJECT ${pugi_files})
+
+add_library(pugixml STATIC ${pugi_files})
+target_include_directories( pugixml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+add_library(pugixml::pugixml ALIAS pugixml)

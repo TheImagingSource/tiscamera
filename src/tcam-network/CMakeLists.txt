@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories(${TCAM_SOURCE_DIR}/external/PugiXml/)
-
 find_package(LibZip REQUIRED)
 
 set(NETWORK_SOURCES
@@ -33,9 +31,9 @@ set(NETWORK_SOURCES
   JedecFile.cpp
   )
 
-add_library(tcam-network SHARED ${NETWORK_SOURCES} $<TARGET_OBJECTS:pugixml_obj>)
+add_library(tcam-network SHARED ${NETWORK_SOURCES})
 target_include_directories(tcam-network PUBLIC ${LIBZIP_INCLUDE_DIR})
-target_link_libraries(tcam-network ${LIBZIP_LIBRARY})
+target_link_libraries(tcam-network ${LIBZIP_LIBRARY} pugixml::pugixml)
 set_project_warnings(tcam-network)
 
 set_property(TARGET tcam-network PROPERTY VERSION ${TCAM_VERSION})
