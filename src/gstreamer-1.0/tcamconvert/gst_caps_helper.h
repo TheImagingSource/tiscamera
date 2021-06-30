@@ -4,6 +4,7 @@
 #include <gst/gst.h>
 #include <memory>
 #include <optional>
+#include <string>
 
 namespace gst_helper
 {

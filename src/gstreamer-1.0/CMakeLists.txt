@@ -67,13 +67,20 @@ add_library(gsttcamsrc SHARED
 	tcamsrc/gsttcamdevice.cpp
 	gstmetatcamstatistics.cpp
 )
+
+# required for gstmetatcamstatistics.h
+target_include_directories(gsttcamsrc
+PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 target_link_libraries( gsttcamsrc
 PRIVATE
 	tcamgstbase
 )
 set_project_warnings(gsttcamsrc)
 
-add_library(gsttcambin SHARED 
+add_library(gsttcambin SHARED
 	gsttcambin.cpp
 )
 
