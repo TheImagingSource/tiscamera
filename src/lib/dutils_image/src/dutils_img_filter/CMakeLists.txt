@@ -25,9 +25,9 @@ add_library( dutils_img_filter_c STATIC
 	"transform/fcc1x_packed/transform_fcc1x_to_fcc8_c.cpp"
 
 	"filter/whitebalance/wb_apply.h"
-#	"filter/whitebalance/wb_apply_c.cpp"
-#	"filter/whitebalance/wb_apply_by16_c.cpp"
-#	"filter/whitebalance/wb_apply_by8_c.cpp"
+	"filter/whitebalance/wb_apply_c.cpp"
+	"filter/whitebalance/wb_apply_by16_c.cpp"
+	"filter/whitebalance/wb_apply_by8_c.cpp"
 
 #	"transform/mono_to_bgr/transform_mono_to_bgr.h"
 #	"transform/mono_to_bgr/transform_mono_to_bgr_internal.h"

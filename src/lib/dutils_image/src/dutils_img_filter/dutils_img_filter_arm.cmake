@@ -7,10 +7,10 @@ add_library( dutils_img_filter_neon STATIC
 
 	"transform/fcc8_fcc16/transform_fcc8_fcc16_neon_v0.cpp"
 
-#	"filter/whitebalance/wb_apply.h"
-#	"filter/whitebalance/wb_apply_sse41.cpp"
-#	"filter/whitebalance/wb_apply_by16_sse4_1.cpp"
-#	"filter/whitebalance/wb_apply_by8_sse2.cpp"
+	"filter/whitebalance/wb_apply.h"
+	"filter/whitebalance/wb_apply_neon.cpp"
+	"filter/whitebalance/wb_apply_by16_neon.cpp"
+	"filter/whitebalance/wb_apply_by8_neon.cpp"
   
 #	"transform/pwl/transform_fccfloat_to_fcc8_sse41_v0.cpp"
 
