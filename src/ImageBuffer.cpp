@@ -36,7 +36,7 @@ ImageBuffer::ImageBuffer(const VideoFormat& format, bool owns_memory)
     buffer.size = format.get_required_buffer_size();
     if (is_own_memory)
     {
-        SPDLOG_INFO("allocating data buffer");
+        SPDLOG_TRACE("allocating data buffer");
         buffer.pData = (unsigned char*)malloc(buffer.size);
     }
     else
