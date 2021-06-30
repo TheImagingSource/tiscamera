@@ -102,7 +102,7 @@ GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming);
 
 
 bool contains_bayer(const GstCaps* caps);
-bool contains_mono(const GstCaps* caps)
+bool contains_mono(const GstCaps* caps);
 
 bool contains_jpeg(const GstCaps* caps);
 
