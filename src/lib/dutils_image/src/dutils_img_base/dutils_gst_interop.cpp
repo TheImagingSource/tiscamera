@@ -33,7 +33,7 @@ namespace
         { img::fourcc::MONO12_PACKED,       g_gst_video_raw,    "GRAY12p" },
         { img::fourcc::MONO12_SPACKED,      g_gst_video_raw,    "GRAY12sp" },
         { img::fourcc::MONO12_MIPI_PACKED,  g_gst_video_raw,    "GRAY12m" },
-        { img::fourcc::MONO16,              g_gst_video_raw,    "GRAY16_LE" },        
+        { img::fourcc::MONO16,              g_gst_video_raw,    "GRAY16_LE" },
 
         { img::fourcc::GRBG8,               g_gst_video_bayer,  "grbg", },
         { img::fourcc::RGGB8,               g_gst_video_bayer,  "rggb", },
@@ -45,10 +45,10 @@ namespace
         { img::fourcc::GRBG10,              g_gst_video_bayer,  "grbg10", },
         { img::fourcc::RGGB10,              g_gst_video_bayer,  "rggb10", },
 
-        { img::fourcc::GBRG10_SPACKED,      g_gst_video_bayer,  "gbrg10", },
-        { img::fourcc::BGGR10_SPACKED,      g_gst_video_bayer,  "bggr10", },
-        { img::fourcc::GRBG10_SPACKED,      g_gst_video_bayer,  "grbg10", },
-        { img::fourcc::RGGB10_SPACKED,      g_gst_video_bayer,  "rggb10", },
+        { img::fourcc::GBRG10_SPACKED,      g_gst_video_bayer,  "gbrg10sp", },
+        { img::fourcc::BGGR10_SPACKED,      g_gst_video_bayer,  "bggr10sp", },
+        { img::fourcc::GRBG10_SPACKED,      g_gst_video_bayer,  "grbg10sp", },
+        { img::fourcc::RGGB10_SPACKED,      g_gst_video_bayer,  "rggb10sp", },
 
         { img::fourcc::GBRG10_MIPI_PACKED,  g_gst_video_bayer,  "gbrg10m", },
         { img::fourcc::BGGR10_MIPI_PACKED,  g_gst_video_bayer,  "bggr10m", },
@@ -166,7 +166,7 @@ img::fourcc    img_lib::gst::gst_caps_string_to_fourcc( std::string_view format_
         }
 
         assert( format_string.empty() != true );
-        if( format_string.empty() ) { // this has practically no meaning, we would return the first fourcc 
+        if( format_string.empty() ) { // this has practically no meaning, we would return the first fourcc
             return img::fourcc::FCC_NULL;
         }
 
