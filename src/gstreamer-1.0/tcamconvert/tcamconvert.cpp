@@ -16,10 +16,10 @@
 
 #include "tcamconvert.h"
 
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
 #include "../../version.h"
 #include "gst_caps_helper.h"
+#include "tcamconvert_context.h"
+#include "tcamprop_impl.h"
 
 #include <algorithm>
 #include <dutils_img/dutils_cpu_features.h>
@@ -30,14 +30,9 @@
 #include <map>
 #include <vector>
 
-struct GstTCamConvert_context
+struct GstTCamConvert_context : public tcamconvert::tcamconvert_context_base
 {
-    img::img_type src_type_;
-    img::img_type dst_type_;
-
-    img_filter::transform_function_type transform_func_ = nullptr;
 };
-
 
 namespace gst_helper
 {
@@ -78,7 +73,18 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcamconvert_debug_category);
 #define GST_CAT_DEFAULT gst_tcamconvert_debug_category
 
 #define gst_tcamconvert_parent_class parent_class
-G_DEFINE_TYPE(GstTCamConvert, gst_tcamconvert, GST_TYPE_BASE_TRANSFORM)
+G_DEFINE_TYPE_WITH_CODE(GstTCamConvert,
+                        gst_tcamconvert,
+                        GST_TYPE_BASE_TRANSFORM,
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP,
+                                              tcamconvert::gst_tcamconvert_prop_init))
+
+
+tcamprop_system::property_list_interface* tcamconvert::get_property_list_interface(TcamProp* iface)
+{
+    return GST_TCAMCONVERT(iface)->context_;
+}
+
 
 static GstCaps* generate_caps_struct(const std::vector<img::fourcc>& fcc_list)
 {
@@ -319,41 +325,6 @@ static void gst_tcamconvert_get_property(GObject* object __attribute__((unused))
     }
 }
 
-
-static auto find_func(img::img_type dst_type, img::img_type src_type)
-    -> img_filter::transform_function_type
-{
-    using func_type =
-        img_filter::transform_function_type (*)(const img::img_type&, const img::img_type&);
-
-    static func_type func_list[] = {
-#if defined DUTILS_ARCH_ARM
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_neon_v0,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_neon_v0,
-        img_filter::transform::get_transform_fcc8_to_fcc16_neon,
-        img_filter::transform::get_transform_fcc16_to_fcc8_neon,
-#else
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_ssse3,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_ssse3,
-        img_filter::transform::get_transform_fcc8_to_fcc16_sse41,
-        img_filter::transform::get_transform_fcc16_to_fcc8_sse41,
-#endif
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc8_c,
-        img_filter::transform::fcc1x_packed::get_transform_fcc10or12_packed_to_fcc16_c,
-        img_filter::transform::get_transform_fcc8_to_fcc16_c,
-        img_filter::transform::get_transform_fcc16_to_fcc8_c,
-    };
-
-    for (auto func : func_list)
-    {
-        if (auto res = func(dst_type, src_type); res)
-        {
-            return res;
-        }
-    }
-    return nullptr;
-}
-
 static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps)
 {
     auto caps_to_img_type = [](const GstCaps* caps) -> img::img_type {
@@ -379,10 +350,14 @@ static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps
         return FALSE;
     }
 
-    self->context_->dst_type_ = dst;
-    self->context_->src_type_ = src;
-    self->context_->transform_func_ = find_func(dst, src);
-
+    if (!self->context_->setup(src, dst))
+    {
+        GST_ERROR_OBJECT(self,
+                         "Failed to find conversion from %s to %s",
+                         img::fcc_to_string(src.type).c_str(),
+                         img::fcc_to_string(dst.type).c_str());
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -576,17 +551,6 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
 {
     auto self = GST_TCAMCONVERT(base);
 
-    auto func = self->context_->transform_func_;
-    if (func == nullptr)
-    {
-        GST_ERROR_OBJECT(self,
-                         "Failed to find conversion from %s to %s",
-                         img::fcc_to_string(self->context_->src_type_.type).c_str(),
-                         img::fcc_to_string(self->context_->dst_type_.type).c_str());
-
-        return GST_FLOW_ERROR;
-    }
-
     GstMapInfo map_in;
     if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READ))
     {
@@ -616,7 +580,7 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
 
     auto dst = img::make_img_desc_from_linear_memory(self->context_->dst_type_, map_out.data);
 
-    func(dst, src);
+    self->context_->transform(src, dst);
 
     gst_buffer_unmap(outbuf, &map_out);
     gst_buffer_unmap(inbuf, &map_in);

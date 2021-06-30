@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-#include "../../gobject/tcamprop.h"
-#include "../../logging.h"
-#include "property_handler_base.h"
+#include "tcamprop_impl.h"
 
-namespace tcamconvert
-{
-prop_system::property_interface* get_property_interface(TcamProp* iface);
-}
+#include "../../logging.h"
 
 namespace
 {
@@ -40,19 +35,6 @@ static char* g_strdup_string_view(std::string_view str) noexcept
     memcpy(rval, str.data(), str.size());
     rval[str.size()] = '\0';
     return rval;
-}
-
-static auto find_property_desc_entry(prop_system::property_interface* self,
-                                     std::string_view str) noexcept -> prop_system::property_desc
-{
-    for (const auto& prop : self->get_property_list())
-    {
-        if (prop.prop_name == str)
-        {
-            return prop;
-        }
-    }
-    return {};
 }
 
 static void write_gvalue(GValue* dst, bool val)
@@ -118,36 +100,48 @@ static void write_gvalue(GValue* dst, const std::string_view& val)
     g_value_take_string(dst, g_strdup_string_view(val));
 }
 
-//
-//static void write_gvalue(GValue* dst, const std::string_view& val)
-//{
-//    if (!dst)
-//        return;
-//
-//    g_value_init(dst, G_TYPE_STRING);
-//    g_value_take_string(dst, g_strdup_string_view(val));
-//}
+auto    get_property_interface( TcamProp* iface, const char* name ) -> tcamprop_system::property_interface*
+{
+    if( iface == nullptr ) {
+        return nullptr;
+    }
+    if (name == nullptr) {
+        return nullptr;
+    }
+    auto* self = tcamconvert::get_property_list_interface(iface);
+    if( self == nullptr ) {
+        return nullptr;
+    }
+
+    return self->find_property(name);
+}
 
 } // namespace
 
 static GSList* gst_tcamconvert_get_tcam_property_names(TcamProp* iface)
 {
-    auto* self = tcamconvert::get_property_interface(iface);
+    auto* self = tcamconvert::get_property_list_interface(iface);
 
     GSList* names = nullptr;
     for (const auto& prop : self->get_property_list())
     {
-        auto flags_opt = self->get_property_flags(prop.prop_name);
+        auto prop_itf = self->find_property(prop.prop_name);
+        if (prop_itf == nullptr)
+        {
+            continue;
+        }
+
+        auto flags_opt = prop_itf->get_property_flags();
         if (!flags_opt.has_value())
         {
             continue;
         }
         auto flags = flags_opt.value();
-        if (!!(flags & prop_system::prop_flags::hide_from_get_property_names))
+        if (!!(flags & tcamprop_system::prop_flags::hide_from_get_property_names))
         {
             continue;
         }
-        if (!(flags & prop_system::prop_flags::implemented))
+        if (!(flags & tcamprop_system::prop_flags::implemented))
         {
             continue;
         }
@@ -159,21 +153,18 @@ static GSList* gst_tcamconvert_get_tcam_property_names(TcamProp* iface)
 
 static gchar* gst_tcamconvert_get_property_type(TcamProp* iface, const gchar* name)
 {
-    auto* self = tcamconvert::get_property_interface(iface);
-
-    auto prop_opt = self->get_property_desc(name);
-    if (!prop_opt)
-    {
+    auto* prop_itf = get_property_interface(iface, name);
+    if( !prop_itf ) {
         return nullptr;
     }
-    auto prop = prop_opt.value();
+
+    auto prop = prop_itf->get_property_desc();
 
     return g_strdup(to_string(prop.type));
 }
 
-
 static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
-                                                  const gchar* name_,
+                                                  const gchar* name,
                                                   GValue* value,
                                                   GValue* min,
                                                   GValue* max,
@@ -184,38 +175,31 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
                                                   GValue* category,
                                                   GValue* group)
 {
-    auto* self = tcamconvert::get_property_interface(iface);
-    if (name_ == nullptr)
+    auto prop_itf = get_property_interface( iface, name );
+    if (!prop_itf)
     {
         return FALSE;
     }
 
-    std::string_view name = name_;
+    auto prop = prop_itf->get_property_desc();
 
-    auto prop_opt = self->get_property_desc(name);
-    if (!prop_opt)
-    {
-        return FALSE;
-    }
-    auto prop = prop_opt.value();
-
-    auto prop_flags_opt = self->get_property_flags(name);
+    auto prop_flags_opt = prop_itf->get_property_flags();
     if (!prop_flags_opt)
     {
         return FALSE;
     }
-    auto prop_flags = prop_flags_opt.value();
 
-    if (!(prop_flags & prop_system::prop_flags::implemented))
+    auto prop_flags = prop_flags_opt.value();
+    if (!(prop_flags & tcamprop_system::prop_flags::implemented))
     {
         return FALSE;
     }
     write_gvalue(flags, (int)(prop_flags));
-    write_gvalue(type, to_string(prop.type));
+    write_gvalue(type, tcamprop_system::to_string(prop.type));
     write_gvalue(category, prop.prop_category);
     write_gvalue(group, prop.prop_group);
 
-    if (prop.type == prop_system::prop_type::button)
+    if (prop.type == tcamprop_system::prop_type::button)
     {
         write_gvalue(value, false);
         write_gvalue(min, false);
@@ -223,17 +207,17 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
         write_gvalue(def, false);
         write_gvalue(stp, true);
     }
-    else if (prop.type == prop_system::prop_type::boolean)
+    else if (prop.type == tcamprop_system::prop_type::boolean)
     {
         if (value)
         {
-            auto tmp = self->get_property(name);
+            auto tmp = prop_itf->get_property_value();
             if (tmp.has_value())
             {
                 write_gvalue(value, tmp.value().integer != 0);
             }
         }
-        auto range_opt = self->get_property_range(name);
+        auto range_opt = prop_itf->get_property_range();
         if (range_opt.has_error())
         {
             return FALSE;
@@ -244,17 +228,18 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
         write_gvalue(def, range_opt.value().val_def.integer != 0);
         write_gvalue(stp, true);
     }
-    else if (prop.type == prop_system::prop_type::integer)
+    else if (prop.type == tcamprop_system::prop_type::integer)
     {
         if (value)
         {
-            auto tmp = self->get_property(name);
+            auto tmp = prop_itf->get_property_value();
+            ;
             if (tmp.has_value())
             {
                 write_gvalue(value, tmp.value().integer);
             }
         }
-        auto range_opt = self->get_property_range(name);
+        auto range_opt = prop_itf->get_property_range();
         if (range_opt.has_error())
         {
             return FALSE;
@@ -266,18 +251,18 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
         write_gvalue(def, range.def);
         write_gvalue(stp, range.stp);
     }
-    else if (prop.type == prop_system::prop_type::real)
+    else if (prop.type == tcamprop_system::prop_type::real)
     {
         if (value)
         {
-            auto tmp = self->get_property(name);
+            auto tmp = prop_itf->get_property_value();
             if (tmp.has_value())
             {
                 write_gvalue(value, tmp.value().real);
             }
         }
 
-        auto range_opt = self->get_property_range(name);
+        auto range_opt = prop_itf->get_property_range();
         if (range_opt.has_error())
         {
             return FALSE;
@@ -289,7 +274,7 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
         write_gvalue(def, range.def);
         write_gvalue(stp, range.stp);
     }
-    else if (prop.type == prop_system::prop_type::menu)
+    else if (prop.type == tcamprop_system::prop_type::menu)
     {
         auto find_string = [&](int idx) -> const char* {
             if (idx < 0 && idx >= (int)prop.menu_entries.size())
@@ -300,14 +285,14 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
         };
         if (value)
         {
-            auto tmp = self->get_property(name);
+            auto tmp = prop_itf->get_property_value();
             if (tmp.has_value())
             {
                 write_gvalue(value, find_string(tmp.value().integer));
             }
         }
 
-        auto range_opt = self->get_property_range(name);
+        auto range_opt = prop_itf->get_property_range();
         if (range_opt.has_error())
         {
             return FALSE;
@@ -326,22 +311,22 @@ static gboolean gst_tcamconvert_get_tcam_property(TcamProp* iface,
     return TRUE;
 }
 
-static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interface* self,
-                                                   const gchar* name_,
-                                                   const GValue* value)
+static gboolean gst_tcamconvert_set_tcam_property(TcamProp* iface,
+                                                  const gchar* name,
+                                                  const GValue* value)
 {
-    if (name_ == nullptr || value == nullptr)
+
+    auto prop_itf = get_property_interface( iface, name );
+    if( prop_itf == nullptr ) {
+        return FALSE;
+    }
+
+    if (value == nullptr)
     {
         return FALSE;
     }
 
-    std::string_view name = name_;
-    auto prop_opt = self->get_property_desc(name);
-    if (!prop_opt)
-    {
-        return FALSE;
-    }
-    auto prop = prop_opt.value();
+    auto prop = prop_itf->get_property_desc();
 
     auto report_type_mismatch = [&](const char* /*type_expected*/) {
         //auto str_recv = G_VALUE_TYPE_NAME( value );
@@ -350,16 +335,16 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
 
     switch (prop.type)
     {
-        case prop_system::prop_type::button:
+        case tcamprop_system::prop_type::button:
         {
-            auto err = self->set_property(name, prop_system::prop_values { true });
+            auto err = prop_itf->set_property_value( tcamprop_system::prop_value { true });
             if (err)
             {
                 return FALSE;
             }
             return TRUE;
         }
-        case prop_system::prop_type::boolean:
+        case tcamprop_system::prop_type::boolean:
         {
             if (!G_VALUE_HOLDS_BOOLEAN(value))
             {
@@ -368,14 +353,14 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
             }
 
             auto val = g_value_get_boolean(value) == TRUE;
-            auto err = self->set_property(name, prop_system::prop_values { val });
+            auto err = prop_itf->set_property_value( tcamprop_system::prop_value { val });
             if (err)
             {
                 return FALSE;
             }
             return TRUE;
         }
-        case prop_system::prop_type::integer:
+        case tcamprop_system::prop_type::integer:
         {
             if (!G_VALUE_HOLDS_INT(value))
             {
@@ -383,14 +368,14 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
                 return FALSE;
             }
             auto val = (int64_t)g_value_get_int(value);
-            auto err = self->set_property(name, prop_system::prop_values { val });
+            auto err = prop_itf->set_property_value( tcamprop_system::prop_value { val });
             if (err)
             {
                 return FALSE;
             }
             return TRUE;
         }
-        case prop_system::prop_type::real:
+        case tcamprop_system::prop_type::real:
         {
             if (!G_VALUE_HOLDS_DOUBLE(value))
             {
@@ -398,14 +383,14 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
                 return FALSE;
             }
             auto val = g_value_get_double(value);
-            auto err = self->set_property(name, prop_system::prop_values { val });
+            auto err = prop_itf->set_property_value( tcamprop_system::prop_value { val });
             if (err)
             {
                 return FALSE;
             }
             return TRUE;
         }
-        case prop_system::prop_type::menu:
+        case tcamprop_system::prop_type::menu:
         {
             int index = 0;
             if (G_VALUE_HOLDS_STRING(value))
@@ -433,7 +418,7 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
             {
                 return FALSE;
             }
-            auto err = self->set_property(name, prop_system::prop_values { index });
+            auto err = prop_itf->set_property_value( tcamprop_system::prop_value { index });
             if (err)
             {
                 return FALSE;
@@ -445,43 +430,25 @@ static gboolean gst_tcamconvert_set_tcam_property_(prop_system::property_interfa
     }
 }
 
-static gboolean gst_tcamconvert_set_tcam_property(TcamProp* iface,
-                                                  const gchar* name,
-                                                  const GValue* value)
+static GSList* gst_tcamconvert_get_menu_entries(TcamProp* iface, const char* name)
 {
-    auto* self = tcamconvert::get_property_interface(iface);
-
-    return gst_tcamconvert_set_tcam_property_(self, name, value);
-}
-
-static GSList* gst_tcamconvert_get_menu_entries(TcamProp* iface, const char* name_)
-{
-    auto* self = tcamconvert::get_property_interface(iface);
-
-    if (name_ == nullptr)
-    {
-        return FALSE;
-    }
-
-    std::string_view name = name_;
-
-    auto prop = find_property_desc_entry(self, name);
-    if (prop.prop_name.empty())
-    {
+    auto prop_itf = get_property_interface( iface, name );
+    if( prop_itf == nullptr ) {
         return nullptr;
     }
 
-    if (prop.type != prop_system::prop_type::menu)
+    auto desc = prop_itf->get_property_desc();
+    if (desc.type != tcamprop_system::prop_type::menu)
     {
         return nullptr;
     }
 
     GSList* ret = nullptr;
-    for (const auto& m : prop.menu_entries) { ret = g_slist_append(ret, g_strdup(m)); }
+    for (const auto& m : desc.menu_entries) { ret = g_slist_append(ret, g_strdup(m)); }
     return ret;
 }
 
-void gst_tcamconvert_prop_init(TcamPropInterface* iface)
+void tcamconvert::gst_tcamconvert_prop_init(TcamPropInterface* iface)
 {
     iface->get_tcam_property_names = gst_tcamconvert_get_tcam_property_names;
     iface->get_tcam_property_type = gst_tcamconvert_get_property_type;

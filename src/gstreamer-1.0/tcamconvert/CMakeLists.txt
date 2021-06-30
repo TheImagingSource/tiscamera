@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 add_library(tcamconvert SHARED 
 	tcamconvert.h
 	tcamconvert.cpp
@@ -21,8 +20,14 @@ add_library(tcamconvert SHARED
 	gst_caps_helper.h
 	gst_caps_helper.cpp
 	
+	tcamprop_impl.h
 	tcamprop_impl.cpp
-	property_handler_base.h
+	"tcamconvert_context.h"
+	"tcamconvert_context.cpp"
+
+	"tcamprop_provider_base.h"
+	"tcamprop_provider_funcbased.h"
+	"tcamprop_provider_funcbased.cpp"
 )
 
 target_include_directories( tcamconvert 
@@ -33,16 +38,13 @@ PRIVATE
 	${GLIB2_INCLUDE_DIR}
 	${GObject_INCLUDE_DIR}
 	${INTROSPECTION_INCLUDE_DIR}
-
-	${TCAM_SOURCE_DIR}/external
 )
 set_project_warnings(tcamconvert)
 
 target_link_libraries( tcamconvert 
-
-	
 PRIVATE
 	spdlog::spdlog
+	outcome::outcome
 	tcamprop
     tcam
 	${GOBJECT_LIBRARIES}
@@ -54,6 +56,19 @@ PRIVATE
 	dutils::dutils_img_base
 	dutils::dutils_img_filter_optimized
 )
+set_property(TARGET tcamconvert PROPERTY CXX_VISIBILITY_PRESET hidden)
+set_property(TARGET tcamconvert PROPERTY VISIBILITY_INLINES_HIDDEN ON)
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0") 
+    target_precompile_headers( tcamconvert PRIVATE
+		<vector>
+		<string>
+		<string_view>
+		<algorithm>
+		<outcome/result.hpp>
+	)
+endif()
+
 
 install(TARGETS tcamconvert
   LIBRARY

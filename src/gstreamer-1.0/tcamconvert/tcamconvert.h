@@ -20,13 +20,7 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/gst.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-    G_BEGIN_DECLS
+G_BEGIN_DECLS
 
 #define GST_TYPE_TCAMCONVERT (gst_tcamconvert_get_type())
 #define GST_TCAMCONVERT(obj) \
@@ -36,25 +30,21 @@ extern "C"
 #define GST_IS_TCAMCONVERT(obj)       (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAMCONVERT))
 #define GST_IS_TCAMCONVERT_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAMCONVERT))
 
-    typedef struct GstTCamConvert
-    {
-        GstBaseTransform base;
+typedef struct GstTCamConvert
+{
+    GstBaseTransform base;
 
-        struct GstTCamConvert_context* context_;
+    struct GstTCamConvert_context* context_;
 
-    } GstTCamConvert;
+} GstTCamConvert;
 
-    typedef struct GstTCamConvertClass
-    {
-        GstBaseTransformClass base_class;
-    } GstTCamConvertClass;
+typedef struct GstTCamConvertClass
+{
+    GstBaseTransformClass base_class;
+} GstTCamConvertClass;
 
-    GType gst_tcamconvert_get_type(void);
+GType gst_tcamconvert_get_type(void);
 
-    G_END_DECLS
-
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
 #endif /* TCAMCONVERT_H_INC_ */
