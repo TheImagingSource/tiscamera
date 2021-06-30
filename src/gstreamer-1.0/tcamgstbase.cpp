@@ -1020,6 +1020,28 @@ bool contains_bayer(const GstCaps* caps)
     return false;
 }
 
+bool contains_mono(const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
+    {
+        if (tcam_gst_contains_mono_8_bit(caps)
+            || tcam_gst_contains_mono_10_bit(caps)
+            || tcam_gst_contains_mono_12_bit(caps)
+            || tcam_gst_contains_mono_16_bit(caps))
+
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool tcam_gst_contains_bayer_10_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
@@ -1055,6 +1077,22 @@ bool tcam_gst_contains_bayer_12_bit(const GstCaps* caps)
     return ret;
 }
 
+
+bool tcam_gst_contains_mono_8_bit(const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    GstCaps* tmp = gst_caps_from_string("video/x-raw,format=GRAY8");
+    gboolean ret = gst_caps_can_intersect(caps, tmp);
+    gst_caps_unref(tmp);
+
+    return ret;
+}
+
+
 bool tcam_gst_contains_mono_10_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
@@ -1084,6 +1122,21 @@ bool tcam_gst_contains_mono_12_bit(const GstCaps* caps)
                                         "GRAY12p, GRAY12p, GRAY12p, GRAY12p,"
                                         "GRAY12s, GRAY12s, GRAY12s, GRAY12s,"
                                         "GRAY12m, GRAY12m, GRAY12m, GRAY12m}");
+    gboolean ret = gst_caps_can_intersect(caps, tmp);
+    gst_caps_unref(tmp);
+
+    return ret;
+}
+
+
+bool tcam_gst_contains_mono_16_bit(const GstCaps* caps)
+{
+    if (caps == nullptr)
+    {
+        return false;
+    }
+
+    GstCaps* tmp = gst_caps_from_string("video/x-raw,format=GRAY16_LE");
     gboolean ret = gst_caps_can_intersect(caps, tmp);
     gst_caps_unref(tmp);
 

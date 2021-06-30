@@ -65,10 +65,16 @@ bool tcam_gst_is_bayer16_string(const char* format_string);
 bool tcam_gst_is_fourcc_rgb(const unsigned int fourcc);
 
 
+bool tcam_gst_contains_mono_8_bit(const GstCaps* caps);
+
+
 bool tcam_gst_contains_mono_10_bit(const GstCaps* caps);
 
 
 bool tcam_gst_contains_mono_12_bit(const GstCaps* caps);
+
+
+bool tcam_gst_contains_mono_16_bit(const GstCaps* caps);
 
 
 bool tcam_gst_contains_bayer_10_bit(const GstCaps* caps);
@@ -96,6 +102,7 @@ GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming);
 
 
 bool contains_bayer(const GstCaps* caps);
+bool contains_mono(const GstCaps* caps)
 
 bool contains_jpeg(const GstCaps* caps);
 
