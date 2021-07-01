@@ -27,7 +27,7 @@ namespace
 
         { img::fourcc::MONO8,               g_gst_video_raw,    "GRAY8", },
         { img::fourcc::MONO10,              g_gst_video_raw,    "GRAY10" },
-        { img::fourcc::MONO10_SPACKED,      g_gst_video_raw,    "GRAY10p" },
+        { img::fourcc::MONO10_SPACKED,      g_gst_video_raw,    "GRAY10sp" },
         { img::fourcc::MONO10_MIPI_PACKED,  g_gst_video_raw,    "GRAY10m" },
         { img::fourcc::MONO12,              g_gst_video_raw,    "GRAY12" },
         { img::fourcc::MONO12_PACKED,       g_gst_video_raw,    "GRAY12p" },
