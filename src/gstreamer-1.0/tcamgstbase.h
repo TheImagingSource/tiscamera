@@ -117,7 +117,7 @@ GstCaps* get_caps_from_element_name(const char* elementname, const char* padname
 
 struct input_caps_required_modules
 {
-    bool bayertransform = false;
+//    bool bayertransform = false;
     bool tcamconvert = false;
     bool bayer2rgb = false;
     bool videoconvert = false;
@@ -126,8 +126,9 @@ struct input_caps_required_modules
 
     bool operator==(const struct input_caps_required_modules& other) const
     {
-        if (bayertransform == other.bayertransform
-            && tcamconvert == other.tcamconvert
+        if (//bayertransform == other.bayertransform
+            //&&
+            tcamconvert == other.tcamconvert
             && bayer2rgb == other.bayer2rgb
             && videoconvert == other.videoconvert && jpegdec == other.jpegdec
             && dutils == other.dutils)
@@ -135,6 +136,26 @@ struct input_caps_required_modules
             return true;
         }
         return false;
+    }
+
+    std::string str()
+    {
+        auto bstr = [](bool val) -> std::string
+        {
+            if (val)
+            {
+                return "true";
+            }
+            return "false";
+        };
+
+        return "tcamconvert: " + bstr(tcamconvert)
+            + "\nbayer2rgb: " + bstr(bayer2rgb)
+            + "\nvideoconvert: " + bstr(videoconvert)
+            + "\njpegdec: " + bstr(jpegdec)
+            + "\ndutils: " + bstr(dutils)
+            + "\n"
+            ;
     }
 };
 

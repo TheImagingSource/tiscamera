@@ -27,14 +27,14 @@ set(PLUGINS
   )
 
 
-add_library(tcamgstbase STATIC tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp)
+add_library(tcamgstbase STATIC tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp tcambinconversion.cpp)
 
 set_project_warnings(tcamgstbase)
 
 
 
-target_include_directories(tcamgstbase 
-PUBLIC 
+target_include_directories(tcamgstbase
+PUBLIC
 	${GLIB2_INCLUDE_DIR}
 	${GObject_INCLUDE_DIR}
 	${INTROSPECTION_INCLUDE_DIR}
@@ -44,7 +44,7 @@ PUBLIC
 	${TCAM_SOURCE_DIR}/external/
 )
 
-target_link_libraries(tcamgstbase 
+target_link_libraries(tcamgstbase
 PRIVATE
 	${GOBJECT_LIBRARIES}
 	${GLIB2_LIBRARIES}

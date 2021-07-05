@@ -474,8 +474,8 @@ static gboolean gst_tcambin_create_source(GstTcamBin* self)
                     self->data->device_type.c_str());
 
     self->data->src_caps = gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
-    GST_INFO_OBJECT(
-        self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->data->src_caps.get()));
+    // GST_INFO_OBJECT(
+    //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->data->src_caps.get()));
 
     return TRUE;
 }
@@ -528,22 +528,16 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
     {
         remove_element(&self->bayer_transform);
     }
-    if (self->exposure)
+    if (self->tcamconvert)
     {
-        remove_element(&self->exposure);
+        remove_element(&self->tcamconvert);
     }
-    if (self->whitebalance)
-    {
-        remove_element(&self->whitebalance);
-    }
+
     if (self->debayer)
     {
         remove_element(&self->debayer);
     }
-    if (self->focus)
-    {
-        remove_element(&self->focus);
-    }
+
     if (self->jpegdec)
     {
         remove_element(&self->jpegdec);
@@ -594,7 +588,7 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
 
     gst_tcambin_clear_elements(self);
 
-    GST_INFO("creating elements");
+    GST_INFO("creating all potentially needed elements");
 
     if (self->src == nullptr)
     {
@@ -632,6 +626,17 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
         // go to finish and do not create other elements
         goto finished_element_creation;
     }
+    else
+    {
+        if (!create_and_add_element(&self->tcamconvert,
+                                    "tcamconvert",
+                                    "tcambin-tcamconvert",
+                                    GST_BIN(self)))
+        {
+            send_missing_element_msg("tcamconvert");
+            return FALSE;
+        }
+    }
 
     if (self->data->device_type == "pimipi")
     {
@@ -652,49 +657,12 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
          || tcam_gst_raw_only_has_mono(self->data->src_caps.get()))
         && self->data->device_type != "pimipi")
     {
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr
-            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "ExposureAuto") == nullptr)
-        {
-            if (!create_and_add_element(
-                    &self->exposure, "tcamautoexposure", "tcambin-exposure", GST_BIN(self)))
-            {
-                send_missing_element_msg("tcamautoexposure");
-                return FALSE;
-            }
-        }
-
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-            && (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr
-                && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus Auto") == nullptr
-                && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "FocusAuto") == nullptr))
-        {
-            if (!create_and_add_element(
-                    &self->focus, "tcamautofocus", "tcambin-focus", GST_BIN(self)))
-            {
-                send_missing_element_msg("tcamautofocus");
-                return FALSE;
-            }
-        }
     }
 
     // always add whitebalance when using bayer
     // we want it when debayering
     // users may still want it when asking for bayer
-    if (contains_bayer(self->data->src_caps.get()))
-    {
-        // use this to see if the device already has the feature
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr
-            && tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "BalanceWhiteAuto")
-                   == nullptr)
-        {
-            if (!create_and_add_element(
-                    &self->whitebalance, "tcamwhitebalance", "tcambin-whitebalance", GST_BIN(self)))
-            {
-                send_missing_element_msg("tcamwhitebalance");
-                return FALSE;
-            }
-        }
-    }
+    if (contains_bayer(self->data->src_caps.get())) {}
 
     if (!create_and_add_element(&self->debayer, "bayer2rgb", "tcambin-debayer", GST_BIN(self)))
     {
@@ -760,8 +728,8 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         return FALSE;
     }
 
-    if (!gst_caps_is_fixed(self->data->src_caps.get()))
-    {
+    // if (!gst_caps_is_fixed(self->data->src_caps.get()))
+    // {
         std::string sc = gst_helper::to_string(self->data->src_caps);
         GstCaps* tmp = tcam_gst_find_largest_caps(self->data->src_caps.get());
         GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
@@ -776,12 +744,12 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         {
             GST_WARNING("Unable to find largest caps. Continuing with unfixated caps.");
         }
-    }
-    else
-    {
-        GST_INFO("Caps are fixed. Using caps for src: %s",
-                 gst_helper::to_string(self->data->src_caps).c_str());
-    }
+    // }
+    // else
+    // {
+    //     GST_INFO("Caps are fixed. Using caps for src: %s",
+    //              gst_helper::to_string(self->data->src_caps).c_str());
+    // }
 
     // explicitly destroy the pipeline caps
     // when having a start/stop cycle that goes PLAYING-READY-PLAYING, etc
@@ -806,7 +774,8 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
 
     // back to normal linking
 
-    g_object_set(self->pipeline_caps, "caps", self->data->src_caps.get(), NULL);
+    auto filter_caps = gst_caps_copy(self->data->src_caps.get());
+    g_object_set(self->pipeline_caps, "caps", filter_caps, NULL);
 
     gboolean ret = gst_element_link(self->src, self->pipeline_caps);
 
@@ -815,6 +784,17 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         GST_ERROR("Unable to link src and capsfilter.");
         return ret;
     }
+    else
+    {
+        gst_element_set_state(self->pipeline_caps, GST_STATE_READY);
+
+        GstCaps* testcaps;
+        g_object_get(self->pipeline_caps, "caps", &testcaps, NULL);
+    }
+
+
+
+
 
     // helper function to post error messages to GstBus
     auto send_linking_element_msg = [self](const std::string& element_name) {
@@ -875,73 +855,14 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         // goto finished_element_linking;
     }
 
-    if (self->bayer_transform && self->modules.bayertransform)
+    if (!link_elements(self->modules.tcamconvert,
+                       &previous_element,
+                       &self->tcamconvert,
+                       pipeline_description,
+                       "tcamconvert"))
     {
-        if (!link_elements(self->modules.bayertransform,
-                           &previous_element,
-                           &self->bayer_transform,
-                           pipeline_description,
-                           "tcambayertransform"))
-        {
-            send_linking_element_msg("tcambayertransform");
-            return FALSE;
-        }
-    }
-
-    // the following elements only support mono or bayer
-    // security check to prevent faulty pipelines
-
-    if (gst_caps_are_bayer_only(self->data->src_caps.get())
-        || tcam_gst_raw_only_has_mono(self->data->src_caps.get()))
-    {
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Exposure Auto") == nullptr
-            || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "ExposureAuto") == nullptr)
-        {
-            if (!link_elements(self->exposure,
-                               &previous_element,
-                               &self->exposure,
-                               pipeline_description,
-                               "tcamautoexposure"))
-            {
-                send_linking_element_msg("tcamautoexposure");
-                return FALSE;
-            }
-        }
-
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Focus") != nullptr
-            && (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Auto Focus") == nullptr
-                || tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "FocusAuto") == nullptr))
-        {
-            if (!link_elements(self->focus,
-                               &previous_element,
-                               &self->focus,
-                               pipeline_description,
-                               "tcamautofocus"))
-            {
-                send_linking_element_msg("tcamautofocus");
-                return FALSE;
-            }
-        }
-    }
-
-    // always add whitebalance when using bayer
-    // we want it when debayering
-    // users may still want it when asking for bayer
-    if (contains_bayer(self->data->src_caps.get()))
-    {
-        // use this to see if the device already has the feature
-        if (tcam_prop_get_tcam_property_type(TCAM_PROP(self->src), "Whitebalance Auto") == nullptr)
-        {
-            if (!link_elements(self->whitebalance,
-                               &previous_element,
-                               &self->whitebalance,
-                               pipeline_description,
-                               "tcamwhitebalance"))
-            {
-                send_linking_element_msg("tcamwhitebalance");
-                return FALSE;
-            }
-        }
+        send_linking_element_msg("tcamconvert");
+        return FALSE;
     }
 
     if (!link_elements(self->modules.bayer2rgb,
@@ -979,8 +900,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     // finished_element_linking:
 
     GST_INFO_OBJECT(self,
-                    "Using %s as exit element for internal pipeline: %s",
-                    gst_element_get_name(previous_element),
+                    "Internal pipeline of tcambin: %s",
                     pipeline_description.c_str());
     self->data->target_pad = gst_helper::get_static_pad(previous_element, "src");
 
@@ -1041,46 +961,48 @@ static GstCaps* generate_all_caps(GstTcamBin* self)
     // if camera is mono,jpeg,yuv => pass through and be done
     // if camera has bayer => add video/x-raw,format{EVERYTHING} with the correct settings
 
-    GstCaps* to_remove = gst_caps_new_empty();
+    // TODO: rework outgoing available caps
 
-    for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
-    {
-        GstStructure* struc = gst_caps_get_structure(all_caps, i);
+    // GstCaps* to_remove = gst_caps_new_empty();
 
-        if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
-        {
-            const char* string = gst_structure_get_string(struc, "format");
+    // for (guint i = 0; i < gst_caps_get_size(all_caps); ++i)
+    // {
+    //     GstStructure* struc = gst_caps_get_structure(all_caps, i);
 
-            if (tcam_gst_is_bayer8_string(string))
-            {
-                const GValue* width = gst_structure_get_value(struc, "width");
-                const GValue* height = gst_structure_get_value(struc, "height");
-                const GValue* framerate = gst_structure_get_value(struc, "framerate");
+    //     if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
+    //     {
+    //         const char* string = gst_structure_get_string(struc, "format");
 
-                GstStructure* s = gst_structure_new_empty("video/x-raw");
+    //         if (tcam_gst_is_bayer8_string(string))
+    //         {
+    //             const GValue* width = gst_structure_get_value(struc, "width");
+    //             const GValue* height = gst_structure_get_value(struc, "height");
+    //             const GValue* framerate = gst_structure_get_value(struc, "framerate");
 
-                GstCaps* tmp = get_caps_from_element_name("bayer2rgb", "src");
+    //             GstStructure* s = gst_structure_new_empty("video/x-raw");
 
-                GstStructure* tmp_struc = gst_structure_copy(gst_caps_get_structure(tmp, 0));
-                gst_structure_set_value(s, "format", gst_structure_get_value(tmp_struc, "format"));
+    //             GstCaps* tmp = get_caps_from_element_name("bayer2rgb", "src");
 
-                gst_structure_set_value(s, "width", width);
-                gst_structure_set_value(s, "height", height);
-                gst_structure_set_value(s, "framerate", framerate);
+    //             GstStructure* tmp_struc = gst_structure_copy(gst_caps_get_structure(tmp, 0));
+    //             gst_structure_set_value(s, "format", gst_structure_get_value(tmp_struc, "format"));
 
-                gst_caps_append_structure(all_caps, s);
+    //             gst_structure_set_value(s, "width", width);
+    //             gst_structure_set_value(s, "height", height);
+    //             gst_structure_set_value(s, "framerate", framerate);
 
-                gst_caps_unref(tmp);
-            }
-            else if (!self->has_dutils
-                     && (tcam_gst_is_bayer12_string(string)
-                         || tcam_gst_is_bayer12_packed_string(string)
-                         || tcam_gst_is_bayer16_string(string)))
-            {
-                gst_caps_append_structure(to_remove, gst_structure_copy(struc));
-            }
-        }
-    }
+    //             gst_caps_append_structure(all_caps, s);
+
+    //             gst_caps_unref(tmp);
+    //         }
+    //         else if (!self->has_dutils
+    //                  && (tcam_gst_is_bayer12_string(string)
+    //                      || tcam_gst_is_bayer12_packed_string(string)
+    //                      || tcam_gst_is_bayer16_string(string)))
+    //         {
+    //             gst_caps_append_structure(to_remove, gst_structure_copy(struc));
+    //         }
+    //     }
+    // }
 
     gst_caps_unref(incoming_caps);
 
@@ -1090,7 +1012,11 @@ static GstCaps* generate_all_caps(GstTcamBin* self)
     // these are hard to parse and should be avoided.
     // all_caps = gst_caps_subtract(all_caps, to_remove);
 
-    gst_caps_unref(to_remove);
+    // gst_caps_unref(to_remove);
+
+
+    GST_DEBUG("All caps: %s", gst_caps_to_string(all_caps));
+
     return all_caps;
 }
 
@@ -1242,8 +1168,8 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
             gst_helper::gst_unique_ptr<GstCaps> src_caps =
                 gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
-            GST_INFO_OBJECT(
-                self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
+            // GST_INFO_OBJECT(
+            //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
 
             // this flag is to used to make the creation of pipelines easier
             // while tcamby1xtransform can convert between many formats
@@ -1252,6 +1178,14 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             // for now (2021.01.13) ignore it if that is the case
             self->toggles.use_by1xtransform =
                 g_strcmp0("pimipi", self->data->device_type.c_str()) == 0;
+
+            if (self->toggles.use_dutils)
+            {
+                if (!self->has_dutils)
+                {
+                    self->toggles.use_dutils = false;
+                }
+            }
 
             if (self->data->user_caps)
             {
@@ -1303,9 +1237,9 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             if (self->pipeline_caps && self->data->src_caps)
             {
 
-                self->data->src_caps.reset(tcam_gst_find_largest_caps(self->data->src_caps.get()));
-
-                g_object_set(self->pipeline_caps, "caps", self->data->src_caps.get(), NULL);
+                // self->data->src_caps.reset(tcam_gst_find_largest_caps(self->data->src_caps.get()));
+                // GST_ERROR("HERE");
+                // g_object_set(self->pipeline_caps, "caps", self->data->src_caps.get(), NULL);
             }
             set_target_pad(self);
 
@@ -1582,14 +1516,15 @@ static void gst_tcambin_init(GstTcamBin* self)
         self->toggles.use_dutils = FALSE;
     }
 
+    GST_ERROR("Dutils has: %d use: %d", self->has_dutils, self->toggles.use_dutils);
+
     self->src = nullptr;
     self->pipeline_caps = nullptr;
     self->dutils = nullptr;
     self->bayer_transform = nullptr;
-    self->exposure = nullptr;
-    self->whitebalance = nullptr;
     self->debayer = nullptr;
-    self->focus = nullptr;
+    self->tcamconvert = nullptr;
+
     self->jpegdec = nullptr;
     self->convert = nullptr;
 

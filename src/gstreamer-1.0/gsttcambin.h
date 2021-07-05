@@ -53,12 +53,10 @@ extern "C"
         GstElement* pipeline_caps;
         GstElement* dutils;
         GstElement* bayer_transform;
-        GstElement* exposure;
-        GstElement* whitebalance;
         GstElement* debayer;
-        GstElement* focus;
         GstElement* jpegdec;
         GstElement* convert;
+        GstElement* tcamconvert;
 
         gboolean elements_created;
         gboolean elements_linked;
