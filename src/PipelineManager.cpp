@@ -505,6 +505,10 @@ bool PipelineManager::stop_playing()
     set_sink_status(TCAM_PIPELINE_STOPPED);
     property_filter->setStatus(TCAM_PIPELINE_STOPPED);
 
+    if (m_pipeline_thread.joinable())
+    {
+        m_pipeline_thread.join();
+    }
     //destroyPipeline();
 
     return true;
