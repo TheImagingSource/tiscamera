@@ -170,6 +170,10 @@ private:
 
     static void unref(T* ptr) noexcept
     {
+        if (ptr == nullptr)
+        {
+            return;
+        }
         using namespace detail;
         unref_object(ptr);
     }
