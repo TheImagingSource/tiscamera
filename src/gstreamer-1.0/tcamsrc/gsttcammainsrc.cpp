@@ -127,7 +127,6 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
 
     /* first see what is possible on our source pad */
     thiscaps = gst_pad_query_caps(GST_BASE_SRC_PAD(basesrc), NULL);
-    GST_DEBUG("caps of src: %" GST_PTR_FORMAT, static_cast<void*>(thiscaps));
 
     // nothing or anything is allowed, we're done
     if (gst_caps_is_empty(thiscaps) || gst_caps_is_any(thiscaps))
@@ -319,15 +318,9 @@ static GstCaps* gst_tcam_mainsrc_get_caps(GstBaseSrc* src, GstCaps* filter __att
     {
         GST_WARNING("Device not initialized. Must be at least READY state.");
         return nullptr;
-        // if (!gst_tcam_mainsrc_init_camera(self))
-        // {
-        //     return nullptr;
-        // }
     }
 
     caps = gst_caps_copy(self->device->all_caps.get());
-
-    GST_INFO("Available caps = %s", gst_helper::to_string(caps).c_str());
 
     return caps;
 }

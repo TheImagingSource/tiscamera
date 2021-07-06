@@ -160,7 +160,7 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
         arv_camera_get_device(camera), m_actual_name.c_str(), &err);
     if (err)
     {
-        SPDLOG_ERROR("Unable to retrieve aravis int: {}", err->message);
+        SPDLOG_ERROR("Unable to retrieve aravis int - {}: {}", name, err->message);
         g_clear_error(&err);
     }
 
