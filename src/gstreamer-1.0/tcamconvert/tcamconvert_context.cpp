@@ -7,7 +7,8 @@
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
 #include "tcamprop_consumer.h"
 
-#include <chrono>
+#include <spdlog/spdlog.h>
+#include <cassert>
 
 static auto find_wb_func(img::img_type type)
 {
@@ -137,7 +138,7 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.r; },
-        [&] { return flags_func(); },
+        [=] { return flags_func(); },
         balance_white_channel_range);
     prop_list_.register_double(
         balance_white_green,
@@ -146,7 +147,7 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.g; },
-        [&] { return flags_func(); },
+        [=] { return flags_func(); },
         balance_white_channel_range);
     prop_list_.register_double(
         balance_white_blue,
@@ -155,7 +156,7 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.b; },
-        [&] { return flags_func(); },
+        [=] { return flags_func(); },
         balance_white_channel_range);
 }
 
@@ -216,9 +217,10 @@ bool tcamconvert::tcamconvert_context_base::setup(
     const gst_helper::gst_ptr<GstElement>& src_element)
 {
     auto prop_elem = tcamprop_system::to_TcamProp(src_element.get());
+    assert( prop_elem != nullptr );
 
     bool val = tcamprop_system::has_property(
-        prop_elem, "SoftwareBalanceWhiteApply", tcamprop_system::prop_type::boolean);
+        prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
     if (val)
     {
         tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
@@ -249,7 +251,6 @@ static auto make_wb_params(bool apply, auto_alg::wb_channel_factors factors) noe
 void tcamconvert::tcamconvert_context_base::transform(const img::img_descriptor& src,
                                                       const img::img_descriptor& dst)
 {
-
     if (transform_binary_color_func_)
     {
         update_balancewhite_values_from_source();
@@ -285,7 +286,6 @@ auto tcamconvert::tcamconvert_context_base::get_color_mode() const noexcept
     }
     return img::is_mono_fcc(src_type_.fourcc_type()) ? color_mode::mono : color_mode::bayer;
 }
-
 
 
 void tcamconvert::tcamconvert_context_base::update_balancewhite_values_from_source()
