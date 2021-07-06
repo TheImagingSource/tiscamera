@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <cassert>
 
 namespace gst_helper
 {
@@ -69,7 +70,6 @@ inline std::string to_string(const gst_ptr<GstCaps>& caps)
     return to_string(caps.get());
 }
 
-
 inline bool caps_empty_or_any(const gst_ptr<GstCaps>& caps) noexcept
 {
     return gst_caps_is_any(caps.get()) || gst_caps_is_empty(caps.get());
@@ -104,7 +104,7 @@ inline std::vector<std::string> gst_string_list_to_vector(const GValue* gst_list
         }
         else
         {
-            GST_ERROR("List does not only contain strings.");
+            assert( G_VALUE_TYPE( val ) == G_TYPE_STRING );
         }
     }
     return ret;

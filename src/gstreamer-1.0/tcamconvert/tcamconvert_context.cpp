@@ -5,6 +5,7 @@
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
+#include "tcamprop_consumer.h"
 
 #include <chrono>
 
@@ -97,20 +98,20 @@ static auto find_transform_function_wb_type(img::img_type dst_type, img::img_typ
 namespace
 {
 using namespace tcamprop_system;
-static const property_desc balance_white_auto = { "BalanceWhiteAuto",
-                                                  prop_type::menu,
-                                                  "AnalogControl",
-                                                  "BalanceWhiteAuto",
-                                                  { "Off", "Continuous", "Once" } };
-static const property_desc balance_white_red = { "BalanceWhiteRed",
+
+static constexpr const char* BalanceWhiteRed_name = "BalanceWhiteRed";
+static constexpr const char* BalanceWhiteGreen_name = "BalanceWhiteGreen";
+static constexpr const char* BalanceWhiteBlue_name = "BalanceWhiteBlue";
+
+static const property_desc balance_white_red = { "BalanceWhiteRed_Apply",
                                                  prop_type::real,
                                                  "AnalogControl",
                                                  "BalanceWhiteAuto" };
-static const property_desc balance_white_green = { "BalanceWhiteGreen",
+static const property_desc balance_white_green = { "BalanceWhiteGreen_Apply",
                                                    prop_type::real,
                                                    "AnalogControl",
                                                    "BalanceWhiteAuto" };
-static const property_desc balance_white_blue = { "BalanceWhiteBlue",
+static const property_desc balance_white_blue = { "BalanceWhiteBlue_Apply",
                                                   prop_type::real,
                                                   "AnalogControl",
                                                   "BalanceWhiteAuto" };
@@ -120,32 +121,15 @@ static const constexpr prop_range_real balance_white_channel_range =
 
 tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
 {
-    auto flags_func = [this](bool locked) {
+    auto flags_func = [this] {
         if (get_color_mode() == color_mode::bayer)
         {
             auto flags = prop_flags::implemented | prop_flags::available;
-            if (locked)
-            {
-                flags |= prop_flags::locked;
-            }
             return flags;
         }
         return prop_flags::noflags;
     };
 
-    prop_list_.register_menu(
-        balance_white_auto,
-        [this](int val) {
-            wb_auto_ = val == 1;
-            if (val == 2)
-            {
-                wb_once_ = true;
-            }
-            return std::error_code {};
-        },
-        [this] { return wb_auto_ ? 1 : 0; },
-        [&] { return flags_func(false); },
-        wb_auto_ ? 1 : 0);
     prop_list_.register_double(
         balance_white_red,
         [this](double val) {
@@ -153,7 +137,7 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.r; },
-        [&] { return flags_func(wb_auto_); },
+        [&] { return flags_func(); },
         balance_white_channel_range);
     prop_list_.register_double(
         balance_white_green,
@@ -162,7 +146,7 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.g; },
-        [&] { return flags_func(wb_auto_); },
+        [&] { return flags_func(); },
         balance_white_channel_range);
     prop_list_.register_double(
         balance_white_blue,
@@ -171,20 +155,19 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
             return std::error_code {};
         },
         [this] { return wb_channels_.b; },
-        [&] { return flags_func(wb_auto_); },
+        [&] { return flags_func(); },
         balance_white_channel_range);
 }
 
 bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::img_type dst_type)
 {
-    auto clr_mode =
-        img::is_mono_fcc(src_type_.fourcc_type()) ? color_mode::mono : color_mode::bayer;
+    auto clr_mode = img::is_mono_fcc(src_type.fourcc_type()) ? color_mode::mono : color_mode::bayer;
 
     transform_unary_func_ = nullptr;
     transfrom_binary_mono_func_ = nullptr;
     transform_binary_color_func_ = nullptr;
 
-    if (src_type_.fourcc_type() == dst_type_.fourcc_type())
+    if (src_type.fourcc_type() == dst_type.fourcc_type())
     {
         if (clr_mode != color_mode::mono)
         {
@@ -221,7 +204,27 @@ bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::i
     this->src_type_ = src_type;
     this->dst_type_ = dst_type;
 
-    auto_alg::reset_auto_pass_context(*auto_pass_state_);
+    return true;
+}
+
+void tcamconvert::tcamconvert_context_base::clear()
+{
+    src_element_ptr_.reset();
+}
+
+bool tcamconvert::tcamconvert_context_base::setup(
+    const gst_helper::gst_ptr<GstElement>& src_element)
+{
+    auto prop_elem = tcamprop_system::to_TcamProp(src_element.get());
+
+    bool val = tcamprop_system::has_property(
+        prop_elem, "SoftwareBalanceWhiteApply", tcamprop_system::prop_type::boolean);
+    if (val)
+    {
+        tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
+
+        src_element_ptr_ = src_element;
+    }
 
     return true;
 }
@@ -249,7 +252,7 @@ void tcamconvert::tcamconvert_context_base::transform(const img::img_descriptor&
 
     if (transform_binary_color_func_)
     {
-        inspect_image(src);
+        update_balancewhite_values_from_source();
 
         img_filter::filter_params tmp = {
             make_wb_params(apply_wb_, wb_channels_),
@@ -267,49 +270,10 @@ void tcamconvert::tcamconvert_context_base::filter(const img::img_descriptor& sr
 {
     if (transform_unary_func_)
     {
-        inspect_image(src);
+        update_balancewhite_values_from_source();
 
         transform_unary_func_(src, make_wb_params(apply_wb_, wb_channels_));
     }
-}
-
-void tcamconvert::tcamconvert_context_base::inspect_image(const img::img_descriptor& src)
-{
-    auto_alg::auto_pass_params params = {};
-
-    params.frame_number = frame_number_++;
-    params.time_point = std::chrono::duration_cast<std::chrono::microseconds>(
-                            std::chrono::steady_clock::now().time_since_epoch())
-                            .count();
-
-    params.wb.is_software_whitebalance = true;
-    params.wb.auto_enabled = wb_auto_;
-    if (wb_once_)
-    {
-        params.wb.one_push_enabled = true;
-    }
-    params.wb.channels = wb_channels_;
-
-    auto res = auto_alg::auto_pass(*auto_pass_state_, src, params);
-    if (res.wb.wb_changed)
-    {
-        wb_channels_ = res.wb.channels;
-        if (wb_once_)
-        {
-            wb_once_ = res.wb.one_push_still_running;
-        }
-    }
-}
-
-auto tcamconvert::tcamconvert_context_base::get_transform_mode() const noexcept
-    -> tcamconvert::tcamconvert_context_base::transform_mode
-{
-    if (src_type_.empty())
-    {
-        return transform_mode::binary;
-    }
-    return src_type_.fourcc_type() == dst_type_.fourcc_type() ? transform_mode::unary :
-                                                                transform_mode::binary;
 }
 
 auto tcamconvert::tcamconvert_context_base::get_color_mode() const noexcept
@@ -320,4 +284,31 @@ auto tcamconvert::tcamconvert_context_base::get_color_mode() const noexcept
         return color_mode::bayer;
     }
     return img::is_mono_fcc(src_type_.fourcc_type()) ? color_mode::mono : color_mode::bayer;
+}
+
+
+
+void tcamconvert::tcamconvert_context_base::update_balancewhite_values_from_source()
+{
+    if (!src_element_ptr_)
+        return;
+
+    auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
+    assert(prop_elem);
+    if (!prop_elem)
+        return;
+
+
+    auto_alg::wb_channel_factors factors = wb_channels_;
+    auto read_chan = [prop_elem](const char* name, float& val) {
+        if (auto res = tcamprop_system::get_value<double>(prop_elem, name); res)
+        {
+            val = res.value();
+        }
+    };
+    read_chan(BalanceWhiteRed_name, factors.r);
+    read_chan(BalanceWhiteGreen_name, factors.g);
+    read_chan(BalanceWhiteBlue_name, factors.b);
+
+    wb_channels_ = factors;
 }

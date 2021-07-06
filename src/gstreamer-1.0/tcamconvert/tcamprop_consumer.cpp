@@ -37,6 +37,34 @@ bool  internal_get_value( TcamProp* elem, const char* name, gvalue_wrapper& val 
     return tcam_prop_get_tcam_property( elem, name, &val, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr );
 }
 
+
+constexpr auto prop_type_from_string(std::string_view v) noexcept -> std::optional<tcamprop_system::prop_type>
+{
+    using namespace tcamprop_system;
+
+    if (v == "boolean")
+    {
+        return prop_type::boolean;
+    }
+    if (v == "integer")
+    {
+        return prop_type::integer;
+    }
+    if (v == "double")
+    {
+        return prop_type::real;
+    }
+    if (v == "button")
+    {
+        return prop_type::button;
+    }
+    if (v == "enum")
+    {
+        return prop_type::menu;
+    }
+    return {};
+}
+
 }
 
 bool  tcamprop_system::get_value( TcamProp* elem, const char* name, GValue& val )
@@ -78,6 +106,34 @@ std::optional<std::string> tcamprop_system::get_category( TcamProp* elem, const 
     return std::string( str );
 }
 
+auto tcamprop_system::get_prop_type(TcamProp* elem, const char* name) -> std::optional<tcamprop_system::prop_type>
+{
+    gvalue_wrapper type = {};
+    if (!tcam_prop_get_tcam_property(elem,
+                                     name,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
+                                     &type,
+                                     nullptr,
+                                     nullptr,
+                                     nullptr))
+    {
+        return {};
+    }
+    if (G_VALUE_TYPE(&type) != G_TYPE_STRING)
+    {
+        return {};
+    }
+    auto str = g_value_get_string(&type);
+    if( str == nullptr ) {
+        return {};
+    }
+    return prop_type_from_string( str );
+}
+
 static std::vector<std::string>    conv_GSList_string_list( GSList* lst )
 {
     std::vector<std::string> rval;
@@ -109,6 +165,12 @@ bool  tcamprop_system::has_property( TcamProp* elem, const char* name )
     bool res = internal_get_value( elem, name, val );
 
     return res;
+}
+
+bool tcamprop_system::has_property(TcamProp* elem, const char* name, prop_type type)
+{
+    auto type = get_prop_type( elem, name );
+    return !type.has_value() ? false : type.value() == type;
 }
 
 template<>

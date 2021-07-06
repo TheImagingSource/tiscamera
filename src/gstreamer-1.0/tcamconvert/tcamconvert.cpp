@@ -17,7 +17,9 @@
 #include "tcamconvert.h"
 
 #include "../../version.h"
-#include "gst_caps_helper.h"
+#include "../gst_helper/gst_caps_helper.h"
+#include "../gst_helper/gst_element_chain.h"
+#include "../gst_helper/gst_helper.h"
 #include "tcamconvert_context.h"
 #include "tcamprop_impl.h"
 
@@ -28,41 +30,12 @@
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <gst/video/gstvideometa.h>
 #include <map>
+#include <spdlog/spdlog.h>
 #include <vector>
 
 struct GstTCamConvert_context : public tcamconvert::tcamconvert_context_base
 {
 };
-
-namespace gst_helper
-{
-inline std::vector<std::string> gst_string_list_to_vector(const GValue* gst_list)
-{
-    if (!GST_VALUE_HOLDS_LIST(gst_list))
-    {
-        GST_ERROR("Given GValue is not a list.");
-        return {};
-    }
-
-    unsigned int gst_list_size = gst_value_list_get_size(gst_list);
-
-    std::vector<std::string> ret;
-    ret.reserve(gst_list_size);
-    for (unsigned int i = 0; i < gst_list_size; ++i)
-    {
-        const GValue* val = gst_value_list_get_value(gst_list, i);
-        if (G_VALUE_TYPE(val) == G_TYPE_STRING)
-        {
-            ret.push_back(g_value_get_string(val));
-        }
-        else
-        {
-            GST_ERROR("List does not only contain strings.");
-        }
-    }
-    return ret;
-}
-} // namespace gst_helper
 
 enum
 {
@@ -671,11 +644,58 @@ static gboolean gst_tcamconvert_copy_metadata(GstBaseTransform* base,
     return TRUE;
 }
 
+static bool is_compatible_source_element(GstElement* element)
+{
+    if (!TCAM_IS_PROP(element))
+    { // When the element has no tcamprop interface, we can quit here
+        return false;
+    }
+    return true;
+}
+
+static GstStateChangeReturn gst_tcamconvert_change_state(GstElement* element, GstStateChange trans)
+{
+    auto* self = GST_TCAMCONVERT(element);
+
+    GstStateChangeReturn ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
+    switch (trans)
+    {
+        case GST_STATE_CHANGE_NULL_TO_READY:
+        {
+            // if we are connected, we look for our GstTcamSrc element, and only here whine about not finding it
+            auto camera_src =
+                gst_helper::find_upstream_element(GST_ELEMENT(self), &is_compatible_source_element);
+            if (camera_src == nullptr)
+            {
+                GST_INFO_OBJECT(self,
+                                "Unable to find a 'The Imaging Source' device. "
+                                "tcamconvert can only be used in conjunction with such a device.");
+            }
+            else
+            {
+                self->context_->setup(camera_src);
+            }
+            break;
+        }
+        case GST_STATE_CHANGE_READY_TO_NULL:
+            self->context_->clear();
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
 static void gst_tcamconvert_init(GstTCamConvert* self)
 {
     self->context_ = new GstTCamConvert_context;
 
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), FALSE);
+}
+
+static void gst_tcamconvert_dispose(GObject* object)
+{
+    G_OBJECT_CLASS(gst_tcamconvert_parent_class)->dispose(object);
 }
 
 static void gst_tcamconvert_finalize(GObject* object)
@@ -692,6 +712,7 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
 
     gobject_class->set_property = gst_tcamconvert_set_property;
     gobject_class->get_property = gst_tcamconvert_get_property;
+    gobject_class->dispose = gst_tcamconvert_dispose;
     gobject_class->finalize = gst_tcamconvert_finalize;
 
 
@@ -704,7 +725,6 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
 
 
     GstCaps* src_caps = generate_caps_struct(tcamconvert_get_all_output_fccs());
-
 
     gst_element_class_add_pad_template(
         gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps));
@@ -721,11 +741,12 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
     gst_base_transform_class->set_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_set_caps);
     gst_base_transform_class->transform = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform);
     gst_base_transform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_ip);
-    GST_BASE_TRANSFORM_CLASS(klass)->copy_metadata =
-        GST_DEBUG_FUNCPTR(gst_tcamconvert_copy_metadata);
+    gst_base_transform_class->copy_metadata = GST_DEBUG_FUNCPTR(gst_tcamconvert_copy_metadata);
+    gstelement_class->change_state = GST_DEBUG_FUNCPTR(gst_tcamconvert_change_state);
 
-    gst_base_transform_class->passthrough_on_same_caps =
-        TRUE; // Mark this transform element as 'calling tranform_ip when src and sink caps are the same
+    // Mark this transform element as 'calling tranform_ip when src and sink caps are the same
+    gst_base_transform_class->passthrough_on_same_caps = TRUE;
+    //gst_base_transform_class->transform_ip_on_passthrough = TRUE;
 
     GST_DEBUG_CATEGORY_INIT(
         gst_tcamconvert_debug_category, "tcamconvert", 0, "tcamconvert element");

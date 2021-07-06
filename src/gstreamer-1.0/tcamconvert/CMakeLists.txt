@@ -17,9 +17,6 @@ add_library(tcamconvert SHARED
 	tcamconvert.h
 	tcamconvert.cpp
 
-	gst_caps_helper.h
-	gst_caps_helper.cpp
-	
 	tcamprop_impl.h
 	tcamprop_impl.cpp
 	"tcamconvert_context.h"
@@ -45,6 +42,7 @@ target_link_libraries( tcamconvert
 PRIVATE
 	spdlog::spdlog
 	outcome::outcome
+	tcam::gst_helper
 	tcamprop
     tcam
 	${GOBJECT_LIBRARIES}
@@ -66,6 +64,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
 		<string_view>
 		<algorithm>
 		<outcome/result.hpp>
+		<spdlog/spdlog.h>
 	)
 endif()
 
