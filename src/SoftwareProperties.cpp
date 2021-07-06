@@ -38,6 +38,14 @@ static emulated::software_prop_desc prop_list[] = {
 
     { sp::Focus, "Focus", TCAM_PROPERTY_TYPE_INTEGER },
     { sp::FocusAuto, "FocusAuto", { { { 0, "Off" }, { 1, "Once" } } }, 0 },
+    { sp::WB_AUTO,
+      "BalanceWhiteAuto",
+      { { { 0, "Off" }, { 1, "Once" }, { 2, "Continuous" } } },
+      2 },
+    { sp::WB_RED, "BalanceWhiteRed", tcam_value_int { 0, 255, 1, 64, 64 } },
+    { sp::WB_GREEN, "BalanceWhiteGreen", tcam_value_int { 0, 255, 1, 64, 64 } },
+    { sp::WB_BLUE, "BalanceWhiteBlue", tcam_value_int { 0, 255, 1, 64, 64 } },
+    { sp::WB_CLAIM, "ClaimBalanceWhiteSoftware", TCAM_PROPERTY_TYPE_BOOLEAN, },
 };
 
 
@@ -147,10 +155,38 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
             SPDLOG_ERROR("Unable to set focus: {}", set_foc.error().message());
         }
     }
+
+    if (auto_pass_ret.wb.wb_changed)
+    {
+        // SPDLOG_INFO("NEW WB: {} {} {}", auto_pass_ret.wb.channels.r, auto_pass_ret.wb.channels.g, auto_pass_ret.wb.channels.b);
+        m_auto_params.wb.channels.r = auto_pass_ret.wb.channels.r;
+        m_auto_params.wb.channels.g = auto_pass_ret.wb.channels.g;
+        m_auto_params.wb.channels.b = auto_pass_ret.wb.channels.b;
+
+        if (m_dev_wb_r)
+        {
+            auto ret_r = m_dev_wb_r->set_value(auto_pass_ret.wb.channels.r * 64.0f);
+            auto ret_g = m_dev_wb_g->set_value(auto_pass_ret.wb.channels.g * 64.0f);
+            auto ret_b = m_dev_wb_b->set_value(auto_pass_ret.wb.channels.b * 64.0f);
+
+            if (!ret_r)
+            {
+                // SPDLOG_WARN("Unable to set BalanceWhiteComponentRed in device: {}", ret_r.error().message());
+            }
+        }
+        else
+        {
+            // SPDLOG_DEBUG("No dev wb");
+        }
+    }
+    else
+    {
+        // SPDLOG_DEBUG("WB not active");
+    }
 }
 
 
-void tcam::property::SoftwareProperties::generate_public_properties(bool /*has_bayer*/)
+void tcam::property::SoftwareProperties::generate_public_properties(bool has_bayer)
 {
     m_auto_params = {};
 
@@ -184,26 +220,40 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool /*has_b
         generate_focus();
     }
 
-    auto iter_wb = find_property(m_device_properties, "BalanceWhiteAuto");
-
-    if (!iter_wb)
+    if (has_bayer)
     {
-        //generate_whitebalance();
+        auto iter_wb = find_property(m_device_properties, "BalanceWhiteAuto");
+
+        if (!iter_wb)
+        {
+            generate_whitebalance();
+        }
     }
 
+    // as a final step compare generated properties to device properties
+    // pass along everything we do not need to intercept
+    // some mmay not be intercepted but replaced with a different interface
+    // those are typically only identified by name
 
     auto contains = [&](const std::shared_ptr<IPropertyBase>& elem) {
         return std::any_of(
             m_properties.begin(), m_properties.end(), [&](const std::shared_ptr<IPropertyBase>& x) {
-                return x->get_name() == elem->get_name();
+                if (x->get_name() == elem->get_name())
+                {
+                    return true;
+                }
+                return false;
             });
     };
 
+    std::vector<std::string> additional_properties = { "BalanceRatioRaw", "BalanceRatioSelector" };
+
     for (auto& p : m_device_properties)
     {
-        if (!contains(p))
+        if (!contains(p)
+            && std::find(additional_properties.begin(), additional_properties.end(), p->get_name())
+                   == additional_properties.end())
         {
-            //SPDLOG_INFO("Adding {}", p->get_name());
             m_properties.push_back(p);
         }
     }
@@ -248,6 +298,34 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
         case emulated::software_prop::FocusAuto:
         {
             return m_auto_params.focus_onepush_params.is_run_cmd;
+        }
+        case emulated::software_prop::WB_AUTO:
+        {
+            if (m_auto_params.wb.one_push_enabled)
+            {
+                return 1;
+            }
+            if (m_auto_params.wb.auto_enabled)
+            {
+                return 2;
+            }
+            return 0;
+        }
+        case emulated::software_prop::WB_RED:
+        {
+            return m_auto_params.wb.channels.r * 64.0f;
+        }
+        case emulated::software_prop::WB_GREEN:
+        {
+            return m_auto_params.wb.channels.g * 64.0f;
+        }
+        case emulated::software_prop::WB_BLUE:
+        {
+            return m_auto_params.wb.channels.b * 64.0f;
+        }
+        case emulated::software_prop::WB_CLAIM:
+        {
+            return m_wb_is_claimed;
         }
         default:
             return false;
@@ -318,9 +396,57 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
 
             return outcome::success();
         }
+        case emulated::software_prop::WB_AUTO:
+        {
+            if (new_val == 0 || new_val == 2)
+            {
+                m_auto_params.wb.auto_enabled = new_val;
+
+                set_locked(emulated::software_prop::WB_RED, new_val);
+                set_locked(emulated::software_prop::WB_GREEN, new_val);
+                set_locked(emulated::software_prop::WB_BLUE, new_val);
+            }
+            else
+            {
+                m_auto_params.wb.one_push_enabled = true;
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_RED:
+        {
+            m_auto_params.wb.channels.r = new_val / 64.0f;
+            if (m_dev_wb_r)
+            {
+                return m_dev_wb_r->set_value(new_val);
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_GREEN:
+        {
+            m_auto_params.wb.channels.g = new_val / 64.0f;
+            if (m_dev_wb_g)
+            {
+                return m_dev_wb_g->set_value(new_val);
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_BLUE:
+        {
+            m_auto_params.wb.channels.b = new_val / 64.0f;
+            if (m_dev_wb_b)
+            {
+                return m_dev_wb_b->set_value(new_val);
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_CLAIM:
+        {
+            m_wb_is_claimed = new_val;
+            return outcome::success();
+        }
         default:
         {
-            SPDLOG_WARN("Not implemented");
+            SPDLOG_WARN("Not implemented. ID: {} value: {}", prop_id, new_val);
             return tcam::status::NotImplemented;
         }
     }
@@ -582,6 +708,47 @@ void SoftwareProperties::generate_focus()
 }
 
 
+void SoftwareProperties::generate_whitebalance()
+{
+    auto base_r = tcam::property::find_property(m_device_properties, "BalanceWhiteRed");
+    auto base_g = tcam::property::find_property(m_device_properties, "BalanceWhiteGreen");
+    auto base_b = tcam::property::find_property(m_device_properties, "BalanceWhiteBlue");
+    auto base_selector = tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
+    auto base_raw = tcam::property::find_property(m_device_properties, "BalanceRatioRaw");
+
+    enable_property(sp::WB_CLAIM);
+
+    if (base_r && base_g && base_b)
+    {
+        m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_r);
+        m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
+        m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
+
+        enable_property_int(sp::WB_RED, m_dev_wb_r);
+        enable_property_int(sp::WB_GREEN, m_dev_wb_g);
+        enable_property_int(sp::WB_BLUE, m_dev_wb_b);
+
+        m_wb_is_claimed = true;
+    }
+    else
+    {
+        m_auto_params.wb.is_software_whitebalance = true;
+        m_wb_is_claimed = false;
+
+        enable_property(sp::WB_RED);
+        enable_property(sp::WB_GREEN);
+        enable_property(sp::WB_BLUE);
+    }
+    enable_property(sp::WB_AUTO);
+
+    set_locked(sp::WB_RED, true);
+    set_locked(sp::WB_GREEN, true);
+    set_locked(sp::WB_BLUE, true);
+
+    m_auto_params.wb.auto_enabled = true;
+}
+
+
 void SoftwareProperties::set_locked(emulated::software_prop prop_id, bool is_locked)
 {
     auto name = find_property_name(prop_id);
@@ -603,8 +770,6 @@ void SoftwareProperties::set_locked(emulated::software_prop prop_id, bool is_loc
     {
         flags &= PropertyFlags::Locked;
     }
-
-    // SPDLOG_INFO("{} now has flags: {:x}", prop_base->get_name(), flags);
 
     switch (prop_base->get_type())
     {
@@ -654,6 +819,11 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
         {
             m_properties.push_back(
                 std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, m_backend));
+            break;
+        }
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyBoolImpl>(desc, m_backend));
             break;
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:

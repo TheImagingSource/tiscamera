@@ -176,7 +176,6 @@ public:
     virtual outcome::result<void> set_value(bool new_value) final;
 
 private:
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
 
     std::string m_name;
     PropertyFlags m_flags;
@@ -184,6 +183,7 @@ private:
     bool m_default;
 
     software_prop m_id;
+    std::weak_ptr<SoftwarePropertyBackend> m_cam;
 };
 
 

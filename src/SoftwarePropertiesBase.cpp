@@ -44,17 +44,17 @@ const std::string_view find_property_name(sp id)
         case sp::HighlightReduction:
             return "HighlightReduction";
         case sp::WB:
-            return "WB";
+            return "BalanceWhite";
         case sp::WB_AUTO:
-            return "WB_AUTO";
+            return "BalanceWhiteAuto";
         case sp::WB_RED:
-            return "WB_RED";
+            return "BalanceWhiteRed";
         case sp::WB_GREEN:
-            return "WB_GREEN";
+            return "BalanceWhiteGreen";
         case sp::WB_BLUE:
-            return "WB_BLUE";
+            return "BalanceWhiteBlue";
         case sp::WB_ONCE:
-            return "WB_ONCE";
+            return "BalanceWhiteOnce";
         case sp::Denoise:
             return "Denoise";
         case sp::Sharpness:

@@ -207,15 +207,30 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const struct software_prop_de
 
 outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
 {
-    SPDLOG_WARN("Not implemented. {}", m_name);
-    return false;
+    if (auto ptr = m_cam.lock())
+    {
+        auto ret =  ptr->get_int(m_id);
+
+        if (ret)
+        {
+            return ret.value();
+        }
+        return ret.as_failure();
+    }
+
+    SPDLOG_ERROR("Unable to lock property backend. Cannot read value.");
+    return tcam::status::ResourceNotLockable;
 }
 
 outcome::result<void> SoftwarePropertyBoolImpl::set_value(bool new_value)
 {
-    SPDLOG_WARN("Not implemented set_value. {} {}", m_name, new_value);
+    if (auto ptr = m_cam.lock())
+    {
+        return ptr->set_int(m_id, new_value);
+    }
 
-    return tcam::status::NotImplemented;
+    SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+    return tcam::status::ResourceNotLockable;
 }
 
 

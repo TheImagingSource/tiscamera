@@ -38,6 +38,7 @@ enum class software_prop
     WB_GREEN,
     WB_BLUE,
     WB_ONCE,
+    WB_CLAIM,
 
     Denoise,
     Sharpness,

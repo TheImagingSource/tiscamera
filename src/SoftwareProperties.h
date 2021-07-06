@@ -55,6 +55,7 @@ private:
     void generate_gain();
     void generate_iris();
     void generate_focus();
+    void generate_whitebalance();
 
     void set_locked(emulated::software_prop prop_id, bool is_locked);
 
@@ -83,6 +84,41 @@ private:
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_gain = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_iris = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_focus = nullptr;
+
+    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_r = nullptr;
+    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_g = nullptr;
+    std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
+
+    bool m_wb_is_claimed = false;
+
+    enum class wb_type
+    {
+        None,
+        DevChannel,
+        DevSelector,
+        Software
+    };
+
+    enum class wb_channel
+    {
+        Red,
+        Green,
+        Blue,
+    };
+
+    struct wb_setter
+    {
+        wb_type type = wb_type::None;
+
+
+        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_r = nullptr;
+        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_g = nullptr;
+        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
+
+        std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
+        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_ratio = nullptr;
+    };
+    wb_setter m_wb;
 
     std::shared_ptr<emulated::SoftwarePropertyBackend> m_backend = nullptr;
 
