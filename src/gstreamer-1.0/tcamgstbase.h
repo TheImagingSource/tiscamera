@@ -38,6 +38,8 @@ GstElement* tcam_gst_find_camera_src(GstElement* element);
 
 std::string get_plugin_version(const char* plugin_name);
 
+bool is_linked(GstElement*, const std::string&);
+
 /*
   extracts video/x-raw from caps and checks if only mono is present
 */

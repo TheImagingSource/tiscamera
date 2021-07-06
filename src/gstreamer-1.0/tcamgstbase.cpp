@@ -179,6 +179,15 @@ std::string get_plugin_version(const char* plugin_name)
 }
 
 
+
+bool is_linked(GstElement* element, const std::string& pad_name)
+{
+    gst_helper::gst_unique_ptr<GstPad> pad = gst_helper::get_static_pad(element, pad_name);
+
+    return gst_pad_is_linked(pad.get());
+}
+
+
 std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector(GSList* lst)
 {
     if (lst == nullptr)
