@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace tcamprop_system
 {
 enum class prop_type
