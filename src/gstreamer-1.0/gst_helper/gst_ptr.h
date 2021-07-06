@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gst/gst.h>
+#include <utility>
 
 
 namespace gst_helper
@@ -56,7 +57,7 @@ template<class T> class gst_ptr
 public:
     gst_ptr() = default;
 
-    gst_ptr( nullptr_t ) noexcept {}
+    gst_ptr(nullptr_t) noexcept {}
 
     gst_ptr(const gst_ptr& op2) noexcept : ptr_ { ref(op2.ptr_) } {}
     gst_ptr(gst_ptr&& op2) noexcept : ptr_ { std::exchange(op2.ptr_, nullptr) } {}
@@ -109,7 +110,7 @@ public:
         }
         else
         {
-            ref( ptr );
+            ref(ptr);
         }
         return gst_ptr { ptr };
     }
@@ -187,7 +188,7 @@ template<class T> bool operator==(nullptr_t, const gst_ptr<T>& ptr) noexcept
 {
     return ptr.empty();
 }
-template<class T> bool operator==(const gst_ptr<T>& ptr, nullptr_t ) noexcept
+template<class T> bool operator==(const gst_ptr<T>& ptr, nullptr_t) noexcept
 {
     return ptr.empty();
 }
