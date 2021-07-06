@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     struct input_caps_toggles toggles;
     struct input_caps_required_modules expected;
 
-    expected.bayertransform = false;
+    expected.tcamconvert = false;
     expected.bayer2rgb = false;
     expected.videoconvert = false;
     expected.jpegdec = false;
@@ -109,8 +109,6 @@ int main(int argc, char* argv[])
 
     test_succeeded = verify_flag("dutils", modules.dutils, expected.dutils, test_succeeded);
 
-    test_succeeded = verify_flag(
-        "by1xtransform", modules.bayertransform, expected.bayertransform, test_succeeded);
 
     if (test_succeeded)
     {
