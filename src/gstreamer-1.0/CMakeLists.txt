@@ -19,6 +19,7 @@ find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
+add_subdirectory( gst_helper )
 add_subdirectory( tcamconvert )
 
 set(PLUGINS
