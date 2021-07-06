@@ -1,6 +1,6 @@
 
-#include "tcamprop_helper.h"
-#include <tcamprop.h>
+#include "tcamprop_consumer.h"
+#include "../../gobject/tcamprop.h"
 
 namespace
 {
@@ -67,7 +67,7 @@ constexpr auto prop_type_from_string(std::string_view v) noexcept -> std::option
 
 }
 
-bool  tcamprop_system::get_value( TcamProp* elem, const char* name, GValue& val )
+bool  tcamprop_system::get_value( TcamProp* elem, const char* name, _GValue& val )
 {
     if( !tcam_prop_get_tcam_property( elem, name, &val, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr ) )
     {
@@ -146,7 +146,7 @@ static std::vector<std::string>    conv_GSList_string_list( GSList* lst )
     return rval;
 }
 
-TcamProp* tcamprop_system::to_TcamProp(GstElement* elem) noexcept {
+TcamProp* tcamprop_system::to_TcamProp(_GstElement* elem) noexcept {
     return TCAM_PROP( elem );
 }
 
@@ -169,8 +169,8 @@ bool  tcamprop_system::has_property( TcamProp* elem, const char* name )
 
 bool tcamprop_system::has_property(TcamProp* elem, const char* name, prop_type type)
 {
-    auto type = get_prop_type( elem, name );
-    return !type.has_value() ? false : type.value() == type;
+    auto res_type = get_prop_type( elem, name );
+    return !res_type.has_value() ? false : res_type.value() == type;
 }
 
 template<>
@@ -267,7 +267,7 @@ auto  tcamprop_system::get_value<int>( TcamProp* elem, const char* name ) -> std
 
 auto tcamprop_system::get_menu_items( TcamProp* prop, const char* menu_name ) -> std::vector<std::string>
 {
-    GSList* ptr_root = tcam_prop_get_tcam_menu_entries( to_TcamProp( prop ), menu_name );
+    GSList* ptr_root = tcam_prop_get_tcam_menu_entries( prop, menu_name );
 
     auto rval = conv_GSList_string_list( ptr_root );
 

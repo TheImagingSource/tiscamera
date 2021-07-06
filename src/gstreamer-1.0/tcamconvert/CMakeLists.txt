@@ -25,6 +25,9 @@ add_library(tcamconvert SHARED
 	"tcamprop_provider_base.h"
 	"tcamprop_provider_funcbased.h"
 	"tcamprop_provider_funcbased.cpp"
+
+	"tcamprop_consumer.h"
+	"tcamprop_consumer.cpp"
 )
 
 target_include_directories( tcamconvert 
