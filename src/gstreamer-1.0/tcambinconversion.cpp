@@ -75,6 +75,7 @@ static const struct conversion_desc tcambin_conversion [] =
     {CAPS_TYPE::JPEG, CAPS_TYPE::JPEG, {false, false, false, false, false},},
     {CAPS_TYPE::JPEG, CAPS_TYPE::RGB_32, {false, false, false, true, false},},
 
+    {CAPS_TYPE::RGB_24, CAPS_TYPE::RGB_24, {false, false, false, false, false},},
     {CAPS_TYPE::RGB_24, CAPS_TYPE::RGB_32, {false, false, true, false, false},},
     {CAPS_TYPE::YUV, CAPS_TYPE::RGB_32, {false, false, true, false, false},},
 
