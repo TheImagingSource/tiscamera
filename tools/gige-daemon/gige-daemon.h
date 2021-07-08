@@ -21,7 +21,7 @@
 
 #include <sys/msg.h>
 
-static const size_t TCAM_DEVICE_LIST_MAX = 10;
+static const size_t TCAM_DEVICE_LIST_MAX = 50;
 
 struct tcam_gige_device_list
 {
