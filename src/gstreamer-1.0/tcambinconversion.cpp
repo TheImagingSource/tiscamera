@@ -25,8 +25,8 @@ namespace {
 
 struct conversion_desc
 {
-    tcam::gst::CAPS_TYPE caps_type_in;
-    tcam::gst::CAPS_TYPE caps_type_out;
+    CAPS_TYPE caps_type_in;
+    CAPS_TYPE caps_type_out;
     struct input_caps_required_modules modules;
 };
 

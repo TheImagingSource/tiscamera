@@ -65,8 +65,8 @@ extern "C"
 
         gboolean has_dutils;
 
-        struct input_caps_required_modules modules;
-        struct input_caps_toggles toggles;
+        struct tcam::gst::input_caps_required_modules modules;
+        struct tcam::gst::input_caps_toggles toggles;
     };
 
 

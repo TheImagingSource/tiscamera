@@ -75,8 +75,8 @@ TEST_CASE("find_input_caps")
                 expected_output = gst_caps_from_string(entry.result.output_caps.c_str());
             }
 
-            struct input_caps_required_modules modules;
-            struct input_caps_toggles toggles;
+            struct tcam::gst::input_caps_required_modules modules;
+            struct tcam::gst::input_caps_toggles toggles;
 
             GstCaps* result_caps = find_input_caps(src_caps, sink_caps, modules, toggles);
 

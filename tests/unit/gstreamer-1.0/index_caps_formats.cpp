@@ -14,7 +14,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
     {
         GstCaps* in = gst_caps_from_string("video/x-raw,format=GRAY16_LE");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-raw,format=GRAY16_LE" };
 
@@ -26,7 +26,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
         GstCaps* in = gst_caps_from_string("video/x-raw,format=GRAY16_LE; "
                                            "video/x-raw,format=GRAY16_LE");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-raw,format=GRAY16_LE" };
 
@@ -38,7 +38,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
         GstCaps* in = gst_caps_from_string("video/x-raw,format=GRAY16_LE; "
                                            "video/x-bayer,format=rggb");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-bayer,format=rggb",
                                               "video/x-raw,format=GRAY16_LE" };
@@ -53,7 +53,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
                                            "video/x-raw,format=GRAY16_LE; "
                                            "video/x-bayer,format=rggb");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-bayer,format=rggb",
                                               "video/x-raw,format=GRAY16_LE" };
@@ -67,7 +67,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
                                            "video/x-bayer,format=rggb; "
                                            "video/x-bayer,format=rggb16");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-bayer,format=rggb",
                                               "video/x-bayer,format=rggb16",
@@ -85,7 +85,7 @@ TEST_CASE("tcamgstbase.cpp::index_caps_formats")
                                            "video/x-raw,format=GRAY16_LE; "
                                            "video/x-bayer,format=rggb");
 
-        std::vector<std::string> out = index_caps_formats(in);
+        std::vector<std::string> out = tcam::gst::index_caps_formats(in);
 
         std::vector<std::string> expected = { "video/x-bayer,format=rggb",
                                               "video/x-bayer,format=rggb16",

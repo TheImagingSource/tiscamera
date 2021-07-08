@@ -50,8 +50,8 @@ TEST_CASE("tcam_gst_find_camera_src")
     REQUIRE(source1 != nullptr);
     REQUIRE(source2 != nullptr);
 
-    GstElement* res_source1 = tcam_gst_find_camera_src(conv1);
-    GstElement* res_source2 = tcam_gst_find_camera_src(bayer2rgb2);
+    GstElement* res_source1 = tcam::gst::tcam_gst_find_camera_src(conv1);
+    GstElement* res_source2 = tcam::gst::tcam_gst_find_camera_src(bayer2rgb2);
 
     REQUIRE(source1 == res_source1);
     REQUIRE(source2 == res_source2);

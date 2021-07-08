@@ -31,6 +31,36 @@
 
 #include "tcambinconversion.h"
 
+
+
+std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector(GSList* lst)
+{
+    if (lst == nullptr)
+    {
+        return {};
+    }
+
+    std::vector<std::string> rval;
+    GSList* iter = lst;
+    do {
+        char* str = static_cast<char*>(iter->data);
+
+        rval.push_back(str);
+
+        ::g_free(str);
+
+        iter = g_slist_next(iter);
+    } while (iter != nullptr);
+
+    g_slist_free(lst);
+
+    return rval;
+}
+
+
+namespace tcam::gst
+{
+
 std::pair<std::string, std::string> separate_serial_and_type(const std::string& input)
 {
     auto pos = input.find("-");
@@ -185,31 +215,6 @@ bool is_linked(GstElement* element, const std::string& pad_name)
     gst_helper::gst_unique_ptr<GstPad> pad = gst_helper::get_static_pad(element, pad_name);
 
     return gst_pad_is_linked(pad.get());
-}
-
-
-std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector(GSList* lst)
-{
-    if (lst == nullptr)
-    {
-        return {};
-    }
-
-    std::vector<std::string> rval;
-    GSList* iter = lst;
-    do {
-        char* str = static_cast<char*>(iter->data);
-
-        rval.push_back(str);
-
-        ::g_free(str);
-
-        iter = g_slist_next(iter);
-    } while (iter != nullptr);
-
-    g_slist_free(lst);
-
-    return rval;
 }
 
 
@@ -1240,7 +1245,7 @@ GstCaps* find_input_caps(GstCaps* available_caps,
         wanted_caps = gst_caps_copy(available_caps);
     }
 
-    tcam::gst::TcamBinConversion conversion;
+    TcamBinConversion conversion;
 
     GstCaps* actual_input = tcam_gst_find_largest_caps(available_caps);
 
@@ -1255,7 +1260,7 @@ GstCaps* find_input_caps(GstCaps* available_caps,
 
 
 static void fill_structure_fixed_resolution(GstStructure* structure,
-                                            const tcam::VideoFormatDescription& format,
+                                            const VideoFormatDescription& format,
                                             const tcam_resolution_description& res)
 {
     GValue fps_list = G_VALUE_INIT;
@@ -1288,7 +1293,7 @@ static void fill_structure_fixed_resolution(GstStructure* structure,
 
 
 GstCaps* convert_videoformatsdescription_to_caps(
-    const std::vector<tcam::VideoFormatDescription>& descriptions)
+    const std::vector<VideoFormatDescription>& descriptions)
 {
     GstCaps* caps = gst_caps_new_empty();
 
@@ -1322,7 +1327,7 @@ GstCaps* convert_videoformatsdescription_to_caps(
             if (r.type == TCAM_RESOLUTION_TYPE_RANGE)
             {
                 std::vector<struct tcam_image_size> framesizes =
-                    tcam::get_standard_resolutions(r.min_size, r.max_size);
+                    get_standard_resolutions(r.min_size, r.max_size);
 
                 // check if min/max are already in the vector.
                 // some devices return std resolutions as max
@@ -1439,4 +1444,5 @@ GstCaps* convert_videoformatsdescription_to_caps(
     }
 
     return caps;
+}
 }

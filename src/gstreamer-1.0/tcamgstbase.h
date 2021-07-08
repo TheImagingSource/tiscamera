@@ -24,6 +24,20 @@
 #include <string>
 #include <vector>
 
+
+namespace tcam
+{
+class VideoFormatDescription;
+}
+
+namespace tcam_helper
+{
+std::vector<std::string> gst_consume_GSList_to_vector(GSList* lst);
+}
+
+namespace tcam::gst
+{
+
 /**
  * returns true if serial and type have been found
  * returns false if only serial has been found
@@ -188,18 +202,9 @@ GstCaps* find_input_caps(GstCaps* available_caps,
                          struct input_caps_required_modules& modules,
                          struct input_caps_toggles toggles);
 
-namespace tcam
-{
-class VideoFormatDescription;
-}
-
 GstCaps* convert_videoformatsdescription_to_caps(
     const std::vector<tcam::VideoFormatDescription>& descriptions);
 
-namespace tcam_helper
-{
-std::vector<std::string> gst_consume_GSList_to_vector(GSList* lst);
 }
-
 
 #endif /* TCAM_GSTTCAMBASE_H */

@@ -41,7 +41,7 @@ TEST_CASE("find_largest_caps")
         {
         }
 
-        GstCaps* result = tcam_gst_find_largest_caps(in);
+        GstCaps* result = tcam::gst::tcam_gst_find_largest_caps(in);
 
         INFO("caps in:  " << gst_caps_to_string(in) << "\n\n");
         INFO("caps out: " << gst_caps_to_string(result) << "\n\n");

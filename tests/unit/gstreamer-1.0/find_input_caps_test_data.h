@@ -25,7 +25,7 @@
 struct fic_test_result
 {
     std::string output_caps;
-    struct input_caps_required_modules modules;
+    struct tcam::gst::input_caps_required_modules modules;
 };
 
 
@@ -34,7 +34,7 @@ struct fic_test_data_container
     std::string name;
     std::string input_caps;
     std::string sink_caps;
-    struct input_caps_toggles toggles;
+    struct tcam::gst::input_caps_toggles toggles;
     fic_test_result result;
 };
 

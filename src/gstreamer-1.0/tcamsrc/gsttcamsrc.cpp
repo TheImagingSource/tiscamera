@@ -361,7 +361,7 @@ static void apply_element_property(GstTcamSrc* self,
                     std::string s;
                     std::string t;
 
-                    bool sep_ret = separate_serial_and_type(string_value, s, t);
+                    bool sep_ret = tcam::gst::separate_serial_and_type(string_value, s, t);
                     if (sep_ret)
                     {
                         GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
@@ -557,7 +557,7 @@ static gboolean open_source_element(GstTcamSrc* self)
             return FALSE;
         }
 
-        auto vals = separate_serial_and_type((const char*)serials->data);
+        auto vals = tcam::gst::separate_serial_and_type((const char*)serials->data);
 
         TCAM_DEVICE_TYPE type = tcam::tcam_device_from_string(vals.second);
 
@@ -628,7 +628,7 @@ static gboolean open_source_element(GstTcamSrc* self)
                 {
                     std::string serial;
                     std::string type_str;
-                    separate_serial_and_type((const char*)i->data, serial, type_str);
+                    tcam::gst::separate_serial_and_type((const char*)i->data, serial, type_str);
 
                     if (serial == self->device_serial
                         && tcam::tcam_device_from_string(type_str) == self->device_type)

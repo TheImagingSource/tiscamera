@@ -99,12 +99,12 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
         return nullptr;
     }
 
-    std::vector<tcam::VideoFormatDescription> format =
+    std::vector<VideoFormatDescription> format =
         self->device->dev->get_available_video_formats();
 
     GST_DEBUG("Found %d pixel formats", (int)format.size());
 
-    GstCaps* caps = convert_videoformatsdescription_to_caps(format);
+    GstCaps* caps = tcam::gst::convert_videoformatsdescription_to_caps(format);
 
     if (gst_caps_get_size(caps) == 0)
     {

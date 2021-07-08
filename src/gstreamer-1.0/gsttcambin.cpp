@@ -29,6 +29,8 @@
 #include <unistd.h>
 #include <vector>
 
+using namespace tcam::gst;
+
 struct tcambin_data
 {
     std::string device_serial;

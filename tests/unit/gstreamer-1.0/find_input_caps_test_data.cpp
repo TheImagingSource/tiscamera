@@ -25,9 +25,9 @@ std::vector<fic_test_data_container> fic_test_data = {};
 void add_test(const std::string& name,
               const std::string& input_caps,
               const std::string& sink_caps,
-              struct input_caps_toggles toggles,
+              struct tcam::gst::input_caps_toggles toggles,
               const std::string& expected_caps,
-              const input_caps_required_modules& expected_modules)
+              const tcam::gst::input_caps_required_modules& expected_modules)
 {
     struct fic_test_result res = {};
     res.output_caps = expected_caps;
@@ -64,8 +64,8 @@ void init_dutils_test_data()
 
 void init_test_data(bool use_pimipi, bool use_dutlis)
 {
-    struct input_caps_toggles toggles = {};
-    struct input_caps_required_modules modules = {};
+    struct tcam::gst::input_caps_toggles toggles = {};
+    struct tcam::gst::input_caps_required_modules modules = {};
 
     if (use_dutlis)
     {
