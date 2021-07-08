@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "device-lost" notifications could take over 3 minutes for aravis cameras.
   Should now appear within 5 seconds.
 
-## [0.14.0] - 2021.
+## [0.14.0] - 2021.07.05
 
 ### Added
 
