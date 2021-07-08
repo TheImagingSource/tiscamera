@@ -29,12 +29,12 @@
  * Main header
  */
 
+namespace tcam
+{
+
 typedef void (*shared_callback)(std::shared_ptr<tcam::ImageBuffer>, void*);
 typedef void (*sink_callback)(tcam::ImageBuffer*, void*);
 typedef void (*c_callback)(const struct tcam_image_buffer*, void*);
-
-namespace tcam
-{
 
 class ImageSink : public SinkInterface
 {

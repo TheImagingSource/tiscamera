@@ -25,6 +25,10 @@
 #include <cstdint>
 #include <cstring>
 
+
+namespace tcam
+{
+
 /**
 * @name TCAM_PIPELINE_STATUS
 * @brief overview over possible pipeline states
@@ -276,5 +280,6 @@ struct tcam_value_bool
     bool default_value;
 };
 
+}
 
 #endif /* TCAM_BASE_TYPES_H */

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <map>
 
+using namespace tcam;
 using namespace tcam::property;
 
 using sp = tcam::property::emulated::software_prop;

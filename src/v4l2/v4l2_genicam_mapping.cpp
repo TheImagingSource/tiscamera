@@ -16,6 +16,10 @@
 
 #include "v4l2_genicam_mapping.h"
 
+using namespace tcam;
+
+namespace
+{
 //{ , { "", TCAM_PROPERTY_TYPE_UNKNOWN, {}, }, },
 
 static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
@@ -422,6 +426,8 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         tcam::v4l2::MappingType::None,
     },
 };
+
+}
 
 
 const struct tcam::v4l2::v4l2_genicam_mapping* tcam::v4l2::find_mapping(uint32_t v4l2_id)

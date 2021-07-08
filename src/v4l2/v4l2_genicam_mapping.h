@@ -31,7 +31,7 @@ struct v4l2_genicam_mapping
     std::string gen_name; // empty if name can be kept
 
     // type that shall be used, TCAM_PROPERTY_TYPE_UNKNOWN if type can stay
-    TCAM_PROPERTY_TYPE gen_type;
+    tcam::TCAM_PROPERTY_TYPE gen_type;
     MappingType conversion_type; // information concerning additional conversion steps
 };
 
