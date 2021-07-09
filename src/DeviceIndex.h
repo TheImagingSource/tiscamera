@@ -27,10 +27,9 @@
 #include <thread>
 #include <vector>
 
-/**
- * @addtogroup API
- * @{
- */
+#include "compiler_defines.h"
+
+VISIBILITY_DEFAULT
 
 namespace tcam
 {
@@ -110,6 +109,6 @@ private:
 
 } /* namespace tcam */
 
-/** @} */
+VISIBILITY_POP
 
 #endif /* TCAM_CAMERA_INDEX_H */

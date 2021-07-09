@@ -24,6 +24,10 @@
 #include <string>
 #include <vector>
 
+#include "../compiler_defines.h"
+
+VISIBILITY_DEFAULT
+
 namespace tcam
 {
 
@@ -73,5 +77,7 @@ std::vector<description> load_description_file(const std::string& filename,
 } /* namespace uvc */
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H */

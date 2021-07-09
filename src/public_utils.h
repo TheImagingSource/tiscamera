@@ -18,10 +18,13 @@
 #define TCAM_PUBLIC_UTILS_H
 
 #include "base_types.h"
+#include "compiler_defines.h"
 
 #include <cstdint>
 #include <string>
 #include <vector>
+
+VISIBILITY_DEFAULT
 
 namespace tcam
 {
@@ -41,5 +44,7 @@ std::vector<tcam_image_size> get_standard_resolutions(const tcam_image_size& min
                                                       const tcam_image_size& max);
 
 } /* namespace tcam */
+
+VISIBILITY_POP
 
 #endif /* TCAM_PUBLIC_UTILS_H */

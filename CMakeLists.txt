@@ -34,6 +34,7 @@ include("cmake/git-helper.cmake")
 
 set(default_build_type "Release")   # Override the default build type to be 'Release' and not 'RelWithDebInfo'
 include("cmake/StandardProjectSettings.cmake")
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 find_git_settings() # exports GIT_COMMIT_COUNT, GIT_TAG, ...
 

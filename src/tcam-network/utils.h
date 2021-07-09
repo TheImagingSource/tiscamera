@@ -26,6 +26,10 @@
 #include <string>
 #include <vector>
 
+#include "../compiler_defines.h"
+
+VISIBILITY_DEFAULT
+
 // ip address, network byte order
 typedef uint32_t ip4_address_t;
 
@@ -99,5 +103,7 @@ bool verifySettings(const std::string& ip,
 bool isValidMAC(const std::string& mac);
 
 } /* namespace tis */
+
+VISIBILITY_POP
 
 #endif /* _UTILS_H_ */

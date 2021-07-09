@@ -25,6 +25,10 @@
 #include <string>
 #include <vector>
 
+#include "../compiler_defines.h"
+
+VISIBILITY_DEFAULT
+
 namespace tis
 {
 /// @name detectInterfaces
@@ -56,4 +60,7 @@ void sendIpRecovery(const std::string mac,
                     const uint32_t gateway);
 
 } // namespace tis
+
+VISIBILITY_POP
+
 #endif /* _CAMERA_DISCOVERY_H_ */

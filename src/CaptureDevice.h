@@ -28,10 +28,9 @@
 #include <string>
 #include <vector>
 
-/**
- * @addtogroup API
- * @{
- */
+#include "compiler_defines.h"
+
+VISIBILITY_DEFAULT
 
 namespace tcam
 {
@@ -123,6 +122,6 @@ std::shared_ptr<CaptureDevice> open_device(const std::string& serial,
 
 } /* namespace tcam */
 
-/** @} */
+VISIBILITY_POP
 
 #endif /* TCAM_CAPTUREDEVICE_H */

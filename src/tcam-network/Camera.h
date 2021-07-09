@@ -25,6 +25,10 @@
 #include <string>
 #include <vector>
 
+#include "../compiler_defines.h"
+
+VISIBILITY_DEFAULT
+
 namespace tis
 {
 class NetworkInterface;
@@ -253,5 +257,7 @@ private:
 };
 
 } // namespace tis
+
+VISIBILITY_POP
 
 #endif /* _CAMERA_H_ */

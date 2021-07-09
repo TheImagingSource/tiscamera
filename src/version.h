@@ -2,6 +2,10 @@
 #ifndef TCAM_VERSION_H
 #define TCAM_VERSION_H
 
+#include "compiler_defines.h"
+
+VISIBILITY_DEFAULT
+
 // commit hash
 const char* get_commit_id();
 
@@ -32,5 +36,7 @@ const char* get_aravis_version_number();
 const char* get_aravis_version();
 
 const char* get_enabled_modules();
+
+VISIBILITY_POP
 
 #endif /* TCAM_VERSION_H */
