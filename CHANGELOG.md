@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GstTcamDeviceProvider, see documentation for usage.
 - Filter for DFG/USB2pro. Device will no longer appear in device listings.
 - `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
+- tcamconvert gstreamer conversion element
 
 ### Changed
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - installation variables are now all defined in CmakeInstall.cmake
 - usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
 - tcambin property `use-dutils` must now be set during GST_STATE_NULL to take affect.
+- gige-daemon maximum for devices increased to 50.
 
 ### Fixed
 
@@ -33,6 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - caps negotiations for unusual caps like 1920x300
 - "device-lost" notifications could take over 3 minutes for aravis cameras.
   Should now appear within 5 seconds.
+
+### Removed
+
+- tcamautoexposure gstreamer element - functionality now in tcammainsrc
+- tcamwhitebalance gstreamer element - functionality now in tcammainsrc,
+  application in tcamconvert/tcamdutils
+- tcamautofocus gstreamer element - functionality now in tcammainsrc
 
 ## [0.14.0] - 2021.07.05
 
