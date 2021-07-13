@@ -5,10 +5,10 @@
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
-#include "tcamprop_consumer.h"
+#include "../tcamprop_system/tcamprop_consumer.h"
 
-#include <spdlog/spdlog.h>
 #include <cassert>
+#include <spdlog/spdlog.h>
 
 static auto find_wb_func(img::img_type type)
 {
@@ -217,7 +217,7 @@ bool tcamconvert::tcamconvert_context_base::setup(
     const gst_helper::gst_ptr<GstElement>& src_element)
 {
     auto prop_elem = tcamprop_system::to_TcamProp(src_element.get());
-    assert( prop_elem != nullptr );
+    assert(prop_elem != nullptr);
 
     bool val = tcamprop_system::has_property(
         prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
@@ -231,8 +231,7 @@ bool tcamconvert::tcamconvert_context_base::setup(
     return true;
 }
 
-auto tcamconvert::tcamconvert_context_base::get_property_list()
-    -> std::vector<tcamprop_system::property_desc>
+auto tcamconvert::tcamconvert_context_base::get_property_list() -> std::vector<std::string_view>
 {
     return prop_list_.get_property_list();
 }

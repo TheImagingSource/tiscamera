@@ -20,7 +20,12 @@ find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
 add_subdirectory( gst_helper )
+add_subdirectory( tcamprop_system )
 add_subdirectory( tcamconvert )
+
+
+add_library( project-warnings INTERFACE )
+SET_PROJECT_WARNINGS( project-warnings )
 
 set(PLUGINS
   gsttcamsrc

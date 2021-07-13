@@ -21,13 +21,6 @@ add_library(tcamconvert SHARED
 	tcamprop_impl.cpp
 	"tcamconvert_context.h"
 	"tcamconvert_context.cpp"
-
-	"tcamprop_provider_base.h"
-	"tcamprop_provider_funcbased.h"
-	"tcamprop_provider_funcbased.cpp"
-
-	"tcamprop_consumer.h"
-	"tcamprop_consumer.cpp"
 )
 
 target_include_directories( tcamconvert 
@@ -56,6 +49,9 @@ PRIVATE
 
 	dutils::dutils_img_base
 	dutils::dutils_img_filter_optimized
+
+	tcamprop_system::provider
+	tcamprop_system::consumer
 )
 set_property(TARGET tcamconvert PROPERTY CXX_VISIBILITY_PRESET hidden)
 set_property(TARGET tcamconvert PROPERTY VISIBILITY_INLINES_HIDDEN ON)

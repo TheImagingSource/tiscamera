@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../gobject/tcamprop.h"
-#include "tcamprop_provider_base.h"
+#include <tcamprop.h>
+#include "../tcamprop_system/tcamprop_provider_base.h"
 
 
 namespace tcamconvert

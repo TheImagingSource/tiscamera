@@ -2,7 +2,7 @@
 
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/transform_base.h" // img_filter::transform_function_type
 #include "../gst_helper/gst_helper.h"
-#include "tcamprop_provider_funcbased.h"
+#include "../tcamprop_system/tcamprop_provider_funcbased.h"
 
 #include <dutils_img/dutils_img.h>
 #include <dutils_img_pipe/auto_alg_pass.h>
@@ -28,7 +28,7 @@ public:
     void clear();
 
     // Inherited via property_interface
-    virtual std::vector<tcamprop_system::property_desc> get_property_list() final;
+    virtual std::vector<std::string_view> get_property_list() final;
 
     virtual tcamprop_system::property_interface* find_property(std::string_view name) final;
 
