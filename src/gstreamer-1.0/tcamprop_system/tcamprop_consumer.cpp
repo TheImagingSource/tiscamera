@@ -1,6 +1,7 @@
 
 #include "tcamprop_consumer.h"
-#include "../../gobject/tcamprop.h"
+//#include "../../lib/tcamprop/src/tcamprop.h"
+#include <tcamprop.h>
 
 namespace
 {

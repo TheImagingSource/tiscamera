@@ -2,6 +2,8 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
+#include <string_view>
 
 namespace tcamprop_system
 {
@@ -47,6 +49,7 @@ enum class prop_flags : uint32_t
     hide_from_get_property_names = 0x100,
     debug_property = 0x200,
 
+    public_flags = 0xFF,
     def_flags = implemented | available,
 };
 
@@ -102,20 +105,28 @@ struct prop_range_integer
     int64_t max = 0;
     int64_t def = 0;
     int64_t stp = 1;
+
+    constexpr prop_range_real to_real() const noexcept {
+        return prop_range_real{ static_cast<double>(min), static_cast<double>(max), static_cast<double>(def), static_cast<double>(stp) };
+    }
 };
 struct prop_range
 {
-    constexpr prop_range() = default;
-    constexpr prop_range(prop_value min, prop_value max, prop_value def, prop_value stp) noexcept
+    prop_range() = default;
+    prop_range(prop_value min, prop_value max, prop_value def, prop_value stp) noexcept
         : val_min(min), val_max(max), val_def(def), val_stp(stp)
     {
     }
-    constexpr prop_range(prop_range_integer r) noexcept
+    prop_range(prop_range_integer r) noexcept
         : val_min(r.min), val_max(r.max), val_def(r.def), val_stp(r.stp)
     {
     }
-    constexpr prop_range(prop_range_real r) noexcept
+    prop_range(prop_range_real r) noexcept
         : val_min(r.min), val_max(r.max), val_def(r.def), val_stp(r.stp)
+    {
+    }
+    prop_range( std::vector<std::string_view>&& op1, int64_t def_index ) noexcept
+        : val_def( def_index ), menu_entries( std::move( op1 ) )
     {
     }
 
@@ -123,6 +134,8 @@ struct prop_range
     prop_value val_max;
     prop_value val_def;
     prop_value val_stp;
+
+    std::vector<std::string_view>   menu_entries;
 
     constexpr prop_range_real to_real() const noexcept
     {
