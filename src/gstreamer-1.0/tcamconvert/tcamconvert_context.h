@@ -36,7 +36,7 @@ public:
 
     void update_balancewhite_values_from_source();
 
-    void filter( const img::img_descriptor& src );
+    void filter(const img::img_descriptor& src);
 
 private:
     img_filter::transform_function_type transfrom_binary_mono_func_ = nullptr;

@@ -2,8 +2,8 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <string_view>
+#include <vector>
 
 namespace tcamprop_system
 {
@@ -106,8 +106,12 @@ struct prop_range_integer
     int64_t def = 0;
     int64_t stp = 1;
 
-    constexpr prop_range_real to_real() const noexcept {
-        return prop_range_real{ static_cast<double>(min), static_cast<double>(max), static_cast<double>(def), static_cast<double>(stp) };
+    constexpr prop_range_real to_real() const noexcept
+    {
+        return prop_range_real { static_cast<double>(min),
+                                 static_cast<double>(max),
+                                 static_cast<double>(def),
+                                 static_cast<double>(stp) };
     }
 };
 struct prop_range
@@ -125,8 +129,8 @@ struct prop_range
         : val_min(r.min), val_max(r.max), val_def(r.def), val_stp(r.stp)
     {
     }
-    prop_range( std::vector<std::string_view>&& op1, int64_t def_index ) noexcept
-        : val_def( def_index ), menu_entries( std::move( op1 ) )
+    prop_range(std::vector<std::string_view>&& op1, int64_t def_index) noexcept
+        : val_def(def_index), menu_entries(std::move(op1))
     {
     }
 
@@ -135,7 +139,7 @@ struct prop_range
     prop_value val_def;
     prop_value val_stp;
 
-    std::vector<std::string_view>   menu_entries;
+    std::vector<std::string_view> menu_entries;
 
     constexpr prop_range_real to_real() const noexcept
     {

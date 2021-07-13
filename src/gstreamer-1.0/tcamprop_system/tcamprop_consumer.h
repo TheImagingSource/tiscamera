@@ -20,11 +20,11 @@ _TcamProp* to_TcamProp(_GstElement* elem) noexcept;
 std::vector<std::string> get_property_names(_TcamProp* elem);
 
 bool has_property(_TcamProp* elem, const char* name);
-bool has_property( _TcamProp* elem, const char* name, prop_type type );
+bool has_property(_TcamProp* elem, const char* name, prop_type type);
 bool get_value(_TcamProp* elem, const char* name, _GValue& val);
 auto get_flags(_TcamProp* elem, const char* name) -> std::optional<prop_flags>;
 auto get_category(_TcamProp* elem, const char* name) -> std::optional<std::string>;
-auto get_prop_type( _TcamProp* elem, const char* name )->std::optional<prop_type>;
+auto get_prop_type(_TcamProp* elem, const char* name) -> std::optional<prop_type>;
 
 template<typename T> auto get_range(_TcamProp* elem, const char* name) -> std::optional<T> = delete;
 
@@ -32,7 +32,8 @@ template<>
 auto get_range<prop_range_integer>(_TcamProp* elem, const char* name)
     -> std::optional<prop_range_integer>;
 template<>
-auto get_range<prop_range_real>(_TcamProp* elem, const char* name) -> std::optional<prop_range_real>;
+auto get_range<prop_range_real>(_TcamProp* elem, const char* name)
+    -> std::optional<prop_range_real>;
 
 template<typename T> auto get_value(_TcamProp* elem, const char* name) -> std::optional<T> = delete;
 template<> auto get_value<bool>(_TcamProp* elem, const char* name) -> std::optional<bool>;
