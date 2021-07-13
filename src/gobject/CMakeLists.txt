@@ -34,6 +34,7 @@ target_link_libraries(tcamprop
   ${GObject_LIBRARIES}
   ${INTROSPECTION_LIBS})
 
+add_library( tcam::tcamprop ALIAS tcamprop )
 
 # version number for gobject introspection API
 set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
