@@ -77,7 +77,6 @@ enum
     PROP_DEVICE_TYPE,
     PROP_CAM_BUFFERS,
     PROP_NUM_BUFFERS,
-    PROP_DO_TIMESTAMP,
     PROP_DROP_INCOMPLETE_FRAMES,
     PROP_STATE,
 };
@@ -573,34 +572,6 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
 }
 
 
-static void gst_tcam_mainsrc_get_times(GstBaseSrc* basesrc,
-                                       GstBuffer* buffer,
-                                       GstClockTime* start,
-                                       GstClockTime* end)
-{
-    if (gst_base_src_is_live(basesrc))
-    {
-        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
-
-        if (GST_CLOCK_TIME_IS_VALID(timestamp))
-        {
-            GstClockTime duration = GST_BUFFER_DURATION(buffer);
-
-            if (GST_CLOCK_TIME_IS_VALID(duration))
-            {
-                *end = timestamp + duration;
-            }
-            *start = timestamp;
-        }
-    }
-    else
-    {
-        *start = -1;
-        *end = -1;
-    }
-}
-
-
 static void buffer_destroy_callback(gpointer data)
 {
     struct destroy_transfer* trans = (destroy_transfer*)data;
@@ -1002,11 +973,6 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             self->n_buffers = g_value_get_int(value);
             break;
         }
-        case PROP_DO_TIMESTAMP:
-        {
-            gst_base_src_set_do_timestamp(GST_BASE_SRC(object), g_value_get_boolean(value));
-            break;
-        }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
             self->drop_incomplete_frames = g_value_get_boolean(value);
@@ -1063,11 +1029,6 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
         case PROP_NUM_BUFFERS:
         {
             g_value_set_int(value, self->n_buffers);
-            break;
-        }
-        case PROP_DO_TIMESTAMP:
-        {
-            g_value_set_boolean(value, gst_base_src_get_do_timestamp(GST_BASE_SRC(object)));
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
@@ -1161,15 +1122,6 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject_class,
-        PROP_DO_TIMESTAMP,
-        g_param_spec_boolean("do-timestamp",
-                             "Do timestamp",
-                             "Apply current stream time to buffers",
-                             true,
-                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS
-                                                      | G_PARAM_CONSTRUCT)));
-    g_object_class_install_property(
-        gobject_class,
         PROP_DROP_INCOMPLETE_FRAMES,
         g_param_spec_boolean("drop-incomplete-buffer",
                              "Drop incomplete buffers",
@@ -1208,7 +1160,6 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
     gstbasesrc_class->stop = gst_tcam_mainsrc_stop;
     gstbasesrc_class->unlock = gst_tcam_mainsrc_unlock;
     gstbasesrc_class->negotiate = gst_tcam_mainsrc_negotiate;
-    gstbasesrc_class->get_times = gst_tcam_mainsrc_get_times;
     gstbasesrc_class->query = gst_tcam_mainsrc_query;
 
     gstpushsrc_class->create = gst_tcam_mainsrc_create;
