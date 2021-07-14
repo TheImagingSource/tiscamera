@@ -465,54 +465,6 @@ static void gst_tcam_mainsrc_close_camera(GstTcamMainSrc* self)
 }
 
 
-static gboolean gst_tcam_mainsrc_start(GstBaseSrc* src)
-{
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
-
-    self->is_running = true;
-
-    if (self->device->dev == nullptr)
-    {
-        if (!gst_tcam_mainsrc_init_camera(self))
-        {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
-}
-
-
-static gboolean gst_tcam_mainsrc_stop(GstBaseSrc* src)
-{
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(src);
-
-    std::unique_lock<std::mutex> lck(self->device->mtx);
-    self->is_running = false;
-
-    self->device->cv.notify_all();
-
-    if (!self->device->dev)
-    {
-        return FALSE;
-    }
-
-    // no lock_guard since new_eos will call change_state which will call stop
-    // in that case we _may_ still hold the lock, which is unwanted.
-
-    // not locking here may cause segfaults
-    // when EOS is fired
-    self->device->stop_and_clear();
-    lck.unlock();
-
-    gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
-
-    GST_DEBUG("Stopped acquisition");
-
-    return TRUE;
-}
-
-
 static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
                                                           GstStateChange change)
 {
@@ -1156,8 +1108,6 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
     gstbasesrc_class->get_caps = gst_tcam_mainsrc_get_caps;
     gstbasesrc_class->set_caps = gst_tcam_mainsrc_set_caps;
     gstbasesrc_class->fixate = gst_tcam_mainsrc_fixate_caps;
-    gstbasesrc_class->start = gst_tcam_mainsrc_start;
-    gstbasesrc_class->stop = gst_tcam_mainsrc_stop;
     gstbasesrc_class->unlock = gst_tcam_mainsrc_unlock;
     gstbasesrc_class->negotiate = gst_tcam_mainsrc_negotiate;
     gstbasesrc_class->query = gst_tcam_mainsrc_query;
