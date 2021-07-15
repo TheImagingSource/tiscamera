@@ -87,6 +87,8 @@ private:
     int64_t m_default;
 
     int m_v4l2_id;
+
+    tcam::v4l2::converter_scale m_converter;
 };
 
 

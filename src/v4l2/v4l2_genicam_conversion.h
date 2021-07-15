@@ -22,6 +22,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace tcam::v4l2
 {
@@ -44,6 +45,12 @@ public:
     virtual double from_device(double) = 0;
 };
 
+struct converter_scale
+{
+    std::function<double(double) > to_device;
+    std::function<double(double) > from_device;
+};
+
 
 enum class MappingType
 {
@@ -56,7 +63,7 @@ enum class MappingType
 
 std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id);
 
-std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id);
+converter_scale find_scale(uint32_t v4l2_id);
 
 outcome::result<std::map<int, std::string>> find_menu_entries(uint32_t v4l2_id);
 

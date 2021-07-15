@@ -224,19 +224,19 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e921,
         "BalanceWhiteRed",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0199e922,
         "BalanceWhiteGreen",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0199e923,
         "BalanceWhiteBlue",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0199e927,

@@ -36,6 +36,27 @@ private:
     double m_conversion_factor = 100;
 };
 
+
+// this function and it sibling exist for
+// for the dfk 72. It's color channels have a range from 0-63
+double wb_channel_from_std_to_dev(double value)
+{
+    const int std_max = 255;
+    const int dev_max = 63;
+
+    return value * dev_max / std_max;
+}
+
+double wb_channel_from_dev_to_std(double value)
+{
+    const int std_max = 255;
+    const int dev_max = 63;
+
+    return value * std_max / dev_max;
+}
+
+
+
 } // namespace
 
 
@@ -57,14 +78,21 @@ std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id)
     }
 }
 
-
-std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id)
+converter_scale find_scale(uint32_t v4l2_id)
+// std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id)
 {
     switch (v4l2_id)
     {
+        // BalanceWhite{Red,Green,Blue}
+        case 0x0199e921:
+        case 0x0199e922:
+        case 0x0199e923:
+        {
+            return {*wb_channel_from_std_to_dev, *wb_channel_from_dev_to_std};
+        }
         default:
         {
-            return nullptr;
+            return {nullptr, nullptr};
         }
     }
 }

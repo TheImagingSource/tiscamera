@@ -30,27 +30,38 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
                                                  const tcam::v4l2::v4l2_genicam_mapping* mapping)
 {
-    m_min = queryctrl->minimum;
-    m_max = queryctrl->maximum;
-    m_step = queryctrl->step;
-
-    if (m_step == 0)
-    {
-        m_step = 1;
-    }
-
-    m_default = ctrl->value;
-
+    m_v4l2_id = queryctrl->id;
     m_name = (char*)queryctrl->name;
+
+    m_converter = {[](double val){return val;}, [](double val){return val;}};
     if (mapping)
     {
         if (!mapping->gen_name.empty())
         {
             m_name = mapping->gen_name;
         }
+        if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
+        {
+            auto tmp = tcam::v4l2::find_scale(queryctrl->id);
+
+            if (tmp.from_device && tmp.to_device)
+            {
+                m_converter = tmp;
+            }
+        }
     }
 
-    m_v4l2_id = queryctrl->id;
+    m_min = m_converter.from_device(queryctrl->minimum);
+    m_max = m_converter.from_device(queryctrl->maximum);
+    m_step = m_converter.from_device(queryctrl->step);
+
+    if (m_step == 0)
+    {
+        m_step = 1;
+    }
+
+    m_default = m_converter.from_device(ctrl->value);
+
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
@@ -60,7 +71,15 @@ outcome::result<int64_t> V4L2PropertyIntegerImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->read_control(m_v4l2_id);
+        auto ret = ptr->read_control(m_v4l2_id);
+        if (ret)
+        {
+            return m_converter.from_device(ret.value());
+        }
+        else
+        {
+            return ret.as_failure();
+        }
     }
     else
     {
@@ -76,7 +95,8 @@ outcome::result<void> V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
+        auto tmp = m_converter.to_device(new_value);
+        OUTCOME_TRY(ptr->write_control(m_v4l2_id, tmp));
     }
     else
     {
