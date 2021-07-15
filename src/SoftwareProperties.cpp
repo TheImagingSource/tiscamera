@@ -159,25 +159,20 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 
     if (auto_pass_ret.wb.wb_changed)
     {
-        // SPDLOG_INFO("NEW WB: {} {} {}", auto_pass_ret.wb.channels.r, auto_pass_ret.wb.channels.g, auto_pass_ret.wb.channels.b);
         m_auto_params.wb.channels.r = auto_pass_ret.wb.channels.r;
         m_auto_params.wb.channels.g = auto_pass_ret.wb.channels.g;
         m_auto_params.wb.channels.b = auto_pass_ret.wb.channels.b;
 
-        if (m_dev_wb_r)
-        {
-            auto ret_r = m_dev_wb_r->set_value(auto_pass_ret.wb.channels.r * 64.0f);
-            auto ret_g = m_dev_wb_g->set_value(auto_pass_ret.wb.channels.g * 64.0f);
-            auto ret_b = m_dev_wb_b->set_value(auto_pass_ret.wb.channels.b * 64.0f);
+        // SPDLOG_DEBUG("WB r: {}", auto_pass_ret.wb.channels.r * 64.0f);
+        // SPDLOG_DEBUG("WB g: {}", auto_pass_ret.wb.channels.g * 64.0f);
+        // SPDLOG_DEBUG("WB b: {}", auto_pass_ret.wb.channels.b * 64.0f);
+        // SPDLOG_DEBUG("");
 
-            if (!ret_r)
-            {
-                // SPDLOG_WARN("Unable to set BalanceWhiteComponentRed in device: {}", ret_r.error().message());
-            }
-        }
-        else
+        if (m_wb.is_dev_wb())
         {
-            // SPDLOG_DEBUG("No dev wb");
+            set_device_wb(emulated::software_prop::WB_RED, auto_pass_ret.wb.channels.r * 64.0f);
+            set_device_wb(emulated::software_prop::WB_GREEN, auto_pass_ret.wb.channels.g * 64.0f);
+            set_device_wb(emulated::software_prop::WB_BLUE, auto_pass_ret.wb.channels.b * 64.0f);
         }
     }
     else
@@ -416,27 +411,27 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         case emulated::software_prop::WB_RED:
         {
             m_auto_params.wb.channels.r = new_val / 64.0f;
-            if (m_dev_wb_r)
+            if (m_wb.is_dev_wb())
             {
-                return m_dev_wb_r->set_value(new_val);
+                return set_device_wb(prop_id, new_val);
             }
             return outcome::success();
         }
         case emulated::software_prop::WB_GREEN:
         {
             m_auto_params.wb.channels.g = new_val / 64.0f;
-            if (m_dev_wb_g)
+            if (m_wb.is_dev_wb())
             {
-                return m_dev_wb_g->set_value(new_val);
+                return set_device_wb(prop_id, new_val);
             }
             return outcome::success();
         }
         case emulated::software_prop::WB_BLUE:
         {
             m_auto_params.wb.channels.b = new_val / 64.0f;
-            if (m_dev_wb_b)
+            if (m_wb.is_dev_wb())
             {
-                return m_dev_wb_b->set_value(new_val);
+                return set_device_wb(prop_id, new_val);
             }
             return outcome::success();
         }
@@ -719,17 +714,35 @@ void SoftwareProperties::generate_whitebalance()
 
     enable_property(sp::WB_CLAIM);
 
+    m_wb = {};
+
     if (base_r && base_g && base_b)
     {
-        m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_r);
-        m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
-        m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
+        m_wb.type = wb_type::DevChannel;
 
-        enable_property_int(sp::WB_RED, m_dev_wb_r);
-        enable_property_int(sp::WB_GREEN, m_dev_wb_g);
-        enable_property_int(sp::WB_BLUE, m_dev_wb_b);
+        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_r);
+        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
+        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
+
+        enable_property_int(sp::WB_RED, m_wb.m_dev_wb_r);
+        enable_property_int(sp::WB_GREEN, m_wb.m_dev_wb_g);
+        enable_property_int(sp::WB_BLUE, m_wb.m_dev_wb_b);
 
         m_wb_is_claimed = true;
+    }
+    else if (base_raw && base_selector)
+    {
+        m_auto_params.wb.is_software_whitebalance = false;
+        m_wb_is_claimed = true;
+
+        m_wb.m_dev_wb_ratio = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_raw);
+        m_wb.m_dev_wb_selector = std::dynamic_pointer_cast<tcam::property::IPropertyEnum>(base_selector);
+
+        m_wb.type = wb_type::DevSelector;
+
+        enable_property(sp::WB_RED);
+        enable_property(sp::WB_GREEN);
+        enable_property(sp::WB_BLUE);
     }
     else
     {
@@ -747,6 +760,66 @@ void SoftwareProperties::generate_whitebalance()
     set_locked(sp::WB_BLUE, true);
 
     m_auto_params.wb.auto_enabled = true;
+}
+
+
+outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop prop_id, unsigned int new_value)
+{
+    if (prop_id != emulated::software_prop::WB_RED
+        && prop_id != emulated::software_prop::WB_GREEN
+        && prop_id != emulated::software_prop::WB_BLUE)
+    {
+        SPDLOG_ERROR("Not a whitebalance property");
+        return tcam::status::NotSupported;
+    }
+
+    if (m_wb.type == wb_type::DevChannel)
+    {
+        if (prop_id == emulated::software_prop::WB_RED)
+        {
+            return m_wb.m_dev_wb_r->set_value(new_value);
+        }
+        else if (prop_id == emulated::software_prop::WB_GREEN)
+        {
+            return m_wb.m_dev_wb_g->set_value(new_value);
+        }
+        else if (prop_id == emulated::software_prop::WB_BLUE)
+        {
+            return m_wb.m_dev_wb_b->set_value(new_value);
+        }
+    }
+    else if (m_wb.type == wb_type::DevSelector)
+    {
+        if (prop_id == emulated::software_prop::WB_RED)
+        {
+            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            m_wb.m_dev_wb_selector->set_value_str("Red");
+            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            m_wb.m_dev_wb_selector->set_value_str(tmp);
+            return ret;
+        }
+        else if (prop_id == emulated::software_prop::WB_GREEN)
+        {
+            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            m_wb.m_dev_wb_selector->set_value_str("Green");
+            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            m_wb.m_dev_wb_selector->set_value_str(tmp);
+            return ret;
+        }
+        else if (prop_id == emulated::software_prop::WB_BLUE)
+        {
+            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            m_wb.m_dev_wb_selector->set_value_str("Blue");
+            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            m_wb.m_dev_wb_selector->set_value_str(tmp);
+            return ret;
+        }
+    }
+    else
+    {
+        SPDLOG_ERROR("Device has no properties for whitebalance. Only software whitebalance is possible!");
+    }
+    return outcome::success();
 }
 
 

@@ -57,6 +57,10 @@ private:
     void generate_focus();
     void generate_whitebalance();
 
+    outcome::result<void> set_device_wb(emulated::software_prop prop_id,
+                                        unsigned int new_value);
+
+
     void set_locked(emulated::software_prop prop_id, bool is_locked);
 
     void enable_property(emulated::software_prop prop_name);
@@ -117,6 +121,17 @@ private:
 
         std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
         std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_ratio = nullptr;
+
+        bool is_dev_wb () const
+        {
+            if (type == wb_type::DevSelector
+                || type == wb_type::DevChannel)
+            {
+                return true;
+            }
+            return false;
+        }
+
     };
     wb_setter m_wb;
 
