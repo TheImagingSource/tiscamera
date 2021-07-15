@@ -1,29 +1,15 @@
 
 #pragma once
 
-#include "tcamprop_system_base.h"
-
-#include <array>
 #include <outcome/result.hpp>
 #include <string_view>
 #include <vector>
+#include <array>
+
+#include "tcamprop_system_base.h"
 
 namespace tcamprop_system
 {
-struct property_desc
-{
-    std::string_view prop_name;
-
-    prop_type type;
-
-    std::string_view prop_category;
-    std::string_view prop_group;
-
-    std::array<std::string_view, 4> static_menu_entries = {};
-
-    prop_flags type_flags = prop_flags::def_flags;
-};
-
 struct property_info
 {
     std::string_view prop_name;
@@ -54,6 +40,6 @@ public:
     virtual ~property_list_interface() = default;
 
     virtual auto get_property_list() -> std::vector<std::string_view> = 0;
-    virtual auto find_property(std::string_view name) -> tcamprop_system::property_interface* = 0;
+    virtual auto find_property(std::string_view name) ->tcamprop_system::property_interface* = 0;
 };
-} // namespace tcamprop_system
+} // namespace prop_system

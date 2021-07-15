@@ -20,31 +20,26 @@ namespace tcamprop_system
 struct property_list_funcbased_property_base : public property_interface
 {
 private:
-    std::string prop_name_;
-    std::string prop_category_;
-    std::string prop_group_;
+    std::string     prop_name_;
+    std::string     prop_category_;
+    std::string     prop_group_;
 
-    prop_type prop_type_ = {};
+    prop_type       prop_type_ = {};
 
-    get_flags_func get_flags_func_;
-    prop_flags static_type_flags_ = prop_flags::noflags;
+    get_flags_func  get_flags_func_;
+    prop_flags      static_type_flags_ = prop_flags::noflags;
 
     virtual outcome::result<prop_value> get() = 0;
     virtual std::error_code set(prop_value val) = 0;
-
 public:
-    property_list_funcbased_property_base(const property_desc& d,
-                                          get_flags_func flags_func) noexcept
-        : prop_name_ { d.prop_name }, prop_category_ { d.prop_category },
-          prop_group_ { d.prop_group }, prop_type_ { d.type },
-          get_flags_func_(flags_func), static_type_flags_ { d.type_flags }
+    property_list_funcbased_property_base( const property_info& nfo,
+                                           get_flags_func&& flags_func ) noexcept
+        : prop_name_{ nfo.prop_name }, prop_category_{ nfo.prop_category }, prop_group_{ nfo.prop_group }, prop_type_{ nfo.type }, get_flags_func_( std::move( flags_func ) )
     {
     }
-    property_list_funcbased_property_base(const property_info& nfo,
-                                          get_flags_func&& flags_func) noexcept
-        : prop_name_ { nfo.prop_name }, prop_category_ { nfo.prop_category },
-          prop_group_ { nfo.prop_group }, prop_type_ { nfo.type },
-          get_flags_func_(std::move(flags_func))
+    property_list_funcbased_property_base( const property_info& nfo,
+                                           prop_flags flags ) noexcept
+        : prop_name_{ nfo.prop_name }, prop_category_{ nfo.prop_category }, prop_group_{ nfo.prop_group }, prop_type_{ nfo.type }, static_type_flags_{ flags }
     {
     }
 
@@ -56,7 +51,7 @@ public:
     }
     outcome::result<prop_range> get_property_range() override
     {
-        return std::make_error_code(std::errc::invalid_argument);
+        return std::make_error_code( std::errc::invalid_argument );
     }
 
     outcome::result<prop_flags> get_property_flags() final
@@ -91,31 +86,28 @@ namespace
 struct property_real : property_list_funcbased_property_base
 {
 private:
-    prop_range_real range_;
+    prop_range_real      range_;
 
     set_value_func<double> set_value;
     get_value_func<double> get_value;
-
 public:
-    property_real(const property_desc& d,
-                  set_value_func<double> s,
-                  get_value_func<double> g,
-                  prop_range_real range,
-                  get_flags_func flags_func)
-        : property_list_funcbased_property_base { d, flags_func }, range_ { range },
-          set_value { s }, get_value { g }
+    property_real( const property_info& nfo,
+                   prop_range_real range,
+                   set_value_func<double>&& s,
+                   get_value_func<double>&& g,
+                   get_flags_func&& flags_func )
+        : property_list_funcbased_property_base{ nfo, std::move( flags_func ) }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
-        assert(d.type == prop_type::real);
+        assert( nfo.type == prop_type::real );
     }
-    property_real(const property_info& nfo,
-                  prop_range_real range,
-                  set_value_func<double>&& s,
-                  get_value_func<double>&& g,
-                  get_flags_func&& flags_func)
-        : property_list_funcbased_property_base { nfo, std::move(flags_func) }, range_ { range },
-          set_value { std::move(s) }, get_value { std::move(g) }
+    property_real( const property_info& nfo,
+                   prop_range_real range,
+                   set_value_func<double>&& s,
+                   get_value_func<double>&& g,
+                   prop_flags flags_func )
+        : property_list_funcbased_property_base{ nfo, std::move( flags_func ) }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
-        assert(nfo.type == prop_type::real);
+        assert( nfo.type == prop_type::real );
     }
 
     outcome::result<prop_range> get_property_range() final
@@ -140,30 +132,28 @@ public:
 
 struct property_integer : property_list_funcbased_property_base
 {
-    prop_range_integer range_;
+    prop_range_integer      range_;
 
     set_value_func<int> set_value;
     get_value_func<int> get_value;
 
-    property_integer(const property_desc& d,
-                     set_value_func<int> s,
-                     get_value_func<int> g,
-                     prop_range_integer range,
-                     get_flags_func flags_func)
-        : property_list_funcbased_property_base { d, flags_func }, range_ { range },
-          set_value { s }, get_value { g }
+    property_integer( const property_info& d,
+                      prop_range_integer range,
+                      set_value_func<int>&& s,
+                      get_value_func<int>&& g,
+                      get_flags_func&& flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
-        assert(d.type == prop_type::integer);
+        assert( d.type == prop_type::integer );
     }
-    property_integer(const property_info& d,
-                     prop_range_integer range,
-                     set_value_func<int>&& s,
-                     get_value_func<int>&& g,
-                     get_flags_func&& flags_func)
-        : property_list_funcbased_property_base { d, std::move(flags_func) }, range_ { range },
-          set_value { std::move(s) }, get_value { std::move(g) }
+    property_integer( const property_info& d,
+                      prop_range_integer range,
+                      set_value_func<int>&& s,
+                      get_value_func<int>&& g,
+                      prop_flags flags )
+        : property_list_funcbased_property_base{ d, flags }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
-        assert(d.type == prop_type::integer);
+        assert( d.type == prop_type::integer );
     }
 
     outcome::result<prop_range> get_property_range() final
@@ -192,19 +182,29 @@ struct property_boolean : property_list_funcbased_property_base
 
     bool default_value_ = false;
 
-    property_boolean(const property_desc& d,
-                     set_value_func<bool> s,
-                     get_value_func<bool> g,
-                     bool def,
-                     get_flags_func flags_func)
-        : property_list_funcbased_property_base { d, flags_func }, set_value { s }, get_value { g },
-          default_value_(def)
+    property_boolean( const property_info& d,
+                      bool def,
+                      set_value_func<bool>&& s,
+                      get_value_func<bool>&& g,
+                      get_flags_func&& flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }, get_value{ std::move( g ) }, default_value_( def )
     {
-        assert(d.type == prop_type::boolean);
+        assert( d.type == prop_type::boolean );
+    }
+    property_boolean( const property_info& d,
+                      bool def,
+                      set_value_func<bool>&& s,
+                      get_value_func<bool>&& g,
+                      prop_flags flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }, get_value{ std::move( g ) }, default_value_( def )
+    {
+        assert( d.type == prop_type::boolean );
     }
     outcome::result<prop_range> get_property_range() final
     {
-        return prop_range::make_boolean(default_value_);
+        return prop_range::make_boolean( default_value_ );
     }
     outcome::result<prop_value> get() final
     {
@@ -226,55 +226,42 @@ struct property_menu : property_list_funcbased_property_base
     set_value_func<int> set_value;
     get_value_func<int> get_value;
 
-    std::vector<std::string> menu_entries_;
+    std::vector<std::string>        menu_entries_;
 
     int default_entry_index_ = 0;
 
-    property_menu(const property_desc& d,
-                  set_value_func<int> s,
-                  get_value_func<int> g,
-                  int def,
-                  get_flags_func flags_func,
-                  const std::vector<std::string>& menu_entries)
-        : property_list_funcbased_property_base { d, flags_func }, set_value { s }, get_value { g },
-          menu_entries_ { menu_entries }, default_entry_index_(def)
+    static auto to_string_vec( const std::vector<std::string_view>& menu_entries )
     {
-        if (menu_entries_.empty())
-        {
-            for (auto&& e : d.static_menu_entries)
-            {
-                if (e.empty())
-                {
-                    continue;
-                }
-                menu_entries_.push_back(std::string(e));
-            }
-        }
+        return std::vector<std::string>{ menu_entries.begin(), menu_entries.end() };
     }
 
-    static auto to_string_vec(const std::vector<std::string_view>& menu_entries)
-    {
-        return std::vector<std::string> { menu_entries.begin(), menu_entries.end() };
-    }
-
-    property_menu(const property_info& d,
-                  const std::vector<std::string_view>& menu_entries,
-                  int def,
-                  set_value_func<int>&& s,
-                  get_value_func<int>&& g,
-                  get_flags_func&& flags_func)
-        : property_list_funcbased_property_base { d, std::move(flags_func) },
-          set_value { std::move(s) }, get_value { std::move(g) }, menu_entries_ { to_string_vec(
-                                                                      menu_entries) },
-          default_entry_index_(def)
+    property_menu( const property_info& d,
+                   const std::vector<std::string_view>& menu_entries,
+                   int def,
+                   set_value_func<int>&& s,
+                   get_value_func<int>&& g,
+                   get_flags_func&& flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }, get_value{ std::move( g ) }, menu_entries_{ to_string_vec( menu_entries ) }, default_entry_index_( def )
     {
     }
-
+    property_menu( const property_info& d,
+                   const std::vector<std::string_view>& menu_entries,
+                   int def,
+                   set_value_func<int>&& s,
+                   get_value_func<int>&& g,
+                   prop_flags flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }, get_value{ std::move( g ) }, menu_entries_{ to_string_vec( menu_entries ) }, default_entry_index_( def )
+    {
+    }
 
     outcome::result<prop_range> get_property_range() final
     {
         prop_range tmp;
-        for (auto&& e : menu_entries_) { tmp.menu_entries.push_back(e); }
+        for( auto&& e : menu_entries_ ) {
+            tmp.menu_entries.push_back( e );
+        }
         tmp.val_def.integer = default_entry_index_;
         return tmp;
     }
@@ -299,8 +286,14 @@ struct property_button : property_list_funcbased_property_base
 {
     set_func_button set_value;
 
-    property_button(const property_desc& d, set_func_button s, get_flags_func flags_func)
-        : property_list_funcbased_property_base { d, flags_func }, set_value { s }
+    property_button( const property_info& d, set_func_button&& s, get_flags_func&& flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }
+    {
+    }
+    property_button( const property_info& d, set_func_button&& s, prop_flags flags_func )
+        : property_list_funcbased_property_base{ d, std::move( flags_func ) },
+        set_value{ std::move( s ) }
     {
     }
 
@@ -315,7 +308,7 @@ struct property_button : property_list_funcbased_property_base
 };
 
 } // namespace
-} // namespace tcamprop_system
+} // namespace prop_system
 
 tcamprop_system::property_list_funcbased::property_list_funcbased() = default;
 tcamprop_system::property_list_funcbased::~property_list_funcbased() = default;
@@ -338,163 +331,52 @@ std::vector<std::string_view> tcamprop_system::property_list_funcbased::get_prop
     return rval;
 }
 
-void tcamprop_system::property_list_funcbased::register_double(const property_desc& dsc,
-                                                               set_value_func<double> set,
-                                                               get_value_func<double> get,
-                                                               const prop_range_real& range)
+void property_list_funcbased::register_double( const property_info& nfo, const prop_range_real& range, set_value_func<double> set, get_value_func<double> get, prop_flags def_flags )
 {
-    register_double(dsc, set, get, get_flags_func {}, range);
+    props_.push_back( std::make_unique<property_real>( nfo, range, std::move( set ), std::move( get ), def_flags ) );
 }
 
-void property_list_funcbased::register_double(const property_info& nfo,
-                                              const prop_range_real& range,
-                                              set_value_func<double> set,
-                                              get_value_func<double> get,
-                                              prop_flags def_flags)
+void property_list_funcbased::register_double( const property_info& nfo, const prop_range_real& range, set_value_func<double> set, get_value_func<double> get, get_flags_func get_fla )
 {
-    props_.push_back(std::make_unique<property_real>(
-        nfo, range, std::move(set), std::move(get), [def_flags] { return def_flags; }));
+    props_.push_back( std::make_unique<property_real>( nfo, range, std::move( set ), std::move( get ), std::move( get_fla ) ) );
 }
 
-void property_list_funcbased::register_double(const property_info& nfo,
-                                              const prop_range_real& range,
-                                              set_value_func<double> set,
-                                              get_value_func<double> get,
-                                              get_flags_func get_fla)
+void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, prop_flags def_flags /*= prop_flags::def_flags */ )
 {
-    props_.push_back(std::make_unique<property_real>(
-        nfo, range, std::move(set), std::move(get), std::move(get_fla)));
+    register_integer( nfo, range, std::move( set ), std::move( get ), std::move( def_flags ) );
 }
 
-void tcamprop_system::property_list_funcbased::register_double(const property_desc& dsc,
-                                                               set_value_func<double> set,
-                                                               get_value_func<double> get,
-                                                               get_flags_func get_fla,
-                                                               const prop_range_real& range)
+void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, get_flags_func get_flags )
 {
-    props_.push_back(std::make_unique<property_real>(dsc, set, get, range, get_fla));
+    props_.push_back( std::make_unique<property_integer>( nfo, range, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
 
-void tcamprop_system::property_list_funcbased::register_integer(const property_desc& dsc,
-                                                                set_value_func<int> set,
-                                                                get_value_func<int> get,
-                                                                const prop_range_integer& range)
+void property_list_funcbased::register_boolean( const property_info& nfo, bool def, set_value_func<bool> set, get_value_func<bool> get, prop_flags def_flags /*= prop_flags::def_flags */ )
 {
-    register_integer(dsc, set, get, get_flags_func {}, range);
+    props_.push_back( std::make_unique<property_boolean>( nfo, def, std::move( set ), std::move( get ), def_flags ) );
 }
 
-void property_list_funcbased::register_integer(const property_info& nfo,
-                                               const prop_range_integer& range,
-                                               set_value_func<int> set,
-                                               get_value_func<int> get,
-                                               get_flags_func get_flags)
+void property_list_funcbased::register_boolean( const property_info& nfo, bool def, set_value_func<bool> set, get_value_func<bool> get, get_flags_func get_flags )
 {
-    props_.push_back(std::make_unique<property_integer>(
-        nfo, range, std::move(set), std::move(get), std::move(get_flags)));
+    props_.push_back( std::make_unique<property_boolean>( nfo, def, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
 
-void property_list_funcbased::register_integer(const property_info& nfo,
-                                               const prop_range_integer& range,
-                                               set_value_func<int> set,
-                                               get_value_func<int> get,
-                                               prop_flags def_flags /*= prop_flags::def_flags */)
+void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int default_menu_entry, set_value_func<int> set, get_value_func<int> get, prop_flags def_flags )
 {
-    register_integer(
-        nfo, range, std::move(set), std::move(get), std::move([def_flags] { return def_flags; }));
+    props_.push_back( std::make_unique<property_menu>( nfo, menu_entries, default_menu_entry, std::move( set ), std::move( get ), def_flags ) );
 }
 
-void tcamprop_system::property_list_funcbased::register_integer(const property_desc& dsc,
-                                                                set_value_func<int> set,
-                                                                get_value_func<int> get,
-                                                                get_flags_func get_flags,
-                                                                const prop_range_integer& range)
+void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int default_menu_entry, set_value_func<int> set, get_value_func<int> get, get_flags_func get_flags )
 {
-    props_.push_back(std::make_unique<property_integer>(dsc, set, get, range, get_flags));
+    props_.push_back( std::make_unique<property_menu>( nfo, menu_entries, default_menu_entry, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
 
-void tcamprop_system::property_list_funcbased::register_boolean(const property_desc& dsc,
-                                                                set_value_func<bool> set,
-                                                                get_value_func<bool> get,
-                                                                bool def)
+void property_list_funcbased::register_button( const property_info& nfo, set_func_button set, prop_flags def_flags /*= prop_flags::def_flags */ )
 {
-    register_boolean(dsc, set, get, get_flags_func {}, def);
+    props_.push_back( std::make_unique<property_button>( nfo, std::move( set ), def_flags ) );
 }
 
-void tcamprop_system::property_list_funcbased::register_boolean(const property_desc& dsc,
-                                                                set_value_func<bool> set,
-                                                                get_value_func<bool> get,
-                                                                get_flags_func get_flags,
-                                                                bool def)
+void property_list_funcbased::register_button( const property_info& nfo, set_func_button set, get_flags_func get_flags )
 {
-    props_.push_back(std::make_unique<property_boolean>(dsc, set, get, def, get_flags));
-}
-
-void tcamprop_system::property_list_funcbased::register_menu(
-    const property_desc& dsc,
-    set_value_func<int> set,
-    get_value_func<int> get,
-    int def,
-    const std::vector<std::string>& menu_entries)
-{
-    register_menu(dsc, set, get, get_flags_func {}, def, menu_entries);
-}
-
-void property_list_funcbased::register_menu(const property_info& nfo,
-                                            const std::vector<std::string_view>& menu_entries,
-                                            int default_menu_entry,
-                                            set_value_func<int> set,
-                                            get_value_func<int> get,
-                                            prop_flags def_flags)
-{
-    props_.push_back(std::make_unique<property_menu>(
-        nfo, menu_entries, default_menu_entry, std::move(set), std::move(get), [def_flags] {
-            return def_flags;
-        }));
-}
-
-void property_list_funcbased::register_menu(const property_info& nfo,
-                                            const std::vector<std::string_view>& menu_entries,
-                                            int default_menu_entry,
-                                            set_value_func<int> set,
-                                            get_value_func<int> get,
-                                            get_flags_func get_flags)
-{
-    props_.push_back(std::make_unique<property_menu>(nfo,
-                                                     menu_entries,
-                                                     default_menu_entry,
-                                                     std::move(set),
-                                                     std::move(get),
-                                                     std::move(get_flags)));
-}
-
-void property_list_funcbased::register_menu(const property_desc& dsc,
-                                            set_value_func<int> set,
-                                            get_value_func<int> get,
-                                            int def)
-{
-    register_menu(dsc, set, get, def, std::vector<std::string> {});
-}
-
-void tcamprop_system::property_list_funcbased::register_menu(
-    const property_desc& dsc,
-    set_value_func<int> set,
-    get_value_func<int> get,
-    get_flags_func get_flags,
-    int def,
-    const std::vector<std::string>& menu_entries)
-{
-    props_.push_back(std::make_unique<property_menu>(dsc, set, get, def, get_flags, menu_entries));
-}
-
-void tcamprop_system::property_list_funcbased::register_button(const property_desc& dsc,
-                                                               set_func_button set)
-{
-    register_button(dsc, set, get_flags_func {});
-}
-
-void tcamprop_system::property_list_funcbased::register_button(const property_desc& dsc,
-                                                               set_func_button set,
-                                                               get_flags_func get_flags)
-{
-    props_.push_back(std::make_unique<property_button>(dsc, set, get_flags));
+    props_.push_back( std::make_unique<property_button>( nfo, std::move( set ), std::move( get_flags ) ) );
 }

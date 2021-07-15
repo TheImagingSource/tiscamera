@@ -104,15 +104,15 @@ static constexpr const char* BalanceWhiteRed_name = "BalanceWhiteRed";
 static constexpr const char* BalanceWhiteGreen_name = "BalanceWhiteGreen";
 static constexpr const char* BalanceWhiteBlue_name = "BalanceWhiteBlue";
 
-static const property_desc balance_white_red = { "BalanceWhiteRed_Apply",
+static const property_info balance_white_red = { "BalanceWhiteRed_Apply",
                                                  prop_type::real,
                                                  "AnalogControl",
                                                  "BalanceWhiteAuto" };
-static const property_desc balance_white_green = { "BalanceWhiteGreen_Apply",
+static const property_info balance_white_green = { "BalanceWhiteGreen_Apply",
                                                    prop_type::real,
                                                    "AnalogControl",
                                                    "BalanceWhiteAuto" };
-static const property_desc balance_white_blue = { "BalanceWhiteBlue_Apply",
+static const property_info balance_white_blue = { "BalanceWhiteBlue_Apply",
                                                   prop_type::real,
                                                   "AnalogControl",
                                                   "BalanceWhiteAuto" };
@@ -133,31 +133,31 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
 
     prop_list_.register_double(
         balance_white_red,
+        balance_white_channel_range,
         [this](double val) {
             wb_channels_.r = val;
             return std::error_code {};
         },
         [this] { return wb_channels_.r; },
-        [=] { return flags_func(); },
-        balance_white_channel_range);
+        [=] { return flags_func(); });
     prop_list_.register_double(
         balance_white_green,
+        balance_white_channel_range,
         [this](double val) {
             wb_channels_.g = val;
             return std::error_code {};
         },
         [this] { return wb_channels_.g; },
-        [=] { return flags_func(); },
-        balance_white_channel_range);
+        [=] { return flags_func(); });
     prop_list_.register_double(
         balance_white_blue,
+        balance_white_channel_range,
         [this](double val) {
             wb_channels_.b = val;
             return std::error_code {};
         },
         [this] { return wb_channels_.b; },
-        [=] { return flags_func(); },
-        balance_white_channel_range);
+        [=] { return flags_func(); });
 }
 
 bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::img_type dst_type)
