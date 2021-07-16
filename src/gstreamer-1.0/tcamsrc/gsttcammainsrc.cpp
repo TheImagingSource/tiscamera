@@ -72,6 +72,13 @@ G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
 
 enum
 {
+    SIGNAL_DEVICE_OPEN,
+    SIGNAL_DEVICE_CLOSE,
+    SIGNAL_LAST,
+};
+
+enum
+{
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE_TYPE,
@@ -81,12 +88,13 @@ enum
     PROP_STATE,
 };
 
+static guint gst_tcammainsrc_signals[SIGNAL_LAST] = { 0, };
+
 
 static GstStaticPadTemplate tcam_mainsrc_template =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS("ANY"));
 
 static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps);
-static gboolean gst_tcam_mainsrc_stop(GstBaseSrc* src);
 
 
 static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
@@ -437,6 +445,11 @@ static void gst_tcam_mainsrc_device_lost_callback(const struct tcam_device_info*
     self->is_running = false;
     gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
 
+    // the device is considered lost.
+    // might as well inform via all possible channels to keep
+    // property queries, etc from appearing while everything is shutting down
+    g_signal_emit(G_OBJECT(self), gst_tcammainsrc_signals[SIGNAL_DEVICE_CLOSE], 0);
+
     // do not call stop
     // some users experience segfaults
     // let EOS handle this. gstreamer will call stop for us
@@ -453,6 +466,10 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
         self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback,
                                                          self);
         self->device->all_caps.reset(gst_tcam_mainsrc_get_all_camera_caps(self));
+        // emit a signal to let other elements/users know that a device has been opened
+        // and properties, etc are now useable
+        g_signal_emit(G_OBJECT(self), gst_tcammainsrc_signals[SIGNAL_DEVICE_OPEN], 0);
+
         return true;
     }
     return false;
@@ -461,6 +478,7 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
 
 static void gst_tcam_mainsrc_close_camera(GstTcamMainSrc* self)
 {
+    g_signal_emit(G_OBJECT(self), gst_tcammainsrc_signals[SIGNAL_DEVICE_CLOSE], 0);
     mainsrc_close_camera(self);
 }
 
@@ -1091,6 +1109,19 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
                             "Property values the internal elements shall use",
                             "",
                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+    gst_tcammainsrc_signals[SIGNAL_DEVICE_OPEN] = g_signal_new("device-open",
+                                                               G_TYPE_FROM_CLASS(klass),
+                                                               G_SIGNAL_RUN_LAST,
+                                                               0,
+                                                               nullptr, nullptr, nullptr,
+                                                               G_TYPE_NONE, 0, G_TYPE_NONE);
+    gst_tcammainsrc_signals[SIGNAL_DEVICE_CLOSE] = g_signal_new("device-close",
+                                                                G_TYPE_FROM_CLASS(klass),
+                                                                G_SIGNAL_RUN_LAST,
+                                                                0,
+                                                                nullptr, nullptr, nullptr,
+                                                                G_TYPE_NONE, 0, G_TYPE_NONE);
 
     GST_DEBUG_CATEGORY_INIT(tcam_mainsrc_debug, "tcammainsrc", 0, "tcam interface");
 
