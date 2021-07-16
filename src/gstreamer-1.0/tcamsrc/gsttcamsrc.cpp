@@ -93,6 +93,15 @@ G_DEFINE_TYPE_WITH_CODE(GstTcamSrc,
                         GST_TYPE_BIN,
                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcam_src_prop_init))
 
+enum
+{
+    SIGNAL_DEVICE_OPEN,
+    SIGNAL_DEVICE_CLOSE,
+    SIGNAL_LAST,
+};
+
+static guint gst_tcamsrc_signals[SIGNAL_LAST] = { 0, };
+
 /**
  * gst_tcam_get_property_type:
  * @self: a #GstTcamSrcProp
@@ -520,6 +529,21 @@ static void apply_element_property(GstTcamSrc* self,
 }
 
 
+static void emit_device_open(GstElement* /*object*/,
+                             void* user_data)
+{
+    // emit our own instance of 'device-open'. user-data is the tcamsrc instance
+    g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
+}
+
+static void emit_device_close(GstElement* /*object*/,
+                              void* user_data)
+{
+    // emit our own instance of 'device-open'. user-data is the tcamsrc instance
+    g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_CLOSE], 0);
+}
+
+
 static gboolean open_source_element(GstTcamSrc* self)
 {
 
@@ -654,6 +678,9 @@ static gboolean open_source_element(GstTcamSrc* self)
         GST_ERROR("Unable to open a source element. Stream not possible.");
         return FALSE;
     }
+
+    g_signal_connect(G_OBJECT(self->active_source), "device-open", G_CALLBACK(emit_device_open), self);
+    g_signal_connect(G_OBJECT(self->active_source), "device-close", G_CALLBACK(emit_device_close), self);
 
     if (self->active_source == self->main_src)
     {
@@ -1136,6 +1163,19 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                             "Property values the internal elements shall use",
                             "",
                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+    gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN] = g_signal_new("device-open",
+                                                           G_TYPE_FROM_CLASS(klass),
+                                                           G_SIGNAL_RUN_LAST,
+                                                           0,
+                                                           nullptr, nullptr, nullptr,
+                                                           G_TYPE_NONE, 0, G_TYPE_NONE);
+    gst_tcamsrc_signals[SIGNAL_DEVICE_CLOSE] = g_signal_new("device-close",
+                                                            G_TYPE_FROM_CLASS(klass),
+                                                            G_SIGNAL_RUN_LAST,
+                                                            0,
+                                                            nullptr, nullptr, nullptr,
+                                                            G_TYPE_NONE, 0, G_TYPE_NONE);
 
     GST_DEBUG_CATEGORY_INIT(tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
