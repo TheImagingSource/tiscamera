@@ -389,9 +389,13 @@ void tcam::AFU050Device::transfer_callback(struct libusb_transfer* transfer)
                 memcpy(b.pData, jpegbuf, jpegsize);
                 b.length = jpegsize;
                 b.size = jpegsize;
-                statistics.frame_count++;
-                buffer->set_statistics(statistics);
+                m_statistics.frame_count++;
+
+                auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
+
+                m_statistics.capture_time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
                 buffer->set_image_buffer(b);
+                buffer->set_statistics(m_statistics);
 
                 jpegptr = 0;
                 jpegsize = 0;
@@ -455,6 +459,7 @@ bool tcam::AFU050Device::start_stream()
     jpegsize = 0;
     jpegptr = 0;
 
+    m_statistics = {};
 
     for (int cnt = 0; cnt < TRANSFER_COUNT; cnt++)
     {

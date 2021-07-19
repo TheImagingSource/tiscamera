@@ -164,7 +164,7 @@ private:
     std::vector<buffer_info> buffers;
 
     bool is_stream_on;
-    struct tcam_stream_statistics statistics;
+    struct tcam_stream_statistics m_statistics;
 
     size_t current_buffer;
     size_t jpegsize;
