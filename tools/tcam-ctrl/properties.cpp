@@ -177,6 +177,7 @@ void print_properties(const std::string& serial)
             printf("Property '%s' has type '%s' .\n", name, t);
         }
     }
+    gst_element_set_state(source, GST_STATE_NULL);
 
     g_slist_free(names);
     gst_object_unref(source);
