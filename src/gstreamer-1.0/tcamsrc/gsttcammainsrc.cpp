@@ -784,7 +784,7 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps)
 
 static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 {
-    GstTcamMainSrc* src = GST_TCAM_MAINSRC(bsrc);
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(bsrc);
     gboolean res = FALSE;
 
     switch (GST_QUERY_TYPE(query))
@@ -795,22 +795,23 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             GstClockTime max_latency;
 
             /* device must be open */
-            if (!src->device->dev)
+            if (!self->device->dev)
             {
-                GST_WARNING_OBJECT(src, "Can't give latency since device isn't open !");
+                GST_WARNING_OBJECT(self, "Can't give latency since device isn't open !");
                 goto done;
             }
 
             /* we must have a framerate */
-            if (src->fps_numerator <= 0 || src->fps_denominator <= 0)
+            if (self->fps_numerator <= 0 || self->fps_denominator <= 0)
             {
-                GST_WARNING_OBJECT(src, "Can't give latency since framerate isn't fixated !");
+                GST_WARNING_OBJECT(self, "Can't give latency since framerate isn't fixated !");
                 goto done;
             }
 
             /* min latency is the time to capture one frame/field */
-            min_latency =
-                gst_util_uint64_scale_int(GST_SECOND, src->fps_denominator, src->fps_numerator);
+            min_latency = gst_util_uint64_scale_int(GST_SECOND,
+                                                    self->fps_denominator,
+                                                    self->fps_numerator);
 
             /* max latency is set to NONE because cameras may enter trigger mode
                and not deliver images for an unspecified amount of time */
@@ -828,9 +829,91 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
             res = TRUE;
             break;
         }
+        case GST_QUERY_CAPS:
+        {
+            GstCaps* query_caps;
+            gst_query_parse_caps (query,
+                                  &query_caps);
+
+            if (!query_caps || gst_caps_is_empty(query_caps))
+            {
+                return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
+            }
+
+            // these queries potentially require device interaction
+            // no device means we return FALSE
+
+            if (!self->device || !self->device->dev)
+            {
+                GST_ERROR("device must be open to answer query. Ensure element is in state READY or higher.");
+                return FALSE;
+            }
+
+            if (gst_caps_is_fixed(query_caps))
+            {
+                //GST_ERROR("FIXED");
+
+                GstStructure* structure = gst_caps_get_structure(query_caps, 0);
+
+                if (!gst_structure_has_field(structure, "framerate"))
+                {
+                    int height = 0;
+                    int width = 0;
+
+                    gst_structure_get_int(structure, "width", &width);
+                    gst_structure_get_int(structure, "height", &height);
+
+                    const char* format_string = gst_structure_get_string(structure, "format");
+
+                    uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                                                                           format_string);
+
+                    std::vector<VideoFormatDescription> format =
+                        self->device->dev->get_available_video_formats();
+
+                    GstCaps* result_caps = gst_caps_copy(query_caps);
+
+                    int fps_min_num;
+                    int fps_min_den;
+                    int fps_max_num;
+                    int fps_max_den;
+
+                    for (auto& f : format)
+                    {
+                        if (f.get_fourcc() == fourcc)
+                        {
+                            auto fps = f.get_framerates({(uint32_t)width, (uint32_t)height});
+
+                            gst_util_double_to_fraction(
+                                *std::min_element(fps.begin(), fps.end()), &fps_min_num, &fps_min_den);
+                            gst_util_double_to_fraction(
+                                *std::max_element(fps.begin(), fps.end()), &fps_max_num, &fps_max_den);
+
+                            GValue fps_val = G_VALUE_INIT;
+                            g_value_init(&fps_val, GST_TYPE_FRACTION_RANGE);
+
+                            gst_value_set_fraction_range_full(
+                                &fps_val, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
+
+                            gst_caps_set_value(result_caps, "framerate", &fps_val);
+
+                            gst_query_set_caps_result(query, result_caps);
+                            return TRUE;
+                        }
+
+                    }
+
+
+                }
+
+            }
+            return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
+        }
         default:
+        {
             res = GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->query(bsrc, query);
             break;
+        }
     }
 
 done:
