@@ -131,6 +131,7 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
 {
     m_name = (char*)queryctrl->name;
     m_v4l2_id = queryctrl->id;
+    m_converter = {[](double val){return val;}, [](double val){return val;}};
 
     if (mapping)
     {
@@ -140,15 +141,18 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
         }
         if (mapping->conversion_type == tcam::v4l2::MappingType::IntToDouble)
         {
-            m_converter = tcam::v4l2::find_int_to_double(m_v4l2_id);
+            //m_converter = tcam::v4l2::find_int_to_double(m_v4l2_id);
+        }
+        else if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
+        {
+            m_converter = tcam::v4l2::find_scale(queryctrl->id);
         }
     }
 
-
-    m_min = conv_double(queryctrl->minimum);
-    m_max = conv_double(queryctrl->maximum);
-    m_step = conv_double(queryctrl->step);
-    m_default = conv_double(ctrl->value);
+    m_min = m_converter.from_device(queryctrl->minimum);
+    m_max = m_converter.from_device(queryctrl->maximum);
+    m_step = m_converter.from_device(queryctrl->step);
+    m_default = m_converter.from_device(ctrl->value);
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
@@ -163,7 +167,7 @@ outcome::result<double> V4L2PropertyDoubleImpl::get_value() const
         auto ret = ptr->read_control(m_v4l2_id);
         if (ret)
         {
-            return conv_double(ret.value());
+            return m_converter.from_device(ret.value());
         }
         return ret.as_failure();
     }
@@ -181,7 +185,7 @@ outcome::result<void> V4L2PropertyDoubleImpl::set_value(double new_value)
 
     if (auto ptr = m_cam.lock())
     {
-        auto r = ptr->write_control(m_v4l2_id, conv_int(new_value));
+        auto r = ptr->write_control(m_v4l2_id, m_converter.to_device(new_value));
         if (!r)
         {
             return r.as_failure();

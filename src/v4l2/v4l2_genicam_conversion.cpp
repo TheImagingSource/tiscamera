@@ -37,6 +37,19 @@ private:
 };
 
 
+double gamma_from_dev_to_std(double value)
+{
+    return value / 100;
+}
+
+
+double gamma_from_std_to_dev(double value)
+{
+    return value * 100;
+}
+
+
+
 // this function and it sibling exist for
 // for the dfk 72. It's color channels have a range from 0-63
 double wb_channel_from_std_to_dev(double value)
@@ -55,6 +68,16 @@ double wb_channel_from_dev_to_std(double value)
     return value * std_max / dev_max;
 }
 
+
+double exposure_absolute_from_std_to_dev(double value)
+{
+    return value / 100;
+}
+
+double exposure_absolute_from_dev_to_std(double value)
+{
+    return value * 100;
+}
 
 
 } // namespace
@@ -83,6 +106,14 @@ converter_scale find_scale(uint32_t v4l2_id)
 {
     switch (v4l2_id)
     {
+        case 0x009a0902: // exposure_absolute
+        {
+            return {*exposure_absolute_from_std_to_dev, *exposure_absolute_from_dev_to_std};
+        }
+        case 0x00980910: // Gamma
+        {
+            return {*gamma_from_std_to_dev, *gamma_from_dev_to_std};
+        }
         // BalanceWhite{Red,Green,Blue}
         case 0x0199e921:
         case 0x0199e922:
@@ -92,7 +123,7 @@ converter_scale find_scale(uint32_t v4l2_id)
         }
         default:
         {
-            return {nullptr, nullptr};
+            return {[](double val){return val;}, [](double val){return val;}};
         }
     }
 }

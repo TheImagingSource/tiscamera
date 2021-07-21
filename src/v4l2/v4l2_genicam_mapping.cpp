@@ -56,7 +56,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x00980910,
         "",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::IntToDouble,
+        tcam::v4l2::MappingType::Scale,
     },
     // exposure_auto
     {
@@ -70,7 +70,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x009a0902,
         "ExposureTime",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0098090c,
