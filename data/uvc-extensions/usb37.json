@@ -594,15 +594,6 @@
         },
         {
             "id": "0x199e267",
-            "name": "Scanning Mode Scale Vertical",
-            "selector": "0x30",
-            "uvc_type": "unsigned",
-            "v4l2_type": "integer",
-            "size_bits":8,
-            "offset_bits": 16
-        },
-        {
-            "id": "0x199e268",
             "name": "Scanning Mode Binning Horizontal",
             "selector": "0x30",
             "uvc_type": "unsigned",
@@ -611,7 +602,7 @@
             "offset_bits": 24
         },
         {
-            "id": "0x199e269",
+            "id": "0x199e268",
             "name": "Scanning Mode Binning Vertical",
             "selector": "0x30",
             "uvc_type": "unsigned",
@@ -620,7 +611,7 @@
             "offset_bits": 32
         },
         {
-            "id": "0x199e270",
+            "id": "0x199e269",
             "name": "Scanning Mode Skipping Horizontal",
             "selector": "0x30",
             "uvc_type": "unsigned",
@@ -629,7 +620,7 @@
             "offset_bits": 40
         },
         {
-            "id": "0x199e271",
+            "id": "0x199e270",
             "name": "Scanning Mode Skipping Vertical",
             "selector": "0x30",
             "uvc_type": "unsigned",
@@ -638,7 +629,7 @@
             "offset_bits": 48
         },
         {
-            "id": "0x199e272",
+            "id": "0x199e271",
             "name": "Scanning Mode Flags",
             "selector": "0x30",
             "uvc_type": "unsigned",
