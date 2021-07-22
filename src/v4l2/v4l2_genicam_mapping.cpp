@@ -163,14 +163,14 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     {
         0x0199e211,
         "StrobeEnable",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_ENUMERATION,
+        tcam::v4l2::MappingType::IntToEnum,
     },
     {
         0x0199e212,
         "StrobePolarity",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_ENUMERATION,
+        tcam::v4l2::MappingType::IntToEnum,
     },
     {
         0x0199e213,
