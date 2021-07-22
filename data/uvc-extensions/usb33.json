@@ -141,12 +141,22 @@
         },
         {
             "id": "0x199e213",
-		    "name": "Strobe Exposure",
+		    "name": "Strobe Operation",
 		    "selector": "0x06",
-		    "uvc_type": "boolean",
-		    "v4l2_type": "boolean",
+		    "uvc_type": "unsigned",
+		    "v4l2_type": "menu",
 		    "size_bits": 1,
-		    "offset_bits": 2
+		    "offset_bits": 2,
+            "entries": [
+                {
+                    "value": 0,
+                    "entry": "Fixed Duration"
+                },
+                {
+                    "value": 1,
+                    "entry": "Exposure"
+                }
+            ]
         },
         {
             "id": "0x199e214",
