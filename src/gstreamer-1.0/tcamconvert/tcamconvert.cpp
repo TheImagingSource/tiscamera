@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Imaging Source Europe GmbH
+ * Copyright 2021 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 #include "tcamconvert.h"
 
 #include "../../version.h"
-#include "../gst_helper/gst_caps_helper.h"
-#include "../gst_helper/gst_element_chain.h"
-#include "../gst_helper/gst_helper.h"
 #include "tcamconvert_context.h"
 #include "tcamprop_impl.h"
 
@@ -28,14 +25,14 @@
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
+#include <gst-helper/gst_element_chain.h>
+#include <gst-helper/gstcaps_dutils_interop.h>
+#include <gst-helper/gvalue_helper.h>
+#include <gst-helper/helper_functions.h>
 #include <gst/video/gstvideometa.h>
 #include <map>
 #include <spdlog/spdlog.h>
 #include <vector>
-
-struct GstTCamConvert_context : public tcamconvert::tcamconvert_context_base
-{
-};
 
 enum
 {
@@ -58,57 +55,6 @@ tcamprop_system::property_list_interface* tcamconvert::get_property_list_interfa
     return GST_TCAMCONVERT(iface)->context_;
 }
 
-
-static GstCaps* generate_caps_struct(const std::vector<img::fourcc>& fcc_list)
-{
-    GstCaps* caps = gst_caps_new_empty(); // this is returned and the caller must take ownership
-
-    std::map<std::string, std::vector<const char*>> simple_map;
-
-    for (const auto fcc : fcc_list)
-    {
-        auto [prefix, format] = img_lib::gst::fourcc_to_gst_caps_descr(fcc);
-        if (!prefix)
-        {
-            //GST_WARN( "Format has empty caps string. Ignoring %s", img::fcc_to_string( fcc ).c_str() );
-            continue;
-        }
-
-        simple_map[prefix].push_back(format);
-    }
-
-    for (auto&& [struct_type, format_string_list] : simple_map)
-    {
-        GValue format_list = {};
-        g_value_init(&format_list, GST_TYPE_LIST);
-        for (auto&& format : format_string_list)
-        {
-            GValue tmp = {};
-            g_value_init(&tmp, G_TYPE_STRING);
-            g_value_set_string(&tmp, format);
-            gst_value_list_append_and_take_value(&format_list, &tmp);
-        }
-
-        GstStructure* structure = gst_structure_new_empty(struct_type.c_str());
-        gst_structure_take_value(structure, "format", &format_list);
-
-        GValue gvalue_width = G_VALUE_INIT;
-        g_value_init(&gvalue_width, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range_step(&gvalue_width, 1, std::numeric_limits<gint>::max(), 1);
-
-        GValue gvalue_height = G_VALUE_INIT;
-        g_value_init(&gvalue_height, GST_TYPE_INT_RANGE);
-        gst_value_set_int_range_step(&gvalue_height, 1, std::numeric_limits<gint>::max(), 1);
-
-        gst_structure_take_value(structure, "width", &gvalue_width);
-        gst_structure_take_value(structure, "height", &gvalue_height);
-        //gst_structure_take_value( structure, "framerate", &gvalue_fps_range );
-
-        gst_caps_append_structure(caps, structure);
-    }
-
-    return caps;
-}
 
 namespace
 {
@@ -303,7 +249,7 @@ static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps
     auto caps_to_img_type = [](const GstCaps* caps) -> img::img_type {
         GstStructure* structure = gst_caps_get_structure(caps, 0);
 
-        return gst_helper::get_gst_struct_image_type(structure);
+        return gst_helper::get_gst_struct_image_type(*structure);
     };
 
     GstTCamConvert* self = GST_TCAMCONVERT(base);
@@ -409,8 +355,11 @@ static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
 
         if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
         {
-            fmt_vec =
-                gst_helper::gst_string_list_to_vector(gst_structure_get_value(structure, "format"));
+            auto gval = gst_structure_get_value(structure, "format");
+            if (gval)
+            {
+                fmt_vec = gst_helper::gst_string_list_to_vector(*gval);
+            }
         }
         else if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
         {
@@ -434,11 +383,11 @@ static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
 
     if (direction == GST_PAD_SRC)
     {
-        GST_DEBUG("Returning INPUT: %s", gst_helper::caps_to_string(res_caps).c_str());
+        GST_DEBUG("Returning INPUT: %s", gst_helper::to_string(*res_caps).c_str());
     }
     else
     {
-        GST_DEBUG("Returning OUTPUT: %s", gst_helper::caps_to_string(res_caps).c_str());
+        GST_DEBUG("Returning OUTPUT: %s", gst_helper::to_string(*res_caps).c_str());
     }
     return res_caps;
 }
@@ -462,8 +411,8 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* /*base*/,
 
     GST_DEBUG("dir=%s transformed %s into %s",
               dir_to_string(direction),
-              gst_helper::caps_to_string(caps).c_str(),
-              gst_helper::caps_to_string(res_caps).c_str());
+              gst_helper::to_string(*caps).c_str(),
+              gst_helper::to_string(*res_caps).c_str());
 
     return res_caps;
 }
@@ -472,7 +421,7 @@ static gboolean gst_tcamconvert_get_unit_size(GstBaseTransform* trans, GstCaps* 
 {
     GstStructure* structure = gst_caps_get_structure(caps, 0);
 
-    auto type = gst_helper::get_gst_struct_image_type(structure);
+    auto type = gst_helper::get_gst_struct_image_type(*structure);
     if (type.empty())
     {
         GST_ELEMENT_ERROR(trans,
@@ -644,9 +593,9 @@ static gboolean gst_tcamconvert_copy_metadata(GstBaseTransform* base,
     return TRUE;
 }
 
-static bool is_compatible_source_element(GstElement* element)
+static bool is_compatible_source_element(GstElement& element)
 {
-    if (!TCAM_IS_PROP(element))
+    if (!TCAM_IS_PROP(&element))
     { // When the element has no tcamprop interface, we can quit here
         return false;
     }
@@ -663,8 +612,8 @@ static GstStateChangeReturn gst_tcamconvert_change_state(GstElement* element, Gs
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
             // if we are connected, we look for our GstTcamSrc element, and only here whine about not finding it
-            auto camera_src =
-                gst_helper::find_upstream_element(GST_ELEMENT(self), &is_compatible_source_element);
+            auto camera_src = gst_helper::find_upstream_element(*GST_ELEMENT(self),
+                                                                &is_compatible_source_element);
             if (camera_src == nullptr)
             {
                 GST_INFO_OBJECT(self,
@@ -688,7 +637,7 @@ static GstStateChangeReturn gst_tcamconvert_change_state(GstElement* element, Gs
 
 static void gst_tcamconvert_init(GstTCamConvert* self)
 {
-    self->context_ = new GstTCamConvert_context;
+    self->context_ = new tcamconvert::tcamconvert_context_base;
 
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), FALSE);
 }
@@ -724,16 +673,16 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
         "The Imaging Source <support@theimagingsource.com>");
 
 
-    GstCaps* src_caps = generate_caps_struct(tcamconvert_get_all_output_fccs());
+    auto src_caps = gst_helper::generate_caps_with_dim( tcamconvert_get_all_output_fccs());
 
     gst_element_class_add_pad_template(
-        gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps));
+        gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps.get()));
 
 
-    GstCaps* sink_caps = generate_caps_struct(tcamconvert_get_all_input_fccs());
+    auto sink_caps = gst_helper::generate_caps_with_dim(tcamconvert_get_all_input_fccs());
 
     gst_element_class_add_pad_template(
-        gstelement_class, gst_pad_template_new("sink", GST_PAD_SINK, GST_PAD_ALWAYS, sink_caps));
+        gstelement_class, gst_pad_template_new("sink", GST_PAD_SINK, GST_PAD_ALWAYS, sink_caps.get()));
 
     gst_base_transform_class->transform_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_size);
     gst_base_transform_class->transform_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_caps);

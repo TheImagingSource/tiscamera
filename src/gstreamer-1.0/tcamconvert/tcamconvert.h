@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Imaging Source Europe GmbH
+ * Copyright 2021 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/gst.h>
 
+namespace tcamconvert {
+    class tcamconvert_context_base;
+}
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_TCAMCONVERT (gst_tcamconvert_get_type())
@@ -34,7 +38,7 @@ typedef struct GstTCamConvert
 {
     GstBaseTransform base;
 
-    struct GstTCamConvert_context* context_;
+    tcamconvert::tcamconvert_context_base* context_;
 
 } GstTCamConvert;
 

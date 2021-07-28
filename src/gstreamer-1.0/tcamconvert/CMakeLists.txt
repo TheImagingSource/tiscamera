@@ -14,11 +14,11 @@
 # limitations under the License.
 
 add_library(tcamconvert SHARED 
-	tcamconvert.h
-	tcamconvert.cpp
+	"tcamconvert.h"
+	"tcamconvert.cpp"
 
-	tcamprop_impl.h
-	tcamprop_impl.cpp
+	"tcamprop_impl.h"
+	"tcamprop_impl.cpp"
 	"tcamconvert_context.h"
 	"tcamconvert_context.cpp"
 )
@@ -26,23 +26,15 @@ add_library(tcamconvert SHARED
 target_include_directories( tcamconvert 
 PRIVATE
 	${GSTREAMER_INCLUDE_DIRS}
-	${GSTREAMER_BASE_INCLUDE_DIRS}
-	${GSTREAMER_VIDEO_INCLUDE_DIRS}
-	${GLIB2_INCLUDE_DIR}
-	${GObject_INCLUDE_DIR}
-	${INTROSPECTION_INCLUDE_DIR}
 )
 set_project_warnings(tcamconvert)
 
 target_link_libraries( tcamconvert 
 PRIVATE
 	spdlog::spdlog
-	outcome::outcome
-	tcam::gst-helper
+	tcam::gst-helper-dutils
 	tcam::tcamprop
     tcam
-	${GOBJECT_LIBRARIES}
-	${GLIB2_LIBRARIES}
 	${GSTREAMER_LIBRARIES}
 	${GSTREAMER_BASE_LIBRARIES}
 	${GSTREAMER_VIDEO_LIBRARIES}

@@ -16,7 +16,7 @@
 
 #include "tcamprop_impl.h"
 
-#include "../tcamprop_system/tcamprop_provider_itf_impl.h"
+#include <tcamprop_system/tcamprop_provider_itf_impl.h>
 
 namespace
 {
