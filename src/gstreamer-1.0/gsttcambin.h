@@ -19,7 +19,6 @@
 
 #include "tcamgstbase/tcamgstbase.h"
 
-#include <girepository.h>
 #include <gst/gst.h>
 
 G_BEGIN_DECLS
@@ -42,26 +41,6 @@ struct _GstTcamBin
     GstBin parent;
 
     tcambin_data* data;
-
-    // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
-    GstElement* src;
-    GstElement* pipeline_caps;
-    GstElement* dutils;
-    GstElement* bayer_transform;
-    GstElement* debayer;
-    GstElement* jpegdec;
-    GstElement* convert;
-    GstElement* tcamconvert;
-
-    gboolean elements_created;
-    gboolean elements_linked;
-    gboolean target_set;
-    gboolean must_apply_state;
-
-    gboolean has_dutils;
-
-    struct tcam::gst::input_caps_required_modules modules;
-    struct tcam::gst::input_caps_toggles toggles;
 };
 
 
