@@ -14,6 +14,8 @@ auto get_gst_struct_image_dim(const GstStructure& structure) -> std::optional<im
 auto get_gst_struct_fcc(const GstStructure& structure) -> img::fourcc;
 
 auto get_gst_struct_image_type(const GstStructure& structure) -> img::img_type;
+auto get_img_type_from_fixated_gstcaps( const GstCaps& structure )->img::img_type;
+
 auto get_gst_struct_framerate(const GstStructure& structure) -> std::optional<double>;
 
 void set_gst_struct_framerate(GstStructure& structure, double framerate) noexcept;
