@@ -17,8 +17,6 @@
 #ifndef TCAM_GSTTCAMBIN_H
 #define TCAM_GSTTCAMBIN_H
 
-#include "tcamgstbase/tcamgstbase.h"
-
 #include <gst/gst.h>
 
 G_BEGIN_DECLS

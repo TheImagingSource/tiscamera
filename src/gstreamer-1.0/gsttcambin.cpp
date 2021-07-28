@@ -19,6 +19,7 @@
 #include "../gobject/tcamprop.h"
 #include "../version.h"
 #include "tcamgstbase/tcamgstjson.h"
+#include "tcamgstbase/tcamgstbase.h"
 
 #include <cstring>
 #include <gst-helper/helper_functions.h>
