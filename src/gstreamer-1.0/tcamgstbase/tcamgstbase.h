@@ -22,21 +22,8 @@
 #include <string>
 #include <vector>
 
-namespace tcam
-{
-class VideoFormatDescription;
-}
-
 namespace tcam::gst
 {
-
-/**
- * returns true if serial and type have been found
- * returns false if only serial has been found
- */
-bool separate_serial_and_type(const std::string& input, std::string& serial, std::string& type);
-
-std::pair<std::string, std::string> separate_serial_and_type(const std::string& input);
 
 // Note: Returned element must be freed via gst_object_unref
 GstElement* tcam_gst_find_camera_src(GstElement* element);
@@ -164,9 +151,6 @@ GstCaps* find_input_caps(GstCaps* available_caps,
                          GstCaps* wanted_caps,
                          input_caps_required_modules& modules,
                          input_caps_toggles toggles);
-
-GstCaps* convert_videoformatsdescription_to_caps(
-    const std::vector<tcam::VideoFormatDescription>& descriptions);
 
 }
 

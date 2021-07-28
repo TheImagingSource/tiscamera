@@ -19,6 +19,8 @@
 #include "../../tcam.h"
 #include "gsttcammainsrc.h"
 
+#include <condition_variable>
+#include <mutex>
 #include <gst-helper/helper_functions.h>
 #include <memory>
 #include <queue>
@@ -35,6 +37,11 @@ struct device_state
 
     std::mutex mtx;
     std::condition_variable cv;
+
+    std::string device_serial;
+    tcam::TCAM_DEVICE_TYPE device_type = tcam::TCAM_DEVICE_TYPE_UNKNOWN;
+
+    std::atomic<bool> is_running = false;
 
     void stop_and_clear()
     {

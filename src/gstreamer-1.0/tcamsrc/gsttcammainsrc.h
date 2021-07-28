@@ -17,15 +17,8 @@
 #ifndef TCAM_GSTTCAMMAINSRC_H
 #define TCAM_GSTTCAMMAINSRC_H
 
-#include "../../tcam.h"
-
-#include <atomic>
-#include <condition_variable>
-#include <girepository.h>
 #include <gst/base/gstpushsrc.h>
 #include <gst/gst.h>
-#include <mutex>
-#include <string>
 
 G_BEGIN_DECLS
 
@@ -46,9 +39,6 @@ struct _GstTcamMainSrc
 {
     GstPushSrc element;
 
-    std::string device_serial;
-    tcam::TCAM_DEVICE_TYPE device_type;
-
     device_state* device;
 
     int fps_numerator;
@@ -56,7 +46,6 @@ struct _GstTcamMainSrc
     int n_buffers;
     int imagesink_buffers;
 
-    std::atomic<bool> is_running;
     gboolean drop_incomplete_frames;
 };
 

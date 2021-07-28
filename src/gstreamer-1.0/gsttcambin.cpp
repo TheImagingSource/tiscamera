@@ -1132,7 +1132,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
                 GST_WARNING("%s", dutils_warning.c_str());
 
-                GError* err = g_error_new(g_quark_from_string("tcamdutils version missmatch"),
+                GError* err = g_error_new(g_quark_from_string("tcamdutils version mismatch"),
                                           1,
                                           "%s",
                                           GST_ELEMENT_NAME(element));

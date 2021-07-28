@@ -17,12 +17,10 @@
 #ifndef TCAM_GSTTCAMSRC_H
 #define TCAM_GSTTCAMSRC_H
 
-#include "../../tcam.h"
+#include "../../base_types.h"
 
-#include <girepository.h>
 #include <gst/gst.h>
 #include <string>
-#include <vector>
 
 G_BEGIN_DECLS
 

@@ -34,17 +34,19 @@ add_library(gsttcamsrc SHARED
 	tcamsrc/mainsrc_device_state.cpp
 	tcamsrc/gsttcamdeviceprovider.cpp
 	tcamsrc/gsttcamdevice.cpp
-	gstmetatcamstatistics.cpp
-)
 
-# required for gstmetatcamstatistics.h
-target_include_directories(gsttcamsrc
-PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}
+	gstmetatcamstatistics.cpp
+	gstmetatcamstatistics.h
+
+	tcamsrc/tcambind.h
+	tcamsrc/tcambind.cpp
 )
 
 target_link_libraries( gsttcamsrc
 PRIVATE
+	${GSTREAMER_LIBRARIES}
+	${GSTREAMER_BASE_LIBRARIES}
+
 	tcamgstbase
 	tcam::gst-helper	
 )

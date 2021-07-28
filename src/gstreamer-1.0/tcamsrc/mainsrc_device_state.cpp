@@ -30,12 +30,12 @@ static void separate_serial_and_type(GstTcamMainSrc* self, const std::string& in
         std::string tmp1 = input.substr(0, pos);
         std::string tmp2 = input.substr(pos + 1);
 
-        self->device_serial = tmp1;
-        self->device_type = tcam::tcam_device_from_string(tmp2);
+        self->device->device_serial = tmp1;
+        self->device->device_type = tcam::tcam_device_from_string(tmp2);
     }
     else
     {
-        self->device_serial = input;
+        self->device->device_serial = input;
     }
 }
 
@@ -48,21 +48,21 @@ bool mainsrc_init_camera(GstTcamMainSrc* self)
 
     self->device->all_caps.reset();
 
-    separate_serial_and_type(self, self->device_serial);
+    separate_serial_and_type(self, self->device->device_serial);
 
     GST_DEBUG("Opening device. Serial: '%s Type: '%s'",
-              self->device_serial.c_str(),
-              tcam::tcam_device_type_to_string(self->device_type).c_str());
+              self->device->device_serial.c_str(),
+              tcam::tcam_device_type_to_string(self->device->device_type).c_str());
 
-    self->device->dev = tcam::open_device(self->device_serial, self->device_type);
+    self->device->dev = tcam::open_device(self->device->device_serial, self->device->device_type);
     if (!self->device->dev)
     {
         GST_ERROR("Unable to open device. No stream possible.");
         mainsrc_close_camera(self);
         return false;
     }
-    self->device_serial = self->device->dev->get_device().get_serial();
-    self->device_type = self->device->dev->get_device().get_device_type();
+    self->device->device_serial = self->device->dev->get_device().get_serial();
+    self->device->device_type = self->device->dev->get_device().get_device_type();
 
     return true;
 }

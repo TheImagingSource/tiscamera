@@ -16,23 +16,18 @@
 
 #include "gsttcamsrc.h"
 
+#include "../../base_types.h"
 #include "../../gobject/tcamprop.h"
 #include "../../logging.h"
-#include "../../tcam.h"
+#include "../../public_utils.h"
+#include "../../version.h"
 #include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgstjson.h"
-#include "../tcamgstbase/tcamgststrings.h"
-#include "gsttcamdeviceprovider.h"
-#include "gsttcammainsrc.h"
+#include "gsttcamdeviceprovider.h"  // only needed because of plugin_init
+#include "gsttcammainsrc.h"  // only needed because of plugin_init
+#include "tcambind.h"
 
-#include <algorithm>
-#include <assert.h>
-#include <queue>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <vector>
 
 using namespace tcam;
 
@@ -101,7 +96,9 @@ enum
     SIGNAL_LAST,
 };
 
-static guint gst_tcamsrc_signals[SIGNAL_LAST] = { 0, };
+static guint gst_tcamsrc_signals[SIGNAL_LAST] = {
+    0,
+};
 
 /**
  * gst_tcam_get_property_type:
@@ -371,7 +368,7 @@ static void apply_element_property(GstTcamSrc* self,
                     std::string s;
                     std::string t;
 
-                    bool sep_ret = tcam::gst::separate_serial_and_type(string_value, s, t);
+                    bool sep_ret = tcambind::separate_serial_and_type(string_value, s, t);
                     if (sep_ret)
                     {
                         GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s'",
@@ -530,15 +527,13 @@ static void apply_element_property(GstTcamSrc* self,
 }
 
 
-static void emit_device_open(GstElement* /*object*/,
-                             void* user_data)
+static void emit_device_open(GstElement* /*object*/, void* user_data)
 {
     // emit our own instance of 'device-open'. user-data is the tcamsrc instance
     g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
 }
 
-static void emit_device_close(GstElement* /*object*/,
-                              void* user_data)
+static void emit_device_close(GstElement* /*object*/, void* user_data)
 {
     // emit our own instance of 'device-open'. user-data is the tcamsrc instance
     g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_CLOSE], 0);
@@ -582,7 +577,7 @@ static gboolean open_source_element(GstTcamSrc* self)
             return FALSE;
         }
 
-        auto vals = tcam::gst::separate_serial_and_type((const char*)serials->data);
+        auto vals = tcambind::separate_serial_and_type((const char*)serials->data);
 
         TCAM_DEVICE_TYPE type = tcam::tcam_device_from_string(vals.second);
 
@@ -653,7 +648,7 @@ static gboolean open_source_element(GstTcamSrc* self)
                 {
                     std::string serial;
                     std::string type_str;
-                    tcam::gst::separate_serial_and_type((const char*)i->data, serial, type_str);
+                    tcambind::separate_serial_and_type((const char*)i->data, serial, type_str);
 
                     if (serial == self->device_serial
                         && tcam::tcam_device_from_string(type_str) == self->device_type)
@@ -680,8 +675,10 @@ static gboolean open_source_element(GstTcamSrc* self)
         return FALSE;
     }
 
-    g_signal_connect(G_OBJECT(self->active_source), "device-open", G_CALLBACK(emit_device_open), self);
-    g_signal_connect(G_OBJECT(self->active_source), "device-close", G_CALLBACK(emit_device_close), self);
+    g_signal_connect(
+        G_OBJECT(self->active_source), "device-open", G_CALLBACK(emit_device_open), self);
+    g_signal_connect(
+        G_OBJECT(self->active_source), "device-close", G_CALLBACK(emit_device_close), self);
 
     if (self->active_source == self->main_src)
     {
@@ -1169,14 +1166,22 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                                                            G_TYPE_FROM_CLASS(klass),
                                                            G_SIGNAL_RUN_LAST,
                                                            0,
-                                                           nullptr, nullptr, nullptr,
-                                                           G_TYPE_NONE, 0, G_TYPE_NONE);
+                                                           nullptr,
+                                                           nullptr,
+                                                           nullptr,
+                                                           G_TYPE_NONE,
+                                                           0,
+                                                           G_TYPE_NONE);
     gst_tcamsrc_signals[SIGNAL_DEVICE_CLOSE] = g_signal_new("device-close",
                                                             G_TYPE_FROM_CLASS(klass),
                                                             G_SIGNAL_RUN_LAST,
                                                             0,
-                                                            nullptr, nullptr, nullptr,
-                                                            G_TYPE_NONE, 0, G_TYPE_NONE);
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            G_TYPE_NONE,
+                                                            0,
+                                                            G_TYPE_NONE);
 
     GST_DEBUG_CATEGORY_INIT(tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
