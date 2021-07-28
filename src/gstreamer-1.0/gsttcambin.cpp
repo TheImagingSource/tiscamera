@@ -1518,7 +1518,7 @@ static void gst_tcambin_init(GstTcamBin* self)
         self->toggles.use_dutils = FALSE;
     }
 
-    GST_ERROR("Dutils has: %d use: %d", self->has_dutils, self->toggles.use_dutils);
+    GST_INFO_OBJECT(self,"Dutils present: %d use-enabled: %d", self->has_dutils, self->toggles.use_dutils);
 
     self->src = nullptr;
     self->pipeline_caps = nullptr;
