@@ -20,10 +20,12 @@
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
 #include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
-#include <tcamprop_system/tcamprop_consumer.h>
 
+#include <Tcam-0.1.h>
 #include <cassert>
+#include <gst-helper/gst_element_chain.h>
 #include <spdlog/spdlog.h>
+#include <tcamprop_system/tcamprop_consumer.h>
 
 static auto find_wb_func(img::img_type type)
 {
@@ -113,66 +115,17 @@ static auto find_transform_function_wb_type(img::img_type dst_type, img::img_typ
 
 namespace
 {
-using namespace tcamprop_system;
 
 static constexpr const char* BalanceWhiteRed_name = "BalanceWhiteRed";
 static constexpr const char* BalanceWhiteGreen_name = "BalanceWhiteGreen";
 static constexpr const char* BalanceWhiteBlue_name = "BalanceWhiteBlue";
 
-static const property_info balance_white_red = { "BalanceWhiteRed_Apply",
-                                                 prop_type::real,
-                                                 "AnalogControl",
-                                                 "BalanceWhiteAuto" };
-static const property_info balance_white_green = { "BalanceWhiteGreen_Apply",
-                                                   prop_type::real,
-                                                   "AnalogControl",
-                                                   "BalanceWhiteAuto" };
-static const property_info balance_white_blue = { "BalanceWhiteBlue_Apply",
-                                                  prop_type::real,
-                                                  "AnalogControl",
-                                                  "BalanceWhiteAuto" };
-static const constexpr prop_range_real balance_white_channel_range =
-    prop_range_real { 0.0, 4.0, 1.0, 0.01 };
 } // namespace
 
-tcamconvert::tcamconvert_context_base::tcamconvert_context_base()
+tcamconvert::tcamconvert_context_base::tcamconvert_context_base(GstTCamConvert* self)
+    : self_reference_(self)
 {
-    auto flags_func = [this] {
-        if (get_color_mode() == color_mode::bayer)
-        {
-            auto flags = prop_flags::implemented | prop_flags::available;
-            return flags;
-        }
-        return prop_flags::noflags;
-    };
 
-    prop_list_.register_double(
-        balance_white_red,
-        balance_white_channel_range,
-        [this](double val) {
-            wb_channels_.r = val;
-            return std::error_code {};
-        },
-        [this] { return wb_channels_.r; },
-        [=] { return flags_func(); });
-    prop_list_.register_double(
-        balance_white_green,
-        balance_white_channel_range,
-        [this](double val) {
-            wb_channels_.g = val;
-            return std::error_code {};
-        },
-        [this] { return wb_channels_.g; },
-        [=] { return flags_func(); });
-    prop_list_.register_double(
-        balance_white_blue,
-        balance_white_channel_range,
-        [this](double val) {
-            wb_channels_.b = val;
-            return std::error_code {};
-        },
-        [this] { return wb_channels_.b; },
-        [=] { return flags_func(); });
 }
 
 bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::img_type dst_type)
@@ -223,27 +176,19 @@ bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::i
     return true;
 }
 
-void tcamconvert::tcamconvert_context_base::clear()
+void tcamconvert::tcamconvert_context_base::init_from_source()
 {
-    src_element_ptr_.reset();
-}
-
-bool tcamconvert::tcamconvert_context_base::setup(
-    const gst_helper::gst_ptr<GstElement>& src_element)
-{
-    auto prop_elem = tcamprop_system::to_TcamProp(src_element.get());
+    auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
     assert(prop_elem != nullptr);
 
     bool val = tcamprop_system::has_property(
         prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
     if (val)
     {
-        tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
-
-        src_element_ptr_ = src_element;
+        apply_wb_ = tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
     }
 
-    return true;
+    init_from_source_done_ = true;
 }
 
 auto tcamconvert::tcamconvert_context_base::get_property_list() -> std::vector<std::string_view>
@@ -304,17 +249,19 @@ auto tcamconvert::tcamconvert_context_base::get_color_mode() const noexcept
 
 void tcamconvert::tcamconvert_context_base::update_balancewhite_values_from_source()
 {
-    if (!src_element_ptr_)
+    if (!src_element_ptr_) {
         return;
+    }
 
     auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
     assert(prop_elem);
-    if (!prop_elem)
+    if (!prop_elem) {
         return;
-
+    }
 
     auto_alg::wb_channel_factors factors = wb_channels_;
-    auto read_chan = [prop_elem](const char* name, float& val) {
+    auto read_chan = [prop_elem](const char* name, float& val)
+    {
         if (auto res = tcamprop_system::get_value<double>(prop_elem, name); res)
         {
             val = res.value();
@@ -325,4 +272,93 @@ void tcamconvert::tcamconvert_context_base::update_balancewhite_values_from_sour
     read_chan(BalanceWhiteBlue_name, factors.b);
 
     wb_channels_ = factors;
+}
+
+
+static bool is_compatible_source_element(GstElement& element)
+{
+    if (!TCAM_IS_PROP(&element))
+    { // When the element has no tcamprop interface, we can quit here
+        return false;
+    }
+    return true;
+}
+
+
+bool tcamconvert::tcamconvert_context_base::try_connect_to_source(bool force)
+{
+    auto camera_src_ptr = gst_helper::find_upstream_element(*GST_ELEMENT(self_reference_),
+                                                            is_compatible_source_element);
+    if (camera_src_ptr == nullptr)
+    {
+        if (force)
+        {
+            // if we are connected, we look for our GstTcamSrc element, and only here whine about not finding it
+            GST_ERROR_OBJECT(self_reference_,
+                             "Unable to find a 'The Imaging Source' device. "
+                             "tcamconvert can only be used in conjunction with such a device.");
+        }
+        return false;
+    }
+    // check if we already are attached to the newly found device
+    if (camera_src_ptr.get() == src_element_ptr_.get())
+    {
+        return true;
+    }
+
+    const bool has_device_open =
+        gst_helper::has_signal(G_OBJECT(camera_src_ptr.get()), "device-open");
+    if (has_device_open)
+    {
+        assert(gst_helper::has_signal(G_OBJECT(camera_src_ptr.get()), "device-close"));
+
+        bool res =
+            signal_handle_device_open_.connect(G_OBJECT(camera_src_ptr.get()),
+                                               "device-open",
+                                               [this](GstElement*) { this->on_device_opened(); });
+        assert(res || "Failed to register 'device-open' signal");
+        bool res2 =
+            signal_handle_device_close_.connect(G_OBJECT(camera_src_ptr.get()),
+                                                "device-close",
+                                                [this](GstElement*) { this->on_device_closed(); });
+        assert(res2 || "Failed to register 'device-open' signal");
+    }
+    else
+    {
+        GST_ERROR_OBJECT(
+            self_reference_,
+            "Source element does not have 'device-open'/'device-close' events. Failing connect");
+        return false;
+    }
+    src_element_ptr_ = std::move(camera_src_ptr);
+
+    const auto cur_state = gst_helper::get_gststate(*src_element_ptr_, false);
+    if (cur_state && cur_state.value() >= GST_STATE_READY)
+    {
+        init_from_source();
+    }
+    return true;
+}
+
+void tcamconvert::tcamconvert_context_base::on_device_opened()
+{
+    init_from_source();
+}
+
+void tcamconvert::tcamconvert_context_base::on_device_closed()
+{
+    init_from_source_done_ = false;
+}
+
+void tcamconvert::tcamconvert_context_base::on_input_pad_linked()
+{
+    try_connect_to_source(false);
+}
+
+void tcamconvert::tcamconvert_context_base::on_input_pad_unlinked()
+{
+    on_device_closed();
+    signal_handle_device_open_.disconnect();
+    signal_handle_device_close_.disconnect();
+    src_element_ptr_ = nullptr;
 }

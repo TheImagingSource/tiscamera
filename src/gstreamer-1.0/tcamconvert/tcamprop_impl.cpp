@@ -23,7 +23,11 @@ namespace
 
 auto make_report_func(TcamProp* iface)
 {
-    auto report_func = [iface](tcamprop_system::error_id, std::string_view dsc) {
+    auto report_func = [iface](tcamprop_system::error_id id, std::string_view dsc) {
+        if( id == tcamprop_system::error_id::property_not_found ) {
+            return;
+        }
+
         auto gst_elem = GST_ELEMENT(iface);
         GST_WARNING_OBJECT(gst_elem, "Error: %s", std::string(dsc).c_str());
     };

@@ -21,6 +21,7 @@
 #include "tcamprop_impl.h"
 
 #include <algorithm>
+#include <array>
 #include <dutils_img/dutils_cpu_features.h>
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
@@ -31,7 +32,6 @@
 #include <gst-helper/helper_functions.h>
 #include <gst/video/gstvideometa.h>
 #include <map>
-#include <spdlog/spdlog.h>
 #include <vector>
 
 enum
@@ -49,6 +49,14 @@ G_DEFINE_TYPE_WITH_CODE(GstTCamConvert,
                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP,
                                               tcamconvert::gst_tcamconvert_prop_init))
 
+
+static tcamconvert::tcamconvert_context_base& get_gst_elem_reference(GstTCamConvert* iface)
+{
+    GstTCamConvert* self = GST_TCAMCONVERT(iface);
+    assert(self != nullptr);
+
+    return *self->context_;
+}
 
 tcamprop_system::property_list_interface* tcamconvert::get_property_list_interface(TcamProp* iface)
 {
@@ -246,30 +254,26 @@ static void gst_tcamconvert_get_property(GObject* object __attribute__((unused))
 
 static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps, GstCaps* outcaps)
 {
-    auto caps_to_img_type = [](const GstCaps* caps) -> img::img_type {
-        GstStructure* structure = gst_caps_get_structure(caps, 0);
-
-        return gst_helper::get_gst_struct_image_type(*structure);
-    };
-
     GstTCamConvert* self = GST_TCAMCONVERT(base);
-    if (!self)
+    if (!self || !incaps || !outcaps)
     {
         return FALSE;
     }
 
-    auto src = caps_to_img_type(incaps);
+    auto& elem = get_gst_elem_reference(self);
+
+    auto src = gst_helper::get_img_type_from_fixated_gstcaps(*incaps);
     if (src.empty())
     {
         return FALSE;
     }
-    auto dst = caps_to_img_type(outcaps);
+    auto dst = gst_helper::get_img_type_from_fixated_gstcaps(*outcaps);
     if (dst.empty())
     {
         return FALSE;
     }
 
-    if (!self->context_->setup(src, dst))
+    if (!elem.setup(src, dst))
     {
         GST_ERROR_OBJECT(self,
                          "Failed to find conversion from %s to %s",
@@ -392,7 +396,7 @@ static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
     return res_caps;
 }
 
-static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* /*base*/,
+static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* base,
                                                GstPadDirection direction,
                                                GstCaps* caps,
                                                GstCaps* filter)
@@ -409,10 +413,11 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* /*base*/,
         gst_caps_unref(tmp_caps);
     }
 
-    GST_DEBUG("dir=%s transformed %s into %s",
-              dir_to_string(direction),
-              gst_helper::to_string(*caps).c_str(),
-              gst_helper::to_string(*res_caps).c_str());
+    GST_DEBUG_OBJECT(base,
+                     "dir=%s transformed %s into %s",
+                     dir_to_string(direction),
+                     gst_helper::to_string(*caps).c_str(),
+                     gst_helper::to_string(*res_caps).c_str());
 
     return res_caps;
 }
@@ -467,16 +472,29 @@ static int get_mapped_stride(GstBuffer* buffer_) noexcept
     return 0;
 }
 
+static img::img_descriptor make_img_desc_from_input_buffer(const img::img_type& src_type,
+                                                           guint8* map_in_data,
+                                                           GstBuffer* inbuf)
+{
+    if (int actual_src_stride = get_mapped_stride(inbuf); actual_src_stride)
+    {
+        return img::make_img_desc_raw(src_type, img::img_plane { map_in_data, actual_src_stride });
+    }
+    return img::make_img_desc_from_linear_memory(
+        src_type, map_in_data); // no explicit stride mentioned, so assume linear memory
+}
+
 static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
                                                GstBuffer* inbuf,
                                                GstBuffer* outbuf)
 {
     auto self = GST_TCAMCONVERT(base);
+    auto& elem = get_gst_elem_reference(self);
 
     GstMapInfo map_in;
     if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READ))
     {
-        GST_ERROR("Input buffer could not be mapped");
+        GST_ERROR_OBJECT(self, "Input buffer could not be mapped");
         return GST_FLOW_OK;
     }
 
@@ -485,24 +503,14 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
     {
         gst_buffer_unmap(inbuf, &map_in);
 
-        GST_ERROR("Output buffer could not be mapped");
+        GST_ERROR_OBJECT(self, "Output buffer could not be mapped");
         return GST_FLOW_OK;
     }
 
-    img::img_descriptor src = {};
-    if (int gst_meta_stride = get_mapped_stride(inbuf); gst_meta_stride)
-    {
-        src = img::make_img_desc_raw(self->context_->src_type_,
-                                     img::img_plane { map_in.data, gst_meta_stride });
-    }
-    else
-    {
-        src = img::make_img_desc_from_linear_memory(self->context_->src_type_, map_in.data);
-    }
+    auto src = make_img_desc_from_input_buffer(elem.src_type_, map_in.data, inbuf);
+    auto dst = img::make_img_desc_from_linear_memory(elem.dst_type_, map_out.data);
 
-    auto dst = img::make_img_desc_from_linear_memory(self->context_->dst_type_, map_out.data);
-
-    self->context_->transform(src, dst);
+    elem.transform(src, dst);
 
     gst_buffer_unmap(outbuf, &map_out);
     gst_buffer_unmap(inbuf, &map_in);
@@ -593,57 +601,55 @@ static gboolean gst_tcamconvert_copy_metadata(GstBaseTransform* base,
     return TRUE;
 }
 
-static bool is_compatible_source_element(GstElement& element)
-{
-    if (!TCAM_IS_PROP(&element))
-    { // When the element has no tcamprop interface, we can quit here
-        return false;
-    }
-    return true;
-}
-
 static GstStateChangeReturn gst_tcamconvert_change_state(GstElement* element, GstStateChange trans)
 {
-    auto* self = GST_TCAMCONVERT(element);
+    auto& elem = get_gst_elem_reference(GST_TCAMCONVERT(element));
 
     GstStateChangeReturn ret = GST_ELEMENT_CLASS(parent_class)->change_state(element, trans);
     switch (trans)
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            // if we are connected, we look for our GstTcamSrc element, and only here whine about not finding it
-            auto camera_src = gst_helper::find_upstream_element(*GST_ELEMENT(self),
-                                                                &is_compatible_source_element);
-            if (camera_src == nullptr)
-            {
-                GST_INFO_OBJECT(self,
-                                "Unable to find a 'The Imaging Source' device. "
-                                "tcamconvert can only be used in conjunction with such a device.");
-            }
-            else
-            {
-                self->context_->setup(camera_src);
-            }
+            elem.try_connect_to_source( false );
             break;
         }
-        case GST_STATE_CHANGE_READY_TO_NULL:
-            self->context_->clear();
-            break;
         default:
             break;
     }
     return ret;
 }
 
+
+static void gst_tcamdutils_sink_pad_linked(GstPad* /*self*/, GstPad* /*peer*/, gpointer user_data)
+{
+    static_cast<GstTCamConvert*>(user_data)->context_->on_input_pad_linked();
+}
+
+static void gst_tcamdutils_sink_pad_unlinked(GstPad* /*self*/, GstPad* /*peer*/, gpointer user_data)
+{
+    static_cast<GstTCamConvert*>(user_data)->context_->on_input_pad_unlinked();
+}
+
 static void gst_tcamconvert_init(GstTCamConvert* self)
 {
-    self->context_ = new tcamconvert::tcamconvert_context_base;
+    self->context_ = new tcamconvert::tcamconvert_context_base( self );
 
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), FALSE);
+
+    auto sink_pad = gst_helper::get_static_pad(*GST_ELEMENT(self), "sink");
+    g_signal_connect(sink_pad.get(), "linked", G_CALLBACK(gst_tcamdutils_sink_pad_linked), self);
+    g_signal_connect(
+        sink_pad.get(), "unlinked", G_CALLBACK(gst_tcamdutils_sink_pad_unlinked), self);
 }
 
 static void gst_tcamconvert_dispose(GObject* object)
 {
+    auto* self = GST_TCAMCONVERT(object);
+    {
+        auto sink_pad = gst_helper::get_static_pad(*GST_ELEMENT(self), "sink");
+        int res = g_signal_handlers_disconnect_by_data(sink_pad.get(), self);
+        assert(res == 2);
+    }
     G_OBJECT_CLASS(gst_tcamconvert_parent_class)->dispose(object);
 }
 
@@ -673,7 +679,7 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
         "The Imaging Source <support@theimagingsource.com>");
 
 
-    auto src_caps = gst_helper::generate_caps_with_dim( tcamconvert_get_all_output_fccs());
+    auto src_caps = gst_helper::generate_caps_with_dim(tcamconvert_get_all_output_fccs());
 
     gst_element_class_add_pad_template(
         gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps.get()));
@@ -682,7 +688,8 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
     auto sink_caps = gst_helper::generate_caps_with_dim(tcamconvert_get_all_input_fccs());
 
     gst_element_class_add_pad_template(
-        gstelement_class, gst_pad_template_new("sink", GST_PAD_SINK, GST_PAD_ALWAYS, sink_caps.get()));
+        gstelement_class,
+        gst_pad_template_new("sink", GST_PAD_SINK, GST_PAD_ALWAYS, sink_caps.get()));
 
     gst_base_transform_class->transform_size = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_size);
     gst_base_transform_class->transform_caps = GST_DEBUG_FUNCPTR(gst_tcamconvert_transform_caps);
