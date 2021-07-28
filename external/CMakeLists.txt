@@ -16,10 +16,8 @@ add_subdirectory(PugiXml EXCLUDE_FROM_ALL)
 
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
-add_library( outcome INTERFACE )
-target_include_directories( outcome INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )
+add_subdirectory(outcome EXCLUDE_FROM_ALL)
 
-add_library( outcome::outcome ALIAS outcome )
 
 include(ExternalProject)
 
