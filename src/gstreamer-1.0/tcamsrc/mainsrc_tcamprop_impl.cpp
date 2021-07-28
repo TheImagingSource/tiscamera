@@ -21,8 +21,10 @@
 
 using namespace tcam::property;
 
+using namespace tcam;
 
-const char* prop_type_to_string(TCAM_PROPERTY_TYPE type)
+
+static const char* prop_type_to_string(TCAM_PROPERTY_TYPE type)
 {
     switch (type)
     {

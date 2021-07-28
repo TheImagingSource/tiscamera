@@ -17,7 +17,7 @@
 #include "gsttcamdeviceprovider.h"
 
 #include "../../tcam.h"
-#include "../tcamgstbase.h"
+#include "../tcamgstbase/tcamgstbase.h"
 #include "gsttcamdevice.h"
 
 #include <algorithm>
@@ -30,7 +30,6 @@ GST_DEBUG_CATEGORY_STATIC(tcam_deviceprovider_debug);
 
 
 G_DEFINE_TYPE(TcamDeviceProvider, tcam_device_provider, GST_TYPE_DEVICE_PROVIDER)
-
 
 struct device
 {
@@ -49,7 +48,6 @@ struct provider_state
     std::atomic<bool> run_updates;
     std::thread _update_thread;
 };
-
 
 static GstDevice* tcam_device_new(GstElementFactory* factory, const tcam::DeviceInfo& device)
 {
@@ -167,7 +165,7 @@ static void update_device_list(TcamDeviceProvider* self)
             self->state->known_devices.end(), new_devices.begin(), new_devices.end());
     };
 
-    std::unique_lock lck(self->state->_mtx);
+    std::unique_lock<std::mutex> lck(self->state->_mtx);
     auto sec = std::chrono::seconds(1);
     while (self->state->run_updates)
     {
@@ -199,7 +197,7 @@ static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
 
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(provider);
 
-    std::lock_guard(self->state->_mtx);
+    std::lock_guard lck(self->state->_mtx);
 
     GList* ret = NULL;
 

@@ -24,8 +24,6 @@ gboolean get_property_by_name(GstTcamMainSrc* self,
                               const gchar* name,
                               struct tcam_device_property* prop);
 
-const char* prop_type_to_string(TCAM_PROPERTY_TYPE type);
-
 
 gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name);
 

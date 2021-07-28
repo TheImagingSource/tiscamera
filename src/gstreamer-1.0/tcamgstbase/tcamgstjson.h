@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "../gobject/tcamprop.h"
+#pragma once
 
 #include <string>
 
+struct _TcamProp;
 
-std::string create_device_settings(const std::string& serial, TcamProp* tcam);
+std::string create_device_settings(const std::string& serial, _TcamProp* tcam);
 
-
-bool load_device_settings(TcamProp* tcam, const std::string& serial, const std::string& cache);
+bool load_device_settings( _TcamProp* tcam, const std::string& serial, const std::string& cache);

@@ -17,22 +17,14 @@
 #ifndef TCAM_GSTTCAMBASE_H
 #define TCAM_GSTTCAMBASE_H
 
-#include "gst_helper.h"
-
 #include <gst/gst.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
-
 
 namespace tcam
 {
 class VideoFormatDescription;
-}
-
-namespace tcam_helper
-{
-std::vector<std::string> gst_consume_GSList_to_vector(GSList* lst);
 }
 
 namespace tcam::gst
@@ -51,8 +43,6 @@ GstElement* tcam_gst_find_camera_src(GstElement* element);
 
 
 std::string get_plugin_version(const char* plugin_name);
-
-bool is_linked(GstElement*, const std::string&);
 
 /*
   extracts video/x-raw from caps and checks if only mono is present
@@ -133,18 +123,15 @@ GstCaps* get_caps_from_element_name(const char* elementname, const char* padname
 
 struct input_caps_required_modules
 {
-//    bool bayertransform = false;
     bool tcamconvert = false;
     bool bayer2rgb = false;
     bool videoconvert = false;
     bool jpegdec = false;
     bool dutils = false;
 
-    bool operator==(const struct input_caps_required_modules& other) const
+    bool operator==(const input_caps_required_modules& other) const noexcept
     {
-        if (//bayertransform == other.bayertransform
-            //&&
-            tcamconvert == other.tcamconvert
+        if (tcamconvert == other.tcamconvert
             && bayer2rgb == other.bayer2rgb
             && videoconvert == other.videoconvert && jpegdec == other.jpegdec
             && dutils == other.dutils)
@@ -153,31 +140,7 @@ struct input_caps_required_modules
         }
         return false;
     }
-
-    std::string str()
-    {
-        auto bstr = [](bool val) -> std::string
-        {
-            if (val)
-            {
-                return "true";
-            }
-            return "false";
-        };
-
-        return "tcamconvert: " + bstr(tcamconvert)
-            + "\nbayer2rgb: " + bstr(bayer2rgb)
-            + "\nvideoconvert: " + bstr(videoconvert)
-            + "\njpegdec: " + bstr(jpegdec)
-            + "\ndutils: " + bstr(dutils)
-            + "\n"
-            ;
-    }
 };
-
-
-void reset_input_caps_modules(struct input_caps_required_modules& modules);
-
 
 struct input_caps_toggles
 {
@@ -199,8 +162,8 @@ struct input_caps_toggles
  */
 GstCaps* find_input_caps(GstCaps* available_caps,
                          GstCaps* wanted_caps,
-                         struct input_caps_required_modules& modules,
-                         struct input_caps_toggles toggles);
+                         input_caps_required_modules& modules,
+                         input_caps_toggles toggles);
 
 GstCaps* convert_videoformatsdescription_to_caps(
     const std::vector<tcam::VideoFormatDescription>& descriptions);

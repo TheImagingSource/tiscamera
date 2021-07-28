@@ -20,43 +20,12 @@ find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
 add_subdirectory( tcamconvert )
+add_subdirectory( tcamgstbase )
 
 set(PLUGINS
   gsttcamsrc
   gsttcambin
   )
-
-
-add_library(tcamgstbase STATIC tcamgstbase.cpp tcamgstjson.cpp tcamgststrings.cpp tcambinconversion.cpp)
-
-set_project_warnings(tcamgstbase)
-
-
-
-target_include_directories(tcamgstbase
-PUBLIC
-	${GLIB2_INCLUDE_DIR}
-	${GObject_INCLUDE_DIR}
-	${INTROSPECTION_INCLUDE_DIR}
-	${GSTREAMER_INCLUDE_DIRS}
-	${GSTREAMER_BASE_INCLUDE_DIRS}
-	${GSTREAMER_VIDEO_INCLUDE_DIRS}
-	${TCAM_SOURCE_DIR}/external/
-)
-
-target_link_libraries(tcamgstbase
-PRIVATE
-	${GOBJECT_LIBRARIES}
-	${GLIB2_LIBRARIES}
-	${GSTREAMER_LIBRARIES}
-	${GSTREAMER_BASE_LIBRARIES}
-	${GSTREAMER_VIDEO_LIBRARIES}
-PUBLIC
-	tcam
-	tcam::tcamprop
-	dutils_img::base
-	spdlog::spdlog
-)
 
 add_library(gsttcamsrc SHARED
 	tcamsrc/gsttcamsrc.cpp
@@ -77,6 +46,7 @@ PUBLIC
 target_link_libraries( gsttcamsrc
 PRIVATE
 	tcamgstbase
+	tcam::gst-helper	
 )
 set_project_warnings(gsttcamsrc)
 
@@ -87,6 +57,7 @@ add_library(gsttcambin SHARED
 target_link_libraries( gsttcambin
 PRIVATE
 	tcamgstbase
+	tcam::gst-helper	
 )
 set_project_warnings(gsttcambin)
 

@@ -19,9 +19,9 @@
 #include "../../gobject/tcamprop.h"
 #include "../../logging.h"
 #include "../../tcam.h"
-#include "../tcamgstbase.h"
-#include "../tcamgstjson.h"
-#include "../tcamgststrings.h"
+#include "../tcamgstbase/tcamgstbase.h"
+#include "../tcamgstbase/tcamgstjson.h"
+#include "../tcamgstbase/tcamgststrings.h"
 #include "gsttcamdeviceprovider.h"
 #include "gsttcammainsrc.h"
 
@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <vector>
 
+using namespace tcam;
 
 GST_DEBUG_CATEGORY_STATIC(tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug

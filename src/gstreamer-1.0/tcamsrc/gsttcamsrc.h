@@ -24,16 +24,7 @@
 #include <string>
 #include <vector>
 
-using namespace tcam;
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-    G_BEGIN_DECLS
-
+G_BEGIN_DECLS
 
 #define GST_TYPE_TCAM_SRC          (gst_tcam_src_get_type())
 #define GST_TCAM_SRC(obj)          (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_TCAM_SRC, GstTcamSrc))
@@ -41,49 +32,44 @@ extern "C"
 #define GST_IS_TCAM_SRC(obj)       (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM_SRC))
 #define GST_IS_TCAM_SRC_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM_SRC))
 
-    typedef struct _GstTcamSrc GstTcamSrc;
-    typedef struct _GstTcamSrcClass GstTcamSrcClass;
+typedef struct _GstTcamSrc GstTcamSrc;
+typedef struct _GstTcamSrcClass GstTcamSrcClass;
 
-    struct _GstTcamSrc
-    {
-        GstBin parent;
+struct _GstTcamSrc
+{
+    GstBin parent;
 
-        GstElement* active_source;
+    GstElement* active_source;
 
-        // convenience container
-        // for all source elements
-        // tcamsrc can address
-        GSList* source_list;
+    // convenience container
+    // for all source elements
+    // tcamsrc can address
+    GSList* source_list;
 
-        GstElement* main_src;
-        GstElement* pimipi_src;
-        GstElement* tegra_src;
+    GstElement* main_src;
+    GstElement* pimipi_src;
+    GstElement* tegra_src;
 
-        std::string device_serial;
-        TCAM_DEVICE_TYPE device_type;
+    std::string device_serial;
+    tcam::TCAM_DEVICE_TYPE device_type;
 
-        gint cam_buffers;
-        gboolean drop_incomplete_frames;
-        gboolean do_timestamp;
-        gint num_buffers;
+    gint cam_buffers;
+    gboolean drop_incomplete_frames;
+    gboolean do_timestamp;
+    gint num_buffers;
 
-        GstPad* pad;
-    };
-
-
-    struct _GstTcamSrcClass
-    {
-        GstBinClass parent_class;
-    };
-
-    GType gst_tcam_src_get_type(void);
-
-    G_END_DECLS
+    GstPad* pad;
+};
 
 
-#ifdef __cplusplus
-}
-#endif
+struct _GstTcamSrcClass
+{
+    GstBinClass parent_class;
+};
+
+GType gst_tcam_src_get_type(void);
+
+G_END_DECLS
 
 
 #endif /* TCAM_GSTTCAMSRC_H */

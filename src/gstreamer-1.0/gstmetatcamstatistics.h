@@ -23,6 +23,8 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 
+G_BEGIN_DECLS
+
 typedef struct _GstMetaTcamStatistics TcamStatisticsMeta;
 
 struct _GstMetaTcamStatistics
@@ -46,5 +48,7 @@ const GstMetaInfo* tcam_statistics_meta_get_info(void);
 
 TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta(GstBuffer* buffer,
                                                         GstStructure* statistics);
+
+G_END_DECLS
 
 #endif /* GST_META_TCAM_STATISTICS_H */

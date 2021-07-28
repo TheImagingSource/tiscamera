@@ -118,7 +118,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "video/x-bayer,format=grbg,width=640,height=480,framerate={60/1,30/1,25/1,15/1}",
              modules);
 
-    reset_input_caps_modules(modules);
+    modules = {};
     modules.bayer2rgb = true;
     add_test("Conversion 1",
              caps::DFK72_CAPS,
@@ -134,7 +134,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              modules);
 
 
-    reset_input_caps_modules(modules);
+    modules = {};
 
     add_test("Pass jpeg",
              caps::ECU010_CAPS,
@@ -147,7 +147,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "image/jpeg,width=320,height=240,framerate=30/1",
              modules);
 
-    reset_input_caps_modules(modules);
+    modules = {};
     modules.videoconvert = true;
     add_test("Select yuv selection for BGRx",
              caps::ECU010_CAPS,
@@ -161,7 +161,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              modules);
 
 
-    reset_input_caps_modules(modules);
+    modules = {};
     modules.videoconvert = true;
     add_test("pass through YUY2",
              caps::ECU010_CAPS,
@@ -172,7 +172,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     //         }
     //     },
 
-    reset_input_caps_modules(modules);
+    modules = {};
     modules.videoconvert = true;
     modules.jpegdec = true;
     add_test("convert jpeg to BGRx",
@@ -182,7 +182,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "image/jpeg, width=1280, height=960, framerate=60/1",
              modules);
 
-    reset_input_caps_modules(modules);
+    modules = {};
     add_test(
         "Mono and mono8 wanted",
         "video/x-raw,format=GRAY8,width=1600,height=1200,framerate={201, 15/1, 15/2, 15/4};"
@@ -219,7 +219,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
 
              modules);
 
-    reset_input_caps_modules(modules);
+    modules = {};
     add_test("Select yuv",
              caps::ECU010_CAPS,
              "video/x-raw",
@@ -231,7 +231,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "video/x-raw, format=YUY2, width=320, height=240, framerate={ 30/1 }",
              modules);
 
-    reset_input_caps_modules(modules);
+    modules = {};
     modules.videoconvert = true;
     add_test("YUV input; BGRx output",
              caps::ECU010_CAPS,

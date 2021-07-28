@@ -15,19 +15,16 @@
  */
 
 #include "gsttcambin.h"
-// #include <girepository.h>
 
 #include "../gobject/tcamprop.h"
 #include "../version.h"
-#include "gst_helper.h"
-#include "tcamgstbase.h"
-#include "tcamgstjson.h"
+#include <gst-helper/helper_functions.h>
+#include "tcamgstbase/tcamgstjson.h"
 
 #include <cstring>
-#include <glib-object.h>
+//#include <glib-object.h>
 #include <string>
 #include <unistd.h>
-#include <vector>
 
 using namespace tcam::gst;
 
@@ -38,16 +35,16 @@ struct tcambin_data
 
     std::string state;
 
-    gst_helper::gst_unique_ptr<GstPad> target_pad;
-    gst_helper::gst_unique_ptr<GstCaps> user_caps;
+    gst_helper::gst_ptr<GstPad> target_pad;
+    gst_helper::gst_ptr<GstCaps> user_caps;
 
     GstPad* src_ghost_pad =
         nullptr; // NOTE: we don't have a reference to this, so this is a observer that will be made invalid in dispose
 
-    gst_helper::gst_unique_ptr<GstElement> out_caps;
+    gst_helper::gst_ptr<GstElement> out_caps;
 
-    gst_helper::gst_unique_ptr<GstCaps> src_caps;
-    gst_helper::gst_unique_ptr<GstCaps> target_caps;
+    gst_helper::gst_ptr<GstCaps> src_caps;
+    gst_helper::gst_ptr<GstCaps> target_caps;
 };
 
 
@@ -475,7 +472,7 @@ static gboolean gst_tcambin_create_source(GstTcamBin* self)
                     self->data->device_serial.c_str(),
                     self->data->device_type.c_str());
 
-    self->data->src_caps = gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
+    self->data->src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*self->src, "src"));
     // GST_INFO_OBJECT(
     //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(self->data->src_caps.get()));
 
@@ -732,11 +729,11 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
 
     // if (!gst_caps_is_fixed(self->data->src_caps.get()))
     // {
-        std::string sc = gst_helper::to_string(self->data->src_caps);
+        std::string sc = gst_helper::to_string(*self->data->src_caps);
         GstCaps* tmp = tcam_gst_find_largest_caps(self->data->src_caps.get());
         GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
                  sc.c_str(),
-                 gst_helper::to_string(tmp).c_str());
+                 gst_helper::to_string(*tmp).c_str());
 
         if (tmp)
         {
@@ -750,7 +747,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     // else
     // {
     //     GST_INFO("Caps are fixed. Using caps for src: %s",
-    //              gst_helper::to_string(self->data->src_caps).c_str());
+    //              gst_helper::to_string(*self->data->src_caps).c_str());
     // }
 
     // explicitly destroy the pipeline caps
@@ -838,7 +835,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     };
 
     std::string pipeline_description = "tcamsrc ! ";
-    pipeline_description += gst_helper::to_string(self->data->src_caps);
+    pipeline_description += gst_helper::to_string(*self->data->src_caps);
 
     GstElement* previous_element = self->pipeline_caps;
 
@@ -904,15 +901,15 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     GST_INFO_OBJECT(self,
                     "Internal pipeline of tcambin: %s",
                     pipeline_description.c_str());
-    self->data->target_pad = gst_helper::get_static_pad(previous_element, "src");
+    self->data->target_pad = gst_helper::get_static_pad(*previous_element, "src");
 
-    if (gst_helper::caps_empty_or_any(self->data->target_caps))
+    if (gst_helper::caps_empty_or_any(*self->data->target_caps))
     {
         self->data->target_caps.reset(gst_caps_copy(self->data->src_caps.get()));
     }
 
     GST_INFO_OBJECT(
-        self, "Working with exit caps: %s", gst_helper::to_string(self->data->target_caps).c_str());
+        self, "Working with exit caps: %s", gst_helper::to_string(*self->data->target_caps).c_str());
     self->elements_linked = TRUE;
 
     return TRUE;
@@ -925,7 +922,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
  */
 static GstCaps* generate_all_caps(GstTcamBin* self)
 {
-    gst_helper::gst_unique_ptr<GstPad> in_pad = gst_helper::get_static_pad(self->src, "src");
+    auto in_pad = gst_helper::get_static_pad(*self->src, "src");
     GstCaps* incoming_caps = gst_pad_query_caps(in_pad.get(), NULL);
 
 
@@ -1017,7 +1014,7 @@ static GstCaps* generate_all_caps(GstTcamBin* self)
     // gst_caps_unref(to_remove);
 
 
-    GST_DEBUG("All caps: %s", gst_caps_to_string(all_caps));
+    GST_DEBUG("All caps: %s", gst_helper::to_string(*all_caps).c_str());
 
     return all_caps;
 }
@@ -1118,7 +1115,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             self->data->out_caps.reset(gst_element_factory_make("capsfilter", "tcambin-out_caps"));
 
             gst_ghost_pad_set_target(GST_GHOST_PAD(self->data->src_ghost_pad),
-                                     gst_helper::get_static_pad(self->data->out_caps, "src").get());
+                                     gst_helper::get_static_pad(*self->data->out_caps, "src").get());
 
             GstCaps* all_caps = generate_all_caps(self);
             g_object_set(self->data->out_caps.get(), "caps", all_caps, NULL);
@@ -1137,8 +1134,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
         {
             GST_INFO("READY_TO_PAUSED");
 
-            gst_helper::gst_unique_ptr<GstPad> sinkpad { gst_pad_get_peer(
-                self->data->src_ghost_pad) };
+            auto sinkpad = gst_helper::get_peer_pad(*self->data->src_ghost_pad );
 
             if (sinkpad == nullptr)
             {
@@ -1160,7 +1156,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 }
                 else
                 {
-                    self->data->target_caps = gst_helper::query_caps(sinkpad);
+                    self->data->target_caps = gst_helper::query_caps(*sinkpad);
                 }
                 gst_object_unref(par);
                 GST_INFO_OBJECT(self,
@@ -1168,8 +1164,8 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                                 static_cast<void*>(self->data->target_caps.get()));
             }
 
-            gst_helper::gst_unique_ptr<GstCaps> src_caps =
-                gst_helper::query_caps(gst_helper::get_static_pad(self->src, "src"));
+            auto src_caps =
+                gst_helper::query_caps(*gst_helper::get_static_pad(*self->src, "src"));
             // GST_INFO_OBJECT(
             //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
 
@@ -1197,7 +1193,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                     GST_ERROR_OBJECT(self,
                                      "The user defined device caps are not supported by the "
                                      "device. User caps are: %s",
-                                     gst_helper::to_string(self->data->user_caps).c_str());
+                                     gst_helper::to_string(*self->data->user_caps).c_str());
                     return GST_STATE_CHANGE_FAILURE;
                 }
 
@@ -1210,7 +1206,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 // they want to define the device format but not the resolution etc.
                 GST_INFO_OBJECT(self,
                                 "Using user defined caps for tcamsrc. User caps are: %s",
-                                gst_helper::to_string(self->data->user_caps).c_str());
+                                gst_helper::to_string(*self->data->user_caps).c_str());
 
                 self->data->src_caps.reset(find_input_caps(self->data->user_caps.get(),
                                                            self->data->target_caps.get(),
@@ -1227,7 +1223,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             {
                 GST_ERROR_OBJECT(self,
                                  "Unable to work with given caps: %s",
-                                 gst_helper::to_string(self->data->target_caps).c_str());
+                                 gst_helper::to_string(*self->data->target_caps).c_str());
                 return GST_STATE_CHANGE_FAILURE;
             }
 
@@ -1255,7 +1251,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
              */
 
             gchar* caps_info_string = g_strdup_printf(
-                "Working with src caps: %s", gst_helper::to_string(self->data->src_caps).c_str());
+                "Working with src caps: %s", gst_helper::to_string(*self->data->src_caps).c_str());
 
             GstMessage* msg = gst_message_new_info(GST_OBJECT(element), nullptr, caps_info_string);
             g_free(caps_info_string);
@@ -1356,7 +1352,7 @@ static void gst_tcambin_get_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
-            g_value_set_string(value, gst_helper::to_string(self->data->user_caps).c_str());
+            g_value_set_string(value, gst_helper::to_string(*self->data->user_caps).c_str());
             break;
         }
         case PROP_USE_DUTILS:

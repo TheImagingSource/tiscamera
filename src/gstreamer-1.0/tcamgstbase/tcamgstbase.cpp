@@ -16,10 +16,10 @@
 
 #include "tcamgstbase.h"
 
-#include "../base_types.h"
-#include "../logging.h"
-#include "../public_utils.h"
-#include "../tcam.h"
+#include "../../base_types.h"
+#include "../../logging.h"
+#include "../../public_utils.h"
+#include "../../tcam.h"
 #include "tcamgststrings.h"
 
 #include <algorithm> //std::find
@@ -30,38 +30,10 @@
 #include <string.h> // strcmp
 
 #include "tcambinconversion.h"
+#include <gst-helper/helper_functions.h>
+#include <gst-helper/gvalue_helper.h>
 
-
-
-std::vector<std::string> tcam_helper::gst_consume_GSList_to_vector(GSList* lst)
-{
-    if (lst == nullptr)
-    {
-        return {};
-    }
-
-    std::vector<std::string> rval;
-    GSList* iter = lst;
-    do {
-        char* str = static_cast<char*>(iter->data);
-
-        rval.push_back(str);
-
-        ::g_free(str);
-
-        iter = g_slist_next(iter);
-    } while (iter != nullptr);
-
-    g_slist_free(lst);
-
-    return rval;
-}
-
-
-namespace tcam::gst
-{
-
-std::pair<std::string, std::string> separate_serial_and_type(const std::string& input)
+std::pair<std::string, std::string> tcam::gst::separate_serial_and_type(const std::string& input)
 {
     auto pos = input.find("-");
 
@@ -76,7 +48,7 @@ std::pair<std::string, std::string> separate_serial_and_type(const std::string& 
 }
 
 
-bool separate_serial_and_type(const std::string& input, std::string& serial, std::string& type)
+bool tcam::gst::separate_serial_and_type(const std::string& input, std::string& serial, std::string& type)
 {
     auto pos = input.find("-");
 
@@ -107,12 +79,14 @@ typedef struct tcam_src_element_
     std::string name;
     // name so because function `g_type_name` exists
     std::string g_type_name_str;
-    std::vector<TCAM_DEVICE_TYPE> type;
+    std::vector<tcam::TCAM_DEVICE_TYPE> type;
 } tcam_src_element;
 
 
-std::vector<tcam_src_element> get_possible_sources()
+static std::vector<tcam_src_element> get_possible_sources()
 {
+    using namespace tcam;
+
     std::vector<tcam_src_element> ret;
 
     ret.push_back({ "tcammainsrc",
@@ -132,7 +106,7 @@ std::vector<tcam_src_element> get_possible_sources()
 }
 
 
-std::vector<std::string> get_source_element_factory_names()
+static std::vector<std::string> get_source_element_factory_names()
 {
     auto sources = get_possible_sources();
 
@@ -146,7 +120,7 @@ std::vector<std::string> get_source_element_factory_names()
 }
 
 
-GstElement* tcam_gst_find_camera_src_rec(GstElement* element,
+static GstElement* tcam_gst_find_camera_src_rec(GstElement* element,
                                          const std::vector<std::string>& factory_names)
 {
     GstPad* orig_pad = gst_element_get_static_pad(element, "sink");
@@ -180,7 +154,7 @@ GstElement* tcam_gst_find_camera_src_rec(GstElement* element,
 }
 
 
-GstElement* tcam_gst_find_camera_src(GstElement* element)
+GstElement* tcam::gst::tcam_gst_find_camera_src(GstElement* element)
 {
     std::vector<std::string> factory_names = get_source_element_factory_names();
 
@@ -188,7 +162,7 @@ GstElement* tcam_gst_find_camera_src(GstElement* element)
 }
 
 
-std::string get_plugin_version(const char* plugin_name)
+std::string tcam::gst::get_plugin_version(const char* plugin_name)
 {
     GstPlugin* plugin = gst_plugin_load_by_name(plugin_name);
     if (plugin == nullptr)
@@ -208,45 +182,12 @@ std::string get_plugin_version(const char* plugin_name)
     return rval;
 }
 
-
-
-bool is_linked(GstElement* element, const std::string& pad_name)
-{
-    gst_helper::gst_unique_ptr<GstPad> pad = gst_helper::get_static_pad(element, pad_name);
-
-    return gst_pad_is_linked(pad.get());
-}
-
-
 static std::vector<std::string> gst_list_to_vector(const GValue* gst_list)
 {
-    std::vector<std::string> ret;
-    if (!GST_VALUE_HOLDS_LIST(gst_list))
-    {
-        SPDLOG_ERROR("Given GValue is not a list.");
-        return ret;
-    }
-
-    for (unsigned int x = 0; x < gst_value_list_get_size(gst_list); ++x)
-    {
-        const GValue* val = gst_value_list_get_value(gst_list, x);
-
-        if (G_VALUE_TYPE(val) == G_TYPE_STRING)
-        {
-
-            ret.push_back(g_value_get_string(val));
-        }
-        else
-        {
-            SPDLOG_ERROR("NOT IMPLEMENTED. TYPE CAN NOT BE INTERPRETED");
-        }
-    }
-
-    return ret;
+    return gst_helper::gst_string_list_to_vector( *gst_list );
 }
 
-
-bool tcam_gst_raw_only_has_mono(const GstCaps* caps)
+bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -402,7 +343,7 @@ static bool tcam_gst_is_fourcc_yuv(const uint32_t fourcc)
 }
 
 
-bool tcam_gst_is_bayer8_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer8_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -419,7 +360,7 @@ bool tcam_gst_is_bayer8_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_bayer10_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer10_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -438,7 +379,7 @@ bool tcam_gst_is_bayer10_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_bayer10_packed_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer10_packed_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -459,7 +400,7 @@ bool tcam_gst_is_bayer10_packed_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_bayer12_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer12_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -478,7 +419,7 @@ bool tcam_gst_is_bayer12_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_bayer12_packed_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer12_packed_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -499,7 +440,7 @@ bool tcam_gst_is_bayer12_packed_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_bayer16_string(const char* format_string)
+bool tcam::gst::tcam_gst_is_bayer16_string(const char* format_string)
 {
     if (format_string == nullptr)
     {
@@ -516,7 +457,7 @@ bool tcam_gst_is_bayer16_string(const char* format_string)
 }
 
 
-bool tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
+bool tcam::gst::tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
 {
     if (fourcc == GST_MAKE_FOURCC('R', 'G', 'B', 'x')
         || fourcc == GST_MAKE_FOURCC('x', 'R', 'G', 'B')
@@ -534,16 +475,12 @@ bool tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
     return FALSE;
 }
 
-bool tcam_gst_is_bayerpwl_fourcc(const unsigned int fourcc)
+static bool tcam_gst_is_bayerpwl_fourcc(const uint32_t fourcc)
 {
-    if (fourcc == FOURCC_PWL_RG12_MIPI || fourcc == FOURCC_PWL_RG12 || fourcc == FOURCC_PWL_RG16H12)
-    {
-        return true;
-    }
-    return false;
+    return img::is_pwl_fcc( static_cast<img::fourcc>( fourcc ) );
 }
 
-bool tcam_gst_is_polarized_mono(const unsigned int fourcc)
+static bool tcam_gst_is_polarized_mono(const unsigned int fourcc)
 {
     if (fourcc == FOURCC_POLARIZATION_MONO8_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_MONO16_90_45_135_0
@@ -561,7 +498,7 @@ bool tcam_gst_is_polarized_mono(const unsigned int fourcc)
 }
 
 
-bool tcam_gst_is_polarized_bayer(const unsigned int fourcc)
+static bool tcam_gst_is_polarized_bayer(const unsigned int fourcc)
 {
     if (fourcc == FOURCC_POLARIZATION_BG8_90_45_135_0
         || fourcc == FOURCC_POLARIZATION_BG16_90_45_135_0
@@ -602,7 +539,7 @@ static bool tcam_gst_fixate_caps(GstCaps* caps)
     return TRUE;
 }
 
-bool gst_caps_are_bayer_only(const GstCaps* caps)
+bool tcam::gst::gst_caps_are_bayer_only(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -640,7 +577,7 @@ $4 = 0x555555a8f120 "EMPTY"
         return true;
     }
 
-    auto tmp_caps_string = gst_helper::to_string(caps);
+    auto tmp_caps_string = gst_helper::to_string(*caps);
     if ((tmp_caps_string == "EMPTY") || gst_caps_is_any(caps))
     {
         return true;
@@ -709,18 +646,10 @@ static std::vector<uint32_t> index_format_fourccs(const GstCaps* caps)
     return ret;
 }
 
-void reset_input_caps_modules(struct input_caps_required_modules& modules)
-{
-    modules.tcamconvert = false;
-    modules.bayer2rgb = false;
-    modules.videoconvert = false;
-    modules.jpegdec = false;
-    modules.dutils = false;
-}
-
-
 static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
 {
+    using namespace tcam::gst;
+
     /**
      * prefer bayer 8-bit over everything else
      * if bayer 8-bit does not exist order according to the following list:
@@ -813,7 +742,7 @@ static uint32_t find_preferred_format(const std::vector<uint32_t>& vec)
 }
 
 
-GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming)
+GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
 {
     /**
      * find_largest_caps tries to find the largest caps
@@ -931,7 +860,7 @@ GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming)
 
     GstCaps* largest_caps = gst_caps_copy_nth(incoming, largest_index);
 
-    SPDLOG_INFO("Fixating assumed largest caps: {}", gst_helper::to_string(largest_caps).c_str());
+    SPDLOG_INFO("Fixating assumed largest caps: {}", gst_helper::to_string(*largest_caps).c_str());
 
     if (!tcam_gst_fixate_caps(largest_caps))
     {
@@ -979,12 +908,12 @@ GstCaps* tcam_gst_find_largest_caps(const GstCaps* incoming)
 
     gst_caps_unref(largest_caps);
 
-    SPDLOG_INFO("Largest caps are: {}", gst_helper::to_string(ret_caps).c_str());
+    SPDLOG_INFO("Largest caps are: {}", gst_helper::to_string(*ret_caps).c_str());
 
     return ret_caps;
 }
 
-bool contains_jpeg(const GstCaps* caps)
+bool tcam::gst::contains_jpeg(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1002,7 +931,7 @@ bool contains_jpeg(const GstCaps* caps)
     return false;
 }
 
-bool contains_bayer(const GstCaps* caps)
+bool tcam::gst::contains_bayer(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1020,7 +949,7 @@ bool contains_bayer(const GstCaps* caps)
     return false;
 }
 
-bool contains_mono(const GstCaps* caps)
+bool tcam::gst::contains_mono(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1042,7 +971,7 @@ bool contains_mono(const GstCaps* caps)
     return false;
 }
 
-bool tcam_gst_contains_bayer_10_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_bayer_10_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1060,7 +989,7 @@ bool tcam_gst_contains_bayer_10_bit(const GstCaps* caps)
 }
 
 
-bool tcam_gst_contains_bayer_12_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_bayer_12_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1078,7 +1007,7 @@ bool tcam_gst_contains_bayer_12_bit(const GstCaps* caps)
 }
 
 
-bool tcam_gst_contains_mono_8_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_mono_8_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1093,7 +1022,7 @@ bool tcam_gst_contains_mono_8_bit(const GstCaps* caps)
 }
 
 
-bool tcam_gst_contains_mono_10_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_mono_10_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1111,7 +1040,7 @@ bool tcam_gst_contains_mono_10_bit(const GstCaps* caps)
 }
 
 
-bool tcam_gst_contains_mono_12_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_mono_12_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1129,7 +1058,7 @@ bool tcam_gst_contains_mono_12_bit(const GstCaps* caps)
 }
 
 
-bool tcam_gst_contains_mono_16_bit(const GstCaps* caps)
+bool tcam::gst::tcam_gst_contains_mono_16_bit(const GstCaps* caps)
 {
     if (caps == nullptr)
     {
@@ -1158,7 +1087,7 @@ static GstCaps* get_caps_from_element(GstElement* element, const char* padname)
     return ret;
 }
 
-GstCaps* get_caps_from_element_name(const char* elementname, const char* padname)
+GstCaps* tcam::gst::get_caps_from_element_name(const char* elementname, const char* padname)
 {
     GstElement* ele = gst_element_factory_make(elementname, "tmp-element");
     if (!ele)
@@ -1174,7 +1103,7 @@ GstCaps* get_caps_from_element_name(const char* elementname, const char* padname
 }
 
 
-std::vector<std::string> index_caps_formats(GstCaps* caps)
+std::vector<std::string> tcam::gst::index_caps_formats(GstCaps* caps)
 {
     // todo missing jpeg
 
@@ -1212,12 +1141,12 @@ std::vector<std::string> index_caps_formats(GstCaps* caps)
 }
 
 
-GstCaps* find_input_caps(GstCaps* available_caps,
+GstCaps* tcam::gst::find_input_caps(GstCaps* available_caps,
                          GstCaps* wanted_caps,
-                         struct input_caps_required_modules& modules,
-                         struct input_caps_toggles toggles)
+                         input_caps_required_modules& modules,
+                         input_caps_toggles toggles)
 {
-    reset_input_caps_modules(modules);
+    modules = {};
 
     if (!GST_IS_CAPS(available_caps))
     {
@@ -1245,8 +1174,8 @@ GstCaps* find_input_caps(GstCaps* available_caps,
 
 
 static void fill_structure_fixed_resolution(GstStructure* structure,
-                                            const VideoFormatDescription& format,
-                                            const tcam_resolution_description& res)
+                                            const tcam::VideoFormatDescription& format,
+                                            const tcam::tcam_resolution_description& res)
 {
     GValue fps_list = G_VALUE_INIT;
     g_value_init(&fps_list, GST_TYPE_LIST);
@@ -1277,7 +1206,7 @@ static void fill_structure_fixed_resolution(GstStructure* structure,
 }
 
 
-GstCaps* convert_videoformatsdescription_to_caps(
+GstCaps* tcam::gst::convert_videoformatsdescription_to_caps(
     const std::vector<VideoFormatDescription>& descriptions)
 {
     GstCaps* caps = gst_caps_new_empty();
@@ -1299,7 +1228,7 @@ GstCaps* convert_videoformatsdescription_to_caps(
             continue;
         }
 
-        std::vector<struct tcam_resolution_description> res = desc.get_resolutions();
+        std::vector<tcam_resolution_description> res = desc.get_resolutions();
 
         for (const auto& r : res)
         {
@@ -1429,5 +1358,4 @@ GstCaps* convert_videoformatsdescription_to_caps(
     }
 
     return caps;
-}
 }

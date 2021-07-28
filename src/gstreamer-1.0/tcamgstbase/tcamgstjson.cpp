@@ -16,16 +16,18 @@
 
 #include "tcamgstjson.h"
 
-#include "../json.h"
-#include "../logging.h"
+#include "../../json.h"
+#include "../../logging.h"
 
-#include <json/json.hpp>
+#include "../../../external/json/json.hpp"
+
+#include "../../gobject/tcamprop.h"
 
 // for convenience
 using json = nlohmann::json;
 
 
-static bool tcam_property_to_json(TcamProp* prop, json& parent, const char* name)
+static bool tcam_property_to_json(_TcamProp* prop, json& parent, const char* name)
 {
     GValue value = G_VALUE_INIT;
     GValue type = G_VALUE_INIT;
@@ -101,7 +103,7 @@ static bool tcam_property_to_json(TcamProp* prop, json& parent, const char* name
 }
 
 
-std::string create_device_settings(const std::string& serial, TcamProp* tcam)
+std::string create_device_settings(const std::string& serial, _TcamProp* tcam)
 {
     if (!tcam)
     {
@@ -143,7 +145,7 @@ std::string create_device_settings(const std::string& serial, TcamProp* tcam)
 }
 
 
-bool load_device_settings(TcamProp* tcam, const std::string& serial, const std::string& cache)
+bool load_device_settings(_TcamProp* tcam, const std::string& serial, const std::string& cache)
 {
     if (!tcam)
     {

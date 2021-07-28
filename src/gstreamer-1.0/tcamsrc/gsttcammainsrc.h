@@ -27,16 +27,7 @@
 #include <mutex>
 #include <string>
 
-using namespace tcam;
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-
-    G_BEGIN_DECLS
-
+G_BEGIN_DECLS
 
 #define GST_TYPE_TCAM_MAINSRC (gst_tcam_mainsrc_get_type())
 #define GST_TCAM_MAINSRC(obj) \
@@ -46,43 +37,37 @@ extern "C"
 #define GST_IS_TCAM_MAINSRC(obj)       (G_TYPE_CHECK_INSTANCE_TYPE((obj), GST_TYPE_TCAM_MAINSRC))
 #define GST_IS_TCAM_MAINSRC_CLASS(obj) (G_TYPE_CHECK_CLASS_TYPE((klass), GST_TYPE_TCAM_MAINSRC))
 
-    typedef struct _GstTcamMainSrc GstTcamMainSrc;
-    typedef struct _GstTcamMainSrcClass GstTcamMainSrcClass;
+typedef struct _GstTcamMainSrc GstTcamMainSrc;
+typedef struct _GstTcamMainSrcClass GstTcamMainSrcClass;
 
-    struct device_state;
+struct device_state;
 
-    struct _GstTcamMainSrc
-    {
-        GstPushSrc element;
+struct _GstTcamMainSrc
+{
+    GstPushSrc element;
 
-        std::string device_serial;
-        TCAM_DEVICE_TYPE device_type;
+    std::string device_serial;
+    tcam::TCAM_DEVICE_TYPE device_type;
 
-        struct device_state* device;
+    device_state* device;
 
-        int fps_numerator;
-        int fps_denominator;
-        int n_buffers;
-        int imagesink_buffers;
+    int fps_numerator;
+    int fps_denominator;
+    int n_buffers;
+    int imagesink_buffers;
 
-        std::atomic<bool> is_running;
-        gboolean drop_incomplete_frames;
-    };
-
-
-    struct _GstTcamMainSrcClass
-    {
-        GstPushSrcClass parent_class;
-    };
-
-    GType gst_tcam_mainsrc_get_type(void);
-
-    G_END_DECLS
+    std::atomic<bool> is_running;
+    gboolean drop_incomplete_frames;
+};
 
 
-#ifdef __cplusplus
-}
-#endif
+struct _GstTcamMainSrcClass
+{
+    GstPushSrcClass parent_class;
+};
 
+GType gst_tcam_mainsrc_get_type(void);
+
+G_END_DECLS
 
 #endif /* TCAM_GSTTCAMMAINSRC_H */

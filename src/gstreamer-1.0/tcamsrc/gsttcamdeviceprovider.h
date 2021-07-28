@@ -16,6 +16,9 @@
 
 #include <gst/gst.h>
 
+struct provider_state;
+
+G_BEGIN_DECLS
 
 #define TCAM_TYPE_DEVICE_PROVIDER tcam_device_provider_get_type()
 #define TCAM_DEVICE_PROVIDER(obj) \
@@ -28,8 +31,6 @@ struct _TcamDeviceProviderClass
 {
     GstDeviceProviderClass parent_class;
 };
-
-struct provider_state;
 
 /**
  * Our device provider instance.
@@ -47,9 +48,11 @@ struct _TcamDeviceProvider
     GstElementFactory* factory;
 
     //GList* devices;
-    struct provider_state* state;
+    provider_state* state;
     //guint timeout_id;
 };
 
 
 GType tcam_device_provider_get_type(void);
+
+G_END_DECLS

@@ -19,9 +19,9 @@
 #include "../../gobject/tcamprop.h"
 #include "../../logging.h"
 #include "../../tcam.h"
-#include "../tcamgstbase.h"
-#include "../tcamgstjson.h"
-#include "../tcamgststrings.h"
+#include "../tcamgstbase/tcamgstbase.h"
+#include "../tcamgstbase/tcamgstjson.h"
+#include "../tcamgstbase/tcamgststrings.h"
 #include "gstmetatcamstatistics.h"
 #include "mainsrc_device_state.h"
 #include "mainsrc_tcamprop_impl.h"
@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <vector>
+
+using namespace tcam;
+
 
 #define GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS 10
 
@@ -106,7 +109,7 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
         return nullptr;
     }
 
-    std::vector<VideoFormatDescription> format =
+    auto format =
         self->device->dev->get_available_video_formats();
 
     GST_DEBUG("Found %d pixel formats", (int)format.size());
@@ -119,7 +122,7 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
     }
 
-    GST_INFO("Device provides the following caps: %s", gst_helper::to_string(caps).c_str());
+    GST_INFO("Device provides the following caps: %s", gst_helper::to_string(*caps).c_str());
 
     return caps;
 }
@@ -148,7 +151,7 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
     }
     /* get the peer caps */
     peercaps = gst_pad_peer_query_caps(GST_BASE_SRC_PAD(basesrc), thiscaps);
-    GST_DEBUG("caps of peer: %s", gst_helper::to_string(peercaps).c_str());
+    GST_DEBUG("caps of peer: %s", gst_helper::to_string(*peercaps).c_str());
 
     if (!gst_caps_is_empty(peercaps) && !gst_caps_is_any(peercaps))
     {
@@ -163,7 +166,7 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
             GstCaps* ipcaps = gst_caps_copy_nth(peercaps, i);
 
             /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
-            bool is_any_caps = gst_helper::to_string(ipcaps) == "ANY";
+            bool is_any_caps = gst_helper::to_string(*ipcaps) == "ANY";
 
             if (gst_caps_is_any(ipcaps) || is_any_caps)
             {
@@ -408,7 +411,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     self->device->sink->drop_incomplete_frames(self->drop_incomplete_frames);
 
     self->is_running = true;
-    GST_INFO("Successfully set caps to: %s", gst_helper::to_string(caps).c_str());
+    GST_INFO("Successfully set caps to: %s", gst_helper::to_string(*caps).c_str());
 
     return TRUE;
 }
@@ -777,7 +780,7 @@ static GstCaps* gst_tcam_mainsrc_fixate_caps(GstBaseSrc* bsrc, GstCaps* caps)
             structure, "framerate", (double)(0.5 + frame_rate), 1);
     }
 
-    GST_DEBUG_OBJECT(self, "Fixated caps to %s", gst_helper::to_string(caps).c_str());
+    GST_DEBUG_OBJECT(self, "Fixated caps to %s", gst_helper::to_string(*caps).c_str());
 
     return GST_BASE_SRC_CLASS(gst_tcam_mainsrc_parent_class)->fixate(bsrc, caps);
 }

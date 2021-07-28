@@ -17,21 +17,21 @@
 #pragma once
 
 #include "../../tcam.h"
-#include "../gst_helper.h"
 #include "gsttcammainsrc.h"
 
+#include <gst-helper/helper_functions.h>
 #include <memory>
 #include <queue>
 
 struct device_state
 {
-    DeviceIndex index_;
+    tcam::DeviceIndex index_;
 
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
     std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
 
-    gst_helper::gst_unique_ptr<GstCaps> all_caps;
+    gst_helper::gst_ptr<GstCaps> all_caps;
 
     std::mutex mtx;
     std::condition_variable cv;
