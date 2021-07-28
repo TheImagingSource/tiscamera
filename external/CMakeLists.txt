@@ -15,7 +15,7 @@
 add_subdirectory(PugiXml EXCLUDE_FROM_ALL)
 
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
-
+add_subdirectory(fmt-7.1.3 EXCLUDE_FROM_ALL)
 add_subdirectory(outcome EXCLUDE_FROM_ALL)
 
 
