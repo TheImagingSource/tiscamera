@@ -1,5 +1,5 @@
 
-#include "tcamprop_provider_funcbased.h"
+#include "tcamprop_system/tcamprop_provider_funcbased.h"
 
 #include <algorithm>
 
@@ -343,7 +343,7 @@ void property_list_funcbased::register_double( const property_info& nfo, const p
 
 void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, prop_flags def_flags /*= prop_flags::def_flags */ )
 {
-    register_integer( nfo, range, std::move( set ), std::move( get ), std::move( def_flags ) );
+    props_.push_back( std::make_unique<property_integer>( nfo, range, std::move( set ), std::move( get ), std::move( def_flags ) ) );
 }
 
 void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, get_flags_func get_flags )

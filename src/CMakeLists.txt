@@ -15,7 +15,7 @@
 
 include( ${TCAM_SOURCE_DIR}/cmake/pkg-helper.cmake )
 
-add_subdirectory(lib/dutils_image EXCLUDE_FROM_ALL)
+add_subdirectory(lib)
 add_subdirectory(gobject)
 
 if (BUILD_GST_1_0)
@@ -44,11 +44,11 @@ add_library(tcam-base STATIC
 
 target_link_libraries( tcam-base 
 PUBLIC
-    dutils::dutils_img
+    dutils_img::img
     spdlog::spdlog
     outcome::outcome
 PRIVATE
-    dutils::dutils_img_auto
+    dutils_img::pipe_auto
 )
     
 target_include_directories( tcam-base PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")

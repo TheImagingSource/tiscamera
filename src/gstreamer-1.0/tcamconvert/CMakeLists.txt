@@ -38,8 +38,8 @@ target_link_libraries( tcamconvert
 PRIVATE
 	spdlog::spdlog
 	outcome::outcome
-	tcam::gst_helper
-	tcamprop
+	tcam::gst-helper
+	tcam::tcamprop
     tcam
 	${GOBJECT_LIBRARIES}
 	${GLIB2_LIBRARIES}
@@ -47,8 +47,8 @@ PRIVATE
 	${GSTREAMER_BASE_LIBRARIES}
 	${GSTREAMER_VIDEO_LIBRARIES}
 
-	dutils::dutils_img_base
-	dutils::dutils_img_filter_optimized
+	dutils_img::base
+	dutils_img::dutils_img_filter_optimized
 
 	tcamprop_system::provider
 	tcamprop_system::consumer

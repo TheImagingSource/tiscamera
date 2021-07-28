@@ -4,7 +4,6 @@
 #include <outcome/result.hpp>
 #include <string_view>
 #include <vector>
-#include <array>
 
 #include "tcamprop_system_base.h"
 

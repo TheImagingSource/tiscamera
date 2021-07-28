@@ -41,13 +41,13 @@ add_library( dutils_img_filter_c STATIC
 
 target_link_libraries( dutils_img_filter_c
 PRIVATE
-	dutils::project_warnings
-	dutils::project_options
+	dutils_img::project_warnings
+	dutils_img::project_options
 PUBLIC
-	dutils::dutils_img
+	dutils_img_base_lib
 )
 
-add_library( dutils::dutils_img_filter_c ALIAS dutils_img_filter_c )
+add_library( dutils_img::dutils_img_filter_c ALIAS dutils_img_filter_c )
 
 if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64" )
 

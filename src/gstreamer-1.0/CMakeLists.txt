@@ -19,13 +19,7 @@ find_package(GLIB2     REQUIRED QUIET)
 find_package(GObject   REQUIRED QUIET)
 find_package(GObjectIntrospection REQUIRED QUIET)
 
-add_subdirectory( gst_helper )
-add_subdirectory( tcamprop_system )
 add_subdirectory( tcamconvert )
-
-
-add_library( project-warnings INTERFACE )
-SET_PROJECT_WARNINGS( project-warnings )
 
 set(PLUGINS
   gsttcamsrc
@@ -59,8 +53,8 @@ PRIVATE
 	${GSTREAMER_VIDEO_LIBRARIES}
 PUBLIC
 	tcam
-	tcamprop
-	dutils::dutils_img
+	tcam::tcamprop
+	dutils_img::base
 	spdlog::spdlog
 )
 

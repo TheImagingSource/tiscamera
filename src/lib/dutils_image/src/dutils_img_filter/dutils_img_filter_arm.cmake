@@ -19,10 +19,10 @@ add_library( dutils_img_filter_neon STATIC
 
 target_link_libraries( dutils_img_filter_neon
 PUBLIC
-	dutils::dutils_img_filter_c
+	dutils_img::dutils_img_filter_c
 PRIVATE
-	dutils::project_options
-	dutils::project_warnings
+	dutils_img::project_options
+	dutils_img::project_warnings
 )
 
 if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64" )
@@ -34,4 +34,4 @@ target_compile_options( dutils_img_filter_neon PUBLIC -mfpu=neon-vfpv4 )	# This 
 endif()
 
 
-add_library( dutils::dutils_img_filter_optimized ALIAS dutils_img_filter_neon )
+add_library( dutils_img::dutils_img_filter_optimized ALIAS dutils_img_filter_neon )

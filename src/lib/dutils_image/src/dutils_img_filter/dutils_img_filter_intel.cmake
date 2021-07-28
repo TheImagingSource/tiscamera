@@ -19,12 +19,12 @@ add_library( dutils_img_filter_sse41 STATIC
 
 target_link_libraries( dutils_img_filter_sse41
 PUBLIC
-	dutils::dutils_img_filter_c
+	dutils_img::dutils_img_filter_c
 PRIVATE
-	dutils::project_options
-	dutils::project_warnings
+	dutils_img::project_options
+	dutils_img::project_warnings
 )
 
 target_compile_options( dutils_img_filter_sse41 PUBLIC -msse4.1 )
 
-add_library( dutils::dutils_img_filter_optimized ALIAS dutils_img_filter_sse41 )
+add_library( dutils_img::dutils_img_filter_optimized ALIAS dutils_img_filter_sse41 )

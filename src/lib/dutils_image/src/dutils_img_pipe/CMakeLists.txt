@@ -40,13 +40,13 @@ add_library(dutils_img_pipe_auto STATIC
 
 target_link_libraries( dutils_img_pipe_auto 
 PRIVATE
-	dutils::project_warnings
-    dutils::project_options
+	dutils_img::project_warnings
+    dutils_img::project_options
 
-    dutils::dutils_img_base
-    dutils::dutils_img_filter_c
+    dutils_img::base
+    dutils_img::dutils_img_filter_c
 PUBLIC
-    dutils::dutils_img
+    dutils_img::img
 )
 
-add_library( dutils::dutils_img_auto ALIAS dutils_img_pipe_auto)
+add_library( dutils_img::pipe_auto ALIAS dutils_img_pipe_auto)

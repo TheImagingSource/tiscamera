@@ -1,5 +1,5 @@
 
-add_library( dutils_img_base STATIC 
+add_library( dutils_img_base_lib STATIC 
 	"cpu_features.cpp"
 	"cpu_features.h"
 	"img_overlay.cpp"
@@ -15,12 +15,12 @@ add_library( dutils_img_base STATIC
 	"dutils_gst_interop.cpp"
 )
 
-target_link_libraries( dutils_img_base 
+target_link_libraries( dutils_img_base_lib 
 PUBLIC 
-	dutils::dutils_img
+	dutils_img::img
 PRIVATE
-	dutils::project_options
-	dutils::project_warnings
+	dutils_img::project_options
+	dutils_img::project_warnings
 )
 
-add_library( dutils::dutils_img_base ALIAS dutils_img_base )
+add_library(dutils_img::base ALIAS dutils_img_base_lib)
