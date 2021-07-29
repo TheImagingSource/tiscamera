@@ -626,7 +626,7 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
             */
             if ( self->device->frame_count >= (guint)self->device->n_buffers )
             {
-                GST_INFO_OBJECT( self, "Stopping stream after %llu buffers.", self->device->frame_count);
+                GST_INFO_OBJECT( self, "Stopping stream after %llu buffers.", (long long unsigned int) (self->device->frame_count));
                 return GST_FLOW_EOS;
             }
             self->device->frame_count++;
