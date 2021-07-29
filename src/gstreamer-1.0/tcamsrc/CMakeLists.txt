@@ -1,5 +1,5 @@
 
-# Copyright 2014 The Imaging Source Europe GmbH
+# Copyright 2021 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,28 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_library(gsttcamsrc SHARED
+	gsttcamsrc.cpp
+	gsttcammainsrc.cpp
+	mainsrc_tcamprop_impl.cpp
+	mainsrc_device_state.cpp
+	gsttcamdeviceprovider.cpp
+	gsttcamdevice.cpp
 
-find_package(GStreamer REQUIRED QUIET)
-#find_package(GLIB2     REQUIRED QUIET)
-#find_package(GObject   REQUIRED QUIET)
-#find_package(GObjectIntrospection REQUIRED QUIET)
+	gstmetatcamstatistics.cpp
+	gstmetatcamstatistics.h
 
-add_subdirectory( tcamconvert )
-add_subdirectory( tcamgstbase )
-add_subdirectory( tcamsrc )
-
-add_library(gsttcambin SHARED
-	gsttcambin.cpp
+	tcambind.h
+	tcambind.cpp
 )
 
-target_link_libraries( gsttcambin
+target_link_libraries( gsttcamsrc
 PRIVATE
+	${GSTREAMER_LIBRARIES}
+	${GSTREAMER_BASE_LIBRARIES}
+
 	tcamgstbase
 	tcam::gst-helper	
 )
-set_project_warnings(gsttcambin)
+set_project_warnings(gsttcamsrc)
 
-install(TARGETS gsttcambin
+install(TARGETS gsttcamsrc
   DESTINATION ${TCAM_INSTALL_GST_1_0}
   COMPONENT tcam-gstreamer-1)
 
+install(FILES gstmetatcamstatistics.h
+  DESTINATION "${TCAM_INSTALL_GST_1_0_HEADER}"
+  COMPONENT tcam-gstreamer-1)
