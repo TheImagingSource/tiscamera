@@ -15,22 +15,21 @@
  */
 
 #include "../../src/gobject/tcamprop.h"
+#include "../../src/public_utils.h"
+#include "../../src/version.h"
 #include "formats.h"
 #include "general.h"
 #include "properties.h"
 #include "system.h"
 
-#include <CLI11/CLI11.hpp>
+#include <CLI11.hpp>
 #include <gst/gst.h>
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
 #include <unistd.h>
 
-using namespace tcam;
-
-
-void print_version(size_t /*t*/)
+static void print_version(size_t /*t*/)
 {
     std::cout << "Versions: " << std::endl
               << "\tTcam:\t" << get_version() << std::endl
@@ -38,28 +37,9 @@ void print_version(size_t /*t*/)
               << "\tModules:\t" << get_enabled_modules() << std::endl;
 }
 
-
-void print_capture_devices(const std::vector<DeviceInfo>& devices)
-{
-    if (devices.size() == 0)
-    {
-        std::cout << "No devices found." << std::endl;
-    }
-    else
-    {
-        std::cout << "Available devices:" << std::endl;
-        std::cout << "Model\t\tType\tSerial" << std::endl << std::endl;
-        for (const auto& d : devices)
-        {
-            std::cout << d.get_name() << "\t" << d.get_device_type_as_string() << "\t"
-                      << d.get_serial() << std::endl;
-        }
-        std::cout << std::endl;
-    }
-}
-
-
-bool separate_serial_and_type(const std::string& input, std::string& serial, std::string& type)
+static bool separate_serial_and_type(const std::string& input,
+                                     std::string& serial,
+                                     std::string& type)
 {
     auto pos = input.find("-");
 
@@ -85,7 +65,7 @@ bool separate_serial_and_type(const std::string& input, std::string& serial, std
 }
 
 
-void print_devices(size_t /*t*/)
+static void print_devices(size_t /*t*/)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 
@@ -126,7 +106,7 @@ void print_devices(size_t /*t*/)
     gst_object_unref(source);
 }
 
-void print_serials_long(size_t)
+static void print_serials_long(size_t)
 {
     GstElement* source = gst_element_factory_make("tcamsrc", "source");
 

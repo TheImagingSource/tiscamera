@@ -17,16 +17,11 @@
 #include "properties.h"
 
 #include "../../src/gobject/tcamprop.h"
-#include "../../src/tcam.h"
-#include "../../src/utils.h"
 #include "general.h"
 
 #include <gst/gst.h>
 #include <iomanip>
 #include <iostream>
-#include <memory>
-
-using namespace tcam;
 
 static const size_t name_width = 40;
 
@@ -47,13 +42,15 @@ void print_properties(const std::string& serial)
         return;
     }
 
-    std::string str;
+    {
+        GValue val = {};
+        g_value_init(&val, G_TYPE_STRING);
+        g_value_set_static_string(&val, serial.c_str());
 
-    GValue val = {};
-    g_value_init(&val, G_TYPE_STRING);
-    g_value_set_static_string(&val, serial.c_str());
+        g_object_set_property(G_OBJECT(source), "serial", &val);
+        g_value_unset(&val);
+    }
 
-    g_object_set_property(G_OBJECT(source), "serial", &val);
     gst_element_set_state(source, GST_STATE_READY);
 
     GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));

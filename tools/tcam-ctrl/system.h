@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <cstdio>
-
 namespace tcam::tools
 {
 

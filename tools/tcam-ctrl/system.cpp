@@ -3,9 +3,9 @@
 
 #include <array>
 #include <iostream>
-#include <memory>
-#include <stdexcept>
 #include <string>
+
+#include <cstdio>
 
 namespace
 {
@@ -73,11 +73,7 @@ void check_system_info(const std::string& info)
 
 } // namespace
 
-namespace tcam::tools
-{
-
-
-void print_packages()
+void tcam::tools::print_packages()
 {
     check_package("tiscamera");
     check_package("tiscamera-tcamprop");
@@ -88,7 +84,7 @@ void print_packages()
 }
 
 
-void print_system_info_general()
+void tcam::tools::print_system_info_general()
 {
     check_system_info("lsb_release -a");
     check_system_info("uname -a");
@@ -97,13 +93,13 @@ void print_system_info_general()
 }
 
 
-void print_system_info_gige()
+void tcam::tools::print_system_info_gige()
 {
     check_system_info("ip a");
 }
 
 
-void print_system_info_usb()
+void tcam::tools::print_system_info_usb()
 {
 
     check_system_info("lsusb");
@@ -111,7 +107,7 @@ void print_system_info_usb()
 }
 
 
-void print_system_info()
+void tcam::tools::print_system_info()
 {
     print_system_info_general();
     print_system_info_usb();
@@ -120,5 +116,3 @@ void print_system_info()
     std::cout << "Please review the printed information to ensure" << std::endl
               << "that nothing you consider confidential is given to other parties." << std::endl;
 }
-
-} // namespace tcam::tools

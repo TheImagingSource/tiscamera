@@ -15,30 +15,32 @@
 
 
 find_package(GStreamer REQUIRED QUIET)
-find_package(GLIB2     REQUIRED QUIET)
-find_package(GObject   REQUIRED QUIET)
-find_package(GObjectIntrospection REQUIRED QUIET)
 
-add_executable(tcam-ctrl main.cpp general.cpp properties.cpp formats.cpp system.cpp)
+add_executable(tcam-ctrl 
+	main.cpp
+	general.cpp
+	general.h
+	properties.h
+	properties.cpp 
+	formats.h
+	formats.cpp
+	system.h
+	system.cpp
+)
 set_project_warnings(tcam-ctrl)
 
 target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
-target_include_directories(tcam-ctrl PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
-target_include_directories(tcam-ctrl PRIVATE ${GLIB2_INCLUDE_DIR})
-target_include_directories(tcam-ctrl PRIVATE ${GObject_INCLUDE_DIR})
+target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/external/CLI11")
 
 
 target_link_libraries( tcam-ctrl
 PRIVATE
-	tcamgstbase
 	tcam
+	tcam::tcamprop
 
 	${GSTREAMER_LIBRARIES}
 	${GSTREAMER_BASE_LIBRARIES}
 	${GSTREAMER_VIDEO_LIBRARIES}
-	${GOBJECT_LIBRARIES}
-	${GLIB2_LIBRARIES}
 )
 
 install(TARGETS tcam-ctrl
