@@ -17,10 +17,9 @@
 #ifndef TCAM_TEST_FIND_INPUT_CAPS_DATA_H
 #define TCAM_TEST_FIND_INPUT_CAPS_DATA_H
 
-#include "tcamgstbase.h"
-
 #include <string>
 #include <vector>
+#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
 
 struct fic_test_result
 {

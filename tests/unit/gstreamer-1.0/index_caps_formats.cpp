@@ -1,10 +1,10 @@
 
-#include "tcamgstbase.h"
 
 #include <catch.hpp>
 #include <gst/gst.h>
 #include <string>
 #include <vector>
+#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
 
 
 TEST_CASE("tcamgstbase.cpp::index_caps_formats")

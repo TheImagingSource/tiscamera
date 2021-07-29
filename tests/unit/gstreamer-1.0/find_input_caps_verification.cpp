@@ -15,9 +15,9 @@
  */
 
 #include "caps/caps.h"
-#include "tcamgstbase.h"
 
 #include <gst/gst.h>
+#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
 
 //
 //

@@ -15,10 +15,10 @@
  */
 
 #include "find_largest_caps_test_data.h"
-#include "tcamgstbase.h"
 
 #include <catch.hpp>
 #include <gst/gst.h>
+#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
 
 TEST_CASE("find_largest_caps")
 {

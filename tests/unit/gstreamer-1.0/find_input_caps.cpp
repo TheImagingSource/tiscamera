@@ -16,7 +16,6 @@
 
 #include "catch.hpp"
 #include "find_input_caps_test_data.h"
-#include "tcamgstbase.h"
 
 #include <gst/gst.h>
 #include <regex>

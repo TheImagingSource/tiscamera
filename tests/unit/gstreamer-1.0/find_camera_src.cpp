@@ -15,9 +15,9 @@
  */
 
 #include "catch.hpp"
-#include "tcamgstbase.h"
 
 #include <gst/gst.h>
+#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
 
 /**
  * This test aimes to verify that multiple sources are correctly identified
