@@ -19,7 +19,6 @@
 #include "../../gobject/tcamprop.h"
 #include "../../logging.h"
 #include "../../tcam.h"
-#include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgstjson.h"
 #include "../tcamgstbase/tcamgststrings.h"
 #include "gstmetatcamstatistics.h"
@@ -27,24 +26,10 @@
 #include "mainsrc_tcamprop_impl.h"
 #include "tcambind.h"
 
-#include <algorithm>
-#include <assert.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <vector>
-
-using namespace tcam;
-
-
 #define GST_TCAM_MAINSRC_DEFAULT_N_BUFFERS 10
 
 GST_DEBUG_CATEGORY_STATIC(tcam_mainsrc_debug);
 #define GST_CAT_DEFAULT tcam_mainsrc_debug
-
-
-using namespace tcam::property;
 
 struct destroy_transfer
 {
@@ -365,7 +350,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
         self->fps_denominator = 1;
         framerate = 1.0;
     }
-    struct tcam_video_format format = {};
+    tcam::tcam_video_format format = {};
 
     format.fourcc = fourcc;
     format.width = width;
@@ -406,7 +391,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
 }
 
 
-static void gst_tcam_mainsrc_device_lost_callback(const struct tcam_device_info* info
+static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* info
                                                   __attribute__((unused)),
                                                   void* user_data)
 {
@@ -500,6 +485,11 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
             }
             break;
         }
+        case GST_STATE_CHANGE_READY_TO_PAUSED:
+        {
+            self->device->frame_count = 0;
+            break;
+        }
         default:
         {
             break;
@@ -589,7 +579,7 @@ static void gst_tcam_mainsrc_sh_callback(std::shared_ptr<tcam::ImageBuffer> buff
 }
 
 
-static void statistics_to_gst_structure(const tcam_stream_statistics* statistics,
+static void statistics_to_gst_structure(const tcam::tcam_stream_statistics* statistics,
                                         GstStructure* struc)
 {
 
@@ -625,45 +615,40 @@ static GstFlowReturn gst_tcam_mainsrc_create(GstPushSrc* push_src, GstBuffer** b
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(push_src);
 
-    std::unique_lock<std::mutex> lck(self->device->mtx);
-
-    static unsigned long frame_count;
-
-    if (self->n_buffers != -1)
+    std::shared_ptr<tcam::ImageBuffer> ptr;
     {
-        /*
-          TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
-        */
-        if (frame_count >= (guint)self->n_buffers)
+        std::unique_lock<std::mutex> lck(self->device->mtx);
+
+        if (self->device->n_buffers != -1)  // #TODO look at this feature? Maybe remove it?
         {
-            GST_INFO("Stopping stream after %lu buffers.", frame_count);
-            return GST_FLOW_EOS;
+            /*
+              TODO: self->n_buffers should have same type as ptr->get_statistics().frame_count
+            */
+            if ( self->device->frame_count >= (guint)self->device->n_buffers )
+            {
+                GST_INFO_OBJECT( self, "Stopping stream after %llu buffers.", self->device->frame_count);
+                return GST_FLOW_EOS;
+            }
+            self->device->frame_count++;
         }
-        else
+
+        while( true )
         {
-            GST_INFO("%lu", frame_count);
+            // wait until new buffer arrives or stop waiting when we have to shut down
+            self->device->cv.wait(lck);
+            if (!self->device->is_running)
+            {
+                return GST_FLOW_EOS;
+            }
+            if (!self->device->queue.empty())
+            {
+                ptr = self->device->queue.front();
+                self->device->queue.pop(); // remove buffer from queue
+
+                break;
+            }
         }
-        frame_count++;
     }
-
-wait_again:
-    // wait until new buffer arrives or stop waiting when we have to shut down
-    while (self->device->is_running && self->device->queue.empty()) { self->device->cv.wait(lck); }
-
-    if (!self->device->is_running)
-    {
-        return GST_FLOW_EOS;
-    }
-
-    if (self->device->queue.empty())
-    {
-        GST_ERROR("Buffer queue is empty. Returning to waiting position");
-
-        goto wait_again;
-    }
-
-    std::shared_ptr<tcam::ImageBuffer> ptr = self->device->queue.front();
-    self->device->queue.pop(); // remove buffer from queue
 
     ptr->set_user_data(self);
 
@@ -692,7 +677,6 @@ wait_again:
 
     // add meta statistics data to buffer
     {
-
         uint64_t gst_frame_count = self->element.parent.segment.position;
         auto stat = ptr->get_statistics();
 
@@ -703,37 +687,41 @@ wait_again:
 
         if (!meta)
         {
-            GST_WARNING("Unable to add meta !!!!");
+            GST_WARNING_OBJECT(self,"Unable to add meta !!!!");
         }
         else
         {
-            const char* damaged = nullptr;
-            if (stat.is_damaged)
+            // Disable this code when tracing is not enabled
+            if( gst_debug_category_get_threshold( GST_CAT_DEFAULT ) >= GST_LEVEL_TRACE )
             {
-                damaged = "true";
-            }
-            else
-            {
-                damaged = "false";
-            }
+                const char* damaged = nullptr;
+                if (stat.is_damaged)
+                {
+                    damaged = "true";
+                }
+                else
+                {
+                    damaged = "false";
+                }
 
-            auto test = fmt::format("Added meta info: \n"
-                                    "gst frame_count: {}\n"
-                                    "backend frame_count {}\n"
-                                    "frames_dropped {}\n"
-                                    "capture_time_ns: {}\n"
-                                    "camera_time_ns: {}\n"
-                                    "framerate: {}\n"
-                                    "is_damaged: {}\n",
-                                    gst_frame_count,
-                                    stat.frame_count,
-                                    stat.frames_dropped,
-                                    stat.capture_time_ns,
-                                    stat.camera_time_ns,
-                                    stat.framerate,
-                                    damaged);
+                auto test = fmt::format("Added meta info: \n"
+                                        "gst frame_count: {}\n"
+                                        "backend frame_count {}\n"
+                                        "frames_dropped {}\n"
+                                        "capture_time_ns: {}\n"
+                                        "camera_time_ns: {}\n"
+                                        "framerate: {}\n"
+                                        "is_damaged: {}\n",
+                                        gst_frame_count,
+                                        stat.frame_count,
+                                        stat.frames_dropped,
+                                        stat.capture_time_ns,
+                                        stat.camera_time_ns,
+                                        stat.framerate,
+                                        damaged);
 
-            GST_TRACE("%s", test.c_str());
+                GST_TRACE_OBJECT(self,"%s", test.c_str());
+            }
         }
 
     } // end meta data
@@ -918,7 +906,7 @@ static void gst_tcam_mainsrc_init(GstTcamMainSrc* self)
     gst_base_src_set_live(GST_BASE_SRC(self), TRUE);
     gst_base_src_set_format(GST_BASE_SRC(self), GST_FORMAT_TIME);
 
-    self->n_buffers = -1;
+    self->device->n_buffers = -1;
     self->drop_incomplete_frames = TRUE;
 
     self->device = new device_state;
@@ -982,7 +970,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             if (std::find(vec.begin(), vec.end(), std::string(type)) == vec.end())
             {
                 GST_ERROR("Unknown device type '%s'", type);
-                self->device->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+                self->device->device_type = tcam::TCAM_DEVICE_TYPE_UNKNOWN;
             }
             else
             {
@@ -1007,7 +995,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         }
         case PROP_NUM_BUFFERS:
         {
-            self->n_buffers = g_value_get_int(value);
+            self->device->n_buffers = g_value_get_int(value);
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
@@ -1065,7 +1053,7 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
         }
         case PROP_NUM_BUFFERS:
         {
-            g_value_set_int(value, self->n_buffers);
+            g_value_set_int(value, self->device->n_buffers);
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:

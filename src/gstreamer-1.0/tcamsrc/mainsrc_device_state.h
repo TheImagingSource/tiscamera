@@ -43,6 +43,9 @@ struct device_state
 
     std::atomic<bool> is_running = false;
 
+    int         n_buffers = -1;
+    uint64_t    frame_count = 0;
+
     void stop_and_clear()
     {
         if (dev)

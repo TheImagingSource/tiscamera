@@ -43,7 +43,6 @@ struct _GstTcamMainSrc
 
     int fps_numerator;
     int fps_denominator;
-    int n_buffers;
     int imagesink_buffers;
 
     gboolean drop_incomplete_frames;

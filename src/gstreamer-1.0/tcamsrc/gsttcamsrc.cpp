@@ -21,10 +21,9 @@
 #include "../../logging.h"
 #include "../../public_utils.h"
 #include "../../version.h"
-#include "../tcamgstbase/tcamgstbase.h"
 #include "../tcamgstbase/tcamgstjson.h"
 #include "gsttcamdeviceprovider.h"  // only needed because of plugin_init
-#include "gsttcammainsrc.h"  // only needed because of plugin_init
+#include "gsttcammainsrc.h"         // only needed because of plugin_init
 #include "tcambind.h"
 
 #include <unistd.h>
@@ -1091,7 +1090,7 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
     GstElementClass* element_class = GST_ELEMENT_CLASS(klass);
 
     gobject_class->finalize = gst_tcam_src_finalize;
-    gobject_class->dispose = (GObjectFinalizeFunc)gst_tcamsrc_dispose;
+    gobject_class->dispose = gst_tcamsrc_dispose;
     gobject_class->set_property = gst_tcam_src_set_property;
     gobject_class->get_property = gst_tcam_src_get_property;
 
@@ -1182,8 +1181,6 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                                                             G_TYPE_NONE,
                                                             0,
                                                             G_TYPE_NONE);
-
-    GST_DEBUG_CATEGORY_INIT(tcam_src_debug, "tcamsrc", 0, "tcam interface");
 
     gst_element_class_set_static_metadata(element_class,
                                           "Tcam Video Source",
