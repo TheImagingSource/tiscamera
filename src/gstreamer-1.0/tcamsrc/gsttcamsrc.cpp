@@ -22,8 +22,8 @@
 #include "../../public_utils.h"
 #include "../../version.h"
 #include "../tcamgstbase/tcamgstjson.h"
-#include "gsttcamdeviceprovider.h"  // only needed because of plugin_init
-#include "gsttcammainsrc.h"         // only needed because of plugin_init
+#include "gsttcamdeviceprovider.h" // only needed because of plugin_init
+#include "gsttcammainsrc.h" // only needed because of plugin_init
 #include "tcambind.h"
 
 #include <unistd.h>
@@ -503,7 +503,7 @@ static void apply_element_property(GstTcamSrc* self,
                 }
                 else
                 {
-                    bool state = load_device_settings(
+                    bool state = tcam::gst::load_device_settings(
                         TCAM_PROP(self), self->device_serial, g_value_get_string(value));
                     if (!state)
                     {
@@ -1065,7 +1065,8 @@ static void gst_tcam_src_get_property(GObject* object,
                 else
                 {
                     std::string tmp =
-                        create_device_settings(self->device_serial, TCAM_PROP(self)).c_str();
+                        tcam::gst::create_device_settings(self->device_serial, TCAM_PROP(self))
+                            .c_str();
                     g_value_set_string(value, tmp.c_str());
                 }
             }

@@ -19,8 +19,13 @@
 
 #include <cstdint>
 
+
+namespace tcam::gst
+{
+
 const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc);
 uint32_t tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format);
 
+} // namespace tcam::gst
 
 #endif /* TCAM_GST_STRINGS_H */

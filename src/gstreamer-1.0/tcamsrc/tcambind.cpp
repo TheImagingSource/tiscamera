@@ -113,7 +113,7 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
             continue;
         }
 
-        const char* caps_string = tcam_fourcc_to_gst_1_0_caps_string(desc.get_fourcc());
+        const char* caps_string = tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(desc.get_fourcc());
 
         if (caps_string == nullptr)
         {

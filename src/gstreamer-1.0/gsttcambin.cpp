@@ -1087,11 +1087,11 @@ static gboolean apply_state(GstTcamBin* self, const std::string& state)
     bool ret;
     if (data.device_serial.empty())
     {
-        ret = load_device_settings(TCAM_PROP(self), "", state);
+        ret = tcam::gst::load_device_settings(TCAM_PROP(self), "", state);
     }
     else
     {
-        ret = load_device_settings(TCAM_PROP(self), data.device_serial, state);
+        ret = tcam::gst::load_device_settings(TCAM_PROP(self), data.device_serial, state);
     }
 
     if (!ret)
@@ -1407,7 +1407,7 @@ static void gst_tcambin_get_property(GObject* object,
             if (!data.device_serial.empty())
             {
                 std::string bla =
-                    create_device_settings(data.device_serial, TCAM_PROP(self)).c_str();
+                    tcam::gst::create_device_settings(data.device_serial, TCAM_PROP(self)).c_str();
                 g_value_set_string(value, bla.c_str());
             }
             else

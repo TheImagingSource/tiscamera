@@ -343,12 +343,13 @@ bool tcam::gst::tcam_gst_is_bayer10_packed_string(const char* format_string)
         return false;
     }
 
-    static const std::array<std::string, 12> format_list = {
+    static constexpr std::array<std::string_view, 12> format_list = {
         "rggb10p", "grbg10p", "gbrg10p", "bggr10p", "rggb10s", "grbg10s",
         "gbrg10s", "bggr10s", "rggb10m", "grbg10m", "gbrg10m", "bggr10m",
     };
 
-    if (std::find(format_list.begin(), format_list.end(), format_string) != format_list.end())
+    if (std::find(format_list.begin(), format_list.end(), std::string_view(format_string))
+        != format_list.end())
     {
         return true;
     }
@@ -383,19 +384,19 @@ bool tcam::gst::tcam_gst_is_bayer12_packed_string(const char* format_string)
         return false;
     }
 
-    static const std::array<std::string, 12> format_list = {
+    static const std::array<std::string_view, 12> format_list = {
         "rggb12p", "grbg12p", "gbrg12p", "bggr12p", "rggb12s", "grbg12s",
         "gbrg12s", "bggr12s", "rggb12m", "grbg12m", "gbrg12m", "bggr12m",
     };
 
-    if (std::find(format_list.begin(), format_list.end(), format_string) != format_list.end())
+    if (std::find(format_list.begin(), format_list.end(), std::string_view(format_string))
+        != format_list.end())
     {
         return true;
     }
 
     return false;
 }
-
 
 bool tcam::gst::tcam_gst_is_bayer16_string(const char* format_string)
 {
@@ -558,7 +559,7 @@ static std::vector<uint32_t> index_format_fourccs(const GstCaps* caps)
 
     // only add when fourcc is not 0
     auto add_format = [&ret](const char* name, const char* fmt) {
-        uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(name, fmt);
+        uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(name, fmt);
         if (fourcc != 0)
         {
             ret.push_back(fourcc);

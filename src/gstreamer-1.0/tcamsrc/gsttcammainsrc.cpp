@@ -335,7 +335,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     const char* format_string = gst_structure_get_string(structure, "format");
 
     uint32_t fourcc =
-        tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure), format_string);
+        tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure), format_string);
 
     double framerate;
     if (frame_rate != nullptr)
@@ -845,7 +845,7 @@ static gboolean gst_tcam_mainsrc_query(GstBaseSrc* bsrc, GstQuery* query)
 
                     const char* format_string = gst_structure_get_string(structure, "format");
 
-                    uint32_t fourcc = tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
+                    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(gst_structure_get_name(structure),
                                                                            format_string);
 
                     auto format =
@@ -1009,7 +1009,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         }
         case PROP_STATE:
         {
-            bool state = load_device_settings(
+            bool state = tcam::gst::load_device_settings(
                 TCAM_PROP(self), self->device->device_serial, g_value_get_string(value));
             if (!state)
             {
@@ -1066,7 +1066,7 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
             if (!self->device->device_serial.empty())
             {
                 std::string bla =
-                    create_device_settings(self->device->device_serial, TCAM_PROP(self)).c_str();
+                    tcam::gst::create_device_settings(self->device->device_serial, TCAM_PROP(self)).c_str();
                 g_value_set_string(value, bla.c_str());
             }
             else

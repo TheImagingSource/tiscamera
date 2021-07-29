@@ -20,6 +20,9 @@
 
 struct _TcamProp;
 
+namespace tcam::gst
+{
 std::string create_device_settings(const std::string& serial, _TcamProp* tcam);
 
-bool load_device_settings( _TcamProp* tcam, const std::string& serial, const std::string& cache);
+bool load_device_settings(_TcamProp* tcam, const std::string& serial, const std::string& cache);
+} // namespace tcam::gst

@@ -19,6 +19,8 @@
 #include <cstring>
 #include <dutils_img/image_fourcc.h>
 
+namespace
+{
 struct TcamGstMapping
 {
     uint32_t fourcc;
@@ -26,6 +28,8 @@ struct TcamGstMapping
     const char* gst_1_0_name;
     const char* gst_format;
 };
+
+} // namespace
 
 static const TcamGstMapping tcam_gst_caps_info[] = {
     {
@@ -408,7 +412,7 @@ static const TcamGstMapping tcam_gst_caps_info[] = {
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
-const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
+const char* tcam::gst::tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
 {
     unsigned int i;
     for (i = 0; i < ARRAYSIZE(tcam_gst_caps_info); ++i)
@@ -421,7 +425,7 @@ const char* tcam_fourcc_to_gst_1_0_caps_string(uint32_t fourcc)
     return NULL;
 }
 
-uint32_t tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format)
+uint32_t tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(const char* name, const char* format)
 {
 
     unsigned int i;
