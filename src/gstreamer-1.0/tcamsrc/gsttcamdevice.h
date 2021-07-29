@@ -18,6 +18,8 @@
 
 #include <gst/gst.h>
 
+G_BEGIN_DECLS
+
 #define TCAM_TYPE_DEVICE tcam_device_get_type()
 #define TCAM_DEVICE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), TCAM_TYPE_DEVICE, TcamDevice))
 
@@ -38,3 +40,5 @@ struct _TcamDevice
 };
 
 GType tcam_device_get_type(void);
+
+G_END_DECLS

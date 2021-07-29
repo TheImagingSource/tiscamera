@@ -16,8 +16,7 @@
 
 #include "gsttcamdeviceprovider.h"
 
-#include "../../tcam.h"
-#include "../tcamgstbase/tcamgstbase.h"
+#include "../../DeviceIndex.h"
 #include "gsttcamdevice.h"
 
 #include <algorithm>
