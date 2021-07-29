@@ -17,48 +17,8 @@
 #pragma once
 
 #include "../../gobject/tcamprop.h"
-#include "gsttcammainsrc.h"
 
-
-gboolean get_property_by_name(GstTcamMainSrc* self,
-                              const gchar* name,
-                              struct tcam_device_property* prop);
-
-
-gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name);
-
-
-GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface);
-
-
-gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
-                                            const gchar* name,
-                                            GValue* value,
-                                            GValue* min,
-                                            GValue* max,
-                                            GValue* def,
-                                            GValue* step,
-                                            GValue* type,
-                                            GValue* flags,
-                                            GValue* category,
-                                            GValue* group);
-
-
-GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name);
-
-
-gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface,
-                                            const gchar* name,
-                                            const GValue* value);
-
-
-GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self);
-
-
-GSList* gst_tcam_mainsrc_get_device_serials_backend(TcamProp* self);
-
-gboolean gst_tcam_mainsrc_get_device_info(TcamProp* self,
-                                          const char* serial,
-                                          char** name,
-                                          char** identifier,
-                                          char** connection_type);
+namespace tcam::mainsrc
+{
+    void gst_tcam_mainsrc_tcamprop_init( TcamPropInterface* iface );
+}

@@ -18,6 +18,7 @@
 
 #include "../../PropertyCategory.h"
 #include "mainsrc_device_state.h"
+#include "gsttcammainsrc.h"
 
 using namespace tcam::property;
 
@@ -55,7 +56,7 @@ static const char* prop_type_to_string(TCAM_PROPERTY_TYPE type)
  *
  * Returns: (transfer full): A string describing the property type
  */
-gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name)
+static gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
@@ -93,7 +94,7 @@ gchar* gst_tcam_mainsrc_get_property_type(TcamProp* iface, const gchar* name)
  *
  * Returns: (element-type utf8) (transfer full): list of property names
  */
-GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
+static GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
 {
     GSList* ret = NULL;
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
@@ -113,7 +114,7 @@ GSList* gst_tcam_mainsrc_get_property_names(TcamProp* iface)
 }
 
 
-gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
+static gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
                                             const gchar* name,
                                             GValue* value,
                                             GValue* min,
@@ -398,7 +399,7 @@ gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
 }
 
 
-GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name)
+static GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name)
 {
     GSList* ret = NULL;
 
@@ -432,7 +433,7 @@ GSList* gst_tcam_mainsrc_get_menu_entries(TcamProp* iface, const char* menu_name
 }
 
 
-gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, const GValue* value)
+static gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, const GValue* value)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
@@ -559,7 +560,7 @@ gboolean gst_tcam_mainsrc_set_tcam_property(TcamProp* iface, const gchar* name, 
 }
 
 
-GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)
+static GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)
 {
 
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
@@ -583,7 +584,7 @@ GSList* gst_tcam_mainsrc_get_device_serials(TcamProp* self)
 }
 
 
-GSList* gst_tcam_mainsrc_get_device_serials_backend(TcamProp* self)
+static GSList* gst_tcam_mainsrc_get_device_serials_backend(TcamProp* self)
 {
     GstTcamMainSrc* s = GST_TCAM_MAINSRC(self);
 
@@ -607,7 +608,7 @@ GSList* gst_tcam_mainsrc_get_device_serials_backend(TcamProp* self)
 }
 
 
-gboolean gst_tcam_mainsrc_get_device_info(TcamProp* self,
+static gboolean gst_tcam_mainsrc_get_device_info(TcamProp* self,
                                           const char* serial,
                                           char** name,
                                           char** identifier,
@@ -682,4 +683,16 @@ gboolean gst_tcam_mainsrc_get_device_info(TcamProp* self,
     }
 
     return ret;
+}
+
+void tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init(TcamPropInterface* iface)
+{
+    iface->get_tcam_property_names = gst_tcam_mainsrc_get_property_names;
+    iface->get_tcam_property_type = gst_tcam_mainsrc_get_property_type;
+    iface->get_tcam_property = gst_tcam_mainsrc_get_tcam_property;
+    iface->get_tcam_menu_entries = gst_tcam_mainsrc_get_menu_entries;
+    iface->set_tcam_property = gst_tcam_mainsrc_set_tcam_property;
+    iface->get_tcam_device_serials = gst_tcam_mainsrc_get_device_serials;
+    iface->get_tcam_device_serials_backend = gst_tcam_mainsrc_get_device_serials_backend;
+    iface->get_tcam_device_info = gst_tcam_mainsrc_get_device_info;
 }

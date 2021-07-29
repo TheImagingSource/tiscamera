@@ -56,22 +56,10 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self);
 static void gst_tcam_mainsrc_close_camera(GstTcamMainSrc* self);
 static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self);
 
-static void gst_tcam_mainsrc_prop_init(TcamPropInterface* iface)
-{
-    iface->get_tcam_property_names = gst_tcam_mainsrc_get_property_names;
-    iface->get_tcam_property_type = gst_tcam_mainsrc_get_property_type;
-    iface->get_tcam_property = gst_tcam_mainsrc_get_tcam_property;
-    iface->get_tcam_menu_entries = gst_tcam_mainsrc_get_menu_entries;
-    iface->set_tcam_property = gst_tcam_mainsrc_set_tcam_property;
-    iface->get_tcam_device_serials = gst_tcam_mainsrc_get_device_serials;
-    iface->get_tcam_device_serials_backend = gst_tcam_mainsrc_get_device_serials_backend;
-    iface->get_tcam_device_info = gst_tcam_mainsrc_get_device_info;
-}
-
 G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
                         gst_tcam_mainsrc,
                         GST_TYPE_PUSH_SRC,
-                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcam_mainsrc_prop_init))
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init))
 
 
 enum
