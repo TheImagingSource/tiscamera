@@ -270,6 +270,7 @@ bool V4l2Device::set_framerate(double framerate)
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
+    // 73 specific behavior
     if (strcmp(this->device.get_info().additional_identifier, "8221") == 0)
     {
         int ret;
@@ -316,7 +317,7 @@ bool V4l2Device::set_framerate(double framerate)
                 break;
             }
         }
-        SPDLOG_DEBUG("Setting framerate to '{}' =  {} / {} and frame rate divisor to {}",
+        SPDLOG_TRACE("Setting framerate to '{}' =  {} / {} and frame rate divisor to {}",
                      framerate,
                      parm.parm.capture.timeperframe.denominator,
                      parm.parm.capture.timeperframe.numerator,
@@ -342,7 +343,7 @@ bool V4l2Device::set_framerate(double framerate)
     {
         parm.parm.capture.timeperframe.numerator = fps->numerator;
         parm.parm.capture.timeperframe.denominator = fps->denominator;
-        SPDLOG_DEBUG("Setting framerate to '{}' =  {} / {}",
+        SPDLOG_TRACE("Setting framerate to '{}' =  {} / {}",
                      framerate,
                      parm.parm.capture.timeperframe.denominator,
                      parm.parm.capture.timeperframe.numerator);
