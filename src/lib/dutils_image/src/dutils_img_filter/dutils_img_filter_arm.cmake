@@ -4,6 +4,7 @@ add_library( dutils_img_filter_neon STATIC
 
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc16_neon_v0.cpp"
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc8_neon_v0.cpp"
+	"transform/fcc1x_packed/transform_fcc1x_to_fcc8_neon.cpp"
 
 	"transform/fcc8_fcc16/transform_fcc8_fcc16_neon_v0.cpp"
 
@@ -14,7 +15,9 @@ add_library( dutils_img_filter_neon STATIC
   
 #	"transform/pwl/transform_fccfloat_to_fcc8_sse41_v0.cpp"
 
-#	"transform/mono_to_bgr/transform_mono_to_bgr_sse41.cpp"
+	"transform/mono_to_bgr/transform_mono_to_bgr_neon.cpp"
+
+	"by_edge/by8_edge_neonv8_v0.cpp"
 )
 
 target_link_libraries( dutils_img_filter_neon

@@ -22,16 +22,13 @@
 
 #include <algorithm>
 #include <array>
-#include <dutils_img/dutils_cpu_features.h>
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
-#include <gst-helper/gst_element_chain.h>
 #include <gst-helper/gstcaps_dutils_interop.h>
 #include <gst-helper/gvalue_helper.h>
 #include <gst-helper/helper_functions.h>
 #include <gst/video/gstvideometa.h>
-#include <map>
 #include <vector>
 
 enum
@@ -61,167 +58,6 @@ static tcamconvert::tcamconvert_context_base& get_gst_elem_reference(GstTCamConv
 tcamprop_system::property_list_interface* tcamconvert::get_property_list_interface(TcamProp* iface)
 {
     return GST_TCAMCONVERT(iface)->context_;
-}
-
-
-namespace
-{
-using fcc_array = std::array<img::fourcc, 16>;
-
-
-struct fcc_array2
-{
-    template<typename... fccs>
-    constexpr fcc_array2(fccs... fcc_list) : data_ { fcc_list... }, count { sizeof...(fcc_list) }
-    {
-    }
-
-    fcc_array data_;
-    int count = 0;
-
-    constexpr auto begin() const noexcept
-    {
-        return data_.begin();
-    }
-    constexpr auto end() const noexcept
-    {
-        return data_.begin() + count;
-    }
-
-    bool has_fcc(img::fourcc fcc) const noexcept
-    {
-        return std::any_of(begin(), end(), [fcc](auto v) { return v == fcc; });
-    }
-};
-
-struct transform_path
-{
-    fcc_array2 src_fcc;
-    fcc_array2 dst_fcc;
-};
-
-using namespace img;
-
-static const constexpr transform_path transform_entries[] = {
-    { { fourcc::MONO8,
-        fourcc::MONO16,
-        fourcc::MONO10,
-        fourcc::MONO10_MIPI_PACKED,
-        fourcc::MONO10_SPACKED,
-        fourcc::MONO12,
-        fourcc::MONO12_MIPI_PACKED,
-        fourcc::MONO12_SPACKED,
-        fourcc::MONO12_PACKED },
-      { fourcc::MONO8, fourcc::MONO16 } },
-    { {
-          fourcc::BGGR8,
-          fourcc::BGGR16,
-          fourcc::BGGR10,
-          fourcc::BGGR10_SPACKED,
-          fourcc::BGGR10_MIPI_PACKED,
-          fourcc::BGGR12,
-          fourcc::BGGR12_PACKED,
-          fourcc::BGGR12_SPACKED,
-          fourcc::BGGR12_MIPI_PACKED,
-      },
-      { fourcc::BGGR8, fourcc::BGGR16 } },
-    { {
-          fourcc::GBRG8,
-          fourcc::GBRG16,
-          fourcc::GBRG10,
-          fourcc::GBRG10_SPACKED,
-          fourcc::GBRG10_MIPI_PACKED,
-          fourcc::GBRG12,
-          fourcc::GBRG12_PACKED,
-          fourcc::GBRG12_SPACKED,
-          fourcc::GBRG12_MIPI_PACKED,
-      },
-      { fourcc::GBRG8, fourcc::GBRG16 } },
-    { {
-          fourcc::RGGB8,
-          fourcc::RGGB16,
-          fourcc::RGGB10,
-          fourcc::RGGB10_SPACKED,
-          fourcc::RGGB10_MIPI_PACKED,
-          fourcc::RGGB12,
-          fourcc::RGGB12_PACKED,
-          fourcc::RGGB12_SPACKED,
-          fourcc::RGGB12_MIPI_PACKED,
-      },
-      { fourcc::RGGB8, fourcc::RGGB16 } },
-    { {
-          fourcc::GRBG8,
-          fourcc::GRBG16,
-          fourcc::GRBG10,
-          fourcc::GRBG10_SPACKED,
-          fourcc::GRBG10_MIPI_PACKED,
-          fourcc::GRBG12,
-          fourcc::GRBG12_PACKED,
-          fourcc::GRBG12_SPACKED,
-          fourcc::GRBG12_MIPI_PACKED,
-      },
-      { fourcc::GRBG8, fourcc::GRBG16 } },
-};
-
-
-void remove_duplicates(std::vector<img::fourcc>& vec)
-{
-    auto f = std::unique(vec.begin(), vec.end());
-    vec.erase(f, vec.end());
-}
-
-void append(std::vector<img::fourcc>& vec, const fcc_array2& arr)
-{
-    for (auto fcc : arr) { vec.push_back(fcc); }
-}
-
-} // namespace
-
-static std::vector<img::fourcc> tcamconvert_get_all_input_fccs()
-{
-    std::vector<img::fourcc> rval;
-    for (auto e : transform_entries) { append(rval, e.src_fcc); }
-    remove_duplicates(rval);
-    return rval;
-}
-
-
-static std::vector<img::fourcc> tcamconvert_get_all_output_fccs()
-{
-    std::vector<img::fourcc> rval;
-    for (auto e : transform_entries) { append(rval, e.dst_fcc); }
-    remove_duplicates(rval);
-    return rval;
-}
-
-static std::vector<img::fourcc> tcamconvert_get_supported_input_fccs(img::fourcc dst_fcc)
-{
-    std::vector<img::fourcc> rval;
-    for (auto e : transform_entries)
-    {
-        if (e.dst_fcc.has_fcc(dst_fcc))
-        {
-            append(rval, e.src_fcc);
-        }
-    }
-    remove_duplicates(rval);
-
-    return rval;
-}
-
-static std::vector<img::fourcc> tcamconvert_get_supported_output_fccs(img::fourcc src_fcc)
-{
-    std::vector<img::fourcc> rval;
-    for (auto e : transform_entries)
-    {
-        if (e.src_fcc.has_fcc(src_fcc))
-        {
-            append(rval, e.dst_fcc);
-        }
-    }
-    remove_duplicates(rval);
-
-    return rval;
 }
 
 /* No properties are implemented, so only a warning is produced */
@@ -300,11 +136,11 @@ static void create_fmt(GstCaps* res_caps,
     std::vector<img::fourcc> vec;
     if (direction == GST_PAD_SRC)
     {
-        vec = tcamconvert_get_supported_input_fccs(fourcc);
+        vec = tcamconvert::tcamconvert_get_supported_input_fccs(fourcc);
     }
     else
     {
-        vec = tcamconvert_get_supported_output_fccs(fourcc);
+        vec = tcamconvert::tcamconvert_get_supported_output_fccs(fourcc);
     }
 
     for (const auto& fcc : vec)
@@ -521,20 +357,23 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
 static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransform* base,
                                                   [[maybe_unused]] GstBuffer* inbuf)
 {
-    //auto self = GST_TCAMCONVERT(base);
-    //GstMapInfo map_in;
-    //if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READ))
-    //{
-    //    GST_ERROR("Input buffer could not be mapped");
-    //    return GST_FLOW_OK;
-    //}
-    //gst_buffer_unmap(inbuf, &map_in);
+    auto& elem = get_gst_elem_reference( GST_TCAMCONVERT( base ) );
 
-    //printf( "blub\n" );
+    GstMapInfo map_in;
+    if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READWRITE))
+    {
+        GST_ERROR_OBJECT(base, "Input buffer could not be mapped");
+        return GST_FLOW_OK;
+    }
+
+    auto src = make_img_desc_from_input_buffer(elem.src_type_, map_in.data, inbuf);
+
+    elem.filter( src );
+
+    gst_buffer_unmap(inbuf, &map_in);
 
     return GST_FLOW_OK;
 }
-
 
 /**
  * Helper function for copy_metadata
@@ -679,13 +518,13 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
         "The Imaging Source <support@theimagingsource.com>");
 
 
-    auto src_caps = gst_helper::generate_caps_with_dim(tcamconvert_get_all_output_fccs());
+    auto src_caps = gst_helper::generate_caps_with_dim( tcamconvert::tcamconvert_get_all_output_fccs());
 
     gst_element_class_add_pad_template(
         gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps.get()));
 
 
-    auto sink_caps = gst_helper::generate_caps_with_dim(tcamconvert_get_all_input_fccs());
+    auto sink_caps = gst_helper::generate_caps_with_dim( tcamconvert::tcamconvert_get_all_input_fccs());
 
     gst_element_class_add_pad_template(
         gstelement_class,

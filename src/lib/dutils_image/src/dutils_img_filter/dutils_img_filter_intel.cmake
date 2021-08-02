@@ -14,7 +14,9 @@ add_library( dutils_img_filter_sse41 STATIC
   
 #	"transform/pwl/transform_fccfloat_to_fcc8_sse41_v0.cpp"
 
-#	"transform/mono_to_bgr/transform_mono_to_bgr_sse41.cpp"
+	"transform/mono_to_bgr/transform_mono_to_bgr_sse41.cpp"
+
+	"by_edge/by8_edge_sse4_1_v0.cpp"
 )
 
 target_link_libraries( dutils_img_filter_sse41

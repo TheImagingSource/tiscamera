@@ -29,14 +29,21 @@ add_library( dutils_img_filter_c STATIC
 	"filter/whitebalance/wb_apply_by16_c.cpp"
 	"filter/whitebalance/wb_apply_by8_c.cpp"
 
-#	"transform/mono_to_bgr/transform_mono_to_bgr.h"
-#	"transform/mono_to_bgr/transform_mono_to_bgr_internal.h"
-#	"transform/mono_to_bgr/transform_mono_to_bgr_c.cpp"
+	"transform/mono_to_bgr/transform_mono_to_bgr.h"
+	"transform/mono_to_bgr/transform_mono_to_bgr_internal.h"
+	"transform/mono_to_bgr/transform_mono_to_bgr_c.cpp"
 
 	"transform/pwl/transform_pwl_to_bayerfloat_internal.h"
 	"transform/pwl/transform_pwl_to_bayerfloat_internal.cpp"
 	"transform/pwl/transform_pwl_functions.h"
 	"transform/pwl/transform_pwl_to_bayerfloat_c.cpp"
+
+
+	"by_edge/by_edge.h"
+	"by_edge/by_edge_internal.h"
+	"by_edge/by8_edge_c.cpp"
+	"by_edge/by8_pixelops.h"
+
 )
 
 target_link_libraries( dutils_img_filter_c

@@ -21,6 +21,8 @@ add_library(tcamconvert SHARED
 	"tcamprop_impl.cpp"
 	"tcamconvert_context.h"
 	"tcamconvert_context.cpp"
+	"transform_impl.h"
+	"transform_impl.cpp"
 )
 
 target_include_directories( tcamconvert 

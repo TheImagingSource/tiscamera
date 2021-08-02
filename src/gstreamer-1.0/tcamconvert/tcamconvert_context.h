@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/transform_base.h" // img_filter::transform_function_type
+#include "transform_impl.h"
 
 #include <dutils_img/dutils_img.h>
 #include <dutils_img_pipe/auto_alg_pass.h>
@@ -31,9 +31,6 @@ namespace tcamconvert
 {
 class tcamconvert_context_base : public tcamprop_system::property_list_interface
 {
-    using wb_func = void (*)(const img::img_descriptor& dst,
-                             const img_filter::whitebalance_params& params);
-
 public:
     img::img_type src_type_;
     img::img_type dst_type_;
@@ -41,7 +38,7 @@ public:
     void on_input_pad_linked();
     void on_input_pad_unlinked();
 public:
-    tcamconvert_context_base( GstTCamConvert* self );
+    tcamconvert_context_base(GstTCamConvert* self);
 
     bool setup(img::img_type src_type, img::img_type dst_type);
 
@@ -50,40 +47,22 @@ public:
     virtual tcamprop_system::property_interface* find_property(std::string_view name) final;
 
     void transform(const img::img_descriptor& src, const img::img_descriptor& dst);
-    void filter( const img::img_descriptor& src );
+    void filter(const img::img_descriptor& src);
 
     bool try_connect_to_source(bool force);
 private:
-    img_filter::transform_function_type transfrom_binary_mono_func_ = nullptr;
+    bool    apply_wb_ = false;
+    img_filter::whitebalance_params whitebalance_params_;
 
-    std::function<void(const img::img_descriptor& dst,
-                       const img::img_descriptor& src,
-                       img_filter::filter_params& params)>
-        transform_binary_color_func_;
+    transform_context   trans_impl_;
 
-    wb_func transform_unary_func_ = nullptr;
-
+    auto fetch_balancewhite_values_from_source() ->img_filter::whitebalance_params;
 private:
-    enum class color_mode
-    {
-        mono,
-        bayer,
-    };
+    void init_from_source();
+    bool init_from_source_done_ = false;
 
-    color_mode get_color_mode() const noexcept;
-    void update_balancewhite_values_from_source();
-
-    tcamprop_system::property_list_funcbased prop_list_;
-
-    bool apply_wb_ = true;
-
-    auto_alg::wb_channel_factors wb_channels_ = {};
-private:
-    void    init_from_source();
-    bool    init_from_source_done_ = false;
-
-    void    on_device_opened();
-    void    on_device_closed();
+    void on_device_opened();
+    void on_device_closed();
 
     gst_helper::gst_device_connect_signal signal_handle_device_open_;
     gst_helper::gst_device_connect_signal signal_handle_device_close_;
