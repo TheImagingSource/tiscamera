@@ -170,9 +170,29 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 
         if (m_wb.is_dev_wb())
         {
-            set_device_wb(emulated::software_prop::WB_RED, auto_pass_ret.wb.channels.r * 64.0f);
-            set_device_wb(emulated::software_prop::WB_GREEN, auto_pass_ret.wb.channels.g * 64.0f);
-            set_device_wb(emulated::software_prop::WB_BLUE, auto_pass_ret.wb.channels.b * 64.0f);
+            auto res = set_device_wb(emulated::software_prop::WB_RED, auto_pass_ret.wb.channels.r * 64.0f);
+
+            if (!res)
+            {
+                SPDLOG_ERROR("Setting whitebalance caused an error: {}", res.as_failure().error().message());
+                return;
+            }
+
+            res = set_device_wb(emulated::software_prop::WB_GREEN, auto_pass_ret.wb.channels.g * 64.0f);
+
+            if (!res)
+            {
+                SPDLOG_ERROR("Setting whitebalance caused an error: {}", res.as_failure().error().message());
+                return;
+            }
+
+            res = set_device_wb(emulated::software_prop::WB_BLUE, auto_pass_ret.wb.channels.b * 64.0f);
+
+            if (!res)
+            {
+                SPDLOG_ERROR("Setting whitebalance caused an error: {}", res.as_failure().error().message());
+                return;
+            }
         }
     }
     else
@@ -793,25 +813,58 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
         if (prop_id == emulated::software_prop::WB_RED)
         {
             const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
-            m_wb.m_dev_wb_selector->set_value_str("Red");
-            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
-            m_wb.m_dev_wb_selector->set_value_str(tmp);
+
+            auto ret = m_wb.m_dev_wb_selector->set_value_str("Red");
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_selector->set_value_str(tmp);
             return ret;
         }
         else if (prop_id == emulated::software_prop::WB_GREEN)
         {
             const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
-            m_wb.m_dev_wb_selector->set_value_str("Green");
-            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
-            m_wb.m_dev_wb_selector->set_value_str(tmp);
+
+            auto ret = m_wb.m_dev_wb_selector->set_value_str("Green");
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_selector->set_value_str(tmp);
             return ret;
         }
         else if (prop_id == emulated::software_prop::WB_BLUE)
         {
             const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
-            m_wb.m_dev_wb_selector->set_value_str("Blue");
-            auto ret = m_wb.m_dev_wb_ratio->set_value(new_value);
-            m_wb.m_dev_wb_selector->set_value_str(tmp);
+
+            auto ret = m_wb.m_dev_wb_selector->set_value_str("Blue");
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_ratio->set_value(new_value);
+            if (!ret)
+            {
+                return ret;
+            }
+
+            ret = m_wb.m_dev_wb_selector->set_value_str(tmp);
             return ret;
         }
     }
