@@ -17,6 +17,7 @@ using sp = tcam::property::emulated::software_prop;
 
 namespace
 {
+    static constexpr tcam_value_double balance_white_channel_range = { 0.0, 4.0, 0.1, 1.0, 1.0 };
 
 static emulated::software_prop_desc prop_list[] = {
     { sp::ExposureTime, "ExposureTime", TCAM_PROPERTY_TYPE_DOUBLE },
@@ -43,9 +44,9 @@ static emulated::software_prop_desc prop_list[] = {
       "BalanceWhiteAuto",
       { { { 0, "Off" }, { 1, "Once" }, { 2, "Continuous" } } },
       2 },
-    { sp::WB_RED, "BalanceWhiteRed", tcam_value_int { 0, 255, 1, 64, 64 } },
-    { sp::WB_GREEN, "BalanceWhiteGreen", tcam_value_int { 0, 255, 1, 64, 64 } },
-    { sp::WB_BLUE, "BalanceWhiteBlue", tcam_value_int { 0, 255, 1, 64, 64 } },
+    { sp::WB_RED, "BalanceWhiteRed", balance_white_channel_range },
+    { sp::WB_GREEN, "BalanceWhiteGreen", balance_white_channel_range },
+    { sp::WB_BLUE, "BalanceWhiteBlue", balance_white_channel_range },
     { sp::WB_CLAIM, "ClaimBalanceWhiteSoftware", TCAM_PROPERTY_TYPE_BOOLEAN, },
 };
 
@@ -327,18 +328,6 @@ outcome::result<int64_t> tcam::property::SoftwareProperties::get_int(
             }
             return 0;
         }
-        case emulated::software_prop::WB_RED:
-        {
-            return m_auto_params.wb.channels.r * 64.0f;
-        }
-        case emulated::software_prop::WB_GREEN:
-        {
-            return m_auto_params.wb.channels.g * 64.0f;
-        }
-        case emulated::software_prop::WB_BLUE:
-        {
-            return m_auto_params.wb.channels.b * 64.0f;
-        }
         case emulated::software_prop::WB_CLAIM:
         {
             return m_wb_is_claimed;
@@ -428,33 +417,6 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
             }
             return outcome::success();
         }
-        case emulated::software_prop::WB_RED:
-        {
-            m_auto_params.wb.channels.r = new_val / 64.0f;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
-        }
-        case emulated::software_prop::WB_GREEN:
-        {
-            m_auto_params.wb.channels.g = new_val / 64.0f;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
-        }
-        case emulated::software_prop::WB_BLUE:
-        {
-            m_auto_params.wb.channels.b = new_val / 64.0f;
-            if (m_wb.is_dev_wb())
-            {
-                return set_device_wb(prop_id, new_val);
-            }
-            return outcome::success();
-        }
         case emulated::software_prop::WB_CLAIM:
         {
             m_wb_is_claimed = new_val;
@@ -507,6 +469,18 @@ outcome::result<double> tcam::property::SoftwareProperties::get_double(
         case emulated::software_prop::GainAutoUpperLimit:
         {
             return m_auto_params.gain.max;
+        }
+        case emulated::software_prop::WB_RED:
+        {
+            return m_auto_params.wb.channels.r;
+        }
+        case emulated::software_prop::WB_GREEN:
+        {
+            return m_auto_params.wb.channels.g;
+        }
+        case emulated::software_prop::WB_BLUE:
+        {
+            return m_auto_params.wb.channels.b;
         }
         default:
         {
@@ -569,6 +543,33 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
         case emulated::software_prop::GainAutoUpperLimit:
         {
             m_auto_params.gain.max = new_val;
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_RED:
+        {
+            m_auto_params.wb.channels.r = new_val;
+            if (m_wb.is_dev_wb())
+            {
+                return set_device_wb(prop_id, new_val);
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_GREEN:
+        {
+            m_auto_params.wb.channels.g = new_val;
+            if (m_wb.is_dev_wb())
+            {
+                return set_device_wb(prop_id, new_val);
+            }
+            return outcome::success();
+        }
+        case emulated::software_prop::WB_BLUE:
+        {
+            m_auto_params.wb.channels.b = new_val;
+            if (m_wb.is_dev_wb())
+            {
+                return set_device_wb(prop_id, new_val);
+            }
             return outcome::success();
         }
         default:
@@ -783,7 +784,7 @@ void SoftwareProperties::generate_whitebalance()
 }
 
 
-outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop prop_id, unsigned int new_value)
+outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop prop_id, double new_value_tmp)
 {
     if (prop_id != emulated::software_prop::WB_RED
         && prop_id != emulated::software_prop::WB_GREEN
@@ -793,6 +794,7 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
         return tcam::status::NotSupported;
     }
 
+    int new_value = static_cast<int>( std::round( new_value_tmp * 64. ) );
     if (m_wb.type == wb_type::DevChannel)
     {
         if (prop_id == emulated::software_prop::WB_RED)

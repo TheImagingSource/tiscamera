@@ -58,7 +58,7 @@ private:
     void generate_whitebalance();
 
     outcome::result<void> set_device_wb(emulated::software_prop prop_id,
-                                        unsigned int new_value);
+                                        double new_value);
 
 
     void set_locked(emulated::software_prop prop_id, bool is_locked);
