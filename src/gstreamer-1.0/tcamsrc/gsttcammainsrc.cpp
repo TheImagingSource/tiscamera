@@ -906,11 +906,10 @@ static void gst_tcam_mainsrc_init(GstTcamMainSrc* self)
     gst_base_src_set_live(GST_BASE_SRC(self), TRUE);
     gst_base_src_set_format(GST_BASE_SRC(self), GST_FORMAT_TIME);
 
-    self->device->n_buffers = -1;
-    self->drop_incomplete_frames = TRUE;
-
     self->device = new device_state;
+    self->device->n_buffers = -1;
     self->imagesink_buffers = 10;
+    self->drop_incomplete_frames = TRUE;
 
     GST_INFO("Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
