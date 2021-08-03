@@ -39,6 +39,8 @@ tcamconvert::tcamconvert_context_base::tcamconvert_context_base(GstTCamConvert* 
 
 void tcamconvert::tcamconvert_context_base::init_from_source()
 {
+    whitebalance_params_.apply = false;
+
     auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
     assert(prop_elem != nullptr);
 
@@ -46,7 +48,7 @@ void tcamconvert::tcamconvert_context_base::init_from_source()
         prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
     if (val)
     {
-        apply_wb_ = tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
+        whitebalance_params_.apply = tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
     }
 
     init_from_source_done_ = true;
@@ -78,7 +80,7 @@ auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_sourc
         return {};
     }
 
-    if( !apply_wb_ ) {
+    if( !whitebalance_params_.apply ) {
         return {};
     }
 
@@ -190,7 +192,6 @@ bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::i
 {
     if( trans_impl_.setup( src_type, dst_type ) )
     {
-
         this->src_type_ = src_type;
         this->dst_type_ = dst_type;
         return true;

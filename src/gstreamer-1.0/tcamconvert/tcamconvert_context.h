@@ -51,7 +51,6 @@ public:
 
     bool try_connect_to_source(bool force);
 private:
-    bool    apply_wb_ = false;
     img_filter::whitebalance_params whitebalance_params_;
 
     transform_context   trans_impl_;
