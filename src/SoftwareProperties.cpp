@@ -342,9 +342,11 @@ outcome::result<void> tcam::property::SoftwareProperties::set_int(emulated::soft
         {
             m_exposure_upper_auto = new_val;
 
-            if (m_exposure_upper_auto)
+            if (m_exposure_upper_auto )
             {
-                m_exposure_auto_upper_limit = 1'000'000 / m_format.get_framerate();
+                if( m_format.get_framerate() != 0 ) {
+                    m_exposure_auto_upper_limit = 1'000'000 / m_format.get_framerate();
+                }
             }
             set_locked(emulated::software_prop::ExposureAutoUpperLimit, new_val);
 
@@ -583,17 +585,16 @@ void SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_forma
 void tcam::property::SoftwareProperties::generate_exposure()
 {
     auto exp_base = tcam::property::find_property(m_device_properties, "ExposureTime");
-
     if (!exp_base)
     {
         SPDLOG_ERROR("Unable to identify exposure interface.");
         return;
-    };
+    }
 
     m_dev_exposure = std::static_pointer_cast<tcam::property::IPropertyFloat>(exp_base);
 
     m_auto_params.exposure.granularity = m_dev_exposure->get_step();
-    ;
+    
     m_auto_params.exposure.min = m_dev_exposure->get_min();
     m_auto_params.exposure.max = m_dev_exposure->get_max();
 
@@ -608,6 +609,8 @@ void tcam::property::SoftwareProperties::generate_exposure()
     }
 
     m_auto_params.exposure.auto_enabled = true;
+
+    m_exposure_auto_upper_limit = m_auto_params.exposure.max;
 
     auto desc_ref = find_property_desc(sp::ExposureAutoReference);
 
