@@ -34,11 +34,11 @@ class SoftwarePropertyBackend;
 class SoftwarePropertyIntegerImpl : public IPropertyInteger
 {
 public:
-    SoftwarePropertyIntegerImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyIntegerImpl(const software_prop_desc& desc,
                                 std::shared_ptr<IPropertyInteger> prop,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    SoftwarePropertyIntegerImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyIntegerImpl(const software_prop_desc& desc,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
     virtual std::string get_name() const final
@@ -94,10 +94,10 @@ private:
 class SoftwarePropertyDoubleImpl : public IPropertyFloat
 {
 public:
-    SoftwarePropertyDoubleImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
                                std::shared_ptr<IPropertyFloat> prop,
                                std::shared_ptr<SoftwarePropertyBackend> backend);
-    SoftwarePropertyDoubleImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
                                std::shared_ptr<SoftwarePropertyBackend> backend);
 
     virtual std::string get_name() const final
@@ -152,7 +152,7 @@ private:
 class SoftwarePropertyBoolImpl : public IPropertyBool
 {
 public:
-    SoftwarePropertyBoolImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyBoolImpl(const software_prop_desc& desc,
                              std::shared_ptr<SoftwarePropertyBackend> backend);
 
     virtual std::string get_name() const final
@@ -190,7 +190,7 @@ private:
 class SoftwarePropertyCommandImpl : public IPropertyCommand
 {
 public:
-    SoftwarePropertyCommandImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyCommandImpl(const software_prop_desc& desc,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
     virtual std::string get_name() const final
@@ -220,7 +220,7 @@ private:
 class SoftwarePropertyEnumImpl : public IPropertyEnum
 {
 public:
-    SoftwarePropertyEnumImpl(const struct software_prop_desc* desc,
+    SoftwarePropertyEnumImpl(const software_prop_desc& desc,
                              std::shared_ptr<SoftwarePropertyBackend> backend);
 
     virtual std::string get_name() const final

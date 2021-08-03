@@ -929,25 +929,25 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
             m_properties.push_back(
-                std::make_shared<emulated::SoftwarePropertyIntegerImpl>(desc, m_backend));
+                std::make_shared<emulated::SoftwarePropertyIntegerImpl>(*desc, m_backend));
             break;
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
             m_properties.push_back(
-                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, m_backend));
+                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(*desc, m_backend));
             break;
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyBoolImpl>(desc, m_backend));
+            m_properties.push_back(std::make_shared<emulated::SoftwarePropertyBoolImpl>(*desc, m_backend));
             break;
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
 
             m_properties.push_back(
-                std::make_shared<emulated::SoftwarePropertyEnumImpl>(desc, m_backend));
+                std::make_shared<emulated::SoftwarePropertyEnumImpl>(*desc, m_backend));
             auto res = set_int(prop_id, desc->default_value_);
             if (!res)
             {
@@ -982,7 +982,7 @@ void tcam::property::SoftwareProperties::enable_property_double(
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
             m_properties.push_back(
-                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(desc, prop, m_backend));
+                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(*desc, prop, m_backend));
             break;
         }
         default:
@@ -1010,7 +1010,7 @@ void tcam::property::SoftwareProperties::enable_property_int(sp prop_id,
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
             m_properties.push_back(
-                std::make_shared<emulated::SoftwarePropertyIntegerImpl>(desc, prop, m_backend));
+                std::make_shared<emulated::SoftwarePropertyIntegerImpl>(*desc, prop, m_backend));
             break;
         }
         default:

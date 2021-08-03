@@ -24,14 +24,13 @@ namespace tcam::property::emulated
 {
 
 SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
-    const struct software_prop_desc* desc,
+    const software_prop_desc& desc,
     std::shared_ptr<IPropertyInteger> prop,
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    m_id = desc->id_;
-
-    m_name = desc->name_;
+    m_id = desc.id_;
+    m_name = desc.name_;
 
     m_min = prop->get_min();
     m_max = prop->get_max();
@@ -44,21 +43,18 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
 }
 
 SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
-    const struct software_prop_desc* desc,
+    const software_prop_desc& desc,
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    if (desc)
-    {
-        m_id = desc->id_;
+    m_id = desc.id_;
 
-        m_name = desc->name_;
+    m_name = desc.name_;
 
-        m_min = desc->range_i_.min;
-        m_max = desc->range_i_.max;
-        m_step = desc->range_i_.step;
-        m_default = desc->range_i_.default_value;
-    }
+    m_min = desc.range_i_.min;
+    m_max = desc.range_i_.max;
+    m_step = desc.range_i_.step;
+    m_default = desc.range_i_.default_value;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
@@ -115,10 +111,10 @@ outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
 
 
 SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
-    const struct software_prop_desc* desc,
+    const software_prop_desc& desc,
     std::shared_ptr<IPropertyFloat> prop,
     std::shared_ptr<SoftwarePropertyBackend> backend)
-    : m_name(desc->name_), m_id(desc->id_), m_cam(backend)
+    : m_name(desc.name_), m_id(desc.id_), m_cam(backend)
 {
     //m_name = prop->get_name();
     m_min = prop->get_min();
@@ -132,24 +128,20 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
 }
 
 SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
-    const struct software_prop_desc* desc,
+    const software_prop_desc& desc,
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    if (desc)
-    {
-        m_id = desc->id_;
+    m_id = desc.id_;
 
-        m_name = desc->name_;
+    m_name = desc.name_;
 
-        m_min = desc->range_d_.min;
-        m_max = desc->range_d_.max;
-        m_step = desc->range_d_.step;
-        m_default = desc->range_d_.default_value;
+    m_min = desc.range_d_.min;
+    m_max = desc.range_d_.max;
+    m_step = desc.range_d_.step;
+    m_default = desc.range_d_.default_value;
 
-        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
-        //m_value = 500.0;
-    }
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
 
@@ -193,15 +185,12 @@ outcome::result<void> SoftwarePropertyDoubleImpl::valid_value(double val)
 }
 
 
-SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const struct software_prop_desc* desc,
+SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const software_prop_desc& desc,
                                                    std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    if (desc)
-    {
-        m_id = desc->id_;
-        m_name = desc->name_;
-    }
+    m_id = desc.id_;
+    m_name = desc.name_;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
@@ -235,14 +224,11 @@ outcome::result<void> SoftwarePropertyBoolImpl::set_value(bool new_value)
 
 
 SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
-    const struct software_prop_desc* desc,
+    const software_prop_desc& desc,
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    if (desc)
-    {
-        m_name = desc->name_;
-    }
+    m_name = desc.name_;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
 }
 
@@ -254,18 +240,15 @@ outcome::result<void> SoftwarePropertyCommandImpl::execute()
 }
 
 
-SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const struct software_prop_desc* desc,
+SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const software_prop_desc& desc,
                                                    std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_cam(backend)
 {
-    if (desc)
-    {
-        m_id = desc->id_;
-        m_name = desc->name_;
-        m_entries = desc->entries_;
+    m_id = desc.id_;
+    m_name = desc.name_;
+    m_entries = desc.entries_;
 
-        m_default = m_entries[desc->default_value_];
-    }
+    m_default = m_entries[desc.default_value_];
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 }
 
