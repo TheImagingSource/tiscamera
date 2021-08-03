@@ -3,7 +3,6 @@
 #include "SoftwareProperties.h"
 
 #include "SoftwarePropertiesImpl.h"
-//#include "algorithms/tcam-algorithm.h"
 #include "logging.h"
 
 #include <algorithm>
@@ -89,21 +88,11 @@ static uint64_t time_now_in_us() noexcept
 }
 
 
-static long frame_counter;
-
 void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 {
     auto_alg::auto_pass_params tmp_params;
     {
         std::scoped_lock lock(m_property_mtx);
-
-        // if( params_.whitebalance_enable )
-        // {
-        //     auto_params_.wb.channels = user_wb_;
-        // } else {
-        //     auto_params_.wb.channels = {};
-        // }
-
 
         tmp_params = m_auto_params;
 
@@ -112,8 +101,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
     }
 
     // TODO: get from ImageBuffer statistics
-    tmp_params.frame_number = frame_counter;
-    frame_counter++;
+    tmp_params.frame_number = m_frame_counter++;
     tmp_params.time_point = time_now_in_us();
 
     auto auto_pass_ret = auto_alg::auto_pass(*p_state, image, tmp_params);
@@ -171,7 +159,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
 
         if (m_wb.is_dev_wb())
         {
-            auto res = set_device_wb(emulated::software_prop::WB_RED, auto_pass_ret.wb.channels.r * 64.0f);
+            auto res = set_device_wb(emulated::software_prop::WB_RED, auto_pass_ret.wb.channels.r);
 
             if (!res)
             {
@@ -179,7 +167,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
                 return;
             }
 
-            res = set_device_wb(emulated::software_prop::WB_GREEN, auto_pass_ret.wb.channels.g * 64.0f);
+            res = set_device_wb(emulated::software_prop::WB_GREEN, auto_pass_ret.wb.channels.g);
 
             if (!res)
             {
@@ -187,7 +175,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
                 return;
             }
 
-            res = set_device_wb(emulated::software_prop::WB_BLUE, auto_pass_ret.wb.channels.b * 64.0f);
+            res = set_device_wb(emulated::software_prop::WB_BLUE, auto_pass_ret.wb.channels.b);
 
             if (!res)
             {
@@ -240,7 +228,6 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
     if (has_bayer)
     {
         auto iter_wb = find_property(m_device_properties, "BalanceWhiteAuto");
-
         if (!iter_wb)
         {
             generate_whitebalance();
@@ -583,6 +570,7 @@ outcome::result<void> tcam::property::SoftwareProperties::set_double(
 
 void SoftwareProperties::update_to_new_format(const tcam::VideoFormat& new_format)
 {
+    m_frame_counter = 0;
     m_format = new_format;
 
     if (get_int(sp::ExposureAutoUpperLimitAuto))
@@ -733,8 +721,6 @@ void SoftwareProperties::generate_whitebalance()
     auto base_selector = tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
     auto base_raw = tcam::property::find_property(m_device_properties, "BalanceRatioRaw");
 
-    enable_property(sp::WB_CLAIM);
-
     m_wb = {};
 
     if (base_r && base_g && base_b)
@@ -769,6 +755,8 @@ void SoftwareProperties::generate_whitebalance()
     {
         m_auto_params.wb.is_software_whitebalance = true;
         m_wb_is_claimed = false;
+
+        enable_property(sp::WB_CLAIM);
 
         enable_property(sp::WB_RED);
         enable_property(sp::WB_GREEN);

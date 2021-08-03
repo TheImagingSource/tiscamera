@@ -140,6 +140,8 @@ private:
     auto_alg::auto_pass_params m_auto_params;
     auto_alg::state_ptr p_state;
     tcam::VideoFormat m_format;
+
+    int64_t     m_frame_counter = 0;
 };
 
 } // namespace tcam::property

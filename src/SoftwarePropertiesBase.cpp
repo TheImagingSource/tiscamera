@@ -4,10 +4,7 @@
 
 using sp = tcam::property::emulated::software_prop;
 
-namespace tcam::property::emulated
-{
-
-const std::string_view find_property_name(sp id)
+const std::string_view tcam::property::emulated::find_property_name(sp id)
 {
     switch (id)
     {
@@ -74,5 +71,3 @@ const std::string_view find_property_name(sp id)
             return "no_such_property";
     }
 }
-
-} // namespace tcam::property::emulated
