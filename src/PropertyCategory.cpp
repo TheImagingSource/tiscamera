@@ -2,15 +2,15 @@
 
 #include "PropertyCategory.h"
 
-#include "string_view"
+#include <string_view>
 
 namespace
 {
 struct tcam_category_table_entry
 {
-    std::string category;
-    std::string group;
-    std::string property;
+    std::string_view category;
+    std::string_view group;
+    std::string_view property;
 };
 
 const tcam_category_table_entry category_table[] = {
@@ -22,7 +22,7 @@ const tcam_category_table_entry category_table[] = {
     { "Exposure", "Exposure", "ExposureAutoUpperLimit" },
     { "Exposure", "Exposure", "ExposureAutoLowerLimit" },
     { "Exposure", "Exposure", "ExposureAutoHighlightReduction" },
-    { "Exposure", "Exposure", "ExposureAutoHighlighReduction" }, // backward compatible workaraound
+    { "Exposure", "Exposure", "ExposureAutoHighlighReduction" }, // backward compatible workaround
     { "Exposure", "Gain", "Gain" },
     { "Exposure", "Gain", "GainAuto" },
     { "Exposure", "Gain", "GainAutoUpperLimit" },
@@ -167,10 +167,7 @@ const tcam_category_table_entry category_table[] = {
 
 } // namespace
 
-namespace tcam::property
-{
-
-std::string get_display_category(std::string_view property)
+std::string_view tcam::property::get_display_category(std::string_view property)
 {
     for (const auto& entry : category_table)
     {
@@ -182,16 +179,14 @@ std::string get_display_category(std::string_view property)
     return "Unknown";
 }
 
-std::string get_display_group(std::string_view property)
+std::string tcam::property::get_display_group(std::string_view property)
 {
     for (const auto& entry : category_table)
     {
         if (entry.property == property)
         {
-            return entry.group;
+            return std::string(entry.group);
         }
     }
     return std::string(property);
 }
-
-} // namespace tcam::property

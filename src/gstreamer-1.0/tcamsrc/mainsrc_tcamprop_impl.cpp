@@ -154,7 +154,7 @@ static gboolean gst_tcam_mainsrc_get_tcam_property(TcamProp* iface,
         g_value_init(category, G_TYPE_STRING);
 
         g_value_set_string(category,
-                           tcam::property::get_display_category(property->get_name()).c_str());
+                           std::string(tcam::property::get_display_category(property->get_name())).c_str());
     }
     if (group)
     {

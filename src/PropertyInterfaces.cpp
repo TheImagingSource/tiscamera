@@ -2,8 +2,10 @@
 
 #include "PropertyInterfaces.h"
 
+#include <algorithm>
+
 std::shared_ptr<tcam::property::IPropertyBase> tcam::property::find_property(
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
     const std::string_view& name)
 {
     auto iter = std::find_if(properties.begin(),

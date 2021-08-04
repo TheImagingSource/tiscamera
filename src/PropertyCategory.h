@@ -20,7 +20,6 @@
 #include "base_types.h"
 #include "visibility.h"
 
-#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -69,7 +68,7 @@ private:
     std::vector<std::shared_ptr<Category>> m_children;
 };
 
-std::string get_display_category(std::string_view property);
+std::string_view get_display_category(std::string_view property);
 std::string get_display_group(std::string_view property);
 
 } // namespace tcam::property

@@ -22,7 +22,6 @@
 #include "error.h"
 #include "visibility.h"
 
-#include <algorithm>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -43,7 +42,7 @@ public:
 
 
 std::shared_ptr<tcam::property::IPropertyBase> find_property(
-    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
     const std::string_view& name);
 
 
