@@ -1,10 +1,52 @@
+
+
 #pragma once
 
 #include <gst/gst.h>
 #include <utility>  // std::exchange
 
+/** gst_ptr
+ * 
+ * gst_ptr is a counting shared pointer.
+ * You create a gst_ptr using  (When in doubt use make_ptr)
+    - make_ptr (the same as make_consume_ptr)
+    - make_wrap_ptr
+        When wrapping, the ref-count of the object is not touched.
+    - make_addref_ptr
+        When wrapping, the ref-count is increased by one, if the object is floating, the floating flag is removed.
+    - make_consume_ptr (this is the same as make_ptr)
+        When wrapping, the floating flag is removed, but addref is not called.
+ * The destructor always decrements the ref-count.
+ * 
+ * Note: gst_ptr<GstStructure> has no ref count and cannot be copied.
+ */
+
 namespace gst_helper
 {
+    /** Simple wrapper like shared_ptr/unique_ptr. If the gstreamer object supports ref-counts the gst_ptr is copyable, otherwise it is only moveable
+     * You can create instances via the make* functions.
+     */
+    template<class T> class gst_ptr;
+
+    /** The default way to create a gst_ptr.
+     * Wraps the passed in pointer and 'consumes' the gobject floating flag.
+     * Note: this calls make_consume_ptr
+     */
+    template<class T> gst_ptr<T> make_ptr( T* ptr ) noexcept;
+    /** Wraps the passed in pointer and increments the reference count of the passed in object.
+     * If the object is floating, the floating flag is removed (via g_object_ref_sink and no separate addref is called).
+     */
+    template<class T> gst_ptr<T> make_addref_ptr( T* ptr ) noexcept;
+    /** Wraps the passed in pointer and 'consumes' the gobject floating flag.
+     * If the object is floating, the floating flag is removed,
+     * If the object is not floating its reference count is not touched.
+     */
+    template<class T> gst_ptr<T> make_consume_ptr( T* ptr ) noexcept;
+    /** Wraps the passed in pointer and does not change the ref-count or floating flag.
+     * Note: The destructor does still run and decreases the ref-count
+     */
+    template<class T> gst_ptr<T> make_wrap_ptr( T* ptr ) noexcept;
+
 namespace detail
 {
 inline void unref_object(GstCaps* ptr) noexcept
@@ -48,6 +90,22 @@ inline void ref_object(GstBufferPool* ptr) noexcept
 {
     gst_object_ref(ptr);
 }
+
+template<class T>
+inline bool consume_floating( T* ptr ) noexcept
+{
+    if( g_object_is_floating( ptr ) )
+    {
+        g_object_ref_sink( ptr );
+        return true;
+    }
+    return false;
+}
+template<>
+inline bool consume_floating<GstCaps>( GstCaps* ptr ) noexcept 
+{
+    return false;
+}
 } // namespace detail
 
 template<class T> class gst_ptr
@@ -76,16 +134,16 @@ public:
         unref( ptr_ );
     }
 
-    /**
-         * Wrap the passed in pointer. So do not increase the reference count.
-         */
+    /** Wraps the passed in pointer and does not change the ref-count or floating flag.
+     * Note: The destructor does still run and decreases the ref-count
+     */
     static gst_ptr wrap(T* ptr) noexcept
     {
         return gst_ptr { ptr };
     }
-    /**
-     * Consume the passed in reference. This means that if the pointer is floating, we remove this floating flag.
-     * The reference counter is not increased.
+    /** Wraps the passed in pointer and 'consumes' the gobject floating flag.
+     * If the object is floating, the floating flag is removed,
+     * If the object is not floating its reference count is not touched.
      */
     static gst_ptr consume(T* ptr) noexcept
     {
@@ -93,35 +151,37 @@ public:
         {
             return gst_ptr {};
         }
-        if (g_object_is_floating(ptr))
-        {
-            g_object_ref_sink(ptr);
-        }
+        detail::consume_floating( ptr );
         return gst_ptr { ptr };
     }
-
+    /** Wraps the passed in pointer and increments the reference count of the passed in object.
+     * If the object is floating, the floating flag is removed (via g_object_ref_sink and no separate addref is called).
+     */
     static gst_ptr addref(T* ptr) noexcept
     {
         if (ptr == nullptr)
         {
             return gst_ptr {};
         }
-        if (g_object_is_floating(ptr))
-        {
-            g_object_ref_sink(ptr);
-        }
-        else
+        if (!detail::consume_floating(ptr))
         {
             ref(ptr);
         }
         return gst_ptr { ptr };
     }
 
+    /**
+     * Checks if the internal pointer is == nullptr
+     */
     bool empty() const noexcept
     {
         return ptr_ == nullptr;
     }
-    T* release() noexcept
+    /**
+     * Returns the internal pointer. Then sets the internal pointer to nullptr.
+     * Note: this does not call unref
+     */
+    [[nodiscard]] T* release() noexcept
     {
         return std::exchange(ptr_, nullptr);
     }
@@ -153,15 +213,31 @@ public:
     {
         return ptr_;
     }
-
+    /**
+     * Decrements the reference counter and then sets the internal pointer to nullptr.
+     * Post-condition: empty() == true
+     * Note: decrement_ref only decrements the reference counter, reset also sets the internal pointer to nullptr
+     */
     void reset() noexcept
     {
         unref(ptr_);
     }
-    void reset(T* ptr) noexcept
-    {
-        unref(ptr_);
-        ptr_ = ptr;
+    /**
+     * Increments the reference counter.
+     */
+    void    add_ref() noexcept {
+        ref( ptr_ );
+    }
+    /**
+     * Decrements the reference counter. N
+     * This does _not_ set the internal pointer to nullptr.
+     * Note: decrement_ref only decrements the reference counter, reset also sets the internal pointer to nullptr
+     */
+    void    decrement_ref() noexcept {
+        if( !ptr_ ) return;
+        
+        using namespace detail;
+        unref_object( ptr_ );
     }
 private:
     gst_ptr(T* ptr) noexcept : ptr_ { ptr } {}
@@ -207,23 +283,14 @@ template<class T> bool operator!=(const gst_ptr<T>& ptr, nullptr_t) noexcept
     return !ptr.empty();
 }
 
-/**
- * This wraps the gst pointer in a gst_ptr and 'consumes' a floating reference. If the object is not floating, no addref is called
- */
 template<class T> gst_ptr<T> make_ptr(T* ptr) noexcept
 {
     return gst_ptr<T>::consume(ptr);
 }
-
-
 template<class T> gst_ptr<T> make_addref_ptr(T* ptr) noexcept
 {
     return gst_ptr<T>::addref(ptr);
 }
-
-/**
- * This wraps the gst pointer in a gst_ptr and 'consumes' a floating reference. If the object is not floating, no addref is called
- */
 template<class T> gst_ptr<T> make_consume_ptr(T* ptr) noexcept
 {
     return gst_ptr<T>::consume(ptr);

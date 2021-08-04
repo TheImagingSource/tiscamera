@@ -4,11 +4,16 @@
 
 namespace gst_helper
 {
+    /**
+     * Tests if the passed in GObject has the according signal.
+     */
     inline bool has_signal( GObject* instance, const char* name ) noexcept
     {
         return g_signal_lookup( name, G_OBJECT_TYPE( instance ) ) != 0;
     }
-
+    /**
+     * Simple wrapper for a GObject signal connection.
+     */
     class gsignal_handle
     {
     public:

@@ -8,14 +8,25 @@
 
 namespace gst_helper
 {
+    /** Fetches the type name of the passed GstElement. */
     std::string             get_type_name( GstElement& element );
+    /** Generates a string from the passed in caps */
     std::string             to_string( const GstCaps& caps );
+    /** Generates a string from the passed in GstState */
     constexpr const char*   to_string( GstState state ) noexcept;
 
+    /** Gets the named GstPad from the elem */
     auto    get_static_pad( GstElement& elem, std::string name ) -> gst_ptr<GstPad>;
+    /** Gets the peer pad of pad */
     auto    get_peer_pad( GstPad& pad ) noexcept -> gst_ptr<GstPad>;
+    /** Fetches the caps from the passed in pad  */
     auto    query_caps( GstPad& pad ) noexcept -> gst_ptr<GstCaps>;
+    /** Returns true when the passed in caps are empty or any */
     auto    caps_empty_or_any( const GstCaps& caps ) noexcept -> bool;
+    /** Returns the current state of the passed in elem
+     * @param wait If false then does not wait for the state, otherwise waits for a pending state change.
+     * @return Returns std::null_opt on error. (When GST_STATE_CHANGE_ASYNC is returnd, the current GstState is returned).
+     */
     auto    get_gststate( GstElement& elem, bool wait = false ) noexcept -> std::optional<GstState>;
     
     inline std::optional<GstState>    get_gststate( GstElement& elem, bool wait ) noexcept

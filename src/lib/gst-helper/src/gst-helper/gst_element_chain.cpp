@@ -65,20 +65,19 @@ bool gst_helper::has_connected_element_upstream( const GstElement& element )
 
 std::string gst_helper::get_plugin_version_from_gst_element( const GstElement& element )
 {
+    // [transfer:none]
     GstElementFactory* camera_factory = gst_element_get_factory( const_cast<GstElement*>(&element) );
     if( camera_factory == nullptr ) {
-        //GST_ERROR( "Failed to get factory for element %" GST_PTR_FORMAT, (void*)element );
         return {};
     }
     auto plugin = gst_helper::make_consume_ptr( gst_plugin_feature_get_plugin( GST_PLUGIN_FEATURE( camera_factory ) ) );
     if( plugin == nullptr ) {
-        //GST_ERROR( "Failed to get plugin from element %" GST_PTR_FORMAT, (void*)element );
         return {};
     }
     const gchar* name = gst_plugin_get_version( plugin.get() );
     if( name == nullptr ) {
-        //GST_ERROR( "Failed to get version string for element %" GST_PTR_FORMAT, (void*)element );
         return {};
     }
-    return name;
+    std::string rval = name;
+    return rval;
 }

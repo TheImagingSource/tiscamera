@@ -9,6 +9,9 @@
 
 namespace gst_helper
 {
+    /**
+     * Simple wrapper over a GstElement* signal connection
+     */
     class gst_device_connect_signal
     {
     public:

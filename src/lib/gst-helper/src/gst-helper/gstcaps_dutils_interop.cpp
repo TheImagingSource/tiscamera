@@ -56,11 +56,12 @@ img::img_type gst_helper::get_gst_struct_image_type(const GstStructure& structur
 
 auto gst_helper::get_img_type_from_fixated_gstcaps(const GstCaps& caps) -> img::img_type
 {
-    auto struc = gst_caps_get_structure( &caps, 0 );
-    if( struc == nullptr ) {
+    auto struc = gst_caps_get_structure(&caps, 0);
+    if (struc == nullptr)
+    {
         return {};
     }
-    return get_gst_struct_image_type( *struc );
+    return get_gst_struct_image_type(*struc);
 }
 
 std::optional<double> gst_helper::get_gst_struct_framerate(const GstStructure& structure)
