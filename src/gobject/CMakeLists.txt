@@ -24,7 +24,7 @@ set(cxxflags "${cxxflags} ${INTROSPECTION_CFLAGS} -std=c++11")
 
 add_library(tcamprop SHARED tcamprop.c)
 
-target_include_directories(tcamprop PRIVATE "${CMAKE_CURRENT_DIRECTORY}")
+target_include_directories(tcamprop PUBLIC "${CMAKE_CURRENT_DIRECTORY}")
 target_include_directories(tcamprop PRIVATE "${GLIB2_INCLUDE_DIR}")
 target_include_directories(tcamprop PRIVATE "${GObject_INCLUDE_DIR}")
 
