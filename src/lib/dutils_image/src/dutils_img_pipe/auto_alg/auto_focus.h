@@ -19,7 +19,7 @@ namespace auto_alg::impl
     public:
         auto_focus();
 
-        bool    is_auto_alg_run_needed( const auto_alg::auto_focus_params& params ) noexcept;
+        bool    is_auto_alg_run_needed( const auto_alg::auto_focus_params& params ) const noexcept;
 
         bool    auto_alg_run( uint64_t time_point, const img::img_descriptor& img, const auto_alg::auto_focus_params& state, img::point offsets, img::dim pixel_dim, int& new_focus_vale );
 

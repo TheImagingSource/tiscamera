@@ -319,7 +319,7 @@ bool auto_alg::impl::supports_auto_focus( const img::img_type& img ) noexcept
 }
 
 
-bool auto_alg::impl::auto_focus::is_auto_alg_run_needed( const auto_alg::auto_focus_params& params ) noexcept
+bool auto_alg::impl::auto_focus::is_auto_alg_run_needed( const auto_alg::auto_focus_params& params ) const noexcept
 {
     if( !params.enable_focus ) {
         return false;
@@ -407,6 +407,8 @@ void	debug_out( char* format, ... )
 }
 #endif
 
+#include <cstdio>
+
 bool	auto_alg::impl::auto_focus::analyze_frame( uint64_t now, const img::img_descriptor& img, int& new_focus_val )
 {
     bool rearm_timer = false;
@@ -443,7 +445,12 @@ bool	auto_alg::impl::auto_focus::analyze_frame( uint64_t now, const img::img_des
     {
         if( check_wait_condition( now ) )
         {
+            //printf( "data.state != data_holder::init && check_wait_condition == true\n" );
             rearm_timer = analyze_frame_( img, new_focus_val );
+        }
+        else
+        {
+            //printf( "data.state != data_holder::init && check_wait_condition != true\n" );
         }
     }
 
@@ -628,11 +635,14 @@ void auto_alg::impl::auto_focus::update_focus( int focus_val )
 
 bool auto_alg::impl::auto_focus::check_wait_condition( uint64_t now )
 {
-    if( img_wait_cnt_ >= 0 && --img_wait_cnt_ < 0 )
+    if( img_wait_cnt_ > 0 )
     {
-        return now > img_wait_endtime_;
+        --img_wait_cnt_;
+        return false;
     }
-    return false;
+    img_wait_cnt_ = 0;
+    //printf( "now=%llu, img_wait_endtime_=%llu\n", now, img_wait_endtime_ );
+    return now > img_wait_endtime_;
 }
 
 void auto_alg::impl::auto_focus::arm_focus_timer( uint64_t now, int diff )
