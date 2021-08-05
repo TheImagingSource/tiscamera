@@ -17,6 +17,7 @@ target_include_directories(tcam-dfk73
   PRIVATE ${UDEV_INCLUDE_DIR})
 
 target_link_libraries(tcam-dfk73 ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
+#set_project_warnings(tcam-dfk73)
 
 set_property(TARGET tcam-dfk73 PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam-dfk73 PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
@@ -32,15 +33,13 @@ endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 find_package(LibUuid REQUIRED QUIET)
 
-add_library(tcam-uvc-extension SHARED
-  uvc-extension-loader.cpp)
+add_library(tcam-uvc-extension STATIC
+    "uvc-extension-loader.h"
+    "uvc-extension-loader.cpp"
+)
+set_project_warnings(tcam-uvc-extension)
 
 target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
 target_include_directories(tcam-uvc-extension
   PRIVATE ${LIBUUID_INCLUDE_DIRS}
   PRIVATE "${TCAM_SOURCE_DIR}/external/json")
-
-install(TARGETS tcam-uvc-extension
-  LIBRARY
-  DESTINATION "${TCAM_INSTALL_LIB}"
-  COMPONENT uvc-extension)

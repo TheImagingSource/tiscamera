@@ -17,6 +17,8 @@
 #ifndef TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H
 #define TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H
 
+#include "../compiler_defines.h"
+
 #include <functional>
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
@@ -24,14 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "../compiler_defines.h"
-
-VISIBILITY_DEFAULT
-
-namespace tcam
-{
-
-namespace uvc
+namespace tcam::uvc
 {
 
 /**
@@ -74,10 +69,6 @@ void apply_mappings(int fd,
 std::vector<description> load_description_file(const std::string& filename,
                                                std::function<void(const std::string&)> cb);
 
-} /* namespace uvc */
-
-} /* namespace tcam */
-
-VISIBILITY_POP
+} // namespace tcam::uvc
 
 #endif /* TCAM_SRC_V4L2_UVC_EXTENSION_LOADER_H */

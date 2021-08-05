@@ -34,7 +34,7 @@ using json = nlohmann::json;
 // that function was the only reason for linking
 // libtcam.so. This way the extension unit loader
 // can be built seperately.
-int xioctl(int fd, unsigned int request, void* arg)
+static int xioctl(int fd, unsigned int request, void* arg)
 {
     constexpr int IOCTL_RETRY = 4;
 
@@ -79,7 +79,7 @@ void tcam::uvc::apply_mappings(int fd,
 }
 
 
-__u8 string_to_u8(const std::string& input)
+static __u8 string_to_u8(const std::string& input)
 {
     char* p;
     long n = strtol(input.c_str(), &p, 16);
@@ -94,7 +94,7 @@ __u8 string_to_u8(const std::string& input)
 }
 
 
-__u32 string_to_u32(const std::string& input)
+static __u32 string_to_u32(const std::string& input)
 {
     char* p;
     long n = strtol(input.c_str(), &p, 16);
@@ -109,7 +109,7 @@ __u32 string_to_u32(const std::string& input)
 }
 
 
-__u8 parse_uvc_type(const std::string& str)
+static __u8 parse_uvc_type(const std::string& str)
 {
     if (str == "unsigned")
     {
@@ -140,7 +140,7 @@ __u8 parse_uvc_type(const std::string& str)
 }
 
 
-__u8 parse_v4l2_type(const std::string& str)
+static __u8 parse_v4l2_type(const std::string& str)
 {
     if (str == "bitmask")
     {
