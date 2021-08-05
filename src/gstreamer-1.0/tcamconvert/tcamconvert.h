@@ -20,8 +20,9 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/gst.h>
 
-namespace tcamconvert {
-    class tcamconvert_context_base;
+namespace tcamconvert
+{
+class tcamconvert_context_base;
 }
 
 G_BEGIN_DECLS

@@ -357,7 +357,7 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
 static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransform* base,
                                                   [[maybe_unused]] GstBuffer* inbuf)
 {
-    auto& elem = get_gst_elem_reference( GST_TCAMCONVERT( base ) );
+    auto& elem = get_gst_elem_reference(GST_TCAMCONVERT(base));
 
     GstMapInfo map_in;
     if (!gst_buffer_map(inbuf, &map_in, GST_MAP_READWRITE))
@@ -368,7 +368,7 @@ static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransf
 
     auto src = make_img_desc_from_input_buffer(elem.src_type_, map_in.data, inbuf);
 
-    elem.filter( src );
+    elem.filter(src);
 
     gst_buffer_unmap(inbuf, &map_in);
 
@@ -449,7 +449,7 @@ static GstStateChangeReturn gst_tcamconvert_change_state(GstElement* element, Gs
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            elem.try_connect_to_source( false );
+            elem.try_connect_to_source(false);
             break;
         }
         default:
@@ -471,7 +471,7 @@ static void gst_tcamdutils_sink_pad_unlinked(GstPad* /*self*/, GstPad* /*peer*/,
 
 static void gst_tcamconvert_init(GstTCamConvert* self)
 {
-    self->context_ = new tcamconvert::tcamconvert_context_base( self );
+    self->context_ = new tcamconvert::tcamconvert_context_base(self);
 
     gst_base_transform_set_in_place(GST_BASE_TRANSFORM(self), FALSE);
 
@@ -486,8 +486,8 @@ static void gst_tcamconvert_dispose(GObject* object)
     auto* self = GST_TCAMCONVERT(object);
     {
         auto sink_pad = gst_helper::get_static_pad(*GST_ELEMENT(self), "sink");
-        int res = g_signal_handlers_disconnect_by_data(sink_pad.get(), self);
-        assert(res == 2);
+        /*int res =*/ g_signal_handlers_disconnect_by_data(sink_pad.get(), self);
+        //assert(res == 2);
     }
     G_OBJECT_CLASS(gst_tcamconvert_parent_class)->dispose(object);
 }
@@ -518,13 +518,15 @@ static void gst_tcamconvert_class_init(GstTCamConvertClass* klass)
         "The Imaging Source <support@theimagingsource.com>");
 
 
-    auto src_caps = gst_helper::generate_caps_with_dim( tcamconvert::tcamconvert_get_all_output_fccs());
+    auto src_caps =
+        gst_helper::generate_caps_with_dim(tcamconvert::tcamconvert_get_all_output_fccs());
 
     gst_element_class_add_pad_template(
         gstelement_class, gst_pad_template_new("src", GST_PAD_SRC, GST_PAD_ALWAYS, src_caps.get()));
 
 
-    auto sink_caps = gst_helper::generate_caps_with_dim( tcamconvert::tcamconvert_get_all_input_fccs());
+    auto sink_caps =
+        gst_helper::generate_caps_with_dim(tcamconvert::tcamconvert_get_all_input_fccs());
 
     gst_element_class_add_pad_template(
         gstelement_class,

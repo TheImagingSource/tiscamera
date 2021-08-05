@@ -37,6 +37,7 @@ public:
 
     void on_input_pad_linked();
     void on_input_pad_unlinked();
+
 public:
     tcamconvert_context_base(GstTCamConvert* self);
 
@@ -50,12 +51,14 @@ public:
     void filter(const img::img_descriptor& src);
 
     bool try_connect_to_source(bool force);
+
 private:
     img_filter::whitebalance_params whitebalance_params_;
 
-    transform_context   trans_impl_;
+    transform_context trans_impl_;
 
-    auto fetch_balancewhite_values_from_source() ->img_filter::whitebalance_params;
+    auto fetch_balancewhite_values_from_source() -> img_filter::whitebalance_params;
+
 private:
     void init_from_source();
     bool init_from_source_done_ = false;

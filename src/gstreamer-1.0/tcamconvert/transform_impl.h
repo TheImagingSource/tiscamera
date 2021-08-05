@@ -34,10 +34,11 @@ struct transform_context
     void filter(const img::img_descriptor& src, const img_filter::whitebalance_params& params);
 
 private:
-    transform_unary_wb_func     transform_unary_wb_func_ = nullptr;
-    transform_binary_func       transfrom_binary_mono_func_;
-    transform_binary_wb_func    transform_fccXX_to_dst_func_;
-private:    // byXX -> bgra stuff
-    std::vector<uint8_t>        transform_intermediate_buffer_;
+    transform_unary_wb_func transform_unary_wb_func_ = nullptr;
+    transform_binary_func transfrom_binary_mono_func_;
+    transform_binary_wb_func transform_fccXX_to_dst_func_;
+
+private: // byXX -> bgra stuff
+    std::vector<uint8_t> transform_intermediate_buffer_;
 };
 } // namespace tcamconvert

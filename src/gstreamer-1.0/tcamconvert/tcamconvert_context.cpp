@@ -48,7 +48,8 @@ void tcamconvert::tcamconvert_context_base::init_from_source()
         prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
     if (val)
     {
-        whitebalance_params_.apply = tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
+        whitebalance_params_.apply =
+            tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
     }
 
     init_from_source_done_ = true;
@@ -56,7 +57,7 @@ void tcamconvert::tcamconvert_context_base::init_from_source()
 
 auto tcamconvert::tcamconvert_context_base::get_property_list() -> std::vector<std::string_view>
 {
-    return {};//prop_list_.get_property_list();
+    return {}; //prop_list_.get_property_list();
 }
 
 auto tcamconvert::tcamconvert_context_base::find_property(std::string_view /*name*/)
@@ -66,7 +67,8 @@ auto tcamconvert::tcamconvert_context_base::find_property(std::string_view /*nam
     return nullptr;
 }
 
-auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_source() -> img_filter::whitebalance_params
+auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_source()
+    -> img_filter::whitebalance_params
 {
     if (!src_element_ptr_)
     {
@@ -80,7 +82,8 @@ auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_sourc
         return {};
     }
 
-    if( !whitebalance_params_.apply ) {
+    if (!whitebalance_params_.apply)
+    {
         return {};
     }
 
@@ -141,12 +144,20 @@ bool tcamconvert::tcamconvert_context_base::try_connect_to_source(bool force)
             signal_handle_device_open_.connect(G_OBJECT(camera_src_ptr.get()),
                                                "device-open",
                                                [this](GstElement*) { this->on_device_opened(); });
-        assert(res || "Failed to register 'device-open' signal");
+        if (!res)
+        {
+            GST_ERROR_OBJECT(self_reference_, "Failed to register 'device-open' signal");
+            return false;
+        }
         bool res2 =
             signal_handle_device_close_.connect(G_OBJECT(camera_src_ptr.get()),
                                                 "device-close",
                                                 [this](GstElement*) { this->on_device_closed(); });
-        assert(res2 || "Failed to register 'device-open' signal");
+        if (!res2)
+        {
+            GST_ERROR_OBJECT(self_reference_, "Failed to register 'device-close' signal");
+            return false;
+        }
     }
     else
     {
@@ -190,7 +201,7 @@ void tcamconvert::tcamconvert_context_base::on_input_pad_unlinked()
 
 bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::img_type dst_type)
 {
-    if( trans_impl_.setup( src_type, dst_type ) )
+    if (trans_impl_.setup(src_type, dst_type))
     {
         this->src_type_ = src_type;
         this->dst_type_ = dst_type;
@@ -203,10 +214,10 @@ bool tcamconvert::tcamconvert_context_base::setup(img::img_type src_type, img::i
 void tcamconvert::tcamconvert_context_base::transform(const img::img_descriptor& src,
                                                       const img::img_descriptor& dst)
 {
-    trans_impl_.transform( src, dst, fetch_balancewhite_values_from_source() );
+    trans_impl_.transform(src, dst, fetch_balancewhite_values_from_source());
 }
 
 void tcamconvert::tcamconvert_context_base::filter(const img::img_descriptor& src)
 {
-    trans_impl_.filter( src, fetch_balancewhite_values_from_source() );
+    trans_impl_.filter(src, fetch_balancewhite_values_from_source());
 }
