@@ -61,11 +61,12 @@ function(set_project_warnings project_name)
     -Wduplicated-branches # Warn when an if-else has identical branches.
 
     # disabled because these lead to false positives
+    -Wswitch
     #-Wswitch-enum   # Warn whenever a switch statement has an index of enumerated type and lacks a case for one or more of the named codes of that enumeration. 
                     # case labels outside the enumeration range also provoke warnings when this option is used. The only difference between -Wswitch and this option is 
                     # that this option gives a warning about an omitted enumeration code even if there is a default label.
-    # -Wsuggest-override # Warn about overriding virtual functions that are not marked with the override keyword.
-    # -Wsuggest-final-methods # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier.
+    -Wsuggest-override # Warn about overriding virtual functions that are not marked with the override keyword.
+    -Wsuggest-final-methods # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier.
 
     # disabled by christopher 2020/02/20
 
