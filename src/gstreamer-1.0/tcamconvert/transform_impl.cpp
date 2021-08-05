@@ -383,7 +383,7 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                     };
                 return transform_fccXX_to_dst_func_ != nullptr;
             }
-            else if (img::is_mono_fcc(src_type.fourcc_type()))
+            else if (img::is_mono_fcc(src_type.fourcc_type())) // monoXX to BGRx
             {
                 auto transform_intermediate_type = img::make_img_type(
                     img_filter::transform::fcc1x_packed::convert_packed_fcc1x_to_fcc8(
@@ -401,17 +401,17 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                 assert(transform_to_bgra_func != nullptr);
 
                 transform_fccXX_to_dst_func_ = [transform_intermediate_type,
+                                                transfrom_to_mono8,
                                                 transform_to_bgra_func,
                                                 this](const img::img_descriptor& dst,
                                                       const img::img_descriptor& src,
                                                       img_filter::filter_params& /*params*/) {
-                    assert(src.fourcc_type() == img::fourcc::MONO8);
                     assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
-                    auto by8_img_desc = img::make_img_desc_from_linear_memory(
+                    auto mono8_img_desc = img::make_img_desc_from_linear_memory(
                         transform_intermediate_type, transform_intermediate_buffer_.data());
 
-                    transform_to_bgra_func(by8_img_desc, src);
+                    transfrom_to_mono8(mono8_img_desc, src);
 
                     transform_to_bgra_func(dst, src);
                 };
