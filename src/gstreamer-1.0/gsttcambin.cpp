@@ -776,7 +776,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
 
     if (tmp)
     {
-        data.src_caps.reset(tmp);
+        data.src_caps = gst_helper::make_wrap_ptr( tmp );
     }
     else
     {
@@ -939,7 +939,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
 
     if (gst_helper::caps_empty_or_any(*data.target_caps))
     {
-        data.target_caps.reset(gst_caps_copy(data.src_caps.get()));
+        data.target_caps = gst_helper::make_ptr(gst_caps_copy(data.src_caps.get()));
     }
 
     GST_INFO_OBJECT(
@@ -1151,7 +1151,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
             gst_element_set_state(data.src, GST_STATE_READY);
 
-            data.out_caps_filter_.reset(gst_element_factory_make("capsfilter", "tcambin-out_caps"));
+            data.out_caps_filter_ = gst_helper::make_consume_ptr( gst_element_factory_make("capsfilter", "tcambin-out_caps") );
 
             gst_ghost_pad_set_target(
                 GST_GHOST_PAD(data.src_ghost_pad),
@@ -1178,7 +1178,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
             if (sinkpad == nullptr)
             {
-                data.target_caps.reset(gst_caps_new_empty());
+                data.target_caps = gst_helper::make_ptr(gst_caps_new_empty());
             }
             else
             {
@@ -1192,7 +1192,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                     GstCaps* ptr = nullptr;
                     g_object_get(par, "caps", &ptr, NULL);
 
-                    data.target_caps.reset(ptr);
+                    data.target_caps = gst_helper::make_ptr(ptr);
                 }
                 else
                 {
@@ -1235,7 +1235,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                     return GST_STATE_CHANGE_FAILURE;
                 }
 
-                data.user_caps.reset(tmp);
+                data.user_caps = gst_helper::make_ptr(tmp);
 
 
                 // Use the intersected caps instead of the user defined ones.
@@ -1246,12 +1246,12 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                                 "Using user defined caps for tcamsrc. User caps are: %s",
                                 gst_helper::to_string(*data.user_caps).c_str());
 
-                data.src_caps.reset(find_input_caps(
+                data.src_caps = gst_helper::make_ptr(find_input_caps(
                     data.user_caps.get(), data.target_caps.get(), data.modules, data.toggles));
             }
             else
             {
-                data.src_caps.reset(find_input_caps(
+                data.src_caps = gst_helper::make_ptr(find_input_caps(
                     src_caps.get(), data.target_caps.get(), data.modules, data.toggles));
             }
 
@@ -1460,7 +1460,7 @@ static void gst_tcambin_set_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
-            data.user_caps.reset(gst_caps_from_string(g_value_get_string(value)));
+            data.user_caps = gst_helper::make_ptr(gst_caps_from_string(g_value_get_string(value)));
             break;
         }
         case PROP_USE_DUTILS:

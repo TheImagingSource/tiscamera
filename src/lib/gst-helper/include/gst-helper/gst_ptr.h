@@ -102,7 +102,7 @@ inline bool consume_floating( T* ptr ) noexcept
     return false;
 }
 template<>
-inline bool consume_floating<GstCaps>( GstCaps* ptr ) noexcept 
+inline bool consume_floating<GstCaps>( GstCaps* /*ptr*/ ) noexcept 
 {
     return false;
 }

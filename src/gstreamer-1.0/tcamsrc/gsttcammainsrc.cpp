@@ -442,9 +442,9 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
     {
         self->device->dev->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback,
                                                          self);
-        self->device->all_caps.reset(gst_tcam_mainsrc_get_all_camera_caps(self));
+        self->device->all_caps = gst_helper::make_ptr(gst_tcam_mainsrc_get_all_camera_caps(self));
         // emit a signal to let other elements/users know that a device has been opened
-        // and properties, etc are now useable
+        // and properties, etc are now usable
         g_signal_emit(G_OBJECT(self), gst_tcammainsrc_signals[SIGNAL_DEVICE_OPEN], 0);
 
         return true;
@@ -481,7 +481,7 @@ static GstStateChangeReturn gst_tcam_mainsrc_change_state(GstElement* element,
                     GST_INFO("FAILURE to initialize device. Aborting...");
                     return GST_STATE_CHANGE_FAILURE;
                 }
-                self->device->all_caps.reset(gst_tcam_mainsrc_get_all_camera_caps(self));
+                self->device->all_caps = gst_helper::make_ptr(gst_tcam_mainsrc_get_all_camera_caps(self));
             }
             break;
         }
