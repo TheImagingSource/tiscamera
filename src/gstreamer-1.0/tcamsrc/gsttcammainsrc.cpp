@@ -16,6 +16,7 @@
 
 #include "gsttcammainsrc.h"
 
+#include "../tcamgstbase/tcamgstbase.h"
 #include "../../gobject/tcamprop.h"
 #include "../../logging.h"
 #include "../../tcam.h"

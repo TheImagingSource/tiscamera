@@ -16,8 +16,6 @@
 
 #include "tcamgstbase.h"
 
-#include "VideoFormatDescription.h"
-#include "public_utils.h"
 #include "../../base_types.h"
 #include "../../logging.h"
 #include "tcamgststrings.h"
