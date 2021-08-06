@@ -3,6 +3,7 @@
 
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <map>
+#include <limits>
 
 std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure& structure)
 {
@@ -15,6 +16,7 @@ std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure&
     }
     return img::dim { width, height };
 }
+
 
 img::fourcc gst_helper::get_gst_struct_fcc(const GstStructure& structure)
 {
@@ -39,6 +41,7 @@ img::fourcc gst_helper::get_gst_struct_fcc(const GstStructure& structure)
                                                    format == nullptr ? "" : format);
 }
 
+
 img::img_type gst_helper::get_gst_struct_image_type(const GstStructure& structure)
 {
     auto dim_opt = get_gst_struct_image_dim(structure);
@@ -53,6 +56,7 @@ img::img_type gst_helper::get_gst_struct_image_type(const GstStructure& structur
     }
     return img::make_img_type(fcc, dim_opt.value());
 }
+
 
 auto gst_helper::get_img_type_from_fixated_gstcaps(const GstCaps& caps) -> img::img_type
 {
