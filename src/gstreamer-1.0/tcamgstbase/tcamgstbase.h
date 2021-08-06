@@ -114,7 +114,6 @@ GstCaps* get_caps_from_element_name(const char* elementname, const char* padname
 struct input_caps_required_modules
 {
     bool tcamconvert = false;
-    bool bayer2rgb = false;
     bool videoconvert = false;
     bool jpegdec = false;
     bool dutils = false;
@@ -122,7 +121,6 @@ struct input_caps_required_modules
     bool operator==(const input_caps_required_modules& other) const noexcept
     {
         if (tcamconvert == other.tcamconvert
-            && bayer2rgb == other.bayer2rgb
             && videoconvert == other.videoconvert && jpegdec == other.jpegdec
             && dutils == other.dutils)
         {

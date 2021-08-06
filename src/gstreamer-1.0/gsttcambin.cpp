@@ -52,7 +52,6 @@ struct tcambin_data
     GstElement* pipeline_caps = nullptr;
     GstElement* dutils = nullptr;
     GstElement* bayer_transform = nullptr;
-    GstElement* debayer = nullptr;
     GstElement* jpegdec = nullptr;
     GstElement* convert = nullptr;
     GstElement* tcamconvert = nullptr;
@@ -572,11 +571,6 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
         remove_element(&data.tcamconvert);
     }
 
-    if (data.debayer)
-    {
-        remove_element(&data.debayer);
-    }
-
     if (data.jpegdec)
     {
         remove_element(&data.jpegdec);
@@ -694,17 +688,6 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
     if ((contains_bayer(data.src_caps.get()) || tcam_gst_raw_only_has_mono(data.src_caps.get()))
         && data.device_type != "pimipi")
     {
-    }
-
-    // always add whitebalance when using bayer
-    // we want it when debayering
-    // users may still want it when asking for bayer
-    if (contains_bayer(data.src_caps.get())) {}
-
-    if (!create_and_add_element(&data.debayer, "bayer2rgb", "tcambin-debayer", GST_BIN(self)))
-    {
-        send_missing_element_msg("bayer2rgb");
-        return FALSE;
     }
 
     if (contains_jpeg(data.src_caps.get()))
@@ -897,16 +880,6 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
                        "tcamconvert"))
     {
         send_linking_element_msg("tcamconvert");
-        return FALSE;
-    }
-
-    if (!link_elements(data.modules.bayer2rgb,
-                       &previous_element,
-                       &data.debayer,
-                       pipeline_description,
-                       "bayer2rgb"))
-    {
-        send_linking_element_msg("bayer2rgb");
         return FALSE;
     }
 
@@ -1561,7 +1534,6 @@ static void gst_tcambin_init(GstTcamBin* self)
     data.pipeline_caps = nullptr;
     data.dutils = nullptr;
     data.bayer_transform = nullptr;
-    data.debayer = nullptr;
     data.tcamconvert = nullptr;
 
     data.jpegdec = nullptr;

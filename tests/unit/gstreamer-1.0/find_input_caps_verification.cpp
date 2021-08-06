@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
     struct tcam::gst::input_caps_required_modules expected;
 
     expected.tcamconvert = false;
-    expected.bayer2rgb = false;
     expected.videoconvert = false;
     expected.jpegdec = false;
     expected.dutils = false;
@@ -100,7 +99,6 @@ int main(int argc, char* argv[])
         test_succeeded = false;
     }
 
-    test_succeeded = verify_flag("bayer", modules.bayer2rgb, expected.bayer2rgb, test_succeeded);
 
     test_succeeded =
         verify_flag("videoconvert", modules.videoconvert, expected.videoconvert, test_succeeded);

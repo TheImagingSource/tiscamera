@@ -100,8 +100,6 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     //          modules
     //     );
 
-    modules.bayer2rgb = true;
-
     // request is any kind of raw
     // since bayer is better than mono
     // return bayer
@@ -119,7 +117,6 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              modules);
 
     modules = {};
-    modules.bayer2rgb = true;
     add_test("Conversion 1",
              caps::DFK72_CAPS,
              "video/x-raw,format=BGRx",
