@@ -17,6 +17,9 @@
 #ifndef TCAM_GSTTCAMBASE_H
 #define TCAM_GSTTCAMBASE_H
 
+
+#include "../../base_types.h"
+
 #include <gst/gst.h>
 #include <cstdint>
 #include <string>
@@ -151,6 +154,8 @@ GstCaps* find_input_caps(GstCaps* available_caps,
                          GstCaps* wanted_caps,
                          input_caps_required_modules& modules,
                          input_caps_toggles toggles);
+
+tcam::image_scaling caps_get_scaling(GstCaps* caps);
 
 }
 

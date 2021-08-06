@@ -16,6 +16,8 @@
 
 #include "tcamgstbase.h"
 
+#include "VideoFormatDescription.h"
+#include "public_utils.h"
 #include "../../base_types.h"
 #include "../../logging.h"
 #include "tcamgststrings.h"
@@ -1130,3 +1132,49 @@ GstCaps* tcam::gst::find_input_caps(GstCaps* available_caps,
     return actual_input;
 }
 
+
+tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
+{
+    tcam::image_scaling sc = {};
+
+    GstStructure* struc = gst_caps_get_structure(caps, 0);
+
+    auto fill_value = [struc] (const std::string& name, int32_t& to_fill_horizontal, int32_t& to_fill_vertical)
+    {
+        if (gst_structure_has_field(struc, name.c_str()))
+        {
+            std::string field_value = gst_structure_get_string(struc, name.c_str());
+
+            const std::string delimiter = "x";
+            std::string token_horizontal = field_value.substr(0, field_value.find(delimiter));
+            std::string token_vertical = field_value.substr(field_value.find(delimiter)+1);
+
+            try
+            {
+                to_fill_horizontal = std::atoi(token_horizontal.c_str());
+                to_fill_vertical = std::atoi(token_vertical.c_str());
+            }
+            catch (const std::exception& e)
+            {
+                SPDLOG_ERROR("Caught exception while interpreting {}: {}", name, e.what());
+
+                to_fill_horizontal = 1;
+                to_fill_vertical = 1;
+            }
+        }
+        else
+        {
+            // SPDLOG_ERROR("No field {}. Using defaults", name);
+            to_fill_horizontal = 1;
+            to_fill_vertical = 1;
+        }
+    };
+
+    fill_value("binning" , sc.binning_h, sc.binning_v);
+
+    fill_value("skipping" , sc.skipping_h, sc.skipping_v);
+
+    //SPDLOG_ERROR("Binning {}x{} Skipping: {}x{}", sc.binning_h, sc.binning_v, sc.skipping_h, sc.skipping_v);
+
+    return sc;
+}
