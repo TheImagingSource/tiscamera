@@ -39,8 +39,8 @@ std::pair<std::string, std::string> tcambind::separate_serial_and_type(const std
 
 
 bool tcambind::separate_serial_and_type(const std::string& input,
-                                         std::string& serial,
-                                         std::string& type)
+                                        std::string& serial,
+                                        std::string& type)
 {
     auto pos = input.find("-");
 
@@ -96,6 +96,22 @@ static void fill_structure_fixed_resolution(GstStructure* structure,
                       res.max_size.height,
                       NULL);
 
+    if (!res.scaling.is_default())
+    {
+        if (res.scaling.binning_h != 1 || res.scaling.binning_v != 1)
+        {
+            std::string binning = std::to_string(res.scaling.binning_h) + "x" + std::to_string(res.scaling.binning_v);
+
+            gst_structure_set(structure, "binning", G_TYPE_STRING, binning.c_str(), nullptr);
+        }
+        if (res.scaling.skipping_h != 1 || res.scaling.skipping_v != 1)
+        {
+            std::string skipping = std::to_string(res.scaling.skipping_h) + "x" + std::to_string(res.scaling.skipping_v);
+
+            gst_structure_set(structure, "skipping", G_TYPE_STRING, skipping.c_str(), nullptr);
+        }
+    }
+
     gst_structure_take_value(structure, "framerate", &fps_list);
 }
 
@@ -150,6 +166,11 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
 
                 for (const auto& reso : framesizes)
                 {
+                    if (!r.scaling.is_default())
+                    {
+                        continue;
+                    }
+
                     GstStructure* structure = gst_structure_from_string(caps_string, NULL);
 
                     std::vector<double> framerates = desc.get_framerates(reso);
@@ -211,12 +232,30 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
                 GstStructure* structure = gst_structure_from_string(caps_string, NULL);
 
                 GValue w = G_VALUE_INIT;
-                g_value_init(&w, GST_TYPE_INT_RANGE);
-                gst_value_set_int_range_step(&w, min_width, max_width, r.width_step_size);
+
+                if (min_width < max_width)
+                {
+                    g_value_init(&w, GST_TYPE_INT_RANGE);
+                    gst_value_set_int_range_step(&w, min_width, max_width, r.width_step_size);
+                }
+                else
+                {
+                    g_value_init(&w, G_TYPE_INT);
+                    g_value_set_int(&w, min_width);
+                }
 
                 GValue h = G_VALUE_INIT;
-                g_value_init(&h, GST_TYPE_INT_RANGE);
-                gst_value_set_int_range_step(&h, min_height, max_height, r.height_step_size);
+
+                if (min_height < max_height)
+                {
+                    g_value_init(&h, GST_TYPE_INT_RANGE);
+                    gst_value_set_int_range_step(&h, min_height, max_height, r.height_step_size);
+                }
+                else
+                {
+                    g_value_init(&h, G_TYPE_INT);
+                    g_value_set_int(&h, min_height);
+                }
 
                 int fps_min_num;
                 int fps_min_den;
@@ -234,6 +273,22 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
 
                 gst_value_set_fraction_range_full(
                     &f, fps_min_num, fps_min_den, fps_max_num, fps_max_den);
+
+                if (!r.scaling.is_default())
+                {
+                    if (r.scaling.binning_h != 1 || r.scaling.binning_v != 1)
+                    {
+                        std::string binning = std::to_string(r.scaling.binning_h) + "x" + std::to_string(r.scaling.binning_v);
+
+                        gst_structure_set(structure, "binning", G_TYPE_STRING, binning.c_str(), nullptr);
+                    }
+                    if (r.scaling.skipping_h != 1 || r.scaling.skipping_v != 1)
+                    {
+                        std::string skipping = std::to_string(r.scaling.skipping_h) + "x" + std::to_string(r.scaling.skipping_v);
+
+                        gst_structure_set(structure, "skipping", G_TYPE_STRING, skipping.c_str(), nullptr);
+                    }
+                }
 
                 gst_structure_take_value(structure, "width", &w);
                 gst_structure_take_value(structure, "height", &h);

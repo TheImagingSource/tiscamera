@@ -94,23 +94,14 @@ uint32_t VideoFormatDescription::get_fourcc() const
 }
 
 
-uint32_t VideoFormatDescription::get_binning() const
-{
-    return format.binning;
-}
-
-
-uint32_t VideoFormatDescription::get_skipping() const
-{
-    return format.skipping;
-}
-
-
 std::vector<struct tcam_resolution_description> VideoFormatDescription::get_resolutions() const
 {
     std::vector<struct tcam_resolution_description> vec;
 
-    for (const auto& r : res) { vec.push_back(r.resolution); }
+    for (const auto& r : res)
+    {
+        vec.push_back(r.resolution);
+    }
 
     return vec;
 }

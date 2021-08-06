@@ -357,6 +357,8 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     format.height = height;
     format.framerate = framerate;
 
+    format.scaling = tcam::gst::caps_get_scaling(caps);
+
     if (!self->device->dev->set_video_format(tcam::VideoFormat(format)))
     {
         GST_ERROR("Unable to set format in device");

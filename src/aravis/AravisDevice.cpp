@@ -177,6 +177,364 @@ DeviceInfo AravisDevice::get_device_description() const
 }
 
 
+void AravisDevice::determine_scaling()
+{
+    m_scale.scale_type = ImageScalingType::Unknown;
+
+    auto check_prop = [this] (const std::string& name, ImageScalingType flag)
+    {
+        auto prop = tcam::property::find_property(m_internal_properties, name);
+        if (prop)
+        {
+            m_scale.scale_type = flag;
+            m_scale.properties.push_back(prop);
+            return true;
+        }
+        return false;
+    };
+
+    check_prop("Binning", ImageScalingType::Binning);
+    check_prop("BinningHorizontal", ImageScalingType::Binning);
+    check_prop("BinningVertical", ImageScalingType::Binning);
+
+    ImageScalingType to_set = ImageScalingType::Skipping;
+
+    // we already have binning
+    // if something skipping related is found we have both
+    if (m_scale.scale_type == ImageScalingType::Binning)
+    {
+        to_set = ImageScalingType::BinningSkipping;
+    }
+
+    check_prop("Skipping", to_set);
+    check_prop("DecimationHorizontal", to_set);
+    check_prop("DecimationVertical", to_set);
+
+    if (m_scale.scale_type == ImageScalingType::Unknown)
+    {
+        m_scale.scale_type = ImageScalingType::None;
+    }
+}
+
+
+void AravisDevice::generate_scales()
+{
+    if (m_scale.scale_type == ImageScalingType::Unknown)
+    {
+        determine_scaling();
+    }
+
+    auto legal_value = [] (const int i)
+    {
+        // only accept valid values
+        if (i == 2 || i == 4 || i == 8)
+        {
+            return true;
+        }
+        return false;
+    };
+
+    if (m_scale.scale_type == ImageScalingType::Binning)
+    {
+        auto binning_h = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+        auto binning_v = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+        auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
+        auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
+
+        for (int i = bh->get_min(); i <= bh->get_max(); i++)
+        {
+            // only accept valid values
+            if (!legal_value(i))
+            {
+                continue;
+            }
+
+            for (int v = bv->get_min(); v <= bv->get_max(); v++)
+            {
+                // only accept valid values
+                if (!legal_value(v))
+                {
+                    continue;
+                }
+
+                image_scaling new_scale = {};
+
+                new_scale.binning_h = i;
+                new_scale.binning_v = v;
+
+                // SPDLOG_INFO("New binning: {}x{}", i, i);
+                //SPDLOG_ERROR("new", bh->);
+
+                m_scale.scales.push_back(new_scale);
+            }
+        }
+
+
+    }
+
+    if (m_scale.scale_type == ImageScalingType::Skipping)
+    {
+        auto skipping_h = tcam::property::find_property(m_scale.properties, "SkippingHorizontal");
+        auto skipping_v = tcam::property::find_property(m_scale.properties, "SkippingVertical");
+
+        auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
+        auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
+
+        for (int i = bh->get_min(); i <= bh->get_max(); i++)
+        {
+            // only accept valid values
+            if (!legal_value(i))
+            {
+                continue;
+            }
+
+            for (int v = bv->get_min(); v <= bv->get_max(); v++)
+            {
+                // only accept valid values
+                if (!legal_value(v))
+                {
+                    continue;
+                }
+
+                image_scaling new_scale = {};
+
+                new_scale.skipping_h = i;
+                new_scale.skipping_v = v;
+
+                m_scale.scales.push_back(new_scale);
+            }
+        }
+
+    }
+
+    if(m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto get_value = [this] (const std::string& name)
+        {
+            GError* err = nullptr;
+            auto ret = arv_device_get_integer_feature_value(arv_camera_get_device(this->arv_camera), name.c_str(), &err);
+
+            if (err)
+            {
+                SPDLOG_ERROR("Received error: {}", err->message);
+                g_clear_error(&err);
+            }
+
+            return ret;
+        };
+
+        auto set_value = [this] (const std::string& name, int value)
+        {
+            GError* err = nullptr;
+            arv_device_set_integer_feature_value(arv_camera_get_device(this->arv_camera), name.c_str(), value, &err);
+
+            if (err)
+            {
+                SPDLOG_ERROR("Received error: {}", err->message);
+                g_clear_error(&err);
+            }
+
+        };
+
+        auto binning_h = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+        auto binning_v = tcam::property::find_property(m_scale.properties, "BinningVertical");
+        // auto skipping_h = tcam::property::find_property(m_scale.m_properties, "SkippingHorizontal");
+        // auto skipping_v = tcam::property::find_property(m_scale.m_properties, "SkippingVertical");
+        auto skipping_h = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
+        auto skipping_v = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+
+        auto sh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
+        auto sv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
+
+        auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
+        auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
+
+        auto scale_is_known = [=] (const tcam::image_scaling& s)
+        {
+            auto find = std::find_if(m_scale.scales.begin(), m_scale.scales.end(),
+                                     [s] (const tcam::image_scaling& vs)
+                                     {
+                                         return (s == vs);
+                                     });
+
+            if (find == m_scale.scales.end())
+            {
+                return false;
+            }
+            return true;
+        };
+
+        // try all possible combinations
+        for (int bin_h = bh->get_min(); bin_h <= bh->get_max(); bin_h++)
+        {
+            for (int bin_v = bv->get_min(); bin_v <= bv->get_max(); bin_v++)
+            {
+                for (int sk_h = sh->get_min(); sk_h <= sh->get_max(); sk_h++)
+                {
+                    for (int sk_v = sv->get_min(); sk_v <= sv->get_max(); sk_v++)
+                    {
+                        tcam::image_scaling is;
+
+                        set_value("TestBinningHorizontal", bin_h);
+                        set_value("TestBinningVertical", bin_v);
+
+                        set_value("TestDecimationHorizontal", sk_h);
+                        set_value("TestDecimationVertical", sk_v);
+
+                        is.binning_h = get_value("TestBinningHorizontal");
+                        is.binning_v = get_value("TestBinningVertical");
+
+                        is.skipping_h = get_value("TestDecimationHorizontal");
+                        is.skipping_v = get_value("TestDecimationVertical");
+
+
+                        if (is.is_default())
+                        {
+                            continue;
+                        }
+
+                        // SPDLOG_ERROR("testing: {}x{} {}x{}", bin_h, bin_v, sk_h, sk_v);
+                        // SPDLOG_ERROR("scale: {}x{} {}x{}", is.binning_h, is.binning_v, is.skipping_h, is.skipping_v);
+
+                        // no need for duplicates
+                        // setting skipping 1x2 or 2x1 might both result in 2x2
+                        if (scale_is_known(is))
+                        {
+                            continue;
+                        }
+
+                        m_scale.scales.push_back(is);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+bool AravisDevice::set_scaling(const image_scaling& scale)
+{
+    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+        auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+        auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+        auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+        SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
+
+        auto ret = bin_h->set_value(scale.binning_h);
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            return false;
+        }
+
+        ret = bin_v->set_value(scale.binning_v);
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            return false;
+        }
+    }
+
+    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto sk_hb = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
+        auto sk_vb = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+
+        auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
+        auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
+
+        SPDLOG_TRACE("Setting skipping to: {}x{}", scale.skipping_h, scale.skipping_v);
+        auto ret = sk_h->set_value(scale.skipping_h);\
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            return false;
+        }
+
+        ret = sk_v->set_value(scale.skipping_v);
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+image_scaling AravisDevice::get_current_scaling()
+{
+    if (m_scale.scale_type == ImageScalingType::Unknown)
+    {
+        determine_scaling();
+    }
+
+    image_scaling ret = {};
+
+    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+        auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+        auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+        auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+        auto res = bin_h->get_value();
+
+        if (!res)
+        {
+            SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
+            return {};
+        }
+        ret.binning_h = res.value();
+        res = bin_v->get_value();
+        if (!res)
+        {
+            SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
+            return {};
+        }
+        ret.binning_v = res.value();
+    }
+
+    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto sk_hb = tcam::property::find_property(m_scale.properties, "DecimationHorizontal");
+        auto sk_vb = tcam::property::find_property(m_scale.properties, "DecimationVertical");
+
+        auto sk_h = dynamic_cast<tcam::property::IPropertyInteger*>(sk_hb.get());
+        auto sk_v = dynamic_cast<tcam::property::IPropertyInteger*>(sk_vb.get());
+
+        auto res = sk_h->get_value();
+
+        if (!res)
+        {
+            SPDLOG_ERROR("Unable to retrieve value for SkippingHorizontal: {}", res.as_failure().error().message());
+            return {};
+        }
+        ret.skipping_h = res.value();
+        res = sk_v->get_value();
+        if (!res)
+        {
+            SPDLOG_ERROR("Unable to retrieve value for SkippingVertical: {}", res.as_failure().error().message());
+            return {};
+        }
+        ret.skipping_v = res.value();
+    }
+
+    return ret;
+}
+
+
 bool AravisDevice::set_video_format(const VideoFormat& new_format)
 {
     if (is_lost)
@@ -228,6 +586,8 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
         return false;
     }
 
+    set_scaling(new_format.get_scaling());
+
     determine_active_video_format();
 
     return true;
@@ -274,6 +634,8 @@ void AravisDevice::determine_active_video_format()
     unsigned int width = x2 - x1;
 
     active_video_format.set_size(width, height);
+
+    active_video_format.set_scaling(get_current_scaling());
 }
 
 
@@ -881,6 +1243,8 @@ void AravisDevice::iterate_genicam(const char* feature)
 
 void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 {
+    generate_scales();
+
     // genicam formats behave like follows:
     // All framerates are valid for all frame sizes
     // All frame sizes are valid for all formats
@@ -931,60 +1295,6 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
     }
 
     std::vector<double> fps;
-
-    node_to_use = "Binning";
-    auto binning_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
-
-    std::vector<int> binning;
-
-    if (binning_node != format_nodes.end())
-    {
-
-        if (ARV_IS_GC_ENUMERATION(*binning_node))
-        {
-            const GSList* childs;
-            const GSList* iter;
-
-            childs = arv_gc_enumeration_get_entries(ARV_GC_ENUMERATION(*binning_node));
-            if (err)
-            {
-                SPDLOG_ERROR("Unable to retrieve enum entries: {}", err->message);
-                g_clear_error(&err);
-            }
-            for (iter = childs; iter != NULL; iter = iter->next)
-            {
-                if (arv_gc_feature_node_is_implemented((ArvGcFeatureNode*)iter->data, NULL))
-                {
-                    if (strcmp(arv_dom_node_get_node_name((ArvDomNode*)iter->data), "EnumEntry")
-                        == 0)
-                    {
-                        GError* error = NULL;
-
-                        // this is the denominator of our framerate
-                        int64_t val =
-                            arv_gc_enum_entry_get_value(ARV_GC_ENUM_ENTRY(iter->data), &error);
-
-                        // std::cout << "Binning entry: "
-                        // << arv_gc_feature_node_get_name ((ArvGcFeatureNode*)iter->data)
-                        // << " - "
-                        // << val << std::endl;
-
-                        binning.push_back(val);
-                    }
-                }
-            }
-        }
-        else
-        {
-            // int range
-            // TODO implement
-        }
-    }
-    else
-    {
-        // default value
-        binning.push_back(0);
-    }
 
     // TODO are there cameras that only have fixed resolutions?
 
@@ -1108,6 +1418,39 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
             SPDLOG_DEBUG("Adding format desc: {} ({:x}) ", desc.description, desc.fourcc);
 
+            tcam_image_size sensor_size = get_sensor_size();
+
+            for (const auto& s : m_scale.scales)
+            {
+                if (rf.resolution.type == TCAM_RESOLUTION_TYPE_FIXED)
+                {
+                    if (s.legal_resolution(sensor_size, rf.resolution.max_size))
+                    {
+                        auto new_rf = rf;
+
+                        new_rf.resolution.scaling = s;
+
+                        res_vec.push_back(new_rf);
+                    }
+                }
+                else
+                {
+                    auto new_rf = rf;
+
+                    // TODO: use TestBinning etc to have values calculated via genicam
+                    new_rf.resolution.max_size = s.allowed_max(sensor_size);
+
+                    // SPDLOG_ERROR("{}x{} max:{}x{} =>",
+                    //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
+                    //              new_rf.resolution.max_size.width, new_rf.resolution.max_size.height);
+
+                    new_rf.resolution.scaling = s;
+
+                    res_vec.push_back(new_rf);
+
+                }
+            }
+
             this->available_videoformats.push_back(
                 VideoFormatDescription(format_handler, desc, res_vec));
         }
@@ -1119,4 +1462,38 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
     // reset format to settings before indexing
     set_video_format(reset_format);
+}
+
+
+tcam_image_size AravisDevice::get_sensor_size() const
+{
+    auto pw = tcam::property::find_property(m_internal_properties, "SensorWidth");
+    auto ph = tcam::property::find_property(m_internal_properties, "SensorHeight");
+
+    if (!pw || !ph)
+    {
+        SPDLOG_ERROR("Unable to find property SensorWidth/SensorHeight");
+        return {};
+    }
+
+    auto width = dynamic_cast<tcam::property::IPropertyInteger*>(pw.get());
+    auto height = dynamic_cast<tcam::property::IPropertyInteger*>(ph.get());
+
+    auto res_w = width->get_value();
+
+    if (!res_w)
+    {
+        SPDLOG_ERROR("Unable to retrieve SensorWidth value");
+        return {};
+    }
+
+    auto res_h = height->get_value();
+
+    if (!res_h)
+    {
+        SPDLOG_ERROR("Unable to retrieve SensorHeight value");
+        return {};
+    }
+
+    return {(uint32_t)res_w.value(), (uint32_t)res_h.value()};
 }

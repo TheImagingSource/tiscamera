@@ -48,6 +48,17 @@ tcam_video_format VideoFormat::get_struct() const
     return format;
 }
 
+
+image_scaling VideoFormat::get_scaling() const
+{
+    return format.scaling;
+}
+
+void VideoFormat::set_scaling(const image_scaling& new_scale)
+{
+    format.scaling = new_scale;
+}
+
 uint32_t VideoFormat::get_fourcc() const
 {
     return format.fourcc;
@@ -94,6 +105,8 @@ std::string VideoFormat::to_string() const
     s += ",";
     s += "width=" + std::to_string(format.width) + ",";
     s += "height=" + std::to_string(format.height) + ",";
+    s += "binning=" + std::to_string(format.scaling.binning_h) + "x" + std::to_string(format.scaling.binning_v) + ",";
+    s += "skipping=" + std::to_string(format.scaling.skipping_h) + "x" + std::to_string(format.scaling.skipping_v) + ",";
     s += "framerate=" + std::to_string(format.framerate);
 
     return s;

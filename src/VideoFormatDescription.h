@@ -72,18 +72,6 @@ public:
      */
     uint32_t get_fourcc() const;
 
-    /**
-     * Returns the binning used
-     * @return uint32 containging the fourcc
-     */
-    uint32_t get_binning() const;
-
-    /**
-     * Returns the skipping used
-     */
-    uint32_t get_skipping() const;
-
-
     std::vector<struct tcam_resolution_description> get_resolutions() const;
 
     std::vector<double> get_frame_rates(const tcam_resolution_description& size) const;

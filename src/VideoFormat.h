@@ -51,6 +51,9 @@ public:
      */
     struct tcam_video_format get_struct() const;
 
+    image_scaling get_scaling() const;
+    void set_scaling(const image_scaling& new_scale);
+
     /**
      * Returns the used pixel format
      * @return uint32 containing the fourcc

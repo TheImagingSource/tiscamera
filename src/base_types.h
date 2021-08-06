@@ -113,6 +113,79 @@ struct tcam_image_size
 };
 
 
+enum ImageScalingType
+{
+    Unknown = 0,
+    None,
+    Override,
+    Binning,
+    Skipping,
+    BinningSkipping,
+};
+
+
+// this struct contains all information
+// about binning/skipping/scaling
+// generally influences possible resolutions
+struct image_scaling
+{
+    // if a camera has only binning
+    // binning_h and binning_v will
+    // be identical for all entries
+
+    // if camera does not have binning, etc.
+    // the value is 1 aka "none"
+    int32_t binning_h = 1;
+    int32_t binning_v = 1;
+
+    int32_t skipping_h = 1;
+    int32_t skipping_v = 1;
+
+    bool operator==(const image_scaling& other) const
+    {
+        if (binning_h == other.binning_h
+            && binning_v == other.binning_v
+            && skipping_h == other.skipping_h
+            && skipping_v == other.skipping_v)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool is_default() const
+    {
+        if (binning_h == 1
+            && binning_v == 1
+            && skipping_h == 1
+            && skipping_v == 1)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool legal_resolution (const tcam_image_size& sensor_size,
+                           const tcam_image_size& resolution) const
+    {
+        uint32_t allowed_width = sensor_size.width / (binning_h * skipping_h);
+        uint32_t allowed_height = sensor_size.height / (binning_v * skipping_v);
+        if (resolution.width <= allowed_width
+            && resolution.height <= allowed_height)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    tcam_image_size allowed_max (const tcam_image_size& sensor_size) const
+    {
+        return {sensor_size.width / (binning_h * skipping_h), sensor_size.height / (binning_v * skipping_v)};
+    }
+};
+
+
 enum TCAM_RESOLUTION_TYPE
 {
     TCAM_RESOLUTION_TYPE_RANGE,
@@ -131,12 +204,15 @@ struct tcam_resolution_description
     unsigned int width_step_size;
     unsigned int height_step_size;
 
+    image_scaling scaling;
+
     uint32_t framerate_count; /**< number of framerates this resolution supports */
 
     bool operator==(const struct tcam_resolution_description& other) const
     {
         if (type == other.type && framerate_count == other.framerate_count
-            && max_size == other.max_size && min_size == other.min_size)
+            && max_size == other.max_size && min_size == other.min_size
+            && scaling == other.scaling)
         {
             return true;
         }
@@ -154,14 +230,12 @@ struct tcam_video_format_description
 {
     uint32_t fourcc; /**< pixel format that is used e.g. RGB32 or Y800 */
     char description[256];
-    uint32_t binning;
-    uint32_t skipping;
 
     uint32_t resolution_count; /**< number of resolutions this format supports */
 
     bool operator==(const struct tcam_video_format_description& other) const
     {
-        if (fourcc == other.fourcc && binning == other.binning && skipping == other.skipping
+        if (fourcc == other.fourcc
             && resolution_count == other.resolution_count
             && strcmp(description, other.description) == 0)
         {
@@ -180,8 +254,9 @@ struct tcam_video_format_description
 struct tcam_video_format
 {
     uint32_t fourcc; /**< pixel format that is used e.g. RGB32 or Y800 */
-    uint32_t binning;
-    uint32_t skipping;
+
+    image_scaling scaling;
+
     uint32_t width;
     uint32_t height;
     double framerate;

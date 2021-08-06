@@ -74,12 +74,14 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
     m_format_handler = std::make_shared<V4L2FormatHandler>(this);
 
-    determine_active_video_format();
 
     p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(m_fd);
     //this->index_all_controls(property_handler);
     this->index_controls();
     this->index_formats();
+
+    determine_active_video_format();
+
 }
 
 
@@ -200,6 +202,8 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
         SPDLOG_ERROR("Unable to set framerate to {}", new_format.get_framerate());
         return false;
     }
+
+    set_scaling(new_format.get_scaling());
 
     /* validation */
 
@@ -608,8 +612,411 @@ static bool checkForBayer(const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdes
 }
 
 
+void V4l2Device::determine_scaling()
+{
+    m_scale.scale_type = ImageScalingType::Unknown;
+
+    auto check_prop = [this] (const std::string& name, ImageScalingType flag)
+    {
+        auto prop = tcam::property::find_property(m_internal_properties, name);
+        if (prop)
+        {
+            m_scale.scale_type = flag;
+            m_scale.properties.push_back(prop);
+            return true;
+        }
+        return false;
+    };
+
+    if (check_prop("OverrideScanningMode", ImageScalingType::Override))
+    {
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Selector"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Identifier"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Binning Horizonta"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Binning Vertical"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Skipping Horizont"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Skipping Vertical"));
+        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Flags"));
+    }
+    else
+    {
+        check_prop("Binning", ImageScalingType::Binning);
+        check_prop("BinningHorizontal", ImageScalingType::Binning);
+        check_prop("BinningVertical", ImageScalingType::Binning);
+
+        ImageScalingType to_set = ImageScalingType::Skipping;
+
+        // we already have binning
+        // if something skipping related is found we have both
+        if (m_scale.scale_type == ImageScalingType::Binning)
+        {
+            to_set = ImageScalingType::BinningSkipping;
+        }
+
+        check_prop("Skipping", to_set);
+        check_prop("SkippingHorizontal", to_set);
+        check_prop("SkippingVertical", to_set);
+    }
+
+    if (m_scale.scale_type == ImageScalingType::Unknown)
+    {
+        m_scale.scale_type = ImageScalingType::None;
+    }
+}
+
+
+image_scaling V4l2Device::get_current_scaling()
+{
+    if (m_scale.scale_type == Unknown)
+    {
+        determine_scaling();
+    }
+
+    if (m_scale.scale_type == ImageScalingType::None)
+    {
+        return {};
+    }
+    else if (m_scale.scale_type == ImageScalingType::Override)
+    {
+        auto override_scanning_mode = tcam::property::find_property(m_internal_properties, "OverrideScanningMode");
+        if (!override_scanning_mode)
+        {
+            SPDLOG_ERROR("Unable to find OverrideScanningMode");
+            return {};
+        }
+
+        auto osm = dynamic_cast<tcam::property::IPropertyInteger*>(override_scanning_mode.get());
+        auto ret = osm->get_value();
+
+        if (!ret)
+        {
+            SPDLOG_ERROR("Unable to retrieve value for OverrideScanningMode: {}", ret.as_failure().error().message());
+            return {};
+        }
+
+        int current_value = ret.value();
+
+        for (const auto i : m_scale.override_index)
+        {
+            if (i.override_value == current_value)
+            {
+                return m_scale.scales.at(i.scales_index);
+            }
+        }
+    }
+
+    image_scaling ret = {};
+
+    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto bin_total = tcam::property::find_property(m_scale.properties, "Binning");
+
+        // only has total binning
+        if (bin_total)
+        {
+
+            auto bin = dynamic_cast<tcam::property::IPropertyInteger*>(bin_total.get());
+
+            auto res = bin->get_value();
+            if (!res)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for Binning: {}", res.as_failure().error().message());
+                return {};
+            }
+
+            ret.binning_h = res.value();
+            ret.binning_v = res.value();
+
+        }
+        else
+        {
+            auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+            auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+            auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+            auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+            auto res = bin_h->get_value();
+
+            if (!res)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
+                return {};
+            }
+            ret.binning_h = res.value();
+            res = bin_v->get_value();
+            if (!res)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
+                return {};
+            }
+            ret.binning_v = res.value();
+
+        }
+    }
+    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        SPDLOG_ERROR("SKIPPING NOT IMPLEMENTED");
+
+    }
+
+    return ret;
+}
+
+
+bool V4l2Device::set_scaling(const image_scaling& scale)
+{
+    bool is_valid = false;
+
+    if (scale.is_default())
+    {
+        is_valid = true;
+    }
+    else
+    {
+        for (const auto& s :m_scale.scales)
+        {
+            if (s == scale)
+            {
+                is_valid = true;
+                break;
+            }
+        }
+    }
+    if (!is_valid)
+    {
+        SPDLOG_ERROR("Scaling description is not valid.");
+        return false;
+    }
+
+    if (m_scale.scale_type == ImageScalingType::None)
+    {
+        return true;
+    }
+
+    if(m_scale.scale_type == ImageScalingType::Override)
+    {
+        if (scale.is_default())
+        {
+            auto over = tcam::property::find_property(m_scale.properties, "OverrideScanningMode");
+
+            auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
+
+            SPDLOG_INFO("Setting override mode to: {}", 1);
+
+            auto ret = override_prop->set_value(1);
+
+            if (!ret)
+            {
+                SPDLOG_ERROR("Unable to set OverrideScanningMode: {}", ret.as_failure().error().message());
+                return false;
+            }
+            return true;
+        }
+
+        for (size_t i = 0; i < m_scale.scales.size(); i++)
+        {
+            if (m_scale.scales.at(i) == scale)
+            {
+                for (const auto& o : m_scale.override_index)
+                {
+                    if (o.scales_index == (int)i)
+                    {
+                        auto over = tcam::property::find_property(m_scale.properties, "OverrideScanningMode");
+
+                        auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
+
+                        SPDLOG_INFO("Setting override mode to: {}", o.override_value);
+
+                        auto ret = override_prop->set_value(o.override_value);
+
+                        if (!ret)
+                        {
+                            SPDLOG_ERROR("Unable to set OverrideScanningMode: {}", ret.as_failure().error().message());
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+        {
+
+            auto bin_total = tcam::property::find_property(m_scale.properties, "Binning");
+
+            // only has total binning
+            if (bin_total)
+            {
+                auto bin = dynamic_cast<tcam::property::IPropertyInteger*>(bin_total.get());
+
+                auto ret = bin->set_value(scale.binning_h);
+                if (!ret)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+                auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+                auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+                auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+                auto ret = bin_h->set_value(scale.binning_h);
+
+                if (!ret)
+                {
+                    return false;
+                }
+
+                ret = bin_v->set_value(scale.binning_v);
+                if (!ret)
+                {
+                    return false;
+                }
+            }
+        }
+        if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+        {
+            SPDLOG_ERROR("SKIPPING NOT IMPLEMENTED");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+void V4l2Device::generate_scales()
+{
+    if (m_scale.scale_type == Unknown)
+    {
+        determine_scaling();
+    }
+
+    if (m_scale.scale_type == ImageScalingType::None)
+    {
+        return;
+    }
+    else if (m_scale.scale_type == ImageScalingType::Override)
+    {
+        auto override_scanning_mode = tcam::property::find_property(m_scale.properties,"OverrideScanningMode");
+        if (!override_scanning_mode)
+        {
+            return;
+        }
+
+        // to actually set, use OverrideScanningMode
+        // to test, use ScanningModeSelector
+        // to see if stuff is a valid setting, use ScanningModeIdentifier == ScanningModeSelector
+
+        auto p = tcam::property::find_property(m_scale.properties, "Scanning Mode Selector");
+        auto identifier_b = tcam::property::find_property(m_scale.properties, "Scanning Mode Identifier");
+        auto binning_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning Horizonta");
+        auto binning_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning Vertical");
+        auto skipping_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping Horizont");
+        auto skipping_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping Vertical");
+        //auto flags_b = tcam::property::find_property(m_scale.properties, "Scanning Mode Flags");
+
+        auto identifier = dynamic_cast<tcam::property::IPropertyInteger*>(identifier_b.get());
+        auto binning_h = dynamic_cast<tcam::property::IPropertyInteger*>(binning_hb.get());
+        auto binning_v = dynamic_cast<tcam::property::IPropertyInteger*>(binning_vb.get());
+        auto skipping_h = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_hb.get());
+        auto skipping_v = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_vb.get());
+        //auto flags = dynamic_cast<tcam::property::IPropertyInteger*>(flags_b.get());
+
+        auto mode = dynamic_cast<tcam::property::IPropertyInteger*>(p.get());
+        int current_value = mode->get_value().value();
+
+        for (int i = mode->get_min(); i <= mode->get_max(); i += mode->get_step())
+        {
+            if (!mode->set_value(i))
+            {
+                SPDLOG_ERROR("mode could not be changed");
+                continue;
+            }
+
+            // ScanningModeIdentifier has to be equal to ScanningModeSelector
+            // if it is 1 it is the default; ignore that
+            if (identifier->get_value().value() != i || i == 1)
+            {
+                continue;
+            }
+
+            // SPDLOG_ERROR("mode: {} ident: {} bin h: {} bin v: {} skip h: {} skip v: {} flags: {}",
+            //              i, identifier->get_value().value(),
+            //              binning_h->get_value().value(), binning_v->get_value().value(),
+            //              skipping_h->get_value().value(), skipping_v->get_value().value(),
+            //              flags->get_value().value());
+
+            image_scaling new_scale = {};
+
+            new_scale.binning_h = binning_h->get_value().value();
+            new_scale.binning_v = binning_v->get_value().value();
+
+            new_scale.skipping_h = skipping_h->get_value().value();
+            new_scale.skipping_v = skipping_v->get_value().value();
+
+            m_scale.scales.push_back(new_scale);
+
+            m_scale.override_index.push_back({i, (int)m_scale.scales.size() - 1});
+
+        }
+        // restore previous setting
+        auto ret = mode->set_value(current_value);
+        if (!ret)
+        {
+            SPDLOG_ERROR("Probing override scanning mode ended with an error: {}", ret.as_failure().error().message());
+        }
+    }
+
+    if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        auto binning = tcam::property::find_property(m_scale.properties, "Binning");
+        // only has binning
+        if (binning)
+        {
+            auto b = dynamic_cast<tcam::property::IPropertyInteger*>(binning.get());
+
+            for (int i = b->get_min(); i <= b->get_max(); i++)
+            {
+                // only accept valid values
+                if (i != 2 && i != 4 && i != 8)
+                {
+                    continue;
+                }
+
+                image_scaling new_scale = {};
+
+                new_scale.binning_h = i;
+                new_scale.binning_v = i;
+
+                // SPDLOG_INFO("New binning: {}x{}", i, i);
+
+                m_scale.scales.push_back(new_scale);
+            }
+
+        }
+
+
+    }
+    if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
+    {
+        // TODO add skipping
+    }
+
+}
+
+
 void V4l2Device::index_formats()
 {
+    generate_scales();
+
     struct v4l2_fmtdesc fmtdesc = {};
     struct v4l2_frmsizeenum frms = {};
 
@@ -629,6 +1036,23 @@ void V4l2Device::index_formats()
 
         std::vector<struct framerate_mapping> rf;
 
+        // needed for binning/skipping later on
+        tcam_image_size largest_res = {};
+
+        // iterate all framesizes to find largest
+        for (frms.index = 0; !tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
+        {
+            if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+            {
+                tcam_image_size tmp = {frms.discrete.width, frms.discrete.height};
+                if (largest_res < tmp)
+                {
+                    largest_res.width = frms.discrete.width;
+                    largest_res.height = frms.discrete.height;
+                }
+            }
+        }
+
         for (frms.index = 0; !tcam_xioctl(m_fd, VIDIOC_ENUM_FRAMESIZES, &frms); frms.index++)
         {
             if (frms.type == V4L2_FRMSIZE_TYPE_DISCRETE)
@@ -647,6 +1071,19 @@ void V4l2Device::index_formats()
 
                 framerate_mapping r = { res, f };
                 rf.push_back(r);
+
+                for (auto s : m_scale.scales)
+                {
+                    if (s.legal_resolution(largest_res, res.max_size))
+                    {
+                        // being here we have a valid resolution/scaling combo
+                        // copy resolution desc and add scaling
+                        auto scaled_res = res;
+                        scaled_res.scaling = s;
+
+                        rf.push_back({scaled_res, f});
+                    }
+                }
             }
             else
             {
@@ -753,6 +1190,8 @@ void V4l2Device::determine_active_video_format()
     format.height = fmt.fmt.pix.height;
 
     format.framerate = get_framerate();
+
+    format.scaling = get_current_scaling();
 
     this->m_active_video_format = VideoFormat(format);
 }
@@ -964,7 +1403,6 @@ bool V4l2Device::get_frame()
 
 void V4l2Device::init_userptr_buffers()
 {
-
     SPDLOG_DEBUG("Will use {} buffers", m_buffers.size());
 
     struct v4l2_requestbuffers req = {};

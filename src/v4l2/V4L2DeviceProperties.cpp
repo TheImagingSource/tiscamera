@@ -90,7 +90,7 @@ std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4
 
     if (mapping)
     {
-        SPDLOG_DEBUG("Conversion requried for qtrcl->name {}", qctrl->name);
+        //SPDLOG_DEBUG("Conversion requried for qtrcl->name {}", qctrl->name);
 
         if (mapping->gen_type != TCAM_PROPERTY_TYPE_UNKNOWN)
         {
@@ -174,11 +174,46 @@ void V4l2Device::sort_properties(
         }
     };
 
+    // the id is the property id we prefer using
+    // for the named property
     preserve_id(0x199e201, "ExposureTime");
     preserve_id(0x0199e202, "ExposureTimeAuto");
     preserve_id(V4L2_CID_PRIVACY, "TriggerMode");
     preserve_id(0x199e204, "Gain");
 
+    // do not drop certain properties
+    // instead store them in a different container
+    // for internal usage
+    // things like binning, skipping, override scanning mode
+    // are needed for later usage
+    auto hide_properties = [this, &properties] (const std::string& name)
+    {
+        auto p = properties.begin();
+        while(p != properties.end())
+        {
+            if (name == p->second->get_name())
+            {
+                m_internal_properties.push_back(p->second);
+                properties.erase(p);
+                return;
+            }
+            p++;
+        }
+    };
+
+    hide_properties("Skipping");
+    hide_properties("Binning");
+    hide_properties("BinningHorizontal");
+    hide_properties("BinningVertical");
+    hide_properties("OverrideScanningMode");
+    hide_properties("Scanning Mode Selector");
+    hide_properties("Scanning Mode Identifier");
+    hide_properties("Scanning Mode Binning Horizontal");
+    hide_properties("Scanning Mode Binning Horizonta");
+    hide_properties("Scanning Mode Binning Vertical");
+    hide_properties("Scanning Mode Skipping Horizont");
+    hide_properties("Scanning Mode Skipping Vertical");
+    hide_properties("Scanning Mode Flags");
 
     m_properties.reserve(properties.size());
 

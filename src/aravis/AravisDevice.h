@@ -99,6 +99,7 @@ private:
     std::weak_ptr<SinkInterface> external_sink;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
     std::shared_ptr<tcam::property::AravisPropertyBackend> m_backend;
 
     ArvStream* stream;
@@ -127,6 +128,24 @@ private:
     // they are generally set to assure well defined interaction
     struct aravis_options arv_options;
 
+
+    struct device_scaling
+    {
+        std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties;
+
+        std::vector<image_scaling> scales;
+
+        ImageScalingType scale_type = ImageScalingType::Unknown;
+    };
+
+    device_scaling m_scale;
+
+
+    void determine_scaling();
+    void generate_scales();
+    bool set_scaling(const image_scaling& scale);
+    image_scaling get_current_scaling();
+
     VideoFormat active_video_format;
 
     std::vector<VideoFormatDescription> available_videoformats;
@@ -142,6 +161,8 @@ private:
     void index_genicam_format(ArvGcNode* /* node */);
 
     void index_properties(const char* name);
+
+    tcam_image_size get_sensor_size() const;
 
 }; /* class GigeCapture */
 

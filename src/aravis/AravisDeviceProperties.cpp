@@ -152,15 +152,26 @@ void AravisDevice::index_properties(const char* name)
                                                          "Height",
                                                          "FPS",
                                                          "AcquisitionFrameRate",
-                                                         "PixelFormat" };
+                                                         "PixelFormat",
+                                                         "Binning",
+                                                         "BinningHorizontal",
+                                                         "BinningVertical",
+                                                         "SkippingHorizontal",
+                                                         "SkippingVertical",
+                                                         "DecimationHorizontal",
+                                                         "DecimationVertical",
+    };
+
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>>* container = &m_properties;
 
     if (std::find(private_settings.begin(),
                   private_settings.end(),
                   arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)))
         != private_settings.end())
     {
-        //SPDLOG_INFO("Private setting {}", arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)));
-        return;
+        //SPDLOG_ERROR("Private setting {}", arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)));
+        //return;
+        container = &m_internal_properties;
     }
 
     std::string prop_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
@@ -173,28 +184,32 @@ void AravisDevice::index_properties(const char* name)
 
     if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Float") == 0)
     {
-        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyDoubleImpl>(
+        container->push_back(std::make_shared<tcam::property::AravisPropertyDoubleImpl>(
             prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Integer") == 0)
     {
-        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyIntegerImpl>(
+        container->push_back(std::make_shared<tcam::property::AravisPropertyIntegerImpl>(
             prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Boolean") == 0)
     {
-        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyBoolImpl>(
+        container->push_back(std::make_shared<tcam::property::AravisPropertyBoolImpl>(
             prop_name, arv_camera, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Command") == 0)
     {
-        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyCommandImpl>(
+        container->push_back(std::make_shared<tcam::property::AravisPropertyCommandImpl>(
             prop_name, node, m_backend));
     }
     else if (strcmp(arv_dom_node_get_node_name(ARV_DOM_NODE(node)), "Enumeration") == 0)
     {
-        m_properties.push_back(std::make_shared<tcam::property::AravisPropertyEnumImpl>(
+        container->push_back(std::make_shared<tcam::property::AravisPropertyEnumImpl>(
             prop_name, arv_camera, node, m_backend));
+    }
+    else
+    {
+        SPDLOG_ERROR("Not implemented - {}!!!!", arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
     }
     //m_properties.push_back();
 }

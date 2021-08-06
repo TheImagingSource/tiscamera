@@ -120,6 +120,7 @@ private:
     std::shared_ptr<V4L2FormatHandler> m_format_handler;
 
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
+    std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
 
     std::thread m_monitor_v4l2_thread;
     std::atomic<bool> m_stop_monitor_v4l2_thread { false };
@@ -133,6 +134,30 @@ private:
     void lost_device();
 
     void update_stream_timeout();
+
+
+    struct override_mapping
+    {
+        int override_value;
+        int scales_index;
+    };
+
+    struct device_scaling
+    {
+        std::vector<std::shared_ptr<tcam::property::IPropertyBase>> properties;
+
+        std::vector<image_scaling> scales;
+
+        std::vector<override_mapping> override_index;
+        ImageScalingType scale_type = ImageScalingType::Unknown;
+    };
+
+    device_scaling m_scale;
+
+    void determine_scaling();
+    void generate_scales();
+    bool set_scaling(const image_scaling& scale);
+    image_scaling get_current_scaling();
 
     /**
      * @brief iterate over all v4l2 format descriptions and convert them
