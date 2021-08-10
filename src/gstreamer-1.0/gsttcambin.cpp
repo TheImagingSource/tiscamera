@@ -589,6 +589,7 @@ static gboolean create_and_add_element(GstElement** element,
                                        const char* element_name,
                                        GstBin* bin)
 {
+#if 0 // #TODO 2021/08/10 christopher: this seems to be 'curious'?
     auto factory = gst_element_factory_find(factory_name);
 
     if (!factory)
@@ -596,6 +597,7 @@ static gboolean create_and_add_element(GstElement** element,
         return FALSE;
     }
     gst_object_unref(factory);
+#endif
 
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
@@ -668,26 +670,6 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
             send_missing_element_msg("tcamconvert");
             return FALSE;
         }
-    }
-
-    if (data.device_type == "pimipi")
-    {
-        if (!create_and_add_element(&data.bayer_transform,
-                                    "tcamby1xtransform",
-                                    "tcambin-bayertransform",
-                                    GST_BIN(self)))
-        {
-            send_missing_element_msg("tcambayertransform");
-            return FALSE;
-        }
-    }
-
-    // the following elements only support mono or bayer
-    // security check to prevent faulty pipelines
-
-    if ((contains_bayer(data.src_caps.get()) || tcam_gst_raw_only_has_mono(data.src_caps.get()))
-        && data.device_type != "pimipi")
-    {
     }
 
     if (contains_jpeg(data.src_caps.get()))
@@ -1180,13 +1162,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
             // GST_INFO_OBJECT(
             //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
-
-            // this flag is to used to make the creation of pipelines easier
-            // while tcamby1xtransform can convert between many formats
-            // it is not always obvious how to create a pipeline with it
-            // when using non pimipi cameras
-            // for now (2021.01.13) ignore it if that is the case
-            data.toggles.use_by1xtransform = g_strcmp0("pimipi", data.device_type.c_str()) == 0;
 
             if (data.toggles.use_dutils)
             {

@@ -133,7 +133,6 @@ struct input_caps_required_modules
 struct input_caps_toggles
 {
     bool use_dutils = false;
-    bool use_by1xtransform = false;
 };
 
 
