@@ -41,6 +41,7 @@ enum class CAPS_TYPE
     YUV,
     TIS_POLARIZED,
     FLOATING,
+    BAYER_PWL,
 };
 
 class TcamBinConversion

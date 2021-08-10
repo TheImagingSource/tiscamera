@@ -119,6 +119,8 @@ static const struct conversion_desc tcambin_conversion [] =
     {CAPS_TYPE::MONO_16, CAPS_TYPE::MONO_8, {false, false, false, true},},
     {CAPS_TYPE::MONO_16, CAPS_TYPE::MONO_16, {false, false, false, true},},
     {CAPS_TYPE::MONO_16, CAPS_TYPE::RGB_32, {false, false, false, true},},
+
+    {CAPS_TYPE::BAYER_PWL, CAPS_TYPE::RGB_32, {false, false, false, true},},
 };
 
 
@@ -126,7 +128,7 @@ static const CAPS_TYPE ALL_CAPS_TYPES[] = {
     CAPS_TYPE::BAYER_8, CAPS_TYPE::BAYER_10,      CAPS_TYPE::BAYER_12, CAPS_TYPE::BAYER_16,
     CAPS_TYPE::RGB_24,  CAPS_TYPE::RGB_32,        CAPS_TYPE::RGB_64,   CAPS_TYPE::MONO_8,
     CAPS_TYPE::MONO_10, CAPS_TYPE::MONO_12,       CAPS_TYPE::MONO_16,  CAPS_TYPE::JPEG,
-    CAPS_TYPE::YUV,     CAPS_TYPE::TIS_POLARIZED, CAPS_TYPE::FLOATING,
+    CAPS_TYPE::YUV,     CAPS_TYPE::TIS_POLARIZED, CAPS_TYPE::FLOATING, CAPS_TYPE::BAYER_PWL,
 };
 
 static GstCaps* get_caps_type_definition(CAPS_TYPE type)
@@ -198,6 +200,10 @@ static GstCaps* get_caps_type_definition(CAPS_TYPE type)
         case CAPS_TYPE::FLOATING:
         {
             return gst_caps_from_string("video/x-tis");
+        }
+        case CAPS_TYPE::BAYER_PWL:
+        {
+            return gst_caps_from_string("video/x-bayer,format={pwl-rggb12,pwl-rggb12m,pwl-rggb16H12}");
         }
         default:
         {
