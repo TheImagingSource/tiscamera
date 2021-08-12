@@ -26,7 +26,7 @@
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <gst-helper/gstcaps_dutils_interop.h>
-#include <gst-helper/gvalue_helper.h>
+#include <gst-helper/gst_gvalue_helper.h>
 #include <gst-helper/helper_functions.h>
 #include <gst/video/gstvideometa.h>
 #include <vector>

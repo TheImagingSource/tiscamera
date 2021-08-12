@@ -1,6 +1,8 @@
 
-#include "gst-helper/gst_element_chain.h"
-#include "gst-helper/helper_functions.h"
+#include <gst-helper/gstelement_helper.h>
+#include <gst-helper/helper_functions.h>
+
+#include <limits>
 
 gst_helper::gst_ptr<GstElement> gst_helper::find_upstream_element(
     GstElement& start_element,

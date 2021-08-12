@@ -1,41 +1,18 @@
 
 #include "tcamprop_system/tcamprop_consumer.h"
-//#include "../../lib/tcamprop/src/tcamprop.h"
+
+#include <gst-helper/gvalue_wrapper.h>
+
 #include <tcamprop.h>
 
 namespace
 {
-struct gvalue_wrapper 
-{
-    gvalue_wrapper() = default;
+    using gvalue_wrapper = gvalue::gvalue_wrapper;
 
-    explicit gvalue_wrapper( double value_to_set ) noexcept {
-        g_value_init( &value, G_TYPE_DOUBLE );
-        g_value_set_double( &value, value_to_set );
-    }
-    explicit gvalue_wrapper( int value_to_set ) noexcept {
-        g_value_init( &value, G_TYPE_INT );
-        g_value_set_int( &value, value_to_set );
-    }
-    explicit gvalue_wrapper( bool value_to_set ) noexcept {
-        g_value_init( &value, G_TYPE_BOOLEAN );
-        g_value_set_boolean( &value, value_to_set ? TRUE : FALSE );
-    }
-    ~gvalue_wrapper()
-    {
-        g_value_unset( &value );
-    }
-
-    operator GValue* () noexcept { return &value; }
-    GValue* operator&() noexcept { return &value; }
-
-private:
-    GValue value = {};
-};
 
 bool  internal_get_value( TcamProp* elem, const char* name, gvalue_wrapper& val )
 {
-    return tcam_prop_get_tcam_property( elem, name, &val, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr );
+    return tcam_prop_get_tcam_property( elem, name, val.get(), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr );
 }
 
 
@@ -80,31 +57,27 @@ bool  tcamprop_system::get_value( TcamProp* elem, const char* name, _GValue& val
 auto tcamprop_system::get_flags( TcamProp* elem, const char* name ) ->std::optional<prop_flags>
 {
     gvalue_wrapper flags;
-    if( !tcam_prop_get_tcam_property( elem, name, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &flags, nullptr, nullptr ) )
+    if( !tcam_prop_get_tcam_property( elem, name, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags.get(), nullptr, nullptr ) )
     {
         return {};
     }
-    if( G_VALUE_TYPE( &flags ) != G_TYPE_INT ) {
+    if( flags.type() != G_TYPE_INT ) {
         return {};
     }
-    return static_cast<prop_flags>( g_value_get_int( &flags ) );
+    return static_cast<prop_flags>( flags.get_int() );
 }
 
 std::optional<std::string> tcamprop_system::get_category( TcamProp* elem, const char* name )
 {
     gvalue_wrapper cat = {};
-    if( !tcam_prop_get_tcam_property( elem, name, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &cat, nullptr ) )
+    if( !tcam_prop_get_tcam_property( elem, name, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, cat.get(), nullptr ) )
     {
         return {};
     }
-    if( G_VALUE_TYPE( &cat ) != G_TYPE_STRING ) {
+    if( cat.type() != G_TYPE_STRING ) {
         return {};
     }
-    auto str = g_value_get_string( &cat );
-    if( str == nullptr ) {
-        return {};
-    }
-    return std::string( str );
+    return cat.get_string();
 }
 
 auto tcamprop_system::get_prop_type(TcamProp* elem, const char* name) -> std::optional<tcamprop_system::prop_type>
@@ -117,22 +90,17 @@ auto tcamprop_system::get_prop_type(TcamProp* elem, const char* name) -> std::op
                                      nullptr,
                                      nullptr,
                                      nullptr,
-                                     &type,
+                                     type.get(),
                                      nullptr,
                                      nullptr,
                                      nullptr))
     {
         return {};
     }
-    if (G_VALUE_TYPE(&type) != G_TYPE_STRING)
-    {
+    if( type.type() != G_TYPE_STRING ) {
         return {};
     }
-    auto str = g_value_get_string(&type);
-    if( str == nullptr ) {
-        return {};
-    }
-    return prop_type_from_string( str );
+    return prop_type_from_string( type.get_string_view() );
 }
 
 static std::vector<std::string>    conv_GSList_string_list( GSList* lst )
@@ -164,7 +132,6 @@ bool  tcamprop_system::has_property( TcamProp* elem, const char* name )
 {
     gvalue_wrapper val = {};
     bool res = internal_get_value( elem, name, val );
-
     return res;
 }
 
@@ -177,51 +144,40 @@ bool tcamprop_system::has_property(TcamProp* elem, const char* name, prop_type t
 template<>
 auto  tcamprop_system::get_range<tcamprop_system::prop_range_integer>( TcamProp* elem, const char* name ) -> std::optional<prop_range_integer>
 {
-    gvalue_wrapper val = {};
-    gvalue_wrapper min = {};
-    gvalue_wrapper max = {};
-    gvalue_wrapper stp = {};
-    gvalue_wrapper def = {};
-    if( !tcam_prop_get_tcam_property( elem, name, &val, &min, &max, &def, &stp, nullptr, nullptr, nullptr, nullptr ) )
+    gvalue_wrapper min, max, stp, def;
+    if( !tcam_prop_get_tcam_property( elem, name, nullptr, min.get(), max.get(), def.get(), stp.get(), nullptr, nullptr, nullptr, nullptr ) )
     {
         return {};
     }
 
-    if( G_VALUE_TYPE( &val ) != G_TYPE_INT ) {
+    if( min.type() != G_TYPE_INT ) {
         return {};
     }
-
-    prop_range_integer rval = {};
-    rval.min = g_value_get_int( &min );
-    rval.max = g_value_get_int( &max );
-    rval.def = g_value_get_int( &def );
-    rval.stp = g_value_get_int( &stp );
-    return rval;
+    return prop_range_integer{
+        min.get_int(),
+        max.get_int(),
+        def.get_int(),
+        stp.get_int()
+    };
 }
 
 template<>
 auto  tcamprop_system::get_range<tcamprop_system::prop_range_real>( TcamProp* elem, const char* name ) -> std::optional<prop_range_real>
 {
-    gvalue_wrapper val = {};
-    gvalue_wrapper min = {};
-    gvalue_wrapper max = {};
-    gvalue_wrapper stp = {};
-    gvalue_wrapper def = {};
-    if( !tcam_prop_get_tcam_property( elem, name, &val, &min, &max, &def, &stp, nullptr, nullptr, nullptr, nullptr ) )
+    gvalue_wrapper min, max, stp, def;
+    if( !tcam_prop_get_tcam_property( elem, name, nullptr, min.get(), max.get(), def.get(), stp.get(), nullptr, nullptr, nullptr, nullptr ) )
     {
         return {};
     }
-
-    if( G_VALUE_TYPE( &val ) != G_TYPE_DOUBLE ) {
+    if( min.type() != G_TYPE_DOUBLE ) {
         return {};
     }
-
-    prop_range_real rval = {};
-    rval.min = g_value_get_double( &min );
-    rval.max = g_value_get_double( &max );
-    rval.def = g_value_get_double( &def );
-    rval.stp = g_value_get_double( &stp );
-    return rval;
+    return prop_range_real{
+        min.get_double(),
+        max.get_double(),
+        def.get_double(),
+        stp.get_double()
+    };
 }
 
 template<>
@@ -232,11 +188,7 @@ auto  tcamprop_system::get_value<bool>( TcamProp* elem, const char* name ) -> st
     {
         return {};
     }
-
-    if( G_VALUE_TYPE( &val ) != G_TYPE_BOOLEAN ) {
-        return {};
-    }
-    return g_value_get_boolean( &val );
+    return val.get_typed_opt<bool>();
 }
 
 template<>
@@ -247,10 +199,7 @@ auto  tcamprop_system::get_value<double>( TcamProp* elem, const char* name ) -> 
     {
         return {};
     }
-    if( G_VALUE_TYPE( &val ) != G_TYPE_DOUBLE ) {
-        return {};
-    }
-    return g_value_get_double( &val );
+    return val.fetch_typed<double>();
 }
 
 template<>
@@ -260,10 +209,17 @@ auto  tcamprop_system::get_value<int>( TcamProp* elem, const char* name ) -> std
     if( !internal_get_value( elem, name, val ) ) {
         return {};
     }
-    if( G_VALUE_TYPE( &val ) != G_TYPE_INT ) {
+    return val.fetch_typed<int>();
+}
+
+template<>
+auto  tcamprop_system::get_value<int64_t>( TcamProp* elem, const char* name ) -> std::optional<int64_t>
+{
+    gvalue_wrapper val = {};
+    if( !internal_get_value( elem, name, val ) ) {
         return {};
     }
-    return g_value_get_int( &val );
+    return val.fetch_typed<int64_t>();
 }
 
 auto tcamprop_system::get_menu_items( TcamProp* prop, const char* menu_name ) -> std::vector<std::string>
@@ -282,21 +238,27 @@ bool tcamprop_system::set_value( _TcamProp* elem, const char* name, const _GValu
     return tcam_prop_set_tcam_property( elem, name, value_to_set );
 }
 
-bool tcamprop_system::set_value( TcamProp* elem, const char* name, bool value_to_set )
+bool tcamprop_system::set_value( _TcamProp* elem, const char* name, int value_to_set )
 {
-    gvalue_wrapper val{ value_to_set };
-    return tcam_prop_set_tcam_property( elem, name, &val );
+    gvalue_wrapper val = gvalue_wrapper::make_value( value_to_set );
+    return tcam_prop_set_tcam_property( elem, name, val.get() );
 }
 
-bool    tcamprop_system::set_value( TcamProp* elem, const char* name, int value_to_set )
+bool tcamprop_system::set_value( _TcamProp* elem, const char* name, bool value_to_set )
 {
-    gvalue_wrapper val{ value_to_set };
-    return tcam_prop_set_tcam_property( elem, name, &val );
+    gvalue_wrapper val = gvalue_wrapper::make_value( value_to_set );
+    return tcam_prop_set_tcam_property( elem, name, val.get() );
 }
 
-bool    tcamprop_system::set_value( TcamProp* elem, const char* name, double value_to_set )
+bool    tcamprop_system::set_value( _TcamProp* elem, const char* name, int64_t value_to_set )
 {
-    gvalue_wrapper val{ value_to_set };
-    return tcam_prop_set_tcam_property( elem, name, &val );
+    gvalue_wrapper val = gvalue_wrapper::make_value( (int)value_to_set );
+    return tcam_prop_set_tcam_property( elem, name, val.get() );
+}
+
+bool    tcamprop_system::set_value( _TcamProp* elem, const char* name, double value_to_set )
+{
+    gvalue_wrapper val = gvalue_wrapper::make_value( value_to_set );
+    return tcam_prop_set_tcam_property( elem, name, val.get() );
 }
 

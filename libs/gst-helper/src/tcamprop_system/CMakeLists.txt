@@ -26,7 +26,7 @@ add_library( tcamprop_system_provider STATIC EXCLUDE_FROM_ALL
 )
 
 target_compile_features( tcamprop_system_provider PUBLIC cxx_std_17 )
-target_link_libraries( tcamprop_system_provider PUBLIC tcamprop_system::base PRIVATE fmt::fmt project-warnings  )
+target_link_libraries( tcamprop_system_provider PUBLIC tcamprop_system::base PRIVATE fmt::fmt project-warnings tcam::gst-helper  )
 target_include_directories( tcamprop_system_provider PRIVATE ${GSTREAMER_INCLUDE_DIRS} )
 add_library( tcamprop_system::provider ALIAS tcamprop_system_provider )
 
@@ -37,7 +37,7 @@ add_library( tcamprop_system_consumer STATIC EXCLUDE_FROM_ALL
 )
 
 target_compile_features( tcamprop_system_consumer PUBLIC cxx_std_17 )
-target_link_libraries( tcamprop_system_consumer PUBLIC tcamprop_system::base PRIVATE tcam::tcamprop project-warnings )
+target_link_libraries( tcamprop_system_consumer PUBLIC tcamprop_system::base PRIVATE tcam::tcamprop project-warnings tcam::gst-helper )
 target_include_directories( tcamprop_system_consumer PRIVATE ${GSTREAMER_INCLUDE_DIRS} )
 
 add_library( tcamprop_system::consumer ALIAS tcamprop_system_consumer )

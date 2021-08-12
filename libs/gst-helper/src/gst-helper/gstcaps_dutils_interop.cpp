@@ -3,12 +3,12 @@
 
 #include <dutils_img_lib/dutils_gst_interop.h>
 #include <map>
-#include <limits>
+#include <gst-helper/gst_gvalue_helper.h>
 
 std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure& structure)
 {
-    int width;
-    int height;
+    int width = 0;
+    int height = 0;
     if (!gst_structure_get_int(&structure, "width", &width)
         || !gst_structure_get_int(&structure, "height", &height))
     {
@@ -16,7 +16,6 @@ std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure&
     }
     return img::dim { width, height };
 }
-
 
 img::fourcc gst_helper::get_gst_struct_fcc(const GstStructure& structure)
 {
@@ -41,7 +40,6 @@ img::fourcc gst_helper::get_gst_struct_fcc(const GstStructure& structure)
                                                    format == nullptr ? "" : format);
 }
 
-
 img::img_type gst_helper::get_gst_struct_image_type(const GstStructure& structure)
 {
     auto dim_opt = get_gst_struct_image_dim(structure);
@@ -57,15 +55,13 @@ img::img_type gst_helper::get_gst_struct_image_type(const GstStructure& structur
     return img::make_img_type(fcc, dim_opt.value());
 }
 
-
-auto gst_helper::get_img_type_from_fixated_gstcaps(const GstCaps& caps) -> img::img_type
+auto gst_helper::get_img_type_from_fixated_gstcaps( const GstCaps& caps ) -> img::img_type
 {
-    auto struc = gst_caps_get_structure(&caps, 0);
-    if (struc == nullptr)
-    {
+    auto struc = gst_caps_get_structure( &caps, 0 );
+    if( struc == nullptr ) {
         return {};
     }
-    return get_gst_struct_image_type(*struc);
+    return get_gst_struct_image_type( *struc );
 }
 
 std::optional<double> gst_helper::get_gst_struct_framerate(const GstStructure& structure)
@@ -143,4 +139,65 @@ gst_helper::gst_ptr<GstCaps>    gst_helper::generate_caps_with_dim( const std::v
     }
 
     return gst_helper::make_wrap_ptr( caps );
+}
+
+static auto convert_GstStructure_format_field_to_fcc_list( const GstStructure& strct ) -> std::vector<img::fourcc>
+{
+    auto struct_name_ = gst_structure_get_name( &strct );
+    assert( struct_name_ != nullptr );
+    if( struct_name_ == nullptr ) {
+        GST_ERROR( "GstStructure with no name" );
+        return {};
+    }
+    std::string_view format_type = struct_name_;
+
+
+    auto gval = gst_structure_get_value( &strct, "format" );
+    if( gval == nullptr ) {
+        return {};
+    }
+
+    std::vector<img::fourcc> rval;
+    auto add_fcc = [&rval,format_type]( const char* str ) {
+        if( str != nullptr ) {
+            auto fcc = img_lib::gst::gst_caps_string_to_fourcc( format_type, str );
+            if( fcc != img::fourcc::FCC_NULL ) {
+                rval.push_back( fcc );
+            }
+        }
+    };
+
+    if( G_VALUE_TYPE( gval ) == G_TYPE_STRING )
+    {
+        add_fcc( g_value_get_string( gval ) );
+    }
+    else if( G_VALUE_TYPE( gval ) == GST_TYPE_LIST || G_VALUE_TYPE( gval ) == GST_TYPE_ARRAY )
+    {
+        for( auto&& entry : gst_helper::gst_list_or_array_to_GValue_vector( *gval ) )
+        {
+            add_fcc( g_value_get_string( entry ) );
+        }
+    }
+    else
+    {
+        return {};
+    }
+    return rval;
+}
+
+auto gst_helper::convert_GstCaps_to_fcc_list( const GstCaps& caps ) ->std::vector<img::fourcc>
+{
+    int struct_cnt = gst_caps_get_size( &caps );
+
+    std::vector<img::fourcc> rval;
+    for( int i = 0; i < struct_cnt; ++i ) {
+        GstStructure* entry = gst_caps_get_structure( &caps, i );
+        assert( entry != nullptr );
+        if( entry == nullptr ) {
+            return {};
+        }
+        auto vec = convert_GstStructure_format_field_to_fcc_list( *entry );
+        rval.insert( rval.end(), vec.begin(), vec.end() );
+    }
+    return rval;
 }

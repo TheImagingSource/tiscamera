@@ -28,7 +28,7 @@
 
 #include "tcambinconversion.h"
 #include <gst-helper/helper_functions.h>
-#include <gst-helper/gvalue_helper.h>   // gst_string_list_to_vector
+#include <gst-helper/gst_gvalue_helper.h>   // gst_string_list_to_vector
 
 
 typedef struct tcam_src_element_

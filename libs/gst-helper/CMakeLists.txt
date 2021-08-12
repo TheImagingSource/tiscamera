@@ -17,6 +17,9 @@ endif()
 
 if( ${gst-helper-libs-standalone} )
 
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+
     add_compile_options( -Wno-psabi )   # disable ABI change message of g++8
     set( CMAKE_CXX_STANDARD 17 )
     set( CMAKE_CXX_STANDARD_REQUIRED ON )

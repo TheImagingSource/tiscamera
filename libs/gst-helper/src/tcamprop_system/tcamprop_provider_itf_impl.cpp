@@ -4,25 +4,12 @@
 #include <cassert>
 #include <fmt/format.h>
 
+#include <gst-helper/gvalue_functions.h>
+#include <gst-helper/gvalue_helper.h>
+
 namespace
 {
     using namespace tcamprop_system;
-
-    static char* g_strdup_string_view( std::string_view str ) noexcept
-    {
-        if( str.size() == 0 )
-        {
-            return nullptr;
-        }
-        char* rval = (char*)g_malloc( str.size() + 1 );
-        if( rval == nullptr )
-        {
-            return nullptr;
-        }
-        memcpy( rval, str.data(), str.size() );
-        rval[str.size()] = '\0';
-        return rval;
-    }
 
     static void write_gvalue( GValue* dst, bool val )
     {
@@ -75,7 +62,7 @@ namespace
             return;
 
         g_value_init( dst, G_TYPE_STRING );
-        g_value_take_string( dst, g_strdup_string_view( val ) );
+        g_value_take_string( dst, gvalue::g_strdup_string( val ) );
     }
 
     void    fwd_error_message( const report_error& report_err_func, tcamprop_system::error_id id, std::string_view dsc = {} )
@@ -100,6 +87,18 @@ namespace
         if( report_err_func ) {
             report_err_func( id, fmt::format( "Property '{}' ({}), {}. Error-message: '{}'", info.prop_name, tcamprop_system::to_string( info.type ), dsc, errc.message() ) );
         }
+    }
+
+
+    std::string_view to_type_name( const GValue& value ) noexcept {
+        if( !G_IS_VALUE( &value ) ) {
+            return "<not-initialized>";
+        }
+        auto name = G_VALUE_TYPE_NAME( &value );
+        if( name == nullptr ) {
+            return "<nullptr>";
+        }
+        return name;
     }
 
 } // namespace
@@ -141,7 +140,7 @@ GSList* tcamprop_system::tcamprop_impl_get_tcam_property_names( property_list_in
             continue;
         }
 
-        names = g_slist_append( names, g_strdup_string_view( prop_name ) );
+        names = g_slist_append( names, gvalue::g_strdup_string( prop_name ) );
     }
     return names;
 }
@@ -187,7 +186,7 @@ gboolean tcamprop_system::tcamprop_impl_get_tcam_property( property_list_interfa
     {
         return FALSE;   // this is not an error
     }
-    write_gvalue( flags, (int)(prop_flags) );
+    write_gvalue( flags, static_cast<int>(prop_flags) );
     write_gvalue( category, prop.prop_category );
     write_gvalue( group, prop.prop_group );
     write_gvalue( type, tcamprop_system::to_string( prop.type ) );
@@ -360,14 +359,14 @@ GSList* tcamprop_system::tcamprop_impl_get_menu_entries( property_list_interface
     }
 
     GSList* ret = nullptr;
-    for( const auto& m : range_opt.value().menu_entries ) { ret = g_slist_append( ret, g_strdup_string_view( m ) ); }
+    for( const auto& m : range_opt.value().menu_entries ) { ret = g_slist_append( ret, gvalue::g_strdup_string( m ) ); }
     return ret;
 }
 
 
 gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interface* prop_list_itf,
                                                   const gchar* name,
-                                                  const GValue* value, const report_error& report_err_func )
+                                                  const GValue* value_ptr, const report_error& report_err_func )
 {
     if( prop_list_itf == nullptr ) {
         fwd_error_message( report_err_func, error_id::prop_list_nullptr );
@@ -377,8 +376,12 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
         fwd_error_message( report_err_func, error_id::parameter_name_nullptr );
         return FALSE;
     }
-    if( value == nullptr ) {
+    if( value_ptr == nullptr ) {
         fwd_error_message( report_err_func, error_id::parameter_invalid_value, "Parameter value is nullptr" );
+        return FALSE;
+    }
+    if( !G_IS_VALUE(value_ptr) ) {
+        fwd_error_message( report_err_func, error_id::parameter_invalid_value, "Parameter G_IS_VALUE( <value> ) == false." );
         return FALSE;
     }
     auto prop_itf = prop_list_itf->find_property( name );
@@ -416,14 +419,13 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
     }
     case tcamprop_system::prop_type::boolean:
     {
-        if( !G_VALUE_HOLDS_BOOLEAN( value ) )
-        {
-            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected boolean, got {}", g_type_name( g_value_get_gtype( value ) ) ) );
+        auto val_opt = gvalue::fetch_typed<bool>( *value_ptr );
+        if( !val_opt ) {
+            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected boolean, got {}", to_type_name( *value_ptr ) ) );
             return FALSE;
         }
 
-        auto val = g_value_get_boolean( value ) == TRUE;
-        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val } );
+        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val_opt.value() } );
         if( err )
         {
             fwd_error_message( report_err_func, error_id::set_function_failed, prop, "set function failed", err );
@@ -433,13 +435,12 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
     }
     case tcamprop_system::prop_type::integer:
     {
-        if( !G_VALUE_HOLDS_INT( value ) )
-        {
-            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected integer, got {}", g_type_name( g_value_get_gtype( value ) ) ) );
+        auto val_opt = gvalue::fetch_typed<int64_t>( *value_ptr );
+        if( !val_opt ) {
+            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected integer, got {}", to_type_name( *value_ptr ) ) );
             return FALSE;
         }
-        auto val = (int64_t)g_value_get_int( value );
-        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val } );
+        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val_opt.value() } );
         if( err )
         {
             fwd_error_message( report_err_func, error_id::set_function_failed, prop, "set function failed", err );
@@ -449,13 +450,12 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
     }
     case tcamprop_system::prop_type::real:
     {
-        if( !G_VALUE_HOLDS_DOUBLE( value ) )
-        {
-            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected real, got {}", g_type_name( g_value_get_gtype( value ) ) ) );
+        auto val_opt = gvalue::fetch_typed<double>( *value_ptr );
+        if( !val_opt ) {
+            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected real, got {}", to_type_name( *value_ptr ) ) );
             return FALSE;
         }
-        auto val = g_value_get_double( value );
-        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val } );
+        auto err = prop_itf->set_property_value( tcamprop_system::prop_value{ val_opt.value() } );
         if( err )
         {
             fwd_error_message( report_err_func, error_id::set_function_failed, prop, "set function failed", err );
@@ -465,15 +465,20 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
     }
     case tcamprop_system::prop_type::menu:
     {
-        int index = 0;
-        if( G_VALUE_HOLDS_STRING( value ) )
+        int64_t index = 0;
+        if( G_VALUE_HOLDS_STRING( value_ptr ) )
         {
             auto range_res = prop_itf->get_property_range();
             if( range_res.has_error() ) {
+                fwd_error_message( report_err_func, error_id::property_failed_get_range, prop, "Failed to fetch range", range_res.error() );
+                return FALSE;
+            }
+            if( g_value_get_string( value_ptr ) == nullptr ) {
+                fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, "Invalid nullptr in <value>" );
                 return FALSE;
             }
 
-            std::string_view str = g_value_get_string( value );
+            std::string_view str = g_value_get_string( value_ptr );
 
             auto& menu_entries = range_res.value().menu_entries;
             auto it = std::find( menu_entries.begin(), menu_entries.end(), str );
@@ -484,9 +489,9 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
             }
             index = std::distance( menu_entries.begin(), it );
         }
-        else if( G_VALUE_HOLDS_INT( value ) )
+        else if( auto val_res = gvalue::fetch_typed<int64_t>( *value_ptr ); val_res )
         {
-            index = g_value_get_int( value );
+            index = val_res.value();
             if( index < 0 )
             {
                 fwd_error_message( report_err_func, error_id::parameter_invalid_value, prop, fmt::format( "failed to find menu entry for '{}'", index ) );
@@ -495,7 +500,7 @@ gboolean tcamprop_system::tcamprop_impl_set_tcam_property( property_list_interfa
         }
         else
         {
-            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected int or string, got {}", g_type_name( g_value_get_gtype( value ) ) ) );
+            fwd_error_message( report_err_func, error_id::property_type_incompatible, prop, fmt::format( "expected int or string, got {}", to_type_name( *value_ptr ) ) );
             return FALSE;
         }
 

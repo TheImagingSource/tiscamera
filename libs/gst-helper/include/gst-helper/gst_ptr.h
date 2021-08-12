@@ -177,14 +177,6 @@ public:
     {
         return ptr_ == nullptr;
     }
-    /**
-     * Returns the internal pointer. Then sets the internal pointer to nullptr.
-     * Note: this does not call unref
-     */
-    [[nodiscard]] T* release() noexcept
-    {
-        return std::exchange(ptr_, nullptr);
-    }
 
     T* get() const noexcept
     {
@@ -238,6 +230,16 @@ public:
         
         using namespace detail;
         unref_object( ptr_ );
+    }
+
+    /**
+     * Returns the internal pointer. Then sets the internal pointer to nullptr.
+     * Note: this does not call unref
+     * Post-condition: empty() == true
+     */
+    [[nodiscard]] T* release() noexcept
+    {
+        return std::exchange( ptr_, nullptr );
     }
 private:
     gst_ptr(T* ptr) noexcept : ptr_ { ptr } {}
@@ -324,8 +326,8 @@ public:
     }
 
     /**
-         * Wrap the passed in pointer. So do not increase the reference count.
-         */
+     * Wrap the passed in pointer. So do not increase the reference count.
+     */
     static gst_ptr wrap( T* ptr ) noexcept
     {
         return gst_ptr{ ptr };
@@ -343,10 +345,7 @@ public:
     {
         return ptr_ == nullptr;
     }
-    T* release() noexcept
-    {
-        return std::exchange( ptr_, nullptr );
-    }
+
 
     T* get() const noexcept
     {
@@ -380,10 +379,15 @@ public:
     {
         unref( ptr_ );
     }
-    void reset( T* ptr )
+
+    /**
+     * Returns the internal pointer. Then sets the internal pointer to nullptr.
+     * Note: this does not call unref
+     * Post-condition: empty() == true
+     */
+    [[nodiscard]] T* release() noexcept
     {
-        unref( ptr_ );
-        ptr_ = ptr;
+        return std::exchange( ptr_, nullptr );
     }
 private:
     gst_ptr( T* ptr ) noexcept : ptr_{ ptr } {}

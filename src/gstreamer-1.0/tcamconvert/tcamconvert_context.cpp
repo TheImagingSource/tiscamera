@@ -19,7 +19,7 @@
 #include "../../gobject/Tcam-0.1.h"
 
 #include <cassert>
-#include <gst-helper/gst_element_chain.h>
+#include <gst-helper/gstelement_helper.h>
 #include <tcamprop_system/tcamprop_consumer.h>
 
 

@@ -134,13 +134,13 @@ struct property_integer : property_list_funcbased_property_base
 {
     prop_range_integer      range_;
 
-    set_value_func<int> set_value;
-    get_value_func<int> get_value;
+    set_value_func<int64_t> set_value;
+    get_value_func<int64_t> get_value;
 
     property_integer( const property_info& d,
                       prop_range_integer range,
-                      set_value_func<int>&& s,
-                      get_value_func<int>&& g,
+                      set_value_func<int64_t>&& s,
+                      get_value_func<int64_t>&& g,
                       get_flags_func&& flags_func )
         : property_list_funcbased_property_base{ d, std::move( flags_func ) }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
@@ -148,8 +148,8 @@ struct property_integer : property_list_funcbased_property_base
     }
     property_integer( const property_info& d,
                       prop_range_integer range,
-                      set_value_func<int>&& s,
-                      get_value_func<int>&& g,
+                      set_value_func<int64_t>&& s,
+                      get_value_func<int64_t>&& g,
                       prop_flags flags )
         : property_list_funcbased_property_base{ d, flags }, range_{ range }, set_value{ std::move( s ) }, get_value{ std::move( g ) }
     {
@@ -223,12 +223,12 @@ struct property_boolean : property_list_funcbased_property_base
 
 struct property_menu : property_list_funcbased_property_base
 {
-    set_value_func<int> set_value;
-    get_value_func<int> get_value;
+    set_value_func<int64_t> set_value;
+    get_value_func<int64_t> get_value;
 
     std::vector<std::string>        menu_entries_;
 
-    int default_entry_index_ = 0;
+    int64_t default_entry_index_ = 0;
 
     static auto to_string_vec( const std::vector<std::string_view>& menu_entries )
     {
@@ -237,9 +237,9 @@ struct property_menu : property_list_funcbased_property_base
 
     property_menu( const property_info& d,
                    const std::vector<std::string_view>& menu_entries,
-                   int def,
-                   set_value_func<int>&& s,
-                   get_value_func<int>&& g,
+                   int64_t def,
+                   set_value_func<int64_t>&& s,
+                   get_value_func<int64_t>&& g,
                    get_flags_func&& flags_func )
         : property_list_funcbased_property_base{ d, std::move( flags_func ) },
         set_value{ std::move( s ) }, get_value{ std::move( g ) }, menu_entries_{ to_string_vec( menu_entries ) }, default_entry_index_( def )
@@ -247,9 +247,9 @@ struct property_menu : property_list_funcbased_property_base
     }
     property_menu( const property_info& d,
                    const std::vector<std::string_view>& menu_entries,
-                   int def,
-                   set_value_func<int>&& s,
-                   get_value_func<int>&& g,
+                   int64_t def,
+                   set_value_func<int64_t>&& s,
+                   get_value_func<int64_t>&& g,
                    prop_flags flags_func )
         : property_list_funcbased_property_base{ d, std::move( flags_func ) },
         set_value{ std::move( s ) }, get_value{ std::move( g ) }, menu_entries_{ to_string_vec( menu_entries ) }, default_entry_index_( def )
@@ -341,12 +341,12 @@ void property_list_funcbased::register_double( const property_info& nfo, const p
     props_.push_back( std::make_unique<property_real>( nfo, range, std::move( set ), std::move( get ), std::move( get_fla ) ) );
 }
 
-void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, prop_flags def_flags /*= prop_flags::def_flags */ )
+void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int64_t> set, get_value_func<int64_t> get, prop_flags def_flags /*= prop_flags::def_flags */ )
 {
     props_.push_back( std::make_unique<property_integer>( nfo, range, std::move( set ), std::move( get ), std::move( def_flags ) ) );
 }
 
-void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int> set, get_value_func<int> get, get_flags_func get_flags )
+void property_list_funcbased::register_integer( const property_info& nfo, const prop_range_integer& range, set_value_func<int64_t> set, get_value_func<int64_t> get, get_flags_func get_flags )
 {
     props_.push_back( std::make_unique<property_integer>( nfo, range, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
@@ -361,12 +361,12 @@ void property_list_funcbased::register_boolean( const property_info& nfo, bool d
     props_.push_back( std::make_unique<property_boolean>( nfo, def, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
 
-void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int default_menu_entry, set_value_func<int> set, get_value_func<int> get, prop_flags def_flags )
+void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int64_t default_menu_entry, set_value_func<int64_t> set, get_value_func<int64_t> get, prop_flags def_flags )
 {
     props_.push_back( std::make_unique<property_menu>( nfo, menu_entries, default_menu_entry, std::move( set ), std::move( get ), def_flags ) );
 }
 
-void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int default_menu_entry, set_value_func<int> set, get_value_func<int> get, get_flags_func get_flags )
+void property_list_funcbased::register_menu( const property_info& nfo, const std::vector<std::string_view>& menu_entries, int64_t default_menu_entry, set_value_func<int64_t> set, get_value_func<int64_t> get, get_flags_func get_flags )
 {
     props_.push_back( std::make_unique<property_menu>( nfo, menu_entries, default_menu_entry, std::move( set ), std::move( get ), std::move( get_flags ) ) );
 }
