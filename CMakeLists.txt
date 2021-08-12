@@ -93,6 +93,7 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
 
   # TODO: these should not always be included
   add_subdirectory(external)
+  add_subdirectory(libs)
   add_subdirectory(src)
 
   if (TCAM_ENABLE_DATA_INSTALL)

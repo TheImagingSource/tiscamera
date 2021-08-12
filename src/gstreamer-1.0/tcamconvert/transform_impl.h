@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../lib/dutils_image/src/dutils_img_filter/dutils_img_filter_params.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/dutils_img_filter_params.h"
 
 #include <dutils_img/dutils_img.h>
 #include <functional>

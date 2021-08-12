@@ -15,7 +15,6 @@
 
 include( ${TCAM_SOURCE_DIR}/cmake/pkg-helper.cmake )
 
-add_subdirectory(lib)
 add_subdirectory(gobject)
 
 if (BUILD_GST_1_0)

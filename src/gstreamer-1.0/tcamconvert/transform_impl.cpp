@@ -1,12 +1,12 @@
 
 #include "transform_impl.h"
 
-#include "../../lib/dutils_image/src/dutils_img_filter/by_edge/by_edge.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/filter/whitebalance/wb_apply.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
-#include "../../lib/dutils_image/src/dutils_img_filter/transform/mono_to_bgr/transform_mono_to_bgr.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/by_edge/by_edge.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/filter/whitebalance/wb_apply.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/transform_fcc1x_to_fcc8.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/transform/fcc8_fcc16/transform_fcc8_fcc16.h"
+#include "../../../libs/dutils_image/src/dutils_img_filter/transform/mono_to_bgr/transform_mono_to_bgr.h"
 
 #include <algorithm>
 #include <array>
