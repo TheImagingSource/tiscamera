@@ -731,28 +731,28 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
         return FALSE;
     }
 
-    // if (!gst_caps_is_fixed(data.src_caps.get()))
-    // {
-    std::string sc = gst_helper::to_string(*data.src_caps);
-    GstCaps* tmp = tcam_gst_find_largest_caps(data.src_caps.get());
-    GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
-             sc.c_str(),
-             gst_helper::to_string(*tmp).c_str());
-
-    if (tmp)
+    if (!gst_caps_is_fixed(data.src_caps.get()))
     {
-        data.src_caps = gst_helper::make_wrap_ptr( tmp );
+        std::string sc = gst_helper::to_string(*data.src_caps);
+        GstCaps* tmp = tcam_gst_find_largest_caps(data.src_caps.get());
+        GST_INFO("Caps were not fixed. Reduced '%s' to: '%s'",
+                 sc.c_str(),
+                 gst_helper::to_string(*tmp).c_str());
+
+        if (tmp)
+        {
+            data.src_caps = gst_helper::make_wrap_ptr( tmp );
+        }
+        else
+        {
+            GST_WARNING("Unable to find largest caps. Continuing with unfixated caps.");
+        }
     }
     else
     {
-        GST_WARNING("Unable to find largest caps. Continuing with unfixated caps.");
+        GST_INFO("Caps are fixed. Using caps for src: %s",
+                 gst_helper::to_string(*data.src_caps).c_str());
     }
-    // }
-    // else
-    // {
-    //     GST_INFO("Caps are fixed. Using caps for src: %s",
-    //              gst_helper::to_string(*data.src_caps).c_str());
-    // }
 
     // explicitly destroy the pipeline caps
     // when having a start/stop cycle that goes PLAYING-READY-PLAYING, etc
@@ -1194,13 +1194,17 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                                 "Using user defined caps for tcamsrc. User caps are: %s",
                                 gst_helper::to_string(*data.user_caps).c_str());
 
-                data.src_caps = gst_helper::make_ptr(find_input_caps(
-                    data.user_caps.get(), data.target_caps.get(), data.modules, data.toggles));
+                data.src_caps = gst_helper::make_ptr(find_input_caps(data.user_caps.get(),
+                                                                     data.target_caps.get(),
+                                                                     data.modules,
+                                                                     data.toggles));
             }
             else
             {
-                data.src_caps = gst_helper::make_ptr(find_input_caps(
-                    src_caps.get(), data.target_caps.get(), data.modules, data.toggles));
+                data.src_caps = gst_helper::make_ptr(find_input_caps(src_caps.get(),
+                                                                     data.target_caps.get(),
+                                                                     data.modules,
+                                                                     data.toggles));
             }
 
             if (!data.src_caps || gst_caps_is_empty(data.src_caps.get()))
