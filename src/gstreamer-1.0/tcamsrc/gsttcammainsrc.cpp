@@ -105,13 +105,11 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
 
 static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
 {
-    GstCaps* thiscaps;
     GstCaps* caps = NULL;
-    GstCaps* peercaps = NULL;
     gboolean result = FALSE;
 
     /* first see what is possible on our source pad */
-    thiscaps = gst_pad_query_caps(GST_BASE_SRC_PAD(basesrc), NULL);
+    GstCaps* thiscaps = gst_pad_query_caps(GST_BASE_SRC_PAD(basesrc), NULL);
 
     // nothing or anything is allowed, we're done
     if (gst_caps_is_empty(thiscaps) || gst_caps_is_any(thiscaps))
@@ -125,20 +123,23 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
         return TRUE;
     }
     /* get the peer caps */
-    peercaps = gst_pad_peer_query_caps(GST_BASE_SRC_PAD(basesrc), thiscaps);
+    GstCaps* peercaps = gst_pad_peer_query_caps(GST_BASE_SRC_PAD(basesrc), nullptr);
     GST_DEBUG("caps of peer: %s", gst_helper::to_string(*peercaps).c_str());
 
     if (!gst_caps_is_empty(peercaps) && !gst_caps_is_any(peercaps))
     {
         GST_DEBUG("Peer gave us something to work with.");
 
+
+        GstCaps* tmp = gst_caps_intersect_full(thiscaps, peercaps, GST_CAPS_INTERSECT_FIRST);
+
         GstCaps* icaps = NULL;
 
         /* Prefer the first caps we are compatible with that the peer proposed */
-        for (guint i = 0; i <= gst_caps_get_size(peercaps) - 1; i--)
+        for (guint i = 0; i <= gst_caps_get_size(tmp) - 1; i--)
         {
             /* get intersection */
-            GstCaps* ipcaps = gst_caps_copy_nth(peercaps, i);
+            GstCaps* ipcaps = gst_caps_copy_nth(tmp, i);
 
             /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
             bool is_any_caps = gst_helper::to_string(*ipcaps) == "ANY";
@@ -153,13 +154,14 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
             icaps = gst_caps_intersect_full(thiscaps, ipcaps, GST_CAPS_INTERSECT_FIRST);
             gst_caps_unref(ipcaps);
 
-            if (!gst_caps_is_empty(icaps))
+            if (icaps && !gst_caps_is_empty(icaps))
             {
                 break;
             }
             gst_caps_unref(icaps);
             icaps = NULL;
         }
+
         GST_DEBUG("intersect: %" GST_PTR_FORMAT, static_cast<void*>(icaps));
 
         if (icaps)
@@ -168,7 +170,7 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
              * resolution strictly bigger then the first peer caps */
             if (gst_caps_get_size(icaps) > 1)
             {
-                GstStructure* s = gst_caps_get_structure(peercaps, 0);
+                GstStructure* s = gst_caps_get_structure(tmp, 0);
                 int best = 0;
                 int twidth, theight;
                 int width = G_MAXINT, height = G_MAXINT;
@@ -253,6 +255,8 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
                 gst_caps_unref(icaps);
             }
         }
+        gst_caps_unref(tmp);
+
         gst_caps_unref(thiscaps);
     }
     else
