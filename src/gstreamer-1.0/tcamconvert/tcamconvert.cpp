@@ -255,6 +255,12 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* base,
                      gst_helper::to_string(*caps).c_str(),
                      gst_helper::to_string(*res_caps).c_str());
 
+    if (gst_caps_is_empty(caps)
+        || gst_caps_is_empty(res_caps))
+    {
+        GST_ELEMENT_ERROR(base, STREAM, FORMAT, (("Unable to convert between caps formats")), (NULL));
+    }
+
     return res_caps;
 }
 
