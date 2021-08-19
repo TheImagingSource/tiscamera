@@ -28,6 +28,7 @@ option(BUILD_TESTS    "Build tests."                         OFF)
 
 option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" OFF)
 option(TCAM_ARAVIS_USB_VISION "Use aravis usb vision backend. Disables v4l2." OFF)
+option(TCAM_DOWNLOAD_MESON "Download version of meson for compilation purposes" OFF)
 
 if (TCAM_ARAVIS_USB_VISION)
   # activate aravis since we need it for usb3vision

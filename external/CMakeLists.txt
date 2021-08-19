@@ -27,43 +27,65 @@ if (BUILD_ARAVIS)
     # check for intltool
     find_package (Intl REQUIRED QUIET)
 
-    # meson confugration
-    # list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC meson ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=false -Dgst-plugin=false -Dusb=false -Dfast-heartbeat=true -Ddocumentation=false -Dintrospection=true -Ddefault_library=static)
+    if (TCAM_DOWNLOAD_MESON)
 
-    # autotools configuration
-    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${CMAKE_CURRENT_SOURCE_DIR}/aravis/autogen.sh --prefix=/usr --enable-viewer=no --enable-gtk-doc-html=no --enable-packet-socket=no --enable-gst-plugin=no --enable-gst-0.10-plugin=no --enable-fast-heartbeat --disable-dependency-tracking)
+      ExternalProject_Add(meson
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/meson
+        GIT_REPOSITORY "https://github.com/mesonbuild/meson/"
+        GIT_TAG 0.59.0
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""        # Do not install we are statically linking
+        UPDATE_COMMAND ""         # Do not rebuild when calling make
+        )
+
+      set(TCAM_MESON_CMD ${CMAKE_CURRENT_SOURCE_DIR}/meson/meson.py)
+
+    else ()
+
+      find_program(EXE_MESON meson REQUIRED)
+
+      execute_process(COMMAND ${EXE_MESON} "--version"
+        OUTPUT_VARIABLE TCAM_MESON_VERSION
+        )
+
+      if (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
+
+        message(FATAL_ERROR "aravis requires meson => 0.53.0")
+
+      endif (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
+
+      set(TCAM_MESON_CMD meson CACHE INTERNAL "meson build tool executable")
+    endif ()
+
+    # meson configuration
+    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${TCAM_MESON_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=disabled -Dgst-plugin=disabled -Dusb=enabled -Dfast-heartbeat=true -Ddocumentation=disabled -Dintrospection=enabled -Ddefault_library=static)
 
     if (TCAM_ARAVIS_USB_VISION)
 
-      # list(APPEND ARAVIS_CONFIG "-Denable-usb=true")
-      list(APPEND ARAVIS_CONFIG "--enable-usb=yes")
+      list(APPEND ARAVIS_CONFIG "-Denable-usb=true")
 
     else (TCAM_ARAVIS_USB_VISION)
 
-      # list(APPEND ARAVIS_CONFIG "-Denable-usb=false")
-      list(APPEND ARAVIS_CONFIG "--enable-usb=no")
+      list(APPEND ARAVIS_CONFIG "-Denable-usb=false")
 
     endif (TCAM_ARAVIS_USB_VISION)
 
     ExternalProject_Add(aravis
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
       GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-      GIT_TAG aravis-0-6
+      GIT_TAG 0.8.16
       CONFIGURE_COMMAND ${ARAVIS_CONFIG}
-      BUILD_COMMAND make -j4 CFLAGS=-fPIC
+      BUILD_COMMAND ninja
       INSTALL_COMMAND ""        # Do not install we are statically linking
       UPDATE_COMMAND ""         # Do not rebuild when calling make
       )
 
-    # ExternalProject_Add(aravis
-    #   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/aravis
-    #   GIT_REPOSITORY "https://github.com/AravisProject/aravis.git"
-    #   GIT_TAG ARAVIS_0_6_3
-    #   CONFIGURE_COMMAND ${ARAVIS_CONFIG}
-    #   BUILD_COMMAND ninja
-    #   INSTALL_COMMAND ""        # Do not install we are statically linking
-    #   UPDATE_COMMAND ""         # Do not rebuild when calling make
-    #   )
+    if (TCAM_DOWNLOAD_MESON)
+      # needed to ensure meson exists before aravis
+      add_dependencies(aravis meson)
+
+    endif (TCAM_DOWNLOAD_MESON)
 
     #
     # Get the latest abbreviated commit hash of the working branch
@@ -75,7 +97,7 @@ if (BUILD_ARAVIS)
       )
 
     set(ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH_INTERNAL}" PARENT_SCOPE)
-    set(ARAVIS_VERSION "0.7" PARENT_SCOPE)
+    set(ARAVIS_VERSION "0.8" PARENT_SCOPE)
 
   else (TCAM_INTERNAL_ARAVIS)
 
