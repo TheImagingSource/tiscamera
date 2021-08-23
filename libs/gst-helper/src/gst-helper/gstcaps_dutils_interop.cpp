@@ -2,8 +2,10 @@
 #include <gst-helper/gstcaps_dutils_interop.h>
 
 #include <dutils_img_lib/dutils_gst_interop.h>
-#include <map>
 #include <gst-helper/gst_gvalue_helper.h>
+
+#include <map>
+#include <limits>
 
 std::optional<img::dim> gst_helper::get_gst_struct_image_dim(const GstStructure& structure)
 {
