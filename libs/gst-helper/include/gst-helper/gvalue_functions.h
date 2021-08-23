@@ -130,7 +130,7 @@ namespace gvalue
         if( g_value_transform( &gval, &trans ) ) {
             return get_typed<T>( trans );
         }
-        return {};
+        return std::nullopt;
     }
 
 }

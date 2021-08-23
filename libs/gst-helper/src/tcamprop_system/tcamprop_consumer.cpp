@@ -40,7 +40,7 @@ constexpr auto prop_type_from_string(std::string_view v) noexcept -> std::option
     {
         return prop_type::menu;
     }
-    return {};
+    return std::nullopt;
 }
 
 }
