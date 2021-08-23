@@ -4355,7 +4355,7 @@ class App {
             if(res.size() != 1) {
                 return false;
             }
-            bool trigger = false;
+            bool trigger;
             auto result = CLI::detail::lexical_cast(res[0], trigger);
             if(trigger)
                 function();
