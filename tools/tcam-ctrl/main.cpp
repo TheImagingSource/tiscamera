@@ -67,64 +67,51 @@ static bool separate_serial_and_type(const std::string& input,
 
 static void print_devices(size_t /*t*/)
 {
-    GstElement* source = gst_element_factory_make("tcamsrc", "source");
+    auto monitor = gst_device_monitor_new();
 
-    GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
+    gst_device_monitor_add_filter(monitor, "Video/Source/tcam", NULL);
 
-    for (GSList* elem = serials; elem; elem = elem->next)
+    GList* devices = gst_device_monitor_get_devices(monitor);
+
+    for (GList* dev = devices; dev; dev = dev->next)
     {
-        char* name;
-        char* identifier;
-        char* connection_type;
+        GstStructure* struc = gst_device_get_properties(GST_DEVICE(dev->data));
 
-        /* This fills the parameters to the likes of:
-           name='DFK Z12GP031',
-           identifier='The Imaging Source Europe GmbH-11410533'
-           connection_type='aravis'
-           The identifier is the name given by the backend
-           The connection_type identifies the backend that is used.
-           Currently 'aravis', 'v4l2' and 'unknown' exist
-        */
-        gboolean ret = tcam_prop_get_device_info(
-            TCAM_PROP(source), (gchar*)elem->data, &name, &identifier, &connection_type);
+        printf("Model: %s Serial: %s Type: %s\n",
+               gst_structure_get_string(struc, "model"),
+               gst_structure_get_string(struc, "serial"),
+               gst_structure_get_string(struc, "type"));
 
-        if (ret) // get_device_info was successfull
-        {
-            std::string s;
-            std::string t;
-            separate_serial_and_type((gchar*)elem->data, s, t);
-
-            printf("Model: %s Serial: %s Type: %s\n", name, s.c_str(), connection_type);
-        }
-        else
-        {
-            fprintf(stderr, "Unable to retrieve device info for '%s'", name);
-        }
     }
 
-    g_slist_free(serials);
-    gst_object_unref(source);
+    g_list_free(devices);
+    gst_object_unref(monitor);
 }
+
 
 static void print_serials_long(size_t)
 {
-    GstElement* source = gst_element_factory_make("tcamsrc", "source");
+    auto monitor = gst_device_monitor_new();
 
-    GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
+    gst_device_monitor_add_filter(monitor, "Video/Source/tcam", NULL);
 
+    GList* devices = gst_device_monitor_get_devices(monitor);
     std::string out;
-
-    for (GSList* elem = serials; elem; elem = elem->next)
+    for (GList* dev = devices; dev; dev = dev->next)
     {
-        out += (gchar*)elem->data;
+        GstStructure* struc = gst_device_get_properties(GST_DEVICE(dev->data));
+
+        out += gst_structure_get_string(struc, "serial");
+        out += "-";
+        out += gst_structure_get_string(struc, "type");
         out += " ";
     }
-
     printf("%s\n", out.c_str());
 
-    g_slist_free(serials);
-    gst_object_unref(source);
+    g_list_free(devices);
+    gst_object_unref(monitor);
 }
+
 
 int main(int argc, char* argv[])
 {
