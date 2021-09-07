@@ -182,6 +182,12 @@
             "modules": ["aravis"]
         },
         {
+            "name": "meson",
+            "version": ">= ",
+            "phase": "compilation",
+            "modules": ["aravis"]
+        },
+        {
             "name": "gtk-doc-tools",
             "version": ">= 1.25",
             "phase": "compilation",

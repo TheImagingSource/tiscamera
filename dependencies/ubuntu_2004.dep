@@ -170,14 +170,14 @@
             "modules": ["aravis"]
         },
         {
-            "name": "autoconf",
-            "version": ">= 2.69-9",
+            "name": "intltool",
+            "version": ">= 0.51.0",
             "phase": "compilation",
             "modules": ["aravis"]
         },
         {
-            "name": "intltool",
-            "version": ">= 0.51.0",
+            "name": "meson",
+            "version": ">= 0.53.0",
             "phase": "compilation",
             "modules": ["aravis"]
         },
