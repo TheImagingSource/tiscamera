@@ -1222,6 +1222,8 @@ bool V4l2Device::extension_unit_is_loaded()
 void V4l2Device::stream()
 {
     m_already_received_valid_image = false;
+    static const int log_repetition = 10;
+    int log_repetition_counter = 0;
     int lost_countdown = lost_countdown_default;
     // period elapsed for current image
     int waited_seconds = 0;
@@ -1294,6 +1296,7 @@ void V4l2Device::stream()
             if (ret_value)
             {
                 lost_countdown = lost_countdown_default; // reset lost countdown variable
+                log_repetition_counter = 0;
             }
             else
             {
@@ -1301,10 +1304,18 @@ void V4l2Device::stream()
             }
             waiting_period = m_stream_timeout_sec;
         }
-        if (lost_countdown <= 0)
+        if (lost_countdown <= 0 && log_repetition_counter < log_repetition)
         {
             SPDLOG_WARN("Did not receive image for long time.");
             lost_countdown = lost_countdown_default;
+            if (log_repetition_counter < log_repetition)
+            {
+                log_repetition_counter++;
+            }
+            if (log_repetition_counter >= log_repetition)
+            {
+                SPDLOG_WARN("Stopping messages \"Did not receive image for long time.\".");
+            }
         }
     }
 }
