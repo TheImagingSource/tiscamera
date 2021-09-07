@@ -109,9 +109,7 @@ static void update_device_list(TcamDeviceProvider* self)
 
             if (iter == new_list.end())
             {
-                GST_DEBUG("Notifying about lost device...");
-                gst_device_provider_device_remove(GST_DEVICE_PROVIDER(self), d.gstdev);
-                g_object_unref(d.gstdev);
+                //GST_DEBUG("Notifying about lost device...");
                 to_remove.push_back(d);
             }
         }
@@ -129,6 +127,7 @@ static void update_device_list(TcamDeviceProvider* self)
                                                             }),
                                              self->state->known_devices.end());
         }
+        return to_remove;
     };
 
     auto check_new_devices = [self](const std::vector<tcam::DeviceInfo>& new_list) {
@@ -153,30 +152,51 @@ static void update_device_list(TcamDeviceProvider* self)
                 std::string name = d.get_serial() + "-" + d.get_device_type_as_string();
 
                 auto new_gstdev = tcam_device_new(self->factory, d);
-                GST_DEBUG("Notifying about new device...");
-                gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), new_gstdev);
+                // GST_DEBUG("Notifying about new device...");
+                // gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), new_gstdev);
                 struct device new_dev = { d, new_gstdev };
                 new_devices.push_back(new_dev);
             }
         }
 
-        self->state->known_devices.insert(
-            self->state->known_devices.end(), new_devices.begin(), new_devices.end());
+        self->state->known_devices.insert(self->state->known_devices.end(),
+                                          new_devices.begin(), new_devices.end());
+
+        return new_devices;
     };
 
     std::unique_lock<std::mutex> lck(self->state->_mtx);
     auto sec = std::chrono::seconds(1);
+    std::vector<device> new_devices;
+    std::vector<device> lost_devices;
+
     while (self->state->run_updates)
     {
         GST_DEBUG("Checking for new devices");
 
         auto new_list = self->state->index.get_device_list();
 
-        check_lost_devices(new_list);
-        check_new_devices(new_list);
+        GST_DEBUG("%zu", new_list.size());
+
+        lost_devices = check_lost_devices(new_list);
+        new_devices = check_new_devices(new_list);
 
         self->state->cv.wait_for(lck, 2 * sec);
+
+        for (const auto& dev : lost_devices)
+        {
+            gst_device_provider_device_remove(GST_DEVICE_PROVIDER(self), dev.gstdev);
+
+            g_object_unref(dev.gstdev);
+
+        }
+
+        for (const auto& dev : new_devices)
+        {
+            gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), dev.gstdev);
+        }
     }
+
     GST_DEBUG("update thread stopping....");
 }
 
@@ -192,21 +212,22 @@ static void tcam_device_provider_init(TcamDeviceProvider* self)
 
 static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
 {
-    GST_INFO("received probe");
+    GST_DEBUG("received probe");
 
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(provider);
 
     std::lock_guard lck(self->state->_mtx);
 
     GList* ret = NULL;
+    auto new_list = self->state->index.get_device_list();
 
-    for (const auto& d : self->state->known_devices)
+    for (const auto& d : new_list)
     {
         std::string long_serial =
-            d.device.get_serial() + "-" + d.device.get_device_type_as_string();
+            d.get_serial() + "-" + d.get_device_type_as_string();
         GST_DEBUG("Appending: %s", long_serial.c_str());
 
-        ret = g_list_append(ret, tcam_device_new(self->factory, d.device));
+        ret = g_list_append(ret, tcam_device_new(self->factory, d));
     }
 
     return ret;
@@ -248,6 +269,11 @@ static void tcam_device_provider_dispose(GObject* object)
 static void tcam_device_provider_finalize(GObject* object)
 {
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(object);
+
+    self->state->run_updates = false;
+    self->state->cv.notify_all();
+
+    self->state->_update_thread.join();
 
     if (self->state)
     {
