@@ -123,3 +123,4 @@ aravis, which is available under the LGPLv2.
 CLI11, available under the 3-Clause BSD-License  
 Catch2, which is published under the Boost Software License, Version 1.0  
 spdlog, which is available under the "MIT" license.  
+fmt, which is available under the "MIT" license.

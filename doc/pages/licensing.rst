@@ -37,3 +37,6 @@ The following projects are included in this project:
    * - sphinx-tabs
      - MIT
      - https://github.com/djungelorm/sphinx-tabs
+   * - fmt
+     - MIT
+     - https://github.com/fmtlib/fmt
