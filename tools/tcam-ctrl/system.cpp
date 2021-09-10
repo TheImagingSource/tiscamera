@@ -39,18 +39,18 @@ std::string exec(const std::string& cmd)
 
 void check_package(const std::string& pckg_name)
 {
-    std::string cmd = "dpkg --status " + pckg_name + " 2>&1";
+    std::string cmd = "dpkg-query --showformat='${Version}' --show " + pckg_name + " 2>&1";
 
     std::string dpkg = exec(cmd);
 
-    if (dpkg.find("is not installed") != std::string::npos)
+    if (dpkg.find("no packages found") != std::string::npos)
     {
         std::cout << pckg_name << " is not installed."
-                  << "\n\n";
+                  << "\n";
     }
     else
     {
-        std::cout << dpkg << "\n";
+        std::cout << pckg_name << ": " << dpkg << "\n";
     }
 }
 
@@ -75,6 +75,12 @@ void check_system_info(const std::string& info)
 
 void tcam::tools::print_packages()
 {
+    if (system("which dpkg-query > /dev/null 2>&1"))
+    {
+        std::cerr << "dplg-query could not be found. No package information available." << std::endl;
+        return;
+    }
+
     check_package("tiscamera");
     check_package("tiscamera-tcamprop");
     check_package("tiscamera-dutils");
