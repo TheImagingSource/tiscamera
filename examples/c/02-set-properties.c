@@ -221,6 +221,7 @@ int main (int argc, char *argv[])
 
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
     // helper function to ensure we have the right state
     // alternatively wait for the first image
