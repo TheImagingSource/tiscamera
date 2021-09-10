@@ -57,6 +57,7 @@ void printHelp(char* execName)
               << "    static=on/off            - toggle static ip state\n"
               << "    name=\"xyz\"             - set name for camera; maximum 15 characters\n"
               << "    firmware=firmware.zip    - file containing new firmware\n"
+              << "    --yes                    - No user confirmation. Assume yes"
               << std::endl;
 
     std::cout << "Camera identification:\n"

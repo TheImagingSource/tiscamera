@@ -33,13 +33,33 @@
 namespace tis
 {
 
+bool has_flag(const std::vector<std::string>& args,
+              const std::string& long_name,
+              const std::string& short_name)
+{
+    auto iter = find_if(args.begin(), args.end(), [&long_name, &short_name](const std::string& s) {
+
+        if (s == long_name || s == short_name)
+        {
+            return true;
+        }
+        return false;
+    });
+
+    if (iter == args.end())
+    {
+        return false;
+    }
+    return true;
+}
+
 std::string getArgumentValue(const std::vector<std::string>& args,
                              const std::string& long_name,
                              const std::string& short_name)
 {
     std::string retv;
 
-    auto iter = find_if(args.begin(), args.end(), [&long_name, &short_name](std::string s) {
+    auto iter = find_if(args.begin(), args.end(), [&long_name, &short_name](const std::string& s) {
         if ((startsWith(s, long_name)) || (startsWith(s, short_name)))
         {
             return true;
@@ -518,16 +538,24 @@ void upgradeFirmware(const std::vector<std::string>& args)
     std::string cF(realpath(firmware.c_str(), actualpath));
 
     std::cout << "Updating the camera using the file: " << cF << std::endl;
-    std::cout << "\n!!! IMPORTANT NOTE !!!\n"
-                 "Do not interrupt the firmware update process.\n"
-                 "Do not disconnect the camera during the firmware update process.\n"
-                 "A failed firmware update may render the camera unusable.\n\n"
-                 "Start the update process [y/N]";
 
-    std::string really;
-    std::cin >> really;
-    if (really.compare("y") != 0)
-        return;
+    bool assume_yes = has_flag(args, "--yes", "");
+
+    if (!assume_yes)
+    {
+        std::cout << "\n!!! IMPORTANT NOTE !!!\n"
+            "Do not interrupt the firmware update process.\n"
+            "Do not disconnect the camera during the firmware update process.\n"
+            "A failed firmware update may render the camera unusable.\n\n"
+            "Start the update process [y/N]";
+
+        std::string really;
+        std::cin >> really;
+        if (really.compare("y") != 0)
+        {
+            return;
+        }
+    }
 
     std::string overrideModelName = getArgumentValue(args, "overrideModelName", "");
 
