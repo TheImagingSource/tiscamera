@@ -16,39 +16,54 @@
 
 #include "general.h"
 
-#include "../../src/gobject/tcamprop.h"
+#include <gst/gst.h>
+
 
 bool is_valid_device_serial(GstElement* source, const std::string& serial)
 {
-    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+    bool ret = false;
 
-    for (GSList* elem = serials; elem; elem = elem->next)
+    auto monitor = gst_device_monitor_new();
+    gst_device_monitor_add_filter(monitor, "Video/Source/tcam", NULL);
+
+    GList* devices = gst_device_monitor_get_devices(monitor);
+
+    gst_object_unref(monitor);
+
+    bool is_long_serial = false;
+
+    if (serial.find("-") != std::string::npos)
     {
-        const char* device_serial = (gchar*)elem->data;
+        is_long_serial = true;
+    }
 
-        if (serial.compare(device_serial) == 0)
+    for (GList* elem = devices; elem; elem = elem->next)
+    {
+        auto dev = (GstDevice*) elem->data;
+        GstStructure* struc = gst_device_get_properties(dev);
+
+        std::string dev_serial;
+
+        if (is_long_serial)
         {
-            g_slist_free_full(serials, g_free);
-            return true;
+            dev_serial = gst_structure_get_string(struc, "serial");
+            dev_serial += "-";
+            dev_serial += gst_structure_get_string(struc, "type");
+        }
+        else
+        {
+            dev_serial = gst_structure_get_string(struc, "serial");
+        }
+        gst_structure_free(struc);
+
+        if (serial == dev_serial)
+        {
+            ret = true;
+            break;
         }
     }
 
-    g_slist_free_full(serials, g_free);
+    g_list_free(devices);
 
-    GSList* serials_backend = tcam_prop_get_device_serials_backend(TCAM_PROP(source));
-
-    for (GSList* elem = serials_backend; elem; elem = elem->next)
-    {
-        const char* device_serial = (gchar*)elem->data;
-
-        if (serial.compare(device_serial) == 0)
-        {
-            g_slist_free_full(serials_backend, g_free);
-            return true;
-        }
-    }
-
-    g_slist_free_full(serials_backend, g_free);
-
-    return false;
+    return ret;
 }
