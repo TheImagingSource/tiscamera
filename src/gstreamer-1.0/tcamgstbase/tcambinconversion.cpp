@@ -32,7 +32,6 @@ struct conversion_desc
 
 // order of required_modules fields
 // bool tcamconvert = false;
-// bool bayer2rgb = false;
 // bool videoconvert = false;
 // bool jpegdec = false;
 // bool dutils = false;
@@ -260,7 +259,7 @@ struct input_caps_required_modules TcamBinConversion::get_modules(GstCaps* caps,
                                                                   struct input_caps_toggles toggles) const
 {
 
-    if (!gst_caps_is_fixed(caps))
+    if (!caps || !gst_caps_is_fixed(caps))
     {
         return {};
     }
