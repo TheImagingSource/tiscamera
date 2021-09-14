@@ -22,6 +22,55 @@
 #include <stdio.h> /* printf and putchar */
 
 
+void print_device(GstDevice* device)
+{
+
+    GstStructure* struc = gst_device_get_properties(device);
+
+    printf("\tmodel:\t%s\tserial:\t%s\ttype:\t%s\n",
+           gst_structure_get_string(struc, "model"),
+           gst_structure_get_string(struc, "serial"),
+           gst_structure_get_string(struc, "type"));
+
+    gst_structure_free(struc);
+
+}
+
+
+gboolean bus_function(GstBus* bus, GstMessage* message, gpointer user_data)
+{
+    GstDevice* device;
+
+    switch (GST_MESSAGE_TYPE(message))
+    {
+        case GST_MESSAGE_DEVICE_ADDED:
+        {
+            gst_message_parse_device_added(message, &device);
+
+            printf("NEW device\n");
+            print_device(device);
+            gst_object_unref(device);
+            break;
+        }
+        case GST_MESSAGE_DEVICE_REMOVED:
+        {
+            gst_message_parse_device_removed(message, &device);
+            printf("REMOVED Device\n");
+            print_device(device);
+            gst_object_unref(device);
+            break;
+        }
+        case GST_MESSAGE_DEVICE_CHANGED: // not used by tiscamera
+        default:
+        {
+            break;
+        }
+    }
+
+    return G_SOURCE_CONTINUE;
+}
+
+
 int main(int argc, char* argv[])
 {
     /* this line sets the gstreamer default logging level
@@ -35,55 +84,53 @@ int main(int argc, char* argv[])
 
     gst_init(&argc, &argv); // init gstreamer
 
-    GError* err = NULL;
+    // The device monitor listens to device activities for us
+    GstDeviceMonitor* monitor = gst_device_monitor_new();
+    // We are only interested in devices that are in the categories
+    // Video and Source && tcam
+    gst_device_monitor_add_filter(monitor, "Video/Source/tcam", NULL);
 
-    GstElement* sample_pipeline = gst_parse_launch("tcambin name=source ! fakesink", &err);
+    //
+    // static query
+    // list all devices that are available right now
+    //
 
-    if (sample_pipeline == NULL)
+    GList* devices = gst_device_monitor_get_devices(monitor);
+
+    for (GList* elem = devices; elem; elem = elem->next)
     {
-        printf("Unable to create pipeline: %s\n", err->message);
-        g_free(err);
-        return 1;
+        GstDevice* device = (GstDevice*) elem->data;
+
+        print_device(device);
     }
 
-    /* create a tcambin to retrieve device information */
-    GstElement* source = gst_bin_get_by_name(GST_BIN(sample_pipeline), "source");
+    g_list_free(devices);
 
-    /* retrieve a single linked list of serials of the available devices */
-    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+    //
+    // dynamic listing
+    // notify us on all device changes (add/remove/changed)
+    // all devices will appear once as ADDED
+    //
 
-    for (GSList* elem = serials; elem; elem = elem->next)
-    {
-        const char* device_serial = (gchar*)elem->data;
+    GstBus* bus = gst_device_monitor_get_bus(monitor);
+    gst_bus_add_watch(bus, bus_function, NULL);
+    gst_object_unref(bus);
 
-        char* name;
-        char* identifier;
-        char* connection_type;
+    // actually start the dynamic monitoring
+    gst_device_monitor_start(monitor);
 
-        /* This fills the parameters to the likes of:
-           name='DFK Z12GP031',
-           identifier='The Imaging Source Europe GmbH-11410533'
-           connection_type='aravis'
-           The identifier is the name given by the backend
-           The connection_type identifies the backend that is used.
-                   Currently 'aravis', 'v4l2', libusb, tegra, pimipi and 'unknown' exist
-        */
-        gboolean ret = tcam_prop_get_device_info(
-            TCAM_PROP(source), device_serial, &name, &identifier, &connection_type);
+    printf("Now listening to device changes. Disconnect your camera to see a remove event. Press Ctrl-C to end.\n");
 
-        if (ret) // get_device_info was successful
-        {
-            printf("Model: %s Serial: %s Type: %s\n", name, (gchar*)elem->data, connection_type);
+    // This is simply used to wait for events or the user to end this script
+    GMainLoop* loop = g_main_loop_new(NULL, FALSE);
+    g_main_loop_run(loop);
+    g_main_loop_unref(loop);
 
-            g_free(name);
-            g_free(identifier);
-            g_free(connection_type);
-        }
-    }
+    // has to be called when gst_device_monitor_start has been called
+    gst_device_monitor_stop(monitor);
 
-    g_slist_free_full(serials, g_free);
-    gst_object_unref(source);
-    gst_object_unref(sample_pipeline);
+    // cleanup
+    gst_object_unref(monitor);
 
     return 0;
 }

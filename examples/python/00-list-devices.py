@@ -21,47 +21,40 @@
 import sys
 import gi
 
-gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
+gi.require_version("GLib", "2.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import GLib, Gst
 
 
-def list_devices():
+def print_device(device):
     """
-    Print information about all  available devices
+
     """
 
-    sample_pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+    # struc is a Gst.Structure
+    struc = device.get_properties()
 
-    if not sample_pipeline:
-        print("Unable to create pipeline")
-        sys.exit(1)
+    print("\tmodel:\t{}\tserial:\t{}\ttype:\t{}".format(struc.get_string("model"),
+                                                        struc.get_string("serial"),
+                                                        struc.get_string("type")))
 
-    source = sample_pipeline.get_by_name("source")
 
-    serials = source.get_device_serials_backend()
+def bus_function(bus, message, user_data):
+    """
 
-    for single_serial in serials:
+    """
 
-        # This returns someting like:
-        # (True,
-        #  name='DFK Z12GP031',
-        #  identifier='The Imaging Source Europe GmbH-11410533',
-        #  connection_type='aravis')
-        # The identifier is the name given by the backend
-        # The connection_type identifies the backend that is used.
-        #     Currently 'aravis', 'v4l2', 'libusb' and 'unknown' exist
-        (return_value, model,
-         identifier, connection_type) = source.get_device_info(single_serial)
+    if message.type == Gst.MessageType.DEVICE_ADDED:
+        device = message.parse_device_added()
+        print("ADDED Device")
+        print_device(device)
+    elif message.type == Gst.MessageType.DEVICE_REMOVED:
+        device = message.parse_device_removed()
+        print("REMOVED Device")
+        print_device(device)
 
-        # return value would be False when a non-existant serial is used
-        # since we are iterating get_device_serials this should not happen
-        if return_value:
-
-            print("Model: {} Serial: {} Type: {}".format(model,
-                                                         single_serial,
-                                                         connection_type))
+    return True
 
 
 if __name__ == "__main__":
@@ -76,4 +69,34 @@ if __name__ == "__main__":
     # for further details
     Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
-    list_devices()
+    monitor = Gst.DeviceMonitor.new()
+
+    monitor.add_filter("Video/Source/tcam")
+
+    #
+    # static query
+    # list all devices that are available right now
+    #
+
+    for device in monitor.get_devices():
+
+        print_device(device)
+
+    #
+    # dynamic listing
+    # notify us on all device changes (add/remove/changed)
+    # all devices will appear once as ADDED
+    #
+
+    bus = monitor.get_bus()
+    bus.add_watch(GLib.PRIORITY_DEFAULT, bus_function, None)
+
+    monitor.start()
+    print("Now listening to device changes. Disconnect your camera to see a remove event. Press Ctrl-C to end.\n")
+
+    # This is simply used to wait for events or the user to end this script
+    loop = GLib.MainLoop.new(None, False)
+    loop.run()
+
+    # has to be called when gst_device_monitor_start has been called
+    monitor.stop()
