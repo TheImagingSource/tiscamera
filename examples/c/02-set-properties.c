@@ -120,7 +120,7 @@ gboolean set_bool_or_enum(GstElement* source,
         GValue set_auto = G_VALUE_INIT;
         g_value_init(&set_auto, G_TYPE_BOOLEAN);
 
-        g_value_set_boolean(&set_auto, FALSE);
+        g_value_set_boolean(&set_auto, (new_value ? TRUE : FALSE));
 
         // actual set
         ret = tcam_prop_set_tcam_property(TCAM_PROP(source),
