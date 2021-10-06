@@ -115,10 +115,27 @@ void tcam::tools::print_system_info_usb()
 
 void tcam::tools::print_system_info()
 {
+    std::cout << "=============" << std::endl;
+    std::cout << "=  General  =" << std::endl;
+    std::cout << "=============" << std::endl;
     print_system_info_general();
+
+    std::cout << "=============" << std::endl;
+    std::cout << "=    USB    =" << std::endl;
+    std::cout << "=============" << std::endl;
     print_system_info_usb();
+
+    std::cout << "=============" << std::endl;
+    std::cout << "=  Network  =" << std::endl;
+    std::cout << "=============" << std::endl;
     print_system_info_gige();
 
-    std::cout << "Please review the printed information to ensure" << std::endl
+    std::cout << "=============" << std::endl;
+    std::cout << "= Packaging =" << std::endl;
+    std::cout << "=============" << std::endl;
+    print_packages();
+
+    std::cout << std::endl;
+    std::cerr << "Please review the printed information to ensure" << std::endl
               << "that nothing you consider confidential is given to other parties." << std::endl;
 }
