@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TCAM_VERSION_MAJOR 0)
-set(TCAM_VERSION_MINOR 15)
+set(TCAM_VERSION_MAJOR 1)
+set(TCAM_VERSION_MINOR 0)
 set(TCAM_VERSION_PATCH 0)
 set(TCAM_VERSION_MODIFIER "")
