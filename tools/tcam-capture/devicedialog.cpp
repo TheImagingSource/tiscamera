@@ -132,7 +132,7 @@ void DeviceDialog::lost_device(const Device& lost_device)
     }
 }
 
-void DeviceDialog::update_device_listing(const std::vector<Device>& dev_list)
+void DeviceDialog::update_device_listing(const std::vector<Device>& /*dev_list*/)
 {}
 
 void DeviceDialog::on_listWidget_currentItemChanged(QListWidgetItem* current,

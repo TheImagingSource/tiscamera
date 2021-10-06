@@ -40,7 +40,7 @@ Device to_device(GstDevice* device)
 }
 
 
-gboolean Indexer::bus_function(GstBus* bus, GstMessage* message, gpointer user_data)
+gboolean Indexer::bus_function(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
 {
     GstDevice* device;
     Indexer* self = static_cast<Indexer*>(user_data);

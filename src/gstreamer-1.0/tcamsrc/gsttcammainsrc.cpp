@@ -45,7 +45,6 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self);
 G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
                         gst_tcam_mainsrc,
                         GST_TYPE_PUSH_SRC,
-                        //G_IMPLEMENT_INTERFACE(TCAM_TYPE_PRO, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init)
                         G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init)
     )
 

@@ -22,93 +22,6 @@
 #include <QHBoxLayout>
 #include <QStandardItemModel>
 
-namespace  {
-
-std::pair<int, int> split_qstring(const QString& s)
-{
-    std::pair<int, int> ret;
-    auto tmp = s.split("x");
-    ret.first = tmp.at(0).toInt();
-    ret.second = tmp.at(1).toInt();
-
-    return ret;
-}
-
-
-std::vector<tcam_image_size> get_standard_resolutions(const tcam_image_size& min,
-                                                      const tcam_image_size& max)
-{
-    static const tcam_image_size resolutions[] = {
-        { 128, 96 },    { 320, 240 },   { 360, 280 },   { 544, 480 },   { 640, 480 },
-        { 352, 288 },   { 576, 480 },   { 720, 480 },   { 960, 720 },   { 1280, 720 },
-        { 1440, 1080 }, { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2048, 1536 },
-        { 2560, 1440 }, { 3840, 2160 }, { 4096, 3072 }, { 7680, 4320 }, { 7680, 4800 },
-    };
-
-    std::vector<struct tcam_image_size> ret;
-    ret.reserve(std::size(resolutions));
-    for (const auto& r : resolutions)
-    {
-        if ((min < r) && (r < max))
-        {
-            ret.push_back(r);
-        }
-    }
-
-    return ret;
-}
-
-
-std::vector<double> create_steps_for_range(double min, double max)
-{
-    std::vector<double> vec;
-
-    if (max <= min)
-        return vec;
-
-    vec.push_back(min);
-
-    // we do not want every framerate to have unnecessary decimals
-    // e.g. 1.345678 instead of 1.00000
-    double current_step = (int)min;
-
-    // 0.0 is not a valid framerate
-    if (current_step < 1.0)
-        current_step = 1.0;
-
-    while (current_step < max)
-    {
-
-        if (current_step < 20.0)
-        {
-            current_step += 1;
-        }
-        else if (current_step < 100.0)
-        {
-            current_step += 10.0;
-        }
-        else if (current_step < 1000.0)
-        {
-            current_step += 50.0;
-        }
-        else
-        {
-            current_step += 100.0;
-        }
-        if (current_step < max)
-        {
-            vec.push_back(current_step);
-        }
-    }
-
-    if (vec.back() != max)
-    {
-        vec.push_back(max);
-    }
-    return vec;
-}
-
-}
 
 CapsWidget::CapsWidget(const Caps& caps, QWidget* parent)
     : QWidget(parent), m_caps(caps)
@@ -457,12 +370,12 @@ scaling CapsWidget::get_scaling() const
 
 tcam_image_size CapsWidget::get_resolution() const
 {
-    tcam_image_size ret;
+    tcam_image_size ret = {};
 
-if (!p_combo_format)
-{
-    return ret;
-}
+    if (!p_combo_format)
+    {
+        return ret;
+    }
     auto entry = p_combo_resolution->currentText();
 
     if (entry.isEmpty())
