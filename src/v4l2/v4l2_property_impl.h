@@ -19,7 +19,7 @@
 #include "../PropertyInterfaces.h"
 #include "../error.h"
 #include "v4l2_genicam_conversion.h"
-#include <../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h>
+#include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 
 #include <linux/videodev2.h>
 #include <map>
