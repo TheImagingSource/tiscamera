@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(tcamgstbase STATIC 
+add_library(tcamgstbase STATIC
 	tcamgstbase.h
-	tcamgstjson.h 
-	tcamgststrings.h 
+	tcamgstjson.h
+	tcamgststrings.h
 	tcambinconversion.h
 
-	tcamgstbase.cpp 
-	tcamgstjson.cpp 
-	tcamgststrings.cpp 
+	tcamgstbase.cpp
+	tcamgstjson.cpp
+	tcamgststrings.cpp
 	tcambinconversion.cpp
 )
 
@@ -29,15 +29,14 @@ set_project_warnings(tcamgstbase)
 
 target_include_directories(tcamgstbase
 PUBLIC
-	${GSTREAMER_INCLUDE_DIRS}
+${GSTREAMER_INCLUDE_DIRS}
 )
 
 target_link_libraries(tcamgstbase
-PUBLIC
-	tcam
-	tcam::tcamprop
-	dutils_img::base
-	spdlog::spdlog
-	tcam::gst-helper-dutils
-)
-
+  PUBLIC
+  tcam
+  tcam::tcamprop
+  dutils_img::base
+  spdlog::spdlog
+  tcam::gst-helper-dutils
+  )

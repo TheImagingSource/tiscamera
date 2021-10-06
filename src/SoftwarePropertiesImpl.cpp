@@ -40,6 +40,23 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     // do not add external flag
     // this is a wrapper around an existing property
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
@@ -56,7 +73,87 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     m_step = desc.range_i_.step;
     m_default = desc.range_i_.default_value;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
+
+
+std::string_view SoftwarePropertyIntegerImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view SoftwarePropertyIntegerImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view SoftwarePropertyIntegerImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view SoftwarePropertyIntegerImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::IntRepresentation_t SoftwarePropertyIntegerImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    return tcamprop1::IntRepresentation_t::Linear;
+}
+
 
 outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
 {
@@ -68,7 +165,7 @@ outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 
@@ -90,7 +187,7 @@ outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -125,6 +222,58 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     // do not add external flag
     // this is a wrapper around an existing property
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
+    const software_prop_desc& desc,
+    std::shared_ptr<IPropertyInteger> prop,
+    std::shared_ptr<SoftwarePropertyBackend> backend)
+    : m_name(desc.name_), m_id(desc.id_), m_cam(backend)
+{
+    //m_name = prop->get_name();
+    m_min = prop->get_min();
+    m_max = prop->get_max();
+    m_step = prop->get_step();
+    m_default = prop->get_default();
+
+    // do not add external flag
+    // this is a wrapper around an existing property
+    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
@@ -142,6 +291,89 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     m_default = desc.range_d_.default_value;
 
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view SoftwarePropertyDoubleImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view SoftwarePropertyDoubleImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view SoftwarePropertyDoubleImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view SoftwarePropertyDoubleImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::FloatRepresentation_t SoftwarePropertyDoubleImpl::get_representation() const
+{
+
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    else
+    {
+        return tcamprop1::FloatRepresentation_t::Linear;
+    }
 }
 
 
@@ -153,7 +385,7 @@ outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -168,7 +400,7 @@ outcome::result<void> SoftwarePropertyDoubleImpl::set_value(double new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 }
@@ -192,7 +424,64 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const software_prop_desc& des
     m_id = desc.id_;
     m_name = desc.name_;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
+
+
+std::string_view SoftwarePropertyBoolImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view SoftwarePropertyBoolImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view SoftwarePropertyBoolImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
 
 outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
 {
@@ -207,7 +496,7 @@ outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
         return ret.as_failure();
     }
 
-    SPDLOG_ERROR("Unable to lock property backend. Cannot read value.");
+    SPDLOG_ERROR("Unable to lock property backend for {}. Cannot read value.", m_name);
     return tcam::status::ResourceNotLockable;
 }
 
@@ -218,7 +507,7 @@ outcome::result<void> SoftwarePropertyBoolImpl::set_value(bool new_value)
         return ptr->set_int(m_id, new_value);
     }
 
-    SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+    SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.", m_name);
     return tcam::status::ResourceNotLockable;
 }
 
@@ -230,6 +519,62 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 {
     m_name = desc.name_;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Command && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view SoftwarePropertyCommandImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view SoftwarePropertyCommandImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view SoftwarePropertyCommandImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -250,9 +595,66 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const software_prop_desc& des
 
     m_default = m_entries[desc.default_value_];
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
-outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string& new_value)
+
+std::string_view SoftwarePropertyEnumImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view SoftwarePropertyEnumImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view SoftwarePropertyEnumImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
@@ -277,12 +679,12 @@ outcome::result<void> SoftwarePropertyEnumImpl::set_value(int64_t new_value)
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock property backend. Cannot write value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot write value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 }
 
-outcome::result<std::string> SoftwarePropertyEnumImpl::get_value() const
+outcome::result<std::string_view> SoftwarePropertyEnumImpl::get_value() const
 {
     OUTCOME_TRY(auto value, get_value_int());
 
@@ -299,7 +701,7 @@ outcome::result<int64_t> SoftwarePropertyEnumImpl::get_value_int() const
     }
     else
     {
-        SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
+        SPDLOG_ERROR("Unable to lock property backend for {}. Cannot retrieve value.", m_name);
         return tcam::status::ResourceNotLockable;
     }
 }

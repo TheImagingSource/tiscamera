@@ -19,6 +19,7 @@
 #include "../PropertyInterfaces.h"
 #include "../error.h"
 #include "v4l2_genicam_conversion.h"
+#include <../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h>
 
 #include <linux/videodev2.h>
 #include <map>
@@ -44,10 +45,17 @@ public:
                             std::shared_ptr<V4L2PropertyBackend> backend,
                             const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+    virtual std::string_view get_unit() const final;
+    virtual tcamprop1::IntRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -75,6 +83,7 @@ public:
 
 private:
     outcome::result<void> valid_value(int64_t val);
+    void realign_value(int64_t& value);
 
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
@@ -89,6 +98,7 @@ private:
     int m_v4l2_id;
 
     tcam::v4l2::converter_scale m_converter;
+    const tcamprop1::prop_static_info_integer* p_static_info;
 };
 
 
@@ -101,10 +111,17 @@ public:
                            std::shared_ptr<V4L2PropertyBackend> backend,
                            const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+    virtual std::string_view get_unit() const final;
+    virtual tcamprop1::FloatRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -146,6 +163,7 @@ private:
     double m_default;
 
     int m_v4l2_id;
+    const tcamprop1::prop_static_info_float* p_static_info;
 };
 
 
@@ -157,10 +175,15 @@ public:
                          std::shared_ptr<V4L2PropertyBackend> backend,
                          const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -183,6 +206,8 @@ private:
     bool m_default;
 
     int m_v4l2_id;
+
+    const tcamprop1::prop_static_info_boolean* p_static_info;
 };
 
 
@@ -194,10 +219,15 @@ public:
                             std::shared_ptr<V4L2PropertyBackend> backend,
                             const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -212,6 +242,8 @@ private:
     PropertyFlags m_flags;
 
     int m_v4l2_id;
+
+    const tcamprop1::prop_static_info_command* p_static_info;
 };
 
 
@@ -223,19 +255,24 @@ public:
                          std::shared_ptr<V4L2PropertyBackend> backend,
                          const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
     };
 
-    virtual outcome::result<void> set_value_str(const std::string& new_value) final;
+    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
-    virtual outcome::result<std::string> get_value() const final;
+    virtual outcome::result<std::string_view> get_value() const final;
     virtual outcome::result<int64_t> get_value_int() const final;
 
     virtual std::string get_default() const final
@@ -257,6 +294,8 @@ private:
     std::string m_default;
 
     int m_v4l2_id;
+
+    const tcamprop1::prop_static_info_enumeration* p_static_info;
 };
 
 

@@ -125,6 +125,8 @@ namespace gvalue
         if( G_VALUE_TYPE( &gval ) == to_gtype<T>() ) {
             return get_typed<T>( gval );
         }
+        static_assert( !std::is_same_v<T, std::string_view>, "Returning a string_view is a bad idea from a transformed temporary GValue" );
+
         GValue trans = {};
         g_value_init( &trans, to_gtype<T>() );
         if( g_value_transform( &gval, &trans ) ) {

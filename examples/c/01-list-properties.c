@@ -27,128 +27,61 @@
 void list_properties(GstElement* source)
 {
 
-    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
+    GError* err = NULL;
+    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source), &err);
 
     for (GSList* cur = names; cur != NULL; cur = cur->next)
     {
         const char* name = (char*)cur->data;
 
-        GValue value = {};
-        GValue min = {};
-        GValue max = {};
-        GValue default_value = {};
-        GValue step_size = {};
-        GValue type = {};
-        GValue flags = {};
-        GValue category = {};
-        GValue group = {};
+        TcamPropertyInfo* info = tcam_prop_get_property_info(TCAM_PROP(source), name, &err);
 
-        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                                   name,
-                                                   &value,
-                                                   &min,
-                                                   &max,
-                                                   &default_value,
-                                                   &step_size,
-                                                   &type,
-                                                   &flags,
-                                                   &category,
-                                                   &group);
-
-        if (!ret)
+        if (err)
         {
-            printf("Could not query property '%s'\n", name);
+            printf("something went wrong %s\\n", err->message);
             continue;
         }
 
-        const char* t = g_value_get_string(&type);
-        if (strcmp(t, "integer") == 0)
+        if (!info)
         {
-            printf("%s(integer) min: %d max: %d step: %d value: %d default: %d  grouping %s %s\n",
-                   name,
-                   g_value_get_int(&min),
-                   g_value_get_int(&max),
-                   g_value_get_int(&step_size),
-                   g_value_get_int(&value),
-                   g_value_get_int(&default_value),
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
+            printf("ERROR\n");
         }
-        else if (strcmp(t, "double") == 0)
-        {
-            printf("%s(double) min: %f max: %f step: %f value: %f default: %f  grouping %s %s\n",
-                   name,
-                   g_value_get_double(&min),
-                   g_value_get_double(&max),
-                   g_value_get_double(&step_size),
-                   g_value_get_double(&value),
-                   g_value_get_double(&default_value),
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-        }
-        else if (strcmp(t, "string") == 0)
-        {
-            printf("%s(string) value: %s default: %s  grouping %s %s\n",
-                   name,
-                   g_value_get_string(&value),
-                   g_value_get_string(&default_value),
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-        }
-        else if (strcmp(t, "enum") == 0)
-        {
-            GSList* entries = tcam_prop_get_tcam_menu_entries(TCAM_PROP(source), name);
 
-            if (entries == NULL)
+        printf("%s(%s):\tdisplay: %s\tdesc: %s\tunit: %s\tcat: %s\n",
+               name,
+               g_enum_to_string(g_type_from_name("TcamPropertyType"), info->type),
+               info->display_name,
+               info->description, info->unit, info->category);
+
+        if (info->type == TCAM_PROPERTY_INT || info->type == TCAM_PROPERTY_DOUBLE)
+        {
+            GValue min = {};
+            GValue step = {};
+            GValue max = {};
+
+            if (!tcam_prop_get_tcam_range(TCAM_PROP(source), name, &min, &max, &step, &err))
             {
-                printf("%s returned no enumeration values.\n", name);
-                continue;
+                printf("Error!\n");
             }
 
-            printf("%s(enum) value: %s default: %s  grouping %s %s\n",
-                   name,
-                   g_value_get_string(&value),
-                   g_value_get_string(&default_value),
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-            printf("Entries: \n");
-            for (unsigned int x = 0; x < g_slist_length(entries); ++x)
+            if (info->type == TCAM_PROPERTY_INT)
             {
-                printf("\t %s\n", (char*)g_slist_nth(entries, x)->data);
+                printf("\t\tRange: %d %d - %d\n", g_value_get_int(&min), g_value_get_int(&max), g_value_get_int(&step));
+                printf("\t\tValue: %d\n", tcam_prop_get_tcam_int(TCAM_PROP(source), name, &err));
+            }
+            else if (info->type == TCAM_PROPERTY_DOUBLE)
+            {
+                printf("\t\tRange: %d %d - %d\n", g_value_get_double(&min), g_value_get_double(&max), g_value_get_double(&step));
+                printf("\t\tValue: %f\n", tcam_prop_get_tcam_double(TCAM_PROP(source), name, &err));
             }
 
-            g_slist_free_full(entries, g_free);
-        }
-        else if (strcmp(t, "boolean") == 0)
-        {
-            printf("%s(boolean) value: %s default: %s  grouping %s %s\n",
-                   name,
-                   g_value_get_boolean(&value) ? "true" : "false",
-                   g_value_get_boolean(&default_value) ? "true" : "false",
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-        }
-        else if (strcmp(t, "button") == 0)
-        {
-            printf("%s(button) grouping %s %s\n",
-                   name,
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-        }
-        else
-        {
-            printf("Property '%s' has type '%s' .\n", name, t);
+            g_value_unset(&min);
+            g_value_unset(&max);
+            g_value_unset(&step);
+
         }
 
-        g_value_unset(&value);
-        g_value_unset(&min);
-        g_value_unset(&max);
-        g_value_unset(&default_value);
-        g_value_unset(&step_size);
-        g_value_unset(&type);
-        g_value_unset(&flags);
-        g_value_unset(&category);
-        g_value_unset(&group);
+        //g_object_unref(info);
     }
 
     g_slist_free_full(names, g_free);
@@ -199,7 +132,7 @@ int main(int argc, char* argv[])
 
     // this is a placeholder definition
     // normally your pipeline would be defined here
-    GstElement* pipeline = gst_parse_launch("tcambin name=source ! fakesink", &err);
+    GstElement* pipeline = gst_parse_launch("tcammainsrc name=source ! fakesink", &err);
 
     if (pipeline == NULL)
     {
@@ -236,7 +169,7 @@ int main(int argc, char* argv[])
         printf("Unable to start pipeline. \n");
     }
 
-    printf("Properties during state PLAYING:\n");
+    printf("Properties during state PLAYING: (ideally the same)\n\n\n");
     list_properties(source);
 
     gst_element_set_state(pipeline, GST_STATE_NULL);

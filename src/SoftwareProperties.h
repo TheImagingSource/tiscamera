@@ -67,6 +67,8 @@ private:
 
     void enable_property_double(emulated::software_prop prop_name,
                                 std::shared_ptr<IPropertyFloat> prop);
+    void enable_property_double(emulated::software_prop prop_name,
+                                std::shared_ptr<IPropertyInteger> prop);
 
     void enable_property_int(emulated::software_prop prop_id,
                              std::shared_ptr<IPropertyInteger> prop);

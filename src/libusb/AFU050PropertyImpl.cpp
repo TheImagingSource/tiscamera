@@ -45,6 +45,40 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
 }
 
 
+std::string_view AFU050PropertyIntegerImpl::get_display_name() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyIntegerImpl::get_description() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyIntegerImpl::get_category() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyIntegerImpl::get_unit() const
+{
+    return std::string_view();
+}
+
+
+tcamprop1::IntRepresentation_t AFU050PropertyIntegerImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    return tcamprop1::IntRepresentation_t::Linear;
+}
+
+
 outcome::result<int64_t> AFU050PropertyIntegerImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -120,6 +154,43 @@ AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
 }
 
 
+std::string_view AFU050PropertyDoubleImpl::get_display_name() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyDoubleImpl::get_description() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyDoubleImpl::get_category() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyDoubleImpl::get_unit() const
+{
+    return std::string_view();
+}
+
+
+tcamprop1::FloatRepresentation_t AFU050PropertyDoubleImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    else
+    {
+        return tcamprop1::FloatRepresentation_t::Linear;
+    }
+}
+
+
 outcome::result<double> AFU050PropertyDoubleImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -187,7 +258,25 @@ AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
 }
 
 
-outcome::result<void> AFU050PropertyEnumImpl::set_value_str(const std::string& new_value)
+std::string_view AFU050PropertyEnumImpl::get_display_name() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyEnumImpl::get_description() const
+{
+    return std::string_view();
+}
+
+
+std::string_view AFU050PropertyEnumImpl::get_category() const
+{
+    return std::string_view();
+}
+
+
+outcome::result<void> AFU050PropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
@@ -225,7 +314,7 @@ outcome::result<void> AFU050PropertyEnumImpl::set_value(int64_t new_value)
 }
 
 
-outcome::result<std::string> AFU050PropertyEnumImpl::get_value() const
+outcome::result<std::string_view> AFU050PropertyEnumImpl::get_value() const
 {
     OUTCOME_TRY(auto value, get_value_int());
 

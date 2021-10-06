@@ -1,4 +1,4 @@
-# Copyright 2017 The Imaging Source Europe GmbH
+# Copyright 2021 The Imaging Source Europe GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,53 +10,95 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
 
-find_package(PythonInterp 3 REQUIRED QUIET)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-if (PYTHONINTERP_FOUND)
+# set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-  find_package(PythonModule QUIET) # this quiet makes find_python_module be quiet
-  find_python_module(PyQt5 REQUIRED)
+find_package(GStreamer REQUIRED QUIET)
+find_package(GLIB2     REQUIRED QUIET)
+find_package(GObject   REQUIRED QUIET)
+find_package(GObjectIntrospection REQUIRED QUIET)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets MultiMediaWidgets Multimedia REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+# find_package(Qt5MultimediaWidgets REQUIRED)
 
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py" @ONLY)
+set(TCAM_CAPTURE_SOURCES
+  main.cpp
+  mainwindow.cpp
+  mainwindow.h
+  mainwindow.ui
+  config.h
+  definitions.h
+  aboutdialog.cpp
+  aboutdialog.h
+  aboutdialog.ui
+  optionsdialog.cpp
+  optionsdialog.h
+  optionsdialog.ui
+  devicedialog.cpp
+  devicedialog.h
+  devicedialog.ui
+  device.cpp
+  device.h
+  indexer.cpp
+  indexer.h
+  devicewidget.cpp
+  devicewidget.h
+  propertydialog.cpp
+  propertydialog.h
+  propertydialog.ui
+  property.cpp
+  property.h
+  propertywidget.cpp
+  propertywidget.h
+  propertyworker.cpp
+  propertyworker.h
+  propertyflags.cpp
+  propertyflags.h
+  tcamslider.cpp
+  tcamslider.h
+  tcamsliderwidget.cpp
+  tcamsliderwidget.h
+  caps.cpp
+  caps.h
+  capswidget.cpp
+  capswidget.h
+  tcamcollection.cpp
+  tcamcollection.h
+  fpscounter.cpp
+  fpscounter.h
+  resources.qrc
+  )
 
-  install(PROGRAMS tcam-capture
-    DESTINATION bin
-    COMPONENT tcam-capture)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+  qt_add_executable(tcam-capture
+    ${TCAM_CAPTURE_SOURCES}
+    )
+else()
+  add_executable(tcam-capture
+    ${TCAM_CAPTURE_SOURCES}
+    )
+endif()
 
-  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture"
-    DESTINATION "${TCAM_INSTALL_PYTHON3_MODULES}"
-    COMPONENT tcam-capture
-    PATTERN "__pycache__" EXCLUDE
-    PATTERN "image_dir*" EXCLUDE)
+target_include_directories(tcam-capture PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_include_directories(tcam-capture PRIVATE ${GSTREAMER_BASE_INCLUDE_DIRS})
+target_include_directories(tcam-capture PRIVATE ${GSTREAMER_VIDEO_INCLUDE_DIRS})
+target_include_directories(tcam-capture PRIVATE ${GLIB2_INCLUDE_DIR})
+target_include_directories(tcam-capture PRIVATE ${GObject_INCLUDE_DIR})
+target_include_directories(tcam-capture PRIVATE ../../src/gstreamer-1.0/tcamgstbase)
+target_include_directories(tcam-capture PRIVATE ../../src/gobject/)
+target_include_directories(tcam-capture PRIVATE ../../src/)
+target_include_directories(tcam-capture PRIVATE ../../external/)
 
-
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam-capture.desktop.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop" @ONLY)
-
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam-capture.desktop"
-    DESTINATION "${TCAM_INSTALL_DESKTOP_FILES}"
-    COMPONENT tcam-capture)
-
-  # this additional step is done to differentiate between a local execution
-  # and an installed execution of tcam-capture
-  # an installed one should search for globally available images
-  # e.g. /usr/share/tiscamera/images
-  # whereas a local one should prefer <tiscamera>/data/images
-  set(TCAM_IMAGE_DIR "${TCAM_INSTALL_IMAGE_DIR}/images")
-
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tcam_capture/image_dir.py.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py" @ONLY)
-
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tcam_capture/image_dir.py"
-    DESTINATION "${TCAM_INSTALL_PYTHON3_MODULES}/tcam_capture"
-    COMPONENT tcam-capture)
-
-  # add softlink to build dir
-  # this ensures tcam-capture works with env.sh
-  ADD_CUSTOM_TARGET(link_target ALL
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/tcam-capture ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tcam-capture)
-
-endif (PYTHONINTERP_FOUND)
+target_link_libraries(tcam-capture PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(tcam-capture PRIVATE ${GOBJECT_LIBRARIES})
+target_link_libraries(tcam-capture PRIVATE ${GLIB2_LIBRARIES})
+target_link_libraries(tcam-capture PRIVATE ${GSTREAMER_LIBRARIES})
+target_link_libraries(tcam-capture PRIVATE ${GSTREAMER_BASE_LIBRARIES})
+target_link_libraries(tcam-capture PRIVATE ${GSTREAMER_VIDEO_LIBRARIES})
+target_link_libraries(tcam-capture PRIVATE tcamprop)
+target_link_libraries(tcam-capture PRIVATE tcamgstbase)

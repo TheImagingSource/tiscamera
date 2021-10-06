@@ -50,6 +50,7 @@ struct _GstTcamSrc
 
     std::string device_serial;
     tcam::TCAM_DEVICE_TYPE device_type;
+    GstDeviceMonitor* p_monitor;
 
     gint cam_buffers;
     gboolean drop_incomplete_frames;

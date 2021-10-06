@@ -72,6 +72,9 @@ namespace gvalue
         constexpr const GValue*   get() const noexcept { return &value_; }
         constexpr GValue*         get() noexcept { return &value_; }
 
+        constexpr const GValue& reference() const noexcept { return value_; }
+        constexpr GValue&       reference() noexcept { return value_; }
+
         /** Clears the internal GValue,
          * Calls g_value_reset to reset the internal value, but does not reset the type.
          */

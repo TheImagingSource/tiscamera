@@ -18,11 +18,11 @@
 
 #include <string>
 
-struct _TcamProp;
+#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
 
 namespace tcam::gst
 {
-std::string create_device_settings(const std::string& serial, _TcamProp* tcam);
+std::string create_device_settings(const std::string& serial, TcamPropertyProvider* tcam);
 
-bool load_device_settings(_TcamProp* tcam, const std::string& serial, const std::string& cache);
+bool load_device_settings(TcamPropertyProvider* tcam, const std::string& serial, const std::string& cache);
 } // namespace tcam::gst

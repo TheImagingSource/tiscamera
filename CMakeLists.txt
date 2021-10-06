@@ -118,17 +118,6 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
     add_subdirectory(tests)
   endif (BUILD_TESTS)
 
-  if (BUILD_GST_1_0)
-
-    # ensure we have the correct install directories
-    # subdirectories make additional checks to find better suited install directories
-    # to prevent the user having to set environment variables, etc
-    get_directory_property(TCAM_INSTALL_GIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_GIR)
-    get_directory_property(TCAM_INSTALL_TYPELIBDIR  DIRECTORY ${TCAM_SOURCE_DIR}/src/gobject  DEFINITION TCAM_INSTALL_TYPELIBDIR)
-    get_directory_property(TCAM_INSTALL_GST_1_0  DIRECTORY ${TCAM_SOURCE_DIR}/src/gstreamer-1.0  DEFINITION TCAM_INSTALL_GST_1_0)
-
-  endif (BUILD_GST_1_0)
-
 endif (NOT TCAM_EXCLUSIVE_BUILD)
 
 # uninstall target

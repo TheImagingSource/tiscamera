@@ -19,6 +19,7 @@
 #include "../logging.h"
 #include "V4L2PropertyBackend.h"
 #include "v4l2_genicam_mapping.h"
+#include "utils.h"
 
 #include <memory>
 
@@ -64,6 +65,85 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view V4L2PropertyIntegerImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view V4L2PropertyIntegerImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view V4L2PropertyIntegerImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view V4L2PropertyIntegerImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::IntRepresentation_t V4L2PropertyIntegerImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    return tcamprop1::IntRepresentation_t::Linear;
 }
 
 
@@ -93,6 +173,8 @@ outcome::result<void> V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 {
     OUTCOME_TRY(valid_value(new_value));
 
+    realign_value(new_value);
+
     if (auto ptr = m_cam.lock())
     {
         auto tmp = m_converter.to_device(new_value);
@@ -110,17 +192,18 @@ outcome::result<void> V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 
 outcome::result<void> V4L2PropertyIntegerImpl::valid_value(int64_t val)
 {
-    if (val % get_step() != 0)
-    {
-        return tcam::status::PropertyValueDoesNotExist;
-    }
-
     if (get_min() > val || val > get_max())
     {
         return tcam::status::PropertyOutOfBounds;
     }
 
     return outcome::success();
+}
+
+
+void V4L2PropertyIntegerImpl::realign_value(int64_t& value)
+{
+    value = tcam::realign_value(value, m_step, m_min, m_max);
 }
 
 
@@ -156,6 +239,89 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+
+}
+
+
+std::string_view V4L2PropertyDoubleImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view V4L2PropertyDoubleImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view V4L2PropertyDoubleImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view V4L2PropertyDoubleImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::FloatRepresentation_t V4L2PropertyDoubleImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    else
+    {
+        return tcamprop1::FloatRepresentation_t::Linear;
+    }
 }
 
 
@@ -237,6 +403,62 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view V4L2PropertyBoolImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view V4L2PropertyBoolImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view V4L2PropertyBoolImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -302,6 +524,62 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
 
     m_cam = backend;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Command && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view V4L2PropertyCommandImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view V4L2PropertyCommandImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view V4L2PropertyCommandImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -381,6 +659,62 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
     }
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
     m_default = m_entries.at(ctrl->value);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view V4L2PropertyEnumImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view V4L2PropertyEnumImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view V4L2PropertyEnumImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -397,7 +731,7 @@ outcome::result<void> V4L2PropertyEnumImpl::valid_value(int value)
 }
 
 
-outcome::result<void> V4L2PropertyEnumImpl::set_value_str(const std::string& new_value)
+outcome::result<void> V4L2PropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
     {
@@ -431,7 +765,7 @@ outcome::result<void> V4L2PropertyEnumImpl::set_value(int64_t new_value)
 }
 
 
-outcome::result<std::string> V4L2PropertyEnumImpl::get_value() const
+outcome::result<std::string_view> V4L2PropertyEnumImpl::get_value() const
 {
     OUTCOME_TRY(int value, get_value_int());
 

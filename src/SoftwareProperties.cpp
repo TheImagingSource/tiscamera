@@ -594,7 +594,7 @@ void tcam::property::SoftwareProperties::generate_exposure()
     m_dev_exposure = std::static_pointer_cast<tcam::property::IPropertyFloat>(exp_base);
 
     m_auto_params.exposure.granularity = m_dev_exposure->get_step();
-    
+
     m_auto_params.exposure.min = m_dev_exposure->get_min();
     m_auto_params.exposure.max = m_dev_exposure->get_max();
 
@@ -734,9 +734,9 @@ void SoftwareProperties::generate_whitebalance()
         m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
         m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
 
-        enable_property_int(sp::WB_RED, m_wb.m_dev_wb_r);
-        enable_property_int(sp::WB_GREEN, m_wb.m_dev_wb_g);
-        enable_property_int(sp::WB_BLUE, m_wb.m_dev_wb_b);
+        enable_property_double(sp::WB_RED, m_wb.m_dev_wb_r);
+        enable_property_double(sp::WB_GREEN, m_wb.m_dev_wb_g);
+        enable_property_double(sp::WB_BLUE, m_wb.m_dev_wb_b);
 
         m_wb_is_claimed = true;
     }
@@ -805,7 +805,7 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
     {
         if (prop_id == emulated::software_prop::WB_RED)
         {
-            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            const std::string tmp = std::string(m_wb.m_dev_wb_selector->get_value().value());
 
             auto ret = m_wb.m_dev_wb_selector->set_value_str("Red");
             if (!ret)
@@ -824,7 +824,7 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
         }
         else if (prop_id == emulated::software_prop::WB_GREEN)
         {
-            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            const std::string tmp = std::string(m_wb.m_dev_wb_selector->get_value().value());
 
             auto ret = m_wb.m_dev_wb_selector->set_value_str("Green");
             if (!ret)
@@ -843,7 +843,7 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
         }
         else if (prop_id == emulated::software_prop::WB_BLUE)
         {
-            const std::string tmp = m_wb.m_dev_wb_selector->get_value().value();
+            const std::string tmp = std::string(m_wb.m_dev_wb_selector->get_value().value());
 
             auto ret = m_wb.m_dev_wb_selector->set_value_str("Blue");
             if (!ret)
@@ -968,9 +968,37 @@ void tcam::property::SoftwareProperties::enable_property(sp prop_id)
 }
 
 
-void tcam::property::SoftwareProperties::enable_property_double(
-    sp prop_id,
-    std::shared_ptr<IPropertyFloat> prop)
+void tcam::property::SoftwareProperties::enable_property_double(sp prop_id,
+                                                                std::shared_ptr<IPropertyFloat> prop)
+{
+    auto desc = find_property_desc(prop_id);
+
+    if (!desc)
+    {
+        SPDLOG_INFO("No desc found {}", prop_id);
+        return;
+    }
+
+    switch (desc->type_)
+    {
+        case TCAM_PROPERTY_TYPE_DOUBLE:
+        {
+            m_properties.push_back(
+                std::make_shared<emulated::SoftwarePropertyDoubleImpl>(*desc, prop, m_backend));
+            break;
+        }
+        default:
+        {
+            SPDLOG_WARN("Not implemented. {}", desc->name_);
+            break;
+        }
+    }
+}
+
+
+
+void tcam::property::SoftwareProperties::enable_property_double(sp prop_id,
+                                                                std::shared_ptr<IPropertyInteger> prop)
 {
     auto desc = find_property_desc(prop_id);
 

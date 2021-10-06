@@ -37,7 +37,7 @@ target_link_libraries(tcamprop
 add_library( tcam::tcamprop ALIAS tcamprop )
 
 # version number for gobject introspection API
-set(TCAM_GI_API_VERSION "0.1" CACHE STRING "Version Number for Gobject Introspection API")
+set(TCAM_GI_API_VERSION "1.0" CACHE STRING "Version Number for Gobject Introspection API")
 
 set_property(TARGET tcamprop PROPERTY VERSION ${TCAM_GI_API_VERSION})
 set_property(TARGET tcamprop PROPERTY SOVERSION ${TCAM_GI_API_VERSION})
@@ -83,22 +83,6 @@ add_custom_target(create_gobject ALL DEPENDS ${TCAM_BINARY_DIR}/src/gobject/Tcam
 install(TARGETS tcamprop LIBRARY
   DESTINATION ${TCAM_INSTALL_LIB}
   COMPONENT tcam-introspection)
-
-# check for better suited install directories
-pkg_check_variable(gobject-introspection-1.0 girdir)
-pkg_check_variable(gobject-introspection-1.0 typelibdir)
-
-if (GOBJECT_INTROSPECTION_1.0_GIRDIR)
-  set(TCAM_INSTALL_GIR ${GOBJECT_INTROSPECTION_1.0_GIRDIR} CACHE PATH "gobject introspection installation path")
-else()
-  set(TCAM_INSTALL_GIR "${CMAKE_INSTALL_PREFIX}/share/gir-1.0/" CACHE PATH "gobject introspection installation path")
-endif()
-
-if (GOBJECT_INTROSPECTION_1.0_TYPELIBDIR)
-  set(TCAM_INSTALL_TYPELIB ${GOBJECT_INTROSPECTION_1.0_TYPELIBDIR} CACHE PATH "gobject introspection typelib installation path")
-else()
-  set(TCAM_INSTALL_TYPELIB "${CMAKE_INSTALL_PREFIX}/lib/girepository-1.0" CACHE PATH "gobject introspection typelib installation path")
-endif()
 
 install(FILES ${TCAM_BINARY_DIR}/src/gobject/Tcam-${TCAM_GI_API_VERSION}.gir
   DESTINATION ${TCAM_INSTALL_GIR}

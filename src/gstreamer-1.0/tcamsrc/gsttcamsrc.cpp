@@ -17,11 +17,12 @@
 #include "gsttcamsrc.h"
 
 #include "../../base_types.h"
-#include "../../gobject/tcamprop.h"
+#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "../../logging.h"
 #include "../../public_utils.h"
 #include "../../version.h"
 #include "../tcamgstbase/tcamgstjson.h"
+#include "tcamsrc_tcamprop_impl.h"
 #include "gsttcamdeviceprovider.h" // only needed because of plugin_init
 #include "gsttcammainsrc.h" // only needed because of plugin_init
 #include "tcambind.h"
@@ -34,51 +35,8 @@ GST_DEBUG_CATEGORY_STATIC(tcam_src_debug);
 #define GST_CAT_DEFAULT tcam_src_debug
 
 
-static GSList* gst_tcam_src_get_property_names(TcamProp* self);
-
-static gchar* gst_tcam_src_get_property_type(TcamProp* self, const gchar* name);
-
-static gboolean gst_tcam_src_get_tcam_property(TcamProp* self,
-                                               const gchar* name,
-                                               GValue* value,
-                                               GValue* min,
-                                               GValue* max,
-                                               GValue* def,
-                                               GValue* step,
-                                               GValue* type,
-                                               GValue* flags,
-                                               GValue* category,
-                                               GValue* group);
-
-static GSList* gst_tcam_src_get_menu_entries(TcamProp* iface, const char* menu_name);
-
-static gboolean gst_tcam_src_set_tcam_property(TcamProp* self,
-                                               const gchar* name,
-                                               const GValue* value);
-
-static GSList* gst_tcam_src_get_device_serials(TcamProp* self);
-static GSList* gst_tcam_src_get_device_serials_backend(TcamProp* self);
-
-static gboolean gst_tcam_src_get_device_info(TcamProp* self,
-                                             const char* serial,
-                                             char** name,
-                                             char** identifier,
-                                             char** connection_type);
-
 static gboolean open_source_element(GstTcamSrc* self);
 
-
-static void gst_tcam_src_prop_init(TcamPropInterface* iface)
-{
-    iface->get_tcam_property_names = gst_tcam_src_get_property_names;
-    iface->get_tcam_property_type = gst_tcam_src_get_property_type;
-    iface->get_tcam_property = gst_tcam_src_get_tcam_property;
-    iface->get_tcam_menu_entries = gst_tcam_src_get_menu_entries;
-    iface->set_tcam_property = gst_tcam_src_set_tcam_property;
-    iface->get_tcam_device_serials = gst_tcam_src_get_device_serials;
-    iface->get_tcam_device_serials_backend = gst_tcam_src_get_device_serials_backend;
-    iface->get_tcam_device_info = gst_tcam_src_get_device_info;
-}
 
 
 #define gst_tcam_src_parent_class parent_class
@@ -86,7 +44,8 @@ static void gst_tcam_src_prop_init(TcamPropInterface* iface)
 G_DEFINE_TYPE_WITH_CODE(GstTcamSrc,
                         gst_tcam_src,
                         GST_TYPE_BIN,
-                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcam_src_prop_init))
+                        //G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, tcam::gst::src::gst_tcam_src_prop_init)
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER, tcam::gst::src::gst_tcam_src_prop_init))
 
 enum
 {
@@ -98,192 +57,6 @@ enum
 static guint gst_tcamsrc_signals[SIGNAL_LAST] = {
     0,
 };
-
-/**
- * gst_tcam_get_property_type:
- * @self: a #GstTcamSrcProp
- * @name: a #char* identifying the property to query
- *
- * Return the type of a property
- *
- * Returns: (transfer full): A string describing the property type
- */
-static gchar* gst_tcam_src_get_property_type(TcamProp* iface, const gchar* name)
-{
-    const gchar* ret = NULL;
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (!self->active_source)
-    {
-        GST_WARNING("Source must be in state READY or higher.");
-        return nullptr;
-    }
-
-    ret = tcam_prop_get_tcam_property_type(TCAM_PROP(self->active_source), name);
-
-
-    return (gchar*)ret;
-}
-
-/**
- * gst_tcam_src_get_property_names:
- * @self: a #GstTcamSrc
- *
- * Return a list of property names
- *
- * Returns: (element-type utf8) (transfer full): list of property names
- */
-static GSList* gst_tcam_src_get_property_names(TcamProp* iface)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (!self->active_source)
-    {
-        GST_WARNING("Source must be in state READY or higher.");
-        return nullptr;
-    }
-
-    return tcam_prop_get_tcam_property_names(TCAM_PROP(self->active_source));
-}
-
-
-static gboolean gst_tcam_src_get_tcam_property(TcamProp* iface,
-                                               const gchar* name,
-                                               GValue* value,
-                                               GValue* min,
-                                               GValue* max,
-                                               GValue* def,
-                                               GValue* step,
-                                               GValue* type,
-                                               GValue* flags,
-                                               GValue* category,
-                                               GValue* group)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (!self->active_source)
-    {
-        GST_WARNING("Source must be in state READY or higher.");
-        return FALSE;
-    }
-
-    return tcam_prop_get_tcam_property(TCAM_PROP(self->active_source),
-                                       name,
-                                       value,
-                                       min,
-                                       max,
-                                       def,
-                                       step,
-                                       type,
-                                       flags,
-                                       category,
-                                       group);
-}
-
-
-static GSList* gst_tcam_src_get_menu_entries(TcamProp* iface, const char* menu_name)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (!self->active_source)
-    {
-        GST_WARNING("Source must be in state READY or higher.");
-        return nullptr;
-    }
-
-    return tcam_prop_get_tcam_menu_entries(TCAM_PROP(self->active_source), menu_name);
-}
-
-
-static gboolean gst_tcam_src_set_tcam_property(TcamProp* iface,
-                                               const gchar* name,
-                                               const GValue* value)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (!self->active_source)
-    {
-        GST_WARNING("Source must be in state READY or higher.");
-        return FALSE;
-    }
-
-    return tcam_prop_set_tcam_property(TCAM_PROP(self->active_source), name, value);
-}
-
-
-static GSList* gst_tcam_src_get_device_serials(TcamProp* iface)
-{
-
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    GSList* ret = nullptr;
-
-    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
-    {
-        GSList* tmp = nullptr;
-
-        tmp = tcam_prop_get_device_serials(TCAM_PROP(iter->data));
-
-        // takes ownership of tmp elements
-        // no g_slist_free required
-        ret = g_slist_concat(ret, tmp);
-    }
-
-
-    return ret;
-}
-
-
-static GSList* gst_tcam_src_get_device_serials_backend(TcamProp* iface)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    GSList* ret = nullptr;
-
-    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
-    {
-        GSList* tmp = nullptr;
-
-        if (!iter->data)
-        {
-            GST_DEBUG("Source list entry is empty.");
-            continue;
-        }
-
-        tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(iter->data));
-
-        // takes ownership of tmp elements
-        // no g_slist_free required
-        ret = g_slist_concat(ret, tmp);
-    }
-
-    return ret;
-}
-
-
-static gboolean gst_tcam_src_get_device_info(TcamProp* iface,
-                                             const char* serial,
-                                             char** name,
-                                             char** identifier,
-                                             char** connection_type)
-{
-    GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    gboolean ret = FALSE;
-
-    for (GSList* iter = self->source_list; iter != nullptr; iter = g_slist_next(iter))
-    {
-        ret = tcam_prop_get_device_info(
-            TCAM_PROP(iter->data), serial, name, identifier, connection_type);
-
-        if (ret)
-        {
-            break;
-        }
-    }
-
-    return ret;
-}
 
 
 enum
@@ -320,25 +93,26 @@ static bool close_source_element(GstTcamSrc* self)
             gst_element_set_state(self->active_source, GST_STATE_NULL);
         }
         // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
-        //gst_bin_remove(GST_BIN(self), self->active_source);
+        // gst_bin_remove(GST_BIN(self), self->active_source);
 
-        self->active_source = nullptr;
+        //gst_object_unref(self->active_source);
+        //self->active_source = nullptr;
     }
     return true;
 }
 
 
-static gboolean is_device_already_open(GstTcamSrc* self)
+static bool is_device_already_open(GstTcamSrc* self)
 {
     char* serial_str = nullptr;
 
     g_object_get(G_OBJECT(self->active_source), "serial", &serial_str, NULL);
 
-    bool is_serial_same = g_strcmp0(self->device_serial.c_str(), serial_str) == 0;
+    bool is_serial_same = self->device_serial == serial_str;
 
     g_free(serial_str);
 
-    return is_serial_same ? TRUE : FALSE;
+    return is_serial_same;
 }
 
 
@@ -494,22 +268,21 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_STATE:
         {
-
             if (self->active_source)
             {
-                if (self->active_source == self->main_src)
-                {
-                    g_object_set_property(G_OBJECT(self->active_source), "state", value);
-                }
-                else
-                {
-                    bool state = tcam::gst::load_device_settings(
-                        TCAM_PROP(self), self->device_serial, g_value_get_string(value));
-                    if (!state)
-                    {
-                        GST_WARNING("Device may be in an undefined state.");
-                    }
-                }
+                // if (self->active_source == self->main_src)
+                // {
+                //     g_object_set_property(G_OBJECT(self->active_source), "state", value);
+                // }
+                // else
+                // {
+                //     bool state = tcam::gst::load_device_settings(
+                //         TCAM_PROP(self), self->device_serial, g_value_get_string(value));
+                //     if (!state)
+                //     {
+                //         GST_WARNING("Device may be in an undefined state.");
+                //     }
+                // }
             }
             else
             {
@@ -532,6 +305,7 @@ static void emit_device_open(GstElement* /*object*/, void* user_data)
     g_signal_emit(G_OBJECT(user_data), gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN], 0);
 }
 
+
 static void emit_device_close(GstElement* /*object*/, void* user_data)
 {
     // emit our own instance of 'device-open'. user-data is the tcamsrc instance
@@ -539,9 +313,34 @@ static void emit_device_close(GstElement* /*object*/, void* user_data)
 }
 
 
+static std::string get_device_serial( GstDevice& device)
+{
+    GstStructure* struc = gst_device_get_properties(&device);
+
+    auto str_ptr = gst_structure_get_string(struc, "serial");
+    std::string serial = str_ptr ? str_ptr : std::string {};
+
+    gst_structure_free(struc);
+
+    return serial;
+}
+
+
+static tcam::TCAM_DEVICE_TYPE get_device_type(GstDevice& device)
+{
+    GstStructure* struc = gst_device_get_properties(&device);
+
+    auto str_ptr = gst_structure_get_string( struc, "type" );
+    std::string type = str_ptr ? str_ptr : std::string{};
+
+    gst_structure_free(struc);
+
+    return tcam::tcam_device_from_string( type );
+}
+
+
 static gboolean open_source_element(GstTcamSrc* self)
 {
-
     if (self->active_source)
     {
         // check if the wanted device is already open
@@ -566,107 +365,128 @@ static gboolean open_source_element(GstTcamSrc* self)
 
       mainsrc has prevalence over other sources for unspecified devices
      */
+    GList* devices = gst_device_monitor_get_devices(self->p_monitor);
 
-    if (self->device_serial.empty() && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    if (!devices)
     {
-        GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(self));
-        if (!serials)
-        {
-            GST_ERROR("No devices to open");
-            return FALSE;
-        }
+        GST_ERROR("No devices to open");
+        return FALSE;
+    }
 
-        auto vals = tcambind::separate_serial_and_type((const char*)serials->data);
+    if (!devices->data)
+    {
+        g_list_free(devices);
+        GST_ERROR("No devices to open");
+        return FALSE;
+    }
 
-        TCAM_DEVICE_TYPE type = tcam::tcam_device_from_string(vals.second);
+    auto get_source = [self] (TCAM_DEVICE_TYPE t)
+    {
+        switch (t)
+        {
+            case TCAM_DEVICE_TYPE_ARAVIS:
+            case TCAM_DEVICE_TYPE_V4L2:
+            case TCAM_DEVICE_TYPE_LIBUSB:
+            {
+                return self->main_src;
+            }
+            case TCAM_DEVICE_TYPE_PIMIPI:
+            {
+                return self->pimipi_src;
+            }
+            case TCAM_DEVICE_TYPE_TEGRA:
+            {
+                return self->tegra_src;
+            }
+            default:
+            {
+                return (GstElement*)nullptr;
+            }
+        }
+    };
 
-        g_slist_free_full(serials, g_free);
+    // no serial and no type, so take first
+    if (self->device_serial.empty()
+        && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    {
+        GstDevice* dev = (GstDevice*)devices->data;
+        TCAM_DEVICE_TYPE type = get_device_type(*dev);
 
-        if (type == TCAM_DEVICE_TYPE_ARAVIS || type == TCAM_DEVICE_TYPE_V4L2
-            || type == TCAM_DEVICE_TYPE_LIBUSB)
-        {
-            self->active_source = self->main_src;
-            self->device_type = type;
-            self->device_serial = vals.first;
-        }
-        else if (type == TCAM_DEVICE_TYPE_PIMIPI)
-        {
-            self->active_source = self->pimipi_src;
-            self->device_type = type;
-            self->device_serial = vals.first;
-        }
-        else if (type == TCAM_DEVICE_TYPE_TEGRA)
-        {
-            self->active_source = self->tegra_src;
-            self->device_type = type;
-            self->device_serial = vals.first;
-        }
-        else
+        //
+        // explicitly use the sources
+        // NO `gst_device_create_element` or such
+        // as those may cause indirection
+        // e.g. tcammainsrc returns tcamsrc as element
+        //
+
+        self->device_serial = get_device_serial(*dev);
+        self->active_source = get_source(type);
+        self->device_type = type;
+
+        if (!self->active_source)
         {
             GST_ERROR("Unable to identify device. No Stream possible.");
+            g_list_free(devices);
             return FALSE;
         }
+
     }
-    else
+    // type but no serial
+    else if (self->device_serial.empty()
+             && self->device_type != TCAM_DEVICE_TYPE_UNKNOWN)
     {
-        for (GSList* iter = self->source_list; iter != nullptr && !self->active_source;
-             iter = g_slist_next(iter))
+        for (GList* i = devices; i != nullptr; i = g_list_next(i))
         {
-            if (!iter->data)
+            GstDevice* dev = (GstDevice*)i->data;
+            auto cur_type = get_device_type(*dev);
+            if (cur_type == self->device_type)
             {
-                GST_DEBUG("!!!");
-                continue;
+                self->active_source = get_source(self->device_type);
+                self->device_serial = get_device_serial(*dev);
             }
-
-            GstElement* cur_elem = (GstElement*)iter->data;
-
-            GSList* tmp = nullptr;
-            if (self->device_type == TCAM_DEVICE_TYPE_UNKNOWN && !self->device_serial.empty())
-            {
-                GST_INFO("Searching for '%s'", self->device_serial.c_str());
-                tmp = tcam_prop_get_device_serials(TCAM_PROP(cur_elem));
-
-                for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
-                {
-                    GST_DEBUG("Comparing '%s' to '%s'",
-                              self->device_serial.c_str(),
-                              (const char*)i->data);
-
-                    if (g_strcmp0((const char*)i->data, self->device_serial.c_str()) == 0)
-                    {
-                        self->active_source = cur_elem;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                tmp = tcam_prop_get_device_serials_backend(TCAM_PROP(cur_elem));
-
-                for (GSList* i = tmp; i != nullptr; i = g_slist_next(i))
-                {
-                    std::string serial;
-                    std::string type_str;
-                    tcambind::separate_serial_and_type((const char*)i->data, serial, type_str);
-
-                    if (serial == self->device_serial
-                        && tcam::tcam_device_from_string(type_str) == self->device_type)
-                    {
-                        self->active_source = cur_elem;
-                        break;
-                    }
-                    // serial empty && type wished
-                    else if (self->device_serial.empty()
-                             && tcam::tcam_device_from_string(type_str) == self->device_type)
-                    {
-                        self->active_source = cur_elem;
-                        break;
-                    }
-                }
-            }
-            g_slist_free_full(tmp, g_free);
         }
     }
+    // serial but no type
+    else if (!self->device_serial.empty()
+             && self->device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+    {
+        for (GList* i = devices; i != nullptr; i = g_list_next(i))
+        {
+            GstDevice* dev = (GstDevice*)i->data;
+            std::string serial = get_device_serial(*dev);
+
+            GST_DEBUG("Comparing '%s' to '%s'",
+                      self->device_serial.c_str(),
+                      serial.c_str());
+
+            if (serial == self->device_serial)
+            {
+                self->device_type = get_device_type(*dev);
+                self->active_source = get_source(self->device_type);
+                break;
+            }
+        }
+    }
+    // serial AND type
+    else
+    {
+        for (GList* i = devices; i != nullptr; i = g_list_next(i))
+        {
+            GstDevice* dev = (GstDevice*)i->data;
+
+            std::string serial = get_device_serial(*dev);
+            auto type = get_device_type(*dev);
+
+            if (serial == self->device_serial
+                && type == self->device_type)
+            {
+                self->active_source = get_source(type);
+                break;
+            }
+        }
+    }
+
+    g_list_free_full(devices, gst_object_unref);
 
     if (!self->active_source)
     {
@@ -674,10 +494,19 @@ static gboolean open_source_element(GstTcamSrc* self)
         return FALSE;
     }
 
-    g_signal_connect(
-        G_OBJECT(self->active_source), "device-open", G_CALLBACK(emit_device_open), self);
-    g_signal_connect(
-        G_OBJECT(self->active_source), "device-close", G_CALLBACK(emit_device_close), self);
+    g_signal_connect(G_OBJECT(self->active_source),
+                     "device-open",
+                     G_CALLBACK(emit_device_open),
+                     self);
+
+    g_signal_connect(G_OBJECT(self->active_source),
+                     "device-close",
+                     G_CALLBACK(emit_device_close),
+                     self);
+
+    //
+    // apply stuff to actual source
+    //
 
     if (self->active_source == self->main_src)
     {
@@ -739,47 +568,6 @@ static gboolean open_source_element(GstTcamSrc* self)
 
     apply_element_property(self, PROP_DO_TIMESTAMP, &val_bool, nullptr);
 
-    // query these as late as possible
-    // src needs some time as things can happen async
-    char* device_serial = nullptr;
-    g_object_get(G_OBJECT(self->active_source), "serial", &device_serial, NULL);
-    if (device_serial)
-    {
-        self->device_serial = device_serial;
-        g_free(device_serial);
-    }
-    else
-    {
-        self->device_serial = {};
-    }
-
-    if (self->active_source == self->main_src)
-    {
-        char* type_str = nullptr;
-        g_object_get(G_OBJECT(self->active_source), "type", &type_str, NULL);
-
-        if (type_str)
-        {
-            self->device_type = tcam::tcam_device_from_string(type_str);
-            g_free(type_str);
-        }
-        else
-        {
-            self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-        }
-    }
-    else if (self->active_source == self->pimipi_src)
-    {
-        self->device_type = TCAM_DEVICE_TYPE_PIMIPI;
-    }
-    else if (self->active_source == self->tegra_src)
-    {
-        self->device_type = TCAM_DEVICE_TYPE_TEGRA;
-    }
-    else
-    {
-        self->device_type = TCAM_DEVICE_TYPE_UNKNOWN;
-    }
 
     GST_INFO("Opened device has serial: '%s' type: '%s'",
              self->device_serial.c_str(),
@@ -833,7 +621,7 @@ static GstStateChangeReturn gst_tcam_src_change_state(GstElement* element, GstSt
     {
         case GST_STATE_CHANGE_READY_TO_NULL:
         {
-
+            close_source_element(self);
             break;
         }
         default:
@@ -845,6 +633,8 @@ static GstStateChangeReturn gst_tcam_src_change_state(GstElement* element, GstSt
 
 static void gst_tcam_src_init(GstTcamSrc* self)
 {
+    self->p_monitor = gst_device_monitor_new();
+    gst_device_monitor_add_filter(self->p_monitor, "Video/Source/tcam", nullptr);
 
     g_object_set(self, "message-forward", TRUE, NULL);
     self->active_source = nullptr;
@@ -925,6 +715,8 @@ static void gst_tcam_src_finalize(GObject* object)
         self->tegra_src = nullptr;
     }
     (&self->device_serial)->std::string::~string();
+
+    gst_object_unref(self->p_monitor);
 
     G_OBJECT_CLASS(gst_tcam_src_parent_class)->finalize(object);
 }
@@ -1058,17 +850,17 @@ static void gst_tcam_src_get_property(GObject* object,
         {
             if (self->active_source)
             {
-                if (self->active_source == self->main_src)
-                {
-                    g_object_get_property(G_OBJECT(self->active_source), "state", value);
-                }
-                else
-                {
-                    std::string tmp =
-                        tcam::gst::create_device_settings(self->device_serial, TCAM_PROP(self))
-                            .c_str();
-                    g_value_set_string(value, tmp.c_str());
-                }
+                // if (self->active_source == self->main_src)
+                // {
+                //     g_object_get_property(G_OBJECT(self->active_source), "state", value);
+                // }
+                // else
+                // {
+                //     std::string tmp =
+                //         tcam::gst::create_device_settings(self->device_serial, TCAM_PROP(self))
+                //             .c_str();
+                //     g_value_set_string(value, tmp.c_str());
+                // }
             }
             else
             {

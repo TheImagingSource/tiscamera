@@ -36,6 +36,6 @@ inline std::string change_extension(const std::string& path, const std::string& 
     return extract_directory(path) + filename.substr(0, filename.find_last_of('.')) + ext;
 }
 
-bool is_valid_device_serial(GstElement* source, const std::string& serial);
+bool is_valid_device_serial(const std::string& serial);
 
 #endif /* GENERAL_H */

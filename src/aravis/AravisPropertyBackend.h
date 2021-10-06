@@ -40,8 +40,8 @@ public:
 
     outcome::result<void> execute(const std::string& name);
 
-    outcome::result<std::string> get_enum(const std::string& name);
-    outcome::result<void> set_enum(const std::string& name, const std::string& value);
+    outcome::result<std::string_view> get_enum(const std::string& name);
+    outcome::result<void> set_enum(const std::string& name, const std::string_view& value);
 
 
 private:

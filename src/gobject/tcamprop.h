@@ -17,39 +17,123 @@
 #ifndef TCAMPROP_H
 #define TCAMPROP_H
 
-#include "Tcam-0.1.h"
+#include "Tcam-1.0.h"
 
 G_BEGIN_DECLS
 
-GSList* tcam_prop_get_tcam_property_names(TcamProp* self);
+// error stuff
 
-const gchar* tcam_prop_get_tcam_property_type(TcamProp* self, const gchar* name);
+#define TCAM_ERROR tcam_error_quark()
 
-gboolean tcam_prop_get_tcam_property(TcamProp* self,
-                                     const gchar* name,
-                                     GValue* value,
-                                     GValue* min,
-                                     GValue* max,
-                                     GValue* def,
-                                     GValue* step,
-                                     GValue* type,
-                                     GValue* flags,
-                                     GValue* category,
-                                     GValue* group);
+GQuark tcam_error_quark(void);
 
-GSList* tcam_prop_get_tcam_menu_entries(TcamProp* self, const char* name);
 
-gboolean tcam_prop_set_tcam_property(TcamProp* self, const gchar* name, const GValue* value);
+GType tcam_error_get_type(void);
 
-GSList* tcam_prop_get_device_serials(TcamProp* self);
+// helper types
 
-GSList* tcam_prop_get_device_serials_backend(TcamProp* self);
+GType tcam_property_flags_get_type (void);
 
-gboolean tcam_prop_get_device_info(TcamProp* self,
-                                   const char* serial,
-                                   char** name,
-                                   char** identifier,
-                                   char** connection_type);
+GType tcam_property_visibility_get_type(void);
+
+GType tcam_property_type_get_type (void);
+
+// static data description
+
+TcamPropertyInfo* tcam_property_info_new (const gchar* name,
+                                          TcamPropertyType type,
+                                          const gchar* displayname,
+                                          const gchar* description,
+                                          const gchar* unit,
+                                          const gchar* category,
+                                          TcamPropertyVisibility visibility);
+
+/**
+ * tcam_property_info_copy: (skip)
+ *
+ * Creates a copy of @data.
+ */
+
+TcamPropertyInfo* tcam_property_info_copy (TcamPropertyInfo* data);
+
+/**
+ * tcam_property_description_free: (skip)
+ *
+ * Free's @data.
+ */
+void tcam_property_info_free (TcamPropertyInfo* data);
+
+
+// actual interface
+
+GSList* tcam_prop_get_tcam_property_names(TcamProp* self, GError** err);
+
+TcamPropertyInfo* tcam_prop_get_property_info(TcamProp* self, const char* name, GError** err);
+
+GSList* tcam_prop_get_tcam_enum_entries(TcamProp* self, const char* name, GError** err);
+
+
+TcamPropertyType tcam_prop_get_tcam_property_type(TcamProp* self, const gchar* name, GError** err);
+
+
+gboolean tcam_prop_get_tcam_range(TcamProp* self, const char* name, GValue* min, GValue* max, GValue* step, GError** err);
+
+gboolean tcam_prop_get_tcam_default(TcamProp* self, const char* name, GValue* default_value, GError** err);
+
+//
+// getter
+//
+
+gboolean tcam_prop_get_tcam_property(TcamProp* self, const gchar* name,
+                              GValue* value, GValue* flags, GError** err);
+
+const char* tcam_prop_get_tcam_string(TcamProp* self,
+                               const char* name,
+                               GError** err);
+
+gint64 tcam_prop_get_tcam_int(TcamProp* self,
+                       const char* name,
+                       GError** err);
+
+gdouble tcam_prop_get_tcam_double(TcamProp* self,
+                           const char* name,
+                           GError** err);
+
+gboolean tcam_prop_get_tcam_bool(TcamProp* self,
+                          const char* name,
+                          GError** err);
+
+//
+// setter
+//
+
+gboolean tcam_prop_set_tcam_property(TcamProp* self, const gchar* name, const GValue* value, GError** err);
+
+gboolean tcam_prop_set_tcam_string(TcamProp* self,
+                                   const char* name,
+                                   const char* value,
+                                   GError** err);
+
+gboolean tcam_prop_set_tcam_int(TcamProp* self,
+                                const char* name,
+                                gint64 value,
+                                GError** err);
+
+gboolean tcam_prop_set_tcam_double(TcamProp* self,
+                                   const char* name,
+                                   gdouble value,
+                                   GError** err);
+
+gboolean tcam_prop_set_tcam_bool(TcamProp* self,
+                                 const char* name,
+                                 gboolean value,
+                                 GError** err);
+
+gboolean tcam_prop_set_tcam_execute(TcamProp* self,
+                                    const char* name,
+                                    GError** err);
+
+
 
 G_END_DECLS
 

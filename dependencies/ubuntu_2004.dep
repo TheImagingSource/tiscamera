@@ -207,6 +207,25 @@
         },
 
         {
+            "name": "libqt5widgets5",
+            "version": ">= 5.9.5",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
+        },
+        {
+            "name": "libqt5gui5",
+            "version": ">= 5.9.5",
+            "phase": "runtime",
+            "modules": ["gui", "tools"]
+        },
+        {
+            "name": "qtbase5-dev",
+            "version": ">= 5.9.5",
+            "phase": "compilation",
+            "modules": ["gui", "tools"]
+        },
+		
+        {
             "name": "python3-pyqt5",
             "version": ">= 5.5.1",
             "phase": "runtime",

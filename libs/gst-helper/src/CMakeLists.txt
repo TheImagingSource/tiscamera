@@ -10,4 +10,6 @@ add_library( project-warnings ALIAS gst-helper-libs-warning-base )
 set( libraries-include-path "${CMAKE_CURRENT_SOURCE_DIR}/../include" )
 
 add_subdirectory( gst-helper )
-add_subdirectory( tcamprop_system )
+add_subdirectory( tcamprop1.0_base )
+add_subdirectory( tcamprop1.0_gobject )
+add_subdirectory( tcamprop1.0_consumer )

@@ -21,10 +21,33 @@
 import sys
 import gi
 
-gi.require_version("Tcam", "0.1")
+gi.require_version("Tcam", "1.0")
 gi.require_version("Gst", "1.0")
+gi.require_version("GLib", "2.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Tcam, Gst, GLib
+
+
+def flag_strings(prop):
+    """
+
+    """
+
+    ret = "Available: "
+
+    if prop.is_available():
+        ret += "yes"
+    else:
+        ret += "no"
+
+    ret += "\tLocked: "
+
+    if prop.is_locked():
+        ret += "yes"
+    else:
+        ret += "no"
+
+    return ret
 
 
 def list_properties(camera):
@@ -33,51 +56,97 @@ def list_properties(camera):
 
     for name in property_names:
 
-        (ret, value,
-         min_value, max_value,
-         default_value, step_size,
-         value_type, flags,
-         category, group) = camera.get_tcam_property(name)
+        base = camera.get_tcam_property(name)
 
-        if not ret:
-            print("could not receive value {}".format(name))
-            continue
+        if base.get_prop_type() == Tcam.PropertyType.INTEGER:
+            mini, maxi, default, step = base.get_range()
 
-        if value_type == "integer" or value_type == "double":
-            print("{}({}) value: {} default: {} min: {} max: {} grouping: {} - {}".format(name,
-                                                                                          value_type,
-                                                                                          value, default_value,
-                                                                                          min_value, max_value,
-                                                                                          category, group))
-        elif value_type == "string":
-            print("{}(string) value: {} default: {} grouping: {} - {}".format(name,
-                                                                              value,
-                                                                              default_value,
-                                                                              category,
-                                                                              group))
-        elif value_type == "button":
-            print("{}(button) grouping is {} -  {}".format(name,
-                                                           category,
-                                                           group))
-        elif value_type == "boolean":
-            print("{}(boolean) value: {} default: {} grouping: {} - {}".format(name,
-                                                                               value,
-                                                                               default_value,
-                                                                               category,
-                                                                               group))
-        elif value_type == "enum":
-            enum_entries = camera.get_tcam_menu_entries(name)
+            print(("{name}\ttype: Integer\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
+                   "\t\t\tDescription: {desc}\n"
+                   "\t\t\tUnit: {unit}\n"
+                   "\t\t\tVisibility: {vis}\n"
+                   "\t\t\tPresentation: {pres}\n"
+                   "\t\t\t{flags}\n\n"
+                   "\t\t\tMin: {mini}\t Max: {maxi}\tStep: {step}\n"
+                   "\t\t\tDefault: {default}\n"
+                   "\t\t\tValue: {val}\n\n").format(name=name,
+                                                    disp_name=base.get_display_name(),
+                                                    cat=base.get_category(),
+                                                    desc=base.get_description(),
+                                                    unit=base.get_unit(),
+                                                    vis=base.get_visibility(),
+                                                    pres=base.get_representation(),
+                                                    flags=flag_strings(base),
+                                                    mini=mini,
+                                                    maxi=maxi,
+                                                    step=step,
+                                                    default=default,
+                                                    val=base.get_value()))
+        elif base.get_prop_type() == Tcam.PropertyType.FLOAT:
 
-            print("{}(enum) value: {} default: {} grouping {} - {}".format(name,
-                                                                           value,
-                                                                           default_value,
-                                                                           category,
-                                                                           group))
-            print("Entries: ")
-            for entry in enum_entries:
-                print("\t {}".format(entry))
-        else:
-            print("This should not happen.")
+            mini, maxi, default, step = base.get_range()
+
+            print(("{name}\ttype: Float\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
+                   "\t\t\tDescription: {desc}\n"
+                   "\t\t\tUnit: {unit}\n"
+                   "\t\t\tVisibility: {vis}\n"
+                   "\t\t\tPresentation: {pres}\n"
+                   "\t\t\t{flags}\n\n"
+                   "\t\t\tMin: {mini}\t Max: {maxi}\tStep: {step}\n"
+                   "\t\t\tDefault: {default}\n"
+                   "\t\t\tValue: {val}\n\n").format(name=name,
+                                                    disp_name=base.get_display_name(),
+                                                    cat=base.get_category(),
+                                                    desc=base.get_description(),
+                                                    unit=base.get_unit(),
+                                                    vis=base.get_visibility(),
+                                                    pres=base.get_representation(),
+                                                    flags=flag_strings(base),
+                                                    mini=mini,
+                                                    maxi=maxi,
+                                                    step=step,
+                                                    default=default,
+                                                    val=base.get_value()))
+        elif base.get_prop_type() == Tcam.PropertyType.ENUMERATION:
+            print(("{name}\ttype: Enumeration\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
+                   "\t\t\tDescription: {desc}\n"
+                   "\t\t\tVisibility: {vis}\n"
+                   "\t\t\t{flags}\n\n"
+                   "\t\t\tEntries: {entries}\n"
+                   "\t\t\tDefault: {default}\n"
+                   "\t\t\tValue: {val}\n\n").format(name=name,
+                                                    disp_name=base.get_display_name(),
+                                                    cat=base.get_category(),
+                                                    desc=base.get_description(),
+                                                    vis=base.get_visibility(),
+                                                    flags=flag_strings(base),
+                                                    entries=base.get_enum_entries(),
+                                                    default=base.get_default(),
+                                                    val=base.get_value()))
+        elif base.get_prop_type() == Tcam.PropertyType.BOOLEAN:
+            print(("{name}\ttype: Boolean\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
+                   "\t\t\tDescription: {desc}\n"
+                   "\t\t\tVisibility: {vis}\n"
+                   "\t\t\t{flags}\n\n"
+                   "\t\t\tDefault: {default}\n"
+                   "\t\t\tValue: {val}\n\n").format(name=name,
+                                                    disp_name=base.get_display_name(),
+                                                    cat=base.get_category(),
+                                                    desc=base.get_description(),
+                                                    vis=base.get_visibility(),
+                                                    flags=flag_strings(base),
+                                                    default=base.get_default(),
+                                                    val=base.get_value()))
+        elif base.get_prop_type() == Tcam.PropertyType.COMMAND:
+            print(("{name}\ttype: Command\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
+                   "\t\t\tDescription: {desc}\n"
+                   "\t\t\tVisibility: {vis}\n"
+                   "\t\t\t{flags}\n\n").format(name=name,
+                                               disp_name=base.get_display_name(),
+                                               cat=base.get_category(),
+                                               desc=base.get_description(),
+                                               vis=base.get_visibility(),
+                                               flags=flag_strings(base)))
 
 
 def block_until_playing(pipeline):
@@ -105,7 +174,7 @@ def main():
     # for further details
     Gst.debug_set_default_threshold(Gst.DebugLevel.WARNING)
 
-    pipeline = Gst.parse_launch("tcambin name=source ! fakesink")
+    pipeline = Gst.parse_launch("tcamsrc name=source ! fakesink")
 
     if not pipeline:
         print("Unable to create pipeline")
@@ -122,19 +191,9 @@ def main():
     if serial is not None:
         source.set_property("serial", serial)
 
-    print("Properties before state PLAYING:")
-    list_properties(source)
+    pipeline.set_state(Gst.State.READY)
 
-    # in the READY state the camera will always be initialized
-    # in the PLAYING sta1te additional properties may appear from gstreamer elements
-    pipeline.set_state(Gst.State.PLAYING)
-
-    # helper function to ensure we have the right state
-    # alternatively wait for the first image
-    if not block_until_playing(pipeline):
-        print("Unable to start pipeline")
-
-    print("Properties during state PLAYING:")
+    print("Properties in state READY:")
     list_properties(source)
 
     pipeline.set_state(Gst.State.NULL)

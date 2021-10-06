@@ -40,11 +40,13 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcamconvert_debug_category);
 #define GST_CAT_DEFAULT gst_tcamconvert_debug_category
 
 #define gst_tcamconvert_parent_class parent_class
-G_DEFINE_TYPE_WITH_CODE(GstTCamConvert,
-                        gst_tcamconvert,
-                        GST_TYPE_BASE_TRANSFORM,
-                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP,
-                                              tcamconvert::gst_tcamconvert_prop_init))
+G_DEFINE_TYPE(GstTCamConvert,
+              gst_tcamconvert,
+              GST_TYPE_BASE_TRANSFORM
+              //, G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP,
+              //                       tcamconvert::gst_tcamconvert_prop_init)
+    )
+
 
 
 static tcamconvert::tcamconvert_context_base& get_gst_elem_reference(GstTCamConvert* iface)
@@ -53,11 +55,6 @@ static tcamconvert::tcamconvert_context_base& get_gst_elem_reference(GstTCamConv
     assert(self != nullptr);
 
     return *self->context_;
-}
-
-tcamprop_system::property_list_interface* tcamconvert::get_property_list_interface(TcamProp* iface)
-{
-    return GST_TCAMCONVERT(iface)->context_;
 }
 
 /* No properties are implemented, so only a warning is produced */

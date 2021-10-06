@@ -125,10 +125,10 @@ outcome::result<void> AravisPropertyBackend::execute(const std::string& name)
     return outcome::success();
 }
 
-outcome::result<std::string> AravisPropertyBackend::get_enum(const std::string& name)
+outcome::result<std::string_view> AravisPropertyBackend::get_enum(const std::string& name)
 {
     GError* err = nullptr;
-    std::string ret = arv_device_get_string_feature_value(p_device, name.c_str(), &err);
+    std::string_view ret = arv_device_get_string_feature_value(p_device, name.c_str(), &err);
     if (err)
     {
         SPDLOG_ERROR("Unable to retrieve enum/string: {}", err->message);
@@ -140,11 +140,14 @@ outcome::result<std::string> AravisPropertyBackend::get_enum(const std::string& 
 }
 
 outcome::result<void> AravisPropertyBackend::set_enum(const std::string& name,
-                                                      const std::string& value)
+                                                      const std::string_view& value)
 {
     GError* err = nullptr;
 
-    arv_device_set_string_feature_value(p_device, name.c_str(), value.c_str(), &err);
+    // simple insurance that everything is null terminated
+    std::string val = std::string(value);
+
+    arv_device_set_string_feature_value(p_device, name.c_str(), val.c_str(), &err);
 
     if (err)
     {

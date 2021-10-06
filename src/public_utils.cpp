@@ -61,6 +61,7 @@ std::string tcam::tcam_device_type_to_string(TCAM_DEVICE_TYPE type)
             return "mipi";
         case TCAM_DEVICE_TYPE_TEGRA:
             return "tegra";
+        case TCAM_DEVICE_TYPE_UNKNOWN:
         default:
             return "unknown";
     }
@@ -70,6 +71,11 @@ std::string tcam::tcam_device_type_to_string(TCAM_DEVICE_TYPE type)
 TCAM_DEVICE_TYPE tcam::tcam_device_from_string(const std::string& input)
 {
     std::string str = input;
+
+    if (input.empty())
+    {
+        return TCAM_DEVICE_TYPE::TCAM_DEVICE_TYPE_UNKNOWN;
+    }
 
     std::transform(
         str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });

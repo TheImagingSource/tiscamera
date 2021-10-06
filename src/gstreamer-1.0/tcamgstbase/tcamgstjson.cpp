@@ -17,7 +17,6 @@
 #include "tcamgstjson.h"
 
 #include "../../../external/json/json.hpp"
-#include "../../gobject/tcamprop.h"
 #include "../../json.h"
 #include "../../logging.h"
 
@@ -25,83 +24,7 @@
 using json = nlohmann::json;
 
 
-static bool tcam_property_to_json(_TcamProp* prop, json& parent, const char* name)
-{
-    GValue value = G_VALUE_INIT;
-    GValue type = G_VALUE_INIT;
-
-    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(prop),
-                                               name,
-                                               &value,
-                                               nullptr,
-                                               nullptr,
-                                               nullptr,
-                                               nullptr,
-                                               &type,
-                                               nullptr,
-                                               nullptr,
-                                               nullptr);
-
-    if (!ret || g_value_get_string(&type) == nullptr)
-    {
-        g_value_unset(&value);
-        g_value_unset(&type);
-
-        SPDLOG_WARN("Unable to read property '{}'", name);
-        return false;
-    }
-
-    if (g_strcmp0("button", g_value_get_string(&type)) == 0) // button property can be skipped
-    {
-        g_value_unset(&value);
-        g_value_unset(&type);
-        return true;
-    }
-    g_value_unset(&type);
-
-    try
-    {
-        switch (G_VALUE_TYPE(&value))
-        {
-            case G_TYPE_INT:
-            {
-                parent.push_back(json::object_t::value_type(name, g_value_get_int(&value)));
-                break;
-            }
-            case G_TYPE_DOUBLE:
-            {
-                parent.push_back(json::object_t::value_type(name, g_value_get_double(&value)));
-                break;
-            }
-            case G_TYPE_STRING:
-            {
-                parent.push_back(json::object_t::value_type(name, g_value_get_string(&value)));
-                break;
-            }
-            case G_TYPE_BOOLEAN:
-            {
-                parent.push_back(
-                    json::object_t::value_type(name, (bool)g_value_get_boolean(&value)));
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
-    }
-    catch (const std::logic_error& err)
-    {
-        g_value_unset(&value);
-        SPDLOG_ERROR(err.what());
-        return false;
-    }
-    g_value_unset(&value);
-    return true;
-}
-
-
-std::string tcam::gst::create_device_settings(const std::string& serial, _TcamProp* tcam)
+std::string tcam::gst::create_device_settings(const std::string& serial, TcamPropertyProvider* tcam)
 {
     if (!tcam)
     {
@@ -124,17 +47,92 @@ std::string tcam::gst::create_device_settings(const std::string& serial, _TcamPr
         return "";
     }
 
-    GSList* names = tcam_prop_get_tcam_property_names(tcam);
+    GError* err = nullptr;
+    GSList* names = tcam_property_provider_get_tcam_property_names(tcam, &err);
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
         const char* prop_name = (const char*)g_slist_nth_data(names, i);
 
-        bool ret = tcam_property_to_json(tcam, j["properties"], prop_name);
-        if (!ret)
+        auto prop_base = tcam_property_provider_get_tcam_property(tcam, prop_name, &err);
+
+
+        switch (tcam_property_base_get_property_type(prop_base))
         {
-            SPDLOG_WARN("Could not convert {} to json.", prop_name);
+            case TCAM_PROPERTY_TYPE_INTEGER:
+            {
+                auto prop_i = TCAM_PROPERTY_INTEGER(prop_base);
+
+                auto value = tcam_property_integer_get_value(prop_i, &err);
+
+                if (!err)
+                {
+                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                }
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_FLOAT:
+            {
+                auto f = TCAM_PROPERTY_FLOAT(prop_base);
+
+                auto value = tcam_property_float_get_value(f, &err);
+
+                if (!err)
+                {
+                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                }
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_ENUMERATION:
+            {
+                auto e = TCAM_PROPERTY_ENUMERATION(prop_base);
+
+                auto value = tcam_property_enumeration_get_value(e, &err);
+
+                if (!err)
+                {
+                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                }
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
+            {
+                auto b = TCAM_PROPERTY_BOOLEAN(prop_base);
+
+                auto value = tcam_property_boolean_get_value(b,&err);
+
+                if (!err)
+                {
+                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                }
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_COMMAND:
+            {
+                auto c = TCAM_PROPERTY_COMMAND(prop_base);
+
+                tcam_property_command_set_command(c, &err);
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
+
+        if (err)
+        {
+            SPDLOG_ERROR("Reading '{}' caused an error: {}",
+                         prop_name,
+                         err->message);
+            g_error_free(err);
+            err = nullptr;
+        }
+
     }
     g_slist_free_full(names, ::g_free);
 
@@ -143,7 +141,7 @@ std::string tcam::gst::create_device_settings(const std::string& serial, _TcamPr
 }
 
 
-bool tcam::gst::load_device_settings(_TcamProp* tcam,
+bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam,
                                      const std::string& serial,
                                      const std::string& cache)
 {
@@ -231,41 +229,89 @@ bool tcam::gst::load_device_settings(_TcamProp* tcam,
     */
     for (auto iter = props.rbegin(); iter != props.rend(); iter++)
     {
-        GValue value = G_VALUE_INIT;
 
-        if (iter.value().is_boolean())
+        GError* err = nullptr;
+        auto prop_base = tcam_property_provider_get_tcam_property(tcam, iter.key().c_str(), &err);
+
+        switch (tcam_property_base_get_property_type(prop_base))
         {
-            g_value_init(&value, G_TYPE_BOOLEAN);
-            g_value_set_boolean(&value, iter.value());
-        }
-        else if (iter.value().is_number_float())
-        {
-            g_value_init(&value, G_TYPE_DOUBLE);
-            g_value_set_double(&value, iter.value());
-        }
-        else if (iter.value().is_number_integer())
-        {
-            g_value_init(&value, G_TYPE_INT);
-            g_value_set_int(&value, iter.value());
-        }
-        else
-        {
-            g_value_init(&value, G_TYPE_STRING);
-            g_value_set_string(&value, iter.value().get<std::string>().c_str());
+            case TCAM_PROPERTY_TYPE_INTEGER:
+            {
+                if (!iter.value().is_number())
+                {
+                    SPDLOG_ERROR("Value for {} is not a number", iter.key().c_str());
+                    break;
+                }
+
+                auto i = TCAM_PROPERTY_INTEGER(prop_base);
+
+                tcam_property_integer_set_value(i, iter.value(), &err);
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_FLOAT:
+            {
+                if (!iter.value().is_number())
+                {
+                    SPDLOG_ERROR("Value for {} is not a number", iter.key().c_str());
+                    break;
+                }
+
+                auto f = TCAM_PROPERTY_FLOAT(prop_base);
+
+                tcam_property_float_set_value(f, iter.value(), &err);
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_ENUMERATION:
+            {
+
+                auto e = TCAM_PROPERTY_ENUMERATION(prop_base);
+
+                tcam_property_enumeration_set_value(e, iter.value().get<std::string>().c_str(), &err);
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
+            {
+
+                if (!iter.value().is_boolean())
+                {
+                    SPDLOG_ERROR("Value for {} is not a bool", iter.key().c_str());
+                    break;
+                }
+
+                auto b = TCAM_PROPERTY_BOOLEAN(prop_base);
+
+                tcam_property_boolean_set_value(b, iter.value(), &err);
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_COMMAND:
+            {
+                auto c = TCAM_PROPERTY_COMMAND(prop_base);
+
+                tcam_property_command_set_command(c, &err);
+                break;
+            }
+            default:
+            {
+                break;
+            }
         }
 
-        gboolean ret = tcam_prop_set_tcam_property(tcam, iter.key().c_str(), &value);
-
-        if (!ret)
+        if (err)
         {
             // iter.value().dump() will add "" around a string
             // this is to signify that it is in fact, a string
             //
-            SPDLOG_ERROR("Setting '{}' to {} caused an error",
+            SPDLOG_ERROR("Setting '{}' to {} caused an error: {}",
                          iter.key().c_str(),
-                         iter.value().dump().c_str());
+                         iter.value().dump().c_str(),
+                         err->message);
+            g_error_free(err);
+            err = nullptr;
         }
-        g_value_unset(&value);
     }
 
     return true;

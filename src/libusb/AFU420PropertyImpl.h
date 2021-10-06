@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
 #include "ep_defines_rx.h"
@@ -24,10 +25,17 @@ public:
                               tcam::afu420::AFU420Property id,
                               std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+    virtual std::string_view get_unit() const final;
+    virtual tcamprop1::IntRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -70,6 +78,7 @@ private:
     int64_t m_default;
 
     tcam::afu420::AFU420Property m_id;
+    const tcamprop1::prop_static_info_integer* p_static_info;
 };
 
 
@@ -81,10 +90,17 @@ public:
                              tcam::afu420::AFU420Property id,
                              std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+    virtual std::string_view get_unit() const final;
+    virtual tcamprop1::FloatRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -127,6 +143,7 @@ private:
     double m_default;
 
     tcam::afu420::AFU420Property m_id;
+    const tcamprop1::prop_static_info_float* p_static_info;
 };
 
 class AFU420PropertyBoolImpl : public IPropertyBool
@@ -137,10 +154,15 @@ public:
                            tcam::afu420::AFU420Property id,
                            std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -168,6 +190,7 @@ private:
     // needed only for write only properties
     bool m_value;
     tcam::afu420::AFU420Property m_id;
+    const tcamprop1::prop_static_info_boolean* p_static_info;
 };
 
 
@@ -179,10 +202,15 @@ public:
                            std::map<int, std::string> m_entries,
                            std::shared_ptr<AFU420DeviceBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+    virtual std::string_view get_description() const final;
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -192,10 +220,10 @@ public:
         m_flags = flags;
     };
 
-    virtual outcome::result<void> set_value_str(const std::string& new_value) final;
+    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
-    virtual outcome::result<std::string> get_value() const final;
+    virtual outcome::result<std::string_view> get_value() const final;
     virtual outcome::result<int64_t> get_value_int() const final;
 
     virtual std::string get_default() const final
@@ -217,6 +245,7 @@ private:
     std::string m_default;
 
     tcam::afu420::AFU420Property m_id;
+    const tcamprop1::prop_static_info_enumeration* p_static_info;
 };
 
 

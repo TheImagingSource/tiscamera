@@ -1,0 +1,11 @@
+* tcam-capture rewrite TODOs/Buglist
+
+** Add Dropped/Statistics info
+
+** Add QTimer to decrease FPS counter in case of TriggerMode
+
+** Add logarithmic slider
+
+** Make double slider actually a 1000 point int slider
+
+** Implement FormatWidget

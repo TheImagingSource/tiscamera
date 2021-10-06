@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "../libs/gst-helper/include/tcamprop1.0_base/tcamprop_base.h"
 #include "PropertyCategory.h"
 #include "PropertyFlags.h"
 #include "base_types.h"
@@ -35,7 +36,12 @@ class IPropertyBase
 public:
     virtual ~IPropertyBase() = default;
 
-    virtual std::string get_name() const = 0;
+    virtual std::string_view get_name() const = 0;
+    virtual std::string_view get_display_name() const = 0;
+    virtual std::string_view get_description() const = 0;
+    virtual std::string_view get_category() const = 0;
+    //virtual std::string_view get_visibility() const = 0;
+
     virtual TCAM_PROPERTY_TYPE get_type() const = 0;
     virtual PropertyFlags get_flags() const = 0;
 };
@@ -54,7 +60,13 @@ public:
         return TCAM_PROPERTY_TYPE_INTEGER;
     }
 
-    virtual std::string get_name() const override = 0;
+    virtual std::string_view get_name() const override = 0;
+    virtual std::string_view get_display_name() const override = 0;
+    virtual std::string_view get_description() const override = 0;
+    virtual std::string_view get_category() const override = 0;
+    virtual std::string_view get_unit() const = 0;
+    virtual tcamprop1::IntRepresentation_t get_representation() const = 0;
+
     virtual PropertyFlags get_flags() const override = 0;
 
     virtual int64_t get_min() const = 0;
@@ -74,7 +86,13 @@ public:
         return TCAM_PROPERTY_TYPE_DOUBLE;
     }
 
-    virtual std::string get_name() const override = 0;
+    virtual std::string_view get_name() const override = 0;
+    virtual std::string_view get_display_name() const override = 0;
+    virtual std::string_view get_description() const override = 0;
+    virtual std::string_view get_category() const override = 0;
+    virtual std::string_view get_unit() const = 0;
+    virtual tcamprop1::FloatRepresentation_t get_representation() const = 0;
+
     virtual PropertyFlags get_flags() const override = 0;
 
     virtual double get_min() const = 0;
@@ -94,7 +112,10 @@ public:
         return TCAM_PROPERTY_TYPE_BOOLEAN;
     }
 
-    virtual std::string get_name() const override = 0;
+    virtual std::string_view get_name() const override = 0;
+    virtual std::string_view get_display_name() const override = 0;
+    virtual std::string_view get_description() const override = 0;
+    virtual std::string_view get_category() const override = 0;
     virtual PropertyFlags get_flags() const override = 0;
 
     virtual bool get_default() const = 0;
@@ -112,7 +133,10 @@ public:
         return TCAM_PROPERTY_TYPE_BUTTON;
     }
 
-    virtual std::string get_name() const override = 0;
+    virtual std::string_view get_name() const override = 0;
+    virtual std::string_view get_display_name() const override = 0;
+    virtual std::string_view get_description() const override = 0;
+    virtual std::string_view get_category() const override = 0;
     virtual PropertyFlags get_flags() const override = 0;
 
     virtual outcome::result<void> execute() = 0;
@@ -127,13 +151,16 @@ public:
         return TCAM_PROPERTY_TYPE_ENUMERATION;
     }
 
-    virtual std::string get_name() const override = 0;
+    virtual std::string_view get_name() const override = 0;
+    virtual std::string_view get_display_name() const override = 0;
+    virtual std::string_view get_description() const override = 0;
+    virtual std::string_view get_category() const override = 0;
     virtual PropertyFlags get_flags() const override = 0;
 
-    virtual outcome::result<void> set_value_str(const std::string& new_value) = 0;
+    virtual outcome::result<void> set_value_str(const std::string_view& new_value) = 0;
     virtual outcome::result<void> set_value(int64_t new_value) = 0;
 
-    virtual outcome::result<std::string> get_value() const = 0;
+    virtual outcome::result<std::string_view> get_value() const = 0;
     virtual outcome::result<int64_t> get_value_int() const = 0;
 
     virtual std::string get_default() const = 0;

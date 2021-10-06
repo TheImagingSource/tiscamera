@@ -16,7 +16,7 @@
 
 #include "properties.h"
 
-#include "../../src/gobject/tcamprop.h"
+#include "../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "general.h"
 
 #include <gst/gst.h>
@@ -24,6 +24,36 @@
 #include <iostream>
 
 static const size_t name_width = 40;
+
+
+std::string get_flag_desc_string(TcamPropertyBase* prop)
+{
+    std::string ret = "Available: ";
+    GError* err;
+    bool av = tcam_property_base_is_available(prop, &err);
+    if (av)
+    {
+        ret += "yes";
+    }
+    else
+    {
+        ret += "no";
+    }
+
+    ret += "\tLocked: ";
+
+    bool lo = tcam_property_base_is_locked(prop, &err);
+
+    if (lo)
+    {
+        ret += "yes";
+    }
+    else
+    {
+        ret += "no";
+    }
+    return ret;
+}
 
 
 void print_properties(const std::string& serial)
@@ -36,7 +66,7 @@ void print_properties(const std::string& serial)
         return;
     }
 
-    if (!is_valid_device_serial(source, serial))
+    if (!is_valid_device_serial(serial))
     {
         std::cerr << "Device with given serial does not exist." << std::endl;
         return;
@@ -53,130 +83,241 @@ void print_properties(const std::string& serial)
 
     gst_element_set_state(source, GST_STATE_READY);
 
-    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
+    GError* err = nullptr;
+    GSList* names =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
         char* name = (char*)g_slist_nth(names, i)->data;
 
-        GValue value = {};
-        GValue min = {};
-        GValue max = {};
-        GValue default_value = {};
-        GValue step_size = {};
-        GValue type = {};
-        GValue flags = {};
-        GValue category = {};
-        GValue group = {};
+        TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source), name, &err);
 
-        gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                                   name,
-                                                   &value,
-                                                   &min,
-                                                   &max,
-                                                   &default_value,
-                                                   &step_size,
-                                                   &type,
-                                                   &flags,
-                                                   &category,
-                                                   &group);
+        TcamPropertyType type = tcam_property_base_get_property_type(base_property);
 
-        if (!ret)
+        switch(type)
         {
-            printf("Could not query property '%s'\n", name);
-            continue;
-        }
-        std::cout << std::left;
-
-        const char* t = g_value_get_string(&type);
-        if (strcmp(t, "integer") == 0)
-        {
-            std::cout << std::fixed << std::setw(name_width) << name << "(int)" << std::right
-                      << " min=" << g_value_get_int(&min) << " max=" << g_value_get_int(&max)
-                      << " step=" << g_value_get_int(&step_size)
-                      << " default=" << g_value_get_int(&default_value)
-                      << " value=" << g_value_get_int(&value)
-                      << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group) << std::endl;
-        }
-        else if (strcmp(t, "double") == 0)
-        {
-            std::cout << std::fixed << std::setw(name_width) << name << "(double)" << std::right
-                      << " min=" << g_value_get_double(&min) << " max=" << g_value_get_double(&max)
-                      << " step=" << g_value_get_double(&step_size)
-                      << " default=" << g_value_get_double(&default_value)
-                      << " value=" << g_value_get_double(&value)
-                      << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group) << std::endl;
-        }
-        else if (strcmp(t, "string") == 0)
-        {
-            printf("%s(string) value: %s default: %s  grouping %s %s\n",
-                   name,
-                   g_value_get_string(&value),
-                   g_value_get_string(&default_value),
-                   g_value_get_string(&category),
-                   g_value_get_string(&group));
-        }
-        else if (strcmp(t, "enum") == 0)
-        {
-            GSList* entries = tcam_prop_get_tcam_menu_entries(TCAM_PROP(source), name);
-
-            if (entries == NULL)
+            case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                printf("%s returned no enumeration values.\n", name);
-                continue;
-            }
+                TcamPropertyInteger* integer = TCAM_PROPERTY_INTEGER(base_property);
+
+                gint64 min;
+                gint64 max;
+                gint64 def = tcam_property_integer_get_default(integer, &err);
+                gint64 step;
+                tcam_property_integer_get_range(integer, &min, &max, &step, &err);
+
+                if (err)
+                {
+                    std::cout << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
 
 
-            std::cout << std::setw(name_width) << name << "(enum) "
-                      << " default=" << std::setw(6) << g_value_get_string(&default_value)
-                      << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group)
-                      << "\n\t\t\t\t\t\tvalue=" << g_value_get_string(&value) << std::endl;
-            for (unsigned int x = 0; x < g_slist_length(entries); ++x)
+                gint64 value = tcam_property_integer_get_value(integer, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                std::string unit;
+                const char* tmp_unit = tcam_property_integer_get_unit(integer);
+
+                if (tmp_unit)
+                {
+                    unit = tmp_unit;
+                }
+
+                std::cout << name << "\ttype: Integer\t"
+                          << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                          << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                          << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                          << "\t\t\tUnit:" << unit << std::endl
+                          << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
+                          << "\t\t\tPresentation: " << g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_integer_get_representation(integer)) << std::endl
+                          << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                          << "" << std::endl
+                          << "\t\t\tDefault: " << def << std::endl
+                          << "\t\t\tValue: " << value
+                          << std::endl << std::endl;
+
+                break;
+
+            }
+            case TCAM_PROPERTY_TYPE_FLOAT:
             {
-                printf("\t\t\t\t\t\t\t %s\n", (const char*)g_slist_nth(entries, x)->data);
+                TcamPropertyFloat* f = TCAM_PROPERTY_FLOAT(base_property);
+
+                gdouble min;
+                gdouble max;
+                gdouble def = tcam_property_float_get_default(f, &err);
+                gdouble step;
+                tcam_property_float_get_range(f, &min, &max, &step, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                gdouble value = tcam_property_float_get_value(f, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                std::string unit;
+                const char* tmp_unit = tcam_property_float_get_unit(f);
+
+                if (tmp_unit)
+                {
+                    unit = tmp_unit;
+                }
+
+                std::cout << std::setprecision(3) << std::fixed
+                          << name << "\ttype: Float\t"
+                          << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                          << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                          << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                          << "\t\t\tUnit:" << unit << std::endl
+                          << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                          << "" << std::endl
+                          << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep:" << step << std::endl
+                          << "\t\t\tDefault: " << def << std::endl
+                          << "\t\t\tValue: " << value
+                          << std::endl << std::endl;
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_ENUMERATION:
+            {
+                TcamPropertyEnumeration* e = TCAM_PROPERTY_ENUMERATION(base_property);
+
+                char* value = tcam_property_enumeration_get_value(e, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                const char* def = tcam_property_enumeration_get_default(e, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                std::string entries;
+
+                GSList* enum_entries = tcam_property_enumeration_get_enum_entries(e, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                if (enum_entries)
+                {
+                    for (GSList* entry = enum_entries; entry != nullptr; entry = entry->next)
+                    {
+                        entries += " ";
+                        entries += (const char*)entry->data;
+                    }
+
+                    g_slist_free_full(enum_entries, g_free);
+                }
+
+
+                std::cout << name << "\ttype: Enumeration\t"
+                          << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                          << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                          << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                          << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
+                          << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                          << "" << std::endl
+                          << "\t\t\tEntries:" << entries << std::endl
+                          << "\t\t\tDefault: " << def << std::endl
+                          << "\t\t\tValue: " << value
+                          << std::endl << std::endl;
+
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
+            {
+                TcamPropertyBoolean* b = TCAM_PROPERTY_BOOLEAN(base_property);
+                gboolean value = tcam_property_boolean_get_value(b, &err);
+                gboolean def = tcam_property_boolean_get_default(b, &err);
+
+                if (err)
+                {
+                    std::cerr << err->message << std::endl;
+                    g_error_free(err);
+                    break;
+                }
+
+                auto bool_string = [] (bool bv)
+                {
+                    if (bv)
+                    {
+                        return "true";
+                    }
+                    return "false";
+                };
+
+                std::cout << name << "\ttype: Boolean\t"
+                          << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                          << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                          << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                          << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                          << "" << std::endl
+                          << "\t\t\tDefault: " << bool_string(def) << std::endl
+                          << "\t\t\tValue: " << bool_string(value)
+                          << std::endl << std::endl;
+
+                break;
+
+            }
+            case TCAM_PROPERTY_TYPE_COMMAND:
+            {
+                std::cout << name << "\ttype: Command\t"
+                          << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
+                          << "Category: " << tcam_property_base_get_category(base_property) << std::endl
+                          << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
+                          << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
+                          << std::endl << std::endl;
+
+                break;
+
+            }
+            default:
+            {
+                break;
+            }
+            std::cout << std::endl << "\n" << std::endl;
+
+            if (base_property)
+            {
+                g_object_unref(base_property);
             }
         }
-        else if (strcmp(t, "boolean") == 0)
-        {
-            std::cout << std::setw(name_width) << name << "(bool)"
-                      << " default=";
-            if (g_value_get_boolean(&default_value))
-            {
-                std::cout << "true";
-            }
-            else
-            {
-                std::cout << "false";
-            }
-            std::cout << " value=";
-            if (g_value_get_boolean(&value))
-            {
-                std::cout << "true";
-            }
-            else
-            {
-                std::cout << "false";
-            }
-            std::cout << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group) << std::endl;
-        }
-        else if (strcmp(t, "button") == 0)
-        {
-            std::cout << std::setw(name_width) << name << "(button)"
-                      << " category=" << g_value_get_string(&category)
-                      << " group=" << g_value_get_string(&group) << std::endl;
-        }
-        else
-        {
-            printf("Property '%s' has type '%s' .\n", name, t);
-        }
+
     }
     gst_element_set_state(source, GST_STATE_NULL);
 
-    g_slist_free(names);
+    g_slist_free_full(names, g_free);
     gst_object_unref(source);
 }
 
@@ -192,7 +333,7 @@ void print_state_json(const std::string& serial)
         return;
     }
 
-    if (!is_valid_device_serial(source, serial))
+    if (!is_valid_device_serial(serial))
     {
         std::cerr << "Device with given serial does not exist." << std::endl;
         return;
@@ -229,7 +370,7 @@ void load_state_json_string(const std::string& serial, const std::string& json_s
         return;
     }
 
-    if (!is_valid_device_serial(source, serial))
+    if (!is_valid_device_serial(serial))
     {
         std::cerr << "Device with given serial does not exist." << std::endl;
         return;

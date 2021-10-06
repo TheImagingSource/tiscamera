@@ -19,22 +19,28 @@ find_package(GStreamer REQUIRED QUIET)
 #find_package(GObject   REQUIRED QUIET)
 #find_package(GObjectIntrospection REQUIRED QUIET)
 
-add_subdirectory( tcamconvert )
-add_subdirectory( tcamgstbase )
-add_subdirectory( tcamsrc )
+add_subdirectory(tcamconvert)
+add_subdirectory(tcamgstbase)
+add_subdirectory(tcamsrc)
 
-add_library(gsttcambin SHARED
-	gsttcambin.cpp
-)
+add_library(gsttcambin
+  SHARED
+  gsttcambin.cpp
+  tcambin_tcamprop_impl.h
+  tcambin_tcamprop_impl.cpp
+  tcambin_data.h
+  )
 
-target_link_libraries( gsttcambin
-PRIVATE
-	tcamgstbase
-	tcam::gst-helper	
-)
+target_link_libraries(gsttcambin
+  PRIVATE
+  tcamgstbase
+  tcam::gst-helper
+  tcamprop1::provider_gobject
+  tcamprop1::consumer
+  )
+
 set_project_warnings(gsttcambin)
 
 install(TARGETS gsttcambin
   DESTINATION ${TCAM_INSTALL_GST_1_0}
   COMPONENT tcam-gstreamer-1)
-

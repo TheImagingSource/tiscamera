@@ -16,16 +16,14 @@
 
 #include "tcamconvert_context.h"
 
-#include "../../gobject/Tcam-0.1.h"
-
 #include <cassert>
 #include <gst-helper/gstelement_helper.h>
-#include <tcamprop_system/tcamprop_consumer.h>
-
+#include <tcamprop1.0_consumer/tcamprop1_consumer.h>
 
 namespace
 {
 
+static constexpr const char* ClaimBalanceWhiteSoftware_name = "ClaimBalanceWhiteSoftware";
 static constexpr const char* BalanceWhiteRed_name = "BalanceWhiteRed";
 static constexpr const char* BalanceWhiteGreen_name = "BalanceWhiteGreen";
 static constexpr const char* BalanceWhiteBlue_name = "BalanceWhiteBlue";
@@ -41,30 +39,41 @@ void tcamconvert::tcamconvert_context_base::init_from_source()
 {
     whitebalance_params_.apply = false;
 
-    auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
+    auto prop_elem = tcamprop1_consumer::get_TcamPropertyProvider(*src_element_ptr_);
     assert(prop_elem != nullptr);
-
-    bool val = tcamprop_system::has_property(
-        prop_elem, "ClaimBalanceWhiteSoftware", tcamprop_system::prop_type::boolean);
-    if (val)
+    if (!prop_elem)
     {
-        whitebalance_params_.apply =
-            tcamprop_system::set_value(prop_elem, "ClaimBalanceWhiteSoftware", true);
+        return;
+    }
+
+    tcamprop1_consumer::TcamPropertyProvider_wrapper provider(*prop_elem);
+
+    auto p_claim_ptr = provider.get_property_ptr<tcamprop1::property_interface_boolean>(
+        "ClaimBalanceWhiteSoftware");
+    if (p_claim_ptr)
+    {
+        auto wb_red =
+            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteRed_name);
+        auto wb_green =
+            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteGreen_name);
+        auto wb_blue =
+            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteBlue_name);
+
+        assert(wb_red && wb_green && wb_blue);
+        if (wb_red && wb_green && wb_blue)
+        {
+            auto err = p_claim_ptr->set_property_value(true);
+            if (!err)
+            {
+                whitebalance_params_.apply = true;
+                wb_red_ = std::move(wb_red);
+                wb_green_ = std::move(wb_green);
+                wb_blue_ = std::move(wb_blue);
+            }
+        }
     }
 
     init_from_source_done_ = true;
-}
-
-auto tcamconvert::tcamconvert_context_base::get_property_list() -> std::vector<std::string_view>
-{
-    return {}; //prop_list_.get_property_list();
-}
-
-auto tcamconvert::tcamconvert_context_base::find_property(std::string_view /*name*/)
-    -> tcamprop_system::property_interface*
-{
-    //return prop_list_.find_property( name );
-    return nullptr;
 }
 
 auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_source()
@@ -75,7 +84,7 @@ auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_sourc
         return {};
     }
 
-    auto prop_elem = tcamprop_system::to_TcamProp(src_element_ptr_.get());
+    auto prop_elem = tcamprop1_consumer::get_TcamPropertyProvider(*src_element_ptr_);
     assert(prop_elem);
     if (!prop_elem)
     {
@@ -88,15 +97,19 @@ auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_sourc
     }
 
     auto factors = whitebalance_params_;
-    auto read_chan = [prop_elem](const char* name, float& val) {
-        if (auto res = tcamprop_system::get_value<double>(prop_elem, name); res)
+
+    auto read_chan = [prop_elem](auto& ptr, float& val)
+    {
+        if (!ptr)
+            return;
+        if (auto res = ptr->get_property_value(); res)
         {
             val = res.value();
         }
     };
-    read_chan(BalanceWhiteRed_name, factors.wb_rr);
-    read_chan(BalanceWhiteGreen_name, factors.wb_gr);
-    read_chan(BalanceWhiteBlue_name, factors.wb_bb);
+    read_chan(wb_red_, factors.wb_rr);
+    read_chan(wb_green_, factors.wb_gr);
+    read_chan(wb_blue_, factors.wb_bb);
     factors.wb_gb = factors.wb_gr;
 
     return whitebalance_params_ = factors;
@@ -105,7 +118,7 @@ auto tcamconvert::tcamconvert_context_base::fetch_balancewhite_values_from_sourc
 
 static bool is_compatible_source_element(GstElement& element)
 {
-    if (!TCAM_IS_PROP(&element))
+    if (!TCAM_IS_PROPERTY_PROVIDER(&element))
     { // When the element has no tcamprop interface, we can quit here
         return false;
     }
@@ -184,6 +197,9 @@ void tcamconvert::tcamconvert_context_base::on_device_opened()
 void tcamconvert::tcamconvert_context_base::on_device_closed()
 {
     init_from_source_done_ = false;
+    wb_red_.reset();
+    wb_green_.reset();
+    wb_blue_.reset();
 }
 
 void tcamconvert::tcamconvert_context_base::on_input_pad_linked()

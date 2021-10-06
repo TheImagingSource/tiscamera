@@ -173,6 +173,85 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
         SPDLOG_ERROR("Unable to retrieve aravis int bounds: {}", err->message);
         g_clear_error(&err);
     }
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view AravisPropertyIntegerImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view AravisPropertyIntegerImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view AravisPropertyIntegerImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view AravisPropertyIntegerImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::IntRepresentation_t AravisPropertyIntegerImpl::get_representation() const
+{
+    if (p_static_info)
+    {
+        return p_static_info->representation;
+    }
+    return tcamprop1::IntRepresentation_t::Linear;
 }
 
 
@@ -257,6 +336,88 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
         SPDLOG_ERROR("Unable to retrieve aravis float bounds: {}", err->message);
         g_clear_error(&err);
     }
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view AravisPropertyDoubleImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view AravisPropertyDoubleImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view AravisPropertyDoubleImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
+}
+
+
+std::string_view AravisPropertyDoubleImpl::get_unit() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->unit;
+    }
+}
+
+
+tcamprop1::FloatRepresentation_t AravisPropertyDoubleImpl::get_representation() const
+{
+    if (!p_static_info)
+    {
+        return tcamprop1::FloatRepresentation_t::Linear;
+    }
+    else
+    {
+        return p_static_info->representation;
+    }
 }
 
 
@@ -333,6 +494,62 @@ AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
     }
 
     m_cam = backend;
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view AravisPropertyBoolImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view AravisPropertyBoolImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view AravisPropertyBoolImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -387,6 +604,62 @@ AravisPropertyCommandImpl::AravisPropertyCommandImpl(const std::string& name,
     : m_cam(backend), m_name(name), p_node(node)
 {
     m_actual_name = arv_gc_feature_node_get_name((ArvGcFeatureNode*)node);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Command  && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view AravisPropertyCommandImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view AravisPropertyCommandImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view AravisPropertyCommandImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -446,6 +719,62 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(const std::string& name,
     {
         m_default = def_ret;
     }
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
+}
+
+
+std::string_view AravisPropertyEnumImpl::get_display_name() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->display_name;
+    }
+}
+
+
+std::string_view AravisPropertyEnumImpl::get_description() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->description;
+    }
+}
+
+
+std::string_view AravisPropertyEnumImpl::get_category() const
+{
+    if (!p_static_info)
+    {
+        return std::string_view();
+    }
+    else
+    {
+        return p_static_info->iccategory;
+    }
 }
 
 
@@ -455,7 +784,7 @@ PropertyFlags AravisPropertyEnumImpl::get_flags() const
 }
 
 
-outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string& new_value)
+outcome::result<void> AravisPropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {
     if (auto ptr = m_cam.lock())
     {
@@ -475,7 +804,7 @@ outcome::result<void> AravisPropertyEnumImpl::set_value(int64_t /*new_value*/)
 }
 
 
-outcome::result<std::string> AravisPropertyEnumImpl::get_value() const
+outcome::result<std::string_view> AravisPropertyEnumImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {

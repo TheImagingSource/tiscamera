@@ -16,8 +16,10 @@
 
 #include "gsttcambin.h"
 
-#include "../gobject/tcamprop.h"
+#include "../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "../version.h"
+#include "tcambin_tcamprop_impl.h"
+#include "tcambin_data.h"
 #include "tcamgstbase/tcamgstjson.h"
 #include "tcamgstbase/tcamgstbase.h"
 
@@ -27,45 +29,6 @@
 #include <unistd.h>
 
 using namespace tcam::gst;
-
-struct tcambin_data
-{
-    std::string device_serial;
-    std::string device_type;
-
-    std::string state;
-
-    gst_helper::gst_ptr<GstPad> target_pad;
-    gst_helper::gst_ptr<GstCaps> user_caps;
-
-    GstPad* src_ghost_pad =
-        nullptr; // NOTE: we don't have a reference to this, so this is a observer that will be made invalid in dispose
-
-    gst_helper::gst_ptr<GstElement> out_caps_filter_;
-
-    gst_helper::gst_ptr<GstCaps> src_caps;
-    gst_helper::gst_ptr<GstCaps> target_caps;
-
-
-    // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
-    GstElement* src = nullptr;
-    GstElement* pipeline_caps = nullptr;
-    GstElement* dutils = nullptr;
-    GstElement* bayer_transform = nullptr;
-    GstElement* jpegdec = nullptr;
-    GstElement* convert = nullptr;
-    GstElement* tcamconvert = nullptr;
-
-    gboolean elements_created = FALSE;
-    gboolean elements_linked = FALSE;
-    gboolean target_set = FALSE;
-    gboolean must_apply_state = FALSE;
-
-    gboolean has_dutils = FALSE;
-
-    tcam::gst::input_caps_required_modules modules;
-    tcam::gst::input_caps_toggles toggles;
-};
 
 
 #define gst_tcambin_parent_class parent_class
@@ -78,369 +41,13 @@ static gboolean gst_tcambin_create_source(GstTcamBin* self);
 static gboolean gst_tcambin_create_elements(GstTcamBin* self);
 static void gst_tcambin_clear_source(GstTcamBin* self);
 
-//
-// introspection interface
-//
-
-static GSList* gst_tcam_bin_get_property_names(TcamProp* self);
-
-static gchar* gst_tcam_bin_get_property_type(TcamProp* self, const gchar* name);
-
-static gboolean gst_tcam_bin_get_tcam_property(TcamProp* self,
-                                               const gchar* name,
-                                               GValue* value,
-                                               GValue* min,
-                                               GValue* max,
-                                               GValue* def,
-                                               GValue* step,
-                                               GValue* type,
-                                               GValue* flags,
-                                               GValue* category,
-                                               GValue* group);
-
-static gboolean gst_tcam_bin_set_tcam_property(TcamProp* self,
-                                               const gchar* name,
-                                               const GValue* value);
-
-static GSList* gst_tcam_bin_get_tcam_menu_entries(TcamProp* self, const gchar* name);
-
-static GSList* gst_tcam_bin_get_device_serials(TcamProp* self);
-static GSList* gst_tcam_bin_get_device_serials_backend(TcamProp* self);
-
-static gboolean gst_tcam_bin_get_device_info(TcamProp* self,
-                                             const char* serial,
-                                             char** name,
-                                             char** identifier,
-                                             char** connection_type);
-
-static void gst_tcam_bin_prop_init(TcamPropInterface* iface)
-{
-    iface->get_tcam_property_names = gst_tcam_bin_get_property_names;
-    iface->get_tcam_property_type = gst_tcam_bin_get_property_type;
-    iface->get_tcam_property = gst_tcam_bin_get_tcam_property;
-    iface->get_tcam_menu_entries = gst_tcam_bin_get_tcam_menu_entries;
-    iface->set_tcam_property = gst_tcam_bin_set_tcam_property;
-    iface->get_tcam_device_serials = gst_tcam_bin_get_device_serials;
-    iface->get_tcam_device_serials_backend = gst_tcam_bin_get_device_serials_backend;
-    iface->get_tcam_device_info = gst_tcam_bin_get_device_info;
-}
-
 
 G_DEFINE_TYPE_WITH_CODE(GstTcamBin,
                         gst_tcambin,
                         GST_TYPE_BIN,
-                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, gst_tcam_bin_prop_init))
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER, tcam::gst::bin::gst_tcambin_tcamprop_init))
 
 
-tcambin_data& get_tcambin_data(gpointer ptr)
-{
-    GstTcamBin* self = GST_TCAMBIN(ptr);
-
-    return *self->data;
-}
-
-/**
- * gst_tcam_get_property_type:
- * @self: a #GstTcamBin
- * @name: a #char* identifying the property to query
- *
- * Return the type of a property
- *
- * Returns: (transfer full): A string describing the property type
- */
-static gchar* gst_tcam_bin_get_property_type(TcamProp* iface, const gchar* name)
-{
-    gchar* ret = NULL;
-
-    GstTcamBin* self = GST_TCAMBIN(iface);
-    auto& data = get_tcambin_data(iface);
-
-    if (!data.src)
-    {
-        GST_ELEMENT_ERROR(self,
-                          RESOURCE,
-                          FAILED,
-                          ("Elements are not initialized."),
-                          ("Set pipeline to state READY or higher."));
-        return nullptr;
-    }
-
-    GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
-    GValue item = G_VALUE_INIT;
-    for (GstIteratorResult res = gst_iterator_next(it, &item); res == GST_ITERATOR_OK;
-         res = gst_iterator_next(it, &item))
-    {
-        GstElement* element = GST_ELEMENT(g_value_get_object(&item));
-        if (TCAM_IS_PROP(element))
-        {
-            ret = g_strdup(tcam_prop_get_tcam_property_type(TCAM_PROP(element), name));
-            if (ret != nullptr)
-            {
-                break;
-            }
-        }
-        g_value_unset(&item);
-    }
-
-    gst_iterator_free(it);
-
-    return ret;
-}
-
-
-/**
- * gst_tcam_bin_get_property_names:
- * @self: a #GstTcamBin
- *
- * Return a list of property names
- *
- * Returns: (element-type utf8) (transfer full): list of property names
- */
-static GSList* gst_tcam_bin_get_property_names(TcamProp* iface)
-{
-    GSList* ret = NULL;
-    GstTcamBin* self = GST_TCAMBIN(iface);
-
-    auto& data = get_tcambin_data(iface);
-
-    if (!data.src)
-    {
-        GST_ELEMENT_ERROR(self,
-                          RESOURCE,
-                          FAILED,
-                          ("Elements are not initialized."),
-                          ("Set pipeline to state READY or higher."));
-        return nullptr;
-    }
-
-    GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
-    GValue item = G_VALUE_INIT;
-    for (GstIteratorResult res = gst_iterator_next(it, &item); res == GST_ITERATOR_OK;
-         res = gst_iterator_next(it, &item))
-    {
-        GstElement* element = GST_ELEMENT(g_value_get_object(&item));
-        if (TCAM_IS_PROP(element))
-        {
-            GSList* prop_names = tcam_prop_get_tcam_property_names(TCAM_PROP(element));
-            ret = g_slist_concat(ret, prop_names);
-        }
-        g_value_unset(&item);
-    }
-
-    gst_iterator_free(it);
-
-    return ret;
-}
-
-
-static gboolean gst_tcam_bin_get_tcam_property(TcamProp* iface,
-                                               const gchar* name,
-                                               GValue* value,
-                                               GValue* min,
-                                               GValue* max,
-                                               GValue* def,
-                                               GValue* step,
-                                               GValue* type,
-                                               GValue* flags,
-                                               GValue* category,
-                                               GValue* group)
-{
-    GstTcamBin* self = GST_TCAMBIN(iface);
-
-    auto& data = get_tcambin_data(iface);
-
-    if (!data.src)
-    {
-        GST_ELEMENT_ERROR(self,
-                          RESOURCE,
-                          FAILED,
-                          ("Elements are not initialized."),
-                          ("Set pipeline to state READY or higher."));
-        return FALSE;
-    }
-
-    gboolean ret = false;
-
-    GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
-    GValue item = G_VALUE_INIT;
-    for (GstIteratorResult res = gst_iterator_next(it, &item); res == GST_ITERATOR_OK;
-         res = gst_iterator_next(it, &item))
-    {
-        GstElement* element = GST_ELEMENT(g_value_get_object(&item));
-        if (TCAM_IS_PROP(element))
-        {
-            if (tcam_prop_get_tcam_property(TCAM_PROP(element),
-                                            name,
-                                            value,
-                                            min,
-                                            max,
-                                            def,
-                                            step,
-                                            type,
-                                            flags,
-                                            category,
-                                            group))
-            {
-                ret = true;
-                break;
-            }
-        }
-        g_value_unset(&item);
-    }
-
-    gst_iterator_free(it);
-
-    return ret;
-}
-
-
-/**
- * gst_tcam_bin_get_tcam_manu_entries:
- * @self: a #GstTcamBin
- * @name: a #char*
- *
- * Return a list of property names
- *
- * Returns: (element-type utf8) (transfer full): a #GSList
- */
-static GSList* gst_tcam_bin_get_tcam_menu_entries(TcamProp* iface, const gchar* name)
-{
-    GstTcamBin* self = GST_TCAMBIN(iface);
-    auto& data = get_tcambin_data(iface);
-
-    if (!data.src)
-    {
-        GST_ELEMENT_ERROR(self,
-                          RESOURCE,
-                          FAILED,
-                          ("Elements are not initialized."),
-                          ("Set pipeline to state READY or higher."));
-        return nullptr;
-    }
-
-    GSList* ret;
-
-    GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
-    GValue item = G_VALUE_INIT;
-    for (GstIteratorResult res = gst_iterator_next(it, &item); res == GST_ITERATOR_OK;
-         res = gst_iterator_next(it, &item))
-    {
-        GstElement* element = GST_ELEMENT(g_value_get_object(&item));
-        if (TCAM_IS_PROP(element))
-        {
-            ret = tcam_prop_get_tcam_menu_entries(TCAM_PROP(element), name);
-            if (ret)
-            {
-                break;
-            }
-        }
-        g_value_unset(&item);
-    }
-
-    gst_iterator_free(it);
-
-    return ret;
-}
-
-static gboolean gst_tcam_bin_set_tcam_property(TcamProp* iface,
-                                               const gchar* name,
-                                               const GValue* value)
-{
-    GstTcamBin* self = GST_TCAMBIN(iface);
-    auto& data = get_tcambin_data(iface);
-
-    if (!data.src)
-    {
-        GST_ELEMENT_ERROR(self,
-                          RESOURCE,
-                          FAILED,
-                          ("Elements are not initialized."),
-                          ("Set pipeline to state READY or higher."));
-        return FALSE;
-    }
-
-    gboolean ret = false;
-
-    GstIterator* it = gst_bin_iterate_elements(GST_BIN(self));
-    GValue item = G_VALUE_INIT;
-    for (GstIteratorResult res = gst_iterator_next(it, &item); res == GST_ITERATOR_OK;
-         res = gst_iterator_next(it, &item))
-    {
-        GstElement* element = GST_ELEMENT(g_value_get_object(&item));
-        if (TCAM_IS_PROP(element))
-        {
-            if (tcam_prop_set_tcam_property(TCAM_PROP(element), name, value))
-            {
-                ret = true;
-                break;
-            }
-        }
-        g_value_unset(&item);
-    }
-
-    gst_iterator_free(it);
-
-    return ret;
-}
-
-
-static GSList* gst_tcam_bin_get_device_serials(TcamProp* self __attribute((__unused__)))
-{
-    GstElement* src = gst_element_factory_make("tcamsrc", nullptr);
-    if (src == nullptr)
-    {
-        g_critical("Failed to create a tcamsrc");
-        return nullptr;
-    }
-
-    GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(src));
-
-    gst_object_unref(src);
-
-    return serials;
-}
-
-
-static GSList* gst_tcam_bin_get_device_serials_backend(TcamProp* self __attribute((__unused__)))
-{
-    GstElement* src = gst_element_factory_make("tcamsrc", nullptr);
-    if (src == nullptr)
-    {
-        g_critical("Failed to create a tcamsrc");
-        return nullptr;
-    }
-
-    GSList* serials = tcam_prop_get_device_serials_backend(TCAM_PROP(src));
-
-    gst_object_unref(src);
-
-    return serials;
-}
-
-
-static gboolean gst_tcam_bin_get_device_info(TcamProp* self __attribute((__unused__)),
-                                             const char* serial,
-                                             char** name,
-                                             char** identifier,
-                                             char** connection_type)
-{
-    GstElement* src = gst_element_factory_make("tcamsrc", nullptr);
-    if (src == nullptr)
-    {
-        g_critical("Failed to create a tcamsrc");
-        return false;
-    }
-    gboolean ret =
-        tcam_prop_get_device_info(TCAM_PROP(src), serial, name, identifier, connection_type);
-    gst_object_unref(src);
-
-    return ret;
-}
-
-
-//
-// gstreamer module
-//
 
 static void gst_tcambin_class_init(GstTcamBinClass* klass);
 static void gst_tcambin_init(GstTcamBin* klass);
@@ -589,16 +196,6 @@ static gboolean create_and_add_element(GstElement** element,
                                        const char* element_name,
                                        GstBin* bin)
 {
-#if 0 // #TODO 2021/08/10 christopher: this seems to be 'curious'?
-    auto factory = gst_element_factory_find(factory_name);
-
-    if (!factory)
-    {
-        return FALSE;
-    }
-    gst_object_unref(factory);
-#endif
-
     *element = gst_element_factory_make(factory_name, element_name);
     if (*element)
     {
@@ -1035,18 +632,18 @@ static void set_target_pad(GstTcamBin* self)
 }
 
 
-static gboolean apply_state(GstTcamBin* self, const std::string& state)
+static gboolean apply_state(GstTcamBin* self, const std::string& /*state*/)
 {
     auto& data = get_tcambin_data(self);
 
-    bool ret;
+    bool ret = true;
     if (data.device_serial.empty())
     {
-        ret = tcam::gst::load_device_settings(TCAM_PROP(self), "", state);
+//        ret = tcam::gst::load_device_settings(TCAM_PROPPROVIDER(self), "", state);
     }
     else
     {
-        ret = tcam::gst::load_device_settings(TCAM_PROP(self), data.device_serial, state);
+        //      ret = tcam::gst::load_device_settings(TCAM_PROPPROVIDER(self), data.device_serial, state);
     }
 
     if (!ret)
@@ -1358,9 +955,9 @@ static void gst_tcambin_get_property(GObject* object,
             }
             if (!data.device_serial.empty())
             {
-                std::string bla =
-                    tcam::gst::create_device_settings(data.device_serial, TCAM_PROP(self)).c_str();
-                g_value_set_string(value, bla.c_str());
+                // std::string bla =
+                //     tcam::gst::create_device_settings(data.device_serial, TCAM_PROPPROVIDER(self)).c_str();
+                // g_value_set_string(value, bla.c_str());
             }
             else
             {

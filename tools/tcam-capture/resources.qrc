@@ -1,0 +1,11 @@
+<!DOCTYPE RCC><RCC version="1.0">
+  <qresource>
+    <file alias="images/logo.png">../../data/images/tiscamera_logo.png</file>
+    <file alias="images/camera.png">../../data/images/23uc256.png</file>
+    <file alias="images/VideoFormat.png">../../data/images/VideoFormat.png</file>
+    <file alias="images/close.png">../../data/images/close.png</file>
+    <file alias="images/dialog.png">../../data/images/dialog.png</file>
+    <file alias="images/Settings.png">../../data/images/Settings.png</file>
+    <!-- <file>images/save.png</file> -->
+  </qresource>
+</RCC>

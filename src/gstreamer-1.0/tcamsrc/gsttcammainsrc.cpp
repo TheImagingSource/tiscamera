@@ -17,7 +17,7 @@
 #include "gsttcammainsrc.h"
 
 #include "../tcamgstbase/tcamgstbase.h"
-#include "../../gobject/tcamprop.h"
+#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "../../logging.h"
 #include "../../tcam.h"
 #include "../tcamgstbase/tcamgstjson.h"
@@ -45,7 +45,9 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self);
 G_DEFINE_TYPE_WITH_CODE(GstTcamMainSrc,
                         gst_tcam_mainsrc,
                         GST_TYPE_PUSH_SRC,
-                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init))
+                        //G_IMPLEMENT_INTERFACE(TCAM_TYPE_PRO, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init)
+                        G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROPERTY_PROVIDER, tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init)
+    )
 
 
 enum
@@ -1015,8 +1017,9 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         }
         case PROP_STATE:
         {
-            bool state = tcam::gst::load_device_settings(
-                TCAM_PROP(self), self->device->device_serial, g_value_get_string(value));
+            // bool state = tcam::gst::load_device_settings(
+            //     TCAM_PROP(self), self->device->device_serial, g_value_get_string(value));
+            bool state = true;
             if (!state)
             {
                 GST_WARNING("Device may be in an undefined state.");
@@ -1071,8 +1074,8 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
         {
             if (!self->device->device_serial.empty())
             {
-                std::string bla =
-                    tcam::gst::create_device_settings(self->device->device_serial, TCAM_PROP(self)).c_str();
+                std::string bla = "";
+                //tcam::gst::create_device_settings(self->device->device_serial, TCAM_PROP(self)).c_str();
                 g_value_set_string(value, bla.c_str());
             }
             else

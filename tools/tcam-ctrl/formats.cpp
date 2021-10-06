@@ -34,7 +34,7 @@ void list_gstreamer_1_0_formats(const std::string& serial)
         return;
     }
 
-    if (!is_valid_device_serial(source, serial))
+    if (!is_valid_device_serial(serial))
     {
         std::cerr << "Device with given serial does not exist." << std::endl;
         return;

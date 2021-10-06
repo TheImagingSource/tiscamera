@@ -19,7 +19,7 @@
 #include <gst/gst.h>
 
 
-bool is_valid_device_serial(GstElement* source, const std::string& serial)
+bool is_valid_device_serial(const std::string& serial)
 {
     bool ret = false;
 

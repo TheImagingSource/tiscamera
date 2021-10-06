@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <tcamprop.h>
-#include <tcamprop_system/tcamprop_provider_base.h>
+// #include <tcamprop.h>
+// #include <tcamprop1.0_gobject/tcam_prop_provider_container.h>
 
 
 namespace tcamconvert
 {
-void gst_tcamconvert_prop_init(TcamPropInterface* iface);
-auto get_property_list_interface(TcamProp* iface) -> tcamprop_system::property_list_interface*;
+// void gst_tcamconvert_prop_init(TcamPropProvider* iface);
+    // auto get_property_list_interface(TcamPropProvider* iface) -> tcamprop1_gobject::tcam_prop_provider_container&;
 } // namespace tcamconvert

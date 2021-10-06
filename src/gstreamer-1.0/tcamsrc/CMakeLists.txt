@@ -16,8 +16,11 @@
 add_library(gsttcamsrc SHARED
 	gsttcamsrc.cpp
 	gsttcammainsrc.cpp
+	mainsrc_tcamprop_impl.h
 	mainsrc_tcamprop_impl.cpp
 	mainsrc_device_state.cpp
+    tcamsrc_tcamprop_impl.h
+    tcamsrc_tcamprop_impl.cpp
 	gsttcamdeviceprovider.cpp
 	gsttcamdevice.cpp
 
@@ -26,16 +29,18 @@ add_library(gsttcamsrc SHARED
 
 	tcambind.h
 	tcambind.cpp
-)
+    )
 
-target_link_libraries( gsttcamsrc
-PRIVATE
+  target_link_libraries( gsttcamsrc
+    PRIVATE
 	${GSTREAMER_LIBRARIES}
 	${GSTREAMER_BASE_LIBRARIES}
 
 	tcamgstbase
-	tcam::gst-helper	
-)
+	tcam::gst-helper
+    tcam::tcamprop
+    tcamprop1::provider_gobject
+    )
 set_project_warnings(gsttcamsrc)
 
 install(TARGETS gsttcamsrc

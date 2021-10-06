@@ -18,6 +18,7 @@
 
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
+#include <../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h>
 
 #include <map>
 #include <memory>
@@ -41,10 +42,21 @@ public:
     SoftwarePropertyIntegerImpl(const software_prop_desc& desc,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+
+    virtual std::string_view get_description() const final;
+
+    virtual std::string_view get_category() const final;
+
+    virtual std::string_view get_unit() const final;
+
+    virtual tcamprop1::IntRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -88,6 +100,7 @@ private:
     int64_t m_default;
 
     software_prop m_id;
+    const tcamprop1::prop_static_info_integer* p_static_info;
 };
 
 
@@ -98,12 +111,26 @@ public:
                                std::shared_ptr<IPropertyFloat> prop,
                                std::shared_ptr<SoftwarePropertyBackend> backend);
     SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
+                               std::shared_ptr<IPropertyInteger> prop,
+                               std::shared_ptr<SoftwarePropertyBackend> backend);
+    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
                                std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+
+    virtual std::string_view get_description() const final;
+
+    virtual std::string_view get_category() const final;
+
+    virtual std::string_view get_unit() const final;
+
+    tcamprop1::FloatRepresentation_t get_representation() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -146,6 +173,7 @@ private:
 
     software_prop m_id;
     std::weak_ptr<SoftwarePropertyBackend> m_cam;
+    const tcamprop1::prop_static_info_float* p_static_info;
 };
 
 
@@ -155,10 +183,17 @@ public:
     SoftwarePropertyBoolImpl(const software_prop_desc& desc,
                              std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+
+    virtual std::string_view get_description() const final;
+
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -184,6 +219,7 @@ private:
 
     software_prop m_id;
     std::weak_ptr<SoftwarePropertyBackend> m_cam;
+    const tcamprop1::prop_static_info_boolean* p_static_info;
 };
 
 
@@ -193,10 +229,17 @@ public:
     SoftwarePropertyCommandImpl(const software_prop_desc& desc,
                                 std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+
+    virtual std::string_view get_description() const final;
+
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -214,6 +257,7 @@ private:
     PropertyFlags m_flags;
 
     software_prop m_id;
+    const tcamprop1::prop_static_info_command* p_static_info;
 };
 
 
@@ -223,10 +267,17 @@ public:
     SoftwarePropertyEnumImpl(const software_prop_desc& desc,
                              std::shared_ptr<SoftwarePropertyBackend> backend);
 
-    virtual std::string get_name() const final
+    virtual std::string_view get_name() const final
     {
         return m_name;
     };
+
+    virtual std::string_view get_display_name() const final;
+
+    virtual std::string_view get_description() const final;
+
+    virtual std::string_view get_category() const final;
+
     virtual PropertyFlags get_flags() const final
     {
         return m_flags;
@@ -236,10 +287,10 @@ public:
         m_flags = flags;
     };
 
-    virtual outcome::result<void> set_value_str(const std::string& new_value) final;
+    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
-    virtual outcome::result<std::string> get_value() const final;
+    virtual outcome::result<std::string_view> get_value() const final;
     virtual outcome::result<int64_t> get_value_int() const final;
 
     virtual std::string get_default() const final
@@ -261,6 +312,7 @@ private:
     std::string m_default;
 
     software_prop m_id;
+    const tcamprop1::prop_static_info_enumeration* p_static_info;
 };
 
 

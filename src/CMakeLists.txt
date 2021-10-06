@@ -15,15 +15,13 @@
 
 include( ${TCAM_SOURCE_DIR}/cmake/pkg-helper.cmake )
 
-add_subdirectory(gobject)
-
 if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
 if (TCAM_ENABLE_BASE_LIBRARIES)
 
-add_library(tcam-base STATIC 
+add_library(tcam-base STATIC
   logging.cpp
   DeviceInfo.cpp
   ImageBuffer.cpp
@@ -37,11 +35,11 @@ add_library(tcam-base STATIC
   VideoFormat.cpp
   VideoFormatDescription.cpp
   ImageSink.cpp
-  
+
   error.cpp
 )
 
-target_link_libraries( tcam-base 
+target_link_libraries( tcam-base
 PUBLIC
     dutils_img::img
     spdlog::spdlog
@@ -49,7 +47,7 @@ PUBLIC
 PRIVATE
     dutils_img::pipe_auto
 )
-    
+
 target_include_directories( tcam-base PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
 
 
@@ -170,8 +168,8 @@ set_project_warnings(tcam)
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})
 set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
-target_include_directories( tcam 
-PRIVATE SYSTEM 
+target_include_directories( tcam
+PRIVATE SYSTEM
     "${TCAM_SOURCE_DIR}/external/"
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}      # For version.h, version.cpp is generated an build in ${CMAKE_CURRENT_BINARY_DIR}, so we have to bend includes to that directory
@@ -183,13 +181,14 @@ PRIVATE
 #   CXX_VISIBILITY_PRESET hidden
 #   )
 
-target_link_libraries(tcam 
-PUBLIC
-    spdlog::spdlog
-    tcam-base
-PRIVATE
-    outcome::outcome
-)
+target_link_libraries(tcam
+  PUBLIC
+  spdlog::spdlog
+  tcam-base
+  PRIVATE
+  outcome::outcome
+  tcamprop1_base
+  )
 
 
 if (BUILD_V4L2)

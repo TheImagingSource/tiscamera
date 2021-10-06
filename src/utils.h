@@ -90,6 +90,11 @@ double map_value_ranges(double input_start,
  */
 std::string get_environment_variable(const std::string& name, const std::string& backup);
 
+
+double realign_value(const double& value, const double& step, const double& min, const double& max);
+
+
+
 } /* namespace tcam */
 
 VISIBILITY_POP
