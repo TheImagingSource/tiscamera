@@ -124,10 +124,8 @@ private:
 
     std::thread m_monitor_v4l2_thread;
     std::atomic<bool> m_stop_monitor_v4l2_thread { false };
-    int udev_monitor_pipe[2] = { 0, 0 };
 
     void monitor_v4l2_thread_func();
-
 
     void notify_device_lost_func();
 

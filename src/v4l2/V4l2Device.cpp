@@ -65,15 +65,9 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
         throw std::runtime_error("Failed opening device.");
     }
 
-    if (pipe(udev_monitor_pipe) != 0)
-    {
-        SPDLOG_ERROR("Unable to create udev monitor pipe");
-        throw std::runtime_error("Failed opening device.");
-    }
     m_monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
     m_format_handler = std::make_shared<V4L2FormatHandler>(this);
-
 
     p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(m_fd);
     //this->index_all_controls(property_handler);
@@ -96,23 +90,6 @@ V4l2Device::~V4l2Device()
 
     this->m_stop_monitor_v4l2_thread = true;
 
-    // signal the udev monitor to exit it's poll/select
-    ssize_t write_ret = write(udev_monitor_pipe[1], "q", 1);
-    if (write_ret != 1)
-    {
-        SPDLOG_ERROR("Error closing udev monitoring pipe. write returned '{}' errno: {}",
-                     write_ret,
-                     strerror(errno));
-    }
-
-    // close write pipe fd
-    close(udev_monitor_pipe[1]);
-
-    if (m_monitor_v4l2_thread.joinable())
-    {
-        m_monitor_v4l2_thread.join();
-    }
-
     if (this->m_fd != -1)
     {
         close(m_fd);
@@ -127,6 +104,11 @@ V4l2Device::~V4l2Device()
     if (m_notification_thread.joinable()) // join this just in case stop_stream was not called
     {
         m_notification_thread.join();
+    }
+
+    if (m_monitor_v4l2_thread.joinable())
+    {
+        m_monitor_v4l2_thread.join();
     }
 }
 
@@ -1514,17 +1496,16 @@ void V4l2Device::monitor_v4l2_thread_func()
            object is set to 0, which will cause select() to not
            block. */
         fd_set fds;
-        int select_fd = (udev_fd > udev_monitor_pipe[0] ? udev_fd : udev_monitor_pipe[0]);
-        struct timeval tv;
-        int ret;
+        int select_fd = udev_fd+1;
 
         FD_ZERO(&fds);
         FD_SET(udev_fd, &fds);
-        FD_SET(udev_monitor_pipe[1], &fds);
+
+        struct timeval tv;
         tv.tv_sec = 1;
         tv.tv_usec = 0;
 
-        ret = select(select_fd, &fds, NULL, NULL, &tv);
+        int ret = select(select_fd, &fds, NULL, NULL, &tv);
 
         /* Check if our file descriptor has received data. */
         if (ret > 0 && FD_ISSET(udev_fd, &fds))
@@ -1557,9 +1538,6 @@ void V4l2Device::monitor_v4l2_thread_func()
             }
         }
     }
-
-    /* close read pipe fd */
-    close(udev_monitor_pipe[0]);
 
     udev_monitor_unref(mon);
     udev_unref(udev);
