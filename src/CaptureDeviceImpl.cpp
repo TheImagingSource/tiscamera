@@ -48,8 +48,6 @@ CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& _device)
         SPDLOG_ERROR("Unable to open device");
         throw bad_device();
     }
-    const auto serial = open_device_info.get_serial();
-    index_.register_device_lost(deviceindex_lost_cb, this, serial);
 }
 
 
@@ -85,6 +83,9 @@ bool CaptureDeviceImpl::open_device(const DeviceInfo& device_desc)
     pipeline->setSource(device);
 
     auto props = device->get_properties();
+
+    const auto serial = open_device_info.get_serial();
+    index_.register_device_lost(deviceindex_lost_cb, this, serial);
 
     return true;
 }
