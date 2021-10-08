@@ -172,11 +172,11 @@ static void update_device_list(TcamDeviceProvider* self)
 
     while (self->state->run_updates)
     {
-        GST_DEBUG("Checking for new devices");
+        // GST_DEBUG("Checking for new devices");
 
         auto new_list = self->state->index.get_device_list();
 
-        GST_DEBUG("%zu", new_list.size());
+        // GST_DEBUG("%zu", new_list.size());
 
         lost_devices = check_lost_devices(new_list);
         new_devices = check_new_devices(new_list);

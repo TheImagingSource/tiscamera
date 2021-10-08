@@ -209,7 +209,7 @@ void AravisDevice::index_properties(const char* name)
     }
     else
     {
-        SPDLOG_ERROR("Not implemented - {}!!!!", arv_dom_node_get_node_name(ARV_DOM_NODE(node)));
+        SPDLOG_ERROR("Not implemented - {} - {}!!!!", arv_dom_node_get_node_name(ARV_DOM_NODE(node)), prop_name);
     }
     //m_properties.push_back();
 }

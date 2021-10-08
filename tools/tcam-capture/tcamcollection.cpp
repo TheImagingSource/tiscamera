@@ -64,7 +64,7 @@ TcamPropertyBase* TcamCollection::get_property(const std::string& name)
 
         if (err)
         {
-            qWarning("Error while retrieving property \"%s\": %s", name, err->message);
+            qWarning("Error while retrieving property \"%s\": %s", name.c_str(), err->message);
             g_error_free(err);
         }
 

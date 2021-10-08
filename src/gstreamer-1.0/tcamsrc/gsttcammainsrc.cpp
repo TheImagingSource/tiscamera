@@ -98,7 +98,7 @@ static GstCaps* gst_tcam_mainsrc_get_all_camera_caps(GstTcamMainSrc* self)
         gst_element_set_state(GST_ELEMENT(self), GST_STATE_NULL);
     }
 
-    GST_INFO("Device provides the following caps: %s", gst_helper::to_string(*caps).c_str());
+    // GST_INFO("Device provides the following caps: %s", gst_helper::to_string(*caps).c_str());
 
     return caps;
 }
@@ -328,7 +328,7 @@ static gboolean gst_tcam_mainsrc_set_caps(GstBaseSrc* src, GstCaps* caps)
     int height = 0;
     int width = 0;
 
-    GST_INFO("Requested caps = %" GST_PTR_FORMAT, static_cast<void*>(caps));
+    GST_INFO("Requested caps = %s", gst_caps_to_string(caps));
 
     self->device->stop_and_clear();
     self->device->sink = nullptr;
@@ -409,6 +409,8 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
     {
         return;
     }
+
+    GST_ERROR("Device lost (%s)", self->device->device_serial.c_str());
 
     GST_ELEMENT_ERROR(GST_ELEMENT(self),
                       RESOURCE,

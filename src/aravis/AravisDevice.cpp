@@ -549,16 +549,48 @@ bool AravisDevice::set_video_format(const VideoFormat& new_format)
     // // set them again after changing the framerate to ensure consistent behaviour
     const char* trig_selector = arv_device_get_string_feature_value(
         arv_camera_get_device(arv_camera), "TriggerSelector", &err);
+
+    if (err)
+    {
+        SPDLOG_ERROR("Caught error: {}", err->message);
+        g_clear_error(&err);
+
+    }
+
     const char* trig_mode =
         arv_device_get_string_feature_value(arv_camera_get_device(arv_camera), "TriggerMode", &err);
+    if (err)
+    {
+        SPDLOG_ERROR("Caught error: {}", err->message);
+        g_clear_error(&err);
+
+    }
 
     arv_camera_set_frame_rate(this->arv_camera, new_format.get_framerate(), &err);
 
+    if (err)
+    {
+        SPDLOG_ERROR("Caught error: {}", err->message);
+        g_clear_error(&err);
+
+    }
     arv_device_set_string_feature_value(
         arv_camera_get_device(arv_camera), "TriggerSelector", trig_selector, &err);
+    if (err)
+    {
+        SPDLOG_ERROR("Caught error: {}", err->message);
+        g_clear_error(&err);
+
+    }
     arv_device_set_string_feature_value(
         arv_camera_get_device(arv_camera), "TriggerMode", trig_mode, &err);
 
+    if (err)
+    {
+        SPDLOG_ERROR("Caught error: {}", err->message);
+        g_clear_error(&err);
+
+    }
     arv_camera_set_pixel_format(this->arv_camera, fourcc2aravis(new_format.get_fourcc()), &err);
 
     if (err)
