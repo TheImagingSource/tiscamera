@@ -90,15 +90,13 @@ static GstDevice* tcam_device_new(GstElementFactory* factory, const tcam::Device
     return ret;
 }
 
-
-static void update_device_list(TcamDeviceProvider* self)
+static void     run_update_logic( std::unique_lock<std::mutex>&, TcamDeviceProvider* self )
 {
-
     auto check_lost_devices = [self](const std::vector<tcam::DeviceInfo>& new_list) {
         std::vector<device> to_remove;
         for (const auto& d : self->state->known_devices)
         {
-            auto iter = std::find_if(new_list.begin(), new_list.end(), [&d](const auto& new_d) {
+            auto not_already_present = std::none_of(new_list.begin(), new_list.end(), [&d](const auto& new_d) {
                 if (new_d.get_serial() == d.device.get_serial()
                     && new_d.get_device_type() == d.device.get_device_type())
                 {
@@ -107,9 +105,8 @@ static void update_device_list(TcamDeviceProvider* self)
                 return false;
             });
 
-            if (iter == new_list.end())
+            if (not_already_present)
             {
-                //GST_DEBUG("Notifying about lost device...");
                 to_remove.push_back(d);
             }
         }
@@ -130,13 +127,14 @@ static void update_device_list(TcamDeviceProvider* self)
         return to_remove;
     };
 
-    auto check_new_devices = [self](const std::vector<tcam::DeviceInfo>& new_list) {
+    auto check_new_devices = [self](const std::vector<tcam::DeviceInfo>& new_list)
+    {
         std::vector<device> new_devices;
 
         for (const auto& d : new_list)
         {
-            auto iter =
-                std::find_if(self->state->known_devices.begin(),
+            auto already_in_known_list =
+                std::any_of(self->state->known_devices.begin(),
                              self->state->known_devices.end(),
                              [&d](const auto& new_d) {
                                  if (new_d.device.get_serial() == d.get_serial()
@@ -147,15 +145,16 @@ static void update_device_list(TcamDeviceProvider* self)
                                  return false;
                              });
 
-            if (iter == self->state->known_devices.end())
+            if (!already_in_known_list)
             {
                 std::string name = d.get_serial() + "-" + d.get_device_type_as_string();
 
                 auto new_gstdev = tcam_device_new(self->factory, d);
-                // GST_DEBUG("Notifying about new device...");
-                // gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), new_gstdev);
-                struct device new_dev = { d, new_gstdev };
-                new_devices.push_back(new_dev);
+                if (g_object_is_floating(new_gstdev))
+                {
+                    g_object_ref_sink(new_gstdev); // this clears floating
+                }
+                new_devices.push_back(device{ d, new_gstdev });
             }
         }
 
@@ -165,41 +164,33 @@ static void update_device_list(TcamDeviceProvider* self)
         return new_devices;
     };
 
-    std::unique_lock<std::mutex> lck(self->state->_mtx);
-    auto sec = std::chrono::seconds(1);
-    std::vector<device> new_devices;
-    std::vector<device> lost_devices;
+    auto new_list = self->state->index.get_device_list();
 
-    while (self->state->run_updates)
+    auto lost_devices = check_lost_devices(new_list);
+    auto new_devices = check_new_devices(new_list);
+
+    for (const auto& dev : lost_devices)
     {
-        // GST_DEBUG("Checking for new devices");
+        gst_device_provider_device_remove(GST_DEVICE_PROVIDER(self), dev.gstdev);
 
-        auto new_list = self->state->index.get_device_list();
-
-        // GST_DEBUG("%zu", new_list.size());
-
-        lost_devices = check_lost_devices(new_list);
-        new_devices = check_new_devices(new_list);
-
-        self->state->cv.wait_for(lck, 2 * sec);
-
-        for (const auto& dev : lost_devices)
-        {
-            gst_device_provider_device_remove(GST_DEVICE_PROVIDER(self), dev.gstdev);
-
-            g_object_unref(dev.gstdev);
-
-        }
-
-        for (const auto& dev : new_devices)
-        {
-            gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), dev.gstdev);
-        }
+        g_object_unref(dev.gstdev);
     }
 
-    GST_DEBUG("update thread stopping....");
+    for (const auto& dev : new_devices)
+    {
+        gst_device_provider_device_add(GST_DEVICE_PROVIDER(self), dev.gstdev);
+    }
 }
 
+static void update_device_list(TcamDeviceProvider* self)
+{
+    std::unique_lock<std::mutex> lck(self->state->_mtx);
+    while (self->state->run_updates)
+    {
+        run_update_logic( lck, self );
+        self->state->cv.wait_for(lck, std::chrono::seconds(2));
+    }
+}
 
 static void tcam_device_provider_init(TcamDeviceProvider* self)
 {
@@ -212,8 +203,6 @@ static void tcam_device_provider_init(TcamDeviceProvider* self)
 
 static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
 {
-    GST_DEBUG("received probe");
-
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(provider);
 
     std::lock_guard lck(self->state->_mtx);
@@ -225,7 +214,6 @@ static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
     {
         std::string long_serial =
             d.get_serial() + "-" + d.get_device_type_as_string();
-        GST_DEBUG("Appending: %s", long_serial.c_str());
 
         ret = g_list_append(ret, tcam_device_new(self->factory, d));
     }
@@ -235,10 +223,10 @@ static GList* tcam_device_provider_probe(GstDeviceProvider* provider)
 
 static gboolean tcam_device_provider_start(GstDeviceProvider* provider)
 {
-    GST_DEBUG("start");
-
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(provider);
 
+    std::unique_lock<std::mutex> lck(self->state->_mtx);
+    run_update_logic( lck, self );
     self->state->run_updates = true;
     self->state->_update_thread = std::thread(update_device_list, self);
 
@@ -247,8 +235,6 @@ static gboolean tcam_device_provider_start(GstDeviceProvider* provider)
 
 static void tcam_device_provider_stop(GstDeviceProvider* provider)
 {
-    GST_DEBUG("stop");
-
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(provider);
 
     self->state->run_updates = false;
@@ -261,7 +247,22 @@ static void tcam_device_provider_dispose(GObject* object)
 {
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(object);
 
+    if( self->state->_update_thread.joinable() )
+    {
+        GST_ERROR( "Disposing TcamDeviceProvider before stopping it" );
+
+        self->state->run_updates = false;
+        self->state->cv.notify_all();
+
+        self->state->_update_thread.join();
+    }
+
     gst_object_replace((GstObject**)&self->factory, NULL);
+
+    for( auto& entry : self->state->known_devices ) {
+        gst_object_unref( entry.gstdev );
+    }
+    self->state->known_devices.clear();
 
     G_OBJECT_CLASS(tcam_device_provider_parent_class)->dispose(object);
 }
@@ -269,12 +270,6 @@ static void tcam_device_provider_dispose(GObject* object)
 static void tcam_device_provider_finalize(GObject* object)
 {
     TcamDeviceProvider* self = TCAM_DEVICE_PROVIDER(object);
-
-    self->state->run_updates = false;
-    self->state->cv.notify_all();
-
-    self->state->_update_thread.join();
-
     if (self->state)
     {
         delete self->state;
@@ -282,7 +277,6 @@ static void tcam_device_provider_finalize(GObject* object)
     }
     G_OBJECT_CLASS(tcam_device_provider_parent_class)->finalize(object);
 }
-
 
 static void tcam_device_provider_class_init(TcamDeviceProviderClass* klass)
 {
