@@ -21,29 +21,62 @@ AFU420PropertyIntegerImpl::AFU420PropertyIntegerImpl(
     m_step = i.step;
 
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 
 std::string_view AFU420PropertyIntegerImpl::get_display_name() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->display_name;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyIntegerImpl::get_description() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->description;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyIntegerImpl::get_category() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->iccategory;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyIntegerImpl::get_unit() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->unit;
+    }
     return std::string_view();
 }
 
@@ -109,29 +142,62 @@ AFU420PropertyDoubleImpl::AFU420PropertyDoubleImpl(
     m_step = d.step;
 
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 
 std::string_view AFU420PropertyDoubleImpl::get_display_name() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->display_name;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyDoubleImpl::get_description() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->description;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyDoubleImpl::get_category() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->iccategory;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyDoubleImpl::get_unit() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->unit;
+    }
     return std::string_view();
 }
 
@@ -204,23 +270,52 @@ AFU420PropertyBoolImpl::AFU420PropertyBoolImpl(
 {
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
     m_value = m_default;
+
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 
 std::string_view AFU420PropertyBoolImpl::get_display_name() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->display_name;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyBoolImpl::get_description() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->description;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyBoolImpl::get_category() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->iccategory;
+    }
     return std::string_view();
 }
 
@@ -283,23 +378,51 @@ AFU420PropertyEnumImpl::AFU420PropertyEnumImpl(const std::string& name,
     // {
     //     SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
     // }
+    auto static_info = tcamprop1::find_prop_static_info(m_name);
+
+    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
+    {
+        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
+    }
+    else if (!static_info.info_ptr)
+    {
+        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        p_static_info = nullptr;
+    }
+    else
+    {
+        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        p_static_info = nullptr;
+    }
 }
 
 
 std::string_view AFU420PropertyEnumImpl::get_display_name() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->display_name;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyEnumImpl::get_description() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->description;
+    }
     return std::string_view();
 }
 
 
 std::string_view AFU420PropertyEnumImpl::get_category() const
 {
+    if (p_static_info)
+    {
+        return p_static_info->iccategory;
+    }
     return std::string_view();
 }
 
