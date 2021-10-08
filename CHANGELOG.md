@@ -16,11 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filter for DFG/USB2pro. Device will no longer appear in device listings.
 - `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
 - tcamconvert gstreamer conversion element
+- internal dependency to fmt
+- cmake flag `TCAM_DOWNLOAD_MESON` for legacy systems to allow modern aravis installations.
+- gobject introspection API version 1.0
 
 ### Changed
 
 - aravis API version is now 0.8.
-  Please use external aravis installations.
 - output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
 - logging now uses spdlog
 - gstreamer buffers are now marked as "live"
@@ -28,11 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
 - tcambin property `use-dutils` must now be set during GST_STATE_NULL to take affect.
 - gige-daemon maximum for devices increased to 50.
+- tcammainsrc 'do-timestamp' default changed to false.
+- cmake flag BUILD_ARAVIS now defaults to ON
+- cmake flag BUILD_DOCUMENTATION now defaults to ON
 
 ### Fixed
 
-- tcambin included tcamautofocus even when camera offered internal auto-focus
-- caps negotiations for unusual caps like 1920x300
 - "device-lost" notifications could take over 3 minutes for aravis cameras.
   Should now appear within 5 seconds.
 
@@ -42,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcamwhitebalance gstreamer element - functionality now in tcammainsrc,
   application in tcamconvert/tcamdutils
 - tcamautofocus gstreamer element - functionality now in tcammainsrc
+- tcamprop 0.1 API
 
 ## [0.14.0] - 2021.07.05
 
