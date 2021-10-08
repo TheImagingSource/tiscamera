@@ -8,6 +8,10 @@
 #include <unordered_map>
 #include <tcamprop1.0_base/tcamprop_property_interface.h>
 
+static bool is_err( GError** err ) {
+    return err && *err;
+}
+
 static TcamPropertyBase* tcamprop_impl_create_node( tcamprop1::property_list_interface& prop_list_itf, const tcamprop1_gobj::impl::guard_state_handle& guard_handle, std::string_view name, GError** err )
 {
     auto prop_itf_ptr = prop_list_itf.find_property( name );
@@ -175,7 +179,7 @@ TcamPropertyBase* tcamprop1_gobj::tcam_property_provider::fetch_item( const char
     }
 
     auto ptr = data_->find_or_create_entry( std::string{ name }, err );
-    if( err || ptr == nullptr ) {
+    if( is_err( err ) || ptr == nullptr ) {
         return nullptr;
     }
     return ptr;
@@ -200,7 +204,7 @@ auto    tcamprop1_gobj::tcam_property_provider::get_tcam_property_names( tcam_pr
 auto tcamprop1_gobj::tcam_property_provider::get_boolean( tcam_property_provider* cont, const char* name, GError** err ) -> gboolean
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return FALSE;
     }
     if( !TCAM_IS_PROPERTY_BOOLEAN( ptr_base ) ) {
@@ -218,7 +222,7 @@ auto tcamprop1_gobj::tcam_property_provider::get_boolean( tcam_property_provider
 auto tcamprop1_gobj::tcam_property_provider::get_integer( tcam_property_provider* cont, const char* name, GError** err ) -> int64_t
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return 0;
     }
     if( !TCAM_IS_PROPERTY_INTEGER( ptr_base ) ) {
@@ -236,7 +240,7 @@ auto tcamprop1_gobj::tcam_property_provider::get_integer( tcam_property_provider
 auto tcamprop1_gobj::tcam_property_provider::get_float( tcam_property_provider* cont, const char* name, GError** err ) -> gdouble
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return 0;
     }
     if( !TCAM_IS_PROPERTY_FLOAT( ptr_base ) ) {
@@ -253,7 +257,7 @@ auto tcamprop1_gobj::tcam_property_provider::get_float( tcam_property_provider* 
 auto tcamprop1_gobj::tcam_property_provider::get_enumeration( tcam_property_provider* cont, const char* name, GError** err ) -> gchar*
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return nullptr;
     }
     if( !TCAM_IS_PROPERTY_ENUMERATION( ptr_base ) ) {
@@ -270,7 +274,7 @@ auto tcamprop1_gobj::tcam_property_provider::get_enumeration( tcam_property_prov
 void tcamprop1_gobj::tcam_property_provider::set_boolean( tcam_property_provider* cont, const char* name, gboolean new_val, GError** err )
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return;
     }
     if( !TCAM_IS_PROPERTY_BOOLEAN( ptr_base ) ) {
@@ -286,7 +290,7 @@ void tcamprop1_gobj::tcam_property_provider::set_boolean( tcam_property_provider
 void tcamprop1_gobj::tcam_property_provider::set_integer( tcam_property_provider* cont, const char* name, gint64 new_val, GError** err )
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return;
     }
     if( !TCAM_IS_PROPERTY_INTEGER( ptr_base ) ) {
@@ -302,7 +306,7 @@ void tcamprop1_gobj::tcam_property_provider::set_integer( tcam_property_provider
 void tcamprop1_gobj::tcam_property_provider::set_float( tcam_property_provider* cont, const char* name, gdouble new_val, GError** err )
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return;
     }
     if( !TCAM_IS_PROPERTY_FLOAT( ptr_base ) ) {
@@ -318,7 +322,7 @@ void tcamprop1_gobj::tcam_property_provider::set_float( tcam_property_provider* 
 void tcamprop1_gobj::tcam_property_provider::set_enumeration( tcam_property_provider* cont, const char* name, const gchar* new_val, GError** err )
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return;
     }
     if( !TCAM_IS_PROPERTY_ENUMERATION( ptr_base ) ) {
@@ -334,7 +338,7 @@ void tcamprop1_gobj::tcam_property_provider::set_enumeration( tcam_property_prov
 void tcamprop1_gobj::tcam_property_provider::set_command( tcam_property_provider* cont, const char* name, GError** err )
 {
     auto ptr_base = get_tcam_property( cont, name, err );
-    if( err || ptr_base == nullptr ) {
+    if( is_err( err ) || ptr_base == nullptr ) {
         return;
     }
     if( !TCAM_IS_PROPERTY_COMMAND( ptr_base ) ) {
