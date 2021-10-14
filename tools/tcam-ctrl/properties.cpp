@@ -92,6 +92,19 @@ void print_properties(const std::string& serial)
 
         TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source), name, &err);
 
+        if (err)
+        {
+            std::cout << "Error while retrieving property" << name << "\": " << err->message << std::endl;
+            g_error_free(err);
+            continue;
+        }
+
+        if (!base_property)
+        {
+            std::cout << "Unable to retrieve property \"" << name << "\"" << std::endl;
+            continue;
+        }
+
         TcamPropertyType type = tcam_property_base_get_property_type(base_property);
 
         switch(type)
