@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     GError* err = NULL;
 
     GstElement* pipeline =
-        gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
+        gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink sync=false", &err);
 
     /* test for error */
     if (pipeline == NULL)

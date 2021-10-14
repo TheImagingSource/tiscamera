@@ -16,100 +16,295 @@
 
 /* This example will show you how to list the available properties */
 
-#include "tcamprop.h" /* gobject introspection interface */
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 #include <string.h>
 #include <unistd.h>
 
+void print_flags(TcamPropertyBase* prop)
+{
+    printf("Available: ");
+    GError* err;
+    gboolean av = tcam_property_base_is_available(prop, &err);
+    if (av)
+    {
+        printf("yes");
+    }
+    else
+    {
+        printf("no");
+    }
+
+    printf("\tLocked: ");
+
+    gboolean lo = tcam_property_base_is_locked(prop, &err);
+
+    if (lo)
+    {
+        printf("yes");
+    }
+    else
+    {
+        printf("no");
+    }
+}
+
 
 void list_properties(GstElement* source)
 {
 
     GError* err = NULL;
-    GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source), &err);
+    GSList* names =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
 
-    for (GSList* cur = names; cur != NULL; cur = cur->next)
+    for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
-        const char* name = (char*)cur->data;
+        char* name = (char*)g_slist_nth(names, i)->data;
 
-        TcamPropertyInfo* info = tcam_prop_get_property_info(TCAM_PROP(source), name, &err);
+        TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source), name, &err);
 
-        if (err)
+        TcamPropertyType type = tcam_property_base_get_property_type(base_property);
+
+        switch(type)
         {
-            printf("something went wrong %s\\n", err->message);
-            continue;
-        }
-
-        if (!info)
-        {
-            printf("ERROR\n");
-        }
-
-        printf("%s(%s):\tdisplay: %s\tdesc: %s\tunit: %s\tcat: %s\n",
-               name,
-               g_enum_to_string(g_type_from_name("TcamPropertyType"), info->type),
-               info->display_name,
-               info->description, info->unit, info->category);
-
-        if (info->type == TCAM_PROPERTY_INT || info->type == TCAM_PROPERTY_DOUBLE)
-        {
-            GValue min = {};
-            GValue step = {};
-            GValue max = {};
-
-            if (!tcam_prop_get_tcam_range(TCAM_PROP(source), name, &min, &max, &step, &err))
+            case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                printf("Error!\n");
-            }
+                TcamPropertyInteger* integer = TCAM_PROPERTY_INTEGER(base_property);
 
-            if (info->type == TCAM_PROPERTY_INT)
+                gint64 def = tcam_property_integer_get_default(integer, &err);
+
+                gint64 min;
+                gint64 max;
+                gint64 step;
+                tcam_property_integer_get_range(integer, &min, &max, &step, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                gint64 value = tcam_property_integer_get_value(integer, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                const char* unit = "";
+                const char* tmp_unit = tcam_property_integer_get_unit(integer);
+
+                if (tmp_unit)
+                {
+                    unit = tmp_unit;
+                }
+
+                printf("%s\ttype: Integer\t"
+                       "Display Name: \"%s\" "
+                       "Category: %s\n"
+                       "\t\t\tDescription: %s\n"
+                       "\t\t\tUnit: %s\n"
+                       "\t\t\tVisibility: %s\n"
+                       "\t\t\tPresentation: %s\n\t\t\t",
+                       name,
+                       tcam_property_base_get_display_name(base_property),
+                       tcam_property_base_get_category(base_property),
+                       tcam_property_base_get_description(base_property),
+                       unit,
+                       tcam_property_base_get_visibility(base_property),
+                       g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_integer_get_representation(integer)));
+                print_flags(base_property);
+                printf("\n\n"
+                       "\t\t\tDefault: %f\n"
+                       "\t\t\tValue: f"
+                       "\n\n", def, value);
+
+                break;
+
+            }
+            case TCAM_PROPERTY_TYPE_FLOAT:
             {
-                printf("\t\tRange: %d %d - %d\n", g_value_get_int(&min), g_value_get_int(&max), g_value_get_int(&step));
-                printf("\t\tValue: %d\n", tcam_prop_get_tcam_int(TCAM_PROP(source), name, &err));
+                TcamPropertyFloat* f = TCAM_PROPERTY_FLOAT(base_property);
+
+                gdouble min;
+                gdouble max;
+                gdouble def = tcam_property_float_get_default(f, &err);
+                gdouble step;
+                tcam_property_float_get_range(f, &min, &max, &step, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                gdouble value = tcam_property_float_get_value(f, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+
+                const char* unit = "";
+                const char* tmp_unit = tcam_property_float_get_unit(f);
+
+                if (tmp_unit)
+                {
+                    unit = tmp_unit;
+                }
+
+                printf("%s\ttype: Float\t"
+                       "Display Name: \"%s\" "
+                       "Category: %s\n"
+                       "\t\t\tDescription: %s\n"
+                       "\t\t\tUnit: %s\n"
+                       "\t\t\tVisibility: %s\n"
+                       "\t\t\tPresentation: %s\n\t\t\t",
+                       name,
+                       tcam_property_base_get_display_name(base_property),
+                       tcam_property_base_get_category(base_property),
+                       tcam_property_base_get_description(base_property),
+                       unit,
+                       tcam_property_base_get_visibility(base_property),
+                       g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_float_get_representation(f)));
+                print_flags(base_property);
+                printf("\n\n"
+                       "\t\t\tDefault: %f\n"
+                       "\t\t\tValue: %f"
+                       "\n\n", def, value);
+
+                break;
             }
-            else if (info->type == TCAM_PROPERTY_DOUBLE)
+            case TCAM_PROPERTY_TYPE_ENUMERATION:
             {
-                printf("\t\tRange: %d %d - %d\n", g_value_get_double(&min), g_value_get_double(&max), g_value_get_double(&step));
-                printf("\t\tValue: %f\n", tcam_prop_get_tcam_double(TCAM_PROP(source), name, &err));
+                TcamPropertyEnumeration* e = TCAM_PROPERTY_ENUMERATION(base_property);
+
+                char* value = tcam_property_enumeration_get_value(e, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                const char* def = tcam_property_enumeration_get_default(e, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                printf("%s\ttype: Enumeration\t"
+                       "Display Name: \"%s\" "
+                       "Category: %s\n"
+                       "\t\t\tDescription: %s\n"
+                       "\t\t\tVisibility: %s\n"
+                       "\t\t\t",
+                       name, tcam_property_base_get_display_name(base_property),
+                       tcam_property_base_get_category(base_property),
+                       tcam_property_base_get_description(base_property),
+                       tcam_property_base_get_visibility(base_property));
+                print_flags(base_property);
+                printf("\n\n"
+                       "\t\t\tEntries:");
+
+                GSList* enum_entries = tcam_property_enumeration_get_enum_entries(e, &err);
+
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
+
+                if (enum_entries)
+                {
+                    for (GSList* entry = enum_entries; entry != NULL; entry = entry->next)
+                    {
+                        printf(" %s", (const char*)entry->data);
+                    }
+
+                    g_slist_free_full(enum_entries, g_free);
+                }
+                printf("\n\t\t\tDefault: %s\n"
+                       "\t\t\tValue: %s\n\n\n", def, value);
+
+                break;
             }
+            case TCAM_PROPERTY_TYPE_BOOLEAN:
+            {
+                TcamPropertyBoolean* b = TCAM_PROPERTY_BOOLEAN(base_property);
+                gboolean value = tcam_property_boolean_get_value(b, &err);
+                gboolean def = tcam_property_boolean_get_default(b, &err);
 
-            g_value_unset(&min);
-            g_value_unset(&max);
-            g_value_unset(&step);
+                if (err)
+                {
+                    printf("%s\n", err->message);
+                    g_error_free(err);
+                    break;
+                }
 
-        }
+                const char* val_str = "false";
+                const char* def_str = "false";
 
-        //g_object_unref(info);
-    }
+                if (value)
+                {
+                    val_str = "true";
+                }
 
-    g_slist_free_full(names, g_free);
-}
+                if (def)
+                {
+                    def_str = "true";
+                }
 
+                printf("%s\ttype: Boolean\t"
+                       "Display Name: \"%s\" "
+                       "Category: %s\n"
+                       "\t\t\tDescription: %s\n"
+                       "\t\t\t",
+                       name,
+                       tcam_property_base_get_display_name(base_property),
+                       tcam_property_base_get_category(base_property),
+                       tcam_property_base_get_description(base_property)
+                    );
+                print_flags(base_property);
+                printf("\n\n\t\t\tDefault: %s\n"
+                       "\t\t\tValue: %s\n\n\n",
+                       def_str, val_str);
 
-gboolean block_until_playing(GstElement* pipeline)
-{
-    while (TRUE)
-    {
-        GstState state;
-        GstState pending;
-
-        // wait 0.1 seconds for something to happen
-        GstStateChangeReturn ret = gst_element_get_state(pipeline, &state, &pending, 100000000);
-
-        if (ret == GST_STATE_CHANGE_SUCCESS)
-        {
-            return TRUE;
-        }
-        else if (ret == GST_STATE_CHANGE_FAILURE)
-        {
-            printf("Failed to change state %s %s %s\n",
-                   gst_element_state_change_return_get_name(ret),
-                   gst_element_state_get_name(state),
-                   gst_element_state_get_name(pending));
-
-            return FALSE;
+                break;
+            }
+            case TCAM_PROPERTY_TYPE_COMMAND:
+            {
+                printf("%s\ttype: Command\t"
+                       "Display Name: \"%s\" "
+                       "Category: %s\n"
+                       "\t\t\tDescription: %s\n"
+                       "\t\t\t",
+                       name,
+                       tcam_property_base_get_display_name(base_property),
+                       tcam_property_base_get_category(base_property),
+                       tcam_property_base_get_description(base_property));
+                print_flags(base_property);
+                printf("\n\n\n");
+                        break;
+            }
+            default:
+            {
+                break;
+            }
+            printf("\n\n\n");
         }
     }
 }
@@ -132,7 +327,7 @@ int main(int argc, char* argv[])
 
     // this is a placeholder definition
     // normally your pipeline would be defined here
-    GstElement* pipeline = gst_parse_launch("tcammainsrc name=source ! fakesink", &err);
+    GstElement* pipeline = gst_parse_launch("tcambin name=source ! fakesink", &err);
 
     if (pipeline == NULL)
     {
@@ -155,23 +350,12 @@ int main(int argc, char* argv[])
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
 
-    printf("Properties before state PLAYING:\n");
-    list_properties(source);
-
     // in the READY state the camera will always be initialized
-    // in the PLAYING state additional properties may appear from gstreamer elements
-    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+    gst_element_set_state(pipeline, GST_STATE_READY);
 
-    // helper function to ensure we have the right state
-    // alternatively wait for the first image
-    if (!block_until_playing(pipeline))
-    {
-        printf("Unable to start pipeline. \n");
-    }
-
-    printf("Properties during state PLAYING: (ideally the same)\n\n\n");
     list_properties(source);
 
+    // cleanup
     gst_element_set_state(pipeline, GST_STATE_NULL);
 
     gst_object_unref(source);

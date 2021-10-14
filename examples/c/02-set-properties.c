@@ -230,6 +230,8 @@ int main(int argc, char* argv[])
       We set the properties to other values
      */
 
+    tcam_prop_enumeration_set_value(source, "Exposure Auto", "Off");
+
     set_bool_or_enum(source, "Exposure Auto", FALSE);
     set_bool_or_enum(source, "Gain Auto", FALSE);
 

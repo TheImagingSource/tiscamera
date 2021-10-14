@@ -22,10 +22,9 @@ import time
 import sys
 import gi
 
-gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Gst
 
 
 def main():

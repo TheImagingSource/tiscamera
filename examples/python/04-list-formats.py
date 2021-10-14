@@ -21,11 +21,11 @@
 
 import sys
 import gi
+import re
 
-gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Gst
 
 
 def print_formats(source):
@@ -49,17 +49,17 @@ def print_formats(source):
         try:
             fmt = structure.get_value("format")
 
-            if type(fmt) is str:
-                print("{} {}".format(name, fmt), end="")
-            elif type(fmt) is Gst.ValueList:
+            if isinstance(fmt) is str:
+                print(f"{name} {fmt}", end="")
+            elif isinstance(fmt) is Gst.ValueList:
 
-                print("{} {{ ".format(name), end="")
+                print(f"{name} {{ ", end="")
 
                 for y in range(Gst.ValueList.get_size(fmt)):
 
                     val = Gst.ValueList.get_value(fmt, y)
 
-                    print("{} ".format(val), end="")
+                    print(f"{val} ", end="")
                 print("}", end="")
             else:
                 print("==")
@@ -72,14 +72,13 @@ def print_formats(source):
             substr = structure.to_string()[begin:]
             values = substr[substr.find("{")+1:substr.find("}")]
 
-            print("{} {{ ".format(name), end="")
+            print(f"{name} {{ ", end="")
 
             for fmt in values.split(","):
 
-                print("{} ".format(fmt), end="")
+                print(f"{fmt} ", end="")
 
             print("}", end="")
-            # continue
 
         # the python gobject introspection wrapper
         # can pose problems in older version
@@ -95,11 +94,9 @@ def print_formats(source):
             width = structure.get_value("width")
             height = structure.get_value("height")
 
-            print(" - {}x{} - ".format(width, height), end="")
+            print(f" - {width}x{height} - ", end="")
 
         except TypeError:
-
-            import re
 
             # width handling
 
@@ -122,7 +119,7 @@ def print_formats(source):
             height_min = v[0]
             height_max = v[1]
 
-            print(" - {}x{} <=> {}x{} - ".format(width_min, height_min, width_max, height_max), end="")
+            print(f" - {width_min}x{height_min} <=> {width_max}x{height_max} - ", end="")
 
         # the python gobject introspection wrapper
         # can pose problems in older version
@@ -134,8 +131,6 @@ def print_formats(source):
             framerates = structure.get_value("framerate")
         except TypeError:
 
-            import re
-
             substr = structure.to_string()[structure.to_string().find("framerate="):]
 
             try:
@@ -143,7 +138,7 @@ def print_formats(source):
                 field, values, remain = re.split("{|}", substr, maxsplit=3)
                 rates = [x.strip() for x in values.split(",")]
                 for r in rates:
-                    print("{} ".format(r), end="")
+                    print(f"{r} ", end="")
             except ValueError:  # we have a GstFractionRange
 
                 values = substr[substr.find("[")+1:substr.find("]")]
@@ -153,15 +148,14 @@ def print_formats(source):
                 fps_max_num = v[2]
                 fps_max_den = v[3]
                 # framerates are fractions thus one framerate euqals two values
-                print("{}/ {} <=> {}/{}".format(fps_min_num, fps_min_den,
-                                                fps_max_num, fps_max_den), end="")
+                print(f"{fps_min_num}/ {fps_min_den} <=> {fps_max_num}/{fps_max_den}", end="")
 
             # printf line break
             print("")
             # we are done here
             continue
 
-        if type(framerates) is Gst.ValueList:
+        if isinstance(framerates) is Gst.ValueList:
 
             for y in range(Gst.ValueList.get_size(framerates)):
 
@@ -169,21 +163,22 @@ def print_formats(source):
 
                 print("{} ".format(val), end="")
 
-        elif type(framerates) is Gst.FractionRange:
+        elif isinstance(framerates) is Gst.FractionRange:
 
             min_val = Gst.value_get_fraction_range_min(framerates)
             max_val = Gst.value_get_fraction_range_max(framerates)
-            print("{} <-> {}".format(min_val, max_val))
+            print(f"{min_val} <-> {max_val}")
 
         else:
-            print("framerates not supported {}".format(type(framerates)))
+            print(f"framerates not supported {isinstance(framerates)}")
             # we are finished
         print("")
 
 
 def main():
     """
-
+    main function
+    initializes GstElement and starts GstCaps query
     """
     Gst.init(sys.argv)  # init gstreamer
 

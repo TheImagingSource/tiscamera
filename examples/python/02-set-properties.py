@@ -21,81 +21,32 @@
 import sys
 import gi
 
-gi.require_version("Tcam", "0.1")
+gi.require_version("Tcam", "1.0")
 gi.require_version("Gst", "1.0")
+gi.require_version("GLib", "2.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Tcam, Gst, GLib
 
 
 def print_properties(camera):
     """
     Print selected properties
     """
-    (ret, value,
-     min_value, max_value,
-     default_value, step_size,
-     value_type, flags,
-     category, group) = camera.get_tcam_property("Exposure Auto")
+    try:
+        value = camera.get_tcam_enumeration("ExposureAuto")
 
-    if ret:
-        print("Exposure Auto has value: {}".format(value))
-    else:
-        print("Could not query Exposure Auto")
+        print(f"Exposure Auto has value: {value}")
 
-    (ret, value,
-     min_value, max_value,
-     default_value, step_size,
-     value_type, flags,
-     category, group) = camera.get_tcam_property("Gain Auto")
+        value = camera.get_tcam_enumeration("GainAuto")
 
-    if ret:
         print("Gain Auto has value: {}".format(value))
-    else:
-        print("Could not query Gain Auto")
+        value = camera.get_tcam_integer("Brightness")
 
-    (ret, value,
-     min_value, max_value,
-     default_value, step_size,
-     value_type, flags,
-     category, group) = camera.get_tcam_property("Brightness")
-
-    if ret:
         print("Brightness has value: {}".format(value))
-    else:
-        print("Could not query Brightness")
 
+    except GLib.Error as err:
 
-def set_bool_or_enum(source, name, new_value):
-    """
-    this function basically exists to ensure the example
-    works with all camera types.
-    If you know the property type of the properties you are
-    setting, you can simply call that
-    instead of checking the type.
-
-    some settings may exhibit as bool or enum,
-    depending on the camera you use.
-    """
-    (ret, value,
-     min_value, max_value,
-     default_value, step_size,
-     value_type, flags,
-     category, group) = source.get_tcam_property(name)
-
-    if not ret:
-        print("Could not query property ", name)
-        return False
-
-    if value_type == "boolean":
-        return source.set_tcam_property(source, name, new_value)
-    elif value_type == "enum":
-
-        if new_value:
-            new_val = "On"
-        else:
-            new_val = "Off"
-
-        return source.set_tcam_property(source, name, new_val)
+        print(f"{err.message}")
 
 
 def block_until_playing(pipeline):
@@ -141,14 +92,10 @@ def main():
 
     # Set properties
 
-    camera.set_tcam_property("Exposure Auto", False)
-    camera.set_tcam_property("Gain Auto", False)
+    camera.set_tcam_enumeration("ExposureAuto", "Off")
+    camera.set_tcam_enumeration("GainAuto", "Off")
 
-    # Some cameras offer exposure and gain as doubles instead of integers.
-    # In that case the used GValue type has to be changed when setting the property.
-    # Some cameras might offer 'Exposure' as 'Exposure Time (us)'.
-    # camera.set_tcam_property("Exposure", 3000.0)
-    camera.set_tcam_property("Brightness", 200)
+    camera.set_tcam_integer("Brightness", 200)
 
     print_properties(camera)
 

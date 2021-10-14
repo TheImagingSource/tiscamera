@@ -70,7 +70,7 @@ static GstFlowReturn callback(GstElement* sink, void* user_data)
 
             // this is only one pixel
             // when dealing with formats like BGRx
-            // pixel_data will have to consist out of
+            // pixel_data will consist out of
             // pixel_offset   => B
             // pixel_offset+1 => G
             // pixel_offset+2 => R

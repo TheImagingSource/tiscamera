@@ -18,7 +18,7 @@
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf */
-#include <tcamprop.h>
+#include <tcam-property-1.0.h>
 #include <unistd.h> /* sleep  */
 
 
@@ -35,12 +35,13 @@ int main(int argc, char* argv[])
 
     gst_init(&argc, &argv); // init gstreamer
 
-    const char* serial = NULL; // the serial number of the camera we want to use
+    //const char* serial = NULL; // the serial number of the camera we want to use
+    const char* serial = "04710899"; // the serial number of the camera we want to use
 
     GError* err = NULL;
 
     GstElement* pipeline =
-        gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink", &err);
+        gst_parse_launch("tcambin name=source ! tcamconvert ! videoconvert ! ximagesink sync=false", &err);
 
     /* test for error */
     if (pipeline == NULL)
@@ -71,37 +72,13 @@ int main(int argc, char* argv[])
      */
     sleep(2);
 
-    GValue trigger_val = {};
-    g_value_init(&trigger_val, G_TYPE_BOOLEAN);
-    g_value_set_boolean(&trigger_val, TRUE);
+    tcam_property_provider_set_tcam_enumeration(TCAM_PROPERTY_PROVIDER(source), "TriggerMode", "On", &err);
 
-    // Check for the type of trigger
-    // Depending on the camera model trigger may be a bool or an enum
-    const gchar* trigger_mode_type =
-        tcam_prop_get_tcam_property_type(TCAM_PROP(source), "Trigger Mode");
-
-    if (!trigger_mode_type)
+    if (err)
     {
-        printf("Unable to determine type of 'Trigger Mode'\n");
-        exit(1);
-    }
-
-    gboolean trigger_is_bool = TRUE;
-    GValue trigger = {};
-
-    if (strcmp(trigger_mode_type, "enum") == 0)
-    {
-        trigger_is_bool = FALSE;
-        g_value_init(&trigger, G_TYPE_STRING);
-        g_value_set_string(&trigger, "On");
-        tcam_prop_set_tcam_property(TCAM_PROP(source), "Trigger Mode", &trigger);
-    }
-    else
-    {
-        g_value_init(&trigger, G_TYPE_BOOLEAN);
-        g_value_set_boolean(&trigger, TRUE);
-
-        tcam_prop_set_tcam_property(TCAM_PROP(source), "Trigger Mode", &trigger);
+        printf("Error while setting trigger mode: %s\n", err->message);
+        g_error_free(err);
+        err = NULL;
     }
 
     while (0 == 0)
@@ -116,11 +93,13 @@ int main(int argc, char* argv[])
             break;
         }
 
-        gboolean r =
-            tcam_prop_set_tcam_property(TCAM_PROP(source), "Software Trigger", &trigger_val);
-        if (!r)
+        tcam_property_provider_set_tcam_command(TCAM_PROPERTY_PROVIDER(source), "TriggerSoftware", &err);
+        if (err)
         {
             printf("!!! Could not trigger. !!!\n");
+            printf("Error while setting trigger: %s\n", err->message);
+            g_error_free(err);
+            err = NULL;
         }
         else
         {
@@ -130,20 +109,7 @@ int main(int argc, char* argv[])
 
     /* deactivate trigger mode */
     /* this is simply to prevent confusion when the camera ist started without wanting to trigger */
-
-    if (trigger_is_bool)
-    {
-        g_value_set_boolean(&trigger, FALSE);
-        tcam_prop_set_tcam_property(TCAM_PROP(source), "Trigger Mode", &trigger);
-    }
-    else
-    {
-        g_value_set_string(&trigger, "Off");
-        tcam_prop_set_tcam_property(TCAM_PROP(source), "Trigger Mode", &trigger);
-    }
-
-    g_value_unset(&trigger);
-    g_value_unset(&trigger_val);
+    tcam_property_provider_set_tcam_enumeration(TCAM_PROPERTY_PROVIDER(source), "TriggerMode", "Off", &err);
 
     // this stops the pipeline and frees all resources
     gst_element_set_state(pipeline, GST_STATE_NULL);

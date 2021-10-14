@@ -23,10 +23,11 @@ import sys
 import gi
 import time
 
-gi.require_version("Tcam", "0.1")
+gi.require_version("Tcam", "1.0")
 gi.require_version("Gst", "1.0")
+gi.require_version("GLib", "2.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Tcam, Gst, GLib
 
 
 def main():
@@ -57,32 +58,29 @@ def main():
     # this is simply to show that the device is running
     time.sleep(2)
 
-    trigger_mode_type = source.get_tcam_property_type("Trigger Mode")
+    try:
+        source.set_tcam_enumeration("TriggerMode", "On")
 
-    if trigger_mode_type == "enum":
-        source.set_tcam_property("Trigger Mode", "On")
-    else:
-        source.set_tcam_property("Trigger Mode", True)
-
-    wait = True
-    while wait:
-        input_text = input("Press 'Enter' to trigger an image.\n q + enter to stop the stream.")
-        if input_text == "q":
-            break
-        else:
-            ret = source.set_tcam_property("Software Trigger", True)
-
-            if ret:
-                print("=== Triggered image. ===\n")
+        wait = True
+        while wait:
+            input_text = input("Press 'Enter' to trigger an image.\n q + enter to stop the stream.")
+            if input_text == "q":
+                break
             else:
-                print("!!! Could not trigger. !!!\n")
+                ret = source.set_tcam_command("TriggerSoftware")
 
-    # deactivate trigger mode
-    # this is simply to prevent confusion when the camera ist started without wanting to trigger
-    if trigger_mode_type == "enum":
-        source.set_tcam_property("Trigger Mode", "Off")
-    else:
-        source.set_tcam_property("Trigger Mode", False)
+                if ret:
+                    print("=== Triggered image. ===\n")
+                else:
+                    print("!!! Could not trigger. !!!\n")
+
+        # deactivate trigger mode
+        # this is simply to prevent confusion when the camera ist started without wanting to trigger
+        source.set_tcam_enumeration("TriggerMode", "Off")
+
+    except GLib.Error as e:
+
+        print(e.message)
 
     # this stops the pipeline and frees all resources
     pipeline.set_state(Gst.State.NULL)

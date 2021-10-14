@@ -191,11 +191,18 @@ def main():
     if serial is not None:
         source.set_property("serial", serial)
 
+    # the pipeline/tcamsrc/tcambin element must
+    # at least be in Gst.State.READY
+    # for a device to be open.
+    # with Gst.State.NULL
+    # no properties will be returned
     pipeline.set_state(Gst.State.READY)
 
-    print("Properties in state READY:")
     list_properties(source)
 
+    # This closes the device
+    # All properties are now invalid
+    # and have to be deleted
     pipeline.set_state(Gst.State.NULL)
 
     return 0
