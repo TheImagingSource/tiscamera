@@ -17,6 +17,12 @@ You can find an online version of the included user documentation here:
 
 https://www.theimagingsource.com/documentation/tiscamera/
 
+## API BREAK
+
+Version 1.0.0 introduces several API changes.
+
+To port your software check our upgrade guide TODO: add link
+
 ## Dependencies
 
 ### Compilation
