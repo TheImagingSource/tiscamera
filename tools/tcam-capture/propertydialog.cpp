@@ -17,6 +17,7 @@
 #include "propertydialog.h"
 
 #include "ui_propertydialog.h"
+#include <QFormLayout>
 
 #include "../../libs/tcamprop/src/tcam-property-1.0.h"
 
@@ -38,22 +39,20 @@ PropertyTree::PropertyTree(QString name,
 
 void PropertyTree::setup_ui()
 {
-    QVBoxLayout* l = new QVBoxLayout();
+    QFormLayout* l = new QFormLayout();
     setLayout(l);
 
     std::vector<std::string> names;
     for (const auto& p : m_properties) { names.push_back(p.first); }
-
 
     std::sort(names.begin(), names.end(), sort_props);
 
     for (const auto& name : names)
     {
         auto ptr = m_properties.at(name);
-        l->addWidget(dynamic_cast<QWidget*>(ptr));
+        auto widget = dynamic_cast<QWidget*>(ptr);
+        l->addRow(ptr->get_name(), widget);
     }
-
-    l->addStretch();
 }
 
 PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)

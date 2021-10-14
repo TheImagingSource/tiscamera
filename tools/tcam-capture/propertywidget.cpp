@@ -65,7 +65,16 @@ void EnumWidget::update()
 
 QString EnumWidget::get_name() const
 {
-    return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
+
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    }
 }
 
 
@@ -99,18 +108,6 @@ void EnumWidget::setup_ui()
     p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
-
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        p_name = new QLabel(disp_name);
-    }
-    else
-    {
-        p_name = new QLabel(get_name());
-    }
-    p_layout->addWidget(p_name);
 
     GError* err = nullptr;
 
@@ -194,7 +191,16 @@ void IntWidget::update()
 
 QString IntWidget::get_name() const
 {
-    return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
+
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    }
 }
 
 
@@ -239,18 +245,6 @@ void IntWidget::setup_ui()
     p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
-
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        p_name = new QLabel(disp_name);
-    }
-    else
-    {
-        p_name = new QLabel(get_name());
-    }
-    p_layout->addWidget(p_name);
 
     gint64 min;
     gint64 max;
@@ -333,7 +327,16 @@ void DoubleWidget::update()
 
 QString DoubleWidget::get_name() const
 {
-    return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
+
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    }
 }
 
 
@@ -371,6 +374,7 @@ void DoubleWidget::spinbox_changed(double new_value)
     emit value_changed(get_name().toStdString().c_str(), new_value);
 }
 
+
 void DoubleWidget::setup_ui()
 {
     p_layout = new QHBoxLayout();
@@ -385,9 +389,7 @@ void DoubleWidget::setup_ui()
     }
     else
     {
-        p_name = new QLabel(get_name());
     }
-    p_layout->addWidget(p_name);
 
     TcamPropertyFloatRepresentation representation = tcam_property_float_get_representation(p_prop);
 
@@ -478,7 +480,16 @@ void BoolWidget::update()
 
 QString BoolWidget::get_name() const
 {
-    return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
+
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    }
 }
 
 
@@ -508,18 +519,6 @@ void BoolWidget::setup_ui()
     p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
-
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        p_name = new QLabel(disp_name);
-    }
-    else
-    {
-        p_name = new QLabel(get_name());
-    }
-    p_layout->addWidget(p_name);
 
     p_checkbox = new QCheckBox();
 
@@ -558,7 +557,16 @@ void ButtonWidget::update()
 
 QString ButtonWidget::get_name() const
 {
-    return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
+
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    }
 }
 
 
@@ -592,18 +600,6 @@ void ButtonWidget::setup_ui()
     p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
-
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        p_name = new QLabel(disp_name);
-    }
-    else
-    {
-        p_name = new QLabel(get_name());
-    }
-    p_layout->addWidget(p_name);
 
     p_button = new QPushButton();
 
