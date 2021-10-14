@@ -121,11 +121,13 @@ void DeviceDialog::lost_device(const Device& lost_device)
         if (*static_cast<DeviceWidget*>(this->ui->listWidget->item(i)) == lost_device)
         {
             QListWidgetItem* item = this->ui->listWidget->takeItem(i);
-            if (*static_cast<DeviceWidget*>(this->ui->listWidget->item(i)) == m_selected_device)
+            if (m_device_is_selected)
             {
-                // TODO
+                if (*static_cast<DeviceWidget*>(this->ui->listWidget->item(i)) == m_selected_device)
+                {
+                    // TODO
+                }
             }
-
             delete item;
             break;
         }
@@ -158,6 +160,6 @@ void DeviceDialog::on_listWidget_itemDoubleClicked(QListWidgetItem* item)
 
 void DeviceDialog::on_listWidget_itemClicked(QListWidgetItem* /*item*/)
 {
-
+    m_device_is_selected = false;
 
 }

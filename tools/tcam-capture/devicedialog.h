@@ -65,6 +65,7 @@ private:
 
     Ui::DeviceDialog* ui;
 
+    bool m_device_is_selected = false;
     Device m_selected_device;
 
     std::vector<Device> m_device_list;

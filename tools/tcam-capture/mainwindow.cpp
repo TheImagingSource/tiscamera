@@ -166,24 +166,22 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
             char* str = nullptr;
             GError* err = nullptr;
             gst_message_parse_error(message, &err, &str);
-            qInfo("///////////////////// %s", str);
-            QString s = str;
+            QString s = err->message;
             if (s.startsWith("Device lost ("))
             {
-                ((MainWindow*)user_data)->device_lost(s);
+                QString serial = s.mid(13, s.length()-2);
 
+                ((MainWindow*)user_data)->device_lost(serial);
             }
 
-            qInfo("%s", err->message);
-            g_clear_error(&err);
+            g_error_free(err);
+            g_free(str);
 
             break;
         }
         case GST_MESSAGE_EOS:
         {
             qInfo("Received EOS");
-
-            ((MainWindow*)user_data)->device_lost("====");
 
             break;
         }
@@ -358,10 +356,10 @@ void MainWindow::open_pipeline(FormatHandling handling)
         g_object_set(p_source, "serial", serial.c_str(), nullptr);
     }
 
-    if (has_property(p_source, "use-dutils"))
-    {
-        g_object_set(p_source, "use-dutils", m_config.use_dutils, nullptr);
-    }
+    // if (has_property(p_source, "use-dutils"))
+    // {
+    //     g_object_set(p_source, "use-dutils", m_config.use_dutils, nullptr);
+    // }
 
     // must not be freed
     GstElementFactory* factory = gst_element_get_factory(p_source);
@@ -595,9 +593,12 @@ void MainWindow::fps_tick(double new_fps)
 }
 
 
-void MainWindow::device_lost_cb(const Device& /*dev*/)
+void MainWindow::device_lost_cb(const Device& dev)
 {
-    device_lost("");
+    if (dev == m_selected_device)
+    {
+        device_lost(dev.serial_long().c_str());
+    }
 }
 
 
@@ -608,6 +609,12 @@ void MainWindow::device_lost(const QString& message)
     {
         qWarning("%s", message.toStdString().c_str());
     }
+
+    if (message != m_selected_device.serial().c_str())
+    {
+        return;
+    }
+
     close_pipeline();
 
     free_property_dialog();
