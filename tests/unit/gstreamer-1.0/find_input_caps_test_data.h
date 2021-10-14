@@ -19,7 +19,7 @@
 
 #include <string>
 #include <vector>
-#include "../../src/gstreamer-1.0/tcamgstbase/tcamgstbase.h"
+#include "../../src/gstreamer-1.0/tcamgstbase/tcambinconversion.h"
 
 struct fic_test_result
 {
@@ -33,7 +33,7 @@ struct fic_test_data_container
     std::string name;
     std::string input_caps;
     std::string sink_caps;
-    struct tcam::gst::input_caps_toggles toggles;
+    //struct tcam::gst::input_caps_toggles toggles;
     fic_test_result result;
 };
 

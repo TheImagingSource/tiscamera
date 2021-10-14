@@ -36,11 +36,13 @@ static GSList* gst_tcambin_get_tcam_property_names (TcamPropertyProvider* iface,
         return nullptr;
     }
 
-    std::vector<std::string> dutils_name_list;
-    if (self.dutils) // if dutils is present then first fetch the names from that
+    std::vector<std::string> convert_name_list;
+    // if dutils(-cuda) is present then first fetch the names from that
+    // tcamconvert does not offer properties
+    if (self.tcam_converter && TCAM_IS_PROPERTY_PROVIDER(self.tcam_converter))
     {
-        dutils_name_list =
-            tcamprop1_consumer::get_property_names_noerror(TCAM_PROPERTY_PROVIDER(self.dutils));
+        convert_name_list =
+            tcamprop1_consumer::get_property_names_noerror(TCAM_PROPERTY_PROVIDER(self.tcam_converter));
     }
     auto src_prop_list_res = tcamprop1_consumer::get_property_names(TCAM_PROPERTY_PROVIDER(self.src));
     if (src_prop_list_res.has_error())
@@ -50,14 +52,15 @@ static GSList* gst_tcambin_get_tcam_property_names (TcamPropertyProvider* iface,
     }
 
     // merge both list;
-    if (dutils_name_list.empty())
+    if (convert_name_list.empty())
     {
         return gst_helper::gst_string_vector_to_GSList(src_prop_list_res.value());
     }
 
     auto& merged_prop_list = src_prop_list_res.value();
-    merged_prop_list.insert(
-        merged_prop_list.end(), dutils_name_list.begin(), dutils_name_list.end());
+    merged_prop_list.insert(merged_prop_list.end(),
+                            convert_name_list.begin(),
+                            convert_name_list.end());
 
     std::sort(merged_prop_list.begin(), merged_prop_list.end());
     merged_prop_list.erase(std::unique(merged_prop_list.begin(), merged_prop_list.end()),
@@ -85,9 +88,9 @@ static TcamPropertyBase* gst_tcambin_get_tcam_property(TcamPropertyProvider* ifa
         return nullptr;
     }
 
-    if (self.dutils)
+    if (self.tcam_converter)
     {
-        auto res = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(self.dutils), name, err);
+        auto res = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(self.tcam_converter), name, err);
         if (res)
         {
             return res;

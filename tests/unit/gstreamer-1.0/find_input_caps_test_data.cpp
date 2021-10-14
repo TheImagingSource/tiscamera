@@ -25,14 +25,14 @@ std::vector<fic_test_data_container> fic_test_data = {};
 void add_test(const std::string& name,
               const std::string& input_caps,
               const std::string& sink_caps,
-              struct tcam::gst::input_caps_toggles toggles,
+              //struct tcam::gst::input_caps_toggles toggles,
               const std::string& expected_caps,
               const tcam::gst::input_caps_required_modules& expected_modules)
 {
     struct fic_test_result res = {};
     res.output_caps = expected_caps;
     res.modules = expected_modules;
-    fic_test_data.push_back({ name, input_caps, sink_caps, toggles, res });
+    //fic_test_data.push_back({ name, input_caps, sink_caps, toggles, res });
 }
 
 
@@ -64,7 +64,7 @@ void init_dutils_test_data()
 
 void init_test_data(bool use_pimipi, bool use_dutlis)
 {
-    struct tcam::gst::input_caps_toggles toggles = {};
+    //struct tcam::gst::input_caps_toggles toggles = {};
     struct tcam::gst::input_caps_required_modules modules = {};
 
     if (use_dutlis)
@@ -82,7 +82,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("pass-trough bayer",
              caps::DFK72_CAPS,
              "video/x-bayer",
-             toggles,
+             //toggles,
              "video/x-bayer,format=grbg,width=2592,height=1944,framerate={15/2,7/1,5/1,4/1};"
              "video/x-bayer,format=grbg,width=1920,height=1080,framerate={15/1,10/1,15/2,5/1};"
              "video/x-bayer,format=grbg,width=1456,height=1944,framerate={15/1,10/1,15/2,5/1};"
@@ -106,7 +106,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("Prefer raw",
              caps::DFK72_CAPS,
              "video/x-raw",
-             toggles,
+             //toggles,
              "video/x-bayer,format=grbg,width=2592,height=1944,framerate={15/2,7/1,5/1,4/1};"
              "video/x-bayer,format=grbg,width=1920,height=1080,framerate={15/1,10/1,15/2,5/1};"
              "video/x-bayer,format=grbg,width=1456,height=1944,framerate={15/1,10/1,15/2,5/1};"
@@ -120,7 +120,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("Conversion 1",
              caps::DFK72_CAPS,
              "video/x-raw,format=BGRx",
-             toggles,
+             //toggles,
              "video/x-bayer,format=grbg,width=2592,height=1944,framerate={15/2,7/1,5/1,4/1};"
              "video/x-bayer,format=grbg,width=1920,height=1080,framerate={15/1,10/1,15/2,5/1};"
              "video/x-bayer,format=grbg,width=1456,height=1944,framerate={15/1,10/1,15/2,5/1};"
@@ -136,7 +136,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("Pass jpeg",
              caps::ECU010_CAPS,
              "image/jpeg",
-             toggles,
+             //toggles,
              "image/jpeg,width=640,height=480,framerate=30/1; "
              "image/jpeg,width=1280,height=720,framerate=30/1; "
              "image/jpeg,width=800,height=600,framerate=30/1; "
@@ -149,7 +149,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("Select yuv selection for BGRx",
              caps::ECU010_CAPS,
              "video/x-raw,format=BGRx",
-             toggles,
+             //toggles,
              "video/x-raw,format=YUY2,width=1280,height=720,framerate={ 9/1 }; "
              "video/x-raw,format=YUY2,width=640,height=480,framerate={ 30/1 }; "
              "video/x-raw,format=YUY2,width=800,height=600,framerate={ 20/1 }; "
@@ -163,7 +163,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("pass through YUY2",
              caps::ECU010_CAPS,
              "video/x-raw,format=BGRx,width=1280,height=720,framerate=9/1",
-             toggles,
+             //toggles,
              "video/x-raw, format=YUY2, width=1280, height=720, framerate=9/1",
              modules);
     //         }
@@ -175,7 +175,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("convert jpeg to BGRx",
              caps::AFU050_CAPS,
              "video/x-raw,format=BGRx,width=1280,height=960,framerate=60/1",
-             toggles,
+             //toggles,
              "image/jpeg, width=1280, height=960, framerate=60/1",
              modules);
 
@@ -185,7 +185,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
         "video/x-raw,format=GRAY8,width=1600,height=1200,framerate={201, 15/1, 15/2, 15/4};"
         "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate={20/1, 15/1, 15/2, 15/4};",
         "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
-        toggles,
+        //toggles,
         "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
         modules);
 
@@ -193,7 +193,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
              "15/2, 15/4};",
              "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
-             toggles,
+             // toggles,           //
              "video/x-raw,format=GRAY8,width=1600,height=1200,framerate=15/1",
              modules);
 
@@ -201,7 +201,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
              "15/2, 15/4};",
              "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate=15/1",
-             toggles,
+             // toggles,
              "video/x-raw,format=GRAY16_LE,width=1600,height=1200,framerate=15/1",
              modules);
 
@@ -210,7 +210,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
              "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
              "15/2, 15/4};",
              "video/x-raw,format=BGRx",
-             toggles,
+             // toggles,
              "video/x-raw,format={GRAY8, GRAY16_LE},width=1600,height=1200,framerate={20/1, 15/1, "
              "15/2, 15/4};",
 
@@ -220,7 +220,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("Select yuv",
              caps::ECU010_CAPS,
              "video/x-raw",
-             toggles,
+             // toggles,
              "video/x-raw, format=YUY2, width=1280, height=720, framerate={ 9/1 }; "
              "video/x-raw, format=YUY2, width=640, height=480, framerate={ 30/1 }; "
              "video/x-raw, format=YUY2, width=800, height=600, framerate={ 20/1 }; "
@@ -233,7 +233,7 @@ void init_test_data(bool use_pimipi, bool use_dutlis)
     add_test("YUV input; BGRx output",
              caps::ECU010_CAPS,
              "video/x-raw, format=BGRx",
-             toggles,
+             // toggles,
              "video/x-raw, format=YUY2, width=1280, height=720, framerate={ 9/1 }; "
              "video/x-raw, format=YUY2, width=640, height=480, framerate={ 30/1 }; "
              "video/x-raw, format=YUY2, width=800, height=600, framerate={ 20/1 }; "

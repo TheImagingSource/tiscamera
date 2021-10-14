@@ -111,47 +111,6 @@ bool contains_jpeg(const GstCaps* caps);
 GstCaps* get_caps_from_element_name(const char* elementname, const char* padname);
 
 
-struct input_caps_required_modules
-{
-    bool tcamconvert = false;
-    bool videoconvert = false;
-    bool jpegdec = false;
-    bool dutils = false;
-
-    bool operator==(const input_caps_required_modules& other) const noexcept
-    {
-        if (tcamconvert == other.tcamconvert
-            && videoconvert == other.videoconvert && jpegdec == other.jpegdec
-            && dutils == other.dutils)
-        {
-            return true;
-        }
-        return false;
-    }
-};
-
-struct input_caps_toggles
-{
-    bool use_dutils = false;
-};
-
-
-/**
- * @param available_caps - caps the source offers
- * @param wanted_caps - caps the sink wants, if null available_caps will be returned
- * @param requires_bayertransform(out) - will be set to true when the tcambayertransform element is required
- * @param requires_bayer2rgb(out) - will be set to true when the bayer2rgb element is required
- * @param requires_vidoeconvert(out) - will be set to true when the videoconvert element is required
- * @param requires_jpegconvert(out) - will be set to true when the jpegdec element is required
- * @param use_dutils(in) - false when dutils shall be ignored
- *
- * @return possible caps for the source
- */
-GstCaps* find_input_caps(GstCaps* available_caps,
-                         GstCaps* wanted_caps,
-                         input_caps_required_modules& modules,
-                         input_caps_toggles toggles);
-
 tcam::image_scaling caps_get_scaling(GstCaps* caps);
 
 }

@@ -30,7 +30,6 @@
 
 using namespace tcam::gst;
 
-
 #define gst_tcambin_parent_class parent_class
 
 GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
@@ -58,12 +57,38 @@ enum
     PROP_SERIAL,
     PROP_DEVICE_TYPE,
     PROP_DEVICE_CAPS,
-    PROP_USE_DUTILS,
+    PROP_CONVERSION_ELEMENT,
     PROP_STATE
 };
 
 static GstStaticPadTemplate src_template =
     GST_STATIC_PAD_TEMPLATE("src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS_ANY);
+
+
+
+
+static bool has_version_parity_with_tiscamera(const std::string& element_name)
+{
+    std::string version = get_plugin_version(element_name.c_str());
+
+    std::string tcam_version = get_version_major();
+    tcam_version += ".";
+    tcam_version += get_version_minor();
+
+    // Only check major.minor
+    // everything else is potential bugfix
+    if (version.find(tcam_version) == std::string::npos)
+    {
+        // do not post any messages here
+        // element is not yet fully initialized
+        // messages will _not_ be correctly propagated
+
+        return false;
+    }
+
+    return true;
+}
+
 
 
 static gboolean gst_tcambin_create_source(GstTcamBin* self)
@@ -164,18 +189,9 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
         data.pipeline_caps = nullptr;
     }
 
-    if (data.dutils)
+    if (data.tcam_converter)
     {
-        remove_element(&data.dutils);
-    }
-
-    if (data.bayer_transform)
-    {
-        remove_element(&data.bayer_transform);
-    }
-    if (data.tcamconvert)
-    {
-        remove_element(&data.tcamconvert);
+        remove_element(&data.tcam_converter);
     }
 
     if (data.jpegdec)
@@ -209,6 +225,49 @@ static gboolean create_and_add_element(GstElement** element,
     return TRUE;
 }
 
+
+// helper function to post error messages to GstBus
+static void send_linking_element_msg (GstTcamBin* self, const std::string& element_name)
+{
+    std::string msg_string = "Could not link element '" + element_name + "'.";
+    GError* err =
+        g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, "%s", msg_string.c_str());
+    GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
+    gst_element_post_message(GST_ELEMENT(self), msg);
+    g_error_free(err);
+    GST_ERROR_OBJECT(self, "%s", msg_string.c_str());
+}
+
+
+
+// helper function to link elements
+static bool link_elements (bool condition,
+                           GstElement** previous_element,
+                           GstElement** element,
+                           std::string& pipeline_description,
+                           const std::string& name)
+{
+    if (condition)
+    {
+        if (!*element)
+        {
+            return false;
+        }
+
+        gboolean link_ret = gst_element_link(*previous_element, *element);
+        if (!link_ret)
+        {
+            return false;
+        }
+
+        pipeline_description += " ! ";
+        pipeline_description += name;
+
+        *previous_element = *element;
+    }
+
+    return true;
+}
 
 static gboolean gst_tcambin_create_elements(GstTcamBin* self)
 {
@@ -248,26 +307,37 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
         GST_ERROR("%s", msg_string.c_str());
     };
 
-    if (data.has_dutils && data.toggles.use_dutils)
+    if (data.conversion_info.selected_conversion == TCAM_BIN_CONVERSION_DUTILS)
     {
-        if (!create_and_add_element(&data.dutils, "tcamdutils", "tcambin-dutils", GST_BIN(self)))
+        if (!create_and_add_element(&data.tcam_converter, "tcamdutils", "tcambin-tcamdutils", GST_BIN(self)))
         {
             send_missing_element_msg("tcamdutils");
             return FALSE;
         }
 
-        // go to finish and do not create other elements
-        goto finished_element_creation;
+
     }
-    else
+    else if (data.conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
     {
-        if (!create_and_add_element(
-                &data.tcamconvert, "tcamconvert", "tcambin-tcamconvert", GST_BIN(self)))
+        if (!create_and_add_element(&data.tcam_converter, "tcamdutils", "tcambin-tcamdutils-cuda", GST_BIN(self)))
         {
-            send_missing_element_msg("tcamconvert");
+            send_missing_element_msg("tcamdutils-cuda");
             return FALSE;
         }
+
     }
+    else // default selection
+    {
+        if (!create_and_add_element(&data.tcam_converter, "tcamconvert", "tcambin-tcamconvert", GST_BIN(self)))
+        {
+            send_missing_element_msg("tcamconcert");
+            return FALSE;
+        }
+
+
+    }
+
+
 
     if (contains_jpeg(data.src_caps.get()))
     {
@@ -278,13 +348,9 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
         }
     }
 
-// videoconvert can be needed by non-dutils and dutils pipelines
-// thus include it after the label
-finished_element_creation:
-
     // this is needed to allow for conversions such as
     // GRAY8 to BGRx that can exist when device-caps are set
-    if (!create_and_add_element(&data.convert, "videoconvert", "tcambin-convert", GST_BIN(self)))
+    if (!create_and_add_element(&data.convert, "videoconvert", "tcambin-videoconvert", GST_BIN(self)))
     {
         send_missing_element_msg("videoconvert");
         return FALSE;
@@ -386,81 +452,31 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
     }
     else
     {
-        gst_element_set_state(data.pipeline_caps, GST_STATE_READY);
+        // gst_element_set_state(data.pipeline_caps, GST_STATE_READY);
 
         GstCaps* testcaps;
         g_object_get(data.pipeline_caps, "caps", &testcaps, NULL);
+
+        GST_ERROR("!!!!!!!!!!!!!!!!!!!!!!!!! filter: %s", gst_caps_to_string(testcaps));
     }
 
-
-    // helper function to post error messages to GstBus
-    auto send_linking_element_msg = [self](const std::string& element_name) {
-        std::string msg_string = "Could not link element '" + element_name + "'.";
-        GError* err =
-            g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, "%s", msg_string.c_str());
-        GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
-        gst_element_post_message(GST_ELEMENT(self), msg);
-        g_error_free(err);
-        GST_ERROR_OBJECT(self, "%s", msg_string.c_str());
-    };
-
-    // helper function to link elements
-    auto link_elements = [self](bool condition,
-                                GstElement** previous_element,
-                                GstElement** element,
-                                std::string& pipeline_description,
-                                const std::string& name) {
-        if (condition)
-        {
-            if (!*element)
-            {
-                return false;
-            }
-
-            gboolean link_ret = gst_element_link(*previous_element, *element);
-            if (!link_ret)
-            {
-                return false;
-            }
-
-            pipeline_description += " ! ";
-            pipeline_description += name;
-
-            *previous_element = *element;
-        }
-
-        return true;
-    };
 
     std::string pipeline_description = "tcamsrc ! ";
     pipeline_description += gst_helper::to_string(*data.src_caps);
 
     GstElement* previous_element = data.pipeline_caps;
 
-    if (data.has_dutils && data.modules.dutils)
-    {
-        if (!link_elements((data.has_dutils && data.modules.dutils),
-                           &previous_element,
-                           &data.dutils,
-                           pipeline_description,
-                           "tcamdutils"))
-        {
-            send_linking_element_msg("tcamdutils");
-            return FALSE;
-        }
 
-        // goto finished_element_linking;
-    }
-
-    if (!link_elements(data.modules.tcamconvert,
+    if (!link_elements(data.modules.dutils,
                        &previous_element,
-                       &data.tcamconvert,
+                       &data.tcam_converter,
                        pipeline_description,
-                       "tcamconvert"))
+                       gst_element_get_name(data.tcam_converter)))
     {
-        send_linking_element_msg("tcamconvert");
+        send_linking_element_msg(self, gst_element_get_name(data.tcam_converter));
         return FALSE;
     }
+
 
     if (!link_elements(data.modules.jpegdec,
                        &previous_element,
@@ -468,7 +484,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
                        pipeline_description,
                        "jpegdec"))
     {
-        send_linking_element_msg("jpegdec");
+        send_linking_element_msg(self, "jpegdec");
         return FALSE;
     }
 
@@ -480,7 +496,7 @@ static gboolean gst_tcambin_link_elements(GstTcamBin* self)
                        pipeline_description,
                        "videoconvert"))
     {
-        send_linking_element_msg("videoconvert");
+        send_linking_element_msg(self, "videoconvert");
         return FALSE;
     }
 
@@ -655,6 +671,76 @@ static gboolean apply_state(GstTcamBin* self, const std::string& /*state*/)
 }
 
 
+static void check_and_notify_version_missmatch (GstTcamBin* self)
+{
+    if (!self->data->tcam_converter)
+    {
+        // this means we either have a pipeline that does not
+        // need one of our conversion elements
+        // or that something is very, very wrong
+        // either way, do not spam the user
+        return;
+    }
+
+    if (self->data->conversion_info.user_selector != TCAM_BIN_CONVERSION_AUTO)
+    {
+        // additional anti spam check
+        // != AUTO means the user has manually selected a conversion element
+        // assume they know what they are doing
+        return;
+    }
+
+    std::string element_name;
+
+    if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_DUTILS)
+    {
+        if (has_version_parity_with_tiscamera("tcamdutils"))
+        {
+            return;
+        }
+        element_name = "tcamdutils";
+    }
+    else if (self->data->conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
+    {
+        if (has_version_parity_with_tiscamera("tcamdutils"))
+        {
+            return;
+        }
+        element_name = "tcamdutils";
+    }
+    else
+    {
+        // only other option is tcamconvert
+        // which is part of tiscamera
+        // version parity is thus guaranteed
+        return;
+    }
+
+    std::string warning = element_name + " version mismatch! "
+        + element_name + " and tiscamera require identical major.minor version. "
+        "Overwrite at own risk by explicitly setting 'tcambin conversion-element=" + element_name + "'. "
+        "Found '"
+        + get_plugin_version(element_name.c_str()) + "' Required: '" + get_version_major() + "."
+        + get_version_minor() + "'";
+
+    GST_WARNING("%s", warning.c_str());
+
+    std::string quark_str = element_name + " version mismatch";
+    GError* err = g_error_new(g_quark_from_string(quark_str.c_str()),
+                              1,
+                              "%s",
+                              GST_ELEMENT_NAME(self));
+
+    GstMessage* msg = gst_message_new_warning(GST_OBJECT(self),
+                                              err,
+                                              warning.c_str());
+    g_clear_error(&err);
+    gst_element_post_message(GST_ELEMENT(self), msg);
+
+}
+
+
+
 static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstStateChange trans)
 {
     GstStateChangeReturn ret = GST_STATE_CHANGE_SUCCESS;
@@ -666,35 +752,14 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            GST_INFO("NULL_TO_READY");
+            GST_DEBUG("NULL_TO_READY");
 
-            // post message about dutils version missmatch
-            // this only happens when we have found tcamdutils
+            // post message about dutils(-cuda) version missmatch
+            // this only happens when we have found tcamdutils(-cuda)
             // but the previous version check failed
             // user can manually set use_dutils to true
             // which overwrites this message
-            if (data.has_dutils && !data.toggles.use_dutils)
-            {
-                std::string dutils_warning =
-                    "tcamdutils version mismatch! "
-                    "tcamdutils and tiscamera require identical major.minor version. "
-                    "Overwrite at own risk by explicitly setting 'tcambin use-dutils=true'. "
-                    "Found '"
-                    + get_plugin_version("tcamdutils") + "' Required: '" + get_version_major() + "."
-                    + get_version_minor() + "'";
-
-                GST_WARNING("%s", dutils_warning.c_str());
-
-                GError* err = g_error_new(g_quark_from_string("tcamdutils version mismatch"),
-                                          1,
-                                          "%s",
-                                          GST_ELEMENT_NAME(element));
-
-                GstMessage* msg =
-                    gst_message_new_warning(GST_OBJECT(element), err, dutils_warning.c_str());
-                g_clear_error(&err);
-                gst_element_post_message(GST_ELEMENT(self), msg);
-            }
+            check_and_notify_version_missmatch(self);
 
             if (data.src == nullptr)
             {
@@ -757,16 +822,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             }
 
             auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
-            // GST_INFO_OBJECT(
-            //     self, "caps of src: %" GST_PTR_FORMAT, static_cast<void*>(src_caps.get()));
-
-            if (data.toggles.use_dutils)
-            {
-                if (!data.has_dutils)
-                {
-                    data.toggles.use_dutils = false;
-                }
-            }
 
             if (data.user_caps)
             {
@@ -794,14 +849,14 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 data.src_caps = gst_helper::make_ptr(find_input_caps(data.user_caps.get(),
                                                                      data.target_caps.get(),
                                                                      data.modules,
-                                                                     data.toggles));
+                                                                     data.conversion_info.selected_conversion));
             }
             else
             {
                 data.src_caps = gst_helper::make_ptr(find_input_caps(src_caps.get(),
                                                                      data.target_caps.get(),
                                                                      data.modules,
-                                                                     data.toggles));
+                                                                     data.conversion_info.selected_conversion));
             }
 
             if (!data.src_caps || gst_caps_is_empty(data.src_caps.get()))
@@ -835,8 +890,8 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
              * the selected caps, no matter what.
              */
 
-            gchar* caps_info_string = g_strdup_printf(
-                "Working with src caps: %s", gst_helper::to_string(*data.src_caps).c_str());
+            gchar* caps_info_string = g_strdup_printf("Working with src caps: %s",
+                                                      gst_helper::to_string(*data.src_caps).c_str());
 
             GstMessage* msg = gst_message_new_info(GST_OBJECT(element), nullptr, caps_info_string);
             g_free(caps_info_string);
@@ -942,16 +997,16 @@ static void gst_tcambin_get_property(GObject* object,
             g_value_set_string(value, gst_helper::to_string(*data.user_caps).c_str());
             break;
         }
-        case PROP_USE_DUTILS:
+        case PROP_CONVERSION_ELEMENT:
         {
-            g_value_set_boolean(value, data.toggles.use_dutils);
+            g_value_set_enum(value, self->data->conversion_info.user_selector);
             break;
         }
         case PROP_STATE:
         {
             if (!data.elements_created)
             {
-                gst_tcambin_create_elements(GST_TCAMBIN(self));
+                //gst_tcambin_create_elements(GST_TCAMBIN(self));
             }
             if (!data.device_serial.empty())
             {
@@ -1009,12 +1064,55 @@ static void gst_tcambin_set_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
+            GST_WARNING("Setting DEVICE_CAPS %s", g_value_get_string(value));
             data.user_caps = gst_helper::make_ptr(gst_caps_from_string(g_value_get_string(value)));
+            GST_INFO("%s", gst_caps_to_string(data.user_caps.get()));
             break;
         }
-        case PROP_USE_DUTILS:
+        case PROP_CONVERSION_ELEMENT:
         {
-            data.toggles.use_dutils = g_value_get_boolean(value);
+            self->data->conversion_info.user_selector = (TcamBinConversionElement)g_value_get_enum(value);
+
+            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CONVERT)
+            {
+                if (self->data->conversion_info.have_tcamconvert)
+                {
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
+                }
+                else
+                {
+                    GST_ERROR("Unable to use tcamconvert. Element does not seem to exist. Falling back to auto");
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+                }
+            }
+            else if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_DUTILS)
+            {
+                if (self->data->conversion_info.have_tcamdutils)
+                {
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
+                }
+                else
+                {
+                    GST_ERROR("Unable to use tcamdutils. Element does not seem to exist. Falling back to auto");
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+                }
+            }
+            else if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CUDA)
+            {
+                if (self->data->conversion_info.have_tcamdutils_cuda)
+                {
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
+                }
+                else
+                {
+                    GST_ERROR("Unable to use tcamconvert. Element does not seem to exist. Falling back to auto");
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+                }
+            }
+            else
+            {
+                self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+            }
 
             break;
         }
@@ -1054,29 +1152,6 @@ static void gst_tcambin_set_property(GObject* object,
 }
 
 
-static bool verify_tcamdutils_version()
-{
-    std::string dutils_version = get_plugin_version("tcamdutils");
-
-    std::string tcam_version = get_version_major();
-    tcam_version += ".";
-    tcam_version += get_version_minor();
-
-    // Only check major.minor
-    // everything else is potential bugfix
-    if (dutils_version.find(tcam_version) == std::string::npos)
-    {
-        // do not post any messages here
-        // element is not yet fully initialized
-        // messages will _not_ be correctly propagated
-
-        return false;
-    }
-
-    return true;
-}
-
-
 static void gst_tcambin_init(GstTcamBin* self)
 {
     GST_DEBUG_OBJECT(self, "init");
@@ -1085,32 +1160,38 @@ static void gst_tcambin_init(GstTcamBin* self)
 
     auto& data = *self->data;
 
-    data.toggles.use_dutils = TRUE;
     data.elements_linked = FALSE;
 
+    data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
 
     auto factory = gst_element_factory_find("tcamdutils");
 
     if (factory != nullptr)
     {
-        data.has_dutils = TRUE;
+        data.conversion_info.have_tcamdutils = true;
         gst_object_unref(factory);
-        data.toggles.use_dutils = verify_tcamdutils_version();
-    }
-    else
-    {
-        data.has_dutils = FALSE;
-        data.toggles.use_dutils = FALSE;
+        if (has_version_parity_with_tiscamera("tcamdutils"))
+        {
+            data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
+        }
     }
 
-    GST_INFO_OBJECT(
-        self, "Dutils present: %d use-enabled: %d", data.has_dutils, data.toggles.use_dutils);
+    auto factory_cuda = gst_element_factory_find("tcamdutils-cuda");
+
+    if (factory_cuda != nullptr)
+    {
+        data.conversion_info.have_tcamdutils_cuda = true;
+        gst_object_unref(factory_cuda);
+        if (has_version_parity_with_tiscamera("tcamdutils-cuda"))
+        {
+            data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
+        }
+    }
 
     data.src = nullptr;
     data.pipeline_caps = nullptr;
-    data.dutils = nullptr;
-    data.bayer_transform = nullptr;
-    data.tcamconvert = nullptr;
+
+    data.tcam_converter = nullptr;
 
     data.jpegdec = nullptr;
     data.convert = nullptr;
@@ -1154,6 +1235,10 @@ static void gst_tcambin_class_init(GstTcamBinClass* klass)
     GObjectClass* object_class = G_OBJECT_CLASS(klass);
     GstElementClass* element_class = GST_ELEMENT_CLASS(klass);
 
+    // enum is not a registered GType for ?reasons?
+    // call explicitly to be sure
+    tcam_bin_conversion_element_get_type();
+
     object_class->dispose = (GObjectFinalizeFunc)gst_tcambin_dispose;
     object_class->finalize = gst_tcambin_finalize;
     object_class->set_property = gst_tcambin_set_property;
@@ -1192,12 +1277,13 @@ static void gst_tcambin_class_init(GstTcamBinClass* klass)
 
     g_object_class_install_property(
         object_class,
-        PROP_USE_DUTILS,
-        g_param_spec_boolean("use-dutils",
-                             "Allow usage of dutils element",
-                             "",
-                             TRUE,
-                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+        PROP_CONVERSION_ELEMENT,
+        g_param_spec_enum("conversion-element",
+                          "conversion",
+                          "Select used transformation element",
+                          g_type_from_name("TcamBinConversionElement"),
+                          TCAM_BIN_CONVERSION_AUTO,
+                          static_cast<GParamFlags>(G_PARAM_READWRITE)));
 
     g_object_class_install_property(
         object_class,

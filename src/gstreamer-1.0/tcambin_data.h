@@ -9,6 +9,20 @@
 #include "gsttcambin.h"
 
 #include "tcamgstbase/tcamgstbase.h"
+#include "tcamgstbase/tcambinconversion.h"
+
+
+
+struct tcambin_conversion
+{
+    bool have_tcamconvert = true;
+    bool have_tcamdutils = false;
+    bool have_tcamdutils_cuda = false;
+
+    TcamBinConversionElement user_selector =  TCAM_BIN_CONVERSION_AUTO;
+    TcamBinConversionElement selected_conversion =  TCAM_BIN_CONVERSION_AUTO;
+
+};
 
 
 struct tcambin_data
@@ -21,8 +35,9 @@ struct tcambin_data
     gst_helper::gst_ptr<GstPad> target_pad;
     gst_helper::gst_ptr<GstCaps> user_caps;
 
-    GstPad* src_ghost_pad =
-        nullptr; // NOTE: we don't have a reference to this, so this is a observer that will be made invalid in dispose
+    // NOTE: we don't have a reference to this,
+    // so this is a observer that will be made invalid in dispose
+    GstPad* src_ghost_pad = nullptr;
 
     gst_helper::gst_ptr<GstElement> out_caps_filter_;
 
@@ -33,21 +48,18 @@ struct tcambin_data
     // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
     GstElement* src = nullptr;
     GstElement* pipeline_caps = nullptr;
-    GstElement* dutils = nullptr;
-    GstElement* bayer_transform = nullptr;
     GstElement* jpegdec = nullptr;
     GstElement* convert = nullptr;
-    GstElement* tcamconvert = nullptr;
+
+    tcambin_conversion conversion_info = {};
+    GstElement* tcam_converter = nullptr;
 
     gboolean elements_created = FALSE;
     gboolean elements_linked = FALSE;
     gboolean target_set = FALSE;
     gboolean must_apply_state = FALSE;
 
-    gboolean has_dutils = FALSE;
-
     tcam::gst::input_caps_required_modules modules;
-    tcam::gst::input_caps_toggles toggles;
 };
 
 

@@ -20,8 +20,83 @@
 
 using namespace tcam::gst;
 
+
+
+static const GEnumValue _tcam_bin_conversion_element_values[] =
+{
+    { TCAM_BIN_CONVERSION_AUTO, "TCAM_BIN_CONVERSION_AUTO", "auto"},
+    { TCAM_BIN_CONVERSION_CONVERT, "TCAM_BIN_CONVERSION_CONVERT", "tcamconvert"},
+    { TCAM_BIN_CONVERSION_DUTILS, "TCAM_BIN_CONVERSION_DUTILS", "tcamdutils"},
+    { TCAM_BIN_CONVERSION_CUDA, "TCAM_BIN_CONVERSION_CUDA", "tcamdutils-cuda"},
+    { 0, nullptr, nullptr}
+};
+
+GType tcam_bin_conversion_element_get_type(void)
+{
+    static GType type = 0;
+    if (!type)
+    {
+        type = g_enum_register_static("TcamBinConversionElement", _tcam_bin_conversion_element_values);
+    }
+    return type;
+}
+
+
+
 namespace
 {
+
+
+GstCaps* filter_by_caps_properties(const GstCaps* input, const GstCaps* filter)
+{
+
+    GstStructure* filter_struc = gst_caps_get_structure(filter, 0);
+
+    GstCaps* internal_filter = gst_caps_new_empty();
+
+    for (guint i = 0; i < gst_caps_get_size(input); ++i)
+    {
+        GstStructure* struc = gst_caps_get_structure(input, i);
+
+        if (gst_structure_get_field_type(struc, "format") == G_TYPE_STRING)
+        {
+            //const char* string = gst_structure_get_string(struc, "format");
+
+            GstStructure* new_struc = gst_structure_new(gst_structure_get_name(struc),
+                                                        "format",
+                                                        G_TYPE_STRING,
+                                                        gst_structure_get_string(struc, "format"),
+                                                        nullptr);
+
+            for (gint x = 0; x < gst_structure_n_fields(filter_struc); x++)
+            {
+                if (g_strcmp0("format", gst_structure_nth_field_name(filter_struc, x)) == 0)
+                {
+                    continue;
+                }
+
+                gst_structure_set_value(new_struc,
+                                        gst_structure_nth_field_name(filter_struc, x),
+                                        gst_structure_get_value(filter_struc, gst_structure_nth_field_name(filter_struc, x)));
+            }
+            gst_caps_append_structure(internal_filter, new_struc);
+
+        }
+    }
+
+    internal_filter = gst_caps_simplify(internal_filter);
+
+
+    GstCaps* ret = gst_caps_intersect((GstCaps*)input, (GstCaps*)internal_filter);
+
+    gst_caps_unref(internal_filter);
+
+    return ret;
+
+}
+
+
+
 
 struct conversion_desc
 {
@@ -31,10 +106,20 @@ struct conversion_desc
 };
 
 // order of required_modules fields
+
 // bool tcamconvert = false;
 // bool videoconvert = false;
 // bool jpegdec = false;
 // bool dutils = false;
+
+// currently the following pipelines are possible
+
+// tcamsrc
+// tcamsrc ! tcamconvert
+// tcamsrc ! tcamconvert ! videoconvert
+// tcamsrc ! jpegdec
+// tcamsrc ! videoconvert
+// tcamsrc ! tcamdutils
 
 static const struct conversion_desc tcambin_conversion [] =
 {
@@ -217,6 +302,61 @@ static GstCaps* get_caps_type_definition(CAPS_TYPE type)
 namespace tcam::gst
 {
 
+
+
+GstCaps* find_input_caps(GstCaps* available_caps,
+                         GstCaps* wanted_caps,
+                         input_caps_required_modules& modules,
+                         TcamBinConversionElement toggles)
+{
+    modules = {};
+
+    if (!GST_IS_CAPS(available_caps))
+    {
+        return nullptr;
+    }
+
+    if (wanted_caps == nullptr || gst_caps_is_empty(wanted_caps))
+    {
+        GST_INFO("No sink caps specified. Continuing with output caps identical to device caps.");
+        wanted_caps = gst_caps_copy(available_caps);
+    }
+
+    TcamBinConversion conversion;
+
+    // the negotiation is not as obvious as one would hope
+    //
+    // available_caps at this point in time might already be reduced in scope
+    // if tcambin->device-caps are set they will be available caps
+    // filter_by_caps_properties reduces available caps by the settings in wanted_caps
+    //
+    // This reduction is to ensure that tcam_gst_find_largest_caps behaves correctly
+    // Example:
+    // camera has maximum of 4000x3000 @ 60fps
+    // wanted_caps: video/x-raw,format=BGRx,framerate=15/1
+    // find_largest_caps would return 4000x3000 @ 60fps
+    // we actually want 4000x3000 @ 15fps
+    // thus already remove all caps that do not have 15fps
+    // to ensure that is the only this largest caps can find.
+    //
+    // toggles is an overwrite for the module selection
+    // this e.g. allows disabling tcamdutils even if they are found
+    // get_modules dictates the modules tcambin shall use, dependent on caps and toggles
+
+    GstCaps* used_caps = filter_by_caps_properties(available_caps, wanted_caps);
+
+    GstCaps* actual_input = tcam_gst_find_largest_caps(used_caps);
+
+    modules = conversion.get_modules(actual_input, wanted_caps, toggles);
+
+    //SPDLOG_ERROR("Returning: {} with modules: \n {}", gst_caps_to_string(actual_input), modules.str());
+
+    return actual_input;
+}
+
+
+
+
 TcamBinConversion::TcamBinConversion()
 {
     m_caps_table.reserve(std::size(ALL_CAPS_TYPES));
@@ -256,7 +396,7 @@ bool TcamBinConversion::is_compatible(GstCaps* to_check, CAPS_TYPE compatible_wi
 
 struct input_caps_required_modules TcamBinConversion::get_modules(GstCaps* caps,
                                                                   GstCaps* wanted_output,
-                                                                  struct input_caps_toggles toggles) const
+                                                                  TcamBinConversionElement toggles) const
 {
 
     if (!caps || !gst_caps_is_fixed(caps))
@@ -264,18 +404,41 @@ struct input_caps_required_modules TcamBinConversion::get_modules(GstCaps* caps,
         return {};
     }
 
+    std::vector<input_caps_required_modules> collection;
+
     for (const auto& conv : tcambin_conversion)
     {
         // be compatible to input/output caps
-        // also ensure we have a a compatible conversion
-        // dutils and non-dutils conversions are in the same table
+        // collect all potential matches
+        // if flags say we should use dutils
+        // but a conversion with them is not possible
+        // we still want to find them
         if (is_compatible(caps, conv.caps_type_in)
-            && is_compatible(wanted_output, conv.caps_type_out)
-            && toggles.use_dutils == conv.modules.dutils)
+            && is_compatible(wanted_output, conv.caps_type_out))
         {
-            return conv.modules;
+            collection.push_back(conv.modules);
         }
     }
+
+    if (collection.empty())
+    {
+        return {};
+    }
+
+    if (collection.size() == 1)
+    {
+        return collection.at(0);
+    }
+
+    for (const auto& c : collection)
+    {
+
+        if (c.dutils && toggles == TCAM_BIN_CONVERSION_DUTILS)
+        {
+            return c;
+        }
+    }
+
     return {};
 }
 
