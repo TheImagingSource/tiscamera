@@ -1,16 +1,13 @@
 
 #pragma once
 
-#include <string>
-#include <gst-helper/helper_functions.h>
-
-#include <gst/gst.h>
-
 #include "gsttcambin.h"
-
-#include "tcamgstbase/tcamgstbase.h"
 #include "tcamgstbase/tcambinconversion.h"
+#include "tcamgstbase/tcamgstbase.h"
 
+#include <gst-helper/helper_functions.h>
+#include <gst/gst.h>
+#include <string>
 
 
 struct tcambin_conversion
@@ -19,9 +16,8 @@ struct tcambin_conversion
     bool have_tcamdutils = false;
     bool have_tcamdutils_cuda = false;
 
-    TcamBinConversionElement user_selector =  TCAM_BIN_CONVERSION_AUTO;
-    TcamBinConversionElement selected_conversion =  TCAM_BIN_CONVERSION_AUTO;
-
+    TcamBinConversionElement user_selector = TCAM_BIN_CONVERSION_AUTO;
+    TcamBinConversionElement selected_conversion = TCAM_BIN_CONVERSION_AUTO;
 };
 
 
@@ -29,6 +25,7 @@ struct tcambin_data
 {
     std::string device_serial;
     std::string device_type;
+    gst_helper::gst_ptr<GstDevice> prop_tcam_device;
 
     std::string state;
 
@@ -43,7 +40,6 @@ struct tcambin_data
 
     gst_helper::gst_ptr<GstCaps> src_caps;
     gst_helper::gst_ptr<GstCaps> target_caps;
-
 
     // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
     GstElement* src = nullptr;

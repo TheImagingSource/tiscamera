@@ -83,6 +83,28 @@ std::string gst_helper::gobject_get_string( gpointer obj, const char* property_n
     return rval;
 }
 
+std::optional<std::string> gst_helper::gobject_get_string_opt(gpointer obj,
+                                                              const char* property_name)
+{
+    if( !gobject_has_property( obj, property_name, G_TYPE_STRING ) ) {
+        return {};
+    }
+    return gobject_get_string( obj, property_name );
+}
+
+bool gst_helper::gobject_has_property(gpointer obj, const char* property_name, GType type /*= G_TYPE_NONE*/ )
+{
+    auto param_desc = g_object_class_find_property( G_OBJECT_CLASS( obj ), property_name );
+    if( param_desc == nullptr ) {
+        return false;
+    }
+    if (type != G_TYPE_NONE)
+    {
+        return param_desc->value_type == type;
+    }
+    return true;
+}
+
 GSList* gst_helper::gst_string_vector_to_GSList( const std::vector<std::string>& lst )
 {
     GSList* ret = nullptr;

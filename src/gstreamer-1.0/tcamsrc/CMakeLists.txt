@@ -21,11 +21,19 @@ add_library(gsttcamsrc SHARED
 	mainsrc_device_state.cpp
     tcamsrc_tcamprop_impl.h
     tcamsrc_tcamprop_impl.cpp
-	gsttcamdeviceprovider.cpp
-	gsttcamdevice.cpp
+
+	"mainsrc_gst_device_provider.cpp"
+	"mainsrc_gst_device_provider.h"
+	"mainsrc_gst_device.cpp"
+	"mainsrc_gst_device.h"
 
 	gstmetatcamstatistics.cpp
 	gstmetatcamstatistics.h
+
+	
+	
+	"tcamsrc_plugin.cpp"
+	
 
 	tcambind.h
 	tcambind.cpp

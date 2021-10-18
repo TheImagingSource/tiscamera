@@ -91,12 +91,39 @@ inline void ref_object(GstBufferPool* ptr) noexcept
     gst_object_ref(ptr);
 }
 
+inline void ref_object(GstDevice* ptr) noexcept
+{
+    gst_object_ref(ptr);
+}
+inline void unref_object(GstDevice* ptr) noexcept
+{
+    gst_object_unref(ptr);
+}
+
+inline void ref_object(GstDeviceMonitor* ptr) noexcept
+{
+    gst_object_ref(ptr);
+}
+inline void unref_object(GstDeviceMonitor* ptr) noexcept
+{
+    gst_object_unref(ptr);
+}
+
+inline void ref_object(GstElementFactory* ptr) noexcept
+{
+    gst_object_ref(ptr);
+}
+inline void unref_object( GstElementFactory* ptr) noexcept
+{
+    gst_object_unref(ptr);
+}
+
 template<class T>
 inline bool consume_floating( T* ptr ) noexcept
 {
     if( g_object_is_floating( ptr ) )
     {
-        g_object_ref_sink( ptr );
+        gst_object_ref_sink( ptr );
         return true;
     }
     return false;
@@ -155,7 +182,7 @@ public:
         return gst_ptr { ptr };
     }
     /** Wraps the passed in pointer and increments the reference count of the passed in object.
-     * If the object is floating, the floating flag is removed (via g_object_ref_sink and no separate addref is called).
+     * If the object is floating, the floating flag is removed. Address is callled in every case.
      */
     static gst_ptr addref(T* ptr) noexcept
     {
@@ -163,10 +190,8 @@ public:
         {
             return gst_ptr {};
         }
-        if (!detail::consume_floating(ptr))
-        {
-            ref(ptr);
-        }
+        detail::consume_floating( ptr );
+        ref(ptr);
         return gst_ptr { ptr };
     }
 

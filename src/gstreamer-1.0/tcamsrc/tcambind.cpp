@@ -125,7 +125,7 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
     {
         if (desc.get_fourcc() == 0)
         {
-            SPDLOG_INFO("Format has empty fourcc. Ignoring");
+            SPDLOG_INFO("Format has empty fourcc. Format-desc='{}'", desc.get_struct().description);
             continue;
         }
 

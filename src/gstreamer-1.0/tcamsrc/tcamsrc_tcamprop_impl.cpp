@@ -26,13 +26,13 @@
 static GSList* gst_tcamsrc_get_tcam_property_names (TcamPropertyProvider* iface, GError** err)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-    if (self->active_source)
+    auto src = tcamsrc::get_active_source( self );
+    if (src)
     {
-        return tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(self->active_source), err);
+        return tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(src), err);
     }
 
-    // TODO set err
+    tcamprop1_gobj::set_gerror(err, TCAM_ERROR_NO_DEVICE_OPEN);
 
     return nullptr;
 }
@@ -41,12 +41,12 @@ static GSList* gst_tcamsrc_get_tcam_property_names (TcamPropertyProvider* iface,
 static TcamPropertyBase* gst_tcamsrc_get_tcam_property(TcamPropertyProvider* iface, const char* name, GError** err)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
-
-
-    if (self->active_source)
+    auto src = tcamsrc::get_active_source(self);
+    if (src)
     {
-        return tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(self->active_source), name, err);
+        return tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(src), name, err);
     }
+
     tcamprop1_gobj::set_gerror(err, TCAM_ERROR_NO_DEVICE_OPEN);
 
     return nullptr;

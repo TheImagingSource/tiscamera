@@ -35,7 +35,6 @@ struct _TcamDeviceClass
 struct _TcamDevice
 {
     GstDevice parent;
-    GstCaps* caps;
     GstElementFactory* factory;
 };
 

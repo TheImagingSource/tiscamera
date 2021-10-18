@@ -22,6 +22,11 @@
 #include <gst/gst.h>
 #include <string>
 
+namespace tcamsrc
+{
+struct tcamsrc_state;
+}
+
 G_BEGIN_DECLS
 
 #define GST_TYPE_TCAM_SRC          (gst_tcam_src_get_type())
@@ -37,27 +42,7 @@ struct _GstTcamSrc
 {
     GstBin parent;
 
-    GstElement* active_source;
-
-    // convenience container
-    // for all source elements
-    // tcamsrc can address
-    GSList* source_list;
-
-    GstElement* main_src;
-    GstElement* pimipi_src;
-    GstElement* tegra_src;
-
-    std::string device_serial;
-    tcam::TCAM_DEVICE_TYPE device_type;
-    GstDeviceMonitor* p_monitor;
-
-    gint cam_buffers;
-    gboolean drop_incomplete_frames;
-    gboolean do_timestamp;
-    gint num_buffers;
-
-    GstPad* pad;
+    tcamsrc::tcamsrc_state* state;
 };
 
 
@@ -69,6 +54,11 @@ struct _GstTcamSrcClass
 GType gst_tcam_src_get_type(void);
 
 G_END_DECLS
+
+namespace tcamsrc
+{
+GstElement* get_active_source(GstTcamSrc*);
+}
 
 
 #endif /* TCAM_GSTTCAMSRC_H */

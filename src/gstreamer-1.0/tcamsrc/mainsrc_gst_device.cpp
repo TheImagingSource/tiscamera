@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-#include "gsttcamdevice.h"
+#include "mainsrc_gst_device.h"
 
+#include <gst-helper/gst_gvalue_helper.h>
 #include <string>
 
 G_DEFINE_TYPE(TcamDevice, tcam_device, GST_TYPE_DEVICE)
-
-
-enum
-{
-    PROP_SERIAL = 1,
-    PROP_MODEL,
-    PROP_TYPE,
-};
-
 
 static void tcam_device_init(TcamDevice* /*self*/) {}
 
@@ -40,28 +32,42 @@ static void tcam_device_dispose(GObject* object)
 {
     TcamDevice* self = TCAM_DEVICE(object);
 
-    gst_object_replace((GstObject**)&self->factory, NULL);
-
+    if (self->factory)
+    {
+        gst_object_unref(self->factory);
+        self->factory = nullptr;
+    }
     G_OBJECT_CLASS(tcam_device_parent_class)->dispose(object);
 }
 
 static GstElement* tcam_device_create_element(GstDevice* device, const gchar* name)
 {
     TcamDevice* self = TCAM_DEVICE(device);
-    GstElement* ret;
 
-    ret = gst_element_factory_create(self->factory, name);
-
+    GstElement* ret = gst_element_factory_create(self->factory, name);
+    if (ret == nullptr)
+    {
+        return nullptr;
+    }
     GstStructure* props = gst_device_get_properties(device);
+    if (props == nullptr)
+    {
+        return nullptr;
+    }
 
-    std::string serial = gst_structure_get_string(props, "serial");
-    std::string type = gst_structure_get_string(props, "type");
+    std::string serial = gst_helper::get_string_entry(*props, "serial");
+    std::string type = gst_helper::get_string_entry(*props, "tcam-device-type");
 
     gst_structure_free(props);
 
-    std::string serial_str = serial + "-" + type;
-
-    gst_util_set_object_arg(G_OBJECT(ret), "serial", serial_str.c_str());
+    if (!serial.empty())
+    {
+        gst_util_set_object_arg(G_OBJECT(ret), "serial", serial.c_str());
+    }
+    if (!type.empty())
+    {
+        gst_util_set_object_arg(G_OBJECT(ret), "type", type.c_str());
+    }
 
     return ret;
 }

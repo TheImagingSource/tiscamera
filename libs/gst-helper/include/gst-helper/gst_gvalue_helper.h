@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <string_view>
+#include <optional>
 
 namespace gst_helper
 {
@@ -20,7 +21,9 @@ namespace gst_helper
 
     /** Fetches the g_object_get string named 'property_name' and creates a std::string form it.
      */
-    std::string     gobject_get_string( gpointer obj, const char* property_name );
+    std::string                 gobject_get_string( gpointer obj, const char* property_name );
+    std::optional<std::string>  gobject_get_string_opt(gpointer obj, const char* property_name);
+    bool            gobject_has_property(gpointer obj, const char* property_name, GType type = G_TYPE_NONE );
 
     /**
      * Returns a GSList of 'char*' objects.
@@ -28,5 +31,24 @@ namespace gst_helper
      * Note: The contents is a char* pointer which must be deleted via g_free
      */
     GSList*         gst_string_vector_to_GSList( const std::vector<std::string>& lst );
+
+    inline std::string get_string_entry(GstStructure& struc, const std::string& entry_name)
+    {
+        auto str = gst_structure_get_string( &struc, entry_name.c_str());
+        if (str == nullptr)
+        {
+            return {};
+        }
+        return str;
+    }
+    inline std::string get_string_entry(GstStructure& struc, const char* entry_name)
+    {
+        auto str = gst_structure_get_string( &struc, entry_name);
+        if (str == nullptr)
+        {
+            return {};
+        }
+        return str;
+    }
 }
 
