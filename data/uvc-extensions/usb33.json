@@ -675,7 +675,7 @@
         },
         {
             "id": "0x199e267",
-            "name": "Scanning Mode Binning Horizontal",
+            "name": "Scanning Mode Binning H",
             "selector": "0x30",
             "uvc_type": "unsigned",
             "v4l2_type": "integer",
@@ -684,7 +684,7 @@
         },
         {
             "id": "0x199e268",
-            "name": "Scanning Mode Binning Vertical",
+            "name": "Scanning Mode Binning V",
             "selector": "0x30",
             "uvc_type": "unsigned",
             "v4l2_type": "integer",
@@ -693,7 +693,7 @@
         },
         {
             "id": "0x199e269",
-            "name": "Scanning Mode Skipping Horizontal",
+            "name": "Scanning Mode Skipping H",
             "selector": "0x30",
             "uvc_type": "unsigned",
             "v4l2_type": "integer",
@@ -702,7 +702,7 @@
         },
         {
             "id": "0x199e270",
-            "name": "Scanning Mode Skipping Vertical",
+            "name": "Scanning Mode Skipping V",
             "selector": "0x30",
             "uvc_type": "unsigned",
             "v4l2_type": "integer",
