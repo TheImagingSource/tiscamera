@@ -612,13 +612,30 @@ void V4l2Device::determine_scaling()
 
     if (check_prop("OverrideScanningMode", ImageScalingType::Override))
     {
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Selector"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Identifier"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Binning Horizonta"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Binning Vertical"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Skipping Horizont"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Skipping Vertical"));
-        m_scale.properties.push_back(tcam::property::find_property(m_internal_properties,"Scanning Mode Flags"));
+        static const char* scanning_mode_entries[] =
+            {
+                "Scanning Mode Selector",
+                "Scanning Mode Identifier",
+                "Scanning Mode Binning H",
+                "Scanning Mode Binning V",
+                "Scanning Mode Skipping H",
+                "Scanning Mode Skipping V",
+                "Scanning Mode Flags",
+            };
+
+        for (const auto& entry : scanning_mode_entries)
+        {
+            if (auto p = tcam::property::find_property(m_internal_properties, entry))
+            {
+                m_scale.properties.push_back(p);
+            }
+            else
+            {
+                SPDLOG_ERROR("Unable to find Scanning Mode property \"{}\". Disabling Binning/Skipping", entry);
+                m_scale.scale_type = ImageScalingType::None;
+                m_scale.properties.clear();
+            }
+        }
     }
     else
     {
@@ -899,10 +916,10 @@ void V4l2Device::generate_scales()
 
         auto p = tcam::property::find_property(m_scale.properties, "Scanning Mode Selector");
         auto identifier_b = tcam::property::find_property(m_scale.properties, "Scanning Mode Identifier");
-        auto binning_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning Horizonta");
-        auto binning_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning Vertical");
-        auto skipping_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping Horizont");
-        auto skipping_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping Vertical");
+        auto binning_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning H");
+        auto binning_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Binning V");
+        auto skipping_hb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping H");
+        auto skipping_vb = tcam::property::find_property(m_scale.properties, "Scanning Mode Skipping V");
         //auto flags_b = tcam::property::find_property(m_scale.properties, "Scanning Mode Flags");
 
         auto identifier = dynamic_cast<tcam::property::IPropertyInteger*>(identifier_b.get());

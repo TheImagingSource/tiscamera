@@ -208,11 +208,10 @@ void V4l2Device::sort_properties(
     hide_properties("OverrideScanningMode");
     hide_properties("Scanning Mode Selector");
     hide_properties("Scanning Mode Identifier");
-    hide_properties("Scanning Mode Binning Horizontal");
-    hide_properties("Scanning Mode Binning Horizonta");
-    hide_properties("Scanning Mode Binning Vertical");
-    hide_properties("Scanning Mode Skipping Horizont");
-    hide_properties("Scanning Mode Skipping Vertical");
+    hide_properties("Scanning Mode Binning H");
+    hide_properties("Scanning Mode Binning V");
+    hide_properties("Scanning Mode Skipping H");
+    hide_properties("Scanning Mode Skipping V");
     hide_properties("Scanning Mode Flags");
 
     m_properties.reserve(properties.size());
