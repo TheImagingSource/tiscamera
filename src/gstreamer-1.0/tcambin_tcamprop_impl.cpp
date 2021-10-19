@@ -17,6 +17,7 @@
 #include "tcambin_tcamprop_impl.h"
 
 #include "tcambin_data.h"
+#include "tcamgstbase/tcamprop_helper.h"
 
 #include <algorithm>
 #include <gst-helper/gst_gvalue_helper.h>
@@ -24,9 +25,7 @@
 #include <tcamprop1.0_gobject/tcam_gerror.h>
 #include <tcamprop1.0_gobject/tcam_property_provider.h>
 
-#include "tcamgstbase/tcamprop_helper.h"
-
-static GSList* gst_tcambin_get_tcam_property_names (TcamPropertyProvider* iface, GError** err)
+static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, GError** err)
 {
     tcambin_data& self = *GST_TCAMBIN(iface)->data;
 
@@ -41,10 +40,11 @@ static GSList* gst_tcambin_get_tcam_property_names (TcamPropertyProvider* iface,
     // tcamconvert does not offer properties
     if (self.tcam_converter && TCAM_IS_PROPERTY_PROVIDER(self.tcam_converter))
     {
-        convert_name_list =
-            tcamprop1_consumer::get_property_names_noerror(TCAM_PROPERTY_PROVIDER(self.tcam_converter));
+        convert_name_list = tcamprop1_consumer::get_property_names_noerror(
+            TCAM_PROPERTY_PROVIDER(self.tcam_converter));
     }
-    auto src_prop_list_res = tcamprop1_consumer::get_property_names(TCAM_PROPERTY_PROVIDER(self.src));
+    auto src_prop_list_res =
+        tcamprop1_consumer::get_property_names(TCAM_PROPERTY_PROVIDER(self.src));
     if (src_prop_list_res.has_error())
     {
         tcamprop1_gobj::set_gerror(err, src_prop_list_res.error());
@@ -58,9 +58,8 @@ static GSList* gst_tcambin_get_tcam_property_names (TcamPropertyProvider* iface,
     }
 
     auto& merged_prop_list = src_prop_list_res.value();
-    merged_prop_list.insert(merged_prop_list.end(),
-                            convert_name_list.begin(),
-                            convert_name_list.end());
+    merged_prop_list.insert(
+        merged_prop_list.end(), convert_name_list.begin(), convert_name_list.end());
 
     std::sort(merged_prop_list.begin(), merged_prop_list.end());
     merged_prop_list.erase(std::unique(merged_prop_list.begin(), merged_prop_list.end()),
@@ -90,7 +89,8 @@ static TcamPropertyBase* gst_tcambin_get_tcam_property(TcamPropertyProvider* ifa
 
     if (self.tcam_converter)
     {
-        auto res = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(self.tcam_converter), name, err);
+        auto res = tcam_property_provider_get_tcam_property(
+            TCAM_PROPERTY_PROVIDER(self.tcam_converter), name, nullptr);
         if (res)
         {
             return res;

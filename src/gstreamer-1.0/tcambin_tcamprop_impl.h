@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include "gsttcambin.h"
-
 #include "../../../libs/tcamprop/src/tcam-property-1.0.h"
+#include "gsttcambin.h"
 
 #include <glib-object.h>
 
