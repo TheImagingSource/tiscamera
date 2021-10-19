@@ -17,30 +17,30 @@ find_package(GObject REQUIRED QUIET) # dependency
 find_package(GLIB2   REQUIRED QUIET) # dependency
 find_package(GIO     REQUIRED QUIET) # dependency
 
-add_executable(gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
-set_project_warnings(gige-daemon)
+add_executable(tcam-gige-daemon main.cpp CameraListHolder.cpp DaemonClass.cpp)
+set_project_warnings(tcam-gige-daemon)
 
-target_include_directories(gige-daemon PRIVATE "${GIO_INCLUDE_DIR}")
-target_include_directories(gige-daemon PRIVATE ${GOBJECT_INCLUDE_DIR})
-target_include_directories(gige-daemon PRIVATE ${GLIB2_INCLUDE_DIR})
+target_include_directories(tcam-gige-daemon PRIVATE "${GIO_INCLUDE_DIR}")
+target_include_directories(tcam-gige-daemon PRIVATE ${GOBJECT_INCLUDE_DIR})
+target_include_directories(tcam-gige-daemon PRIVATE ${GLIB2_INCLUDE_DIR})
 
 if (TCAM_INTERNAL_ARAVIS)
   # we require two includes
   # as some header are generated
-  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
-  target_include_directories(gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
+  target_include_directories(tcam-gige-daemon SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
+  target_include_directories(tcam-gige-daemon SYSTEM PRIVATE "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
 
-  target_link_libraries(gige-daemon PRIVATE "${ARAVIS_LIB}")
+  target_link_libraries(tcam-gige-daemon PRIVATE "${ARAVIS_LIB}")
 
 else (TCAM_INTERNAL_ARAVIS)
 
-  target_include_directories(gige-daemon PRIVATE "${aravis_INCLUDE_DIR}")
+  target_include_directories(tcam-gige-daemon PRIVATE "${aravis_INCLUDE_DIR}")
 
-  target_link_libraries(gige-daemon PRIVATE "${aravis_LIBRARIES}")
+  target_link_libraries(tcam-gige-daemon PRIVATE "${aravis_LIBRARIES}")
 
 endif (TCAM_INTERNAL_ARAVIS)
 
-target_link_libraries(gige-daemon
+target_link_libraries(tcam-gige-daemon
 PRIVATE
     "${LIBXML2_LIBRARIES}"
     "${GIO_LIBRARIES}"
@@ -51,6 +51,6 @@ PRIVATE
     outcome::outcome
 )
 
-install(TARGETS gige-daemon
+install(TARGETS tcam-gige-daemon
   DESTINATION ${TCAM_INSTALL_BIN}
   COMPONENT tcam-gige-daemon)

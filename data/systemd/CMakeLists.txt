@@ -16,9 +16,9 @@
 
 if(BUILD_ARAVIS)
 
-  configure_file(gige-daemon.service.cmake ${CMAKE_CURRENT_BINARY_DIR}/gige-daemon.service)
+  configure_file(tcam-gige-daemon.service.cmake ${CMAKE_CURRENT_BINARY_DIR}/tcam-gige-daemon.service)
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gige-daemon.service
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tcam-gige-daemon.service
     DESTINATION ${TCAM_INSTALL_SYSTEMD}
     COMPONENT tcam-gige-daemon)
 

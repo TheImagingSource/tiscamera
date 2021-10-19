@@ -25,7 +25,7 @@
 
 // gige-daemon communication
 
-#include "../gige-daemon/gige-daemon.h"
+#include "../../tools/tcam-gige-daemon/gige-daemon.h"
 #include "../tcam-semaphores.h"
 
 #include <sys/ipc.h>
@@ -116,7 +116,8 @@ uint32_t tcam::fourcc2aravis(uint32_t fourcc)
     return 0;
 }
 
-static const std::string gige_daemon_lock_file = "/var/lock/gige-daemon.lock";
+// TODO: move lock file name to cmake
+static const std::string gige_daemon_lock_file = "/var/lock/tcam-gige-daemon.lock";
 
 
 std::vector<DeviceInfo> tcam::get_gige_device_list()

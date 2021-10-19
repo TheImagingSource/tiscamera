@@ -34,7 +34,7 @@ endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
 
-  add_subdirectory(gige-daemon)
+  add_subdirectory(tcam-gige-daemon)
 
   add_subdirectory(tcam-gigetool)
 
