@@ -437,6 +437,10 @@ struct input_caps_required_modules TcamBinConversion::get_modules(GstCaps* caps,
         {
             return c;
         }
+        else if (c.dutils && toggles == TCAM_BIN_CONVERSION_CONVERT)
+        {
+            return c;
+        }
     }
 
     return {};
