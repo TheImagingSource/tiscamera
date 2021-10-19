@@ -597,9 +597,9 @@ static void tcam_property_enumeration_default_init( __attribute__ ((unused)) Tca
  * tcam_property_enumeration_get_value:
  * @self: A #TcamPropertyEnumeration
  * @err: return location for a GError, or NULL
- * Returns: (transfer full)(type utf8): The current value of the property
+ * Returns: (transfer none)(type utf8): The current value of the property
  */
-gchar* tcam_property_enumeration_get_value( TcamPropertyEnumeration* self, GError** err )
+const gchar* tcam_property_enumeration_get_value( TcamPropertyEnumeration* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ), NULL );
@@ -653,9 +653,9 @@ GSList* tcam_property_enumeration_get_enum_entries( TcamPropertyEnumeration* sel
  * tcam_property_enumeration_get_default:
  * @self: A #TcamPropertyEnumeration
  * @err: return location for a GError, or NULL
- * Returns: (transfer full)(type utf8): The default value of the property
+ * Returns: (transfer none)(type utf8): The default value of the property
  */
-gchar* tcam_property_enumeration_get_default( TcamPropertyEnumeration* self, GError** err )
+const gchar* tcam_property_enumeration_get_default( TcamPropertyEnumeration* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ), NULL );
@@ -911,11 +911,11 @@ gdouble     tcam_property_provider_get_tcam_float( TcamPropertyProvider* self, c
  * @name: (not nullable): name of the property whose value will be returned.
  * @err: return location for a GError, or NULL
  *
- * Returns: (transfer full)(type utf8): The current value of the property
+ * Returns: (transfer none)(type utf8): The current value of the property
  */
-gchar* tcam_property_provider_get_tcam_enumeration( TcamPropertyProvider* self, const gchar* name, GError** err )
+const gchar* tcam_property_provider_get_tcam_enumeration( TcamPropertyProvider* self, const gchar* name, GError** err )
 {
-    gchar* rval = FALSE;
+    const gchar* rval = FALSE;
     g_return_val_if_fail( self != NULL, rval );
     g_return_val_if_fail( name != NULL, rval );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), rval );

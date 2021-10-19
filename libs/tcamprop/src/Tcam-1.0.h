@@ -150,11 +150,11 @@ struct _TcamPropertyEnumerationInterface
 {
     GTypeInterface parent_interface;
 
-    char*       (*get_value)(TcamPropertyEnumeration* self, GError** err);
-    void        (*set_value)(TcamPropertyEnumeration* self, const char* value, GError** err);
+    const gchar* (*get_value)(TcamPropertyEnumeration* self, GError** err);
+    void        (*set_value)(TcamPropertyEnumeration* self, const gchar* value, GError** err);
 
     GSList*     (*get_enum_entries)(TcamPropertyEnumeration* self, GError** err );
-    char*       (*get_default)(TcamPropertyEnumeration* self, GError** err);
+    const gchar* (*get_default)(TcamPropertyEnumeration* self, GError** err);
 
     gpointer    padding[6];
 };
@@ -181,16 +181,16 @@ struct _TcamPropertyProviderInterface
     GSList*             (*get_tcam_property_names) (TcamPropertyProvider* self, GError** err);
     TcamPropertyBase*   (*get_tcam_property)(TcamPropertyProvider* self, const gchar* name, GError** err);
 
-    void        (*set_tcam_boolean)(TcamPropertyProvider* self, const gchar* name, gboolean value, GError** err);
-    void        (*set_tcam_integer)(TcamPropertyProvider* self, const gchar* name, gint64 value, GError** err);
-    void        (*set_tcam_float)(TcamPropertyProvider* self, const gchar* name, gdouble value, GError** err);
-    void        (*set_tcam_enumeration)(TcamPropertyProvider* self, const gchar* name, const gchar* value, GError** err);
-    void        (*set_tcam_command)(TcamPropertyProvider* self, const gchar* name, GError** err);
+    void            (*set_tcam_boolean)(TcamPropertyProvider* self, const gchar* name, gboolean value, GError** err);
+    void            (*set_tcam_integer)(TcamPropertyProvider* self, const gchar* name, gint64 value, GError** err);
+    void            (*set_tcam_float)(TcamPropertyProvider* self, const gchar* name, gdouble value, GError** err);
+    void            (*set_tcam_enumeration)(TcamPropertyProvider* self, const gchar* name, const gchar* value, GError** err);
+    void            (*set_tcam_command)(TcamPropertyProvider* self, const gchar* name, GError** err);
 
-    gboolean    (*get_tcam_boolean)(TcamPropertyProvider* self, const gchar* name, GError** err);
-    gint64      (*get_tcam_integer)(TcamPropertyProvider* self, const gchar* name, GError** err);
-    gdouble     (*get_tcam_float)(TcamPropertyProvider* self, const gchar* name, GError** err);
-    char*       (*get_tcam_enumeration)(TcamPropertyProvider* self, const gchar* name, GError** err);
+    gboolean        (*get_tcam_boolean)(TcamPropertyProvider* self, const gchar* name, GError** err);
+    gint64          (*get_tcam_integer)(TcamPropertyProvider* self, const gchar* name, GError** err);
+    gdouble         (*get_tcam_float)(TcamPropertyProvider* self, const gchar* name, GError** err);
+    const gchar*    (*get_tcam_enumeration)(TcamPropertyProvider* self, const gchar* name, GError** err);
 
     gpointer    padding[12];
 };
