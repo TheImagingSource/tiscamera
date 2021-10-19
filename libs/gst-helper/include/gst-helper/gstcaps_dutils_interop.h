@@ -52,5 +52,6 @@ void set_gst_struct_framerate(GstStructure& structure, double framerate) noexcep
 auto generate_caps_with_dim( const std::vector<img::fourcc>& fcc_list ) -> gst_ptr<GstCaps>;
 
 auto convert_GstCaps_to_fcc_list( const GstCaps& caps )->std::vector<img::fourcc>;
+auto convert_GstStructure_to_fcc_list( const GstStructure& strct )->std::vector<img::fourcc>;
 
 } // namespace gst_helper

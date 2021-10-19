@@ -143,7 +143,7 @@ gst_helper::gst_ptr<GstCaps>    gst_helper::generate_caps_with_dim( const std::v
     return gst_helper::make_wrap_ptr( caps );
 }
 
-static auto convert_GstStructure_format_field_to_fcc_list( const GstStructure& strct ) -> std::vector<img::fourcc>
+auto gst_helper::convert_GstStructure_to_fcc_list( const GstStructure& strct ) -> std::vector<img::fourcc>
 {
     auto struct_name_ = gst_structure_get_name( &strct );
     assert( struct_name_ != nullptr );
@@ -198,7 +198,7 @@ auto gst_helper::convert_GstCaps_to_fcc_list( const GstCaps& caps ) ->std::vecto
         if( entry == nullptr ) {
             return {};
         }
-        auto vec = convert_GstStructure_format_field_to_fcc_list( *entry );
+        auto vec = convert_GstStructure_to_fcc_list( *entry );
         rval.insert( rval.end(), vec.begin(), vec.end() );
     }
     return rval;

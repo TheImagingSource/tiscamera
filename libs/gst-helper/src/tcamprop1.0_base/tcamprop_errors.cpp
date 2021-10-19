@@ -27,6 +27,7 @@ namespace
         case status::parameter_null:                            return { "Passed pointer is null", std::errc::no_such_device };
         case status::property_is_readonly:                      return { "Property is read-only", std::errc::invalid_argument };
         case status::property_default_not_available:            return { "Property-default is not available", std::errc::invalid_argument };
+        case status::enumeration_property_list_error:           return { "Failed to find a enumeration entry in internal range", std::errc::protocol_error };
         }
         return {};
     }

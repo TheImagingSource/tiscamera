@@ -12,6 +12,8 @@ namespace gst_helper
     std::string             get_type_name( GstElement& element );
     /** Generates a string from the passed in caps */
     std::string             to_string( const GstCaps& caps );
+    /** Generates a string from the passed in GstStructure */
+    std::string             to_string( const GstStructure& strct );
     /** Generates a string from the passed in GstState */
     constexpr const char*   to_string( GstState state ) noexcept;
 
@@ -77,7 +79,18 @@ namespace gst_helper
         {
             return {};
         }
+        std::string rval = tmp;
+        g_free( tmp );
+        return rval;
+    }
 
+    inline std::string to_string( const GstStructure& strct )
+    {
+        auto tmp = gst_structure_to_string( &strct );
+        if( tmp == nullptr )
+        {
+            return {};
+        }
         std::string rval = tmp;
         g_free( tmp );
         return rval;

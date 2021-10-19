@@ -16,11 +16,44 @@ struct TcamPropHelperEnumeration
 
     static constexpr auto tcam_property_type = TCAM_PROPERTY_TYPE_ENUMERATION;
 
-    static auto fetch_PropImpl( gpointer itf ) -> auto& { return cast_to_instance( itf )->data_; }
+    void init( tcamprop1::property_interface_enumeration* itf, const guard_state_handle& handle ) noexcept
+    {
+        data_.init( itf, handle );
+    }
 
+    static auto fetch_PropImpl( gpointer itf ) -> auto& { return cast_to_instance( itf )->data_; }
     static auto make_guard( TcamPropertyEnumeration* itf, GError** err ) -> auto { return fetch_PropImpl( itf ).make_guard( err ); }
 
     static TcamPropHelperEnumeration* cast_to_instance( gpointer );
+
+    // Helper function to fetch the according std::string::c_str from the enum_range cache
+    template<class T>
+    static const char*    get_range_entry( T& self_ref, outcome::result<std::string_view>&& op_result,  GError** err )
+    {
+        if( op_result.has_error() ) {
+            fill_GError( op_result.error(), err );
+            return nullptr;
+        }
+
+        auto entry = op_result.value();
+
+        if( !self_ref.parent.enum_range_cache_ ) {
+            if( auto range_opt = self_ref->get_property_range(); range_opt.has_error() ) {
+                fill_GError( range_opt.error(), err );
+                return nullptr;
+            } else {
+                self_ref.parent.enum_range_cache_ = range_opt.value();
+            }
+        }
+
+
+        int index = self_ref.parent.enum_range_cache_.value().get_index_of( entry );
+        if( index < 0 ) {
+            fill_GError( err, tcamprop1::status::enumeration_property_list_error );
+            return nullptr;
+        }
+        return self_ref.parent.enum_range_cache_.value().enum_entries.at( index ).c_str();
+    }
 
     static auto set_value( TcamPropertyEnumeration* self, const char* value, GError** err ) -> void {
         auto self_ref = TcamPropHelperEnumeration::make_guard( self, err );
@@ -29,19 +62,13 @@ struct TcamPropHelperEnumeration
         }
         fill_GError( self_ref->set_property_value( value ), err );
     }
-    static auto get_value( TcamPropertyEnumeration* self, GError** err ) -> char* {
+    static auto get_value( TcamPropertyEnumeration* self, GError** err ) -> const char* {
         auto self_ref = TcamPropHelperEnumeration::make_guard( self, err );
         if( !self_ref ) {
             return nullptr;
         }
-        if( auto value_res = self_ref->get_property_value(); value_res.has_error() ) {
-            fill_GError( value_res.error(), err );
-            return nullptr;
-        }
-        else
-        {
-            return gvalue::g_strdup_string( value_res.value() );
-        }
+
+        return get_range_entry( self_ref, self_ref->get_property_value(), err );
     }
     static auto get_enum_entries( TcamPropertyEnumeration* self, GError** err ) -> GSList* {
         auto self_ref = TcamPropHelperEnumeration::make_guard( self, err );
@@ -49,29 +76,23 @@ struct TcamPropHelperEnumeration
             return nullptr;
         }
 
-        if( auto range_opt = self_ref->get_property_range(); range_opt.has_error() ) {
-            fill_GError( range_opt.error(), err );
-            return nullptr;
+        if( !self_ref.parent.enum_range_cache_ ) {
+            if( auto range_opt = self_ref->get_property_range(); range_opt.has_error() ) {
+                fill_GError( range_opt.error(), err );
+                return nullptr;
+            } else {
+                self_ref.parent.enum_range_cache_ = range_opt.value();
+            }
         }
-        else
-        {
-            return gst_helper::gst_string_vector_to_GSList( range_opt.value().enum_entries );
-        }
+        return gst_helper::gst_string_vector_to_GSList( self_ref.parent.enum_range_cache_.value().enum_entries );
     }
-    static auto get_default( TcamPropertyEnumeration* self, GError** err ) -> char* {
+    static auto get_default( TcamPropertyEnumeration* self, GError** err ) -> const char* {
         auto self_ref = TcamPropHelperEnumeration::make_guard( self, err );
         if( !self_ref ) {
             return nullptr;
         }
 
-        if( auto def_res = self_ref->get_property_default(); def_res.has_error() ) {
-            fill_GError( def_res.error(), err );
-            return nullptr;
-        }
-        else
-        {
-            return gvalue::g_strdup_string( def_res.value() );
-        }
+        return get_range_entry( self_ref, self_ref->get_property_default(), err );
     }
 };
 
@@ -146,6 +167,6 @@ TcamPropertyBase* tcamprop1_gobj::impl::create_enumeration( tcamprop1::property_
     }
 
     auto* ptr = TcamPropHelperEnumerationClass_helper::cast_to_instance( p_obj );
-    ptr->data_.init( prop_itf_ptr, handle );
+    ptr->init( prop_itf_ptr, handle );
     return TCAM_PROPERTY_BASE(ptr);
 }

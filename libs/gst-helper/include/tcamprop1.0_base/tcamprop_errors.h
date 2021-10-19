@@ -19,6 +19,7 @@ namespace tcamprop1
         parameter_null,
         property_is_readonly,
         property_default_not_available,
+        enumeration_property_list_error,        // failed to match an enum_entry name to an property_range_enumeration entry
     };
 
     std::error_code         make_error_code( tcamprop1::status e );

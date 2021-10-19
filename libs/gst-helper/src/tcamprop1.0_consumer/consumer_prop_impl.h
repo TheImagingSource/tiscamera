@@ -98,7 +98,6 @@ namespace tcamprop1_consumer::impl
         TcamPropertyBase* get_derived_node() noexcept { return TCAM_PROPERTY_BASE( ptr_.get() ); }
     public:
         prop_consumer_enumeration( gobject_helper::gobject_ptr<TcamPropertyEnumeration>&& ptr );
-        ~prop_consumer_enumeration();
 
         auto get_property_range( uint32_t flags ) -> outcome::result<tcamprop1::prop_range_enumeration> final;
         auto get_property_default( uint32_t flags )->outcome::result<std::string_view> final;
@@ -107,9 +106,6 @@ namespace tcamprop1_consumer::impl
         auto set_property_value( std::string_view value, uint32_t flags ) -> std::error_code final;
     private:
         gobject_helper::gobject_ptr<TcamPropertyEnumeration>    ptr_;
-
-        gchar*          value_cache_ = nullptr; 
-        gchar*          default_cache_ = nullptr;
     };
 
     class prop_consumer_command : public consumer_prop_node_base<prop_consumer_command, tcamprop1::property_interface_command>

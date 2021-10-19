@@ -254,7 +254,7 @@ auto tcamprop1_gobj::tcam_property_provider::get_float( tcam_property_provider* 
     return rval;
 }
 
-auto tcamprop1_gobj::tcam_property_provider::get_enumeration( tcam_property_provider* cont, const char* name, GError** err ) -> gchar*
+auto tcamprop1_gobj::tcam_property_provider::get_enumeration( tcam_property_provider* cont, const char* name, GError** err ) -> const gchar*
 {
     auto ptr_base = get_tcam_property( cont, name, err );
     if( is_err( err ) || ptr_base == nullptr ) {

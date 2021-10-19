@@ -61,7 +61,7 @@ namespace tcamprop1_gobj
         static auto get_boolean( tcam_property_provider* cont, const char* name, GError** err )->gboolean;
         static auto get_integer( tcam_property_provider* cont, const char* name, GError** err )->gint64;
         static auto get_float( tcam_property_provider* cont, const char* name, GError** err )->gdouble;
-        static auto get_enumeration( tcam_property_provider* cont, const char* name, GError** err )->gchar*;
+        static auto get_enumeration( tcam_property_provider* cont, const char* name, GError** err )->const gchar*;
 
         static void set_boolean( tcam_property_provider* cont, const char* name, gboolean new_val, GError** err );
         static void set_integer( tcam_property_provider* cont, const char* name, gint64 new_val, GError** err );

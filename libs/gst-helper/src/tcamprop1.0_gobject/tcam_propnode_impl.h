@@ -44,6 +44,7 @@ namespace tcamprop1_gobj::impl
         tcamprop1::prop_static_info_str             static_info_;
         tcamprop1_gobj::impl::guard_state_handle    guard_state_handle_;
         std::string                                 unit_cache_;
+        std::optional<tcamprop1::prop_range_enumeration>           enum_range_cache_;
     private:
         tcamprop1::property_interface*  base_itf_ptr_;
     public:

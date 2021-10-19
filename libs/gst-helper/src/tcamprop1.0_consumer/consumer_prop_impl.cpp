@@ -264,12 +264,6 @@ tcamprop1_consumer::impl::prop_consumer_enumeration::prop_consumer_enumeration( 
     init( get_derived_node() );
 }
 
-tcamprop1_consumer::impl::prop_consumer_enumeration::~prop_consumer_enumeration()
-{
-    g_free( value_cache_ );
-    g_free( default_cache_ );
-}
-
 auto tcamprop1_consumer::impl::prop_consumer_enumeration::get_property_range( [[maybe_unused]] uint32_t flags ) -> outcome::result<tcamprop1::prop_range_enumeration>
 {
     GError* err = nullptr;
@@ -289,13 +283,7 @@ auto tcamprop1_consumer::impl::prop_consumer_enumeration::get_property_default( 
     {
         return convert_GError_to_error_code_consumer( err );
     }
-    g_free( value_cache_ );
-    value_cache_ = rval;
-    
-    if( !value_cache_ ) {
-        return std::string_view{};
-    }
-    return value_cache_;
+    return rval;
 }
 
 auto tcamprop1_consumer::impl::prop_consumer_enumeration::get_property_value( [[maybe_unused]] uint32_t flags ) ->outcome::result<std::string_view>
@@ -306,14 +294,7 @@ auto tcamprop1_consumer::impl::prop_consumer_enumeration::get_property_value( [[
     {
         return convert_GError_to_error_code_consumer( err );
     }
-
-    g_free( default_cache_ );
-    default_cache_ = rval;
-
-    if( !default_cache_ ) {
-        return std::string_view{};
-    }
-    return default_cache_;
+    return rval;
 }
 
 auto tcamprop1_consumer::impl::prop_consumer_enumeration::set_property_value( std::string_view value, [[maybe_unused]] uint32_t flags ) -> std::error_code

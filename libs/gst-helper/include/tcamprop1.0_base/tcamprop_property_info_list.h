@@ -352,7 +352,7 @@ namespace tcamprop1::prop_list
     constexpr const auto Contrast = make_Integer(
         "Contrast",
         "Image", "Contrast",
-        "Controls the value of the contrast algorithm."
+        "Controls the strength of the contrast algorithm."
     );
     constexpr const auto Gamma = make_Float(
         "Gamma",
