@@ -14,8 +14,6 @@ either part of tiscamera or are indirectly used.
    tcam-capture.rst
    tcam-ctrl.rst
    tcam-gigetool.rst
-   camera-ip-conf.rst
-   firmware-update.rst
    tcam-gige-daemon.rst
    tcam-uvc-extension-loader.rst
 
