@@ -37,7 +37,7 @@ endif (TCAM_ARAVIS_USB_VISION)
 
 option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
 option(TCAM_BUILD_FIRMWARE_UPDATE_ONLY "Disable all other libraries/tool and only build firmware-update." OFF)
-option(TCAM_BUILD_CAMERA_IP_CONF_ONLY "Disable all other libraries/tool and only build camera-ip-conf." OFF)
+option(TCAM_BUILD_GIGETOOL_ONLY "Disable all other libraries/tool and only build camera-ip-conf." OFF)
 
 option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder." ON)
 option(TCAM_ENABLE_BASE_LIBRARIES "Build/install base libraries." ON)
@@ -128,7 +128,7 @@ if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 
 endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 
-if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+if (TCAM_BUILD_GIGETOOL_ONLY)
 
   set(BUILD_GST_1_0 OFF)
   set(BUILD_ARAVIS OFF)
@@ -143,6 +143,6 @@ if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
   set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
   set(TCAM_BUILD_FIRMWARE_UPDATE_ONLY OFF)
 
-  set(TCAM_ENABLED_MODULES "camera-ip-conf")
+  set(TCAM_ENABLED_MODULES "tcam-gigetool")
 
-endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+endif (TCAM_BUILD_GIGETOOL_ONLY)

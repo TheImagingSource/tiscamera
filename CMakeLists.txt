@@ -80,13 +80,13 @@ if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 
 
-if (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+if (TCAM_BUILD_GIGETOOL_ONLY)
 
   add_subdirectory(external)
   add_subdirectory(src/tcam-network/)
-  add_subdirectory(tools/camera-ip-conf)
+  add_subdirectory(tools/tcam-gigetool)
 
-endif (TCAM_BUILD_CAMERA_IP_CONF_ONLY)
+endif (TCAM_BUILD_GIGETOOL_ONLY)
 
 
 if (NOT TCAM_EXCLUSIVE_BUILD)
