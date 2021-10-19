@@ -94,7 +94,7 @@ std::optional<std::string> gst_helper::gobject_get_string_opt(gpointer obj,
 
 bool gst_helper::gobject_has_property(gpointer obj, const char* property_name, GType type /*= G_TYPE_NONE*/ )
 {
-    auto param_desc = g_object_class_find_property( G_OBJECT_CLASS( obj ), property_name );
+    auto param_desc = g_object_class_find_property( G_OBJECT_GET_CLASS( obj ), property_name );
     if( param_desc == nullptr ) {
         return false;
     }
