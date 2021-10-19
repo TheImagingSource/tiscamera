@@ -5,7 +5,7 @@
 
 static gboolean g_print_device_caps = FALSE;
 
-static gboolean print_caps_field(GQuark field, const GValue* value, gpointer unused)
+static gboolean print_caps_field(GQuark field, const GValue* value, gpointer unused __attribute__((unused)))
 {
     gchar* str = gst_value_serialize(value);
 
@@ -72,7 +72,7 @@ static void print_device(GstDevice* device, gboolean add_message)
 }
 
 
-static gboolean my_bus_func(GstBus* bus, GstMessage* message, gpointer user_data)
+static gboolean my_bus_func(GstBus* bus __attribute__((unused)), GstMessage* message, gpointer user_data __attribute__((unused)))
 {
     GstDevice* device;
 

@@ -14,28 +14,26 @@
 # limitations under the License.
 
 
+LIBS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-1.0 --libs)
+LIBS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 --libs)
+LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --libs)
+LIBS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --libs)
 
-LIBS:=$(shell pkg-config gstreamer-1.0 --libs)
-LIBS:=$(shell pkg-config gstreamer-video-1.0 --libs)
-LIBS+=$(shell pkg-config gobject-introspection-1.0 --libs)
-LIBS+=$(shell pkg-config tcam --libs)
-
-CFLAGS:=$(shell pkg-config gstreamer-1.0 --cflags)
-CFLAGS:=$(shell pkg-config gstreamer-video-1.0 --cflags)
-CFLAGS+=$(shell pkg-config gobject-introspection-1.0 --cflags)
-CFLAGS+=$(shell pkg-config tcam --cflags)
+CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-1.0 --cflags)
+CFLAGS:=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gstreamer-video-1.0 --cflags)
+CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config gobject-introspection-1.0 --cflags)
+CFLAGS+=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config tcam --cflags)
 
 .PHONY: all clean
 
-EXECS = 01-list-properties
-# 00-list-devices  02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost 10-metadata 11-device-state 12-device-monitor
+EXECS = 00-list-devices  02-set-properties 03-live-stream 04-list-formats 05-set-format 06-softwaretrigger 07-appsink 08-save-stream 09-device-lost 10-metadata 11-device-state 12-device-monitor
 
 
 all: $(EXECS)
 
 
 $(EXECS): %: %.c
-	$(CC) -g -DGST_DISABLE_DEPRECATED -O0 $(CFLAGS) -o $@ $< $(LIBS)
+	$(CC) -g -DGST_DISABLE_DEPRECATED -Wall -Wextra -O0 $(CFLAGS) -o $@ $< $(LIBS)
 
 clean:
 	$(RM) *.o

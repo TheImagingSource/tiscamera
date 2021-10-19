@@ -19,8 +19,6 @@
 #include <gst/gst.h>
 #include <stdio.h>
 #include <string.h>
-#include <tcamprop.h>
-
 
 int main(int argc, char* argv[])
 {
@@ -94,6 +92,8 @@ int main(int argc, char* argv[])
     /* the pipeline automatically handles all elements that have been added to it.
        thus they do not have to be cleaned up manually */
     gst_object_unref(pipeline);
+
+    printf("Stream saved to: %s\n", file_location);
 
     return 0;
 }

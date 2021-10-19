@@ -16,8 +16,6 @@
 
 /* This example will show you how to list information about the available devices */
 
-#include "tcamprop.h" /* gobject introspection interface */
-
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 
@@ -37,7 +35,7 @@ void print_device(GstDevice* device)
 }
 
 
-gboolean bus_function(GstBus* bus, GstMessage* message, gpointer user_data)
+gboolean bus_function(GstBus* bus __attribute__((unused)), GstMessage* message, gpointer user_data __attribute__((unused)))
 {
     GstDevice* device;
 
@@ -54,6 +52,7 @@ gboolean bus_function(GstBus* bus, GstMessage* message, gpointer user_data)
         }
         case GST_MESSAGE_DEVICE_REMOVED:
         {
+            // this can also be used as an alternative to device-lost signals
             gst_message_parse_device_removed(message, &device);
             printf("REMOVED Device\n");
             print_device(device);
@@ -67,6 +66,9 @@ gboolean bus_function(GstBus* bus, GstMessage* message, gpointer user_data)
         }
     }
 
+    // this means we want to continue
+    // to listen to device events
+    // to stop listening return G_SOURCE_REMOVE;
     return G_SOURCE_CONTINUE;
 }
 

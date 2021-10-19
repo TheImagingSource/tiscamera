@@ -18,17 +18,17 @@
    and how to get the actual iamge data */
 
 #include "gstmetatcamstatistics.h"
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <gst/video/video.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tcamprop.h>
 #include <unistd.h>
 
 
-static gboolean meta_struc_print(GQuark field_id, const GValue* value, gpointer user_data)
+static gboolean meta_struc_print(GQuark field_id, const GValue* value, gpointer user_data  __attribute__((unused)))
 {
     // GQuark is a gobject internal ID for strings
     // we call the function g_quark_to_string to get the name of the field
@@ -71,7 +71,7 @@ static gboolean meta_struc_print(GQuark field_id, const GValue* value, gpointer 
   This function will be called in a separate thread when our appsink
   says there is data for us. user_data has to be defined when calling g_signal_connect.
  */
-static GstFlowReturn callback(GstElement* sink, void* user_data)
+static GstFlowReturn callback(GstElement* sink, void* user_data  __attribute__((unused)))
 {
     printf("new sample\n");
 
@@ -82,13 +82,13 @@ static GstFlowReturn callback(GstElement* sink, void* user_data)
     if (sample)
     {
         static guint framecount = 0;
-        int pixel_data = -1;
 
         framecount++;
 
         GstBuffer* buffer = gst_sample_get_buffer(sample);
-        GstMapInfo info; // contains the actual image
-        GstCaps* c = gst_sample_get_caps(sample);
+
+        // if you need the associated caps
+        // GstCaps* c = gst_sample_get_caps(sample);
 
         GstMeta* meta = gst_buffer_get_meta(buffer, g_type_from_name("TcamStatisticsMetaApi"));
 

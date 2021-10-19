@@ -16,8 +16,6 @@
 
 /* This example will show you how to start a live stream from your camera */
 
-#include "tcamprop.h" /* gobject introspection interface */
-
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 #include <unistd.h> /* usleep */
@@ -37,7 +35,7 @@ static gboolean starts_with(const char* a, const char* b)
 }
 
 
-static gboolean bus_callback(GstBus* bus, GstMessage* message, gpointer data)
+static gboolean bus_callback(GstBus* bus __attribute__((unused)), GstMessage* message, gpointer data __attribute__((unused)))
 {
     g_print("Got %s message\n", GST_MESSAGE_TYPE_NAME(message));
 
@@ -133,9 +131,9 @@ int main(int argc, char* argv[])
     GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
 
     gst_bus_add_signal_watch(bus);
-    int bus_watch_id = gst_bus_add_watch(bus, bus_callback, NULL);
+    //int bus_watch_id = gst_bus_add_watch(bus, bus_callback, NULL);
 
-    gst_object_unref(bus);
+    //gst_object_unref(bus);
 
 
     gst_element_set_state(pipeline, GST_STATE_PLAYING);

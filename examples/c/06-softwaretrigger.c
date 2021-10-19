@@ -35,13 +35,12 @@ int main(int argc, char* argv[])
 
     gst_init(&argc, &argv); // init gstreamer
 
-    //const char* serial = NULL; // the serial number of the camera we want to use
-    const char* serial = "04710899"; // the serial number of the camera we want to use
+    const char* serial = NULL; // the serial number of the camera we want to use
 
     GError* err = NULL;
 
     GstElement* pipeline =
-        gst_parse_launch("tcambin name=source ! tcamconvert ! videoconvert ! ximagesink sync=false", &err);
+        gst_parse_launch("tcambin name=source ! video/x-raw,format=BGRx ! videoconvert ! ximagesink ", &err);
 
     /* test for error */
     if (pipeline == NULL)

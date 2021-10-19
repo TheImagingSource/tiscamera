@@ -16,7 +16,7 @@
 
 /* This example will show you how to list the formats your device offers */
 
-#include "tcamprop.h" /* gobject introspection interface */
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
@@ -57,6 +57,8 @@ int main(int argc, char* argv[])
     GstPad* pad = gst_element_get_static_pad(source, "src");
 
     GstCaps* caps = gst_pad_query_caps(pad, NULL);
+
+    printf("================ %s\n", gst_caps_to_string(caps));
 
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
     {

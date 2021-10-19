@@ -83,6 +83,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -92,6 +93,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -115,12 +117,12 @@ void list_properties(GstElement* source)
                        tcam_property_base_get_category(base_property),
                        tcam_property_base_get_description(base_property),
                        unit,
-                       tcam_property_base_get_visibility(base_property),
+                       g_enum_to_string(tcam_property_visibility_get_type() , tcam_property_base_get_visibility(base_property)),
                        g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_integer_get_representation(integer)));
                 print_flags(base_property);
                 printf("\n\n"
-                       "\t\t\tDefault: %f\n"
-                       "\t\t\tValue: f"
+                       "\t\t\tDefault: %ld\n"
+                       "\t\t\tValue: %ld"
                        "\n\n", def, value);
 
                 break;
@@ -130,9 +132,10 @@ void list_properties(GstElement* source)
             {
                 TcamPropertyFloat* f = TCAM_PROPERTY_FLOAT(base_property);
 
+                gdouble def = tcam_property_float_get_default(f, &err);
+;
                 gdouble min;
                 gdouble max;
-                gdouble def = tcam_property_float_get_default(f, &err);
                 gdouble step;
                 tcam_property_float_get_range(f, &min, &max, &step, &err);
 
@@ -140,6 +143,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -149,6 +153,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -173,7 +178,7 @@ void list_properties(GstElement* source)
                        tcam_property_base_get_category(base_property),
                        tcam_property_base_get_description(base_property),
                        unit,
-                       tcam_property_base_get_visibility(base_property),
+                       g_enum_to_string(tcam_property_visibility_get_type() , tcam_property_base_get_visibility(base_property)),
                        g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_float_get_representation(f)));
                 print_flags(base_property);
                 printf("\n\n"
@@ -193,6 +198,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -202,6 +208,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 
@@ -214,7 +221,7 @@ void list_properties(GstElement* source)
                        name, tcam_property_base_get_display_name(base_property),
                        tcam_property_base_get_category(base_property),
                        tcam_property_base_get_description(base_property),
-                       tcam_property_base_get_visibility(base_property));
+                       g_enum_to_string(tcam_property_visibility_get_type() , tcam_property_base_get_visibility(base_property)));
                 print_flags(base_property);
                 printf("\n\n"
                        "\t\t\tEntries:");
@@ -252,6 +259,7 @@ void list_properties(GstElement* source)
                 {
                     printf("%s\n", err->message);
                     g_error_free(err);
+                    err = NULL;
                     break;
                 }
 

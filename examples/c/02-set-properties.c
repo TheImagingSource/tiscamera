@@ -16,160 +16,88 @@
 
 /* This example will show you how to set properties for a certain camera */
 
-#include "tcamprop.h" /* gobject introspection interface */
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 
 
-void print_enum_or_bool(GstElement* source, const char* name)
+void print_enum_property(GstElement* source, const char* name)
 {
-    GValue value = {};
+    /* this is only a sample not all properties will be set here */
 
-    GValue type = {};
-    /* We are only interested in the value, this  */
-    gboolean ret = tcam_prop_get_tcam_property(
-        TCAM_PROP(source), name, &value, NULL, NULL, NULL, NULL, &type, NULL, NULL, NULL);
+    GError* err = NULL;
+    TcamPropertyBase* property_base = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source),
+                                                                               name,
+                                                                               &err);
 
-    if (!ret)
+    if (err)
     {
-        printf("Could not query %s\n", name);
-        return;
+        printf("Error while retrieving property: %s\n", err->message);
+        g_error_free(err);
+        err = NULL;
     }
 
-    const char* t = g_value_get_string(&type);
-
-    // exposure auto is a bool
-    if (strcmp(t, "boolean") == 0)
+    if (tcam_property_base_get_property_type(property_base) != TCAM_PROPERTY_TYPE_ENUMERATION)
     {
-        printf("%s has value: %s\n", name, g_value_get_boolean(&value) ? "true" : "false");
-    }
-    else if (strcmp(t, "enum") == 0)
-    {
-        printf("%s has value: %s\n", name, g_value_get_string(&value));
-    }
-    g_value_unset(&value);
-    g_value_unset(&type);
-}
-
-
-void print_properties(GstElement* source)
-{
-
-    print_enum_or_bool(source, "Exposure Auto");
-    print_enum_or_bool(source, "Gain Auto");
-
-    GValue brightness_value = G_VALUE_INIT;
-
-    gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                               "Brightness",
-                                               &brightness_value,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL,
-                                               NULL);
-
-    if (ret)
-    {
-        printf("Brightness has value: %d\n", g_value_get_int(&brightness_value));
-        g_value_unset(&brightness_value);
+        printf("%s has wrong type. This should not happen.\n", name);
     }
     else
     {
-        printf("Could not query Brightness\n");
-    }
-}
+        TcamPropertyEnumeration* property_enum = TCAM_PROPERTY_ENUMERATION(property_base);
+        const char* value = tcam_property_enumeration_get_value(property_enum, &err);
 
-
-gboolean set_bool_or_enum(GstElement* source, const char* name, gboolean new_value)
-{
-    // this function basically exists to ensure the example
-    // works with all camera types.
-    // If you know the property type of the properties you are
-    // setting, you can simply call that
-    // instead of checking the type.
-
-    // some settings may exhibit as bool or enum,
-    // depending on the camera you use.
-
-    GValue type = {};
-
-    gboolean ret = tcam_prop_get_tcam_property(
-        TCAM_PROP(source), name, NULL, NULL, NULL, NULL, NULL, &type, NULL, NULL, NULL);
-
-    if (!ret)
-    {
-        printf("Could not query property %s\n", name);
-        return FALSE;
-    }
-
-    const char* t = g_value_get_string(&type);
-
-    // exposure auto is a bool
-    if (strcmp(t, "boolean") == 0)
-    {
-        GValue set_auto = G_VALUE_INIT;
-        g_value_init(&set_auto, G_TYPE_BOOLEAN);
-
-        g_value_set_boolean(&set_auto, FALSE);
-
-        // actual set
-        ret = tcam_prop_set_tcam_property(TCAM_PROP(source), name, &set_auto);
-        g_value_unset(&set_auto);
-    }
-    else if (strcmp(t, "enum") == 0)
-    {
-        GValue set_auto = G_VALUE_INIT;
-        g_value_init(&set_auto, G_TYPE_STRING);
-
-        if (new_value)
+        if (err)
         {
-            g_value_set_string(&set_auto, "On");
+            printf("Error while retrieving property: %s\n", err->message);
+            g_error_free(err);
+            err = NULL;
         }
         else
         {
-            g_value_set_string(&set_auto, "Off");
+            printf("%s: %s\n", name, value);
         }
-
-        // actual set
-        ret = tcam_prop_set_tcam_property(TCAM_PROP(source), name, &set_auto);
-        g_value_unset(&set_auto);
     }
-    g_value_unset(&type);
-
-    return ret;
 }
 
 
-gboolean block_until_playing(GstElement* pipeline)
+void set_enum_property(GstElement* source, const char* name, const char* value)
 {
-    while (TRUE)
+    GError* err = NULL;
+    TcamPropertyBase* property_base = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source),
+                                                                               name,
+                                                                               &err);
+
+    if (err)
     {
-        GstState state;
-        GstState pending;
+        printf("Error while retrieving property: %s\n", err->message);
+        g_error_free(err);
+        err = NULL;
+    }
 
-        // wait 0.1 seconds for something to happen
-        GstStateChangeReturn ret = gst_element_get_state(pipeline, &state, &pending, 100000000);
+    if (tcam_property_base_get_property_type(property_base) != TCAM_PROPERTY_TYPE_ENUMERATION)
+    {
+        printf("ExposureAuto has wrong type. This should not happen.\n");
+    }
+    else
+    {
+        TcamPropertyEnumeration* enum_property = TCAM_PROPERTY_ENUMERATION(property_base);
 
-        if (ret == GST_STATE_CHANGE_SUCCESS)
+        tcam_property_enumeration_set_value(enum_property, value, &err);
+
+        if (err)
         {
-            return TRUE;
+            printf("Error while setting property: %s\n", err->message);
+            g_error_free(err);
+            err = NULL;
         }
-        else if (ret == GST_STATE_CHANGE_FAILURE)
+        else
         {
-            printf("Failed to change state %s %s %s\n",
-                   gst_element_state_change_return_get_name(ret),
-                   gst_element_state_get_name(state),
-                   gst_element_state_get_name(pending));
-
-            return FALSE;
+            printf("Set %s to %s\n", name, value);
         }
     }
 }
+
 
 
 int main(int argc, char* argv[])
@@ -195,6 +123,7 @@ int main(int argc, char* argv[])
     {
         printf("Unable to create pipeline: %s\n", err->message);
         g_free(err);
+        err = NULL;
         return 1;
     }
 
@@ -212,43 +141,40 @@ int main(int argc, char* argv[])
         g_object_set_property(G_OBJECT(source), "serial", &val);
     }
 
-    // helper function to ensure we have the right state
-    // alternatively wait for the first image
-    // then everything is guaranteed to be initialized
-    if (!block_until_playing(pipeline))
-    {
-        printf("Unable to start pipeline. \n");
-    }
+    gst_element_set_state(pipeline, GST_STATE_READY);
+
     /* Device is now in a state for interactions */
 
     /*
       We print the properties for a before/after comparison,
      */
-    print_properties(source);
+    printf("Values before we change them:\n\n");
+
+    print_enum_property(source, "ExposureAuto");
+    print_enum_property(source, "GainAuto");
 
     /*
       We set the properties to other values
      */
+    printf("\nChanging:\n\n");
 
-    tcam_prop_enumeration_set_value(source, "Exposure Auto", "Off");
+    set_enum_property(source, "ExposureAuto", "Off");
+    set_enum_property(source, "GainAuto", "Off");
 
-    set_bool_or_enum(source, "Exposure Auto", FALSE);
-    set_bool_or_enum(source, "Gain Auto", FALSE);
+    /* alternatively you can get/set directly on the TCAM_PROPERTY_PROVIDER */
+    /* for this you need to know the type of the property you want to get/set */
 
+    /* tcam_property_provider_set_tcam_enumeration(TCAM_PROPERTY_PROVIDER(source), "ExposureAuto", "Off"); */
+    /* tcam_property_provider_set_tcam_integer(TCAM_PROPERTY_PROVIDER(source), "Brightness", 200); */
+    /* tcam_property_provider_set_tcam_float(TCAM_PROPERTY_PROVIDER(source), "ExposureTime", 30000.0); */
 
-    GValue set_brightness = G_VALUE_INIT;
-    g_value_init(&set_brightness, G_TYPE_INT);
-
-    g_value_set_int(&set_brightness, 200);
-
-    tcam_prop_set_tcam_property(TCAM_PROP(source), "Brightness", &set_brightness);
-
-    g_value_unset(&set_brightness);
+    printf("\nValues after we changed them:\n\n");
 
     /*
       second print for the before/after comparison
      */
-    print_properties(source);
+    print_enum_property(source, "ExposureAuto");
+    print_enum_property(source, "GainAuto");
 
     /* cleanup, reset state */
     gst_element_set_state(source, GST_STATE_NULL);

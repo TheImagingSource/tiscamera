@@ -16,8 +16,6 @@
 
 /* This example will show you how to start a live stream from your camera */
 
-#include "tcamprop.h" /* gobject introspection interface */
-
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
 
@@ -41,6 +39,13 @@ int main(int argc, char* argv[])
 
     GstElement* pipeline =
         gst_parse_launch("tcambin name=source ! videoconvert ! ximagesink sync=false", &err);
+
+    if (err)
+    {
+        printf("%s\n", err->message);
+        g_error_free(err);
+        err = NULL;
+    }
 
     /* test for error */
     if (pipeline == NULL)

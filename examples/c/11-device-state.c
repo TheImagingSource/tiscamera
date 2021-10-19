@@ -16,7 +16,7 @@
 
 /* This example will show you how to get/set the JSON property description for a certain camera */
 
-#include "tcamprop.h" /* gobject introspection interface */
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */

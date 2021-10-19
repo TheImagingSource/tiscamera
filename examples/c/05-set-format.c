@@ -19,7 +19,7 @@
   with a specific format
  */
 
-#include "tcamprop.h" /* gobject introspection interface */
+#include "tcam-property-1.0.h" /* gobject introspection interface */
 
 #include <gst/gst.h>
 #include <stdio.h> /* printf and putchar */
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
                       480,
                       "framerate",
                       GST_TYPE_FRACTION,
-                      30,
+                      15,
                       1,
                       NULL);
 
