@@ -18,7 +18,7 @@
 
 #include "../PropertyInterfaces.h"
 #include "../compiler_defines.h"
-#include <../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h>
+#include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 
 #include <arv.h>
 
