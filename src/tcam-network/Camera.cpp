@@ -50,6 +50,13 @@ std::shared_ptr<Camera> getCameraFromList(const camera_list cameras,
                 return true;
             }
         }
+        else if (id_type == CAMERA_IP)
+        {
+            if (cam->getCurrentIP().compare(identifier) == 0)
+            {
+                return true;
+            }
+        }
         else if (id_type == CAMERA_NAME)
         {
             if (cam->getUserDefinedName().compare(identifier) == 0)

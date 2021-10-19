@@ -40,7 +40,8 @@ enum camera_ident
 {
     CAMERA_NAME = 0,
     CAMERA_SERIAL,
-    CAMERA_MAC
+    CAMERA_MAC,
+    CAMERA_IP
 };
 
 /// @name getCameraFromList
