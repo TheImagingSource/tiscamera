@@ -23,8 +23,6 @@ add_library(tcamgstbase STATIC
 	tcamgstjson.cpp
 	tcamgststrings.cpp
 	tcambinconversion.cpp
-    tcamprop_helper.h
-    tcamprop_helper.cpp
 )
 
 set_project_warnings(tcamgstbase)

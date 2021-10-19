@@ -16,17 +16,16 @@
 
 #include "tcamsrc_tcamprop_impl.h"
 
-#include <gst/gst.h>
 #include "gsttcamsrc.h"
 
-#include "../tcamgstbase/tcamprop_helper.h"
-
+#include <gst/gst.h>
 #include <tcamprop1.0_gobject/tcam_gerror.h>
+#include <tcamprop1.0_gobject/tcam_property_provider_simple_functions.h>
 
-static GSList* gst_tcamsrc_get_tcam_property_names (TcamPropertyProvider* iface, GError** err)
+static GSList* gst_tcamsrc_get_tcam_property_names(TcamPropertyProvider* iface, GError** err)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
-    auto src = tcamsrc::get_active_source( self );
+    auto src = tcamsrc::get_active_source(self);
     if (src)
     {
         return tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(src), err);
@@ -38,7 +37,9 @@ static GSList* gst_tcamsrc_get_tcam_property_names (TcamPropertyProvider* iface,
 }
 
 
-static TcamPropertyBase* gst_tcamsrc_get_tcam_property(TcamPropertyProvider* iface, const char* name, GError** err)
+static TcamPropertyBase* gst_tcamsrc_get_tcam_property(TcamPropertyProvider* iface,
+                                                       const char* name,
+                                                       GError** err)
 {
     GstTcamSrc* self = GST_TCAM_SRC(iface);
     auto src = tcamsrc::get_active_source(self);
@@ -57,14 +58,14 @@ void tcam::gst::src::gst_tcam_src_prop_init(TcamPropertyProviderInterface* iface
     iface->get_tcam_property_names = gst_tcamsrc_get_tcam_property_names;
     iface->get_tcam_property = gst_tcamsrc_get_tcam_property;
 
-    iface->set_tcam_boolean = tcamprop_helper_set_tcam_boolean;
-    iface->set_tcam_integer = tcamprop_helper_set_tcam_integer;
-    iface->set_tcam_float = tcamprop_helper_set_tcam_float;
-    iface->set_tcam_enumeration = tcamprop_helper_set_tcam_enumeration;
-    iface->set_tcam_command = tcamprop_helper_set_tcam_command;
+    iface->set_tcam_boolean = tcamprop1_gobj::provider_set_tcam_boolean;
+    iface->set_tcam_integer = tcamprop1_gobj::provider_set_tcam_integer;
+    iface->set_tcam_float = tcamprop1_gobj::provider_set_tcam_float;
+    iface->set_tcam_enumeration = tcamprop1_gobj::provider_set_tcam_enumeration;
+    iface->set_tcam_command = tcamprop1_gobj::provider_set_tcam_command;
 
-    iface->get_tcam_boolean = tcamprop_helper_get_tcam_boolean;
-    iface->get_tcam_integer = tcamprop_helper_get_tcam_integer;
-    iface->get_tcam_float = tcamprop_helper_get_tcam_float;
-    iface->get_tcam_enumeration = tcamprop_helper_get_tcam_enumeration;
+    iface->get_tcam_boolean = tcamprop1_gobj::provider_get_tcam_boolean;
+    iface->get_tcam_integer = tcamprop1_gobj::provider_get_tcam_integer;
+    iface->get_tcam_float = tcamprop1_gobj::provider_get_tcam_float;
+    iface->get_tcam_enumeration = tcamprop1_gobj::provider_get_tcam_enumeration;
 }

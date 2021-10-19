@@ -24,6 +24,7 @@
 #include <tcamprop1.0_consumer/tcamprop1_consumer.h>
 #include <tcamprop1.0_gobject/tcam_gerror.h>
 #include <tcamprop1.0_gobject/tcam_property_provider.h>
+#include <tcamprop1.0_gobject/tcam_property_provider_simple_functions.h>
 
 static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, GError** err)
 {
@@ -106,14 +107,14 @@ void tcam::gst::bin::gst_tcambin_tcamprop_init(TcamPropertyProviderInterface* if
     iface->get_tcam_property_names = gst_tcambin_get_tcam_property_names;
     iface->get_tcam_property = gst_tcambin_get_tcam_property;
 
-    iface->set_tcam_boolean = tcamprop_helper_set_tcam_boolean;
-    iface->set_tcam_integer = tcamprop_helper_set_tcam_integer;
-    iface->set_tcam_float = tcamprop_helper_set_tcam_float;
-    iface->set_tcam_enumeration = tcamprop_helper_set_tcam_enumeration;
-    iface->set_tcam_command = tcamprop_helper_set_tcam_command;
+    iface->set_tcam_boolean = tcamprop1_gobj::provider_set_tcam_boolean;
+    iface->set_tcam_integer = tcamprop1_gobj::provider_set_tcam_integer;
+    iface->set_tcam_float = tcamprop1_gobj::provider_set_tcam_float;
+    iface->set_tcam_enumeration = tcamprop1_gobj::provider_set_tcam_enumeration;
+    iface->set_tcam_command = tcamprop1_gobj::provider_set_tcam_command;
 
-    iface->get_tcam_boolean = tcamprop_helper_get_tcam_boolean;
-    iface->get_tcam_integer = tcamprop_helper_get_tcam_integer;
-    iface->get_tcam_float = tcamprop_helper_get_tcam_float;
-    iface->get_tcam_enumeration = tcamprop_helper_get_tcam_enumeration;
+    iface->get_tcam_boolean = tcamprop1_gobj::provider_get_tcam_boolean;
+    iface->get_tcam_integer = tcamprop1_gobj::provider_get_tcam_integer;
+    iface->get_tcam_float = tcamprop1_gobj::provider_get_tcam_float;
+    iface->get_tcam_enumeration = tcamprop1_gobj::provider_get_tcam_enumeration;
 }
