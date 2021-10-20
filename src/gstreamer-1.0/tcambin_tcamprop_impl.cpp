@@ -87,7 +87,7 @@ static TcamPropertyBase* gst_tcambin_get_tcam_property(TcamPropertyProvider* ifa
         return nullptr;
     }
 
-    if (self.tcam_converter)
+    if (self.tcam_converter && TCAM_IS_PROPERTY_PROVIDER(self.tcam_converter))
     {
         auto res = tcam_property_provider_get_tcam_property(
             TCAM_PROPERTY_PROVIDER(self.tcam_converter), name, nullptr);
