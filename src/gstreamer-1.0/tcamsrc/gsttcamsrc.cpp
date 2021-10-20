@@ -373,7 +373,7 @@ static device_id get_device_id(GstDevice& device)
     }
 
     auto serial = gst_helper::get_string_entry(*struc, "serial");
-    auto type = gst_helper::get_string_entry(*struc, "tcam-device-type");
+    auto type = gst_helper::get_string_entry(*struc, "type");
 
     gst_structure_free(struc);
 

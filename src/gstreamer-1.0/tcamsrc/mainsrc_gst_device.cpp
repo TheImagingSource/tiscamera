@@ -56,7 +56,7 @@ static GstElement* tcam_device_create_element(GstDevice* device, const gchar* na
     }
 
     std::string serial = gst_helper::get_string_entry(*props, "serial");
-    std::string type = gst_helper::get_string_entry(*props, "tcam-device-type");
+    std::string type = gst_helper::get_string_entry(*props, "type");
 
     gst_structure_free(props);
 
