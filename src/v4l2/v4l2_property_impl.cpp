@@ -23,6 +23,36 @@
 
 #include <memory>
 
+namespace
+{
+
+// helper function to supress false positive error
+bool needs_static_info(const std::string& name)
+{
+    static const char* blacklist [] =
+        {
+            "OverrideScanningMode",
+            "Scanning Mode Selector",
+            "Scanning Mode Identifier",
+            "Scanning Mode Scale Horizontal",
+            "Scanning Mode Scale Vertical",
+            "Scanning Mode Binning H",
+            "Scanning Mode Binning V",
+            "Scanning Mode Skipping H",
+            "Scanning Mode Skipping V",
+            "Scanning Mode Flags",
+        };
+
+    if (std::find(std::begin(blacklist), std::end(blacklist), name) != std::end(blacklist))
+    {
+        return false;
+    }
+    return true;
+}
+
+} // namespace
+
+
 namespace tcam::property
 {
 
@@ -74,7 +104,10 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (needs_static_info(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
@@ -248,7 +281,10 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (needs_static_info(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
