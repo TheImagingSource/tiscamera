@@ -1,0 +1,48 @@
+v1.1.10
+ * Fix group tabs behaviour (#31)
+
+v1.1.9
+ * Fix copying of tab assets (JS and CSS) when module is installed as a python egg
+ * Make tabs wrap on narrow screens (#30)
+ * Add support for nested tabs (#29)
+
+v1.1.8
+ * Add support for :linenos: to code tabs (#22)
+ * Improve fallback for non-HTML builders (#19)
+ * Add spelling builder to list of builders (#20)
+ * Fix naming a tab as a number (#24)
+
+v1.1.7
+ * Fix css files not being removed when tabs are not used on a page
+ * Now require sphinx>=1.4
+ * Fix issues with script and css includes on readthedocs (#17)
+
+v1.1.6
+ * Don't emit an additional error in the copy assets handler if the build process fails
+
+v1.1.5
+ * Add sphinx_tabs_nowarn option to disable warning about incompatible builder. Useful when running sphinx-build with the -W flag
+
+v1.1.4
+ * Fix broken javascript file inclusion
+
+v1.1.3
+ * Insert CSS and JS files after custom ones add in conf.py 
+
+v1.1.2
+ * Add support for dirhtml builder
+
+v1.1.1
+ * Allow multiple group tabs with the same name (the ordering of the tabs is used to determine the group ids)
+ * Use b64 encoding of group id for group tabs to avoid illegal character in CSS class
+
+v1.1.0
+ * Fix issue with multiple words in tab titles
+ * Add support for markup in tab titles
+ * Fix graphical glitches caused by illegal characters in group tab ids
+
+v1.0.1
+ * Fix possible exception when adding/removing CSS/JS files from the context
+
+v1.0.0
+ * Initial version

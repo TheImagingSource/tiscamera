@@ -1,16 +1,18 @@
-sphinx-tabs [![Build Status](https://travis-ci.org/djungelorm/sphinx-tabs.svg?branch=master)](https://travis-ci.org/djungelorm/sphinx-tabs)
-========================================
+# sphinx-tabs
+
+[![Github-CI][github-ci]][github-link]
+[![Coverage Status][codecov-badge]][codecov-link]
+[![PyPI][pypi-badge]][pypi-link]
 
 Create tabbed content in [Sphinx documentation](http://www.sphinx-doc.org) when building HTML.
 
-For example, see the [Raw] code of [test/index.rst](test/index.rst) which generates the following:
+For example, see the [Raw] code of [docs/index.rst](docs/index.rst) which generates the following:
 
-A live demo can be found here: https://djungelorm.github.io/sphinx-tabs/
+A live demo can be found here: <https://sphinx-tabs.readthedocs.io>
 
 ![Tabs](/images/tabs.gif)
 
-Installation
-----------------------------------------
+## Installation
 
 ```bash
 pip install sphinx-tabs
@@ -22,8 +24,34 @@ To enable the extension in Sphinx, add the following to your conf.py:
 extensions = ['sphinx_tabs.tabs']
 ```
 
-Basic Tabs
-----------------------------------------
+If needed, there is a configuration option to allow additional builders to be considered compatible. For example, to add the `linkcheck` builder, add the following to your conf.py:
+
+```python
+sphinx_tabs_valid_builders = ['linkcheck']
+```
+
+If you are using [Read The Docs](https://readthedocs.org/) for building your documentation, the extension must be added as a requirement. Please add the following to `requirements.txt` at the root of the project:
+
+```
+sphinx-tabs
+```
+
+## Contributing
+
+We welcome all contributions!
+See the [EBP Contributing Guide](https://executablebooks.org/en/latest/contributing.html) for general details.
+
+The simplest way to run tests is to install [pre-commit](https://pre-commit.com/) for linting and [tox](https://tox.readthedocs.io) for unit tests and documentation build:
+
+```console
+$ pre-commit run --all
+```
+
+```console
+$ tox -p
+```
+
+## Basic Tabs
 
 Basic tabs can be coded as follows:
 
@@ -45,11 +73,14 @@ Basic tabs can be coded as follows:
 
 ![Tabs](/images/tabs.gif)
 
-Grouped Tabs
-----------------------------------------
+The contents of each tab can be displayed by clicking on the tab that you wish to show. Clicking on the tab that is currently open will hide the tab's content, leaving only the tab set labels visible.
 
-Tabs can be grouped, so that changing the current tab in one area changes the current tab in the
-another area. For example:
+Alternatively, tab sets can be focused using :kbd:`Tab`. The :kbd:`Left Arrow` and :kbd:`Right Arrow` keys can then be used to navigate across the tab set and :kbd:`Enter` can be used to select a tab.
+
+## Grouped Tabs
+
+Tabs can be grouped, so that changing the current tab in one tabset changes the current tab in all other tabsets containing a tab with a matching label.
+For example:
 
 ```rst
 .. tabs::
@@ -83,10 +114,12 @@ another area. For example:
 
 ![Group Tabs](/images/groupTabs.gif)
 
-Code Tabs
-----------------------------------------
+If permitted by the user's browser, the last selected group tab will be remembered when changing page. As such, if any tabsets on the next page contain a tab with the same label it will be selected.
 
-Tabs containing code areas with syntax highlighting can be created as follows:
+
+## Code Tabs
+
+Grouped tabs containing code with syntax highlighting can be created as follows:
 
 ```rst
 .. tabs::
@@ -127,3 +160,32 @@ Tabs containing code areas with syntax highlighting can be created as follows:
 ```
 
 ![Code Tabs](/images/codeTabs.gif)
+
+Code tabs also support custom lexers (added via sphinx `conf.py`). Pass the lexers alias as the first argument of `code-tab`.
+
+By default, code tabs are labelled with the language name, though a custom label can be provided as an optional second argument to the `code-tabs` directive:
+
+```rst
+.. tabs::
+
+   .. code-tab:: c I love C
+
+         int main(const int argc, const char **argv) {
+           return 0;
+         }
+
+   .. code-tab:: py I love Python more
+
+         def main():
+             return
+
+```
+
+The tab label is used to group tabs, including `code-tabs`. As such, the same custom label should be used to group related tabs.
+
+[github-ci]: https://github.com/executablebooks/sphinx-tabs/workflows/continuous-integration/badge.svg?branch=master
+[github-link]: https://github.com/executablebooks/sphinx-tabs
+[pypi-badge]: https://img.shields.io/pypi/v/sphinx-tabs.svg
+[pypi-link]: https://pypi.org/project/sphinx-tabs
+[codecov-badge]: https://codecov.io/gh/executablebooks/sphinx-tabs/branch/master/graph/badge.svg
+[codecov-link]: https://codecov.io/gh/executablebooks/sphinx-tabs

@@ -14,9 +14,18 @@
 #
 import os
 import sys
+import sphinx
 # sys.path.insert(0, os.path.abspath('.'))
 
-sys.path.insert(0, os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/sphinx-tabs'))
+#
+# sphinx-tabs can cause warnings/compilation error
+# address this by offering different version
+#
+if sphinx.__display_version__ >= '4.2.0':
+    sys.path.insert(0, os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/sphinx-tabs'))
+else:
+    sys.path.insert(0, os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/sphinx-tabs-v1.1.13'))
+
 sys.path.insert(0, os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/tcamprop'))
 
 # -- Project information -----------------------------------------------------

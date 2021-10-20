@@ -1,0 +1,13 @@
+<document source="index.rst">
+    <container classes="sphinx-tabs" type="tab-element">
+        <div aria-label="Tabbed content" classes="closeable" role="tablist">
+            <button aria-controls="panel-0-Qysr" aria-selected="true" classes="sphinx-tabs-tab code-tab group-tab" ids="tab-0-Qysr" name="Qysr" role="tab" tabindex="0">
+                C++
+            <button aria-controls="panel-0-UHl0aG9u" aria-selected="false" classes="sphinx-tabs-tab code-tab group-tab" ids="tab-0-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="-1">
+                Python
+        <div aria-labelledby="tab-0-Qysr" classes="sphinx-tabs-panel code-tab group-tab" ids="panel-0-Qysr" name="Qysr" role="tabpanel" tabindex="0">
+            <literal_block force="False" highlight_args="{}" language="c++" linenos="True" xml:space="preserve">
+                std::cout << "hello world" << std::endl;
+        <div aria-labelledby="tab-0-UHl0aG9u" classes="sphinx-tabs-panel code-tab group-tab" hidden="true" ids="panel-0-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0">
+            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                print('hello world')

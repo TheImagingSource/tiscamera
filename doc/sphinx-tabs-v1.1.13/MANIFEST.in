@@ -1,0 +1,23 @@
+exclude docs
+recursive-exclude docs *
+exclude tests
+recursive-exclude tests *
+exclude images
+recursive-exclude images *
+
+exclude .pre-commit-config.yaml
+exclude .readthedocs.yml
+exclude pylint.cfg
+exclude tox.ini
+exclude codecov.yml
+
+include LICENSE
+include README.md
+include CHANGELOG.md
+
+recursive-include sphinx_tabs *.css
+recursive-include sphinx_tabs *.js
+
+include *.js
+include *.json
+recursive-include __tests__ *.js

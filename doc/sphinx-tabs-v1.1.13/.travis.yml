@@ -1,0 +1,23 @@
+sudo: required
+dist: xenial
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7"
+env:
+  - SPHINX_VERSION=">=1.4, <1.5"
+  - SPHINX_VERSION=">=1.5, <1.6"
+  - SPHINX_VERSION=">=1.6, <1.7"
+  - SPHINX_VERSION=">=1.7, <1.8"
+  - SPHINX_VERSION=">=1.8, <1.9"
+
+install:
+ - pip install "sphinx $SPHINX_VERSION"
+ - pip install lxml sphinx_testing
+
+script:
+ - python setup.py install
+ - make test

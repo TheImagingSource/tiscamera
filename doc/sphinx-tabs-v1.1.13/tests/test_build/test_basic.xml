@@ -1,0 +1,23 @@
+<document source="index.rst">
+    <container classes="sphinx-tabs" type="tab-element">
+        <div aria-label="Tabbed content" classes="closeable" role="tablist">
+            <button aria-controls="panel-0-0-0" aria-selected="true" classes="sphinx-tabs-tab" ids="tab-0-0-0" name="0-0" role="tab" tabindex="0">
+                Apples
+            <button aria-controls="panel-0-0-1" aria-selected="false" classes="sphinx-tabs-tab" ids="tab-0-0-1" name="0-1" role="tab" tabindex="-1">
+                Pears
+            <button aria-controls="panel-0-0-2" aria-selected="false" classes="sphinx-tabs-tab" ids="tab-0-0-2" name="0-2" role="tab" tabindex="-1">
+                Oranges
+            <button aria-controls="panel-0-0-3" aria-selected="false" classes="sphinx-tabs-tab" ids="tab-0-0-3" name="0-3" role="tab" tabindex="-1">
+                404
+        <div aria-labelledby="tab-0-0-0" classes="sphinx-tabs-panel" ids="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0">
+            <paragraph>
+                Apples are green, or sometimes red.
+        <div aria-labelledby="tab-0-0-1" classes="sphinx-tabs-panel" hidden="true" ids="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0">
+            <paragraph>
+                Pears are green.
+        <div aria-labelledby="tab-0-0-2" classes="sphinx-tabs-panel" hidden="true" ids="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0">
+            <paragraph>
+                Oranges are orange.
+        <div aria-labelledby="tab-0-0-3" classes="sphinx-tabs-panel" hidden="true" ids="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0">
+            <paragraph>
+                A number in the name.
