@@ -83,7 +83,7 @@ static GstDevice* tcam_mainsrc_device_new(GstElementFactory* factory,
                                             "model",
                                             G_TYPE_STRING,
                                             model.c_str(),
-                                            "tcam-device-type",
+                                            "type",
                                             G_TYPE_STRING,
                                             type.c_str(),
                                             nullptr);
