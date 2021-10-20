@@ -17,7 +17,6 @@
 #include "tcambin_tcamprop_impl.h"
 
 #include "tcambin_data.h"
-#include "tcamgstbase/tcamprop_helper.h"
 
 #include <algorithm>
 #include <gst-helper/gst_gvalue_helper.h>
