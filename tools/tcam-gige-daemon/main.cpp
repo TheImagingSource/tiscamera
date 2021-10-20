@@ -29,8 +29,8 @@
 #include <unistd.h>
 
 static const std::string RUNNING_DIR = "/";
-static const std::string LOCK_FILE = "/var/lock/gige-daemon.lock";
-static const std::string LOG_FILE = "gige-daemon.log";
+static const std::string LOCK_FILE = "/var/lock/tcam-gige-daemon.lock";
+static const std::string LOG_FILE = "tcam-gige-daemon.log";
 
 DaemonClass daemon_instance(LOCK_FILE);
 
