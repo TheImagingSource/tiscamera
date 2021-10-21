@@ -736,6 +736,8 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
     int largest_index = 0;
     int largest_width = -1;
     int largest_height = -1;
+    std::string binning = "1x1";
+    std::string skipping = "1x1";
 
     for (guint i = 0; i < gst_caps_get_size(incoming); ++i)
     {
@@ -825,6 +827,11 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
 
     SPDLOG_INFO("Fixating assumed largest caps: {}", gst_helper::to_string(*largest_caps).c_str());
 
+    if (gst_caps_is_fixed(largest_caps))
+    {
+        return largest_caps;
+    }
+
     if (!tcam_gst_fixate_caps(largest_caps))
     {
         gst_caps_unref(largest_caps);
@@ -862,6 +869,12 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
                                             "height",
                                             G_TYPE_INT,
                                             h,
+                                            "binning",
+                                            G_TYPE_STRING,
+                                            binning.c_str(),
+                                            "skipping",
+                                            G_TYPE_STRING,
+                                            skipping.c_str(),
                                             NULL);
 
     if (gst_structure_has_field(s, "format"))
