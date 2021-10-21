@@ -728,6 +728,11 @@ GstCaps* tcam::gst::tcam_gst_find_largest_caps(const GstCaps* incoming)
         return nullptr;
     }
 
+    if (gst_caps_is_fixed(incoming))
+    {
+        return gst_caps_copy(incoming);
+    }
+
     int largest_index = 0;
     int largest_width = -1;
     int largest_height = -1;
