@@ -61,7 +61,7 @@ static const constexpr transform_path transform_entries[] = {
         fourcc::MONO12_MIPI_PACKED,
         fourcc::MONO12_SPACKED,
         fourcc::MONO12_PACKED },
-      { fourcc::MONO8, fourcc::MONO16 } },
+      { fourcc::MONO8, fourcc::MONO16, fourcc::BGRA32 } },
     { {
           fourcc::BGGR8,
           fourcc::BGGR16,
@@ -376,7 +376,7 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                     [transform_to_bgra_func](const img::img_descriptor& dst,
                                              const img::img_descriptor& src,
                                              img_filter::filter_params& /*params*/) {
-                        assert(dst.fourcc_type() == img::fourcc::MONO8);
+                        assert(src.fourcc_type() == img::fourcc::MONO8);
                         assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
                         transform_to_bgra_func(dst, src);
