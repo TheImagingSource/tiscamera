@@ -19,20 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - internal dependency to fmt
 - cmake flag `TCAM_DOWNLOAD_MESON` for legacy systems to allow modern aravis installations.
 - gobject introspection API version 1.0
+- tcambin property `conversion-element`
+  Used to select the internal conversion elements.
+  Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
 
 ### Changed
 
+- gobject introspection API tcamprop renamed to tcam-property
 - aravis API version is now 0.8.
 - output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
 - logging now uses spdlog
 - gstreamer buffers are now marked as "live"
 - installation variables are now all defined in CmakeInstall.cmake
 - usage of tcamprop now requires the element to be in GST_STATE_READY or higher.
-- tcambin property `use-dutils` must now be set during GST_STATE_NULL to take affect.
-- gige-daemon maximum for devices increased to 50.
+- renamed gige-daemon to tcam-gige-daemon for consistency.
+- tcam-gige-daemon maximum for devices increased to 50.
 - tcammainsrc 'do-timestamp' default changed to false.
 - cmake flag BUILD_ARAVIS now defaults to ON
 - cmake flag BUILD_DOCUMENTATION now defaults to ON
+- tcam-gigetool rewrite. Now a full C++ implementation.
+  Output has changed.
 
 ### Fixed
 
@@ -46,6 +52,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   application in tcamconvert/tcamdutils
 - tcamautofocus gstreamer element - functionality now in tcammainsrc
 - tcamprop 0.1 API
+- firmware-update
+  Moved to a separate repository:
+- camera-ip-conf
+  Use tcam-gigetool instead
+- tcambin property `use-dutils`
 
 ## [0.14.0] - 2021.07.05
 
