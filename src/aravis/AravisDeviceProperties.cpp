@@ -18,6 +18,7 @@
 #include "../logging.h"
 #include "AravisDevice.h"
 #include "aravis_property_impl.h"
+#include "aravis_utils.h"
 
 namespace
 {
@@ -78,96 +79,9 @@ void AravisDevice::index_properties(const char* name)
         }
     }
 
-    static std::vector<std::string> private_settings = { "TLParamsLocked",
-                                                         "GevSCPSDoNotFragment",
-                                                         "GevTimestampTickFrequency",
-                                                         "GevTimeSCPD",
-                                                         "GevSCPD",
-                                                         "PayloadSize",
-                                                         "PayloadPerFrame",
-                                                         "PayloadPerPacket",
-                                                         "TotalPacketSize",
-                                                         "PacketsPerFrame",
-                                                         "PacketTimeUS",
-                                                         "GevSCPSPacketSize",
-                                                         "GevSCPSFireTestPacket",
-                                                         "DeviceVendorName",
-                                                         "DeviceType",
-                                                         "DeviceModelType",
-                                                         "DeviceVersion",
-                                                         "DeviceSerialNumber",
-                                                         "DeviceUserID",
-                                                         "DeviceSFNCVersionMajor",
-                                                         "DeviceSFNCVersionMinor",
-                                                         "DeviceTLType",
-                                                         "DeviceTLTypeMajor",
-                                                         "DeviceTLTypeMinor",
-                                                         "DeviceTLTypeSubMinor",
-                                                         "DeviceLinkSelector",
-                                                         "WidthMax",
-                                                         "HeightMax",
-                                                         "ChunkModeActive",
-                                                         "ChunkImage",
-                                                         "ChunkBlockId",
-                                                         "ActionDeviceKey",
-                                                         "ActionSelector",
-                                                         "ActionGroupMask",
-                                                         "ActionGroupKey",
-                                                         "UserSetSelector",
-                                                         "UserSetLoad",
-                                                         "UserSetSave",
-                                                         "UserSetDefault",
-                                                         "DeviceScanType",
-                                                         "StringReg",
-                                                         "DeviceModelName",
-                                                         "DeviceSFNCVersionSubMinor",
-                                                         "MaskedIntReg",
-                                                         "DeviceTLVersionMajor",
-                                                         "MaskedIntReg",
-                                                         "DeviceTLVersionMinor",
-                                                         "DeviceTLVersionSubMinor",
-                                                         "DeviceLinkHeartbeatTimeout",
-                                                         "DeviceStreamChannelCount",
-                                                         "DeviceStreamChannelSelector",
-                                                         "DeviceStreamChannelType",
-                                                         "DeviceStreamChannelLink",
-                                                         "DeviceStreamChannelEndianness",
-                                                         "DeviceStreamChannelPacketSize",
-                                                         "DeviceEventChannelCount",
-                                                         "DeviceTemperatureConverter",
-                                                         "IMX174HardwareWDRShutterMode",
-                                                         "IMX174HardwareWDREnable",
-                                                         "IMX174WDRShutter2",
-                                                         "ChunkIMX174FrameSet",
-                                                         "ChunkIMX174FrameId",
-                                                         "SensorPixelHeight",
-                                                         "SensorPixelWidth",
-                                                         "AcquisitionStart",
-                                                         "AcquisitionStop",
-                                                         "AcquisitionMode",
-                                                         // "Binning",
-                                                         "SensorWidth",
-                                                         "SensorHeight",
-                                                         "Width",
-                                                         "Height",
-                                                         "FPS",
-                                                         "AcquisitionFrameRate",
-                                                         "PixelFormat",
-                                                         "Binning",
-                                                         "BinningHorizontal",
-                                                         "BinningVertical",
-                                                         "SkippingHorizontal",
-                                                         "SkippingVertical",
-                                                         "DecimationHorizontal",
-                                                         "DecimationVertical",
-    };
-
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>>* container = &m_properties;
 
-    if (std::find(private_settings.begin(),
-                  private_settings.end(),
-                  arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)))
-        != private_settings.end())
+    if (is_private_setting(arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node))))
     {
         //SPDLOG_ERROR("Private setting {}", arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node)));
         //return;

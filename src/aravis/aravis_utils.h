@@ -39,6 +39,8 @@ unsigned int get_aravis_device_count();
 
 std::vector<DeviceInfo> get_aravis_device_list();
 
+bool is_private_setting(const std::string& name);
+
 } /* namespace tcam */
 
 VISIBILITY_POP
