@@ -421,7 +421,7 @@ static gboolean gst_tcamconvert_copy_metadata(GstBaseTransform* base,
                                               GstBuffer* outbuf)
 {
     /* now copy the metadata */
-    GST_DEBUG_OBJECT(base, "copying metadata");
+    // GST_DEBUG_OBJECT(base, "copying metadata");
 
     /* this should not happen, buffers allocated from a pool or with
      * new_allocate should always be writable. */
