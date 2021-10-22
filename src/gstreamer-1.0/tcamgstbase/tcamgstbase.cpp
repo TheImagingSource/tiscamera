@@ -300,6 +300,19 @@ static bool tcam_gst_is_fourcc_yuv(const uint32_t fourcc)
 }
 
 
+bool tcam::gst::format_is_yuv(const char* name, const char* fmt)
+{
+    if (!name || !fmt)
+    {
+        return false;
+    }
+
+    uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(name, fmt);
+
+    return tcam_gst_is_fourcc_yuv(fourcc);
+}
+
+
 bool tcam::gst::tcam_gst_is_bayer8_string(const char* format_string)
 {
     if (format_string == nullptr)

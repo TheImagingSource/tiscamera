@@ -39,6 +39,7 @@ std::string get_plugin_version(const char* plugin_name);
 */
 bool tcam_gst_raw_only_has_mono(const GstCaps* src_caps);
 
+bool format_is_yuv(const char* name, const char* fmt);
 
 bool tcam_gst_is_bayer8_string(const char* fourcc);
 
