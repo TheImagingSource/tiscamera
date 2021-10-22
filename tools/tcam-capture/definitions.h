@@ -24,3 +24,12 @@ enum class FormatHandling : int
     Auto,
     Dialog,
 };
+
+
+enum class ConversionElement : int
+{
+    Auto = 0,
+    TcamConvert,
+    TcamDutils,
+    TcamDutilsCuda,
+};

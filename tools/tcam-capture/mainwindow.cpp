@@ -488,28 +488,13 @@ void MainWindow::close_pipeline()
 
 void MainWindow::load_settings()
 {
-    QSettings s;
-
-    m_config.format_selection_type =  (FormatHandling)s.value("format_selection_type", (int)m_config.format_selection_type).toInt();
-    m_config.use_dutils = s.value("use_dutils", m_config.use_dutils).toBool();
-    auto tmp = s.value("pipeline", m_config.pipeline).toString();
-    if (!tmp.isEmpty())
-    {
-        m_config.pipeline = tmp;
-    }
-    qInfo("Pipeline base string: %s", m_config.pipeline.toStdString().c_str());
+    m_config.load();
 }
 
 
 void MainWindow::save_settings()
 {
-    QSettings s;
-
-    s.setValue("use_dutils", m_config.use_dutils);
-    s.setValue("format_selection_type", (int)m_config.format_selection_type);
-
-    // do not safe pipeline
-    // if in doubt we always have the default value
+    m_config.save();
 }
 
 void MainWindow::on_actionPlay_triggered()

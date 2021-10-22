@@ -17,21 +17,48 @@
 #pragma once
 
 #include <QString>
+#include <QSettings>
 
 #include "definitions.h"
 
 struct TcamCaptureConfig
 {
     FormatHandling format_selection_type = FormatHandling::Auto;
+    ConversionElement conversion_element = ConversionElement::Auto;
     bool use_dutils = true;
     // expectations
     // output element name: sink
     // if a capsfilter element named device-caps exists it will have the configured caps set
-    // all tcamprop elements are named: tcam0, tcam1, etc
+    // all tcam-property elements are named: tcam0, tcam1, etc
     // tcam0 is always source
-    QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! videoconvert ! queue ! fpsdisplaysink video-sink=xvimagesink sync=false name=sink "
-        "text-overlay=false signal-fps-measurements=true";
-    //QString pipeline = "";
+    QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! videoconvert ! queue "
+        "! fpsdisplaysink video-sink=xvimagesink sync=false name=sink text-overlay=false signal-fps-measurements=true";
 
 
+    void save()
+    {
+        QSettings s;
+
+        s.setValue("format_selection_type", (int)format_selection_type);
+        s.setValue("conversion_element", (int)conversion_element);
+
+        // do not safe pipeline
+        // if in doubt we always have the default value
+    }
+
+    void load()
+    {
+        QSettings s;
+
+        format_selection_type = (FormatHandling)s.value("format_selection_type", (int)format_selection_type).toInt();
+        conversion_element = (ConversionElement)s.value("conversion_element", (int)conversion_element).toInt();
+
+        //auto tmp = s.value("pipeline", pipeline).toString();
+        auto tmp = s.value("pipeline", "").toString();
+        if (!tmp.isEmpty())
+        {
+            pipeline = tmp;
+        }
+        qInfo("Pipeline base string: %s", pipeline.toStdString().c_str());
+    }
 };
