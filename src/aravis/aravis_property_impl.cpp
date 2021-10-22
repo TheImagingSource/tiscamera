@@ -17,6 +17,7 @@
 #include "aravis_property_impl.h"
 
 #include "AravisPropertyBackend.h"
+#include "aravis_utils.h"
 #include "../logging.h"
 
 namespace
@@ -182,7 +183,10 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (!is_private_setting(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
@@ -345,7 +349,10 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (!is_private_setting(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
@@ -503,7 +510,10 @@ AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (!is_private_setting(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
@@ -613,7 +623,10 @@ AravisPropertyCommandImpl::AravisPropertyCommandImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (!is_private_setting(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
@@ -728,7 +741,10 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(const std::string& name,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        if (!is_private_setting(m_name))
+        {
+            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        }
         p_static_info = nullptr;
     }
     else
