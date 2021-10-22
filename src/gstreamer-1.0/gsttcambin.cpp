@@ -165,7 +165,7 @@ static gboolean gst_tcambin_create_source(GstTcamBin* self)
 
     auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
 
-    data.available_caps = tcambin_filter_unsupported_caps(*data.src_caps.get());
+    data.available_caps = tcambin_filter_unsupported_caps(*src_caps.get());
 
     return TRUE;
 }
