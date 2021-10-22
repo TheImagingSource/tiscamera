@@ -39,13 +39,13 @@ struct tcambin_data
     gst_helper::gst_ptr<GstElement> out_caps_filter_;
 
     gst_helper::gst_ptr<GstCaps> src_caps;
+    gst_helper::gst_ptr<GstCaps> available_caps;
     gst_helper::gst_ptr<GstCaps> target_caps;
 
     // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
     GstElement* src = nullptr;
     GstElement* pipeline_caps = nullptr;
     GstElement* jpegdec = nullptr;
-    GstElement* convert = nullptr;
 
     tcambin_conversion conversion_info = {};
     GstElement* tcam_converter = nullptr;
