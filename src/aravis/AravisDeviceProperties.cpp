@@ -63,8 +63,7 @@ void AravisDevice::index_properties(const char* name)
 
             std::string node_name = arv_gc_feature_node_get_name(ARV_GC_FEATURE_NODE(node));
 
-            if (node_name == "DeviceControl" || node_name == "TransportLayerControl"
-                || node_name == "ImageFormatControl")
+            if (node_name == "DeviceControl" || node_name == "TransportLayerControl")
             {
                 return;
             }
