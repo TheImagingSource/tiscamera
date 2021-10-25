@@ -175,12 +175,6 @@ int main(int argc, char* argv[])
                                      "Read a JSON string/file containing properties and their "
                                      "values and set them in the device");
 
-    std::string device_type;
-    auto existing_device_types = tcam::get_device_type_list_strings();
-    std::set<std::string> s(existing_device_types.begin(), existing_device_types.end());
-
-    app.add_set("-t,--type", device_type, s, "camera type", "unknown");
-
     list_devices->excludes(show_caps);
     list_devices->excludes(show_properties);
     show_properties->excludes(show_caps);
