@@ -56,6 +56,7 @@ struct tcambin_data
     gboolean must_apply_state = FALSE;
 
     tcam::gst::input_caps_required_modules modules;
+    gst_helper::gst_ptr<GstStructure>   prop_init_;
 };
 
 

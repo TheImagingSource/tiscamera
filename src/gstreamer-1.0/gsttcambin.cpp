@@ -54,6 +54,7 @@ enum
     PROP_CONVERSION_ELEMENT,
     PROP_STATE,
     PROP_TCAMDEVICE,
+    PROP_TCAM_PROPERTIES,
 };
 
 static GstStaticPadTemplate src_template =
@@ -86,9 +87,8 @@ static bool has_version_parity_with_tiscamera(const std::string& element_name)
 static gst_helper::gst_ptr<GstCaps> tcambin_filter_unsupported_caps(const GstCaps& source_caps)
 {
 
-    auto filter_func = [] (GstCapsFeatures* features,
-                           GstStructure* structure,
-                           gpointer /*user_data*/) -> gboolean
+    auto filter_func =
+        [](GstCapsFeatures* features, GstStructure* structure, gpointer /*user_data*/) -> gboolean
     {
         if (features)
         {
@@ -157,6 +157,17 @@ static gboolean gst_tcambin_create_source(GstTcamBin* self)
     data.device_serial = gst_helper::gobject_get_string(G_OBJECT(data.src), "serial");
     //data.device_type = gst_helper::gobject_get_string_opt(G_OBJECT(data.src), "type").value_or(std::string {});
     data.device_type = gst_helper::gobject_get_string(G_OBJECT(data.src), "type");
+
+    if (data.prop_init_)
+    {
+        GValue tmp = G_VALUE_INIT;
+        g_value_init(&tmp, GST_TYPE_STRUCTURE);
+        gst_value_set_structure(&tmp, data.prop_init_.get());
+        g_object_set_property(G_OBJECT(data.src), "tcam-properties", &tmp);
+        g_value_unset(&tmp);
+
+        //state.prop_init_.reset();
+    }
 
     GST_INFO_OBJECT(self,
                     "Opened device has serial: '%s' type: '%s'",
@@ -328,7 +339,7 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
 
     std::string pipeline_string = "tcamsrc";
 
-    if(gst_element_link(data.src, data.pipeline_caps))
+    if (gst_element_link(data.src, data.pipeline_caps))
     {
         pipeline_string += " ! capsfilter name=tcambin-src_caps";
     }
@@ -385,7 +396,8 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
 
         std::string bin_name = "tcambin-";
         bin_name += element_name;
-        if(!link_elements(true, &data.pipeline_caps, &data.tcam_converter, pipeline_string, bin_name))
+        if (!link_elements(
+                true, &data.pipeline_caps, &data.tcam_converter, pipeline_string, bin_name))
         {
             send_linking_element_msg(self, element_name);
             return false;
@@ -585,7 +597,8 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
 
             if (data.user_caps)
             {
-                GstCaps* tmp = gst_caps_intersect(data.user_caps.get(), self->data->available_caps.get());
+                GstCaps* tmp =
+                    gst_caps_intersect(data.user_caps.get(), self->data->available_caps.get());
                 if (tmp == nullptr)
                 {
                     GST_ERROR_OBJECT(self,
@@ -772,6 +785,27 @@ static void gst_tcambin_get_property(GObject* object,
             }
             break;
         }
+        case PROP_TCAM_PROPERTIES:
+        {
+            if (!data.src)
+            {
+                gst_helper::gst_ptr<GstStructure> ptr;
+                if (!data.prop_init_.empty())
+                {
+                    ptr = gst_helper::make_ptr(gst_structure_copy(data.prop_init_.get()));
+                }
+                else
+                {
+                    ptr = gst_helper::make_ptr(gst_structure_new_empty("tcam"));
+                }
+                gst_value_set_structure(value, ptr.get());
+            }
+            else
+            {
+                g_object_get_property(G_OBJECT(data.src), "tcam-properties", value);
+            }
+            break;
+        }
         default:
         {
             G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -916,6 +950,26 @@ static void gst_tcambin_set_property(GObject* object,
             else
             {
                 data.prop_tcam_device = gst_helper::make_addref_ptr(ptr);
+            }
+            break;
+        }
+        case PROP_TCAM_PROPERTIES:
+        {
+            if (!data.src)
+            {
+                auto strc = gst_value_get_structure(value);
+                if (strc)
+                {
+                    data.prop_init_ = gst_helper::make_ptr(gst_structure_copy(strc));
+                }
+                else
+                {
+                    data.prop_init_.reset();
+                }
+            }
+            else
+            {
+                g_object_set_property(G_OBJECT(data.src), "tcam-properties", value);
             }
             break;
         }
@@ -1077,6 +1131,22 @@ static void gst_tcambin_class_init(GstTcamBinClass* klass)
                             "Property values the internal elements shall use",
                             "",
                             static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
+
+    g_object_class_install_property(
+        object_class,
+        PROP_TCAM_PROPERTIES,
+        g_param_spec_boxed(
+            "tcam-properties",
+            "Properties via GstStructure",
+            "In GST_STATE_NULL, sets the initial values for tcam-property 1.0 properties."
+            "In GST_STATE_READY, sets the current properties of the device, or reads the current "
+            "state of all properties"
+            "Names and types are the ones found in the tcam-property 1.0 interface."
+            "(Usage e.g.: 'gst-launch-1.0 tcambin "
+            "tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...')",
+            GST_TYPE_STRUCTURE,
+            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
     gst_element_class_add_pad_template(element_class, gst_static_pad_template_get(&src_template));
 
