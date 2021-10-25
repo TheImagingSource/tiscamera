@@ -63,7 +63,7 @@ struct src_interface_list : tcamprop1::property_list_interface
 
 struct device_state
 {
-    tcam::DeviceIndex index_;
+    //tcam::DeviceIndex index_;
 
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
@@ -87,6 +87,11 @@ struct device_state
 
     std::vector<std::unique_ptr<tcamprop1::property_interface>> tcamprop_properties;
 
+    gst_helper::gst_ptr<GstStructure>   prop_init_;
+
+    bool    is_device_open() const {
+        return dev != nullptr;
+    }
 
     void stop_and_clear()
     {

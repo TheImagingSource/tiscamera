@@ -14,7 +14,7 @@ Source element that retrieves images from a device.
 The tcammainsrc existed as `tcamsrc` prior to tiscamera 0.13.0.  
 It is used for v4l2, aravis and libusb devices.
 
-.. list-table:: tcamsrc properties
+.. list-table:: tcammainsrc properties
    :header-rows: 1
    :widths: 25 10 65
 
@@ -40,6 +40,35 @@ It is used for v4l2, aravis and libusb devices.
    * - property-state
      - string
      - JSON string describing the state of all device properties. See :any:`state`.
+   * - :ref:`tcam-properties<tcam-properties>`
+     - GstStructure
+     - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+
+.. _tcam-properties:
+
+Gstreamer object property `tcam-properties`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In ``state ==  GST_STATE_NULL``:
+
+* Set on `tcam-properties` copies the passed in structure. This structure gets applied to the device when transitioning to `GST_STATE_READY`.
+* Get on `tcam-properties` returns either the previously passed in structure or if nothing was set, an empty structure.
+
+In ``state >= GST_STATE_READY``:
+
+* Set on `tcam-properties` applies the passed in GstStructure to the currently open device.
+* Get on `tcam-properties` returns the property values of the currently open device.
+
+One usage is using this to specify the startup properties of the device in a command line. 
+
+E.g.:
+
+.. code-block:: sh
+
+    gst-launch-1.0 tcammainsrc prop-struct=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...
+
+Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
+
 
 MetaData
 --------
@@ -418,3 +447,55 @@ Internal pipelines will always be created when the element state is set to PAUSE
 Should the selected camera offer focus properties the element :any:`tcamautofocus` will also be included.
 
 Elements that offer auto algorithms (auto exposure/focus) will only be included when the camera itself does not offer these functions.
+
+
+GObject properties
+########################
+
+.. _tcam-properties:
+
+GObject property `tcam-properties`
+--------------------------------------
+
+In ``state ==  GST_STATE_NULL``:
+
+* Set on `tcam-properties` copies the passed in structure. This structure gets applied to the device when transitioning to `GST_STATE_READY`.
+* Get on `tcam-properties` returns either the previously passed in structure or if nothing was set, an empty structure.
+
+In ``state >= GST_STATE_READY``:
+
+* Set on `tcam-properties` applies the passed in GstStructure to the currently open device.
+* Get on `tcam-properties` returns the property values of the currently open device.
+
+One usage is using this to specify the startup properties of the device in a command line. 
+
+E.g.:
+
+.. code-block:: sh
+
+    gst-launch-1.0 tcammainsrc prop-struct=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...
+
+Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
+
+
+.. _tcam-device:
+
+GObject property `tcam-device`
+--------------------------------------
+
+This write-only property allows to open a specific device by passing a `GstDevice`.
+
+`tcam-device` is only writeable in `GST_STATE_NULL`.
+
+In the transition from `GST_STATE_NULL` to `GST_STATE_READY`, if this property was set, the tcamsrc calls `gst_device_create_element` with the assigned `GstDevice`.
+
+If this property is not set, the default opening procedure is using `serial` and `type` to find a suitable device via `GstDeviceMonitor` and opening that.
+
+E.g:
+
+.. code-block:: cpp
+
+    GstElement* src = ...;
+    GstDevice* dev = fetch_first_device_from_monitor();
+
+    g_object_set( G_OBJECT( src ), "tcam-device", dev );
