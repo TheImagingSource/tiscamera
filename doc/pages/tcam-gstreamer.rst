@@ -44,31 +44,6 @@ It is used for v4l2, aravis and libusb devices.
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
 
-.. _tcam-properties:
-
-Gstreamer object property `tcam-properties`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In ``state ==  GST_STATE_NULL``:
-
-* Set on `tcam-properties` copies the passed in structure. This structure gets applied to the device when transitioning to `GST_STATE_READY`.
-* Get on `tcam-properties` returns either the previously passed in structure or if nothing was set, an empty structure.
-
-In ``state >= GST_STATE_READY``:
-
-* Set on `tcam-properties` applies the passed in GstStructure to the currently open device.
-* Get on `tcam-properties` returns the property values of the currently open device.
-
-One usage is using this to specify the startup properties of the device in a command line. 
-
-E.g.:
-
-.. code-block:: sh
-
-    gst-launch-1.0 tcammainsrc prop-struct=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...
-
-Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
-
 
 MetaData
 --------
@@ -428,15 +403,18 @@ The format that can always be expected to work is `BGRx`. All other formats depe
      - bool
      - Use the tcamdutils element, if present.
        Default: True
-   * - property-state
-     - string
-     - JSON string describing the state of all device properties. See :any:`state`.
+   * - :ref:`tcam-device<tcam-device>`
+     - GstDevice
+     - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
+   * - :ref:`tcam-properties<tcam-properties>`
+     - GstStructure
+     - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+
        
-Internal pipelines will always be created when the element state is set to PAUSED.
+Internal pipelines will always be created when the element state is set to READY.
 
 
-
-    tcamsrc -> capsfilter -> tcamautoexposure -> tcamwhitebalance -> bayer2rgb
+    tcamsrc -> capsfilter -> tcamconvert
 
     tcamsrc -> capsfilter -> tcamdutils
 

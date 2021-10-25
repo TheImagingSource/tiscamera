@@ -16,6 +16,7 @@
 
 #include "gsttcamsrc.h"
 
+#include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_serialize.h"
 #include "../../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "../../base_types.h"
 #include "../../logging.h"
@@ -26,6 +27,7 @@
 
 #include <gst-helper/gst_gvalue_helper.h>
 #include <gst-helper/gst_ptr.h>
+#include <gst/gst.h>
 #include <unistd.h>
 
 using namespace tcam;
@@ -47,6 +49,8 @@ struct tcamsrc_state
     gboolean drop_incomplete_frames = true;
     gboolean do_timestamp = false;
     gint num_buffers = -1;
+
+    gst_helper::gst_ptr<GstStructure>   prop_init_;
 };
 } // namespace tcamsrc
 
@@ -89,6 +93,7 @@ enum
     PROP_DROP_INCOMPLETE_FRAMES,
     PROP_STATE,
     PROP_TCAMDEVICE,
+    PROP_TCAM_PROPERTIES,
 };
 
 static tcamsrc::tcamsrc_state& get_element_state(GstTcamSrc* self)
@@ -289,30 +294,6 @@ static void apply_element_property(GstTcamSrc* self,
             }
             break;
         }
-        case PROP_STATE:
-        {
-            if (state.active_source)
-            {
-                // if (state.active_source == state.main_src)
-                // {
-                //     g_object_set_property(G_OBJECT(state.active_source), "state", value);
-                // }
-                // else
-                // {
-                //     bool state = tcam::gst::load_device_settings(
-                //         TCAM_PROP(self), state.device_serial, g_value_get_string(value));
-                //     if (!state)
-                //     {
-                //         GST_WARNING("Device may be in an undefined state.");
-                //     }
-                // }
-            }
-            else
-            {
-                GST_WARNING("No active source.");
-            }
-            break;
-        }
         case PROP_TCAMDEVICE:
         {
             if (!is_state_null())
@@ -330,6 +311,26 @@ static void apply_element_property(GstTcamSrc* self,
             else
             {
                 state.device_to_open = gst_helper::make_addref_ptr(ptr);
+            }
+            break;
+        }
+        case PROP_TCAM_PROPERTIES:
+        {
+            if (!state.active_source)
+            {
+                auto strc = gst_value_get_structure(value);
+                if (strc)
+                {
+                    state.prop_init_ = gst_helper::make_ptr(gst_structure_copy(strc));
+                }
+                else
+                {
+                    state.prop_init_.reset();
+                }
+            }
+            else
+            {
+                g_object_set_property(G_OBJECT(state.active_source), "tcam-properties", value);
             }
             break;
         }
@@ -519,6 +520,17 @@ static gboolean open_source_element(GstTcamSrc* self)
 
     apply_element_property(self, PROP_DO_TIMESTAMP, &val_bool, nullptr);
 
+    if (state.prop_init_)
+    {
+        GValue tmp = G_VALUE_INIT;
+        g_value_init(&tmp, GST_TYPE_STRUCTURE);
+        gst_value_set_structure(&tmp, state.prop_init_.get());
+        g_object_set_property(G_OBJECT(state.active_source), "tcam-properties", &tmp);
+        g_value_unset(&tmp);
+
+        //state.prop_init_.reset();
+    }
+
     GST_INFO("Opened device with serial: '%s' type: '%s'",
              state.device_serial.c_str(),
              tcam::tcam_device_type_to_string(state.device_type).c_str());
@@ -683,25 +695,24 @@ static void gst_tcam_src_get_property(GObject* object,
             }
             break;
         }
-        case PROP_STATE:
+        case PROP_TCAM_PROPERTIES:
         {
-            if (state.active_source)
+            if (!state.active_source)
             {
-                // if (state.active_source == state.main_src)
-                // {
-                //     g_object_get_property(G_OBJECT(state.active_source), "state", value);
-                // }
-                // else
-                // {
-                //     std::string tmp =
-                //         tcam::gst::create_device_settings(state.device_serial, TCAM_PROP(self))
-                //             .c_str();
-                //     g_value_set_string(value, tmp.c_str());
-                // }
+                gst_helper::gst_ptr<GstStructure> ptr;
+                if (!state.prop_init_.empty())
+                {
+                    ptr = gst_helper::make_ptr(gst_structure_copy(state.prop_init_.get()));
+                }
+                else
+                {
+                    ptr = gst_helper::make_ptr(gst_structure_new_empty("tcam"));
+                }
+                gst_value_set_structure(value, ptr.get());
             }
             else
             {
-                GST_WARNING("No active source.");
+                g_object_get_property(G_OBJECT(state.active_source), "tcam-properties", value);
             }
             break;
         }
@@ -839,6 +850,22 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                             "Assigns a GstDevice to open when transitioning from NULL to READY.",
                             GST_TYPE_DEVICE,
                             static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS)));
+
+
+    g_object_class_install_property(
+        gobject_class,
+        PROP_TCAM_PROPERTIES,
+        g_param_spec_boxed(
+            "tcam-properties",
+            "Properties via GstStructure",
+            "In GST_STATE_NULL, sets the initial values for tcam-property 1.0 properties."
+            "In GST_STATE_READY, sets the current properties of the device, or reads the current "
+            "state of all properties"
+            "Names and types are the ones found in the tcam-property 1.0 interface."
+            "(Usage e.g.: 'gst-launch-1.0 tcamsrc "
+            "tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...')",
+            GST_TYPE_STRUCTURE,
+            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
     gst_tcamsrc_signals[SIGNAL_DEVICE_OPEN] = g_signal_new("device-open",
                                                            G_TYPE_FROM_CLASS(klass),
