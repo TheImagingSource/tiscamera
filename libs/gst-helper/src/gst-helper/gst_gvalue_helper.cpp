@@ -70,6 +70,24 @@ std::vector<const GValue*> gst_helper::gst_list_or_array_to_GValue_vector( const
     return {};
 }
 
+std::vector<std::string>    gst_helper::convert_GSList_to_string_vector_consume( GSList* lst )
+{
+    if( lst == nullptr ) {
+        return {};
+    }
+    std::vector<std::string> rval;
+
+    for( auto ptr = lst; ptr != nullptr; ptr = ptr->next )
+    {
+        rval.push_back( static_cast<const char*>(ptr->data) );
+    }
+
+    g_slist_free_full( lst, g_free );
+
+    return rval;
+}
+
+
 
 std::string gst_helper::gobject_get_string( gpointer obj, const char* property_name )
 {

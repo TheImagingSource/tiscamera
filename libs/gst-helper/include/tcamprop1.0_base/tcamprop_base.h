@@ -17,22 +17,17 @@ namespace tcamprop1
         Command,
         Enumeration
     };
-
-    constexpr const char* to_string( prop_type t ) noexcept;
-
     enum class Visibility_t {
         Beginner,
         Expert,
         Guru,
         Invisible,
     };
-
     enum class Access_t {
         RO,
         WO,
         RW
     };
-
     enum class IntRepresentation_t {
         Linear,
         Logarithmic,
@@ -48,6 +43,11 @@ namespace tcamprop1
         PureNumber,
     };
 
+    constexpr const char* to_string( prop_type t ) noexcept;
+    constexpr const char* to_string( Visibility_t t ) noexcept;
+    constexpr const char* to_string( Access_t t ) noexcept;
+    constexpr const char* to_string( IntRepresentation_t t ) noexcept;
+    constexpr const char* to_string( FloatRepresentation_t t ) noexcept;
 
     struct prop_static_info
     {
@@ -144,5 +144,54 @@ namespace tcamprop1
         };
         return nullptr;
     }
+
+    constexpr const char* to_string( Visibility_t t ) noexcept
+    {
+        switch( t )
+        {
+        case tcamprop1::Visibility_t::Beginner: return "Beginner";
+        case tcamprop1::Visibility_t::Expert:   return "Expert";
+        case tcamprop1::Visibility_t::Guru:     return "Guru";
+        case tcamprop1::Visibility_t::Invisible:return "Invisible";
+        }
+        return nullptr;
+    }
+    constexpr const char* to_string( Access_t t ) noexcept
+    {
+        switch( t )
+        {
+        case tcamprop1::Access_t::RO:       return "RO";
+        case tcamprop1::Access_t::WO:       return "WO";
+        case tcamprop1::Access_t::RW:       return "RW";
+        }
+        return nullptr;
+    }
+
+    constexpr const char* to_string( IntRepresentation_t t ) noexcept
+    {
+        switch( t )
+        {
+        case IntRepresentation_t::Linear:       return "Linear";
+        case IntRepresentation_t::Logarithmic:  return "Logarithmic";
+        case IntRepresentation_t::Boolean:      return "Boolean";
+        case IntRepresentation_t::PureNumber:   return "PureNumber";
+        case IntRepresentation_t::HexNumber:    return "HexNumber";
+        case IntRepresentation_t::IPV4Address:  return "IPV4Address";
+        case IntRepresentation_t::MACAddress:   return "MACAddress";
+        }
+        return "";
+    }
+    constexpr const char* to_string( FloatRepresentation_t t ) noexcept
+    {
+        switch( t )
+        {
+        case FloatRepresentation_t::Linear:         return "Linear";
+        case FloatRepresentation_t::Logarithmic:    return "Logarithmic";
+        case FloatRepresentation_t::PureNumber:     return "PureNumber";
+
+        }
+        return nullptr;
+    }
+
 
 } // namespace tcamprop1

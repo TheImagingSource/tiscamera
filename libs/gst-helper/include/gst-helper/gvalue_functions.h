@@ -3,6 +3,7 @@
 #include <optional>
 #include <string_view>
 #include <type_traits>
+#include <string>
 
 #include "gvalue_helper.h"
 
@@ -54,6 +55,8 @@ namespace gvalue
         else if constexpr( std::is_same_v<Tval, double> ) { return G_TYPE_DOUBLE; }
         else if constexpr( std::is_same_v<Tval, char*> ) { return G_TYPE_STRING; }
         else if constexpr( std::is_same_v<Tval, void*> ) { return G_TYPE_POINTER; }
+        else if constexpr( std::is_same_v<Tval, const char*> ) { return G_TYPE_STRING; }
+        else if constexpr( std::is_same_v<Tval, const void*> ) { return G_TYPE_POINTER; }
         else {
             static_assert(std::is_same_v<Tval, guchar>, "Type mapping not implemented for this T");
         }
@@ -107,6 +110,16 @@ namespace gvalue
             }
             return std::string_view{};
         }
+        else if constexpr( std::is_same_v<T, std::string> )
+        {
+            if( G_VALUE_TYPE( &gval ) != G_TYPE_STRING ) {
+                return std::nullopt;
+            }
+            if( auto res = g_value_get_string( &gval ); res ) {
+                return std::string( res );
+            }
+            return std::string{};
+        }
         else
         {
             if( G_VALUE_TYPE( &gval ) != to_gtype<T>() ) {
@@ -122,17 +135,28 @@ namespace gvalue
     template<typename T>
     std::optional<T>        fetch_typed( const GValue& gval ) noexcept
     {
-        if( G_VALUE_TYPE( &gval ) == to_gtype<T>() ) {
-            return get_typed<T>( gval );
+        static_assert(!std::is_same_v<T, std::string_view>, "Returning a string_view is a bad idea from a transformed temporary GValue");
+        if constexpr( std::is_same_v<T, std::string> )
+        {
+            auto tmp = fetch_typed<const char*>( gval );
+            if( tmp.has_value() ) {
+                return std::string( tmp.value() );
+            }
+            return std::string{};
         }
-        static_assert( !std::is_same_v<T, std::string_view>, "Returning a string_view is a bad idea from a transformed temporary GValue" );
+        else
+        {
+            if( G_VALUE_TYPE( &gval ) == to_gtype<T>() ) {
+                return get_typed<T>( gval );
+            }
 
-        GValue trans = {};
-        g_value_init( &trans, to_gtype<T>() );
-        if( g_value_transform( &gval, &trans ) ) {
-            return get_typed<T>( trans );
+            GValue trans = {};
+            g_value_init( &trans, to_gtype<T>() );
+            if( g_value_transform( &gval, &trans ) ) {
+                return get_typed<T>( trans );
+            }
+            return std::nullopt;
         }
-        return std::nullopt;
     }
 
 }

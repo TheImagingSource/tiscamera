@@ -22,6 +22,11 @@ namespace gvalue
             g_value_init( &value_, G_VALUE_TYPE( &op2.value_ ) );
             g_value_copy( &op2.value_, &value_ );
         }
+        explicit gvalue_wrapper( const GValue& op2 ) noexcept
+        {
+            g_value_init( &value_, G_VALUE_TYPE( &op2) );
+            g_value_copy( &op2, &value_ );
+        }
         gvalue_wrapper& operator=( gvalue_wrapper&& op2 ) noexcept
         {
             if( this != &op2 ) {
@@ -54,14 +59,19 @@ namespace gvalue
             g_value_set_int( &rval.value_, value_to_set );
             return rval;
         }
-        //static gvalue_wrapper   make_value( int64_t value_to_set ) noexcept {
-        //    gvalue_wrapper rval = make_typed( G_TYPE_INT64 );
-        //    g_value_set_int64( &rval.value_, value_to_set );
-        //    return rval;
-        //}
+        static gvalue_wrapper   make_value( int64_t value_to_set ) noexcept {
+            gvalue_wrapper rval = make_typed( G_TYPE_INT64 );
+            g_value_set_int64( &rval.value_, value_to_set );
+            return rval;
+        }
         static gvalue_wrapper   make_value( bool value_to_set ) noexcept {
             gvalue_wrapper rval = make_typed( G_TYPE_BOOLEAN );
             g_value_set_boolean( &rval.value_, value_to_set ? TRUE : FALSE );
+            return rval;
+        }
+        static gvalue_wrapper   make_value( const char* value_to_set ) noexcept {
+            gvalue_wrapper rval = make_typed( G_TYPE_STRING );
+            g_value_set_string( &rval.value_, value_to_set );
             return rval;
         }
         ~gvalue_wrapper()
@@ -118,7 +128,7 @@ namespace gvalue
         /** Fetches the contained value and tries to convert it to the passed in type.
          * If the GValue contains the exact type, just returns its value, otherwise tries to convert it to the requested type.
          */
-        template<typename T>    auto fetch_typed() noexcept -> std::optional<T>
+        template<typename T>    auto fetch_typed() const noexcept -> std::optional<T>
         {
             return gvalue::fetch_typed<T>( value_ );
         }

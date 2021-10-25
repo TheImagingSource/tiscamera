@@ -402,7 +402,7 @@ public:
 
     void reset() noexcept
     {
-        unref( ptr_ );
+        unref( std::exchange( ptr_, nullptr ) );
     }
 
     /**

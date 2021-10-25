@@ -20,6 +20,18 @@ static TcamPropertyBase* tcamprop_impl_create_node( tcamprop1::property_list_int
         return nullptr;
     }
 
+    auto prop_state_opt = prop_itf_ptr->get_property_state();
+    if( prop_state_opt.has_error() )
+    {
+        tcamprop1_gobj::set_gerror( err, prop_state_opt.error() );
+        return nullptr;
+    }
+    if( !prop_state_opt.value().is_implemented )
+    {
+        tcamprop1_gobj::set_gerror( err, tcamprop1::status::property_is_not_implemented );
+        return nullptr;
+    }
+
     switch( prop_itf_ptr->get_property_type() )
     {
     case tcamprop1::prop_type::Boolean:

@@ -32,6 +32,13 @@ namespace gst_helper
      */
     GSList*         gst_string_vector_to_GSList( const std::vector<std::string>& lst );
 
+    /**
+     * Converts the GSList passed in to a std::vector<std::stirng> object.
+     * Note: The list and its elements are consumer
+     */
+    std::vector<std::string>         convert_GSList_to_string_vector_consume( GSList* lst );
+
+
     inline std::string get_string_entry(GstStructure& struc, const std::string& entry_name)
     {
         auto str = gst_structure_get_string( &struc, entry_name.c_str());
