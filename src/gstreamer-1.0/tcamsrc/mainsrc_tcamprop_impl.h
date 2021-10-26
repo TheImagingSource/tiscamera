@@ -56,6 +56,10 @@ struct TcamPropertyBase : TBase
     {
         tcamprop1::prop_state ret = {};
 
+        auto flags = m_prop->get_flags();
+
+        ret.is_locked = tcam::property::is_locked(flags);
+
         return ret;
     }
 };
