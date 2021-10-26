@@ -14,6 +14,8 @@ Source element that retrieves images from a device.
 The tcammainsrc existed as `tcamsrc` prior to tiscamera 0.13.0.  
 It is used for v4l2, aravis and libusb devices.
 
+Always use tcamsrc. tcammainsrc is considered an internal element.
+
 .. list-table:: tcammainsrc properties
    :header-rows: 1
    :widths: 25 10 65
@@ -143,196 +145,33 @@ It is a convenience wrapper and offers no additional properties.
 
 | As of tiscamera 0.13.0 the supported source elements include tcammainsrc and tcampimipisrc.
 | tiscamera 0.14.0 added support for tcamtegrasrc.
-
-.. todo::
-
-   Add tcampimipisrc doc link
    
-.. _tcamautoexposure:
-   
-tcamautoexposure
-################
 
-Automatically adjust exposure and gain to reach the wished image brightness.
-
-.. list-table:: tcamautoexposure properties
-   :header-rows: 1
-   :widths: 20 50 10 20
-
-   * - Name
-     - Description
-     - Default
-     - Property Interface
-   * - auto-exposure
-     - Bool stating if the exposure value will be changed or not.
-     - True
-     - Exposure Auto
-   * - auto-gain
-     - Bool stating if the gain value will be changed or not.
-     - True
-     - Gain Auto
-   * - auto-iris
-     - Bool stating if the iris value will be changed or not.
-     - True
-     - Iris Auto
-   * - brightness-reference
-     - Image brightness that shall be considered ideal.
-       The auto algorithm will try to get within a certain range of this value and adjust exposure/gain to remain within the range. The range is +/- 5 of the brightness reference value.
-       Minimum: 0
-       Maximum: 255
-     - 128
-     - Brightness Reference
-   * - exposure-min
-     - Minimum Exposure Value the element is allowed to set.
-       If the user defined value is lower than the camera internal value the camera minimum will be used.
-       If the user defined value is not a possible value it will be rejected.
-     - Minimum of the camera
-     - Exposure Auto Min
-   * - exposure-max
-     - Maximum Exposure Value the element is allowed to set.
-       If the user defined value is higher than the camera internal maximum the camera maximum will be used.
-       If the user defined value is higher than the value that is possible with the current framerate the value will be set. **This can cause problems.**
-       Default: Highest value the framerate allows i.e. 30 fps => 1000000 / (30 / 1) = 33333.3
-       This is a maximum exposure time of 33333 micro seconds.
-     - Maximum of the camera / Exposure time the format allows
-     - Exposure Auto Max
-   * - gain-min
-     - Minimum Gain Value the element is allowed to set.
-       If the user defined value is lower than the camera internal value the camera minimum will be used.
-       If the user defined value is not a possible value it will be rejected.
-     - Minimum of the camera
-     - Gain Auto Min
-   * - gain-max
-     - Maximum Gain Value the element is allowed to set.
-     - Maximum of the camera
-     - Gain Auto Max
-   * - iris-min
-     - Minimum iris value the element is allowed to set.
-       Some cameras suggest a minimum value for auto algorithms that is higher than the actual minimal value. This value will be used when available.
-     - Minimum value of the camera.
-     - Iris Auto Min
-   * - iris-max
-     - Maximum iris value the element is to set.
-     - Maximum of the camera.
-     - Iris Auto Max
-     
-The following properties are related to the region of interest.
-The region of interest is a section of the entire image that shall be used by the element for its auto algorithm.
-Per default the region equals the entire image unless the user defines these values.
-
-.. list-table:: tcamautoexposure roi properties
-   :header-rows: 1
-   :widths: 10 30 20 40
-            
-   * - Name
-     - Values
-     - TcamProp
-     - Description
-   * - left
-     - Default: 0
-     - Exposure ROI Left
-     - X coordinate of the upper left corner. Values are in image pixel.
-   * - top
-     - Default: 0
-     - Exposure ROI Top
-     - Y coordinate of the upper left corner. Values are in image pixel.
-   * - width
-     - | Default: image width
-       | Minimum: 8
-       | Maximum: image width - exposure roi left
-     - Exposure ROI Width
-     - Width the ROI shall have.
-   * - height
-     - | Default: image height
-       | Minimum: 8
-       | Maximum: image height - exposure roi top
-     - Exposure ROI Height
-     - Height the ROI shall have.
-
-.. _tcamwhitebalance:
-       
-tcamwhitebalance
-################
-
-Color correction for bayer images.
-
-.. list-table:: GstTcamMeta fields
+.. list-table:: TcamSrc properties
    :header-rows: 1
    :widths: 25 10 65
 
    * - fieldname
      - type
      - description
-   * - red
-     - int
-     - Red Channel
-   * - green
-     - int
-     - Green Channel
-   * - blue
-     - int
-     - Blue Channel
-   * - auto
-     - bool
-     - Bool stating if the module should automatically adjust the rgb values or if static values should be used to allow user defined whitebalance.
-       _Default_: True
-       PI: Whitebalance Auto
-   * - module-enabled
-     - bool
-     - Bool stating if whitebalance values will be applied or note
-       *Default* : True
-       PI: Exposure Auto
-   * - camera-whitebalance
-     - bool
-     - Bool stating if the whitebalance values shall be applied via software or in the device. Currently only the 72 USB cameras support this.
-       Default: False
-       PI: Camera Whitebalance
-       
-.. _tcamautofocus:
-       
-tcamautofocus
-#############
+      
+   * - serial
+     - string
+       - Serial number of the device that shall be used
+     * - type
+       - string
+       - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
+     * - tcam-device
+       - GstDevice
+       - GstDevice instance that shall be used. Same as setting serial and type. Is write-only.
+     * - available-caps
+       - string
+       - String description of the GstCaps that can be used in `device-caps`. Will be equal to or a subsection of the GstCaps offered by tcamsrc.
+     * - device-caps
+       - string
+       - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
 
-Allows for cameras with focus elements to automatically adjust focus.
-
-- auto - Activate an auto focus run by setting this property to true. It will be set to false once the run is finished.
-  Default: False
-  PI: Focus Auto
-
-The following properties are related to the region of interest.
-The region of interest is a section of the entire image that shall be used by the element for its
-auto algorithm.
-Per default the region equals the entire image unless the user defines these values.
-
-.. list-table:: tcamautoexposure properties
-   :header-rows: 1
-   :widths: 10 30 20 40
-   
-   * - Name
-     - Values
-     - TcamProp
-     - Description
-   * - left
-     - Default: 0
-     - Focus ROI Left
-     - X coordinate of the upper left corner. Values are in image pixel.
-   * - top
-     - Default: 0
-     - Focus ROI Top
-     - Y coordinate of the upper left corner. Values are in image pixel.
-   * - width
-     - | Default: image width
-       | Minimum: 8
-       | Maximum: image width - focus roi left
-     - Focus ROI Width
-     - Width the ROI shall have.
-   * - height
-     - | Default: image height
-       | Minimum: 8
-       | Maximum: image height - focus roi top
-     - Focus ROI Height
-     - Height the ROI shall have.
-
+                                                
 .. _tcamdutils:
 
 tcamdutils
@@ -348,19 +187,7 @@ For more information read `the documentation <https://www.theimagingsource.com/d
    tiscamera and tiscamera-dutils are version locked, meaning their major.minor version have to match.
    If a mismatch is detected, tcambin will disable the usage of the tcamdutils element and
    notify you with a GStreamer warning log message and a GstBus message.
-   This can be overwritten by manually setting `use-dutils` to `true`.
-
-.. todo::
-
-   Add link to tiscamera-dutils documentation
-
-.. _tcambiteater:
-
-tcambiteater
-############
-
-Removed with tiscamera 0.13.0.
-Functionality is now included in tiscamera-dutils
+   This can be overwritten by manually setting the tcambin property `conversion-element` to `tcamdutils`.
 
 .. _tcambin:
 
@@ -375,14 +202,16 @@ The offered caps are the sum of unfiltered camera caps and caps that will be ava
 
 The format that can always be expected to work is `BGRx`. All other formats depend on the used device.
 
-.. note::
-   When using tiscamera-dutils with tcambin a version check is undertaken.
-   tiscamera and tiscamera-dutils are version locked, meaning their major.minor version have to match.
-   If a mismatch is detected, tcambin will disable the usage of the tcamdutils element and
-   notify you with a GStreamer warning log message and a GstBus message.
-   This can be overwritten by manually setting `use-dutils` to `true`.
+.. todo:: Add cuda package name
 
-.. list-table:: TcamSrc properties
+.. note::
+   When using tiscamera-dutils or ?????? with tcambin a version check is undertaken.
+   tiscamera and tiscamera-dutils/????? are version locked, meaning their major.minor version have to match.
+   If a mismatch is detected, tcambin will disable the usage of the tcamdutils/tcamdutils-cuda element and
+   notify you with a GStreamer warning log message and a GstBus message.
+   This can be overwritten by manually setting `conversion-element` to the concerning element name.
+
+.. list-table:: TcamBin properties
    :header-rows: 1
    :widths: 25 10 65
 
@@ -396,23 +225,36 @@ The format that can always be expected to work is `BGRx`. All other formats depe
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
-   * - device-caps
-     - string
-     - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
-   * - use-dutils
-     - bool
-     - Use the tcamdutils element, if present.
-       Default: True
    * - :ref:`tcam-device<tcam-device>`
      - GstDevice
      - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
+   * - available-caps
+     - string
+     - String description of the GstCaps that can be used in `device-caps`. Will be equal to or a subsection of the GstCaps offered by tcamsrc.
+   * - device-caps
+     - string
+     - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
-
+   * - conversion-element
+     - enum
+     - Select the transformation element to use.
+       Assuming all elements are available the selection is as follows:
        
-Internal pipelines will always be created when the element state is set to READY.
+       tcamdutils-cuda > tcamdutils > tcamconvert
 
+       Both tcamdutils and tcamdutils-cuda are available as separate packages in our download section.
+       This property has to be set while in state `GST_STATE_NULL`.
+       
+       Possible values: `auto`, `tcamconvert`, `tcamdutils`, `tcamdutils-cuda`
+       Default: `auto`
+   * - state
+     - string
+     - JSON string describing the state of all device properties. See :any:`state`.
+       
+
+Internal pipelines will always be created when the element state is set to READY.
 
     tcamsrc -> capsfilter -> tcamconvert
 
@@ -422,13 +264,14 @@ Internal pipelines will always be created when the element state is set to READY
 
     tcamsrc -> capsfilter
 
+
 Should the selected camera offer focus properties the element :any:`tcamautofocus` will also be included.
 
 Elements that offer auto algorithms (auto exposure/focus) will only be included when the camera itself does not offer these functions.
 
 
 GObject properties
-########################
+##################
 
 .. _tcam-properties:
 

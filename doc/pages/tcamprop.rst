@@ -1,23 +1,99 @@
-########
-TcamProp
-########
+#############
+Tcam-Property
+#############
 
 
 This page describes the official gobject-introspection API.
 
 .. note::
-   The current version of this API is 0.1
+   The current version of this API is 1.0
 
-Base Object
-###########
+Helper Types
+############
+   
+TcamError
+---------
 
-All tiscamera gstreamer elements implement the TcamProp interface.
-This interface allows access to all properties that the camera and software offer,
-as well as possibilities for device discovery.
+.. c:enum:: TcamError
 
-.. c:type:: TcamProp
+   Enumeration containing all possible error types tcam-property will return.
+            
+   .. c:enumerator:: TCAM_ERROR_SUCCESS                     
+   .. c:enumerator:: TCAM_ERROR_UNKNOWN                     
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE      
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_WRITEABLE
 
-    This object is typically a converted gstreamer element like tcambin or tcamautoexposure.
+      | The property is either read only or temporarily locked.
+      | Call :c:func:`tcam_property_base_is_locked` for verification.
+                     
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
+
+      The property is of a different type.
+                     
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE 
+   .. c:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
+      
+      No device has been opened that can offer properties.
+      This typically means the GstElement is not in GST_STATE_READY or higher.
+      
+   .. c:enumerator:: TCAM_ERROR_DEVICE_LOST
+
+      | The device has been lost.
+      | This should be considered a fatal, unrecoverable error.
+                     
+   .. c:enumerator:: TCAM_ERROR_PARAMETER_NULL
+
+      | One of the given arguments is NULL.
+      | Are provider/property pointer valid?
+      | Is the name a valid string?
+
+   .. c:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
+
+.. c:enum:: TcamPropertyVisibility
+
+   .. c:enumerator:: \
+      TCAM_PROPERTY_VISIBILITY_BEGINNER
+      TCAM_PROPERTY_VISIBILITY_EXPERT
+      TCAM_PROPERTY_VISIBILITY_GURU
+      TCAM_PROPERTY_VISIBILITY_INVISIBLE 
+
+.. c:enum:: TcamPropertyIntRepresentation
+
+   Enumeration describing recommendations on how the property should be represented.
+
+   .. c:enumerator:: \
+      TCAM_PROPERTY_INTREPRESENTATION_LINEAR
+      TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC 
+      TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER
+      TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER 
+            
+.. c:enum:: TcamPropertyFloatRepresentation
+
+   Enumeration describing recommendations on how the property should be represented.
+
+   .. c:enumerator:: \
+      TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR
+      TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC
+      TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER 
+
+.. c:enum:: TcamPropertyType
+
+   Enumeration containing all possible property types.
+            
+   .. c:enumerator:: \
+      TCAM_PROPERTY_TYPE_INTEGER
+      TCAM_PROPERTY_TYPE_FLOAT
+      TCAM_PROPERTY_TYPE_ENUMERATION
+      TCAM_PROPERTY_TYPE_BOOLEAN
+      TCAM_PROPERTY_TYPE_COMMAND
+
+   
+External Types
+##############
+
+All tiscamera gstreamer elements implement the :c:type:`TcamPropertyProvider` interface.
+This interface allows access to all properties that the camera and software offer.
 
 .. c:type:: GSList
 
@@ -33,6 +109,16 @@ as well as possibilities for device discovery.
         
         g_slist_free_full( list, ::g_free );
 
+.. c:type:: GError
+
+   GObject error reporting mechanism.
+
+   A returned GError has to _always_ be freed by the user with g_error_free().
+   The GError will contain a string describing the cause of the error and an error code.
+   The message can be accessed through the member variable `message`.
+   The error code can be accessed though the member variable `code`.
+   The error code will be a :c:enum:`TcamError` enum entry.
+        
 .. c:type:: GValue
 
     GObject based variant type, used as arguments.
@@ -53,182 +139,281 @@ as well as possibilities for device discovery.
         g_value_unset( &value );
         g_value_unset( &group );
 
+        
+TcamPropertyProvider
+####################
 
-Device Discovery
+.. c:type:: TcamPropertyProvider
+
+   This object is typically a converted gstreamer element like tcambin, tcamsrc or tcamdutils.
+
+tcam_property_provider_get_tcam_property_names
+----------------------------------------------
+
+.. c:function:: GSList* tcam_property_provider_get_tcam_property_names(TcamPropertyProvider* self, GError** err)
+
+    Retrieve a list of all currently available properties. GstElement must be `GST_STATE_READY` or higher.
+
+    :param self: a TcamPropertyProvider  
+    :param err: a :c:type:`GError` pointer, may be NULL
+
+    :returns: (element-type utf8) (transfer full): a #GSList
+    :retval GSList*: a single linked list containing strings with property names
+    :retval NULL: If an error occurs, NULL will be returned
+
+
+    .. tabs::
+
+       .. group-tab:: c
+
+          .. code-block:: c
+
+             GstElement* source = gst_element_factory_make("tcambin", "source");
+
+             gst_element_set_state(source, GST_STATE_READY);
+             
+             GSList* property_names = tcam_property_provider_get_names(TCAM_PROPERTY_PROVIDER(source));
+
+             // free GSList and all contained strings
+             g_slist_free_full(property_names, g_free);
+
+             gst_element_set_state(source, GST_STATE_NULL);
+             
+             // free GstElement
+             gst_object_unref(source);
+
+       .. group-tab:: python
+             
+          .. code-block:: python
+
+             # nothing to do
+             # python cleans up automatically
+
+             TcamPropertyBase*   tcam_property_provider_get_tcam_property( TcamPropertyProvider* self, const gchar* name, GError** err );
+
+tcam_property_provider_get_tcam_property
+----------------------------------------
+
+
+.. c:function:: TcamPropertyBase*   tcam_property_provider_get_tcam_property( TcamPropertyProvider* self, const gchar* name, GError** err );
+                
+   :param self: a TcamPropertyProvider
+   :param name: a string pointer, naming the property that shall be set.
+   :param err: pointer for error retrieval, may be NULL
+   :return: a TcamPropertyBase pointer
+   :retval: a valid TcamPropertyBase instance
+   :retval: NULL in case of an error. Check err.
+               
+tcam_property_provider_set_tcam_boolean
+---------------------------------------
+
+Convenience function to set the value of a boolean.
+
+For complex applications it is recommended to use a :c:type:`TcamPropertyBoolean` instance instead.
+                
+.. c:function:: void        tcam_property_provider_set_tcam_boolean( TcamPropertyProvider* self, const gchar* name, gboolean value, GError** err );
+
+   :param self: a TcamPropertyProvider
+   :param name: a string pointer, naming the property that shall be set.
+   :param value: a boolean with the value that shall be set
+   :param err: pointer for error retrieval, may be NULL
+                
+tcam_property_provider_set_tcam_integer
+---------------------------------------
+
+Convenience function to set the value of an integer.
+
+For complex applications it is recommended to use a :c:type:`TcamPropertyInteger` instance instead.
+
+.. c:function:: void        tcam_property_provider_set_tcam_integer( TcamPropertyProvider* self, const gchar* name, gint64 value, GError** err );
+
+   :param self: a TcamPropertyProvider
+   :param name: a string pointer, naming the property that shall be set.
+   :param value: an integer with the value that shall be set
+   :param err: pointer for error retrieval, may be NULL
+
+tcam_property_provider_set_tcam_float
+-------------------------------------
+
+Convenience function to set the value of a float.
+
+For complex applications it is recommended to use a :c:type:`TcamPropertyFloat` instance instead.
+               
+.. c:function:: void        tcam_property_provider_set_tcam_float( TcamPropertyProvider* self, const gchar* name, gdouble value, GError** err );
+
+   :param self: a TcamPropertyProvider
+   :param name: a string pointer, naming the property that shall be set.
+   :param value: a double with the value that shall be set
+   :param err: pointer for error retrieval, may be NULL
+
+tcam_property_provider_set_tcam_enumeration
+-------------------------------------------
+
+Convenience function to set the value of an enum.
+
+For complex applications it is recommended to use a :c:type:`TcamPropertyEnumeration` instance instead.
+               
+.. c:function:: void        tcam_property_provider_set_tcam_enumeration( TcamPropertyProvider* self, const gchar* name, const gchar* value, GError** err );
+
+   :param self: a TcamPropertyProvider
+   :param name: a string pointer, naming the property that shall be set.
+   :param value: a string with the value that shall be set
+   :param err: pointer for error retrieval, may be NULL
+                
+.. c:function:: void        tcam_property_provider_set_tcam_command( TcamPropertyProvider* self, const gchar* name, GError** err );
+
+.. c:function:: gboolean    tcam_property_provider_get_tcam_boolean( TcamPropertyProvider* self, const gchar* name, GError** err );
+.. c:function:: gint64      tcam_property_provider_get_tcam_integer( TcamPropertyProvider* self, const gchar* name, GError** err );
+.. c:function:: gdouble     tcam_property_provider_get_tcam_float( TcamPropertyProvider* self, const gchar* name, GError** err );
+.. c:function:: gchar*      tcam_property_provider_get_tcam_enumeration( TcamPropertyProvider* self, const gchar* name, GError** err );
+
+
+TcamPropertyBase
 ################
 
-The following functions can be used for device discovery.
-Only tcamsrc and tcambin implement these.
 
-.. c:function:: GSList* tcam_prop_get_device_serials(TcamProp* self)
+
+.. c:type:: TcamPropertyBase
+            
+.. py:class:: TcamPropertyBase
+
+   Base class for all properties. Can be cast into different derived classes.
+   Check the property type via :c:func:`tcam_property_base_get_property_type` to ensure the correct cast will be used.
+
+.. c:function:: const gchar* tcam_property_base_get_name( TcamPropertyBase* self );
+
+   :param self: Pointer to the property instance
+   :returns: Name of the property
+   :retval: const gchar*, string containing the name
+
+   The property owns the string. It will be freed once the property is destroyed.
                 
-   @self: a #TcamProp
-  
-   Retrieve a list of all connected device serial numbers
+.. c:function:: const gchar* tcam_property_base_get_display_name( TcamPropertyBase* self );
+
+   :param self: Pointer to the property instance
+   :returns: Name of the property
+   :retval: const gchar*, string containing the display name
+                
+   | The property owns the string. It will be freed once the property is destroyed.
+   |
+   | The display name is a human readable name intended for GUIs and similar interfaces.
+
+""""""""""""""
+
+.. c:function:: const gchar* tcam_property_base_get_description( TcamPropertyBase* self );
+
+   :param self: Pointer to the property instance
+   :returns: Name of the property
+   :retval: const gchar*, string containing the description
+
+   The property owns the string. It will be freed once the property is destroyed.
+
+""""""""""""""
    
-   Returns: (element-type utf8) (transfer full): a #GSList
+.. c:function:: const gchar* tcam_property_base_get_category( TcamPropertyBase* self );
+
+   :param self: Pointer to the property instance
+   :returns: Name of the property
+   :retval: const gchar*, string containing the category
+
+   The property owns the string. It will be freed once the property is destroyed.
+
+^^^^^
    
-        
-.. c:function:: gboolean tcam_prop_get_device_info (TcamProp* self, const char* serial, char** name, char** identifier, char** connection_type)
+.. c:function:: TcamPropertyVisibility tcam_property_base_get_visibility( TcamPropertyBase* self );
+.. c:function:: TcamPropertyType tcam_property_base_get_property_type( TcamPropertyBase* self );
+.. c:function:: gboolean tcam_property_base_is_available( TcamPropertyBase* self, GError** err );
+.. c:function:: gboolean tcam_property_base_is_locked( TcamPropertyBase* self, GError** err );
+
+TcamPropertyBoolean
+###################
+
+.. c:type:: TcamPropertyBoolean
+
+Inherits from :c:type:`TcamPropertyBase`.
+Can be obtained by casting a :c:type:`TcamPropertyBase` with :c:macro:`TCAM_PROPERTY_BOOLEAN(TcamPropertyBase*)`.
                 
-   | @self: a #TcamProp
-   | @serial: (in): serial number of camera to query
-   | @name: (out) (optional): location to store an allocated string.
-   |                          Use g_free() to free the returned string
-   | @identifier: (out) (optional): location to store an allocated string.
-   |                                Use g_free() to free the returned string
-   | @connection_type: (out) (optional): location to store an allocated string.
-   |                                     Use g_free() to free the returned string
+.. c:function:: gboolean tcam_property_boolean_get_value( TcamPropertyBoolean* self, GError** err );
+
+^^^^^
+
+.. c:function:: void tcam_property_boolean_set_value( TcamPropertyBoolean* self, gboolean value, GError** err );
+
+^^^^^
                 
-   Get details of a given camera.
+.. c:function:: gboolean tcam_property_boolean_get_default( TcamPropertyBoolean* self, GError** err );
 
-   Returns: True on success
+TcamPropertyInteger
+###################
 
-.. c:function:: GSList* tcam_prop_get_device_serials_backend (TcamProp* self)
+.. c:type:: TcamPropertyInteger
+            
+.. c:function:: gint64 tcam_property_integer_get_value( TcamPropertyInteger* self, GError** err );
+.. c:function:: void tcam_property_integer_set_value( TcamPropertyInteger* self, gint64 value, GError** err );
+.. c:function:: void tcam_property_integer_get_range( TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err );
+.. c:function:: gint64 tcam_property_integer_get_default( TcamPropertyInteger* self, GError** err );
+.. c:function:: const gchar* tcam_property_integer_get_unit( TcamPropertyInteger* self );
+.. c:function:: TcamPropertyIntRepresentation tcam_property_integer_get_representation( TcamPropertyInteger* self );
 
-   @self: a #TcamProp
+TcamPropertyFloat
+#################
 
-   Retrieve a list of all connected device serial numbers with the backend appended
+.. c:type:: TcamPropertyFloat
 
-   | Retrieved serials may appear multiple times but with different backends.
-   | The format will always be `<serial>-<backend>`.
-   | The contained strings will have to be freed by the user.
-   | Call `g_slist_free_full(<list_var>, ::g_free)` to clear the list and the contained strings.
+^^^^^
+            
+.. c:function:: gdouble tcam_property_float_get_value( TcamPropertyFloat* self, GError** err );
 
-   Returns: (element-type utf8) (transfer full): a #GSList
+^^^^^
+                
+.. c:function:: void tcam_property_float_set_value( TcamPropertyFloat* self, gdouble value, GError** err );
 
-Property I/O
-############
+^^^^^
+                
+.. c:function:: void tcam_property_float_get_range( TcamPropertyFloat* self, gdouble* min_value, gdouble* max_value, gdouble* step_value, GError** err );
 
-tcam_prop_get_tcam_property_names
----------------------------------
+^^^^^
+                
+.. c:function:: gdouble tcam_property_float_get_default( TcamPropertyFloat* self,GError** err );
 
-.. c:function:: GSList* tcam_prop_get_tcam_property_names(TcamProp* self)
+^^^^^
+                
+.. c:function:: const gchar* tcam_property_float_get_unit( TcamPropertyFloat* self );
 
-    Retrieve a list of all currently available properties.
+^^^^^
+                
+.. c:function:: TcamPropertyFloatRepresentation tcam_property_float_get_representation( TcamPropertyFloat* self );
 
-    @self: a #TcamProp
+TcamPropertyEnumeration
+#######################
 
-    Returns: (element-type utf8) (transfer full): a #GSList
+.. c:type:: TcamPropertyEnumeration
 
+^^^^^
+            
+.. c:function:: gchar* tcam_property_enumeration_get_value( TcamPropertyEnumeration* self, GError** err );
 
-tcam_prop_get_tcam_property
----------------------------
+   The caller takes ownership of the returned value.
 
-.. c:function:: gboolean tcam_prop_get_tcam_property(TcamProp* self, const gchar* name, GValue* value, GValue* min, GValue* max, GValue* def, GValue* step, GValue* type, GValue* flags, GValue* category, GValue* group)
+^^^^^
 
-    Queries the specified property for its value, range, etc.
+.. c:function:: void tcam_property_enumeration_set_value( TcamPropertyEnumeration* self, const gchar* value, GError** err );
 
-    @self: Pointer to #TcamProp instance that shall be queried.
+^^^^^
+                
+.. c:function:: GSList* tcam_property_enumeration_get_enum_entries( TcamPropertyEnumeration* self, GError** err );
 
-    @name: Name of the property to query.
+   The caller takes ownership of the returned list and its values.
 
-    Returns: A gboolean. TRUE if query could be answered and values filled.
+^^^^^
 
-.. list-table:: Arguments
-   :header-rows: 1
-   :widths: 10 20 50 10 10
+.. c:function:: gchar* tcam_property_enumeration_get_default( TcamPropertyEnumeration* self, GError** err );
 
-   * - Name
-     - Type
-     - Description
-     - In/Out
-     - Optional
-   * - self
-     - TcamProp
-     -
-     - In
-     - No
-   * - name
-     - const char*
-     - identifying the property to query
-     - In
-     - No
-   * - value
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - min
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - max
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - def
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - step
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - type
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - flags
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - category
-     - GValue*
-     -
-     - Out
-     - Yes
-   * - group
-     - GValue*
-     -
-     - Out
-     - Yes
+TcamPropertyCommand
+###################
 
-tcam_prop_get_tcam_menu_entries
--------------------------------
+.. c:type:: TcamPropertyCommand
 
-.. c:function:: GSList* tcam_prop_get_tcam_menu_entries( TcamProp* self, const gchar* name )
+^^^^^
 
-    If the specified property is a string list, this returnes the available string entries.
-
-    @self: Pointer to #TcamProp instance that shall be queried.
-
-    @name: Name of the property for which the menu entries shall be returned.
-
-    Returns: A pointer to a #GSList containing the c-strings of all entries. (element-type utf8) (transfer full): a #GSList
-
-
-tcam_prop_set_tcam_property
----------------------------
-
-.. c:function:: gboolean tcam_prop_set_tcam_property( TcamProp* self, const gchar* name, const GValue* value )
-
-    @self: Pointer to #TcamProp instance that shall be queried.
-
-    @name: Name of the property.
-
-    @value: Value that shall be set
-
-    Returns: TRUE if setting this property was successful, otherwise FALSE.
-
-
-tcam_prop_get_tcam_property_type
---------------------------------
-
-.. c:function:: const gchar* tcam_prop_get_tcam_property_type( TcamProp* self, const gchar* name )
-
-    Deprecated!
-
-    Returns the 'type' of the specified property.
-
-    @self: Pointer to #TcamProp instance that shall be queried.
-
-    @name: Name of the property.
-
-    Returns: A pointer to a c-string containing the type of the requested property. Returns NULL when property does not exist.
+.. c:function:: void tcam_property_command_set_command( TcamPropertyCommand* self, GError** err );

@@ -51,9 +51,8 @@ Arguments
 
 .. option:: --version
 
-   Print version information about the used tiscamera and aravis versions.
-
-   Print information about the library versions of tiscamera and aravis.
+      Print information about the library versions of tiscamera and aravis
+      and the configured tiscamera modules.
 
 .. option:: -t,--type {aravis,v4l2,libusb,unknown}
 
@@ -83,3 +82,28 @@ Arguments
       # load string
       tcam-ctrl --load <SERIAL> '{\"Exposure\":3000,"Exposure\ Auto\":false}'
 
+
+.. option:: --list-serial-long
+
+   Lists all serial numbers in long form, i.e. `<serial>-<backend>`.
+
+.. option:: --packages
+
+   Lists all packages from `The Imaging Source` that are installed on the system,
+   as well as their version.
+
+.. option:: --system-info
+
+   Print system information to stdout.
+
+.. option:: --gige-info
+
+   Print information about network capabilities of the system to stdout.
+
+.. option:: --usb-info
+
+   Print information about usb capabilities of the system to stdout.
+
+.. option:: --all-info
+
+   Convenience wrapper. Calls `--gige-info`, `--usb-info` and `--system-info`.

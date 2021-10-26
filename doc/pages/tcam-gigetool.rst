@@ -4,14 +4,15 @@
 tcam-gigetool
 #############
 
-An alternative tool to :any:`camera-ip-conf`.
+Network camera configuration tool.
+Allows IP configuration, firmware upload, etc.
 
 Arguments
 ---------
 
 The following arguments may be required by a command:
 
-:IDENTIFIER: Unique identifier of the camera: serial number or MAC address
+:IDENTIFIER: Unique identifier of the camera: serial number, MAC or IP address
 :FILENAME:   Filename of firmware file to upload
 
 .. program:: gigetool
@@ -29,11 +30,47 @@ The following arguments may be required by a command:
    .. option:: --format
 
       Format of the device-specific information that will be printed.
-      The field descriptors must be prepended with a '%'.
       
-      Default is `%m%s%u%i`.
+      Default is `msui`.
 
+      .. list-table:: list format options
+         :header-rows: 1
+         :widths: 10 90
+
+         * - Option
+           - Description
+         * - m
+           - Name of the camera model
+         * - s
+           - Serial number of the camera
+         * - u:
+           - User defined name, may be empty
+         * - i:
+           - Current ip
+         * - n:
+           - Current netmask
+         * - g:
+           - Current gateway
+         * - I:
+           - Persistent IP, may be empty
+         * - N:
+           - Persistent netmask, may be empty
+         * - G:
+           - Persistent gateway, may be empty
+         * - f:
+           - Interface name, network interface that was used to reach the camera
+         * - d:
+           - Yes/No field, stating if dhcp is enabled
+         * - S:
+           - Yes/No field, stating if static ip settings are enabled
+         * - M:
+           - MAC address of the camera
+         * - r:
+           - Yes/No field saying if the camera is reachable for streaming
+
+      :bla: aa
       :m: Name of the camera model
+      :M: MAC address of the camera
       :s: Serial number of the camera
       :u: User defined name, may be empty
       :i: Current ip
@@ -120,3 +157,5 @@ The following arguments may be required by a command:
                
       lowest IP address to use for auto-configuration
       (default=x.x.x.10)
+
+      
