@@ -122,6 +122,30 @@ These are:
     | Possible types: GstFraction, GstValuelist, GstFractionRange
     | Other elements might also use the field `fps`. This is not used by tiscamera elements.
     | The framerate is in frames per second.
+**binning**:
+    | Possible types: string
+    | The value always has the structure `AxB`.
+    |
+    | `A` describes the horizontal binning factor.
+    | `B` describes the vertical binning factor.
+    | 
+    | Example:
+    | `2x2` describes factor 2 binning in both directions.
+    | 
+    | The default value is '1x1'.
+    | This is implied for all cameras and can be ignored/left out.
+**skipping**:
+    | Possible types: string
+    | The value always has the structure `AxB`.
+    |
+    | `A` describes the horizontal skipping factor.
+    | `B` describes the vertical skipping factor.
+    | 
+    | Example:
+    | `2x2` describes factor 2 skipping in both directions.
+    | 
+    | The default value is '1x1'.
+    | This is implied for all cameras and can be ignored/left out.
 
 A range will be displayed in ``[]`` with the minimum and maximum values:
 
