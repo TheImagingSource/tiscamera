@@ -308,7 +308,7 @@ void AravisDevice::generate_scales()
 
     }
 
-    if(m_scale.scale_type == ImageScalingType::BinningSkipping)
+    if (m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
         auto get_value = [this] (const std::string& name)
         {
@@ -1471,6 +1471,10 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
                     // TODO: use TestBinning etc to have values calculated via genicam
                     new_rf.resolution.max_size = s.allowed_max(sensor_size);
+
+                    // ensure max is divisible by step
+                    new_rf.resolution.max_size.width -= new_rf.resolution.max_size.width % new_rf.resolution.width_step_size;
+                    new_rf.resolution.max_size.height -= new_rf.resolution.max_size.height % new_rf.resolution.height_step_size;
 
                     // SPDLOG_ERROR("{}x{} max:{}x{} =>",
                     //              new_rf.resolution.min_size.width, new_rf.resolution.min_size.height,
