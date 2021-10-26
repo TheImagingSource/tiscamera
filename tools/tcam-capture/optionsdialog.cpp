@@ -18,17 +18,23 @@
 
 #include "ui_optionsdialog.h"
 
-OptionsDialog::OptionsDialog(TcamCaptureConfig& config, const OptionsSettings& settings, QWidget* parent)
+
+
+OptionsDialog::OptionsDialog(TcamCaptureConfig& config,
+                             const OptionsSettings& settings,
+                             QWidget* parent)
     : QDialog(parent), ui(new Ui::OptionsDialog)
 {
     ui->setupUi(this);
 
-    ui->check_dutils->setEnabled(settings.enable_dutils);
-    ui->check_dutils->setChecked(config.use_dutils);
+    // these should be in the same order as the enum class
+    // that makes get/set easier
+    ui->combo_convert_options->addItem("Auto");
+    ui->combo_convert_options->addItem("tcamconvert");
+    ui->combo_convert_options->addItem("tcamdutils");
+    ui->combo_convert_options->addItem("tcamdutils-cuda");
 
-    // QObject::connect(ui->buttonBox->a acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
-    // QObject::connect(ui->rejectButton, SIGNAL(clicked()), this, SLOT(reject()));
-
+    ui->combo_convert_options->setCurrentIndex((int)config.conversion_element);
 }
 
 
@@ -40,10 +46,8 @@ TcamCaptureConfig OptionsDialog::get_config () const
 {
     TcamCaptureConfig conf = {};
 
-    if (ui->check_dutils->isEnabled())
-    {
-        conf.use_dutils = ui->check_dutils->isChecked();
-    }
+    conf.conversion_element = (ConversionElement)ui->combo_convert_options->currentIndex();
+
     return conf;
 
 }

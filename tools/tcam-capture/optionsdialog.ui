@@ -14,17 +14,10 @@
    <string>tcam-capture - Options</string>
   </property>
   <layout class="QFormLayout" name="formLayout_2">
-   <item row="0" column="1">
-    <widget class="QCheckBox" name="check_dutils">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Use tiscamera-dutils (if available):</string>
+      <string>Conversion element to use:</string>
      </property>
     </widget>
    </item>
@@ -64,6 +57,9 @@
       <string/>
      </property>
     </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="combo_convert_options"/>
    </item>
   </layout>
  </widget>

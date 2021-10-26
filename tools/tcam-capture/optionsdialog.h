@@ -25,10 +25,18 @@ namespace Ui
 class OptionsDialog;
 }
 
+enum class OptionsConversionElement
+{
+    Auto,
+    TcamConvert,
+    TcamDutils,
+    TcamDutilsCuda,
+};
+
 
 struct OptionsSettings
 {
-    bool enable_dutils = true;
+    OptionsConversionElement conversion_element = OptionsConversionElement::Auto;
     bool enable_apply_properties = true;
     bool enable_restart_device = true;
 };
