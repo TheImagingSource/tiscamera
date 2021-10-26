@@ -616,6 +616,8 @@ void V4l2Device::determine_scaling()
             {
                 "Scanning Mode Selector",
                 "Scanning Mode Identifier",
+                "Scanning Mode Scale Horizontal",
+                "Scanning Mode Scale Vertical",
                 "Scanning Mode Binning H",
                 "Scanning Mode Binning V",
                 "Scanning Mode Skipping H",
