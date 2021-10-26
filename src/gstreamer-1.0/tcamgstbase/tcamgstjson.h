@@ -22,7 +22,7 @@
 
 namespace tcam::gst
 {
-std::string create_device_settings(const std::string& serial, TcamPropertyProvider* tcam);
+std::string create_device_settings(TcamPropertyProvider* tcam);
 
-bool load_device_settings(TcamPropertyProvider* tcam, const std::string& serial, const std::string& cache);
+bool load_device_settings(TcamPropertyProvider* tcam, const std::string& json_data);
 } // namespace tcam::gst

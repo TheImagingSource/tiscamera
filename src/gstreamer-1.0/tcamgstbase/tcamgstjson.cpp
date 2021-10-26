@@ -17,122 +17,110 @@
 #include "tcamgstjson.h"
 
 #include "../../../external/json/json.hpp"
-#include "../../json.h"
 #include "../../logging.h"
 
 // for convenience
 using json = nlohmann::json;
 
-
-std::string tcam::gst::create_device_settings(const std::string& serial, TcamPropertyProvider* tcam)
+std::string tcam::gst::create_device_settings(TcamPropertyProvider* tcam)
 {
     if (!tcam)
     {
-        return "";
+        return {};
     }
 
     json j;
-    try
+
+    auto& write_obj = j;
+
+    GError* err_get_name = nullptr;
+    GSList* names = tcam_property_provider_get_tcam_property_names(tcam, &err_get_name);
+    if (err_get_name)
     {
-        if (!serial.empty())
-        {
-            j["serial"] = serial;
-        }
-        j["version"] = tcam::JSON_FILE_VERSION_CURRENT;
-        j["properties"] = {};
-    }
-    catch (std::logic_error& err)
-    {
-        SPDLOG_ERROR(err.what());
-        return "";
+        SPDLOG_ERROR("Failed to read property names from , err={}.", err_get_name->message);
+        g_error_free(err_get_name);
+        return {};
     }
 
-    GError* err = nullptr;
-    GSList* names = tcam_property_provider_get_tcam_property_names(tcam, &err);
+    /**
+     * If err is set, reports the error and returns true. Otherwise false is returned.
+     */
+    auto is_prop_error_consume = [](GError* err, const char* property_name) -> bool
+    {
+        if (!err)
+        {
+            return false;
+        }
+        SPDLOG_ERROR("Reading '{}' caused an error: {}", property_name, err->message);
+        g_error_free(err);
+        return true;
+    };
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
-        const char* prop_name = (const char*)g_slist_nth_data(names, i);
+        GError* err_get_prop = nullptr;
 
-        auto prop_base = tcam_property_provider_get_tcam_property(tcam, prop_name, &err);
+        const char* prop_name = static_cast<const char*>(g_slist_nth_data(names, i));
 
+        auto prop_base = tcam_property_provider_get_tcam_property(tcam, prop_name, &err_get_prop);
+        if (is_prop_error_consume(err_get_prop, prop_name))
+        {
+            continue;
+        }
 
         switch (tcam_property_base_get_property_type(prop_base))
         {
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
-                auto prop_i = TCAM_PROPERTY_INTEGER(prop_base);
-
-                auto value = tcam_property_integer_get_value(prop_i, &err);
-
-                if (!err)
+                GError* err = nullptr;
+                auto value =
+                    tcam_property_integer_get_value(TCAM_PROPERTY_INTEGER(prop_base), &err);
+                if (!is_prop_error_consume(err, prop_name))
                 {
-                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                    write_obj.push_back(json::object_t::value_type(prop_name, value));
                 }
-
                 break;
             }
             case TCAM_PROPERTY_TYPE_FLOAT:
             {
-                auto f = TCAM_PROPERTY_FLOAT(prop_base);
-
-                auto value = tcam_property_float_get_value(f, &err);
-
-                if (!err)
+                GError* err = nullptr;
+                auto value = tcam_property_float_get_value(TCAM_PROPERTY_FLOAT(prop_base), &err);
+                if (!is_prop_error_consume(err, prop_name))
                 {
-                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                    write_obj.push_back(json::object_t::value_type(prop_name, value));
                 }
-
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
             {
-                auto e = TCAM_PROPERTY_ENUMERATION(prop_base);
-
-                auto value = tcam_property_enumeration_get_value(e, &err);
-
-                if (!err)
+                GError* err = nullptr;
+                auto value =
+                    tcam_property_enumeration_get_value(TCAM_PROPERTY_ENUMERATION(prop_base), &err);
+                if (!is_prop_error_consume(err, prop_name))
                 {
-                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                    write_obj.push_back(json::object_t::value_type(prop_name, value));
                 }
-
                 break;
             }
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
-                auto b = TCAM_PROPERTY_BOOLEAN(prop_base);
-
-                auto value = tcam_property_boolean_get_value(b,&err);
-
-                if (!err)
+                GError* err = nullptr;
+                auto value =
+                    tcam_property_boolean_get_value(TCAM_PROPERTY_BOOLEAN(prop_base), &err);
+                if (!is_prop_error_consume(err, prop_name))
                 {
-                    j["properties"].push_back(json::object_t::value_type(prop_name, value));
+                    write_obj.push_back(json::object_t::value_type(prop_name, value));
                 }
-
                 break;
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
-                auto c = TCAM_PROPERTY_COMMAND(prop_base);
-
-                tcam_property_command_set_command(c, &err);
-                break;
-            }
-            default:
-            {
+                // Nothing to do here
                 break;
             }
         }
 
-        if (err)
-        {
-            SPDLOG_ERROR("Reading '{}' caused an error: {}",
-                         prop_name,
-                         err->message);
-            g_error_free(err);
-            err = nullptr;
-        }
-
+        g_object_unref(prop_base);
     }
     g_slist_free_full(names, ::g_free);
 
@@ -140,98 +128,31 @@ std::string tcam::gst::create_device_settings(const std::string& serial, TcamPro
     return j.dump(indent);
 }
 
-
-bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam,
-                                     const std::string& serial,
-                                     const std::string& cache)
+enum class apply_single_json_entry_rval
 {
-    if (!tcam)
-    {
-        return false;
-    }
+    success,
+    error,
+    locked_error,
+};
 
-    SPDLOG_INFO(cache.c_str());
-    json j;
+static auto apply_single_json_entry(
+    TcamPropertyProvider* tcam,
+    json::iterator iter,
+    std::function<void(std::string_view, std::string_view)> report_error_func)
+    -> apply_single_json_entry_rval
+{
+    auto property_name = iter.key();
+
     try
     {
-        j = json::parse(cache);
-    }
-    catch (json::parse_error& e)
-    {
-        SPDLOG_ERROR("Unable to parse property settings. JSON parser returned: {}", e.what());
-        return false;
-    }
-
-    std::string serial_str;
-    try
-    {
-        serial_str = j.at("serial");
-    }
-    catch (json::out_of_range& e)
-    {
-        SPDLOG_DEBUG("State string has no serial. Omitting check.");
-    }
-
-    std::string version;
-    try
-    {
-        version = j.at("version");
-    }
-    catch (json::out_of_range& e)
-    {
-        SPDLOG_DEBUG("State string has no version. Omitting check.");
-    }
-
-    if (!serial_str.empty())
-    {
-        if (serial_str.compare(serial) != 0)
-        {
-            SPDLOG_ERROR("Serial mismatch. State string will not be evaluated.");
-            return false;
-        }
-    }
-
-    if (!version.empty())
-    {
-        if (version != tcam::JSON_FILE_VERSION_CURRENT)
-        {
-            SPDLOG_ERROR("Version mismatch for state file.");
-            return false;
-        }
-    }
-
-    /*
-      This check is to allow for simplified
-      versions that can be used with gst-launch
-      all meta data is omitted and the properties
-      name does not exist.
-      basically root == properties
-     */
-    json props;
-
-    if (j.find("properties") != j.end())
-    {
-        props = j["properties"];
-    }
-    else
-    {
-        props = j;
-    }
-
-
-    /*
-      the order is alphabetical i.e. not in the same order the input data is
-      since we use the string names for property identification
-      we use the reverse order to apply auto properties before properties
-      e.g. 'Exposure Auto' before 'Exposure'.
-      This allows the disabling of read-only flags for exposure
-      before setting the exposure value
-    */
-    for (auto iter = props.rbegin(); iter != props.rend(); iter++)
-    {
-
         GError* err = nullptr;
-        auto prop_base = tcam_property_provider_get_tcam_property(tcam, iter.key().c_str(), &err);
+        auto prop_base = tcam_property_provider_get_tcam_property(tcam, property_name.c_str(), &err);
+        if (err)
+        {
+            report_error_func(property_name, err->message);
+            g_error_free(err);
+            return apply_single_json_entry_rval::error;
+        }
 
         switch (tcam_property_base_get_property_type(prop_base))
         {
@@ -239,80 +160,149 @@ bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam,
             {
                 if (!iter.value().is_number())
                 {
-                    SPDLOG_ERROR("Value for {} is not a number", iter.key().c_str());
+                    report_error_func(
+                        property_name, fmt::format("Value '{}' is not a number", iter.value().dump()));
                     break;
                 }
-
-                auto i = TCAM_PROPERTY_INTEGER(prop_base);
-
-                tcam_property_integer_set_value(i, iter.value(), &err);
-
+                tcam_property_integer_set_value(
+                    TCAM_PROPERTY_INTEGER(prop_base), iter.value(), &err);
                 break;
             }
             case TCAM_PROPERTY_TYPE_FLOAT:
             {
                 if (!iter.value().is_number())
                 {
-                    SPDLOG_ERROR("Value for {} is not a number", iter.key().c_str());
+                    report_error_func(
+                        property_name, fmt::format("Value '{}' is not a number", iter.value().dump()));
                     break;
                 }
-
-                auto f = TCAM_PROPERTY_FLOAT(prop_base);
-
-                tcam_property_float_set_value(f, iter.value(), &err);
-
+                tcam_property_float_set_value(TCAM_PROPERTY_FLOAT(prop_base), iter.value(), &err);
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
             {
-
-                auto e = TCAM_PROPERTY_ENUMERATION(prop_base);
-
-                tcam_property_enumeration_set_value(e, iter.value().get<std::string>().c_str(), &err);
+                tcam_property_enumeration_set_value(TCAM_PROPERTY_ENUMERATION(prop_base),
+                                                    iter.value().get<std::string>().c_str(),
+                                                    &err);
 
                 break;
             }
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
-
                 if (!iter.value().is_boolean())
                 {
-                    SPDLOG_ERROR("Value for {} is not a bool", iter.key().c_str());
+                    report_error_func(
+                        property_name,
+                        fmt::format("Value '{}' is not a boolean", iter.value().dump()));
                     break;
                 }
 
-                auto b = TCAM_PROPERTY_BOOLEAN(prop_base);
-
-                tcam_property_boolean_set_value(b, iter.value(), &err);
-
+                tcam_property_boolean_set_value(
+                    TCAM_PROPERTY_BOOLEAN(prop_base), iter.value(), &err);
                 break;
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
-                auto c = TCAM_PROPERTY_COMMAND(prop_base);
-
-                tcam_property_command_set_command(c, &err);
-                break;
-            }
-            default:
-            {
+                tcam_property_command_set_command(TCAM_PROPERTY_COMMAND(prop_base), &err);
                 break;
             }
         }
+
+        g_object_unref(prop_base);
 
         if (err)
         {
-            // iter.value().dump() will add "" around a string
-            // this is to signify that it is in fact, a string
-            //
-            SPDLOG_ERROR("Setting '{}' to {} caused an error: {}",
-                         iter.key().c_str(),
-                         iter.value().dump().c_str(),
-                         err->message);
-            g_error_free(err);
-            err = nullptr;
+            if (err->domain == tcam_error_quark() && err->code == TCAM_ERROR_PROPERTY_NOT_WRITEABLE)
+            {
+                g_error_free(err);
+                return apply_single_json_entry_rval::locked_error;
+            }
+            else
+            {
+                report_error_func(property_name,
+                                  fmt::format("Setting value to {} failed with {}",
+                                              iter.value().dump(),
+                                              err->message));
+
+                g_error_free(err);
+                return apply_single_json_entry_rval::error;
+            }
         }
+        return apply_single_json_entry_rval::success;
+    }
+    catch (const std::exception& ex)
+    {
+        report_error_func(property_name, ex.what());
+        return apply_single_json_entry_rval::error;
+    }
+}
+
+
+bool tcam::gst::load_device_settings(TcamPropertyProvider* tcam, const std::string& json_data)
+{
+    if (!tcam)
+    {
+        return false;
     }
 
-    return true;
+    json props;
+    try
+    {
+        props = json::parse(json_data);
+    }
+    catch (json::parse_error& e)
+    {
+        SPDLOG_ERROR("Unable to parse property settings. JSON parser returned: {}", e.what());
+        return false;
+    }
+
+    // Report functions
+    auto report_error = [](std::string_view property_name, std::string_view error_desc)
+    {
+        SPDLOG_WARN("Failed to write property '{}', due to: {}", property_name, error_desc);
+    };
+
+    // we use a list of iterators to ease implementation of retries
+    std::vector<json::iterator> prop_entry_list;
+    prop_entry_list.reserve(props.size());
+    for (auto iter = props.begin(); iter != props.end(); ++iter)
+    {
+        prop_entry_list.push_back(iter);
+    }
+
+    /* This works like this:
+     * Walk current list
+     *  if one returns 'locked' as the error, add that entry to the retry-list
+     *  If one succeeds we set the according flag. 
+     *  If the retry-list contains elements and at least one property could be successfully written, retry using the remaining items in the retry list.
+     */
+
+    // we need this flag to prevent us continually re-trying the same items.
+    bool at_least_one_success = false;
+    do {
+        std::vector<json::iterator>
+            retry_list; // this is the list of items which were blocked by a locked flag
+        for (auto&& it : prop_entry_list)
+        {
+            auto res = apply_single_json_entry(tcam, it, report_error);
+            if (res == apply_single_json_entry_rval::locked_error)
+            {
+                retry_list.push_back(it);
+            }
+            else if (res == apply_single_json_entry_rval::success)
+            {
+                at_least_one_success = true;
+            }
+        }
+        prop_entry_list = std::move(
+            retry_list); // move contents of the retry_list into the list which will be walked in the next cycle
+    } while (at_least_one_success && !prop_entry_list.empty());
+
+    // generate the error message list for the properties we could not write due to being 'locked'
+    for (auto&& entry : prop_entry_list)
+    {
+        report_error(entry.key(), "Failed to write locked property");
+    }
+
+    return props.size() != prop_entry_list.size(); // we have at least one successfully 'set' entry
 }
