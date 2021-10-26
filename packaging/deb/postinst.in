@@ -28,6 +28,7 @@ fi
 case "$1" in
 
     configure)
+        ldconfig
         @ARAVIS_POSTINST@
         ;;
 
