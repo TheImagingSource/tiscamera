@@ -39,9 +39,6 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
    * - drop-incomplete-buffer
      - bool
      - When incomplete buffers should be delivered this has to be set to `false`.
-   * - property-state
-     - string
-     - JSON string describing the state of all device properties. See :any:`state`.
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
@@ -157,20 +154,19 @@ It is a convenience wrapper and offers no additional properties.
       
    * - serial
      - string
-       - Serial number of the device that shall be used
-     * - type
-       - string
-       - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
-     * - tcam-device
-       - GstDevice
-       - GstDevice instance that shall be used. Same as setting serial and type. Is write-only.
-     * - available-caps
-       - string
-       - String description of the GstCaps that can be used in `device-caps`. Will be equal to or a subsection of the GstCaps offered by tcamsrc.
-     * - device-caps
-       - string
-       - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
-
+     - Serial number of the device that shall be used
+   * - type
+     - string
+     - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
+   * - :ref:`tcam-device<tcam-device>`
+     - GstDevice
+     - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
+   * - :ref:`tcam-properties<tcam-properties>`
+     - GstStructure
+     - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+   * - :ref:`tcam-properties-json<tcam-properties-json>`
+     - string
+     - Property that can be used to set/get the current TcamPropertyProvider properties. This works the same way `tcam-properties` works, but uses a json string to provide the property names and values.
                                                 
 .. _tcamdutils:
 
@@ -237,6 +233,9 @@ The format that can always be expected to work is `BGRx`. All other formats depe
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+   * - :ref:`tcam-properties-json<tcam-properties-json>`
+     - string
+     - Property that can be used to set/get the current TcamPropertyProvider properties. This works the same way `tcam-properties` works, but uses a json string to provide the property names and values.
    * - conversion-element
      - enum
      - Select the transformation element to use.
@@ -273,6 +272,29 @@ Elements that offer auto algorithms (auto exposure/focus) will only be included 
 GObject properties
 ##################
 
+.. _tcam-device:
+
+GObject property `tcam-device`
+--------------------------------------
+
+This write-only property allows to open a specific device by passing a `GstDevice`.
+
+`tcam-device` is only writeable in `GST_STATE_NULL`.
+
+In the transition from `GST_STATE_NULL` to `GST_STATE_READY`, if this property was set, the tcamsrc calls `gst_device_create_element` with the assigned `GstDevice`.
+
+If this property is not set, the default opening procedure uses `serial` and `type` to find a suitable device via `GstDeviceMonitor`.
+
+E.g:
+
+.. code-block:: cpp
+
+    GstElement* src = ...;
+    GstDevice* dev = fetch_first_device_from_monitor();
+
+    g_object_set( G_OBJECT( src ), "tcam-device", dev );
+
+
 .. _tcam-properties:
 
 GObject property `tcam-properties`
@@ -282,6 +304,8 @@ In ``state ==  GST_STATE_NULL``:
 
 * Set on `tcam-properties` copies the passed in structure. This structure gets applied to the device when transitioning to `GST_STATE_READY`.
 * Get on `tcam-properties` returns either the previously passed in structure or if nothing was set, an empty structure.
+
+.. note::  The property values set in `GST_STATE_NULL` are only used by the next state transition to `GST_STATE_READY` and are discarded after that.
 
 In ``state >= GST_STATE_READY``:
 
@@ -299,24 +323,29 @@ E.g.:
 Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
 
 
-.. _tcam-device:
+.. _tcam-properties-json:
 
-GObject property `tcam-device`
---------------------------------------
+GObject property `tcam-properties-json`
+-------------------------------------------------
 
-This write-only property allows to open a specific device by passing a `GstDevice`.
+In ``state ==  GST_STATE_NULL``:
 
-`tcam-device` is only writeable in `GST_STATE_NULL`.
+* Set on `tcam-properties-json` copies the passed in string. This data gets applied to the device when transitioning to `GST_STATE_READY`.
+* Get on `tcam-properties-json` returns either the previously passed in string or if nothing was set, an empty string.
 
-In the transition from `GST_STATE_NULL` to `GST_STATE_READY`, if this property was set, the tcamsrc calls `gst_device_create_element` with the assigned `GstDevice`.
+.. note::  The property values set in `GST_STATE_NULL` are only used by the next state transition to `GST_STATE_READY` and are discarded after that.
 
-If this property is not set, the default opening procedure is using `serial` and `type` to find a suitable device via `GstDeviceMonitor` and opening that.
+In ``state >= GST_STATE_READY``:
 
-E.g:
+* Set on `tcam-properties` applies the passed in json data to the currently open device.
+* Get on `tcam-properties` returns the property values of the currently open device.
 
-.. code-block:: cpp
+This can be used to get a json formatted snap shot of the current property values or to set saved property values in the device.
 
-    GstElement* src = ...;
-    GstDevice* dev = fetch_first_device_from_monitor();
+Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
 
-    g_object_set( G_OBJECT( src ), "tcam-device", dev );
+This example would dump the device property settings as a json string to the command line:
+
+.. code-block:: sh
+
+    tcam-ctrl --save <serial>
