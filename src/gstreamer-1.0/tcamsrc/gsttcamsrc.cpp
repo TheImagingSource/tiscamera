@@ -528,7 +528,7 @@ static gboolean open_source_element(GstTcamSrc* self)
         g_object_set_property(G_OBJECT(state.active_source), "tcam-properties", &tmp);
         g_value_unset(&tmp);
 
-        //state.prop_init_.reset();
+        state.prop_init_.reset();
     }
 
     GST_INFO("Opened device with serial: '%s' type: '%s'",

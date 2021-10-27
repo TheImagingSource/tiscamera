@@ -27,8 +27,6 @@ struct tcambin_data
     std::string device_type;
     gst_helper::gst_ptr<GstDevice> prop_tcam_device;
 
-    std::string state;
-
     gst_helper::gst_ptr<GstPad> target_pad;
     gst_helper::gst_ptr<GstCaps> user_caps;
 
@@ -46,17 +44,22 @@ struct tcambin_data
     GstElement* src = nullptr;
     GstElement* pipeline_caps = nullptr;
     GstElement* jpegdec = nullptr;
-
-    tcambin_conversion conversion_info = {};
     GstElement* tcam_converter = nullptr;
 
-    gboolean elements_created = FALSE;
-    gboolean elements_linked = FALSE;
-    gboolean target_set = FALSE;
-    gboolean must_apply_state = FALSE;
+    tcambin_conversion conversion_info = {};
+
+    bool elements_created = false;
+    bool target_set = false;
+
+    bool is_open() const noexcept
+    {
+        return elements_created;
+    }
 
     tcam::gst::input_caps_required_modules modules;
-    gst_helper::gst_ptr<GstStructure>   prop_init_;
+
+    gst_helper::gst_ptr<GstStructure> prop_init_;
+    std::string prop_init_json_;
 };
 
 
