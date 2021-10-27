@@ -21,6 +21,8 @@
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
 
+#include "property_dependencies.h"
+
 #include <linux/videodev2.h>
 #include <unistd.h> // pipe, usleep
 
@@ -222,6 +224,46 @@ void V4l2Device::sort_properties(
     {
         m_properties.push_back(it->second);
     }
+
+
+    //
+    // v4l2/uvc devices do not have proper interdependencies for properties
+    // manually reapply some of them
+    // this causes things like ExposureAuto==On to lock ExposureTime
+    //
+    for (auto& prop: m_properties)
+    {
+        std::vector<std::weak_ptr<tcam::property::PropertyLock>> dependencies_to_include;
+        auto dependencies = tcam::property::find_dependency(prop->get_name());
+
+        if (dependencies)
+        {
+            for (const auto& dep : dependencies->dependencies)
+            {
+                auto itere = std::find_if(m_properties.begin(), m_properties.end(), [&dep](const auto& p)
+                {
+                    if (p->get_name() == dep)
+                    {
+                        return true;
+                    }
+                    return false;
+                });
+
+                if (itere != m_properties.end())
+                {
+                    auto ptr = std::dynamic_pointer_cast<tcam::property::PropertyLock>(*itere);
+                    dependencies_to_include.push_back(ptr);
+                }
+            }
+        }
+        if (!dependencies_to_include.empty())
+        {
+            auto ptr = std::dynamic_pointer_cast<tcam::property::PropertyLock>(prop);
+            if (ptr)
+                ptr->set_dependencies(dependencies_to_include);
+        }
+    }
+
 }
 
 

@@ -35,7 +35,8 @@ add_library(tcam-base STATIC
   VideoFormat.cpp
   VideoFormatDescription.cpp
   ImageSink.cpp
-
+  property_dependencies.h
+  property_dependencies.cpp
   error.cpp
 )
 

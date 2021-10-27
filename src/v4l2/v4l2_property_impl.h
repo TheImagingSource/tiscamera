@@ -21,6 +21,8 @@
 #include "v4l2_genicam_conversion.h"
 #include "../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 
+#include "../property_dependencies.h"
+
 #include <linux/videodev2.h>
 #include <map>
 #include <memory>
@@ -37,7 +39,8 @@ namespace tcam::property
 
 class V4L2PropertyBackend;
 
-class V4L2PropertyIntegerImpl : public IPropertyInteger
+
+class V4L2PropertyIntegerImpl : public PropertyLock, public IPropertyInteger
 {
 public:
     V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
@@ -81,6 +84,20 @@ public:
 
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
+    virtual void set_locked(bool new_locked_state) final
+    {
+        lock(m_flags, new_locked_state);
+    };
+
+    virtual bool lock_others() const final
+    {
+        return false;
+    }
+
+    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final
+    {}
+
+
 private:
     outcome::result<void> valid_value(int64_t val);
     void realign_value(int64_t& value);
@@ -102,7 +119,7 @@ private:
 };
 
 
-class V4L2PropertyDoubleImpl : public IPropertyFloat
+class V4L2PropertyDoubleImpl : public PropertyLock, public IPropertyFloat
 {
 public:
     V4L2PropertyDoubleImpl(const std::string& name, int id);
@@ -147,6 +164,20 @@ public:
 
     virtual outcome::result<void> set_value(double new_value) final;
 
+    virtual void set_locked(bool new_locked_state) final
+    {
+        lock(m_flags, new_locked_state);
+    };
+
+    virtual bool lock_others() const final
+    {
+        return false;
+    }
+
+    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final
+    {}
+
+
 private:
     outcome::result<void> valid_value(double val);
 
@@ -167,7 +198,9 @@ private:
 };
 
 
-class V4L2PropertyBoolImpl : public IPropertyBool
+
+
+class V4L2PropertyBoolImpl : public PropertyLock, public IPropertyBool
 {
 public:
     V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
@@ -197,6 +230,18 @@ public:
 
     virtual outcome::result<void> set_value(bool new_value) final;
 
+    virtual void set_locked(bool new_locked_state) final
+    {
+        lock(m_flags, new_locked_state);
+    };
+
+    virtual bool lock_others() const final
+    {
+        return get_value().value();
+    }
+
+    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>& deps) final;
+
 private:
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
@@ -205,13 +250,15 @@ private:
 
     bool m_default;
 
+    std::vector<std::weak_ptr<PropertyLock>> m_dependencies;
+
     int m_v4l2_id;
 
     const tcamprop1::prop_static_info_boolean* p_static_info;
 };
 
 
-class V4L2PropertyCommandImpl : public IPropertyCommand
+class V4L2PropertyCommandImpl : public PropertyLock, public IPropertyCommand
 {
 public:
     V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
@@ -235,6 +282,19 @@ public:
 
     virtual outcome::result<void> execute() final;
 
+    virtual void set_locked(bool new_locked_state) final
+    {
+        lock(m_flags, new_locked_state);
+    };
+
+    virtual bool lock_others() const final
+    {
+        return false;
+    }
+
+    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final
+    {}
+
 private:
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
@@ -247,7 +307,7 @@ private:
 };
 
 
-class V4L2PropertyEnumImpl : public IPropertyEnum
+class V4L2PropertyEnumImpl : public PropertyLock, public IPropertyEnum
 {
 public:
     V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
@@ -282,6 +342,25 @@ public:
 
     virtual std::vector<std::string> get_entries() const final;
 
+    virtual void set_locked(bool new_locked_state) final
+    {
+        lock(m_flags, new_locked_state);
+    };
+
+    virtual bool lock_others() const final
+    {
+        bool value = tcam::property::enum_to_bool(get_value().value());
+        // the following properties are inverted
+        // aka this == off -> others locked
+        if (get_name() == "TriggerMode")
+        {
+            return !value;
+        }
+        return value;
+    }
+
+    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>& deps) final;
+
 private:
     outcome::result<void> valid_value(int value);
 
@@ -294,6 +373,8 @@ private:
     std::string m_default;
 
     int m_v4l2_id;
+
+    std::vector<std::weak_ptr<PropertyLock>> m_dependencies;
 
     const tcamprop1::prop_static_info_enumeration* p_static_info;
 };

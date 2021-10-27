@@ -541,6 +541,25 @@ outcome::result<void> V4L2PropertyBoolImpl::set_value(bool new_value)
 }
 
 
+void V4L2PropertyBoolImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLock>> &deps)
+{
+    m_dependencies = deps;
+
+    // ensure that all dependencies are in the correct locked state
+    // by explicitly setting them the the current value
+
+    bool new_locked_state = lock_others();
+
+    for (auto& dep : m_dependencies)
+    {
+        if (auto d = dep.lock())
+        {
+            d->set_locked(new_locked_state);
+        }
+    }
+}
+
+
 V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
                                                  struct v4l2_ext_control* /*ctrl*/,
                                                  std::shared_ptr<V4L2PropertyBackend> backend,
@@ -774,6 +793,20 @@ outcome::result<void> V4L2PropertyEnumImpl::set_value_str(const std::string_view
         if (it->second == new_value)
         {
             OUTCOME_TRY(set_value(it->first));
+
+            if (!m_dependencies.empty())
+            {
+                bool new_locked_state = lock_others();
+                for (auto& dep : m_dependencies)
+                {
+                    if (auto d = dep.lock())
+                    {
+                        d->set_locked(new_locked_state);
+                    }
+                }
+
+            }
+
             return outcome::success();
         }
     }
@@ -831,5 +864,25 @@ std::vector<std::string> V4L2PropertyEnumImpl::get_entries() const
     for (auto it = m_entries.begin(); it != m_entries.end(); ++it) { v.push_back(it->second); }
     return v;
 }
+
+
+void V4L2PropertyEnumImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLock>> &deps)
+{
+    m_dependencies = deps;
+
+    // ensure that all dependencies are in the correct locked state
+    // by explicitly setting them the the current value
+
+    bool new_locked_state = lock_others();
+
+    for (auto& dep : m_dependencies)
+    {
+        if (auto d = dep.lock())
+           {
+               d->set_locked(new_locked_state);
+           }
+    }
+}
+
 
 } // namespace tcam::property

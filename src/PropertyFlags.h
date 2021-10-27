@@ -102,7 +102,26 @@ inline bool is_locked(PropertyFlags flags) noexcept
 
 inline void set_locked(PropertyFlags& flags) noexcept
 {
-    flags = flags | PropertyFlags::Locked;
+    flags |= PropertyFlags::Locked;
+}
+
+
+inline void unlock(PropertyFlags& flags) noexcept
+{
+    flags &= PropertyFlags::Locked;
+}
+
+
+inline void lock(PropertyFlags& flags, bool is_locked) noexcept
+{
+    if (is_locked)
+    {
+        set_locked(flags);
+    }
+    else
+    {
+        unlock(flags);
+    }
 }
 
 } // namespace tcam::property
