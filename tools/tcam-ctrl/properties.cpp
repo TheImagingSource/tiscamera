@@ -370,7 +370,7 @@ void print_state_json(const std::string& serial)
     gst_element_set_state(source, GST_STATE_READY);
 
     char* state_str = nullptr;
-    g_object_get(G_OBJECT(source), "state", &state_str, NULL);
+    g_object_get(G_OBJECT(source), "tcam-properties-json", &state_str, NULL);
     if (state_str != nullptr)
     {
         std::cout << state_str << std::endl;
@@ -406,7 +406,7 @@ void load_state_json_string(const std::string& serial, const std::string& json_s
 
     gst_element_set_state(source, GST_STATE_READY);
 
-    g_object_set(G_OBJECT(source), "state", json_str.c_str(), NULL);
+    g_object_set(G_OBJECT(source), "tcam-properties-json", json_str.c_str(), NULL);
     gst_element_set_state(source, GST_STATE_NULL);
 
     gst_object_unref(source);
