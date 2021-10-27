@@ -94,8 +94,9 @@ void print_properties(const std::string& serial)
 
         if (err)
         {
-            std::cout << "Error while retrieving property" << name << "\": " << err->message << std::endl;
+            std::cout << "Error while retrieving property \"" << name << "\": " << err->message << std::endl;
             g_error_free(err);
+            err = nullptr;
             continue;
         }
 
@@ -123,6 +124,7 @@ void print_properties(const std::string& serial)
                 {
                     std::cout << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -133,6 +135,7 @@ void print_properties(const std::string& serial)
                 {
                     std::cerr << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -174,6 +177,7 @@ void print_properties(const std::string& serial)
                 {
                     std::cerr << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -183,6 +187,7 @@ void print_properties(const std::string& serial)
                 {
                     std::cerr << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -217,8 +222,9 @@ void print_properties(const std::string& serial)
 
                 if (err)
                 {
-                    std::cerr << err->message << std::endl;
+                    std::cerr << name << ": " << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -226,8 +232,9 @@ void print_properties(const std::string& serial)
 
                 if (err)
                 {
-                    std::cerr << err->message << std::endl;
+                    std::cerr << name << ": " << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -237,8 +244,9 @@ void print_properties(const std::string& serial)
 
                 if (err)
                 {
-                    std::cerr << err->message << std::endl;
+                    std::cerr << name << ": " << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
@@ -278,6 +286,7 @@ void print_properties(const std::string& serial)
                 {
                     std::cerr << err->message << std::endl;
                     g_error_free(err);
+                    err = nullptr;
                     break;
                 }
 
