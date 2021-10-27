@@ -18,7 +18,6 @@
 
 #include "gsttcamsrc.h"
 
-#include <gst/gst.h>
 #include <tcamprop1.0_gobject/tcam_gerror.h>
 #include <tcamprop1.0_gobject/tcam_property_provider_simple_functions.h>
 

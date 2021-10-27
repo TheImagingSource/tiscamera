@@ -64,7 +64,7 @@ enum
     PROP_CAM_BUFFERS,
     PROP_NUM_BUFFERS,
     PROP_DROP_INCOMPLETE_FRAMES,
-    PROP_TCAM_PROPERTIES,
+    PROP_TCAM_PROPERTIES_GSTSTRUCT,
 };
 
 static guint gst_tcammainsrc_signals[SIGNAL_LAST] = {
@@ -1036,7 +1036,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             }
             break;
         }
-        case PROP_TCAM_PROPERTIES:
+        case PROP_TCAM_PROPERTIES_GSTSTRUCT:
         {
             auto strc = gst_value_get_structure(value);
             if (!self->device->is_device_open())
@@ -1104,7 +1104,7 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
             g_value_set_boolean(value, self->drop_incomplete_frames);
             break;
         }
-        case PROP_TCAM_PROPERTIES:
+        case PROP_TCAM_PROPERTIES_GSTSTRUCT:
         {
             gst_helper::gst_ptr<GstStructure> ptr;
             if (!self->device->is_device_open())
@@ -1209,7 +1209,7 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
 
     g_object_class_install_property(
         gobject_class,
-        PROP_TCAM_PROPERTIES,
+        PROP_TCAM_PROPERTIES_GSTSTRUCT,
         g_param_spec_boxed(
             "tcam-properties",
             "Properties via GstStructure",

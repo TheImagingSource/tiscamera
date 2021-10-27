@@ -27,6 +27,7 @@
 
 #include <gst-helper/gst_gvalue_helper.h>
 #include <gst-helper/gst_ptr.h>
+#include <gst-helper/helper_functions.h>
 #include <gst/gst.h>
 #include <unistd.h>
 
@@ -36,21 +37,26 @@ namespace tcamsrc
 {
 struct tcamsrc_state
 {
-    GstElement* active_source = nullptr;
+    gst_helper::gst_ptr<GstElement> active_source;
     GstDeviceMonitor* p_monitor = nullptr;
     GstPad* pad = nullptr;
 
     gst_helper::gst_ptr<GstDevice> device_to_open;
-
     std::string device_serial;
     tcam::TCAM_DEVICE_TYPE device_type = TCAM_DEVICE_TYPE_UNKNOWN;
 
-    gint cam_buffers = 10;
-    gboolean drop_incomplete_frames = true;
-    gboolean do_timestamp = false;
-    gint num_buffers = -1;
+    int cam_buffers = 10;
+    bool drop_incomplete_frames = true;
+    bool do_timestamp = false;
+    int num_buffers = -1;
 
-    gst_helper::gst_ptr<GstStructure>   prop_init_;
+    gst_helper::gst_ptr<GstStructure> prop_init_gststructure_;
+    std::string prop_init_json_;
+
+    bool is_open() const noexcept
+    {
+        return active_source != nullptr;
+    }
 };
 } // namespace tcamsrc
 
@@ -91,9 +97,9 @@ enum
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
     PROP_DROP_INCOMPLETE_FRAMES,
-    PROP_STATE,
+    PROP_TCAM_PROPERTIES_JSON,
     PROP_TCAMDEVICE,
-    PROP_TCAM_PROPERTIES,
+    PROP_TCAM_PROPERTIES_GSTSTRUCT,
 };
 
 static tcamsrc::tcamsrc_state& get_element_state(GstTcamSrc* self)
@@ -103,7 +109,7 @@ static tcamsrc::tcamsrc_state& get_element_state(GstTcamSrc* self)
 
 GstElement* tcamsrc::get_active_source(GstTcamSrc* self)
 {
-    return self->state->active_source;
+    return self->state->active_source.get();
 }
 
 static GstStaticPadTemplate tcam_src_template =
@@ -111,13 +117,12 @@ static GstStaticPadTemplate tcam_src_template =
 
 static void close_active_source_element(GstTcamSrc* self)
 {
-    if (self->state->active_source)
+    if (self->state->is_open())
     {
-        gst_element_set_state(self->state->active_source, GST_STATE_NULL);
+        gst_element_set_state(self->state->active_source.get(), GST_STATE_NULL);
         // TODO causes critical error  g_object_ref: assertion 'old_val > 0' failed
         // gst_bin_remove(GST_BIN(self), self->active_source);
 
-        //gst_object_unref(self->active_source);
         self->state->active_source = nullptr;
     }
 }
@@ -129,22 +134,11 @@ static void apply_element_property(GstTcamSrc* self,
 {
     auto& state = get_element_state(self);
 
-    auto is_state_null = [&]
-    {
-        GstState cur_gst_state = GST_STATE_NULL;
-        auto res = gst_element_get_state(GST_ELEMENT(self), &cur_gst_state, NULL, 0);
-        if (res == GST_STATE_CHANGE_FAILURE || res == GST_STATE_CHANGE_ASYNC)
-        {
-            return false;
-        }
-        return cur_gst_state == GST_STATE_NULL;
-    };
-
     switch (prop_id)
     {
         case PROP_SERIAL:
         {
-            if (!is_state_null())
+            if (state.is_open())
             {
                 GST_ERROR_OBJECT(self,
                                  "The gobject property 'serial' can only be set in GST_STATE_NULL");
@@ -163,30 +157,28 @@ static void apply_element_property(GstTcamSrc* self,
                 if (!t.empty())
                 {
                     auto type = tcam::tcam_device_from_string(t);
-                    GST_INFO("Serial-Type input detected. Using serial: '%s' type: '%s' (from %s)",
-                             s.c_str(),
-                             tcam::tcam_device_type_to_string(type).c_str(),
-                             string_value.c_str());
-
                     state.device_serial = s;
                     state.device_type = type;
 
-                    GST_DEBUG("Type interpreted as '%s'",
-                              tcam::tcam_device_type_to_string(state.device_type).c_str());
+                    GST_INFO_OBJECT(self,
+                                    "Set camera serial to '%s', Type to '%s'. (from %s).",
+                                    s.c_str(),
+                                    tcam::tcam_device_type_to_string(type).c_str(),
+                                    string_value.c_str());
                 }
                 else
                 {
                     state.device_serial = string_value;
-                    //state.device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+
+                    GST_INFO_OBJECT(
+                        self, "Set camera serial to '%s'.", state.device_serial.c_str());
                 }
             }
-
-            GST_INFO("Set camera serial to %s", state.device_serial.c_str());
             break;
         }
         case PROP_DEVICE_TYPE:
         {
-            if (!is_state_null())
+            if (state.is_open())
             {
                 GST_ERROR_OBJECT(self,
                                  "The gobject property 'type' can only be set in GST_STATE_NULL");
@@ -196,37 +188,39 @@ static void apply_element_property(GstTcamSrc* self,
             const char* type = g_value_get_string(value);
             if (!type)
             {
-                return;
-            }
-
-            // this check is simply for messaging the user
-            // about invalid values
-            auto vec = tcam::get_device_type_list_strings();
-            if (std::find(vec.begin(), vec.end(), std::string(type)) == vec.end())
-            {
-                GST_ERROR("Unknown device type '%s'", type);
                 state.device_type = TCAM_DEVICE_TYPE_UNKNOWN;
             }
             else
             {
-                GST_DEBUG("Setting device type to %s", type);
-                state.device_type = tcam::tcam_device_from_string(type);
+                // this check is simply for messaging the user about invalid values
+                auto vec = tcam::get_device_type_list_strings();
+                if (std::find(vec.begin(), vec.end(), std::string(type)) == vec.end())
+                {
+                    GST_ERROR_OBJECT(self, "Unknown device type '%s'", type);
+                    state.device_type = TCAM_DEVICE_TYPE_UNKNOWN;
+                }
+                else
+                {
+                    state.device_type = tcam::tcam_device_from_string(type);
+                    GST_INFO_OBJECT(self, "Setting device type to %s", type);
+                }
             }
             break;
         }
         case PROP_CAM_BUFFERS:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "camera-buffers"))
             {
-                g_object_set_property(G_OBJECT(state.active_source), "camera-buffers", value);
+                g_object_set_property(G_OBJECT(state.active_source.get()), "camera-buffers", value);
             }
             else
             {
-                if (state.active_source)
+                if (state.is_open())
                 {
-                    GST_INFO("Used source element does not support \"camera-buffers\".");
+                    GST_INFO_OBJECT(self,
+                                    "Used source element does not support \"camera-buffers\".");
                 }
                 else
                 {
@@ -238,17 +232,17 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_NUM_BUFFERS:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "num-buffers"))
             {
-                g_object_set_property(G_OBJECT(state.active_source), "num-buffers", value);
+                g_object_set_property(G_OBJECT(state.active_source.get()), "num-buffers", value);
             }
             else
             {
-                if (state.active_source)
+                if (state.is_open())
                 {
-                    GST_INFO("Used source element does not support \"num-buffers\".");
+                    GST_INFO_OBJECT(self, "Used source element does not support \"num-buffers\".");
                 }
                 else
                 {
@@ -260,11 +254,11 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_DO_TIMESTAMP:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "do-timestamp"))
             {
-                g_object_set_property(G_OBJECT(state.active_source), "do-timestamp", value);
+                g_object_set_property(G_OBJECT(state.active_source.get()), "do-timestamp", value);
             }
             else
             {
@@ -274,18 +268,19 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "drop-incomplete-buffer"))
             {
                 g_object_set_property(
-                    G_OBJECT(state.active_source), "drop-incomplete-buffer", value);
+                    G_OBJECT(state.active_source.get()), "drop-incomplete-buffer", value);
             }
             else
             {
-                if (state.active_source)
+                if (state.is_open())
                 {
-                    GST_INFO("Used source element does not support \"drop-incomplete-buffer\"");
+                    GST_INFO_OBJECT(
+                        self, "Used source element does not support \"drop-incomplete-buffer\"");
                 }
                 else
                 {
@@ -296,7 +291,7 @@ static void apply_element_property(GstTcamSrc* self,
         }
         case PROP_TCAMDEVICE:
         {
-            if (!is_state_null())
+            if (state.is_open())
             {
                 GST_ERROR_OBJECT(
                     self, "The gobject property 'tcam-device' can only be set in GST_STATE_NULL");
@@ -314,23 +309,46 @@ static void apply_element_property(GstTcamSrc* self,
             }
             break;
         }
-        case PROP_TCAM_PROPERTIES:
+        case PROP_TCAM_PROPERTIES_JSON:
         {
-            if (!state.active_source)
+            if (!state.is_open())
             {
-                auto strc = gst_value_get_structure(value);
-                if (strc)
+                if (auto ptr = g_value_get_string(value); ptr != nullptr)
                 {
-                    state.prop_init_ = gst_helper::make_ptr(gst_structure_copy(strc));
+                    state.prop_init_json_ = ptr;
                 }
                 else
                 {
-                    state.prop_init_.reset();
+                    state.prop_init_json_ = {};
                 }
             }
             else
             {
-                g_object_set_property(G_OBJECT(state.active_source), "tcam-properties", value);
+                if (auto ptr = g_value_get_string(value); ptr != nullptr)
+                {
+                    tcam::gst::load_device_settings(TCAM_PROPERTY_PROVIDER(self), ptr);
+                }
+            }
+            break;
+        }
+        case PROP_TCAM_PROPERTIES_GSTSTRUCT:
+        {
+            if (!state.is_open())
+            {
+                auto strc = gst_value_get_structure(value);
+                if (strc)
+                {
+                    state.prop_init_gststructure_ = gst_helper::make_ptr(gst_structure_copy(strc));
+                }
+                else
+                {
+                    state.prop_init_gststructure_.reset();
+                }
+            }
+            else
+            {
+                g_object_set_property(
+                    G_OBJECT(state.active_source.get()), "tcam-properties", value);
             }
             break;
         }
@@ -383,6 +401,52 @@ static device_id get_device_id(GstDevice& device)
 
 } // namespace
 
+static gst_helper::gst_ptr<GstDevice> find_suitable_device(GstDeviceMonitor& monitor,
+                                                           const std::string& serial,
+                                                           tcam::TCAM_DEVICE_TYPE type)
+{
+    /*
+      How source selection works
+
+      if serial exists -> use first matching source
+      if serial && type exist -> use matching source
+      if no serial && type -> matching source
+      if no source && no type -> first source with device available
+
+      mainsrc has prevalence over other sources for unspecified devices
+     */
+    GList* device_list = gst_device_monitor_get_devices(&monitor);
+
+    gst_helper::gst_ptr<GstDevice> rval;
+
+    for (GList* iter = device_list; iter != nullptr; iter = g_list_next(iter))
+    {
+        GstDevice* dev = static_cast<GstDevice*>(iter->data);
+        if (dev == nullptr)
+        {
+            continue;
+        }
+
+        auto device_id = get_device_id(*dev);
+
+        if (!serial.empty() && serial != device_id.serial)
+        {
+            continue;
+        }
+        if (type != TCAM_DEVICE_TYPE_UNKNOWN && type != device_id.type)
+        {
+            continue;
+        }
+
+        rval = gst_helper::make_addref_ptr(dev);
+        break;
+    }
+
+    g_list_free_full(device_list, gst_object_unref);
+
+    return rval;
+}
+
 static gboolean open_source_element(GstTcamSrc* self)
 {
     auto& state = get_element_state(self);
@@ -393,75 +457,45 @@ static gboolean open_source_element(GstTcamSrc* self)
     gst_helper::gst_ptr<GstDevice> selected_gst_device;
     if (state.device_to_open == nullptr)
     {
-        /*
-          How source selection works
-
-          if serial exists -> use first matching source
-          if serial && type exist -> use matching source
-          if no serial && type -> matching source
-          if no source && no type -> first source with device available
-
-          mainsrc has prevalence over other sources for unspecified devices
-         */
-        GList* devices = gst_device_monitor_get_devices(state.p_monitor);
-        if (!devices)
+        selected_gst_device =
+            find_suitable_device(*state.p_monitor, state.device_serial, state.device_type);
+        if (selected_gst_device == nullptr)
         {
-            GST_ERROR("Failed to open tcamsrc device, but no devices in GstDeviceMonitor list");
+            std::string err_desc;
+
+            // This generates a 'good' error description string
+            if (state.device_serial.empty() && state.device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+            {
+                err_desc = "Failed to find any device to open.";
+            }
+            else if (state.device_type == TCAM_DEVICE_TYPE_UNKNOWN)
+            {
+                err_desc = fmt::format("Failed to find a device for the given serial='{}'.",
+                                       state.device_serial);
+            }
+            else
+            {
+                err_desc =
+                    fmt::format("Failed to find a device for the given serial='{}' and type='{}'.",
+                                state.device_serial,
+                                tcam::tcam_device_type_to_string(state.device_type));
+            }
+
+            GST_ELEMENT_ERROR(self, RESOURCE, NOT_FOUND, ("%s", err_desc.c_str()), (NULL));
             return FALSE;
         }
-
-        auto find_device_for_params =
-            [](GList* device_list,
-               std::string serial_to_open,
-               TCAM_DEVICE_TYPE device_type_to_open) -> gst_helper::gst_ptr<GstDevice>
-        {
-            for (GList* iter = device_list; iter != nullptr; iter = g_list_next(iter))
-            {
-                GstDevice* dev = static_cast<GstDevice*>(iter->data);
-                if (dev == nullptr)
-                {
-                    continue;
-                }
-
-                auto device_id = get_device_id(*dev);
-
-                if (!serial_to_open.empty() && serial_to_open != device_id.serial)
-                {
-                    continue;
-                }
-                if (device_type_to_open != TCAM_DEVICE_TYPE_UNKNOWN
-                    && device_type_to_open != device_id.type)
-                {
-                    continue;
-                }
-                return gst_helper::make_addref_ptr(dev);
-            }
-            return nullptr;
-        };
-
-        selected_gst_device =
-            find_device_for_params(devices, state.device_serial, state.device_type);
-
-        g_list_free_full(devices, gst_object_unref);
     }
     else
     {
         selected_gst_device = state.device_to_open;
     }
 
-    if (selected_gst_device == nullptr)
+    auto new_device =
+        gst_helper::make_ptr(gst_device_create_element(selected_gst_device.get(), nullptr));
+    if (!new_device)
     {
-        GST_ERROR(
-            "Failed to find a device for the given serial='%s' and type='%s'. Stream not possible.",
-            state.device_serial.c_str(),
-            tcam::tcam_device_type_to_string(state.device_type).c_str());
-        return FALSE;
-    }
-
-    state.active_source = gst_device_create_element(selected_gst_device.get(), nullptr);
-    if (!state.active_source)
-    {
-        GST_ERROR("Unable to open a source element. Stream not possible.");
+        GST_ELEMENT_ERROR(
+            self, RESOURCE, NOT_FOUND, ("Failed to open the source element."), (NULL));
         return FALSE;
     }
 
@@ -470,27 +504,28 @@ static gboolean open_source_element(GstTcamSrc* self)
     state.device_serial = serial;
     state.device_type = type;
 
-    g_signal_connect(
-        G_OBJECT(state.active_source), "device-open", G_CALLBACK(emit_device_open), self);
+    g_signal_connect(G_OBJECT(new_device.get()), "device-open", G_CALLBACK(emit_device_open), self);
 
     g_signal_connect(
-        G_OBJECT(state.active_source), "device-close", G_CALLBACK(emit_device_close), self);
+        G_OBJECT(new_device.get()), "device-close", G_CALLBACK(emit_device_close), self);
 
-    gst_bin_add(GST_BIN(self), state.active_source);
-    // bin takes ownership over source element
-    // we want to hold all source elements outside of
-    // the bin for indexing purposes
-    g_object_ref(state.active_source);
+    auto state_change_res = gst_element_set_state(new_device.get(), GST_STATE_READY);
+    if (state_change_res == GST_STATE_CHANGE_FAILURE)
+    {
+        GST_ERROR_OBJECT(self, "Failed gst_element_set_state GST_STATE_READY on the source element.");
+        return FALSE;
+    }
+
+    state.active_source = new_device;
+
+    gst_bin_add(GST_BIN(self), state.active_source.get());
 
     gst_ghost_pad_set_target(GST_GHOST_PAD(state.pad), NULL);
-    auto target_pad = gst_element_get_static_pad(state.active_source, "src");
-    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(state.pad), target_pad))
+    auto target_pad = gst_helper::get_static_pad(*state.active_source, "src");
+    if (!gst_ghost_pad_set_target(GST_GHOST_PAD(state.pad), target_pad.get()))
     {
-        GST_ERROR("Could not set target for ghostpad.");
+        GST_ERROR_OBJECT(self, "Could not set target for ghostpad.");
     }
-    gst_object_unref(target_pad);
-
-    gst_element_set_state(state.active_source, GST_STATE_READY);
 
     GValue val = G_VALUE_INIT;
 
@@ -520,20 +555,27 @@ static gboolean open_source_element(GstTcamSrc* self)
 
     apply_element_property(self, PROP_DO_TIMESTAMP, &val_bool, nullptr);
 
-    if (state.prop_init_)
+    if (state.prop_init_gststructure_)
     {
         GValue tmp = G_VALUE_INIT;
         g_value_init(&tmp, GST_TYPE_STRUCTURE);
-        gst_value_set_structure(&tmp, state.prop_init_.get());
-        g_object_set_property(G_OBJECT(state.active_source), "tcam-properties", &tmp);
+        gst_value_set_structure(&tmp, state.prop_init_gststructure_.get());
+        g_object_set_property(G_OBJECT(state.active_source.get()), "tcam-properties", &tmp);
         g_value_unset(&tmp);
 
-        state.prop_init_.reset();
+        state.prop_init_gststructure_.reset();
+    }
+    if (!state.prop_init_json_.empty())
+    {
+        tcam::gst::load_device_settings(TCAM_PROPERTY_PROVIDER(state.active_source.get()),
+                                        state.prop_init_json_);
+        state.prop_init_json_ = {};
     }
 
-    GST_INFO("Opened device with serial: '%s' type: '%s'",
-             state.device_serial.c_str(),
-             tcam::tcam_device_type_to_string(state.device_type).c_str());
+    GST_INFO_OBJECT(self,
+                    "Opened device with serial: '%s' type: '%s'",
+                    state.device_serial.c_str(),
+                    tcam::tcam_device_type_to_string(state.device_type).c_str());
 
     return TRUE;
 }
@@ -612,10 +654,11 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_DEVICE_TYPE:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source), "type"))
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
+                                                "type"))
             {
-                g_object_get_property(G_OBJECT(state.active_source), "type", value);
+                g_object_get_property(G_OBJECT(state.active_source.get()), "type", value);
             }
             else
             {
@@ -626,83 +669,99 @@ static void gst_tcam_src_get_property(GObject* object,
         }
         case PROP_CAM_BUFFERS:
         {
-            if (state.active_source)
+            if (state.is_open())
             {
                 if (state.active_source
-                    && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+                    && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                     "camera-buffers"))
                 {
-                    g_object_get_property(G_OBJECT(state.active_source), "camera-buffers", value);
+                    g_object_get_property(
+                        G_OBJECT(state.active_source.get()), "camera-buffers", value);
                 }
                 else
                 {
-                    GST_WARNING("Source element does not support camera-buffers.");
+                    GST_WARNING_OBJECT(self, "Source element does not support camera-buffers.");
                 }
             }
             else
             {
-                GST_WARNING("No active source.");
+                GST_WARNING_OBJECT(self, "No active source.");
             }
             break;
         }
         case PROP_NUM_BUFFERS:
         {
-            if (state.active_source)
+            if (state.is_open())
             {
-                if (state.active_source
-                    && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+                if (state.is_open()
+                    && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                     "num-buffers"))
                 {
-                    g_object_get_property(G_OBJECT(state.active_source), "num-buffers", value);
+                    g_object_get_property(
+                        G_OBJECT(state.active_source.get()), "num-buffers", value);
                 }
                 else
                 {
-                    GST_WARNING("Source element does not support num-buffers.");
+                    GST_WARNING_OBJECT(self, "Source element does not support num-buffers.");
                 }
             }
             else
             {
-                GST_WARNING("No active source.");
+                GST_WARNING_OBJECT(self, "No active source.");
             }
             break;
         }
         case PROP_DO_TIMESTAMP:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "do-timestamp"))
             {
-                g_object_get_property(G_OBJECT(state.active_source), "do-timestamp", value);
+                g_object_get_property(G_OBJECT(state.active_source.get()), "do-timestamp", value);
             }
             else
             {
-                GST_WARNING("No active source.");
+                GST_WARNING_OBJECT(self, "No active source.");
             }
             break;
         }
         case PROP_DROP_INCOMPLETE_FRAMES:
         {
-            if (state.active_source
-                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source),
+            if (state.is_open()
+                && g_object_class_find_property(G_OBJECT_GET_CLASS(state.active_source.get()),
                                                 "drop-incomplete-buffer"))
             {
                 g_object_get_property(
-                    G_OBJECT(state.active_source), "drop-incomplete-buffer", value);
+                    G_OBJECT(state.active_source.get()), "drop-incomplete-buffer", value);
             }
             else
             {
-                GST_WARNING("No active source.");
+                GST_WARNING_OBJECT(self, "No active source.");
             }
             break;
         }
-        case PROP_TCAM_PROPERTIES:
+        case PROP_TCAM_PROPERTIES_JSON:
         {
-            if (!state.active_source)
+            if (!state.is_open())
+            {
+                g_value_set_string(value, "");
+            }
+            else
+            {
+                std::string tmp = tcam::gst::create_device_settings(TCAM_PROPERTY_PROVIDER(self));
+                g_value_set_string(value, tmp.c_str());
+            }
+            break;
+        }
+        case PROP_TCAM_PROPERTIES_GSTSTRUCT:
+        {
+            if (!state.is_open())
             {
                 gst_helper::gst_ptr<GstStructure> ptr;
-                if (!state.prop_init_.empty())
+                if (!state.prop_init_gststructure_.empty())
                 {
-                    ptr = gst_helper::make_ptr(gst_structure_copy(state.prop_init_.get()));
+                    ptr = gst_helper::make_ptr(
+                        gst_structure_copy(state.prop_init_gststructure_.get()));
                 }
                 else
                 {
@@ -712,7 +771,8 @@ static void gst_tcam_src_get_property(GObject* object,
             }
             else
             {
-                g_object_get_property(G_OBJECT(state.active_source), "tcam-properties", value);
+                g_object_get_property(
+                    G_OBJECT(state.active_source.get()), "tcam-properties", value);
             }
             break;
         }
@@ -835,12 +895,13 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
 
     g_object_class_install_property(
         gobject_class,
-        PROP_STATE,
-        g_param_spec_string("state",
-                            "Property State",
-                            "Property values the internal elements shall use",
-                            "",
-                            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+        PROP_TCAM_PROPERTIES_JSON,
+        g_param_spec_string(
+            "tcam-properties-json",
+            "Reads/Writes the properties as a json string",
+            "Reads/Writes the properties as a json string to/from the source/filter elements",
+            "",
+            static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
     g_object_class_install_property(
         gobject_class,
@@ -854,7 +915,7 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
 
     g_object_class_install_property(
         gobject_class,
-        PROP_TCAM_PROPERTIES,
+        PROP_TCAM_PROPERTIES_GSTSTRUCT,
         g_param_spec_boxed(
             "tcam-properties",
             "Properties via GstStructure",
