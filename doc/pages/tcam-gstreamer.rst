@@ -248,10 +248,6 @@ The format that can always be expected to work is `BGRx`. All other formats depe
        
        Possible values: `auto`, `tcamconvert`, `tcamdutils`, `tcamdutils-cuda`
        Default: `auto`
-   * - state
-     - string
-     - JSON string describing the state of all device properties. See :any:`state`.
-       
 
 Internal pipelines will always be created when the element state is set to READY.
 
