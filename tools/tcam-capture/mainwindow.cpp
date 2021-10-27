@@ -60,7 +60,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     p_toolbar = new QToolBar("Main");
 
-//    p_toolbar->setStyleSheet("border:5px solid #ff0000;");
     auto action_quit = new QAction(QIcon::fromTheme(":/images/close.png"), "Quit");
     action_quit->setShortcut(QKeySequence("Ctrl+Shift+Q"));
 
@@ -73,17 +72,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     p_toolbar->addAction(action_open);
 
     p_action_property_dialog = new QAction(QIcon(":/images/dialog.png"), "Open Property Dialog");
+    p_action_property_dialog->setShortcut(QKeySequence("Ctrl+P"));
     connect(p_action_property_dialog, &QAction::triggered, this, &MainWindow::on_actionOpen_triggered);
 
     p_toolbar->addAction(p_action_property_dialog);
 
     p_action_format_dialog = new QAction(QIcon(":/images/VideoFormat.png"), "Open Format Dialog");
+    p_action_format_dialog->setShortcut(QKeySequence("Ctrl+U"));
     connect(p_action_format_dialog, &QAction::triggered, this, &MainWindow::open_format_triggered);
 
     p_toolbar->addAction(p_action_format_dialog);
 
 
     auto action_about = new QAction(QIcon::fromTheme("SP_BrowserStop"), "Info");
+    action_about->setShortcut(QKeySequence("Ctrl+I"));
     connect(action_about, &QAction::triggered, this, &MainWindow::open_about_triggered);
     p_toolbar->addAction(action_about);
 
