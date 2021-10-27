@@ -552,7 +552,14 @@ ButtonWidget::ButtonWidget(TcamPropertyCommand* prop,
 }
 
 void ButtonWidget::update()
-{}
+{
+    GError* err = nullptr;
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+
+    HANDLE_ERROR(err, return);
+
+    set_locked(lock);
+}
 
 
 QString ButtonWidget::get_name() const
