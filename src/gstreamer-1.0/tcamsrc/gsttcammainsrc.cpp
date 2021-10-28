@@ -146,7 +146,7 @@ static gboolean gst_tcam_mainsrc_negotiate(GstBaseSrc* basesrc)
             /* Sometimes gst_caps_is_any returns FALSE even for ANY caps?!?! */
             bool is_any_caps = gst_helper::to_string(*ipcaps) == "ANY";
 
-            if (gst_caps_is_any(ipcaps) || is_any_caps)
+            if (gst_caps_is_any(ipcaps) || is_any_caps || gst_caps_is_empty(ipcaps))
             {
                 continue;
             }
