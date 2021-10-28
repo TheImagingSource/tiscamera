@@ -419,6 +419,11 @@ void MainWindow::open_pipeline(FormatHandling handling)
         qInfo("Auto selected caps are: %s", gst_caps_to_string(caps));
     }
 
+    if (src_caps)
+    {
+        gst_caps_unref(src_caps);
+    }
+
     if (has_property(p_source, "device-caps"))
     {
         qInfo("settings caps to : %s", gst_caps_to_string(caps));
@@ -477,6 +482,12 @@ void MainWindow::close_pipeline()
         gst_element_set_state(p_pipeline, GST_STATE_NULL);
         gst_object_unref(p_pipeline);
         p_pipeline = nullptr;
+
+        if (p_about)
+        {
+            p_about->set_tcambin(nullptr);
+        }
+        p_source = nullptr;
     }
 
     reset_fps_tick();
@@ -542,6 +553,11 @@ void MainWindow::open_about_triggered()
 {
     p_about = new AboutDialog(this);
 
+    if (p_source)
+    {
+        p_about->set_tcambin(p_source);
+    }
+
     p_about->show();
 }
 
@@ -565,6 +581,11 @@ void MainWindow::enable_device_gui_elements(bool toggle)
 {
     p_action_property_dialog->setEnabled(toggle);
     p_action_format_dialog->setEnabled(toggle);
+
+    if (p_about)
+    {
+        p_about->set_tcambin(p_source);
+    }
 }
 
 

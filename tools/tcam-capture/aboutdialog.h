@@ -19,6 +19,8 @@
 
 #include <QDialog>
 
+#include <gst/gst.h>
+
 namespace Ui {
 class AboutDialog;
 }
@@ -31,11 +33,21 @@ public:
     explicit AboutDialog(QWidget *parent = nullptr);
     ~AboutDialog();
 
+    void set_tcambin(GstElement* bin);
+
+private slots:
+
+    void update_state();
+    void write_state();
+
 private:
 
     void fill_versions();
+    void fill_state();
 
     Ui::AboutDialog *ui;
+
+    GstElement* p_tcambin = nullptr;
 };
 
 #endif // ABOUTDIALOG_H

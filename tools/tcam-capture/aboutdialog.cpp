@@ -19,6 +19,7 @@
 
 #include <QProcess>
 #include <QLabel>
+#include <QPushButton>
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
@@ -29,6 +30,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     ui->tab_versions->layout()->setAlignment(Qt::AlignTop);
 
     fill_versions();
+    fill_state();
 }
 
 AboutDialog::~AboutDialog()
@@ -66,4 +68,49 @@ void AboutDialog::fill_versions()
 
     ui->label_versions->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     ui->label_versions->setText(s);
+}
+
+
+void AboutDialog::fill_state()
+{
+    auto apply_button = ui->buttonBox_2->button(QDialogButtonBox::Apply);
+    auto reset_button = ui->buttonBox_2->button(QDialogButtonBox::Reset);
+
+    connect(apply_button, &QPushButton::clicked, this, &AboutDialog::write_state);
+    connect(reset_button, &QPushButton::clicked, this, &AboutDialog::update_state);
+}
+
+
+void AboutDialog::set_tcambin(GstElement* bin)
+{
+    p_tcambin = bin;
+
+    update_state();
+}
+
+
+void AboutDialog::update_state()
+{
+    if (!p_tcambin)
+    {
+        ui->state_field->setPlainText("");
+        ui->state_field->setEnabled(false);
+        return;
+    }
+
+    GValue state = G_VALUE_INIT;
+    g_object_get_property(G_OBJECT(p_tcambin), "tcam-properties-json", &state);
+
+    ui->state_field->setPlainText(g_value_get_string(&state));
+
+    ui->state_field->setEnabled(true);
+}
+
+
+void AboutDialog::write_state()
+{
+    auto str = ui->state_field->toPlainText();
+
+    g_object_set(p_tcambin, "tcam-properties-json", str.toStdString().c_str(), nullptr);
+
 }
