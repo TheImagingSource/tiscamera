@@ -46,7 +46,7 @@ add_library(gsttcamsrc SHARED
 
 	tcamgstbase
 	tcam::gst-helper
-    tcam::tcamprop
+    tcam::tcam-property
     tcamprop1::provider_gobject
     )
 set_project_warnings(gsttcamsrc)

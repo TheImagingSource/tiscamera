@@ -30,7 +30,7 @@ target_link_libraries( tcamprop1_provider_gobject
 PUBLIC
 	tcamprop1::provider 
 PRIVATE
-	tcam::tcamprop 
+	tcam::tcam-property 
 	fmt::fmt 
 	project-warnings 
 	tcam::gst-helper

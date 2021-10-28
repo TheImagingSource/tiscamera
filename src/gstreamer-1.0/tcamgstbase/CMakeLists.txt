@@ -35,7 +35,7 @@ ${GSTREAMER_INCLUDE_DIRS}
 target_link_libraries(tcamgstbase
   PUBLIC
   tcam
-  tcam::tcamprop
+  tcam::tcam-property
   dutils_img::base
   spdlog::spdlog
   tcam::gst-helper-dutils

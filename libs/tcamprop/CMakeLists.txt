@@ -1,17 +1,17 @@
 
 cmake_minimum_required(VERSION 3.2)
 
-project(tcamprop)
+project(tcam-property)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    set( tcamprop-standalone true )
+  set( tcamproperty-standalone true )
 else()
-    set( tcamprop-standalone false )
+  set( tcamproperty-standalone false )
 endif()
 
-if( ${tcamprop-standalone} )
+if( ${tcamproperty-standalone} )
     set(default_build_type "Release")
 
     if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -29,19 +29,19 @@ if( ${tcamprop-standalone} )
 endif()
 
 
-set(TCAMPROP_VERSION_MAJOR 1)
-set(TCAMPROP_VERSION_MINOR 0)
-set(TCAMPROP_VERSION_PATCH 0)
+set(TCAM_PROPERTY_VERSION_MAJOR 1)
+set(TCAM_PROPERTY_VERSION_MINOR 0)
+set(TCAM_PROPERTY_VERSION_PATCH 0)
 
-set(TCAMPROP_VERSION "${TCAMPROP_VERSION_MAJOR}.${TCAMPROP_VERSION_MINOR}.${TCAMPROP_VERSION_PATCH}" CACHE STRING "Version number")
+set(TCAM_PROPERTY_VERSION "${TCAM_PROPERTY_VERSION_MAJOR}.${TCAM_PROPERTY_VERSION_MINOR}.${TCAM_PROPERTY_VERSION_PATCH}" CACHE STRING "Version number")
 
 
-set(TCAMPROP_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
-set(TCAMPROP_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
+set(TCAM_PROPERTY_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path")
+set(TCAM_PROPERTY_INSTALL_INCLUDE "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "header installation path")
 
 add_subdirectory(src)
 
-add_library( tcam::tcamprop ALIAS tcamprop )
+add_library( tcam::tcam-property ALIAS tcam-property )
 
 # uninstall target
 configure_file(
@@ -52,15 +52,15 @@ configure_file(
 # create target uninstall to deinstall tiscamera
 # if tiscamera is a subproject/module
 # create uninstall-tcamprop instead
-if( ${tcamprop-standalone} )
+if( ${tcamproperty-standalone} )
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 else()
-  add_custom_target(uninstall-tcamprop
+  add_custom_target(uninstall-tcamproperty
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-if( ${tcamprop-standalone} )
+if( ${tcamproperty-standalone} )
 
     include(CPackComponent)
 
@@ -82,15 +82,15 @@ if( ${tcamprop-standalone} )
     set(CPACK_SET_DESTDIR "on")
     set(CPACK_GENERATOR "DEB")
 
-    set(CPACK_PACKAGE_VERSION_MAJOR "${TCAMPROP_VERSION_MAJOR}")
-    set(CPACK_PACKAGE_VERSION_MINOR "${TCAMPROP_VERSION_MINOR}")
-    set(CPACK_PACKAGE_VERSION_PATCH "${TCAMPROP_VERSION_PATCH}")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${TCAM_PROPERTY_VERSION_MAJOR}")
+    set(CPACK_PACKAGE_VERSION_MINOR "${TCAM_PROPERTY_VERSION_MINOR}")
+    set(CPACK_PACKAGE_VERSION_PATCH "${TCAM_PROPERTY_VERSION_PATCH}")
 
     include( cmake/git-helper.cmake )
 
     git_commit_count(GIT_COMMIT_COUNT)
     # ensure package version always increases
-    set(CPACK_DEBIAN_PACKAGE_VERSION "${TCAMPROP_VERSION}.${GIT_COMMIT_COUNT}")
+    set(CPACK_DEBIAN_PACKAGE_VERSION "${TCAM_PROPERTY_VERSION}.${GIT_COMMIT_COUNT}")
 
     set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
@@ -102,11 +102,11 @@ if( ${tcamprop-standalone} )
     set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
 
 
-    set(CPACK_PACKAGE_NAME "tiscamera-tcamprop")
+    set(CPACK_PACKAGE_NAME "tiscamera-tcamproperty")
 
     include(cmake/package-name.cmake)
 
-    create_package_name(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}" "${TCAMPROP_VERSION}")
+    create_package_name(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}" "${TCAM_PROPERTY_VERSION}")
 
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 

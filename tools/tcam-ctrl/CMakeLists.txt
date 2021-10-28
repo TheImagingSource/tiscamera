@@ -36,7 +36,7 @@ target_include_directories(tcam-ctrl PRIVATE "${TCAM_SOURCE_DIR}/external/CLI11"
 target_link_libraries( tcam-ctrl
 PRIVATE
 	tcam
-	tcam::tcamprop
+	tcam::tcam-property
 
 	${GSTREAMER_LIBRARIES}
 	${GSTREAMER_BASE_LIBRARIES}

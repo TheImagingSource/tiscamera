@@ -36,7 +36,7 @@ target_link_libraries(tcamconvert
   PRIVATE
   spdlog::spdlog
   tcam::gst-helper-dutils
-  tcam::tcamprop
+  tcam::tcam-property
   tcam
   ${GSTREAMER_LIBRARIES}
   ${GSTREAMER_BASE_LIBRARIES}
