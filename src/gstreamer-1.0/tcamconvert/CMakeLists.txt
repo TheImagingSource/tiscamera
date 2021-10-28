@@ -17,8 +17,8 @@ add_library(tcamconvert SHARED
   "tcamconvert.h"
   "tcamconvert.cpp"
 
-  "tcamprop_impl.h"
-  "tcamprop_impl.cpp"
+  
+  
   "tcamconvert_context.h"
   "tcamconvert_context.cpp"
   "transform_impl.h"

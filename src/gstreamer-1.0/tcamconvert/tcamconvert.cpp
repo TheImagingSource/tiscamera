@@ -18,15 +18,14 @@
 
 #include "../../version.h"
 #include "tcamconvert_context.h"
-#include "tcamprop_impl.h"
 
 #include <algorithm>
 #include <array>
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
-#include <gst-helper/gstcaps_dutils_interop.h>
 #include <gst-helper/gst_gvalue_helper.h>
+#include <gst-helper/gstcaps_dutils_interop.h>
 #include <gst-helper/helper_functions.h>
 #include <gst/video/gstvideometa.h>
 #include <vector>
@@ -40,13 +39,7 @@ GST_DEBUG_CATEGORY_STATIC(gst_tcamconvert_debug_category);
 #define GST_CAT_DEFAULT gst_tcamconvert_debug_category
 
 #define gst_tcamconvert_parent_class parent_class
-G_DEFINE_TYPE(GstTCamConvert,
-              gst_tcamconvert,
-              GST_TYPE_BASE_TRANSFORM
-              //, G_IMPLEMENT_INTERFACE(TCAM_TYPE_PROP,
-              //                       tcamconvert::gst_tcamconvert_prop_init)
-    )
-
+G_DEFINE_TYPE(GstTCamConvert, gst_tcamconvert, GST_TYPE_BASE_TRANSFORM)
 
 
 static tcamconvert::tcamconvert_context_base& get_gst_elem_reference(GstTCamConvert* iface)
@@ -234,7 +227,8 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* base,
                                                GstCaps* caps,
                                                GstCaps* filter)
 {
-    auto dir_to_string = [](GstPadDirection dir) {
+    auto dir_to_string = [](GstPadDirection dir)
+    {
         return dir == GST_PAD_SRC ? "GST_PAD_SRC" : "GST_PAD_SINK";
     };
 
@@ -252,10 +246,10 @@ static GstCaps* gst_tcamconvert_transform_caps(GstBaseTransform* base,
                      gst_helper::to_string(*caps).c_str(),
                      gst_helper::to_string(*res_caps).c_str());
 
-    if (gst_caps_is_empty(caps)
-        || gst_caps_is_empty(res_caps))
+    if (gst_caps_is_empty(caps) || gst_caps_is_empty(res_caps))
     {
-        GST_ELEMENT_ERROR(base, STREAM, FORMAT, (("Unable to convert between caps formats")), (NULL));
+        GST_ELEMENT_ERROR(
+            base, STREAM, FORMAT, (("Unable to convert between caps formats")), (NULL));
     }
 
     return res_caps;
@@ -357,8 +351,7 @@ static GstFlowReturn gst_tcamconvert_transform(GstBaseTransform* base,
     return GST_FLOW_OK;
 }
 
-static GstFlowReturn gst_tcamconvert_transform_ip([[maybe_unused]] GstBaseTransform* base,
-                                                  [[maybe_unused]] GstBuffer* inbuf)
+static GstFlowReturn gst_tcamconvert_transform_ip(GstBaseTransform* base, GstBuffer* inbuf)
 {
     auto& elem = get_gst_elem_reference(GST_TCAMCONVERT(base));
 
@@ -489,7 +482,7 @@ static void gst_tcamconvert_dispose(GObject* object)
     auto* self = GST_TCAMCONVERT(object);
     {
         auto sink_pad = gst_helper::get_static_pad(*GST_ELEMENT(self), "sink");
-        /*int res =*/ g_signal_handlers_disconnect_by_data(sink_pad.get(), self);
+        /*int res =*/g_signal_handlers_disconnect_by_data(sink_pad.get(), self);
         //assert(res == 2);
     }
     G_OBJECT_CLASS(gst_tcamconvert_parent_class)->dispose(object);

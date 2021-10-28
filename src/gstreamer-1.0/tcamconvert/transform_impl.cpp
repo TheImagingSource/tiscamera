@@ -1,6 +1,7 @@
 
 #include "transform_impl.h"
 
+#include "../../../libs/dutils_image/src/dutils_img_base/memcpy_image.h"
 #include "../../../libs/dutils_image/src/dutils_img_filter/by_edge/by_edge.h"
 #include "../../../libs/dutils_image/src/dutils_img_filter/filter/whitebalance/wb_apply.h"
 #include "../../../libs/dutils_image/src/dutils_img_filter/transform/fcc1x_packed/fcc1x_packed_to_fcc.h"
@@ -267,7 +268,8 @@ static auto find_transform_function_wb_type(img::img_type dst_type, img::img_typ
 
     auto transform_func = [transform_only_func, wb_func](const img::img_descriptor& dst,
                                                          const img::img_descriptor& src,
-                                                         img_filter::filter_params& params) {
+                                                         img_filter::filter_params& params)
+    {
         transform_only_func(dst, src);
         wb_func(dst, params.whitebalance);
     };
@@ -284,7 +286,8 @@ static auto find_bayer8_to_bgra_func(const img::img_type& dst_type, const img::i
 #elif
     auto func = img_filter::transform::by_edge::get_transform_by8_to_dst_c(dst_type, src_type);
 #endif
-    return [func](const img::img_descriptor& dst, const img::img_descriptor& src) {
+    return [func](const img::img_descriptor& dst, const img::img_descriptor& src)
+    {
         static const img_filter::transform::by_edge::options opt = { {}, false, false };
 
         auto dst_ = img::flip_image_in_img_desc(dst);
@@ -375,12 +378,13 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                 transform_fccXX_to_dst_func_ =
                     [transform_to_bgra_func](const img::img_descriptor& dst,
                                              const img::img_descriptor& src,
-                                             img_filter::filter_params& /*params*/) {
-                        assert(src.fourcc_type() == img::fourcc::MONO8);
-                        assert(dst.fourcc_type() == img::fourcc::BGRA32);
+                                             img_filter::filter_params& /*params*/)
+                {
+                    assert(src.fourcc_type() == img::fourcc::MONO8);
+                    assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
-                        transform_to_bgra_func(dst, src);
-                    };
+                    transform_to_bgra_func(dst, src);
+                };
                 return transform_fccXX_to_dst_func_ != nullptr;
             }
             else if (img::is_mono_fcc(src_type.fourcc_type())) // monoXX to BGRx
@@ -400,12 +404,12 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                     find_transform_mono_to_bgr_func(dst_type, transform_intermediate_type);
                 assert(transform_to_bgra_func != nullptr);
 
-                transform_fccXX_to_dst_func_ = [transform_intermediate_type,
-                                                transfrom_to_mono8,
-                                                transform_to_bgra_func,
-                                                this](const img::img_descriptor& dst,
-                                                      const img::img_descriptor& src,
-                                                      img_filter::filter_params& /*params*/) {
+                transform_fccXX_to_dst_func_ =
+                    [transform_intermediate_type, transfrom_to_mono8, transform_to_bgra_func, this](
+                        const img::img_descriptor& dst,
+                        const img::img_descriptor& src,
+                        img_filter::filter_params& /*params*/)
+                {
                     assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
                     auto mono8_img_desc = img::make_img_desc_from_linear_memory(
@@ -426,10 +430,11 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                 auto transform_by8_to_bgra_func = find_bayer8_to_bgra_func(dst_type, src_type);
                 assert(transform_by8_to_bgra_func != nullptr);
 
-                transform_fccXX_to_dst_func_ = [transform_by8_to_bgra_func,
-                                                wb_func](const img::img_descriptor& dst,
-                                                         const img::img_descriptor& src,
-                                                         img_filter::filter_params& params) {
+                transform_fccXX_to_dst_func_ =
+                    [transform_by8_to_bgra_func, wb_func](const img::img_descriptor& dst,
+                                                          const img::img_descriptor& src,
+                                                          img_filter::filter_params& params)
+                {
                     assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
                     wb_func(src, params.whitebalance);
@@ -458,7 +463,8 @@ bool tcamconvert::transform_context::setup(img::img_type src_type, img::img_type
                                                 transform_intermediate_type,
                                                 this](const img::img_descriptor& dst,
                                                       const img::img_descriptor& src,
-                                                      img_filter::filter_params& params) {
+                                                      img_filter::filter_params& params)
+                {
                     assert(dst.fourcc_type() == img::fourcc::BGRA32);
 
                     auto by8_img_desc = img::make_img_desc_from_linear_memory(
@@ -480,16 +486,29 @@ void tcamconvert::transform_context::transform(const img::img_descriptor& src,
                                                const img::img_descriptor& dst,
                                                const img_filter::whitebalance_params& params)
 {
-    if (transform_fccXX_to_dst_func_)
+    if (transform_fccXX_to_dst_func_ == nullptr && transfrom_binary_mono_func_ == nullptr)
     {
-        img_filter::filter_params tmp = { params };
-
-        transform_fccXX_to_dst_func_(dst, src, tmp);
-
-        return;
+        img::memcpy_image(dst, src);
+        if (transform_unary_wb_func_ && params.apply)
+        {
+            transform_unary_wb_func_(dst, params);
+        }
     }
+    else
+    {
+        if (transform_fccXX_to_dst_func_)
+        {
+            img_filter::filter_params tmp = { params };
 
-    transfrom_binary_mono_func_(dst, src);
+            transform_fccXX_to_dst_func_(dst, src, tmp);
+
+            return;
+        }
+
+        assert(transfrom_binary_mono_func_ != nullptr);
+
+        transfrom_binary_mono_func_(dst, src);
+    }
 }
 
 void tcamconvert::transform_context::filter(const img::img_descriptor& src,
