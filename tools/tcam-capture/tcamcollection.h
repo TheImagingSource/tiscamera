@@ -17,7 +17,7 @@
 #pragma once
 
 #include <gst/gst.h>
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
+#include <tcam-property-1.0.h>
 #include <vector>
 #include <map>
 #include <string>

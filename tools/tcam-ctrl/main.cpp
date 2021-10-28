@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "../../src/public_utils.h"
 #include "../../src/version.h"
 #include "formats.h"
@@ -27,6 +26,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
+#include <tcam-property-1.0.h>
 #include <unistd.h>
 
 static void print_version(size_t /*t*/)

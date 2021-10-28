@@ -20,8 +20,6 @@
 #include "mainsrc_device_state.h"
 #include "gsttcammainsrc.h"
 
-#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
-
 using namespace tcam::property;
 
 using namespace tcam;

@@ -21,7 +21,7 @@
 #include "tcamslider.h"
 #include "tcamsliderwidget.h"
 
-#include "tcam-property-1.0.h"
+#include <tcam-property-1.0.h>
 
 #include <QBoxLayout>
 #include <QCheckBox>

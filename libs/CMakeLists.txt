@@ -15,4 +15,4 @@
 
 add_subdirectory(dutils_image EXCLUDE_FROM_ALL)
 add_subdirectory(gst-helper EXCLUDE_FROM_ALL)
-add_subdirectory(tcamprop)
+add_subdirectory(tcam-property)

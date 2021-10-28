@@ -16,12 +16,12 @@
 
 #include "properties.h"
 
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
 #include "general.h"
 
 #include <gst/gst.h>
 #include <iomanip>
 #include <iostream>
+#include <tcam-property-1.0.h>
 
 static const size_t name_width = 40;
 

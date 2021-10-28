@@ -17,7 +17,7 @@
 #include "gsttcamsrc.h"
 
 #include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_serialize.h"
-#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
+#include "../../../libs/tcam-property/src/tcam-property-1.0.h"
 #include "../../base_types.h"
 #include "../../logging.h"
 #include "../../public_utils.h"

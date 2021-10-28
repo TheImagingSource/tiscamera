@@ -18,11 +18,10 @@
 #define INDEXER_H
 
 #include "device.h"
-#include "gst/gst.h"
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
 
 #include <QMutex>
 #include <QTimer>
+#include <gst/gst.h>
 #include <vector>
 
 class Indexer : public QObject

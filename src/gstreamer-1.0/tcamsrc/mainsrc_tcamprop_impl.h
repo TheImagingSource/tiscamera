@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
+#include "../../../libs/tcam-property/src/tcam-property-1.0.h"
 #include "../../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info_list.h"
 #include "../../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h"
 #include "../../../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_interface.h"

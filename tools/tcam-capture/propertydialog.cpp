@@ -19,7 +19,7 @@
 #include "ui_propertydialog.h"
 #include <QFormLayout>
 
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
+#include <tcam-property-1.0.h>
 
 // overload the function call operator
 bool sort_props(const std::string& lhs, const std::string& rhs)

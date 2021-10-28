@@ -17,8 +17,7 @@
 #pragma once
 
 #include <string>
-
-#include "../../../libs/tcamprop/src/tcam-property-1.0.h"
+#include <tcam-property-1.0.h>
 
 namespace tcam::gst
 {

@@ -17,15 +17,15 @@
 #ifndef PROPERTYWORKER_H
 #define PROPERTYWORKER_H
 
-#include "../../libs/tcamprop/src/tcam-property-1.0.h"
+#include "propertywidget.h"
+#include "tcamcollection.h"
 
 #include <QThread>
 #include <QTimer>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#include "propertywidget.h"
-#include "tcamcollection.h"
+#include <tcam-property-1.0.h>
 
 class PropertyWorker : public QObject
 {
