@@ -620,6 +620,10 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 return GST_STATE_CHANGE_FAILURE;
             }
 
+            // apply caps to internal capsfilter
+            // this applies the caps to tcamsrc
+            g_object_set(self->data->pipeline_caps, "caps", self->data->src_caps.get(), NULL);
+
             /*
              * We send this message as a means of always notifying
              * applications of the output caps we use.
@@ -834,7 +838,6 @@ static void gst_tcambin_set_property(GObject* object,
         {
             GST_INFO("Setting device-caps to %s", g_value_get_string(value));
             state.user_caps = gst_helper::make_ptr(gst_caps_from_string(g_value_get_string(value)));
-            GST_INFO("%s", gst_caps_to_string(state.user_caps.get()));
             break;
         }
         case PROP_CONVERSION_ELEMENT:
