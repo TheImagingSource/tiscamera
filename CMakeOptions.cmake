@@ -36,7 +36,6 @@ if (TCAM_ARAVIS_USB_VISION)
 endif (TCAM_ARAVIS_USB_VISION)
 
 option(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY "Disable all other libraries/tool and only build tcam-uvc-extension-loader." OFF)
-option(TCAM_BUILD_FIRMWARE_UPDATE_ONLY "Disable all other libraries/tool and only build firmware-update." OFF)
 option(TCAM_BUILD_GIGETOOL_ONLY "Disable all other libraries/tool and only build camera-ip-conf." OFF)
 
 option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder." ON)
@@ -108,25 +107,6 @@ if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
   set(TCAM_ENABLED_MODULES "tcam-uvc-extension-loader")
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
-
-if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
-
-  set(BUILD_GST_1_0 OFF)
-  set(BUILD_ARAVIS OFF)
-  set(BUILD_V4L2 OFF)
-  set(BUILD_LIBUSB OFF)
-  set(BUILD_TOOLS OFF)
-  set(BUILD_DOCUMENTATION OFF)
-  set(BUILD_TESTS OFF)
-  set(TCAM_ARAVIS_USB_VISION OFF)
-
-  set(TCAM_EXCLUSIVE_BUILD ON)
-  set(TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY OFF)
-  set(TCAM_BUILD_CAMERA_IP_CONF_ONLY OFF)
-
-  set(TCAM_ENABLED_MODULES "firmware-update")
-
-endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
 
 if (TCAM_BUILD_GIGETOOL_ONLY)
 

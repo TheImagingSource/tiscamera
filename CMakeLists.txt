@@ -72,14 +72,6 @@ if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
-if (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
-
-  add_subdirectory(external)
-  add_subdirectory(tools/firmware-update)
-
-endif (TCAM_BUILD_FIRMWARE_UPDATE_ONLY)
-
-
 if (TCAM_BUILD_GIGETOOL_ONLY)
 
   add_subdirectory(external)

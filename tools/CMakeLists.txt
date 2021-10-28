@@ -24,8 +24,6 @@ endif (TCAM_BUILD_WITH_GUI)
 
 if (BUILD_V4L2)
 
-  add_subdirectory(firmware-update)
-
   add_subdirectory(dfk73udev)
 
   add_subdirectory(tcam-uvc-extension-loader)
