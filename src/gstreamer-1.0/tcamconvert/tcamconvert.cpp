@@ -19,8 +19,6 @@
 #include "../../version.h"
 #include "tcamconvert_context.h"
 
-#include <algorithm>
-#include <array>
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img_lib/dutils_gst_interop.h>
@@ -101,10 +99,13 @@ static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps
 
     if (!elem.setup(src, dst))
     {
-        GST_ERROR_OBJECT(self,
-                         "Failed to find conversion from %s to %s",
-                         img::fcc_to_string(src.type).c_str(),
-                         img::fcc_to_string(dst.type).c_str());
+        GST_ELEMENT_ERROR(self,
+                          STREAM,
+                          FORMAT,
+                          ("Failed to find conversion from %s to %s",
+                           img::fcc_to_string(src.type).c_str(),
+                           img::fcc_to_string(dst.type).c_str()),
+                          (NULL));
         return FALSE;
     }
     return TRUE;
@@ -113,15 +114,12 @@ static gboolean gst_tcamconvert_set_caps(GstBaseTransform* base, GstCaps* incaps
 
 static void create_fmt(GstCaps* res_caps,
                        const GstStructure* structure,
-                       const std::string& fmt,
+                       img::fourcc fourcc,
                        GstPadDirection direction)
 {
     const GValue* w = gst_structure_get_value(structure, "width");
     const GValue* h = gst_structure_get_value(structure, "height");
     const GValue* frt = gst_structure_get_value(structure, "framerate");
-
-    const img::fourcc fourcc =
-        img_lib::gst::gst_caps_string_to_fourcc(gst_structure_get_name(structure), fmt);
 
     std::vector<img::fourcc> vec;
     if (direction == GST_PAD_SRC)
@@ -181,32 +179,10 @@ static GstCaps* transform_caps(GstCaps* caps, GstPadDirection direction)
     {
         GstStructure* structure = gst_caps_get_structure(caps, i);
 
-        std::vector<std::string> fmt_vec;
+        auto fcc_vec = gst_helper::convert_GstStructure_to_fcc_list(*structure);
 
-        if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
-        {
-            auto gval = gst_structure_get_value(structure, "format");
-            if (gval)
-            {
-                fmt_vec = gst_helper::gst_string_list_to_vector(*gval);
-            }
-        }
-        else if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
-        {
-            fmt_vec.push_back(gst_structure_get_string(structure, "format"));
-        }
-
-        if (fmt_vec.empty())
-        {
-            GST_ERROR("No format given.");
-            continue;
-        }
-
-        // for every entry in fmt_vec create a GstCaps that is appended to res_caps
-        for (auto&& fcc_string : fmt_vec)
-        {
-            create_fmt(res_caps, structure, fcc_string, direction);
-        }
+        // for every entry in fcc_vec create a GstCaps that is appended to res_caps
+        for (auto&& fcc : fcc_vec) { create_fmt(res_caps, structure, fcc, direction); }
     }
 
     res_caps = gst_caps_simplify(res_caps);
@@ -265,8 +241,8 @@ static gboolean gst_tcamconvert_get_unit_size(GstBaseTransform* trans, GstCaps* 
         GST_ELEMENT_ERROR(trans,
                           CORE,
                           NEGOTIATION,
-                          (NULL),
-                          ("Incomplete caps, format/dimensions missing or unknown"));
+                          ("Incomplete caps, format/dimensions missing or unknown"),
+                          (NULL));
         return FALSE;
     }
     size_t img_size = img::calc_minimum_img_size(type.fourcc_type(), type.dim);
@@ -275,8 +251,8 @@ static gboolean gst_tcamconvert_get_unit_size(GstBaseTransform* trans, GstCaps* 
         GST_ELEMENT_ERROR(trans,
                           CORE,
                           NEGOTIATION,
-                          (NULL),
-                          ("Incomplete caps, unable to compute image size from format and dim"));
+                          ("Incomplete caps, unable to compute image size from format and dim"),
+                          (NULL));
         return FALSE;
     }
 
