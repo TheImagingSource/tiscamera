@@ -570,6 +570,13 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 GST_INFO_OBJECT(self,
                                 "caps of sink: %" GST_PTR_FORMAT,
                                 static_cast<void*>(data.target_caps.get()));
+
+                if (gst_caps_is_any(data.target_caps.get()))
+                {
+                    // when offered 'ANY' change to 'EMPTY'
+                    // prefer a single 'generic' caps definition over two
+                    data.target_caps = gst_helper::make_ptr(gst_caps_new_empty());
+                }
             }
 
             auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
