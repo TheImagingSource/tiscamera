@@ -33,3 +33,31 @@ enum class ConversionElement : int
     TcamDutils,
     TcamDutilsCuda,
 };
+
+
+static const char* conversion_element_to_string (const ConversionElement entry)
+{
+    switch(entry)
+    {
+        case ConversionElement::Auto:
+        {
+            return "auto";
+        }
+        case ConversionElement::TcamConvert:
+        {
+            return "tcamconvert";
+        }
+        case ConversionElement::TcamDutils:
+        {
+            return "tcamdutils";
+        }
+        case ConversionElement::TcamDutilsCuda:
+        {
+            return "tcamdutils-cuda";
+        }
+        default:
+        {
+            return "";
+        }
+    }
+}

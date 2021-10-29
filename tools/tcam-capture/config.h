@@ -25,7 +25,6 @@ struct TcamCaptureConfig
 {
     FormatHandling format_selection_type = FormatHandling::Auto;
     ConversionElement conversion_element = ConversionElement::Auto;
-    bool use_dutils = true;
     // expectations
     // output element name: sink
     // if a capsfilter element named device-caps exists it will have the configured caps set
@@ -58,7 +57,11 @@ struct TcamCaptureConfig
         if (!tmp.isEmpty())
         {
             pipeline = tmp;
+
+            pipeline.replace(QString("{display-sink}"),
+                             QString("fpsdisplaysink video-sink=xvimagesink sync=false name=sink text-overlay=false signal-fps-measurements=true"));
         }
+
         qInfo("Pipeline base string: %s", pipeline.toStdString().c_str());
     }
 };
