@@ -413,12 +413,6 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
 
     GST_ERROR("Device lost (%s)", self->device->device_serial.c_str());
 
-    GST_ELEMENT_ERROR(GST_ELEMENT(self),
-                      RESOURCE,
-                      NOT_FOUND,
-                      ("Device lost (%s)", self->device->device_serial.c_str()),
-                      (NULL));
-
 #if GST_VERSION_MAJOR >= 1 && GST_VERSION_MINOR >= 10
 
     GST_ELEMENT_ERROR_WITH_DETAILS(
@@ -429,15 +423,30 @@ static void gst_tcam_mainsrc_device_lost_callback(const tcam::tcam_device_info* 
         ((nullptr)),
         ("serial", G_TYPE_STRING, self->device->device_serial.c_str(), nullptr));
 
+#else
+
+    GST_ELEMENT_ERROR(GST_ELEMENT(self),
+                      RESOURCE,
+                      NOT_FOUND,
+                      ("Device lost (%s)", self->device->device_serial.c_str()),
+                      (NULL));
+
 #endif
 
     self->device->is_running = false;
-    gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
 
     // the device is considered lost.
     // might as well inform via all possible channels to keep
     // property queries, etc from appearing while everything is shutting down
     g_signal_emit(G_OBJECT(self), gst_tcammainsrc_signals[SIGNAL_DEVICE_CLOSE], 0);
+
+    // do not send EOS here
+    // this can cause a deadlock in the tcambin state handling
+    // EOS will be triggered in mainsrc_create and transmitted through the capture thread
+    // this has been triggered by setting self->device->is_running to false
+
+    // gst_element_send_event(GST_ELEMENT(self), gst_event_new_eos());
+
 
     // do not call stop
     // some users experience segfaults
