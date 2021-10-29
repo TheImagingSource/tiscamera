@@ -293,6 +293,8 @@ void MainWindow::open_pipeline(FormatHandling handling)
     std::string pipeline_string = m_config.pipeline.toStdString();
     GError* err = nullptr;
 
+    bool set_device = false;
+
     if (p_pipeline)
     {
         GstState state;
@@ -316,7 +318,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     }
     else
     {
-
+        set_device = true;
         p_pipeline = gst_parse_launch(pipeline_string.c_str(), &err);
     }
 
@@ -343,21 +345,22 @@ void MainWindow::open_pipeline(FormatHandling handling)
         return g_object_class_find_property(G_OBJECT_GET_CLASS(element), name) != nullptr;
     };
 
-    p_source = gst_bin_get_by_name(GST_BIN(p_pipeline), "tcam0");
-
-    if (!p_source)
+    if (set_device)
     {
-        // TODO throw error to user
-        qInfo("NO source for you");
-        return;
+        p_source = gst_bin_get_by_name(GST_BIN(p_pipeline), "tcam0");
+
+        if (!p_source)
+        {
+            // TODO throw error to user
+            qInfo("NO source for you");
+            return;
+        }
+
+        if (has_property(p_source, "serial"))
+        {
+            g_object_set(p_source, "serial", serial.c_str(), nullptr);
+        }
     }
-
-
-    if (has_property(p_source, "serial"))
-    {
-        g_object_set(p_source, "serial", serial.c_str(), nullptr);
-    }
-
     // if (has_property(p_source, "use-dutils"))
     // {
     //     g_object_set(p_source, "use-dutils", m_config.use_dutils, nullptr);
@@ -384,17 +387,26 @@ void MainWindow::open_pipeline(FormatHandling handling)
         gst_object_ref(tcamsrc);
     }
 
-    GstPad* src_pad = gst_element_get_static_pad(tcamsrc, "src");
+    GstCaps* src_caps = nullptr;
+    if (has_property(p_source, "available-caps"))
+    {
+        const char* available_caps = nullptr;
+        g_object_get(p_source, "available-caps", &available_caps, NULL);
+        src_caps = gst_caps_from_string(available_caps);
+        m_selected_device.set_caps(src_caps);
+    }
+    else
+    {
+        GstPad* src_pad = gst_element_get_static_pad(tcamsrc, "src");
 
-    GstCaps* src_caps = gst_pad_query_caps(src_pad, nullptr);
+        src_caps = gst_pad_query_caps(src_pad, nullptr);
 
-    gst_object_unref(src_pad);
+        gst_object_unref(src_pad);
 
-    m_selected_device.set_caps(src_caps);
+        m_selected_device.set_caps(src_caps);
 
-    qInfo("SOURCE CAPS: %s", gst_caps_to_string(src_caps));
-
-    gst_object_unref(tcamsrc);
+        gst_object_unref(tcamsrc);
+    }
 
     GstCaps* caps;
     if (handling == FormatHandling::Dialog)
