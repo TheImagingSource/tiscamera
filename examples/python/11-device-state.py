@@ -21,10 +21,9 @@
 import sys
 import gi
 
-gi.require_version("Tcam", "0.1")
 gi.require_version("Gst", "1.0")
 
-from gi.repository import Tcam, Gst
+from gi.repository import Gst
 
 
 def block_until_playing(pipeline):
@@ -76,17 +75,18 @@ def main():
         print("Unable to start pipeline")
 
     # Print properties for a before/after comparison
-    state = camera.get_property("state")
+    state = camera.get_property("tcam-properties-json")
 
-    print("State of device is:\n{}".format(state))
+    print(f"State of device is:\n{state}")
 
     # Change JSON description here
     # not part of this example
-    camera.set_property("state", state)
+
+    camera.set_property("tcam-properties-json", state)
 
     # Print properties for a before/after comparison
     state = camera.get_property("state")
-    print("State of device is:\n{}".format(state))
+    print(f"State of device is:\n{state}")
 
     # cleanup, reset state
     pipeline.set_state(Gst.State.NULL)

@@ -33,6 +33,11 @@ def print_properties(camera):
     Print selected properties
     """
     try:
+
+        property_exposure_auto = camera.get_tcam_property("ExposureAuto")
+
+        print(property_exposure_auto.get_value())
+
         value = camera.get_tcam_enumeration("ExposureAuto")
 
         print(f"Exposure Auto has value: {value}")
@@ -40,9 +45,10 @@ def print_properties(camera):
         value = camera.get_tcam_enumeration("GainAuto")
 
         print("Gain Auto has value: {}".format(value))
-        value = camera.get_tcam_integer("Brightness")
 
-        print("Brightness has value: {}".format(value))
+        value = camera.get_tcam_float("ExposureTime")
+
+        print("ExposureTimer has value: {}".format(value))
 
     except GLib.Error as err:
 
@@ -95,7 +101,7 @@ def main():
     camera.set_tcam_enumeration("ExposureAuto", "Off")
     camera.set_tcam_enumeration("GainAuto", "Off")
 
-    camera.set_tcam_integer("Brightness", 200)
+    camera.set_tcam_float("ExposureTime", 2000)
 
     print_properties(camera)
 

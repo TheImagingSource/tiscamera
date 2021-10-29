@@ -47,7 +47,7 @@ def bus_function(bus, message, user_data):
 
     if message.type == Gst.MessageType.DEVICE_ADDED:
         device = message.parse_device_added()
-        print("ADDED Device")
+        print("NEW Device")
         print_device(device)
     elif message.type == Gst.MessageType.DEVICE_REMOVED:
         device = message.parse_device_removed()
