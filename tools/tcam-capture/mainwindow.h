@@ -90,15 +90,15 @@ private slots:
 private:
     Ui::MainWindow* ui;
 
-    AboutDialog* p_about;
+    AboutDialog* p_about = nullptr;
 
     TcamCaptureConfig m_config;
     //QSettings m_settings;
 
-    QToolBar* p_toolbar;
+    QToolBar* p_toolbar = nullptr;
 
-    QAction* p_action_property_dialog;
-    QAction* p_action_format_dialog;
+    QAction* p_action_property_dialog = nullptr;
+    QAction* p_action_format_dialog = nullptr;
 
     std::shared_ptr<Indexer> m_index;
     Device m_selected_device;
@@ -106,12 +106,12 @@ private:
     GstElement* p_pipeline;
 
     TcamCollection m_tcam_collection;
-    GstElement* p_source;
-    GstElement* p_displaysink;
+    GstElement* p_source = nullptr;
+    GstElement* p_displaysink = nullptr;
     gulong m_fps_signal_id;
 
-    QLabel* p_fps_label;
-    QLabel* p_settings_label;
+    QLabel* p_fps_label = nullptr;
+    QLabel* p_settings_label = nullptr;
 
     FPSCounter m_fps_counter;
 
