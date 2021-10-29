@@ -605,7 +605,7 @@ void MainWindow::device_lost_cb(const Device& dev)
 {
     if (dev == m_selected_device)
     {
-        device_lost(dev.serial_long().c_str());
+        device_lost(dev.serial().c_str());
     }
 }
 
