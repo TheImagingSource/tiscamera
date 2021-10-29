@@ -585,7 +585,7 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             {
                 GstCaps* tmp =
                     gst_caps_intersect(data.user_caps.get(), self->data->available_caps.get());
-                if (tmp == nullptr)
+                if (tmp == nullptr || gst_caps_is_empty(tmp))
                 {
                     GST_ERROR_OBJECT(self,
                                      "The user defined device caps are not supported by the "
