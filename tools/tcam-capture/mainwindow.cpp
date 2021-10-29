@@ -38,8 +38,8 @@
 #include <gobject/gvaluecollector.h>
 #include <gst/video/videooverlay.h>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     p_property_dialog = nullptr;
@@ -93,8 +93,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(action_options, &QAction::triggered, this, &MainWindow::open_options_triggered);
     p_toolbar->addAction(action_options);
 
-    enable_device_gui_elements(false);
-
     p_toolbar->setMovable(false);
     this->addToolBar(p_toolbar);
 
@@ -107,6 +105,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     this->statusBar()->addPermanentWidget(p_settings_label);
     this->statusBar()->addPermanentWidget(p_fps_label);
+
+    enable_device_gui_elements(false);
+
+    // open device dialog to make it more obvious what to do next
+    QTimer::singleShot(200, this, SLOT(on_actionOpen_Device_triggered()));
 }
 
 
@@ -123,11 +126,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-
-void MainWindow::use_dutils(bool use_it)
-{
-    m_use_dutils = use_it;
-}
 
 static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
 {
@@ -288,8 +286,6 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::open_pipeline(FormatHandling handling)
 {
-    std::string serial = m_selected_device.serial_long();
-
     std::string pipeline_string = m_config.pipeline.toStdString();
     GError* err = nullptr;
 
@@ -356,15 +352,24 @@ void MainWindow::open_pipeline(FormatHandling handling)
             return;
         }
 
+        // if (has_property(p_source, "tcam-device"))
+        // {
+        //     g_object_set(p_source, "tcam-device", m_selected_device, nullptr);
+        // }
+        // else
         if (has_property(p_source, "serial"))
         {
+            std::string serial = m_selected_device.serial_long();
             g_object_set(p_source, "serial", serial.c_str(), nullptr);
         }
+
+        if (has_property(p_source, "conversion-element"))
+        {
+            qInfo("Setting 'conversion-element' property to '%s'",
+                  conversion_element_to_string(m_config.conversion_element));
+            g_object_set(p_source, "conversion-element", m_config.conversion_element, nullptr);
+        }
     }
-    // if (has_property(p_source, "use-dutils"))
-    // {
-    //     g_object_set(p_source, "use-dutils", m_config.use_dutils, nullptr);
-    // }
 
     // must not be freed
     GstElementFactory* factory = gst_element_get_factory(p_source);
@@ -411,7 +416,6 @@ void MainWindow::open_pipeline(FormatHandling handling)
     GstCaps* caps;
     if (handling == FormatHandling::Dialog)
     {
-        //on_actionOpenFormat_triggered();
         p_selected_caps = open_format_dialog();
 
         caps = p_selected_caps;
@@ -598,6 +602,11 @@ void MainWindow::enable_device_gui_elements(bool toggle)
     {
         p_about->set_tcambin(p_source);
     }
+
+    if (!toggle)
+    {
+        set_settings_string("");
+    }
 }
 
 
@@ -624,7 +633,6 @@ void MainWindow::device_lost_cb(const Device& dev)
 
 void MainWindow::device_lost(const QString& message)
 {
-    //qError("Lost device. Stopping...");
     if (!message.isEmpty())
     {
         qWarning("%s", message.toStdString().c_str());
@@ -647,16 +655,17 @@ void MainWindow::device_lost(const QString& message)
     QString s = "Device has been lost. Please reconnect or re-open it.\n\n";
     s += message;
     error_dialog->setText(s);
-    //error_dialog->showMessage(s);
 
     error_dialog->exec();
-    //error_dialog->show();
 }
 
 
 void MainWindow::set_settings_string(const QString str)
 {
-    p_settings_label->setText(str);
+    if (p_settings_label)
+    {
+        p_settings_label->setText(str);
+    }
 }
 
 

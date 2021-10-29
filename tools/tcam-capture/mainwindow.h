@@ -51,8 +51,6 @@ public:
 
     void closeEvent(QCloseEvent *event);
 
-    void use_dutils(bool);
-
     void set_settings_string(const QString str);
 
 public slots:
@@ -88,12 +86,17 @@ private slots:
     void fps_tick(double);
 
 private:
+
+    static void init_device_dialog(MainWindow* instance)
+    {
+        instance->on_actionOpen_Device_triggered();
+    }
+
     Ui::MainWindow* ui;
 
     AboutDialog* p_about = nullptr;
 
     TcamCaptureConfig m_config;
-    //QSettings m_settings;
 
     QToolBar* p_toolbar = nullptr;
 
