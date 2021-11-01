@@ -18,6 +18,7 @@
 
 #include "../../VideoFormatDescription.h"
 
+#include <gst-helper/gst_ptr.h>
 #include <gst/gst.h>
 
 namespace tcambind
@@ -32,7 +33,7 @@ bool separate_serial_and_type(const std::string& input, std::string& serial, std
 std::pair<std::string, std::string> separate_serial_and_type(const std::string& input);
 
 
-GstCaps* convert_videoformatsdescription_to_caps(
+gst_helper::gst_ptr<GstCaps> convert_videoformatsdescription_to_caps(
     const std::vector<tcam::VideoFormatDescription>& descriptions);
 
 } // namespace tcambind

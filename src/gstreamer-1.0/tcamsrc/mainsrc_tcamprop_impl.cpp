@@ -16,81 +16,327 @@
 
 #include "mainsrc_tcamprop_impl.h"
 
-#include "../../PropertyCategory.h"
-#include "mainsrc_device_state.h"
 #include "gsttcammainsrc.h"
+#include "mainsrc_device_state.h"
 
-using namespace tcam::property;
+#include <algorithm>
 
-using namespace tcam;
+namespace tcam::mainsrc
+{
 
-// static TcamError error_code_from_outcome(const std::error_code& res)
-// {
-//     if (res.category() == tcam::error_category())
-//     {
-//         switch (static_cast<tcam::status>(res.value()))
-//         {
-//             case status::DeviceCouldNotBeOpened:
-//             case status::DeviceDoesNotExist:
-//             case status::DeviceBlocked:
-//             case status::DeviceLost:
-//             {
-//                 return TCAM_ERROR_DEVICE_LOST;
-//             }
-//             case status::PropertyDoesNotExist:
-//             case status::PropertyOutOfBounds:
-//             case status::PropertyValueDoesNotExist:
-//             case status::PropertyIsLocked:
-//             {
-//                 return TCAM_ERROR_PROPERTY_NOT_SETTABLE;
-//             }
-//             case status::FormatInvalid:
-//             case status::ResourceNotLockable:
-//             case status::Timeout:
-//             case status::NotImplemented:
-//             case status::NotSupported:
-//             case status::UndefinedError:
-//             default:
-//             {
-//                 return TCAM_ERROR_UNKNOWN;
-//             }
-//         }
-//     }
-//     return TCAM_ERROR_UNKNOWN;
-// }
+template<class TBase> struct TcamPropertyBase : TBase
+{
+    TcamPropertyBase(std::shared_ptr<tcam::property::IPropertyBase> prop) : m_prop(prop) {}
 
-// // fmt is not a string literal, waranting this pragma
-// #pragma GCC diagnostic ignored "-Wformat-nonliteral"
-// inline void fill_gerror_from_outcome(GError** gerr,
-//                                      const std::string& fmt,
-//                                      const std::error_code& err)
-// {
-//     if (gerr)
-//     {
-//         //*gerr =  g_error_new(TCAM_ERROR, error_code_from_outcome(err), fmt.c_str(), err.message());
-//     }
-// }
-// #pragma GCC diagnostic warning "-Wformat-nonliteral"
+    std::shared_ptr<tcam::property::IPropertyBase> m_prop;
+
+    virtual auto get_property_name() const noexcept -> std::string_view final
+    {
+        return m_prop->get_name();
+    }
+    virtual auto get_property_info() const noexcept -> tcamprop1::prop_static_info final
+    {
+        tcamprop1::prop_static_info ret;
+        ret.name = m_prop->get_name();
+        ret.iccategory = m_prop->get_category();
+        ret.display_name = m_prop->get_display_name();
+        ret.description = m_prop->get_description();
+
+        ret.visibility = tcamprop1::Visibility_t::Beginner;
+
+        return ret;
+    }
+
+    virtual auto get_property_state(uint32_t /*flags = 0*/)
+        -> outcome::result<tcamprop1::prop_state> final
+    {
+        auto flags = m_prop->get_flags();
+
+        tcamprop1::prop_state ret = {};
+        ret.is_implemented = flags & tcam::property::PropertyFlags::Implemented;
+        ret.is_locked = tcam::property::is_locked(flags);
+        ret.is_available = flags & tcam::property::PropertyFlags::Available;
+        return ret;
+    }
+};
 
 
-static device_state& get_device_reference (GstTcamMainSrc* iface)
+struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_integer>
+{
+    TcamPropertyInteger(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+    virtual auto get_property_range(uint32_t /* flags = 0 */)
+        -> outcome::result<tcamprop1::prop_range_integer> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+
+        tcamprop1::prop_range_integer ret = { tmp->get_min(), tmp->get_max(), tmp->get_step() };
+
+        return ret;
+    }
+
+    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<int64_t> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+
+        return tmp->get_default();
+    }
+
+    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<int64_t> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+
+        return tmp->get_value();
+    }
+    virtual auto set_property_value(int64_t value, uint32_t /*flags*/) -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+
+        auto ret = tmp->set_value(value);
+        if (ret)
+        {
+            return tcam::status::Success;
+        }
+        return ret.error();
+    }
+
+    virtual auto get_representation() const noexcept -> tcamprop1::IntRepresentation_t final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+        return tmp->get_representation();
+    }
+
+    virtual auto get_unit() const noexcept -> std::string_view final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
+        return tmp->get_unit();
+    }
+};
+
+
+struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
+{
+    TcamPropertyFloat(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+    virtual auto get_property_range(uint32_t /* flags = 0 */)
+        -> outcome::result<tcamprop1::prop_range_float> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+
+        tcamprop1::prop_range_float ret = { tmp->get_min(), tmp->get_max(), tmp->get_step() };
+
+        return ret;
+    }
+
+    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<double> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+
+        return tmp->get_default();
+    }
+
+    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<double> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+
+        return tmp->get_value();
+    }
+
+    virtual auto set_property_value(double value, uint32_t /*flags*/) -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+
+        auto ret = tmp->set_value(value);
+
+        if (ret)
+        {
+            return tcam::status::Success;
+        }
+        return ret.error();
+    }
+
+    virtual auto get_representation() const noexcept -> tcamprop1::FloatRepresentation_t final
+    {
+        return tcamprop1::FloatRepresentation_t::PureNumber;
+    }
+
+    virtual auto get_unit() const noexcept -> std::string_view final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+        return tmp->get_unit();
+    }
+};
+
+
+struct TcamPropertyBoolean : TcamPropertyBase<tcamprop1::property_interface_boolean>
+{
+    TcamPropertyBoolean(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+    virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<bool> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
+
+        return tmp->get_default();
+    }
+
+    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<bool> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
+
+        return tmp->get_value();
+    }
+
+    virtual auto set_property_value(bool value, uint32_t /*flags*/) -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyBool*>(m_prop.get());
+
+        auto ret = tmp->set_value(value);
+
+        if (ret)
+        {
+            return tcam::status::Success;
+        }
+        return ret.error();
+    }
+};
+
+
+struct TcamPropertyEnumeration : TcamPropertyBase<tcamprop1::property_interface_enumeration>
+{
+    TcamPropertyEnumeration(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+    virtual auto get_property_range(uint32_t /* flags = 0 */)
+        -> outcome::result<tcamprop1::prop_range_enumeration> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
+
+        return tcamprop1::prop_range_enumeration { tmp->get_entries() };
+    }
+
+    virtual auto get_property_default(uint32_t /*flags = 0 */)
+        -> outcome::result<std::string_view> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
+
+        auto entries = tmp->get_entries();
+
+        auto it = std::find(entries.begin(), entries.end(), tmp->get_default());
+
+        size_t index = 0;
+
+        if (it != entries.end())
+        {
+            index = std::distance(entries.begin(), it);
+        }
+        return entries.at(index);
+    }
+
+    virtual auto get_property_value(uint32_t /*flags*/) -> outcome::result<std::string_view> final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
+
+        return tmp->get_value();
+    }
+
+    virtual auto set_property_value(std::string_view value, uint32_t /*flags*/)
+        -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyEnum*>(m_prop.get());
+
+        auto ret = tmp->set_value_str(value);
+        if (ret)
+        {
+            return tcam::status::Success;
+        }
+        return ret.error();
+    }
+};
+
+
+struct TcamPropertyCommand : TcamPropertyBase<tcamprop1::property_interface_command>
+{
+    TcamPropertyCommand(std::shared_ptr<tcam::property::IPropertyBase> prop)
+        : TcamPropertyBase { prop }
+    {
+    }
+
+    auto execute_command(uint32_t /* flags */) -> std::error_code final
+    {
+        auto tmp = static_cast<tcam::property::IPropertyCommand*>(m_prop.get());
+        auto ret = tmp->execute();
+        if (ret)
+        {
+            return tcam::status::Success;
+        }
+        return ret.error();
+    }
+};
+} // namespace tcam::mainsrc
+
+auto tcam::mainsrc::make_wrapper_instance(
+    const std::shared_ptr<tcam::property::IPropertyBase>& prop)
+    -> std::unique_ptr<tcamprop1::property_interface>
+{
+    switch (prop->get_type())
+    {
+        case tcam::TCAM_PROPERTY_TYPE_INTEGER:
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyInteger>(prop);
+        }
+        case tcam::TCAM_PROPERTY_TYPE_DOUBLE:
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyFloat>(prop);
+        }
+        case tcam::TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyBoolean>(prop);
+        }
+        case tcam::TCAM_PROPERTY_TYPE_ENUMERATION:
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyEnumeration>(prop);
+        }
+        case tcam::TCAM_PROPERTY_TYPE_BUTTON:
+        {
+            return std::make_unique<tcam::mainsrc::TcamPropertyCommand>(prop);
+        }
+        case tcam::TCAM_PROPERTY_TYPE_STRING:
+            return nullptr;
+        case tcam::TCAM_PROPERTY_TYPE_UNKNOWN:
+            return nullptr;
+    }
+    return nullptr;
+}
+
+static device_state& get_device_reference(GstTcamMainSrc* iface)
 {
     GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
 
-    assert( self != nullptr );
-	assert( self->device != nullptr );
+    assert(self != nullptr);
+    assert(self->device != nullptr);
 
     return *self->device;
 }
 
-
-static auto tcammainsrc_get_provider_impl_from_interface( TcamPropertyProvider* self ) -> tcamprop1_gobj::tcam_property_provider*
+static auto tcammainsrc_get_provider_impl_from_interface(TcamPropertyProvider* self)
+    -> tcamprop1_gobj::tcam_property_provider*
 {
-    auto& device = get_device_reference( GST_TCAM_MAINSRC( self ) );
+    auto& device = get_device_reference(GST_TCAM_MAINSRC(self));
     return &device.tcamprop_container_;
 }
 
 void tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init(TcamPropertyProviderInterface* iface)
 {
-    tcamprop1_gobj::init_provider_interface<&tcammainsrc_get_provider_impl_from_interface>( iface );
+    tcamprop1_gobj::init_provider_interface<&tcammainsrc_get_provider_impl_from_interface>(iface);
 }

@@ -16,123 +16,98 @@
 
 #include "mainsrc_device_state.h"
 
-#include "../../PropertyInterfaces.h"
-
 #include "mainsrc_tcamprop_impl.h"
+#include "tcambind.h"
 
-static void separate_serial_and_type(GstTcamMainSrc* self, const std::string& input)
+void device_state::stop_and_clear()
 {
-    auto pos = input.find("-");
-
-    if (pos != std::string::npos)
+    if (dev)
     {
-        // assign to tmp variables
-        // input could be self->device_serial
-        // overwriting it would ivalidate input for
-        // device_type retrieval
-        std::string tmp1 = input.substr(0, pos);
-        std::string tmp2 = input.substr(pos + 1);
-
-        self->device->device_serial = tmp1;
-        self->device->device_type = tcam::tcam_device_from_string(tmp2);
+        dev->stop_stream();
     }
-    else
+    while (!queue.empty())
     {
-        self->device->device_serial = input;
+        auto ptr = queue.front();
+        queue.pop();
+        if (sink)
+        {
+            sink->requeue_buffer(ptr);
+        }
     }
 }
 
-
-static void populate_tcamprop_interface(GstTcamMainSrc* self)
+void device_state::close()
 {
-    self->device->tcamprop_properties.clear();
-    auto properties = self->device->dev->get_properties();
+    std::lock_guard<std::mutex> lck(stream_mtx_);
 
-    self->device->tcamprop_interface.tcamprop_properties.reserve(properties.size());
+    // clear list to ensure property users get a no device error
+    tcamprop_container_.clear_list();
+    tcamprop_interface_.clear();
+    if (dev)
+    {
+        stop_and_clear();
+
+        dev = nullptr;
+        sink = nullptr;
+        all_caps.reset();
+    }
+}
+
+void device_state::populate_tcamprop_interface()
+{
+    auto properties = dev->get_properties();
+
+    tcamprop_interface_.tcamprop_properties.reserve(properties.size());
 
     for (auto& p : properties)
     {
-        switch (p->get_type())
+        auto prop = tcam::mainsrc::make_wrapper_instance(p);
+        if (prop)
         {
-            case tcam::TCAM_PROPERTY_TYPE_INTEGER:
-            {
-                self->device->tcamprop_interface.tcamprop_properties.push_back(std::make_unique<tcam::mainsrc::TcamPropertyInteger>(p));
-                break;
-            }
-            case tcam::TCAM_PROPERTY_TYPE_DOUBLE:
-            {
-                self->device->tcamprop_interface.tcamprop_properties.push_back(std::make_unique<tcam::mainsrc::TcamPropertyFloat>(p));
-                break;
-            }
-            case tcam::TCAM_PROPERTY_TYPE_BOOLEAN:
-            {
-                self->device->tcamprop_interface.tcamprop_properties.push_back(std::make_unique<tcam::mainsrc::TcamPropertyBoolean>(p));
-                break;
-            }
-            case tcam::TCAM_PROPERTY_TYPE_ENUMERATION:
-            {
-                self->device->tcamprop_interface.tcamprop_properties.push_back(std::make_unique<tcam::mainsrc::TcamPropertyEnumeration>(p));
-                break;
-            }
-            case tcam::TCAM_PROPERTY_TYPE_BUTTON:
-            {
-                self->device->tcamprop_interface.tcamprop_properties.push_back(std::make_unique<tcam::mainsrc::TcamPropertyCommand>(p));
-                break;
-            }
-            case tcam::TCAM_PROPERTY_TYPE_STRING:
-            case tcam::TCAM_PROPERTY_TYPE_UNKNOWN:
-            default:
-            {
-                break;
-            }
+            tcamprop_interface_.tcamprop_properties.push_back(std::move(prop));
         }
     }
 
-    self->device->tcamprop_container_.create_list(&self->device->tcamprop_interface);
+    tcamprop_container_.create_list(&tcamprop_interface_);
 }
-
 
 bool mainsrc_init_camera(GstTcamMainSrc* self)
 {
-    GST_DEBUG_OBJECT(self, "Initializing device.");
-
     self->device->dev = nullptr;
-
     self->device->all_caps.reset();
 
-    separate_serial_and_type(self, self->device->device_serial);
-
-    GST_DEBUG("Opening device. Serial: '%s Type: '%s'",
-              self->device->device_serial.c_str(),
-              tcam::tcam_device_type_to_string(self->device->device_type).c_str());
+    GST_DEBUG_OBJECT(self,
+                     "Trying to open device with serial='%s and type='%s'.",
+                     self->device->device_serial.c_str(),
+                     tcam::tcam_device_type_to_string(self->device->device_type).c_str());
 
     self->device->dev = tcam::open_device(self->device->device_serial, self->device->device_type);
     if (!self->device->dev)
     {
-        GST_ERROR("Unable to open device. No stream possible.");
-        mainsrc_close_camera(self);
+        GST_ELEMENT_ERROR(self, RESOURCE, NOT_FOUND, ("Failed to open device."), (NULL));
+        self->device->close();
         return false;
     }
+
+    auto format = self->device->dev->get_available_video_formats();
+
+    auto caps = tcambind::convert_videoformatsdescription_to_caps(format);
+    if (caps == nullptr || gst_caps_get_size(caps.get()) == 0)
+    {
+        GST_ELEMENT_ERROR(self, CORE, CAPS, ("Failed to create caps for device."), (NULL));
+        self->device->close();
+        return false;
+    }
+
+    GST_DEBUG_OBJECT(
+        self, "Device provides the following caps: %s", gst_helper::to_string(*caps).c_str());
+
+    self->device->all_caps = caps;
+
     self->device->device_serial = self->device->dev->get_device().get_serial();
     self->device->device_type = self->device->dev->get_device().get_device_type();
 
-    populate_tcamprop_interface(self);
+    self->device->populate_tcamprop_interface();
 
     return true;
-}
-
-
-void mainsrc_close_camera(GstTcamMainSrc* self)
-{
-    GST_INFO_OBJECT(self, "Closing device");
-
-    std::lock_guard<std::mutex> lck(self->device->mtx);
-
-    // clear list to ensure property users get a no device error
-    self->device->tcamprop_properties.clear();
-
-    if (self->device->dev)
-    {
-        self->device->close();
-    }
 }

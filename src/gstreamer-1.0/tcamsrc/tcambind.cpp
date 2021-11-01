@@ -116,7 +116,7 @@ static void fill_structure_fixed_resolution(GstStructure* structure,
 }
 
 
-GstCaps* tcambind::convert_videoformatsdescription_to_caps(
+gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
     const std::vector<tcam::VideoFormatDescription>& descriptions)
 {
     GstCaps* caps = gst_caps_new_empty();
@@ -305,5 +305,5 @@ GstCaps* tcambind::convert_videoformatsdescription_to_caps(
         }
     }
 
-    return caps;
+    return gst_helper::make_ptr( caps );
 }

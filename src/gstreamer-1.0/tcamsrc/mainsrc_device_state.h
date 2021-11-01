@@ -16,18 +16,21 @@
 
 #pragma once
 
+#include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_provider.h"
 #include "../../tcam.h"
 #include "gsttcammainsrc.h"
 
 #include <condition_variable>
-#include <mutex>
 #include <gst-helper/helper_functions.h>
-#include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_provider.h"
-#include <tcamprop1.0_base/tcamprop_property_interface.h>
 #include <memory>
+#include <mutex>
 #include <queue>
+#include <string>
+#include <tcamprop1.0_base/tcamprop_property_interface.h>
+#include <vector>
 
-
+namespace tcam::mainsrc
+{
 struct src_interface_list : tcamprop1::property_list_interface
 {
     std::vector<std::unique_ptr<tcamprop1::property_interface>> tcamprop_properties;
@@ -38,16 +41,11 @@ struct src_interface_list : tcamprop1::property_list_interface
 
         ret.reserve(tcamprop_properties.size());
 
-        for (const auto& v : tcamprop_properties)
-        {
-            ret.push_back(v->get_property_name());
-        }
+        for (const auto& v : tcamprop_properties) { ret.push_back(v->get_property_name()); }
         return ret;
-    };
-    auto find_property( std::string_view name ) -> tcamprop1::property_interface* final
-
+    }
+    auto find_property(std::string_view name) -> tcamprop1::property_interface* final
     {
-
         for (const auto& v : tcamprop_properties)
         {
             if (name == v->get_property_name())
@@ -56,70 +54,48 @@ struct src_interface_list : tcamprop1::property_list_interface
             }
         }
         return nullptr;
-    };
-
-
+    }
+    void clear() noexcept
+    {
+        tcamprop_properties.clear();
+    }
 };
+} // namespace tcam::mainsrc
 
 struct device_state
 {
-    //tcam::DeviceIndex index_;
-
     std::shared_ptr<tcam::CaptureDevice> dev;
     std::shared_ptr<tcam::ImageSink> sink;
     std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
 
     gst_helper::gst_ptr<GstCaps> all_caps;
 
-    std::mutex mtx;
-    std::condition_variable cv;
+    std::mutex stream_mtx_;
+    std::condition_variable stream_cv_;
 
     std::string device_serial;
     tcam::TCAM_DEVICE_TYPE device_type = tcam::TCAM_DEVICE_TYPE_UNKNOWN;
 
     std::atomic<bool> is_running = false;
 
-    int         n_buffers = -1;
-    uint64_t    frame_count = 0;
+    int n_buffers = -1;
+    uint64_t frame_count = 0;
 
-    src_interface_list tcamprop_interface;
+    tcam::mainsrc::src_interface_list tcamprop_interface_;
     tcamprop1_gobj::tcam_property_provider tcamprop_container_;
 
-    std::vector<std::unique_ptr<tcamprop1::property_interface>> tcamprop_properties;
+    gst_helper::gst_ptr<GstStructure> prop_init_;
 
-    gst_helper::gst_ptr<GstStructure>   prop_init_;
-
-    bool    is_device_open() const {
+    bool is_device_open() const noexcept
+    {
         return dev != nullptr;
     }
 
-    void stop_and_clear()
-    {
-        if (dev)
-        {
-            dev->stop_stream();
-        }
-        while (!queue.empty())
-        {
-            auto ptr = queue.front();
-            queue.pop();
-            if (sink)
-            {
-                sink->requeue_buffer(ptr);
-            }
-        }
-    }
+    void stop_and_clear();
 
-    void close()
-    {
-        stop_and_clear();
+    void close();
 
-        dev = nullptr;
-        sink = nullptr;
-    }
+    void populate_tcamprop_interface();
 };
 
-
 bool mainsrc_init_camera(GstTcamMainSrc* self);
-
-void mainsrc_close_camera(GstTcamMainSrc* self);
