@@ -52,18 +52,18 @@ void tcamconvert::tcamconvert_context_base::init_from_source()
         "ClaimBalanceWhiteSoftware");
     if (p_claim_ptr)
     {
-        auto wb_red =
-            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteRed_name);
-        auto wb_green =
-            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteGreen_name);
-        auto wb_blue =
-            provider.get_property_ptr<tcamprop1::property_interface_float>(BalanceWhiteBlue_name);
-
-        assert(wb_red && wb_green && wb_blue);
-        if (wb_red && wb_green && wb_blue)
+        auto err = p_claim_ptr->set_property_value(true);
+        if (!err)
         {
-            auto err = p_claim_ptr->set_property_value(true);
-            if (!err)
+            auto wb_red = provider.get_property_ptr<tcamprop1::property_interface_float>(
+                BalanceWhiteRed_name);
+            auto wb_green = provider.get_property_ptr<tcamprop1::property_interface_float>(
+                BalanceWhiteGreen_name);
+            auto wb_blue = provider.get_property_ptr<tcamprop1::property_interface_float>(
+                BalanceWhiteBlue_name);
+
+            assert(wb_red && wb_green && wb_blue);
+            if (wb_red && wb_green && wb_blue)
             {
                 whitebalance_params_.apply = true;
                 wb_red_ = std::move(wb_red);
