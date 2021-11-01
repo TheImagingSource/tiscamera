@@ -29,9 +29,35 @@ Device to_device(GstDevice* device)
     }
 
     GstCaps* caps = gst_device_get_caps(device);
-    std::string name = gst_structure_get_string(struc, "model");
-    std::string serial = gst_structure_get_string(struc, "serial");
-    std::string type = gst_structure_get_string(struc, "type");
+
+    std::string name;
+    const char* name_str = gst_structure_get_string(struc, "model");
+
+    if (name_str)
+    {
+        name = name_str;
+    }
+
+    std::string serial;
+    const char* serial_str = gst_structure_get_string(struc, "serial");
+
+    if (serial_str)
+    {
+        serial = serial_str;
+    }
+
+    std::string type;
+    const char* type_str = gst_structure_get_string(struc, "type");
+
+    if (type_str)
+    {
+        type = type_str;
+    }
+    else
+    {
+        type = "unknown";
+    }
+
     Device ret(name, serial, type, caps);
 
     gst_structure_free(struc);
