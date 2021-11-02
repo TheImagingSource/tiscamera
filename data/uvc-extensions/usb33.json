@@ -482,54 +482,6 @@
 		    "size_bits": 8,
 		    "offset_bits": 0
         },
-
-        {
-            "id": "0x199e249",
-		    "name": "White Balance Temp. Preset",
-		    "selector": "0x50",
-		    "uvc_type": "unsigned",
-		    "v4l2_type": "menu",
-		    "size_bits": 16,
-		    "offset_bits": 0,
-		    "entries": [
-                {
-                    "value": 2500,
-                    "entry": "Sodium Vapor Lamp"
-                },
-                {
-                    "value": 2700,
-                    "entry": "Warm Light"
-                },
-                {
-                    "value": 3000,
-                    "entry": "Halogen Light"
-                },
-                {
-                    "value": 3500,
-                    "entry": "Neutral White"
-                },
-                {
-                    "value": 4000,
-                    "entry": "Cool White Fluorescent Light"
-                },
-                {
-                    "value": 5000,
-                    "entry": "Cool White/Daylight (CFL)"
-                },
-                {
-                    "value": 6000,
-                    "entry": "Daylight"
-                },
-                {
-			        "value": 7500,
-			        "entry": "Cool White LED"
-		        },
-			    {
-				    "value": 10000,
-				    "entry": "Blue Sky"
-			    }
-		    ]
-        },
         {
             "id": "0x199e250",
             "name": "White Balance Temperature",
