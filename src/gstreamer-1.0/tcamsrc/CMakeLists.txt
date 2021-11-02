@@ -13,6 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_library(gsttcamstatistics SHARED
+  gstmetatcamstatistics.cpp
+  gstmetatcamstatistics.h
+  )
+
+target_include_directories(gsttcamstatistics
+  PRIVATE
+  ${GSTREAMER_INCLUDE_DIRS}
+  )
+
+target_link_libraries( gsttcamstatistics
+  PRIVATE
+  ${GSTREAMER_LIBRARIES}
+  ${GSTREAMER_BASE_LIBRARIES}
+  )
+
+
 add_library(gsttcamsrc SHARED
 	gsttcamsrc.cpp
 	gsttcammainsrc.cpp
@@ -22,18 +39,15 @@ add_library(gsttcamsrc SHARED
     tcamsrc_tcamprop_impl.h
     tcamsrc_tcamprop_impl.cpp
 
-	"mainsrc_gst_device_provider.cpp"
-	"mainsrc_gst_device_provider.h"
-	"mainsrc_gst_device.cpp"
-	"mainsrc_gst_device.h"
+	mainsrc_gst_device_provider.cpp
+	mainsrc_gst_device_provider.h
+	mainsrc_gst_device.cpp
+	mainsrc_gst_device.h
 
 	gstmetatcamstatistics.cpp
 	gstmetatcamstatistics.h
 
-	
-	
-	"tcamsrc_plugin.cpp"
-	
+	tcamsrc_plugin.cpp
 
 	tcambind.h
 	tcambind.cpp

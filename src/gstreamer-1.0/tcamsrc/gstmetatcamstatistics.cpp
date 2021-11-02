@@ -16,6 +16,7 @@
 
 #include "gstmetatcamstatistics.h"
 
+#include <cstring>
 
 GType tcam_statistics_meta_api_get_type(void)
 {
@@ -123,4 +124,31 @@ TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta(GstBuffer* buffer, GstSt
     meta->structure = statistics;
 
     return meta;
+}
+
+
+gboolean tcam_statistics_get_structure(TcamStatisticsMeta* meta, char* out_buffer, size_t out_buffer_size)
+{
+    if (!meta || !out_buffer)
+    {
+        return FALSE;
+    }
+
+    char* tmp =  gst_structure_to_string(meta->structure);
+
+    if (strlen(tmp) >= out_buffer_size)
+    {
+        g_free(tmp);
+        return FALSE;
+    }
+
+    if (out_buffer_size > 0)
+    {
+        out_buffer[0] = '\0';
+        strncat(out_buffer, tmp, out_buffer_size - 1);
+    }
+
+    g_free(tmp);
+
+    return TRUE;
 }

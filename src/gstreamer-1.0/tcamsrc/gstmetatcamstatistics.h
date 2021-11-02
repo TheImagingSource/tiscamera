@@ -23,6 +23,9 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 
+_Pragma("GCC visibility push (default)")
+extern "C" {
+
 G_BEGIN_DECLS
 
 typedef struct _GstMetaTcamStatistics TcamStatisticsMeta;
@@ -49,6 +52,11 @@ const GstMetaInfo* tcam_statistics_meta_get_info(void);
 TcamStatisticsMeta* gst_buffer_add_tcam_statistics_meta(GstBuffer* buffer,
                                                         GstStructure* statistics);
 
+gboolean tcam_statistics_get_structure(TcamStatisticsMeta*, char* out_buffer, size_t out_buffer_size);
+
 G_END_DECLS
+
+} // extern "C"
+_Pragma("GCC visibility pop")
 
 #endif /* GST_META_TCAM_STATISTICS_H */
