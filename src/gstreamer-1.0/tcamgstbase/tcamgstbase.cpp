@@ -18,17 +18,16 @@
 
 #include "../../base_types.h"
 #include "../../logging.h"
+#include "tcambinconversion.h"
 #include "tcamgststrings.h"
 
 #include <algorithm> //std::find
+#include <cstring> // strcmp
 #include <dutils_img/fcc_to_string.h>
 #include <dutils_img/image_fourcc_func.h>
-#include <map>
-#include <cstring> // strcmp
-
-#include "tcambinconversion.h"
+#include <gst-helper/gst_gvalue_helper.h> // gst_string_list_to_vector
 #include <gst-helper/helper_functions.h>
-#include <gst-helper/gst_gvalue_helper.h>   // gst_string_list_to_vector
+#include <map>
 
 
 typedef struct tcam_src_element_
@@ -141,7 +140,7 @@ std::string tcam::gst::get_plugin_version(const char* plugin_name)
 
 static std::vector<std::string> gst_list_to_vector(const GValue* gst_list)
 {
-    return gst_helper::gst_string_list_to_vector( *gst_list );
+    return gst_helper::gst_string_list_to_vector(*gst_list);
 }
 
 bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
@@ -151,7 +150,8 @@ bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
         return false;
     }
 
-    auto correct_format = [](const char* str) {
+    auto correct_format = [](const char* str)
+    {
         if (str == nullptr)
         {
             return false;
@@ -160,9 +160,9 @@ bool tcam::gst::tcam_gst_raw_only_has_mono(const GstCaps* caps)
         static const char* formats[] = { "GRAY8",   "GRAY16_LE", "GRAY16_BE", "GRAY12p",
                                          "GRAY10p", "GRAY12m",   "GRAY10m" };
 
-        return std::any_of(std::begin(formats), std::end(formats), [str](const char* op2) {
-            return strcmp(str, op2) == 0;
-        });
+        return std::any_of(std::begin(formats),
+                           std::end(formats),
+                           [str](const char* op2) { return strcmp(str, op2) == 0; });
     };
 
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
@@ -448,7 +448,7 @@ bool tcam::gst::tcam_gst_is_fourcc_rgb(const unsigned int fourcc)
 
 static bool tcam_gst_is_bayerpwl_fourcc(const uint32_t fourcc)
 {
-    return img::is_pwl_fcc( static_cast<img::fourcc>( fourcc ) );
+    return img::is_pwl_fcc(static_cast<img::fourcc>(fourcc));
 }
 
 static bool tcam_gst_is_polarized_mono(const unsigned int fourcc)
@@ -571,7 +571,8 @@ static std::vector<uint32_t> index_format_fourccs(const GstCaps* caps)
 
 
     // only add when fourcc is not 0
-    auto add_format = [&ret](const char* name, const char* fmt) {
+    auto add_format = [&ret](const char* name, const char* fmt)
+    {
         uint32_t fourcc = tcam::gst::tcam_fourcc_from_gst_1_0_caps_string(name, fmt);
         if (fourcc != 0)
         {
@@ -947,10 +948,8 @@ bool tcam::gst::contains_mono(const GstCaps* caps)
 
     for (unsigned int i = 0; i < gst_caps_get_size(caps); ++i)
     {
-        if (tcam_gst_contains_mono_8_bit(caps)
-            || tcam_gst_contains_mono_10_bit(caps)
-            || tcam_gst_contains_mono_12_bit(caps)
-            || tcam_gst_contains_mono_16_bit(caps))
+        if (tcam_gst_contains_mono_8_bit(caps) || tcam_gst_contains_mono_10_bit(caps)
+            || tcam_gst_contains_mono_12_bit(caps) || tcam_gst_contains_mono_16_bit(caps))
 
         {
             return true;
@@ -1130,14 +1129,14 @@ std::vector<std::string> tcam::gst::index_caps_formats(GstCaps* caps)
 }
 
 
-
 tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
 {
     tcam::image_scaling sc = {};
 
     GstStructure* struc = gst_caps_get_structure(caps, 0);
 
-    auto fill_value = [struc] (const std::string& name, int32_t& to_fill_horizontal, int32_t& to_fill_vertical)
+    auto fill_value =
+        [struc](const std::string& name, int32_t& to_fill_horizontal, int32_t& to_fill_vertical)
     {
         if (gst_structure_has_field(struc, name.c_str()))
         {
@@ -1145,7 +1144,7 @@ tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
 
             const std::string delimiter = "x";
             std::string token_horizontal = field_value.substr(0, field_value.find(delimiter));
-            std::string token_vertical = field_value.substr(field_value.find(delimiter)+1);
+            std::string token_vertical = field_value.substr(field_value.find(delimiter) + 1);
 
             try
             {
@@ -1168,11 +1167,33 @@ tcam::image_scaling tcam::gst::caps_get_scaling(GstCaps* caps)
         }
     };
 
-    fill_value("binning" , sc.binning_h, sc.binning_v);
+    fill_value("binning", sc.binning_h, sc.binning_v);
 
-    fill_value("skipping" , sc.skipping_h, sc.skipping_v);
+    fill_value("skipping", sc.skipping_h, sc.skipping_v);
 
     //SPDLOG_ERROR("Binning {}x{} Skipping: {}x{}", sc.binning_h, sc.binning_v, sc.skipping_h, sc.skipping_v);
 
     return sc;
+}
+
+bool tcam::gst::is_gst_state_equal_or_greater(GstElement* self, GstState state) noexcept
+{
+    GstState cur_state = GST_STATE_NULL;
+    auto res = gst_element_get_state(self, &cur_state, NULL, GST_CLOCK_TIME_NONE);
+    if (res == GST_STATE_CHANGE_FAILURE)
+    {
+        return false;
+    }
+    return cur_state >= state;
+}
+
+bool tcam::gst::is_gst_state_equal_or_less(GstElement* self, GstState state) noexcept
+{
+    GstState cur_state = GST_STATE_NULL;
+    auto res = gst_element_get_state(self, &cur_state, NULL, GST_CLOCK_TIME_NONE);
+    if (res == GST_STATE_CHANGE_FAILURE)
+    {
+        return false;
+    }
+    return cur_state <= state;
 }

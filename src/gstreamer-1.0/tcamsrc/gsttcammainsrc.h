@@ -43,9 +43,6 @@ struct _GstTcamMainSrc
 
     int fps_numerator;
     int fps_denominator;
-    int imagesink_buffers;
-
-    gboolean drop_incomplete_frames;
 };
 
 
@@ -55,6 +52,8 @@ struct _GstTcamMainSrcClass
 };
 
 GType gst_tcam_mainsrc_get_type(void);
+
+GST_DEBUG_CATEGORY_EXTERN(tcam_mainsrc_debug);
 
 G_END_DECLS
 

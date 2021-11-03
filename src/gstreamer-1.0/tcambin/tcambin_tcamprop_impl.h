@@ -18,7 +18,6 @@
 
 #include "gsttcambin.h"
 
-#include <glib-object.h>
 #include <tcam-property-1.0.h>
 
 namespace tcam::gst::bin

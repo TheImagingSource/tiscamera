@@ -16,21 +16,20 @@
 
 #include "gsttcambin.h"
 
-#include "../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_serialize.h"
-#include "../../libs/tcam-property/src/tcam-property-1.0.h"
-#include "../version.h"
+#include "../../../libs/tcam-property/src/tcam-property-1.0.h"
+#include "../../version.h"
+#include "../tcamgstbase/tcamgstbase.h"
+#include "../tcamgstbase/tcamgstjson.h"
 #include "tcambin_data.h"
 #include "tcambin_tcamprop_impl.h"
-#include "tcamgstbase/tcamgstbase.h"
-#include "tcamgstbase/tcamgstjson.h"
 
+#include <cassert>
 #include <cstring>
 #include <gst-helper/gst_gvalue_helper.h>
 #include <gst-helper/helper_functions.h>
 #include <string>
+#include <tcamprop1.0_gobject/tcam_property_serialize.h>
 #include <unistd.h>
-
-using namespace tcam::gst;
 
 #define gst_tcambin_parent_class parent_class
 
@@ -64,7 +63,7 @@ static GstStaticPadTemplate src_template =
 
 static bool has_version_parity_with_tiscamera(const std::string& element_name)
 {
-    std::string version = get_plugin_version(element_name.c_str());
+    std::string version = tcam::gst::get_plugin_version(element_name.c_str());
 
     std::string tcam_version = get_version_major();
     tcam_version += ".";
@@ -134,94 +133,106 @@ void gst_tcambin_apply_properties(GstTcamBin* self, const GstStructure& strct)
         });
 }
 
-static gboolean gst_tcambin_create_source(GstTcamBin* self)
+static bool tcambin_create_source(GstTcamBin* self)
 {
     gst_tcambin_clear_source(self);
 
     auto& data = get_tcambin_data(self);
 
-    GST_DEBUG("Creating source...");
-
+    gst_helper::gst_ptr<GstElement> src_element;
     if (data.prop_tcam_device)
     {
-        data.src = gst_device_create_element(data.prop_tcam_device.get(), "tcambin-source");
+        src_element = gst_helper::make_ptr(
+            gst_device_create_element(data.prop_tcam_device.get(), "tcambin-source"));
     }
     else
     {
-        data.src = gst_element_factory_make("tcamsrc", "tcambin-source");
+        src_element = gst_helper::make_ptr(gst_element_factory_make("tcamsrc", "tcambin-source"));
+        assert(src_element);
 
         if (!data.device_type.empty())
         {
-            GST_INFO("Setting source type to %s", data.device_type.c_str());
-            g_object_set(G_OBJECT(data.src), "type", data.device_type.c_str(), NULL);
+            GST_INFO_OBJECT(self, "Setting source type to %s", data.device_type.c_str());
+            g_object_set(G_OBJECT(src_element.get()), "type", data.device_type.c_str(), NULL);
         }
 
         if (!data.device_serial.empty())
         {
-            GST_INFO("Setting source serial to %s", data.device_serial.c_str());
-            g_object_set(G_OBJECT(data.src), "serial", data.device_serial.c_str(), NULL);
+            GST_INFO_OBJECT(self, "Setting source serial to %s", data.device_serial.c_str());
+            g_object_set(G_OBJECT(src_element.get()), "serial", data.device_serial.c_str(), NULL);
         }
     }
 
-    gst_bin_add(GST_BIN(self), data.src);
+    if (src_element == nullptr)
+    {
+        // The actual object should have told us what went wrong
+        return false;
+    }
+
+    gst_bin_add(GST_BIN(self), src_element.get());
 
     // set to READY so that caps are always readable
-    gst_element_set_state(data.src, GST_STATE_READY);
+    auto res = gst_element_set_state(src_element.get(), GST_STATE_READY);
+    if (res == GST_STATE_CHANGE_FAILURE)
+    {
+        return false;
+    }
 
-    data.device_serial = gst_helper::gobject_get_string(G_OBJECT(data.src), "serial");
-    data.device_type =
-        gst_helper::gobject_get_string_opt(G_OBJECT(data.src), "type").value_or(std::string {});
+    data.src_element = src_element;
 
     GST_INFO_OBJECT(self,
                     "Opened device has serial: '%s' type: '%s'",
-                    data.device_serial.c_str(),
-                    data.device_type.c_str());
+                    gst_helper::gobject_get_string_opt(data.src_element.get(), "serial")
+                        .value_or(std::string {})
+                        .c_str(),
+                    gst_helper::gobject_get_string_opt(data.src_element.get(), "type")
+                        .value_or(std::string {})
+                        .c_str());
 
-    auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
+    // reset 'serial' and 'type' property
+    data.device_serial = {};
+    data.device_type = {};
+    data.prop_tcam_device = {};
+
+    auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src_element, "src"));
 
     data.available_caps = tcambin_filter_unsupported_caps(*src_caps.get());
 
-    return TRUE;
+    return true;
 }
 
 
 static void gst_tcambin_clear_source(GstTcamBin* self)
 {
     auto& data = get_tcambin_data(self);
-
-    if (data.src)
+    if (data.src_element)
     {
-        gst_element_set_state(data.src, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), data.src);
-        data.src = nullptr;
+        gst_element_set_state(data.src_element.get(), GST_STATE_NULL);
+        gst_bin_remove(GST_BIN(self), data.src_element.get());
+        data.src_element = nullptr;
     }
 }
-
 
 static void gst_tcambin_clear_elements(GstTcamBin* self)
 {
     auto& data = get_tcambin_data(self);
 
-    auto remove_element = [=](GstElement** element)
+    auto remove_element = [self](GstElement* element)
     {
-        if (!GST_IS_ELEMENT(*element))
-        {
-            return;
-        }
+        assert(GST_IS_ELEMENT(element));
 
-        gst_element_set_state(*element, GST_STATE_NULL);
-        gst_bin_remove(GST_BIN(self), *element);
+        gst_element_set_state(element, GST_STATE_NULL);
+        gst_bin_remove(GST_BIN(self), element);
         // not needed bin_remove automatically does that
         // gst_object_unref(element);
-        *element = nullptr;
     };
 
     if (data.pipeline_caps)
     {
         gst_element_set_state(data.pipeline_caps, GST_STATE_NULL);
-        if (data.src)
+        if (data.src_element)
         {
-            gst_element_unlink_pads(data.src, "src", data.pipeline_caps, "sink");
+            gst_element_unlink_pads(data.src_element.get(), "src", data.pipeline_caps, "sink");
         }
         gst_bin_remove(GST_BIN(self), data.pipeline_caps);
         data.pipeline_caps = nullptr;
@@ -229,13 +240,14 @@ static void gst_tcambin_clear_elements(GstTcamBin* self)
 
     if (data.tcam_converter)
     {
-        remove_element(&data.tcam_converter);
+        remove_element(data.tcam_converter);
         data.tcam_converter = nullptr;
     }
 
     if (data.jpegdec)
     {
-        remove_element(&data.jpegdec);
+        remove_element(data.jpegdec);
+        data.jpegdec = nullptr;
     }
 
     data.elements_created = false;
@@ -248,119 +260,73 @@ static gboolean create_and_add_element(GstElement** element,
                                        GstBin* bin)
 {
     *element = gst_element_factory_make(factory_name, element_name);
-    if (*element)
-    {
-        GST_DEBUG("Adding %s(%p) to pipeline", factory_name, (void*)*element);
-        gst_bin_add(bin, *element);
-    }
-    else
+    if (!*element)
     {
         return FALSE;
     }
+    GST_DEBUG_OBJECT(GST_ELEMENT(bin), "Adding %s(%p) to pipeline", factory_name, (void*)*element);
+    gst_bin_add(bin, *element);
     return TRUE;
 }
 
-
-// helper function to post error messages to GstBus
-static void send_linking_element_msg(GstTcamBin* self, const std::string& element_name)
-{
-    std::string msg_string = "Could not link element '" + element_name + "'.";
-    GError* err =
-        g_error_new(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, "%s", msg_string.c_str());
-    GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
-    gst_element_post_message(GST_ELEMENT(self), msg);
-    g_error_free(err);
-    GST_ERROR_OBJECT(self, "%s", msg_string.c_str());
-}
-
-
 // helper function to link elements
-static bool link_elements(bool condition,
-                          GstElement** previous_element,
-                          GstElement** element,
+static bool link_elements(GstElement* previous_element,
+                          GstElement* element,
                           std::string& pipeline_description,
                           const std::string& name)
 {
-    if (condition)
+    if (!element)
     {
-        if (!*element)
-        {
-            return false;
-        }
-
-        gboolean link_ret = gst_element_link(*previous_element, *element);
-        if (!link_ret)
-        {
-            return false;
-        }
-
-        pipeline_description += " ! ";
-        pipeline_description += name;
+        return false;
     }
 
+    gboolean link_ret = gst_element_link(previous_element, element);
+    if (!link_ret)
+    {
+        return false;
+    }
+    pipeline_description += " ! ";
+    pipeline_description += name;
     return true;
 }
 
-static gboolean gst_tcambin_create_elements(GstTcamBin* self)
+static bool tcambin_create_elements(GstTcamBin* self)
 {
     auto& data = get_tcambin_data(self);
 
-    if (data.is_open())
-    {
-        return TRUE;
-    }
+    assert(!data.is_open()); // already open?
 
-    gst_tcambin_clear_elements(self);
-
-    GST_INFO("creating all potentially needed elements");
-
-    if (data.src == nullptr)
-    {
-        gst_tcambin_create_source(self);
-    }
+    GST_INFO_OBJECT(self, "creating all tcambin pipeline elements");
 
     data.pipeline_caps = gst_element_factory_make("capsfilter", "tcambin-src_caps");
-
     if (data.pipeline_caps == nullptr)
     {
-        GST_ERROR("Could not create internal pipeline caps. Aborting");
-        return FALSE;
+        GST_ERROR_OBJECT(self, "Could not create internal pipeline caps. Aborting");
+        return false;
     }
-
-    auto send_missing_element_msg = [self](const std::string& element_name)
-    {
-        std::string msg_string = "Could not create element '" + element_name + "'.";
-        GError* err =
-            g_error_new_literal(GST_CORE_ERROR, GST_CORE_ERROR_MISSING_PLUGIN, msg_string.c_str());
-        GstMessage* msg = gst_message_new_error(GST_OBJECT(self), err, msg_string.c_str());
-        gst_element_post_message(GST_ELEMENT(self), msg);
-        g_error_free(err);
-        GST_ERROR("%s", msg_string.c_str());
-    };
 
     gst_bin_add(GST_BIN(self), data.pipeline_caps);
 
     std::string pipeline_string = "tcamsrc";
 
-    if (gst_element_link(data.src, data.pipeline_caps))
+    if (gst_element_link(data.src_element.get(), data.pipeline_caps))
     {
         pipeline_string += " ! capsfilter name=tcambin-src_caps";
     }
     else
     {
-        send_missing_element_msg("capsfilter");
-        return FALSE;
+        GST_ELEMENT_ERROR(
+            self, CORE, MISSING_PLUGIN, ("Could not create/link element 'capsfilter'."), (NULL));
+        return false;
     }
 
-    if (tcam::gst::contains_jpeg(self->data->available_caps.get()))
+    if (tcam::gst::contains_jpeg(data.available_caps.get()))
     {
-        if (contains_jpeg(data.available_caps.get()))
+        if (!create_and_add_element(&data.jpegdec, "jpegdec", "tcambin-jpegdec", GST_BIN(self)))
         {
-            if (!create_and_add_element(&data.jpegdec, "jpegdec", "tcambin-jpegdec", GST_BIN(self)))
-            {
-                send_missing_element_msg("jpegdec");
-                return FALSE;
-            }
+            GST_ELEMENT_ERROR(
+                self, CORE, MISSING_PLUGIN, ("Could not create element 'jpegdec'."), (NULL));
+            return false;
         }
     }
     else
@@ -371,8 +337,9 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
             if (!create_and_add_element(
                     &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils", GST_BIN(self)))
             {
-                send_missing_element_msg("tcamdutils");
-                return FALSE;
+                GST_ELEMENT_ERROR(
+                    self, CORE, MISSING_PLUGIN, ("Could not create element 'jpegdec'."), (NULL));
+                return false;
             }
             element_name = "tcamdutils";
         }
@@ -381,8 +348,12 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
             if (!create_and_add_element(
                     &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils-cuda", GST_BIN(self)))
             {
-                send_missing_element_msg("tcamdutils-cuda");
-                return FALSE;
+                GST_ELEMENT_ERROR(self,
+                                  CORE,
+                                  MISSING_PLUGIN,
+                                  ("Could not create element 'tcamdutils-cuda'."),
+                                  (NULL));
+                return false;
             }
             element_name = "tcamdutils-cuda";
         }
@@ -391,28 +362,35 @@ static gboolean gst_tcambin_create_elements(GstTcamBin* self)
             if (!create_and_add_element(
                     &data.tcam_converter, "tcamconvert", "tcambin-tcamconvert", GST_BIN(self)))
             {
-                send_missing_element_msg("tcamconvert");
-                return FALSE;
+                GST_ELEMENT_ERROR(self,
+                                  CORE,
+                                  MISSING_PLUGIN,
+                                  ("Could not create element 'tcamconvert'."),
+                                  (NULL));
+
+                return false;
             }
             element_name = "tcamconvert";
         }
 
-        std::string bin_name = "tcambin-";
-        bin_name += element_name;
-        if (!link_elements(
-                true, &data.pipeline_caps, &data.tcam_converter, pipeline_string, bin_name))
+        std::string bin_name = "tcambin-" + element_name;
+        if (!link_elements(data.pipeline_caps, data.tcam_converter, pipeline_string, bin_name))
         {
-            send_linking_element_msg(self, element_name);
+            GST_ELEMENT_ERROR(self,
+                              CORE,
+                              NEGOTIATION,
+                              ("Could not link element '%s'.", element_name.c_str()),
+                              (NULL));
             return false;
         }
     }
     data.target_pad = gst_helper::get_static_pad(*self->data->tcam_converter, "src");
 
-    GST_DEBUG("Internal pipeline: %s", pipeline_string.c_str());
+    GST_DEBUG_OBJECT(self, "Internal pipeline: %s", pipeline_string.c_str());
 
     data.elements_created = true;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -426,13 +404,13 @@ static void set_target_pad(GstTcamBin* self)
     {
         if (data.target_pad == nullptr)
         {
-            GST_ERROR("target_pad not defined");
+            GST_ERROR_OBJECT(self, "target_pad not defined");
         }
         else
         {
             if (!gst_ghost_pad_set_target(GST_GHOST_PAD(data.src_ghost_pad), data.target_pad.get()))
             {
-                GST_ERROR("Could not set target for ghostpad.");
+                GST_ERROR_OBJECT(self, "Could not set target for ghostpad.");
             }
         }
         data.target_set = true;
@@ -491,10 +469,10 @@ static void check_and_notify_version_missmatch(GstTcamBin* self)
         + element_name
         + "'. "
           "Found '"
-        + get_plugin_version(element_name.c_str()) + "' Required: '" + get_version_major() + "."
-        + get_version_minor() + "'";
+        + tcam::gst::get_plugin_version(element_name.c_str()) + "' Required: '"
+        + get_version_major() + "." + get_version_minor() + "'";
 
-    GST_WARNING("%s", warning.c_str());
+    GST_WARNING_OBJECT(self, "%s", warning.c_str());
 
     std::string quark_str = element_name + " version mismatch";
     GError* err =
@@ -517,8 +495,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
     {
         case GST_STATE_CHANGE_NULL_TO_READY:
         {
-            GST_DEBUG("NULL_TO_READY");
-
             // post message about dutils(-cuda) version missmatch
             // this only happens when we have found tcamdutils(-cuda)
             // but the previous version check failed
@@ -526,22 +502,36 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             // which overwrites this message
             check_and_notify_version_missmatch(self);
 
-            if (data.src == nullptr)
+            if (!tcambin_create_source(self))
             {
-                gst_tcambin_create_source(self);
+                return GST_STATE_CHANGE_FAILURE;
             }
 
-            gst_element_set_state(data.src, GST_STATE_READY);
-
-            gst_tcambin_create_elements(self);
+            if (!tcambin_create_elements(self))
+            {
+                gst_tcambin_clear_source(self);
+                return GST_STATE_CHANGE_FAILURE;
+            }
             set_target_pad(self);
+
+            // all elements should now be here, so we can load the settings
+            if (!data.prop_init_json_.empty())
+            {
+                tcam::gst::load_device_settings(TCAM_PROPERTY_PROVIDER(self), data.prop_init_json_);
+
+                data.prop_init_json_ = {};
+            }
+            if (data.prop_init_)
+            {
+                gst_tcambin_apply_properties(self, *data.prop_init_);
+
+                data.prop_init_.reset();
+            }
 
             break;
         }
         case GST_STATE_CHANGE_READY_TO_PAUSED:
         {
-            GST_DEBUG("READY_TO_PAUSED");
-
             auto sinkpad = gst_helper::get_peer_pad(*data.src_ghost_pad);
 
             if (sinkpad == nullptr)
@@ -579,7 +569,8 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 }
             }
 
-            auto src_caps = gst_helper::query_caps(*gst_helper::get_static_pad(*data.src, "src"));
+            auto src_caps =
+                gst_helper::query_caps(*gst_helper::get_static_pad(*data.src_element, "src"));
 
             if (data.user_caps)
             {
@@ -587,10 +578,13 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                     gst_caps_intersect(data.user_caps.get(), self->data->available_caps.get());
                 if (tmp == nullptr || gst_caps_is_empty(tmp))
                 {
-                    GST_ERROR_OBJECT(self,
-                                     "The user defined device caps are not supported by the "
-                                     "device. User caps are: %s",
-                                     gst_helper::to_string(*data.user_caps).c_str());
+                    GST_ELEMENT_ERROR(self,
+                                      STREAM,
+                                      WRONG_TYPE,
+                                      ("The user defined device caps are not supported by the "
+                                       "device. User caps are: %s",
+                                       gst_helper::to_string(*data.user_caps).c_str()),
+                                      (NULL));
                     return GST_STATE_CHANGE_FAILURE;
                 }
 
@@ -627,7 +621,6 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
                 return GST_STATE_CHANGE_FAILURE;
             }
 
-            // apply caps to internal capsfilter
             // this applies the caps to tcamsrc
             g_object_set(self->data->pipeline_caps, "caps", self->data->src_caps.get(), NULL);
 
@@ -647,27 +640,11 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
             g_free(caps_info_string);
             gst_element_post_message(element, msg);
 
-            if (!data.prop_init_json_.empty())
-            {
-                tcam::gst::load_device_settings(TCAM_PROPERTY_PROVIDER(self), data.prop_init_json_);
-
-                data.prop_init_json_ = {};
-            }
-            if (data.prop_init_)
-            {
-                gst_tcambin_apply_properties(self, *data.prop_init_);
-
-                data.prop_init_.reset();
-            }
-
             ret = GST_STATE_CHANGE_NO_PREROLL;
             break;
         }
         default:
         {
-#if GST_VERSION_MINOR >= 14
-            GST_INFO("Changing state: %s", gst_state_change_get_name(trans));
-#endif
             break;
         }
     }
@@ -712,6 +689,20 @@ static GstStateChangeReturn gst_tcam_bin_change_state(GstElement* element, GstSt
     return ret;
 }
 
+static bool is_state_null(GstTcamBin* self) noexcept
+{
+    return tcam::gst::is_gst_state_equal_or_less(GST_ELEMENT(self), GST_STATE_NULL);
+}
+
+static bool is_state_ready_or_higher(GstTcamBin* self) noexcept
+{
+    return tcam::gst::is_gst_state_equal_or_greater(GST_ELEMENT(self), GST_STATE_READY);
+}
+
+static bool is_state_ready_or_lower(GstTcamBin* self) noexcept
+{
+    return tcam::gst::is_gst_state_equal_or_less(GST_ELEMENT(self), GST_STATE_READY);
+}
 
 static void gst_tcambin_get_property(GObject* object,
                                      guint prop_id,
@@ -719,15 +710,16 @@ static void gst_tcambin_get_property(GObject* object,
                                      GParamSpec* pspec)
 {
     GstTcamBin* self = GST_TCAMBIN(object);
+
     auto& state = get_tcambin_data(self);
 
     switch (prop_id)
     {
         case PROP_SERIAL:
         {
-            if (state.src)
+            if (state.src_element)
             {
-                g_object_get_property(G_OBJECT(state.src), "serial", value);
+                g_object_get_property(G_OBJECT(state.src_element.get()), "serial", value);
             }
             else
             {
@@ -737,10 +729,9 @@ static void gst_tcambin_get_property(GObject* object,
         }
         case PROP_DEVICE_TYPE:
         {
-
-            if (state.src)
+            if (state.src_element)
             {
-                g_object_get_property(G_OBJECT(state.src), "type", value);
+                g_object_get_property(G_OBJECT(state.src_element.get()), "type", value);
             }
             else
             {
@@ -750,11 +741,25 @@ static void gst_tcambin_get_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
+            if (!is_state_ready_or_higher(self))
+            {
+                GST_ERROR_OBJECT(
+                    self, "GObject property 'device-caps' is only readable >= GST_STATE_READY.");
+                return;
+            }
+
             g_value_set_string(value, gst_helper::to_string(*state.user_caps).c_str());
             break;
         }
         case PROP_AVAILABLE_CAPS:
         {
+            if (!is_state_ready_or_higher(self))
+            {
+                GST_ERROR_OBJECT(
+                    self, "GObject property 'device-caps' is only readable >= GST_STATE_READY.");
+                return;
+            }
+
             g_value_set_string(value, gst_helper::to_string(*state.available_caps).c_str());
             break;
         }
@@ -820,35 +825,53 @@ static void gst_tcambin_set_property(GObject* object,
     {
         case PROP_SERIAL:
         {
-            state.device_serial =
-                g_value_get_string(value) != nullptr ? g_value_get_string(value) : std::string();
-            if (state.src != nullptr)
+            if (!is_state_null(self))
             {
-                GST_INFO("Setting source serial to %s", state.device_serial.c_str());
-                g_object_set_property(G_OBJECT(state.src), "serial", value);
+                GST_ERROR_OBJECT(
+                    self, "GObject property 'serial' is not writable in state >= GST_STATE_READY.");
+                return;
             }
 
+            state.device_serial =
+                g_value_get_string(value) != nullptr ? g_value_get_string(value) : std::string();
             break;
         }
         case PROP_DEVICE_TYPE:
         {
+            if (!is_state_null(self))
+            {
+                GST_ERROR_OBJECT(
+                    self, "GObject property 'serial' is not writable in state >= GST_STATE_READY.");
+                return;
+            }
+
             state.device_type =
                 g_value_get_string(value) != nullptr ? g_value_get_string(value) : std::string();
-            if (state.src != nullptr)
-            {
-                GST_INFO("Setting source device type to %s", g_value_get_string(value));
-                g_object_set_property(G_OBJECT(state.src), "type", value);
-            }
             break;
         }
         case PROP_DEVICE_CAPS:
         {
-            GST_INFO("Setting device-caps to %s", g_value_get_string(value));
+            if (!is_state_ready_or_lower(self))
+            {
+                GST_ERROR_OBJECT(
+                    self,
+                    "GObject property 'device-caps' is not writable in state >= GST_STATE_PAUSED.");
+                return;
+            }
+
             state.user_caps = gst_helper::make_ptr(gst_caps_from_string(g_value_get_string(value)));
             break;
         }
         case PROP_CONVERSION_ELEMENT:
         {
+            if (!is_state_null(self))
+            {
+                GST_ERROR_OBJECT(self,
+                                 "GObject property 'conversion-element' is not writable in state "
+                                 ">= GST_STATE_READY.");
+                return;
+            }
+
             self->data->conversion_info.user_selector =
                 (TcamBinConversionElement)g_value_get_enum(value);
 
@@ -860,8 +883,10 @@ static void gst_tcambin_set_property(GObject* object,
                 }
                 else
                 {
-                    GST_ERROR("Unable to use tcamconvert. Element does not seem to exist. Falling "
-                              "back to auto");
+                    GST_ERROR_OBJECT(
+                        self,
+                        "Unable to use tcamconvert. Element does not seem to exist. Falling "
+                        "back to auto");
                     self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
                 }
             }
@@ -873,8 +898,10 @@ static void gst_tcambin_set_property(GObject* object,
                 }
                 else
                 {
-                    GST_ERROR("Unable to use tcamdutils. Element does not seem to exist. Falling "
-                              "back to auto");
+                    GST_ERROR_OBJECT(
+                        self,
+                        "Unable to use tcamdutils. Element does not seem to exist. Falling "
+                        "back to auto");
                     self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
                 }
             }
@@ -886,8 +913,10 @@ static void gst_tcambin_set_property(GObject* object,
                 }
                 else
                 {
-                    GST_ERROR("Unable to use tcamconvert. Element does not seem to exist. Falling "
-                              "back to auto");
+                    GST_ERROR_OBJECT(
+                        self,
+                        "Unable to use tcamconvert. Element does not seem to exist. Falling "
+                        "back to auto");
                     self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
                 }
             }
@@ -900,10 +929,11 @@ static void gst_tcambin_set_property(GObject* object,
         }
         case PROP_TCAMDEVICE:
         {
-            if (state.is_open())
+            if (!is_state_null(self))
             {
                 GST_ERROR_OBJECT(
-                    self, "The gobject property 'tcam-device' can only be set in GST_STATE_NULL");
+                    self,
+                    "GObject property 'tcam-device' is not writable in state >= GST_STATE_READY.");
                 return;
             }
 
@@ -973,42 +1003,36 @@ static void gst_tcambin_set_property(GObject* object,
 
 static void gst_tcambin_init(GstTcamBin* self)
 {
-    GST_DEBUG_OBJECT(self, "init");
-
     self->data = new tcambin_data;
 
     auto& data = *self->data;
 
     data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
 
+    // #TODO maybe this could be done statically. These test have to be done only once in a process
     auto factory = gst_element_factory_find("tcamdutils");
     if (factory != nullptr)
     {
         data.conversion_info.have_tcamdutils = true;
-        gst_object_unref(factory);
         if (has_version_parity_with_tiscamera("tcamdutils"))
         {
             data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
         }
+        gst_object_unref(factory);
     }
 
     auto factory_cuda = gst_element_factory_find("tcamdutils-cuda");
     if (factory_cuda != nullptr)
     {
         data.conversion_info.have_tcamdutils_cuda = true;
-        gst_object_unref(factory_cuda);
         if (has_version_parity_with_tiscamera("tcamdutils-cuda"))
         {
             data.conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
         }
+        gst_object_unref(factory_cuda);
     }
 
-    data.src = nullptr;
-    data.pipeline_caps = nullptr;
-    data.tcam_converter = nullptr;
-    data.jpegdec = nullptr;
-
-    // NOTE: the result of gst_ghost_pad_new_no_target is a floating reference that is consumer by gst_element_add_pad
+    // NOTE: the result of gst_ghost_pad_new_no_target is a floating reference that is consumed by gst_element_add_pad
     data.src_ghost_pad = gst_ghost_pad_new_no_target("src", GST_PAD_SRC);
     gst_element_add_pad(GST_ELEMENT(self), data.src_ghost_pad);
 
@@ -1026,8 +1050,6 @@ static void gst_tcambin_finalize(GObject* object)
 
 static void gst_tcambin_dispose(GstTcamBin* self)
 {
-    GST_DEBUG("dispose");
-
     gst_tcambin_clear_source(self);
     gst_tcambin_clear_elements(self);
 
@@ -1154,11 +1176,6 @@ static gboolean plugin_init(GstPlugin* plugin)
 
     return gst_element_register(plugin, "tcambin", GST_RANK_NONE, GST_TYPE_TCAMBIN);
 }
-
-#ifndef TCAMBIN_VERSION
-#define TCAMBIN_VERSION "1.0.0"
-#endif
-
 
 #ifndef PACKAGE
 #define PACKAGE "tcam"

@@ -1,9 +1,9 @@
 
 #pragma once
 
+#include "../tcamgstbase/tcambinconversion.h"
+#include "../tcamgstbase/tcamgstbase.h"
 #include "gsttcambin.h"
-#include "tcamgstbase/tcambinconversion.h"
-#include "tcamgstbase/tcamgstbase.h"
 
 #include <gst-helper/helper_functions.h>
 #include <gst/gst.h>
@@ -23,9 +23,15 @@ struct tcambin_conversion
 
 struct tcambin_data
 {
+    // source init variables, used only in tcambin_create_source
+    // if tcambin_create_source terminated successfully, these are reset
     std::string device_serial;
     std::string device_type;
     gst_helper::gst_ptr<GstDevice> prop_tcam_device;
+
+    gst_helper::gst_ptr<GstStructure> prop_init_;
+    std::string prop_init_json_;
+    //
 
     gst_helper::gst_ptr<GstPad> target_pad;
     gst_helper::gst_ptr<GstCaps> user_caps;
@@ -41,7 +47,7 @@ struct tcambin_data
     gst_helper::gst_ptr<GstCaps> target_caps;
 
     // #TODO the lifetime of these is somewhat unclear to me, maybe look through this again
-    GstElement* src = nullptr;
+    gst_helper::gst_ptr<GstElement> src_element;
     GstElement* pipeline_caps = nullptr;
     GstElement* jpegdec = nullptr;
     GstElement* tcam_converter = nullptr;
@@ -57,9 +63,6 @@ struct tcambin_data
     }
 
     tcam::gst::input_caps_required_modules modules;
-
-    gst_helper::gst_ptr<GstStructure> prop_init_;
-    std::string prop_init_json_;
 };
 
 

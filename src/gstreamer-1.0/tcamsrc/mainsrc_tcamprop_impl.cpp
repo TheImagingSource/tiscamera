@@ -319,21 +319,16 @@ auto tcam::mainsrc::make_wrapper_instance(
     return nullptr;
 }
 
-static device_state& get_device_reference(GstTcamMainSrc* iface)
+static auto tcammainsrc_get_provider_impl_from_interface(TcamPropertyProvider* iface)
+    -> tcamprop1_gobj::tcam_property_provider*
 {
-    GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
+    assert(iface != nullptr);
 
+    GstTcamMainSrc* self = GST_TCAM_MAINSRC(iface);
     assert(self != nullptr);
     assert(self->device != nullptr);
 
-    return *self->device;
-}
-
-static auto tcammainsrc_get_provider_impl_from_interface(TcamPropertyProvider* self)
-    -> tcamprop1_gobj::tcam_property_provider*
-{
-    auto& device = get_device_reference(GST_TCAM_MAINSRC(self));
-    return &device.tcamprop_container_;
+    return &self->device->get_container();
 }
 
 void tcam::mainsrc::gst_tcam_mainsrc_tcamprop_init(TcamPropertyProviderInterface* iface)

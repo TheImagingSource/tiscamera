@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "../../../libs/gst-helper/include/tcamprop1.0_gobject/tcam_property_provider.h"
 #include "../../tcam.h"
 #include "gsttcammainsrc.h"
 
@@ -27,6 +26,7 @@
 #include <queue>
 #include <string>
 #include <tcamprop1.0_base/tcamprop_property_interface.h>
+#include <tcamprop1.0_gobject/tcam_property_provider.h>
 #include <vector>
 
 namespace tcam::mainsrc
@@ -64,38 +64,77 @@ struct src_interface_list : tcamprop1::property_list_interface
 
 struct device_state
 {
-    std::shared_ptr<tcam::CaptureDevice> dev;
+public:
+    device_state(GstTcamMainSrc* parent) noexcept : parent_ { parent } {}
+
+public: // data members currently still used in gstmainsrc.cpp, maybe move them into this
+    std::shared_ptr<tcam::CaptureDevice> device_;
     std::shared_ptr<tcam::ImageSink> sink;
-    std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
 
-    gst_helper::gst_ptr<GstCaps> all_caps;
-
+public: // streaming stuff
     std::mutex stream_mtx_;
     std::condition_variable stream_cv_;
+    std::atomic<bool> is_streaming_ = false;
 
-    std::string device_serial;
-    tcam::TCAM_DEVICE_TYPE device_type = tcam::TCAM_DEVICE_TYPE_UNKNOWN;
+    std::queue<std::shared_ptr<tcam::ImageBuffer>> queue;
 
-    std::atomic<bool> is_running = false;
+public: // sink init properties, should be moved into this object
+    int imagesink_buffers_ = 10;
+    bool drop_incomplete_frames_ = true;
 
-    int n_buffers = -1;
-    uint64_t frame_count = 0;
+public: // members used for num-buffers functionality
+    int n_buffers_ = -1;
+    uint64_t n_buffers_delivered_ = 0;
 
-    tcam::mainsrc::src_interface_list tcamprop_interface_;
-    tcamprop1_gobj::tcam_property_provider tcamprop_container_;
+public: // init properties get/set methods. Note: These take the device_open_mutex_ lock internally
+    bool set_device_serial(const std::string& str) noexcept;
+    bool set_device_type(tcam::TCAM_DEVICE_TYPE type) noexcept;
 
-    gst_helper::gst_ptr<GstStructure> prop_init_;
+    void set_tcam_properties(const GstStructure* ptr) noexcept;
+    auto get_tcam_properties() noexcept -> gst_helper::gst_ptr<GstStructure>;
 
+    std::string get_device_serial() const noexcept;
+    tcam::TCAM_DEVICE_TYPE get_device_type() const noexcept;
+
+    // Returns a copy of the device caps when open, otherwise nullptr
+    GstCaps* get_device_caps() const;
+
+public:
     bool is_device_open() const noexcept
     {
-        return dev != nullptr;
+        return device_ != nullptr;
     }
 
     void stop_and_clear();
-
     void close();
+    bool open_camera();
+
+    void apply_properties(const GstStructure& strct);
+
+    auto get_container() -> tcamprop1_gobj::tcam_property_provider&
+    {
+        return tcamprop_container_;
+    }
+
+private:
+    mutable std::mutex
+        device_open_mutex_; // this is mutable because we want to use this in logically const methods
+
+    // init properties, these get cleared on successful open
+    std::string device_serial_to_open_;
+    tcam::TCAM_DEVICE_TYPE device_type_to_open_ = tcam::TCAM_DEVICE_TYPE_UNKNOWN;
+    gst_helper::gst_ptr<GstStructure> prop_init_;
+
+
+    // cache for the device caps
+    gst_helper::gst_ptr<GstCaps> all_caps_;
+
+    // Reference to the GstElement owning this device_state instance
+    GstTcamMainSrc* parent_ = nullptr;
+
+    // stuff for TcamPropertyProvider
+    tcam::mainsrc::src_interface_list tcamprop_interface_;
+    tcamprop1_gobj::tcam_property_provider tcamprop_container_;
 
     void populate_tcamprop_interface();
 };
-
-bool mainsrc_init_camera(GstTcamMainSrc* self);

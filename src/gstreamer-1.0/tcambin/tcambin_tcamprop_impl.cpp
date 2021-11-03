@@ -29,7 +29,7 @@ static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, 
 {
     tcambin_data& self = *GST_TCAMBIN(iface)->data;
 
-    if (self.src == nullptr)
+    if (self.src_element == nullptr)
     {
         tcamprop1_gobj::set_gerror(err, tcamprop1::status::device_not_opened);
         return nullptr;
@@ -44,7 +44,7 @@ static GSList* gst_tcambin_get_tcam_property_names(TcamPropertyProvider* iface, 
             TCAM_PROPERTY_PROVIDER(self.tcam_converter));
     }
     auto src_prop_list_res =
-        tcamprop1_consumer::get_property_names(TCAM_PROPERTY_PROVIDER(self.src));
+        tcamprop1_consumer::get_property_names(TCAM_PROPERTY_PROVIDER(self.src_element.get()));
     if (src_prop_list_res.has_error())
     {
         tcamprop1_gobj::set_gerror(err, src_prop_list_res.error());
@@ -81,7 +81,7 @@ static TcamPropertyBase* gst_tcambin_get_tcam_property(TcamPropertyProvider* ifa
         return nullptr;
     }
 
-    if (self.src == nullptr)
+    if (self.src_element == nullptr)
     {
         tcamprop1_gobj::set_gerror(err, tcamprop1::status::device_not_opened);
         return nullptr;
@@ -97,7 +97,8 @@ static TcamPropertyBase* gst_tcambin_get_tcam_property(TcamPropertyProvider* ifa
         }
     }
 
-    return tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(self.src), name, err);
+    return tcam_property_provider_get_tcam_property(
+        TCAM_PROPERTY_PROVIDER(self.src_element.get()), name, err);
 }
 
 

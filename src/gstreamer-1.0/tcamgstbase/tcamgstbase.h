@@ -114,6 +114,18 @@ GstCaps* get_caps_from_element_name(const char* elementname, const char* padname
 
 tcam::image_scaling caps_get_scaling(GstCaps* caps);
 
+
+/**
+ * Tests if the current state is >= the parameter.
+ * Note: state retrieval errors are always false
+ */
+bool is_gst_state_equal_or_greater( GstElement* self, GstState state ) noexcept;
+/**
+ * Tests if the current state is <= the parameter.
+ * Note: state retrieval errors are always false
+ */
+bool is_gst_state_equal_or_less( GstElement* self, GstState state ) noexcept;
+
 }
 
 #endif /* TCAM_GSTTCAMBASE_H */
