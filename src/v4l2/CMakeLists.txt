@@ -40,6 +40,8 @@ add_library(tcam-uvc-extension STATIC
 set_project_warnings(tcam-uvc-extension)
 
 target_link_libraries(tcam-uvc-extension ${LIBUUID_LIBRARIES})
+
 target_include_directories(tcam-uvc-extension
   PRIVATE ${LIBUUID_INCLUDE_DIRS}
+  PRIVATE "${TCAM_BINARY_DIR}/"
   PRIVATE "${TCAM_SOURCE_DIR}/external/json")

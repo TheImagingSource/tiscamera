@@ -16,6 +16,8 @@
 
 #include "uvc-extension-loader.h"
 
+#include "src/tcam-config.h"
+
 #include "json.hpp"
 
 #include <fcntl.h>
@@ -26,6 +28,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <uuid/uuid.h>
+#include <stdlib.h> // getenv
 
 using json = nlohmann::json;
 
@@ -170,6 +173,77 @@ static __u8 parse_v4l2_type(const std::string& str)
     return 0;
 }
 
+std::vector<std::string> get_search_directories()
+{
+    std::vector<std::string> directories;
+
+    directories.push_back(get_current_dir_name());
+
+    char* env_entry = getenv("TCAM_UVC_EXTENSION_DIR");
+    if (env_entry)
+    {
+        directories.push_back(env_entry);
+    }
+
+    directories.push_back(TCAM_INSTALL_UVC_EXTENSION);
+
+    return directories;
+}
+
+
+std::string tcam::uvc::determine_extension_file(const std::string& pid_in)
+{
+    std::string filename;
+
+    // interpret nuber as hex
+    int pid = strtol(pid_in.c_str(), NULL, 16);
+
+    if ((pid & 0x8300) == 0x8300)
+    {
+        filename = "usb2.json";
+    }
+    else if ((pid & 0x8400) == 0x8400
+             || (pid & 0x8500) == 0x8500
+             || (pid & 0x8600) == 0x8600
+             || (pid & 0x8700) == 0x8700)
+    {
+        // usb 23
+        filename = "usb23.json";
+    }
+    else if ((pid & 0x9000) == 0x9000
+             || (pid & 0x9800) == 0x9800)
+    {
+        // usb 33/38
+        filename = "usb33.json";
+    }
+    else if ((pid & 0x9400) == 0x9400)
+    {
+        // usb 37
+        filename = "usb37.json";
+    }
+
+    if (filename.empty())
+    {
+        return filename;
+    }
+
+    std::vector<std::string> search_path = get_search_directories();
+
+    // old school method
+    // std::filesystem not used for backwards compatability
+    for (const auto& sp : search_path)
+    {
+        std::string name = sp + "/" + filename;
+        struct stat buffer;
+        if (stat (name.c_str(), &buffer) == 0)
+        {
+            return name;
+        }
+    }
+    return "";
+
+}
+
 
 std::vector<tcam::uvc::description> tcam::uvc::load_description_file(
     const std::string& filename,
@@ -182,6 +256,11 @@ std::vector<tcam::uvc::description> tcam::uvc::load_description_file(
     std::vector<description> mappings;
 
     std::ifstream ifs(filename);
+
+    if (!ifs.good())
+    {
+        return mappings;
+    }
 
     json json_desc;
 

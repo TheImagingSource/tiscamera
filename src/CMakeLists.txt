@@ -19,6 +19,10 @@ if (BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
 endif (BUILD_GST_1_0)
 
+configure_file (
+  "${CMAKE_CURRENT_SOURCE_DIR}/tcam-config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/tcam-config.h")
+
 if (TCAM_ENABLE_BASE_LIBRARIES)
 
 add_library(tcam-base STATIC
@@ -206,6 +210,7 @@ if (BUILD_V4L2)
 
   target_link_libraries(tcam PRIVATE ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
   target_link_libraries(tcam PRIVATE tcam-dfk73)
+  target_link_libraries(tcam PRIVATE tcam-uvc-extension)
 
 endif (BUILD_V4L2)
 

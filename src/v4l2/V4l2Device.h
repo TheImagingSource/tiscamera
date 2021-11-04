@@ -167,6 +167,7 @@ private:
 
     void determine_active_video_format();
 
+    bool load_extension_unit();
     bool extension_unit_is_loaded();
 
     std::shared_ptr<tcam::property::IPropertyBase> new_control(struct v4l2_queryctrl* qctrl);

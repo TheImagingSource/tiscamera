@@ -20,6 +20,7 @@
 #include "v4l2_genicam_mapping.h"
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
+#include "uvc-extension-loader.h"
 
 #include "property_dependencies.h"
 
@@ -149,7 +150,7 @@ void V4l2Device::sort_properties(
 
     auto preserve_id = [&properties](uint32_t v4l2_id, const std::string& name) {
         int count = 0;
-        for (const auto p : properties)
+        for (const auto& p : properties)
         {
             if (p.second->get_name() == name)
             {
@@ -267,22 +268,42 @@ void V4l2Device::sort_properties(
 }
 
 
+bool V4l2Device::load_extension_unit()
+{
+    auto message_cb = [](const std::string& message)
+    {
+        SPDLOG_DEBUG("{}", message.c_str());
+    };
+
+    std::string extension_file = tcam::uvc::determine_extension_file(this->device.get_info().additional_identifier);
+
+    if (extension_file.empty())
+    {
+        SPDLOG_WARN("Unable to determine uvc extension file");
+        return false;
+    }
+
+    auto mappings = tcam::uvc::load_description_file(extension_file, message_cb);
+    if (mappings.empty())
+    {
+        SPDLOG_WARN("Unable to load uvc extension file");
+        return false;
+    }
+    tcam::uvc::apply_mappings(m_fd, mappings, message_cb);
+
+    return true;
+}
+
+
 void V4l2Device::index_controls()
 {
-    bool extension_unit_exists = false;
-    // test for loaded extension unit.
-    for (unsigned int i = 0; i < 3; ++i)
+    bool extension_unit_exists = extension_unit_is_loaded();
+
+    if (!extension_unit_exists)
     {
-        if (extension_unit_is_loaded())
-        {
-            extension_unit_exists = true;
-            break;
-        }
-        else
-        {
-            usleep(500);
-        }
+        extension_unit_exists = load_extension_unit();
     }
+
     if (!extension_unit_exists)
     {
         SPDLOG_WARN(

@@ -49,6 +49,14 @@ int map(int fd, uvc_xu_control_mapping* ctrl);
 
 
 /**
+ * @name determind_description_file
+ * @param pid - product id of the camera that is used
+ * @return filename to use, empty on error
+ */
+std::string determine_extension_file(const std::string& pid);
+
+
+/**
  * @name apply_mappings
  * @param fd - file descriptor of the device
  * @param mappings - descriptions that shall be used
