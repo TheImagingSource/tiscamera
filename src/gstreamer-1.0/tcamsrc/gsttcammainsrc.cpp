@@ -863,7 +863,11 @@ static void gst_tcam_mainsrc_init(GstTcamMainSrc* self)
     gst_base_src_set_format(GST_BASE_SRC(self), GST_FORMAT_TIME);
 
     self->device = new device_state(self);
-    self->fps_denominator = 30;
+
+    // default to 1/1 fps as fallback
+    // these values are only used for GstQuery
+    // they should always be set in set_caps
+    self->fps_denominator = 1;
     self->fps_denominator = 1;
 
     GST_INFO_OBJECT(
