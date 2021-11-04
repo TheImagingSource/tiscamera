@@ -337,8 +337,11 @@ static bool tcambin_create_elements(GstTcamBin* self)
             if (!create_and_add_element(
                     &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils", GST_BIN(self)))
             {
-                GST_ELEMENT_ERROR(
-                    self, CORE, MISSING_PLUGIN, ("Could not create element 'jpegdec'."), (NULL));
+                GST_ELEMENT_ERROR(self,
+                                  CORE,
+                                  MISSING_PLUGIN,
+                                  ("Could not create element 'tcamdutils'."),
+                                  (NULL));
                 return false;
             }
             element_name = "tcamdutils";
@@ -841,7 +844,7 @@ static void gst_tcambin_set_property(GObject* object,
             if (!is_state_null(self))
             {
                 GST_ERROR_OBJECT(
-                    self, "GObject property 'serial' is not writable in state >= GST_STATE_READY.");
+                    self, "GObject property 'type' is not writable in state >= GST_STATE_READY.");
                 return;
             }
 
