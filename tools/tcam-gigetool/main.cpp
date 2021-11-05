@@ -178,67 +178,68 @@ void list_cameras(const std::string& format)
     {
         for (unsigned int i = 0; i < format.size(); ++i)
         {
+            // width is header number +3 to accomodate ` | `
             switch (format.at(i))
             {
                 case 'm':
                 {
-                    std::cout << std::setw(20) << cam->getModelName();
+                    std::cout << std::setw(23) << cam->getModelName();
                     break;
                 }
                 case 's':
                 {
-                    std::cout << std::setw(16) << cam->getSerialNumber();
+                    std::cout << std::setw(19) << cam->getSerialNumber();
                     break;
                 }
                 case 'u':
                 {
-                    std::cout << std::setw(20) << cam->getUserDefinedName();
+                    std::cout << std::setw(23) << cam->getUserDefinedName();
                     break;
                 }
                 case 'i':
                 {
-                    std::cout << std::setw(17) << cam->getCurrentIP();
+                    std::cout << std::setw(20) << cam->getCurrentIP();
                     break;
                 }
                 case 'n':
                 {
-                    std::cout << std::setw(17) << cam->getCurrentSubnet();
+                    std::cout << std::setw(20) << cam->getCurrentSubnet();
                     break;
                 }
                 case 'g':
                 {
-                    std::cout << std::setw(17) << cam->getCurrentGateway();
+                    std::cout << std::setw(20) << cam->getCurrentGateway();
                     break;
                 }
                 case 'I':
                 {
-                    std::cout << std::setw(17) << cam->getPersistentIP();
+                    std::cout << std::setw(20) << cam->getPersistentIP();
                     break;
                 }
                 case 'N':
                 {
-                    std::cout << std::setw(20) << cam->getPersistentSubnet();
+                    std::cout << std::setw(23) << cam->getPersistentSubnet();
                     break;
                 }
                 case 'G':
                 {
-                    std::cout << std::setw(20) << cam->getPersistentGateway();
+                    std::cout << std::setw(23) << cam->getPersistentGateway();
                     break;
                 }
                 case 'f':
                 {
-                    std::cout << std::setw(12) << cam->getInterfaceName();
+                    std::cout << std::setw(15) << cam->getInterfaceName();
                     break;
                 }
                 case 'd':
                 {
                     if (cam->isDHCPactive())
                     {
-                        std::cout << std::setw(10) << "Yes";
+                        std::cout << std::setw(13) << "Yes";
                     }
                     else
                     {
-                        std::cout << std::setw(10) << "No";
+                        std::cout << std::setw(13) << "No";
                     }
                     break;
                 }
@@ -246,29 +247,29 @@ void list_cameras(const std::string& format)
                 {
                     if (cam->isStaticIPactive())
                     {
-                        std::cout << std::setw(10) << "Yes";
+                        std::cout << std::setw(13) << "Yes";
                     }
                     else
                     {
-                        std::cout << std::setw(10) << "No";
+                        std::cout << std::setw(13) << "No";
                     }
 
                     break;
                 }
                 case 'M':
                 {
-                    std::cout << std::setw(18) << cam->getMAC();
+                    std::cout << std::setw(21) << cam->getMAC();
                     break;
                 }
                 case 'r':
                 {
                     if (cam->isReachable())
                     {
-                        std::cout << std::setw(10) << "Yes";
+                        std::cout << std::setw(13) << "Yes";
                     }
                     else
                     {
-                        std::cout << std::setw(10) << "No";
+                        std::cout << std::setw(13) << "No";
                     }
                     break;
                 }
@@ -741,7 +742,7 @@ int execute_batch_upload (const CLI::App& app)
 
 
 // all allowed characters
-static const std::string list_format_chars = "msuingONGfdSMr";
+static const std::string list_format_chars = "msuingINGfdSMr";
 
 // validator for possible --format characters
 struct ListValidator : public CLI::Validator
@@ -793,7 +794,7 @@ int main(int argc, char* argv[])
                                                 "i - current ip address\n"
                                                 "n - current netmask\n"
                                                 "g - current gateway\n"
-                                                "O - persistent ip\n"
+                                                "I - persistent ip\n"
                                                 "N - persistent netmask\n"
                                                 "G - persistent gateway\n"
                                                 "f - local network interface\n"
