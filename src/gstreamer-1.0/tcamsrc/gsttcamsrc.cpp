@@ -94,10 +94,10 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE_TYPE,
-    PROP_CAM_BUFFERS,
+    PROP_CAMERA_BUFFERS,
     PROP_NUM_BUFFERS,
     PROP_DO_TIMESTAMP,
-    PROP_DROP_INCOMPLETE_FRAMES,
+    PROP_DROP_INCOMPLETE_BUFFER,
     PROP_TCAM_PROPERTIES_JSON,
     PROP_TCAMDEVICE,
     PROP_TCAM_PROPERTIES_GSTSTRUCT,
@@ -306,7 +306,7 @@ static gboolean open_source_element(GstTcamSrc* self)
     g_value_init(&val, G_TYPE_INT);
     g_value_set_int(&val, state.cam_buffers);
     // manually set all properties to ensure they are correctly applied
-    apply_element_property(self, PROP_CAM_BUFFERS, &val, nullptr);
+    apply_element_property(self, PROP_CAMERA_BUFFERS, &val, nullptr);
 
     // g_value_reset(&val);
     // g_value_init(&val, G_TYPE_INT);
@@ -321,7 +321,7 @@ static gboolean open_source_element(GstTcamSrc* self)
     g_value_init(&val_bool, G_TYPE_BOOLEAN);
     g_value_set_boolean(&val_bool, state.drop_incomplete_frames);
 
-    apply_element_property(self, PROP_DROP_INCOMPLETE_FRAMES, &val_bool, nullptr);
+    apply_element_property(self, PROP_DROP_INCOMPLETE_BUFFER, &val_bool, nullptr);
 
     // g_value_reset(&val);
     // g_value_init(&val, G_TYPE_BOOLEAN);
@@ -495,7 +495,7 @@ static void apply_element_property(GstTcamSrc* self,
             }
             break;
         }
-        case PROP_CAM_BUFFERS:
+        case PROP_CAMERA_BUFFERS:
         {
             if (state.is_open())
             {
@@ -556,7 +556,7 @@ static void apply_element_property(GstTcamSrc* self,
             }
             break;
         }
-        case PROP_DROP_INCOMPLETE_FRAMES:
+        case PROP_DROP_INCOMPLETE_BUFFER:
         {
             if (state.is_open())
             {
@@ -688,7 +688,7 @@ static void gst_tcam_src_get_property(GObject* object,
             }
             break;
         }
-        case PROP_CAM_BUFFERS:
+        case PROP_CAMERA_BUFFERS:
         {
             if (state.is_open())
             {
@@ -748,7 +748,7 @@ static void gst_tcam_src_get_property(GObject* object,
             }
             break;
         }
-        case PROP_DROP_INCOMPLETE_FRAMES:
+        case PROP_DROP_INCOMPLETE_BUFFER:
         {
             if (state.is_open())
             {
@@ -883,7 +883,7 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
 
     g_object_class_install_property(
         gobject_class,
-        PROP_CAM_BUFFERS,
+        PROP_CAMERA_BUFFERS,
         g_param_spec_int("camera-buffers",
                          "Number of Buffers",
                          "Number of buffers to use for retrieving images",
@@ -912,7 +912,7 @@ static void gst_tcam_src_class_init(GstTcamSrcClass* klass)
                                                       | G_PARAM_CONSTRUCT)));
     g_object_class_install_property(
         gobject_class,
-        PROP_DROP_INCOMPLETE_FRAMES,
+        PROP_DROP_INCOMPLETE_BUFFER,
         g_param_spec_boolean("drop-incomplete-buffer",
                              "Drop incomplete buffers",
                              "Drop buffer that are incomplete.",

@@ -18,30 +18,44 @@ Always use tcamsrc. tcammainsrc is considered an internal element.
 
 .. list-table:: tcammainsrc properties
    :header-rows: 1
-   :widths: 25 10 65
+   :widths: 15 10 55 10 10
 
    * - fieldname
      - type
      - description
+     - set available
+     - get available
    * - serial
      - string
      - Serial number of the device that shall be used
+     - `< GST_STATE_READY`
+     - always
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, unknown
+     - `< GST_STATE_READY`
+     - always
    * - camera-buffers
      - int
      - Number of internal buffers the backend can use.
+     - `< GST_STATE_PAUSED`
+     - always
    * - num-buffers
      - int
      - Only send the specified number of images.
        With 'num-buffers=200' tcamsrc will automatically send an EOS and stop the device after 200 buffers have been sent to the pipeline.
+     - `< GST_STATE_PAUSED`
+     - always
    * - drop-incomplete-buffer
      - bool
      - When incomplete buffers should be delivered this has to be set to `false`.
+     - always
+     - always
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+     - always
+     - always
 
 
 MetaData
@@ -146,28 +160,61 @@ It is a convenience wrapper and offers no additional properties.
 
 .. list-table:: TcamSrc properties
    :header-rows: 1
-   :widths: 25 10 65
+   :widths: 15 10 55 10 10
 
    * - fieldname
      - type
      - description
-      
+     - set available
+     - get available
+
    * - serial
      - string
      - Serial number of the device that shall be used
+     - `< GST_STATE_READY`
+     - always
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
+     - `< GST_STATE_READY`
+     - always
    * - :ref:`tcam-device<tcam-device>`
      - GstDevice
      - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
+     - `< GST_STATE_READY`
+     - never
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+     - always
+     - always
    * - :ref:`tcam-properties-json<tcam-properties-json>`
      - string
      - Property that can be used to set/get the current TcamPropertyProvider properties. This works the same way `tcam-properties` works, but uses a json string to provide the property names and values.
-                                                
+     - always
+     - always
+   * - camera-buffers
+     - int
+     - Number of internal buffers the backend can use. Forwarded to the actual device opened in `GST_STATE_READY`.
+     - always
+     - `>= GST_STATE_READY`
+   * - num-buffers
+     - int
+     - Only send the specified number of images.
+       With 'num-buffers=200' tcamsrc will automatically send an EOS and stop the device after 200 buffers have been sent to the pipeline.  Forwarded to the actual device opened in `GST_STATE_READY`.
+     - always
+     - `>= GST_STATE_READY`
+   * - drop-incomplete-buffer
+     - bool
+     - When incomplete buffers should be delivered this has to be set to `false`. Forwarded to the actual device opened in `GST_STATE_READY`.
+     - always
+     - `>= GST_STATE_READY`
+   * - do-timestamp 
+     - bool
+     - Sets the `do-timestamp` property. Forwarded to the actual device opened in `GST_STATE_READY`.
+     - always
+     - `>= GST_STATE_READY`
+
 .. _tcamdutils:
 
 tcamdutils
@@ -209,33 +256,49 @@ The format that can always be expected to work is `BGRx`. All other formats depe
 
 .. list-table:: TcamBin properties
    :header-rows: 1
-   :widths: 25 10 65
+   :widths: 15 10 55 10 10
 
    * - fieldname
      - type
      - description
-     
+     - set available
+     - get available
+
    * - serial
      - string
      - Serial number of the device that shall be used
+     - `< GST_STATE_READY`
+     - always
    * - type
      - string
      - Backend the camera shall use. Available options: v4l2, aravis, libusb, pimipi, unknown
+     - `< GST_STATE_READY`
+     - always
    * - :ref:`tcam-device<tcam-device>`
      - GstDevice
      - Assigns a GstDevice to open when transitioning from `GST_STATE_NULL` to `GST_STATE_READY`.
+     - `< GST_STATE_READY`
+     - never
    * - available-caps
      - string
      - String description of the GstCaps that can be used in `device-caps`. Will be equal to or a subsection of the GstCaps offered by tcamsrc.
+     - never
+     - `>= GST_STATE_READY`
    * - device-caps
      - string
      - String that overwrites the auto-detection of the gstreamer caps that will be set for the internal tcamsrc
+     - `< GST_STATE_PAUSED`
+     - always
    * - :ref:`tcam-properties<tcam-properties>`
      - GstStructure
      - Property that can be used to set/get the current TcamPropertyProvider properties. This can be used like: `gst-launch-1.0 tcambin tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...`
+     - always
+     - always
    * - :ref:`tcam-properties-json<tcam-properties-json>`
      - string
      - Property that can be used to set/get the current TcamPropertyProvider properties. This works the same way `tcam-properties` works, but uses a json string to provide the property names and values.
+     - always
+     - always
    * - conversion-element
      - enum
      - Select the transformation element to use.
@@ -248,6 +311,8 @@ The format that can always be expected to work is `BGRx`. All other formats depe
        
        Possible values: `auto`, `tcamconvert`, `tcamdutils`, `tcamdutils-cuda`
        Default: `auto`
+     - `< GST_STATE_READY`
+     - always
 
 Internal pipelines will always be created when the element state is set to READY.
 

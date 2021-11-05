@@ -744,14 +744,14 @@ static void gst_tcambin_get_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
-            if (!is_state_ready_or_higher(self))
+            if( state.user_caps )
             {
-                GST_ERROR_OBJECT(
-                    self, "GObject property 'device-caps' is only readable >= GST_STATE_READY.");
-                return;
+                g_value_set_string(value, gst_helper::to_string(*state.user_caps).c_str());
             }
-
-            g_value_set_string(value, gst_helper::to_string(*state.user_caps).c_str());
+            else
+            {
+                g_value_set_string(value, "");
+            }
             break;
         }
         case PROP_AVAILABLE_CAPS:

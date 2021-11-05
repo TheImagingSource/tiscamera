@@ -59,9 +59,9 @@ enum
     PROP_0,
     PROP_SERIAL,
     PROP_DEVICE_TYPE,
-    PROP_CAM_BUFFERS,
+    PROP_CAMERA_BUFFERS,
     PROP_NUM_BUFFERS,
-    PROP_DROP_INCOMPLETE_FRAMES,
+    PROP_DROP_INCOMPLETE_BUFFER,
     PROP_TCAM_PROPERTIES_GSTSTRUCT,
 };
 
@@ -976,17 +976,18 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
                 }
                 else
                 {
-                    state.set_device_type(tcam::tcam_device_from_string( type_str ));
+                    state.set_device_type(tcam::tcam_device_from_string(type_str));
                 }
             }
             break;
         }
-        case PROP_CAM_BUFFERS:
+        case PROP_CAMERA_BUFFERS:
         {
-            if (!is_state_ready_or_lower( self ))
+            if (!is_state_ready_or_lower(self))
             {
-                GST_ERROR_OBJECT(
-                    self, "GObject property 'camera-buffers' is not writable in state >= GST_STATE_READY.");
+                GST_ERROR_OBJECT(self,
+                                 "GObject property 'camera-buffers' is not writable in state >= "
+                                 "GST_STATE_PAUSED.");
                 return;
             }
             else
@@ -997,11 +998,11 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         }
         case PROP_NUM_BUFFERS:
         {
-            if (!is_state_ready_or_lower( self ))
+            if (!is_state_ready_or_lower(self))
             {
                 GST_ERROR_OBJECT(self,
-                                 "GObject property 'camera-buffers' is not writable in state >= "
-                                 "GST_STATE_READY.");
+                                 "GObject property 'num-buffers' is not writable in state >= "
+                                 "GST_STATE_PAUSED.");
             }
             else
             {
@@ -1009,7 +1010,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             }
             break;
         }
-        case PROP_DROP_INCOMPLETE_FRAMES:
+        case PROP_DROP_INCOMPLETE_BUFFER:
         {
             state.drop_incomplete_frames_ = g_value_get_boolean(value) != FALSE;
             if (self->device->sink)
@@ -1055,7 +1056,7 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
 
             break;
         }
-        case PROP_CAM_BUFFERS:
+        case PROP_CAMERA_BUFFERS:
         {
             g_value_set_int(value, state.imagesink_buffers_);
             break;
@@ -1065,7 +1066,7 @@ static void gst_tcam_mainsrc_get_property(GObject* object,
             g_value_set_int(value, state.n_buffers_);
             break;
         }
-        case PROP_DROP_INCOMPLETE_FRAMES:
+        case PROP_DROP_INCOMPLETE_BUFFER:
         {
             g_value_set_boolean(value, state.drop_incomplete_frames_);
             break;
@@ -1128,7 +1129,7 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
 
     g_object_class_install_property(
         gobject_class,
-        PROP_CAM_BUFFERS,
+        PROP_CAMERA_BUFFERS,
         g_param_spec_int("camera-buffers",
                          "Number of Buffers",
                          "Number of buffers to use for retrieving images",
@@ -1148,7 +1149,7 @@ static void gst_tcam_mainsrc_class_init(GstTcamMainSrcClass* klass)
                          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     g_object_class_install_property(
         gobject_class,
-        PROP_DROP_INCOMPLETE_FRAMES,
+        PROP_DROP_INCOMPLETE_BUFFER,
         g_param_spec_boolean("drop-incomplete-buffer",
                              "Drop incomplete buffers",
                              "Drop buffer that are incomplete.",
