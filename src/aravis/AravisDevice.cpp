@@ -234,37 +234,89 @@ void AravisDevice::generate_scales()
         auto binning_h = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
         auto binning_v = tcam::property::find_property(m_scale.properties, "BinningVertical");
 
-        auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
-        auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
-
-        for (int i = bh->get_min(); i <= bh->get_max(); i++)
+        if (binning_h && binning_v)
         {
-            // only accept valid values
-            if (!legal_value(i))
-            {
-                continue;
-            }
+            auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
+            auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
 
-            for (int v = bv->get_min(); v <= bv->get_max(); v++)
+            for (int i = bh->get_min(); i <= bh->get_max(); i++)
             {
                 // only accept valid values
-                if (!legal_value(v))
+                if (!legal_value(i))
                 {
                     continue;
                 }
 
-                image_scaling new_scale = {};
+                for (int v = bv->get_min(); v <= bv->get_max(); v++)
+                {
+                    // only accept valid values
+                    if (!legal_value(v))
+                    {
+                        continue;
+                    }
 
-                new_scale.binning_h = i;
-                new_scale.binning_v = v;
+                    image_scaling new_scale = {};
 
-                // SPDLOG_INFO("New binning: {}x{}", i, i);
-                //SPDLOG_ERROR("new", bh->);
+                    new_scale.binning_h = i;
+                    new_scale.binning_v = v;
 
-                m_scale.scales.push_back(new_scale);
+                    // SPDLOG_INFO("New binning: {}x{}", i, i);
+                    //SPDLOG_ERROR("new", bh->);
+
+                    m_scale.scales.push_back(new_scale);
+                }
             }
         }
+        else
+        {
+            auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
 
+            if (binning_base)
+            {
+                auto binning = dynamic_cast<tcam::property::IPropertyEnum*>(binning_base.get());
+
+                auto entries = binning->get_entries();
+
+                for (const auto& entry : entries)
+                {
+                    if (entry == "X1")
+                    {
+                        m_scale.scales.push_back({1, 1});
+                    }
+                    else if (entry == "X2")
+                    {
+                        m_scale.scales.push_back({2, 2});
+                    }
+                    else if (entry == "X4")
+                    {
+                        m_scale.scales.push_back({4, 4});
+                    }
+                    else
+                    {
+                        SPDLOG_WARN("Binning entry '{}' not implemented.", entry);
+                    }
+                }
+
+                // for (int i = binning->get_min(); i <= binning->get_max(); i++)
+                // {
+                //     if (!legal_value(i))
+                //     {
+                //         continue;
+                //     }
+
+                //     image_scaling new_scale = {};
+
+                //     new_scale.binning_h = i;
+                //     new_scale.binning_v = i;
+
+                //     // SPDLOG_INFO("New binning: {}x{}", i, i);
+                //     //SPDLOG_ERROR("new", bh->);
+
+                //     m_scale.scales.push_back(new_scale);
+                // }
+
+            }
+        }
 
     }
 
@@ -412,28 +464,68 @@ bool AravisDevice::set_scaling(const image_scaling& scale)
 {
     if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-        auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
-
-        auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
-        auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
-
-        SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
-
-        auto ret = bin_h->set_value(scale.binning_h);
-
-        if (!ret)
+        auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
+        if (binning_base)
         {
-            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
-            return false;
+            SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
+
+            auto binning = dynamic_cast<tcam::property::IPropertyEnum*>(binning_base.get());
+
+            std::string value;
+
+            // this type of binning should only appear
+            // in legacy cameras that only offer Binning
+            if (scale.binning_h == 1)
+            {
+                value = "X1";
+            }
+            else if (scale.binning_h == 2)
+            {
+                value = "x2";
+            }
+            else if (scale.binning_h == 4)
+            {
+                value = "X4";
+            }
+            else
+            {
+                SPDLOG_ERROR("Binning type not implemented");
+            }
+
+            auto ret = binning->set_value_str(value);
+
+            if (!ret)
+            {
+                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+
+                return false;
+            }
         }
-
-        ret = bin_v->set_value(scale.binning_v);
-
-        if (!ret)
+        else
         {
-            SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
-            return false;
+            auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+            auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+            auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+            auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+            SPDLOG_TRACE("Setting binning to: {}x{}", scale.binning_h, scale.binning_v);
+
+            auto ret = bin_h->set_value(scale.binning_h);
+
+            if (!ret)
+            {
+                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+                return false;
+            }
+
+            ret = bin_v->set_value(scale.binning_v);
+
+            if (!ret)
+            {
+                SPDLOG_ERROR("Unable to set binning: {}", ret.as_failure().error().message());
+                return false;
+            }
         }
     }
 
@@ -478,27 +570,65 @@ image_scaling AravisDevice::get_current_scaling()
 
     if (m_scale.scale_type == ImageScalingType::Binning || m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
-        auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
-        auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+        auto binning_base = tcam::property::find_property(m_scale.properties, "Binning");
 
-        auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
-        auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
-
-        auto res = bin_h->get_value();
-
-        if (!res)
+        if (binning_base)
         {
-            SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
-            return {};
+            auto binning = dynamic_cast<tcam::property::IPropertyEnum*>(binning_base.get());
+
+            auto value = binning->get_value();
+
+            if (!value)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for Binning: {}", value.as_failure().error().message());
+                return {};
+            }
+
+            if (value.value() == "X1")
+            {
+                ret.binning_h = 1;
+                ret.binning_v = 1;
+            }
+            else if (value.value() == "X2")
+            {
+                ret.binning_h = 2;
+                ret.binning_v = 2;
+            }
+            else if (value.value() == "X4")
+            {
+                ret.binning_h = 4;
+                ret.binning_v = 4;            }
+            else
+            {
+                SPDLOG_WARN("Binning entry '{}' not implemented.", value.value());
+                return {};
+            }
+
         }
-        ret.binning_h = res.value();
-        res = bin_v->get_value();
-        if (!res)
+        else
         {
-            SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
-            return {};
+            auto bin_hb = tcam::property::find_property(m_scale.properties, "BinningHorizontal");
+            auto bin_vb = tcam::property::find_property(m_scale.properties, "BinningVertical");
+
+            auto bin_h = dynamic_cast<tcam::property::IPropertyInteger*>(bin_hb.get());
+            auto bin_v = dynamic_cast<tcam::property::IPropertyInteger*>(bin_vb.get());
+
+            auto res = bin_h->get_value();
+
+            if (!res)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for BinningHorizontal: {}", res.as_failure().error().message());
+                return {};
+            }
+            ret.binning_h = res.value();
+            res = bin_v->get_value();
+            if (!res)
+            {
+                SPDLOG_ERROR("Unable to retrieve value for BinningVertical: {}", res.as_failure().error().message());
+                return {};
+            }
+            ret.binning_v = res.value();
         }
-        ret.binning_v = res.value();
     }
 
     if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
@@ -786,7 +916,6 @@ bool set_stream_options(ArvStream* stream)
             // there are no values that want more than two decimal position
             // ceilf seems to produce more reliable values than ceil
             double res = (double)ceilf(std::stof(value) * 100.0L) / 100.0L;
-            SPDLOG_ERROR("{} == {}", value, res);
             g_object_set(stream,
                          name.c_str(),
                          res,
@@ -872,8 +1001,6 @@ bool set_stream_options(ArvStream* stream)
 
     if (!stream_options.empty())
     {
-        SPDLOG_DEBUG("Setting arv_stream options: {}", stream_options);
-
         auto settings = tcam::split_string(stream_options, ",");
 
         for (auto s : settings)
@@ -886,8 +1013,6 @@ bool set_stream_options(ArvStream* stream)
             }
             else
             {
-                SPDLOG_ERROR("Setting {} to {}", single_setting.at(0), single_setting.at(1));
-
                 // attempt setting int
                 // if it fails the value is not an int
                 // and we attempt double, and if that fails it has to be an enum
