@@ -136,14 +136,9 @@ AravisDevice::AravisDevice(const DeviceInfo& device_desc) : stream(NULL)
         throw std::runtime_error("Error while creating ArvCamera");
     }
 
-    arv_options.auto_socket_buffer = false;
-    arv_options.packet_timeout = 40;
-    arv_options.frame_retention = 200;
-
     if (arv_camera_is_gv_device(this->arv_camera))
     {
         auto_set_packet_size();
-        determine_packet_request_ratio();
     }
 
     format_handler = std::make_shared<AravisFormatHandler>(this);
@@ -742,6 +737,180 @@ void AravisDevice::requeue_buffer(std::shared_ptr<ImageBuffer> buffer)
 }
 
 
+bool set_stream_options(ArvStream* stream)
+{
+
+    // helper functions
+    // these attempt to set a certain value type
+    // if a conversion fails we return false and
+    // the stream object will not be touched
+
+    auto set_int = [&stream] (const std::string& name, const std::string& value)
+    {
+        try
+        {
+            // stoi likes to convert 0.8 to 0.
+            // check if point is in value
+            // -> is double, don't even try
+            if (value.find(".") != std::string::npos)
+            {
+                return false;
+            }
+
+            auto res = std::stoi(value);
+            g_object_set(stream,
+                         name.c_str(),
+                         res,
+                         nullptr);
+
+            int test;
+            g_object_get(stream, name.c_str(), &test, nullptr);
+
+            if (test != res)
+            {
+                SPDLOG_ERROR("Setting {} did not go as expected. {} != {}", name, test, res);
+                return false;
+            }
+        }
+        catch (...)
+        {
+            return false;
+        }
+        return true;
+    };
+
+    auto set_double = [&stream] (const std::string& name, const std::string& value)
+    {
+        try
+        {
+            // there are no values that want more than two decimal position
+            // ceilf seems to produce more reliable values than ceil
+            double res = (double)ceilf(std::stof(value) * 100.0L) / 100.0L;
+            SPDLOG_ERROR("{} == {}", value, res);
+            g_object_set(stream,
+                         name.c_str(),
+                         res,
+                         nullptr);
+
+            double test;
+            g_object_get(stream, name.c_str(), &test, nullptr);
+
+            if (test != res)
+            {
+                SPDLOG_ERROR("Setting {} did not go as expected. {} != {}", name, test, res);
+                return false;
+            }
+        }
+        catch (...)
+        {
+            return false;
+        }
+        return true;
+    };
+
+    auto set_enum = [&stream] (const std::string& name, const std::string& value)
+    {
+        GObjectClass* klass = G_OBJECT_GET_CLASS(stream);
+
+        if (!klass)
+        {
+            SPDLOG_ERROR("No GObject klass for arv_stream");
+            return false;
+        }
+
+        // what happens here:
+        // we retrieve all properties of arvstream
+        // search for a property with matching name
+        // look up the GEnum entry in the hope that the value string matches
+        // then set the actual value
+
+        uint n_props = 0;
+        GParamSpec** props = g_object_class_list_properties(klass, &n_props);
+
+        for (unsigned int i = 0; i < n_props; ++i)
+        {
+            if (strcmp(props[i]->name, name.c_str()) == 0)
+            {
+                auto entry = g_enum_get_value_by_name((GEnumClass*)g_type_class_peek(props[i]->value_type), value.c_str());
+
+                if (entry)
+                {
+                    g_object_set(stream,
+                                 name.c_str(),
+                                 entry->value,
+                                 nullptr);
+
+                    g_free(props);
+
+                    // potential debug code
+                    // leave it
+                    // as it is a mess to find the correct functions to coll
+
+                    // gint resend = -1;
+                    // g_object_get(stream, "packet-resend", &resend, nullptr);
+                    // auto val = g_enum_get_value((GEnumClass*)g_type_class_peek(g_type_from_name("ArvGvStreamPacketResend")),
+                    //                             resend);
+                    // SPDLOG_ERROR("==== packet resend = {}", val->value_name);
+
+                    return true;
+                }
+                // we already have the valid entry
+                // since no interpretation is possible
+                // be can simply abort;
+                break;
+            }
+        }
+
+        g_free(props);
+
+        return false;
+    };
+
+    // actual function
+
+    std::string stream_options = tcam::get_environment_variable("TCAM_ARV_STREAM_OPTIONS", "");
+
+    if (!stream_options.empty())
+    {
+        SPDLOG_DEBUG("Setting arv_stream options: {}", stream_options);
+
+        auto settings = tcam::split_string(stream_options, ",");
+
+        for (auto s : settings)
+        {
+            auto single_setting = tcam::split_string(s, "=");
+
+            if (single_setting.size() != 2)
+            {
+                SPDLOG_ERROR("Unable to interpret TCAM_ARV_STREAM_OPTIONS setting: {}", s);
+            }
+            else
+            {
+                SPDLOG_ERROR("Setting {} to {}", single_setting.at(0), single_setting.at(1));
+
+                // attempt setting int
+                // if it fails the value is not an int
+                // and we attempt double, and if that fails it has to be an enum
+                // if that also fails hte user made an error and gave an invalid value
+                if (!set_int(single_setting.at(0), single_setting.at(1)))
+                {
+                    if (!set_double(single_setting.at(0), single_setting.at(1)))
+                    {
+                        if (!set_enum(single_setting.at(0), single_setting.at(1)))
+                        {
+                            SPDLOG_ERROR("TCAM_ARV_STREAM_OPTIONS: value for '{}' could not be interpreted. Value is: '{}'",
+                                         single_setting.at(0), single_setting.at(1));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
 bool AravisDevice::start_stream()
 {
     if (arv_camera == nullptr)
@@ -802,24 +971,7 @@ bool AravisDevice::start_stream()
 
     if (ARV_IS_GV_STREAM(this->stream))
     {
-        if (this->arv_options.auto_socket_buffer)
-        {
-            g_object_set(this->stream,
-                         "socket-buffer",
-                         ARV_GV_STREAM_SOCKET_BUFFER_AUTO,
-                         "socket-buffer-size",
-                         0,
-                         NULL);
-        }
-
-        g_object_set(this->stream,
-                     "packet-timeout",
-                     (unsigned)this->arv_options.packet_timeout * 1000,
-                     "frame-retention",
-                     (unsigned)this->arv_options.frame_retention * 1000,
-                     NULL);
-        g_object_set(
-            this->stream, "packet-request-ratio", this->arv_options.packet_request_ratio, NULL);
+        set_stream_options(this->stream);
     }
 
     for (std::size_t i = 0; i < buffers.size(); ++i)
@@ -884,33 +1036,6 @@ bool AravisDevice::stop_stream()
     }
 
     return true;
-}
-
-
-void AravisDevice::determine_packet_request_ratio()
-{
-    std::string arv_prr = tcam::get_environment_variable("TCAM_ARV_PACKET_REQUEST_RATIO", "0.1");
-
-    double eps = 0.0;
-
-    try
-    {
-        eps = std::stof(arv_prr);
-    }
-    catch (...)
-    {
-        SPDLOG_WARN("Unable to interpret the value for TCAM_ARV_PACKET_REQUEST_RATIO. Falling back "
-                    "to default value.");
-    }
-
-    if (eps <= 0.0 || eps > 1.0)
-    {
-        this->arv_options.packet_request_ratio = 0.1;
-    }
-    else
-    {
-        this->arv_options.packet_request_ratio = eps;
-    }
 }
 
 
