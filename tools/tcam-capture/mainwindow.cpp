@@ -397,8 +397,12 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         const char* available_caps = nullptr;
         g_object_get(p_source, "available-caps", &available_caps, NULL);
-        src_caps = gst_caps_from_string(available_caps);
-        m_selected_device.set_caps(src_caps);
+
+        if (available_caps)
+        {
+            src_caps = gst_caps_from_string(available_caps);
+            m_selected_device.set_caps(src_caps);
+        }
     }
     else
     {
