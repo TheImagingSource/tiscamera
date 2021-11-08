@@ -100,6 +100,8 @@ GstCaps* Caps::get_default_caps() const
             "video/x-raw,width=1920,height=1080,framerate=15/1",
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=30/1",
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=15/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=15/1",
             "video/x-raw,width=640,height=480,framerate=30/1",
         };
 
@@ -115,6 +117,10 @@ GstCaps* Caps::get_default_caps() const
             break;
         }
         gst_caps_unref(test);
+    }
+    if (!ret)
+    {
+        return gst_caps_copy(p_caps);
     }
     return ret;
 }
@@ -461,7 +467,10 @@ std::vector<std::string> Caps::get_binning(const std::string& format) const
     {
         if (f.format == format)
         {
-            ret.push_back(f.scale.binning_str());
+            if (std::find(ret.begin(), ret.end(), f.scale.binning_str()) == ret.end())
+            {
+                ret.push_back(f.scale.binning_str());
+            }
         }
     }
 
