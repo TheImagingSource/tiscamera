@@ -94,6 +94,8 @@ if (BUILD_ARAVIS)
   set(srcs
     ${srcs}
     aravis/AravisDevice.cpp
+    aravis/AravisDeviceStream.cpp
+    aravis/AravisDeviceScaling.cpp
     aravis/AravisPropertyBackend.cpp
     aravis/AravisDeviceProperties.cpp
     aravis/aravis_property_impl.cpp
