@@ -57,10 +57,8 @@ public:
 
     virtual tcamprop1::IntRepresentation_t get_representation() const final;
 
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
+    virtual PropertyFlags get_flags() const final;
+
     virtual void set_flags(PropertyFlags flags) final
     {
         m_flags = flags;
@@ -131,10 +129,8 @@ public:
 
     tcamprop1::FloatRepresentation_t get_representation() const final;
 
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
+    virtual PropertyFlags get_flags() const final;
+
     virtual void set_flags(PropertyFlags flags) final
     {
         m_flags = flags;
@@ -171,6 +167,8 @@ private:
     double m_step;
     double m_default;
 
+    bool m_device_flags = false;
+
     software_prop m_id;
     std::weak_ptr<SoftwarePropertyBackend> m_cam;
     const tcamprop1::prop_static_info_float* p_static_info;
@@ -194,10 +192,8 @@ public:
 
     virtual std::string_view get_category() const final;
 
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
+    virtual PropertyFlags get_flags() const final;
+
     virtual void set_flags(PropertyFlags flags) final
     {
         m_flags = flags;
@@ -240,10 +236,8 @@ public:
 
     virtual std::string_view get_category() const final;
 
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
+    virtual PropertyFlags get_flags() const final;
+
     virtual void set_flags(PropertyFlags flags) final
     {
         m_flags = flags;
@@ -278,10 +272,8 @@ public:
 
     virtual std::string_view get_category() const final;
 
-    virtual PropertyFlags get_flags() const final
-    {
-        return m_flags;
-    };
+    virtual PropertyFlags get_flags() const final;
+
     virtual void set_flags(PropertyFlags flags) final
     {
         m_flags = flags;

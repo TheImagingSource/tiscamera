@@ -4,6 +4,7 @@
 
 #include "SoftwarePropertiesBase.h"
 #include "error.h"
+#include "PropertyFlags.h"
 
 namespace tcam::property
 {
@@ -23,6 +24,8 @@ public:
 
     outcome::result<double> get_double(software_prop id);
     outcome::result<void> set_double(software_prop id, double new_value);
+
+    tcam::property::PropertyFlags get_flags(software_prop id) const;
 
 private:
     SoftwareProperties* p_impl;

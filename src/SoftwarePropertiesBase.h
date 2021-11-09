@@ -89,6 +89,7 @@ struct software_prop_desc
     tcam_value_int range_i_;
     int default_value_ = 0;
     std::map<int, std::string> entries_;
+    bool device_flags = false;
 };
 
 } // namespace tcam::property::emulated

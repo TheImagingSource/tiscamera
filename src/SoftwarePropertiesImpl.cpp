@@ -155,6 +155,12 @@ tcamprop1::IntRepresentation_t SoftwarePropertyIntegerImpl::get_representation()
 }
 
 
+PropertyFlags SoftwarePropertyIntegerImpl::get_flags() const
+{
+    return m_flags;
+};
+
+
 outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
 {
     int64_t value = 0;
@@ -219,9 +225,16 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     m_step = prop->get_step();
     m_default = prop->get_default();
 
-    // do not add external flag
-    // this is a wrapper around an existing property
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    if (desc.device_flags)
+    {
+        m_device_flags = true;
+    }
+    else
+    {
+        // do not add external flag
+        // this is a wrapper around an existing property
+        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    }
 
     auto static_info = tcamprop1::find_prop_static_info(m_name);
 
@@ -254,9 +267,16 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     m_step = prop->get_step();
     m_default = prop->get_default();
 
-    // do not add external flag
-    // this is a wrapper around an existing property
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    if (desc.device_flags)
+    {
+        m_device_flags = true;
+    }
+    else
+    {
+        // do not add external flag
+        // this is a wrapper around an existing property
+        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
+    }
 
     auto static_info = tcamprop1::find_prop_static_info(m_name);
 
@@ -290,8 +310,14 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     m_step = desc.range_d_.step;
     m_default = desc.range_d_.default_value;
 
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
-
+    if (desc.device_flags)
+    {
+        m_device_flags = true;
+    }
+    else
+    {
+        m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
+    }
     auto static_info = tcamprop1::find_prop_static_info(m_name);
 
     if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
@@ -375,6 +401,22 @@ tcamprop1::FloatRepresentation_t SoftwarePropertyDoubleImpl::get_representation(
         return tcamprop1::FloatRepresentation_t::Linear;
     }
 }
+
+
+PropertyFlags SoftwarePropertyDoubleImpl::get_flags() const
+{
+    if (m_device_flags)
+    {
+        if (auto ptr = m_cam.lock())
+        {
+            SPDLOG_ERROR("returning flags!!!");
+            return ptr->get_flags(m_id);
+        }
+        return tcam::property::PropertyFlags::None;
+        //return tcam::status::ResourceNotLockable;
+    }
+    return m_flags;
+};
 
 
 outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
@@ -483,6 +525,12 @@ std::string_view SoftwarePropertyBoolImpl::get_category() const
 }
 
 
+PropertyFlags SoftwarePropertyBoolImpl::get_flags() const
+{
+    return m_flags;
+};
+
+
 outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -578,6 +626,12 @@ std::string_view SoftwarePropertyCommandImpl::get_category() const
 }
 
 
+PropertyFlags SoftwarePropertyCommandImpl::get_flags() const
+{
+    return m_flags;
+};
+
+
 outcome::result<void> SoftwarePropertyCommandImpl::execute()
 {
     SPDLOG_WARN("Not implemented. {}", m_name);
@@ -652,6 +706,12 @@ std::string_view SoftwarePropertyEnumImpl::get_category() const
         return p_static_info->iccategory;
     }
 }
+
+
+PropertyFlags SoftwarePropertyEnumImpl::get_flags() const
+{
+    return m_flags;
+};
 
 
 outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string_view& new_value)

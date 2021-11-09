@@ -44,6 +44,7 @@ public:
     outcome::result<double> get_double(emulated::software_prop);
     outcome::result<void> set_double(emulated::software_prop, double);
 
+    tcam::property::PropertyFlags get_flags(emulated::software_prop);
 
     void update_to_new_format(const tcam::VideoFormat& new_format);
 
@@ -55,7 +56,10 @@ private:
     void generate_gain();
     void generate_iris();
     void generate_focus();
+    void convert_whitebalance();
     void generate_whitebalance();
+
+    outcome::result<double> get_device_wb(emulated::software_prop prop_id);
 
     outcome::result<void> set_device_wb(emulated::software_prop prop_id,
                                         double new_value);
@@ -63,7 +67,7 @@ private:
 
     void set_locked(emulated::software_prop prop_id, bool is_locked);
 
-    void enable_property(emulated::software_prop prop_name);
+    void enable_property(emulated::software_prop prop_name, bool device_flags=false);
 
     void enable_property_double(emulated::software_prop prop_name,
                                 std::shared_ptr<IPropertyFloat> prop);
@@ -122,7 +126,7 @@ private:
         std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
 
         std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
-        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_ratio = nullptr;
+        std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_ratio = nullptr;
 
         bool is_dev_wb () const
         {

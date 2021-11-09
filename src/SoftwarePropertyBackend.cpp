@@ -33,4 +33,9 @@ outcome::result<void> SoftwarePropertyBackend::set_double(software_prop id, doub
     return p_impl->set_double(id, new_value);
 }
 
+tcam::property::PropertyFlags SoftwarePropertyBackend::get_flags(software_prop id) const
+{
+    return p_impl->get_flags(id);
+}
+
 } // namespace tcam::property::emulated
