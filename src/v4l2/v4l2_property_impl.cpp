@@ -31,6 +31,8 @@ bool needs_static_info(const std::string& name)
 {
     static const char* blacklist [] =
         {
+            "Binning",
+            "Skipping",
             "OverrideScanningMode",
             "Scanning Mode Selector",
             "Scanning Mode Identifier",
