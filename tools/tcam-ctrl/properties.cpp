@@ -88,6 +88,7 @@ void print_properties(const std::string& serial)
 
     for (unsigned int i = 0; i < g_slist_length(names); ++i)
     {
+        err = nullptr;
         char* name = (char*)g_slist_nth(names, i)->data;
 
         TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source), name, &err);

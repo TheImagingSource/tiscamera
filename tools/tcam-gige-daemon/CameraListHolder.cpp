@@ -162,7 +162,7 @@ void CameraListHolder::loop_function()
     tmp_ptr->device_count = arv_list.size();
 
     struct tcam_device_info* ptr = tmp_ptr->devices;
-    for (const auto dev : arv_list)
+    for (const auto& dev : arv_list)
     {
         memcpy(ptr, &dev, sizeof(struct tcam_device_info));
         ++ptr;

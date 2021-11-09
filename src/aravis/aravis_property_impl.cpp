@@ -48,41 +48,6 @@ tcam::property::AccessMode arv_access_to_tcam(ArvGcAccessMode mode)
 }
 
 
-tcam::Visibility arv_visibility_to_tcam(ArvGcVisibility visibility)
-{
-
-    // typedef enum {
-    //     ARV_GC_VISIBILITY_UNDEFINED = -1,
-    //     ARV_GC_VISIBILITY_INVISIBLE,
-    //     ARV_GC_VISIBILITY_GURU,
-    //     ARV_GC_VISIBILITY_EXPERT,
-    //     ARV_GC_VISIBILITY_BEGINNER
-    // } ArvGcVisibility;
-
-    switch (visibility)
-    {
-        case ARV_GC_VISIBILITY_UNDEFINED:
-        case ARV_GC_VISIBILITY_BEGINNER:
-        {
-            return tcam::Visibility::Beginner;
-        }
-        case ARV_GC_VISIBILITY_EXPERT:
-        {
-            return tcam::Visibility::Expert;
-        }
-        case ARV_GC_VISIBILITY_GURU:
-        {
-            return tcam::Visibility::Guru;
-        }
-        case ARV_GC_VISIBILITY_INVISIBLE:
-        default:
-        {
-            return tcam::Visibility::Invisible;
-        }
-    }
-}
-
-
 tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
 {
 
