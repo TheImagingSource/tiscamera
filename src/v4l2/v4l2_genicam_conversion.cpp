@@ -54,7 +54,7 @@ double gamma_from_std_to_dev(double value)
 // for the dfk 72. It's color channels have a range from 0-63
 double wb_channel_from_std_to_dev(double value)
 {
-    const int std_max = 255;
+    const double std_max = 4.0;
     const int dev_max = 63;
 
     return value * dev_max / std_max;
@@ -62,7 +62,7 @@ double wb_channel_from_std_to_dev(double value)
 
 double wb_channel_from_dev_to_std(double value)
 {
-    const int std_max = 255;
+    const double std_max = 4.0;
     const int dev_max = 63;
 
     return value * std_max / dev_max;
@@ -77,6 +77,24 @@ double exposure_absolute_from_std_to_dev(double value)
 double exposure_absolute_from_dev_to_std(double value)
 {
     return value * 100;
+}
+
+
+double wb_256_channel_from_std_to_dev(double value)
+{
+    const double std_max = 4.0;
+    const int dev_max = 256;
+
+    return value * dev_max / std_max;
+}
+
+
+double wb_256_channel_from_dev_to_std(double value)
+{
+    const double std_max = 4.0;
+    const int dev_max = 256;
+
+    return value * std_max / dev_max;
 }
 
 
@@ -120,6 +138,12 @@ converter_scale find_scale(uint32_t v4l2_id)
         case 0x0199e923:
         {
             return {*wb_channel_from_std_to_dev, *wb_channel_from_dev_to_std};
+        }
+        case 0x098090e:
+        case 0x098090f:
+        case 0x0199e248:
+        {
+            return {*wb_256_channel_from_std_to_dev, *wb_256_channel_from_dev_to_std};
         }
         default:
         {

@@ -81,14 +81,14 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     {
         0x0098090e,
         "BalanceWhiteRed",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_DOUBLE,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0098090f,
         "BalanceWhiteBlue",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_DOUBLE,
+        tcam::v4l2::MappingType::Scale,
     },
     // privacy aka trigger
     {
@@ -337,8 +337,8 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     {
         0x0199e248,
         "BalanceWhiteGreen",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_DOUBLE,
+        tcam::v4l2::MappingType::Scale,
     },
     {
         0x0199e249,
