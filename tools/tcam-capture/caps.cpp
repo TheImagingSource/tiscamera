@@ -103,6 +103,7 @@ GstCaps* Caps::get_default_caps() const
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=15/1",
             "video/x-raw,width=640,height=480,framerate=30/1",
+            "image/jpeg,width=1920,height=1080,framerate=30/1",
         };
 
     GstCaps* ret = nullptr;
@@ -277,13 +278,56 @@ void Caps::generate()
 
         const char* name = gst_structure_get_name(structure);
 
-        if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
+        if (gst_structure_has_field(structure, "format"))
         {
-            const char* format = gst_structure_get_string(structure, "format");
+            if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
+            {
+                const char* format = gst_structure_get_string(structure, "format");
+
+                auto scale = create_scale(structure);
+
+                auto fmt_struct = find_format(format, scale);
+
+                if (fmt_struct == tmp.end())
+                {
+                    // new format
+                    struct caps_format t = {};
+                    tmp.push_back(t);
+
+                    fmt = &(tmp.back());
+                }
+                else
+                {
+                    fmt = &(*fmt_struct);
+                }
+
+                fmt->format = format;
+                fmt->gst_format = name;
+                fmt->gst_format += ",format=";
+                fmt->gst_format += format;
+                fmt->scale = scale;
+            }
+            else if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
+            {
+                qWarning("gst structure format list not implemented");
+                continue;
+            }
+            else
+            {
+                qWarning("format handling not implemented for unexpected type in strcture: %s\n",
+                         gst_structure_to_string(structure));
+                continue;
+            }
+
+        }
+        else
+        {
+            // only name
+            // typically for things like AFU050 => jpeg
 
             auto scale = create_scale(structure);
 
-            auto fmt_struct = find_format(format, scale);
+            auto fmt_struct = find_format(name, scale);
 
             if (fmt_struct == tmp.end())
             {
@@ -298,22 +342,9 @@ void Caps::generate()
                 fmt = &(*fmt_struct);
             }
 
-            fmt->format = format;
+            fmt->format = name;
             fmt->gst_format = name;
-            fmt->gst_format += ",format=";
-            fmt->gst_format += format;
             fmt->scale = scale;
-        }
-        else if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
-        {
-            qWarning("gst structure format list not implemented");
-            continue;
-        }
-        else
-        {
-            qWarning("format handling not implemented for unexpected type: %s\n",
-                     G_VALUE_TYPE_NAME(gst_structure_get_field_type(structure, "format")));
-            continue;
         }
 
 
