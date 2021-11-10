@@ -71,8 +71,6 @@ std::shared_ptr<BackendLoader> BackendLoader::get_instance()
 
 tcam::BackendLoader::BackendLoader()
 {
-    // logger cal required to ensure defaults are correctly set
-    Logger::getInstance();
     load_backends();
 }
 

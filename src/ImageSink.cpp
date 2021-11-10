@@ -18,8 +18,6 @@
 
 #include "internal.h"
 
-#include <iostream>
-
 using namespace tcam;
 
 

@@ -69,6 +69,9 @@ set( srcs
   PropertyFilter.cpp
   ImageSource.cpp
   public_utils.cpp
+
+  libtcam_base.h
+  libtcam_base.cpp
 )
 
 if (BUILD_V4L2)

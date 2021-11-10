@@ -19,6 +19,7 @@ add_library(gsttcambin
   tcambin_tcamprop_impl.h
   tcambin_tcamprop_impl.cpp
   tcambin_data.h
+  tcambin_plugin.cpp
 )
 
 target_link_libraries(gsttcambin

@@ -33,7 +33,6 @@
 
 #define gst_tcambin_parent_class parent_class
 
-GST_DEBUG_CATEGORY_STATIC(gst_tcambin_debug);
 #define GST_CAT_DEFAULT gst_tcambin_debug
 
 G_DEFINE_TYPE_WITH_CODE(GstTcamBin,
@@ -337,11 +336,8 @@ static bool tcambin_create_elements(GstTcamBin* self)
             if (!create_and_add_element(
                     &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils", GST_BIN(self)))
             {
-                GST_ELEMENT_ERROR(self,
-                                  CORE,
-                                  MISSING_PLUGIN,
-                                  ("Could not create element 'tcamdutils'."),
-                                  (NULL));
+                GST_ELEMENT_ERROR(
+                    self, CORE, MISSING_PLUGIN, ("Could not create element 'tcamdutils'."), (NULL));
                 return false;
             }
             element_name = "tcamdutils";
@@ -744,7 +740,7 @@ static void gst_tcambin_get_property(GObject* object,
         }
         case PROP_DEVICE_CAPS:
         {
-            if( state.user_caps )
+            if (state.user_caps)
             {
                 g_value_set_string(value, gst_helper::to_string(*state.user_caps).c_str());
             }
@@ -1171,25 +1167,3 @@ static void gst_tcambin_class_init(GstTcamBinClass* klass)
                                          "Tcam based bin",
                                          "The Imaging Source <support@theimagingsource.com>");
 }
-
-
-static gboolean plugin_init(GstPlugin* plugin)
-{
-    GST_DEBUG_CATEGORY_INIT(gst_tcambin_debug, "tcambin", 0, "TcamBin");
-
-    return gst_element_register(plugin, "tcambin", GST_RANK_NONE, GST_TYPE_TCAMBIN);
-}
-
-#ifndef PACKAGE
-#define PACKAGE "tcam"
-#endif
-
-GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
-                  GST_VERSION_MINOR,
-                  tcambin,
-                  "Tcam Video Bin",
-                  plugin_init,
-                  get_version(),
-                  "Proprietary",
-                  "tcambin",
-                  "theimagingsource.com")

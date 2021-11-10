@@ -22,50 +22,16 @@
 
 #include <dutils_img/fcc_to_string.h>
 
-
 std::pair<std::string, std::string> tcambind::separate_serial_and_type(const std::string& input)
 {
     auto pos = input.find("-");
 
     if (pos != std::string::npos)
     {
-        std::string tmp1 = input.substr(0, pos);
-        std::string tmp2 = input.substr(pos + 1);
-
-        return std::make_pair(tmp1, tmp2);
+        return std::make_pair( input.substr( 0, pos ), input.substr( pos + 1 ) );
     }
     return std::make_pair(input, std::string {});
 }
-
-
-bool tcambind::separate_serial_and_type(const std::string& input,
-                                        std::string& serial,
-                                        std::string& type)
-{
-    auto pos = input.find("-");
-
-    if (pos != std::string::npos)
-    {
-        // assign to tmp variables
-        // input could be self->device_serial
-        // overwriting it would invalidate input for
-        // device_type retrieval
-        std::string tmp1 = input.substr(0, pos);
-        std::string tmp2 = input.substr(pos + 1);
-
-        serial = tmp1;
-        type = tmp2;
-
-        return true;
-    }
-    else
-    {
-        serial = input;
-    }
-    return false;
-}
-
-
 
 static void fill_structure_fixed_resolution(GstStructure* structure,
                                             const tcam::VideoFormatDescription& format,
@@ -76,8 +42,8 @@ static void fill_structure_fixed_resolution(GstStructure* structure,
 
     for (auto rate : format.get_frame_rates(res))
     {
-        int frame_rate_numerator;
-        int frame_rate_denominator;
+        int frame_rate_numerator = 0;
+        int frame_rate_denominator = 0;
         gst_util_double_to_fraction(rate, &frame_rate_numerator, &frame_rate_denominator);
 
         GValue fraction = G_VALUE_INIT;

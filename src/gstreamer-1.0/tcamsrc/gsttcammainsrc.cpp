@@ -407,7 +407,8 @@ static bool gst_tcam_mainsrc_init_camera(GstTcamMainSrc* self)
         return false;
     }
 
-    self->device->device_->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback, self);
+    self->device->device_->register_device_lost_callback(gst_tcam_mainsrc_device_lost_callback,
+                                                         self);
 
     // emit a signal to let other elements/users know that a device has been opened
     // and properties, etc are now usable
@@ -869,9 +870,6 @@ static void gst_tcam_mainsrc_init(GstTcamMainSrc* self)
     // they should always be set in set_caps
     self->fps_denominator = 1;
     self->fps_denominator = 1;
-
-    GST_INFO_OBJECT(
-        self, "Versions:\n\tTcam:\t%s\n\tAravis:\t%s", get_version(), get_aravis_version());
 }
 
 
@@ -898,7 +896,7 @@ static bool is_state_null(GstTcamMainSrc* self)
 
 static bool is_state_ready_or_lower(GstTcamMainSrc* self)
 {
-    return tcam::gst::is_gst_state_equal_or_less( GST_ELEMENT( self ), GST_STATE_READY );
+    return tcam::gst::is_gst_state_equal_or_less(GST_ELEMENT(self), GST_STATE_READY);
 }
 
 
@@ -923,7 +921,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
             }
             if (g_value_get_string(value) == nullptr)
             {
-                state.set_device_serial(std::string{});
+                state.set_device_serial(std::string {});
             }
             else
             {
@@ -969,7 +967,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
 
                 // this check is simply for messaging the user about invalid values
                 auto vec = tcam::get_device_type_list_strings();
-                if (std::find(vec.begin(), vec.end(), type_str ) == vec.end())
+                if (std::find(vec.begin(), vec.end(), type_str) == vec.end())
                 {
                     GST_ERROR_OBJECT(self, "Unknown device type '%s'", type);
                     state.set_device_type(tcam::TCAM_DEVICE_TYPE_UNKNOWN);
@@ -1022,7 +1020,7 @@ static void gst_tcam_mainsrc_set_property(GObject* object,
         case PROP_TCAM_PROPERTIES_GSTSTRUCT:
         {
             auto strc = gst_value_get_structure(value);
-            self->device->set_tcam_properties( strc );
+            self->device->set_tcam_properties(strc);
             break;
         }
         default:

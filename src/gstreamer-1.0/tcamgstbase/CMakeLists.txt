@@ -23,6 +23,9 @@ add_library(tcamgstbase STATIC
 	tcamgstjson.cpp
 	tcamgststrings.cpp
 	tcambinconversion.cpp
+
+	spdlog_gst_sink.h
+	spdlog_gst_sink.cpp
 )
 
 set_project_warnings(tcamgstbase)

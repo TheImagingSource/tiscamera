@@ -19,51 +19,8 @@
 
 #include "compiler_defines.h"
 
-#include <stdarg.h> /* va_args */
-#include <string>
-
-
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
-#include "spdlog/spdlog.h"
-
-
-enum TCAM_LOG_LEVEL
-{
-    TCAM_LOG_OFF = 0,
-    TCAM_LOG_TRACE = 1,
-    TCAM_LOG_DEBUG = 2,
-    TCAM_LOG_INFO = 3,
-    TCAM_LOG_WARNING = 4,
-    TCAM_LOG_ERROR = 5,
-};
-
-typedef void (
-    *logging_callback)(void* user_data, enum TCAM_LOG_LEVEL, const char*, int, const char*, ...);
-
-
-class Logger
-{
-
-public:
-    static Logger& getInstance();
-
-    void set_external_callback(logging_callback cb_function, void* user_data);
-    void delete_external_callback();
-
-private:
-    Logger();
-
-    Logger(const Logger&) = delete;
-    Logger& operator=(const Logger&) = delete;
-
-    Logger(Logger&&) = delete;
-    Logger operator=(Logger&&) = delete;
-    void load_default_settings();
-
-    enum spdlog::level::level_enum level;
-    logging_callback callback;
-    void* cb_user_data;
-};
+#include <spdlog/spdlog.h>
 
 #endif /* TCAM_LOGGING_H */

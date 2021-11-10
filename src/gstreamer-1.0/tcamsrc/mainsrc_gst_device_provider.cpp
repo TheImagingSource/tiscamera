@@ -151,7 +151,7 @@ static void run_update_logic(std::unique_lock<std::mutex>& /*lck*/,
             gst_helper::make_ptr(tcam_mainsrc_device_new(self->state->factory_.get(), *iter));
         if (new_gstdev == nullptr)
         {
-            SPDLOG_WARN("Failed to create a device for serial={}", iter->get_name());
+            SPDLOG_WARN("Failed to create a TcamDevice for serial={}", iter->get_name());
             continue;
         }
         self->state->known_devices_.push_back(device { *iter, new_gstdev });

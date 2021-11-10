@@ -59,7 +59,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
 	<string_view>
 	<algorithm>
 	<outcome/result.hpp>
-	<spdlog/spdlog.h>
+	"../../logging.h"		# Include spdlog indirectly
 	)
 endif()
 

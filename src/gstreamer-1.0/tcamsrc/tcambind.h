@@ -23,13 +23,10 @@
 
 namespace tcambind
 {
-
 /**
-* returns true if serial and type have been found
-* returns false if only serial has been found
+* Seperates a string of layout 'serial-type' into first == serial, second == type.
+* If no '-' is found, first will contain the full input
 */
-bool separate_serial_and_type(const std::string& input, std::string& serial, std::string& type);
-
 std::pair<std::string, std::string> separate_serial_and_type(const std::string& input);
 
 

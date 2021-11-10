@@ -53,12 +53,19 @@ Enabling logging for all our elements can be carried out like this:
 
     gst-launch-1.0 --gst-debug=tcam*:5 ....
 
+or by defining a environment variable via
+
+.. code-block:: sh
+
+    export GST_DEBUG=tcam*:5
+
+
 This would set the log level of all our GStreamer elements to DEBUG.
 For more precise logging, a comma separated list can be used.
 
 .. code-block:: sh
 
-    gst-launch-1.0 --gst-debug=tcamsrc:3,tcambin:5,tcamautofocus:2 ....
+    gst-launch-1.0 --gst-debug=tcamsrc:3,tcambin:5,tcam-libtcam:2 ....
 
 When logging to a file, it is generally recommended to disable color output.
 

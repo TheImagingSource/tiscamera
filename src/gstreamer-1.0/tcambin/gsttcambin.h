@@ -51,4 +51,6 @@ GType gst_tcambin_get_type(void);
 
 G_END_DECLS
 
+GST_DEBUG_CATEGORY_EXTERN(gst_tcambin_debug);
+
 #endif /* TCAM_GSTTCAMBIN_H */

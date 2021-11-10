@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 The Imaging Source Europe GmbH
+ * Copyright 2021 The Imaging Source Europe GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include "logging.h"
+
+VISIBILITY_DEFAULT
+
+namespace libtcam
+{
+void setup_default_logger(bool add_stdout_logger = false);
+
+std::optional<spdlog::level::level_enum>    get_env_log_level() noexcept;
+
+auto get_spdlog_logger() -> std::shared_ptr<spdlog::logger>;
+
+void print_version_info_once();
+
+} // namespace libtcam
+
+VISIBILITY_POP
