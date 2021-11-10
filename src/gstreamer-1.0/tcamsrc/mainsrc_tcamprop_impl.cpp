@@ -163,7 +163,8 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
 
     virtual auto get_representation() const noexcept -> tcamprop1::FloatRepresentation_t final
     {
-        return tcamprop1::FloatRepresentation_t::PureNumber;
+        auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
+        return tmp->get_representation();
     }
 
     virtual auto get_unit() const noexcept -> std::string_view final
