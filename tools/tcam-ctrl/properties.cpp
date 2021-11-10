@@ -21,6 +21,10 @@
 #include <gst/gst.h>
 #include <iomanip>
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+
 #include <tcam-property-1.0.h>
 
 static const size_t name_width = 40;
@@ -84,14 +88,36 @@ void print_properties(const std::string& serial)
     gst_element_set_state(source, GST_STATE_READY);
 
     GError* err = nullptr;
-    GSList* names =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
+    GSList* n =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
 
-    for (unsigned int i = 0; i < g_slist_length(names); ++i)
+    // convert GSList to vector
+    // do this to make sorting easier
+    // names should be alphabetically sorted
+    // this is simply to make finding a property
+    // more predictable
+    std::vector<std::string> names;
+
+    names.reserve(g_slist_length(n));
+
+    for (unsigned int i = 0; i < g_slist_length(n); ++i)
+    {
+        names.push_back((char*)g_slist_nth(n, i)->data);
+    }
+
+    g_slist_free_full(n, g_free);
+
+    std::sort(names.begin(), names.end(),
+              [] (const std::string& a, const std::string& b)
+              {
+                  return a<b;
+              });
+
+    for (const auto& name : names)
     {
         err = nullptr;
-        char* name = (char*)g_slist_nth(names, i)->data;
 
-        TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source), name, &err);
+        TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source),
+                                                                                   name.c_str(), &err);
 
         if (err)
         {
@@ -148,7 +174,7 @@ void print_properties(const std::string& serial)
                     unit = tmp_unit;
                 }
 
-                std::cout << name << "\ttype: Integer\t"
+                std::cout << std::setw(20) << std::left << name << "\ttype: Integer\t"
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
@@ -200,7 +226,7 @@ void print_properties(const std::string& serial)
                     unit = tmp_unit;
                 }
 
-                std::cout << std::setprecision(3) << std::fixed
+                std::cout << std::setw(20) << std::left << std::setprecision(3) << std::fixed
                           << name << "\ttype: Float\t"
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
@@ -263,7 +289,7 @@ void print_properties(const std::string& serial)
                 }
 
 
-                std::cout << name << "\ttype: Enumeration\t"
+                std::cout << std::setw(20) << std::left << name << "\ttype: Enumeration\t"
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
@@ -300,7 +326,7 @@ void print_properties(const std::string& serial)
                     return "false";
                 };
 
-                std::cout << name << "\ttype: Boolean\t"
+                std::cout << std::setw(20) << std::left << name << "\ttype: Boolean\t"
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
@@ -315,7 +341,7 @@ void print_properties(const std::string& serial)
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
-                std::cout << name << "\ttype: Command\t"
+                std::cout << std::setw(20) << std::left << name << "\ttype: Command\t"
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
@@ -340,7 +366,6 @@ void print_properties(const std::string& serial)
     }
     gst_element_set_state(source, GST_STATE_NULL);
 
-    g_slist_free_full(names, g_free);
     gst_object_unref(source);
 }
 
