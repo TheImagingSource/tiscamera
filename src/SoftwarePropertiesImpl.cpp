@@ -409,7 +409,6 @@ PropertyFlags SoftwarePropertyDoubleImpl::get_flags() const
     {
         if (auto ptr = m_cam.lock())
         {
-            SPDLOG_ERROR("returning flags!!!");
             return ptr->get_flags(m_id);
         }
         return tcam::property::PropertyFlags::None;
