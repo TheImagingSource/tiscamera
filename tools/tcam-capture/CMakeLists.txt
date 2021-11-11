@@ -61,8 +61,6 @@ set(TCAM_CAPTURE_SOURCES
   propertyflags.h
   tcamslider.cpp
   tcamslider.h
-  tcamsliderwidget.cpp
-  tcamsliderwidget.h
   caps.cpp
   caps.h
   capswidget.cpp

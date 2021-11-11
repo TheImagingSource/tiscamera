@@ -19,7 +19,6 @@
 
 #include "propertyflags.h"
 #include "tcamslider.h"
-#include "tcamsliderwidget.h"
 
 #include <tcam-property-1.0.h>
 
@@ -112,13 +111,12 @@ private:
     void setup_ui();
     void write_value(int64_t new_value);
 
-    QBoxLayout* p_layout;
-    QLabel* p_name;
+    QBoxLayout* p_layout = nullptr;
+    QLabel* p_name = nullptr;
+    TcamSlider* p_slider = nullptr;
+    QSpinBox* p_box = nullptr;
 
-    TcamSlider* p_slider;
-    QSpinBox* p_box;
-
-    TcamPropertyInteger* p_prop;
+    TcamPropertyInteger* p_prop = nullptr;
 };
 
 
@@ -152,12 +150,15 @@ private:
     void setup_ui();
     void write_value(double new_value);
 
-    QBoxLayout* p_layout;
-    QLabel* p_name;
-    TcamDoubleSlider* p_slider;
-    QDoubleSpinBox* p_box;
+    QBoxLayout* p_layout = nullptr;
+    QLabel* p_name = nullptr;
 
-    TcamPropertyFloat* p_prop;
+    TcamSlider* p_slider = nullptr;
+    QDoubleSpinBox* p_box = nullptr;
+
+    TcamPropertyFloatRepresentation m_representation;
+
+    TcamPropertyFloat* p_prop = nullptr;
 };
 
 

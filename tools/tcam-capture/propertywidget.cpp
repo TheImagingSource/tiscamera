@@ -173,9 +173,12 @@ void IntWidget::update()
 
     HANDLE_ERROR(err, return);
 
-    p_slider->blockSignals(true);
-    p_slider->setValue(value);
-    p_slider->blockSignals(false);
+    if (p_slider)
+    {
+        p_slider->blockSignals(true);
+        p_slider->setValue(value);
+        p_slider->blockSignals(false);
+    }
 
     p_box->blockSignals(true);
     p_box->setValue(value);
@@ -212,7 +215,10 @@ std::string IntWidget::get_category() const
 
 void IntWidget::set_locked(bool lock)
 {
-    p_slider->setDisabled(lock);
+    if (p_slider)
+    {
+        p_slider->setDisabled(lock);
+    }
     p_box->setDisabled(lock);
 }
 
@@ -230,10 +236,12 @@ void IntWidget::slider_changed(int new_value)
 
 void IntWidget::spinbox_changed(int new_value)
 {
-    p_slider->blockSignals(true);
-    p_slider->setValue(new_value);
-    p_slider->blockSignals(false);
-
+    if (p_slider)
+    {
+        p_slider->blockSignals(true);
+        p_slider->setValue(new_value);
+        p_slider->blockSignals(false);
+    }
     write_value(new_value);
 
     emit value_changed(get_name().toStdString().c_str(), new_value);
@@ -253,13 +261,29 @@ void IntWidget::setup_ui()
     tcam_property_integer_get_range(p_prop, &min, &max, &step, &err);
     gint64 value = tcam_property_integer_get_value(p_prop, &err);
 
-    p_slider = new TcamSlider();
+    TcamPropertyIntRepresentation representation = tcam_property_integer_get_representation(p_prop);
 
-    p_slider->setRange(min, max);
-    p_slider->setSingleStep(step);
-    p_slider->setValue(value);
+    if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
+    {
+        if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
+        {
+            p_slider = new TcamSlider();
+        }
+        else if (representation == TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC)
+        {
+            p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
+        }
+        else
+        {
+            throw std::runtime_error("representation not implemented.");
+        }
 
-    connect(p_slider, &QSlider::valueChanged, this, &IntWidget::slider_changed);
+        p_slider->setRange(min, max);
+        p_slider->setSingleStep(step);
+        p_slider->setValue(value);
+
+        connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed);
+    }
 
     p_box = new QSpinBox();
 
@@ -309,9 +333,12 @@ void DoubleWidget::update()
 
     HANDLE_ERROR(err, return);
 
-    p_slider->blockSignals(true);
-    p_slider->setValue(value);
-    p_slider->blockSignals(false);
+    if (p_slider)
+    {
+        p_slider->blockSignals(true);
+        p_slider->setValue(value);
+        p_slider->blockSignals(false);
+    }
 
     p_box->blockSignals(true);
     p_box->setValue(value);
@@ -348,7 +375,11 @@ std::string DoubleWidget::get_category() const
 
 void DoubleWidget::set_locked(bool lock)
 {
-    p_slider->setDisabled(lock);
+    if (p_slider)
+    {
+        p_slider->setDisabled(lock);
+    }
+
     p_box->setDisabled(lock);
 }
 
@@ -365,9 +396,13 @@ void DoubleWidget::slider_changed(double new_value)
 
 void DoubleWidget::spinbox_changed(double new_value)
 {
-    p_slider->blockSignals(true);
-    p_slider->setValue(new_value);
-    p_slider->blockSignals(false);
+
+    if (p_slider)
+    {
+        p_slider->blockSignals(true);
+        p_slider->setValue(new_value);
+        p_slider->blockSignals(false);
+    }
 
     write_value(new_value);
 
@@ -381,21 +416,7 @@ void DoubleWidget::setup_ui()
 
     setLayout(p_layout);
 
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        p_name = new QLabel(disp_name);
-    }
-    else
-    {
-    }
-
-    TcamPropertyFloatRepresentation representation = tcam_property_float_get_representation(p_prop);
-
-    if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
-    {}
-    p_slider = new TcamDoubleSlider();
+    m_representation = tcam_property_float_get_representation(p_prop);
 
     gdouble min;
     gdouble max;
@@ -403,14 +424,29 @@ void DoubleWidget::setup_ui()
     GError* err = nullptr;
     tcam_property_float_get_range(p_prop, &min, &max, &step, &err);
 
-    p_slider->setRange(min, max);
-    p_slider->setSingleStep(step);
-
     gdouble value = tcam_property_float_get_value(p_prop, &err);
 
-    p_slider->setValue(value);
+    if (m_representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
+    {
+        if (m_representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
+        {
+            p_slider = new TcamSlider();
+        }
+        else if (m_representation == TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC)
+        {
+            p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
+        }
+        else
+        {
+            throw std::runtime_error("representation not implemented.");
+        }
 
-    connect(p_slider, &QSlider::valueChanged, this, &DoubleWidget::slider_changed);
+        p_slider->setRange(min, max);
+        p_slider->setSingleStep(step);
+        p_slider->setValue(value);
+
+        connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed);
+    }
 
     QString unit = " ";
     unit += tcam_property_float_get_unit(p_prop);
@@ -427,7 +463,10 @@ void DoubleWidget::setup_ui()
             this,
             &DoubleWidget::spinbox_changed);
 
-    p_layout->addWidget(p_slider);
+    if (p_slider)
+    {
+        p_layout->addWidget(p_slider);
+    }
     p_layout->addWidget(p_box);
 
     // the font tagging is used to make the
