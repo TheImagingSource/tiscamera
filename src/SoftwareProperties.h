@@ -121,9 +121,9 @@ private:
         wb_type type = wb_type::None;
 
 
-        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_r = nullptr;
-        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_g = nullptr;
-        std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
+        std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_r = nullptr;
+        std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_g = nullptr;
+        std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_b = nullptr;
 
         std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_ratio = nullptr;

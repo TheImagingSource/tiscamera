@@ -804,9 +804,9 @@ void SoftwareProperties::convert_whitebalance()
     {
         m_wb.type = wb_type::DevChannel;
 
-        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_r);
-        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
-        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
+        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_r);
+        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_g);
+        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_b);
 
         enable_property(sp::WB_RED);
         enable_property(sp::WB_GREEN);
@@ -859,9 +859,9 @@ void SoftwareProperties::generate_whitebalance()
     {
         m_wb.type = wb_type::DevChannel;
 
-        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_r);
-        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_g);
-        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base_b);
+        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_r);
+        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_g);
+        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_b);
 
         enable_property_double(sp::WB_RED, m_wb.m_dev_wb_r);
         enable_property_double(sp::WB_GREEN, m_wb.m_dev_wb_g);
@@ -917,7 +917,7 @@ outcome::result<double> SoftwareProperties::get_device_wb(emulated::software_pro
 
     if (m_wb.type == wb_type::DevChannel)
     {
-        outcome::result<int64_t> dev_val = [&]{
+        outcome::result<double> dev_val = [&]{
             if (prop_id == emulated::software_prop::WB_RED)
             {
                 return m_wb.m_dev_wb_r->get_value();
@@ -937,7 +937,7 @@ outcome::result<double> SoftwareProperties::get_device_wb(emulated::software_pro
 
         if (dev_val)
         {
-            return dev_val.value() / 64.0;
+            return dev_val.value();
         }
         return dev_val.as_failure();
     }
@@ -1020,26 +1020,35 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
     {
         if (prop_id == emulated::software_prop::WB_RED)
         {
-            if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            {
-                new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            }
+
+            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+            // {
+            //     SPDLOG_ERROR("INTEGER");
+            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
+            // }
+
             return m_wb.m_dev_wb_r->set_value(new_value_tmp);
         }
         else if (prop_id == emulated::software_prop::WB_GREEN)
         {
-            if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            {
-                new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            }
+
+            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+            // {
+            //     SPDLOG_ERROR("INTEGER");
+            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
+            // }
+
             return m_wb.m_dev_wb_r->set_value(new_value_tmp);
         }
         else if (prop_id == emulated::software_prop::WB_BLUE)
         {
-            if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            {
-                new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            }
+
+            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
+            // {
+            //     SPDLOG_ERROR("INTEGER");
+            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
+            // }
+
             return m_wb.m_dev_wb_r->set_value(new_value_tmp);
         }
     }
