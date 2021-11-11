@@ -18,6 +18,8 @@
 
 #include "logging.h"
 
+#include <optional>
+
 VISIBILITY_DEFAULT
 
 namespace libtcam
