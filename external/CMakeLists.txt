@@ -59,7 +59,7 @@ if (BUILD_ARAVIS)
     endif ()
 
     # meson configuration
-    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${TCAM_MESON_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=disabled -Dgst-plugin=disabled -Dfast-heartbeat=true -Ddocumentation=disabled -Dintrospection=enabled -Ddefault_library=static)
+    list(APPEND ARAVIS_CONFIG CFLAGS=-fPIC ${TCAM_MESON_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/aravis -Dviewer=disabled -Dgst-plugin=disabled -Dfast-heartbeat=true -Ddocumentation=disabled -Dintrospection=disabled -Ddefault_library=static)
 
     if (TCAM_ARAVIS_USB_VISION)
 
