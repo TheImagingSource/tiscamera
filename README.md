@@ -21,7 +21,7 @@ https://www.theimagingsource.com/documentation/tiscamera/
 
 Version 1.0.0 introduces several API changes.
 
-To port your software check our upgrade guide TODO: add link
+To port your software check [our upgrade guide](doc/upgrade_guide_1.0.md)
 
 ## Dependencies
 
