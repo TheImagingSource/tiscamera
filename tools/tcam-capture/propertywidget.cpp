@@ -19,8 +19,6 @@
 #include <gst/gst.h>
 
 
-// TODO: add device lost notification to macro
-
 #define HANDLE_ERROR(err, action)                                       \
     if(err)                                                             \
     {                                                                   \
@@ -90,16 +88,20 @@ void EnumWidget::set_locked(bool lock)
 }
 
 
-void EnumWidget::drop_down_changed(const QString& entry)
+void EnumWidget::drop_down_changed(const QString& /*entry*/)
 {
-    auto s = entry.toStdString();
+    emit value_changed(this);
+}
+
+
+void EnumWidget::set_in_backend()
+{
+    auto s = p_combobox->currentText().toStdString();
 
     GError* err = nullptr;
     tcam_property_enumeration_set_value(p_prop, s.c_str(), &err);
 
     HANDLE_ERROR(err, return)
-
-    emit value_changed(get_name().toStdString().c_str(), entry);
 }
 
 
@@ -228,9 +230,7 @@ void IntWidget::slider_changed(int new_value)
     p_box->setValue(new_value);
     p_box->blockSignals(false);
 
-    write_value(new_value);
-
-    emit value_changed(get_name().toStdString().c_str(), new_value);
+    emit value_changed(this);
 }
 
 
@@ -244,7 +244,7 @@ void IntWidget::spinbox_changed(int new_value)
     }
     write_value(new_value);
 
-    emit value_changed(get_name().toStdString().c_str(), new_value);
+    emit value_changed(this);
 }
 
 
@@ -311,6 +311,16 @@ void IntWidget::write_value(int64_t new_value)
     GError* err = nullptr;
 
     tcam_property_integer_set_value(p_prop, new_value, &err);
+
+    HANDLE_ERROR(err, return)
+}
+
+
+void IntWidget::set_in_backend()
+{
+    GError* err = nullptr;
+
+    tcam_property_integer_set_value(p_prop, p_box->value(), &err);
 
     HANDLE_ERROR(err, return)
 }
@@ -389,9 +399,7 @@ void DoubleWidget::slider_changed(double new_value)
     p_box->setValue(new_value);
     p_box->blockSignals(false);
 
-    write_value(new_value);
-
-    emit value_changed(get_name().toStdString().c_str(), new_value);
+    emit value_changed(this);
 }
 
 void DoubleWidget::spinbox_changed(double new_value)
@@ -404,9 +412,7 @@ void DoubleWidget::spinbox_changed(double new_value)
         p_slider->blockSignals(false);
     }
 
-    write_value(new_value);
-
-    emit value_changed(get_name().toStdString().c_str(), new_value);
+    emit value_changed(this);
 }
 
 
@@ -489,6 +495,16 @@ void DoubleWidget::write_value(double new_value)
 }
 
 
+void DoubleWidget::set_in_backend()
+{
+    GError* err = nullptr;
+
+    tcam_property_float_set_value(p_prop, p_box->value(), &err);
+
+    HANDLE_ERROR(err, return)
+}
+
+
 BoolWidget::BoolWidget(TcamPropertyBoolean* prop,
                        QWidget* parent)
     : QWidget(parent), p_prop(prop)
@@ -543,14 +559,9 @@ void BoolWidget::set_locked(bool lock)
     p_checkbox->setEnabled(!lock);
 }
 
-void BoolWidget::checkbox_changed(bool new_value)
+void BoolWidget::checkbox_changed(bool /*new_value*/)
 {
-    GError* err = nullptr;
-    tcam_property_boolean_set_value(p_prop, new_value, &err);
-
-    HANDLE_ERROR(err, return)
-
-    emit value_changed(get_name().toStdString().c_str(), new_value);
+    emit value_changed(this);
 }
 
 void BoolWidget::setup_ui()
@@ -580,6 +591,15 @@ void BoolWidget::setup_ui()
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
     toolTip += QString("</font>");
     this->setToolTip(toolTip);
+}
+
+
+void BoolWidget::set_in_backend()
+{
+    GError* err = nullptr;
+    tcam_property_boolean_set_value(p_prop, p_checkbox->isChecked(), &err);
+
+    HANDLE_ERROR(err, return)
 }
 
 
@@ -630,14 +650,17 @@ void ButtonWidget::set_locked(bool lock)
 
 void ButtonWidget::got_clicked()
 {
+    emit value_changed(this);
+}
+
+void ButtonWidget::set_in_backend()
+{
     GError* err = nullptr;
 
     tcam_property_command_set_command(p_prop, &err);
 
     HANDLE_ERROR(err, return)
-
-    emit value_changed(get_name().toStdString().c_str());
-}
+};
 
 
 void ButtonWidget::setup_ui()

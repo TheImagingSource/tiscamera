@@ -44,6 +44,8 @@ public:
     virtual std::string get_category() const = 0;
 
     virtual void set_locked(bool) = 0;
+
+    virtual void set_in_backend() = 0;
 };
 
 class EnumWidget : public QWidget, public Property
@@ -61,13 +63,15 @@ public:
 
     virtual void set_locked(bool) final;
 
+    virtual void set_in_backend() final;
+
 public slots:
 
     void drop_down_changed(const QString& entry);
 
 signals:
 
-    void value_changed(const char*, QString);
+    void value_changed(Property*);
     void device_lost(const QString& info);
 
 private:
@@ -97,6 +101,8 @@ public:
 
     virtual void set_locked(bool) final;
 
+    virtual void set_in_backend() final;
+
 public slots:
 
     void slider_changed(int);
@@ -104,7 +110,7 @@ public slots:
 
 signals:
 
-    void value_changed(const char*, int);
+    void value_changed(Property*);
     void device_lost(const QString& info);
 
 private:
@@ -136,6 +142,8 @@ public:
 
     virtual void set_locked(bool) final;
 
+    virtual void set_in_backend() final;
+
 public slots:
 
     void slider_changed(double);
@@ -143,7 +151,7 @@ public slots:
 
 signals:
 
-    void value_changed(const char*, double);
+    void value_changed(Property*);
     void device_lost(const QString& info);
 
 private:
@@ -178,6 +186,7 @@ public:
 
     virtual void set_locked(bool) final;
 
+    virtual void set_in_backend() final;
 
 public slots:
 
@@ -185,7 +194,7 @@ public slots:
 
 signals:
 
-    void value_changed(const char*, bool);
+    void value_changed(Property*);
     void device_lost(const QString& info);
 
 private:
@@ -216,13 +225,15 @@ public:
 
     virtual void set_locked(bool) final;
 
+    virtual void set_in_backend() final;
+
 public slots:
 
     void got_clicked();
 
 signals:
 
-    void value_changed(const char*);
+    void value_changed(Property*);
     void device_lost(const QString& info);
 
 private:

@@ -41,12 +41,11 @@ public:
 
 public slots:
 
-    void set_bool(const std::string& name, bool value);
-    void set_int(const std::string& name, int value);
-    void set_double(const std::string& name, double value);
-    void set_enum(const std::string& name, QString value);
-    void set_button(const std::string& name);
-    void set_property(const std::string& name, GValue* value);
+    void write_property(Property* p)
+    {
+        p->set_in_backend();
+    };
+
     void run();
 
 private:

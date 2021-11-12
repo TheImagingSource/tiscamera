@@ -38,8 +38,6 @@ public:
 
     TcamPropertyBase* get_property(const std::string& name);
 
-    gboolean set_property(const std::string& name, const GValue* value);
-
     GstElement* origin_of_property(const std::string& name);
 
 };

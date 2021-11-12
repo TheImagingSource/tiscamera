@@ -77,16 +77,6 @@ TcamPropertyBase* TcamCollection::get_property(const std::string& name)
 }
 
 
-gboolean TcamCollection::set_property(const std::string& /*name*/, const GValue* /*value*/)
-{
-    //if (auto e = origin_of_property(name))
-        //{
-        //GError* err = nullptr;
-        //return tcam_prop_set_tcam_property(TCAM_PROP(e), name.c_str(), value, &err);
-        //}
-    return FALSE;
-}
-
 GstElement* TcamCollection::origin_of_property(const std::string& name)
 {
     try

@@ -137,22 +137,23 @@ void PropertyDialog::initialize_dialog()
             case TCAM_PROPERTY_TYPE_FLOAT:
             {
                 auto ptr = new DoubleWidget(TCAM_PROPERTY_FLOAT(prop));
-                connect(ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::set_double);
-
+                connect(ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &DoubleWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 m_properties[name] = dynamic_cast<Property*>(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_INTEGER:
             {
                 auto ptr = new IntWidget(TCAM_PROPERTY_INTEGER(prop));
-                connect(ptr, &IntWidget::value_changed, p_worker, &PropertyWorker::set_int);
+                connect(ptr, &IntWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &IntWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 m_properties[name] = dynamic_cast<Property*>(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
             {
                 auto ptr = new EnumWidget(TCAM_PROPERTY_ENUMERATION(prop));
-                connect(ptr, &EnumWidget::value_changed, p_worker, &PropertyWorker::set_enum);
+                connect(ptr, &EnumWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &EnumWidget::device_lost, this, &PropertyDialog::notify_device_lost);
 
                 m_properties[name] = dynamic_cast<Property*>(ptr);
@@ -161,13 +162,15 @@ void PropertyDialog::initialize_dialog()
             case TCAM_PROPERTY_TYPE_BOOLEAN:
             {
                 auto ptr = new BoolWidget(TCAM_PROPERTY_BOOLEAN(prop));
-                connect(ptr, &BoolWidget::value_changed, p_worker, &PropertyWorker::set_bool);
+                connect(ptr, &BoolWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &BoolWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 break;
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
                 auto ptr = new ButtonWidget(TCAM_PROPERTY_COMMAND(prop));
-                connect(ptr, &ButtonWidget::value_changed, p_worker, &PropertyWorker::set_button);
+                connect(ptr, &ButtonWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(ptr, &ButtonWidget::device_lost, this, &PropertyDialog::notify_device_lost);
                 m_properties[name] = dynamic_cast<Property*>(ptr);
                 break;
             }
