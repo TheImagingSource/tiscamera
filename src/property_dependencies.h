@@ -47,17 +47,17 @@ public:
 };
 
 
-struct dependency
-{
-    std::string name;
-    std::vector<std::shared_ptr<tcam::property::PropertyLock>> to_lock;
-};
+//struct dependency
+//{
+//    std::string name;
+//    std::vector<std::shared_ptr<tcam::property::PropertyLock>> to_lock;
+//};
 
 
 struct dependency_entry
 {
-    const std::string name;
-    const std::vector<std::string> dependencies;
+    const std::string_view name;
+    const std::vector<std::string_view> dependencies;
 };
 
 
