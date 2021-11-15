@@ -173,7 +173,7 @@ static __u8 parse_v4l2_type(const std::string& str)
     return 0;
 }
 
-std::vector<std::string> get_search_directories()
+static std::vector<std::string> get_search_directories()
 {
     std::vector<std::string> directories;
 

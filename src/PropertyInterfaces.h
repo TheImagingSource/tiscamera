@@ -16,16 +16,14 @@
 
 #pragma once
 
-#include "../libs/gst-helper/include/tcamprop1.0_base/tcamprop_base.h"
-#include "PropertyCategory.h"
 #include "PropertyFlags.h"
 #include "base_types.h"
 #include "error.h"
-#include "visibility.h"
 
 #include <memory>
 #include <string>
 #include <string_view>
+#include <tcamprop1.0_base/tcamprop_base.h>
 #include <vector>
 
 namespace tcam::property

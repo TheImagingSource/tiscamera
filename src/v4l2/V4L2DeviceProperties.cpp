@@ -22,7 +22,7 @@
 #include "v4l2_utils.h"
 #include "uvc-extension-loader.h"
 
-#include "property_dependencies.h"
+#include "../property_dependencies.h"
 
 #include <linux/videodev2.h>
 #include <unistd.h> // pipe, usleep

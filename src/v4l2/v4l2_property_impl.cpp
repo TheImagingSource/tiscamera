@@ -17,9 +17,9 @@
 #include "v4l2_property_impl.h"
 
 #include "../logging.h"
+#include "../utils.h"
 #include "V4L2PropertyBackend.h"
 #include "v4l2_genicam_mapping.h"
-#include "utils.h"
 
 #include <memory>
 

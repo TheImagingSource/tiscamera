@@ -18,11 +18,11 @@
 
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
-#include <../libs/gst-helper/include/tcamprop1.0_base/tcamprop_property_info.h>
 
 #include <map>
 #include <memory>
 #include <string>
+#include <tcamprop1.0_base/tcamprop_property_info.h>
 
 using namespace tcam::property;
 

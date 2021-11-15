@@ -30,7 +30,6 @@ add_library(tcam-base STATIC
   DeviceInfo.cpp
   ImageBuffer.cpp
   PropertyInterfaces.cpp
-  PropertyCategory.cpp
   SoftwarePropertiesBase.cpp
   SoftwareProperties.cpp
   SoftwarePropertyBackend.cpp
@@ -49,15 +48,13 @@ PUBLIC
     dutils_img::img
     spdlog::spdlog
     outcome::outcome
+    tcamprop1::base
 PRIVATE
     dutils_img::pipe_auto
 )
 
-target_include_directories( tcam-base PRIVATE SYSTEM "${TCAM_SOURCE_DIR}/external/")
-
-
-target_compile_definitions(tcam-base PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 set_project_warnings(tcam-base)
+
 set( srcs
   BackendLoader.cpp
   DeviceIndex.cpp
@@ -73,23 +70,6 @@ set( srcs
   libtcam_base.h
   libtcam_base.cpp
 )
-
-if (BUILD_V4L2)
-  add_subdirectory(v4l2)
-
-  set(srcs
-    ${srcs}
-    v4l2/V4l2Device.cpp
-    v4l2/V4L2PropertyBackend.cpp
-    v4l2/V4L2DeviceProperties.cpp
-    v4l2/v4l2_property_impl.cpp
-    v4l2/v4l2_genicam_mapping.cpp
-    v4l2/v4l2_genicam_conversion.cpp
-    v4l2/v4l2_utils.cpp
-    v4l2/v4l2_api.cpp
-    )
-
-endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
   add_subdirectory(tcam-network)
@@ -116,27 +96,6 @@ if (BUILD_ARAVIS)
 
 endif (BUILD_ARAVIS)
 
-if (BUILD_LIBUSB)
-  set(srcs
-    ${srcs}
-    libusb/AFU050Device.cpp
-    libusb/AFU050DeviceBackend.cpp
-    libusb/AFU050PropertyImpl.cpp
-    libusb/AFU420Device.cpp
-    libusb/AFU420PropertyImpl.cpp
-    libusb/AFU420DeviceBackend.cpp
-    libusb/AFU420DeviceProperties.cpp
-    libusb/libusb_utils.cpp
-    libusb/UsbSession.cpp
-    libusb/UsbHandler.cpp
-    libusb/LibusbDevice.cpp
-    libusb/libusb_api.cpp
-    )
-
-  add_definitions(-DHAVE_LIBUSB)
-  find_package(libusb-1.0 REQUIRED QUIET)
-
-endif (BUILD_LIBUSB)
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
@@ -180,11 +139,12 @@ set_property(TARGET tcam PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
 
 target_include_directories( tcam
 PRIVATE SYSTEM
-    "${TCAM_SOURCE_DIR}/external/"
+    "${TCAM_SOURCE_DIR}/external/"      # TODO remove this
 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}      # For version.h, version.cpp is generated an build in ${CMAKE_CURRENT_BINARY_DIR}, so we have to bend includes to that directory
 )
 
+target_compile_definitions(tcam PRIVATE TCAM_LOG_ENV_NAME="TCAM_LOG")
 
 # set_target_properties(tcam
 #   PROPERTIES
@@ -197,27 +157,28 @@ target_link_libraries(tcam
   tcam-base
   PRIVATE
   outcome::outcome
-  tcamprop1_base
+  tcamprop1::base
   )
 
 
 if (BUILD_V4L2)
+  add_subdirectory(v4l2)
 
-
-  find_package(UDev REQUIRED QUIET)
-  include_directories(tcam PRIVATE ${UDEV_INCLUDE_DIR})
-
-  target_compile_definitions(tcam PRIVATE -DHAVE_UDEV)
   target_compile_definitions(tcam PRIVATE -DHAVE_V4L2)
 
-  find_package(libusb-1.0 REQUIRED QUIET)
-  target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
-
-  target_link_libraries(tcam PRIVATE ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES})
-  target_link_libraries(tcam PRIVATE tcam-dfk73)
-  target_link_libraries(tcam PRIVATE tcam-uvc-extension)
+  target_link_libraries(tcam PRIVATE tcam-v4l2)
 
 endif (BUILD_V4L2)
+
+
+if (BUILD_LIBUSB)
+    add_subdirectory( libusb )
+
+    target_compile_definitions( tcam PRIVATE -DHAVE_LIBUSB)
+
+    target_link_libraries(tcam PRIVATE tcam-libusb-backend)
+
+endif (BUILD_LIBUSB)
 
 
 if (BUILD_ARAVIS)
@@ -265,12 +226,6 @@ if (BUILD_ARAVIS)
 
 endif (BUILD_ARAVIS)
 
-
-if (BUILD_LIBUSB)
-  target_include_directories(tcam PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
-  target_link_libraries(tcam PRIVATE ${LIBUSB_1_LIBRARIES})
-
-endif (BUILD_LIBUSB)
 
 install(TARGETS tcam
   LIBRARY
