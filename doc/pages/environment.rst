@@ -31,18 +31,18 @@ The value is in bytes.
 
    export TCAM_GIGE_PACKET_SIZE=9000
 
-TCAM_ARV_PACKET_REQUEST_RATIO
-+++++++++++++++++++++++++++++
+TCAM_ARV_STREAM_OPTIONS
++++++++++++++++++++++++
+`TCAM_ARV_STREAM_OPTIONS` allows setting all options for the arvstream object.
 
-`TCAM_ARV_PACKET_REQUEST_RATIO` allows setting the packet resend request limit
-as a percentage of frame packet number. See “packet-request-ratio” property of
-arvgvstream.
-The value has to be between 0.0 and 1.0.
+For an overview over available options, please look at `the official aravis documentation <https://aravisproject.github.io/docs/aravis-0.8/ArvGvStream.html>`_.
 
 .. code-block:: sh
 
-   export TCAM_ARV_PACKET_REQUEST_RATIO=1.0
+   export TCAM_ARV_STREAM_OPTIONS=packet-resend-ratio=0.8,packet-timeout=20000,packet-resend=ARV_GV_STREAM_PACKET_RESEND_NEVER
 
+Enumerations use the complete enumeration value.
+   
 .. _env_gstreamer:
  
 GStreamer

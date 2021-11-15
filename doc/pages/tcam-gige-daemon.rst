@@ -1,4 +1,4 @@
-.. _gige_daemon:
+.. _tcam_gige_daemon:
 
 ################
 tcam-gige-daemon

@@ -81,6 +81,14 @@ Running without Installation
 To integrate tiscamera into the system environment, source the `env.sh` script located in the build directory.
 It will adjust environment variables so that GStreamer elements, etc can be found.
 
+To do this call the following in the current terminal:
+
+.. code-block:: sh
+
+   
+   source <tiscamera build directory>/env.sh
+                
+
 Verifying the Installation
 ==========================
 
@@ -111,7 +119,7 @@ To reference both APIs, add the following lines:
       .. code-block:: c
                   
          #include <gst/gst.h>
-         #include <tcamprop.h>
+         #include <tcam-property-1.0.h>
                   
    .. group-tab:: python
 
@@ -119,7 +127,7 @@ To reference both APIs, add the following lines:
                   
          import gi
 
-         gi.require_version("Tcam", "0.1")
+         gi.require_version("Tcam", "1.0")
          gi.require_version("Gst", "1.0")
 
          from gi.repository import Tcam, Gst
@@ -136,9 +144,6 @@ For a quick listing of available devices, execute the following in a terminal:
 
    tcam-ctrl -l
 
-The responsible functions are :c:func:`tcam_prop_get_device_serials`
-and :c:func:`tcam_prop_get_device_info`
-
 .. tabs::
 
    .. group-tab:: c
@@ -147,75 +152,50 @@ and :c:func:`tcam_prop_get_device_info`
 
          gst_init(&argc, &argv); // init gstreamer
 
-         /* create a tcambin to retrieve device information */
-         GstElement* source = gst_element_factory_make("tcambin", "source");
+         GstDeviceMonitor* monitor = gst_device_monitor_new();
+         // We are only interested in devices that are in the categories
+         // Video and Source and tcam
+         gst_device_monitor_add_filter(monitor, "Video/Source/tcam", NULL);
 
-         /* retrieve a single linked list of serials of the available devices */
-         GSList* serials = tcam_prop_get_device_serials(TCAM_PROP(source));
+         GList* devices = gst_device_monitor_get_devices(monitor);
 
-         for (GSList* elem = serials; elem; elem = elem->next)
+         for (GList* elem = devices; elem; elem = elem->next)
          {
-             const char* device_serial = (gchar*)elem->data;
+             GstDevice* device = (GstDevice*) elem->data;
 
-             char* name;
-             char* identifier;
-             char* connection_type;
+             GstStructure* struc = gst_device_get_properties(device);
 
-             /* This fills the parameters to the likes of:
-             name='DFK Z12GP031',
-             identifier='The Imaging Source Europe GmbH-11410533'
-             connection_type='aravis'
-             The identifier is the name given by the backend
-             The connection_type identifies the backend that is used.
-             Currently 'aravis', 'v4l2' and 'unknown' exist
-             */
-             gboolean ret = tcam_prop_get_device_info(TCAM_PROP(source),
-                                                      device_serial,
-                                                      &name,
-                                                      &identifier,
-                                                      &connection_type);
+             printf("\tmodel:\t%s\tserial:\t%s\ttype:\t%s\n",
+                    gst_structure_get_string(struc, "model"),
+                    gst_structure_get_string(struc, "serial"),
+                    gst_structure_get_string(struc, "type"));
 
-             if (ret) // get_device_info was successful
-             {
-                 printf("Model: %s Serial: %s Type: %s\n",
-                        name, (gchar*)elem->data, connection_type);
-
-                 g_free(name);
-                 g_free(identifier);
-                 g_free(connection_type);
-             }
+             gst_structure_free(struc);
          }
 
-         g_slist_free_full(serials, g_free);
+         g_list_free(devices);
+         gst_object_unref(monitor);
+
 
    .. group-tab:: python
 
       .. code-block:: python
-                  
-         source = Gst.ElementFactory.make("tcambin")
-   
-         serials = source.get_device_serials_backend()
-   
-         for single_serial in serials:
-   
-             # This returns someting like:
-             # (True,
-             #  name='DFK Z12GP031',
-             #  identifier='The Imaging Source Europe GmbH-11410533',
-             #  connection_type='aravis')
-             # The identifier is the name given by the backend
-             # The connection_type identifies the backend that is used.
-             #     Currently 'aravis', 'v4l2', 'libusb' and 'unknown' exist
-             (return_value, model,
-             identifier, connection_type) = source.get_device_info(single_serial)
-   
-             # return value would be False when a non-existant serial is used
-             # since we are iterating get_device_serials this should not happen
-             if return_value:
-   
-                 print("Model: {} Serial: {} Type: {}".format(model,
-                                                              single_serial,
-                                                              connection_type))
+
+         Gst.init(sys.argv)
+                      
+         monitor = Gst.DeviceMonitor.new()
+         # We are only interested in devices that are in the categories
+         # Video and Source and tcam
+         monitor.add_filter("Video/Source/tcam")
+
+         for device in monitor.get_devices():
+
+             struc = device.get_properties()
+
+             print("\tmodel:\t{}\tserial:\t{}\ttype:\t{}".format(struc.get_string("model"),
+                                                                 struc.get_string("serial"),
+                                                                 struc.get_string("type")))
+
 
 This code can be found in the example `00-list-devices`.
 
@@ -544,53 +524,53 @@ For an overview of available properties, type the following into a terminal:
 
          /* create a tcambin to retrieve device information */
          GstElement* source = gst_element_factory_make("tcambin", "source");
+         
+         gst_element_set_state(source, GST_STATE_READY);
 
-         GSList* names = tcam_prop_get_tcam_property_names(TCAM_PROP(source));
+         GError* err = NULL;
+         GSList* n =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
 
-         for (GSList* cur = names; cur != NULL; cur = cur->next)
+         for (unsigned int i = 0; i < g_slist_length(names); ++i)
          {
+             err = NULL;
              const char* name = (char*)cur->data;
 
-             GValue value = {};
-             GValue min = {};
-             GValue max = {};
-             GValue default_value = {};
-             GValue step_size = {};
-             GValue type = {};
-             GValue flags = {};
-             GValue category = {};
-             GValue group = {};
+             TcamPropertyBase* base_property = tcam_property_provider_get_tcam_property(TCAM_PROPERTY_PROVIDER(source),
+                                                                                        name, &err);
 
-             gboolean ret = tcam_prop_get_tcam_property(TCAM_PROP(source),
-                                                        name,
-                                                        &value,
-                                                        &min,
-                                                        &max,
-                                                        &default_value,
-                                                        &step_size,
-                                                        &type,
-                                                        &flags,
-                                                        &category,
-                                                        &group);
+             if (err)
+             {
+                 printf("Error while retrieving property \"%s\": %s\n", name, err->message);
+                 g_error_free(err);
+                 err = NULL;
+                 continue;
+             }
 
-             if (!ret)
+             if (!base_property)
              {
                  printf("Could not query property '%s'\n", name);
                  continue;
              }
 
-             g_value_unset( &value );
-             g_value_unset( &min );
-             g_value_unset( &max );
-             g_value_unset( &default_value );
-             g_value_unset( &step_size );
-             g_value_unset( &type );
-             g_value_unset( &flags );
-             g_value_unset( &category );
-             g_value_unset( &group );
+             TcamPropertyType type = tcam_property_base_get_property_type(base_property);
+
+             switch(type)
+             {
+                 case TCAM_PROPERTY_TYPE_INTEGER:
+                 {
+                     TcamPropertyInteger* integer = TCAM_PROPERTY_INTEGER(base_property);
+                     break;
+                 }
+             }
+             
+             if (base_property)
+             {
+                 g_object_unref(base_property);
+             }
          }
 
-         g_slist_free_full(names,g_free);
+         g_slist_free_full(names, g_free);
+         gst_element_set_state(source, GST_STATE_NULL);
          gst_object_unref(source);
                      
    .. group-tab:: python
@@ -620,7 +600,7 @@ This code can be found in the example `01-list-properties`.
 Set Property
 ------------
 
-The responsible function is `tcam_prop_set_tcam_property`.
+
 
 .. tabs::
 
@@ -631,17 +611,18 @@ The responsible function is `tcam_prop_set_tcam_property`.
          /* create a tcambin to retrieve device information */
          GstElement* source = gst_element_factory_make("tcambin", "source");
 
-         const char* serial = NULL;
-         /* in the READY state the camera will always be initialized */
          gst_element_set_state(source, GST_STATE_READY);
-         GValue set_auto = G_VALUE_INIT;
-         g_value_init(&set_auto, G_TYPE_BOOLEAN);
 
-         g_value_set_boolean(&set_auto, FALSE);
+         GError* err = NULL;
+         GSList* n =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
+
+         if (err)
+         {
+             printf("Error while retrieving names: %s\n", err->message);
+             g_error_free(err);
+             err = NULL;
+         }
          
-         tcam_prop_set_tcam_property(TCAM_PROP(source),
-                                     "Exposure Auto", &set_auto);
-         g_value_unset(&set_auto);
 
                   
    .. group-tab:: python

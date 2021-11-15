@@ -67,12 +67,20 @@ For more precise logging, a comma separated list can be used.
 
     gst-launch-1.0 --gst-debug=tcamsrc:3,tcambin:5,tcam-libtcam:2 ....
 
+To log to a file set the environment variable `GST_DEBUG_FILE`.
+
+.. code-block:: sh
+
+   export GST_DEBUG_FILE=./gstreamer-output.log
+    
 When logging to a file, it is generally recommended to disable color output.
 
 .. code-block:: sh
 
    gst-launch-1.0 --gst-debug-no-color .....
 
+
+   
 Aravis
 ======
 
