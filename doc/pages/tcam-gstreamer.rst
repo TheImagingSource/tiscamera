@@ -379,7 +379,7 @@ E.g.:
 
 .. code-block:: sh
 
-    gst-launch-1.0 tcammainsrc prop-struct=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...
+    gst-launch-1.0 tcammainsrc tcam-properties=tcam,ExposureAuto=Off,ExposureTime=33333 ! ...
 
 Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
 

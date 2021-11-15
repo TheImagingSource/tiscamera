@@ -14,74 +14,74 @@ Helper Types
 TcamError
 ---------
 
-.. c:enum:: TcamError
+.. cpp:enum:: TcamError
 
    Enumeration containing all possible error types tcam-property will return.
             
-   .. c:enumerator:: TCAM_ERROR_SUCCESS                     
-   .. c:enumerator:: TCAM_ERROR_UNKNOWN                     
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE      
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_NOT_WRITEABLE
+   .. cpp:enumerator:: TCAM_ERROR_SUCCESS                     
+   .. cpp:enumerator:: TCAM_ERROR_UNKNOWN                     
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_IMPLEMENTED    
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_AVAILABLE      
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_NOT_WRITEABLE
 
       | The property is either read only or temporarily locked.
       | Call :c:func:`tcam_property_base_is_locked` for verification.
                      
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_TYPE_INCOMPATIBLE
 
       The property is of a different type.
                      
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE 
-   .. c:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_VALUE_OUT_OF_RANGE 
+   .. cpp:enumerator:: TCAM_ERROR_NO_DEVICE_OPEN
       
       No device has been opened that can offer properties.
       This typically means the GstElement is not in GST_STATE_READY or higher.
       
-   .. c:enumerator:: TCAM_ERROR_DEVICE_LOST
+   .. cpp:enumerator:: TCAM_ERROR_DEVICE_LOST
 
       | The device has been lost.
       | This should be considered a fatal, unrecoverable error.
                      
-   .. c:enumerator:: TCAM_ERROR_PARAMETER_NULL
+   .. cpp:enumerator:: TCAM_ERROR_PARAMETER_NULL
 
       | One of the given arguments is NULL.
       | Are provider/property pointer valid?
       | Is the name a valid string?
 
-   .. c:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
+   .. cpp:enumerator:: TCAM_ERROR_PROPERTY_DEFAULT_NOT_AVAILABLE
 
-.. c:enum:: TcamPropertyVisibility
+.. cpp:enum:: TcamPropertyVisibility
 
-   .. c:enumerator:: \
+   .. cpp:enumerator:: \
       TCAM_PROPERTY_VISIBILITY_BEGINNER
       TCAM_PROPERTY_VISIBILITY_EXPERT
       TCAM_PROPERTY_VISIBILITY_GURU
       TCAM_PROPERTY_VISIBILITY_INVISIBLE 
 
-.. c:enum:: TcamPropertyIntRepresentation
+.. cpp:enum:: TcamPropertyIntRepresentation
 
    Enumeration describing recommendations on how the property should be represented.
 
-   .. c:enumerator:: \
+   .. cpp:enumerator:: \
       TCAM_PROPERTY_INTREPRESENTATION_LINEAR
       TCAM_PROPERTY_INTREPRESENTATION_LOGARITHMIC 
       TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER
       TCAM_PROPERTY_INTREPRESENTATION_HEXNUMBER 
             
-.. c:enum:: TcamPropertyFloatRepresentation
+.. cpp:enum:: TcamPropertyFloatRepresentation
 
    Enumeration describing recommendations on how the property should be represented.
 
-   .. c:enumerator:: \
+   .. cpp:enumerator:: \
       TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR
       TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC
       TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER 
 
-.. c:enum:: TcamPropertyType
+.. cpp:enum:: TcamPropertyType
 
    Enumeration containing all possible property types.
             
-   .. c:enumerator:: \
+   .. cpp:enumerator:: \
       TCAM_PROPERTY_TYPE_INTEGER
       TCAM_PROPERTY_TYPE_FLOAT
       TCAM_PROPERTY_TYPE_ENUMERATION
@@ -117,7 +117,7 @@ This interface allows access to all properties that the camera and software offe
    The GError will contain a string describing the cause of the error and an error code.
    The message can be accessed through the member variable `message`.
    The error code can be accessed though the member variable `code`.
-   The error code will be a :c:enum:`TcamError` enum entry.
+   The error code will be a :cpp:enum:`TcamError` enum entry.
         
 .. c:type:: GValue
 
