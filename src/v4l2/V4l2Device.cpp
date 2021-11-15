@@ -538,6 +538,10 @@ bool V4l2Device::stop_stream()
 void V4l2Device::notify_device_lost_func()
 {
     SPDLOG_INFO("notifying callbacks about lost device");
+    if (this->m_is_stream_on)
+    {
+        stop_stream();
+    }
     this->lost_device();
 }
 
