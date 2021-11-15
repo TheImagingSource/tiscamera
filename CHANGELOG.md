@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcambin property `conversion-element`
   Used to select the internal conversion elements.
   Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
+- TCAM_ARV_STREAM_OPTIONS, allows setting of ArvStream options
 
 ### Changed
 
@@ -57,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - camera-ip-conf
   Use tcam-gigetool instead
 - tcambin property `use-dutils`
+- TCAM_ARV_PACKET_REQUEST_RATIO, replaced with TCAM_ARV_STREAM_OPTIONS
 
 ## [0.14.0] - 2021.07.05
 
