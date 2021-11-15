@@ -135,6 +135,8 @@ int camera_to_color_gain(double value)
     return map_value_ranges(0, (4.0 - (1.0 / 256.0)), 0, 255, value);
 }
 
+#define COLOR_MAX (4.0-(1.0/256.0))
+
 
 bool AFU420Device::create_color_gain()
 {
@@ -147,52 +149,57 @@ bool AFU420Device::create_color_gain()
       this allows direct adjustments from the tcamwhitebalance gst module
      */
 
-    tcam_value_int ir = {};
+    tcam_value_double ir = {};
     ir.min = 0;
-    ir.max = 255;
-    ir.step = 1;
+    ir.max = COLOR_MAX;
+    ir.step = 0.1;
 
     double value = 0;
     get_color_gain_factor(color_gain::ColorGainRed, value);
 
-    ir.value = camera_to_color_gain(value);
-    ir.default_value = 64;
+    ir.value = value;
+        //camera_to_color_gain(value);
+    ir.default_value = 1.0;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
-        "BalanceWhiteComponentRed", ir, tcam::afu420::AFU420Property::WB_Red, m_backend));
+    m_properties.push_back(std::make_shared<AFU420PropertyDoubleImpl>(
+        "BalanceWhiteRed", ir, tcam::afu420::AFU420Property::WB_Red, m_backend));
 
 
     /// gain green
 
-    tcam_value_int ig = {};
+    tcam_value_double ig = {};
     ig.min = 0;
-    ig.max = 255;
-    ig.step = 1;
+    ig.max = COLOR_MAX;
+    ig.step = 0.1;
 
     value = 0;
     get_color_gain_factor(color_gain::ColorGainGreen1, value);
 
-    ig.value = camera_to_color_gain(value);
-    ig.default_value = 64;
+    //ig.value = camera_to_color_gain(value);
+    ig.value = value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
-        "BalanceWhiteComponentGreen", ig, tcam::afu420::AFU420Property::WB_Green, m_backend));
+    ig.default_value = 1.0;
+
+    m_properties.push_back(std::make_shared<AFU420PropertyDoubleImpl>(
+        "BalanceWhiteGreen", ig, tcam::afu420::AFU420Property::WB_Green, m_backend));
 
     /// gain blue
 
-    tcam_value_int ib = {};
+    tcam_value_double ib = {};
     ib.min = 0;
-    ib.max = 255;
-    ib.step = 1;
+    ib.max = COLOR_MAX;
+    ib.step = 0.1;
 
     value = 0;
     get_color_gain_factor(color_gain::ColorGainBlue, value);
 
-    ib.value = camera_to_color_gain(value);
-    ib.default_value = 64;
+    //ib.value = camera_to_color_gain(value);
+    ib.value = value;
 
-    m_properties.push_back(std::make_shared<AFU420PropertyIntegerImpl>(
-        "BalanceWhiteComponentBlue", ib, tcam::afu420::AFU420Property::WB_Green, m_backend));
+    ib.default_value = 1.0;
+
+    m_properties.push_back(std::make_shared<AFU420PropertyDoubleImpl>(
+        "BalanceWhiteBlue", ib, tcam::afu420::AFU420Property::WB_Green, m_backend));
 
     return true;
 }
@@ -589,9 +596,9 @@ bool AFU420Device::get_color_gain_factor(color_gain eColor, double& dValue)
 }
 
 
-bool AFU420Device::set_color_gain_factor(color_gain eColor, int value)
+bool AFU420Device::set_color_gain_factor(color_gain eColor, double value)
 {
-    double dValue = color_gain_to_camera(value);
+    double dValue = value;
 
     if (!((dValue >= 0.0) && (dValue <= (4.0 - (1.0 / 256.0)))))
     {
@@ -662,6 +669,11 @@ int64_t AFU420Device::get_strobe(strobe_parameter param)
     if (param == strobe_parameter::polarity)
     {
         ret = control_read(value, BASIC_PC_TO_USB_FLASH_STROBE, 0, 5);
+    }
+
+    if (ret < 0)
+    {
+        return -1;
     }
 
     strobe_data tmp = {};

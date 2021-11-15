@@ -441,7 +441,7 @@ protected:
     bool set_hdr(int64_t);
 
     bool get_color_gain_factor(color_gain eColor, double& dValue);
-    bool set_color_gain_factor(color_gain eColor, int dValue);
+    bool set_color_gain_factor(color_gain eColor, double dValue);
     int read_strobe(strobe_data& strobe);
     int64_t get_strobe(strobe_parameter param);
     bool set_strobe(strobe_parameter param, int64_t);
