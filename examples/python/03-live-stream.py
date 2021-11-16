@@ -43,7 +43,7 @@ def main():
 
     pipeline = Gst.parse_launch("tcambin name=bin "
                                 " ! videoconvert"
-                                " ! ximagesink")
+                                " ! ximagesink sync=false")
 
     # retrieve the bin element from the pipeline
     camera = pipeline.get_by_name("bin")
