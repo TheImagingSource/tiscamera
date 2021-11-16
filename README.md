@@ -10,6 +10,7 @@ This repository will give you additional resources to control your TIS camera.
 * uvc extensions
 * utilities
 * examples on how to interact with your camera
+* documentation
 
 ## Documentation
 
