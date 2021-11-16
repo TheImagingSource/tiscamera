@@ -382,8 +382,8 @@ static bool tcambin_create_elements(GstTcamBin* self)
                               (NULL));
             return false;
         }
+        data.target_pad = gst_helper::get_static_pad(*self->data->tcam_converter, "src");
     }
-    data.target_pad = gst_helper::get_static_pad(*self->data->tcam_converter, "src");
 
     GST_DEBUG_OBJECT(self, "Internal pipeline: %s", pipeline_string.c_str());
 
