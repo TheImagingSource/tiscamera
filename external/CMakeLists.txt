@@ -24,9 +24,6 @@ include(ExternalProject)
 if (BUILD_ARAVIS)
   if (TCAM_INTERNAL_ARAVIS)
 
-    # check for intltool
-    find_package (Intl REQUIRED QUIET)
-
     if (TCAM_DOWNLOAD_MESON)
 
       ExternalProject_Add(meson
