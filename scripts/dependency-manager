@@ -40,7 +40,7 @@ def get_distribution_release():
     process = subprocess.Popen(['lsb_release', '-a'],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
+    stdout, _stderr = process.communicate()
 
     lsb_str = stdout.decode('UTF-8')
     release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
@@ -78,7 +78,7 @@ def get_distribution():
     process = subprocess.Popen(['lsb_release', '-a'],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
+    stdout, _stderr = process.communicate()
 
     lsb_str = stdout.decode('UTF-8')
     release = re.search("Release:\\s(.+)$", lsb_str, re.MULTILINE)
@@ -92,7 +92,7 @@ def get_distribution():
 
 def update_package_list():
     """
-
+    Constructs and executes package update command
     """
     cmd = ["sudo", "apt", "update"]
     subprocess.call(cmd)
@@ -100,7 +100,7 @@ def update_package_list():
 
 def install_packages(package_list: list, yes: bool = False, dry: bool = False):
     """
-
+    Constructs and executes package installation command
     """
 
     cmd = ["sudo", "apt", "install"]
@@ -117,7 +117,10 @@ def install_packages(package_list: list, yes: bool = False, dry: bool = False):
     subprocess.call(cmd2)
 
 
-class Dependency(object):
+class Dependency():
+    """
+    Represesentation of a single dependency
+    """
 
     def __init__(self, json_node):
 
@@ -132,12 +135,15 @@ class Dependency(object):
 
     def deb(self):
         """
-
+        Returns dependency in a way that is usable as a deb dependency
         """
         return "{} ({})".format(self.name, self.version)
 
 
-class DependencyManager(object):
+class DependencyManager():
+    """
+    Main class
+    """
 
     def __init__(self):
 
@@ -159,8 +165,8 @@ class DependencyManager(object):
 
         try:
             self.__load_dependencies(dependency_file)
-        except (TypeError, RuntimeError) as e:
-            raise RuntimeError("Aborted loading dependencies. Reason: {}".format(e))
+        except (TypeError, RuntimeError) as error:
+            raise RuntimeError("Aborted loading dependencies. Reason: {}".format(error)) from error
 
         if self.args.command == "install":
             self.install()
@@ -360,6 +366,6 @@ The most commonly used git commands are:
 if __name__ == "__main__":
     try:
         DependencyManager()
-    except RuntimeError as e:
-        print("{}".format(e))
+    except RuntimeError as err:
+        print("{}".format(err))
         sys.exit(1)
