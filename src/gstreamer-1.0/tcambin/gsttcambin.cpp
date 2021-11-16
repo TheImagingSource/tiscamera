@@ -327,6 +327,20 @@ static bool tcambin_create_elements(GstTcamBin* self)
                 self, CORE, MISSING_PLUGIN, ("Could not create element 'jpegdec'."), (NULL));
             return false;
         }
+
+
+        std::string bin_name = "tcambin-jpegdec";
+        if (!link_elements(data.pipeline_caps, data.jpegdec, pipeline_string, bin_name))
+        {
+            GST_ELEMENT_ERROR(self,
+                              CORE,
+                              NEGOTIATION,
+                              ("Could not link element '%s'.", "jpegdec"),
+                              (NULL));
+            return false;
+        }
+
+        data.target_pad = gst_helper::get_static_pad(*self->data->jpegdec, "src");
     }
     else
     {
