@@ -127,9 +127,9 @@ string(REGEX REPLACE "\n" "" CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAG
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/postinst.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/deb/prerm.in" "${CMAKE_CURRENT_BINARY_DIR}/deb/prerm")
 
-set(CPACK_DEBIAN_PACKAGE_PROVIDES "tiscamera-tcamprop")
-set(CPACK_DEBIAN_PACKAGE_CONFLICTS "tiscamera-tcamprop")
-set(CPACK_DEBIAN_PACKAGE_REPLACES "tiscamera-tcamprop")
+set(CPACK_DEBIAN_PACKAGE_PROVIDES "tiscamera-tcamproperty")
+set(CPACK_DEBIAN_PACKAGE_CONFLICTS "tiscamera-tcamproperty")
+set(CPACK_DEBIAN_PACKAGE_REPLACES "tiscamera-tcamproperty")
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/deb/postinst;${CMAKE_CURRENT_BINARY_DIR}/deb/prerm;")
 
