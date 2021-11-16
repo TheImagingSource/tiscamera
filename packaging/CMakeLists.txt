@@ -122,8 +122,6 @@ endif (NOT TCAM_DISTRIBUTION_DESCRIPTION)
 
 ### required for tcam-capture
 
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "python-gi (>= 3.20), python-gst-1.0")
-
 # when dealing with -DBUIL_TOOLS=OFF and similar situations
 # the dependency list might end with a trailing `,`
 # this will cause dpkg to report an error and abort the installation
