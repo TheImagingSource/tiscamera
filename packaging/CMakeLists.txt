@@ -104,10 +104,20 @@ execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --pac
   RESULT_VARIABLE return_value)
 
 if (return_value EQUAL "1")
-
   message(WARNING "Unable to parse dependencies. You will not be able to generate packages without errors.")
-
 endif()
+
+if (NOT TCAM_DISTRIBUTION_DESCRIPTION)
+  # TCAM_DISTRIBUTION_DESCRIPTION will be read be package-name.cmake
+  execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager dist-release
+    WORKING_DIRECTORY "${TCAM_SOURCE_DIR}"
+    OUTPUT_VARIABLE TCAM_DISTRIBUTION_DESCRIPTION
+    RESULT_VARIABLE return_value)
+
+  if (return_value EQUAL "1")
+    message(WARNING "Unable to parse distribution. Packages will not contain distribution.")
+  endif()
+endif (NOT TCAM_DISTRIBUTION_DESCRIPTION)
 
 
 ### required for tcam-capture
