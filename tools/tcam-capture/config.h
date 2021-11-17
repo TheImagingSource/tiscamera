@@ -52,7 +52,6 @@ struct TcamCaptureConfig
         format_selection_type = (FormatHandling)s.value("format_selection_type", (int)format_selection_type).toInt();
         conversion_element = (ConversionElement)s.value("conversion_element", (int)conversion_element).toInt();
 
-        //auto tmp = s.value("pipeline", pipeline).toString();
         auto tmp = s.value("pipeline", "").toString();
         if (!tmp.isEmpty())
         {
@@ -60,8 +59,8 @@ struct TcamCaptureConfig
 
             pipeline.replace(QString("{display-sink}"),
                              QString("fpsdisplaysink video-sink=xvimagesink sync=false name=sink text-overlay=false signal-fps-measurements=true"));
+            qInfo("Pipeline string: %s", pipeline.toStdString().c_str());
         }
 
-        qInfo("Pipeline base string: %s", pipeline.toStdString().c_str());
     }
 };

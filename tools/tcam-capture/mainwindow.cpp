@@ -137,7 +137,7 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
             GError* err = nullptr;
             gst_message_parse_info(message, &err, &str);
 
-            qInfo("INFO: %s", str);
+            //qInfo("INFO: %s", str);
 
             QString s = str;
 
@@ -147,8 +147,6 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
             {
                 s = s.remove( QRegExp( "\\(\\w*\\)" ) );
                 s = s.section(":",1);
-
-                // qInfo("`````````````````````````````````````````````%s", s.toStdString().c_str());
 
                 ((MainWindow*)user_data)->set_settings_string(s);
             }
@@ -327,10 +325,6 @@ void MainWindow::open_pipeline(FormatHandling handling)
         }
         return;
     }
-    else
-    {
-        qInfo("Started pipeline: %s", pipeline_string.c_str());
-    }
 
     auto bus = gst_pipeline_get_bus (GST_PIPELINE(p_pipeline));
     m_gst_bus_id = gst_bus_add_watch(bus, bus_callback, this);
@@ -365,7 +359,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
 
         if (has_property(p_source, "conversion-element"))
         {
-            qInfo("Setting 'conversion-element' property to '%s'",
+            qDebug("Setting 'conversion-element' property to '%s'",
                   conversion_element_to_string(m_config.conversion_element));
             g_object_set(p_source, "conversion-element", m_config.conversion_element, nullptr);
         }
@@ -423,20 +417,15 @@ void MainWindow::open_pipeline(FormatHandling handling)
         p_selected_caps = open_format_dialog();
 
         caps = p_selected_caps;
-        qInfo("Manually selected caps are: %s", gst_caps_to_string(caps));
-
     }
     else if (handling == FormatHandling::Static)
     {
         caps = p_selected_caps;
-        qInfo("Manually selected caps are: %s", gst_caps_to_string(caps));
     }
     else
     {
         auto c = Caps(src_caps);
         caps = c.get_default_caps();
-
-        qInfo("Auto selected caps are: %s", gst_caps_to_string(caps));
     }
 
     if (src_caps)

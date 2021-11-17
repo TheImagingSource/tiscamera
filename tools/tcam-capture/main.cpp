@@ -16,6 +16,8 @@
 
 #include "mainwindow.h"
 
+#include "../src/version.h"
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <gst/gst.h>
@@ -26,37 +28,29 @@ int main(int argc, char* argv[])
     gst_init(&argc, &argv);
 
     // make logging useful
-    qSetMessagePattern("%{file}(%{line}): %{message}");
+    qSetMessagePattern("%{time} - %{file}:%{line}: %{type} %{message}");
 
     QApplication a(argc, argv);
 
     a.setOrganizationName("the_imaging_source");
     a.setOrganizationDomain("theimagingsource.com");
     a.setApplicationName("tcam-capture");
-    // TODO get from version.h
-    a.setApplicationVersion("1.0.0");
+
+    a.setApplicationVersion(get_version());
 
     QCommandLineParser parser;
     parser.setApplicationDescription("The Imaging Source Live Stream Application");
     parser.addHelpOption();
     parser.addVersionOption();
 
-    // A boolean option with a single name (-p)
-    QCommandLineOption reset_option("reset", "Reset application settings and clear cache");
-    parser.addOption(reset_option);
-
-    //QCommandLineOption config_option("config", "Use custom config");
-    parser.addPositionalArgument("config", "Use custom config");
+    // QCommandLineOption reset_option("reset", "Reset application settings and clear cache");
+    // parser.addOption(reset_option);
 
     // Process the actual command line arguments given by the user
     parser.process(a);
 
-    const QStringList args = parser.positionalArguments();
+    // const QStringList args = parser.positionalArguments();
 
-    for (int i = 0; i < args.size(); i++)
-    {
-        qInfo("%s", args.at(i).toStdString().c_str());
-    }
     MainWindow w;
 
     w.show();
