@@ -24,8 +24,6 @@
 
 struct caps_resolution
 {
-    bool is_range;
-    bool is_fps_range;
     unsigned int width;
     unsigned int height;
 
@@ -134,6 +132,8 @@ private:
 
     std::vector<struct caps_format> formats;
 
+    std::vector<struct caps_format> generate_from_fixed_caps();
+    std::vector<struct caps_format> generate_from_caps_list();
     void generate();
 };
 

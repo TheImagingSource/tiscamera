@@ -26,6 +26,45 @@
 
 namespace {
 
+struct image_size
+{
+    int width;
+    int height;
+
+    bool operator<(const struct image_size& other) const
+    {
+        if (height <= other.height && width <= other.width)
+        {
+            return true;
+        }
+        return false;
+    }
+};
+
+std::vector<image_size> get_standard_resolutions(const image_size& min,
+                                                 const image_size& max,
+                                                 const image_size& step)
+{
+    static const image_size resolutions[] = {
+        { 128, 96 },    { 320, 240 },   { 360, 280 },   { 544, 480 },   { 640, 480 },
+        { 352, 288 },   { 576, 480 },   { 720, 480 },   { 960, 720 },   { 1280, 720 },
+        { 1440, 1080 }, { 1920, 1080 }, { 1920, 1200 }, { 2048, 1152 }, { 2048, 1536 },
+        { 2560, 1440 }, { 3840, 2160 }, { 4096, 3072 }, { 7680, 4320 }, { 7680, 4800 },
+    };
+
+    std::vector<struct image_size> ret;
+    ret.reserve(std::size(resolutions));
+    for (const auto& r : resolutions)
+    {
+        if ((min < r) && (r < max) && (r.width % step.width == 0) && (r.height % step.height == 0))
+        {
+            ret.push_back(r);
+        }
+    }
+
+    return ret;
+}
+
 
 std::vector<double> create_steps_for_range(double min, double max)
 {
@@ -75,6 +114,94 @@ std::vector<double> create_steps_for_range(double min, double max)
     }
     return vec;
 }
+
+
+std::vector<double> index_framerates(const GValue* framerate)
+{
+    std::vector<double> framerates;
+
+    if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
+    {
+        for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
+        {
+            const GValue* val = gst_value_list_get_value(framerate, x);
+
+            if (G_VALUE_TYPE(val) == GST_TYPE_FRACTION)
+            {
+                int num = gst_value_get_fraction_numerator(val);
+                int den = gst_value_get_fraction_denominator(val);
+
+                framerates.push_back(num / den);
+            }
+            else
+            {
+                qWarning(
+                    "Handling of framerate handling not implemented for non fraction types.\n");
+                break;
+            }
+        }
+    }
+    else if (G_VALUE_TYPE(framerate) == GST_TYPE_FRACTION_RANGE)
+    {
+        const GValue* fps_min = gst_value_get_fraction_range_min(framerate);
+        const GValue* fps_max = gst_value_get_fraction_range_max(framerate);
+
+        int num = gst_value_get_fraction_numerator(fps_min);
+        int den = gst_value_get_fraction_denominator(fps_min);
+
+        double fps_min_value;
+        gst_util_fraction_to_double(num, den, &fps_min_value);
+
+        num = gst_value_get_fraction_numerator(fps_max);
+        den = gst_value_get_fraction_denominator(fps_max);
+
+        double fps_max_value;
+        gst_util_fraction_to_double(num, den, &fps_max_value);
+
+        framerates = create_steps_for_range(fps_min_value, fps_max_value);
+    }
+    return framerates;
+}
+
+
+std::vector<struct caps_format>::iterator find_format (std::vector<struct caps_format>& tmp, const std::string& name, const scaling& scale)
+{
+    auto ret = std::find_if(tmp.begin(), tmp.end(), [&name, &scale](const struct caps_format& fmt)
+    {
+        if (fmt.format == name
+            && fmt.scale == scale)
+        {
+            return true;
+        }
+        return false;
+    });
+
+    return ret;
+}
+
+
+scaling create_scale(const GstStructure* structure)
+{
+    scaling ret;
+    if (gst_structure_has_field(structure, "binning"))
+    {
+        std::string s = gst_structure_get_string(structure, "binning");
+
+        ret.binning_h = std::stoi(s.substr(0, 1));
+        ret.binning_v = std::stoi(s.substr(2, 1));
+    }
+    if (gst_structure_has_field(structure, "skipping"))
+    {
+        std::string s = gst_structure_get_string(structure, "skipping");
+
+        ret.skipping_h = std::stoi(s.substr(0, 1));
+        ret.skipping_v = std::stoi(s.substr(2, 1));
+    }
+
+    return ret;
+};
+
+
 
 }
 
@@ -229,44 +356,9 @@ std::vector<double> Caps::get_framerates(const std::string& format,
 }
 
 
-void Caps::generate()
+std::vector<struct caps_format> Caps::generate_from_fixed_caps()
 {
-    m_default_settings = {};
     std::vector<struct caps_format> tmp;
-
-    auto find_format = [&tmp](const std::string& name, const scaling& scale)
-    {
-        return std::find_if(tmp.begin(), tmp.end(), [&name, &scale](const struct caps_format& fmt)
-        {
-            if (fmt.format == name
-                    && fmt.scale == scale)
-            {
-                return true;
-            }
-            return false;
-        });
-    };
-
-    auto create_scale = [] (const GstStructure* structure) -> scaling
-    {
-        scaling ret;
-        if (gst_structure_has_field(structure, "binning"))
-        {
-            std::string s = gst_structure_get_string(structure, "binning");
-
-            ret.binning_h = std::stoi(s.substr(0, 1));
-            ret.binning_v = std::stoi(s.substr(2, 1));
-        }
-        if (gst_structure_has_field(structure, "skipping"))
-        {
-            std::string s = gst_structure_get_string(structure, "skipping");
-
-            ret.skipping_h = std::stoi(s.substr(0, 1));
-            ret.skipping_v = std::stoi(s.substr(2, 1));
-        }
-
-        return ret;
-    };
 
     for (unsigned int i = 0; i < gst_caps_get_size(p_caps); ++i)
     {
@@ -286,7 +378,7 @@ void Caps::generate()
 
                 auto scale = create_scale(structure);
 
-                auto fmt_struct = find_format(format, scale);
+                auto fmt_struct = find_format(tmp, format, scale);
 
                 if (fmt_struct == tmp.end())
                 {
@@ -327,7 +419,7 @@ void Caps::generate()
 
             auto scale = create_scale(structure);
 
-            auto fmt_struct = find_format(name, scale);
+            auto fmt_struct = find_format(tmp, name, scale);
 
             if (fmt_struct == tmp.end())
             {
@@ -366,7 +458,6 @@ void Caps::generate()
                 qWarning("Unable to query width\n");
                 continue;
             }
-            res.is_range = false;
         }
 
         GType height_type = gst_structure_get_field_type(structure, "height");
@@ -392,55 +483,129 @@ void Caps::generate()
 
         const GValue* framerate = gst_structure_get_value(structure, "framerate");
 
-        std::vector<double> framerates;
-        if (G_VALUE_TYPE(framerate) == GST_TYPE_LIST)
-        {
-            for (unsigned int x = 0; x < gst_value_list_get_size(framerate); ++x)
-            {
-                const GValue* val = gst_value_list_get_value(framerate, x);
-
-                if (G_VALUE_TYPE(val) == GST_TYPE_FRACTION)
-                {
-                    int num = gst_value_get_fraction_numerator(val);
-                    int den = gst_value_get_fraction_denominator(val);
-
-                    framerates.push_back(num / den);
-                }
-                else
-                {
-                    qWarning(
-                        "Handling of framerate handling not implemented for non fraction types.\n");
-                    break;
-                }
-            }
-            res.framerates = framerates;
-            res.is_fps_range = false;
-        }
-        else if (G_VALUE_TYPE(framerate) == GST_TYPE_FRACTION_RANGE)
-        {
-            const GValue* min = gst_value_get_fraction_range_min(framerate);
-            const GValue* max = gst_value_get_fraction_range_max(framerate);
-
-            int num = gst_value_get_fraction_numerator(min);
-            int den = gst_value_get_fraction_denominator(min);
-
-            double fps_min;
-            gst_util_fraction_to_double(num, den, &fps_min);
-
-            num = gst_value_get_fraction_numerator(max);
-            den = gst_value_get_fraction_denominator(max);
-
-            double fps_max;
-            gst_util_fraction_to_double(num, den, &fps_max);
-
-            res.framerates = create_steps_for_range(fps_min, fps_max);
-            res.is_fps_range = true;
-        }
+        res.framerates = index_framerates(framerate);
 
         fmt->resolutions.push_back(res);
     }
 
-    formats = tmp;
+    return tmp;
+}
+
+
+std::vector<struct caps_format> Caps::generate_from_caps_list()
+{
+    std::vector<struct caps_format> tmp;
+
+    for (unsigned int i = 0; i < gst_caps_get_size(p_caps); ++i)
+    {
+        caps_format* fmt;
+        // int width;
+        // int height;
+
+        GstStructure* structure = gst_caps_get_structure(p_caps, i);
+
+        GType height_type = gst_structure_get_field_type(structure, "height");
+        GType width_type = gst_structure_get_field_type(structure, "width");
+
+        if (width_type != GST_TYPE_INT_RANGE || height_type != GST_TYPE_INT_RANGE)
+        {
+            continue;
+        }
+
+        const char* name = gst_structure_get_name(structure);
+
+        if (gst_structure_has_field(structure, "format"))
+        {
+            if (gst_structure_get_field_type(structure, "format") == G_TYPE_STRING)
+            {
+                const char* format = gst_structure_get_string(structure, "format");
+
+                auto scale = create_scale(structure);
+
+                auto fmt_struct = find_format(tmp, format, scale);
+
+                if (fmt_struct == tmp.end())
+                {
+                    // new format
+                    struct caps_format t = {};
+                    tmp.push_back(t);
+
+                    fmt = &(tmp.back());
+                }
+                else
+                {
+                    fmt = &(*fmt_struct);
+                }
+
+                fmt->format = format;
+                fmt->gst_format = name;
+                fmt->gst_format += ",format=";
+                fmt->gst_format += format;
+                fmt->scale = scale;
+            }
+            else if (gst_structure_get_field_type(structure, "format") == GST_TYPE_LIST)
+            {
+                qWarning("gst structure format list not implemented");
+                continue;
+            }
+            else
+            {
+                qWarning("format handling not implemented for unexpected type in strcture: %s\n",
+                         gst_structure_to_string(structure));
+                continue;
+            }
+        }
+
+        image_size min = {};
+        image_size max = {};
+        image_size step = {};
+
+        const GValue* width_value = gst_structure_get_value(structure, "width");
+
+        min.width = gst_value_get_int_range_min(width_value);
+        max.width = gst_value_get_int_range_max(width_value);
+        step.width = gst_value_get_int_range_step(width_value);
+
+        const GValue* height_value = gst_structure_get_value(structure, "height");
+
+        min.height = gst_value_get_int_range_min(height_value);
+        max.height = gst_value_get_int_range_max(height_value);
+        step.height = gst_value_get_int_range_step(height_value);
+
+
+        auto resolutions = get_standard_resolutions(min, max, step);
+
+        const GValue* framerate = gst_structure_get_value(structure, "framerate");
+
+        for (const auto& resolution : resolutions )
+        {
+            struct caps_resolution res;
+
+            res.width = resolution.width;
+            res.height =resolution.height;
+
+            res.framerates = index_framerates(framerate);
+            fmt->resolutions.push_back(res);
+        }
+
+    }
+
+    return tmp;
+}
+
+
+void Caps::generate()
+{
+    m_default_settings = {};
+
+    if (has_resolution_ranges())
+    {
+        formats = generate_from_caps_list();
+    }
+    else
+    {
+        formats = generate_from_fixed_caps();
+    }
 }
 
 
