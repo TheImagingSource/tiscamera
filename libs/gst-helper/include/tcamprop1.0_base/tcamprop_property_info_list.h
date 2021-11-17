@@ -504,6 +504,61 @@ namespace tcamprop1::prop_list
         "Effective height of the sensor in pixels.", {}, IntRepresentation_t::PureNumber, Visibility_t::Expert, Access_t::RO
     );
 
+    constexpr const auto TriggerActivation = make_Enumeration(
+        "TriggerActivation",
+        "Special", "Trigger Activation",
+        "The Trigger Polarity parameter controls whether a trigger event is accepted on the rising or falling edge of the signal connected to the TRIGGER_IN line."
+    );
+
+    constexpr const auto TriggerSelector = make_Enumeration(
+        "TriggerSelector",
+        "Special", "Trigger Selector",
+        "#TODO"
+    );
+
+    constexpr const auto TriggerOverlap = make_Enumeration(
+        "TriggerOverlap",
+        "Special", "Trigger Overlap",
+        "Specifies the type trigger overlap permitted with the previous frame or line. This defines when a valid trigger will be accepted (or latched) for a new frame or a new line."
+    );
+
+    constexpr const auto TriggerMask = make_Float(
+        "TriggerMask",
+        "Special", "Trigger Mask",
+        "Specifies the time for which trigger pulses are ignored after accepting a trigger signal."
+    );
+
+    constexpr const auto TriggerDenoise = make_Float(
+        "TriggerDenoise",
+        "Special", "Trigger Denoise",
+        "#TODO"
+    );
+
+    constexpr const auto TriggerDelay = make_Float(
+        "TriggerDelay",
+        "Special", "Trigger Delay",
+        "Specifies the delay in microseconds (us) to apply after the trigger reception before activating it.",
+        "µs"
+    );
+
+    constexpr const auto TriggerDebouncer = make_Float(
+        "TriggerDebouncer",
+        "Special", "Trigger Debouncer",
+        "#TODO"
+    );
+
+    constexpr const auto GPIn = make_Integer(
+        "GPIn",
+        "DigitalIO", "General Purpose Input",
+        "#TODO"
+    );
+
+    constexpr const auto GPOut = make_Integer(
+        "GPOut",
+        "DigitalIO", "General Purpose Output",
+        "#TODO"
+    );
+
     /* Missing here but present in Tims list
         String          DeviceUserID
         Enumeration     DeviceTemperatureSelector
