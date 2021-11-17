@@ -155,7 +155,9 @@ void EnumWidget::setup_ui()
     // this enabled auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += QString("</font>");
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    toolTip += "</p></font>";
     this->setToolTip(toolTip);
 }
 
@@ -301,7 +303,9 @@ void IntWidget::setup_ui()
     // this enabled auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += QString("</font>");
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    toolTip += "</p></font>";
     this->setToolTip(toolTip);
 }
 
@@ -480,7 +484,9 @@ void DoubleWidget::setup_ui()
     // this enabled auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += QString("</font>");
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    toolTip += "</p></font>";
     this->setToolTip(toolTip);
 }
 
@@ -589,7 +595,9 @@ void BoolWidget::setup_ui()
     // this enabled auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += QString("</font>");
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    toolTip += "</p></font>";
     this->setToolTip(toolTip);
 }
 
@@ -681,6 +689,8 @@ void ButtonWidget::setup_ui()
     // this enabled auto wrapping
     QString toolTip = QString("<font>");
     toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += QString("</font>");
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
+    toolTip += "</p></font>";
     this->setToolTip(toolTip);
 }
