@@ -164,6 +164,7 @@ void PropertyDialog::initialize_dialog()
                 auto ptr = new BoolWidget(TCAM_PROPERTY_BOOLEAN(prop));
                 connect(ptr, &BoolWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &BoolWidget::device_lost, this, &PropertyDialog::notify_device_lost);
+                m_properties[name] = dynamic_cast<Property*>(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
