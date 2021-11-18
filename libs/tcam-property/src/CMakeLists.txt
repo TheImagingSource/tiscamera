@@ -57,7 +57,7 @@ add_custom_command(
   ${INTROSPECTION_SCANNER}
   Tcam-1.0.h tcam-property-1.0.h tcam-property-1.0.c
   --namespace=Tcam
-  --nsversion=${TCAM_GI_API_VERSION}
+  --nsversion=${TCAM_PROPERTY_GI_API_VERSION}
   --warn-all
   --include=GObject-2.0
   -I${CMAKE_CURRENT_SOURCE_DIR}
