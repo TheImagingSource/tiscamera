@@ -6,7 +6,7 @@ if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
   find_package(UDev REQUIRED QUIET)
   find_package(libusb-1.0 REQUIRED QUIET)
 
-  add_library(tcam-dfk73 dfk73.c)
+  add_library(tcam-dfk73 STATIC dfk73.c)
 
   target_compile_definitions(tcam-dfk73
     PRIVATE -DHAVE_USB
@@ -21,11 +21,6 @@ if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
   set_property(TARGET tcam-dfk73 PROPERTY VERSION ${TCAM_VERSION})
   set_property(TARGET tcam-dfk73 PROPERTY SOVERSION ${TCAM_VERSION_MAJOR})
-
-  install(TARGETS tcam-dfk73
-    LIBRARY
-    DESTINATION "${TCAM_INSTALL_LIB}"
-    COMPONENT tcam-libdfk73)
 
 endif (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
