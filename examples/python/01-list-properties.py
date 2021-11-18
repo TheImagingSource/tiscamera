@@ -93,11 +93,9 @@ def list_properties(camera):
                 default = base.get_default()
                 mini, maxi, step = base.get_range()
 
-                if not base.get_unit():
-                    #.decode("utf-8"):
+                unit = base.get_unit()
+                if not unit:
                     unit = ""
-                else:
-                    unit = base.get_unit().encode('utf-8')
 
                 print(("{name}\ttype: Float\tDisplay Name: \"{disp_name}\"\tCategory: {cat}\n"
                        "\t\t\tDescription: {desc}\n"
