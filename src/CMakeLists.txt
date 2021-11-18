@@ -25,6 +25,7 @@ configure_file (
 
 if (TCAM_ENABLE_BASE_LIBRARIES)
 
+
 add_library(tcam-base STATIC
   logging.cpp
   DeviceInfo.cpp
@@ -70,32 +71,6 @@ set( srcs
   libtcam_base.h
   libtcam_base.cpp
 )
-
-if (BUILD_ARAVIS)
-  add_subdirectory(tcam-network)
-
-  set(srcs
-    ${srcs}
-    aravis/AravisDevice.cpp
-    aravis/AravisDeviceStream.cpp
-    aravis/AravisDeviceScaling.cpp
-    aravis/AravisPropertyBackend.cpp
-    aravis/AravisDeviceProperties.cpp
-    aravis/aravis_property_impl.cpp
-    aravis/aravis_utils.cpp
-    aravis/aravis_api.cpp
-    )
-
-
-  if (NOT TCAM_INTERNAL_ARAVIS)
-
-    find_package(Aravis REQUIRED QUIET)
-
-  endif(NOT TCAM_INTERNAL_ARAVIS)
-
-
-endif (BUILD_ARAVIS)
-
 
 
 set(CMAKE_INSTALL_RPATH "${TCAM_INSTALL_LIB}/tcam-${TCAM_VERSION_MAJOR}")
@@ -166,7 +141,7 @@ if (BUILD_V4L2)
 
   target_compile_definitions(tcam PRIVATE -DHAVE_V4L2)
 
-  target_link_libraries(tcam PRIVATE tcam-v4l2)
+  target_link_libraries(tcam PRIVATE tcam-backend-v4l2)
 
 endif (BUILD_V4L2)
 
@@ -176,53 +151,20 @@ if (BUILD_LIBUSB)
 
     target_compile_definitions( tcam PRIVATE -DHAVE_LIBUSB)
 
-    target_link_libraries(tcam PRIVATE tcam-libusb-backend)
+    target_link_libraries(tcam PRIVATE tcam-backend-libusb)
 
 endif (BUILD_LIBUSB)
+
 
 
 if (BUILD_ARAVIS)
 
   target_compile_definitions(tcam PRIVATE -DHAVE_ARAVIS)
 
-  find_package(GObject REQUIRED QUIET) # dependency
-  find_package(GLIB2   REQUIRED QUIET) # dependency
-  find_package(GIO     REQUIRED QUIET) # dependency
+  add_subdirectory(tcam-network)
+  add_subdirectory(aravis)
 
-  target_include_directories(tcam PRIVATE ${GOBJECT_INCLUDE_DIR})
-  target_include_directories(tcam PRIVATE ${GLIB2_INCLUDE_DIR})
-  target_include_directories(tcam PRIVATE "${TCAM_SOURCE_DIR}/tools/gige-daemon")
-
-  if (TCAM_INTERNAL_ARAVIS)
-    add_dependencies(tcam aravis)
-    set(ARAVIS_LIB "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/libaravis-0.8.a")
-
-    find_package(LibXml2 REQUIRED QUIET)
-    find_package(PCAP REQUIRED QUIET)
-
-    target_include_directories(tcam PRIVATE "${GIO_INCLUDE_DIR}")
-    target_include_directories(tcam SYSTEM PRIVATE "${TCAM_SOURCE_DIR}/external/aravis/src")
-    target_include_directories(tcam PRIVATE SYSTEM "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/")
-
-    target_link_libraries(tcam PRIVATE "${ARAVIS_LIB}")
-    target_link_libraries(tcam PRIVATE "${LIBXML2_LIBRARIES}")
-    target_link_libraries(tcam PRIVATE "${GIO_LIBRARIES}")
-    target_link_libraries(tcam PRIVATE "${PCAP_LIBRARIES}")
-
-  else (TCAM_INTERNAL_ARAVIS)
-
-    target_include_directories(tcam PRIVATE SYSTEM ${aravis_INCLUDE_DIR})
-    target_link_libraries(tcam PRIVATE ${aravis_LIBRARIES})
-
-  endif (TCAM_INTERNAL_ARAVIS)
-
-  if (TCAM_ARAVIS_USB_VISION)
-
-    find_package(libusb-1.0 REQUIRED QUIET)
-    target_include_directories(tcam PRIVATE "${LIBUSB_1_INCLUDE_DIRS}")
-    target_link_libraries(tcam PRIVATE "${LIBUSB_1_LIBRARIES}")
-
-  endif (TCAM_ARAVIS_USB_VISION)
+  target_link_libraries(tcam PRIVATE tcam-backend-aravis)
 
 endif (BUILD_ARAVIS)
 

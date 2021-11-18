@@ -15,28 +15,28 @@
 
 find_package(libusb-1.0 REQUIRED QUIET)
 
-add_library( tcam-libusb-backend STATIC
-    AFU050Device.cpp
-    AFU050DeviceBackend.cpp
-    AFU050PropertyImpl.cpp
-    AFU420Device.cpp
-    AFU420PropertyImpl.cpp
-    AFU420DeviceBackend.cpp
-    AFU420DeviceProperties.cpp
-    libusb_utils.cpp
-    UsbSession.cpp
-    UsbHandler.cpp
-    LibusbDevice.cpp
-    libusb_api.cpp
-    )
+add_library( tcam-backend-libusb STATIC
+  AFU050Device.cpp
+  AFU050DeviceBackend.cpp
+  AFU050PropertyImpl.cpp
+  AFU420Device.cpp
+  AFU420PropertyImpl.cpp
+  AFU420DeviceBackend.cpp
+  AFU420DeviceProperties.cpp
+  libusb_utils.cpp
+  UsbSession.cpp
+  UsbHandler.cpp
+  LibusbDevice.cpp
+  libusb_api.cpp
+  )
 
 
-target_link_libraries(tcam-libusb-backend
-PUBLIC
-    tcam-base
-)
+target_link_libraries(tcam-backend-libusb
+  PUBLIC
+  tcam-base
+  )
 
-target_include_directories(tcam-libusb-backend PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
-target_link_libraries(tcam-libusb-backend PRIVATE ${LIBUSB_1_LIBRARIES})
+target_include_directories(tcam-backend-libusb PRIVATE ${LIBUSB_1_INCLUDE_DIRS})
+target_link_libraries(tcam-backend-libusb PRIVATE ${LIBUSB_1_LIBRARIES})
 
-set_project_warnings(tcam-libusb-backend)
+set_project_warnings(tcam-backend-libusb)
