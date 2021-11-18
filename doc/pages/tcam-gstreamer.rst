@@ -325,11 +325,6 @@ Internal pipelines will always be created when the element state is set to READY
     tcamsrc -> capsfilter
 
 
-Should the selected camera offer focus properties the element :any:`tcamautofocus` will also be included.
-
-Elements that offer auto algorithms (auto exposure/focus) will only be included when the camera itself does not offer these functions.
-
-
 GObject properties
 ##################
 
@@ -383,6 +378,9 @@ E.g.:
 
 Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
 
+If a locked property is encountered it will by tried again after all other properties have been set.
+
+
 
 .. _tcam-properties-json:
 
@@ -404,6 +402,8 @@ In ``state >= GST_STATE_READY``:
 This can be used to get a json formatted snap shot of the current property values or to set saved property values in the device.
 
 Property names and types are the ones of the `TcamPropertyBase` objects exposed by the `TcamPropertyProvider` interface.
+
+If a locked property is encountered it will by tried again after all other properties have been set.
 
 This example would dump the device property settings as a json string to the command line:
 

@@ -36,16 +36,19 @@ This is a simplified folder structure of the tiscamera project:
 |   │   ├── outcome
 |   │   └── PugiXml
 |   │   ├── spdlog
-|   ├── libs - internal libraries
-|   │   ├── dutils_image
-|   │   ├── gst-helper
-|   │   ├── tcam-property - gstreamer-1.0 property interface library
+|   ├── libs - collection of helper libraries, not external projects
+|   │   ├── dutils_image - simplified version of tiscamera-dutils algorithms
+|   │   ├── gst-helper - helper libraries for gstreamer elements
+|   │   └── tcam-property - tcam-property GObject library
 |   ├── packaging - resources for the creation of binary distributions
 |   │   └── deb
 |   ├── scripts - helper scripts, see :any:`scripts`
 |   ├── src - general source directory
 |   │   ├── aravis - aravis backend
 |   │   ├── gstreamer-1.0 - gstreamer modules
+|   │   │   ├── tcamconvert - files related to the tcamconvert gstreamer plugin
+|   │   │   ├── tcamgstbase - collection of shared gstreamer functionality
+|   │   │   └── tcamsrc - files related to the tcamconvert gstreamer plugin
 |   │   ├── libusb - libusb-1.0 backend
 |   │   ├── tcam-network - network helper library
 |   │   └── v4l2 - v4l2 backend
@@ -57,6 +60,7 @@ This is a simplified folder structure of the tiscamera project:
 |   │       └── tcam-network
 |   └── tools - directory for applications 
 |       ├── dfk73udev
+|       ├── :ref:`tcam-gige-daemon<tcam_gige_daemon>`
 |       ├── :ref:`tcam-capture<tcam_capture>`
 |       ├── :ref:`tcam-ctrl<tcam_ctrl>`
 |       ├── :ref:`tcam-gige-daemon<gige_daemon>`
@@ -83,7 +87,7 @@ libtcam-network
 ---------------
 
 Common network functionality.
-Used by :ref:`gige-daemon<gige_daemon>` and :ref:`tcam-gigetool<tcam_gigetool>`
+Used by :ref:`tcam-gige-daemon<tcam_gige_daemon>` and :ref:`tcam-gigetool<tcam_gigetool>`
 
 libtcam-uvc-extension
 ---------------------
@@ -100,3 +104,25 @@ libtcam-dfk73
 
 Helper library for the correct initialization of DFK73 cameras.
 
+Threading
+=========
+
+Tiscamera will start multiple threads in the background.
+The following is an overview over these.
+
+- Indexing
+  An internal device indexing thread will run periodically to ensure
+  all potential devices are known and accessible to the user.
+- Internal capture thread
+  This thread is responsible for image acquisition. It will call the auto algorithms for further processing.
+- Auto algorithms  
+  This thread checks for exposure corrections, white balance and other before passing the image buffer to gstreamer.
+- Streaming thread
+  This is the thread tcamsrc and internal elements reside in.
+  It will wait for a new image buffer to be given and pass it to downstream elements.
+- GStreamer thread
+  The main gstreamer thread. Responsible for message handling and state changes.
+  Typically implicitly started by the user application.
+- Device lost thread
+  Security thread for the propagation of device lost events. Idle unless such an event occurs.
+  
