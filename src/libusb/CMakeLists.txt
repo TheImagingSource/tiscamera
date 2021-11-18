@@ -15,7 +15,7 @@
 
 find_package(libusb-1.0 REQUIRED QUIET)
 
-add_library( tcam-libusb-backend
+add_library( tcam-libusb-backend STATIC
     AFU050Device.cpp
     AFU050DeviceBackend.cpp
     AFU050PropertyImpl.cpp
