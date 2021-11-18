@@ -6,7 +6,7 @@ if (NOT TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
   find_package(UDev REQUIRED QUIET)
   find_package(libusb-1.0 REQUIRED QUIET)
 
-  add_library(tcam-dfk73 STATIC dfk73.c)
+  add_library(tcam-dfk73 dfk73.c)
 
   target_compile_definitions(tcam-dfk73
     PRIVATE -DHAVE_USB
