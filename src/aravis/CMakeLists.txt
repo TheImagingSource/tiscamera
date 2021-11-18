@@ -34,8 +34,6 @@ if (BUILD_ARAVIS)
 
   if (TCAM_INTERNAL_ARAVIS)
 
-    find_package(Aravis REQUIRED QUIET)
-
     set(ARAVIS_LIB "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/libaravis-0.8.a")
 
     find_package(LibXml2 REQUIRED QUIET)
@@ -62,6 +60,8 @@ if (BUILD_ARAVIS)
     target_link_libraries(tcam-backend-aravis PRIVATE "${PCAP_LIBRARIES}")
 
   else (TCAM_INTERNAL_ARAVIS)
+
+    find_package(Aravis REQUIRED QUIET)
 
     target_include_directories(tcam-backend-aravis PRIVATE SYSTEM ${aravis_INCLUDE_DIR})
 
