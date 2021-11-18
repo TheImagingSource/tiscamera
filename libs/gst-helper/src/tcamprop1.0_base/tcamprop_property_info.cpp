@@ -18,7 +18,7 @@ static const constexpr tcamprop1::prop_static_info_find_result static_prop_list[
     to_( lst::GainAuto ),
     to_( lst::GainAutoLowerLimit ),
     to_( lst::GainAutoUpperLimit ),
-    to_( lst::Exposure ),
+    to_( lst::ExposureTime ),
     to_( lst::ExposureAuto ),
     to_( lst::ExposureAutoReference ),
     to_( lst::ExposureAutoLowerLimit ),

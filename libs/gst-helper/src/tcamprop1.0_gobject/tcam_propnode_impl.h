@@ -5,6 +5,8 @@
 #include <tcamprop1.0_base/tcamprop_errors.h>
 #include "guard_state.h"
 
+#include <mutex>
+
 namespace tcamprop1_gobj::impl
 {
     TcamPropertyBase* create_float( tcamprop1::property_interface_float* prop_itf_ptr, const guard_state_handle& handle );
@@ -43,8 +45,11 @@ namespace tcamprop1_gobj::impl
 
         tcamprop1::prop_static_info_str             static_info_;
         tcamprop1_gobj::impl::guard_state_handle    guard_state_handle_;
-        std::string                                 unit_cache_;
-        std::optional<tcamprop1::prop_range_enumeration>           enum_range_cache_;
+
+        std::string                                 unit_cache_;    // this cache is always initialized in the init method and will never change
+
+        std::mutex                                          enum_range_cache_mutex_;   // Because range requests can fail, we have to have a mutex to guard against this here
+        std::optional<tcamprop1::prop_range_enumeration>    enum_range_cache_;
     private:
         tcamprop1::property_interface*  base_itf_ptr_;
     public:
@@ -154,7 +159,7 @@ namespace tcamprop1_gobj::impl
     template<class TDataStruct>
     GType   generate_and_fetch_type()
     {
-        static gsize g_define_type_id__volatile = 0;
+        static volatile gsize g_define_type_id__volatile = 0;
         if( g_once_init_enter( &g_define_type_id__volatile ) )
         {
             GType g_define_type_id =
@@ -172,3 +177,4 @@ namespace tcamprop1_gobj::impl
         return g_define_type_id__volatile;
     }
 }
+

@@ -10,6 +10,7 @@ add_library( tcamprop1_base STATIC
 
 	"tcamprop_errors.cpp"
 	"tcamprop_property_info.cpp"
+	"tcamprop_property_info_list.cpp"
 )
 
 target_compile_features( tcamprop1_base PUBLIC cxx_std_17 )

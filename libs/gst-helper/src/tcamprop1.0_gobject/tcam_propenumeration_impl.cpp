@@ -19,6 +19,9 @@ struct TcamPropHelperEnumeration
     void init( tcamprop1::property_interface_enumeration* itf, const guard_state_handle& handle ) noexcept
     {
         data_.init( itf, handle );
+        if( auto range_opt = itf->get_property_range(); !range_opt.has_error() ) {
+            data_.enum_range_cache_ = range_opt.value();
+        }
     }
 
     static auto fetch_PropImpl( gpointer itf ) -> auto& { return cast_to_instance( itf )->data_; }
@@ -37,15 +40,17 @@ struct TcamPropHelperEnumeration
 
         auto entry = op_result.value();
 
-        if( !self_ref.parent.enum_range_cache_ ) {
-            if( auto range_opt = self_ref->get_property_range(); range_opt.has_error() ) {
-                fill_GError( range_opt.error(), err );
-                return nullptr;
-            } else {
-                self_ref.parent.enum_range_cache_ = range_opt.value();
+        {
+            std::lock_guard lck{ self_ref.parent.enum_range_cache_mutex_ };
+            if( !self_ref.parent.enum_range_cache_ ) {
+                if( auto range_opt = self_ref->get_property_range(); range_opt.has_error() ) {
+                    fill_GError( range_opt.error(), err );
+                    return nullptr;
+                } else {
+                    self_ref.parent.enum_range_cache_ = range_opt.value();
+                }
             }
         }
-
 
         int index = self_ref.parent.enum_range_cache_.value().get_index_of( entry );
         if( index < 0 ) {
