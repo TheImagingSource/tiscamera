@@ -77,10 +77,24 @@ gboolean Indexer::bus_function(GstBus* /*bus*/, GstMessage* message, gpointer us
         {
             gst_message_parse_device_added(message, &device);
             auto dev = to_device(device);
-            emit self->new_device(dev);
-            self->m_mutex.lock();
-            self->m_device_list.push_back(dev);
-            self->m_mutex.unlock();
+
+            if (std::none_of(self->m_device_list.begin(), self->m_device_list.end(),
+                             [&dev](const Device& vec_dev)
+                             {
+                                 if (vec_dev == dev)
+                                 {
+                                     return false;
+                                 }
+                                 return true;
+                             }))
+            {
+                emit self->new_device(dev);
+                self->m_mutex.lock();
+
+                self->m_device_list.push_back(dev);
+
+                self->m_mutex.unlock();
+            }
             gst_object_unref(device);
             break;
         }
@@ -128,6 +142,26 @@ Indexer::Indexer()
     gst_object_unref(bus);
 
     gst_device_monitor_add_filter(p_monitor, "Video/Source/tcam", NULL);
+
+    GList* devices = gst_device_monitor_get_devices(p_monitor);
+
+    m_device_list.reserve(g_list_length(devices));
+    for (GList* entry = devices; entry != nullptr; entry = entry->next)
+    {
+        GstDevice* dev = (GstDevice*)entry->data;
+
+        auto device = to_device(dev);
+
+        m_device_list.push_back(device);
+    }
+
+    g_list_free(devices);
+
+    for (const auto& dev : m_device_list)
+    {
+        emit new_device(dev);
+    }
+
     gst_device_monitor_start(p_monitor);
 }
 
