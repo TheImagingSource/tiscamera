@@ -25,14 +25,14 @@ public:
                               tcam::afu420::AFU420Property id,
                               std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string_view get_name() const final
+    virtual tcamprop1::prop_static_info get_static_info() const final
     {
-        return m_name;
-    };
-
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
     virtual std::string_view get_unit() const final;
     virtual tcamprop1::IntRepresentation_t get_representation() const final;
 
@@ -90,14 +90,15 @@ public:
                              tcam::afu420::AFU420Property id,
                              std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string_view get_name() const final
+    virtual tcamprop1::prop_static_info get_static_info() const final
     {
-        return m_name;
-    };
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
     virtual std::string_view get_unit() const final;
     virtual tcamprop1::FloatRepresentation_t get_representation() const final;
 
@@ -154,14 +155,14 @@ public:
                            tcam::afu420::AFU420Property id,
                            std::shared_ptr<tcam::property::AFU420DeviceBackend> backend);
 
-    virtual std::string_view get_name() const final
+    virtual tcamprop1::prop_static_info get_static_info() const final
     {
-        return m_name;
-    };
-
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
     virtual PropertyFlags get_flags() const final
     {
@@ -202,14 +203,15 @@ public:
                            std::map<int, std::string> m_entries,
                            std::shared_ptr<AFU420DeviceBackend> backend);
 
-    virtual std::string_view get_name() const final
+    virtual tcamprop1::prop_static_info get_static_info() const final
     {
-        return m_name;
-    };
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
 
     virtual PropertyFlags get_flags() const final
     {

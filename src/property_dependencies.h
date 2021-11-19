@@ -26,15 +26,13 @@
 
 namespace tcam::property
 {
-
-
 class PropertyLock
 {
 public:
 
     virtual ~PropertyLock() = default;
 
-    virtual std::string_view get_name() const = 0;
+    //virtual std::string_view get_name() const = 0;
 
     virtual PropertyFlags get_flags() const = 0;
 

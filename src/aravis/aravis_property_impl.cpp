@@ -162,45 +162,6 @@ AravisPropertyIntegerImpl::AravisPropertyIntegerImpl(const std::string& name,
 }
 
 
-std::string_view AravisPropertyIntegerImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view AravisPropertyIntegerImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view AravisPropertyIntegerImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 std::string_view AravisPropertyIntegerImpl::get_unit() const
 {
     if (!p_static_info)
@@ -327,46 +288,6 @@ AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
     }
 }
 
-
-std::string_view AravisPropertyDoubleImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view AravisPropertyDoubleImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view AravisPropertyDoubleImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 std::string_view AravisPropertyDoubleImpl::get_unit() const
 {
     if (!p_static_info)
@@ -488,46 +409,6 @@ AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
     }
 }
 
-
-std::string_view AravisPropertyBoolImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view AravisPropertyBoolImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view AravisPropertyBoolImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 PropertyFlags AravisPropertyBoolImpl::get_flags() const
 {
     return arv_flags_to_tcam(p_node);
@@ -600,46 +481,6 @@ AravisPropertyCommandImpl::AravisPropertyCommandImpl(const std::string& name,
         p_static_info = nullptr;
     }
 }
-
-
-std::string_view AravisPropertyCommandImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view AravisPropertyCommandImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view AravisPropertyCommandImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 PropertyFlags AravisPropertyCommandImpl::get_flags() const
 {
@@ -718,46 +559,6 @@ AravisPropertyEnumImpl::AravisPropertyEnumImpl(const std::string& name,
         p_static_info = nullptr;
     }
 }
-
-
-std::string_view AravisPropertyEnumImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view AravisPropertyEnumImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view AravisPropertyEnumImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 PropertyFlags AravisPropertyEnumImpl::get_flags() const
 {

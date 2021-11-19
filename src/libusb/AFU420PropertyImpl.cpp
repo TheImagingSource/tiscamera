@@ -40,37 +40,6 @@ AFU420PropertyIntegerImpl::AFU420PropertyIntegerImpl(
     }
 }
 
-
-std::string_view AFU420PropertyIntegerImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyIntegerImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyIntegerImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
-
 std::string_view AFU420PropertyIntegerImpl::get_unit() const
 {
     if (p_static_info)
@@ -160,37 +129,6 @@ AFU420PropertyDoubleImpl::AFU420PropertyDoubleImpl(
         p_static_info = nullptr;
     }
 }
-
-
-std::string_view AFU420PropertyDoubleImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyDoubleImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyDoubleImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
 
 std::string_view AFU420PropertyDoubleImpl::get_unit() const
 {
@@ -289,37 +227,6 @@ AFU420PropertyBoolImpl::AFU420PropertyBoolImpl(
     }
 }
 
-
-std::string_view AFU420PropertyBoolImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyBoolImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyBoolImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
-
 outcome::result<bool> AFU420PropertyBoolImpl::get_value() const
 {
     // if (m_ctrl.is_write_only)
@@ -395,37 +302,6 @@ AFU420PropertyEnumImpl::AFU420PropertyEnumImpl(const std::string& name,
         p_static_info = nullptr;
     }
 }
-
-
-std::string_view AFU420PropertyEnumImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyEnumImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU420PropertyEnumImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
 
 outcome::result<void> AFU420PropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {

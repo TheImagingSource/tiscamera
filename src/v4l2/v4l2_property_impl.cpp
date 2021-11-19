@@ -119,46 +119,6 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
     }
 }
 
-
-std::string_view V4L2PropertyIntegerImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view V4L2PropertyIntegerImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view V4L2PropertyIntegerImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 std::string_view V4L2PropertyIntegerImpl::get_unit() const
 {
     if (!p_static_info)
@@ -297,46 +257,6 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
 
 }
 
-
-std::string_view V4L2PropertyDoubleImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view V4L2PropertyDoubleImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view V4L2PropertyDoubleImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 std::string_view V4L2PropertyDoubleImpl::get_unit() const
 {
     if (!p_static_info)
@@ -460,46 +380,6 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
     }
 }
 
-
-std::string_view V4L2PropertyBoolImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view V4L2PropertyBoolImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view V4L2PropertyBoolImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -600,46 +480,6 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
     }
 }
 
-
-std::string_view V4L2PropertyCommandImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view V4L2PropertyCommandImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view V4L2PropertyCommandImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
-
 outcome::result<void> V4L2PropertyCommandImpl::execute()
 {
 
@@ -734,46 +574,6 @@ V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
         p_static_info = nullptr;
     }
 }
-
-
-std::string_view V4L2PropertyEnumImpl::get_display_name() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->display_name;
-    }
-}
-
-
-std::string_view V4L2PropertyEnumImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view V4L2PropertyEnumImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 outcome::result<void> V4L2PropertyEnumImpl::valid_value(int value)
 {

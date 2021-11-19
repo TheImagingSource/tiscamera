@@ -45,7 +45,8 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
 
     if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
     {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+        p_static_info =
+            static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
     }
     else if (!static_info.info_ptr)
     {
@@ -78,7 +79,8 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
 
     if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
     {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
+        p_static_info =
+            static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
     }
     else if (!static_info.info_ptr)
     {
@@ -92,45 +94,14 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     }
 }
 
-
-std::string_view SoftwarePropertyIntegerImpl::get_display_name() const
+tcamprop1::prop_static_info SoftwarePropertyIntegerImpl::get_static_info() const
 {
-    if (!p_static_info)
+    if (p_static_info)
     {
-        return std::string_view();
+        return *p_static_info;
     }
-    else
-    {
-        return p_static_info->display_name;
-    }
+    return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
 }
-
-
-std::string_view SoftwarePropertyIntegerImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view SoftwarePropertyIntegerImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 std::string_view SoftwarePropertyIntegerImpl::get_unit() const
 {
@@ -143,7 +114,6 @@ std::string_view SoftwarePropertyIntegerImpl::get_unit() const
         return p_static_info->unit;
     }
 }
-
 
 tcamprop1::IntRepresentation_t SoftwarePropertyIntegerImpl::get_representation() const
 {
@@ -158,7 +128,7 @@ tcamprop1::IntRepresentation_t SoftwarePropertyIntegerImpl::get_representation()
 PropertyFlags SoftwarePropertyIntegerImpl::get_flags() const
 {
     return m_flags;
-};
+}
 
 
 outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
@@ -211,7 +181,6 @@ outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
 
     return outcome::success();
 }
-
 
 SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     const software_prop_desc& desc,
@@ -336,45 +305,14 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     }
 }
 
-
-std::string_view SoftwarePropertyDoubleImpl::get_display_name() const
+tcamprop1::prop_static_info SoftwarePropertyDoubleImpl::get_static_info() const
 {
-    if (!p_static_info)
+    if (p_static_info)
     {
-        return std::string_view();
+        return *p_static_info;
     }
-    else
-    {
-        return p_static_info->display_name;
-    }
+    return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
 }
-
-
-std::string_view SoftwarePropertyDoubleImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view SoftwarePropertyDoubleImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 std::string_view SoftwarePropertyDoubleImpl::get_unit() const
 {
@@ -415,7 +353,7 @@ PropertyFlags SoftwarePropertyDoubleImpl::get_flags() const
         //return tcam::status::ResourceNotLockable;
     }
     return m_flags;
-};
+}
 
 
 outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
@@ -470,7 +408,8 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const software_prop_desc& des
 
     if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
     {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
+        p_static_info =
+            static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
     }
     else if (!static_info.info_ptr)
     {
@@ -484,57 +423,25 @@ SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const software_prop_desc& des
     }
 }
 
-
-std::string_view SoftwarePropertyBoolImpl::get_display_name() const
+tcamprop1::prop_static_info SoftwarePropertyBoolImpl::get_static_info() const
 {
-    if (!p_static_info)
+    if (p_static_info)
     {
-        return std::string_view();
+        return *p_static_info;
     }
-    else
-    {
-        return p_static_info->display_name;
-    }
+    return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
 }
-
-
-std::string_view SoftwarePropertyBoolImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view SoftwarePropertyBoolImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 PropertyFlags SoftwarePropertyBoolImpl::get_flags() const
 {
     return m_flags;
-};
-
+}
 
 outcome::result<bool> SoftwarePropertyBoolImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
     {
-        auto ret =  ptr->get_int(m_id);
+        auto ret = ptr->get_int(m_id);
 
         if (ret)
         {
@@ -571,7 +478,8 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 
     if (static_info.type == tcamprop1::prop_type::Command && static_info.info_ptr)
     {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
+        p_static_info =
+            static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
     }
     else if (!static_info.info_ptr)
     {
@@ -586,49 +494,19 @@ SoftwarePropertyCommandImpl::SoftwarePropertyCommandImpl(
 }
 
 
-std::string_view SoftwarePropertyCommandImpl::get_display_name() const
+tcamprop1::prop_static_info SoftwarePropertyCommandImpl::get_static_info() const
 {
-    if (!p_static_info)
+    if (p_static_info)
     {
-        return std::string_view();
+        return *p_static_info;
     }
-    else
-    {
-        return p_static_info->display_name;
-    }
+    return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
 }
-
-
-std::string_view SoftwarePropertyCommandImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view SoftwarePropertyCommandImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 PropertyFlags SoftwarePropertyCommandImpl::get_flags() const
 {
     return m_flags;
-};
+}
 
 
 outcome::result<void> SoftwarePropertyCommandImpl::execute()
@@ -653,7 +531,8 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const software_prop_desc& des
 
     if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
     {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
+        p_static_info =
+            static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
     }
     else if (!static_info.info_ptr)
     {
@@ -667,50 +546,19 @@ SoftwarePropertyEnumImpl::SoftwarePropertyEnumImpl(const software_prop_desc& des
     }
 }
 
-
-std::string_view SoftwarePropertyEnumImpl::get_display_name() const
+tcamprop1::prop_static_info SoftwarePropertyEnumImpl::get_static_info() const
 {
-    if (!p_static_info)
+    if (p_static_info)
     {
-        return std::string_view();
+        return *p_static_info;
     }
-    else
-    {
-        return p_static_info->display_name;
-    }
+    return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
 }
-
-
-std::string_view SoftwarePropertyEnumImpl::get_description() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->description;
-    }
-}
-
-
-std::string_view SoftwarePropertyEnumImpl::get_category() const
-{
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
-    {
-        return p_static_info->iccategory;
-    }
-}
-
 
 PropertyFlags SoftwarePropertyEnumImpl::get_flags() const
 {
     return m_flags;
-};
+}
 
 
 outcome::result<void> SoftwarePropertyEnumImpl::set_value_str(const std::string_view& new_value)

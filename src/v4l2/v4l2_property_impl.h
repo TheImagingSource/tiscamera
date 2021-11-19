@@ -48,14 +48,16 @@ public:
                             std::shared_ptr<V4L2PropertyBackend> backend,
                             const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string_view get_name() const final
-    {
-        return m_name;
-    };
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+    virtual tcamprop1::prop_static_info get_static_info() const final
+    {
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
+
     virtual std::string_view get_unit() const final;
     virtual tcamprop1::IntRepresentation_t get_representation() const final;
 
@@ -128,14 +130,15 @@ public:
                            std::shared_ptr<V4L2PropertyBackend> backend,
                            const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string_view get_name() const final
-    {
-        return m_name;
-    };
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+    virtual tcamprop1::prop_static_info get_static_info() const final
+    {
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
     virtual std::string_view get_unit() const final;
     virtual tcamprop1::FloatRepresentation_t get_representation() const final;
 
@@ -208,14 +211,15 @@ public:
                          std::shared_ptr<V4L2PropertyBackend> backend,
                          const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string_view get_name() const final
-    {
-        return m_name;
-    };
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+    virtual tcamprop1::prop_static_info get_static_info() const final
+    {
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
     virtual PropertyFlags get_flags() const final
     {
@@ -266,14 +270,14 @@ public:
                             std::shared_ptr<V4L2PropertyBackend> backend,
                             const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string_view get_name() const final
+    virtual tcamprop1::prop_static_info get_static_info() const final
     {
-        return m_name;
-    };
-
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
     virtual PropertyFlags get_flags() const final
     {
@@ -315,14 +319,15 @@ public:
                          std::shared_ptr<V4L2PropertyBackend> backend,
                          const tcam::v4l2::v4l2_genicam_mapping* mapping = nullptr);
 
-    virtual std::string_view get_name() const final
-    {
-        return m_name;
-    };
 
-    virtual std::string_view get_display_name() const final;
-    virtual std::string_view get_description() const final;
-    virtual std::string_view get_category() const final;
+    virtual tcamprop1::prop_static_info get_static_info() const final
+    {
+        if (p_static_info)
+        {
+            return *p_static_info;
+        }
+        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+    }
 
     virtual PropertyFlags get_flags() const final
     {

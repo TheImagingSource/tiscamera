@@ -61,37 +61,6 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
     }
 }
 
-
-std::string_view AFU050PropertyIntegerImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyIntegerImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyIntegerImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
-
 std::string_view AFU050PropertyIntegerImpl::get_unit() const
 {
     if (p_static_info)
@@ -203,37 +172,6 @@ AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     }
 }
 
-
-std::string_view AFU050PropertyDoubleImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyDoubleImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyDoubleImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
-
 std::string_view AFU050PropertyDoubleImpl::get_unit() const
 {
     if (p_static_info)
@@ -339,37 +277,6 @@ AFU050PropertyEnumImpl::AFU050PropertyEnumImpl(const std::string& name,
         SPDLOG_ERROR("Unable to lock propertybackend. Cannot retrieve value.");
     }
 }
-
-
-std::string_view AFU050PropertyEnumImpl::get_display_name() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->display_name;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyEnumImpl::get_description() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->description;
-    }
-    return std::string_view();
-}
-
-
-std::string_view AFU050PropertyEnumImpl::get_category() const
-{
-    if (p_static_info)
-    {
-        return p_static_info->iccategory;
-    }
-    return std::string_view();
-}
-
 
 outcome::result<void> AFU050PropertyEnumImpl::set_value_str(const std::string_view& new_value)
 {

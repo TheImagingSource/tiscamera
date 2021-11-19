@@ -36,15 +36,7 @@ template<class TBase> struct TcamPropertyBase : TBase
     }
     virtual auto get_property_info() const noexcept -> tcamprop1::prop_static_info final
     {
-        tcamprop1::prop_static_info ret;
-        ret.name = m_prop->get_name();
-        ret.iccategory = m_prop->get_category();
-        ret.display_name = m_prop->get_display_name();
-        ret.description = m_prop->get_description();
-
-        ret.visibility = tcamprop1::Visibility_t::Beginner;
-
-        return ret;
+        return m_prop->get_static_info();
     }
 
     virtual auto get_property_state(uint32_t /*flags = 0*/)

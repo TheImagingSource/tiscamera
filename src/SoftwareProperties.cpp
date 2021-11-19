@@ -630,6 +630,7 @@ tcam::property::PropertyFlags SoftwareProperties::get_flags(emulated::software_p
             {
                 return m_wb.m_dev_wb_ratio->get_flags();
             }
+            return PropertyFlags::None;
         }
         default:
         {
@@ -917,7 +918,7 @@ outcome::result<double> SoftwareProperties::get_device_wb(emulated::software_pro
 
     if (m_wb.type == wb_type::DevChannel)
     {
-        outcome::result<double> dev_val = [&]{
+        outcome::result<double> dev_val = [&]() -> outcome::result<double> {
             if (prop_id == emulated::software_prop::WB_RED)
             {
                 return m_wb.m_dev_wb_r->get_value();
@@ -931,8 +932,7 @@ outcome::result<double> SoftwareProperties::get_device_wb(emulated::software_pro
                 return m_wb.m_dev_wb_b->get_value();
             }
 
-            //return (std::error_code) tcam::status::NotSupported;
-
+            return tcam::status::NotSupported;
         }();
 
         if (dev_val)
