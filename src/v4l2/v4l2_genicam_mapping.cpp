@@ -28,28 +28,24 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x00980900,
         "BlackLevel",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Saturation
     {
         0x00980902,
         "",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Hue
     {
         0x00980903,
         "",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Gain
     {
         0x00980913,
         "",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Gamma
     {
@@ -101,14 +97,12 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x009a090a,
         "Focus",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     // Exposure Time (us)
     {
         0x199e201,
         "ExposureTime",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Auto Shutter
     {
@@ -121,13 +115,11 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x199e203,
         "ExposureAutoReference",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x199e204,
         "Gain",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // Gain Auto
     {
@@ -140,7 +132,6 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x199e207,
         "BalanceWhitePreset",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x199e208,
@@ -152,13 +143,11 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e209,
         "TriggerSoftware",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e210,
         "TriggerDelay",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
+        TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         0x0199e211,
@@ -176,49 +165,41 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e213,
         "StrobeExposure",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e214,
         "StrobeDuration",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e215,
         "StrobeDelay",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e216,
         "GPOut",
         TCAM_PROPERTY_TYPE_INTEGER,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e217,
         "GPIn",
         TCAM_PROPERTY_TYPE_INTEGER,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e218,
         "OffsetX",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e219,
         "OffsetY",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e220,
-        "OffsetAuto",
+        "OffsetAutoCenter",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e921,
@@ -242,97 +223,81 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e927,
         "OffsetX",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e928,
         "OffsetY",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e234,
         "TriggerPolarity",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e235,
         "TriggerOperation",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e236,
         "TriggerExposureMode",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e237,
         "TriggerBurstCount",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e238,
         "TriggerDebounceTime",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e239,
         "TriggerMaskTime",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e240,
         "TriggerNoiseSuppressionTime",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e241,
-        "AutoFunctionsROIControl",
+        "AutoFunctionsROIEnable",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e242,
         "AutoFunctionsROILeft",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e243,
         "AutoFunctionsROITop",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e244,
         "AutoFunctionsROIWidth",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e245,
         "AutoFunctionsROIHeight",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e246,
         "BalanceWhiteMode",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e247,
         "BalanceWhiteAutoPreset",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e248,
@@ -344,31 +309,26 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e249,
         "BalanceWhiteTemperaturePreset",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e250,
         "BalanceWhiteTemperature",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e251,
         "ReverseY",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e252,
         "ReverseX",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e253,
         "HighlightReduction",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e254,
@@ -380,54 +340,46 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
         0x0199e255,
         "ExposureAutoLowerLimit",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e256,
         "ExposureAutoUpperLimit",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e257,
         "OverrideScanningMode",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e258,
         "AutoFunctionsROIPreset",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e259,
         "GainAutoLowerLimit",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e260,
         "GainAutoUpperLimit",
         TCAM_PROPERTY_TYPE_DOUBLE,
-        tcam::v4l2::MappingType::None,
     },
     // TriggerGlobalResetRelease
     {
         0x0199e261,
         "SensorShutterMode",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
     {
         0x0199e262,
         "IMXLowLatencyMode",
         TCAM_PROPERTY_TYPE_UNKNOWN,
-        tcam::v4l2::MappingType::None,
     },
 };
 
-}
+} // namespace
 
 
 const struct tcam::v4l2::v4l2_genicam_mapping* tcam::v4l2::find_mapping(uint32_t v4l2_id)

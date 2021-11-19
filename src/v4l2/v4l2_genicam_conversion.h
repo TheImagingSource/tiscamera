@@ -27,25 +27,7 @@
 namespace tcam::v4l2
 {
 
-
-class ConverterIntToDouble
-{
-public:
-    virtual ~ConverterIntToDouble() = default;
-    virtual double to_double(int64_t) = 0;
-    virtual int64_t to_int(double) = 0;
-};
-
-
-class ConverterScale
-{
-public:
-    virtual ~ConverterScale() = default;
-    virtual double to_device(double) = 0;
-    virtual double from_device(double) = 0;
-};
-
-struct converter_scale
+    struct converter_scale
 {
     std::function<double(double) > to_device;
     std::function<double(double) > from_device;
@@ -56,12 +38,8 @@ enum class MappingType
 {
     None,
     IntToEnum,
-    IntToDouble,
     Scale,
 };
-
-
-std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id);
 
 converter_scale find_scale(uint32_t v4l2_id);
 

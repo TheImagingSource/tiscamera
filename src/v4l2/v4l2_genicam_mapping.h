@@ -20,7 +20,7 @@
 #include "../base_types.h"
 #include "v4l2_genicam_conversion.h"
 
-#include <string>
+#include <string_view>
 
 namespace tcam::v4l2
 {
@@ -28,11 +28,11 @@ namespace tcam::v4l2
 struct v4l2_genicam_mapping
 {
     uint32_t v4l2_id;
-    std::string gen_name; // empty if name can be kept
+    std::string_view gen_name; // empty if name can be kept
 
     // type that shall be used, TCAM_PROPERTY_TYPE_UNKNOWN if type can stay
-    tcam::TCAM_PROPERTY_TYPE gen_type;
-    MappingType conversion_type; // information concerning additional conversion steps
+    tcam::TCAM_PROPERTY_TYPE gen_type = TCAM_PROPERTY_TYPE_UNKNOWN;
+    MappingType conversion_type = tcam::v4l2::MappingType::None; // information concerning additional conversion steps
 };
 
 

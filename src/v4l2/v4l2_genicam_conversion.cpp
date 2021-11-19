@@ -19,24 +19,6 @@
 namespace
 {
 
-class ConverterGamma : public tcam::v4l2::ConverterIntToDouble
-{
-public:
-    virtual double to_double(int64_t value) final
-    {
-        return value / m_conversion_factor;
-    };
-
-    virtual int64_t to_int(double value) final
-    {
-        return value * m_conversion_factor;
-    };
-
-private:
-    double m_conversion_factor = 100;
-};
-
-
 double gamma_from_dev_to_std(double value)
 {
     return value / 100;
@@ -47,8 +29,6 @@ double gamma_from_std_to_dev(double value)
 {
     return value * 100;
 }
-
-
 
 // this function and it sibling exist for
 // for the dfk 72. It's color channels have a range from 0-63
@@ -103,21 +83,6 @@ double wb_256_channel_from_dev_to_std(double value)
 
 namespace tcam::v4l2
 {
-
-std::shared_ptr<ConverterIntToDouble> find_int_to_double(uint32_t v4l2_id)
-{
-    switch (v4l2_id)
-    {
-        case 0x00980910: // Gamma
-        {
-            return std::make_shared<ConverterGamma>();
-        }
-        default:
-        {
-            return nullptr;
-        }
-    }
-}
 
 converter_scale find_scale(uint32_t v4l2_id)
 // std::shared_ptr<ConverterScale> find_scale(uint32_t v4l2_id)

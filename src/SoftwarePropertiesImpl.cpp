@@ -50,12 +50,12 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        SPDLOG_ERROR("static information for {} does not exist!", m_name);
         p_static_info = nullptr;
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
+        SPDLOG_ERROR("static information for {} has the wrong type!", m_name);
         p_static_info = nullptr;
     }
 }

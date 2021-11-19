@@ -217,11 +217,7 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
         {
             m_name = mapping->gen_name;
         }
-        if (mapping->conversion_type == tcam::v4l2::MappingType::IntToDouble)
-        {
-            //m_converter = tcam::v4l2::find_int_to_double(m_v4l2_id);
-        }
-        else if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
+        if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
         {
             m_converter = tcam::v4l2::find_scale(queryctrl->id);
         }
