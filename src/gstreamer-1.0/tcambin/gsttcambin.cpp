@@ -888,11 +888,11 @@ static void gst_tcambin_set_property(GObject* object,
             self->data->conversion_info.user_selector =
                 (TcamBinConversionElement)g_value_get_enum(value);
 
-            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CONVERT)
+            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CUDA)
             {
-                if (self->data->conversion_info.have_tcamconvert)
+                if (self->data->conversion_info.have_tcamdutils_cuda)
                 {
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
                 }
                 else
                 {
@@ -918,24 +918,42 @@ static void gst_tcambin_set_property(GObject* object,
                     self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
                 }
             }
-            else if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CUDA)
+            else
+            {
+                if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_CONVERT)
+                {
+                    if (self->data->conversion_info.have_tcamconvert)
+                    {
+                        self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
+                    }
+                    else
+                    {
+                        GST_ERROR_OBJECT(
+                            self,
+                            "Unable to use tcamconvert. Element does not seem to exist. Falling "
+                            "back to auto");
+                        self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+                    }
+                }
+            }
+
+            if (self->data->conversion_info.user_selector == TCAM_BIN_CONVERSION_AUTO)
             {
                 if (self->data->conversion_info.have_tcamdutils_cuda)
                 {
                     self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CUDA;
+                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_CUDA;
+                }
+                else if (self->data->conversion_info.have_tcamdutils)
+                {
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_DUTILS;
+                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_DUTILS;
                 }
                 else
                 {
-                    GST_ERROR_OBJECT(
-                        self,
-                        "Unable to use tcamconvert. Element does not seem to exist. Falling "
-                        "back to auto");
-                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
+                    self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_CONVERT;
+                    self->data->conversion_info.user_selector = TCAM_BIN_CONVERSION_CONVERT;
                 }
-            }
-            else
-            {
-                self->data->conversion_info.selected_conversion = TCAM_BIN_CONVERSION_AUTO;
             }
 
             break;
