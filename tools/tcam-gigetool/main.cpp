@@ -57,6 +57,23 @@ tis::camera_list get_camera_list()
         (std::shared_ptr<tis::Camera> camera)
     {
         std::lock_guard<std::mutex> mutex_lock(cam_lock);
+
+        // filter cameras that are already known
+        // this may happen when an interface
+        // has multple addresses
+        if (std::any_of(cameras.begin(), cameras.end(),
+                        [&camera](const std::shared_ptr<tis::Camera> cam)
+                        {
+                            if (camera->getMAC() == cam->getMAC())
+                            {
+                                return true;
+                            }
+                            return false;
+                        }))
+        {
+            return;
+        }
+
         cameras.push_back(camera);
     };
 
