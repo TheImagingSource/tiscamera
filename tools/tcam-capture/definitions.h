@@ -35,7 +35,7 @@ enum class ConversionElement : int
 };
 
 
-static const char* conversion_element_to_string (const ConversionElement entry)
+inline const char* conversion_element_to_string (const ConversionElement entry)
 {
     switch(entry)
     {

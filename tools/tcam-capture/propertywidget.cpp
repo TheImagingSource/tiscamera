@@ -19,23 +19,35 @@
 #include <gst/gst.h>
 
 
-#define HANDLE_ERROR(err, action)                                       \
-    if(err)                                                             \
-    {                                                                   \
-        qWarning("Error while handling property: %s", err->message);    \
-        if (err->code == TCAM_ERROR_DEVICE_LOST)                        \
-        {                                                               \
-            qWarning("Device lost");                                    \
-            emit device_lost(err->message);                             \
-        }                                                               \
-        g_error_free(err);                                              \
-        action;                                                         \
+#define HANDLE_ERROR(err, action)                                    \
+    if (err)                                                         \
+    {                                                                \
+        qWarning("Error while handling property: %s", err->message); \
+        if (err->code == TCAM_ERROR_DEVICE_LOST)                     \
+        {                                                            \
+            qWarning("Device lost");                                 \
+            emit device_lost(err->message);                          \
+        }                                                            \
+        g_error_free(err);                                           \
+        action;                                                      \
     }
 
 
+static auto get_safe_display_name(TcamPropertyBase* prop) -> QString
+{
+    auto disp_name = tcam_property_base_get_display_name(prop);
+    if (disp_name && strcmp(disp_name, "") != 0)
+    {
+        return disp_name;
+    }
+    else
+    {
+        return tcam_property_base_get_name(prop);
+    }
+}
 
-EnumWidget::EnumWidget(TcamPropertyEnumeration* prop,
-                       QWidget* parent)
+
+EnumWidget::EnumWidget(TcamPropertyEnumeration* prop, QWidget* parent)
     : QWidget(parent), p_prop(prop)
 {
 
@@ -47,52 +59,37 @@ void EnumWidget::update()
     GError* err = nullptr;
     QString value = tcam_property_enumeration_get_value(p_prop, &err);
 
-    HANDLE_ERROR(err, return)
-
-    p_combobox->blockSignals(true);
-    p_combobox->setCurrentText(value);
-    p_combobox->blockSignals(false);
+    HANDLE_ERROR(err, return )
 
     bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 
-    set_locked(lock);
+    p_combobox->blockSignals(true);
+    p_combobox->setCurrentText(value);
+    p_combobox->setEnabled(!lock);
+    p_combobox->blockSignals(false);
 }
-
 
 QString EnumWidget::get_name() const
 {
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        return disp_name;
-    }
-    else
-    {
-        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    }
+    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
 }
-
 
 std::string EnumWidget::get_category() const
 {
     return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
 }
 
-
 void EnumWidget::set_locked(bool lock)
 {
     p_combobox->setEnabled(!lock);
 }
 
-
 void EnumWidget::drop_down_changed(const QString& /*entry*/)
 {
     emit value_changed(this);
 }
-
 
 void EnumWidget::set_in_backend()
 {
@@ -101,7 +98,7 @@ void EnumWidget::set_in_backend()
     GError* err = nullptr;
     tcam_property_enumeration_set_value(p_prop, s.c_str(), &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
 
 
@@ -112,14 +109,17 @@ void EnumWidget::setup_ui()
     setLayout(p_layout);
 
     GError* err = nullptr;
-
     QString value = tcam_property_enumeration_get_value(p_prop, &err);
 
-    tcam_property_enumeration_get_default(p_prop, &err);
+    HANDLE_ERROR(err, return );
 
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
 
+    HANDLE_ERROR(err, return );
 
     GSList* entries = tcam_property_enumeration_get_enum_entries(p_prop, &err);
+
+    HANDLE_ERROR(err, return );
 
     // if (show_property_flags() && m_flags.is_external())
     // {
@@ -138,14 +138,15 @@ void EnumWidget::setup_ui()
 
     p_combobox->setEditable(false);
 
-    for (auto e = entries; e != nullptr; e = e->next)
-    {
-        p_combobox->addItem((const char*)e->data);
-    }
+    for (auto e = entries; e != nullptr; e = e->next) { p_combobox->addItem((const char*)e->data); }
 
     g_slist_free_full(entries, g_free);
 
+    p_combobox->blockSignals(true);
     p_combobox->setCurrentText(value);
+    p_combobox->setDisabled(lock);
+    p_combobox->blockSignals(false);
+
     connect(p_combobox, &QComboBox::currentTextChanged, this, &EnumWidget::drop_down_changed);
 
     p_layout->addWidget(p_combobox);
@@ -162,52 +163,41 @@ void EnumWidget::setup_ui()
 }
 
 
-IntWidget::IntWidget(TcamPropertyInteger* prop,
-                     QWidget* parent)
-    : QWidget(parent), p_prop(prop)
+IntWidget::IntWidget(TcamPropertyInteger* prop, QWidget* parent) : QWidget(parent), p_prop(prop)
 {
     setup_ui();
 }
-
 
 void IntWidget::update()
 {
     GError* err = nullptr;
     gint64 value = tcam_property_integer_get_value(p_prop, &err);
 
-    HANDLE_ERROR(err, return);
+    HANDLE_ERROR(err, return );
+
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+    HANDLE_ERROR(err, return );
 
     if (p_slider)
     {
         p_slider->blockSignals(true);
         p_slider->setValue(value);
+        p_slider->setDisabled(lock);
         p_slider->blockSignals(false);
     }
-
-    p_box->blockSignals(true);
-    p_box->setValue(value);
-    p_box->blockSignals(false);
-
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return);
-
-    set_locked(lock);
+    if (p_box)
+    {
+        p_box->blockSignals(true);
+        p_box->setValue(value);
+        p_box->setDisabled(lock);
+        p_box->blockSignals(false);
+    }
 }
 
 
 QString IntWidget::get_name() const
 {
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        return disp_name;
-    }
-    else
-    {
-        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    }
+    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
 }
 
 
@@ -263,6 +253,8 @@ void IntWidget::setup_ui()
     tcam_property_integer_get_range(p_prop, &min, &max, &step, &err);
     gint64 value = tcam_property_integer_get_value(p_prop, &err);
 
+    bool is_locked = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), nullptr);
+
     TcamPropertyIntRepresentation representation = tcam_property_integer_get_representation(p_prop);
 
     if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
@@ -283,19 +275,30 @@ void IntWidget::setup_ui()
         p_slider->setRange(min, max);
         p_slider->setSingleStep(step);
         p_slider->setValue(value);
+        p_slider->setDisabled(is_locked);
 
         connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed);
+        p_layout->addWidget(p_slider);
     }
 
     p_box = new QSpinBox();
 
-    p_box->setRange(min, max);
-    p_box->setSingleStep(step);
+    if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
+    {
+        p_box->setRange(min, max);
+        p_box->setSingleStep(step);
+    }
+    if (auto unit_ptr = tcam_property_integer_get_unit(p_prop); unit_ptr)
+    {
+        QString unit = " ";
+        unit += unit_ptr;
+        p_box->setSuffix(unit);
+    }
+    p_box->setDisabled(is_locked);
     p_box->setValue(value);
 
     connect(p_box, QOverload<int>::of(&QSpinBox::valueChanged), this, &IntWidget::spinbox_changed);
 
-    p_layout->addWidget(p_slider);
     p_layout->addWidget(p_box);
 
     // the font tagging is used to make the
@@ -316,9 +319,8 @@ void IntWidget::write_value(int64_t new_value)
 
     tcam_property_integer_set_value(p_prop, new_value, &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
-
 
 void IntWidget::set_in_backend()
 {
@@ -326,15 +328,10 @@ void IntWidget::set_in_backend()
 
     tcam_property_integer_set_value(p_prop, p_box->value(), &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
 
-
-
-
-DoubleWidget::DoubleWidget(TcamPropertyFloat* prop,
-                           QWidget* parent)
-    : QWidget(parent), p_prop(prop)
+DoubleWidget::DoubleWidget(TcamPropertyFloat* prop, QWidget* parent) : QWidget(parent), p_prop(prop)
 {
     setup_ui();
 }
@@ -345,39 +342,32 @@ void DoubleWidget::update()
     GError* err = nullptr;
     gdouble value = tcam_property_float_get_value(p_prop, &err);
 
-    HANDLE_ERROR(err, return);
+    HANDLE_ERROR(err, return );
+
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+
+    HANDLE_ERROR(err, return );
 
     if (p_slider)
     {
         p_slider->blockSignals(true);
         p_slider->setValue(value);
+        p_slider->setDisabled(lock);
         p_slider->blockSignals(false);
     }
-
-    p_box->blockSignals(true);
-    p_box->setValue(value);
-    p_box->blockSignals(false);
-
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return);
-
-    set_locked(lock);
+    if (p_box)
+    {
+        p_box->blockSignals(true);
+        p_box->setValue(value);
+        p_box->setDisabled(lock);
+        p_box->blockSignals(false);
+    }
 }
 
 
 QString DoubleWidget::get_name() const
 {
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        return disp_name;
-    }
-    else
-    {
-        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    }
+    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
 }
 
 
@@ -408,7 +398,6 @@ void DoubleWidget::slider_changed(double new_value)
 
 void DoubleWidget::spinbox_changed(double new_value)
 {
-
     if (p_slider)
     {
         p_slider->blockSignals(true);
@@ -434,7 +423,15 @@ void DoubleWidget::setup_ui()
     GError* err = nullptr;
     tcam_property_float_get_range(p_prop, &min, &max, &step, &err);
 
+    HANDLE_ERROR(err, return );
+
     gdouble value = tcam_property_float_get_value(p_prop, &err);
+
+    HANDLE_ERROR(err, return );
+
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+
+    HANDLE_ERROR(err, return );
 
     if (m_representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
     {
@@ -454,19 +451,24 @@ void DoubleWidget::setup_ui()
         p_slider->setRange(min, max);
         p_slider->setSingleStep(step);
         p_slider->setValue(value);
+        p_slider->setDisabled(lock);
 
         connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed);
     }
 
-    QString unit = " ";
-    unit += tcam_property_float_get_unit(p_prop);
-
     p_box = new QDoubleSpinBox();
 
-    p_box->setSuffix(unit);
+    if (auto unit_ptr = tcam_property_float_get_unit(p_prop); unit_ptr)
+    {
+        QString unit = " ";
+        unit += unit_ptr;
+        p_box->setSuffix(unit);
+    }
+
     p_box->setRange(min, max);
     p_box->setSingleStep(step);
     p_box->setValue(value);
+    p_box->setDisabled(lock);
 
     connect(p_box,
             QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -497,7 +499,7 @@ void DoubleWidget::write_value(double new_value)
 
     tcam_property_float_set_value(p_prop, new_value, &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
 
 
@@ -507,13 +509,11 @@ void DoubleWidget::set_in_backend()
 
     tcam_property_float_set_value(p_prop, p_box->value(), &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
 
 
-BoolWidget::BoolWidget(TcamPropertyBoolean* prop,
-                       QWidget* parent)
-    : QWidget(parent), p_prop(prop)
+BoolWidget::BoolWidget(TcamPropertyBoolean* prop, QWidget* parent) : QWidget(parent), p_prop(prop)
 {
     setup_ui();
 }
@@ -524,41 +524,27 @@ void BoolWidget::update()
     GError* err = nullptr;
     bool value = tcam_property_boolean_get_value(p_prop, &err);
 
-    HANDLE_ERROR(err, return);
-
-    p_checkbox->blockSignals(true);
-    p_checkbox->toggled(value);
-    p_checkbox->blockSignals(false);
+    HANDLE_ERROR(err, return );
 
     bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
 
-    HANDLE_ERROR(err, return);
+    HANDLE_ERROR(err, return );
 
-    set_locked(lock);
+    p_checkbox->blockSignals(true);
+    p_checkbox->toggled(value);
+    p_checkbox->setEnabled(!lock);
+    p_checkbox->blockSignals(false);
 }
-
-
 
 QString BoolWidget::get_name() const
 {
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        return disp_name;
-    }
-    else
-    {
-        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    }
+    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
 }
-
 
 std::string BoolWidget::get_category() const
 {
     return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
 }
-
 
 void BoolWidget::set_locked(bool lock)
 {
@@ -576,16 +562,20 @@ void BoolWidget::setup_ui()
 
     setLayout(p_layout);
 
-    p_checkbox = new QCheckBox();
-
     GError* err = nullptr;
-
     bool value = tcam_property_boolean_get_value(p_prop, &err);
 
-    if (value)
-    {
-        p_checkbox->toggle();
-    }
+    HANDLE_ERROR(err, return );
+
+    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+
+    HANDLE_ERROR(err, return );
+
+    p_checkbox = new QCheckBox();
+
+    p_checkbox->toggled(value);
+    p_checkbox->setEnabled(!lock);
+
     connect(p_checkbox, &QCheckBox::clicked, this, &BoolWidget::checkbox_changed);
 
     p_layout->addWidget(p_checkbox);
@@ -607,12 +597,11 @@ void BoolWidget::set_in_backend()
     GError* err = nullptr;
     tcam_property_boolean_set_value(p_prop, p_checkbox->isChecked(), &err);
 
-    HANDLE_ERROR(err, return)
+    HANDLE_ERROR(err, return )
 }
 
 
-ButtonWidget::ButtonWidget(TcamPropertyCommand* prop,
-                           QWidget* parent)
+ButtonWidget::ButtonWidget(TcamPropertyCommand* prop, QWidget* parent)
     : QWidget(parent), p_prop(prop)
 {
     setup_ui();
@@ -623,7 +612,7 @@ void ButtonWidget::update()
     GError* err = nullptr;
     bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
 
-    HANDLE_ERROR(err, return);
+    HANDLE_ERROR(err, return );
 
     set_locked(lock);
 }
@@ -631,16 +620,7 @@ void ButtonWidget::update()
 
 QString ButtonWidget::get_name() const
 {
-    auto disp_name = tcam_property_base_get_display_name(TCAM_PROPERTY_BASE(p_prop));
-
-    if (disp_name && strcmp(disp_name, "") != 0)
-    {
-        return disp_name;
-    }
-    else
-    {
-        return tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    }
+    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
 }
 
 
@@ -667,8 +647,8 @@ void ButtonWidget::set_in_backend()
 
     tcam_property_command_set_command(p_prop, &err);
 
-    HANDLE_ERROR(err, return)
-};
+    HANDLE_ERROR(err, return )
+}
 
 
 void ButtonWidget::setup_ui()
