@@ -48,7 +48,8 @@ if (BUILD_ARAVIS)
 
       if (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
 
-        message(FATAL_ERROR "aravis requires meson => 0.53.0")
+        message(FATAL_ERROR "aravis requires meson => 0.53.0. Set -DTCAM_DOWNLOAD_MESON=ON to have tiscamera download a more recent version.")
+
 
       endif (TCAM_MESON_VERSION VERSION_LESS 0.53.0)
 
@@ -95,6 +96,22 @@ if (BUILD_ARAVIS)
 
     set(ARAVIS_GIT_COMMIT_HASH "${ARAVIS_GIT_COMMIT_HASH_INTERNAL}" PARENT_SCOPE)
     set(ARAVIS_VERSION "0.8" PARENT_SCOPE)
+
+
+    # cmake integration of generated libraries
+    # building with ninja might cause problems otherwise
+    set(ARAVIS_LIB "${TCAM_BINARY_DIR}/external/aravis-prefix/src/aravis-build/src/libaravis-0.8.a")
+
+    add_custom_command(OUTPUT "${ARAVIS_LIB}"
+      DEPENDS aravis)
+
+    add_custom_target(arv-lib DEPENDS "${ARAVIS_LIB}")
+
+    add_library(aravis-library STATIC IMPORTED GLOBAL)
+    add_dependencies(aravis-library arv-lib)
+    set_target_properties(aravis-library PROPERTIES
+      IMPORTED_LOCATION "${ARAVIS_LIB}"
+      )
 
   else (TCAM_INTERNAL_ARAVIS)
 
