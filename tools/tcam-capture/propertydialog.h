@@ -66,11 +66,10 @@ signals:
     void device_lost(const QString& info);
 
 private:
-    void initialize_dialog();
+    void initialize_dialog(TcamCollection& collection);
 
     Ui::PropertyDialog* ui;
 
-    TcamCollection m_collection;
     QThread* p_work_thread;
     PropertyWorker* p_worker;
 

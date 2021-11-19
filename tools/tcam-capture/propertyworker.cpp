@@ -16,8 +16,7 @@
 
 #include "propertyworker.h"
 
-PropertyWorker::PropertyWorker(TcamCollection& collection, const std::vector<Property*>& props)
-    : m_properties(props), m_collection(collection)
+PropertyWorker::PropertyWorker()
 {
 
     p_timer = new QTimer(this);

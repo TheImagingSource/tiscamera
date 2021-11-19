@@ -56,7 +56,7 @@ void PropertyTree::setup_ui()
 }
 
 PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)
-    : QDialog(parent), ui(new Ui::PropertyDialog), m_collection(collection)
+    : QDialog(parent), ui(new Ui::PropertyDialog)
 {
     ui->setupUi(this);
     Qt::WindowFlags flags = this->windowFlags();
@@ -65,11 +65,11 @@ PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)
 
     p_work_thread = new QThread(this);
     p_work_thread->start();
-    p_worker = new PropertyWorker(m_collection, {});
+    p_worker = new PropertyWorker();
 
     p_worker->moveToThread(p_work_thread);
 
-    initialize_dialog();
+    initialize_dialog(collection);
 
     std::vector<Property*> props;
     for (const auto& p : m_properties) { props.push_back(p.second); }
@@ -97,17 +97,17 @@ void PropertyDialog::notify_device_lost(const QString& info)
 }
 
 
-void PropertyDialog::initialize_dialog()
+void PropertyDialog::initialize_dialog(TcamCollection& collection)
 {
     this->ui->tabWidget->clear();
 
-    auto names = m_collection.get_names();
+    auto names = collection.get_names();
 
     std::vector<std::string> known_categories;
 
     for (const std::string& name : names)
     {
-        TcamPropertyBase* prop = m_collection.get_property(name);
+        TcamPropertyBase* prop = collection.get_property(name);
 
         if (!prop)
         {

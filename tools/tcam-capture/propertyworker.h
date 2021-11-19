@@ -18,7 +18,6 @@
 #define PROPERTYWORKER_H
 
 #include "propertywidget.h"
-#include "tcamcollection.h"
 
 #include <QThread>
 #include <QTimer>
@@ -31,8 +30,7 @@ class PropertyWorker : public QObject
 {
     Q_OBJECT
 public:
-    PropertyWorker() = default;
-    PropertyWorker(TcamCollection& collection, const std::vector<Property*>&);
+    PropertyWorker();
 
     ~PropertyWorker();
 
@@ -55,7 +53,6 @@ private:
 
     QTimer* p_timer;
 
-    TcamCollection m_collection;
     bool m_run = true;
 };
 
