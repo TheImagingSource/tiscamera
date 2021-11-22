@@ -41,7 +41,6 @@ DeviceDialog::~DeviceDialog()
 
 void DeviceDialog::fill_list()
 {
-
     auto selection = this->ui->listWidget->currentItem();
     Device selected_dev;
     bool have_device = false;
@@ -50,8 +49,6 @@ void DeviceDialog::fill_list()
         have_device = true;
         selected_dev = ((const DeviceWidget*)selection)->get_device();
     }
-
-    QMutexLocker lock(&m_mutex);
 
     this->ui->listWidget->blockSignals(true);
     this->ui->listWidget->clear();
@@ -115,19 +112,13 @@ void DeviceDialog::new_device(const Device& new_device)
 
 void DeviceDialog::lost_device(const Device& lost_device)
 {
-    QMutexLocker lock(&m_mutex);
     for (int i = 0; i < this->ui->listWidget->count(); ++i)
     {
-        if (*static_cast<DeviceWidget*>(this->ui->listWidget->item(i)) == lost_device)
+        auto itemf = static_cast<DeviceWidget*>(this->ui->listWidget->item(i));
+        if (*itemf == lost_device)
         {
             QListWidgetItem* item = this->ui->listWidget->takeItem(i);
-            if (m_device_is_selected)
-            {
-                if (*static_cast<DeviceWidget*>(this->ui->listWidget->item(i)) == m_selected_device)
-                {
-                    // TODO
-                }
-            }
+
             delete item;
             break;
         }
@@ -140,7 +131,6 @@ void DeviceDialog::update_device_listing(const std::vector<Device>& /*dev_list*/
 void DeviceDialog::on_listWidget_currentItemChanged(QListWidgetItem* current,
                                                     QListWidgetItem* /*previous*/)
 {
-    QMutexLocker lock(&m_mutex);
     if (current)
     {
         m_selected_device = ((DeviceWidget*)current)->get_device();
@@ -150,7 +140,6 @@ void DeviceDialog::on_listWidget_currentItemChanged(QListWidgetItem* current,
 
 void DeviceDialog::on_listWidget_itemDoubleClicked(QListWidgetItem* item)
 {
-    QMutexLocker lock(&m_mutex);
     if (item)
     {
         m_selected_device = ((DeviceWidget*)item)->get_device();

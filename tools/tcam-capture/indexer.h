@@ -41,18 +41,17 @@ signals:
     void new_list(const std::vector<Device>&);
 
 private:
-    void update();
     static gboolean bus_function(GstBus* bus, GstMessage* message, gpointer user_data);
 
 private:
+    void add_device(GstDevice* new_device);
+    void remove_device(GstDevice* device);
+
     std::vector<Device> m_device_list;
 
     QMutex m_mutex;
 
-    GstElement* p_source;
-    QTimer* p_timer;
-
-    GstDeviceMonitor* p_monitor;
+    GstDeviceMonitor* p_monitor = nullptr;
 };
 
 #endif // INDEXER_H

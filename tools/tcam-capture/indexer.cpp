@@ -16,7 +16,43 @@
 
 #include "indexer.h"
 
-Device to_device(GstDevice* device)
+#include <mutex>
+#include <QThread>
+#include <QEvent>
+#include <QCoreApplication>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+template <typename F>
+static void postToObject(QObject* obj,F && fun) {
+   QMetaObject::invokeMethod( obj, std::forward<F>(fun), Qt::QueuedConnection );
+}
+
+#else
+namespace
+{
+template<typename F> struct FEvent : public QEvent
+{
+    using Fun = typename std::decay<F>::type;
+    Fun fun_;
+    FEvent(Fun&& fun) : QEvent(QEvent::None), fun_(std::move(fun)) {}
+    FEvent(const Fun& fun) : QEvent(QEvent::None), fun_(fun) {}
+    ~FEvent()
+    {
+        fun_();
+    }
+};
+} // namespace
+
+template<typename F> static void postToObject(QObject* obj,F&& fun)
+{
+    if (qobject_cast<QThread*>(obj))
+        qWarning( "posting a call to a thread object - consider using postToThread" );
+    QCoreApplication::postEvent(obj, new ::FEvent<F>(std::forward<F>(fun)));
+}
+#endif
+
+
+static Device to_device(GstDevice* device)
 {
     GstStructure* struc = gst_device_get_properties(device);
     gchar* display_name = gst_device_get_display_name(device);
@@ -24,7 +60,6 @@ Device to_device(GstDevice* device)
     if (!struc)
     {
         qWarning("No properties to handle.\n");
-        gst_object_unref(device);
         return Device();
     }
 
@@ -68,7 +103,7 @@ Device to_device(GstDevice* device)
 
 gboolean Indexer::bus_function(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
 {
-    GstDevice* device;
+    GstDevice* device = nullptr;
     Indexer* self = static_cast<Indexer*>(user_data);
 
     switch (GST_MESSAGE_TYPE(message))
@@ -76,49 +111,18 @@ gboolean Indexer::bus_function(GstBus* /*bus*/, GstMessage* message, gpointer us
         case GST_MESSAGE_DEVICE_ADDED:
         {
             gst_message_parse_device_added(message, &device);
-            auto dev = to_device(device);
 
-            if (std::none_of(self->m_device_list.begin(), self->m_device_list.end(),
-                             [&dev](const Device& vec_dev)
-                             {
-                                 if (vec_dev == dev)
-                                 {
-                                     return false;
-                                 }
-                                 return true;
-                             }))
-            {
-                emit self->new_device(dev);
-                self->m_mutex.lock();
+            self->add_device(device);
 
-                self->m_device_list.push_back(dev);
-
-                self->m_mutex.unlock();
-            }
             gst_object_unref(device);
             break;
         }
         case GST_MESSAGE_DEVICE_REMOVED:
         {
             gst_message_parse_device_removed(message, &device);
-            Device dev = to_device(device);
 
-            self->m_mutex.lock();
+            self->remove_device(device);
 
-            self->m_device_list.erase(std::remove_if(self->m_device_list.begin(),
-                                                    self->m_device_list.end(),
-                                                    [&dev](const Device& d) {
-                                                        if (dev == d)
-                                                        {
-                                                            return true;
-                                                        }
-                                                        return false;
-                                                    }),
-                                     self->m_device_list.end());
-
-            self->m_mutex.unlock();
-            qInfo("Device lost: %s", dev.serial_long().c_str());
-            emit self->device_lost(dev);
             gst_object_unref(device);
             break;
         }
@@ -134,7 +138,6 @@ gboolean Indexer::bus_function(GstBus* /*bus*/, GstMessage* message, gpointer us
 
 Indexer::Indexer()
 {
-
     p_monitor = gst_device_monitor_new();
 
     GstBus* bus = gst_device_monitor_get_bus(p_monitor);
@@ -142,27 +145,16 @@ Indexer::Indexer()
     gst_object_unref(bus);
 
     gst_device_monitor_add_filter(p_monitor, "Video/Source/tcam", NULL);
+    gst_device_monitor_start(p_monitor);
 
     GList* devices = gst_device_monitor_get_devices(p_monitor);
-
-    m_device_list.reserve(g_list_length(devices));
     for (GList* entry = devices; entry != nullptr; entry = entry->next)
     {
         GstDevice* dev = (GstDevice*)entry->data;
 
-        auto device = to_device(dev);
-
-        m_device_list.push_back(device);
+        add_device(dev);
     }
-
-    g_list_free(devices);
-
-    for (const auto& dev : m_device_list)
-    {
-        emit new_device(dev);
-    }
-
-    gst_device_monitor_start(p_monitor);
+    g_list_free_full(devices, gst_object_unref);
 }
 
 Indexer::~Indexer()
@@ -178,5 +170,43 @@ std::vector<Device> Indexer::get_device_list()
     return m_device_list;
 }
 
-void Indexer::update()
-{}
+void Indexer::add_device(GstDevice* new_device)
+{
+    auto dev = to_device(new_device);
+
+    bool is_new_device = false;
+    {
+        std::lock_guard lck { m_mutex };
+        is_new_device = std::none_of(m_device_list.begin(),
+                                     m_device_list.end(),
+                                     [&dev](const Device& vec_dev) { return vec_dev == dev; });
+        if (is_new_device)
+        {
+            m_device_list.push_back(dev);
+        }
+    }
+    if (is_new_device) // moved out of scope of lock
+    {
+        qInfo("New device: %s", dev.serial_long().c_str());
+
+        postToObject( this, [this,dev]{ emit this->new_device( dev ); } );
+    }
+}
+
+void Indexer::remove_device(GstDevice* device)
+{
+    Device dev = to_device(device);
+
+    m_mutex.lock();
+
+    m_device_list.erase(std::remove_if(m_device_list.begin(),
+                                       m_device_list.end(),
+                                       [&dev](const Device& d) { return dev == d; }),
+                        m_device_list.end());
+
+    m_mutex.unlock();
+
+    qInfo("Device lost: %s", dev.serial_long().c_str());
+
+    postToObject( this, [this,dev]{ emit this->device_lost( dev ); } );
+}
