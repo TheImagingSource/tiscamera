@@ -186,7 +186,7 @@ gst_helper::gst_ptr<GstCaps> tcambind::convert_videoformatsdescription_to_caps(
 
                 std::vector<double> fps = desc.get_frame_rates(r);
 
-                std::vector<double> highest_fps = desc.get_framerates({ min_width, min_height });
+                std::vector<double> highest_fps = desc.get_framerates({ max_width, max_height });
 
                 if (fps.empty())
                 {
