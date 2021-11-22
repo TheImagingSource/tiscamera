@@ -70,14 +70,10 @@ const tcam::property::dependency_entry* tcam::property::find_dependency(const st
 {
     auto iter = std::find_if(std::begin(dependency_list), std::end(dependency_list), [name](const dependency_entry& dep)
     {
-        if (dep.name == name)
-        {
-            return true;
-        }
-        return false;
+        return dep.name == name;
     });
 
-    if (iter)
+    if (iter != std::end(dependency_list))
     {
         return iter;
     }
