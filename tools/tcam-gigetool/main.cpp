@@ -531,8 +531,7 @@ int execute_rescue(const CLI::App& app)
         std::cout << "Setting gw to:" << gw_str <<std::endl;
     }
 
-    std::string err;
-    if (tis::verifySettings(ip_str, nm_str, gw_str, err))
+    auto send = [=] ()
     {
         try
         {
@@ -542,11 +541,40 @@ int execute_rescue(const CLI::App& app)
         {
             std::cerr << "An Error occured while sending the rescue packet." << std::endl;
         }
+
+    };
+
+    std::string err;
+    if (tis::verifySettings(ip_str, nm_str, gw_str, err))
+    {
+        send();
     }
     else
     {
-        std::cerr << err << std::endl;
-        return 1;
+        auto yes = app.get_option("--yes");
+
+        if (yes)
+        {
+            send();
+        }
+        else
+        {
+            std::cout << "Settings verification failed." << std::endl
+                      << "Reason: " << err << std::endl
+                      << "To prevent this warning add `--yes` to the command."
+                      << "Do you really want to proceed(y/N)? ";
+
+            std::string really;
+            std::cin >> really;
+            if (really.compare("y") != 0)
+            {
+                return 2;
+            }
+            else
+            {
+                send();
+            }
+        }
     }
     return 0;
 }
@@ -839,6 +867,7 @@ int main(int argc, char* argv[])
     app_rescue->add_option("--ip", "IPv4 address to be set")->check(CLI::ValidIPV4)->required();
     app_rescue->add_option("--netmask", "IPv4 netmask to be set")->check(CLI::ValidIPV4)->required();
     app_rescue->add_option("--gateway", "IPv4 gateway address to be set")->check(CLI::ValidIPV4)->required();
+    app_rescue->add_flag("--yes", "Assume user says yes to actions");
 
     auto app_fw = app.add_subcommand("upload", "upload firmware to camera");
     app_fw->add_option("--file", "Firmware file to use")->check(CLI::ExistingFile)->required();
