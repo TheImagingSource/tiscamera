@@ -25,6 +25,7 @@
 #include <cmath>
 #include <cstring>
 #include <stdexcept>
+#include <dutils_img/fcc_to_string.h> // img::fcc_to_string
 
 
 using namespace tcam;
@@ -41,35 +42,80 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
     auto dev = arv_camera_get_device(device->arv_camera);
 
     // TODO implement better way to check for availability
-    GError** error = NULL;
+    GError* error = NULL;
+    double min = 0.0;
+    double max = 0.0;
 
     if (pixelformat != 0)
     {
         arv_device_set_integer_feature_value(
-            dev, "TestPixelFormat", fourcc2aravis(pixelformat), error);
-    }
-    arv_device_set_integer_feature_value(dev, "TestWidth", s.width, error);
-    arv_device_set_integer_feature_value(dev, "TestHeight", s.height, error);
+            dev, "TestPixelFormat", fourcc2aravis(pixelformat), &error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
 
-    double min = arv_device_get_float_feature_value(dev, "ResultingMinFPS", error);
-    double max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS", error);
+        arv_device_set_integer_feature_value(dev, "TestWidth", s.width, &error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
+        arv_device_set_integer_feature_value(dev, "TestHeight", s.height, &error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
+        min = arv_device_get_float_feature_value(dev, "ResultingMinFPS", &error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
+        max = arv_device_get_float_feature_value(dev, "ResultingMaxFPS", &error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
+    }
 
     if (min == 0.0 && max == 0.0)
     {
+        if (this->device->stream)
+        {
+            // this means a stream is active
+            // do not touch settings
+            return ret;
+        }
+
+        auto active_format = arv_camera_get_pixel_format(this->device->arv_camera, &error);
+
+        arv_camera_set_pixel_format(this->device->arv_camera, fourcc2aravis(pixelformat), &error);
+
         // this means TestPixelFormat, TestWidth, TestHeight are not available
         // could be an UsbVision camera
         int x1, x2, y1, y2;
-        arv_camera_get_region(this->device->arv_camera, &x1, &y1, &x2, &y2, error);
+        arv_camera_get_region(this->device->arv_camera, &x1, &y1, &x2, &y2, &error);
 
         unsigned int height = y2 - y1;
         unsigned int width = x2 - x1;
 
-        arv_camera_set_region(this->device->arv_camera, 0, 0, s.width, s.height, error);
+        arv_camera_set_region(this->device->arv_camera, 0, 0, s.width, s.height, &error);
 
-        min = arv_device_get_float_feature_value(dev, "MinFPS", error);
-        max = arv_device_get_float_feature_value(dev, "MaxFPS", error);
+        arv_camera_get_frame_rate_bounds(this->device->arv_camera, &min, &max, &error);
 
-        arv_camera_set_region(this->device->arv_camera, 0, 0, width, height, error);
+        if (error)
+        {
+            g_error_free(error);
+            error = nullptr;
+        }
+
+        arv_camera_set_pixel_format(this->device->arv_camera, active_format, &error);
+
+        arv_camera_set_region(this->device->arv_camera, 0, 0, width, height, &error);
     }
 
     if (min == 0.0 && max == 0.0)
@@ -78,7 +124,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
         // hope for the second and try it
         guint n_fps_values = 0;
         auto fps_values =
-            arv_device_dup_available_enumeration_feature_values(dev, "FPS", &n_fps_values, error);
+            arv_device_dup_available_enumeration_feature_values(dev, "FPS", &n_fps_values, &error);
 
         if (n_fps_values == 0)
         {
@@ -110,7 +156,7 @@ std::vector<double> AravisDevice::AravisFormatHandler::get_framerates(
     SPDLOG_TRACE("Queried: {}x{} fourcc {} Received min: {} max {}",
                  s.width,
                  s.height,
-                 pixelformat,
+                 img::fcc_to_string(pixelformat),
                  min,
                  max);
 
@@ -393,7 +439,9 @@ void AravisDevice::index_genicam()
 
     iterate_genicam("Root");
     index_properties("Root");
+    determine_active_video_format();
     index_genicam_format(NULL);
+    set_video_format(this->active_video_format);
 }
 
 
@@ -537,6 +585,8 @@ void AravisDevice::iterate_genicam(const char* feature)
 
 void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 {
+    // storing current setting and restoring them is done
+    // by the caller.
     generate_scales();
 
     // genicam formats behave like follows:
@@ -600,38 +650,6 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
     int height_max = 0;
     int height_step = 0;
 
-    arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max, &err);
-
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    width_step = arv_camera_get_width_increment(this->arv_camera, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    height_step = arv_camera_get_height_increment(this->arv_camera, &err);
-    if (err)
-    {
-        SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
-        g_clear_error(&err);
-    }
-
-    tcam_image_size min = { (unsigned int)width_min, (unsigned int)height_min };
-    tcam_image_size max = { (unsigned int)width_max, (unsigned int)height_max };
-
     node_to_use = "PixelFormat";
 
     auto pixel_node = std::find_if(format_nodes.begin(), format_nodes.end(), find_node);
@@ -687,6 +705,49 @@ void AravisDevice::index_genicam_format(ArvGcNode* /* node */)
 
             desc.resolution_count = 1;
             framerate_mapping rf = {};
+
+            arv_camera_set_pixel_format(this->arv_camera, format_ptr[1], &err);
+
+            if (err)
+            {
+                SPDLOG_ERROR("%s", err->message);
+                g_error_free(err);
+                err = nullptr;
+                continue;
+            }
+
+            arv_camera_get_width_bounds(this->arv_camera, &width_min, &width_max, &err);
+            if (err)
+            {
+                SPDLOG_ERROR("Unable to retrieve width bounds: {}", err->message);
+                g_clear_error(&err);
+            }
+
+            arv_camera_get_height_bounds(this->arv_camera, &height_min, &height_max, &err);
+
+            if (err)
+            {
+                SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+                g_clear_error(&err);
+            }
+
+            width_step = arv_camera_get_width_increment(this->arv_camera, &err);
+            if (err)
+            {
+                SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+                g_clear_error(&err);
+            }
+
+            height_step = arv_camera_get_height_increment(this->arv_camera, &err);
+            if (err)
+            {
+                SPDLOG_ERROR("Unable to retrieve height bounds: {}", err->message);
+                g_clear_error(&err);
+            }
+
+            tcam_image_size min = { (unsigned int)width_min, (unsigned int)height_min };
+            tcam_image_size max = { (unsigned int)width_max, (unsigned int)height_max };
+
 
             rf.resolution.max_size = max;
             rf.resolution.min_size = min;

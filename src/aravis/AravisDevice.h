@@ -99,8 +99,8 @@ private:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
     std::shared_ptr<tcam::property::AravisPropertyBackend> m_backend;
 
-    ArvStream* stream;
-    ArvGc* genicam;
+    ArvStream* stream = nullptr;
+    ArvGc* genicam = nullptr;
 
     struct buffer_info
     {
