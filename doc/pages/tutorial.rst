@@ -10,6 +10,22 @@ For a simpler version, read the README.md in the project's root directory.
 Setup
 =====
 
+To install tiscamera one can choose between manual compilation
+and installation of precompiled ubuntu packages.
+
+The precompiled packages can be found on `github<https://github.com/TheImagingSource/tiscamera/releases>`
+or in the `Linux download section<https://www.theimagingsource.com/support/downloads-for-linux/>`.
+
+The contain support for all potential camera types.
+For a minimal setup it is recommended to manually compile.
+
+.. todo::
+
+   compile link
+   
+Instruction on how to manually compile can be found here.
+
+
 The first half of this tutorial describes the configuration and build process
 required to build tiscamera on a local PC.
 For stable releases, a precompiled .deb-file is available: see :ref:`packaging`.
@@ -508,7 +524,7 @@ such as software trigger, exposure, and complete auto adjustment algorithms.
 Get/List Properties
 -------------------
 
-The responsible function is `tcam_prop_get_tcam_property_names`.
+The responsible function is `tcam_property_provider_get_tcam_property_names`.
 
 For an overview of available properties, type the following into a terminal:
 
@@ -616,6 +632,11 @@ Set Property
          GError* err = NULL;
          GSList* n =  tcam_property_provider_get_tcam_property_names(TCAM_PROPERTY_PROVIDER(source), &err);
 
+         tcam_property_provider_set_enumeration(TCAM_PROPERTY_PROVIDER(source), "ExposureAuto", "Off");
+         // tcam_property_provider_set_float(TCAM_PROPERTY_PROVIDER(source), "ExposureTime", 10000.0);
+         // tcam_property_provider_set_integer(TCAM_PROPERTY_PROVIDER(source), "Brightness", 128);
+         // tcam_property_provider_set_boolean(TCAM_PROPERTY_PROVIDER(source), "ExposureAuto", "Off");
+         
          if (err)
          {
              printf("Error while retrieving names: %s\n", err->message);
@@ -634,7 +655,13 @@ Set Property
          # in the READY state the camera will always be initialized
          camera.set_state(Gst.State.READY)
 
-         camera.set_tcam_property("Exposure Auto", False)
+         try:
+             camera.set_tcam_enumeration("ExposureAuto", "Off")
+             # camera.set_tcam_float("ExposureTime", 10000.0)
+             # camera.set_tcam_integer("Brightness", 128)
+             # camera.set_tcam_enumeration("ExposureAuto", "Off")
+         except GLib.Error as err:
+             print("Unable to set error: {}", err.message)
 
                   
 This code can be found in the example `02-set-properties`.

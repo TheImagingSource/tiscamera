@@ -2,6 +2,12 @@
 
 To upgrade to tiscamera 1.0 you have to be aware of the following changes:
 
+## Device Support
+
+Some cameras are no longer supported.
+The most important being all 23 cameras.
+For a complete overview ???? ink to supported devices
+
 ## Compilation
 
 tiscamera-1.0 uses a more up to date version of aravis.
@@ -101,9 +107,18 @@ To get the range 0 - 265 mulptily value with 64.
 
 ## tcamprop
 
+tcamprop has been renamed to tcam-property.
+The API version has changed to 1.0.
+
 All tcamprop functions now have an GError argument.
 This allows for better error handling.
+
+All properties are now represented as objects.
+
 Please look at the corresponding examples on how to use them.
+
+TODO: documentation link
+TODO sample references
 
 ## GstCaps
 
@@ -122,15 +137,6 @@ GstCaps can now contain the value skipping'.
 If you have not yet used skipping this does not affect you.
 
 See documentation for further details ???? link
-
-## TcamProp
-
-The actual API has been rewritten and is now GeniCam compatible.
-
-All properties are now represented as objects.
-
-TODO: documentation link
-TODO sample references
 
 
 ## tools

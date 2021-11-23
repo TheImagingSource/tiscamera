@@ -8,27 +8,8 @@ Compatibility
 All `The Imaging Source` cameras can be addressed under Linux.
 Some legacy hardware is not supported by the tiscamera libraries.
 
-.. list-table:: compatability list
-   :header-rows: 1
+:ref:`supported devices<supported_devices>`
 
-   * - Type
-     - Linux I/O
-     - tiscamera
-   * - Usb-2.0
-     - yes
-     - yes
-   * - Usb-3.0
-     - yes
-     - yes
-   * - GigE
-     - yes
-     - yes
-   * - Firewire
-     - yes
-     - no
-   * - Converter / Grabber
-     - yes
-     - no
 
 
 ===============
@@ -106,11 +87,11 @@ Locate the Firmware
 
    .. group-tab:: Usb-3.X
 
-      Please :any:`contact the Imaging Source <contact>` to receive the necessary files.
+      Please :ref:`contact the Imaging Source <contact>` to receive the necessary files.
 
    .. group-tab:: GigE
 
-      Please :any:`contact the Imaging Source <contact>` to receive the necessary files.
+      Please :ref:`contact the Imaging Source <contact>` to receive the necessary files.
 
 Writing the Firmware
 --------------------

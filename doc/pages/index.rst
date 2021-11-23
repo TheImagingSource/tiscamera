@@ -4,7 +4,7 @@ Welcome to tiscamera's documentation!
 
 This is the user documentation for The Imaging Source Linux libraries.
 
-If assistance is required at any point, please :any:`contact our support <contact>`. 
+If assistance is required at any point, please :ref:`contact our support <contact>`. 
 
 .. todolist::
 
@@ -16,7 +16,7 @@ This allows user to easily integrate the project (or parts of it) into their own
 Modifications or maintenance can be carried out without assistance of The Imaging Source.
 This allows for extended product life cycles.
 
-The entire software stack is open allows the usage of arbitrary hardware.
+The entire software stack is open to allow the usage of arbitrary hardware.
 The only requirement is a Linux based operating system.
 
 Included Modules
@@ -37,7 +37,7 @@ Included Modules
 - tools
 
   Tools to make camera interactions easier.
-  Also includes things like firmware updates, GigE camera configuration, etc.
+  Includes things like GigE camera configuration, simple commandline application, live view
 
 Overview
 --------
