@@ -31,4 +31,4 @@ target_link_libraries(start-stop ${GSTREAMER_VIDEO_LIBRARIES})
 target_link_libraries(start-stop ${GLIB2_LIBRARIES})
 target_link_libraries(start-stop ${GOBJECT_LIBRARIES})
 
-configure_file(start-stop-runner.sh start-stop-runner.sh COPYONLY)
+configure_file(start-stop-runner.sh "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/start-stop-runner.sh" COPYONLY)

@@ -100,7 +100,7 @@ if [ ! -z "$SERIAL" ]; then
     serial_str="--serial=$SERIAL"
 fi
 
-rest_str=""
+rest_str="--rest=NULL"
 if [ ! -z "$REST" ]; then
     rest_str="--rest=$REST"
 fi
@@ -124,7 +124,7 @@ fi
 # this is the command that will be executed in the loop
 # we want gdb attached
 # gdb needs to exit after a successfull run
-CMD="gdb -ex run -ex quit --args $DIR/start-stop ${serial_str} ${caps_str} ${logging}"
+CMD="gdb -ex run -ex quit --args $DIR/start-stop ${serial_str} ${caps_str} ${rest_str} ${logging}"
 
 # due to the logging implementation
 # the usage of `eval` is required.
@@ -157,7 +157,7 @@ else
 
     for number in $( seq 1 $NUMBER_RUNS )
     do
-        echo "==== Run number: ${number}"
+        echo -e "\n\n==== Run number: ${number}\n\n"
         eval $CMD
     done
 
