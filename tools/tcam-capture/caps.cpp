@@ -199,7 +199,7 @@ scaling create_scale(const GstStructure* structure)
     }
 
     return ret;
-};
+}
 
 
 
