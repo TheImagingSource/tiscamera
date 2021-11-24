@@ -100,3 +100,7 @@ target_link_libraries(tcam-capture PRIVATE ${GSTREAMER_BASE_LIBRARIES})
 target_link_libraries(tcam-capture PRIVATE ${GSTREAMER_VIDEO_LIBRARIES})
 target_link_libraries(tcam-capture PRIVATE tcam::tcam-property)
 target_link_libraries(tcam-capture PRIVATE tcamgstbase)
+
+install(TARGETS tcam-capture
+  DESTINATION ${TCAM_INSTALL_BIN}
+  COMPONENT tcam_capture)
