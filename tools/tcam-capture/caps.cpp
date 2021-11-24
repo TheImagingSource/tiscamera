@@ -223,12 +223,16 @@ GstCaps* Caps::get_default_caps() const
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=1920,height=1080,framerate=15/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=30/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=15/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=30/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=15/1",
             "video/x-raw,width=1920,height=1080,framerate=30/1",
             "video/x-raw,width=1920,height=1080,framerate=15/1",
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=30/1",
             "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=15/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
             "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=15/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=30/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=15/1",
             "video/x-raw,width=640,height=480,framerate=30/1",
             "image/jpeg,width=1920,height=1080,framerate=30/1",
         };
@@ -264,9 +268,10 @@ bool Caps::has_resolution_ranges() const
 {
     std::string s = gst_caps_to_string(p_caps);
 
-    auto it = s.find("[");
+    auto it = s.find("width=(int)[");
+    auto it2 = s.find("height=(int)[");
 
-    if (it != std::string::npos)
+    if (it != std::string::npos || it2 != std::string::npos)
     {
         return true;
     }
@@ -303,7 +308,9 @@ std::string Caps::get_gst_name(const std::string& format) const
     for (const auto& f : formats)
     {
         if (format == f.format)
+        {
             return f.gst_format;
+        }
     }
 
     return "";
