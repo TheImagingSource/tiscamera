@@ -546,6 +546,10 @@ void MainWindow::open_property_dialog()
     connect(p_property_dialog, &QDialog::finished, this, &MainWindow::free_property_dialog);
     connect(p_property_dialog, &PropertyDialog::device_lost, this, &MainWindow::device_lost);
 
+    QString window_title = "tcam-capture - property dialog - ";
+    window_title += m_selected_device.serial_long().c_str();
+    p_property_dialog->setWindowTitle(window_title);
+
     p_property_dialog->show();
 }
 
