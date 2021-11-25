@@ -15,17 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GstTcamDeviceProvider, see documentation for usage.
 - Filter for DFG/USB2pro. Device will no longer appear in device listings.
 - `tcam-ctrl --packages` - list all installed 'The Imaging Source' packages and their version
+- `tcam-ctrl --version` now lists configured modules
 - tcamconvert gstreamer conversion element
 - internal dependency to fmt
 - cmake flag `TCAM_DOWNLOAD_MESON` for legacy systems to allow modern aravis installations.
-- gobject introspection API version 1.0
 - tcambin property `conversion-element`
   Used to select the internal conversion elements.
   Available options are `tcamconvert`, `tcamdutils`, `tcamdutils-cuda` and `auto`.
 - TCAM_ARV_STREAM_OPTIONS, allows setting of ArvStream options
+- support for tcamdutils-cuda
+- gstreamer property `tcam-properties`. GstStructure like description of properties.
+  See documentation for more details.
 
 ### Changed
 
+- gobject introspection API version 1.0
 - gobject introspection API tcamprop renamed to tcam-property
 - aravis API version is now 0.8.
 - output directory for binaries/libraries to <build-dir>/bin and <build-dir>/lib
@@ -40,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cmake flag BUILD_DOCUMENTATION now defaults to ON
 - tcam-gigetool rewrite. Now a full C++ implementation.
   Output has changed.
+- tcam-capture rewrite. Now a full C++ implementation.
+  Aimed to be as simple as possible.
+  For more complex use cases use tis-measure.
 
 ### Fixed
 
@@ -59,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Use tcam-gigetool instead
 - tcambin property `use-dutils`
 - TCAM_ARV_PACKET_REQUEST_RATIO, replaced with TCAM_ARV_STREAM_OPTIONS
+- unmaintained unit tests
 
 ## [0.14.0] - 2021.07.05
 
