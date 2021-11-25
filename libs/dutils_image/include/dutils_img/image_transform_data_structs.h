@@ -19,7 +19,38 @@ namespace img
         uint16_t	table_y16[256 * 256];
     };
 
-    struct color_matrix
+    // range of the components seems to be [-1;+3]
+    struct color_matrix_float
+    {
+        union
+        {
+            struct
+            {
+                float r_rfac, r_gfac, r_bfac,
+                    g_rfac, g_gfac, g_bfac,
+                    b_rfac, b_gfac, b_bfac;
+            };
+            float fac[9];
+            float fac_3x3[3][3];
+        };
+        static constexpr color_matrix_float get_defaults() noexcept { return get_increased_saturation(); }
+        static constexpr color_matrix_float get_increased_saturation() noexcept {
+            return color_matrix_float{ 1.40625f,  -0.203125f, -0.203125f,
+                                 -0.203125f,  1.40625f , -0.203125f,
+                                 -0.203125f, -0.203125f,  1.40625f };
+        }
+        static constexpr color_matrix_float get_neutral() noexcept {
+            return color_matrix_float{ 1.f, 0.f, 0.f,
+                                  0.f, 1.f, 0.f,
+                                  0.f, 0.f, 1.f };
+        }
+        constexpr float& operator[]( int idx ) noexcept { return fac[idx]; }
+        constexpr float operator[]( int idx ) const noexcept { return fac[idx]; }
+        constexpr float at( int x, int y ) const noexcept { return fac_3x3[x][y]; }
+    };
+
+    // this should be faced out in the future
+    struct color_matrix_int
     {
         union
         {
@@ -33,14 +64,14 @@ namespace img
             int16_t fac_3x3[3][3];
         };
 
-        static constexpr color_matrix get_defaults() noexcept { return get_increased_saturation(); }
-        static constexpr color_matrix get_increased_saturation() noexcept {
-            return color_matrix{  90, -13, -13,
+        static constexpr color_matrix_int get_defaults() noexcept { return get_increased_saturation(); }
+        static constexpr color_matrix_int get_increased_saturation() noexcept {
+            return color_matrix_int{  90, -13, -13,
                                  -13,  90, -13, 
                                  -13, -13,  90 };
         }
-        static constexpr color_matrix get_neutral() noexcept {
-            return color_matrix{ 64,  0,  0,
+        static constexpr color_matrix_int get_neutral() noexcept {
+            return color_matrix_int{ 64,  0,  0,
                                   0, 64,  0,
                                   0,  0, 64 };
         }
@@ -68,6 +99,15 @@ namespace img
     {
         float   hdr_gain = 0.f;       // [0.f;120.f]
     };
+
+    struct whitebalance_params
+    {
+        bool    apply = false;      // entries ignored on false
+        float   wb_rr = 1.f;        // [0;4( 1.0 ^= neutral
+        float   wb_gr = 1.f;
+        float   wb_bb = 1.f;
+        float   wb_gb = 1.f;
+};
 }
 
 #ifdef _MSC_VER

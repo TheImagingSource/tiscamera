@@ -112,6 +112,11 @@ namespace img
         return make_img_desc_raw( type.fourcc_type(), type.dim, type.buffer_length, plane0 );
     }
 
+    constexpr img_descriptor	make_img_desc_raw(img::img_type type, img_planar_layout_data plane0) noexcept
+    {
+      return make_img_desc_raw(type.fourcc_type(), type.dim, type.buffer_length, plane0);
+    }
+
     constexpr img_descriptor	make_img_desc_raw( fourcc fcc, img::dim dim, int data_length, img_plane plane0, uint32_t flags /*= 0*/ ) noexcept
     {
         img_descriptor res{

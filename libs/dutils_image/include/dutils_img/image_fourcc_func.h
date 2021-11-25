@@ -371,6 +371,22 @@ namespace img
             return false;
         }
     }
+    constexpr bool      is_adi_fcc( img::fourcc fcc ) noexcept
+    {
+        switch( fcc )
+        {
+        case img::fourcc::POLARIZATION_ADI_MONO8:
+        case img::fourcc::POLARIZATION_ADI_MONO16:
+        case img::fourcc::POLARIZATION_ADI_PLANAR_MONO8:
+        case img::fourcc::POLARIZATION_ADI_PLANAR_MONO16:
+        case img::fourcc::POLARIZATION_ADI_RGB8:
+        case img::fourcc::POLARIZATION_ADI_RGB16:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     constexpr bool      is_pwl_fcc( img::fourcc fcc ) noexcept
     {
         return fcc == img::fourcc::PWL_RG12_MIPI || fcc == img::fourcc::PWL_RG12 || fcc == img::fourcc::PWL_RG16H12;

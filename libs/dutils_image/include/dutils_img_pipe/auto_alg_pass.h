@@ -55,7 +55,7 @@ namespace auto_alg
 
         whitebalance_values		wb{};
 
-        color_matrix_params		clr{ color_matrix::get_defaults(), false };
+        color_matrix_params		clr{ color_matrix_float::get_defaults(), false };
 
         auto_focus_params       focus_onepush_params{};
 

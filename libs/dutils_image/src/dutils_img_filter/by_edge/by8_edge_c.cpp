@@ -35,7 +35,7 @@ FORCEINLINE void    store<BGR24>( void* p_dest, int x, pixel val )
     out_line[x] = BGR24{ val.b, val.g, val.r };
 }
 
-FORCEINLINE  pixel	apply_color_matrix_c( const img::color_matrix& clr, pixel str )
+FORCEINLINE  pixel	apply_color_matrix_c( const img::color_matrix_int& clr, pixel str )
 {
     int r = ((int) str.r * clr.r_rfac + (int) str.g * clr.r_gfac + (int) str.b * clr.r_bfac) / 64;
     int g = ((int) str.r * clr.g_rfac + (int) str.g * clr.g_gfac + (int) str.b * clr.g_bfac) / 64;

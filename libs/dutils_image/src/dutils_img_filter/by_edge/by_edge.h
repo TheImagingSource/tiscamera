@@ -11,7 +11,7 @@ namespace by_edge
 {
     struct options
     {
-        img::color_matrix	color_mtx;
+        img::color_matrix_int	color_mtx;
 
         bool                use_color_matrix;
         bool                use_avg_green;

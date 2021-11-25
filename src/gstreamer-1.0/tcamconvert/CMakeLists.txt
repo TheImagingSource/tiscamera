@@ -43,7 +43,7 @@ target_link_libraries(tcamconvert
   ${GSTREAMER_VIDEO_LIBRARIES}
 
   dutils_img::base
-  dutils_img::dutils_img_filter_optimized
+  dutils_img::img_filter_optimized
 
   tcamprop1::consumer
   )

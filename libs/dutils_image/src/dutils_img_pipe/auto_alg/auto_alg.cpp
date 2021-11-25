@@ -6,6 +6,8 @@
 #include "../../dutils_img_base/interop_private.h"
 #include "../tools/profiler_include.h"
 
+#include <cmath>
+
 using namespace auto_alg;
 
 using by_pattern = img::by_transform::by_pattern;
@@ -20,11 +22,11 @@ auto_alg::impl::RGBf auto_alg::impl::clip_RGBf_pixel_to_range( const RGBf& rgb )
 }
 
 
-auto_alg::impl::pixel auto_alg::impl::apply_color_matrix_c( const img::color_matrix& clr, const auto_alg::impl::pixel& rgb )
+auto_alg::impl::pixel auto_alg::impl::apply_color_matrix_c( const img::color_matrix_float& clr, const auto_alg::impl::pixel& rgb )
 {
-    int r_tmp = (((int)rgb.r) * clr.r_rfac + ((int)rgb.g) * clr.r_gfac + ((int)rgb.b) * clr.r_bfac) / 64;
-    int g_tmp = (((int)rgb.r) * clr.g_rfac + ((int)rgb.g) * clr.g_gfac + ((int)rgb.b) * clr.g_bfac) / 64;
-    int b_tmp = (((int)rgb.r) * clr.b_rfac + ((int)rgb.g) * clr.b_gfac + ((int)rgb.b) * clr.b_bfac) / 64;
+    int r_tmp = std::lround(((int)rgb.r) * clr.r_rfac + ((int)rgb.g) * clr.r_gfac + ((int)rgb.b) * clr.r_bfac);
+    int g_tmp = std::lround(((int)rgb.r) * clr.g_rfac + ((int)rgb.g) * clr.g_gfac + ((int)rgb.b) * clr.g_bfac);
+    int b_tmp = std::lround(((int)rgb.r) * clr.b_rfac + ((int)rgb.g) * clr.b_gfac + ((int)rgb.b) * clr.b_bfac);
 
     uint8_t r = (uint8_t) CLIP( r_tmp, 0, 0xFF );
     uint8_t g = (uint8_t) CLIP( g_tmp, 0, 0xFF );
@@ -32,11 +34,11 @@ auto_alg::impl::pixel auto_alg::impl::apply_color_matrix_c( const img::color_mat
     return auto_alg::impl::pixel{ b, g, r };
 }
 
-auto_alg::impl::RGBf  auto_alg::impl::apply_color_matrix_c( const color_matrix& clr, const RGBf& rgb )
+auto_alg::impl::RGBf  auto_alg::impl::apply_color_matrix_c( const color_matrix_float& clr, const RGBf& rgb )
 {
-    float r_tmp = (rgb.r * clr.r_rfac + rgb.g * clr.r_gfac + rgb.b * clr.r_bfac) / 64.f;
-    float g_tmp = (rgb.r * clr.g_rfac + rgb.g * clr.g_gfac + rgb.b * clr.g_bfac) / 64.f;
-    float b_tmp = (rgb.r * clr.b_rfac + rgb.g * clr.b_gfac + rgb.b * clr.b_bfac) / 64.f;
+    float r_tmp = rgb.r * clr.r_rfac + rgb.g * clr.r_gfac + rgb.b * clr.r_bfac;
+    float g_tmp = rgb.r * clr.g_rfac + rgb.g * clr.g_gfac + rgb.b * clr.g_bfac;
+    float b_tmp = rgb.r * clr.b_rfac + rgb.g * clr.b_gfac + rgb.b * clr.b_bfac;
 
     float r = CLIP( r_tmp, 0.f, 1.f );
     float g = CLIP( g_tmp, 0.f, 1.f );

@@ -4,17 +4,11 @@
 #include <dutils_img/dutils_img.h>
 #include <dutils_img/image_bayer_pattern.h>
 #include "../dutils_img_base/interop_private.h"
+#include <dutils_img/image_transform_data_structs.h>
 
 namespace img_filter
 {
-    struct whitebalance_params
-    {
-        bool    apply = false;
-        float   wb_rr = 1.f;
-        float   wb_gr = 1.f;
-        float   wb_bb = 1.f;
-        float   wb_gb = 1.f;
-    };
+    using img::whitebalance_params;
 
     /** Transforms the struct to either the default or clips the elements to the whitebalance range
      * If !apply then all members will be set to 1.f
@@ -42,10 +36,10 @@ namespace img_filter
 
     struct bayer_pattern_parameters
     {
-        static bayer_pattern_parameters     convert( img::by_transform::by_pattern pat, const img_filter::whitebalance_params& params ) noexcept;
+        static bayer_pattern_parameters     convert( img::by_transform::by_pattern pat, const img::whitebalance_params& params ) noexcept;
 
         bayer_pattern_parameters() = default;
-        constexpr bayer_pattern_parameters( img::by_transform::by_pattern pat, const whitebalance_params& params ) noexcept
+        constexpr bayer_pattern_parameters( img::by_transform::by_pattern pat, const img::whitebalance_params& params ) noexcept
         {
             using namespace img::by_transform;
             switch( pat )
@@ -66,7 +60,7 @@ namespace img_filter
         float wb_x1y1 = 0;
     };
 
-    inline     bayer_pattern_parameters     bayer_pattern_parameters::convert( img::by_transform::by_pattern pat, const img_filter::whitebalance_params& params ) noexcept
+    inline     bayer_pattern_parameters     bayer_pattern_parameters::convert( img::by_transform::by_pattern pat, const img::whitebalance_params& params ) noexcept
     {
         return bayer_pattern_parameters( pat, params );
     }

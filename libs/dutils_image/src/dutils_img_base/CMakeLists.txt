@@ -13,6 +13,8 @@ add_library( dutils_img_base_lib STATIC
 	"img_rect_tools.h"
 	"img_rect_tools.cpp"
 	"dutils_gst_interop.cpp"
+
+	"img_string_helper.cpp"
 )
 
 target_link_libraries( dutils_img_base_lib 

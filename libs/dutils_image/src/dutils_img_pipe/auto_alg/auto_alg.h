@@ -18,8 +18,8 @@ namespace auto_alg::impl
     auto_whitebalance_result	auto_whitebalance_cam( const auto_sample_points& data, const wb_channel_factors& wb );
     auto_whitebalance_result	auto_whitebalance_soft( const image_sampling_points_rgbf& data, const wb_channel_factors& wb );
 
-    pixel			apply_color_matrix_c( const color_matrix& clr, const pixel& rgb );
-    RGBf			apply_color_matrix_c( const color_matrix& clr, const RGBf& rgb );
+    pixel			apply_color_matrix_c( const color_matrix_float& clr, const pixel& rgb );
+    RGBf			apply_color_matrix_c( const color_matrix_float& clr, const RGBf& rgb );
 
     RGBf			clip_RGBf_pixel_to_range( const RGBf& rgb ) noexcept;
 

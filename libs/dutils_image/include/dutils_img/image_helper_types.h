@@ -52,7 +52,7 @@ namespace img
     {
         constexpr rect() noexcept = default;
         constexpr rect( int l, int t, int r, int b ) noexcept : left( l ), top( t ), right( r ), bottom( b ) {}
-        constexpr rect( point pos, dim size ) noexcept : left( pos.x ), top( pos.y ), right( size.cx ), bottom( size.cy ) {}
+        constexpr rect( point pos, dim size ) noexcept : left( pos.x ), top( pos.y ), right( pos.x + size.cx ), bottom( pos.y + size.cy ) {}
         constexpr rect( dim size ) noexcept : left( 0 ), top( 0 ), right( size.cx ), bottom( size.cy ) {}
 
         int     left = 0;
@@ -74,7 +74,7 @@ namespace img
         if( r.left > r.right ) {
             std::swap( r.left, r.right );
         }
-        if( r.bottom > r.top ) {
+        if( r.top > r.bottom) {
             std::swap( r.bottom, r.top );
         }
         return r;

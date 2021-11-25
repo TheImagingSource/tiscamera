@@ -9,7 +9,7 @@
 
 namespace auto_alg
 {
-    using img::color_matrix;
+    using img::color_matrix_float;
 
     struct property_cont_exposure
     {
@@ -56,7 +56,7 @@ namespace auto_alg
 
     struct color_matrix_params
     {
-        color_matrix		mtx;
+        color_matrix_float	mtx;
         bool	            enabled;
     };
 

@@ -2,6 +2,10 @@
 
 add_library( dutils_img_filter_sse41 STATIC 
 
+	"by_edge/by_edge.h"
+	"by_edge/by_edge_internal.h"
+	"by_edge/by8_edge_sse4_1_v0.cpp"
+
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc16_ssse3_v0.cpp"
 	"transform/fcc1x_packed/fcc1x_packed_to_fcc8_ssse3_v0.cpp"
 
@@ -11,16 +15,12 @@ add_library( dutils_img_filter_sse41 STATIC
 	"filter/whitebalance/wb_apply_sse41.cpp"
 	"filter/whitebalance/wb_apply_by16_sse4_1.cpp"
 	"filter/whitebalance/wb_apply_by8_sse2.cpp"
-  
-#	"transform/pwl/transform_fccfloat_to_fcc8_sse41_v0.cpp"
 
 	"transform/mono_to_bgr/transform_mono_to_bgr_sse41.cpp"
-
-	"by_edge/by8_edge_sse4_1_v0.cpp"
 )
 
 target_link_libraries( dutils_img_filter_sse41
-PUBLIC
+PRIVATE
 	dutils_img::dutils_img_filter_c
 PRIVATE
 	dutils_img::project_options
@@ -29,4 +29,4 @@ PRIVATE
 
 target_compile_options( dutils_img_filter_sse41 PUBLIC -msse4.1 )
 
-add_library( dutils_img::dutils_img_filter_optimized ALIAS dutils_img_filter_sse41 )
+add_library( dutils_img::img_filter_optimized ALIAS dutils_img_filter_sse41 )

@@ -40,7 +40,7 @@ add_library(dutils_img_pipe_auto STATIC
 
 target_link_libraries( dutils_img_pipe_auto 
 PRIVATE
-	dutils_img::project_warnings
+    dutils_img::project_warnings
     dutils_img::project_options
 
     dutils_img::base
