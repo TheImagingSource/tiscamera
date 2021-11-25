@@ -1013,6 +1013,7 @@ void V4l2Device::generate_scales()
     if (m_scale.scale_type == ImageScalingType::Skipping || m_scale.scale_type == ImageScalingType::BinningSkipping)
     {
         // TODO add skipping
+        SPDLOG_ERROR("Skipping not implemented");
     }
 
 }

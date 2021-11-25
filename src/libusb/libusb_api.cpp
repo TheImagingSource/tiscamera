@@ -63,7 +63,7 @@ size_t get_libusb_device_list(struct tcam_device_info* array, size_t array_size)
         return 0;
     }
 
-    for (const auto v : vec)
+    for (const auto& v : vec)
     {
         auto i = v.get_info();
         memcpy(array, &i, sizeof(struct tcam_device_info));
