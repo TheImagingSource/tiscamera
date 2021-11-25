@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     p_property_dialog = nullptr;
-    setWindowTitle("TCam Capture");
+    setWindowTitle("tcam-capture");
     setWindowIcon(QIcon(":/images/logo.png"));
     m_index = std::make_shared<Indexer>();
     connect(m_index.get(), &Indexer::device_lost, this, &MainWindow::device_lost_cb);
@@ -547,6 +547,8 @@ void MainWindow::open_property_dialog()
     connect(p_property_dialog, &PropertyDialog::device_lost, this, &MainWindow::device_lost);
 
     QString window_title = "tcam-capture - property dialog - ";
+    window_title += m_selected_device.model().c_str();
+    window_title += " - ";
     window_title += m_selected_device.serial_long().c_str();
     p_property_dialog->setWindowTitle(window_title);
 
@@ -604,6 +606,17 @@ void MainWindow::enable_device_gui_elements(bool toggle)
     {
         set_settings_string("");
     }
+
+    QString window_title = "tcam-capture";
+    if (toggle)
+    {
+        window_title += " - ";
+        window_title += m_selected_device.model().c_str();
+        window_title += " - ";
+        window_title += m_selected_device.serial_long().c_str();
+    }
+
+    setWindowTitle(window_title);
 }
 
 
@@ -704,6 +717,14 @@ GstCaps* MainWindow::open_format_dialog()
     connect(buttonBox, &QDialogButtonBox::rejected, &format_dialog, &QDialog::reject);
 
     layout->addWidget(buttonBox);
+
+    QString window_title = "caps selection - ";
+    window_title += m_selected_device.model().c_str();
+    window_title += " - ";
+    window_title += m_selected_device.serial_long().c_str();
+    format_dialog.setWindowTitle(window_title);
+
+    format_dialog.setMinimumSize(320, 240);
 
     if (format_dialog.exec() == QDialog::Accepted)
     {
