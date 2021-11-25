@@ -283,19 +283,19 @@ void IntWidget::setup_ui()
 
     p_box = new QSpinBox();
 
-    if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
-    {
-        p_box->setRange(min, max);
-        p_box->setSingleStep(step);
-    }
+    p_box->setRange(min, max);
+    p_box->setSingleStep(step);
+
     if (auto unit_ptr = tcam_property_integer_get_unit(p_prop); unit_ptr)
     {
         QString unit = " ";
         unit += unit_ptr;
         p_box->setSuffix(unit);
     }
+
     p_box->setDisabled(is_locked);
     p_box->setValue(value);
+    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 
     connect(p_box, QOverload<int>::of(&QSpinBox::valueChanged), this, &IntWidget::spinbox_changed);
 
@@ -469,6 +469,8 @@ void DoubleWidget::setup_ui()
     p_box->setSingleStep(step);
     p_box->setValue(value);
     p_box->setDisabled(lock);
+
+    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 
     connect(p_box,
             QOverload<double>::of(&QDoubleSpinBox::valueChanged),
