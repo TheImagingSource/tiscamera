@@ -288,29 +288,25 @@ const prop_static_info_enumeration lst::AutoFunctionsROIPreset = make_Enumeratio
     "Auto ROI", "Auto Functions ROI Preset",
     "Select a predefined region of interest for auto functions"
 );
-const prop_static_info_float lst::AutoFunctionsROIHeight = make_Float(
+const prop_static_info_integer lst::AutoFunctionsROIHeight = make_Integer(
     "AutoFunctionsROIHeight",
     "Auto ROI", "Auto Functions ROI Height",
-    "Vertical size of the auto functions region of interest.",
-    "%"
+    "Vertical size of the auto functions region of interest."
 );
-const prop_static_info_float lst::AutoFunctionsROIWidth = make_Float(
+const prop_static_info_integer lst::AutoFunctionsROIWidth = make_Integer(
     "AutoFunctionsROIWidth",
     "Auto ROI", "Auto Functions ROI Width",
-    "Horizontal size of the auto functions region of interest.",
-    "%"
+    "Horizontal size of the auto functions region of interest."
 );
-const prop_static_info_float lst::AutoFunctionsROITop = make_Float(
+const prop_static_info_integer lst::AutoFunctionsROITop = make_Integer(
     "AutoFunctionsROITop",
     "Auto ROI", "Auto Functions ROI Top",
-    "Vertical offset of the auto functions region of interest.",
-    "%"
+    "Vertical offset of the auto functions region of interest."
 );
-const prop_static_info_float lst::AutoFunctionsROILeft = make_Float(
+const prop_static_info_integer lst::AutoFunctionsROILeft = make_Integer(
     "AutoFunctionsROILeft",
     "Auto ROI", "Auto Functions ROI Left",
-    "Horizontal offset of the auto functions region of interest.",
-    "%"
+    "Horizontal offset of the auto functions region of interest."
 );
 
 const prop_static_info_integer lst::Denoise = make_Integer(

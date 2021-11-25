@@ -159,8 +159,8 @@ namespace tcamprop1_gobj::impl
     template<class TDataStruct>
     GType   generate_and_fetch_type()
     {
-        static gsize g_define_type_id__volatile = 0;
-        if( g_once_init_enter( &g_define_type_id__volatile ) )
+        static gsize g_define_type_id_volatile = 0;
+        if( g_once_init_enter( &g_define_type_id_volatile ) )
         {
             GType g_define_type_id =
                 g_type_register_static_simple( G_TYPE_OBJECT,
@@ -172,9 +172,9 @@ namespace tcamprop1_gobj::impl
                                                (GTypeFlags)0 );
 
             TDataStruct::register_interfaces( g_define_type_id );
-            g_once_init_leave( &g_define_type_id__volatile, g_define_type_id );
+            g_once_init_leave( &g_define_type_id_volatile, g_define_type_id );
         }
-        return g_define_type_id__volatile;
+        return g_define_type_id_volatile;
     }
 }
 

@@ -91,10 +91,10 @@ namespace tcamprop1::prop_list
 
     extern const prop_static_info_boolean AutoFunctionsROIEnable;
     extern const prop_static_info_enumeration AutoFunctionsROIPreset;
-    extern const prop_static_info_float AutoFunctionsROIHeight;
-    extern const prop_static_info_float AutoFunctionsROIWidth;
-    extern const prop_static_info_float AutoFunctionsROITop;
-    extern const prop_static_info_float AutoFunctionsROILeft;
+    extern const prop_static_info_integer AutoFunctionsROIHeight;
+    extern const prop_static_info_integer AutoFunctionsROIWidth;
+    extern const prop_static_info_integer AutoFunctionsROITop;
+    extern const prop_static_info_integer AutoFunctionsROILeft;
 
     extern const prop_static_info_integer Denoise;
     extern const prop_static_info_integer Sharpness;
