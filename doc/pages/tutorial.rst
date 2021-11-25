@@ -666,9 +666,9 @@ Set Property
                   
 This code can be found in the example `02-set-properties`.
 
-Where to Go from Here
+Where to go from here
 =====================
 
-Take a look at our :any:`reference`, the :any:`GStreamer documentation<reading_gstreamer>` or :any:`ask us a question<contact>`.
+Take a look at our :any:`reference`, the :any:`GStreamer documentation<reading_gstreamer>` or :ref:`ask us a question<contact>`.
 
 For extended examples (including OpenCV, ROS and GUI frameworks), please have a look at our :ref:`extended examples<examples_further>`.

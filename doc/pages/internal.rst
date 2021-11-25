@@ -63,7 +63,7 @@ This is a simplified folder structure of the tiscamera project:
 |       ├── :ref:`tcam-gige-daemon<tcam_gige_daemon>`
 |       ├── :ref:`tcam-capture<tcam_capture>`
 |       ├── :ref:`tcam-ctrl<tcam_ctrl>`
-|       ├── :ref:`tcam-gige-daemon<gige_daemon>`
+|       ├── :ref:`tcam-gige-daemon<tcam_gige_daemon>`
 |       ├── :ref:`tcam-gigetool<tcam_gigetool>`
 |       └── :ref:`tcam-uvc-extension-loader<tcam_uvc_extension_loader>`
 

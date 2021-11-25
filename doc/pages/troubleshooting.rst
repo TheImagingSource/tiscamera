@@ -10,7 +10,7 @@ A good starting point is to enable logging.
 GStreamer logging and tiscamera logging will most likely be helpful.
 See :ref:`logging`.
 
-If in doubt, please :any:`contact our support<contact>`. We will gladly answer any questions and help with troubleshooting.
+If in doubt, please :ref:`contact our support<contact>`. We will gladly answer any questions and help with troubleshooting.
 
 ===
 USB

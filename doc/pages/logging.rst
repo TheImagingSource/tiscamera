@@ -4,42 +4,14 @@
 Logging
 #######
 
-There are two separate logging functionalities one should be aware of:
-The project internal functionality (TCAM_LOG) and the GStreamer-owned functionality.
+All tiscamera logging is done via GStreamer
 
-TCAM_LOG
-========
+Categories
+==========
 
-Our libraries offer logging for debugging purposes.
-Currently, logging is only possible to the console.
-Output redirects to files and user-specified callbacks
-are planned but have not yet been implemented.
+tiscamera generally writes logs to a category named after the correlating element, e.g. tcamsrc, tcambin, tcamconvert.
 
-To enable logging, set the environment variable TCAM_LOG.
-The following values are possible:
-
-.. list-table:: Logging States
-   :header-rows: 1
-   :widths: 10 90
-
-   * - Name
-     - Description
-   * - OFF
-     - No logging
-   * - TRACE
-     - Gives as much information as possible.
-   * - DEBUG
-     - Information that is potentially useful to understand/debug a problem.
-   * - INFO
-     - Information that may be useful to the user under certain circumstances( e.g. Disabling a software feature because the used camera already offers a similar feature).
-   * - WARNING
-     - Events that might cause problems and are noticeable to the user but do not affect the general streaming capabilities of the camera.
-   * - ERROR
-     - Events that may cause a stream to end and other critical failures. The tcamsrc will see these as reasons to end streaming.
-
-Per default, all logging is set to OFF.
-
-To disable logging, unset the environment variable or set it to OFF.
+Additionally the category `tcam-libtcam` exists. It offers additional logging entries for the backend. 
 
 GStreamer
 =========

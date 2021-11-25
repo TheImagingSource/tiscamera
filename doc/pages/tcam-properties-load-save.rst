@@ -1,5 +1,5 @@
 ########################
-Property-loading/saving
+Property Loading/Saving
 ########################
 
 To allow for an easy serializing/desrializing of gstreamer filter state :ref:`tcambin` and :ref:`tcamsrc` have gobject properties
@@ -23,51 +23,75 @@ E.g.:
 
 Setting several properties via `GstStructure`:
 
-.. code-block:: c
+.. todo::
 
-    GstElement* src = ...;
+   Add python samples
 
-    // Create a new structure
-    GstStructure* new_property_struct = gst_structure_new_empty( "tcam" );
+.. tabs::
 
-    // Change 2 properties so that we can see a 'difference'
-    gst_structure_set( new_property_struct, 
-                        "ExposureAuto", G_TYPE_STRING, "Off", 
-                        "ExposureTime", G_TYPE_DOUBLE, 35000., 
-                        NULL );
+   .. group-tab:: c
 
-    GValue new_state = G_VALUE_INIT;
-    g_value_init( &new_state, GST_TYPE_STRUCTURE );
-    gst_value_set_structure( &new_state, new_property_struct );
+      .. code-block:: c
 
-    // Set the new property settings
-    g_object_set_property(G_OBJECT(source), "tcam-properties", &new_state);
+         GstElement* source = ...;
 
+         // Create a new structure
+         GstStructure* new_property_struct = gst_structure_new_empty("tcam-properties");
+                      
+         // Change 2 properties so that we can see a 'difference'
+         gst_structure_set(new_property_struct, 
+                           "ExposureAuto", G_TYPE_STRING, "Off", 
+                           "ExposureTime", G_TYPE_DOUBLE, 35000., 
+                           NULL);
+
+         GValue new_state = G_VALUE_INIT;
+         g_value_init(&new_state, GST_TYPE_STRUCTURE);
+         gst_value_set_structure(&new_state, new_property_struct);
+
+         // Set the new property settings
+         g_object_set_property(G_OBJECT(source), "tcam-properties", &new_state);
+
+   .. group-tab:: python
+
+      .. code-block:: python
+
+         source = ...
+
+         new_property_struct = Gst.Structure.empty("tcam-properties")
+         
+         source.set_property("tcam-properties", new_state)
+         
+         
 Reading the `GstStructure` of a opened device:
 
-.. code-block:: c
+.. tabs::
 
-    GstElement* src = ...;
+   .. group-tab:: c
 
-    // Initialize the GValue
-    GValue current_properties = G_VALUE_INIT;
-    g_value_init(&current_properties, GST_TYPE_STRUCTURE);
+      .. code-block:: c
 
-    // Get the GObject property
-    g_object_get_property(G_OBJECT(source), "tcam-properties", &current_properties);
+         GstElement* src = ...;
 
-    // get a string to print the current property state
-    char* string = gst_structure_to_string( gst_value_get_structure(&current_properties) );
-    printf("Current properties:\n%s\n", string );
-    g_free( string ); // free the string
+         // Initialize the GValue
+         GValue current_properties = G_VALUE_INIT;
+         g_value_init(&current_properties, GST_TYPE_STRUCTURE);
 
-    g_value_unset( &current_properties );  // free the Gststurcture in the GValue
+         // Get the GObject property
+         g_object_get_property(G_OBJECT(source), "tcam-properties", &current_properties);
 
-Note:
-* If a property is locked when loading it, writing to the property is retried after all other properties are written. (This circumvents the problem of property order for e.g. "ExposureTime" and "ExposureAuto")
-* Failed writing/reading of properties gets logged to the gstreamer log.
-* Writing to the property in `GST_STATE_NULL` sets an internal cache which gets applied in the state transition to `GST_STATE_READY`
-    
+         // get a string to print the current property state
+         char* string = gst_structure_to_string(gst_value_get_structure(&current_properties));
+         printf("Current properties:\n%s\n", string);
+         g_free(string); // free the string
+
+         g_value_unset(&current_properties); // free the GstStructure in the GValue
+
+.. note::
+   * If a property is locked when loading it, writing to the property is retried after all other properties are written. (This circumvents the problem of property order for e.g. "ExposureTime" and "ExposureAuto")
+   * Failed writing/reading of properties gets logged to the gstreamer log.
+   * Writing to the property in `GST_STATE_NULL` sets an internal cache which gets applied in the state transition to `GST_STATE_READY`
+
+
 ---------------------
 tcam-properties-json
 ---------------------

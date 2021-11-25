@@ -1,3 +1,5 @@
+.. _gstreamer:
+
 #########
 GStreamer
 #########
@@ -151,11 +153,21 @@ A range will be displayed in ``[]`` with the minimum and maximum values:
 
 ``video/x-bayer,format=gbrg,width=[480,1920],height=[4,1200],framerate=[34375/37184,50/1];``
 
+Ranges only need to be dealt with when using GigE cameras.
+
 A list will be displayed in ``{}`` with each possible value:
 
 ``video/x-bayer,format=gbrg,width=640,height=480,framerate={6875/3136,3/1,4/1,5/1,6/1,7/1,8/1,9/1,10/1,11/1,12/1,13/1,14/1,15/1,16/1,17/1,18/1,19/1,20/1,30/1,40/1,50/1,60/1,70/1,80/1,90/1,100/1,150/1,200/1,250/1,61875/238}``
 
-Ranges only need to be dealt with when using GigE cameras.
+.. warning::
+
+   when dealing with binning/skipping the GstCaps that are retrievable will differ depending on the backend (v4l2/aravis).
+
+   Cameras that use the aravis backend will only mention binning/skipping in the range description.
+   As the GstCaps with fixed resolutions are typically generated from these ranges the binning/skipping values can also be used with them.
+
+   V4L2 only has fixed caps. They will be explicitly listed.
+   
 
 Possible formats
 ----------------
@@ -166,7 +178,7 @@ Together they describe a unique format.
 **video/x-raw**:
     Unstructured and uncompressed raw video data.
 
-    Common format field entries include: ``MONO8``, ``GRAY16_LE``, ``BGRx``, ``YUYV``, ``BGR``
+    Common format field entries include: ``GRAY8``, ``GRAY16_LE``, ``BGRx``, ``YUYV``, ``BGR``
 
 **video/x-bayer**:
 
@@ -225,6 +237,8 @@ General Suggestions
 *******************
 
 Set `sync=false` on your sink element. This will prevent images from arriving later than necessary.
+
+Add a queue element to separate the image creation fro the image processing. Be aware that this will create an additional image copy.
 
 *********
 Debugging
