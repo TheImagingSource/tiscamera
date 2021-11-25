@@ -33,7 +33,7 @@ public:
 
 private:
     Device _dev;
-    std::string icon_path = "/home/edt/work/tiscamera/data/images/23uc256.png";
+    std::string icon_path = ":/images/camera.png";
 };
 
 #endif // DEVICEWIDGET_H
