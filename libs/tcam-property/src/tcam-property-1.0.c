@@ -259,6 +259,7 @@ TcamPropertyType tcam_property_base_get_property_type( TcamPropertyBase* self )
 gboolean        tcam_property_base_is_available( TcamPropertyBase* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, FALSE );
+	g_return_val_if_fail( err == NULL || *err == NULL, FALSE);
     g_return_val_if_fail( TCAM_IS_PROPERTY_BASE( self ), FALSE );
 
     TcamPropertyBaseInterface* iface = TCAM_PROPERTY_BASE_GET_IFACE( self );
@@ -279,6 +280,7 @@ gboolean        tcam_property_base_is_available( TcamPropertyBase* self, GError*
 gboolean        tcam_property_base_is_locked( TcamPropertyBase* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, FALSE );
+    g_return_val_if_fail( err == NULL || *err == NULL, FALSE );
     g_return_val_if_fail( TCAM_IS_PROPERTY_BASE( self ), FALSE );
 
     TcamPropertyBaseInterface* iface = TCAM_PROPERTY_BASE_GET_IFACE( self );
@@ -304,6 +306,7 @@ static void tcam_property_boolean_default_init( __attribute__ ((unused)) TcamPro
 gboolean tcam_property_boolean_get_value( TcamPropertyBoolean* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, FALSE );
+    g_return_val_if_fail( err == NULL || *err == NULL, FALSE );
     g_return_val_if_fail( TCAM_IS_PROPERTY_BOOLEAN( self ), FALSE );
 
     TcamPropertyBooleanInterface* iface = TCAM_PROPERTY_BOOLEAN_GET_IFACE( self );
@@ -323,6 +326,7 @@ gboolean tcam_property_boolean_get_value( TcamPropertyBoolean* self, GError** er
 void tcam_property_boolean_set_value( TcamPropertyBoolean* self, gboolean value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_BOOLEAN( self ) );
 
     TcamPropertyBooleanInterface* iface = TCAM_PROPERTY_BOOLEAN_GET_IFACE( self );
@@ -341,6 +345,7 @@ void tcam_property_boolean_set_value( TcamPropertyBoolean* self, gboolean value,
 gboolean tcam_property_boolean_get_default( TcamPropertyBoolean* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, FALSE );
+    g_return_val_if_fail( err == NULL || *err == NULL, FALSE );
     g_return_val_if_fail( TCAM_IS_PROPERTY_BOOLEAN( self ), FALSE );
 
     TcamPropertyBooleanInterface* iface = TCAM_PROPERTY_BOOLEAN_GET_IFACE( self );
@@ -366,6 +371,7 @@ static void tcam_property_integer_default_init( __attribute__ ((unused)) TcamPro
 gint64 tcam_property_integer_get_value( TcamPropertyInteger* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, 0 );
+    g_return_val_if_fail( err == NULL || *err == NULL, 0 );
     g_return_val_if_fail( TCAM_IS_PROPERTY_INTEGER( self ), 0 );
 
     TcamPropertyIntegerInterface* iface = TCAM_PROPERTY_INTEGER_GET_IFACE( self );
@@ -385,6 +391,7 @@ gint64 tcam_property_integer_get_value( TcamPropertyInteger* self, GError** err 
 void tcam_property_integer_set_value( TcamPropertyInteger* self, gint64 value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_INTEGER( self ) );
 
     TcamPropertyIntegerInterface* iface = TCAM_PROPERTY_INTEGER_GET_IFACE( self );
@@ -405,6 +412,7 @@ void tcam_property_integer_set_value( TcamPropertyInteger* self, gint64 value, G
 void tcam_property_integer_get_range( TcamPropertyInteger* self, gint64* min_value, gint64* max_value, gint64* step_value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_INTEGER( self ) );
 
     TcamPropertyIntegerInterface* iface = TCAM_PROPERTY_INTEGER_GET_IFACE( self );
@@ -423,6 +431,7 @@ void tcam_property_integer_get_range( TcamPropertyInteger* self, gint64* min_val
 gint64  tcam_property_integer_get_default( TcamPropertyInteger* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, 0 );
+    g_return_val_if_fail( err == NULL || *err == NULL, 0 );
     g_return_val_if_fail( TCAM_IS_PROPERTY_INTEGER( self ), 0 );
 
     TcamPropertyIntegerInterface* iface = TCAM_PROPERTY_INTEGER_GET_IFACE( self );
@@ -485,6 +494,7 @@ static void tcam_property_float_default_init( __attribute__ ((unused)) TcamPrope
 gdouble tcam_property_float_get_value( TcamPropertyFloat* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, 0 );
+    g_return_val_if_fail( err == NULL || *err == NULL, 0 );
     g_return_val_if_fail( TCAM_IS_PROPERTY_FLOAT( self ), 0 );
 
     TcamPropertyFloatInterface* iface = TCAM_PROPERTY_FLOAT_GET_IFACE( self );
@@ -504,6 +514,7 @@ gdouble tcam_property_float_get_value( TcamPropertyFloat* self, GError** err )
 void tcam_property_float_set_value( TcamPropertyFloat* self, gdouble value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_FLOAT( self ) );
 
     TcamPropertyFloatInterface* iface = TCAM_PROPERTY_FLOAT_GET_IFACE( self );
@@ -524,6 +535,7 @@ void tcam_property_float_set_value( TcamPropertyFloat* self, gdouble value, GErr
 void tcam_property_float_get_range( TcamPropertyFloat* self, gdouble* min_value, gdouble* max_value, gdouble* step_value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_FLOAT( self ) );
 
     TcamPropertyFloatInterface* iface = TCAM_PROPERTY_FLOAT_GET_IFACE( self );
@@ -542,6 +554,7 @@ void tcam_property_float_get_range( TcamPropertyFloat* self, gdouble* min_value,
 gdouble tcam_property_float_get_default( TcamPropertyFloat* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, 0 );
+    g_return_val_if_fail( err == NULL || *err == NULL, 0 );
     g_return_val_if_fail( TCAM_IS_PROPERTY_FLOAT( self ), 0 );
 
     TcamPropertyFloatInterface* iface = TCAM_PROPERTY_FLOAT_GET_IFACE( self );
@@ -602,6 +615,7 @@ static void tcam_property_enumeration_default_init( __attribute__ ((unused)) Tca
 const gchar* tcam_property_enumeration_get_value( TcamPropertyEnumeration* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
+    g_return_val_if_fail( err == NULL || *err == NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ), NULL );
 
     TcamPropertyEnumerationInterface* iface = TCAM_PROPERTY_ENUMERATION_GET_IFACE( self );
@@ -621,6 +635,7 @@ const gchar* tcam_property_enumeration_get_value( TcamPropertyEnumeration* self,
 void tcam_property_enumeration_set_value( TcamPropertyEnumeration* self, const gchar* value, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ) );
 
     TcamPropertyEnumerationInterface* iface = TCAM_PROPERTY_ENUMERATION_GET_IFACE( self );
@@ -639,6 +654,7 @@ void tcam_property_enumeration_set_value( TcamPropertyEnumeration* self, const g
 GSList* tcam_property_enumeration_get_enum_entries( TcamPropertyEnumeration* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
+    g_return_val_if_fail( err == NULL || *err == NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ), NULL );
 
     TcamPropertyEnumerationInterface* iface = TCAM_PROPERTY_ENUMERATION_GET_IFACE( self );
@@ -658,6 +674,7 @@ GSList* tcam_property_enumeration_get_enum_entries( TcamPropertyEnumeration* sel
 const gchar* tcam_property_enumeration_get_default( TcamPropertyEnumeration* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
+    g_return_val_if_fail( err == NULL || *err == NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_ENUMERATION( self ), NULL );
 
     TcamPropertyEnumerationInterface* iface = TCAM_PROPERTY_ENUMERATION_GET_IFACE( self );
@@ -681,6 +698,7 @@ static void tcam_property_command_default_init( __attribute__ ((unused)) TcamPro
 void tcam_property_command_set_command( TcamPropertyCommand* self, GError** err )
 {
     g_return_if_fail( self != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_COMMAND( self ) );
 
     TcamPropertyCommandInterface* iface = TCAM_PROPERTY_COMMAND_GET_IFACE( self );
@@ -705,6 +723,7 @@ static void tcam_property_provider_default_init( __attribute__( (unused) )TcamPr
 GSList* tcam_property_provider_get_tcam_property_names( TcamPropertyProvider* self, GError** err )
 {
     g_return_val_if_fail( self != NULL, NULL );
+    g_return_val_if_fail( err == NULL || *err == NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), NULL );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -727,6 +746,7 @@ TcamPropertyBase* tcam_property_provider_get_tcam_property( TcamPropertyProvider
 {
     g_return_val_if_fail( self != NULL, NULL );
     g_return_val_if_fail( name != NULL, NULL );
+    g_return_val_if_fail( err == NULL || *err == NULL, NULL );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), NULL );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -748,6 +768,7 @@ void        tcam_property_provider_set_tcam_boolean( TcamPropertyProvider* self,
 {
     g_return_if_fail( self != NULL );
     g_return_if_fail( name != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ) );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -768,6 +789,7 @@ void        tcam_property_provider_set_tcam_integer( TcamPropertyProvider* self,
 {
     g_return_if_fail( self != NULL );
     g_return_if_fail( name != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ) );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -788,6 +810,7 @@ void        tcam_property_provider_set_tcam_float( TcamPropertyProvider* self, c
 {
     g_return_if_fail( self != NULL );
     g_return_if_fail( name != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ) );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -808,6 +831,7 @@ void        tcam_property_provider_set_tcam_enumeration( TcamPropertyProvider* s
 {
     g_return_if_fail( self != NULL );
     g_return_if_fail( name != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ) );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -827,6 +851,7 @@ void        tcam_property_provider_set_tcam_command( TcamPropertyProvider* self,
 {
     g_return_if_fail( self != NULL );
     g_return_if_fail( name != NULL );
+    g_return_if_fail( err == NULL || *err == NULL );
     g_return_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ) );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -849,6 +874,7 @@ gboolean    tcam_property_provider_get_tcam_boolean( TcamPropertyProvider* self,
     gboolean rval = FALSE;
     g_return_val_if_fail( self != NULL, rval );
     g_return_val_if_fail( name != NULL, rval );
+    g_return_val_if_fail( err == NULL || *err == NULL, rval );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), rval );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -872,6 +898,7 @@ gint64      tcam_property_provider_get_tcam_integer( TcamPropertyProvider* self,
     gint64 rval = 0;
     g_return_val_if_fail( self != NULL, rval );
     g_return_val_if_fail( name != NULL, rval );
+    g_return_val_if_fail( err == NULL || *err == NULL, rval );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), rval );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -895,6 +922,7 @@ gdouble     tcam_property_provider_get_tcam_float( TcamPropertyProvider* self, c
     gdouble rval = FALSE;
     g_return_val_if_fail( self != NULL, rval );
     g_return_val_if_fail( name != NULL, rval );
+    g_return_val_if_fail( err == NULL || *err == NULL, 0 );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), rval );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
@@ -918,6 +946,7 @@ const gchar* tcam_property_provider_get_tcam_enumeration( TcamPropertyProvider* 
     const gchar* rval = FALSE;
     g_return_val_if_fail( self != NULL, rval );
     g_return_val_if_fail( name != NULL, rval );
+    g_return_val_if_fail( err == NULL || *err == NULL, rval );
     g_return_val_if_fail( TCAM_IS_PROPERTY_PROVIDER( self ), rval );
 
     TcamPropertyProviderInterface* iface = TCAM_PROPERTY_PROVIDER_GET_IFACE( self );
