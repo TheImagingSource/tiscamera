@@ -51,7 +51,15 @@ void PropertyTree::setup_ui()
     {
         auto ptr = m_properties.at(name);
         auto widget = dynamic_cast<QWidget*>(ptr);
-        l->addRow(ptr->get_name(), widget);
+
+        QLabel* name_label = new QLabel(ptr->get_name());
+
+        static const int min_height = 50;
+
+        name_label->setMinimumHeight(min_height);
+        widget->setMinimumHeight(min_height);
+
+        l->addRow(name_label, widget);
     }
 }
 
