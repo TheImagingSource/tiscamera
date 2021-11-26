@@ -599,7 +599,7 @@ int execute_upload (const CLI::App& app)
 
     std::string firmware_file;
 
-    auto firmware = app.get_option("--firmware");
+    auto firmware = app.get_option("--file");
     if (*firmware)
     {
         firmware->results(firmware_file);
@@ -630,13 +630,12 @@ int execute_upload (const CLI::App& app)
             "Start the update process [y/N]";
 
         std::string really;
-        std::cin >> really;
+        std::getline(std::cin, really);
         if (really.compare("y") != 0)
         {
             return 2;
         }
     }
-
 
     auto func = [](int progress, const std::string& s) {
         std::cout << "\r";
@@ -699,7 +698,7 @@ int execute_batch_upload (const CLI::App& app)
     }
 
     std::string firmware_file;
-    auto firmware = app.get_option("--firmware");
+    auto firmware = app.get_option("--file");
     if (*firmware)
     {
         firmware->results(firmware_file);
@@ -871,6 +870,9 @@ int main(int argc, char* argv[])
 
     auto app_fw = app.add_subcommand("upload", "upload firmware to camera");
     app_fw->add_option("--file", "Firmware file to use")->check(CLI::ExistingFile)->required();
+    // group hidden causes the option to not be listed in help
+    // this option can break a camera, do not advertise it
+    app_fw->add_option("-o,--overrideModelName", "Overwrite model name")->group("");
     app_fw->add_flag("--yes", "Assume user says yes to actions");
 
     auto app_batch_fw = app.add_subcommand("batchupload", "upload firmware to camera");
