@@ -533,6 +533,7 @@ void MainWindow::open_property_dialog()
 {
     if (p_property_dialog)
     {
+        p_property_dialog->activateWindow();
         return;
     }
 
@@ -566,6 +567,12 @@ void MainWindow::free_property_dialog()
 
 void MainWindow::open_about_triggered()
 {
+    if (p_about)
+    {
+        p_about->activateWindow();
+        return;
+    }
+
     p_about = new AboutDialog(this);
 
     if (p_source)
