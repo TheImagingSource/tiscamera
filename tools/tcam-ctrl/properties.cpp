@@ -178,11 +178,12 @@ void print_properties(const std::string& serial)
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                          << "\t\t\tUnit:" << unit << std::endl
+                          << "\t\t\tUnit: " << unit << std::endl
                           << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
                           << "\t\t\tPresentation: " << g_enum_to_string(tcam_property_intrepresentation_get_type(), tcam_property_integer_get_representation(integer)) << std::endl
                           << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
                           << "" << std::endl
+                          << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step << std::endl
                           << "\t\t\tDefault: " << def << std::endl
                           << "\t\t\tValue: " << value
                           << std::endl << std::endl;
@@ -231,12 +232,12 @@ void print_properties(const std::string& serial)
                           << "Display Name: \"" << tcam_property_base_get_display_name(base_property) << "\" "
                           << "Category: " << tcam_property_base_get_category(base_property) << std::endl
                           << "\t\t\tDescription: " << tcam_property_base_get_description(base_property) << std::endl
-                          << "\t\t\tUnit:" << unit << std::endl
+                          << "\t\t\tUnit: " << unit << std::endl
                           << "\t\t\tVisibility: " << tcam_property_base_get_visibility(base_property) << std::endl
                           << "\t\t\tPresentation: " << g_enum_to_string(tcam_property_floatrepresentation_get_type(), tcam_property_float_get_representation(f)) << std::endl
                           << "\t\t\t" << get_flag_desc_string(base_property) << std::endl
                           << "" << std::endl
-                          << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep:" << step << std::endl
+                          << "\t\t\tMin: " << min << "\tMax: " << max << "\tStep: " << step << std::endl
                           << "\t\t\tDefault: " << def << std::endl
                           << "\t\t\tValue: " << value
                           << std::endl << std::endl;
