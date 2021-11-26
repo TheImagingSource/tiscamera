@@ -34,6 +34,8 @@ PropertyTree::PropertyTree(QString name,
                            QWidget* parent)
     : QWidget(parent), m_properties(properties), m_name(name)
 {
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+
     setup_ui();
 }
 
