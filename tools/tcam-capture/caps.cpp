@@ -219,12 +219,6 @@ GstCaps* Caps::get_default_caps() const
     // for performance sake, prefer bayer 8-bit
     static const char* defaults [] =
         {
-            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=1920,height=1080,framerate=30/1",
-            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=1920,height=1080,framerate=15/1",
-            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=30/1",
-            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=15/1",
-            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=30/1",
-            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=15/1",
 
             "video/x-bayer,format=pwl-rggb12m,width=1920,height=1080,framerate=30/1",
             "video/x-bayer,format=pwl-rggb12,width=1920,height=1080,framerate=30/1",
@@ -233,15 +227,15 @@ GstCaps* Caps::get_default_caps() const
             "video/x-bayer,format=pwl-rggb12,width=1920,height=1080,framerate=15/1",
             "video/x-bayer,format=pwl-rggb16H12,width=1920,height=1080,framerate=15/1",
 
+            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=1920,height=1080,framerate=30/1",
+            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=1920,height=1080,framerate=15/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=30/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=1920,height=1080,framerate=15/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=30/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=1920,height=1080,framerate=15/1",
+
             "video/x-raw,width=1920,height=1080,framerate=30/1",
             "video/x-raw,width=1920,height=1080,framerate=15/1",
-
-            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=30/1",
-            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=15/1",
-            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
-            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=15/1",
-            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=30/1",
-            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=15/1",
 
             "video/x-bayer,format=pwl-rggb12m,width=640,height=480,framerate=30/1",
             "video/x-bayer,format=pwl-rggb12,width=640,height=480,framerate=30/1",
@@ -249,6 +243,13 @@ GstCaps* Caps::get_default_caps() const
             "video/x-bayer,format=pwl-rggb12m,width=640,height=480,framerate=15/1",
             "video/x-bayer,format=pwl-rggb12,width=640,height=480,framerate=15/1",
             "video/x-bayer,format=pwl-rggb16H12,width=640,height=480,framerate=15/1",
+
+            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=30/1",
+            "video/x-bayer,format={gbrg,bggr,rggb,grbg},width=640,height=480,framerate=15/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=30/1",
+            "video/x-bayer,format={gbrg10m,bggr10m,rggb10m,grbg10m},width=640,height=480,framerate=15/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=30/1",
+            "video/x-bayer,format={gbrg16,bggr16,rggb16,grbg16},width=640,height=480,framerate=15/1",
 
             "video/x-raw,width=640,height=480,framerate=30/1",
             "image/jpeg,width=1920,height=1080,framerate=30/1",
