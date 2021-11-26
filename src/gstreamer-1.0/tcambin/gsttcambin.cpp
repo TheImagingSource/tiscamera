@@ -359,7 +359,7 @@ static bool tcambin_create_elements(GstTcamBin* self)
         else if (data.conversion_info.selected_conversion == TCAM_BIN_CONVERSION_CUDA)
         {
             if (!create_and_add_element(
-                    &data.tcam_converter, "tcamdutils", "tcambin-tcamdutils-cuda", GST_BIN(self)))
+                    &data.tcam_converter, "tcamdutils-cuda", "tcambin-tcamdutils-cuda", GST_BIN(self)))
             {
                 GST_ELEMENT_ERROR(self,
                                   CORE,
