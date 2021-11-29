@@ -16,9 +16,10 @@
 
 #include "propertyworker.h"
 
+#include "propertywidget.h"
+
 PropertyWorker::PropertyWorker()
 {
-
     p_timer = new QTimer(this);
 
     connect(p_timer, SIGNAL(timeout()), this, SLOT(run()));
@@ -39,7 +40,6 @@ PropertyWorker::~PropertyWorker()
 void PropertyWorker::stop()
 {
     m_run = false;
-    m_cv.notify_all();
 }
 
 void PropertyWorker::add_properties(const std::vector<Property*>& new_props)
@@ -47,6 +47,11 @@ void PropertyWorker::add_properties(const std::vector<Property*>& new_props)
     m_properties.insert(m_properties.end(), new_props.begin(), new_props.end());
 }
 
+
+void PropertyWorker::write_property(Property* p)
+{
+    p->set_in_backend();
+}
 
 void PropertyWorker::run()
 {

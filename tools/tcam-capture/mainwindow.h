@@ -18,19 +18,21 @@
 #define MAINWINDOW_H
 
 #include "capswidget.h"
-#include "gst/gst.h"
-#include "indexer.h"
-#include "propertydialog.h"
-#include "tcamcollection.h"
-#include "fpscounter.h"
 #include "config.h"
 #include "definitions.h"
+#include "fpscounter.h"
+#include "indexer.h"
+#include "tcamcollection.h"
 
+#include <QCloseEvent>
 #include <QMainWindow>
 #include <QSettings>
-#include <QToolBar>
 #include <QTimer>
-#include <QCloseEvent>
+#include <QToolBar>
+#include <gst/gst.h>
+#include <memory>
+
+class PropertyDialog;
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -49,13 +51,13 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 
     void set_settings_string(const QString str);
 
 public slots:
 
-    void device_lost(const QString& message="");
+    void device_lost(const QString& message = "");
     void device_lost_cb(const Device& dev);
 
 private slots:
@@ -86,13 +88,12 @@ private slots:
     void fps_tick(double);
 
 private:
-
     static void init_device_dialog(MainWindow* instance)
     {
         instance->on_actionOpen_Device_triggered();
     }
 
-    Ui::MainWindow* ui;
+    Ui::MainWindow* ui = nullptr;
 
     AboutDialog* p_about = nullptr;
 
@@ -105,13 +106,13 @@ private:
 
     std::shared_ptr<Indexer> m_index;
     Device m_selected_device;
-    PropertyDialog* p_property_dialog;
-    GstElement* p_pipeline;
+    PropertyDialog* p_property_dialog = nullptr;
+    GstElement* p_pipeline = nullptr;
 
     TcamCollection m_tcam_collection;
     GstElement* p_source = nullptr;
     GstElement* p_displaysink = nullptr;
-    gulong m_fps_signal_id;
+    gulong m_fps_signal_id = 0;
 
     QLabel* p_fps_label = nullptr;
     QLabel* p_settings_label = nullptr;

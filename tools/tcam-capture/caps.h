@@ -17,15 +17,17 @@
 #ifndef CAPS_H
 #define CAPS_H
 
-#include <QString>
 #include <gst/gst.h>
 #include <string>
 #include <vector>
 
+
+
+
 struct caps_resolution
 {
-    unsigned int width;
-    unsigned int height;
+    unsigned int width = 0;
+    unsigned int height = 0;
 
     std::vector<double> framerates;
 };
@@ -40,10 +42,7 @@ struct scaling
 
     bool is_default() const
     {
-        if (binning_h == 1
-            && binning_v ==1
-            && skipping_h == 1
-            && skipping_v == 1)
+        if (binning_h == 1 && binning_v == 1 && skipping_h == 1 && skipping_v == 1)
         {
             return true;
         }
@@ -52,10 +51,8 @@ struct scaling
 
     bool operator==(const scaling& other) const
     {
-        if (binning_h == other.binning_h
-            && binning_v == other.binning_v
-            && skipping_h == other.skipping_h
-            && skipping_v == other.skipping_v)
+        if (binning_h == other.binning_h && binning_v == other.binning_v
+            && skipping_h == other.skipping_h && skipping_v == other.skipping_v)
         {
             return true;
         }
@@ -71,7 +68,6 @@ struct scaling
     {
         return std::to_string(binning_h) + "x" + std::to_string(binning_v);
     }
-
 };
 
 struct caps_format
@@ -84,56 +80,38 @@ struct caps_format
     std::vector<struct caps_resolution> resolutions;
 };
 
-
-struct single_format
-{
-    std::string format;
-    scaling scale;
-
-    int width;
-    int height;
-
-    double framerate;
-};
-
-
 class Caps
 {
 public:
-    Caps(GstCaps* caps);
+    explicit Caps(GstCaps* caps);
+    ~Caps();
 
-    GstCaps* get_default_caps() const;
-
-    single_format get_default_format() const;
+    static GstCaps* get_default_caps( GstCaps* intersect );
 
     bool has_resolution_ranges() const;
     std::vector<std::string> get_formats() const;
     std::string get_gst_name(const std::string& format) const;
-    std::vector<std::pair<uint, uint>> get_resolutions(const std::string& format, const scaling &scale = {}) const;
+    std::vector<std::pair<uint, uint>> get_resolutions(const std::string& format,
+                                                       const scaling& scale = {}) const;
 
-    std::vector<double> get_framerates(const std::string& format, const scaling &scale,
+    std::vector<double> get_framerates(const std::string& format,
+                                       const scaling& scale,
                                        unsigned int width,
                                        unsigned int height) const;
-
-    GstCaps* find_caps(const QString format, int width, int height, double framerate) const;
-
-    const GstCaps& get_caps() const;
 
     bool has_binning() const;
     bool has_skipping() const;
 
     std::vector<std::string> get_binning(const std::string& format) const;
     std::vector<std::string> get_skipping(const std::string& format) const;
-
 private:
-    GstCaps* p_caps;
+    GstCaps* p_caps = nullptr;
 
-    single_format m_default_settings;
+    std::vector<caps_format> formats;
 
-    std::vector<struct caps_format> formats;
+    std::vector<caps_format> generate_from_fixed_caps();
+    std::vector<caps_format> generate_from_caps_list();
 
-    std::vector<struct caps_format> generate_from_fixed_caps();
-    std::vector<struct caps_format> generate_from_caps_list();
     void generate();
 };
 

@@ -22,10 +22,8 @@
 #include <QFormLayout>
 #include <tcam-property-1.0.h>
 
-PropertyTree::PropertyTree(QString name,
-                           const std::vector<Property*>& properties,
-                           QWidget* parent)
-    : QWidget(parent), m_properties(properties), m_name(name)
+PropertyTree::PropertyTree(const std::vector<Property*>& properties, QWidget* parent)
+    : QWidget(parent), m_properties(properties)
 {
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 
@@ -124,12 +122,10 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
             qWarning("%s has empty category!", name.c_str());
         }
 
-        auto is_known_category = std::any_of(known_categories.begin(),
-                                 known_categories.end(),
-                                 [&category](const std::string& categ)
-                                 {
-                                     return categ == category;
-                                 });
+        auto is_known_category =
+            std::any_of(known_categories.begin(),
+                        known_categories.end(),
+                        [&category](const std::string& categ) { return categ == category; });
 
         if (!is_known_category)
             known_categories.push_back(category);
@@ -178,11 +174,6 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 prop_list.push_back(ptr);
                 break;
             }
-            default:
-            {
-                qWarning("Property Type not implemented");
-                break;
-            }
         }
     }
 
@@ -197,7 +188,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 props.push_back(p);
             }
         }
-        PropertyTree* tab_tree = new PropertyTree(cat.c_str(), props);
+        PropertyTree* tab_tree = new PropertyTree(props);
 
         ui->tabWidget->addTab(tab_tree, cat.c_str());
     }

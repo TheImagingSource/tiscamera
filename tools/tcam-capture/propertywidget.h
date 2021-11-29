@@ -27,7 +27,6 @@
 #include <QSpinBox>
 #include <QString>
 #include <QWidget>
-#include <gst/gst.h>
 #include <string>
 #include <tcam-property-1.0.h>
 
@@ -37,13 +36,10 @@ public:
     virtual ~Property() = default;
 
     virtual void update() = 0;
+    virtual void set_in_backend() = 0;
 
     QString get_name() const;
     std::string get_category() const;
-
-    virtual void set_locked(bool) = 0;
-
-    virtual void set_in_backend() = 0;
 
 protected:
     virtual TcamPropertyBase* get_property_base() const noexcept = 0;
@@ -56,8 +52,6 @@ public:
     EnumWidget(TcamPropertyEnumeration* prop, QWidget* parent = nullptr);
 
     virtual void update() final;
-
-    virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
 
@@ -79,12 +73,9 @@ signals:
 private:
     void setup_ui();
 
-    QBoxLayout* p_layout;
-    QLabel* p_name;
+    QComboBox* p_combobox = nullptr;
 
-    QComboBox* p_combobox;
-
-    TcamPropertyEnumeration* p_prop;
+    TcamPropertyEnumeration* p_prop = nullptr;
 };
 
 class IntWidget : public QWidget, public Property
@@ -93,11 +84,7 @@ class IntWidget : public QWidget, public Property
 public:
     IntWidget(TcamPropertyInteger* prop, QWidget* parent = nullptr);
 
-
     virtual void update() final;
-
-    virtual void set_locked(bool) final;
-
     virtual void set_in_backend() final;
 
 protected:
@@ -120,8 +107,6 @@ private:
     void setup_ui();
     void write_value(int64_t new_value);
 
-    QBoxLayout* p_layout = nullptr;
-    QLabel* p_name = nullptr;
     TcamSlider* p_slider = nullptr;
     QSpinBox* p_box = nullptr;
 
@@ -135,11 +120,7 @@ class DoubleWidget : public QWidget, public Property
 public:
     DoubleWidget(TcamPropertyFloat* prop, QWidget* parent = nullptr);
 
-
     virtual void update() final;
-
-    virtual void set_locked(bool) final;
-
     virtual void set_in_backend() final;
 
 protected:
@@ -162,9 +143,6 @@ private:
     void setup_ui();
     void write_value(double new_value);
 
-    QBoxLayout* p_layout = nullptr;
-    QLabel* p_name = nullptr;
-
     TcamSlider* p_slider = nullptr;
     QDoubleSpinBox* p_box = nullptr;
 
@@ -179,9 +157,6 @@ public:
     BoolWidget(TcamPropertyBoolean* prop, QWidget* parent = nullptr);
 
     virtual void update() final;
-
-    virtual void set_locked(bool) final;
-
     virtual void set_in_backend() final;
 
 protected:
@@ -202,12 +177,9 @@ signals:
 private:
     void setup_ui();
 
-    QBoxLayout* p_layout;
-    QLabel* p_name;
+    QCheckBox* p_checkbox = nullptr;
 
-    QCheckBox* p_checkbox;
-
-    TcamPropertyBoolean* p_prop;
+    TcamPropertyBoolean* p_prop = nullptr;
 };
 
 
@@ -219,9 +191,6 @@ public:
 
 
     virtual void update() final;
-
-    virtual void set_locked(bool) final;
-
     virtual void set_in_backend() final;
 
 protected:
@@ -242,12 +211,9 @@ signals:
 private:
     void setup_ui();
 
-    QBoxLayout* p_layout;
-    QLabel* p_name;
+    QPushButton* p_button = nullptr;
 
-    QPushButton* p_button;
-
-    TcamPropertyCommand* p_prop;
+    TcamPropertyCommand* p_prop = nullptr;
 };
 
 

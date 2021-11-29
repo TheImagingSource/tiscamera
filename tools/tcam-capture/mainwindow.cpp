@@ -18,24 +18,20 @@
 
 #include "./ui_mainwindow.h"
 
-#include <QMenu>
 #include <QDialogButtonBox>
 #include <QErrorMessage>
+#include <QMenu>
 #include <QMessageBox>
 // #include <QVideoWidget>
-#include <gst/gst.h>
-
+#include "aboutdialog.h"
 #include "caps.h"
 #include "device.h"
-#include "aboutdialog.h"
 #include "devicedialog.h"
-#include "propertydialog.h"
 #include "optionsdialog.h"
-#include "tcamcollection.h"
+#include "propertydialog.h"
 
-#include <regex>
 #include <glib-object.h>
-#include <gobject/gvaluecollector.h>
+#include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 
 
@@ -73,7 +69,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     p_action_property_dialog = new QAction(QIcon(":/images/dialog.png"), "Open Property Dialog");
     p_action_property_dialog->setShortcut(QKeySequence("Ctrl+P"));
-    connect(p_action_property_dialog, &QAction::triggered, this, &MainWindow::on_actionOpen_triggered);
+    connect(
+        p_action_property_dialog, &QAction::triggered, this, &MainWindow::on_actionOpen_triggered);
 
     p_toolbar->addAction(p_action_property_dialog);
 
@@ -119,7 +116,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
     close_pipeline();
     save_settings();
@@ -129,7 +126,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user_data)
 {
-    switch(GST_MESSAGE_TYPE(message))
+    switch (GST_MESSAGE_TYPE(message))
     {
         case GST_MESSAGE_INFO:
         {
@@ -145,8 +142,8 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
             // set infos for users
             if (s.startsWith("Working with src caps:"))
             {
-                s = s.remove( QRegExp( "\\(\\w*\\)" ) );
-                s = s.section(":",1);
+                s = s.remove(QRegExp("\\(\\w*\\)"));
+                s = s.section(":", 1);
 
                 ((MainWindow*)user_data)->set_settings_string(s);
             }
@@ -167,7 +164,7 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
             QString s = err->message;
             if (s.startsWith("Device lost ("))
             {
-                QString serial = s.mid(13, s.length()-2);
+                QString serial = s.mid(13, s.length() - 2);
 
                 ((MainWindow*)user_data)->device_lost(serial);
             }
@@ -222,12 +219,19 @@ static gboolean bus_callback(GstBus* /*bus*/, GstMessage* message, gpointer user
 
             break;
         }
+        case GST_MESSAGE_ASYNC_DONE:
+        { // ignore
+            break;
+        }
+        case GST_MESSAGE_NEW_CLOCK:
+        { // ignore
+            break;
+        }
         default:
         {
             qInfo("Message handling not implemented: %s", GST_MESSAGE_TYPE_NAME(message));
             break;
         }
-
     }
 
     return TRUE;
@@ -265,7 +269,6 @@ void MainWindow::on_actionOpen_Device_triggered()
         qInfo("device selected: %s\n", m_selected_device.str().c_str());
 
         open_pipeline(dialog.get_format_handling());
-
     }
     else
     {
@@ -294,7 +297,8 @@ void MainWindow::open_pipeline(FormatHandling handling)
         GstState state;
         GstState pending;
         // wait 0.1 sec
-        GstStateChangeReturn change_ret = gst_element_get_state(p_pipeline, &state, &pending, 100000000);
+        GstStateChangeReturn change_ret =
+            gst_element_get_state(p_pipeline, &state, &pending, 100000000);
 
         if (change_ret == GST_STATE_CHANGE_SUCCESS)
         {
@@ -308,7 +312,6 @@ void MainWindow::open_pipeline(FormatHandling handling)
             qWarning("Unable to determine pipeline state. Attempting restart.");
             close_pipeline();
         }
-
     }
     else
     {
@@ -326,7 +329,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
         return;
     }
 
-    auto bus = gst_pipeline_get_bus (GST_PIPELINE(p_pipeline));
+    auto bus = gst_pipeline_get_bus(GST_PIPELINE(p_pipeline));
     m_gst_bus_id = gst_bus_add_watch(bus, bus_callback, this);
     gst_object_unref(bus);
 
@@ -360,7 +363,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
         if (has_property(p_source, "conversion-element"))
         {
             qDebug("Setting 'conversion-element' property to '%s'",
-                  conversion_element_to_string(m_config.conversion_element));
+                   conversion_element_to_string(m_config.conversion_element));
             g_object_set(p_source, "conversion-element", m_config.conversion_element, nullptr);
         }
     }
@@ -411,7 +414,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
         gst_object_unref(tcamsrc);
     }
 
-    GstCaps* caps;
+    GstCaps* caps = nullptr;
     if (handling == FormatHandling::Dialog)
     {
         p_selected_caps = open_format_dialog();
@@ -424,8 +427,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     }
     else
     {
-        auto c = Caps(src_caps);
-        caps = c.get_default_caps();
+        caps = Caps::get_default_caps( src_caps );
     }
 
     if (src_caps)
@@ -442,7 +444,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         auto capsfilter = gst_bin_get_by_name(GST_BIN(p_pipeline), "device-caps");
 
-        if (!capsfilter )
+        if (!capsfilter)
         {
             qWarning("Source does not have property 'device-caps'.");
             qWarning("Alternative of capsfilter named 'device-caps' does not exist.");
@@ -458,14 +460,14 @@ void MainWindow::open_pipeline(FormatHandling handling)
 
     if (has_property(p_displaysink, "video-sink"))
     {
-        GstElement* disp;
+        GstElement* disp = nullptr;
         g_object_get(p_displaysink, "video-sink", &disp, nullptr);
         gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(disp), this->ui->widget->winId());
+        g_object_unref(disp);
     }
 
-    m_fps_signal_id = g_signal_connect(p_displaysink,
-                                       "fps-measurements",
-                                       G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
+    m_fps_signal_id = g_signal_connect(
+        p_displaysink, "fps-measurements", G_CALLBACK(&FPSCounter::fps_callback), &m_fps_counter);
 
     gst_element_set_state(p_pipeline, GST_STATE_PLAYING);
 
@@ -705,7 +707,6 @@ void MainWindow::on_actionOpen_triggered()
 
 GstCaps* MainWindow::open_format_dialog()
 {
-
     auto format_dialog = QDialog();
 
     auto layout = new QVBoxLayout();
@@ -713,12 +714,11 @@ GstCaps* MainWindow::open_format_dialog()
     format_dialog.setLayout(layout);
 
     //qInfo("Device caps for format dialog: %s", gst_caps_to_string(m_selected_device.caps()));
-    auto fmt_widget = new CapsWidget(m_selected_device.caps());
+    auto fmt_widget = new CapsWidget(Caps(m_selected_device.caps()));
 
     layout->addWidget(fmt_widget);
 
-    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
-                                          | QDialogButtonBox::Cancel);
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     connect(buttonBox, &QDialogButtonBox::accepted, &format_dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &format_dialog, &QDialog::reject);
@@ -737,11 +737,6 @@ GstCaps* MainWindow::open_format_dialog()
     {
         GstCaps* new_caps = fmt_widget->get_caps();
 
-        if (p_selected_caps)
-        {
-            gst_caps_unref(p_selected_caps);
-        }
-
         //p_selected_caps = new_caps;
         return new_caps;
     }
@@ -752,11 +747,15 @@ GstCaps* MainWindow::open_format_dialog()
 void MainWindow::open_format_triggered()
 {
     auto caps = open_format_dialog();
-
     if (caps)
     {
+        if (p_selected_caps)
+        {
+            gst_caps_unref(p_selected_caps);
+            p_selected_caps = nullptr;
+        }
+
         p_selected_caps = caps;
         open_pipeline(FormatHandling::Static);
     }
-
 }

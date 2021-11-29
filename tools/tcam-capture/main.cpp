@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include "mainwindow.h"
-
 #include "../src/version.h"
+#include "mainwindow.h"
 
 #include <QApplication>
 #include <QCommandLineParser>

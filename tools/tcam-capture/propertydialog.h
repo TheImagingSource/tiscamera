@@ -21,8 +21,8 @@
 #include "tcamcollection.h"
 
 #include <QDialog>
+#include <QLayout>
 #include <QThread>
-#include <gst/gst.h>
 #include <string>
 
 class Property;
@@ -36,16 +36,13 @@ class PropertyTree : public QWidget
     Q_OBJECT
 
 public:
-    PropertyTree(QString name,
-                 const std::vector<Property*>& properties,
-                 QWidget* parent = nullptr);
+    PropertyTree(const std::vector<Property*>& properties, QWidget* parent = nullptr);
 
 private:
     void setup_ui();
 
     std::vector<Property*> m_properties;
 
-    QString m_name;
     QVBoxLayout* p_layout = nullptr;
 };
 
@@ -68,7 +65,7 @@ signals:
 private:
     void initialize_dialog(TcamCollection& collection);
 
-    Ui::PropertyDialog* ui  = nullptr;
+    Ui::PropertyDialog* ui = nullptr;
 
     QThread* p_work_thread = nullptr;
     PropertyWorker* p_worker = nullptr;

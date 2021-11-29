@@ -49,8 +49,7 @@ std::string Property::get_category() const
 }
 
 
-template<class TWidget>
-static void emit_error_stuff( TWidget* widget, GError* err )
+template<class TWidget> static void emit_error_stuff(TWidget* widget, GError* err)
 {
     qWarning("Error while handling property '%s'. Message: %s",
              qUtf8Printable(widget->get_name()),
@@ -60,15 +59,15 @@ static void emit_error_stuff( TWidget* widget, GError* err )
         qWarning("Device lost");
         emit widget->device_lost(err->message);
     }
-    g_error_free( err );
+    g_error_free(err);
 }
 
 
-#define HANDLE_ERROR(err, action)                                   \
-    if (err)                                                        \
-    {                                                               \
-        emit_error_stuff( this, err );                              \
-        action;                                                     \
+#define HANDLE_ERROR(err, action)    \
+    if (err)                         \
+    {                                \
+        emit_error_stuff(this, err); \
+        action;                      \
     }
 
 
@@ -102,7 +101,6 @@ void EnumWidget::update()
     {
         // p_combobox->blockSignals(true);
         p_combobox->setEnabled(false);
-        p_combobox->setPlaceholderText("Not available"); // this seemingly does not work
         p_combobox->setCurrentIndex(-1); // this shows the placeholder text
         // p_combobox->blockSignals(false);
     }
@@ -119,11 +117,6 @@ void EnumWidget::update()
         p_combobox->setCurrentText(value);
         // p_combobox->blockSignals(false);
     }
-}
-
-void EnumWidget::set_locked(bool lock)
-{
-    p_combobox->setEnabled(!lock);
 }
 
 void EnumWidget::drop_down_changed(const QString& /*entry*/)
@@ -143,7 +136,7 @@ void EnumWidget::set_in_backend()
 
 void EnumWidget::setup_ui()
 {
-    p_layout = new QHBoxLayout();
+    auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 
@@ -158,8 +151,6 @@ void EnumWidget::setup_ui()
     for (auto e = entries; e != nullptr; e = e->next) { p_combobox->addItem((const char*)e->data); }
 
     g_slist_free_full(entries, g_free);
-
-    p_combobox->setPlaceholderText("Not available");
 
     update();
 
@@ -231,18 +222,6 @@ void IntWidget::update()
     }
 }
 
-void IntWidget::set_locked(bool lock)
-{
-    if (p_slider)
-    {
-        p_slider->setDisabled(lock);
-    }
-    if (p_box)
-    {
-        p_box->setReadOnly(lock);
-    }
-}
-
 void IntWidget::slider_changed(int new_value)
 {
     p_box->blockSignals(true);
@@ -269,7 +248,7 @@ void IntWidget::spinbox_changed(int new_value)
 
 void IntWidget::setup_ui()
 {
-    p_layout = new QHBoxLayout();
+    auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 
@@ -389,16 +368,6 @@ void DoubleWidget::update()
     }
 }
 
-void DoubleWidget::set_locked(bool lock)
-{
-    if (p_slider)
-    {
-        p_slider->setDisabled(lock);
-    }
-
-    p_box->setReadOnly(lock);
-}
-
 void DoubleWidget::slider_changed(double new_value)
 {
     p_box->blockSignals(true);
@@ -423,7 +392,7 @@ void DoubleWidget::spinbox_changed(double new_value)
 
 void DoubleWidget::setup_ui()
 {
-    p_layout = new QHBoxLayout();
+    auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 
@@ -503,7 +472,7 @@ void BoolWidget::update()
     bool is_available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    if( !is_available)
+    if (!is_available)
     {
         p_checkbox->setEnabled(false);
     }
@@ -522,11 +491,6 @@ void BoolWidget::update()
     }
 }
 
-void BoolWidget::set_locked(bool lock)
-{
-    p_checkbox->setEnabled(!lock);
-}
-
 void BoolWidget::checkbox_changed(bool /*new_value*/)
 {
     emit value_changed(this);
@@ -534,7 +498,7 @@ void BoolWidget::checkbox_changed(bool /*new_value*/)
 
 void BoolWidget::setup_ui()
 {
-    p_layout = new QHBoxLayout();
+    auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 
@@ -570,7 +534,7 @@ void ButtonWidget::update()
     bool is_available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    if( !is_available )
+    if (!is_available)
     {
         p_button->setEnabled(false);
     }
@@ -584,11 +548,6 @@ void ButtonWidget::update()
     }
 }
 
-void ButtonWidget::set_locked(bool lock)
-{
-    p_button->setEnabled(!lock);
-}
-
 void ButtonWidget::got_clicked()
 {
     emit value_changed(this);
@@ -600,12 +559,12 @@ void ButtonWidget::set_in_backend()
 
     tcam_property_command_set_command(p_prop, &err);
 
-    HANDLE_ERROR(err, return )
+    HANDLE_ERROR(err, return );
 }
 
 void ButtonWidget::setup_ui()
 {
-    p_layout = new QHBoxLayout();
+    auto p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 

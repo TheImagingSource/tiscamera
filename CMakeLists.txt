@@ -61,7 +61,7 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON )
 
 include(CMakeInstall.cmake)
 
-include("clang-format")
+#include("clang-format")
 
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 

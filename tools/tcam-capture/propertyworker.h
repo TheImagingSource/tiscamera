@@ -17,21 +17,16 @@
 #ifndef PROPERTYWORKER_H
 #define PROPERTYWORKER_H
 
-#include "propertywidget.h"
-
-#include <QThread>
 #include <QTimer>
-#include <condition_variable>
-#include <memory>
-#include <mutex>
-#include <tcam-property-1.0.h>
+#include <vector>
+
+class Property;
 
 class PropertyWorker : public QObject
 {
     Q_OBJECT
 public:
     PropertyWorker();
-
     ~PropertyWorker();
 
     void stop();
@@ -39,17 +34,12 @@ public:
 
 public slots:
 
-    void write_property(Property* p)
-    {
-        p->set_in_backend();
-    };
+    void write_property(Property* p);
 
     void run();
 
 private:
     std::vector<Property*> m_properties;
-    std::condition_variable m_cv;
-    std::mutex m_mtx;
 
     QTimer* p_timer = nullptr;
 

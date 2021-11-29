@@ -51,14 +51,10 @@ set(TCAM_CAPTURE_SOURCES
   propertydialog.cpp
   propertydialog.h
   propertydialog.ui
-  property.cpp
-  property.h
   propertywidget.cpp
   propertywidget.h
   propertyworker.cpp
   propertyworker.h
-  propertyflags.cpp
-  propertyflags.h
   tcamslider.cpp
   tcamslider.h
   caps.cpp

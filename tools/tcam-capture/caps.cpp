@@ -18,11 +18,9 @@
 
 #include <algorithm>
 
-#include "tcamgstbase.h"
 #include <vector>
 #include <string>
-
-
+#include <QDebug>
 
 namespace {
 
@@ -160,6 +158,9 @@ std::vector<double> index_framerates(const GValue* framerate)
 
         framerates = create_steps_for_range(fps_min_value, fps_max_value);
     }
+
+    std::sort(framerates.rbegin(), framerates.rend());
+
     return framerates;
 }
 
@@ -213,8 +214,12 @@ Caps::Caps(GstCaps* caps)
     generate();
 }
 
+Caps::~Caps()
+{
+    gst_caps_unref(p_caps);
+}
 
-GstCaps* Caps::get_default_caps() const
+GstCaps* Caps::get_default_caps(GstCaps* intersect)
 {
     // for performance sake, prefer bayer 8-bit
     static const char* defaults [] =
@@ -260,9 +265,9 @@ GstCaps* Caps::get_default_caps() const
     {
         GstCaps* test = gst_caps_from_string(d);
 
-        if (gst_caps_can_intersect(p_caps, test))
+        if (gst_caps_can_intersect(intersect, test))
         {
-            ret = gst_caps_intersect(p_caps, test);
+            ret = gst_caps_intersect(intersect, test);
             gst_caps_unref(test);
             break;
         }
@@ -270,17 +275,10 @@ GstCaps* Caps::get_default_caps() const
     }
     if (!ret)
     {
-        return gst_caps_copy(p_caps);
+        return gst_caps_copy(intersect);
     }
     return ret;
 }
-
-
-single_format Caps::get_default_format() const
-{
-    return m_default_settings;
-}
-
 
 bool Caps::has_resolution_ranges() const
 {
@@ -361,8 +359,6 @@ std::vector<double> Caps::get_framerates(const std::string& format,
                                          unsigned int width,
                                          unsigned int height) const
 {
-    std::vector<double> ret;
-
     for (const auto& f : formats)
     {
         if (f.format == format && f.scale == scale)
@@ -377,7 +373,7 @@ std::vector<double> Caps::get_framerates(const std::string& format,
         }
     }
 
-    return ret;
+    return {};
 }
 
 
@@ -618,11 +614,8 @@ std::vector<struct caps_format> Caps::generate_from_caps_list()
     return tmp;
 }
 
-
 void Caps::generate()
 {
-    m_default_settings = {};
-
     if (has_resolution_ranges())
     {
         formats = generate_from_caps_list();
@@ -632,23 +625,6 @@ void Caps::generate()
         formats = generate_from_fixed_caps();
     }
 }
-
-
-GstCaps* Caps::find_caps(const QString, // format
-                         int, // width
-                         int, // height
-                         double) const // framerate
-{
-    qWarning("NOT IMPLEMENTED");
-
-    return nullptr;
-}
-
-const GstCaps& Caps::get_caps() const
-{
-    return *p_caps;
-}
-
 
 bool Caps::has_binning() const
 {
@@ -681,7 +657,6 @@ bool Caps::has_skipping() const
 
 std::vector<std::string> Caps::get_binning(const std::string& format) const
 {
-
     std::vector<std::string> ret;
 
     for (const auto& f : formats)
@@ -701,7 +676,6 @@ std::vector<std::string> Caps::get_binning(const std::string& format) const
 
 std::vector<std::string> Caps::get_skipping(const std::string& format) const
 {
-
     std::vector<std::string> ret;
 
     for (const auto& f : formats)

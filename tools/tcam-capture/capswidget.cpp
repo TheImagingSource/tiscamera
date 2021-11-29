@@ -292,7 +292,22 @@ void CapsWidget::fill_combo_framerate(const QString& format, const scaling& scal
     }
 
     if (!current_entry.isEmpty())
-    p_combo_framerate->setCurrentText(current_entry);
+    {
+        p_combo_framerate->setCurrentText(current_entry);
+    }
+    else
+    {
+        // either select 60 FPS or the highest
+        auto f = std::find(res.begin(), res.end(), 60.0 );
+        if (f == res.end())
+        {
+            f = std ::max_element(res.begin(), res.end());
+        }
+        if (f != res.end())
+        {
+            p_combo_framerate->setCurrentText(QString::number(*f));
+        }
+    }
 
     p_combo_framerate->blockSignals(false);
 }
