@@ -16,21 +16,14 @@
 
 #include "propertydialog.h"
 
+#include "propertywidget.h"
 #include "ui_propertydialog.h"
-#include <QFormLayout>
 
+#include <QFormLayout>
 #include <tcam-property-1.0.h>
 
-// overload the function call operator
-bool sort_props(const std::string& lhs, const std::string& rhs)
-{
-    // dereference the pointers to compare their targets
-    // using the Product class's operator<(...) function
-    return lhs < rhs;
-}
-
 PropertyTree::PropertyTree(QString name,
-                           const std::map<std::string, Property*>& properties,
+                           const std::vector<Property*>& properties,
                            QWidget* parent)
     : QWidget(parent), m_properties(properties), m_name(name)
 {
@@ -44,14 +37,8 @@ void PropertyTree::setup_ui()
     QFormLayout* l = new QFormLayout();
     setLayout(l);
 
-    std::vector<std::string> names;
-    for (const auto& p : m_properties) { names.push_back(p.first); }
-
-    std::sort(names.begin(), names.end(), sort_props);
-
-    for (const auto& name : names)
+    for (auto* ptr : m_properties)
     {
-        auto ptr = m_properties.at(name);
         auto widget = dynamic_cast<QWidget*>(ptr);
 
         QLabel* name_label = new QLabel(ptr->get_name());
@@ -83,10 +70,7 @@ PropertyDialog::PropertyDialog(TcamCollection& collection, QWidget* parent)
 
     initialize_dialog(collection);
 
-    std::vector<Property*> props;
-    for (const auto& p : m_properties) { props.push_back(p.second); }
-
-    p_worker->add_properties(props);
+    p_worker->add_properties(m_properties);
 }
 
 PropertyDialog::~PropertyDialog()
@@ -117,6 +101,8 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
 
     std::vector<std::string> known_categories;
 
+    std::vector<Property*>& prop_list = m_properties;
+
     for (const std::string& name : names)
     {
         TcamPropertyBase* prop = collection.get_property(name);
@@ -127,31 +113,36 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
             continue;
         }
 
-        std::string category = tcam_property_base_get_category(prop);
+        std::string category;
+        if (auto cat = tcam_property_base_get_category(prop); cat)
+        {
+            category = cat;
+        }
 
         if (category.empty())
         {
             qWarning("%s has empty category!", name.c_str());
         }
 
-        auto iter = std::find_if(
-            known_categories.begin(), known_categories.end(), [&category](const std::string& categ) {
-                if (categ == category)
-                    return true;
-                return false;
-            });
+        auto is_known_category = std::any_of(known_categories.begin(),
+                                 known_categories.end(),
+                                 [&category](const std::string& categ)
+                                 {
+                                     return categ == category;
+                                 });
 
-        if (iter == known_categories.end())
+        if (!is_known_category)
             known_categories.push_back(category);
 
-        switch(tcam_property_base_get_property_type(prop))
+        switch (tcam_property_base_get_property_type(prop))
         {
             case TCAM_PROPERTY_TYPE_FLOAT:
             {
                 auto ptr = new DoubleWidget(TCAM_PROPERTY_FLOAT(prop));
-                connect(ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(
+                    ptr, &DoubleWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &DoubleWidget::device_lost, this, &PropertyDialog::notify_device_lost);
-                m_properties[name] = dynamic_cast<Property*>(ptr);
+                prop_list.push_back(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_INTEGER:
@@ -159,7 +150,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 auto ptr = new IntWidget(TCAM_PROPERTY_INTEGER(prop));
                 connect(ptr, &IntWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &IntWidget::device_lost, this, &PropertyDialog::notify_device_lost);
-                m_properties[name] = dynamic_cast<Property*>(ptr);
+                prop_list.push_back(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_ENUMERATION:
@@ -167,8 +158,7 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 auto ptr = new EnumWidget(TCAM_PROPERTY_ENUMERATION(prop));
                 connect(ptr, &EnumWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &EnumWidget::device_lost, this, &PropertyDialog::notify_device_lost);
-
-                m_properties[name] = dynamic_cast<Property*>(ptr);
+                prop_list.push_back(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_BOOLEAN:
@@ -176,15 +166,16 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 auto ptr = new BoolWidget(TCAM_PROPERTY_BOOLEAN(prop));
                 connect(ptr, &BoolWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &BoolWidget::device_lost, this, &PropertyDialog::notify_device_lost);
-                m_properties[name] = dynamic_cast<Property*>(ptr);
+                prop_list.push_back(ptr);
                 break;
             }
             case TCAM_PROPERTY_TYPE_COMMAND:
             {
                 auto ptr = new ButtonWidget(TCAM_PROPERTY_COMMAND(prop));
-                connect(ptr, &ButtonWidget::value_changed, p_worker, &PropertyWorker::write_property);
+                connect(
+                    ptr, &ButtonWidget::value_changed, p_worker, &PropertyWorker::write_property);
                 connect(ptr, &ButtonWidget::device_lost, this, &PropertyDialog::notify_device_lost);
-                m_properties[name] = dynamic_cast<Property*>(ptr);
+                prop_list.push_back(ptr);
                 break;
             }
             default:
@@ -193,19 +184,17 @@ void PropertyDialog::initialize_dialog(TcamCollection& collection)
                 break;
             }
         }
-
-
     }
 
     for (const auto& cat : known_categories)
     {
-        std::map<std::string, Property*> props;
+        std::vector<Property*> props;
 
-        for (auto& p : m_properties)
+        for (auto& p : prop_list)
         {
-            if (p.second->get_category() == cat)
+            if (p->get_category() == cat)
             {
-                props.emplace(p);
+                props.push_back(p);
             }
         }
         PropertyTree* tab_tree = new PropertyTree(cat.c_str(), props);

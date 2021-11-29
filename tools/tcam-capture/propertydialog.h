@@ -17,7 +17,6 @@
 #ifndef PROPERTYDIALOG_H
 #define PROPERTYDIALOG_H
 
-#include "propertywidget.h"
 #include "propertyworker.h"
 #include "tcamcollection.h"
 
@@ -26,6 +25,7 @@
 #include <gst/gst.h>
 #include <string>
 
+class Property;
 namespace Ui
 {
 class PropertyDialog;
@@ -37,16 +37,16 @@ class PropertyTree : public QWidget
 
 public:
     PropertyTree(QString name,
-                 const std::map<std::string, Property*>& properties,
+                 const std::vector<Property*>& properties,
                  QWidget* parent = nullptr);
 
 private:
     void setup_ui();
 
-    std::map<std::string, Property*> m_properties;
+    std::vector<Property*> m_properties;
 
     QString m_name;
-    QVBoxLayout* p_layout;
+    QVBoxLayout* p_layout = nullptr;
 };
 
 class PropertyDialog : public QDialog
@@ -68,12 +68,12 @@ signals:
 private:
     void initialize_dialog(TcamCollection& collection);
 
-    Ui::PropertyDialog* ui;
+    Ui::PropertyDialog* ui  = nullptr;
 
-    QThread* p_work_thread;
-    PropertyWorker* p_worker;
+    QThread* p_work_thread = nullptr;
+    PropertyWorker* p_worker = nullptr;
 
-    std::map<std::string, Property*> m_properties;
+    std::vector<Property*> m_properties;
 };
 
 #endif // PROPERTYDIALOG_H

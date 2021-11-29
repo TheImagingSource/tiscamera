@@ -51,7 +51,7 @@ private:
     std::condition_variable m_cv;
     std::mutex m_mtx;
 
-    QTimer* p_timer;
+    QTimer* p_timer = nullptr;
 
     bool m_run = true;
 };
