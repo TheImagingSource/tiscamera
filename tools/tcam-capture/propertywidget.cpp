@@ -18,23 +18,14 @@
 
 #include <gst/gst.h>
 
-
-#define HANDLE_ERROR(err, action)                                    \
-    if (err)                                                         \
-    {                                                                \
-        qWarning("Error while handling property: %s", err->message); \
-        if (err->code == TCAM_ERROR_DEVICE_LOST)                     \
-        {                                                            \
-            qWarning("Device lost");                                 \
-            emit device_lost(err->message);                          \
-        }                                                            \
-        g_error_free(err);                                           \
-        action;                                                      \
+QString Property::get_name() const
+{
+    auto prop = get_property_base();
+    if (!prop)
+    {
+        return {};
     }
 
-
-static auto get_safe_display_name(TcamPropertyBase* prop) -> QString
-{
     auto disp_name = tcam_property_base_get_display_name(prop);
     if (disp_name && strcmp(disp_name, "") != 0)
     {
@@ -47,38 +38,87 @@ static auto get_safe_display_name(TcamPropertyBase* prop) -> QString
 }
 
 
+std::string Property::get_category() const
+{
+    auto prop = get_property_base();
+    if (!prop || tcam_property_base_get_category(prop) == nullptr)
+    {
+        return {};
+    }
+    return tcam_property_base_get_category(prop);
+}
+
+
+template<class TWidget>
+static void emit_error_stuff( TWidget* widget, GError* err )
+{
+    qWarning("Error while handling property '%s'. Message: %s",
+             qUtf8Printable(widget->get_name()),
+             err->message);
+    if (err->code == TCAM_ERROR_DEVICE_LOST)
+    {
+        qWarning("Device lost");
+        emit widget->device_lost(err->message);
+    }
+    g_error_free( err );
+}
+
+
+#define HANDLE_ERROR(err, action)                                   \
+    if (err)                                                        \
+    {                                                               \
+        emit_error_stuff( this, err );                              \
+        action;                                                     \
+    }
+
+
+static QString generate_tooltip(TcamPropertyBase* p_prop)
+{
+    // the font tagging is used to make the
+    // tool tip text 'feature rich'
+    // this enabled auto wrapping
+    QString toolTip = QString("<font>");
+    toolTip += tcam_property_base_get_description(p_prop);
+    toolTip += "<p>API ID: ";
+    toolTip += tcam_property_base_get_name(p_prop);
+    toolTip += "</p></font>";
+    return toolTip;
+}
+
 EnumWidget::EnumWidget(TcamPropertyEnumeration* prop, QWidget* parent)
     : QWidget(parent), p_prop(prop)
 {
-
     setup_ui();
 }
 
 void EnumWidget::update()
 {
     GError* err = nullptr;
-    QString value = tcam_property_enumeration_get_value(p_prop, &err);
 
-    HANDLE_ERROR(err, return )
+    bool available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
+    HANDLE_ERROR(err, return );
 
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+    if (!available)
+    {
+        // p_combobox->blockSignals(true);
+        p_combobox->setEnabled(false);
+        p_combobox->setPlaceholderText("Not available"); // this seemingly does not work
+        p_combobox->setCurrentIndex(-1); // this shows the placeholder text
+        // p_combobox->blockSignals(false);
+    }
+    else
+    {
+        QString value = tcam_property_enumeration_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
 
-    HANDLE_ERROR(err, return )
+        bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+        HANDLE_ERROR(err, return );
 
-    p_combobox->blockSignals(true);
-    p_combobox->setCurrentText(value);
-    p_combobox->setEnabled(!lock);
-    p_combobox->blockSignals(false);
-}
-
-QString EnumWidget::get_name() const
-{
-    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
-}
-
-std::string EnumWidget::get_category() const
-{
-    return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
+        // p_combobox->blockSignals(true);
+        p_combobox->setEnabled(!lock);
+        p_combobox->setCurrentText(value);
+        // p_combobox->blockSignals(false);
+    }
 }
 
 void EnumWidget::set_locked(bool lock)
@@ -98,9 +138,8 @@ void EnumWidget::set_in_backend()
     GError* err = nullptr;
     tcam_property_enumeration_set_value(p_prop, s.c_str(), &err);
 
-    HANDLE_ERROR(err, return )
+    HANDLE_ERROR(err, return );
 }
-
 
 void EnumWidget::setup_ui()
 {
@@ -109,30 +148,8 @@ void EnumWidget::setup_ui()
     setLayout(p_layout);
 
     GError* err = nullptr;
-    QString value = tcam_property_enumeration_get_value(p_prop, &err);
-
-    HANDLE_ERROR(err, return );
-
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return );
-
     GSList* entries = tcam_property_enumeration_get_enum_entries(p_prop, &err);
-
     HANDLE_ERROR(err, return );
-
-    // if (show_property_flags() && m_flags.is_external())
-    // {
-    //     auto si = style()->standardIcon(QStyle::SP_ComputerIcon);
-    //     int iconSize = 32;
-    //     QLabel* iconLabel = new QLabel;
-    //     iconLabel->setToolTip("Property is emulated on the computer.");
-    //     iconLabel->setPixmap(si.pixmap(iconSize, iconSize));
-    //     iconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    //     iconLabel->setMargin(2);
-    //     p_layout->addWidget(iconLabel);
-    //     //layout->addWidget(titleLabel, 0, 1);
-    // }
 
     p_combobox = new QComboBox();
 
@@ -142,26 +159,16 @@ void EnumWidget::setup_ui()
 
     g_slist_free_full(entries, g_free);
 
-    p_combobox->blockSignals(true);
-    p_combobox->setCurrentText(value);
-    p_combobox->setDisabled(lock);
-    p_combobox->blockSignals(false);
+    p_combobox->setPlaceholderText("Not available");
+
+    update();
 
     connect(p_combobox, &QComboBox::currentTextChanged, this, &EnumWidget::drop_down_changed);
 
     p_layout->addWidget(p_combobox);
 
-    // the font tagging is used to make the
-    // tool tip text 'feature rich'
-    // this enabled auto wrapping
-    QString toolTip = QString("<font>");
-    toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "<p>API ID: ";
-    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "</p></font>";
-    this->setToolTip(toolTip);
+    this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }
-
 
 IntWidget::IntWidget(TcamPropertyInteger* prop, QWidget* parent) : QWidget(parent), p_prop(prop)
 {
@@ -171,41 +178,58 @@ IntWidget::IntWidget(TcamPropertyInteger* prop, QWidget* parent) : QWidget(paren
 void IntWidget::update()
 {
     GError* err = nullptr;
-    gint64 value = tcam_property_integer_get_value(p_prop, &err);
 
+    bool available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-    HANDLE_ERROR(err, return );
-
-    if (p_slider)
+    if (!available)
     {
-        p_slider->blockSignals(true);
-        p_slider->setValue(value);
-        p_slider->setDisabled(lock);
-        p_slider->blockSignals(false);
+        if (p_slider)
+            p_slider->setDisabled(true);
+        if (p_box)
+            p_box->setDisabled(true);
     }
-    if (p_box)
+    else
     {
-        p_box->blockSignals(true);
-        p_box->setValue(value);
-        p_box->setDisabled(lock);
-        p_box->blockSignals(false);
+        gint64 min;
+        gint64 max;
+        gint64 step;
+        tcam_property_integer_get_range(p_prop, &min, &max, &step, &err);
+        HANDLE_ERROR(err, return );
+
+        gint64 value = tcam_property_integer_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+        HANDLE_ERROR(err, return );
+
+        if (p_slider)
+        {
+            p_slider->blockSignals(true);
+
+            p_slider->setRange(min, max);
+            p_slider->setSingleStep(step);
+
+            p_slider->setValue(value);
+            p_slider->setDisabled(lock);
+
+            p_slider->blockSignals(false);
+        }
+        if (p_box)
+        {
+            p_box->blockSignals(true);
+            p_box->setDisabled(false);
+
+            p_box->setRange(min, max);
+            p_box->setSingleStep(step);
+
+            p_box->setValue(value);
+            p_box->setReadOnly(lock);
+
+            p_box->blockSignals(false);
+        }
     }
 }
-
-
-QString IntWidget::get_name() const
-{
-    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
-}
-
-
-std::string IntWidget::get_category() const
-{
-    return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
-}
-
 
 void IntWidget::set_locked(bool lock)
 {
@@ -213,7 +237,10 @@ void IntWidget::set_locked(bool lock)
     {
         p_slider->setDisabled(lock);
     }
-    p_box->setDisabled(lock);
+    if (p_box)
+    {
+        p_box->setReadOnly(lock);
+    }
 }
 
 void IntWidget::slider_changed(int new_value)
@@ -246,17 +273,7 @@ void IntWidget::setup_ui()
 
     setLayout(p_layout);
 
-    gint64 min;
-    gint64 max;
-    gint64 step;
-    GError* err = nullptr;
-    tcam_property_integer_get_range(p_prop, &min, &max, &step, &err);
-    gint64 value = tcam_property_integer_get_value(p_prop, &err);
-
-    bool is_locked = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), nullptr);
-
     TcamPropertyIntRepresentation representation = tcam_property_integer_get_representation(p_prop);
-
     if (representation != TCAM_PROPERTY_INTREPRESENTATION_PURENUMBER)
     {
         if (representation == TCAM_PROPERTY_INTREPRESENTATION_LINEAR)
@@ -269,49 +286,33 @@ void IntWidget::setup_ui()
         }
         else
         {
-            throw std::runtime_error("representation not implemented.");
+            qWarning("representation not implemented.");
         }
-
-        p_slider->setRange(min, max);
-        p_slider->setSingleStep(step);
-        p_slider->setValue(value);
-        p_slider->setDisabled(is_locked);
-
-        connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed);
-        p_layout->addWidget(p_slider);
     }
 
     p_box = new QSpinBox();
-
-    p_box->setRange(min, max);
-    p_box->setSingleStep(step);
+    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 
     if (auto unit_ptr = tcam_property_integer_get_unit(p_prop); unit_ptr)
     {
-        QString unit = " ";
-        unit += unit_ptr;
-        p_box->setSuffix(unit);
+        p_box->setSuffix(QString::asprintf(" %s", unit_ptr));
     }
 
-    p_box->setDisabled(is_locked);
-    p_box->setValue(value);
-    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
+    update();
 
-    connect(p_box, QOverload<int>::of(&QSpinBox::valueChanged), this, &IntWidget::spinbox_changed);
-
-    p_layout->addWidget(p_box);
-
-    // the font tagging is used to make the
-    // tool tip text 'feature rich'
-    // this enabled auto wrapping
-    QString toolTip = QString("<font>");
-    toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "<p>API ID: ";
-    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "</p></font>";
-    this->setToolTip(toolTip);
+    if (p_slider)
+    {
+        connect(p_slider, &TcamSlider::valueChanged, this, &IntWidget::slider_changed);
+        p_layout->addWidget(p_slider);
+    }
+    if (p_box)
+    {
+        connect(
+            p_box, QOverload<int>::of(&QSpinBox::valueChanged), this, &IntWidget::spinbox_changed);
+        p_layout->addWidget(p_box);
+    }
+    this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }
-
 
 void IntWidget::write_value(int64_t new_value)
 {
@@ -336,46 +337,57 @@ DoubleWidget::DoubleWidget(TcamPropertyFloat* prop, QWidget* parent) : QWidget(p
     setup_ui();
 }
 
-
 void DoubleWidget::update()
 {
     GError* err = nullptr;
-    gdouble value = tcam_property_float_get_value(p_prop, &err);
 
+    bool is_available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return );
-
-    if (p_slider)
+    if (!is_available)
     {
-        p_slider->blockSignals(true);
-        p_slider->setValue(value);
-        p_slider->setDisabled(lock);
-        p_slider->blockSignals(false);
+        if (p_slider)
+            p_slider->setDisabled(true);
+        if (p_box)
+            p_box->setDisabled(true);
     }
-    if (p_box)
+    else
     {
-        p_box->blockSignals(true);
-        p_box->setValue(value);
-        p_box->setDisabled(lock);
-        p_box->blockSignals(false);
+        gdouble min = 0;
+        gdouble max = 0;
+        gdouble step = 1;
+        tcam_property_float_get_range(p_prop, &min, &max, &step, &err);
+        HANDLE_ERROR(err, return );
+
+        gdouble value = tcam_property_float_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
+
+        bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+        HANDLE_ERROR(err, return );
+
+        if (p_slider)
+        {
+            p_slider->blockSignals(true);
+            p_slider->setRange(min, max);
+            p_slider->setSingleStep(step);
+
+            p_slider->setValue(value);
+            p_slider->setDisabled(lock);
+            p_slider->blockSignals(false);
+        }
+        if (p_box)
+        {
+            p_box->blockSignals(true);
+            p_box->setDisabled(false);
+            p_box->setRange(min, max);
+            p_box->setSingleStep(step);
+
+            p_box->setValue(value);
+            p_box->setReadOnly(lock);
+            p_box->blockSignals(false);
+        }
     }
 }
-
-
-QString DoubleWidget::get_name() const
-{
-    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
-}
-
-
-std::string DoubleWidget::get_category() const
-{
-    return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
-}
-
 
 void DoubleWidget::set_locked(bool lock)
 {
@@ -384,7 +396,7 @@ void DoubleWidget::set_locked(bool lock)
         p_slider->setDisabled(lock);
     }
 
-    p_box->setDisabled(lock);
+    p_box->setReadOnly(lock);
 }
 
 void DoubleWidget::slider_changed(double new_value)
@@ -415,31 +427,15 @@ void DoubleWidget::setup_ui()
 
     setLayout(p_layout);
 
-    m_representation = tcam_property_float_get_representation(p_prop);
+    auto representation = tcam_property_float_get_representation(p_prop);
 
-    gdouble min;
-    gdouble max;
-    gdouble step;
-    GError* err = nullptr;
-    tcam_property_float_get_range(p_prop, &min, &max, &step, &err);
-
-    HANDLE_ERROR(err, return );
-
-    gdouble value = tcam_property_float_get_value(p_prop, &err);
-
-    HANDLE_ERROR(err, return );
-
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return );
-
-    if (m_representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
+    if (representation != TCAM_PROPERTY_FLOATREPRESENTATION_PURENUMBER)
     {
-        if (m_representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
+        if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LINEAR)
         {
             p_slider = new TcamSlider();
         }
-        else if (m_representation == TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC)
+        else if (representation == TCAM_PROPERTY_FLOATREPRESENTATION_LOGARITHMIC)
         {
             p_slider = new TcamSlider(TcamSliderScale::Logarithmic);
         }
@@ -447,53 +443,33 @@ void DoubleWidget::setup_ui()
         {
             throw std::runtime_error("representation not implemented.");
         }
-
-        p_slider->setRange(min, max);
-        p_slider->setSingleStep(step);
-        p_slider->setValue(value);
-        p_slider->setDisabled(lock);
-
-        connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed);
     }
 
     p_box = new QDoubleSpinBox();
+    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 
     if (auto unit_ptr = tcam_property_float_get_unit(p_prop); unit_ptr)
     {
-        QString unit = " ";
-        unit += unit_ptr;
-        p_box->setSuffix(unit);
+        p_box->setSuffix(QString::asprintf(" %s", unit_ptr));
     }
 
-    p_box->setRange(min, max);
-    p_box->setSingleStep(step);
-    p_box->setValue(value);
-    p_box->setDisabled(lock);
-
-    p_box->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
-
-    connect(p_box,
-            QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this,
-            &DoubleWidget::spinbox_changed);
+    update();
 
     if (p_slider)
     {
+        connect(p_slider, &TcamSlider::valueChanged, this, &DoubleWidget::slider_changed);
         p_layout->addWidget(p_slider);
     }
-    p_layout->addWidget(p_box);
-
-    // the font tagging is used to make the
-    // tool tip text 'feature rich'
-    // this enabled auto wrapping
-    QString toolTip = QString("<font>");
-    toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "<p>API ID: ";
-    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "</p></font>";
-    this->setToolTip(toolTip);
+    if (p_box)
+    {
+        connect(p_box,
+                QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                this,
+                &DoubleWidget::spinbox_changed);
+        p_layout->addWidget(p_box);
+    }
+    this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }
-
 
 void DoubleWidget::write_value(double new_value)
 {
@@ -503,7 +479,6 @@ void DoubleWidget::write_value(double new_value)
 
     HANDLE_ERROR(err, return )
 }
-
 
 void DoubleWidget::set_in_backend()
 {
@@ -524,28 +499,27 @@ BoolWidget::BoolWidget(TcamPropertyBoolean* prop, QWidget* parent) : QWidget(par
 void BoolWidget::update()
 {
     GError* err = nullptr;
-    bool value = tcam_property_boolean_get_value(p_prop, &err);
 
+    bool is_available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+    if( !is_available)
+    {
+        p_checkbox->setEnabled(false);
+    }
+    else
+    {
+        bool value = tcam_property_boolean_get_value(p_prop, &err);
+        HANDLE_ERROR(err, return );
 
-    HANDLE_ERROR(err, return );
+        bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+        HANDLE_ERROR(err, return );
 
-    p_checkbox->blockSignals(true);
-    p_checkbox->toggled(value);
-    p_checkbox->setEnabled(!lock);
-    p_checkbox->blockSignals(false);
-}
-
-QString BoolWidget::get_name() const
-{
-    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
-}
-
-std::string BoolWidget::get_category() const
-{
-    return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
+        p_checkbox->blockSignals(true);
+        p_checkbox->toggled(value);
+        p_checkbox->setEnabled(!lock);
+        p_checkbox->blockSignals(false);
+    }
 }
 
 void BoolWidget::set_locked(bool lock)
@@ -564,35 +538,16 @@ void BoolWidget::setup_ui()
 
     setLayout(p_layout);
 
-    GError* err = nullptr;
-    bool value = tcam_property_boolean_get_value(p_prop, &err);
-
-    HANDLE_ERROR(err, return );
-
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
-
-    HANDLE_ERROR(err, return );
-
     p_checkbox = new QCheckBox();
 
-    p_checkbox->toggled(value);
-    p_checkbox->setEnabled(!lock);
+    update();
 
     connect(p_checkbox, &QCheckBox::clicked, this, &BoolWidget::checkbox_changed);
 
     p_layout->addWidget(p_checkbox);
 
-    // the font tagging is used to make the
-    // tool tip text 'feature rich'
-    // this enabled auto wrapping
-    QString toolTip = QString("<font>");
-    toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "<p>API ID: ";
-    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "</p></font>";
-    this->setToolTip(toolTip);
+    this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }
-
 
 void BoolWidget::set_in_backend()
 {
@@ -601,7 +556,6 @@ void BoolWidget::set_in_backend()
 
     HANDLE_ERROR(err, return )
 }
-
 
 ButtonWidget::ButtonWidget(TcamPropertyCommand* prop, QWidget* parent)
     : QWidget(parent), p_prop(prop)
@@ -612,31 +566,28 @@ ButtonWidget::ButtonWidget(TcamPropertyCommand* prop, QWidget* parent)
 void ButtonWidget::update()
 {
     GError* err = nullptr;
-    bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
 
+    bool is_available = tcam_property_base_is_available(TCAM_PROPERTY_BASE(p_prop), &err);
     HANDLE_ERROR(err, return );
 
-    set_locked(lock);
+    if( !is_available )
+    {
+        p_button->setEnabled(false);
+    }
+    else
+    {
+        bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
+
+        HANDLE_ERROR(err, return );
+
+        p_button->setEnabled(!lock);
+    }
 }
-
-
-QString ButtonWidget::get_name() const
-{
-    return get_safe_display_name(TCAM_PROPERTY_BASE(p_prop));
-}
-
-
-std::string ButtonWidget::get_category() const
-{
-    return tcam_property_base_get_category(TCAM_PROPERTY_BASE(p_prop));
-}
-
 
 void ButtonWidget::set_locked(bool lock)
 {
     p_button->setEnabled(!lock);
 }
-
 
 void ButtonWidget::got_clicked()
 {
@@ -652,27 +603,19 @@ void ButtonWidget::set_in_backend()
     HANDLE_ERROR(err, return )
 }
 
-
 void ButtonWidget::setup_ui()
 {
-
     p_layout = new QHBoxLayout();
 
     setLayout(p_layout);
 
     p_button = new QPushButton();
 
+    update();
+
     connect(p_button, &QPushButton::pressed, this, &ButtonWidget::got_clicked);
 
     p_layout->addWidget(p_button);
 
-    // the font tagging is used to make the
-    // tool tip text 'feature rich'
-    // this enabled auto wrapping
-    QString toolTip = QString("<font>");
-    toolTip += tcam_property_base_get_description(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "<p>API ID: ";
-    toolTip += tcam_property_base_get_name(TCAM_PROPERTY_BASE(p_prop));
-    toolTip += "</p></font>";
-    this->setToolTip(toolTip);
+    this->setToolTip(generate_tooltip(TCAM_PROPERTY_BASE(p_prop)));
 }

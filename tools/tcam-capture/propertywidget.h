@@ -17,10 +17,7 @@
 #ifndef PROPERTYWIDGET_H
 #define PROPERTYWIDGET_H
 
-#include "propertyflags.h"
 #include "tcamslider.h"
-
-#include <tcam-property-1.0.h>
 
 #include <QBoxLayout>
 #include <QCheckBox>
@@ -32,6 +29,7 @@
 #include <QWidget>
 #include <gst/gst.h>
 #include <string>
+#include <tcam-property-1.0.h>
 
 class Property
 {
@@ -40,30 +38,34 @@ public:
 
     virtual void update() = 0;
 
-    virtual QString get_name() const = 0;
-    virtual std::string get_category() const = 0;
+    QString get_name() const;
+    std::string get_category() const;
 
     virtual void set_locked(bool) = 0;
 
     virtual void set_in_backend() = 0;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept = 0;
 };
 
 class EnumWidget : public QWidget, public Property
 {
     Q_OBJECT
 public:
-    EnumWidget(TcamPropertyEnumeration* prop,
-               QWidget* parent = nullptr);
+    EnumWidget(TcamPropertyEnumeration* prop, QWidget* parent = nullptr);
 
     virtual void update() final;
-
-    virtual QString get_name() const final;
-
-    virtual std::string get_category() const final;
 
     virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
 
 public slots:
 
@@ -89,19 +91,20 @@ class IntWidget : public QWidget, public Property
 {
     Q_OBJECT
 public:
-    IntWidget(TcamPropertyInteger* prop,
-              QWidget* parent = nullptr);
+    IntWidget(TcamPropertyInteger* prop, QWidget* parent = nullptr);
 
 
     virtual void update() final;
 
-    virtual QString get_name() const final;
-
-    virtual std::string get_category() const final;
-
     virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
 
 public slots:
 
@@ -130,19 +133,20 @@ class DoubleWidget : public QWidget, public Property
 {
     Q_OBJECT
 public:
-    DoubleWidget(TcamPropertyFloat* prop,
-                 QWidget* parent = nullptr);
+    DoubleWidget(TcamPropertyFloat* prop, QWidget* parent = nullptr);
 
 
     virtual void update() final;
 
-    virtual QString get_name() const final;
-
-    virtual std::string get_category() const final;
-
     virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
 
 public slots:
 
@@ -164,8 +168,6 @@ private:
     TcamSlider* p_slider = nullptr;
     QDoubleSpinBox* p_box = nullptr;
 
-    TcamPropertyFloatRepresentation m_representation;
-
     TcamPropertyFloat* p_prop = nullptr;
 };
 
@@ -174,19 +176,19 @@ class BoolWidget : public QWidget, public Property
 {
     Q_OBJECT
 public:
-    BoolWidget(TcamPropertyBoolean* prop,
-               QWidget* parent = nullptr);
-
+    BoolWidget(TcamPropertyBoolean* prop, QWidget* parent = nullptr);
 
     virtual void update() final;
-
-    virtual QString get_name() const final;
-
-    virtual std::string get_category() const final;
 
     virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
 
 public slots:
 
@@ -213,19 +215,20 @@ class ButtonWidget : public QWidget, public Property
 {
     Q_OBJECT
 public:
-    ButtonWidget(TcamPropertyCommand* prop,
-                 QWidget* parent = nullptr);
+    ButtonWidget(TcamPropertyCommand* prop, QWidget* parent = nullptr);
 
 
     virtual void update() final;
 
-    virtual QString get_name() const final;
-
-    virtual std::string get_category() const final;
-
     virtual void set_locked(bool) final;
 
     virtual void set_in_backend() final;
+
+protected:
+    virtual TcamPropertyBase* get_property_base() const noexcept final
+    {
+        return TCAM_PROPERTY_BASE(p_prop);
+    }
 
 public slots:
 
