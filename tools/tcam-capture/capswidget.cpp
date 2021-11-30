@@ -297,8 +297,8 @@ void CapsWidget::fill_combo_framerate(const QString& format, const scaling& scal
     }
     else
     {
-        // either select 60 FPS or the highest
-        auto f = std::find(res.begin(), res.end(), 60.0 );
+        // either select 30 FPS or the highest
+        auto f = std::find(res.begin(), res.end(), 30.0 );
         if (f == res.end())
         {
             f = std ::max_element(res.begin(), res.end());
