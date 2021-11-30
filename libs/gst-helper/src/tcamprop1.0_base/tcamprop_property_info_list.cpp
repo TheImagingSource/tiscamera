@@ -63,7 +63,7 @@ const prop_static_info_enumeration lst::ExposureAutoUpperLimitAuto = make_Enumer
     "Exposure", "Exposure Auto Upper Limit Auto",
     "Automatically sets the upper limit to match the Acquisition Frame Rate.", Visibility_t::Expert
 );
-const prop_static_info_boolean lst::ExposureAutoHighlightReduction = make_Boolean(  // #TODO the camera has a typo in this name
+const prop_static_info_boolean lst::ExposureAutoHighlightReduction = make_Boolean(
     "ExposureAutoHighlightReduction",
     "Exposure", "Exposure Auto Highlight Reduction",
     "Lets the ExposureAuto/GainAuto algorithm try to avoid over-exposures."
@@ -119,21 +119,21 @@ const prop_static_info_boolean lst::ClaimBalanceWhiteSoftware = make_Boolean(
 );
 const prop_static_info_boolean lst::ClaimHDRGain = make_Boolean(
     "ClaimHDRGain",
-    "Image", {}, {}, Visibility_t::Invisible
+    "Exposure", {}, {}, Visibility_t::Invisible
 );
 const prop_static_info_float lst::HDRGain = make_Float(
     "HDRGain",
-    "Image", "HDR Gain",
-    "#TODO"
+    "Exposure", "HDR Gain",
+    "Controls the HDR window selection."
 );
 const prop_static_info_boolean lst::HDRGainAuto = make_Boolean(
     "HDRGainAuto",
-    "Image", "Auto HDR Gain",
+    "Exposure", "Auto HDR Gain",
     "Enables the automatic HDR Gain value selection."
 );
 const prop_static_info_float lst::HDRGainAutoReference = make_Float(
     "HDRGainAutoReference",
-    "Image", "Auto HDR Gain reference",
+    "Exposure", "Auto HDR Gain reference",
     "Changes the reference point used when Auto HDR Gain is enabled.", {}, {}, Visibility_t::Expert
 );
 
@@ -170,51 +170,6 @@ const prop_static_info_boolean lst::ReverseY = make_Boolean(
     "Flip vertically the image sent by the device. The Region of interest is applied after the flipping.",
     Visibility_t::Expert
 );
-const prop_static_info_enumeration lst::TriggerMode = make_Enumeration(
-    "TriggerMode",
-    "Special", "Trigger Mode",
-    "Controls if the selected trigger is active."
-);
-const prop_static_info_enumeration lst::TriggerSource = make_Enumeration(
-    "TriggerSource",
-    "Special", "Trigger Source",
-    "Specifies the internal signal or physical input Line to use as the trigger source."
-);
-const prop_static_info_command lst::TriggerSoftware = make_Command(
-    "TriggerSoftware",
-    "Special", "Trigger Software",
-    "Generates an internal trigger. TriggerSource must be set to Software."
-);
-const prop_static_info_enumeration lst::TriggerPolarity = make_Enumeration(
-    "TriggerPolarity",
-    "Special", "Trigger Polarity",
-    "#TODO"
-);
-const prop_static_info_enumeration lst::TriggerExposureMode = make_Enumeration(
-    "TriggerExposureMode",
-    "Special", "Trigger Exposure Mode",
-    "#TODO"
-);
-const prop_static_info_integer lst::TriggerBurstCount = make_Integer(
-    "TriggerBurstCount",
-    "Special",
-    "Trigger Burst Count",
-    "#TODO"
-);
-
-
-const prop_static_info_enumeration lst::TriggerOperation = make_Enumeration(
-    "TriggerOperation",
-    "Special", "Trigger Operation",
-    "#TODO"
-);
-// #TODO revisit this
-//const prop_static_info_enumeration lst::strobe_mode = make_Enumeration( // maybe BAD??
-//    "StrobeMode", 
-//    "Special", "Strobe Mode",
-//    "#TODO"
-//);
-
 const prop_static_info_integer lst::Iris = make_Integer(
     "Iris",
     "Lens", "Iris",
@@ -224,7 +179,7 @@ const prop_static_info_integer lst::Iris = make_Integer(
 const prop_static_info_enumeration lst::IrisAuto = make_Enumeration(
     "IrisAuto",
     "Lens", "Auto Iris",
-    "Enables the automatic Iris setting selection." // #TODO maybe improve this
+    "Enables the automatic Iris setting selection." 
 );
 
 const prop_static_info_integer lst::Focus = make_Integer(
@@ -247,23 +202,23 @@ const prop_static_info_enumeration lst::AutoFocusROIEnable = make_Enumeration(
 
 const prop_static_info_integer lst::AutoFocusROILeft = make_Integer(
     "AutoFocusROILeft",
-    "Lens", "AutoFocusROILeft",
-    "#TODO" // #TODO maybe improve this
+    "Lens", "Auto Focus ROI Left",
+    "Horizontal offset of the auto functions region of interest."
 );
 const prop_static_info_integer lst::AutoFocusROITop = make_Integer(
     "AutoFocusROITop",
-    "Lens", "AutoFocusROITop",
-    "#TODO" // #TODO maybe improve this
+    "Lens", "Auto Focus ROI Top",
+    "Vertical offset of the auto functions region of interest."
 );
 const prop_static_info_integer lst::AutoFocusROIWidth = make_Integer(
     "AutoFocusROIWidth",
-    "Lens", "AutoFocusROIWidth",
-    "#TODO" // #TODO maybe improve this
+    "Lens", "Auto Focus ROI Width",
+    "Horizontal size of the auto focus region of interest."
 );
 const prop_static_info_integer lst::AutoFocusROIHeight = make_Integer(
     "AutoFocusROIHeight",
-    "Lens", "AutoFocusROIHeight",
-    "#TODO" // #TODO maybe improve this
+    "Lens", "Auto Focus ROI Height",
+    "Vertical size of the auto focus region of interest."
 );
 
 const prop_static_info_integer lst::Zoom = make_Integer(
@@ -423,7 +378,19 @@ const prop_static_info_float lst::ColorTransformation_Value_Gain22 = make_Float(
     "Changes the color transformation for one factor on a pixel.", Visibility_t::Guru
 );
 
-// Off/On
+const prop_static_info_integer lst::SensorWidth = make_Integer(
+    "SensorWidth",
+    "Sensor", "Sensor Width",
+    "Effective width of the sensor in pixels.", {}, IntRepresentation_t::PureNumber, Visibility_t::Expert, Access_t::RO
+);
+
+const prop_static_info_integer lst::SensorHeight = make_Integer(
+    "SensorHeight",
+    "Sensor", "Sensor Height",
+    "Effective height of the sensor in pixels.", {}, IntRepresentation_t::PureNumber, Visibility_t::Expert, Access_t::RO
+);
+
+
 const prop_static_info_enumeration lst::StrobeEnable = make_Enumeration(
     "StrobeEnable",
     "Special", "Strobe Enable",
@@ -439,45 +406,71 @@ const prop_static_info_enumeration lst::StrobePolarity = make_Enumeration(
 const prop_static_info_enumeration lst::StrobeOperation = make_Enumeration(
     "StrobeOperation",
     "Special", "Strobe Operation",
-    "#TODO" // #TODO maybe improve this
+    "Specifies how the length of the strobe pulses is controlled."
 );
 
 const prop_static_info_integer lst::StrobeDuration = make_Integer(
     "StrobeDuration",
     "Special", "Strobe Duration",
-    "#TODO" // #TODO maybe improve this
+    "Controls the length of the strobe pulses if Strobe Operation is set to use the fixed duration mode.",
+    "µs"
 );
 
 const prop_static_info_integer lst::StrobeDelay = make_Integer(
     "StrobeDelay",
     "Special", "Strobe Delay",
-    "#TODO" // #TODO maybe improve this
+    "Parameter can be used to add a small delay between the start of exposure and the strobe output pulse.",
+    "µs"
 );
 
-// GenICam standard property
-const prop_static_info_integer lst::SensorWidth = make_Integer(
-    "SensorWidth",
-    "Sensor", "Sensor Width",
-    "Effective width of the sensor in pixels.", {}, IntRepresentation_t::PureNumber, Visibility_t::Expert, Access_t::RO
+const prop_static_info_enumeration lst::TriggerMode = make_Enumeration(
+    "TriggerMode",
+    "Special", "Trigger Mode",
+    "Controls if the selected trigger is active."
+);
+const prop_static_info_command lst::TriggerSoftware = make_Command(
+    "TriggerSoftware",
+    "Special", "Trigger Software",
+    "Generates an internal trigger. TriggerSource must be set to Software."
+);
+const prop_static_info_enumeration lst::TriggerSource = make_Enumeration(
+    "TriggerSource",
+    "Special", "Trigger Source",
+    "Specifies the internal signal or physical input Line to use as the trigger source."
+);
+//const prop_static_info_enumeration lst::TriggerPolarity = make_Enumeration(
+//    "TriggerPolarity",
+//    "Special", "Trigger Polarity",
+//    "#TODO"
+//);
+const prop_static_info_enumeration lst::TriggerSelector = make_Enumeration(
+    "TriggerSelector",
+    "Special", "Trigger Selector",
+    "Controls the way in which the exposure time is controlled in trigger mode."
+);
+//const prop_static_info_enumeration lst::TriggerExposureMode = make_Enumeration(
+//    "TriggerExposureMode",
+//    "Special", "Trigger Exposure Mode",
+//    "#TODO"
+//);
+
+const prop_static_info_integer lst::TriggerBurstCount = make_Integer(
+    "TriggerBurstCount",
+    "Special",
+    "Trigger Burst Count",
+    "Controls the count of frames to generate per trigger pulse."
 );
 
-// GenICam standard property
-const prop_static_info_integer lst::SensorHeight = make_Integer(
-    "SensorHeight",
-    "Sensor", "Sensor Height",
-    "Effective height of the sensor in pixels.", {}, IntRepresentation_t::PureNumber, Visibility_t::Expert, Access_t::RO
+const prop_static_info_enumeration lst::TriggerOperation = make_Enumeration(
+    "TriggerOperation",
+    "Special", "Trigger Operation",
+    "Controls the operation mode of the sensor in trigger mode."
 );
 
 const prop_static_info_enumeration lst::TriggerActivation = make_Enumeration(
     "TriggerActivation",
     "Special", "Trigger Activation",
     "The Trigger Polarity parameter controls whether a trigger event is accepted on the rising or falling edge of the signal connected to the TRIGGER_IN line."
-);
-
-const prop_static_info_enumeration lst::TriggerSelector = make_Enumeration(
-    "TriggerSelector",
-    "Special", "Trigger Selector",
-    "#TODO"
 );
 
 const prop_static_info_enumeration lst::TriggerOverlap = make_Enumeration(
@@ -489,13 +482,15 @@ const prop_static_info_enumeration lst::TriggerOverlap = make_Enumeration(
 const prop_static_info_float lst::TriggerMask = make_Float(
     "TriggerMask",
     "Special", "Trigger Mask",
-    "Specifies the time for which trigger pulses are ignored after accepting a trigger signal."
+    "Specifies the time for which trigger pulses are ignored after accepting a trigger signal.",
+    "µs"
 );
 
 const prop_static_info_float lst::TriggerDenoise = make_Float(
     "TriggerDenoise",
     "Special", "Trigger Denoise",
-    "#TODO"
+    "Specifies the time for which trigger input has to be high in order to be accepted as a trigger signal.",
+    "µs"
 );
 
 const prop_static_info_float lst::TriggerDelay = make_Float(
@@ -508,17 +503,24 @@ const prop_static_info_float lst::TriggerDelay = make_Float(
 const prop_static_info_float lst::TriggerDebouncer = make_Float(
     "TriggerDebouncer",
     "Special", "Trigger Debouncer",
-    "#TODO"
+    "Specifies the time for which trigger input has to be low in order accept the next trigger signal.",
+    "µs"
+);
+
+const prop_static_info_boolean lst::IMXLowLatencyTriggerMode = make_Boolean(
+    "IMXLowLatencyTriggerMode",
+    "Special", "IMX Low-Latency Mode",
+    "controls whether the sensor operates in low-latency trigger mode"
 );
 
 const prop_static_info_integer lst::GPIn = make_Integer(
     "GPIn",
     "DigitalIO", "General Purpose Input",
-    "#TODO"
+    "Status of the digital input pin."
 );
 
 const prop_static_info_integer lst::GPOut = make_Integer(
     "GPOut",
     "DigitalIO", "General Purpose Output",
-    "#TODO"
+    "Status of the digital output pin."
 );

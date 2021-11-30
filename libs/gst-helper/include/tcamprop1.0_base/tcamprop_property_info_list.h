@@ -65,13 +65,7 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_enumeration OffsetAutoCenter;
     extern const prop_static_info_boolean ReverseX;
     extern const prop_static_info_boolean ReverseY;
-    extern const prop_static_info_enumeration TriggerMode;
-    extern const prop_static_info_enumeration TriggerSource;
-    extern const prop_static_info_command TriggerSoftware;
-    extern const prop_static_info_enumeration TriggerPolarity;
-    extern const prop_static_info_enumeration TriggerExposureMode;
-    extern const prop_static_info_integer TriggerBurstCount;
-    extern const prop_static_info_enumeration TriggerOperation;
+
 
 
     extern const prop_static_info_integer Iris;
@@ -120,29 +114,49 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_float ColorTransformation_Value_Gain21;
     extern const prop_static_info_float ColorTransformation_Value_Gain22;
 
-    // #TODO revisit this
-    //const prop_static_info_enumeration strobe_mode = make_Enumeration( // maybe BAD??
-    //    "StrobeMode", 
-    //    "Special", "Strobe Mode",
-    //    "#TODO"
-    //);
-    extern const prop_static_info_enumeration StrobeEnable;
+    // GenICam standard property
+    extern const prop_static_info_integer SensorWidth;
+    extern const prop_static_info_integer SensorHeight;
+
+    // strobe stuff
+    constexpr const std::array<std::string_view, 2> StrobePolarity_enum_entries = { "ActiveHigh", "ActiveLow" };
+    constexpr const std::array<std::string_view, 2> StrobeOperation_enum_entries = { "Exposure", "FixedDuration"};
+
+    extern const prop_static_info_enumeration StrobeEnable; // enum_entries_off_on
     extern const prop_static_info_enumeration StrobePolarity;
     extern const prop_static_info_enumeration StrobeOperation;
     extern const prop_static_info_integer StrobeDuration;
     extern const prop_static_info_integer StrobeDelay;
 
-    // GenICam standard property
-    extern const prop_static_info_integer SensorWidth;
-    extern const prop_static_info_integer SensorHeight;
+    // Trigger stuff
+    constexpr const std::array<std::string_view, 2> TriggerActivation_enum_entries = { "RisingEdge", "FallingEdge" };
+    constexpr const std::array<std::string_view, 4> TriggerSource_enum_entries = { "Line1", "Software", "Action0", "Any" };
+    constexpr const std::array<std::string_view, 2> TriggerSelector_enum_entries = { "FrameStart", "ExposureActive" };
+    constexpr const std::array<std::string_view, 2> TriggerOperation_enum_entries = { "Default", "GlobalResetRelease" };
+    constexpr const std::array<std::string_view, 2> TriggerOverlap_enum_entries = { "Off", "ReadOut" };
+
+    extern const prop_static_info_enumeration TriggerMode;  // enum_entries_off_on
+    extern const prop_static_info_command TriggerSoftware;
+
     extern const prop_static_info_enumeration TriggerActivation;
-    extern const prop_static_info_enumeration TriggerSelector;
+    //extern const prop_static_info_enumeration TriggerPolarity;    // Same as TriggerActivation
+
+    extern const prop_static_info_enumeration TriggerSource;
+
+    extern const prop_static_info_enumeration TriggerSelector;    // same as TriggerExposureMode
+    //extern const prop_static_info_enumeration TriggerExposureMode;    // same as TriggerSelector?
+    extern const prop_static_info_integer TriggerBurstCount;
+    extern const prop_static_info_enumeration TriggerOperation;
     extern const prop_static_info_enumeration TriggerOverlap;
+
     extern const prop_static_info_float TriggerMask;
     extern const prop_static_info_float TriggerDenoise;
     extern const prop_static_info_float TriggerDelay;
     extern const prop_static_info_float TriggerDebouncer;
 
+    extern const prop_static_info_boolean IMXLowLatencyTriggerMode;
+
+    // GPIO??
     extern const prop_static_info_integer GPIn;
     extern const prop_static_info_integer GPOut;
 
