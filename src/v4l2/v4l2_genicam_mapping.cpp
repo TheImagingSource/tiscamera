@@ -163,7 +163,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     },
     {
         0x0199e213,
-        "StrobeExposure",
+        "StrobeOperation",
         TCAM_PROPERTY_TYPE_UNKNOWN,
     },
     {
@@ -199,7 +199,8 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     {
         0x0199e220,
         "OffsetAutoCenter",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        TCAM_PROPERTY_TYPE_ENUMERATION,
+        tcam::v4l2::MappingType::IntToEnum,
     },
     {
         0x0199e921,
@@ -227,42 +228,37 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     {
         0x0199e928,
         "OffsetY",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
     },
     {
         0x0199e234,
-        "TriggerPolarity",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerActivation",
     },
     {
         0x0199e235,
         "TriggerOperation",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
     },
     {
         0x0199e236,
-        "TriggerExposureMode",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerSelector",
     },
     {
         0x0199e237,
         "TriggerBurstCount",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
     },
     {
         0x0199e238,
-        "TriggerDebounceTime",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerDebouncer",
+        TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         0x0199e239,
-        "TriggerMaskTime",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerMask",
+        TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         0x0199e240,
-        "TriggerNoiseSuppressionTime",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerDenoise",
+        TCAM_PROPERTY_TYPE_DOUBLE,
     },
     {
         0x0199e241,
@@ -369,8 +365,9 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     // TriggerGlobalResetRelease
     {
         0x0199e261,
-        "SensorShutterMode",
-        TCAM_PROPERTY_TYPE_UNKNOWN,
+        "TriggerOperation",
+        TCAM_PROPERTY_TYPE_ENUMERATION, // Seems to map to TriggerOperation
+        tcam::v4l2::MappingType::IntToEnum
     },
     {
         0x0199e262,

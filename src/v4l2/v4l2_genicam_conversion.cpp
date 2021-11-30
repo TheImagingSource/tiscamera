@@ -136,12 +136,17 @@ outcome::result<std::map<int, std::string>> find_menu_entries(uint32_t v4l2_id)
         case 0x0199e208: // TriggerMode
         case 0x0199e211: // StrobeEnable
         case 0x0199e254: // ExposureAutoUpperLimitAuto
+        case 0x0199e220:    // OffsetAutoCenter
         {
             return std::map<int, std::string> { { 0, "Off" }, { 1, "On" } };
         }
         case 0x0199e212: // StrobePolarity
         {
             return std::map<int, std::string> { { 0, "ActiveHigh" }, { 1, "ActiveLow" } };
+        }
+        case 0x0199e261: // TriggerOperation
+        {
+            return std::map<int, std::string> { { 0, "Default" }, { 1, "GlobalResetRelease" } };
         }
         default:
         {

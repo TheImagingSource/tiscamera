@@ -108,7 +108,7 @@ V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctr
     {
         if (needs_static_info(m_name))
         {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+            SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
         }
         p_static_info = nullptr;
     }
@@ -241,7 +241,7 @@ V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
     {
         if (needs_static_info(m_name))
         {
-            SPDLOG_ERROR("static information for {} do not exist!", m_name);
+            SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
         }
         p_static_info = nullptr;
     }
@@ -366,7 +366,7 @@ V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
         p_static_info = nullptr;
     }
     else
@@ -466,7 +466,7 @@ V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctr
     }
     else if (!static_info.info_ptr)
     {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
+        SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
         p_static_info = nullptr;
     }
     else
