@@ -214,6 +214,14 @@ Caps::Caps(GstCaps* caps)
     generate();
 }
 
+
+Caps::Caps(const Caps& other)
+{
+    formats = other.formats;
+    p_caps = gst_caps_copy(other.p_caps);
+}
+
+
 Caps::~Caps()
 {
     gst_caps_unref(p_caps);

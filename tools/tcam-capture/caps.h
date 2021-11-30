@@ -84,6 +84,7 @@ class Caps
 {
 public:
     explicit Caps(GstCaps* caps);
+    Caps(const Caps& other);
     ~Caps();
 
     static GstCaps* get_default_caps( GstCaps* intersect );

@@ -419,11 +419,11 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         p_selected_caps = open_format_dialog();
 
-        caps = p_selected_caps;
+        caps = gst_caps_copy(p_selected_caps);
     }
     else if (handling == FormatHandling::Static)
     {
-        caps = p_selected_caps;
+        caps = gst_caps_copy(p_selected_caps);
     }
     else
     {
@@ -454,6 +454,12 @@ void MainWindow::open_pipeline(FormatHandling handling)
             // TODO check if element really is a capsfilter
             g_object_set(capsfilter, "caps", caps, nullptr);
         }
+    }
+
+    if (caps)
+    {
+        gst_caps_unref(caps);
+        caps = nullptr;
     }
 
     p_displaysink = gst_bin_get_by_name(GST_BIN(p_pipeline), "sink");
