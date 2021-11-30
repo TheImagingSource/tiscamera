@@ -147,7 +147,7 @@ void SoftwareProperties::auto_pass(const img::img_descriptor& image)
         }
     }
 
-    if (auto_pass_ret.wb.wb_changed && m_auto_params.wb.is_software_whitebalance)
+    if (auto_pass_ret.wb.wb_changed)
     {
         m_auto_params.wb.channels.r = auto_pass_ret.wb.channels.r;
         m_auto_params.wb.channels.g = auto_pass_ret.wb.channels.g;
@@ -234,9 +234,10 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
             generate_whitebalance();
             SPDLOG_INFO("generating");
         }
-         else
+        else
         {
-            auto base_selector = tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
+            auto base_selector =
+                tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
             auto base_raw = tcam::property::find_property(m_device_properties, "BalanceRatioRaw");
 
             if (!base_raw)
@@ -244,8 +245,7 @@ void tcam::property::SoftwareProperties::generate_public_properties(bool has_bay
                 base_raw = tcam::property::find_property(m_device_properties, "BalanceRatio");
             }
 
-            if (base_selector
-                && base_raw)
+            if (base_selector && base_raw)
             {
                 // this means we have whitebalance in the device but no nice properties
                 convert_whitebalance();
@@ -1020,36 +1020,15 @@ outcome::result<void> SoftwareProperties::set_device_wb(emulated::software_prop 
     {
         if (prop_id == emulated::software_prop::WB_RED)
         {
-
-            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            // {
-            //     SPDLOG_ERROR("INTEGER");
-            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            // }
-
             return m_wb.m_dev_wb_r->set_value(new_value_tmp);
         }
         else if (prop_id == emulated::software_prop::WB_GREEN)
         {
-
-            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            // {
-            //     SPDLOG_ERROR("INTEGER");
-            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            // }
-
-            return m_wb.m_dev_wb_r->set_value(new_value_tmp);
+            return m_wb.m_dev_wb_g->set_value(new_value_tmp);
         }
         else if (prop_id == emulated::software_prop::WB_BLUE)
         {
-
-            // if (m_wb.m_dev_wb_r->get_type() == TCAM_PROPERTY_TYPE_INTEGER)
-            // {
-            //     SPDLOG_ERROR("INTEGER");
-            //     new_value_tmp = static_cast<int>( std::round( new_value_tmp * 64. ) );
-            // }
-
-            return m_wb.m_dev_wb_r->set_value(new_value_tmp);
+            return m_wb.m_dev_wb_b->set_value(new_value_tmp);
         }
     }
     else if (m_wb.type == wb_type::DevSelector)
