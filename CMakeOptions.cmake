@@ -42,6 +42,8 @@ option(TCAM_ENABLE_DATA_INSTALL "Install static data from data/examples folder."
 option(TCAM_ENABLE_BASE_LIBRARIES "Build/install base libraries." ON)
 option(TCAM_BUILD_WITH_GUI "Build/install with GUI applications/dependencies" ON)
 
+option(TCAM_ENABLE_CMAKE_CLANGFORMAT_TARGET "Enable clang-format build target" ON)
+
 set(TCAM_EXCLUSIVE_BUILD OFF CACHE INTERNAL "Internal convenience flag to signify a tool is built exclusively.")
 
 
