@@ -5,8 +5,9 @@ Supported devices
 #################
 
 
-All `The Imaging Source` cameras can be addressed under Linux.
-Some legacy hardware is not supported by the tiscamera libraries.
+All `The Imaging Source` cameras can be addressed under Linux.  
+Some legacy hardware is not supported by the tiscamera libraries.  
+Exceptions to these rules will be explicitly stated in the table.
 
 .. list-table:: compatability list
    :header-rows: 1
@@ -27,6 +28,10 @@ Some legacy hardware is not supported by the tiscamera libraries.
      - yes
      - yes
      - no
+   * - 25
+     - yes
+     - yes
+     - yes
    * - 33
      - yes
      - yes
@@ -67,13 +72,15 @@ Some legacy hardware is not supported by the tiscamera libraries.
      - no
      - yes
      - yes
-
-Exceptions to these rules will be explicitly stated in the table.
-
-  .. todo::
-
-     73 ?
-     25 ?
+   * - 73 USB
+     - no
+     - yes
+     - no
+   * - Zoom Cameras
+     - yes
+     - yes
+     - yes
+       
 
 Your camera is not listed or you are still unsure?
 :ref:`Contact our support<contact>`, they will gladly help you.
