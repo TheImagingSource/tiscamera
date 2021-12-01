@@ -60,6 +60,7 @@ template<class TWidget> static void emit_error_stuff(TWidget* widget, GError* er
         emit widget->device_lost(err->message);
     }
     g_error_free(err);
+    err = nullptr;
 }
 
 
@@ -99,10 +100,10 @@ void EnumWidget::update()
 
     if (!available)
     {
-        // p_combobox->blockSignals(true);
+        p_combobox->blockSignals(true);
         p_combobox->setEnabled(false);
         p_combobox->setCurrentIndex(-1); // this shows the placeholder text
-        // p_combobox->blockSignals(false);
+        p_combobox->blockSignals(false);
     }
     else
     {
@@ -112,10 +113,21 @@ void EnumWidget::update()
         bool lock = tcam_property_base_is_locked(TCAM_PROPERTY_BASE(p_prop), &err);
         HANDLE_ERROR(err, return );
 
-        // p_combobox->blockSignals(true);
+        p_combobox->blockSignals(true);
         p_combobox->setEnabled(!lock);
-        p_combobox->setCurrentText(value);
-        // p_combobox->blockSignals(false);
+
+        // setCurrentText caused problems on some developer systems
+        // by selecting the entry via index this is circumvented
+        for (int index = 0; index < p_combobox->count(); index++)
+        {
+            if (p_combobox->itemText(index) == value)
+            {
+                p_combobox->setCurrentIndex(index);
+                break;
+            }
+        }
+
+        p_combobox->blockSignals(false);
     }
 }
 
