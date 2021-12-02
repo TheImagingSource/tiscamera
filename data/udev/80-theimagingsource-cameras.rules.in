@@ -1,24 +1,36 @@
 
 # This file assures that The Imaging Source USB cameras are correctly recognized
 
+#
+# legacy rules
+#
+
+# disabled as devices are no longer officially supported by tiscamera
+# kept for reference and for users to manually enabled them for things like v4l2 support
+
 # if no driver has claimed the interface yet, load uvcvideo
-ACTION=="add", SUBSYSTEM=="usb", \
-ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8101", \
-RUN+="/sbin/modprobe -b uvcvideo"
+# ACTION=="add", SUBSYSTEM=="usb", \
+#                ATTRS{idVendor}=="199e", ATTRS{idProduct}=="8101", \
+#                RUN+="/sbin/modprobe -b uvcvideo"
 
 # add the imaging source VID and PID to the list of devices supported by uvcvideo
-ACTION=="add", SUBSYSTEM=="drivers", \
-               ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
-               RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/driver/uvcvideo'"
+# ACTION=="add", SUBSYSTEM=="drivers", \
+#                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
+#                RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/driver/uvcvideo'"
 
 # Second action with different sysfs path.
 # The API changed at one point so this path has been added.
-ACTION=="add", SUBSYSTEM=="drivers", \
-               ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
-               RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/usb/drivers/uvcvideo/new_id'"
+# ACTION=="add", SUBSYSTEM=="drivers", \
+#                ENV{DEVPATH}=="/bus/usb/drivers/uvcvideo", \
+#                RUN+="/bin/sh -c 'echo 199e 8101 > /sys/bus/usb/drivers/uvcvideo/new_id'"
+
+#
+# end legacy
+#
 
 # give users permission to interact with cameras
-SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", \
+                  GROUP="video", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
 
 
 
