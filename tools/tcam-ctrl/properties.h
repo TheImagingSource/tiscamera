@@ -18,12 +18,23 @@
 
 #include <string>
 
+enum class OutputType
+{
+    ConsoleFirendly,
+    AsIs,
+};
+
 /**
  * @brief print function for properties
  * @param properties - Property collection that shall be printed
  */
 void print_properties(const std::string& serial);
 
+
+void print_tcam_properties(const std::string& serial, OutputType print_type = OutputType::ConsoleFirendly);
+
+void load_tcam_properties(const std::string& serial,
+                          const std::string& property_string);
 
 void print_state_json(const std::string& serial);
 

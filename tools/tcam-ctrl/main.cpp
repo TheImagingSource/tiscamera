@@ -168,9 +168,21 @@ int main(int argc, char* argv[])
     auto show_properties =
         app.add_option("-p,--properties", serial, "list available device properties");
 
-    auto save_state = app.add_option(
-        "--save", serial, "Print a JSON string containing all properties and their current values");
-    auto load_state = app.add_option("--load",
+    auto save_properties = app.add_option("--save",
+                                          serial,
+                                          "Print a JSON string containing all properties and their current values");
+    auto save_properties_no_console = app.add_flag("--no-console",
+                                                   "Output string is not intended for commandline usage.")->needs(save_properties);
+
+    auto load_properties = app.add_option("--load",
+                                          serial,
+                                          "Read a JSON string/file containing properties and their "
+                                          "values and set them in the device");
+
+    auto save_json = app.add_option(
+        "--save-json", serial, "Print a JSON string containing all properties and their current values");
+
+    auto load_json = app.add_option("--load-json",
                                      serial,
                                      "Read a JSON string/file containing properties and their "
                                      "values and set them in the device");
@@ -200,11 +212,17 @@ int main(int argc, char* argv[])
     {
         print_properties(serial);
     }
-    else if (*save_state)
+    else if (*save_properties)
     {
-        print_state_json(serial);
+        OutputType print_type = OutputType::ConsoleFirendly;
+
+        if (*save_properties_no_console)
+        {
+            print_type = OutputType::AsIs;
+        }
+        print_tcam_properties(serial, print_type);
     }
-    else if (*load_state)
+    else if (*load_properties)
     {
         if (app.remaining_size() != 1)
         {
@@ -213,6 +231,41 @@ int main(int argc, char* argv[])
 
         std::vector<std::string> vec = app.remaining();
         std::cout << "Loading: " << vec.at(0) << std::endl;
+
+        // TODO: replace with std::filesystem once c++17 is
+        // available on reference system
+
+        std::string prop_str;
+
+        struct stat sb;
+
+        if (stat(vec.at(0).c_str(), &sb) == 0
+            && S_ISREG(sb.st_mode)) // can be open && is regular file
+        {
+            std::ifstream ifs(vec.at(0));
+            prop_str = std::string((std::istreambuf_iterator<char>(ifs)),
+                                   (std::istreambuf_iterator<char>()));
+        }
+        else // string itself is json
+        {
+            prop_str = vec.at(0);
+        }
+
+        load_tcam_properties(serial, prop_str);
+    }
+    else if (*save_json)
+    {
+        print_state_json(serial);
+    }
+    else if (*load_json)
+    {
+        if (app.remaining_size() != 1)
+        {
+            std::cerr << "Too many arguments" << std::endl;
+        }
+
+        std::vector<std::string> vec = app.remaining();
+        std::cout << "Loading:\n\n " << std::endl<< std::endl<< vec.at(0) << "\n\n\n" << std::endl;
 
         // TODO: replace with std::filesystem once c++17 is
         // available on reference system
