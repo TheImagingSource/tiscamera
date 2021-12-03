@@ -25,13 +25,14 @@ struct TcamCaptureConfig
 {
     FormatHandling format_selection_type = FormatHandling::Auto;
     ConversionElement conversion_element = ConversionElement::Auto;
+    QString video_sink_element = "xvimagesink";
     // expectations
     // output element name: sink
     // if a capsfilter element named device-caps exists it will have the configured caps set
     // all tcam-property elements are named: tcam0, tcam1, etc
     // tcam0 is always source
     QString pipeline = "tcambin name=tcam0 ! video/x-raw,format=BGRx ! queue ! videoconvert "
-        "! fpsdisplaysink video-sink=xvimagesink sync=false name=sink text-overlay=false signal-fps-measurements=true";
+        "! fpsdisplaysink video-sink={video-sink-element} sync=false name=sink text-overlay=false signal-fps-measurements=true";
 
 
     void save()
@@ -41,7 +42,7 @@ struct TcamCaptureConfig
         s.setValue("format_selection_type", (int)format_selection_type);
         s.setValue("conversion_element", (int)conversion_element);
 
-        // do not safe pipeline
+        // do not save pipeline
         // if in doubt we always have the default value
     }
 
@@ -58,9 +59,14 @@ struct TcamCaptureConfig
             pipeline = tmp;
 
             pipeline.replace(QString("{display-sink}"),
-                             QString("fpsdisplaysink video-sink=xvimagesink sync=false name=sink text-overlay=false signal-fps-measurements=true"));
+                             QString("fpsdisplaysink video-sink={video_sink_element} sync=false name=sink text-overlay=false signal-fps-measurements=true"));
             qInfo("Pipeline string: %s", pipeline.toStdString().c_str());
         }
+
+        auto tmp_sink_element = s.value("video-sink-element", video_sink_element).toString();
+
+        pipeline.replace(QString("{video-sink-element}"),
+                         tmp_sink_element);
 
     }
 };
