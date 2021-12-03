@@ -106,7 +106,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     enable_device_gui_elements(false);
 
     // open device dialog to make it more obvious what to do next
-    QTimer::singleShot(200, this, SLOT(on_actionOpen_Device_triggered()));
 }
 
 
@@ -121,6 +120,35 @@ void MainWindow::closeEvent(QCloseEvent* event)
     close_pipeline();
     save_settings();
     event->accept();
+}
+
+
+bool MainWindow::open_device(const QString& serial)
+{
+    auto device_list = m_index->get_device_list();
+
+    bool found_it = false;
+    for (const auto& dev : device_list)
+    {
+        if (dev.serial_long() == serial.toStdString()
+            || dev.serial() == serial.toStdString())
+        {
+            found_it = true;
+            m_selected_device = dev;
+            break;
+        }
+    }
+
+    if (!found_it)
+    {
+        return false;
+    }
+
+    qInfo("device selected: %s\n", m_selected_device.str().c_str());
+
+    open_pipeline(FormatHandling::Auto);
+
+    return true;
 }
 
 

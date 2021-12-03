@@ -45,13 +45,30 @@ int main(int argc, char* argv[])
     // QCommandLineOption reset_option("reset", "Reset application settings and clear cache");
     // parser.addOption(reset_option);
 
+    QCommandLineOption serial_option("serial", "Open device on startup", "serial");
+    parser.addOption(serial_option);
+
     // Process the actual command line arguments given by the user
     parser.process(a);
 
-    // const QStringList args = parser.positionalArguments();
+    QString serial = parser.value(serial_option);
 
     MainWindow w;
 
     w.show();
+
+    if (serial.isEmpty())
+    {
+        QTimer::singleShot(200, &w, SLOT(on_actionOpen_Device_triggered()));
+    }
+    else
+    {
+        // this will block the GUI
+        // should the camera need a long time to open
+        if (!w.open_device(serial))
+        {
+            return 1;
+        }
+    }
     return a.exec();
 }

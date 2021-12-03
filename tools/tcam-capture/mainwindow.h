@@ -51,9 +51,11 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
 
     void set_settings_string(const QString str);
+
+    bool open_device(const QString& serial);
 
 public slots:
 
