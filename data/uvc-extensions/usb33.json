@@ -104,8 +104,8 @@
 		    "offset_bits": 0
         },
         {
-            "id": "0x199e210",
-		    "name": "Trigger Delay",
+            "id": "0x199e272",
+		    "name": "Trigger Delay (100ns)",
 		    "selector": "0x1A",
 		    "uvc_type": "unsigned",
 		    "v4l2_type": "integer",
