@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-_gige-daemon () {
+_tcam-gige-daemon () {
 
     local cur prev words cword
     _init_completion || return
@@ -50,4 +50,4 @@ _gige-daemon () {
 
     return 0
 } &&
-    complete -F _gige-daemon gige-daemon
+    complete -F _tcam-gige-daemon tcam-gige-daemon

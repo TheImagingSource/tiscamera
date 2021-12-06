@@ -23,57 +23,29 @@ _tcam-capture () {
     local COMMANDS=(
         "--help"
         "-h"
-        "--reset"
+        "--help-all"
         "-v"
-        "-vv"
-        "-vvv"
-        "-vvvv"
-        "-vvvvv"
+        "--version"
         "--serial"
-        "--format"
-        "--fullscreen"
     )
-    # helper function
-    # tries to find the current serial number in the existing arguments
-    find_serial () {
 
-        local next_is_serial=0
-
-        for i in "${COMP_WORDS[@]}";
-        do
-            if [ $next_is_serial -eq 1 ]; then
-                echo $i
-                break
-                # return $i
-            fi
-            if [ "$i" = "--serial" ]; then
-                next_is_serial=1
-            fi
-        done
-    }
+    local command i
+    for (( i=0; i < ${#words[@]}-1; i++ )); do
+        if [[ ${COMMANDS[@]} =~ ${words[i]} ]]; then
+            command=${words[i]}
+            break
+        fi
+    done
 
     case $prev in
         --serial)
-            COMPREPLY=( $( compgen -W "$( tcam-ctrl -l | awk -print 'NF>1{print $4}' )" -- "$cur" ) )
-            return 0
-            ;;
-        --format)
-
-            local serial=$(find_serial)
-
-            if [ -z $serial ]; then
-                # echo "Please give a serial with --serial first"
-                COMPREPLY=()
-            else
-                COMPREPLY=( $( compgen -o noquote -W "$( tcam-ctrl -c $serial | awk '{if (NR!=1) {print}}' | awk '{gsub( ";","" ); print}' )" -- "$cur" ) )
-            fi
-
+            COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
             return 0
             ;;
     esac
 
     # complete using basic options
-    COMPREPLY=( $( compgen -W '-h --help --reset --serial --format -v --fullscreen' -- "$cur" ) )
+    #COMPREPLY=( $( compgen -W '-h --help --reset --serial --format -v --fullscreen' -- "$cur" ) )
 
 
     if [[ ${#COMPREPLY[@]} -ne 0 ]]; then
@@ -81,8 +53,8 @@ _tcam-capture () {
         # already been specified somewhere on the command line, as long as
         # these options can only be used once (in a word, "options", in
         # opposition to "tests" and "actions", as in the find(1) manpage).
-        local -A onlyonce=( [--serial]=1 [--format]=1 [--help]=1 [-h]=1
-                            [--reset]=1 [-fullscreen]=1 )
+        local -A onlyonce=( [--serial]=1 [--format]=1 [--help]=1 [-h]=1 [-v]=1 [--version]=1
+                             )
         local j
         for i in "${words[@]}"; do
             [[ $i && ${onlyonce[$i]} ]] || continue
@@ -90,6 +62,12 @@ _tcam-capture () {
                 [[ ${COMPREPLY[j]} == $i ]] && unset 'COMPREPLY[j]'
             done
         done
+    fi
+
+
+    # no command yet, show what commands we have
+    if [ "$command" = "" ]; then
+        COMPREPLY=( $( compgen -W '${COMMANDS[@]}' -- "$cur" ) )
     fi
 
     return 0

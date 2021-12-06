@@ -5,7 +5,7 @@ if (BUILD_V4L2)
 endif (BUILD_V4L2)
 
 if (BUILD_ARAVIS)
-  list(APPEND completion_files "gige-daemon")
+  list(APPEND completion_files "tcam-gige-daemon")
 endif (BUILD_ARAVIS)
 
 

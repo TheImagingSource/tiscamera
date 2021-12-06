@@ -6,17 +6,24 @@ _tcam-ctrl () {
     _init_completion || return
 
     local COMMANDS=(
-        "help"
-        "list"
-        "caps"
-        "formats"
-        "properties"
-        "-p"
+        "--list"
         "-l"
+        "--caps"
         "-c"
+        "--properties"
+        "-p"
         "-h"
         "--help"
         "--version"
+        "--list-serial-long"
+        "--packages"
+        "--usb-info"
+        "--gige-info"
+        "--all-info"
+        "--save"
+        "--load"
+        "--save-json"
+        "--load-json"
     )
 
     local command i
@@ -30,7 +37,7 @@ _tcam-ctrl () {
 
     if [[ -n $command ]]; then
         case $command in
-            list|properties|formats|caps|-c|-p)
+            list|properties|formats|caps|-c|-p|--caps|--properties)
                 # COMPREPLY=( $( compgen -W "$( tcam-ctrl -- | awk -print 'NF>1{print $5}' )" -- "$cur" ) )
                 COMPREPLY=( $( compgen -W "$( tcam-ctrl --list-serial-long)" -- "$cur" ) )
                 return 0
