@@ -36,7 +36,8 @@ public:
 
     virtual tcamprop1::prop_static_info get_static_info() const = 0;
 
-    std::string_view get_name() const noexcept {
+    std::string_view get_name() const noexcept
+    {
         return get_static_info().name;
     }
 
@@ -61,11 +62,7 @@ public:
     virtual std::string_view get_unit() const = 0;
     virtual tcamprop1::IntRepresentation_t get_representation() const = 0;
 
-    virtual PropertyFlags get_flags() const override = 0;
-
-    virtual int64_t get_min() const = 0;
-    virtual int64_t get_max() const = 0;
-    virtual int64_t get_step() const = 0;
+    virtual tcamprop1::prop_range_integer get_range() const = 0;
     virtual int64_t get_default() const = 0;
 
     virtual outcome::result<int64_t> get_value() const = 0;
@@ -83,11 +80,8 @@ public:
     virtual std::string_view get_unit() const = 0;
     virtual tcamprop1::FloatRepresentation_t get_representation() const = 0;
 
-    virtual PropertyFlags get_flags() const override = 0;
+    virtual tcamprop1::prop_range_float get_range() const = 0;
 
-    virtual double get_min() const = 0;
-    virtual double get_max() const = 0;
-    virtual double get_step() const = 0;
     virtual double get_default() const = 0;
 
     virtual outcome::result<double> get_value() const = 0;
@@ -101,8 +95,6 @@ public:
     {
         return TCAM_PROPERTY_TYPE_BOOLEAN;
     }
-
-    virtual PropertyFlags get_flags() const override = 0;
 
     virtual bool get_default() const = 0;
 
@@ -119,8 +111,6 @@ public:
         return TCAM_PROPERTY_TYPE_BUTTON;
     }
 
-    virtual PropertyFlags get_flags() const override = 0;
-
     virtual outcome::result<void> execute() = 0;
 };
 
@@ -133,13 +123,9 @@ public:
         return TCAM_PROPERTY_TYPE_ENUMERATION;
     }
 
-    virtual PropertyFlags get_flags() const override = 0;
-
     virtual outcome::result<void> set_value_str(const std::string_view& new_value) = 0;
-    virtual outcome::result<void> set_value(int64_t new_value) = 0;
 
     virtual outcome::result<std::string_view> get_value() const = 0;
-    virtual outcome::result<int64_t> get_value_int() const = 0;
 
     virtual std::string get_default() const = 0;
 

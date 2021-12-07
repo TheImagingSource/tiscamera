@@ -88,7 +88,7 @@ void AravisDevice::generate_scales()
             auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(binning_h.get());
             auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(binning_v.get());
 
-            for (int i = bh->get_min(); i <= bh->get_max(); i++)
+            for (int i = bh->get_range().min; i <= bh->get_range().max; i++)
             {
                 // only accept valid values
                 if (!legal_value(i))
@@ -96,7 +96,7 @@ void AravisDevice::generate_scales()
                     continue;
                 }
 
-                for (int v = bv->get_min(); v <= bv->get_max(); v++)
+                for (int v = bv->get_range().min; v <= bv->get_range().max; v++)
                 {
                     // only accept valid values
                     if (!legal_value(v))
@@ -146,7 +146,7 @@ void AravisDevice::generate_scales()
                     }
                 }
 
-                // for (int i = binning->get_min(); i <= binning->get_max(); i++)
+                // for (int i = binning->get_range().min; i <= binning->get_range().max; i++)
                 // {
                 //     if (!legal_value(i))
                 //     {
@@ -177,7 +177,7 @@ void AravisDevice::generate_scales()
         auto bh = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_h.get());
         auto bv = dynamic_cast<tcam::property::IPropertyInteger*>(skipping_v.get());
 
-        for (int i = bh->get_min(); i <= bh->get_max(); i++)
+        for (int i = bh->get_range().min; i <= bh->get_range().max; i++)
         {
             // only accept valid values
             if (!legal_value(i))
@@ -185,7 +185,7 @@ void AravisDevice::generate_scales()
                 continue;
             }
 
-            for (int v = bv->get_min(); v <= bv->get_max(); v++)
+            for (int v = bv->get_range().min; v <= bv->get_range().max; v++)
             {
                 // only accept valid values
                 if (!legal_value(v))
@@ -262,13 +262,13 @@ void AravisDevice::generate_scales()
         };
 
         // try all possible combinations
-        for (int bin_h = bh->get_min(); bin_h <= bh->get_max(); bin_h++)
+        for (int bin_h = bh->get_range().min; bin_h <= bh->get_range().max; bin_h++)
         {
-            for (int bin_v = bv->get_min(); bin_v <= bv->get_max(); bin_v++)
+            for (int bin_v = bv->get_range().min; bin_v <= bv->get_range().max; bin_v++)
             {
-                for (int sk_h = sh->get_min(); sk_h <= sh->get_max(); sk_h++)
+                for (int sk_h = sh->get_range().min; sk_h <= sh->get_range().max; sk_h++)
                 {
-                    for (int sk_v = sv->get_min(); sk_v <= sv->get_max(); sk_v++)
+                    for (int sk_v = sv->get_range().min; sk_v <= sv->get_range().max; sk_v++)
                     {
                         tcam::image_scaling is;
 

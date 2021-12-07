@@ -32,9 +32,7 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     m_id = desc.id_;
     m_name = desc.name_;
 
-    m_min = prop->get_min();
-    m_max = prop->get_max();
-    m_step = prop->get_step();
+    range_ = prop->get_range();
     m_default = prop->get_default();
 
     // do not add external flag
@@ -69,9 +67,7 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
 
     m_name = desc.name_;
 
-    m_min = desc.range_i_.min;
-    m_max = desc.range_i_.max;
-    m_step = desc.range_i_.step;
+    range_ = { desc.range_i_.min, desc.range_i_.max, desc.range_i_.step };
     m_default = desc.range_i_.default_value;
     m_flags = (PropertyFlags::Available | PropertyFlags::Implemented | PropertyFlags::External);
 
@@ -151,8 +147,6 @@ outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
 
 outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
     if (auto ptr = m_cam.lock())
     {
         if (ptr->set_int(m_id, new_value))
@@ -168,20 +162,6 @@ outcome::result<void> SoftwarePropertyIntegerImpl::set_value(int64_t new_value)
     }
 }
 
-outcome::result<void> SoftwarePropertyIntegerImpl::valid_value(int64_t val)
-{
-    if (m_max < val || m_min > val)
-    {
-        return tcam::status::PropertyOutOfBounds;
-    }
-    if (val % m_step != 0)
-    {
-        return tcam::status::PropertyValueDoesNotExist;
-    }
-
-    return outcome::success();
-}
-
 SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     const software_prop_desc& desc,
     std::shared_ptr<IPropertyFloat> prop,
@@ -189,9 +169,7 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     : m_name(desc.name_), m_id(desc.id_), m_cam(backend)
 {
     //m_name = prop->get_name();
-    m_min = prop->get_min();
-    m_max = prop->get_max();
-    m_step = prop->get_step();
+    range_ = prop->get_range();
     m_default = prop->get_default();
 
     if (desc.device_flags)
@@ -230,10 +208,8 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     std::shared_ptr<SoftwarePropertyBackend> backend)
     : m_name(desc.name_), m_id(desc.id_), m_cam(backend)
 {
+    range_ = { (double)prop->get_range().min, (double)prop->get_range().max, (double)prop->get_range().stp };
     //m_name = prop->get_name();
-    m_min = prop->get_min();
-    m_max = prop->get_max();
-    m_step = prop->get_step();
     m_default = prop->get_default();
 
     if (desc.device_flags)
@@ -274,9 +250,7 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
 
     m_name = desc.name_;
 
-    m_min = desc.range_d_.min;
-    m_max = desc.range_d_.max;
-    m_step = desc.range_d_.step;
+    range_ = { desc.range_d_.min, desc.range_d_.max, desc.range_d_.step };
     m_default = desc.range_d_.default_value;
 
     if (desc.device_flags)
@@ -371,8 +345,6 @@ outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
 
 outcome::result<void> SoftwarePropertyDoubleImpl::set_value(double new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
     if (auto ptr = m_cam.lock())
     {
         return ptr->set_double(m_id, new_value);
@@ -383,18 +355,6 @@ outcome::result<void> SoftwarePropertyDoubleImpl::set_value(double new_value)
         return tcam::status::ResourceNotLockable;
     }
 }
-
-
-outcome::result<void> SoftwarePropertyDoubleImpl::valid_value(double val)
-{
-    if (get_min() > val || val > get_max())
-    {
-        return tcam::status::PropertyOutOfBounds;
-    }
-
-    return outcome::success();
-}
-
 
 SoftwarePropertyBoolImpl::SoftwarePropertyBoolImpl(const software_prop_desc& desc,
                                                    std::shared_ptr<SoftwarePropertyBackend> backend)

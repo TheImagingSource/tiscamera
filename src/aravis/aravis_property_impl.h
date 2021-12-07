@@ -51,18 +51,10 @@ public:
 
     virtual PropertyFlags get_flags() const final;
 
-    virtual int64_t get_min() const final
+    virtual tcamprop1::prop_range_integer get_range() const final
     {
-        return m_min;
-    };
-    virtual int64_t get_max() const final
-    {
-        return m_max;
-    };
-    virtual int64_t get_step() const final
-    {
-        return m_step;
-    };
+        return { m_min, m_max, m_step };
+    }
     virtual int64_t get_default() const final
     {
         return m_default;
@@ -72,8 +64,6 @@ public:
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-    outcome::result<void> valid_value(int64_t val) const;
-
     std::weak_ptr<AravisPropertyBackend> m_cam;
 
     // display name
@@ -114,19 +104,10 @@ public:
     virtual tcamprop1::FloatRepresentation_t get_representation() const final;
 
     virtual PropertyFlags get_flags() const final;
-
-    virtual double get_min() const final
+    virtual tcamprop1::prop_range_float get_range() const final
     {
-        return m_min;
-    };
-    virtual double get_max() const final
-    {
-        return m_max;
-    };
-    virtual double get_step() const final
-    {
-        return m_step;
-    };
+        return { m_min, m_max, m_step };
+    }
     virtual double get_default() const final
     {
         return m_default;

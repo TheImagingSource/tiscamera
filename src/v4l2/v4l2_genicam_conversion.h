@@ -16,33 +16,37 @@
 
 #pragma once
 
-#include "../error.h"
-
-#include <cstdint>
-#include <map>
-#include <memory>
 #include <string>
-#include <functional>
+#include <vector>
 
 namespace tcam::v4l2
 {
 
-    struct converter_scale
+struct converter_scale
 {
-    std::function<double(double) > to_device;
-    std::function<double(double) > from_device;
+    using func_type_to_device = int64_t (*)(double);
+    using func_type_from = double (*)(int64_t);
+
+    func_type_to_device to_device_ = nullptr;
+    func_type_from from_device_ = nullptr;
+
+    int64_t to_device(double val) const
+    {
+        return to_device_ ? to_device_(val) : val;
+    }
+    double from_device(int64_t val) const
+    {
+        return from_device_ ? from_device_(val) : val;
+    }
 };
 
-
-enum class MappingType
+struct menu_entry
 {
-    None,
-    IntToEnum,
-    Scale,
+    int value = 0;
+    std::string entry_name;
 };
 
-converter_scale find_scale(uint32_t v4l2_id);
-
-outcome::result<std::map<int, std::string>> find_menu_entries(uint32_t v4l2_id);
+using menu_entry_list = std::vector<menu_entry>;
+using fetch_menu_entries_func = std::vector<menu_entry> (*)();
 
 } // namespace tcam::v4l2

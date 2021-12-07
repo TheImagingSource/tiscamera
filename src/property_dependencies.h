@@ -16,41 +16,21 @@
 
 #pragma once
 
-#include <vector>
 #include <memory>
 #include <string_view>
-#include <string>
-#include <algorithm>
-
-#include "PropertyFlags.h"
+#include <vector>
 
 namespace tcam::property
 {
 class PropertyLock
 {
 public:
-
     virtual ~PropertyLock() = default;
 
-    //virtual std::string_view get_name() const = 0;
-
-    virtual PropertyFlags get_flags() const = 0;
-
     virtual void set_locked(bool new_locked_state) = 0;
-
     virtual bool lock_others() const = 0;
-
     virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) = 0;
-
 };
-
-
-//struct dependency
-//{
-//    std::string name;
-//    std::vector<std::shared_ptr<tcam::property::PropertyLock>> to_lock;
-//};
-
 
 struct dependency_entry
 {
@@ -58,11 +38,8 @@ struct dependency_entry
     const std::vector<std::string_view> dependencies;
 };
 
-
-bool enum_to_bool (const std::string_view& value);
-
+bool enum_to_bool(const std::string_view& value);
 
 const dependency_entry* find_dependency(const std::string_view& name);
-
 
 } // namespace tcam::property

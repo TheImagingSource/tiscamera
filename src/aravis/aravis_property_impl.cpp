@@ -61,6 +61,7 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
         g_error_free(err);
+        err = nullptr;
     }
     else
     {
@@ -76,6 +77,7 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
         g_error_free(err);
+        err = nullptr;
     }
     else
     {
@@ -93,6 +95,7 @@ tcam::property::PropertyFlags arv_flags_to_tcam(ArvGcNode* node)
     {
         SPDLOG_ERROR("Unable to retrieve node flag information: {}", err->message);
         g_error_free(err);
+        err = nullptr;
     }
     else
     {
@@ -211,8 +214,6 @@ outcome::result<int64_t> AravisPropertyIntegerImpl::get_value() const
 
 outcome::result<void> AravisPropertyIntegerImpl::set_value(int64_t new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
     if (auto ptr = m_cam.lock())
     {
         auto r = ptr->set_int(m_actual_name, new_value);
@@ -228,17 +229,6 @@ outcome::result<void> AravisPropertyIntegerImpl::set_value(int64_t new_value)
         return tcam::status::ResourceNotLockable;
     }
 }
-
-outcome::result<void> AravisPropertyIntegerImpl::valid_value(int64_t val) const
-{
-    if (get_min() > val || val > get_max())
-    {
-        return tcam::status::PropertyOutOfBounds;
-    }
-
-    return outcome::success();
-}
-
 
 AravisPropertyDoubleImpl::AravisPropertyDoubleImpl(const std::string& name,
                                                    ArvCamera* camera,
@@ -322,8 +312,6 @@ PropertyFlags AravisPropertyDoubleImpl::get_flags() const
 
 outcome::result<void> AravisPropertyDoubleImpl::set_value(double new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
     if (auto ptr = m_cam.lock())
     {
         auto r = ptr->set_double(m_actual_name, new_value);
@@ -358,17 +346,6 @@ outcome::result<double> AravisPropertyDoubleImpl::get_value() const
         return tcam::status::ResourceNotLockable;
     }
 }
-
-outcome::result<void> AravisPropertyDoubleImpl::valid_value(double value) const
-{
-    if (get_min() > value || value > get_max())
-    {
-        return tcam::status::PropertyOutOfBounds;
-    }
-
-    return outcome::success();
-}
-
 
 AravisPropertyBoolImpl::AravisPropertyBoolImpl(const std::string& name,
                                                ArvCamera* camera,

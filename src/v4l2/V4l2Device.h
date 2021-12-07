@@ -37,20 +37,6 @@ namespace tcam
 
 class V4l2Device : public DeviceInterface
 {
-
-    class V4L2FormatHandler : public FormatHandlerInterface
-    {
-        friend class V4l2Device;
-
-    public:
-        V4L2FormatHandler(V4l2Device*);
-        std::vector<double> get_framerates(const struct tcam_image_size&,
-                                           int pixelformat = 0) final;
-
-    protected:
-        V4l2Device* device;
-    };
-
 public:
     explicit V4l2Device(const DeviceInfo&);
 
@@ -117,8 +103,6 @@ private:
 
     std::vector<framerate_conv> framerate_conversions;
 
-    std::shared_ptr<V4L2FormatHandler> m_format_handler;
-
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_internal_properties;
 
@@ -170,17 +154,16 @@ private:
     bool load_extension_unit();
     bool extension_unit_is_loaded();
 
-    std::shared_ptr<tcam::property::IPropertyBase> new_control(struct v4l2_queryctrl* qctrl);
+    void generate_properties( const std::vector<v4l2_queryctrl>& qctrl_list );
     void index_controls();
-    void sort_properties(
-        std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties);
+    void update_dependency_information();
 
     std::shared_ptr<tcam::property::V4L2PropertyBackend> p_property_backend;
 
     // streaming related
 
     // on initial startup all buffers are received once, but empty
-    // this causes unneccessary error messages
+    // this causes unnecessary error messages
     // filter those messages until we receive one valid image
     bool m_already_received_valid_image = false;
 

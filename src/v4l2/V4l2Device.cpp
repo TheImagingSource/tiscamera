@@ -18,7 +18,6 @@
 
 #include "../logging.h"
 #include "../utils.h"
-#include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
 
 #include <algorithm>
@@ -31,21 +30,6 @@
 #include <unistd.h>
 
 using namespace tcam;
-
-
-V4l2Device::V4L2FormatHandler::V4L2FormatHandler(V4l2Device* dev) : device(dev) {}
-
-
-std::vector<double> V4l2Device::V4L2FormatHandler::get_framerates(const struct tcam_image_size& s
-                                                                  __attribute__((unused)),
-                                                                  int pixelformat
-                                                                  __attribute__((unused)))
-{
-    std::vector<double> ret;
-
-    return ret;
-}
-
 
 static const int lost_countdown_default = 5;
 
@@ -65,8 +49,6 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
     }
 
     m_monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
-
-    m_format_handler = std::make_shared<V4L2FormatHandler>(this);
 
     p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(m_fd);
     //this->index_all_controls(property_handler);
@@ -483,14 +465,14 @@ void V4l2Device::lost_device()
  * in kernel versions < 3.15 uvcvideo does not correctly interpret bayer 8-bit
  * this function detects those cases and corrects all settings
  */
-static bool checkForBayer(const struct v4l2_fmtdesc& fmtdesc, struct v4l2_fmtdesc& new_desc)
+static bool checkForBayer(const v4l2_fmtdesc& fmtdesc, v4l2_fmtdesc& new_desc)
 {
 
     new_desc = fmtdesc;
     // when v4l2 does not recognize a format fourcc it will
     // set the fourcc to 0 and pass the description string.
     // we compare the possible strings and correct the fourcc
-    // for loater emulation of the correct pattern
+    // for later emulation of the correct pattern
 
     if (strcmp((const char*)fmtdesc.description, "47425247-0000-0010-8000-00aa003") == 0)
     {
@@ -541,7 +523,7 @@ void V4l2Device::determine_scaling()
         return false;
     };
 
-    if (check_prop("OverrideScanningMode", ImageScalingType::Override))
+    if (check_prop("Override Scanning Mode", ImageScalingType::Override))
     {
         static const char* scanning_mode_entries[] =
             {
@@ -610,10 +592,10 @@ image_scaling V4l2Device::get_current_scaling()
     }
     else if (m_scale.scale_type == ImageScalingType::Override)
     {
-        auto override_scanning_mode = tcam::property::find_property(m_internal_properties, "OverrideScanningMode");
+        auto override_scanning_mode = tcam::property::find_property(m_internal_properties, "Override Scanning Mode");
         if (!override_scanning_mode)
         {
-            SPDLOG_ERROR("Unable to find OverrideScanningMode");
+            SPDLOG_ERROR("Unable to find 'Override Scanning Mode'");
             return {};
         }
 
@@ -622,7 +604,7 @@ image_scaling V4l2Device::get_current_scaling()
 
         if (!ret)
         {
-            SPDLOG_ERROR("Unable to retrieve value for OverrideScanningMode: {}", ret.as_failure().error().message());
+            SPDLOG_ERROR("Unable to retrieve value for 'Override Scanning Mode': {}", ret.as_failure().error().message());
             return {};
         }
 
@@ -730,7 +712,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
     {
         if (scale.is_default())
         {
-            auto over = tcam::property::find_property(m_scale.properties, "OverrideScanningMode");
+            auto over = tcam::property::find_property(m_scale.properties, "Override Scanning Mode");
 
             auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
 
@@ -740,7 +722,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
 
             if (!ret)
             {
-                SPDLOG_ERROR("Unable to set OverrideScanningMode: {}", ret.as_failure().error().message());
+                SPDLOG_ERROR("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
                 return false;
             }
             return true;
@@ -754,7 +736,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
                 {
                     if (o.scales_index == (int)i)
                     {
-                        auto over = tcam::property::find_property(m_scale.properties, "OverrideScanningMode");
+                        auto over = tcam::property::find_property(m_scale.properties, "Override Scanning Mode");
 
                         auto override_prop = dynamic_cast<tcam::property::IPropertyInteger*>(over.get());
 
@@ -764,7 +746,7 @@ bool V4l2Device::set_scaling(const image_scaling& scale)
 
                         if (!ret)
                         {
-                            SPDLOG_ERROR("Unable to set OverrideScanningMode: {}", ret.as_failure().error().message());
+                            SPDLOG_ERROR("Unable to set 'Override Scanning Mode': {}", ret.as_failure().error().message());
                             return false;
                         }
                         return true;
@@ -837,13 +819,13 @@ void V4l2Device::generate_scales()
     }
     else if (m_scale.scale_type == ImageScalingType::Override)
     {
-        auto override_scanning_mode = tcam::property::find_property(m_scale.properties,"OverrideScanningMode");
+        auto override_scanning_mode = tcam::property::find_property(m_scale.properties,"Override Scanning Mode");
         if (!override_scanning_mode)
         {
             return;
         }
 
-        // to actually set, use OverrideScanningMode
+        // to actually set, use 'Override Scanning Mode'
         // to test, use ScanningModeSelector
         // to see if stuff is a valid setting, use ScanningModeIdentifier == ScanningModeSelector
 
@@ -865,7 +847,7 @@ void V4l2Device::generate_scales()
         auto mode = dynamic_cast<tcam::property::IPropertyInteger*>(p.get());
         int current_value = mode->get_value().value();
 
-        for (int i = mode->get_min(); i <= mode->get_max(); i += mode->get_step())
+        for (int i = mode->get_range().min; i <= mode->get_range().max; i += mode->get_range().stp )
         {
             if (!mode->set_value(i))
             {
@@ -915,7 +897,7 @@ void V4l2Device::generate_scales()
         {
             auto b = dynamic_cast<tcam::property::IPropertyInteger*>(binning.get());
 
-            for (int i = b->get_min(); i <= b->get_max(); i++)
+            for (int i = b->get_range().min; i <= b->get_range().max; i++)
             {
                 // only accept valid values
                 if (i != 2 && i != 4 && i != 8)

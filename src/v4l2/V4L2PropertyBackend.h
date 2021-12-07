@@ -17,10 +17,9 @@
 #pragma once
 
 #include "../error.h"
+#include "v4l2_genicam_conversion.h"
 
-#include <cstdint>
-#include <map>
-#include <string>
+#include <vector>
 
 namespace tcam::property
 {
@@ -34,10 +33,10 @@ public:
 
     outcome::result<int64_t> read_control(int v4l2_id);
 
-    std::map<int, std::string> get_menu_entries(int v4l2_id, int max);
+    std::vector<tcam::v4l2::menu_entry> get_menu_entries(int v4l2_id, int max);
 
 private:
-    int p_fd;
+    int p_fd = 0;
 };
 
 } // namespace tcam::property

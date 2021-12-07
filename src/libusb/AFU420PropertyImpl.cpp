@@ -89,7 +89,7 @@ outcome::result<void> AFU420PropertyIntegerImpl::set_value(int64_t new_value)
 
 outcome::result<void> AFU420PropertyIntegerImpl::valid_value(int64_t value)
 {
-    if (get_min() > value || value > get_max())
+    if (m_min > value || value > m_max)
     {
         return tcam::status::PropertyOutOfBounds;
     }
@@ -190,7 +190,7 @@ outcome::result<void> AFU420PropertyDoubleImpl::set_value(double new_value)
 
 outcome::result<void> AFU420PropertyDoubleImpl::valid_value(double value)
 {
-    if (get_min() > value || value > get_max())
+    if (m_min > value || value > m_max)
     {
         return tcam::status::PropertyOutOfBounds;
     }

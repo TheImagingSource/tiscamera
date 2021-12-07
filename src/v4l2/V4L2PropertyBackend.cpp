@@ -25,16 +25,15 @@
 tcam::property::V4L2PropertyBackend::V4L2PropertyBackend(int fd) : p_fd(fd) {}
 
 
-outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, struct v4l2_control* ctrl)
+static outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, v4l2_control* ctrl)
 {
     auto ret = tcam::tcam_xioctl(fd, request, ctrl);
-
     if (ret >= 0)
     {
         return ctrl->value;
     }
 
-    std::string action = "GET";
+    std::string_view action = "GET";
     if (request == VIDIOC_S_CTRL)
     {
         action = "SET";
@@ -88,25 +87,20 @@ outcome::result<int64_t> tcam::property::V4L2PropertyBackend::read_control(int v
 }
 
 
-std::map<int, std::string> tcam::property::V4L2PropertyBackend::get_menu_entries(int v4l2_id,
-                                                                                 int max)
+auto tcam::property::V4L2PropertyBackend::get_menu_entries(int v4l2_id, int max)
+    -> std::vector<tcam::v4l2::menu_entry>
 {
-    std::map<int, std::string> entries;
-
-    struct v4l2_querymenu qmenu = {};
-    qmenu.id = v4l2_id;
-
+    std::vector<tcam::v4l2::menu_entry> rval;
     for (int i = 0; i <= max; i++)
     {
+        v4l2_querymenu qmenu = {};
+        qmenu.id = v4l2_id;
         qmenu.index = i;
         if (tcam_xioctl(p_fd, VIDIOC_QUERYMENU, &qmenu))
         {
             continue;
         }
-
-        std::string map_string((char*)qmenu.name);
-        entries.emplace(i, map_string);
+        rval.push_back({ i, std::string((char*)qmenu.name) });
     }
-
-    return entries;
+    return rval;
 }

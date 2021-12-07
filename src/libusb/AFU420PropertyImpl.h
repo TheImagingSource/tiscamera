@@ -44,18 +44,10 @@ public:
     {
         m_flags = flags;
     };
-    virtual int64_t get_min() const final
+    virtual tcamprop1::prop_range_integer get_range() const final
     {
-        return m_min;
-    };
-    virtual int64_t get_max() const final
-    {
-        return m_max;
-    };
-    virtual int64_t get_step() const final
-    {
-        return m_step;
-    };
+        return { m_min, m_max, m_step };
+    }
     virtual int64_t get_default() const final
     {
         return m_default;
@@ -110,18 +102,11 @@ public:
     {
         m_flags = flags;
     };
-    virtual double get_min() const final
+
+    virtual tcamprop1::prop_range_float get_range() const final
     {
-        return m_min;
-    };
-    virtual double get_max() const final
-    {
-        return m_max;
-    };
-    virtual double get_step() const final
-    {
-        return m_step;
-    };
+        return { m_min, m_max, m_step };
+    }
     virtual double get_default() const final
     {
         return m_default;

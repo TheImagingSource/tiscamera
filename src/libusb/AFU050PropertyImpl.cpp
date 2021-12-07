@@ -107,18 +107,6 @@ outcome::result<void> AFU050PropertyIntegerImpl::set_value(int64_t new_value)
     }
 }
 
-
-outcome::result<void> AFU050PropertyIntegerImpl::valid_value(int64_t value)
-{
-    if (get_min() > value || value > get_max())
-    {
-        return tcam::status::PropertyOutOfBounds;
-    }
-
-    return outcome::success();
-}
-
-
 AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     const std::string& name,
     control_definition ctrl,
@@ -230,7 +218,7 @@ outcome::result<void> AFU050PropertyDoubleImpl::set_value(double new_value)
 
 outcome::result<void> AFU050PropertyDoubleImpl::valid_value(double value)
 {
-    if (get_min() > value || value > get_max())
+    if (m_min > value || value > m_max)
     {
         return tcam::status::PropertyOutOfBounds;
     }

@@ -65,9 +65,7 @@ struct TcamPropertyInteger : TcamPropertyBase<tcamprop1::property_interface_inte
     {
         auto tmp = static_cast<tcam::property::IPropertyInteger*>(m_prop.get());
 
-        tcamprop1::prop_range_integer ret = { tmp->get_min(), tmp->get_max(), tmp->get_step() };
-
-        return ret;
+        return tmp->get_range();
     }
 
     virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<int64_t> final
@@ -121,9 +119,7 @@ struct TcamPropertyFloat : TcamPropertyBase<tcamprop1::property_interface_float>
     {
         auto tmp = static_cast<tcam::property::IPropertyFloat*>(m_prop.get());
 
-        tcamprop1::prop_range_float ret = { tmp->get_min(), tmp->get_max(), tmp->get_step() };
-
-        return ret;
+        return tmp->get_range();
     }
 
     virtual auto get_property_default(uint32_t /* flags = 0 */) -> outcome::result<double> final

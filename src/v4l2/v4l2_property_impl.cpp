@@ -26,113 +26,130 @@
 namespace
 {
 
-// helper function to supress false positive error
-bool needs_static_info(const std::string& name)
+static void check_and_fixup_range(std::string_view prop_name,
+                                  tcamprop1::prop_range_integer& range,
+                                  int64_t def)
 {
-    static const char* blacklist [] =
-        {
-            "Binning",
-            "Skipping",
-            "OverrideScanningMode",
-            "Scanning Mode Selector",
-            "Scanning Mode Identifier",
-            "Scanning Mode Scale Horizontal",
-            "Scanning Mode Scale Vertical",
-            "Scanning Mode Binning H",
-            "Scanning Mode Binning V",
-            "Scanning Mode Skipping H",
-            "Scanning Mode Skipping V",
-            "Scanning Mode Flags",
-        };
-
-    if (std::find(std::begin(blacklist), std::end(blacklist), name) != std::end(blacklist))
+    if (range.stp == 0)
     {
-        return false;
+        SPDLOG_DEBUG("Step size for property '{}' is 0.", prop_name, range.stp);
+        range.stp = 1;
     }
-    return true;
+    if (range.stp > 0)
+    {
+        if (range.min > range.max || def < range.min || def > range.max
+            || (def - range.min) % range.stp != 0 /*|| range_.stp > (range_.max - range_.min)*/)
+        {
+            SPDLOG_DEBUG("Property '{}', invalid range. min={} max={} def={} stp={}.",
+                         prop_name,
+                         range.min,
+                         range.max,
+                         def,
+                         range.stp);
+        }
+    }
+}
+
+static void check_and_fixup_range(std::string_view prop_name,
+                                  const tcamprop1::prop_range_float& range,
+                                  int64_t def)
+{
+    if (range.stp > 0)
+    {
+        if (range.min > range.max || def < range.min || def > range.max)
+        {
+            SPDLOG_DEBUG("Property '{}', invalid range. min={} max={} def={} stp={}.",
+                         prop_name,
+                         range.min,
+                         range.max,
+                         def,
+                         range.stp);
+        }
+    }
 }
 
 } // namespace
 
-
-namespace tcam::property
+tcam::property::V4L2PropertyImplBase::V4L2PropertyImplBase(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : m_name((const char*)queryctrl.name), m_v4l2_id(queryctrl.id), m_cam(backend)
 {
+}
 
-V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(struct v4l2_queryctrl* queryctrl,
-                                                 struct v4l2_ext_control* ctrl,
-                                                 std::shared_ptr<V4L2PropertyBackend> backend,
-                                                 const tcam::v4l2::v4l2_genicam_mapping* mapping)
+tcam::property::V4L2PropertyImplBase::V4L2PropertyImplBase(
+    const v4l2_queryctrl& queryctrl,
+    const tcamprop1::prop_static_info* static_info,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : m_name(static_info->name), m_v4l2_id(queryctrl.id), m_cam(backend),
+      p_static_info_base(static_info)
 {
-    m_v4l2_id = queryctrl->id;
-    m_name = (char*)queryctrl->name;
+}
 
-    m_converter = {[](double val){return val;}, [](double val){return val;}};
-    if (mapping)
+outcome::result<void> tcam::property::V4L2PropertyImplBase::set_backend_value(int64_t new_value)
+{
+    if (auto ptr = m_cam.lock())
     {
-        if (!mapping->gen_name.empty())
-        {
-            m_name = mapping->gen_name;
-        }
-        if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
-        {
-            auto tmp = tcam::v4l2::find_scale(queryctrl->id);
-
-            if (tmp.from_device && tmp.to_device)
-            {
-                m_converter = tmp;
-            }
-        }
-    }
-
-    m_min = m_converter.from_device(queryctrl->minimum);
-    m_max = m_converter.from_device(queryctrl->maximum);
-    m_step = m_converter.from_device(queryctrl->step);
-
-    if (m_step == 0)
-    {
-        m_step = 1;
-    }
-
-    m_default = m_converter.from_device(ctrl->value);
-
-    m_cam = backend;
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Integer && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_integer*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (needs_static_info(m_name))
-        {
-            SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
-        }
-        p_static_info = nullptr;
+        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
     }
     else
     {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
+        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
+        return tcam::status::ResourceNotLockable;
+    }
+    return outcome::success();
+}
+
+outcome::result<int64_t> tcam::property::V4L2PropertyImplBase::get_backend_value() const
+{
+    if (auto ptr = m_cam.lock())
+    {
+        return ptr->read_control(m_v4l2_id);
+    }
+    else
+    {
+        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
+        return tcam::status::ResourceNotLockable;
     }
 }
 
-std::string_view V4L2PropertyIntegerImpl::get_unit() const
+tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend,
+    const tcamprop1::prop_static_info_integer* static_info,
+    tcam::v4l2::converter_scale scale)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
+      p_static_info(static_info)
 {
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
+    range_ = { static_cast<int64_t>(m_converter.from_device(queryctrl.minimum)),
+               static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)),
+               static_cast<int64_t>(m_converter.from_device(queryctrl.step)) };
+    m_default = m_converter.from_device(queryctrl.default_value);
+
+    check_and_fixup_range(get_internal_name(), range_, m_default);
+}
+
+tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyImplBase(queryctrl, backend)
+{
+    range_ = { queryctrl.minimum, queryctrl.maximum, queryctrl.step };
+    m_default = m_converter.from_device(queryctrl.default_value);
+
+    check_and_fixup_range(get_internal_name(), range_, m_default);
+}
+
+std::string_view tcam::property::V4L2PropertyIntegerImpl::get_unit() const
+{
+    if (p_static_info)
     {
         return p_static_info->unit;
     }
+    return std::string_view();
 }
 
-
-tcamprop1::IntRepresentation_t V4L2PropertyIntegerImpl::get_representation() const
+tcamprop1::IntRepresentation_t tcam::property::V4L2PropertyIntegerImpl::get_representation() const
 {
     if (p_static_info)
     {
@@ -142,284 +159,133 @@ tcamprop1::IntRepresentation_t V4L2PropertyIntegerImpl::get_representation() con
 }
 
 
-outcome::result<int64_t> V4L2PropertyIntegerImpl::get_value() const
+outcome::result<int64_t> tcam::property::V4L2PropertyIntegerImpl::get_value() const
 {
-    if (auto ptr = m_cam.lock())
+    auto ret = get_backend_value();
+    if (ret.has_value())
     {
-        auto ret = ptr->read_control(m_v4l2_id);
-        if (ret)
-        {
-            return m_converter.from_device(ret.value());
-        }
-        else
-        {
-            return ret.as_failure();
-        }
+        return m_converter.from_device(ret.value());
     }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return tcam::status::ResourceNotLockable;
-    }
+    return ret.error();
 }
 
-
-outcome::result<void> V4L2PropertyIntegerImpl::set_value(int64_t new_value)
+outcome::result<void> tcam::property::V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
-    realign_value(new_value);
-
-    if (auto ptr = m_cam.lock())
-    {
-        auto tmp = m_converter.to_device(new_value);
-        OUTCOME_TRY(ptr->write_control(m_v4l2_id, tmp));
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return tcam::status::ResourceNotLockable;
-    }
-
-    return outcome::success();
-}
-
-
-outcome::result<void> V4L2PropertyIntegerImpl::valid_value(int64_t val)
-{
-    if (get_min() > val || val > get_max())
+    if (range_.min > new_value || new_value > range_.max)
     {
         return tcam::status::PropertyOutOfBounds;
     }
+    if ((new_value % range_.stp) != 0)
+    {
+        SPDLOG_INFO("Value is not compatible with step size.");
+        return tcam::status::PropertyOutOfBounds;
+    }
 
-    return outcome::success();
+    auto tmp = m_converter.to_device(new_value);
+    return set_backend_value(tmp);
 }
 
-
-void V4L2PropertyIntegerImpl::realign_value(int64_t& value)
+tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend,
+    const tcamprop1::prop_static_info_float* static_info,
+    tcam::v4l2::converter_scale scale)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), m_converter(scale),
+      p_static_info(static_info)
 {
-    value = tcam::realign_value(value, m_step, m_min, m_max);
+    range_ = { m_converter.from_device(queryctrl.minimum),
+               m_converter.from_device(queryctrl.maximum),
+               m_converter.from_device(queryctrl.step) };
+    m_default = m_converter.from_device(queryctrl.default_value);
+
+    check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-
-V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(struct v4l2_queryctrl* queryctrl,
-                                               struct v4l2_ext_control* ctrl,
-                                               std::shared_ptr<V4L2PropertyBackend> backend,
-                                               const tcam::v4l2::v4l2_genicam_mapping* mapping)
+tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyImplBase(queryctrl, backend)
 {
-    m_name = (char*)queryctrl->name;
-    m_v4l2_id = queryctrl->id;
-    m_converter = {[](double val){return val;}, [](double val){return val;}};
+    range_ = { static_cast<double>(queryctrl.minimum),
+               static_cast<double>(queryctrl.maximum),
+               static_cast<double>(queryctrl.step) };
+    m_default = static_cast<double>(queryctrl.default_value);
 
-    if (mapping)
-    {
-        if (!mapping->gen_name.empty())
-        {
-            m_name = mapping->gen_name;
-        }
-        if (mapping->conversion_type == tcam::v4l2::MappingType::Scale)
-        {
-            m_converter = tcam::v4l2::find_scale(queryctrl->id);
-        }
-    }
-
-    m_min = m_converter.from_device(queryctrl->minimum);
-    m_max = m_converter.from_device(queryctrl->maximum);
-    m_step = m_converter.from_device(queryctrl->step);
-    m_default = m_converter.from_device(ctrl->value);
-
-    m_cam = backend;
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Float && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_float*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        if (needs_static_info(m_name))
-        {
-            SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
-        }
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
-
+    check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-std::string_view V4L2PropertyDoubleImpl::get_unit() const
+std::string_view tcam::property::V4L2PropertyDoubleImpl::get_unit() const
 {
-    if (!p_static_info)
-    {
-        return std::string_view();
-    }
-    else
+    if (p_static_info)
     {
         return p_static_info->unit;
     }
+    return std::string_view();
 }
 
-
-tcamprop1::FloatRepresentation_t V4L2PropertyDoubleImpl::get_representation() const
+tcamprop1::FloatRepresentation_t tcam::property::V4L2PropertyDoubleImpl::get_representation() const
 {
     if (p_static_info)
     {
         return p_static_info->representation;
     }
-    else
-    {
-        return tcamprop1::FloatRepresentation_t::Linear;
-    }
+    return tcamprop1::FloatRepresentation_t::Linear;
 }
 
-
-outcome::result<double> V4L2PropertyDoubleImpl::get_value() const
+outcome::result<double> tcam::property::V4L2PropertyDoubleImpl::get_value() const
 {
-
-    if (auto ptr = m_cam.lock())
+    auto ret = get_backend_value();
+    if (ret)
     {
-        auto ret = ptr->read_control(m_v4l2_id);
-        if (ret)
-        {
-            return m_converter.from_device(ret.value());
-        }
-        return ret.as_failure();
+        return m_converter.from_device(ret.value());
     }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return tcam::status::ResourceNotLockable;
-    }
+    return ret.error();
 }
 
-
-outcome::result<void> V4L2PropertyDoubleImpl::set_value(double new_value)
+outcome::result<void> tcam::property::V4L2PropertyDoubleImpl::set_value(double new_value)
 {
-    OUTCOME_TRY(valid_value(new_value));
-
-    if (auto ptr = m_cam.lock())
-    {
-        auto r = ptr->write_control(m_v4l2_id, m_converter.to_device(new_value));
-        if (!r)
-        {
-            return r.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return tcam::status::ResourceNotLockable;
-    }
-}
-
-
-outcome::result<void> V4L2PropertyDoubleImpl::valid_value(double val)
-{
-    if (get_min() > val || val > get_max())
+    if (range_.min > new_value || new_value > range_.max)
     {
         return tcam::status::PropertyOutOfBounds;
     }
 
-    return outcome::success();
+    return set_backend_value(m_converter.to_device(new_value));
 }
 
-
-V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(struct v4l2_queryctrl* queryctrl,
-                                           struct v4l2_ext_control* ctrl,
-                                           std::shared_ptr<V4L2PropertyBackend> backend,
-                                           const tcam::v4l2::v4l2_genicam_mapping* mapping)
+tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyImplBase(queryctrl, backend)
 {
-    if (ctrl->value == 0)
-    {
-        m_default = false;
-    }
-    else
-    {
-        m_default = true;
-    }
-    m_name = (char*)queryctrl->name;
-    if (mapping)
-    {
-        if (!mapping->gen_name.empty())
-        {
-            m_name = mapping->gen_name;
-        }
-    }
-
-    m_v4l2_id = queryctrl->id;
-
-    m_cam = backend;
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Boolean && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_boolean*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    m_default = queryctrl.default_value != 0;
 }
 
-outcome::result<bool> V4L2PropertyBoolImpl::get_value() const
+tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend,
+    const tcamprop1::prop_static_info_boolean* static_info)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), p_static_info(static_info)
 {
-    if (auto ptr = m_cam.lock())
-    {
-        auto ret = ptr->read_control(m_v4l2_id);
-        if (ret)
-        {
-            return ret.value();
-        }
-        return ret.error();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return tcam::status::ResourceNotLockable;
-    }
+    m_default = queryctrl.default_value != 0;
 }
 
-outcome::result<void> V4L2PropertyBoolImpl::set_value(bool new_value)
+outcome::result<bool> tcam::property::V4L2PropertyBoolImpl::get_value() const
 {
-    int64_t val = 0;
-    if (new_value)
+    auto ret = get_backend_value();
+    if (ret)
     {
-        val = 1;
+        return ret.value() != 0;
     }
-
-    if (auto ptr = m_cam.lock())
-    {
-        auto ret = ptr->write_control(m_v4l2_id, val);
-        if (!ret)
-        {
-            return ret.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return tcam::status::ResourceNotLockable;
-    }
+    return ret.error();
 }
 
+outcome::result<void> tcam::property::V4L2PropertyBoolImpl::set_value(bool new_value)
+{
+    return set_backend_value(new_value != 0);
+}
 
-void V4L2PropertyBoolImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLock>> &deps)
+void tcam::property::V4L2PropertyBoolImpl::set_dependencies(
+    std::vector<std::weak_ptr<PropertyLock>>& deps)
 {
     m_dependencies = deps;
 
@@ -437,234 +303,109 @@ void V4L2PropertyBoolImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLo
     }
 }
 
-
-V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(struct v4l2_queryctrl* queryctrl,
-                                                 struct v4l2_ext_control* /*ctrl*/,
-                                                 std::shared_ptr<V4L2PropertyBackend> backend,
-                                                 const tcam::v4l2::v4l2_genicam_mapping* mapping)
+tcam::property::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyImplBase(queryctrl, backend)
 {
-    m_name = (char*)queryctrl->name;
-
-    if (mapping)
-    {
-        if (!mapping->gen_name.empty())
-        {
-            m_name = mapping->gen_name;
-        }
-    }
-
-    m_v4l2_id = queryctrl->id;
-
-    m_cam = backend;
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Command && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_command*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        SPDLOG_ERROR("static information for name='{}', id=0x{:x} do not exist!", m_name, m_v4l2_id );
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
 }
 
-outcome::result<void> V4L2PropertyCommandImpl::execute()
+tcam::property::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend,
+    const tcamprop1::prop_static_info_command* static_info)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), p_static_info(static_info)
 {
-
-    if (auto ptr = m_cam.lock())
-    {
-        auto ret = ptr->write_control(m_v4l2_id, 1);
-        if (!ret)
-        {
-            return ret.as_failure();
-        }
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return tcam::status::ResourceNotLockable;
-    }
 }
 
-
-V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(struct v4l2_queryctrl* queryctrl,
-                                           struct v4l2_ext_control* ctrl,
-                                           std::shared_ptr<V4L2PropertyBackend> backend,
-                                           const tcam::v4l2::v4l2_genicam_mapping* mapping)
+outcome::result<void> tcam::property::V4L2PropertyCommandImpl::execute()
 {
-    m_cam = backend;
-    m_v4l2_id = queryctrl->id;
-
-    if (!mapping)
-    {
-        m_name = (char*)queryctrl->name;
-
-        if (auto ptr = m_cam.lock())
-        {
-            m_entries = ptr->get_menu_entries(m_v4l2_id, queryctrl->maximum);
-        }
-        else
-        {
-            SPDLOG_WARN("Unable to retrieve enum entries during property creation.");
-        }
-    }
-    else
-    {
-        if (!mapping->gen_name.empty())
-        {
-            m_name = mapping->gen_name;
-        }
-        else
-        {
-            m_name = (char*)queryctrl->name;
-        }
-
-        //if (mapping->gen_enum_entries)
-        if (mapping->conversion_type == tcam::v4l2::MappingType::IntToEnum)
-        {
-            auto res = tcam::v4l2::find_menu_entries(m_v4l2_id);
-            if (res)
-            {
-                m_entries = res.value();
-            }
-            //mapping->gen_conversion.value().conversion.menu_entries;
-        }
-        else
-        {
-            if (auto ptr = m_cam.lock())
-            {
-                m_entries = ptr->get_menu_entries(m_v4l2_id, queryctrl->maximum);
-            }
-            else
-            {
-                SPDLOG_WARN("Unable to retrieve enum entries during property creation.");
-            }
-        }
-    }
-    m_flags = (PropertyFlags::Available | PropertyFlags::Implemented);
-    m_default = m_entries.at(ctrl->value);
-
-    auto static_info = tcamprop1::find_prop_static_info(m_name);
-
-    if (static_info.type == tcamprop1::prop_type::Enumeration && static_info.info_ptr)
-    {
-        p_static_info = static_cast<const tcamprop1::prop_static_info_enumeration*>(static_info.info_ptr);
-    }
-    else if (!static_info.info_ptr)
-    {
-        SPDLOG_ERROR("static information for {} do not exist!", m_name);
-        p_static_info = nullptr;
-    }
-    else
-    {
-        SPDLOG_ERROR("static information for {} have the wrong type!", m_name);
-        p_static_info = nullptr;
-    }
+    return set_backend_value(1);
 }
 
-outcome::result<void> V4L2PropertyEnumImpl::valid_value(int value)
+tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyImplBase(queryctrl, backend)
 {
-    auto it = m_entries.find(value);
+    m_entries = backend->get_menu_entries(queryctrl.id, queryctrl.maximum);
 
-    if (it == m_entries.end())
+    m_default = get_entry_name(queryctrl.default_value);
+}
+
+tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend,
+    const tcamprop1::prop_static_info_enumeration* static_info,
+    tcam::v4l2::fetch_menu_entries_func func)
+    : V4L2PropertyImplBase(queryctrl, static_info, backend), p_static_info(static_info)
+{
+    if (func)
     {
-        return tcam::status::PropertyValueDoesNotExist;
+        m_entries = func();
+    }
+    else
+    {
+        m_entries = backend->get_menu_entries(queryctrl.id, queryctrl.maximum);
+    }
+
+    m_default = get_entry_name(queryctrl.default_value);
+}
+
+outcome::result<void> tcam::property::V4L2PropertyEnumImpl::set_value_str(
+    const std::string_view& new_value)
+{
+    auto value_to_set = get_entry_value(new_value);
+    if (value_to_set.has_error())
+    {
+        return value_to_set.error();
+    }
+
+    auto ret = set_backend_value(value_to_set.value());
+    if (ret.has_error())
+    {
+        return ret.error();
+    }
+
+    if (!m_dependencies.empty())
+    {
+        bool new_locked_state = lock_others();
+        for (auto& dep : m_dependencies)
+        {
+            if (auto d = dep.lock())
+            {
+                d->set_locked(new_locked_state);
+            }
+        }
     }
 
     return outcome::success();
 }
 
-
-outcome::result<void> V4L2PropertyEnumImpl::set_value_str(const std::string_view& new_value)
+outcome::result<std::string_view> tcam::property::V4L2PropertyEnumImpl::get_value() const
 {
-    for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
+    OUTCOME_TRY(int64_t value, get_backend_value());
+
+    for (const auto& [entry_value, entry_name] : m_entries)
     {
-        if (it->second == new_value)
+        if (entry_value == value)
         {
-            OUTCOME_TRY(set_value(it->first));
-
-            if (!m_dependencies.empty())
-            {
-                bool new_locked_state = lock_others();
-                for (auto& dep : m_dependencies)
-                {
-                    if (auto d = dep.lock())
-                    {
-                        d->set_locked(new_locked_state);
-                    }
-                }
-
-            }
-
-            return outcome::success();
+            return entry_name;
         }
     }
-    return tcam::status::PropertyDoesNotExist;
+    return tcam::status::PropertyOutOfBounds;
 }
 
-
-outcome::result<void> V4L2PropertyEnumImpl::set_value(int64_t new_value)
-{
-    if (!valid_value(new_value))
-    {
-        return tcam::status::PropertyValueDoesNotExist;
-    }
-
-    if (auto ptr = m_cam.lock())
-    {
-        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
-        return outcome::success();
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot write value.");
-        return tcam::status::ResourceNotLockable;
-    }
-}
-
-
-outcome::result<std::string_view> V4L2PropertyEnumImpl::get_value() const
-{
-    OUTCOME_TRY(int value, get_value_int());
-
-    // TODO: additional checks if key exists
-
-    return m_entries.at(value);
-}
-
-
-outcome::result<int64_t> V4L2PropertyEnumImpl::get_value_int() const
-{
-    if (auto ptr = m_cam.lock())
-    {
-        return ptr->read_control(m_v4l2_id);
-    }
-    else
-    {
-        SPDLOG_ERROR("Unable to lock v4l2 device backend. Cannot retrieve value.");
-        return tcam::status::ResourceNotLockable;
-    }
-}
-
-
-std::vector<std::string> V4L2PropertyEnumImpl::get_entries() const
+std::vector<std::string> tcam::property::V4L2PropertyEnumImpl::get_entries() const
 {
     std::vector<std::string> v;
-    for (auto it = m_entries.begin(); it != m_entries.end(); ++it) { v.push_back(it->second); }
+    v.reserve(m_entries.size());
+    for (const auto& [entry_value, entry_name] : m_entries) { v.push_back(entry_name); }
     return v;
 }
 
-
-void V4L2PropertyEnumImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLock>> &deps)
+void tcam::property::V4L2PropertyEnumImpl::set_dependencies(
+    std::vector<std::weak_ptr<PropertyLock>>& deps)
 {
     m_dependencies = deps;
 
@@ -676,11 +417,33 @@ void V4L2PropertyEnumImpl::set_dependencies(std::vector<std::weak_ptr<PropertyLo
     for (auto& dep : m_dependencies)
     {
         if (auto d = dep.lock())
-           {
-               d->set_locked(new_locked_state);
-           }
+        {
+            d->set_locked(new_locked_state);
+        }
     }
 }
 
+std::string_view tcam::property::V4L2PropertyEnumImpl::get_entry_name(int value) const
+{
+    for (const auto& [entry_value, entry_name] : m_entries)
+    {
+        if (entry_value == value)
+        {
+            return entry_name;
+        }
+    }
+    return {};
+}
 
-} // namespace tcam::property
+outcome::result<int64_t> tcam::property::V4L2PropertyEnumImpl::get_entry_value(
+    std::string_view name) const
+{
+    for (const auto& [entry_value, entry_name] : m_entries)
+    {
+        if (entry_name == name)
+        {
+            return entry_value;
+        }
+    }
+    return tcam::status::PropertyDoesNotExist;
+}

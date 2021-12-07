@@ -16,14 +16,12 @@
 
 #include "utils.h"
 
-//#include "internal.h"
-
 #include "logging.h"
 
-#include <algorithm>
+//#include <algorithm>
 #include <cmath>
 #include <cstring>
-#include <dutils_img/image_transform_base.h>
+//#include <dutils_img/image_transform_base.h>
 #include <errno.h>
 #include <fstream>
 #include <limits>
@@ -232,18 +230,4 @@ std::string tcam::get_environment_variable(const std::string& name, const std::s
     }
 
     return value;
-}
-
-
-double tcam::realign_value(const double& value, const double& step, const double& min, const double& max)
-{
-    auto mod = fmod(value, step);
-    if (mod == 0)
-    {
-        return value;
-    }
-
-    auto new_val = value - mod;
-
-    return std::min(std::max(new_val ,min), max);
 }

@@ -16,7 +16,8 @@
 
 #include "property_dependencies.h"
 
-#include <string_view>
+#include <algorithm>
+#include <iterator>
 
 namespace
 {

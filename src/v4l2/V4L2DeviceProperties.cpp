@@ -15,15 +15,15 @@
  */
 
 #include "../logging.h"
+#include "../property_dependencies.h"
 #include "../utils.h"
 #include "V4l2Device.h"
+#include "uvc-extension-loader.h"
 #include "v4l2_genicam_mapping.h"
 #include "v4l2_property_impl.h"
 #include "v4l2_utils.h"
-#include "uvc-extension-loader.h"
 
-#include "../property_dependencies.h"
-
+#include <algorithm>
 #include <linux/videodev2.h>
 #include <unistd.h> // pipe, usleep
 
@@ -31,208 +31,167 @@
 using namespace tcam;
 using namespace tcam::v4l2;
 
-
-std::shared_ptr<tcam::property::IPropertyBase> V4l2Device::new_control(struct v4l2_queryctrl* qctrl)
+static auto create_mapped_prop(
+    const v4l2_queryctrl& qctrl,
+    const v4l2_genicam_mapping& mapping,
+    const std::shared_ptr<tcam::property::V4L2PropertyBackend>& p_property_backend)
+    -> std::shared_ptr<tcam::property::IPropertyBase>
 {
-    if (qctrl->flags & V4L2_CTRL_FLAG_DISABLED)
-    {
-        return nullptr;
-    }
+    using namespace tcam::property;
 
-    if (qctrl->type == V4L2_CTRL_TYPE_CTRL_CLASS)
+    switch (mapping.info_property_type_)
     {
-        // ignore unneccesary controls descriptions such as control "groups"
-        return nullptr;
-    }
-    struct v4l2_ext_control ext_ctrl = {};
-    struct v4l2_ext_controls ctrls = {};
-
-    ext_ctrl.id = qctrl->id;
-    ctrls.ctrl_class = V4L2_CTRL_ID2CLASS(qctrl->id);
-    ctrls.count = 1;
-    ctrls.controls = &ext_ctrl;
-
-    if (V4L2_CTRL_ID2CLASS(qctrl->id) != V4L2_CTRL_CLASS_USER && qctrl->id < V4L2_CID_PRIVATE_BASE)
-    {
-        if (qctrl->type == V4L2_CTRL_TYPE_STRING)
+        case tcamprop1::prop_type::Boolean:
         {
-            ext_ctrl.size = qctrl->maximum + 1;
-            ext_ctrl.string = (char*)malloc(ext_ctrl.size);
-            ext_ctrl.string[0] = 0;
+            return std::make_shared<V4L2PropertyBoolImpl>(
+                qctrl,
+                p_property_backend,
+                static_cast<const tcamprop1::prop_static_info_boolean*>(mapping.info_));
         }
-
-        if (qctrl->flags & V4L2_CTRL_FLAG_WRITE_ONLY)
+        case tcamprop1::prop_type::Integer:
         {
-            SPDLOG_INFO("Encountered write only control.");
+            return std::make_shared<V4L2PropertyIntegerImpl>(
+                qctrl,
+                p_property_backend,
+                static_cast<const tcamprop1::prop_static_info_integer*>(mapping.info_),
+                mapping.converter_);
         }
-
-        else if (tcam_xioctl(m_fd, VIDIOC_G_EXT_CTRLS, &ctrls))
+        case tcamprop1::prop_type::Float:
         {
-            SPDLOG_ERROR("Errno {} getting ext_ctrl {}", errno, qctrl->name);
-            return nullptr;
+            return std::make_shared<V4L2PropertyDoubleImpl>(
+                qctrl,
+                p_property_backend,
+                static_cast<const tcamprop1::prop_static_info_float*>(mapping.info_),
+                mapping.converter_);
         }
-    }
-    else
-    {
-        struct v4l2_control ctrl = {};
-
-        ctrl.id = qctrl->id;
-        if (tcam_xioctl(m_fd, VIDIOC_G_CTRL, &ctrl))
+        case tcamprop1::prop_type::Command:
         {
-            SPDLOG_ERROR("error {} getting ctrl {}", errno, qctrl->name);
-            return nullptr;
+            return std::make_shared<V4L2PropertyCommandImpl>(
+                qctrl,
+                p_property_backend,
+                static_cast<const tcamprop1::prop_static_info_command*>(mapping.info_));
         }
-        ext_ctrl.value = ctrl.value;
-    }
-
-    const struct v4l2_genicam_mapping* mapping = find_mapping(qctrl->id);
-
-    // decide what property type to use through TCAM_PROPERTY_TYPE and not v4l2 property type
-    // this way we can generate types v4l2 does not have, i.e. double
-    TCAM_PROPERTY_TYPE type = v4l2_property_type_to_tcam(qctrl->type);
-
-    if (mapping)
-    {
-        //SPDLOG_DEBUG("Conversion requried for qtrcl->name {}", qctrl->name);
-
-        if (mapping->gen_type != TCAM_PROPERTY_TYPE_UNKNOWN)
+        case tcamprop1::prop_type::Enumeration:
         {
-            type = mapping->gen_type;
+            return std::make_shared<V4L2PropertyEnumImpl>(
+                qctrl,
+                p_property_backend,
+                static_cast<const tcamprop1::prop_static_info_enumeration*>(mapping.info_),
+                mapping.fetch_menu_entries_);
         }
     }
+    return nullptr;
+}
 
+static auto create_unmapped_prop(
+    const v4l2_queryctrl& qctrl,
+    const std::shared_ptr<tcam::property::V4L2PropertyBackend>& p_property_backend)
+    -> std::shared_ptr<tcam::property::IPropertyBase>
+{
+    using namespace tcam::property;
+
+    TCAM_PROPERTY_TYPE type = v4l2_property_type_to_tcam(qctrl.type);
     switch (type)
     {
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
-            return std::make_shared<tcam::property::V4L2PropertyIntegerImpl>(
-                qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<V4L2PropertyIntegerImpl>(qctrl, p_property_backend);
         }
         case TCAM_PROPERTY_TYPE_DOUBLE:
         {
-            return std::make_shared<tcam::property::V4L2PropertyDoubleImpl>(
-                qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<V4L2PropertyDoubleImpl>(qctrl, p_property_backend);
         }
         case TCAM_PROPERTY_TYPE_ENUMERATION:
         {
-            return std::make_shared<tcam::property::V4L2PropertyEnumImpl>(
-                qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<V4L2PropertyEnumImpl>(qctrl, p_property_backend);
         }
         case TCAM_PROPERTY_TYPE_BUTTON:
         {
-            return std::make_shared<tcam::property::V4L2PropertyCommandImpl>(
-                qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<V4L2PropertyCommandImpl>(qctrl, p_property_backend);
         }
         case TCAM_PROPERTY_TYPE_BOOLEAN:
         {
-            return std::make_shared<tcam::property::V4L2PropertyBoolImpl>(
-                qctrl, &ext_ctrl, p_property_backend, mapping);
+            return std::make_shared<V4L2PropertyBoolImpl>(qctrl, p_property_backend);
         }
         case TCAM_PROPERTY_TYPE_STRING:
-        default:
+        case TCAM_PROPERTY_TYPE_UNKNOWN:
         {
-            SPDLOG_WARN("Unknown v4l2 property type - %d.", qctrl->type);
+            SPDLOG_WARN("Unknown v4l2 property type - {}.", qctrl.type);
             return nullptr;
         }
     }
-
-    return 0;
 }
 
-
-void V4l2Device::sort_properties(
-    std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> properties)
+void V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qctrl_list)
 {
-    if (properties.empty())
+    auto is_id_present = [&qctrl_list](uint32_t id_to_look_for)
     {
-        return;
-    }
-
-    auto preserve_id = [&properties](uint32_t v4l2_id, const std::string& name) {
-        int count = 0;
-        for (const auto& p : properties)
-        {
-            if (p.second->get_name() == name)
-            {
-                count++;
-            }
-        }
-
-        // this means there is only one interface provider
-        // nothing to remove
-        if (count <= 1)
-        {
-            return;
-        }
-
-        auto p = properties.begin();
-        while (p != properties.end())
-        {
-            if (p->first != v4l2_id && (p->second->get_name() == name))
-            {
-                SPDLOG_DEBUG("Found additional interface for {}({:x}). Hiding", name, v4l2_id);
-                p = properties.erase(p);
-            }
-            p++;
-        }
+        return std::any_of(qctrl_list.begin(),
+                           qctrl_list.end(),
+                           [id_to_look_for](const v4l2_queryctrl& ctrl)
+                           { return ctrl.id == id_to_look_for; });
     };
 
-    // the id is the property id we prefer using
-    // for the named property
-    preserve_id(0x199e201, "ExposureTime");
-    preserve_id(0x0199e202, "ExposureTimeAuto");
-    preserve_id(V4L2_CID_PRIVACY, "TriggerMode");
-    preserve_id(0x199e204, "Gain");
-
-    // do not drop certain properties
-    // instead store them in a different container
-    // for internal usage
-    // things like binning, skipping, override scanning mode
-    // are needed for later usage
-    auto hide_properties = [this, &properties] (const std::string& name)
+    for (const auto& qctrl : qctrl_list)
     {
-        auto p = properties.begin();
-        while(p != properties.end())
+        std::shared_ptr<tcam::property::IPropertyBase> prop_ptr;
+
+        bool is_internal_property = false;
+        const v4l2_genicam_mapping* mapping = find_mapping(qctrl.id);
+        if (!mapping)
         {
-            if (name == p->second->get_name())
-            {
-                m_internal_properties.push_back(p->second);
-                properties.erase(p);
-                return;
-            }
-            p++;
+            SPDLOG_WARN("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
+                        qctrl.id,
+                        (char*)qctrl.name);
+
+            prop_ptr = create_unmapped_prop(qctrl, p_property_backend);
         }
-    };
+        else
+        {
+            if (mapping->preferred_id_ && is_id_present(mapping->preferred_id_))
+            {
+                SPDLOG_TRACE("Skipping property id={:#x} due to presence of id={:#x}.",
+                             qctrl.id,
+                             mapping->preferred_id_);
+                continue;
+            }
 
-    hide_properties("Skipping");
-    hide_properties("Binning");
-    hide_properties("BinningHorizontal");
-    hide_properties("BinningVertical");
-    hide_properties("OverrideScanningMode");
-    hide_properties("Scanning Mode Selector");
-    hide_properties("Scanning Mode Identifier");
-    hide_properties("Scanning Mode Scale Horizontal");
-    hide_properties("Scanning Mode Scale Vertical");
-    hide_properties("Scanning Mode Binning H");
-    hide_properties("Scanning Mode Binning V");
-    hide_properties("Scanning Mode Skipping H");
-    hide_properties("Scanning Mode Skipping V");
-    hide_properties("Scanning Mode Flags");
+            is_internal_property = mapping->mapping_type_ == mapping_type::internal;
 
-    m_properties.reserve(properties.size());
+            if (mapping->info_)
+            {
+                prop_ptr = create_mapped_prop(qctrl, *mapping, p_property_backend);
+            }
+            else
+            {
+                prop_ptr = create_unmapped_prop(qctrl, p_property_backend);
+            }
+        }
 
-    for (auto it = properties.begin(); it != properties.end(); ++it)
-    {
-        m_properties.push_back(it->second);
+        if (prop_ptr)
+        {
+            if (is_internal_property)
+            {
+                m_internal_properties.push_back(prop_ptr);
+            }
+            else
+            {
+                m_properties.push_back(prop_ptr);
+            }
+        }
     }
 
+    update_dependency_information();
+}
 
+void V4l2Device::update_dependency_information()
+{
     //
     // v4l2/uvc devices do not have proper interdependencies for properties
     // manually reapply some of them
     // this causes things like ExposureAuto==On to lock ExposureTime
     //
-    for (auto& prop: m_properties)
+    for (auto& prop : m_properties)
     {
         std::vector<std::weak_ptr<tcam::property::PropertyLock>> dependencies_to_include;
         auto dependencies = tcam::property::find_dependency(prop->get_name());
@@ -241,14 +200,9 @@ void V4l2Device::sort_properties(
         {
             for (const auto& dep : dependencies->dependencies)
             {
-                auto itere = std::find_if(m_properties.begin(), m_properties.end(), [&dep](const auto& p)
-                {
-                    if (p->get_name() == dep)
-                    {
-                        return true;
-                    }
-                    return false;
-                });
+                auto itere = std::find_if(m_properties.begin(),
+                                          m_properties.end(),
+                                          [&dep](const auto& p) { return p->get_name() == dep; });
 
                 if (itere != m_properties.end())
                 {
@@ -261,12 +215,12 @@ void V4l2Device::sort_properties(
         {
             auto ptr = std::dynamic_pointer_cast<tcam::property::PropertyLock>(prop);
             if (ptr)
+            {
                 ptr->set_dependencies(dependencies_to_include);
+            }
         }
     }
-
 }
-
 
 bool V4l2Device::load_extension_unit()
 {
@@ -275,7 +229,8 @@ bool V4l2Device::load_extension_unit()
         SPDLOG_DEBUG("{}", message.c_str());
     };
 
-    std::string extension_file = tcam::uvc::determine_extension_file(this->device.get_info().additional_identifier);
+    std::string extension_file =
+        tcam::uvc::determine_extension_file(this->device.get_info().additional_identifier);
 
     if (extension_file.empty())
     {
@@ -310,23 +265,20 @@ void V4l2Device::index_controls()
             "The property extension unit does not exist. Not all properties will be accessible.");
     }
 
-    std::map<uint32_t, std::shared_ptr<tcam::property::IPropertyBase>> new_properties;
-
-    struct v4l2_queryctrl qctrl = {};
+    v4l2_queryctrl qctrl = {};
     qctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
+
+    std::vector<v4l2_queryctrl> qctrl_av;
 
     while (tcam_xioctl(this->m_fd, VIDIOC_QUERYCTRL, &qctrl) == 0)
     {
-        auto prop = new_control(&qctrl);
-
-        if (prop)
+        // ignore unnecessary control descriptions such as control "groups"
+        if (!(qctrl.flags & V4L2_CTRL_FLAG_DISABLED) && qctrl.type != V4L2_CTRL_TYPE_CTRL_CLASS)
         {
-            new_properties.emplace(qctrl.id, prop);
-            //sort_properties(qctrl.id, prop);
+            qctrl_av.push_back(qctrl);
         }
-
         qctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
     }
 
-    sort_properties(new_properties);
+    generate_properties(qctrl_av);
 }

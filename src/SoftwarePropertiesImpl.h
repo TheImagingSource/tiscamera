@@ -54,18 +54,12 @@ public:
     {
         m_flags = flags;
     }
-    virtual int64_t get_min() const final
+
+    virtual tcamprop1::prop_range_integer get_range() const final
     {
-        return m_min;
+        return range_;
     }
-    virtual int64_t get_max() const final
-    {
-        return m_max;
-    }
-    virtual int64_t get_step() const final
-    {
-        return m_step;
-    }
+
     virtual int64_t get_default() const final
     {
         return m_default;
@@ -76,16 +70,13 @@ public:
     virtual outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-    outcome::result<void> valid_value(int64_t val);
-
     std::weak_ptr<SoftwarePropertyBackend> m_cam;
 
     std::string m_name;
     PropertyFlags m_flags;
 
-    int64_t m_min;
-    int64_t m_max;
-    int64_t m_step;
+    tcamprop1::prop_range_integer range_;
+
     int64_t m_default;
 
     software_prop m_id;
@@ -117,17 +108,10 @@ public:
     {
         m_flags = flags;
     }
-    virtual double get_min() const final
+
+    virtual tcamprop1::prop_range_float get_range() const final
     {
-        return m_min;
-    }
-    virtual double get_max() const final
-    {
-        return m_max;
-    }
-    virtual double get_step() const final
-    {
-        return m_step;
+        return range_;
     }
     virtual double get_default() const final
     {
@@ -138,15 +122,11 @@ public:
     virtual outcome::result<void> set_value(double new_value) final;
 
 private:
-    outcome::result<void> valid_value(double val);
-
-
     std::string m_name;
     PropertyFlags m_flags;
 
-    double m_min;
-    double m_max;
-    double m_step;
+    tcamprop1::prop_range_float range_;
+
     double m_default;
 
     bool m_device_flags = false;

@@ -663,10 +663,10 @@ void tcam::property::SoftwareProperties::generate_exposure()
 
     m_dev_exposure = std::static_pointer_cast<tcam::property::IPropertyFloat>(exp_base);
 
-    m_auto_params.exposure.granularity = m_dev_exposure->get_step();
+    m_auto_params.exposure.granularity = m_dev_exposure->get_range().stp;
 
-    m_auto_params.exposure.min = m_dev_exposure->get_min();
-    m_auto_params.exposure.max = m_dev_exposure->get_max();
+    m_auto_params.exposure.min = m_dev_exposure->get_range().min;
+    m_auto_params.exposure.max = m_dev_exposure->get_range().max;
 
     auto exp_val = m_dev_exposure->get_value();
     if (exp_val)
@@ -713,8 +713,8 @@ void tcam::property::SoftwareProperties::generate_gain()
     m_dev_gain = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(gain_base);
 
     m_auto_params.gain.auto_enabled = true;
-    m_auto_params.gain.min = m_dev_gain->get_min();
-    m_auto_params.gain.max = m_dev_gain->get_max();
+    m_auto_params.gain.min = m_dev_gain->get_range().min;
+    m_auto_params.gain.max = m_dev_gain->get_range().max;
     auto gain_val = m_dev_gain->get_value();
     if (gain_val)
     {
@@ -746,8 +746,8 @@ void tcam::property::SoftwareProperties::generate_iris()
 
     m_dev_iris = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base);
 
-    m_auto_params.iris.min = m_dev_iris->get_min();
-    m_auto_params.iris.max = m_dev_iris->get_max();
+    m_auto_params.iris.min = m_dev_iris->get_range().min;
+    m_auto_params.iris.max = m_dev_iris->get_range().max;
 
     auto iris_val = m_dev_iris->get_value();
     if (iris_val)
@@ -778,8 +778,8 @@ void SoftwareProperties::generate_focus()
     m_dev_focus = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base);
 
     m_auto_params.focus_onepush_params.enable_focus = true;
-    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min = m_dev_focus->get_min();
-    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_max = m_dev_focus->get_max();
+    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_min = m_dev_focus->get_range().min;
+    m_auto_params.focus_onepush_params.run_cmd_params.focus_range_max = m_dev_focus->get_range().max;
 
     enable_property(sp::FocusAuto);
     enable_property_int(sp::Focus, m_dev_focus);
