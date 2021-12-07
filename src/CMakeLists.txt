@@ -15,9 +15,9 @@
 
 include( ${TCAM_SOURCE_DIR}/cmake/pkg-helper.cmake )
 
-if (BUILD_GST_1_0)
+if (TCAM_BUILD_GST_1_0)
   add_subdirectory(gstreamer-1.0)
-endif (BUILD_GST_1_0)
+endif (TCAM_BUILD_GST_1_0)
 
 configure_file (
   "${CMAKE_CURRENT_SOURCE_DIR}/tcam-config.h.in"
@@ -136,28 +136,28 @@ target_link_libraries(tcam
   )
 
 
-if (BUILD_V4L2)
+if (TCAM_BUILD_V4L2)
   add_subdirectory(v4l2)
 
   target_compile_definitions(tcam PRIVATE -DHAVE_V4L2)
 
   target_link_libraries(tcam PRIVATE tcam-backend-v4l2)
 
-endif (BUILD_V4L2)
+endif (TCAM_BUILD_V4L2)
 
 
-if (BUILD_LIBUSB)
-    add_subdirectory( libusb )
+if (TCAM_BUILD_LIBUSB)
+  add_subdirectory( libusb )
 
-    target_compile_definitions( tcam PRIVATE -DHAVE_LIBUSB)
+  target_compile_definitions( tcam PRIVATE -DHAVE_LIBUSB)
 
-    target_link_libraries(tcam PRIVATE tcam-backend-libusb)
+  target_link_libraries(tcam PRIVATE tcam-backend-libusb)
 
-endif (BUILD_LIBUSB)
+endif (TCAM_BUILD_LIBUSB)
 
 
 
-if (BUILD_ARAVIS)
+if (TCAM_BUILD_ARAVIS)
 
   target_compile_definitions(tcam PRIVATE -DHAVE_ARAVIS)
 
@@ -166,7 +166,7 @@ if (BUILD_ARAVIS)
 
   target_link_libraries(tcam PRIVATE tcam-backend-aravis)
 
-endif (BUILD_ARAVIS)
+endif (TCAM_BUILD_ARAVIS)
 
 
 install(TARGETS tcam

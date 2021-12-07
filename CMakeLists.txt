@@ -98,19 +98,19 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
   endif (TCAM_ENABLE_DATA_INSTALL)
 
 
-  if (BUILD_TOOLS)
+  if (TCAM_BUILD_TOOLS)
     add_subdirectory(tools)
-  endif (BUILD_TOOLS)
+  endif (TCAM_BUILD_TOOLS)
 
-  if (BUILD_DOCUMENTATION)
+  if (TCAM_BUILD_DOCUMENTATION)
     add_subdirectory(doc)
-  endif (BUILD_DOCUMENTATION)
+  endif (TCAM_BUILD_DOCUMENTATION)
 
-  if (BUILD_TESTS)
+  if (TCAM_BUILD_TESTS)
     enable_testing()
 
     add_subdirectory(tests)
-  endif (BUILD_TESTS)
+  endif (TCAM_BUILD_TESTS)
 
 endif (NOT TCAM_EXCLUSIVE_BUILD)
 

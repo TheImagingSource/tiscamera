@@ -16,13 +16,13 @@
 # This file contains all options/variables that users
 # can set to configure tiscamera
 
-option(BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
-option(BUILD_ARAVIS   "Include GigE support via aravis"      ON)
-option(BUILD_V4L2     "Include support for USB cameras"      ON )
-option(BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
-option(BUILD_TOOLS    "Build additional utilities"           ON)
-option(BUILD_DOCUMENTATION "Build internal code documentation"    ON)
-option(BUILD_TESTS    "Build tests."                         OFF)
+option(TCAM_BUILD_GST_1_0  "Build gstreamer-1.0 plugins?"         ON)
+option(TCAM_BUILD_ARAVIS   "Include GigE support via aravis"      ON)
+option(TCAM_BUILD_V4L2     "Include support for USB cameras"      ON )
+option(TCAM_BUILD_LIBUSB   "Include support for LibUsb cameras"   ON )
+option(TCAM_BUILD_TOOLS    "Build additional utilities"           ON)
+option(TCAM_BUILD_DOCUMENTATION "Build internal code documentation"    ON)
+option(TCAM_BUILD_TESTS    "Build tests."                         OFF)
 
 
 option(TCAM_INTERNAL_ARAVIS "Use internal aravis dependency instead of system libraries" ON)
@@ -31,7 +31,7 @@ option(TCAM_DOWNLOAD_MESON "Download version of meson for compilation purposes" 
 
 if (TCAM_ARAVIS_USB_VISION)
   # activate aravis since we need it for usb3vision
-  set(BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
+  set(TCAM_BUILD_ARAVIS ON CACHE BOOL "Include GigE support via aravis" FORCE)
 
 endif (TCAM_ARAVIS_USB_VISION)
 
@@ -60,32 +60,32 @@ if (NOT TCAM_EXCLUSIVE_BUILD)
     endif ("${TCAM_ENABLED_MODULES}" STREQUAL "")
   endfunction()
 
-  if (BUILD_GST_1_0)
+  if (TCAM_BUILD_GST_1_0)
     add_module("gst")
-  endif (BUILD_GST_1_0)
+  endif (TCAM_BUILD_GST_1_0)
 
-  if (BUILD_ARAVIS)
+  if (TCAM_BUILD_ARAVIS)
     add_module("aravis")
-  endif (BUILD_ARAVIS)
+  endif (TCAM_BUILD_ARAVIS)
 
-  if (BUILD_V4L2)
+  if (TCAM_BUILD_V4L2)
     add_module("v4l2")
-  endif (BUILD_V4L2)
-  if (BUILD_LIBUSB)
+  endif (TCAM_BUILD_V4L2)
+  if (TCAM_BUILD_LIBUSB)
     add_module("libusb")
-  endif (BUILD_LIBUSB)
+  endif (TCAM_BUILD_LIBUSB)
 
-  if (BUILD_TOOLS)
+  if (TCAM_BUILD_TOOLS)
     add_module("tools")
-  endif (BUILD_TOOLS)
+  endif (TCAM_BUILD_TOOLS)
 
-  if (BUILD_DOCUMENTATION)
+  if (TCAM_BUILD_DOCUMENTATION)
     add_module("doc")
-  endif (BUILD_DOCUMENTATION)
+  endif (TCAM_BUILD_DOCUMENTATION)
 
-  if (BUILD_TESTS)
+  if (TCAM_BUILD_TESTS)
     add_module("tests")
-  endif (BUILD_TESTS)
+  endif (TCAM_BUILD_TESTS)
 
 endif (NOT TCAM_EXCLUSIVE_BUILD)
 
@@ -93,13 +93,13 @@ endif (NOT TCAM_EXCLUSIVE_BUILD)
 # we only want the extension loader and associated things
 if (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
-  set(BUILD_GST_1_0 OFF)
-  set(BUILD_ARAVIS OFF)
-  set(BUILD_V4L2 OFF)
-  set(BUILD_LIBUSB OFF)
-  set(BUILD_TOOLS OFF)
-  set(BUILD_DOCUMENTATION OFF)
-  set(BUILD_TESTS OFF)
+  set(TCAM_BUILD_GST_1_0 OFF)
+  set(TCAM_BUILD_ARAVIS OFF)
+  set(TCAM_BUILD_V4L2 OFF)
+  set(TCAM_BUILD_LIBUSB OFF)
+  set(TCAM_BUILD_TOOLS OFF)
+  set(TCAM_BUILD_DOCUMENTATION OFF)
+  set(TCAM_BUILD_TESTS OFF)
   set(TCAM_ARAVIS_USB_VISION OFF)
   set(TCAM_EXCLUSIVE_BUILD ON)
 
@@ -112,13 +112,13 @@ endif (TCAM_BUILD_UVC_EXTENSION_LOADER_ONLY)
 
 if (TCAM_BUILD_GIGETOOL_ONLY)
 
-  set(BUILD_GST_1_0 OFF)
-  set(BUILD_ARAVIS OFF)
-  set(BUILD_V4L2 OFF)
-  set(BUILD_LIBUSB OFF)
-  set(BUILD_TOOLS OFF)
-  set(BUILD_DOCUMENTATION OFF)
-  set(BUILD_TESTS OFF)
+  set(TCAM_BUILD_GST_1_0 OFF)
+  set(TCAM_BUILD_ARAVIS OFF)
+  set(TCAM_BUILD_V4L2 OFF)
+  set(TCAM_BUILD_LIBUSB OFF)
+  set(TCAM_BUILD_TOOLS OFF)
+  set(TCAM_BUILD_DOCUMENTATION OFF)
+  set(TCAM_BUILD_TESTS OFF)
   set(TCAM_ARAVIS_USB_VISION OFF)
 
   set(TCAM_EXCLUSIVE_BUILD ON)

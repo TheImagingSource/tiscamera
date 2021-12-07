@@ -65,7 +65,7 @@ git_commit_count(GIT_COMMIT_COUNT)
 set(CPACK_DEBIAN_PACKAGE_VERSION "${TCAM_VERSION}.${GIT_COMMIT_COUNT}")
 set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
-if (BUILD_ARAVIS)
+if (TCAM_BUILD_ARAVIS)
 
   set(ARAVIS_PRERM "systemctl stop gige-daemon.service
         systemctl disable gige-daemon.service")
@@ -74,14 +74,14 @@ if (BUILD_ARAVIS)
 
   add_deps("aravis")
 
-else (BUILD_ARAVIS)
+else (TCAM_BUILD_ARAVIS)
 
   set(ARAVIS_PRERM "")
   set(ARAVIS_POSTINST "")
 
-endif (BUILD_ARAVIS)
+endif (TCAM_BUILD_ARAVIS)
 
-if (BUILD_TOOLS)
+if (TCAM_BUILD_TOOLS)
 
   add_deps("tools")
 
@@ -91,11 +91,11 @@ if (BUILD_TOOLS)
 
   endif (TCAM_BUILD_WITH_GUI)
 
-endif (BUILD_TOOLS)
+endif (TCAM_BUILD_TOOLS)
 
-if (BUILD_DOCUMENTATION)
-      add_deps("documentation")
-endif (BUILD_DOCUMENTATION)
+if (TCAM_BUILD_DOCUMENTATION)
+  add_deps("documentation")
+endif (TCAM_BUILD_DOCUMENTATION)
 
 
 execute_process(COMMAND ${TCAM_SOURCE_DIR}/scripts/dependency-manager list --package deb -m=${TCAM_PACKAGE_MODULES}

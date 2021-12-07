@@ -18,11 +18,11 @@ set(tcam_pkgconfig_dependencies "gobject-introspection-1.0")
 
 add_subdirectory(images)
 
-if (BUILD_TOOLS)
+if (TCAM_BUILD_TOOLS)
   add_subdirectory(bash-completion)
-endif (BUILD_TOOLS)
+endif (TCAM_BUILD_TOOLS)
 
-if (BUILD_ARAVIS AND BUILD_TOOLS)
+if (TCAM_BUILD_ARAVIS AND TCAM_BUILD_TOOLS)
 
   # leave as a reminder on how to handle aravis versions should a
   # more internal pkg-config file be needed
@@ -36,24 +36,24 @@ if (BUILD_ARAVIS AND BUILD_TOOLS)
   # endif (${aravis_VERSION} MATCHES "-1")
 
   add_subdirectory(systemd)
-endif (BUILD_ARAVIS AND BUILD_TOOLS)
+endif (TCAM_BUILD_ARAVIS AND TCAM_BUILD_TOOLS)
 
 
-if (BUILD_V4L2)
+if (TCAM_BUILD_V4L2)
 
   # set(tcam_pkgconfig_dependencies "${tcam_pkgconfig_dependencies} libudev libusb-1.0")
 
   add_subdirectory(uvc-extensions)
 
-endif (BUILD_V4L2)
+endif (TCAM_BUILD_V4L2)
 
-if (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+if (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
   # udev rules are needed for device permissions
   # libusb and usb3vision require access to change the used driver
 
   add_subdirectory(udev)
 
-endif (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+endif (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 
 if (NOT TCAM_EXCLUSIVE_BUILD)
 

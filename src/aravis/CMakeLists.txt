@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (BUILD_ARAVIS)
+if (TCAM_BUILD_ARAVIS)
 
   add_library(tcam-backend-aravis STATIC
     AravisDevice.cpp
@@ -77,4 +77,4 @@ if (BUILD_ARAVIS)
 
   endif (TCAM_ARAVIS_USB_VISION)
 
-endif (BUILD_ARAVIS)
+endif (TCAM_BUILD_ARAVIS)

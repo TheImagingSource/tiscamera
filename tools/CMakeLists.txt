@@ -22,16 +22,16 @@ if (TCAM_BUILD_WITH_GUI)
 
 endif (TCAM_BUILD_WITH_GUI)
 
-if (BUILD_V4L2)
+if (TCAM_BUILD_V4L2)
 
   add_subdirectory(tcam-uvc-extension-loader)
 
-endif (BUILD_V4L2)
+endif (TCAM_BUILD_V4L2)
 
-if (BUILD_ARAVIS)
+if (TCAM_BUILD_ARAVIS)
 
   add_subdirectory(tcam-gige-daemon)
 
   add_subdirectory(tcam-gigetool)
 
-endif (BUILD_ARAVIS)
+endif (TCAM_BUILD_ARAVIS)

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-if (BUILD_DOCUMENTATION)
+if (TCAM_BUILD_DOCUMENTATION)
 
   find_package(Sphinx REQUIRED)
 
@@ -64,4 +64,4 @@ if (BUILD_DOCUMENTATION)
     "${CMAKE_CURRENT_BINARY_DIR}/html"
     "${CMAKE_CURRENT_BINARY_DIR}/man")
 
-endif (BUILD_DOCUMENTATION)
+endif (TCAM_BUILD_DOCUMENTATION)

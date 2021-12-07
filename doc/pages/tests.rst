@@ -53,7 +53,7 @@ The following tests are executed by a tester before publication of a new release
 The tests are executed on the current reference system.
 
 For most tests, the following configuration is assumed:
-``cmake -DBUILD_ARAVIS=ON -DBUILD_USB=ON -DBUILD_LIBUSB=ON -DBUILD_TESTS=ON -DBUILD_TOOLS=ON ..``
+``cmake -DTCAM_BUILD_ARAVIS=ON -DTCAM_BUILD_USB=ON -DTCAM_BUILD_LIBUSB=ON -DTCAM_BUILD_TESTS=ON -DTCAM_BUILD_TOOLS=ON ..``
 
 - [ ] Building/Installation
 

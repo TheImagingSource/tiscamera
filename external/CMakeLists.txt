@@ -21,7 +21,7 @@ add_subdirectory(outcome EXCLUDE_FROM_ALL)
 
 include(ExternalProject)
 
-if (BUILD_ARAVIS)
+if (TCAM_BUILD_ARAVIS)
   if (TCAM_INTERNAL_ARAVIS)
 
     if (TCAM_DOWNLOAD_MESON)
@@ -123,10 +123,10 @@ if (BUILD_ARAVIS)
 
   endif (TCAM_INTERNAL_ARAVIS)
 
-else (BUILD_ARAVIS)
+else (TCAM_BUILD_ARAVIS)
 
   set(ARAVIS_GIT_COMMIT_HASH "not_configured" PARENT_SCOPE)
   set(ARAVIS_VERSION "not_configured" PARENT_SCOPE)
 
 
-endif (BUILD_ARAVIS)
+endif (TCAM_BUILD_ARAVIS)

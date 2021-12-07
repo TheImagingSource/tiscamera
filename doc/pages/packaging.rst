@@ -13,7 +13,7 @@ Currently, only the creation of Debian packages is supported.
 A release will be published at https://github.com/TheImagingSource/tiscamera/releases .
 
 As of 0.12.0 packages offered by The Imaging Source are available for amd64, aarch64, and Raspberry Pi 4 (armhf).  
-These packages are created with the options `BUILD_TOOLS`, `BUILD_V4L2`, `BUILD_LIBUSB`, `BUILD_ARAVIS` and `BUILD_DOCUMENTATION` set to `ON`.
+These packages are created with the options `TCAM_BUILD_TOOLS`, `TCAM_BUILD_V4L2`, `TCAM_BUILD_LIBUSB`, `TCAM_BUILD_ARAVIS` and `TCAM_BUILD_DOCUMENTATION` set to `ON`.
 
 Naming
 ======

@@ -97,7 +97,7 @@ else()
 
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-if (BUILD_TOOLS)
+if (TCAM_BUILD_TOOLS)
 
   find_package(PythonInterp 3 REQUIRED QUIET)
 
@@ -108,7 +108,7 @@ if (BUILD_TOOLS)
 
   set(TCAM_INSTALL_PYTHON3_MODULES "${PYTHON_SITE_PACKAGES}" CACHE PATH "Installation path for python3 modules")
 
-endif (BUILD_TOOLS)
+endif (TCAM_BUILD_TOOLS)
 
 
 ##
@@ -139,7 +139,7 @@ endif()
 ##
 # GStreamer installation directories
 ##
-if (BUILD_GST_1_0)
+if (TCAM_BUILD_GST_1_0)
 
   pkg_check_variable(gstreamer-1.0 pluginsdir)
   pkg_check_variable(gstreamer-1.0 includedir)
@@ -161,7 +161,7 @@ if (BUILD_GST_1_0)
       CACHE PATH "gstreamer-1.0 header installation path")
   endif (GSTREAMER_1.0_INCLUDEDIR)
 
-endif (BUILD_GST_1_0)
+endif (TCAM_BUILD_GST_1_0)
 
 
 
@@ -171,13 +171,13 @@ function(print_install_overview)
 
   if (NOT TCAM_EXCLUSIVE_BUILD)
 
-    MESSAGE(STATUS "Build gstreamer-1.0 plugins:   " ${BUILD_GST_1_0})
-    MESSAGE(STATUS "Support for GigE via aravis:   " ${BUILD_ARAVIS})
-    MESSAGE(STATUS "Support for USB cameras:       " ${BUILD_V4L2})
-    MESSAGE(STATUS "Support for LibUsb cameras:    " ${BUILD_LIBUSB})
-    MESSAGE(STATUS "Build additional utilities:    " ${BUILD_TOOLS})
-    MESSAGE(STATUS "Build documentation            " ${BUILD_DOCUMENTATION})
-    MESSAGE(STATUS "Build tests                    " ${BUILD_TESTS})
+    MESSAGE(STATUS "Build gstreamer-1.0 plugins:   " ${TCAM_BUILD_GST_1_0})
+    MESSAGE(STATUS "Support for GigE via aravis:   " ${TCAM_BUILD_ARAVIS})
+    MESSAGE(STATUS "Support for USB cameras:       " ${TCAM_BUILD_V4L2})
+    MESSAGE(STATUS "Support for LibUsb cameras:    " ${TCAM_BUILD_LIBUSB})
+    MESSAGE(STATUS "Build additional utilities:    " ${TCAM_BUILD_TOOLS})
+    MESSAGE(STATUS "Build documentation            " ${TCAM_BUILD_DOCUMENTATION})
+    MESSAGE(STATUS "Build tests                    " ${TCAM_BUILD_TESTS})
     MESSAGE(STATUS "")
 
   endif (NOT TCAM_EXCLUSIVE_BUILD)
@@ -201,32 +201,32 @@ function(print_install_overview)
   MESSAGE(STATUS "Installing libraries to:             " ${TCAM_INSTALL_LIB})
   MESSAGE(STATUS "Installing header to:                " ${TCAM_INSTALL_INCLUDE})
 
-  if (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+  if (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
     MESSAGE(STATUS "Installing udev rules to:            " ${TCAM_INSTALL_UDEV})
-  endif (BUILD_V4L2 OR BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
+  endif (TCAM_BUILD_V4L2 OR TCAM_BUILD_LIBUSB OR TCAM_ARAVIS_USB_VISION)
 
-  if (BUILD_ARAVIS AND BUILD_TOOLS)
-  MESSAGE(STATUS "Installing systemd units to:         " ${TCAM_INSTALL_SYSTEMD})
-  endif (BUILD_ARAVIS AND BUILD_TOOLS)
+  if (TCAM_BUILD_ARAVIS AND TCAM_BUILD_TOOLS)
+    MESSAGE(STATUS "Installing systemd units to:         " ${TCAM_INSTALL_SYSTEMD})
+  endif (TCAM_BUILD_ARAVIS AND TCAM_BUILD_TOOLS)
 
-  if (BUILD_V4L2)
+  if (TCAM_BUILD_V4L2)
     MESSAGE(STATUS "Installing uvc-extensions to:        " ${TCAM_INSTALL_UVC_EXTENSION})
-  endif (BUILD_V4L2)
+  endif (TCAM_BUILD_V4L2)
 
-  if (BUILD_TOOLS)
+  if (TCAM_BUILD_TOOLS)
     MESSAGE(STATUS "Installing desktop files to:         " ${TCAM_INSTALL_DESKTOP_FILES})
-  endif (BUILD_TOOLS)
+  endif (TCAM_BUILD_TOOLS)
 
   MESSAGE(STATUS "Installing data files to:            " ${TCAM_INSTALL_IMAGE_DIR})
 
-  if (BUILD_DOCUMENTATION)
+  if (TCAM_BUILD_DOCUMENTATION)
     MESSAGE(STATUS "Installing documentation to          " ${TCAM_INSTALL_DOCUMENTATION})
-  endif (BUILD_DOCUMENTATION)
+  endif (TCAM_BUILD_DOCUMENTATION)
 
-  if (BUILD_GST_1_0)
+  if (TCAM_BUILD_GST_1_0)
     MESSAGE(STATUS "Installing gstreamer-1.0 to:         " ${TCAM_INSTALL_GST_1_0})
     MESSAGE(STATUS "Installing gstreamer-1.0 header to:  " ${TCAM_INSTALL_GST_1_0_HEADER})
-  endif (BUILD_GST_1_0)
+  endif (TCAM_BUILD_GST_1_0)
   MESSAGE(STATUS "Installing gobject-introspection to: " ${TCAM_INSTALL_GIR})
   MESSAGE(STATUS "Installing introspection typelib to: " ${TCAM_INSTALL_TYPELIB})
   MESSAGE(STATUS "")

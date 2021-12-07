@@ -60,9 +60,9 @@ mkdir build
 cd build
 
 # With ARAVIS:
-cmake -DBUILD_ARAVIS=ON ..
+cmake -DTCAM_BUILD_ARAVIS=ON ..
 # Without ARAVIS
-cmake -DBUILD_ARAVIS=OFF ..
+cmake -DTCAM_BUILD_ARAVIS=OFF ..
 
 make
 sudo make install
@@ -73,19 +73,19 @@ If you want to change the prefix, read the section [installation directories](ht
 
 #### cmake options
 The most important cmake options are:
-- **-DBUILD_ARAVIS=<ON/OFF>**
+- **-DTCAM_BUILD_ARAVIS=<ON/OFF>**
 Build tiscamera with support for GigE cameras via aravis.
 
-- **-DBUILD_TOOLS=<ON/OFF>**
+- **-DTCAM_BUILD_TOOLS=<ON/OFF>**
 Build additional tools for camera interaction (e.g. firmware tools and tcam-capture).
 
-- **-DBUILD_V4L2=<ON/OFF>**
+- **-DTCAM_BUILD_V4L2=<ON/OFF>**
 Build tiscamera with support for USB cameras via UVC/V4L2.
 
-- **-DBUILD_LIBUSB=<ON/OFF>**
+- **-DTCAM_BUILD_LIBUSB=<ON/OFF>**
 Build tiscamera with support for USB cameras via LibUsb (i.e. AFU420, AFU050, DFK73).
 
-- **-DBUILD_DOCUMENTATION=<ON/OFF>**
+- **-DTCAM_BUILD_DOCUMENTATION=<ON/OFF>**
 Build html user documentation.
 
 - **-DCMAKE_INSTALL_PREFIX**

@@ -17,7 +17,7 @@ Ubuntu LTS 18.04 is not capable of compiling this out of the box.
 
 You can set the cmake option `TCAM_DOWNLOAD_MESON` to `ON` to have tiscamera handle this case for you.
 
-The configuration flags `BUILD_ARAVIS` and `BUILD_DOCUMENTATION` now have the default `ON`.
+The configuration flags `TCAM_BUILD_ARAVIS` and `TCAM_BUILD_DOCUMENTATION` now have the default `ON`.
 
 
 ## Device discovery

@@ -31,28 +31,31 @@ cmake options
      - description
      - default
 
-   * - BUILD_ARAVIS
+   * - TCAM_BUILD_ARAVIS
      - Build tiscamera with support for aravis devices.
-     - OFF
-   * - BUILD_GST_1_0
+     - ON
+       
+   * - TCAM_BUILD_GST_1_0
      - Build gstreamer 1.0 plugins.
      - ON
-   * - BUILD_TOOLS
+       
+   * - TCAM_BUILD_TOOLS
      - Build additional tools for camera interaction.
-     - OFF
-   * - BUILD_V4L2
+     - ON
+       
+   * - TCAM_BUILD_V4L2
      - Build tiscamera with support for V4L2 devices.
      - ON
 
-   * - BUILD_LIBUSB
+   * - TCAM_BUILD_LIBUSB
      - Build tiscamera with support for USB devices that that have no native driver.
      - ON
 
-   * - BUILD_DOCUMENTATION
+   * - TCAM_BUILD_DOCUMENTATION
      - Build html documentation. This requires Sphinx Version >= 1.4
-     - OFF
+     - ON
        
-   * - BUILD_TESTS
+   * - TCAM_BUILD_TESTS
      - Build unit/integration tests.
      - OFF
 
