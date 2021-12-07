@@ -9,5 +9,7 @@ if (BUILD_ARAVIS)
 endif (BUILD_ARAVIS)
 
 
-install(FILES "${completion_files}"
-  DESTINATION "${TCAM_INSTALL_BASH_COMPLETION}")
+foreach (file "${completion_files}")
+  install(FILES ${file}
+    DESTINATION "${TCAM_INSTALL_BASH_COMPLETION}")
+endforeach()
