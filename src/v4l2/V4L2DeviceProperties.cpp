@@ -93,6 +93,10 @@ static auto create_unmapped_prop(
     TCAM_PROPERTY_TYPE type = v4l2_property_type_to_tcam(qctrl.type);
     switch (type)
     {
+        case TCAM_PROPERTY_TYPE_BOOLEAN:
+        {
+            return std::make_shared<V4L2PropertyBoolImpl>(qctrl, p_property_backend);
+        }
         case TCAM_PROPERTY_TYPE_INTEGER:
         {
             return std::make_shared<V4L2PropertyIntegerImpl>(qctrl, p_property_backend);
@@ -109,10 +113,6 @@ static auto create_unmapped_prop(
         {
             return std::make_shared<V4L2PropertyCommandImpl>(qctrl, p_property_backend);
         }
-        case TCAM_PROPERTY_TYPE_BOOLEAN:
-        {
-            return std::make_shared<V4L2PropertyBoolImpl>(qctrl, p_property_backend);
-        }
         case TCAM_PROPERTY_TYPE_STRING:
         case TCAM_PROPERTY_TYPE_UNKNOWN:
         {
@@ -120,6 +120,7 @@ static auto create_unmapped_prop(
             return nullptr;
         }
     }
+    return nullptr;
 }
 
 void V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qctrl_list)

@@ -107,7 +107,12 @@ static const converter_scale gain_converter = { [](double v) -> int64_t
                                                 {
                                                     return v / 100.;
                                                 } };
-
+static const converter_scale trigger_delay_100ns_converter = { [](double v) -> int64_t
+                                                { return std::lround(v * 10.); },
+                                                [](int64_t v) -> double
+                                                {
+                                                    return v / 10.;
+                                                } };
 
 auto fetch_menu_entries_v4l2_ExposureAuto()
 {
@@ -171,7 +176,7 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x0199e207, &prop_lst::BalanceWhiteAutoPreset },
     { 0x0199e208, &prop_lst::TriggerMode, fetch_menu_entries_off_on, 0x009a0910 },
     { 0x0199e209, &prop_lst::TriggerSoftware },
-    { 0x0199e210, &prop_lst::TriggerDelay },
+    { 0x0199e210, &prop_lst::TriggerDelay, 0x199e272 },
     { 0x0199e211, &prop_lst::StrobeEnable, fetch_menu_entries_off_on },
     { 0x0199e212, &prop_lst::StrobePolarity, fetch_menu_entries_StrobePolarity },
     { 0x0199e213, &prop_lst::StrobeOperation },
@@ -234,6 +239,8 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e269, mapping_type::internal }, // Scanning Mode Skipping H
     { 0x199e270, mapping_type::internal }, // Scanning Mode Skipping V
     { 0x199e271, mapping_type::internal }, // Scanning Mode Flags
+
+    { 0x199e272, &prop_lst::TriggerDelay, trigger_delay_100ns_converter },  // Trigger Delay (100ns)
 };
 
 // clang-format on
