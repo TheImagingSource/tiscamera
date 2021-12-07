@@ -68,7 +68,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/uvc-extension/"
     CACHE PATH "Folder for uvc extension descriptions")
   set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACHE PATH "Folder for storing .desktop files")
-
+  set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions/" CACHE PATH "Folder for storing bash-completions")
 else()
 
   set(TCAM_INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "library installation path" FORCE)
@@ -92,6 +92,7 @@ else()
     "${CMAKE_INSTALL_PREFIX}/share/theimagingsource/tiscamera/uvc-extension/"
     CACHE PATH "Folder for uvc extension descriptions" FORCE)
   set(TCAM_INSTALL_DESKTOP_FILES "${CMAKE_INSTALL_PREFIX}/share/applications" CACHE PATH "Folder for storing .desktop files" FORCE)
+  set(TCAM_INSTALL_BASH_COMPLETION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions/" CACHE PATH "Folder for storing bash-completions" FORCE)
 
 
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
