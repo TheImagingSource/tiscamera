@@ -27,7 +27,7 @@ The following tools are required for a firmware update:
 
    .. group-tab:: Usb-2.0
 
-      ``firmware-update``
+      ``tcam-firmware-update``
 
       firmware-update is not part of a standard tiscamera installation.
       To get the tool you have to manually compile the tiscamera repository.
@@ -35,17 +35,18 @@ The following tools are required for a firmware update:
 
    .. group-tab:: Usb-3.X
 
-      ``firmware-update``
+      ``tcam-firmware-update``
 
-      firmware-update is not part of a standard tiscamera installation.
+      tcam-firmware-update is not part of a standard tiscamera installation.
+      You can find it here: https://github.com/theimagingsource/tcam-firmware-update
       To get the tool you have to manually compile the tiscamera repository.
       firmware-update can then be found in the build directory under `tools/firmware-update/`.
                   
    .. group-tab:: GigE
 
-      ``camera-ip-conf``
+      ``tcam-gigetool``
 
-      camera-ip-conf is part of a standard tiscamera installation when aravis support is enabled.
+      tcam-gigetool is part of a standard tiscamera installation when GigE support is enabled.
 
 
 Identifying the Camera
@@ -59,19 +60,19 @@ To identify the available devices, execute the following command in a terminal:
 
       .. code-block:: sh
 
-         sudo firmware-update -l
+         tcam-firmware-update -l
 
    .. group-tab:: Usb-3.X
 
       .. code-block:: sh
                    
-         sudo firmware-update -l
+         tcam-firmware-update -l
       
    .. group-tab:: GigE
 
       .. code-block:: sh
 
-         camera-ip-conf -l
+         tcam-gigetool list
 
 
 Locate the Firmware
@@ -102,23 +103,20 @@ Writing the Firmware
 
       .. code-block:: sh
 
-         cd <tiscamera-build-dir>/tool/firmware-update/
-         sudo .firmware-update -u -d <SERIAL> -f <path to firmware file>
-
+         sudo tcam-firmware-update -u -d <SERIAL> -f <path to firmware file>
 
    .. group-tab:: Usb-3.X
 
       .. code-block:: sh
                    
-         cd <tiscamera-build-dir>/tool/firmware-update/
-         sudo .firmware-update -u -d <SERIAL> -f <path to firmware file>
+         sudo tcam-firmware-update -u -d <SERIAL> -f <path to firmware file>
                
 
    .. group-tab:: GigE
       
       .. code-block:: sh
 
-         camera-ip-conf upload --serial <SERIAL> firmware=<path to firmware file>
+         tcam-gigetool upload --serial <SERIAL> firmware=<path to firmware file>
       
 
             

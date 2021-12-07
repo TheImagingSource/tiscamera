@@ -4,10 +4,37 @@
 tcam-capture
 ############
 
-tcam-capture is the general purpose image retrieval application of The Imaging Source under Linux.
+| tcam-capture is the general purpose image retrieval application of The Imaging Source under Linux.  
+| It is considered an application for debugging/testing purposes.
 
 .. image:: ../images/tcam-capture-running.png
 
+==================
+Keyboard Shortcuts
+==================
+
+The following is a complete list of shortcuts tcam-capture offers.
+
+.. list-table:: keyboard shortcuts
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Shortcut
+     - Action
+
+   * - Ctrl-Shift-Q
+     - Quit tcam-capture
+   * - Ctrl-U
+     - Open format dialog
+       Requires a device to already be open.
+   * - Ctrl-I
+     - Open info dialog
+   * - Ctrl-O
+     - Open device dialog
+   * - Ctrl-P
+     - Open property dialog
+       Requires a device to be already open.
+           
 =====================
 Commandline Arguments
 =====================
@@ -16,29 +43,19 @@ tcam-capture has several optional arguments to change its behavior:
 
 .. option:: -h, --help
 
-   Show this help message and exit
+   Show this help message and exit.
+
+.. option:: --help-all
+
+   Display Qt specific options.
    
-.. option:: --serial SERIAL
+.. option:: --serial <serial>
 
    Open device with serial immediately.
 
-.. option:: --format CAPS_STR
+.. option:: -v, --version
 
-   Open device with this gstreamer caps.
-
-.. option:: --verbose, -v
-
-   Increase logging level. Maximum is 5.
-
-.. option:: --reset
-
-   Reset application settings and clear cache.
-   This deletes all user settings.
-
-.. option:: --fullscreen
-
-   Start the application in fullscreen mode.
-
+   Display version information.
 
 Additionally GStreamer arguments can be passed to retrieve debug information about the streams.
 The following GStreamer commandline arguments are currently supported:
@@ -51,105 +68,74 @@ The following GStreamer commandline arguments are currently supported:
 
 For more information concerning gstreamer debugging/logging, see :ref:`logging`
 
-===========
-Preferences
-===========
-
-tcam-capture offers several options to change its behavior.
-To open the options dialog, press the `Preferences` button in the toolbar.
-The configuration file can be found under `$XDG_CONFIG_DIR/tcam-capture.conf`.
-
-**Default** : `~/.config/tcam-capture.conf`
-
-Image/Video
-===========
-
-.. image:: ../images/tcam-capture-options-saving.png
-   :width: 400
-   :align: right
-
-Save Location
--------------
-
-Default: /tmp
-
-Folder in which images/videos will be saved.
-
-Image Type
-----------
-
-Image encoding that will be used when saving images.
-
-_Default_: png
-
-Video Type
-----------
-
-_Default_: avi
-
-Video encoding that will be used when saving videos.
-
-Naming Options
---------------
-
-The available options are identical for images and videos.
-
-:User Prefix:
-   Random string defined by the user that is prepended to the
-   file name. The maximum length is 100 characters.
-   Default: Empty
-:Include Serial:
-   Adds the serial number of the used device to the filename.
-   Default: True
-:Include Format:  Include a simple format description.
-                  This description contains all information concerning the currently used device caps.
-                  The string will have the format:
-                  ``format_widthxheight_framerate-numerator_framerate-denominator``.
-                  To ensure the file can be saved, characters like '/' are replaced with underscores.
-                  Default: True
-:Include Counter:  Include a unique counter in the filename. If the
-                   application is restarted, the counter will pickup where it left off, assuming all
-                   other parts of the name remain identical.
-                   Default: True
-:Counter Size:  Padding size the counter shall have
-                Maximum: 10 digits
-                Default: 5 digits
-:Include Timestamp:  Include a timestamp with local time in the
-                     filename. The timestamp will be in ISO format i.e. YYYYmmddTHHMMSS.
-                     When both timestamp and counter are active, the counter
-                     will be reset once the timestamp changes.
-                     Default: True
-
-
-General
+=======
+Dialogs
 =======
 
-.. image:: ../images/tcam-capture-options-general.png
-   :align: right
-   :width: 400
+The following is a description of all dialog windows tcam-capture may open.
 
-Show Device Dialog On Startup
-    Whether or not to show the device selection dialog on startup
-    will be ignored when a device is reopened.
-    Default: True
+Device Dialog
+=============
 
-Reopen Device On Startup:
-  If a device was open during the last application shutdown, tcam-capture will
-  automatically try to reopen the device. If the device does not exist, it will
-  fall back to its default behavior.
-  Default: True
+The device dialog will list all `The Imaging Source` devices that are supported by tiscamera.
 
-Use Dutils:
-  A toggle to disable the usage of tiscamera-dutils.
-  The package tiscamera-dutils will have to be installed for this to be enabled.
-  Default: True
+To see which devices are supported by tiscamera, see :ref:`supported devices<supported_devices>`.
 
-Apply cached properties:
-  When closing a device tcam-capture saves a snapshot of all properties and their current value.
-  These will be written into the device when it is opened the next time.
-  The files can be found in the tcam-capture cache directory.
-  When disabled the device will be opened 'as is' and tcam-capture will not touch any properties.
-  
+Property Dialog
+===============
+
+.. TODO::
+
+   describe
+
+Caps Dialog
+===========
+
+.. TODO::
+
+   describe
+
+Info
+====
+
+Versions
+--------
+
+Lists version information about tiscamera and other `The Imaging Source` packages.
+
+tiscamera will only be listed as installed when installed as a debian package.
+
+State
+-----
+
+The state tab will display the current json property description.
+
+Clicking `Reset` will update the the description.
+
+Clicking `Apply` will apply the string to the tcambin.
+
+
+Options
+=======
+
+Conversion Element
+------------------
+
+**Default**: Auto
+
+Selector for the tcambin property `conversion-element`.
+
+.. TODO::
+
+   link to tcambin
+
+Apply properties on start
+-------------------------
+
+.. TODO::
+
+   implement
+
 =======
 Caching
 =======

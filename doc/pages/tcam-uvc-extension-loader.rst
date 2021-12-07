@@ -29,7 +29,7 @@ Plug & Play
 ===========
 
 With a default installation, `tcam-uvc-extension-loader` is automatically called when a
-compatible device is attached. This is done via :any:`UDev rules <udev>`.
+compatible device is attached. This is done via :ref:`UDev rules <udev>`.
     
 Extension Unit
 ==============
