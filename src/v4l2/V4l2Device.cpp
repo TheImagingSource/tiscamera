@@ -50,7 +50,7 @@ V4l2Device::V4l2Device(const DeviceInfo& device_desc)
 
     m_monitor_v4l2_thread = std::thread(&V4l2Device::monitor_v4l2_thread_func, this);
 
-    p_property_backend = std::make_shared<tcam::property::V4L2PropertyBackend>(m_fd);
+    p_property_backend = std::make_shared<tcam::v4l2::V4L2PropertyBackend>(m_fd);
     //this->index_all_controls(property_handler);
     this->index_controls();
     this->index_formats();
@@ -128,7 +128,7 @@ bool V4l2Device::set_video_format(const VideoFormat& new_format)
     uint32_t fourcc = new_format.get_fourcc();
 
     // use greyscale for camera interaction
-    if (emulate_bayer)
+    if (m_emulate_bayer)
     {
         fourcc = V4L2_PIX_FMT_GREY;
     }
@@ -942,7 +942,7 @@ void V4l2Device::index_formats()
         struct tcam_video_format_description desc = {};
 
         struct v4l2_fmtdesc new_desc = {};
-        emulate_bayer = checkForBayer(fmtdesc, new_desc);
+        m_emulate_bayer = checkForBayer(fmtdesc, new_desc);
 
         // internal fourcc definitions are identical with v4l2
         desc.fourcc = new_desc.pixelformat;
@@ -1080,7 +1080,7 @@ void V4l2Device::determine_active_video_format()
         return;
     }
 
-    struct v4l2_streamparm parm = {};
+    v4l2_streamparm parm = {};
 
     parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 

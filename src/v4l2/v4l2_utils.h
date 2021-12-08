@@ -26,15 +26,6 @@ VISIBILITY_INTERNAL
 
 namespace tcam
 {
-
-namespace v4l2
-{
-
-TCAM_PROPERTY_TYPE v4l2_property_type_to_tcam(uint32_t type);
-
-} /* namespace v4l2 */
-
-
 /**
  * @name get_v4l2_device_list
  * @brief lists all supported v4l2 devices

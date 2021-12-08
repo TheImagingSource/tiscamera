@@ -16,11 +16,16 @@
 
 #pragma once
 
+#include <linux/videodev2.h>
 #include <string>
 #include <vector>
 
 namespace tcam::v4l2
 {
+
+using v4l2_queryctrl_list = std::vector<v4l2_queryctrl>;
+
+bool is_id_present(const v4l2_queryctrl_list& qctrl_list, uint32_t id_to_look_for) noexcept;
 
 struct converter_scale
 {
@@ -48,5 +53,8 @@ struct menu_entry
 
 using menu_entry_list = std::vector<menu_entry>;
 using fetch_menu_entries_func = std::vector<menu_entry> (*)();
+
+
+constexpr uint32_t V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH = 0x0199e206;
 
 } // namespace tcam::v4l2

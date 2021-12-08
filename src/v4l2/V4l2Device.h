@@ -49,7 +49,7 @@ public:
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> get_properties() final
     {
         return m_properties;
-    };
+    }
 
     bool set_video_format(const VideoFormat&) override;
 
@@ -89,7 +89,7 @@ private:
     VideoFormat m_active_video_format;
 
     std::vector<VideoFormatDescription> m_available_videoformats;
-    bool emulate_bayer = false;
+    bool m_emulate_bayer = false;
 
     // v4l2 uses fractions
     // to assure correct handling we store the values received by v4l2
@@ -158,7 +158,7 @@ private:
     void index_controls();
     void update_dependency_information();
 
-    std::shared_ptr<tcam::property::V4L2PropertyBackend> p_property_backend;
+    std::shared_ptr<tcam::v4l2::V4L2PropertyBackend> p_property_backend;
 
     // streaming related
 

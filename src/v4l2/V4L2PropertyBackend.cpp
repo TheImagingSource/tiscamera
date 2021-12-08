@@ -22,7 +22,7 @@
 #include <linux/videodev2.h>
 
 
-tcam::property::V4L2PropertyBackend::V4L2PropertyBackend(int fd) : p_fd(fd) {}
+tcam::v4l2::V4L2PropertyBackend::V4L2PropertyBackend(int fd) : p_fd(fd) {}
 
 
 static outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request, v4l2_control* ctrl)
@@ -67,7 +67,7 @@ static outcome::result<int64_t> v4l2_control_ioctl(int fd, unsigned int request,
 }
 
 
-outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int v4l2_id,
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyBackend::write_control(int v4l2_id,
                                                                             int new_value)
 {
     struct v4l2_control ctrl = {};
@@ -78,7 +78,7 @@ outcome::result<int64_t> tcam::property::V4L2PropertyBackend::write_control(int 
 }
 
 
-outcome::result<int64_t> tcam::property::V4L2PropertyBackend::read_control(int v4l2_id)
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyBackend::read_control(int v4l2_id)
 {
     struct v4l2_control ctrl = {};
     ctrl.id = v4l2_id;
@@ -87,7 +87,7 @@ outcome::result<int64_t> tcam::property::V4L2PropertyBackend::read_control(int v
 }
 
 
-auto tcam::property::V4L2PropertyBackend::get_menu_entries(int v4l2_id, int max)
+auto tcam::v4l2::V4L2PropertyBackend::get_menu_entries(int v4l2_id, int max)
     -> std::vector<tcam::v4l2::menu_entry>
 {
     std::vector<tcam::v4l2::menu_entry> rval;

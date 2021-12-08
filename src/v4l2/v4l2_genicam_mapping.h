@@ -17,69 +17,39 @@
 #pragma once
 
 
-#include "../base_types.h"
+#include "../PropertyInterfaces.h"
+#include "V4L2PropertyBackend.h"
 #include "v4l2_genicam_conversion.h"
 
+#include <memory>
 #include <string_view>
-#include <tcamprop1.0_base/tcamprop_base.h>
-#include <tcamprop1.0_base/tcamprop_property_info.h>
 
 namespace tcam::v4l2
 {
 
-enum class mapping_type {
-    normal,
-    internal,
-};
+struct v4l2_genicam_mapping; // pre-declaration
 
-struct v4l2_genicam_mapping
+enum class mapping_type
 {
-    constexpr v4l2_genicam_mapping(
-        uint32_t id,
-        mapping_type type) noexcept
-        : v4l2_id(id), mapping_type_( type )
-    {
-    }
-
-    template<class Tprop_static_info>
-    constexpr v4l2_genicam_mapping(uint32_t id, const Tprop_static_info* info_type, uint32_t preferred_id = 0)
-        : v4l2_id(id), preferred_id_( preferred_id ), info_(info_type), info_property_type_(Tprop_static_info::property_type)
-    {
-    }
-    template<class Tprop_static_info>
-    constexpr v4l2_genicam_mapping(uint32_t id,
-                                   const Tprop_static_info* info_type,
-                                   converter_scale converter, uint32_t preferred_id = 0 )
-        : v4l2_id(id), preferred_id_( preferred_id ), info_(info_type),
-          info_property_type_(Tprop_static_info::property_type), converter_ { converter }
-    {
-    }
-
-    constexpr v4l2_genicam_mapping(uint32_t id,
-                                   const tcamprop1::prop_static_info_enumeration* info_type,
-                                   fetch_menu_entries_func func, uint32_t preferred_id = 0 )
-        : v4l2_id(id), preferred_id_( preferred_id ), info_(info_type), info_property_type_(tcamprop1::prop_type::Enumeration),
-          fetch_menu_entries_(func)
-    {
-    }
-
-    uint32_t v4l2_id = 0;   // only used for lookup
-    uint32_t preferred_id_ = 0; // when a control with this id is present, use that instead of this one
-
-    tcamprop1::prop_static_info const* info_ = nullptr;
-    tcamprop1::prop_type info_property_type_ = tcamprop1::prop_type::Boolean;
-
-    tcam::v4l2::converter_scale converter_ = {};                // only valid for tcamprop1::prop_type::Integer and tcamprop1::prop_type::Float
-    fetch_menu_entries_func fetch_menu_entries_ = nullptr;      // only valid for tcamprop1::prop_type::Enumeration
-
-    mapping_type mapping_type_ = mapping_type::normal;
+    normal,
+    internal,   // internal properties get added to the 'internal' property list
+    blacklist,  // blacklist properties will be ignored when building properties
 };
 
+struct v4l2_genicam_mapping_info
+{
+    uint32_t preferred_v4l2_id = 0;
+    mapping_type mapping_type_ = mapping_type::normal;
 
-// check if mapping exists for v4l2 property id
-// returns mapping description if existent
-// nullptr otherwise
-// ownership is not given
-const v4l2_genicam_mapping* find_mapping(uint32_t v4l2_id);
+    const v4l2_genicam_mapping* item = nullptr;
+};
+
+v4l2_genicam_mapping_info find_mapping_info(uint32_t v4l2_id);
+
+auto create_mapped_prop(const std::vector<v4l2_queryctrl>& device_qctrl_list,
+                        const v4l2_queryctrl& qctrl,
+                        const v4l2_genicam_mapping& mapping,
+                        const std::shared_ptr<tcam::v4l2::V4L2PropertyBackend>& p_property_backend)
+    -> std::shared_ptr<tcam::property::IPropertyBase>;
 
 } /* namespace tcam::v4l2 */

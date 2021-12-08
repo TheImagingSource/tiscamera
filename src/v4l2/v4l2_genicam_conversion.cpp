@@ -16,4 +16,13 @@
 
 #include "v4l2_genicam_conversion.h"
 
+#include <algorithm>
 
+bool tcam::v4l2::is_id_present(const v4l2_queryctrl_list& qctrl_list,
+                               uint32_t id_to_look_for) noexcept
+{
+    return std::any_of(qctrl_list.begin(),
+                       qctrl_list.end(),
+                       [id_to_look_for](const v4l2_queryctrl& ctrl)
+                       { return ctrl.id == id_to_look_for; });
+}

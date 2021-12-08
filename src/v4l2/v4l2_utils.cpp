@@ -27,44 +27,9 @@
 
 #include <linux/videodev2.h>
 
-using namespace tcam;
-
-TCAM_PROPERTY_TYPE tcam::v4l2::v4l2_property_type_to_tcam(uint32_t type)
+std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 {
-    switch (type)
-    {
-        case V4L2_CTRL_TYPE_BOOLEAN:
-        {
-            return TCAM_PROPERTY_TYPE_BOOLEAN;
-        }
-        case V4L2_CTRL_TYPE_INTEGER:
-        {
-            return TCAM_PROPERTY_TYPE_INTEGER;
-        }
-        case V4L2_CTRL_TYPE_STRING:
-        {
-            return TCAM_PROPERTY_TYPE_STRING;
-        }
-        case V4L2_CTRL_TYPE_INTEGER_MENU:
-        case V4L2_CTRL_TYPE_MENU:
-        {
-            return TCAM_PROPERTY_TYPE_ENUMERATION;
-        }
-        case V4L2_CTRL_TYPE_BUTTON:
-        {
-            return TCAM_PROPERTY_TYPE_BUTTON;
-        }
-        default:
-        {
-            return TCAM_PROPERTY_TYPE_UNKNOWN;
-        }
-    }
-}
-
-
-std::vector<DeviceInfo> tcam::get_v4l2_device_list()
-{
-    std::vector<DeviceInfo> device_list;
+    std::vector<tcam::DeviceInfo> device_list;
 
     struct udev* udev = udev_new();
     if (!udev)

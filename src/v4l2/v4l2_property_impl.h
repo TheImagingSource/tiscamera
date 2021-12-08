@@ -28,15 +28,18 @@
 
 namespace tcam::v4l2
 {
-struct v4l2_genicam_mapping;
-}
-
-namespace tcam::property
-{
+using tcam::property::IPropertyBase;
+using tcam::property::IPropertyBool;
+using tcam::property::IPropertyCommand;
+using tcam::property::IPropertyEnum;
+using tcam::property::IPropertyFloat;
+using tcam::property::IPropertyInteger;
+using tcam::property::PropertyFlags;
+using tcam::property::PropertyLock;
 
 class V4L2PropertyBackend;
 
-class V4L2PropertyImplBase
+class V4L2PropertyImplBase : public PropertyLock
 {
 protected:
     V4L2PropertyImplBase(const v4l2_queryctrl& queryctrl,
@@ -48,10 +51,25 @@ protected:
     outcome::result<void> set_backend_value(int64_t new_value);
     outcome::result<int64_t> get_backend_value() const;
 
+    outcome::result<void> set_backend_value(uint32_t ctrl_id, int64_t new_value);
+    outcome::result<int64_t> get_backend_value(uint32_t ctrl_id) const;
+
+    /**
+     * Function called when this property wants to know if dependent properties should be locked.
+     */
+    virtual bool should_set_dependent_locked() const
+    {
+        return false;
+    }
+    void set_dependent_properties(std::vector<std::weak_ptr<PropertyLock>>&& controls) override;
+    auto get_dependent_names() const -> std::vector<std::string_view> override;
+
 protected:
+    void update_dependent_lock_state();
+
     const std::string& get_internal_name() const noexcept
     {
-        return m_name;
+        return name_;
     }
     tcamprop1::prop_static_info get_static_info_internal() const
     {
@@ -59,23 +77,28 @@ protected:
         {
             return *p_static_info_base;
         }
-        return tcamprop1::prop_static_info { /*.name =*/m_name, {}, {}, {} };
+        return tcamprop1::prop_static_info { /*.name =*/name_, {}, {}, {} };
+    }
+    auto get_dependency_entry() const
+    {
+        return dependency_info_;
     }
 
 private:
-    std::string m_name;
+    std::string name_;
 
-    uint32_t m_v4l2_id = 0;
+    uint32_t v4l2_id_ = 0;
 
     std::weak_ptr<V4L2PropertyBackend> m_cam;
 
     const tcamprop1::prop_static_info* p_static_info_base = nullptr;
+
+    std::vector<std::weak_ptr<PropertyLock>> dependent_controls_;
+
+    const tcam::property::dependency_entry* dependency_info_ = nullptr;
 };
 
-class V4L2PropertyIntegerImpl :
-    public V4L2PropertyImplBase,
-    public PropertyLock,
-    public IPropertyInteger
+class V4L2PropertyIntegerImpl : public V4L2PropertyImplBase, public IPropertyInteger
 {
 public:
     V4L2PropertyIntegerImpl(const v4l2_queryctrl& queryctrl,
@@ -107,21 +130,14 @@ public:
     {
         return m_default;
     }
-    outcome::result<int64_t> get_value() const final;
 
+    outcome::result<int64_t> get_value() const final;
     outcome::result<void> set_value(int64_t new_value) final;
 
-    void set_locked(bool new_locked_state) final
+    void set_locked(bool new_locked_state) override
     {
         lock(m_flags, new_locked_state);
     }
-
-    bool lock_others() const final
-    {
-        return false;
-    }
-
-    void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final {}
 
 private:
     PropertyFlags m_flags = PropertyFlags::Available | PropertyFlags::Implemented;
@@ -133,10 +149,7 @@ private:
     const tcamprop1::prop_static_info_integer* p_static_info = nullptr;
 };
 
-class V4L2PropertyDoubleImpl :
-    public V4L2PropertyImplBase,
-    public PropertyLock,
-    public IPropertyFloat
+class V4L2PropertyDoubleImpl : public V4L2PropertyImplBase, public IPropertyFloat
 {
 public:
     V4L2PropertyDoubleImpl(const v4l2_queryctrl& queryctrl,
@@ -145,7 +158,6 @@ public:
                            const std::shared_ptr<V4L2PropertyBackend>& backend,
                            const tcamprop1::prop_static_info_float* static_info,
                            tcam::v4l2::converter_scale scale);
-
 
     tcamprop1::prop_static_info get_static_info() const final
     {
@@ -168,21 +180,13 @@ public:
     {
         return m_default;
     }
-    outcome::result<double> get_value() const final;
+    outcome::result<double> get_value() const override;
+    outcome::result<void> set_value(double new_value) override;
 
-    outcome::result<void> set_value(double new_value) final;
-
-    void set_locked(bool new_locked_state) final
+    void set_locked(bool new_locked_state) override
     {
         lock(m_flags, new_locked_state);
     }
-
-    bool lock_others() const final
-    {
-        return false;
-    }
-
-    void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final {}
 
 private:
     tcam::v4l2::converter_scale m_converter;
@@ -196,7 +200,7 @@ private:
     const tcamprop1::prop_static_info_float* p_static_info = nullptr;
 };
 
-class V4L2PropertyBoolImpl : public V4L2PropertyImplBase, public PropertyLock, public IPropertyBool
+class V4L2PropertyBoolImpl : public V4L2PropertyImplBase, public IPropertyBool
 {
 public:
     V4L2PropertyBoolImpl(const v4l2_queryctrl& queryctrl,
@@ -220,36 +224,30 @@ public:
     {
         return m_default;
     }
-    outcome::result<bool> get_value() const final;
-    outcome::result<void> set_value(bool new_value) final;
+    outcome::result<bool> get_value() const override;
+    outcome::result<void> set_value(bool new_value) override;
 
-    void set_locked(bool new_locked_state) final
+    void set_locked(bool new_locked_state) override
     {
         lock(m_flags, new_locked_state);
     }
 
-    bool lock_others() const final
-    {
-        return get_value().value();
-    }
-
-    void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>& deps) final;
+    // currently unused
+    //bool should_set_dependent_locked() const override
+    //{
+    //    return get_value().value();
+    //}
 
 private:
     PropertyFlags m_flags = PropertyFlags::Available | PropertyFlags::Implemented;
 
     bool m_default = false;
 
-    std::vector<std::weak_ptr<PropertyLock>> m_dependencies;
-
     const tcamprop1::prop_static_info_boolean* p_static_info = nullptr;
 };
 
 
-class V4L2PropertyCommandImpl :
-    public V4L2PropertyImplBase,
-    public PropertyLock,
-    public IPropertyCommand
+class V4L2PropertyCommandImpl : public V4L2PropertyImplBase, public IPropertyCommand
 {
 public:
     V4L2PropertyCommandImpl(const v4l2_queryctrl& queryctrl,
@@ -275,21 +273,14 @@ public:
         lock(m_flags, new_locked_state);
     }
 
-    bool lock_others() const final
-    {
-        return false;
-    }
-
-    void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) final {}
-
 private:
-    PropertyFlags m_flags;
+    PropertyFlags m_flags = PropertyFlags::Available | PropertyFlags::Implemented;
 
     const tcamprop1::prop_static_info_command* p_static_info = nullptr;
 };
 
 
-class V4L2PropertyEnumImpl : public V4L2PropertyImplBase, public PropertyLock, public IPropertyEnum
+class V4L2PropertyEnumImpl : public V4L2PropertyImplBase, public IPropertyEnum
 {
 public:
     V4L2PropertyEnumImpl(const v4l2_queryctrl& queryctrl,
@@ -306,40 +297,26 @@ public:
     }
 
 
-    PropertyFlags get_flags() const final
+    PropertyFlags get_flags() const override
     {
         return m_flags;
     }
 
-    outcome::result<void> set_value_str(const std::string_view& new_value) final;
-    outcome::result<std::string_view> get_value() const final;
+    outcome::result<void> set_value_str(const std::string_view& new_value) override;
+    outcome::result<std::string_view> get_value() const override;
 
-    std::string get_default() const final
+    std::string get_default() const override
     {
         return m_default;
     }
 
-    std::vector<std::string> get_entries() const final;
+    std::vector<std::string> get_entries() const override;
 
     void set_locked(bool new_locked_state) final
     {
         lock(m_flags, new_locked_state);
     }
-
-    bool lock_others() const final
-    {
-        bool value = tcam::property::enum_to_bool(get_value().value());
-        // the following properties are inverted
-        // aka this == off -> others locked
-        if (get_name() == "TriggerMode")
-        {
-            return !value;
-        }
-        return value;
-    }
-
-    void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>& deps) final;
-
+    bool should_set_dependent_locked() const final;
 private:
     std::string_view get_entry_name(int value) const;
     outcome::result<int64_t> get_entry_value(std::string_view name) const;
@@ -350,10 +327,17 @@ private:
 
     std::string m_default;
 
-    std::vector<std::weak_ptr<PropertyLock>> m_dependencies;
-
     const tcamprop1::prop_static_info_enumeration* p_static_info = nullptr;
 };
 
+class prop_impl_33U_balance_white_auto : public V4L2PropertyEnumImpl
+{
+public:
+    prop_impl_33U_balance_white_auto(const v4l2_queryctrl& queryctrl_balance_white_auto,
+                                     const std::shared_ptr<V4L2PropertyBackend>& backend);
 
-} // namespace tcam::property
+    outcome::result<void> set_value_str(const std::string_view& new_value) override;
+};
+
+
+} // namespace tcam::v4l2

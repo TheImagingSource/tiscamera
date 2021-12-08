@@ -17,11 +17,9 @@
 #include "v4l2_property_impl.h"
 
 #include "../logging.h"
-#include "../utils.h"
 #include "V4L2PropertyBackend.h"
-#include "v4l2_genicam_mapping.h"
 
-#include <memory>
+#include <tcamprop1.0_base/tcamprop_property_info_list.h>
 
 namespace
 {
@@ -70,27 +68,35 @@ static void check_and_fixup_range(std::string_view prop_name,
 
 } // namespace
 
-tcam::property::V4L2PropertyImplBase::V4L2PropertyImplBase(
+tcam::v4l2::V4L2PropertyImplBase::V4L2PropertyImplBase(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
-    : m_name((const char*)queryctrl.name), m_v4l2_id(queryctrl.id), m_cam(backend)
+    : name_((const char*)queryctrl.name), v4l2_id_(queryctrl.id), m_cam(backend)
 {
+    dependency_info_ = tcam::property::find_dependency_entry(get_internal_name());
 }
 
-tcam::property::V4L2PropertyImplBase::V4L2PropertyImplBase(
+tcam::v4l2::V4L2PropertyImplBase::V4L2PropertyImplBase(
     const v4l2_queryctrl& queryctrl,
     const tcamprop1::prop_static_info* static_info,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
-    : m_name(static_info->name), m_v4l2_id(queryctrl.id), m_cam(backend),
+    : name_(static_info->name), v4l2_id_(queryctrl.id), m_cam(backend),
       p_static_info_base(static_info)
 {
+    dependency_info_ = tcam::property::find_dependency_entry(get_internal_name());
 }
 
-outcome::result<void> tcam::property::V4L2PropertyImplBase::set_backend_value(int64_t new_value)
+outcome::result<void> tcam::v4l2::V4L2PropertyImplBase::set_backend_value(int64_t new_value)
+{
+    return set_backend_value(v4l2_id_, new_value);
+}
+
+outcome::result<void> tcam::v4l2::V4L2PropertyImplBase::set_backend_value(uint32_t ctrl_id,
+                                                                          int64_t new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        OUTCOME_TRY(ptr->write_control(m_v4l2_id, new_value));
+        OUTCOME_TRY(ptr->write_control(ctrl_id, new_value));
     }
     else
     {
@@ -100,11 +106,16 @@ outcome::result<void> tcam::property::V4L2PropertyImplBase::set_backend_value(in
     return outcome::success();
 }
 
-outcome::result<int64_t> tcam::property::V4L2PropertyImplBase::get_backend_value() const
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyImplBase::get_backend_value() const
+{
+    return get_backend_value(v4l2_id_);
+}
+
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyImplBase::get_backend_value(uint32_t ctrl_id) const
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->read_control(m_v4l2_id);
+        return ptr->read_control(ctrl_id);
     }
     else
     {
@@ -113,7 +124,39 @@ outcome::result<int64_t> tcam::property::V4L2PropertyImplBase::get_backend_value
     }
 }
 
-tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
+std::vector<std::string_view> tcam::v4l2::V4L2PropertyImplBase::get_dependent_names() const
+{
+    if (dependency_info_)
+    {
+        return dependency_info_->dependent_property_names;
+    }
+    return {};
+}
+
+void tcam::v4l2::V4L2PropertyImplBase::update_dependent_lock_state()
+{
+    if (dependent_controls_.empty())
+        return;
+
+    bool new_locked_state = should_set_dependent_locked();
+    for (auto& dep : dependent_controls_)
+    {
+        if (auto d = dep.lock())
+        {
+            d->set_locked(new_locked_state);
+        }
+    }
+}
+
+void tcam::v4l2::V4L2PropertyImplBase::set_dependent_properties(
+    std::vector<std::weak_ptr<PropertyLock>>&& controls)
+{
+    dependent_controls_ = std::move(controls);
+
+    update_dependent_lock_state();
+}
+
+tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_integer* static_info,
@@ -129,7 +172,7 @@ tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
+tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
     : V4L2PropertyImplBase(queryctrl, backend)
@@ -140,7 +183,7 @@ tcam::property::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-std::string_view tcam::property::V4L2PropertyIntegerImpl::get_unit() const
+std::string_view tcam::v4l2::V4L2PropertyIntegerImpl::get_unit() const
 {
     if (p_static_info)
     {
@@ -149,7 +192,7 @@ std::string_view tcam::property::V4L2PropertyIntegerImpl::get_unit() const
     return std::string_view();
 }
 
-tcamprop1::IntRepresentation_t tcam::property::V4L2PropertyIntegerImpl::get_representation() const
+tcamprop1::IntRepresentation_t tcam::v4l2::V4L2PropertyIntegerImpl::get_representation() const
 {
     if (p_static_info)
     {
@@ -159,7 +202,7 @@ tcamprop1::IntRepresentation_t tcam::property::V4L2PropertyIntegerImpl::get_repr
 }
 
 
-outcome::result<int64_t> tcam::property::V4L2PropertyIntegerImpl::get_value() const
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyIntegerImpl::get_value() const
 {
     auto ret = get_backend_value();
     if (ret.has_value())
@@ -169,15 +212,16 @@ outcome::result<int64_t> tcam::property::V4L2PropertyIntegerImpl::get_value() co
     return ret.error();
 }
 
-outcome::result<void> tcam::property::V4L2PropertyIntegerImpl::set_value(int64_t new_value)
+outcome::result<void> tcam::v4l2::V4L2PropertyIntegerImpl::set_value(int64_t new_value)
 {
     if (range_.min > new_value || new_value > range_.max)
     {
+        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].", get_internal_name(), new_value, range_.min, range_.max);
         return tcam::status::PropertyOutOfBounds;
     }
     if ((new_value % range_.stp) != 0)
     {
-        SPDLOG_INFO("Value is not compatible with step size.");
+        SPDLOG_DEBUG("Property '{}', value of {} is incompatible with step size of {}.", get_internal_name(), new_value, range_.stp);
         return tcam::status::PropertyOutOfBounds;
     }
 
@@ -185,7 +229,7 @@ outcome::result<void> tcam::property::V4L2PropertyIntegerImpl::set_value(int64_t
     return set_backend_value(tmp);
 }
 
-tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
+tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_float* static_info,
@@ -201,7 +245,7 @@ tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
+tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
     : V4L2PropertyImplBase(queryctrl, backend)
@@ -214,7 +258,7 @@ tcam::property::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
 
-std::string_view tcam::property::V4L2PropertyDoubleImpl::get_unit() const
+std::string_view tcam::v4l2::V4L2PropertyDoubleImpl::get_unit() const
 {
     if (p_static_info)
     {
@@ -223,7 +267,7 @@ std::string_view tcam::property::V4L2PropertyDoubleImpl::get_unit() const
     return std::string_view();
 }
 
-tcamprop1::FloatRepresentation_t tcam::property::V4L2PropertyDoubleImpl::get_representation() const
+tcamprop1::FloatRepresentation_t tcam::v4l2::V4L2PropertyDoubleImpl::get_representation() const
 {
     if (p_static_info)
     {
@@ -232,7 +276,7 @@ tcamprop1::FloatRepresentation_t tcam::property::V4L2PropertyDoubleImpl::get_rep
     return tcamprop1::FloatRepresentation_t::Linear;
 }
 
-outcome::result<double> tcam::property::V4L2PropertyDoubleImpl::get_value() const
+outcome::result<double> tcam::v4l2::V4L2PropertyDoubleImpl::get_value() const
 {
     auto ret = get_backend_value();
     if (ret)
@@ -242,17 +286,18 @@ outcome::result<double> tcam::property::V4L2PropertyDoubleImpl::get_value() cons
     return ret.error();
 }
 
-outcome::result<void> tcam::property::V4L2PropertyDoubleImpl::set_value(double new_value)
+outcome::result<void> tcam::v4l2::V4L2PropertyDoubleImpl::set_value(double new_value)
 {
     if (range_.min > new_value || new_value > range_.max)
     {
+        SPDLOG_DEBUG("Property '{}', value of {} is not in range of [{},{}].", get_internal_name(), new_value, range_.min, range_.max);
         return tcam::status::PropertyOutOfBounds;
     }
 
     return set_backend_value(m_converter.to_device(new_value));
 }
 
-tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
+tcam::v4l2::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
     : V4L2PropertyImplBase(queryctrl, backend)
@@ -260,7 +305,7 @@ tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
     m_default = queryctrl.default_value != 0;
 }
 
-tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
+tcam::v4l2::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_boolean* static_info)
@@ -269,7 +314,7 @@ tcam::property::V4L2PropertyBoolImpl::V4L2PropertyBoolImpl(
     m_default = queryctrl.default_value != 0;
 }
 
-outcome::result<bool> tcam::property::V4L2PropertyBoolImpl::get_value() const
+outcome::result<bool> tcam::v4l2::V4L2PropertyBoolImpl::get_value() const
 {
     auto ret = get_backend_value();
     if (ret)
@@ -279,38 +324,19 @@ outcome::result<bool> tcam::property::V4L2PropertyBoolImpl::get_value() const
     return ret.error();
 }
 
-outcome::result<void> tcam::property::V4L2PropertyBoolImpl::set_value(bool new_value)
+outcome::result<void> tcam::v4l2::V4L2PropertyBoolImpl::set_value(bool new_value)
 {
     return set_backend_value(new_value != 0);
 }
 
-void tcam::property::V4L2PropertyBoolImpl::set_dependencies(
-    std::vector<std::weak_ptr<PropertyLock>>& deps)
-{
-    m_dependencies = deps;
-
-    // ensure that all dependencies are in the correct locked state
-    // by explicitly setting them the the current value
-
-    bool new_locked_state = lock_others();
-
-    for (auto& dep : m_dependencies)
-    {
-        if (auto d = dep.lock())
-        {
-            d->set_locked(new_locked_state);
-        }
-    }
-}
-
-tcam::property::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
+tcam::v4l2::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
     : V4L2PropertyImplBase(queryctrl, backend)
 {
 }
 
-tcam::property::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
+tcam::v4l2::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_command* static_info)
@@ -318,12 +344,12 @@ tcam::property::V4L2PropertyCommandImpl::V4L2PropertyCommandImpl(
 {
 }
 
-outcome::result<void> tcam::property::V4L2PropertyCommandImpl::execute()
+outcome::result<void> tcam::v4l2::V4L2PropertyCommandImpl::execute()
 {
     return set_backend_value(1);
 }
 
-tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
+tcam::v4l2::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend)
     : V4L2PropertyImplBase(queryctrl, backend)
@@ -333,7 +359,7 @@ tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
     m_default = get_entry_name(queryctrl.default_value);
 }
 
-tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
+tcam::v4l2::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
     const v4l2_queryctrl& queryctrl,
     const std::shared_ptr<V4L2PropertyBackend>& backend,
     const tcamprop1::prop_static_info_enumeration* static_info,
@@ -352,12 +378,13 @@ tcam::property::V4L2PropertyEnumImpl::V4L2PropertyEnumImpl(
     m_default = get_entry_name(queryctrl.default_value);
 }
 
-outcome::result<void> tcam::property::V4L2PropertyEnumImpl::set_value_str(
+outcome::result<void> tcam::v4l2::V4L2PropertyEnumImpl::set_value_str(
     const std::string_view& new_value)
 {
     auto value_to_set = get_entry_value(new_value);
     if (value_to_set.has_error())
     {
+        SPDLOG_DEBUG("Property '{}', value of {} is not in enumeration.", get_internal_name(), new_value);
         return value_to_set.error();
     }
 
@@ -367,22 +394,12 @@ outcome::result<void> tcam::property::V4L2PropertyEnumImpl::set_value_str(
         return ret.error();
     }
 
-    if (!m_dependencies.empty())
-    {
-        bool new_locked_state = lock_others();
-        for (auto& dep : m_dependencies)
-        {
-            if (auto d = dep.lock())
-            {
-                d->set_locked(new_locked_state);
-            }
-        }
-    }
+    update_dependent_lock_state();
 
     return outcome::success();
 }
 
-outcome::result<std::string_view> tcam::property::V4L2PropertyEnumImpl::get_value() const
+outcome::result<std::string_view> tcam::v4l2::V4L2PropertyEnumImpl::get_value() const
 {
     OUTCOME_TRY(int64_t value, get_backend_value());
 
@@ -396,7 +413,7 @@ outcome::result<std::string_view> tcam::property::V4L2PropertyEnumImpl::get_valu
     return tcam::status::PropertyOutOfBounds;
 }
 
-std::vector<std::string> tcam::property::V4L2PropertyEnumImpl::get_entries() const
+std::vector<std::string> tcam::v4l2::V4L2PropertyEnumImpl::get_entries() const
 {
     std::vector<std::string> v;
     v.reserve(m_entries.size());
@@ -404,26 +421,7 @@ std::vector<std::string> tcam::property::V4L2PropertyEnumImpl::get_entries() con
     return v;
 }
 
-void tcam::property::V4L2PropertyEnumImpl::set_dependencies(
-    std::vector<std::weak_ptr<PropertyLock>>& deps)
-{
-    m_dependencies = deps;
-
-    // ensure that all dependencies are in the correct locked state
-    // by explicitly setting them the the current value
-
-    bool new_locked_state = lock_others();
-
-    for (auto& dep : m_dependencies)
-    {
-        if (auto d = dep.lock())
-        {
-            d->set_locked(new_locked_state);
-        }
-    }
-}
-
-std::string_view tcam::property::V4L2PropertyEnumImpl::get_entry_name(int value) const
+std::string_view tcam::v4l2::V4L2PropertyEnumImpl::get_entry_name(int value) const
 {
     for (const auto& [entry_value, entry_name] : m_entries)
     {
@@ -435,7 +433,7 @@ std::string_view tcam::property::V4L2PropertyEnumImpl::get_entry_name(int value)
     return {};
 }
 
-outcome::result<int64_t> tcam::property::V4L2PropertyEnumImpl::get_entry_value(
+outcome::result<int64_t> tcam::v4l2::V4L2PropertyEnumImpl::get_entry_value(
     std::string_view name) const
 {
     for (const auto& [entry_value, entry_name] : m_entries)
@@ -445,5 +443,48 @@ outcome::result<int64_t> tcam::property::V4L2PropertyEnumImpl::get_entry_value(
             return entry_value;
         }
     }
-    return tcam::status::PropertyDoesNotExist;
+    return tcam::status::PropertyOutOfBounds;
+}
+
+bool tcam::v4l2::V4L2PropertyEnumImpl::should_set_dependent_locked() const
+{
+    auto dep_entry = get_dependency_entry();
+    if (!dep_entry)
+        return false;
+
+    auto res = get_value();
+    if (res.has_error())
+        return false;
+
+    return res.value() == dep_entry->prop_enum_state_for_locked;
+}
+
+static auto fetch_balance_white_entries()
+{
+    using namespace tcam::v4l2;
+    return std::vector<menu_entry> {
+        menu_entry { 0, "Off" },
+        menu_entry { 2, "Once" },
+        menu_entry { 1, "Continuous" },
+    };
+}
+
+tcam::v4l2::prop_impl_33U_balance_white_auto::prop_impl_33U_balance_white_auto(
+    const v4l2_queryctrl& queryctrl,
+    const std::shared_ptr<V4L2PropertyBackend>& backend)
+    : V4L2PropertyEnumImpl(queryctrl,
+                           backend,
+                           &tcamprop1::prop_list::BalanceWhiteAuto,
+                           fetch_balance_white_entries)
+{
+}
+
+outcome::result<void> tcam::v4l2::prop_impl_33U_balance_white_auto::set_value_str(
+    const std::string_view& new_value)
+{
+    if (new_value == "Once")
+    {
+        return set_backend_value(V4L2_CID_TIS_WHITEBALANCE_ONE_PUSH, 1);
+    }
+    return V4L2PropertyEnumImpl::set_value_str(new_value);
 }

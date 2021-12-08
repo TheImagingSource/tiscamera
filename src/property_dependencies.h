@@ -27,19 +27,34 @@ class PropertyLock
 public:
     virtual ~PropertyLock() = default;
 
+    /**
+     * Called when a property like 'ExposureAuto' wants to 'lock' 'ExposureTime'.
+     * 'ExposureAuto' calls this, when its state changes, on 'ExposureTime' to lock it.
+     */
     virtual void set_locked(bool new_locked_state) = 0;
-    virtual bool lock_others() const = 0;
-    virtual void set_dependencies(std::vector<std::weak_ptr<PropertyLock>>&) = 0;
+    
+    /**
+     * Function called to specify the list of dependent properties
+     * This then returns the list of dependent names, and if available set_dependent_names is called with the according property list.
+     */
+    virtual void set_dependent_properties(std::vector<std::weak_ptr<PropertyLock>>&&) = 0;
+    /**
+     * Function called after all properties were created.
+     * This then returns the list of dependent names, and if available set_dependent_names is called with the according property list.
+     */
+    virtual std::vector<std::string_view> get_dependent_names() const {
+        return {};
+    }
 };
 
 struct dependency_entry
 {
     const std::string_view name;
-    const std::vector<std::string_view> dependencies;
+    const std::vector<std::string_view> dependent_property_names;
+    const std::string_view prop_enum_state_for_locked;
+    //const bool prop_boolean_state_for_locked = false; // currently unused
 };
 
-bool enum_to_bool(const std::string_view& value);
-
-const dependency_entry* find_dependency(const std::string_view& name);
+const dependency_entry* find_dependency_entry(std::string_view name);
 
 } // namespace tcam::property

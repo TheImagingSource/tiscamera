@@ -16,67 +16,56 @@
 
 #include "property_dependencies.h"
 
-#include <algorithm>
-#include <iterator>
-
 namespace
 {
 
+// clang-format off
 static const tcam::property::dependency_entry dependency_list[] =
 {
-
-        {
-            "ExposureAuto", {"ExposureTime"},
-        },
-        {
-            "ExposureAutoUpperLimitAuto", {"ExposureAutoUpperLimit"},
-        },
-        {
-            "GainAuto",
-            {
-                "Gain"
-            }
-        },
-        {
-            "BalanceWhiteAuto",
-            {
-                "BalanceWhiteRed","BalanceWhiteGreen", "BalanceWhiteBlue",
-            }
-        },
-        {
-            "OffsetAuto",
-            {
-                "OffsetX", "OffsetY"
-            }
-        },
-        {
-            "TriggerMode", {"TriggerSoftware"},
-        }
+    {
+        "ExposureAuto",
+        { "ExposureTime" },
+        "Continuous"
+    },
+    {
+        "ExposureAutoUpperLimitAuto",
+        {"ExposureAutoUpperLimit"},
+        "Continuous"
+    },
+    {
+        "GainAuto",
+        { "Gain" },
+        "Continuous"
+    },
+    {
+        "BalanceWhiteAuto",
+        { "BalanceWhiteRed","BalanceWhiteGreen", "BalanceWhiteBlue", },
+        "Continuous"
+    },
+    {
+        "OffsetAutoCenter",
+        { "OffsetX", "OffsetY" },
+        "On"
+    },
+    {
+        "TriggerMode",
+        {"TriggerSoftware"},
+        "Off"
+    }
 };
+
+// clang-format on
 
 } // namespace
 
-bool tcam::property::enum_to_bool (const std::string_view& value)
+const tcam::property::dependency_entry* tcam::property::find_dependency_entry(std::string_view name)
 {
-    if (value == "On"
-        || value == "Continuous")
+    for (const auto& entry : dependency_list)
     {
-        return true;
-    }
-    return false;
-
-}
-
-const tcam::property::dependency_entry* tcam::property::find_dependency(const std::string_view& name)
-{
-    auto iter = std::find_if(std::begin(dependency_list), std::end(dependency_list), [name](const dependency_entry& dep)
-    {
-        return dep.name == name;
-    });
-
-    if (iter != std::end(dependency_list))
-    {
-        return iter;
+        if (entry.name == name)
+        {
+            return &entry;
+        }
     }
     return nullptr;
 }
