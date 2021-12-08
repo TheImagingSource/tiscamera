@@ -26,6 +26,19 @@
 #include <glob.h>
 
 #include <linux/videodev2.h>
+#include <regex>
+
+namespace
+{
+
+static const std::regex device_blacklist [] =
+{
+    std::regex("81.."), // 21/31/41
+    std::regex("84.."), // 23U, AFU130
+    std::regex("8221"), // DFK 73
+};
+
+} // namespace
 
 std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 {
@@ -112,6 +125,23 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 
             if (udev_device_get_sysattr_value(parent_device, "idProduct") != NULL)
             {
+                auto is_blacklisted = [] (const char* idp)
+                {
+                    for (const auto& bl_entry : device_blacklist)
+                    {
+                        if (std::regex_search(idp, bl_entry))
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+
+                if (is_blacklisted(udev_device_get_sysattr_value(parent_device, "idProduct")))
+                {
+                    continue;
+                }
+
                 strncpy(info.additional_identifier,
                         udev_device_get_sysattr_value(parent_device, "idProduct"),
                         sizeof(info.additional_identifier) - 1);
