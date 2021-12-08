@@ -68,9 +68,9 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="199e", \
 # Product IDs 0x84xx, 0x85xx, 0x86xx, 0x87xx = 23U, 24U, 27U, 23er AFU
 #
 
-@SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
-@SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="84??", \
-@SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
+# @SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
+# @SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="84??", \
+# @SILENT@               RUN+="@TCAM_INSTALL_BIN@/tcam-uvc-extension-loader --device=/dev/%k -f @TCAM_INSTALL_UVC_EXTENSION@/usb23.json"
 
 @SILENT@ACTION=="add", SUBSYSTEM=="video4linux", \
 @SILENT@               ATTRS{idVendor}=="199e", ATTRS{idProduct}=="85??", \
