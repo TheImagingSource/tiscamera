@@ -24,8 +24,6 @@ namespace tcamprop1::prop_list
     constexpr const std::array<std::string_view, 2> enum_entries_off_on = { "Off", "On" };
     constexpr const std::array<std::string_view, 2> enum_entries_off_once = { "Off", "Once" };
 
-    constexpr const std::array<std::string_view, 2> TriggerOperation_EnumEntries = { "Default", "GlobalResetRelease" };
-
     constexpr const std::array<std::string_view, 6> AutoFunctionsROIPreset_EnumEntries = {
         "Full Sensor", "Custom Rectangle", "Center 50%", "Center 25%", "Bottom Half", "Top Half",
     };
@@ -42,8 +40,9 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_float ExposureAutoUpperLimit;
     extern const prop_static_info_enumeration ExposureAutoUpperLimitAuto;
     extern const prop_static_info_boolean ExposureAutoHighlightReduction;
+
     extern const prop_static_info_enumeration BalanceWhiteAuto;
-    
+
     extern const prop_static_info_enumeration BalanceWhiteMode;
     extern const prop_static_info_enumeration BalanceWhiteAutoPreset;
     extern const prop_static_info_enumeration BalanceWhiteTemperaturePreset;
@@ -65,8 +64,6 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_enumeration OffsetAutoCenter;
     extern const prop_static_info_boolean ReverseX;
     extern const prop_static_info_boolean ReverseY;
-
-
 
     extern const prop_static_info_integer Iris;
     extern const prop_static_info_enumeration IrisAuto;
@@ -120,7 +117,7 @@ namespace tcamprop1::prop_list
 
     // strobe stuff
     constexpr const std::array<std::string_view, 2> StrobePolarity_enum_entries = { "ActiveHigh", "ActiveLow" };
-    constexpr const std::array<std::string_view, 2> StrobeOperation_enum_entries = { "Exposure", "FixedDuration"};
+    constexpr const std::array<std::string_view, 2> StrobeOperation_enum_entries = { "Exposure", "Fixed Duration"};
 
     extern const prop_static_info_enumeration StrobeEnable; // enum_entries_off_on
     extern const prop_static_info_enumeration StrobePolarity;
@@ -129,10 +126,10 @@ namespace tcamprop1::prop_list
     extern const prop_static_info_integer StrobeDelay;
 
     // Trigger stuff
-    constexpr const std::array<std::string_view, 2> TriggerActivation_enum_entries = { "RisingEdge", "FallingEdge" };
+    constexpr const std::array<std::string_view, 2> TriggerActivation_enum_entries = { "Rising Edge", "Falling Edge" };
     constexpr const std::array<std::string_view, 4> TriggerSource_enum_entries = { "Line1", "Software", "Action0", "Any" };
-    constexpr const std::array<std::string_view, 2> TriggerSelector_enum_entries = { "FrameStart", "ExposureActive" };
-    constexpr const std::array<std::string_view, 2> TriggerOperation_enum_entries = { "Default", "GlobalResetRelease" };
+    constexpr const std::array<std::string_view, 2> TriggerSelector_enum_entries = { "Frame Start", "Exposure Active" };
+    constexpr const std::array<std::string_view, 2> TriggerOperation_enum_entries = { "Default", "Global Reset Release" };
     constexpr const std::array<std::string_view, 2> TriggerOverlap_enum_entries = { "Off", "ReadOut" };
 
     extern const prop_static_info_enumeration TriggerMode;  // enum_entries_off_on

@@ -393,32 +393,32 @@ const prop_static_info_integer lst::SensorHeight = make_Integer(
 
 const prop_static_info_enumeration lst::StrobeEnable = make_Enumeration(
     "StrobeEnable",
-    "Special", "Strobe Enable",
+    "DigitalIO", "Strobe Enable",
     "Enables the strobe controls."
 );
 
 const prop_static_info_enumeration lst::StrobePolarity = make_Enumeration(
     "StrobePolarity",
-    "Special", "Strobe Polarity",
+    "DigitalIO", "Strobe Polarity",
     "Controls the polarity of the strobe signal."
 );
 
 const prop_static_info_enumeration lst::StrobeOperation = make_Enumeration(
     "StrobeOperation",
-    "Special", "Strobe Operation",
+    "DigitalIO", "Strobe Operation",
     "Specifies how the length of the strobe pulses is controlled."
 );
 
 const prop_static_info_integer lst::StrobeDuration = make_Integer(
     "StrobeDuration",
-    "Special", "Strobe Duration",
+    "DigitalIO", "Strobe Duration",
     "Controls the length of the strobe pulses if Strobe Operation is set to use the fixed duration mode.",
     "µs"
 );
 
 const prop_static_info_integer lst::StrobeDelay = make_Integer(
     "StrobeDelay",
-    "Special", "Strobe Delay",
+    "DigitalIO", "Strobe Delay",
     "Parameter can be used to add a small delay between the start of exposure and the strobe output pulse.",
     "µs"
 );
