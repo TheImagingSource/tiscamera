@@ -25,6 +25,9 @@ if (TCAM_BUILD_ARAVIS)
     aravis_api.cpp
     )
 
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    target_precompile_headers(tcam-backend-aravis REUSE_FROM tcam-base)
+  endif()
   set_project_warnings(tcam-backend-aravis)
 
   target_link_libraries(tcam-backend-aravis

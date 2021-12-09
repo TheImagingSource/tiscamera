@@ -44,6 +44,17 @@ add_library(tcam-base STATIC
   error.cpp
 )
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+  target_precompile_headers(tcam-base
+    PRIVATE
+	<vector>
+	<string>
+	<string_view>
+	<algorithm>
+	<outcome/result.hpp>
+	)
+endif()
+
 target_link_libraries( tcam-base
 PUBLIC
     dutils_img::img
@@ -107,6 +118,10 @@ add_custom_target(generate-version-file
 add_dependencies(tcam-base generate-version-file)
 
 add_library(tcam SHARED ${srcs} ${TCAM_VERSION_FILE})
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+  target_precompile_headers(tcam REUSE_FROM tcam-base)
+endif()
 
 set_project_warnings(tcam)
 set_property(TARGET tcam PROPERTY VERSION ${TCAM_VERSION})

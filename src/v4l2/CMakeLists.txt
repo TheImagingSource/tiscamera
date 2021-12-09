@@ -52,6 +52,10 @@ target_link_libraries(tcam-backend-v4l2
   ${UDEV_LIBRARIES} ${LIBUSB_1_LIBRARIES}
   )
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+  target_precompile_headers(tcam-backend-v4l2 REUSE_FROM tcam-base)
+endif()
+
 target_compile_definitions(tcam-backend-v4l2 PRIVATE -DHAVE_UDEV)
 
 target_include_directories(tcam-backend-v4l2
