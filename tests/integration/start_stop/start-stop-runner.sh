@@ -79,7 +79,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ $ONLY_LOG != 0 && $LOG_FILE == "" ]; then
+if [ $ONLY_LOG != 0 ] && [ "$LOG_FILE" == "" ]; then
 
     echo "--only-log requires a log file. Specify on with --log"
 
