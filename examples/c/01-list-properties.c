@@ -192,7 +192,7 @@ void list_properties(GstElement* source)
             {
                 TcamPropertyEnumeration* e = TCAM_PROPERTY_ENUMERATION(base_property);
 
-                char* value = tcam_property_enumeration_get_value(e, &err);
+                const char* value = tcam_property_enumeration_get_value(e, &err);
 
                 if (err)
                 {
