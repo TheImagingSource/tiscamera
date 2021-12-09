@@ -4,22 +4,6 @@ Environment
 
 This page describes environment variables that might be relevant when dealing with tiscamera.
 
-Tiscamera
-=========
-
-The following environment variables are used by tiscamera.
-
-TCAM_LOG
-++++++++
-
-.. code-block:: sh
-
-   TCAM_LOG={ERROR|WARNING|INFO|DEBUG|TRACE|OFF}
-   # write to file instead
-   TCAM_LOG_FILE=/tmp/tcam.log
-   # disable log colors
-   TCAM_LOG_NO_COLOR=1
-
 TCAM_GIGE_PACKET_SIZE
 +++++++++++++++++++++
 

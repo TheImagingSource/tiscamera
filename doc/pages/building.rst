@@ -97,7 +97,15 @@ cmake options
 
    * - TCAM_GI_API_VERSION
      - Version the gobject introspection tiscamera has.
-     - 0.1 
+     - 1.0
+
+   * - TCAM_DOWNLOAD_MESON
+     - Download a local meson version to compile aravis.
+     - OFF
+
+   * - TCAM_BUILD_WITH_GUI
+     - Enable/Disable GUI parts of tiscamera. Currently only involves tcam-capture.
+     - ON
        
 Installation Directories
 ========================
@@ -113,10 +121,26 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
      - Variable
      - Default Directory
      - Description
-   * - Binaries
+   * - bash completions
+     - TCAM_INSTALL_BASH_COMPLETION
+     - /usr/share/bash-completion/completions/
+     - Directory for bash completions
+   * - binaries
      - TCAM_INSTALL_BIN
      - /usr/bin
      - Directory for executables
+   * - desktop files
+     - TCAM_INSTALL_DESKTOP_FILES
+     - /usr/share/applications
+     - 
+   * - documentation
+     - TCAM_INSTALL_DOCUMENTATION
+     - /usr/share/theimagingsource/tiscamera/doc/
+     - location of html documentation
+   * -
+     - 
+     -
+     - 
    * - Libraries
      - TCAM_INSTALL_LIB
      - /usr/lib
@@ -140,7 +164,7 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
    * - UDev
      - TCAM_INSTALL_UDEV
      - /etc/udev/rules.d/
-     - Directory for :any:`udev`
+     - Directory for :ref:`udev`
    * - UVC Extensions
      - TCAM_INSTALL_UVC_EXTENSION
      - /usr/share/theimagingsource/tiscamera/
@@ -149,10 +173,6 @@ Paths may change when CMAKE_INSTALL_PREFIX is set.
      - TCAM_INSTALL_PKGCONFIG
      - /usr/lib/pgkconfig
      -
-   * - Desktop Files
-     - TCAM_INSTALL_DESKTOP_FILES
-     - /usr/share/applications
-     - 
 
 ========
 Building

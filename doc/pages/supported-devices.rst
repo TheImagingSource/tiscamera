@@ -16,7 +16,7 @@ Exceptions to these rules will be explicitly stated in the table.
      - Linux I/O
      - tiscamera <= 0.14
      - tiscamera >= 1.0
-   * - 31, 41
+   * - 21, 31, 41
      - yes
      - no
      - no
@@ -84,3 +84,6 @@ Exceptions to these rules will be explicitly stated in the table.
 
 Your camera is not listed or you are still unsure?
 :ref:`Contact our support<contact>`, they will gladly help you.
+
+**Linux I/O** means that device interaction are possible either through
+standard Linux kernel drivers or open source third party libraries such as aravis.

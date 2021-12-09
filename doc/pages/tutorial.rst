@@ -1,10 +1,14 @@
 
+.. _tutorial:
+
 ########
 Tutorial
 ########
 
 This page contains a extended tutorial on how to get started with The Imaging Source Cameras.
 For a simpler version, read the README.md in the project's root directory.
+
+.. _tutorial_setup:
 
 =====
 Setup
@@ -13,24 +17,17 @@ Setup
 To install tiscamera one can choose between manual compilation
 and installation of precompiled ubuntu packages.
 
-The precompiled packages can be found on `github<https://github.com/TheImagingSource/tiscamera/releases>`
-or in the `Linux download section<https://www.theimagingsource.com/support/downloads-for-linux/>`.
+The precompiled packages can be found on `github <https://github.com/TheImagingSource/tiscamera/releases>`_
+or in the `Linux download section <https://www.theimagingsource.com/support/downloads-for-linux/>`_.
 
-The contain support for all potential camera types.
-For a minimal setup it is recommended to manually compile.
-
-.. todo::
-
-   compile link
-   
-Instruction on how to manually compile can be found here.
-
+| The packages contain support for all potential camera types.
+| For a minimal setup it is recommended to manually compile.
 
 The first half of this tutorial describes the configuration and build process
 required to build tiscamera on a local PC.
-For stable releases, a precompiled .deb-file is available: see :ref:`packaging`.
+For stable releases, precompiled .deb-files are available: see :ref:`packaging`.
 
-Currently only amd64 releases are available.
+.. _tutorial_cloning:
 
 Cloning
 =======
@@ -43,13 +40,14 @@ To retrieve the code, clone it from github:
 
 For this, ``git`` must be installed.
 
-Now change into the tiscamera directory and create a build directory:
+Now change into the tiscamera directory:
 
 .. code-block:: sh
 
    cd tiscamera
-   mkdir build
 
+.. _tutorial_dependencies:
+   
 Dependencies
 ============
 
@@ -64,6 +62,7 @@ To install all dependencies, execute the following command in the tiscamera dire
 
 To install only runtime or compilation dependencies use the additional arguments `--runtime` and `--compilation`.
 
+.. _tutorial_configuration:
 
 Configuration
 =============
@@ -76,6 +75,12 @@ For an overview of available cmake options, see :any:`configuring`.
 
 To interactively change options, use the program ``cmake-gui``.
 Under Debian/Ubuntu, it can be installed with ``sudo apt install cmake-qt-gui``.
+
+.. code-block:: sh
+
+   mkdir build
+   cd build
+   cmake ..
 
 
 Compilation
@@ -100,7 +105,6 @@ It will adjust environment variables so that GStreamer elements, etc can be foun
 To do this call the following in the current terminal:
 
 .. code-block:: sh
-
    
    source <tiscamera build directory>/env.sh
                 
@@ -147,7 +151,9 @@ To reference both APIs, add the following lines:
          gi.require_version("Gst", "1.0")
 
          from gi.repository import Tcam, Gst
-                  
+
+.. _tutorial_discovery:
+         
 Camera Discovery
 ================
 
@@ -281,7 +287,10 @@ which will free up all hardware resources.
          camera.set_state(Gst.State.NULL)
                            
 This code can be found in the example `02-set-properties`.
-            
+
+
+.. _tutorial_streaming:
+
 Streaming
 =========
 
@@ -513,6 +522,7 @@ The image `sample` that is given to the function contains the image, video caps 
 
 This code can be found in the example `07-appsink`.
 
+.. _tutorial_properties:
 
 Properties
 ==========

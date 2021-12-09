@@ -14,7 +14,8 @@ No properties will be available.
 GST_STATE_NULL -> GST_STATE_READY
 #################################
 
-Upon entering this state a camera will be opened.
+Upon entering this state a device will be opened.
+If the requested device cannot be found or opened a `GST_STATE_CHANGE_FAILURE` will be returned.
 
 tcamconvert/tcamdutils/tcamdutils-cuda will be initialized.
 

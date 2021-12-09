@@ -5,6 +5,81 @@
 Error Handling
 ##############
 
+tiscamera
+
+
+GStreamer
+#########
+
+gst_element_set_state() will return a GstStateChangeReturn value.
+
+.. todo::
+
+   add gstreamer documentation links
+
+.. tabs::
+
+   .. group-tab:: c
+
+      .. code-block:: c
+
+         GstPipeline* pipeline = ...
+         GstStateChangeReturn ret = gst_element_set_state(GST_ELEMENT(pipeline), GST_STATE_PLAYING);
+
+         if (ret == GST_STATE_CHANGE_SUCCESS)
+         {
+             // everything is wonderful
+         }
+         else if (ret == GST_STATE_CHANGE_ASYNC)
+         {
+             // elements are still working
+             // call gst_element_get_state()
+             // to get a final result
+         }
+         else if (ret == GST_STAT_CHANGE_FAILURE)
+         {
+             // The pipeline did not start
+             // increase logging to find out what is happening
+             // typical causes can be
+             // - wrong caps
+             // - elements cannot work with each other
+             // - device cannot be opened
+         }
+         else
+         {
+             // this means a GST_STATE_CHANGE_NO_PREROLL happens.
+             // This case can be ignored.
+         }
+
+   .. group-tab:: python
+
+      .. code-block:: python
+
+         pipeline = ...
+         change_ret = pipeline.set_state(Gst.State.PLAYING)
+
+         if change_ret == Gst.StateChange.SUCCESS:
+             # everything is wonderful
+             pass
+         elif change_ret == Gst.StateChange.ASYNC:
+             # elements are still working
+             # call gst_element_get_state()
+             # to get a final result 
+             # to get a final result
+             pass
+         elif ret == GST_STAT_CHANGE_FAILURE:
+             # The pipeline did not start
+             # increase logging to find out what is happening
+             # typical causes can be
+             # - wrong caps
+             # - elements cannot work with each other
+             # - device cannot be opened
+             pass
+         else:
+             # this means a Gst.StateChange.NO_PREROLL happens.
+             # This case can be ignored.
+             pass
+         
 tcam-property
 #############
 

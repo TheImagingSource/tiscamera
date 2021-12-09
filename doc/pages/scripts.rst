@@ -131,39 +131,13 @@ All dependency descriptions are located in `<tiscamera>/dependencies/`
        ]
    }
 
-.. _install_dependencies_sh:   
-   
-=======================
-install-dependencies.sh
-=======================
-
-.. warning::
-
-   Deprecated as of `tiscamera 0.13.0`. Please use dependency-manager instead.
-
-install-dependencies.sh is a shell script that allows the installation
-of dependencies on Debian-based systems.
-It allows for the installation of compilation and/or runtime dependencies. These can be
-selected with ``--compilation`` and ``--runtime``.
-
-Additionally, the argument ``--yes`` can be given to suppress the confirmation prompt of ``apt-get``.
-
-Since the usage of installed packages by other software can not be tracked,
-an uninstall option is not available.
-
-To install all dependencies, call
-
-.. code-block:: sh
-
-   scripts/install-dependencies.sh --compilation --runtime
-   
 .. _env_sh:
    
 ======
 env.sh
 ======
 
-env.sh is a Bourne shell script that can be sourced to integrate the build directory
+env.sh is a Bourne Again shell script that can be sourced to integrate the build directory
 into the current environment.
 
 It will append directories to the PATH and library search path for the dynamic linker

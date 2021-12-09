@@ -59,8 +59,6 @@ This is a simplified folder structure of the tiscamera project:
 |   │       ├── gstreamer-1.0
 |   │       └── tcam-network
 |   └── tools - directory for applications 
-|       ├── dfk73udev
-|       ├── :ref:`tcam-gige-daemon<tcam_gige_daemon>`
 |       ├── :ref:`tcam-capture<tcam_capture>`
 |       ├── :ref:`tcam-ctrl<tcam_ctrl>`
 |       ├── :ref:`tcam-gige-daemon<tcam_gige_daemon>`
@@ -99,10 +97,9 @@ libtcamgstbase
 
 Common functionality that is shared between the tcam gstreamer elements.
 
-libtcam-dfk73
--------------
+.. todo::
 
-Helper library for the correct initialization of DFK73 cameras.
+   move threading to own page?
 
 Threading
 =========
