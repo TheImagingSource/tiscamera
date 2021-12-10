@@ -232,6 +232,100 @@ This additional information are not part of the GstStructure that contains all c
               if features.contains("memory:NVMM"):
                   # do something with this information
 
+******************************
+Negotiations & Transformations
+******************************
+
+As a multimedia framework GStreamer not only allows for image retrieval but also transformations between formats.
+For this it is often necessary to add additional caps to a pipeline, so that elements will know what to expect and
+negotiate with other elements accordingly.
+
+GStreamer elements commonly have one input and one output pad.
+Exceptions are sources (only out pads) and sinks (only input pads).
+Negotiations happen upstream, meaning the element that will receive images will tell the sending element what kind of format it expects.
+
+If multiple caps formats are acceptable they will be listed together.
+The sending element can then decide what to use and reduce the offered caps further.
+
+.. code-block:: sh
+
+   tcamsrc ! appsink
+
+In this pipeline `appsink` will offer the caps `ANY`, meaning any fixed caps will be accepted.
+This leads the `tcamsrc` to select the caps it thinks a best.
+
+.. todo::
+
+   refer tcamsrc caps preferences
+   write caps preferences
+
+
+   
+.. code-block:: sh
+
+   tcamsrc ! video/x-bayer,format=bggr,width=640,height=480,framerate=30/1 ! appsink
+
+   
+In this pipeline the appsink get filtered by the given caps. Since the appsink caps are `ANY` this will always succeed.
+The tcamsrc then filters its out going caps with the given caps. If the result is `EMPTY` a negotiation error will be returned,
+resulting in a failed negotiation.
+
+.. code-block:: sh
+
+   tcamsrc \
+   ! video/x-bayer,format=bggr,width=640,height=480,framerate=30/1;\
+   video/x-bayer,format=bggr16,width=640,height=480,framerate=30/1 \
+   ! appsink
+
+   
+This pipeline is the same as the one before, except that the tcamsrc can choose between bggr and bggr16.
+Due to its own preferences
+
+.. todo::
+   
+   link to caps preferences
+
+it will use bggr.
+
+.. code-block:: sh
+
+   tcamsrc ! tcamconvert ! video/x-raw,format=BGRx ! appsink
+
+Here tcamconvert is being told that the appsink will only accept BGRx.
+This leads to tcamconvert only using caps for the negotiations with tcamsrc that can be converted to BGRx.
+Since multiple formats can be converted to BGRx the tcamsrc once again can choose according to its own preferences.
+
+To prevent auto selection explicit caps have to be given.
+
+.. code-block:: sh
+
+   tcamsrc ! video/x-raw,format=rggb16 ! tcamconvert ! video/x-raw,format=BGRx ! appsink
+
+This pipeline will retrieve bayer 16-bit from the tcamsrc and let tcamconvert transform it to BGRx.
+The rest of the caps (width, height, framerate) are still auto negotiated.
+
+tcambin
+-------
+
+The previous description of negotiations summarizes much of the internal behavior of the tcambin.
+The tcambin is a source bin, meaning it acts as a wrapper around a source element and includes additional steps.
+
+These steps are transformations and image adjustments like white balance.
+
+Like the previous examples that required an explicit restriction of the source caps for the transformation element to
+work as wanted, the tcambin will require this too.
+
+.. code-block:: sh
+
+   tcamsrc ! video/x-raw,format=rggb16 ! tcamconvert ! video/x-raw,format=BGRx ! appsink
+
+is equal to:
+
+.. code-block:: sh
+
+   tcambin device-caps=video/x-raw,format=rggb16 ! video/x-raw,format=BGRx ! appsink
+
+
 *******************
 General Suggestions
 *******************

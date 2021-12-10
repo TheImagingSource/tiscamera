@@ -7,8 +7,6 @@ tcam-capture
 | tcam-capture is the general purpose image retrieval application of The Imaging Source under Linux.  
 | It is considered an application for debugging/testing purposes.
 
-.. image:: ../images/tcam-capture-running.png
-
 ==================
 Keyboard Shortcuts
 ==================
