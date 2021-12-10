@@ -132,7 +132,6 @@ private:
 
     QTimer* p_fps_timer = nullptr;
 
-    int m_gst_bus_id = -1;
     bool m_use_dutils = true;
 
     GstCaps* p_selected_caps = nullptr;

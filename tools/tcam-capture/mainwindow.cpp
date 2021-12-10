@@ -130,8 +130,7 @@ bool MainWindow::open_device(const QString& serial)
     bool found_it = false;
     for (const auto& dev : device_list)
     {
-        if (dev.serial_long() == serial.toStdString()
-            || dev.serial() == serial.toStdString())
+        if (dev.serial_long() == serial.toStdString() || dev.serial() == serial.toStdString())
         {
             found_it = true;
             m_selected_device = dev;
@@ -279,6 +278,7 @@ void MainWindow::on_actionOpen_Device_triggered()
         if (p_selected_caps)
         {
             gst_caps_unref(p_selected_caps);
+            p_selected_caps = nullptr;
         }
         if (p_pipeline)
         {
@@ -345,6 +345,10 @@ void MainWindow::open_pipeline(FormatHandling handling)
     {
         set_device = true;
         p_pipeline = gst_parse_launch(pipeline_string.c_str(), &err);
+
+        auto bus = gst_pipeline_get_bus(GST_PIPELINE(p_pipeline));
+        [[maybe_unused]] auto gst_bus_id = gst_bus_add_watch(bus, bus_callback, this);
+        gst_object_unref(bus);
     }
 
     if (!p_pipeline)
@@ -356,10 +360,6 @@ void MainWindow::open_pipeline(FormatHandling handling)
         }
         return;
     }
-
-    auto bus = gst_pipeline_get_bus(GST_PIPELINE(p_pipeline));
-    m_gst_bus_id = gst_bus_add_watch(bus, bus_callback, this);
-    gst_object_unref(bus);
 
     auto has_property = [](GstElement* element, const char* name)
     {
@@ -455,7 +455,7 @@ void MainWindow::open_pipeline(FormatHandling handling)
     }
     else
     {
-        caps = Caps::get_default_caps( src_caps );
+        caps = Caps::get_default_caps(src_caps);
     }
 
     if (src_caps)
