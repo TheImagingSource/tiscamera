@@ -78,10 +78,12 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
         std::shared_ptr<tcam::property::IPropertyBase> prop_ptr;
         if (!map_info.item)
         {
-            SPDLOG_WARN("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
-                        qctrl.id,
-                        (char*)qctrl.name);
-
+            if (map_info.mapping_type_ != mapping_type::internal) // there was an entry but no mapping
+            {
+                SPDLOG_WARN("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
+                            qctrl.id,
+                            (char*)qctrl.name);
+            }
             prop_ptr = create_unmapped_prop(qctrl, p_property_backend);
         }
         else
