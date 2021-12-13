@@ -16,12 +16,12 @@
 
 find_package(GStreamer REQUIRED QUIET)
 
-add_executable(tcam-ctrl 
+add_executable(tcam-ctrl
 	main.cpp
 	general.cpp
 	general.h
 	properties.h
-	properties.cpp 
+	properties.cpp
 	formats.h
 	formats.cpp
 	system.h

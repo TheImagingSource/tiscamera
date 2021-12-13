@@ -17,6 +17,7 @@
 #include "general.h"
 
 #include <gst/gst.h>
+#include <iostream>
 
 
 bool is_valid_device_serial(const std::string& serial)
@@ -66,4 +67,71 @@ bool is_valid_device_serial(const std::string& serial)
     g_list_free(devices);
 
     return ret;
+}
+
+
+gst_helper::gst_ptr<GstElement> open_element(const std::string& element_name)
+{
+    gst_helper::gst_ptr<GstElement> source = gst_helper::make_ptr(gst_element_factory_make(element_name.c_str(), "source"));
+
+    if (!source)
+    {
+        std::cerr << "Unable to create gstreamer element." << std::endl;
+        return nullptr;
+    }
+    return source;
+}
+
+
+bool set_serial(gst_helper::gst_ptr<GstElement>& element, const std::string& serial)
+{
+    if (!is_valid_device_serial(serial))
+    {
+        std::cerr << "Device with given serial does not exist." << std::endl;
+        return false;
+    }
+
+    GValue val = {};
+    g_value_init(&val, G_TYPE_STRING);
+    g_value_set_static_string(&val, serial.c_str());
+
+    g_object_set_property(G_OBJECT(element.get()), "serial", &val);
+    g_value_unset(&val);
+
+    return true;
+}
+
+
+
+ElementStateGuard::ElementStateGuard(GstElement& element)
+    : p_element(element)
+{}
+
+ElementStateGuard::~ElementStateGuard()
+{
+    gst_element_set_state(&p_element, GST_STATE_NULL);
+}
+
+bool ElementStateGuard::set_state(GstState state)
+{
+    auto change_res = gst_element_set_state(&p_element, state);
+
+    if (change_res == GST_STATE_CHANGE_SUCCESS)
+    {
+        return true;
+    }
+    else if (change_res == GST_STATE_CHANGE_ASYNC)
+    {
+        GstClockTime check_timeout = 2000000; // 2 seconds
+        auto check_res = gst_element_get_state(&p_element, nullptr, nullptr, check_timeout);
+
+        // only check for success
+        // if after 2 seconds that is not the case something is fishy
+        // user has to take care of that
+        if (check_res == GST_STATE_CHANGE_SUCCESS)
+        {
+            return true;
+        }
+    }
+    return false;
 }

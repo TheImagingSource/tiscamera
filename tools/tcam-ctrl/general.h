@@ -20,6 +20,8 @@
 #include <gst/gst.h>
 #include <string>
 
+#include <gst-helper/gst_ptr.h>
+
 inline std::string extract_directory(const std::string& path)
 {
     return path.substr(0, path.find_last_of('/') + 1);
@@ -37,5 +39,24 @@ inline std::string change_extension(const std::string& path, const std::string& 
 }
 
 bool is_valid_device_serial(const std::string& serial);
+
+
+gst_helper::gst_ptr<GstElement> open_element(const std::string& element_name = "tcamsrc");
+
+bool set_serial(gst_helper::gst_ptr<GstElement>& element, const std::string& serial);
+
+/*
+ * Helper struct for state handling
+ */
+struct ElementStateGuard
+{
+    explicit ElementStateGuard(GstElement& element);
+
+    ~ElementStateGuard();
+
+    bool set_state(GstState state);
+
+    GstElement& p_element;
+};
 
 #endif /* GENERAL_H */
