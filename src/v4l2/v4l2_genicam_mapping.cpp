@@ -322,9 +322,12 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
     { 0x199e272, &prop_lst::TriggerDelay, trigger_delay_100ns_converter },          // usb33 "Trigger Delay (100ns)"
 
     { 0x0199e920, mapping_type::internal },                                         // usb2 ExtIO
-    { 0x0199e921, &prop_lst::BalanceWhiteRed, wb_for_DFK72_channel_converter },     // usb2 "GainR"
-    { 0x0199e922, &prop_lst::BalanceWhiteGreen, wb_for_DFK72_channel_converter },   // usb2 "GainG"
-    { 0x0199e923, &prop_lst::BalanceWhiteBlue, wb_for_DFK72_channel_converter },    // usb2 "GainB"
+    // { 0x0199e921, &prop_lst::BalanceWhiteRed, wb_for_DFK72_channel_converter },     // usb2 "GainR"
+    // { 0x0199e922, &prop_lst::BalanceWhiteGreen, wb_for_DFK72_channel_converter },   // usb2 "GainG"
+    // { 0x0199e923, &prop_lst::BalanceWhiteBlue, wb_for_DFK72_channel_converter },    // usb2 "GainB"
+    { 0x0199e921, mapping_type::blacklist },     // usb2 "GainR"
+    { 0x0199e922, mapping_type::blacklist },   // usb2 "GainG"
+    { 0x0199e923, mapping_type::blacklist },    // usb2 "GainB"
     // 0x0199e924 ?
     { 0x0199e925, mapping_type::internal },                                         // usb2 "Binning"
     // 0x0199e926 ?
