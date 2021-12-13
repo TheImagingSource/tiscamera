@@ -56,7 +56,11 @@ void TcamSlider::setRange(double min, double max)
 
 void TcamSlider::setSingleStep(double step)
 {
+    if( step == 0. )
+        step = 1.;
+    
     m_value_step = step;
+    m_scale = 1 / step;
 
     if (m_scale_type == TcamSliderScale::Linear)
     {
@@ -85,9 +89,7 @@ double TcamSlider::value()
 {
     if (m_scale_type == TcamSliderScale::Linear)
     {
-        double value = QSlider::value() / m_scale;
-        value -= fmod(value, m_value_step);
-        return value;
+        return QSlider::value() / m_scale;
     }
     else
     {
@@ -115,7 +117,7 @@ int TcamSlider::calculate_slider_value (double user_value)
 
     double val = log_(user_value);
 
-    return m_scale / rangelen * (val - minval);
+    return 10000 / rangelen * (val - minval);
 }
 
 
@@ -125,7 +127,7 @@ double TcamSlider::calculate_user_value (int slider_value)
 
     double rangelen = log_(m_value_max) - minval;
 
-    double val = std::exp(minval + rangelen / m_scale * slider_value);
+    double val = std::exp(minval + rangelen / 10000 * slider_value);
 
     val -= fmod(val, m_value_step);
 
