@@ -187,6 +187,18 @@ int main(int argc, char* argv[])
                                      "Read a JSON string/file containing properties and their "
                                      "values and set them in the device");
 
+    auto list_transform = app.add_subcommand("--transform", "bla");
+
+    std::string transform_element = "tcamconvert";
+    list_transform->add_option("-e,--element", transform_element, "Which transform element to use.", true);
+
+
+    auto transform_group =list_transform->add_option_group("caps");
+    auto list_transform_in = transform_group->add_option("--in", "Caps that go into the transform element");
+    auto list_transform_out = transform_group->add_option("--out", "Caps to come out of the transform element");
+
+    list_transform_in->excludes(list_transform_out);
+
     list_devices->excludes(show_caps);
     list_devices->excludes(show_properties);
     show_properties->excludes(show_caps);
@@ -194,7 +206,13 @@ int main(int argc, char* argv[])
     // CLI11 uses "TEXT" as a filler for the option string arguments
     // replace it with "SERIAL" to make the help text more intuitive.
     app.get_formatter()->label("TEXT", "SERIAL");
-    app.require_option();
+
+    // the help Formatter instance is inherited/shared from the parent (app)
+    // We want a separate formatter to have different place holder texts
+    // create new Formatter instance as we really only need the text and nothing else
+    list_transform->formatter(std::make_shared<CLI::Formatter>());
+    list_transform->get_formatter()->label("TEXT", "GstElement");
+
     app.allow_extras();
 
     CLI11_PARSE(app, argc, argv);
@@ -287,6 +305,24 @@ int main(int argc, char* argv[])
         }
 
         load_state_json_string(serial, json_str);
+    }
+    else if (*list_transform)
+    {
+        std::string caps_str = "";
+        ElementPadDirection direction = ElementPadDirection::Both;
+
+        if (*list_transform_in)
+        {
+            list_transform_in->results(caps_str);
+            direction = ElementPadDirection::In;
+        }
+        else if (*list_transform_out)
+        {
+            list_transform_out->results(caps_str);
+            direction = ElementPadDirection::Out;
+        }
+
+        return convert(transform_element, direction, caps_str);
     }
 
     return 0;

@@ -25,4 +25,16 @@
  */
 void list_gstreamer_1_0_formats(const std::string& serial);
 
+
+enum class ElementPadDirection
+{
+    Both,
+    In,
+    Out,
+};
+
+int convert (const std::string& element_name,
+             ElementPadDirection direction = ElementPadDirection::Both,
+             const std::string& caps_str = "");
+
 #endif /* FORMATS_H */
