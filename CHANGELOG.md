@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tcamautofocus gstreamer element - functionality now in tcammainsrc
 - tcamprop 0.1 API
 - firmware-update
-  Moved to a separate repository:
+  Moved to a separate repository: https://github.com/theimagingsource/tcam-firmware-update
 - camera-ip-conf
   Use tcam-gigetool instead
 - tcambin property `use-dutils`
