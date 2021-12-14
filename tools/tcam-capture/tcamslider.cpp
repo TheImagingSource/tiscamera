@@ -16,6 +16,8 @@ double log_(double value)
     return std::log(value);
 }
 
+static const int slider_max_steps = 10000;
+
 }
 
 
@@ -117,7 +119,7 @@ int TcamSlider::calculate_slider_value (double user_value)
 
     double val = log_(user_value);
 
-    return 10000 / rangelen * (val - minval);
+    return slider_max_steps / rangelen * (val - minval);
 }
 
 
@@ -127,7 +129,7 @@ double TcamSlider::calculate_user_value (int slider_value)
 
     double rangelen = log_(m_value_max) - minval;
 
-    double val = std::exp(minval + rangelen / 10000 * slider_value);
+    double val = std::exp(minval + rangelen / slider_max_steps * slider_value);
 
     val -= fmod(val, m_value_step);
 
