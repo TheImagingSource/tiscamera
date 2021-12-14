@@ -24,40 +24,34 @@
 #endif
 
 #include <glob.h>
-
 #include <linux/videodev2.h>
 #include <regex>
 
-namespace
-{
-
-static const std::regex device_blacklist [] =
-{
-    std::regex("81.."), // 21/31/41
-    std::regex("84.."), // 23U, AFU130
-    std::regex("8221"), // DFK 73
-};
-
-} // namespace
-
 std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 {
-    std::vector<tcam::DeviceInfo> device_list;
-
     struct udev* udev = udev_new();
     if (!udev)
     {
-        return device_list;
+        return {};
     }
+
+    static const std::regex device_blacklist[] = {
+        std::regex("81.."), // 21/31/41
+        std::regex("84.."), // 23U, AFU130
+        std::regex("8221"), // DFK 73
+    };
+
+    std::vector<tcam::DeviceInfo> device_list;
 
     /* Create a list of the devices in the 'video4linux' subsystem. */
     struct udev_enumerate* enumerate = udev_enumerate_new(udev);
     udev_enumerate_add_match_subsystem(enumerate, "video4linux");
     udev_enumerate_scan_devices(enumerate);
     struct udev_list_entry* devices = udev_enumerate_get_list_entry(enumerate);
-    struct udev_list_entry* dev_list_entry;
+    struct udev_list_entry* dev_list_entry = nullptr;
 
-    auto device_is_known = [&device_list](const DeviceInfo& info) {
+    auto device_is_known = [&device_list](const DeviceInfo& info)
+    {
         for (const auto& dev : device_list)
         {
             if (dev.get_serial() == info.get_serial())
@@ -125,7 +119,7 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
 
             if (udev_device_get_sysattr_value(parent_device, "idProduct") != NULL)
             {
-                auto is_blacklisted = [] (const char* idp)
+                auto is_blacklisted = [](const char* idp)
                 {
                     for (const auto& bl_entry : device_blacklist)
                     {
@@ -176,4 +170,23 @@ std::vector<tcam::DeviceInfo> tcam::get_v4l2_device_list()
     udev_unref(udev);
 
     return device_list;
+}
+
+tcam::v4l2::v4l2_device_type tcam::v4l2::get_device_type(const DeviceInfo& info)
+{
+    if (info.get_device_type() != TCAM_DEVICE_TYPE_V4L2)
+    {
+        return v4l2_device_type::unknown;
+    }
+    std::string add_info = info.get_info().additional_identifier;
+    if (add_info.empty())
+    {
+        return v4l2_device_type::unknown;
+    }
+
+    if (add_info == "8307" || add_info == "8207")
+    {
+        return v4l2_device_type::dfk72;
+    }
+    return v4l2_device_type::unknown;
 }

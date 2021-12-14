@@ -26,6 +26,16 @@ VISIBILITY_INTERNAL
 
 namespace tcam
 {
+namespace v4l2
+{
+enum class v4l2_device_type
+{
+    unknown,
+    dfk72,
+};
+
+v4l2_device_type get_device_type(const DeviceInfo&);
+}
 /**
  * @name get_v4l2_device_list
  * @brief lists all supported v4l2 devices

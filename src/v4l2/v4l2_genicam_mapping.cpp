@@ -175,6 +175,7 @@ static const converter_scale trigger_delay_100ns_converter = { [](double v) -> i
                                                                    return v / 10.;
                                                                } };
 
+
 auto fetch_menu_entries_v4l2_ExposureAuto()
 {
     return menu_entry_list { { 1, "Off" }, { 3, "Continuous" } };
@@ -338,11 +339,34 @@ static const tcam::v4l2::v4l2_genicam_mapping v4l2_conv_dict[] = {
 
 };
 
+static const converter_scale gain_mul_dB_converter =
+{ // actual range of sensor register seems to be [8;63], but firmware says its [4;63] so we just assume the firmware is right
+    [](double v) -> int64_t
+    { // 10 ^ (v / 20), this is voltage gain
+        return std::lround(std::pow(10., v / 20.) * 4.);
+    },
+    [](int64_t v) -> double
+    {
+        return 20. * std::log(v / 4.);
+    },
+    { 0.1 },    // I am unsure if this is great. practically we have 59 valid values, and a range of [0.0;53.137]
+    { 0. }      // default gain in the camera is bad!!
+};
+
+
+static const v4l2_genicam_mapping    dfk72_conv_dict[] =
+{
+    { 0x00980913 /*V4L2_CID_GAIN*/, &prop_lst::Gain, gain_mul_dB_converter },
+};
+
 // clang-format on
 
-static const tcam::v4l2::v4l2_genicam_mapping* find_mapping(uint32_t v4l2_id)
+
+template<size_t N>
+static const tcam::v4l2::v4l2_genicam_mapping* find_mapping(const v4l2_genicam_mapping (&arr)[N],
+                                                            uint32_t v4l2_id)
 {
-    for (const auto& entry : v4l2_conv_dict)
+    for (const auto& entry : arr)
     {
         if (entry.v4l2_id == v4l2_id)
         {
@@ -355,9 +379,18 @@ static const tcam::v4l2::v4l2_genicam_mapping* find_mapping(uint32_t v4l2_id)
 } // namespace
 
 
-tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(uint32_t v4l2_id)
+tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(v4l2_device_type dev_type,
+                                                                    uint32_t v4l2_id)
 {
-    auto ptr = find_mapping(v4l2_id);
+    const tcam::v4l2::v4l2_genicam_mapping* ptr = nullptr;
+    if (dev_type == v4l2_device_type::dfk72)
+    {
+        ptr = find_mapping(dfk72_conv_dict, v4l2_id);
+    }
+    if (ptr == nullptr)
+    {
+        ptr = find_mapping(v4l2_conv_dict, v4l2_id);
+    }
     if (!ptr)
     {
         return {};
@@ -373,6 +406,7 @@ tcam::v4l2::v4l2_genicam_mapping_info tcam::v4l2::find_mapping_info(uint32_t v4l
 }
 
 auto tcam::v4l2::create_mapped_prop(
+    [[maybe_unused]] v4l2_device_type dev_type,
     const std::vector<v4l2_queryctrl>& device_qctrl_list,
     const v4l2_queryctrl& current_prop_qctrl,
     const v4l2_genicam_mapping& mapping,

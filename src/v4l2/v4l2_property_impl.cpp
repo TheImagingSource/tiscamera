@@ -165,9 +165,17 @@ tcam::v4l2::V4L2PropertyIntegerImpl::V4L2PropertyIntegerImpl(
       p_static_info(static_info)
 {
     range_ = { static_cast<int64_t>(m_converter.from_device(queryctrl.minimum)),
-               static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)),
-               static_cast<int64_t>(m_converter.from_device(queryctrl.step)) };
-    m_default = m_converter.from_device(queryctrl.default_value);
+               static_cast<int64_t>(m_converter.from_device(queryctrl.maximum)) };
+
+    if (scale.step_.has_value())
+        range_.stp = static_cast<int64_t>(scale.step_.value());
+    else
+        range_.stp = static_cast<int64_t>(m_converter.from_device(queryctrl.step));
+
+    if (scale.default_.has_value())
+        m_default = scale.default_.value();
+    else
+        m_default = m_converter.from_device(queryctrl.default_value);
 
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }
@@ -238,9 +246,16 @@ tcam::v4l2::V4L2PropertyDoubleImpl::V4L2PropertyDoubleImpl(
       p_static_info(static_info)
 {
     range_ = { m_converter.from_device(queryctrl.minimum),
-               m_converter.from_device(queryctrl.maximum),
-               m_converter.from_device(queryctrl.step) };
-    m_default = m_converter.from_device(queryctrl.default_value);
+               m_converter.from_device(queryctrl.maximum) };
+    if (scale.step_.has_value())
+        range_.stp = scale.step_.value();
+    else
+        range_.stp = m_converter.from_device(queryctrl.step);
+
+    if (scale.default_.has_value())
+        m_default = scale.default_.value();
+    else
+        m_default = m_converter.from_device(queryctrl.default_value);
 
     check_and_fixup_range(get_internal_name(), range_, m_default);
 }

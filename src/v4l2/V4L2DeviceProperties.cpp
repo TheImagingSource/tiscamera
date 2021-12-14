@@ -59,26 +59,29 @@ static auto create_unmapped_prop(
 
 void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qctrl_list)
 {
+    auto dev_type = v4l2::get_device_type(this->device);
+
     for (const auto& qctrl : qctrl_list)
     {
-        auto map_info = tcam::v4l2::find_mapping_info(qctrl.id);
-        if (map_info.preferred_v4l2_id && is_id_present(qctrl_list,map_info.preferred_v4l2_id))
+        auto map_info = tcam::v4l2::find_mapping_info(dev_type, qctrl.id);
+        if (map_info.preferred_v4l2_id && is_id_present(qctrl_list, map_info.preferred_v4l2_id))
         {
             SPDLOG_TRACE("Skipping property id={:#x} due to presence of id={:#x}.",
                          qctrl.id,
                          map_info.preferred_v4l2_id);
             continue;
         }
-        if( map_info.mapping_type_ == mapping_type::blacklist ) {
-            SPDLOG_TRACE("Skipping property id={:#x}, because it is blacklisted.",
-                         qctrl.id);
+        if (map_info.mapping_type_ == mapping_type::blacklist)
+        {
+            SPDLOG_TRACE("Skipping property id={:#x}, because it is blacklisted.", qctrl.id);
             continue;
         }
 
         std::shared_ptr<tcam::property::IPropertyBase> prop_ptr;
         if (!map_info.item)
         {
-            if (map_info.mapping_type_ != mapping_type::internal) // there was an entry but no mapping
+            if (map_info.mapping_type_
+                != mapping_type::internal) // there was an entry but no mapping
             {
                 SPDLOG_WARN("Failed to find mapping entry for v4l2 ctrl id=0x{:x}, name='{}'.",
                             qctrl.id,
@@ -88,7 +91,8 @@ void tcam::V4l2Device::generate_properties(const std::vector<v4l2_queryctrl>& qc
         }
         else
         {
-            prop_ptr = create_mapped_prop(qctrl_list, qctrl, *map_info.item, p_property_backend);
+            prop_ptr =
+                create_mapped_prop(dev_type, qctrl_list, qctrl, *map_info.item, p_property_backend);
         }
 
         if (prop_ptr)

@@ -20,6 +20,7 @@
 #include "../PropertyInterfaces.h"
 #include "V4L2PropertyBackend.h"
 #include "v4l2_genicam_conversion.h"
+#include "v4l2_utils.h"
 
 #include <memory>
 #include <string_view>
@@ -32,8 +33,8 @@ struct v4l2_genicam_mapping; // pre-declaration
 enum class mapping_type
 {
     normal,
-    internal,   // internal properties get added to the 'internal' property list
-    blacklist,  // blacklist properties will be ignored when building properties
+    internal, // internal properties get added to the 'internal' property list
+    blacklist, // blacklist properties will be ignored when building properties
 };
 
 struct v4l2_genicam_mapping_info
@@ -44,9 +45,10 @@ struct v4l2_genicam_mapping_info
     const v4l2_genicam_mapping* item = nullptr;
 };
 
-v4l2_genicam_mapping_info find_mapping_info(uint32_t v4l2_id);
+v4l2_genicam_mapping_info find_mapping_info(v4l2_device_type dev_type, uint32_t v4l2_id);
 
-auto create_mapped_prop(const std::vector<v4l2_queryctrl>& device_qctrl_list,
+auto create_mapped_prop(v4l2_device_type dev_type,
+                        const std::vector<v4l2_queryctrl>& device_qctrl_list,
                         const v4l2_queryctrl& qctrl,
                         const v4l2_genicam_mapping& mapping,
                         const std::shared_ptr<tcam::v4l2::V4L2PropertyBackend>& p_property_backend)
