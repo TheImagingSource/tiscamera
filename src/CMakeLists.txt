@@ -31,9 +31,9 @@ add_library(tcam-base STATIC
   DeviceInfo.cpp
   ImageBuffer.cpp
   PropertyInterfaces.cpp
-  SoftwarePropertiesBase.cpp
+  
   SoftwareProperties.cpp
-  SoftwarePropertyBackend.cpp
+  
   SoftwarePropertiesImpl.cpp
   utils.cpp
   VideoFormat.cpp

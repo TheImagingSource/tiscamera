@@ -42,8 +42,6 @@ static auto create_unmapped_prop(
             return std::make_shared<V4L2PropertyBoolImpl>(qctrl, p_property_backend);
         case V4L2_CTRL_TYPE_INTEGER:
             return std::make_shared<V4L2PropertyIntegerImpl>(qctrl, p_property_backend);
-        //case tcam::TCAM_PROPERTY_TYPE_DOUBLE:
-        //    return std::make_shared<V4L2PropertyDoubleImpl>(qctrl, p_property_backend);
         case V4L2_CTRL_TYPE_INTEGER_MENU:
         case V4L2_CTRL_TYPE_MENU:
             return std::make_shared<V4L2PropertyEnumImpl>(qctrl, p_property_backend);

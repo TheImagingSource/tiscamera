@@ -22,7 +22,7 @@ namespace tcam::property
 {
 
 
-enum class AccessMode : uint8_t
+enum class AccessMode
 {
     RW,
     RO,
@@ -38,6 +38,7 @@ enum class PropertyFlags
     Available = 0x2,
     Locked = 0x4,
     External = 0x8,
+    Hidden = 0x10,
     // additional flags like 'External' to indicate library and not camera internal properties?
 };
 

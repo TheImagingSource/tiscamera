@@ -4,7 +4,6 @@
 
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
-#include "SoftwarePropertyBackend.h"
 #include "VideoFormat.h"
 #include "compiler_defines.h"
 
@@ -18,15 +17,14 @@
 namespace tcam::property
 {
 
-namespace emulated
-{
-class SoftwarePropertiesBackend;
-}
-
-class SoftwareProperties
+class SoftwareProperties :
+    public std::enable_shared_from_this<SoftwareProperties>,
+    public emulated::SoftwarePropertyBackend
 {
 public:
-    explicit SoftwareProperties(
+    SoftwareProperties( const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties );
+public:
+    static std::shared_ptr<SoftwareProperties> create(
         const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& dev_properties,
         bool has_bayer);
 
@@ -37,14 +35,13 @@ public:
 
     void auto_pass(const img::img_descriptor& image);
 
+    outcome::result<int64_t> get_int(emulated::software_prop prop_id) final;
+    outcome::result<void> set_int(emulated::software_prop prop_id, int64_t new_val) final;
 
-    outcome::result<int64_t> get_int(emulated::software_prop prop_id);
-    outcome::result<void> set_int(emulated::software_prop prop_id, int64_t new_val);
+    outcome::result<double> get_double(emulated::software_prop) final;
+    outcome::result<void> set_double(emulated::software_prop, double) final;
 
-    outcome::result<double> get_double(emulated::software_prop);
-    outcome::result<void> set_double(emulated::software_prop, double);
-
-    tcam::property::PropertyFlags get_flags(emulated::software_prop);
+    tcam::property::PropertyFlags get_flags(emulated::software_prop) const final;
 
     void update_to_new_format(const tcam::VideoFormat& new_format);
 
@@ -52,30 +49,16 @@ private:
     // encapsulation for internal property generation
     void generate_public_properties(bool has_bayer);
 
-    void generate_exposure();
-    void generate_gain();
-    void generate_iris();
-    void generate_focus();
-    void convert_whitebalance();
-    void generate_whitebalance();
+    void generate_exposure_auto();
+    void generate_gain_auto();
+    void generate_iris_auto();
+    void generate_focus_auto();
+
+    void generate_balance_white_auto();
+    void generate_balance_white_channels();
 
     outcome::result<double> get_device_wb(emulated::software_prop prop_id);
-
-    outcome::result<void> set_device_wb(emulated::software_prop prop_id,
-                                        double new_value);
-
-
-    void set_locked(emulated::software_prop prop_id, bool is_locked);
-
-    void enable_property(emulated::software_prop prop_name, bool device_flags=false);
-
-    void enable_property_double(emulated::software_prop prop_name,
-                                std::shared_ptr<IPropertyFloat> prop);
-    void enable_property_double(emulated::software_prop prop_name,
-                                std::shared_ptr<IPropertyInteger> prop);
-
-    void enable_property_int(emulated::software_prop prop_id,
-                             std::shared_ptr<IPropertyInteger> prop);
+    outcome::result<void> set_device_wb(emulated::software_prop prop_id, double new_value);
 
     // properties the actual camera has
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_device_properties;
@@ -83,11 +66,10 @@ private:
     // properties the user has
     std::vector<std::shared_ptr<tcam::property::IPropertyBase>> m_properties;
 
-    auto_alg::property_cont_exposure m_brightness_reference;
-
-    std::mutex m_property_mtx;
+    mutable std::mutex m_property_mtx;
 
     std::shared_ptr<tcam::property::IPropertyFloat> m_dev_exposure = nullptr;
+
     bool m_exposure_upper_auto = true;
     double m_exposure_auto_upper_limit = 0;
 
@@ -99,28 +81,18 @@ private:
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_g = nullptr;
     std::shared_ptr<tcam::property::IPropertyInteger> m_dev_wb_b = nullptr;
 
+    bool m_is_software_auto_wb = false;
     bool m_wb_is_claimed = false;
 
     enum class wb_type
     {
         None,
         DevChannel,
-        DevSelector,
-        Software
-    };
-
-    enum class wb_channel
-    {
-        Red,
-        Green,
-        Blue,
+        DevSelector
     };
 
     struct wb_setter
     {
-        wb_type type = wb_type::None;
-
-
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_r = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_g = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_b = nullptr;
@@ -128,27 +100,34 @@ private:
         std::shared_ptr<tcam::property::IPropertyEnum> m_dev_wb_selector = nullptr;
         std::shared_ptr<tcam::property::IPropertyFloat> m_dev_wb_ratio = nullptr;
 
-        bool is_dev_wb () const
+        auto get_type() const
         {
-            if (type == wb_type::DevSelector
-                || type == wb_type::DevChannel)
-            {
-                return true;
-            }
-            return false;
+            if (m_dev_wb_r)
+                return wb_type::DevChannel;
+            if (m_dev_wb_selector)
+                return wb_type::DevSelector;
+            return wb_type::None;
         }
 
+        bool is_dev_wb() const
+        {
+            return get_type() != wb_type::None;
+        }
     };
     wb_setter m_wb;
-
-    std::shared_ptr<emulated::SoftwarePropertyBackend> m_backend = nullptr;
 
     auto_alg::auto_pass_params m_auto_params;
     auto_alg::state_ptr p_state;
     tcam::VideoFormat m_format;
 
-    int64_t     m_frame_counter = 0;
+    int64_t m_frame_counter = 0;
+
+    template<class Tprop_info_type, typename... Tparams>
+    void add_prop_entry(emulated::software_prop id,
+                        const Tprop_info_type* prop_info,
+                        Tparams&&... params);
 };
+
 
 } // namespace tcam::property
 

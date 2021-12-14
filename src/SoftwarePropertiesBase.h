@@ -1,26 +1,24 @@
 #pragma once
 
-#include "base_types.h"
+#include "PropertyInterfaces.h"
 
-#include <map>
-#include <string>
 #include <string_view>
+#include <tcamprop1.0_base/tcamprop_base.h>
+#include <vector>
 
 namespace tcam::property::emulated
 {
-
 enum class software_prop
 {
-    Invalid = 0,
+    ExposureTime,
+    ExposureAuto,
+    ExposureAutoLowerLimit,
+    ExposureAutoUpperLimit,
+    ExposureAutoReference,
+    ExposureAutoUpperLimitAuto,
+    ExposureAutoHighlightReduction,
 
-    ExposureTime = 1,
-    ExposureAuto = 2,
-    ExposureAutoLowerLimit = 3,
-    ExposureAutoUpperLimit = 4,
-    ExposureAutoReference = 5,
-    ExposureAutoUpperLimitAuto = 6,
-
-    Gain = 7,
+    Gain,
     GainAuto,
     GainAutoLowerLimit,
     GainAutoUpperLimit,
@@ -30,66 +28,50 @@ enum class software_prop
     Focus,
     FocusAuto,
 
-    HighlightReduction,
-
-    WB,
-    WB_AUTO,
-    WB_RED,
-    WB_GREEN,
-    WB_BLUE,
-    WB_ONCE,
-    WB_CLAIM,
-
-    Denoise,
-    Sharpness,
-
-    Brightness,
-    Contrast,
-    Saturation,
-    Hue,
-    Gamma,
+    BalanceWhiteAuto,
+    BalanceWhiteRed,
+    BalanceWhiteGreen,
+    BalanceWhiteBlue,
+    ClaimBalanceWhiteSoftware,
 };
 
-
-const std::string_view find_property_name(software_prop id);
-
-
-struct software_prop_desc
+struct prop_range_integer_def
 {
-    software_prop_desc(software_prop id, std::string_view n, TCAM_PROPERTY_TYPE t)
-        : id_(id), name_(n), type_(t), range_d_(), range_i_(), entries_()
-    {
-    }
-    software_prop_desc(software_prop id, std::string_view n, tcam_value_int r)
-        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_INTEGER)
-    {
-        range_i_ = r;
-    }
-    software_prop_desc(software_prop id, std::string_view n, tcam_value_double r)
-        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_DOUBLE)
-    {
-        range_d_ = r;
-    }
+    tcamprop1::prop_range_integer range;
+    int64_t def = 0;
+};
 
-    software_prop_desc(software_prop id,
-                       std::string_view n,
-                       const std::map<int, std::string>& e,
-                       int default_val)
-        : software_prop_desc(id, n, TCAM_PROPERTY_TYPE_ENUMERATION)
-    {
-        //range_ = {};
-        entries_ = e;
-        default_value_ = default_val;
-    }
+struct prop_range_float_def
+{
+    tcamprop1::prop_range_float range;
+    double def = 0;
+};
 
-    software_prop id_;
-    std::string_view name_;
-    TCAM_PROPERTY_TYPE type_;
-    tcam_value_double range_d_;
-    tcam_value_int range_i_;
-    int default_value_ = 0;
-    std::map<int, std::string> entries_;
-    bool device_flags = false;
+inline auto to_range(IPropertyFloat& prop)
+{
+    return prop_range_float_def { prop.get_range(), prop.get_default() };
+}
+inline auto to_range(IPropertyInteger& prop)
+{
+    return prop_range_integer_def { prop.get_range(), prop.get_default() };
+}
+
+template<size_t N> inline auto to_range(const std::array<std::string_view, N>& arr)
+{
+    return std::vector<std::string_view> { arr.begin(), arr.end() };
+}
+
+class SoftwarePropertyBackend
+{
+public:
+    virtual ~SoftwarePropertyBackend() = default;
+
+    virtual outcome::result<int64_t> get_int(software_prop id) = 0;
+    virtual outcome::result<void> set_int(software_prop id, int64_t i) = 0;
+
+    virtual outcome::result<double> get_double(software_prop id) = 0;
+    virtual outcome::result<void> set_double(software_prop id, double new_value) = 0;
+    virtual tcam::property::PropertyFlags get_flags(software_prop id) const = 0;
 };
 
 } // namespace tcam::property::emulated

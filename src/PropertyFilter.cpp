@@ -25,7 +25,7 @@ PropertyFilter::PropertyFilter(
             break;
         }
     }
-    m_impl = std::make_shared<tcam::property::SoftwareProperties>(props, has_bayer);
+    m_impl = tcam::property::SoftwareProperties::create(props, has_bayer);
 }
 
 

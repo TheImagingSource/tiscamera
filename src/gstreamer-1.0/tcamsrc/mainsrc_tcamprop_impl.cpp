@@ -48,6 +48,7 @@ template<class TBase> struct TcamPropertyBase : TBase
         ret.is_implemented = flags & tcam::property::PropertyFlags::Implemented;
         ret.is_locked = tcam::property::is_locked(flags);
         ret.is_available = flags & tcam::property::PropertyFlags::Available;
+        ret.is_name_hidden = flags & tcam::property::PropertyFlags::Hidden;
         return ret;
     }
 };

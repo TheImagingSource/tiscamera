@@ -22,12 +22,12 @@ public:
     virtual struct FilterDescription getDescription() const final
     {
         return m_description;
-    };
+    }
 
     virtual bool transform(ImageBuffer& /*in*/, ImageBuffer& /*out*/) final
     {
         return false;
-    };
+    }
 
     virtual bool apply(std::shared_ptr<ImageBuffer>) final;
 

@@ -19,227 +19,168 @@
 #include "PropertyInterfaces.h"
 #include "SoftwarePropertiesBase.h"
 
-#include <map>
 #include <memory>
 #include <string>
 #include <tcamprop1.0_base/tcamprop_property_info.h>
 
-using namespace tcam::property;
-
 namespace tcam::property::emulated
 {
-
-
-class SoftwarePropertyBackend;
-
-class SoftwarePropertyIntegerImpl : public IPropertyInteger
+template<class TBaseItf> class SoftwarePropertyImplBase : public TBaseItf
 {
 public:
-    SoftwarePropertyIntegerImpl(const software_prop_desc& desc,
-                                std::shared_ptr<IPropertyInteger> prop,
-                                std::shared_ptr<SoftwarePropertyBackend> backend);
-
-    SoftwarePropertyIntegerImpl(const software_prop_desc& desc,
-                                std::shared_ptr<SoftwarePropertyBackend> backend);
-
-    virtual tcamprop1::prop_static_info get_static_info() const final;
-
-    virtual std::string_view get_unit() const final;
-
-    virtual tcamprop1::IntRepresentation_t get_representation() const final;
-
-    virtual PropertyFlags get_flags() const final;
-
-    virtual void set_flags(PropertyFlags flags) final
+    tcamprop1::prop_static_info get_static_info() const final
     {
-        m_flags = flags;
+        return *p_static_info;
     }
 
-    virtual tcamprop1::prop_range_integer get_range() const final
+    PropertyFlags get_flags() const final
+    {
+        if (auto ptr = m_cam.lock())
+        {
+            return ptr->get_flags(m_id);
+        }
+        return tcam::property::PropertyFlags::None;
+    }
+
+protected:
+    auto get_internal_name() const noexcept
+    {
+        return p_static_info->name;
+    }
+
+    SoftwarePropertyImplBase(software_prop id,
+                             const tcamprop1::prop_static_info* info,
+                             const std::shared_ptr<SoftwarePropertyBackend>& ptr)
+        : m_id(id), m_cam(ptr), p_static_info(info)
+    {
+    }
+
+    const software_prop m_id;
+    std::weak_ptr<SoftwarePropertyBackend> m_cam;
+
+    const tcamprop1::prop_static_info* p_static_info = nullptr;
+};
+
+class SoftwarePropertyIntegerImpl : public SoftwarePropertyImplBase<IPropertyInteger>
+{
+public:
+    SoftwarePropertyIntegerImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
+                                software_prop id,
+                                const tcamprop1::prop_static_info_integer* info,
+                                const prop_range_integer_def& range);
+
+    std::string_view get_unit() const final;
+
+    tcamprop1::IntRepresentation_t get_representation() const final;
+
+    tcamprop1::prop_range_integer get_range() const final
     {
         return range_;
     }
 
-    virtual int64_t get_default() const final
+    int64_t get_default() const final
     {
         return m_default;
     }
 
-    virtual outcome::result<int64_t> get_value() const final;
-
-    virtual outcome::result<void> set_value(int64_t new_value) final;
+    outcome::result<int64_t> get_value() const final;
+    outcome::result<void> set_value(int64_t new_value) final;
 
 private:
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
-
-    std::string m_name;
-    PropertyFlags m_flags;
-
     tcamprop1::prop_range_integer range_;
 
-    int64_t m_default;
+    int64_t m_default = 0;
 
-    software_prop m_id;
-    const tcamprop1::prop_static_info_integer* p_static_info;
+    const tcamprop1::prop_static_info_integer* static_info_integer_ = nullptr;
 };
 
 
-class SoftwarePropertyDoubleImpl : public IPropertyFloat
+class SoftwarePropertyDoubleImpl : public SoftwarePropertyImplBase<IPropertyFloat>
 {
 public:
-    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
-                               std::shared_ptr<IPropertyFloat> prop,
-                               std::shared_ptr<SoftwarePropertyBackend> backend);
-    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
-                               std::shared_ptr<IPropertyInteger> prop,
-                               std::shared_ptr<SoftwarePropertyBackend> backend);
-    SoftwarePropertyDoubleImpl(const software_prop_desc& desc,
-                               std::shared_ptr<SoftwarePropertyBackend> backend);
+    SoftwarePropertyDoubleImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
+                               software_prop id,
+                               const tcamprop1::prop_static_info_float* info,
+                               const prop_range_float_def& range);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final;
-
-    virtual std::string_view get_unit() const final;
-
+    std::string_view get_unit() const final;
     tcamprop1::FloatRepresentation_t get_representation() const final;
 
-    virtual PropertyFlags get_flags() const final;
-
-    virtual void set_flags(PropertyFlags flags) final
-    {
-        m_flags = flags;
-    }
-
-    virtual tcamprop1::prop_range_float get_range() const final
+    tcamprop1::prop_range_float get_range() const final
     {
         return range_;
     }
-    virtual double get_default() const final
+    double get_default() const final
     {
         return m_default;
     }
-    virtual outcome::result<double> get_value() const final;
-
-    virtual outcome::result<void> set_value(double new_value) final;
+    outcome::result<double> get_value() const final;
+    outcome::result<void> set_value(double new_value) final;
 
 private:
-    std::string m_name;
-    PropertyFlags m_flags;
-
     tcamprop1::prop_range_float range_;
 
-    double m_default;
+    double m_default = 0;
 
-    bool m_device_flags = false;
-
-    software_prop m_id;
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
-    const tcamprop1::prop_static_info_float* p_static_info;
+    const tcamprop1::prop_static_info_float* static_info_float_ = nullptr;
 };
 
 
-class SoftwarePropertyBoolImpl : public IPropertyBool
+class SoftwarePropertyBoolImpl : public SoftwarePropertyImplBase<IPropertyBool>
 {
 public:
-    SoftwarePropertyBoolImpl(const software_prop_desc& desc,
-                             std::shared_ptr<SoftwarePropertyBackend> backend);
-
-    virtual tcamprop1::prop_static_info get_static_info() const final;
-
-    virtual PropertyFlags get_flags() const final;
-
-    virtual void set_flags(PropertyFlags flags) final
-    {
-        m_flags = flags;
-    }
-    virtual bool get_default() const final
+    SoftwarePropertyBoolImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
+                             software_prop id,
+                             const tcamprop1::prop_static_info_boolean* info,
+                             bool def);
+    bool get_default() const final
     {
         return m_default;
     }
-    virtual outcome::result<bool> get_value() const final;
-
-    virtual outcome::result<void> set_value(bool new_value) final;
+    outcome::result<bool> get_value() const final;
+    outcome::result<void> set_value(bool new_value) final;
 
 private:
+    bool m_default = false;
 
-    std::string m_name;
-    PropertyFlags m_flags;
-
-    bool m_default;
-
-    software_prop m_id;
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
-    const tcamprop1::prop_static_info_boolean* p_static_info;
+    //const tcamprop1::prop_static_info_boolean* p_static_info;
 };
 
 
-class SoftwarePropertyCommandImpl : public IPropertyCommand
+class SoftwarePropertyCommandImpl : public SoftwarePropertyImplBase<IPropertyCommand>
 {
 public:
-    SoftwarePropertyCommandImpl(const software_prop_desc& desc,
-                                std::shared_ptr<SoftwarePropertyBackend> backend);
+    SoftwarePropertyCommandImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
+                                software_prop id,
+                                const tcamprop1::prop_static_info_command* info);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final;
-
-    virtual PropertyFlags get_flags() const final;
-
-    virtual void set_flags(PropertyFlags flags) final
-    {
-        m_flags = flags;
-    }
-    virtual outcome::result<void> execute() final;
-
-private:
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
-
-    std::string m_name;
-    PropertyFlags m_flags;
-
-    software_prop m_id;
-    const tcamprop1::prop_static_info_command* p_static_info;
+    outcome::result<void> execute() final;
 };
 
 
-class SoftwarePropertyEnumImpl : public IPropertyEnum
+class SoftwarePropertyEnumImpl : public SoftwarePropertyImplBase<IPropertyEnum>
 {
 public:
-    SoftwarePropertyEnumImpl(const software_prop_desc& desc,
-                             std::shared_ptr<SoftwarePropertyBackend> backend);
+    SoftwarePropertyEnumImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
+                             software_prop id,
+                             const tcamprop1::prop_static_info_enumeration* info,
+                             std::vector<std::string_view>&& entries,
+                             int default_entry);
 
-    virtual tcamprop1::prop_static_info get_static_info() const final;
+    outcome::result<void> set_value_str(const std::string_view& new_value) final;
+    outcome::result<std::string_view> get_value() const final;
 
-    virtual PropertyFlags get_flags() const final;
-
-    virtual void set_flags(PropertyFlags flags) final
+    std::string get_default() const final
     {
-        m_flags = flags;
+        return std::string { m_default };
     }
 
-    virtual outcome::result<void> set_value_str(const std::string_view& new_value) final;
-    virtual outcome::result<void> set_value(int64_t new_value) final;
-
-    virtual outcome::result<std::string_view> get_value() const final;
-    virtual outcome::result<int64_t> get_value_int() const final;
-
-    virtual std::string get_default() const final
-    {
-        return m_default;
-    }
-
-    virtual std::vector<std::string> get_entries() const final;
+    std::vector<std::string> get_entries() const final;
 
 private:
-    bool valid_value(int value);
+    std::vector<std::string_view> m_entries;
 
-    std::map<int, std::string> m_entries;
-    std::weak_ptr<SoftwarePropertyBackend> m_cam;
-
-    std::string m_name;
-    PropertyFlags m_flags;
-
-    std::string m_default;
-
-    software_prop m_id;
-    const tcamprop1::prop_static_info_enumeration* p_static_info;
+    std::string_view m_default;
 };
 
 
