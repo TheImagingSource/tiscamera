@@ -115,14 +115,11 @@ std::shared_ptr<CaptureDevice> tcam::open_device(const std::string& serial, TCAM
     DeviceIndex index;
     for (const auto& d : index.get_device_list())
     {
-
-
         if ((d.get_serial().compare(serial) == 0 || serial.empty())
             && (type == TCAM_DEVICE_TYPE_UNKNOWN || d.get_device_type() == type))
         {
             return _open(d);
         }
     }
-
     return nullptr;
 }

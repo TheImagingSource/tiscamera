@@ -15,9 +15,8 @@
  */
 #include "LibraryHandle.h"
 
-#include "internal.h"
-
 #include <dlfcn.h>
+#include <stdexcept>
 #include <string>
 
 
@@ -67,9 +66,23 @@ void* tcam::LibraryHandle::open_library(const std::string& name, const std::stri
 
     if (!library_handle)
     {
-        SPDLOG_INFO("Could not load library {}", library_name.c_str());
-        SPDLOG_INFO("    Reason: {}", dlerror());
+        SPDLOG_INFO("Could not load library {}. Reason: {}", library_name, dlerror() );
     }
 
     return library_handle;
+}
+
+void* tcam::LibraryHandle::load_raw_function(const std::string& functionName)
+{
+    dlerror();
+    void* const result = dlsym(handle_, functionName.c_str());
+    if (!result)
+    {
+        char* const error = dlerror();
+        if (error)
+        {
+            throw std::logic_error("can't find symbol named \"" + functionName + "\": " + error);
+        }
+    }
+    return result;
 }

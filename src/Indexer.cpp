@@ -99,8 +99,8 @@ void Indexer::update_device_list_thread()
             if (found == tmp_dev_list.end())
             {
                 SPDLOG_INFO("Lost device {} - {}. Contacting callbacks",
-                            d.get_name().c_str(),
-                            d.get_serial().c_str());
+                            d.get_name(),
+                            d.get_serial());
                 lost_list.push_back(d);
             }
         }
@@ -141,7 +141,7 @@ void Indexer::sort_device_list(std::vector<DeviceInfo>& lst)
     /*
       Sorting of devices shall create the following order:
 
-      local before remote/network meaing v4l2, libusb, aravis
+      local before remote/network meaning v4l2, libusb, aravis
       sorted after user defined names
       sorted serials, if no name is given
     */
@@ -176,8 +176,6 @@ std::vector<DeviceInfo> Indexer::get_device_list() const
 
 void Indexer::register_device_lost(dev_callback cb, void* user_data)
 {
-    SPDLOG_DEBUG("Registered device lost callback");
-
     std::lock_guard<std::mutex> lock(mtx_);
     callbacks_.push_back({ cb, user_data, "" });
 }
@@ -185,7 +183,6 @@ void Indexer::register_device_lost(dev_callback cb, void* user_data)
 
 void Indexer::register_device_lost(dev_callback cb, void* user_data, const std::string& serial)
 {
-    SPDLOG_DEBUG("Registered device lost callback for {}", serial.c_str());
     std::lock_guard<std::mutex> lock(mtx_);
     callbacks_.push_back({ cb, user_data, serial });
 }

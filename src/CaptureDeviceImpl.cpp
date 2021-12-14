@@ -16,12 +16,7 @@
 
 #include "CaptureDeviceImpl.h"
 
-#include "DeviceIndex.h"
-#include "DeviceInterface.h"
-#include "PipelineManager.h"
-#include "SoftwareProperties.h"
 #include "logging.h"
-#include "utils.h"
 
 #include <exception>
 
@@ -30,14 +25,14 @@ using namespace tcam;
 
 struct bad_device : std::exception
 {
-    const char* what() const noexcept
+    const char* what() const noexcept final
     {
         return "Device did not comply with commands.";
     }
 };
 
 
-CaptureDeviceImpl::CaptureDeviceImpl() : pipeline(nullptr), device(nullptr), index_() {}
+CaptureDeviceImpl::CaptureDeviceImpl() {}
 
 
 CaptureDeviceImpl::CaptureDeviceImpl(const DeviceInfo& _device)
@@ -167,7 +162,7 @@ std::vector<std::shared_ptr<tcam::property::IPropertyBase>> CaptureDeviceImpl::g
 {
     if (!is_device_open())
     {
-        return std::vector<std::shared_ptr<tcam::property::IPropertyBase>>();
+        return {};
     }
     return pipeline->get_properties();
 }
@@ -218,7 +213,7 @@ VideoFormat CaptureDeviceImpl::get_active_video_format() const
 {
     if (!is_device_open())
     {
-        return VideoFormat();
+        return {};
     }
 
     return device->get_active_video_format();

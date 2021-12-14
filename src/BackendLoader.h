@@ -17,20 +17,18 @@
 #ifndef TCAM_BACKEND_LOADER_H
 #define TCAM_BACKEND_LOADER_H
 
-
-#include "DeviceInterface.h"
-#include "LibraryHandle.h"
 #include "base_types.h"
+#include "compiler_defines.h"
 
-#include <functional>
 #include <memory>
-#include <string>
 #include <vector>
 
 VISIBILITY_INTERNAL
 
 namespace tcam
 {
+class DeviceInterface;
+class DeviceInfo;
 
 class BackendLoader
 {

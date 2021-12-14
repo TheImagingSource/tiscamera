@@ -20,12 +20,9 @@
 #include "DeviceInfo.h"
 #include "base_types.h"
 
-#include <atomic>
-#include <condition_variable>
 #include <memory>
-#include <mutex>
-#include <thread>
 #include <vector>
+#include <string>
 
 #include "compiler_defines.h"
 
@@ -80,31 +77,10 @@ public:
      * @brief
      */
     void remove_device_lost(dev_callback callback);
-
-    void remove_device_lost(dev_callback callback, const std::string& serial);
-
-    /**
-     * @param[in/out] DeviceInfo that shall be filled. \
-     *                Must contain identifier or serial
-     * @return true if device found and argument could be filled
-     */
-    bool fill_device_info(DeviceInfo&) const;
-
 private:
     std::shared_ptr<Indexer> indexer_;
 
-    mutable std::mutex mtx;
-
-    std::vector<DeviceInfo> device_list;
-
-    struct callback_data
-    {
-        dev_callback callback;
-        void* data;
-        std::string serial;
-    };
-
-    std::vector<callback_data> callbacks;
+    std::vector<dev_callback> callbacks;
 };
 
 } /* namespace tcam */

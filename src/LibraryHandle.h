@@ -17,10 +17,9 @@
 #ifndef TCAM_LIBRARYHANDLE_H
 #define TCAM_LIBRARYHANDLE_H
 
-#include <dlfcn.h>
-#include <functional>
 #include <memory>
-#include <stdexcept>
+#include <functional>
+#include <string>
 
 namespace tcam
 {
@@ -46,31 +45,16 @@ private:
 public:
     ~LibraryHandle();
 
-
     template<class T> std::function<T> load(std::string const& functionName)
     {
-        dlerror();
-        void* const result = dlsym(handle_, functionName.c_str());
-        if (!result)
-        {
-            char* const error = dlerror();
-            if (error)
-            {
-                throw std::logic_error("can't find symbol named \"" + functionName
-                                       + "\": " + error);
-            }
-        }
-
-        return reinterpret_cast<T*>(result);
+        return reinterpret_cast<T*>(load_raw_function(functionName));
     }
-
-
 private:
     static void* open_library(const std::string& name, const std::string& path = "");
 
-    void* handle_;
+    void* load_raw_function( const std::string& functionName );
 
-
+    void* handle_ = nullptr;
 }; // class LibraryHandle
 
 } /* namespace tcam */

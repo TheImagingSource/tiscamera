@@ -21,6 +21,8 @@
 #include "../compiler_defines.h"
 
 #include <arv.h>
+#include <vector>
+#include <string>
 
 VISIBILITY_DEFAULT
 

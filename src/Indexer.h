@@ -11,8 +11,6 @@
 #include <thread>
 #include <vector>
 
-//#include "BackendLoader.h"
-
 #include "compiler_defines.h"
 
 // VISIBILITY_INTERNAL
@@ -61,10 +59,10 @@ private:
     std::vector<DeviceInfo> fetch_device_list_backend() const;
     static void sort_device_list(std::vector<DeviceInfo>& lst);
 
-    bool continue_thread_;
+    bool continue_thread_ = true;
     mutable std::mutex mtx_;
-    unsigned int wait_period_;
-    std::atomic<bool> have_list_;
+    unsigned int wait_period_ = 2;
+    std::atomic<bool> have_list_ = false;
     std::thread work_thread_;
 
     mutable std::condition_variable wait_for_list_;

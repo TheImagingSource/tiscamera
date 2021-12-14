@@ -17,7 +17,6 @@
 #ifndef TCAM_CAPTUREDEVICE_H
 #define TCAM_CAPTUREDEVICE_H
 
-#include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "PropertyInterfaces.h"
 #include "SinkInterface.h"

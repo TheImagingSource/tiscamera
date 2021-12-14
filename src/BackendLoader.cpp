@@ -16,11 +16,13 @@
 
 #include "BackendLoader.h"
 
+#include "DeviceInterface.h"
 #include "devicelibrary.h"
-#include "internal.h"
+#include "LibraryHandle.h"
 
 #include <dlfcn.h>
 #include <string>
+#include <functional>
 
 #ifdef HAVE_ARAVIS
 #include "aravis/aravis_api.h"
@@ -88,7 +90,6 @@ tcam::BackendLoader::~BackendLoader()
 
 void tcam::BackendLoader::load_backends()
 {
-
     backends = {
 #ifdef HAVE_V4L2
         { TCAM_DEVICE_TYPE_V4L2,
@@ -124,7 +125,6 @@ void tcam::BackendLoader::unload_backends() {}
 
 std::shared_ptr<DeviceInterface> tcam::BackendLoader::open_device(const tcam::DeviceInfo& device)
 {
-
     auto search = [this](TCAM_DEVICE_TYPE type) {
         for (auto& b : this->backends)
         {
@@ -159,12 +159,10 @@ std::vector<DeviceInfo> BackendLoader::get_device_list_from_backend(BackendLoade
     {
         return ret;
     }
-    SPDLOG_TRACE("retrieving list for {}", b.name.c_str());
+
     size_t t = b.get_device_list_size();
 
-    SPDLOG_TRACE("Amount of devices: {}", t);
-
-    struct tcam_device_info* temp = new struct tcam_device_info[t];
+    tcam_device_info* temp = new struct tcam_device_info[t];
 
     size_t copied_elements = b.get_device_list(temp, t);
     ret.reserve(copied_elements);
@@ -185,10 +183,8 @@ std::vector<DeviceInfo> BackendLoader::get_device_list(enum TCAM_DEVICE_TYPE typ
             return get_device_list_from_backend(b);
         }
     }
-
     return {};
 }
-
 
 std::vector<DeviceInfo> BackendLoader::get_device_list_all_backends()
 {

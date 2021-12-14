@@ -19,8 +19,7 @@
 
 #include "base_types.h"
 
-#include <memory>
-#include <vector>
+#include <string>
 
 /**
  * @addtogroup API
@@ -38,16 +37,16 @@ class DeviceInfo
 {
 
 public:
-    explicit DeviceInfo(const struct tcam_device_info&);
+    explicit DeviceInfo(const tcam_device_info&);
 
     /**
      * @brief Creates an invalid device
      */
     DeviceInfo();
 
-    DeviceInfo(const DeviceInfo&);
+    DeviceInfo(const DeviceInfo&) = default;
 
-    DeviceInfo& operator=(const DeviceInfo&);
+    DeviceInfo& operator=(const DeviceInfo&) = default;
 
     bool operator==(const DeviceInfo& other) const;
 
@@ -56,15 +55,13 @@ public:
      * @brief returns a struct version of the device description
      * @return struct tcam_device_info
      */
-    struct tcam_device_info get_info() const;
+    tcam_device_info get_info() const;
 
     /**
      * Description for get_name.
      * @return string containing the device model
      */
     std::string get_name() const;
-
-    std::string get_name_safe() const;
 
     /**
      * @return string containing the serial number of the device
@@ -81,7 +78,7 @@ public:
     /**
      * @return TCAM_DEVICE_TYPE of the device
      */
-    enum TCAM_DEVICE_TYPE get_device_type() const;
+    TCAM_DEVICE_TYPE get_device_type() const;
 
     /**
      * @brief returns @TCAM_DEVICE_TYPE string representation
@@ -91,7 +88,7 @@ public:
 
 private:
     /// internal device representation
-    struct tcam_device_info device;
+    tcam_device_info device;
 
 }; /* class DeviceInfo */
 

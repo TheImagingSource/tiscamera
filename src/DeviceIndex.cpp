@@ -16,59 +16,45 @@
 
 #include "DeviceIndex.h"
 
-#include "BackendLoader.h"
 #include "Indexer.h"
 #include "logging.h"
-#include "utils.h"
 
 #include <algorithm>
-#include <cstring>
-#include <memory>
-#include <string>
-#include <unistd.h>
-#include <vector>
 
 using namespace tcam;
 
-
 DeviceIndex::DeviceIndex()
-    : indexer_(Indexer::get_instance()), device_list(std::vector<DeviceInfo>()),
-      callbacks(std::vector<callback_data>())
+    : indexer_(Indexer::get_instance())
 {
 }
-
 
 DeviceIndex::~DeviceIndex()
 {
-    for (auto& cb : callbacks) { indexer_->remove_device_lost(cb.callback); }
+    for (auto& cb : callbacks) { indexer_->remove_device_lost(cb); }
 }
-
 
 void DeviceIndex::register_device_lost(dev_callback c, void* user_data)
 {
-    callbacks.push_back({ c, user_data, "" });
+    callbacks.push_back(c);
 
     indexer_->register_device_lost(c, user_data);
 }
 
-
 void DeviceIndex::register_device_lost(dev_callback c, void* user_data, const std::string& serial)
 {
-    callbacks.push_back({ c, user_data, serial });
+    callbacks.push_back(c);
 
     indexer_->register_device_lost(c, user_data, serial);
 }
-
 
 void DeviceIndex::remove_device_lost(dev_callback callback)
 {
     indexer_->remove_device_lost(callback);
 
     auto it = std::begin(callbacks); //std::begin is a free function in C++11
-    for (auto& value : callbacks)
+    for (const auto& value : callbacks)
     {
-
-        if (value.callback == callback)
+        if (value == callback)
         {
             callbacks.erase(it);
             break;
@@ -76,55 +62,6 @@ void DeviceIndex::remove_device_lost(dev_callback callback)
         it++; //at the end OR make sure you do this in each iteration
     }
 }
-
-
-void DeviceIndex::remove_device_lost(dev_callback callback, const std::string& serial)
-{
-    indexer_->remove_device_lost(callback, serial);
-
-    auto it = std::begin(callbacks); //std::begin is a free function in C++11
-    for (auto& value : callbacks)
-    {
-
-        if (value.callback == callback)
-        {
-            callbacks.erase(it);
-            break;
-        }
-        it++; //at the end OR make sure you do this in each iteration
-    }
-}
-
-
-bool DeviceIndex::fill_device_info(DeviceInfo& info) const
-{
-    if (!info.get_serial().empty())
-    {
-        for (const auto& d : device_list)
-        {
-            if (info.get_serial() == d.get_serial())
-            {
-                info = d;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    if (!info.get_identifier().empty())
-    {
-        for (const auto& d : device_list)
-        {
-            if (info.get_identifier() == d.get_identifier())
-            {
-                info = d;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 
 std::vector<DeviceInfo> DeviceIndex::get_device_list() const
 {

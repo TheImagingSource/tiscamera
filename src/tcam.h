@@ -23,7 +23,6 @@
  */
 
 #include "CaptureDevice.h"
-#include "DeviceIndex.h"
 #include "DeviceInfo.h"
 #include "ImageBuffer.h"
 #include "ImageSink.h"
