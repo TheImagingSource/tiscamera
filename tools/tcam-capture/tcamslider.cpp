@@ -60,7 +60,7 @@ void TcamSlider::setSingleStep(double step)
 {
     if( step == 0. )
         step = 1.;
-    
+
     m_value_step = step;
     m_scale = 1 / step;
 
@@ -130,6 +130,12 @@ double TcamSlider::calculate_user_value (int slider_value)
     double rangelen = log_(m_value_max) - minval;
 
     double val = std::exp(minval + rangelen / slider_max_steps * slider_value);
+
+    // fmod application will prevent max value
+    if (val == m_value_min || val == m_value_max)
+    {
+        return val;
+    }
 
     val -= fmod(val, m_value_step);
 
