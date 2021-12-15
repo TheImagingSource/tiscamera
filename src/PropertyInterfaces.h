@@ -48,12 +48,14 @@ public:
 
 std::shared_ptr<tcam::property::IPropertyBase> find_property(
     const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
-    const std::string_view& name);
+    std::string_view name);
 
 
 class IPropertyInteger : public IPropertyBase
 {
 public:
+    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_INTEGER;
+
     TCAM_PROPERTY_TYPE get_type() const final
     {
         return TCAM_PROPERTY_TYPE_INTEGER;
@@ -72,6 +74,8 @@ public:
 class IPropertyFloat : public IPropertyBase
 {
 public:
+    static const constexpr auto property_type = tcam::TCAM_PROPERTY_TYPE_DOUBLE;
+
     TCAM_PROPERTY_TYPE get_type() const final
     {
         return TCAM_PROPERTY_TYPE_DOUBLE;
@@ -91,6 +95,8 @@ public:
 class IPropertyBool : public IPropertyBase
 {
 public:
+    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_BOOLEAN;
+
     TCAM_PROPERTY_TYPE get_type() const final
     {
         return TCAM_PROPERTY_TYPE_BOOLEAN;
@@ -106,6 +112,8 @@ public:
 class IPropertyCommand : public IPropertyBase
 {
 public:
+    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_BUTTON;
+
     TCAM_PROPERTY_TYPE get_type() const final
     {
         return TCAM_PROPERTY_TYPE_BUTTON;
@@ -118,6 +126,8 @@ public:
 class IPropertyEnum : public IPropertyBase
 {
 public:
+    static const constexpr auto property_type = TCAM_PROPERTY_TYPE_ENUMERATION;
+
     TCAM_PROPERTY_TYPE get_type() const final
     {
         return TCAM_PROPERTY_TYPE_ENUMERATION;
@@ -132,5 +142,22 @@ public:
     virtual std::vector<std::string> get_entries() const = 0;
 };
 
+
+template<class Tprop_type>
+inline std::shared_ptr<Tprop_type> find_property(
+    const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
+    std::string_view name)
+{
+    auto ptr = find_property(properties,name);
+    if (ptr == nullptr)
+    {
+        return nullptr;
+    }
+    if (ptr->get_type() != Tprop_type::property_type)
+    {
+        return nullptr;
+    }
+    return std::static_pointer_cast<Tprop_type>(ptr);
+}
 
 } // namespace tcam::property
