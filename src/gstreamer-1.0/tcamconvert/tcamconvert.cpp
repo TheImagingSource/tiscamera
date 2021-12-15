@@ -117,10 +117,6 @@ static void create_fmt(GstCaps* res_caps,
                        img::fourcc fourcc,
                        GstPadDirection direction)
 {
-    const GValue* w = gst_structure_get_value(structure, "width");
-    const GValue* h = gst_structure_get_value(structure, "height");
-    const GValue* frt = gst_structure_get_value(structure, "framerate");
-
     std::vector<img::fourcc> vec;
     if (direction == GST_PAD_SRC)
     {
@@ -133,39 +129,30 @@ static void create_fmt(GstCaps* res_caps,
 
     for (const auto& fcc : vec)
     {
-        std::string cur_caps_str = img_lib::gst::fourcc_to_gst_caps_string(fcc);
-        if (cur_caps_str.empty())
-        {
-            continue;
-        }
-        GstCaps* caps_to_add = gst_caps_from_string(cur_caps_str.c_str());
-        if (caps_to_add == nullptr)
+        auto caps_fmt = img_lib::gst::fourcc_to_gst_caps_descr(fcc);
+
+        if (!caps_fmt.gst_struct_name)
         {
             continue;
         }
 
-        if (w && h)
+        // copy the incoming structure
+        // and replace name and (if used) format
+        // this way all additional information (width, fps, binning, etc) are preserved
+        // we do not touch these information as we do not resize, etc the GstBuffer
+
+        GstStructure* tmp_struc = gst_structure_copy(structure);
+
+        gst_structure_set_name(tmp_struc, caps_fmt.gst_struct_name);
+
+        if (caps_fmt.format_entry)
         {
-            // NOTE: we copy this to encompass value ranges
-
-            GValue width = G_VALUE_INIT;
-            GValue height = G_VALUE_INIT;
-            g_value_init(&width, G_VALUE_TYPE(w));
-            g_value_init(&height, G_VALUE_TYPE(h));
-
-            g_value_copy(w, &width);
-            g_value_copy(h, &height);
-
-            gst_caps_set_value(caps_to_add, "width", &width);
-            gst_caps_set_value(caps_to_add, "height", &height);
-
-            g_value_unset(&width);
-            g_value_unset(&height);
+            gst_structure_set(tmp_struc, "format", G_TYPE_STRING, caps_fmt.format_entry, nullptr);
         }
-        if (frt)
-        {
-            gst_caps_set_value(caps_to_add, "framerate", frt);
-        }
+
+        // gst_caps_new_full takes ownership of tmp_struc
+        GstCaps* caps_to_add = gst_caps_new_full(tmp_struc, nullptr);
+
         gst_caps_append(res_caps, caps_to_add);
     }
 }
