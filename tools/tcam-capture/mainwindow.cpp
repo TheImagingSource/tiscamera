@@ -593,8 +593,13 @@ void MainWindow::open_property_dialog()
 }
 
 
-void MainWindow::free_property_dialog()
+void MainWindow::free_property_dialog (bool force_close)
 {
+    if (p_property_dialog && force_close)
+    {
+        p_property_dialog->close();
+    }
+
     // this only exists to ensure that only one dialog instance can exist
     // deletion is taken care of by WA_DeleteOnClose
     p_property_dialog = nullptr;
@@ -698,7 +703,7 @@ void MainWindow::device_lost(const QString& message)
 
     close_pipeline();
 
-    free_property_dialog();
+    free_property_dialog(true);
 
     auto error_dialog = new QMessageBox(this);
     error_dialog->setCheckBox(nullptr);

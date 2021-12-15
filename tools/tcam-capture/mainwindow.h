@@ -75,7 +75,7 @@ private slots:
     void on_widget_customContextMenuRequested(const QPoint& pos);
 
     void open_property_dialog();
-    void free_property_dialog();
+    void free_property_dialog(bool force_close = false);
 
     void on_actionOpen_triggered();
 
