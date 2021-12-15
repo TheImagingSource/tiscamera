@@ -726,14 +726,12 @@ void tcam::property::SoftwareProperties::generate_exposure_auto()
 
 void tcam::property::SoftwareProperties::generate_gain_auto()
 {
-    auto gain_base = tcam::property::find_property(m_device_properties, "Gain");
-    if (!gain_base)
+    m_dev_gain = tcam::property::find_property<IPropertyFloat>(m_device_properties, "Gain");
+    if (!m_dev_gain)
     {
-        SPDLOG_ERROR("Unable to identify gain interface.");
+        SPDLOG_ERROR("Unable to fetch gain interface.");
         return;
-    };
-
-    m_dev_gain = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(gain_base);
+    }
 
     m_auto_params.gain.auto_enabled = true;
     m_auto_params.gain.min = m_dev_gain->get_range().min;
@@ -745,7 +743,9 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
     }
     else
     {
-        SPDLOG_ERROR("Unable to retrieve value for property '{}', due to {}", gain_base->get_name(), gain_val.error().message());
+        SPDLOG_ERROR("Unable to retrieve value for property '{}', due to {}",
+                     m_dev_gain->get_name(),
+                     gain_val.error().message());
         return;
     }
 
@@ -765,13 +765,7 @@ void tcam::property::SoftwareProperties::generate_gain_auto()
 
 void tcam::property::SoftwareProperties::generate_iris_auto()
 {
-    auto base = tcam::property::find_property(m_device_properties, "Iris");
-    if (!base)
-    {
-        return;
-    }
-
-    m_dev_iris = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base);
+    m_dev_iris = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Iris");
     if (!m_dev_iris)
     {
         return;
@@ -798,13 +792,7 @@ void tcam::property::SoftwareProperties::generate_iris_auto()
 
 void SoftwareProperties::generate_focus_auto()
 {
-    auto base = tcam::property::find_property(m_device_properties, "Focus");
-    if (!base)
-    {
-        return;
-    }
-
-    m_dev_focus = std::dynamic_pointer_cast<tcam::property::IPropertyInteger>(base);
+    m_dev_focus = tcam::property::find_property<IPropertyInteger>(m_device_properties, "Focus");
     if (!m_dev_focus)
     {
         return;
@@ -834,15 +822,15 @@ void SoftwareProperties::generate_focus_auto()
 
 void SoftwareProperties::generate_balance_white_channels()
 {
-    auto base_selector = tcam::property::find_property(m_device_properties, "BalanceRatioSelector");
-    auto base_raw = tcam::property::find_property(m_device_properties, "BalanceRatioRaw");
-    if (!base_raw)
+    auto wb_selector =
+        tcam::property::find_property<IPropertyEnum>(m_device_properties, "BalanceRatioSelector");
+    auto wb_ratio =
+        tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatioRaw");
+    if (!wb_ratio)
     {
-        base_raw = tcam::property::find_property(m_device_properties, "BalanceRatio");
+        wb_ratio =
+            tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceRatio");
     }
-
-    auto wb_ratio = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_raw);
-    auto wb_selector = std::dynamic_pointer_cast<tcam::property::IPropertyEnum>(base_selector);
 
     // #TODO check if all channels are present
     if (!m_wb.m_dev_wb_ratio || !m_wb.m_dev_wb_selector)
@@ -873,9 +861,9 @@ void SoftwareProperties::generate_balance_white_auto()
         return 1.0;
     };
 
-    auto base_r = tcam::property::find_property(m_device_properties, "BalanceWhiteRed");
-    auto base_g = tcam::property::find_property(m_device_properties, "BalanceWhiteGreen");
-    auto base_b = tcam::property::find_property(m_device_properties, "BalanceWhiteBlue");
+    auto base_r = tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceWhiteRed");
+    auto base_g = tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceWhiteGreen");
+    auto base_b = tcam::property::find_property<IPropertyFloat>(m_device_properties, "BalanceWhiteBlue");
     if (m_wb.m_dev_wb_selector) // we already generated RGB channels for BalanceWhiteRed/BalanceWhiteGreen/BalanceWhiteBlue via selector
     {
         m_auto_params.wb.is_software_whitebalance = false;
@@ -887,9 +875,9 @@ void SoftwareProperties::generate_balance_white_auto()
     }
     else if (base_r && base_g && base_b)
     {
-        m_wb.m_dev_wb_r = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_r);
-        m_wb.m_dev_wb_g = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_g);
-        m_wb.m_dev_wb_b = std::dynamic_pointer_cast<tcam::property::IPropertyFloat>(base_b);
+        m_wb.m_dev_wb_r = base_r;
+        m_wb.m_dev_wb_g = base_g;
+        m_wb.m_dev_wb_b = base_b;
 
         add_prop_entry(
             sp::BalanceWhiteRed, &prop_lst::BalanceWhiteRed, emulated::to_range(*m_wb.m_dev_wb_r));
