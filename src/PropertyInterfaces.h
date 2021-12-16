@@ -24,6 +24,7 @@
 #include <string>
 #include <string_view>
 #include <tcamprop1.0_base/tcamprop_base.h>
+#include <tcamprop1.0_base/tcamprop_property_info.h>
 #include <vector>
 
 namespace tcam::property
@@ -108,7 +109,6 @@ public:
     virtual outcome::result<void> set_value(bool new_value) = 0;
 };
 
-
 class IPropertyCommand : public IPropertyBase
 {
 public:
@@ -148,7 +148,7 @@ inline std::shared_ptr<Tprop_type> find_property(
     const std::vector<std::shared_ptr<tcam::property::IPropertyBase>>& properties,
     std::string_view name)
 {
-    auto ptr = find_property(properties,name);
+    auto ptr = find_property(properties, name);
     if (ptr == nullptr)
     {
         return nullptr;
@@ -159,5 +159,45 @@ inline std::shared_ptr<Tprop_type> find_property(
     }
     return std::static_pointer_cast<Tprop_type>(ptr);
 }
+
+
+class IPropertyInteger2 : public IPropertyInteger
+{
+public:
+    virtual tcamprop1::prop_static_info_integer get_static_info_ext() const = 0;
+
+    tcamprop1::prop_static_info get_static_info() const override
+    {
+        return get_static_info_ext();
+    }
+    std::string_view get_unit() const override
+    {
+        return get_static_info_ext().unit;
+    }
+    tcamprop1::IntRepresentation_t get_representation() const override
+    {
+        return get_static_info_ext().representation;
+    }
+};
+
+class IPropertyFloat2 : public IPropertyFloat
+{
+public:
+    virtual tcamprop1::prop_static_info_float get_static_info_ext() const = 0;
+
+    tcamprop1::prop_static_info get_static_info() const override
+    {
+        return get_static_info_ext();
+    }
+    std::string_view get_unit() const override
+    {
+        return get_static_info_ext().unit;
+    }
+    tcamprop1::FloatRepresentation_t get_representation() const override
+    {
+        return get_static_info_ext().representation;
+    }
+};
+
 
 } // namespace tcam::property
