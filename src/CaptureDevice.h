@@ -22,12 +22,11 @@
 #include "SinkInterface.h"
 #include "VideoFormat.h"
 #include "VideoFormatDescription.h"
+#include "compiler_defines.h"
 
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "compiler_defines.h"
 
 VISIBILITY_DEFAULT
 

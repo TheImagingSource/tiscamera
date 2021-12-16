@@ -61,7 +61,7 @@ protected:
     const tcamprop1::prop_static_info* p_static_info = nullptr;
 };
 
-class SoftwarePropertyIntegerImpl : public SoftwarePropertyImplBase<IPropertyInteger>
+class SoftwarePropertyIntegerImpl : public SoftwarePropertyImplBase<IPropertyInteger2>
 {
 public:
     SoftwarePropertyIntegerImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
@@ -69,10 +69,10 @@ public:
                                 const tcamprop1::prop_static_info_integer* info,
                                 const prop_range_integer_def& range);
 
-    std::string_view get_unit() const final;
-
-    tcamprop1::IntRepresentation_t get_representation() const final;
-
+    tcamprop1::prop_static_info_integer get_static_info_ext() const override
+    {
+        return *static_info_integer_;
+    }
     tcamprop1::prop_range_integer get_range() const final
     {
         return range_;
@@ -95,7 +95,7 @@ private:
 };
 
 
-class SoftwarePropertyDoubleImpl : public SoftwarePropertyImplBase<IPropertyFloat>
+class SoftwarePropertyDoubleImpl : public SoftwarePropertyImplBase<IPropertyFloat2>
 {
 public:
     SoftwarePropertyDoubleImpl(const std::shared_ptr<SoftwarePropertyBackend>& backend,
@@ -103,9 +103,10 @@ public:
                                const tcamprop1::prop_static_info_float* info,
                                const prop_range_float_def& range);
 
-    std::string_view get_unit() const final;
-    tcamprop1::FloatRepresentation_t get_representation() const final;
-
+    tcamprop1::prop_static_info_float get_static_info_ext() const override
+    {
+        return *static_info_float_;
+    }
     tcamprop1::prop_range_float get_range() const final
     {
         return range_;

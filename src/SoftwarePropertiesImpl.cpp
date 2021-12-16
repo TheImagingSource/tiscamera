@@ -34,16 +34,6 @@ SoftwarePropertyIntegerImpl::SoftwarePropertyIntegerImpl(
     static_info_integer_ = info;
 }
 
-std::string_view SoftwarePropertyIntegerImpl::get_unit() const
-{
-    return static_info_integer_->unit;
-}
-
-tcamprop1::IntRepresentation_t SoftwarePropertyIntegerImpl::get_representation() const
-{
-    return static_info_integer_->representation;
-}
-
 outcome::result<int64_t> SoftwarePropertyIntegerImpl::get_value() const
 {
     if (auto ptr = m_cam.lock())
@@ -81,17 +71,6 @@ SoftwarePropertyDoubleImpl::SoftwarePropertyDoubleImpl(
     : SoftwarePropertyImplBase(id, info, backend), range_(range.range), m_default(range.def)
 {
     static_info_float_ = info;
-}
-
-std::string_view SoftwarePropertyDoubleImpl::get_unit() const
-{
-    return static_info_float_->unit;
-}
-
-
-tcamprop1::FloatRepresentation_t SoftwarePropertyDoubleImpl::get_representation() const
-{
-    return static_info_float_->representation;
 }
 
 outcome::result<double> SoftwarePropertyDoubleImpl::get_value() const
