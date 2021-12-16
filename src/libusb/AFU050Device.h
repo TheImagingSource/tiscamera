@@ -187,7 +187,7 @@ private:
     void monitor_device();
 
     void add_int(const std::string& name, const VC_UNIT unit, const unsigned char prop);
-    void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop);
+    void add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop, double modifier=1.0);
     void add_enum(const std::string& name,
                   const VC_UNIT unit,
                   const unsigned char prop,

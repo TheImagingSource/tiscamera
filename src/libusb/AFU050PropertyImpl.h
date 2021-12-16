@@ -74,7 +74,8 @@ class AFU050PropertyDoubleImpl : public IPropertyFloat
 public:
     AFU050PropertyDoubleImpl(const std::string& name,
                              control_definition ctrl,
-                             std::shared_ptr<tcam::property::AFU050DeviceBackend> backend);
+                             std::shared_ptr<tcam::property::AFU050DeviceBackend> backend,
+                             double modifier = 1.0);
 
     virtual tcamprop1::prop_static_info get_static_info() const final
     {
@@ -120,6 +121,11 @@ private:
     double m_max;
     double m_step;
     double m_default;
+    // only really used for whitebalance
+    // not the cleanest solution
+    // due to small scope of implementation
+    // deemed acceptable for now
+    double m_modifier;
 
     control_definition m_ctrl;
 

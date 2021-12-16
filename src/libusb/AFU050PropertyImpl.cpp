@@ -21,17 +21,17 @@ AFU050PropertyIntegerImpl::AFU050PropertyIntegerImpl(
             m_default = ret.value();
         }
         auto ret_min = ptr->get_int(m_ctrl, GET_MIN);
-        if (ret)
+        if (ret_min)
         {
             m_min = ret_min.value();
         }
         auto ret_max = ptr->get_int(m_ctrl, GET_MAX);
-        if (ret)
+        if (ret_max)
         {
             m_max = ret_max.value();
         }
         auto ret_step = ptr->get_int(m_ctrl, GET_RES);
-        if (ret)
+        if (ret_step)
         {
             m_step = ret_step.value();
         }
@@ -110,30 +110,31 @@ outcome::result<void> AFU050PropertyIntegerImpl::set_value(int64_t new_value)
 AFU050PropertyDoubleImpl::AFU050PropertyDoubleImpl(
     const std::string& name,
     control_definition ctrl,
-    std::shared_ptr<tcam::property::AFU050DeviceBackend> cam)
-    : m_cam(cam), m_name(name), m_ctrl(ctrl)
+    std::shared_ptr<tcam::property::AFU050DeviceBackend> cam,
+    double modifier)
+    : m_cam(cam), m_name(name), m_ctrl(ctrl), m_modifier(modifier)
 {
     if (auto ptr = m_cam.lock())
     {
         auto ret = ptr->get_int(m_ctrl, GET_DEF);
         if (ret)
         {
-            m_default = ret.value();
+            m_default = ret.value() / modifier;
         }
         auto ret_min = ptr->get_int(m_ctrl, GET_MIN);
-        if (ret)
+        if (ret_min)
         {
-            m_min = ret_min.value();
+            m_min = ret_min.value() / modifier;
         }
         auto ret_max = ptr->get_int(m_ctrl, GET_MAX);
-        if (ret)
+        if (ret_max)
         {
-            m_max = ret_max.value();
+            m_max = ret_max.value() / modifier;
         }
         auto ret_step = ptr->get_int(m_ctrl, GET_RES);
-        if (ret)
+        if (ret_step)
         {
-            m_step = ret_step.value();
+            m_step = ret_step.value() / modifier;
         }
     }
     else
@@ -191,7 +192,7 @@ outcome::result<double> AFU050PropertyDoubleImpl::get_value() const
 
         if (ret)
         {
-            return ret.value();
+            return ret.value() / m_modifier;
         }
         return ret.as_failure();
     }
@@ -206,7 +207,7 @@ outcome::result<void> AFU050PropertyDoubleImpl::set_value(double new_value)
 {
     if (auto ptr = m_cam.lock())
     {
-        return ptr->set_int(m_ctrl, new_value);
+        return ptr->set_int(m_ctrl, new_value * m_modifier);
     }
     else
     {

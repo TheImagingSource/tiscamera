@@ -143,9 +143,11 @@ void AFU050Device::create_properties()
              XU_FOCUS_ONE_PUSH,
              { { { 0, "Off" }, { 1, "Once" } } });
 
-    add_int("BalanceWhiteRed", VC_UNIT_EXTENSION_UNIT, XU_GAIN_R_CONTROL);
-    add_int("BalanceWhiteGreen", VC_UNIT_EXTENSION_UNIT, XU_GAIN_G_CONTROL);
-    add_int("BalanceWhiteBlue", VC_UNIT_EXTENSION_UNIT, XU_GAIN_B_CONTROL);
+    static const double wb_mod = 1023.75;
+
+    add_double("BalanceWhiteRed", VC_UNIT_EXTENSION_UNIT, XU_GAIN_R_CONTROL, wb_mod);
+    add_double("BalanceWhiteGreen", VC_UNIT_EXTENSION_UNIT, XU_GAIN_G_CONTROL, wb_mod);
+    add_double("BalanceWhiteBlue", VC_UNIT_EXTENSION_UNIT, XU_GAIN_B_CONTROL, wb_mod);
     add_enum("BalanceWhiteAuto",
              VC_UNIT_EXTENSION_UNIT,
              XU_AUTO_WHITE_BALANCE,
@@ -525,7 +527,7 @@ void AFU050Device::add_int(const std::string& name, const VC_UNIT unit, const un
 }
 
 
-void AFU050Device::add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop)
+void AFU050Device::add_double(const std::string& name, const VC_UNIT unit, const unsigned char prop, double modifier)
 {
     if (unit == VC_UNIT_HEADER || prop == 0)
     {
@@ -537,7 +539,7 @@ void AFU050Device::add_double(const std::string& name, const VC_UNIT unit, const
     control_definition cd = { unit, prop };
 
     m_properties.push_back(
-        std::make_shared<tcam::property::AFU050PropertyDoubleImpl>(name, cd, m_backend));
+        std::make_shared<tcam::property::AFU050PropertyDoubleImpl>(name, cd, m_backend, modifier));
 }
 
 
