@@ -59,7 +59,7 @@ struct TcamCaptureConfig
             pipeline = tmp;
 
             pipeline.replace(QString("{display-sink}"),
-                             QString("fpsdisplaysink video-sink={video_sink_element} sync=false name=sink text-overlay=false signal-fps-measurements=true"));
+                             QString("fpsdisplaysink video-sink={video-sink-element} sync=false name=sink text-overlay=false signal-fps-measurements=true"));
             qInfo("Pipeline string: %s", pipeline.toStdString().c_str());
         }
 
